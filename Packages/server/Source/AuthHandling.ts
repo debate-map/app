@@ -2,7 +2,7 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import express, {RequestHandler} from "express";
 import cookieSession from "cookie-session";
-import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID} from "dm_common";
+import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import expressSession from "express-session";
 import {Assert} from "web-vcore/nm/js-vextensions";
@@ -60,9 +60,11 @@ passport.use(new GoogleStrategy(
 			permissionGroups,
 			photoURL: profile.photos?.[0]?.value,
 		});
+		const defaultPolicyID = await GetAsync(()=>GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name));
 		const userHidden = new UserHidden({
 			email: profile_firstEmail,
 			providerData: [profile._json],
+			lastAccessPolicy: defaultPolicyID,
 		});
 		const command = new AddUser({user, userHidden});
 		command._userInfo_override = graph.userInfo; // use system-user to run the AddUser command

@@ -141,8 +141,10 @@ class PermissionSetForTypeEditor extends BaseComponent<{enabled: boolean, collec
 		return (
 			<Row>
 				<CheckBox enabled={enabled} text="access" value={value.access ?? "partial"} onChange={val=>Change(a=>a.access = val)}/>
-				<CheckBox ml={10} enabled={enabled} text="modify" value={PermitCriteriaToCheckBoxVal(value.modify)} onChange={val=>Change(a=>a.modify = CheckBoxValToPermitCriteria(val))}/>
-				<CheckBox ml={10} enabled={enabled} text="delete" value={PermitCriteriaToCheckBoxVal(value.delete)} onChange={val=>Change(a=>a.delete = CheckBoxValToPermitCriteria(val))}/>
+				{collection != "nodeRatings" &&
+				<CheckBox ml={10} enabled={enabled} text="modify" value={PermitCriteriaToCheckBoxVal(value.modify)} onChange={val=>Change(a=>a.modify = CheckBoxValToPermitCriteria(val))}/>}
+				{collection != "nodeRatings" &&
+				<CheckBox ml={10} enabled={enabled} text="delete" value={PermitCriteriaToCheckBoxVal(value.delete)} onChange={val=>Change(a=>a.delete = CheckBoxValToPermitCriteria(val))}/>}
 				{collection == "nodes" &&
 				<CheckBox ml={10} enabled={enabled} text="vote" value={PermitCriteriaToCheckBoxVal(value.vote)} onChange={val=>Change(a=>a.vote = CheckBoxValToPermitCriteria(val))}/>}
 				{collection == "nodes" &&

@@ -10,7 +10,7 @@ import {UserEdit} from "../CommandMacros.js";
 export class AddAccessPolicy extends Command<{policy: AccessPolicy}, {id: string}> {
 	Validate() {
 		const {policy} = this.payload;
-		policy.id = GenerateUUID();
+		policy.id = this.GenerateUUID_Once("id");
 		policy.creator = this.userInfo.id;
 		policy.createdAt = Date.now();
 

@@ -1,5 +1,6 @@
 import {GetFontSizeForNode, GetNodeDisplayText, MapNodeL3, MapNodeType_Info} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 
 /* interface JQuery {
@@ -11,7 +12,7 @@ import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 }); */
 
-export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
+export const GetMeasurementInfoForNode = CreateAccessor((node: MapNodeL3, path: string)=>{
 	const nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 	const displayText = GetNodeDisplayText(node, path);
@@ -55,4 +56,4 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	// this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 
 	return {expectedBoxWidth, width, expectedHeight};
-}
+});

@@ -9,11 +9,11 @@ import {GetAccessPolicy, GetUser} from "dm_common";
 export class GenericEntryInfoUI extends BaseComponentPlus({singleLine: false} as {
 	id: string | number,
 	creatorID: string, createdAt: number,
-	accessPolicyID?: string,
+	accessPolicyID?: string, accessPolicyButton?: JSX.Element,
 	singleLine?: boolean,
 }, {}) {
 	render() {
-		const {id, creatorID, createdAt, accessPolicyID, singleLine} = this.props;
+		const {id, creatorID, createdAt, accessPolicyID, accessPolicyButton, singleLine} = this.props;
 		const creator = GetUser(creatorID);
 		const accessPolicy = accessPolicyID ? GetAccessPolicy(accessPolicyID) : null;
 
@@ -40,7 +40,7 @@ export class GenericEntryInfoUI extends BaseComponentPlus({singleLine: false} as
 		return (
 			<Column sel style={E(singleLine && {fontSize: 14})}>
 				{singleLine &&
-					<Row>
+					<Row center>
 						<Text>ID: {id} ({createdAtTimeStr}, by: </Text>
 						{userLink}
 						<Text>)</Text>
@@ -48,14 +48,14 @@ export class GenericEntryInfoUI extends BaseComponentPlus({singleLine: false} as
 				{!singleLine &&
 				<>
 					<Row>ID: {id}</Row>
-					<Row>
+					<Row center>
 						<Text>Created at: {createdAtTimeStr} (by: </Text>
 						{userLink}
 						<Text>)</Text>
 					</Row>
 					{accessPolicy &&
-					<Row>
-						<Text>Access-policy: </Text>{accessPolicyLink}
+					<Row center>
+						<Text>Access-policy: </Text>{accessPolicyLink}{accessPolicyButton}
 					</Row>}
 				</>}
 			</Column>

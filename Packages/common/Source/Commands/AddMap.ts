@@ -1,12 +1,12 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {Map} from "../DB/maps/@Map.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {GetUserHidden} from "../DB/userHiddens.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNode} from "./AddNode.js";
 
@@ -29,12 +29,16 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		map.edits = 0;
 		map.editedAt = map.createdAt;
 
+		const userHidden = GetUserHidden.NN(this.userInfo.id);
 		const newRootNode = new MapNode({
 			//ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID),
-			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+			//accessPolicy: map.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
+			accessPolicy: map.accessPolicy, // add-map dialog doesn't let user choose node-access-policy yet, so use the map's accessor policy for the root-node
 			type: MapNodeType.category, creator: map.creator, rootNodeForMap: map.id,
 		});
-		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: "Root"})}));
+		//const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: "Root"})}));
+		const newRootNodeRevision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: "Root"})});
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 

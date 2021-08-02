@@ -13,10 +13,10 @@ const MTName = MTClass.name;
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$id: {$ref: "UUID"},
-		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["name", "type", "url", "description"], makeOptional_all: true}),
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["accessPolicy", "name", "type", "url", "description"], makeOptional_all: true}),
 	}),
 })
-export class UpdateMediaData extends Command<{id: string, updates: Partial<Media>}, {}> {
+export class UpdateMedia extends Command<{id: string, updates: Partial<Media>}, {}> {
 	oldData: MT;
 	newData: MT;
 	Validate() {

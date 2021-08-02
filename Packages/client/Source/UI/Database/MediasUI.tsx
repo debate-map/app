@@ -6,11 +6,10 @@ import {store} from "Store";
 import {GetSelectedMedia, GetSelectedMediaID} from "Store/main/database";
 import {Observer, GetUpdates, ES, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "dm_common";
+import {Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
 import {MediaDetailsUI, ShowAddMediaDialog} from "./Medias/MediaDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
-import {Assert} from "../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
 @Observer
 export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_newData: Media|n, selectedMedia_newDataError: string|n}) {
@@ -72,7 +71,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 										onClick={async e=>{
 											Assert(selectedMedia); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedMedia, selectedMedia_newData);
-											await new UpdateMediaData({id: selectedMedia.id, updates}).RunOnServer();
+											await new UpdateMedia({id: selectedMedia.id, updates}).RunOnServer();
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
 								{creatorOrMod &&

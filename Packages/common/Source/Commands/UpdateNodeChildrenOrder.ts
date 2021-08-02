@@ -31,7 +31,7 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 		const changeable_final = (IsUserCreatorOrMod(this.userInfo.id, node) && changeableForNonAdmins) || HasAdminPermissions(this.userInfo.id);
 		AssertV(changeable_final, "You don't have permission to change this node's children-order.");
 		
-		this.newNodeData = {...this.oldNodeData, ...{childrenOrder}};
+		this.newNodeData = {...this.oldNodeData, childrenOrder};
 		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");*/
 
 		// todo: this should basically

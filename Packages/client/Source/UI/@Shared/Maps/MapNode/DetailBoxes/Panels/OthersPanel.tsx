@@ -1,5 +1,5 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAttachmentType, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink} from "dm_common";
-import {Fragment} from "react";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
+import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {Observer} from "web-vcore";
@@ -8,6 +8,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, CheckBox, Column, Pre, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 
 @Observer
 export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
@@ -21,6 +22,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		//const creator = GetUser(node.creator);
 		// viewers: GetNodeViewers(node.id),
 		const creatorOrMod = IsUserCreatorOrMod(userID, node);
+		const accessPolicy = GetAccessPolicy(node.accessPolicy);
 
 		const parent = GetParentNodeL3(path);
 		const parentPath = SlicePath(path, 1) as string;
@@ -59,7 +61,15 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 			|| (node.type === MapNodeType.argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
-				<GenericEntryInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt} accessPolicyID={node.accessPolicy}/>
+				<GenericEntryInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt} accessPolicyID={node.accessPolicy}
+					accessPolicyButton={
+						<PolicyPicker containerStyle={{flex: "none"}} value={node.accessPolicy} onChange={val=>{
+							new UpdateNodeAccessPolicy({nodeID: node.id, accessPolicy: val}).RunOnServer();
+						}}>
+							{/*<Button ml={5} enabled={creatorOrMod} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>*/}
+							<Button ml={5} p="3px 7px" enabled={creatorOrMod} text="Change" style={{width: "100%"}}/>
+						</PolicyPicker>
+					}/>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>
 					{parentLinks.length == 0 ? "none" : parentLinks.map((link, index)=>{
@@ -87,14 +97,6 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						</Fragment>;
 					})}
 				</Row>
-				{/*<Row center>
-					<Text>Control type:</Text>
-					<Select ml={5} options={["Private", "Public"]} value={changeControlType_currentType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.ValidateErrorStr} onChange={val=>{
-						changeControlTypeCommand.RunOnServer();
-					}}/>
-					<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
-				</Row>*/}
-				{/* <Row>Viewers: {viewers.length || '...'} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row> */}
 
 				{nodeArgOrParentSPArg_info && <>
 					<Row mt={10} style={{fontWeight: "bold"}}>Argument:</Row>

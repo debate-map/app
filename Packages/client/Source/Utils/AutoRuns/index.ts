@@ -1,9 +1,10 @@
 /*function requireAll(r) { r.keys().forEach(r); }
 requireAll(require.context('./', true, /\.js$/)); */
 
-import "./AddUserInfoToRavenContext";
-import "./InitForNewlyLoadedMap";
-import "./LoadShare";
-import "./PageViewRecorder";
-import "./TimelineNodeFocuser";
-import "./UserSignUpHelper";
+import "./AddUserInfoToRavenContext.js";
+import "./InitForNewlyLoadedMap.js";
+import "./LoadDefaultsFromDB.js";
+import "./LoadShare.js";
+import "./PageViewRecorder.js";
+import "./TimelineNodeFocuser.js";
+import "./UserSignUpHelper.js";

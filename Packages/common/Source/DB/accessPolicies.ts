@@ -30,7 +30,7 @@ export const GetSystemAccessPolicyID = CreateAccessor((name: string)=>{
 });
 
 // todo: make so the below remember user preferences better (eg. defaulting to user's last-selected access-policy)
-export const GetDefaultAccessPolicyID_ForMap = CreateAccessor(()=>{
+/*export const GetDefaultAccessPolicyID_ForMap = CreateAccessor(()=>{
 	return GetSystemAccessPolicyID("Public, ungoverned (standard)");
 });
 export const GetDefaultAccessPolicyID_ForNode = CreateAccessor(()=>{
@@ -41,7 +41,7 @@ export const GetDefaultAccessPolicyID_ForNodeRating = CreateAccessor(()=>{
 });
 export const GetDefaultAccessPolicyID_ForMedia = CreateAccessor(()=>{
 	return GetSystemAccessPolicyID("Public, ungoverned (standard)");
-});
+});*/
 
 export function UserFulfillsPermitCriteria(userID: string|n, criteria: PermitCriteria) {
 	const approvals = GetUserReputation_Approvals(userID);

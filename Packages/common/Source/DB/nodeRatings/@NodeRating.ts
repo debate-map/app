@@ -4,7 +4,7 @@ import {NodeRatingType} from "./@NodeRatingType.js";
 
 @MGLClass({table: "nodeRatings"})
 export class NodeRating {
-	constructor(initialData: Partial<NodeRating> & Pick<NodeRating, "node" | "type" | "user" | "value">) {
+	constructor(initialData: Partial<NodeRating> & Pick<NodeRating, "node" | "type" | "value">) {
 		CE(this).VSet(initialData);
 	}
 
@@ -25,12 +25,12 @@ export class NodeRating {
 	type: NodeRatingType;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"})
-	user: string;
+	@Field({type: "string"}, {opt: true})
+	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n).nullable())
+	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {opt: true})
-	editedAt?: number;
+	createdAt: number;
 
 	@DB((t, n)=>t.float(n))
 	@Field({type: "number"})

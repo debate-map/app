@@ -1,41 +1,44 @@
-import {AddMap, GetDefaultAccessPolicyID_ForMap, GetDefaultAccessPolicyID_ForMedia, IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, Map_namePattern, MeID} from "dm_common";
-import {InfoButton} from "web-vcore";
-import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {AddMap, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID} from "dm_common";
+import React from "react";
+import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
+import {Observer} from "web-vcore";
+import {DEL, ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
 
+@Observer
 export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 	render() {
 		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
 		const {Change, creating, enabled} = this.helpers;
-
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), newData);
+		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
+		const nodeAccessPolicy = GetAccessPolicy(newData.nodeAccessPolicy);
 
-		const splitAt = 230;
+		const splitAt = 105;
 		const width = 600;
 		return (
 			<Column style={style}>
 				{!creating &&
 					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				<RowLR mt={5} splitAt={100} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name:</Pre>
 					<TextInput
 						pattern={Map_namePattern} required
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
-				<RowLR mt={5} splitAt={100} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Note:</Pre>
 					<TextInput enabled={enabled} style={{width: "100%"}}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
-				<RowLR mt={5} splitAt={100} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Inline note:</Pre>
 					<CheckBox enabled={enabled} style={{width: "100%"}}
 						value={newData.noteInline ?? false} onChange={val=>Change(newData.noteInline = val)}/>
@@ -75,23 +78,18 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 						<Spinner enabled={enabled} style={{width: "100%"}}
 							value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
 					</RowLR> */}
-				{!creating && // we don't want to overwhelm new users trying to create their own map...
-				<Column mt={10}>
-					<CheckBox text="Node defaults:" enabled={creatorOrMod} value={newData.nodeDefaults != null} onChange={val=>{
-						const defaultNodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap();
-						newData.VSet("nodeDefaults", val ? defaultNodeDefaults : DEL);
-						this.Update();
-					}}/>
-					{newData.nodeDefaults != null &&
-					<Column ml={20}>
-						<PermissionsPanel newRevisionData={newData.nodeDefaults} enabled={enabled} forDefaultsInMap={true} Change={()=>{
-							/*if (newData.nodeDefaults.permission_edit.type == PermissionInfoType.creator && newData.requireMapEditorsCanEdit) {
-								newData.nodeDefaults.permission_edit.type = PermissionInfoType.mapEditors;
-							}*/
-							this.Update();
-						}}/>
-					</Column>}
-				</Column>}
+				<RowLR mt={5} splitAt={splitAt}>
+					<Pre>Access policy: </Pre>
+					<PolicyPicker value={newData.accessPolicy} onChange={val=>Change(newData.accessPolicy = val)}>
+						<Button enabled={enabled} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
+					</PolicyPicker>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}>
+					<Pre>Node access policy: </Pre>
+					<PolicyPicker value={newData.nodeAccessPolicy} onChange={val=>Change(newData.nodeAccessPolicy = val)}>
+						<Button enabled={enabled} text={nodeAccessPolicy ? `${nodeAccessPolicy.name} (id: ${nodeAccessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
+					</PolicyPicker>
+				</RowLR>
 			</Column>
 		);
 	}
@@ -99,9 +97,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 
 export async function ShowAddMapDialog() {
 	const prep = await GetAsync(()=>{
-		return {
-			accessPolicy: GetDefaultAccessPolicyID_ForMap(),
-		};
+		return {accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy};
 	});
 
 	let newMap = new Map({

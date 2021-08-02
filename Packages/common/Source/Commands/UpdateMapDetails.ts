@@ -1,29 +1,25 @@
-import {AddSchema, AssertValidate, NewSchema, GetSchemaJSON, GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, NewSchema, GetSchemaJSON, GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp, SimpleSchema, DeriveJSONSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetMap} from "../DB/maps.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-type MainType = Map;
-const MTName = "Map";
+const MTClass = Map;
+type MT = typeof MTClass.prototype;
+const MTName = MTClass.name;
 
 @MapEdit("id")
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			id: {$ref: "UUID"},
-			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "note", "noteInline", "visibility", "defaultExpandDepth", "defaultTimelineID", "requireMapEditorsCanEdit", "nodeDefaults", "editors"),
-			}),
-		},
-		required: ["id", "updates"],
+	payloadSchema: ()=>SimpleSchema({
+		$id: {$ref: "UUID"},
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["accessPolicy", "name", "note", "noteInline", "defaultExpandDepth", "nodeAccessPolicy", /*"nodeAccessPolicy_required",*/ "editors"]}),
 	}),
 })
-export class UpdateMapDetails extends Command<{id: string, updates: Partial<MainType>}, {}> {
-	oldData: MainType;
-	newData: MainType;
+export class UpdateMapDetails extends Command<{id: string, updates: Partial<MT>}, {}> {
+	oldData: MT;
+	newData: MT;
 	Validate() {
 		const {id: mapID, updates: mapUpdates} = this.payload;
 		this.oldData = GetMap.NN(mapID);

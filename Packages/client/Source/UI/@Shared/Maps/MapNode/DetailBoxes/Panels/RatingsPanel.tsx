@@ -1,18 +1,17 @@
 import {DN, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {Pre, Select, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {GetViewportRect, Observer} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, GetNodeChildren, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating} from "dm_common";
-
-
+import {GetViewportRect, Observer, observer_simple} from "web-vcore";
+import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, GetNodeChildren, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React from "react";
 import {AreaChart, XAxis, YAxis, CartesianGrid, Area, ReferenceLine, Tooltip} from "recharts";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
+import {PolicyPicker} from "../../../../../../UI/Database/Policies/PolicyPicker.js";
 
 /*let sampleData = [
 	{rating: 0, count: 0},
@@ -26,11 +25,13 @@ type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRating
 
 @Observer
 export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2|n}) {
+	root: HTMLDivElement|n;
 	render() {
 		const {node, path, ratingType, ratings} = this.props;
 		const {size} = this.state;
 
 		const userID = MeID();
+		const myDefaultAccessPolicy = GetUserHidden(userID)?.lastAccessPolicy;
 		const form = GetNodeForm(node, path);
 		const nodeChildren = GetNodeChildren(node.id);
 		let smoothing = GetRatingUISmoothing();
@@ -44,7 +45,8 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		const {labels, values} = ratingTypeInfo;
 		function GetValueForLabel(label) { return values[labels.indexOf(label)]; }
 		function GetLabelForValue(value) { return labels[values.indexOf(value)]; }
-		const myRating = TransformRatingForContext(ratings.find(a=>a.user == userID)?.value, reverseRatings);
+		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
+		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
 
 		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100]; // .concat(labels.Max(null, true) == 200 ? [200] : []);
 		const minLabel = labels.Min(undefined, true); const maxLabel = labels.Max(undefined, true); const
@@ -72,7 +74,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		let height = myRating != null ? 260 : 250; */
 
 		return (
-			<div ref="root" style={{position: "relative"/* , minWidth: 496 */}}
+			<div ref={c=>this.root = c} style={{position: "relative"/* , minWidth: 496 */}}
 				onClick={e=>{
 					if (ratingType == "impact") return;
 					const target = e.target as HTMLElement;
@@ -90,32 +92,52 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 					const ratingOnChart_exact = minLabel + (percentOnChart * range);
 					const closestRatingSlot = dataFinal.OrderBy(a=>a.label.Distance(ratingOnChart_exact)).First();
 					let newRating_label = closestRatingSlot.label;
+					let newRating_accessPolicyID = myRating_raw?.accessPolicy ?? myDefaultAccessPolicy;
 
 					// let finalRating = GetRatingForForm(rating, form);
+					const splitAt = 100;
+					const Change = (..._)=>boxController.UpdateUI();
 					const boxController = ShowMessageBox({
 						title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
-						message: ()=>(
-							<div style={{padding: "10px 0"}}>
-									Rating: <Spinner min={minLabel} max={maxLabel} style={{width: 60}}
-									value={newRating_label} onChange={val=>DN(newRating_label = val, boxController.UpdateUI())}/>
-							</div>
-						),
+						message: observer_simple(()=>{
+							const newRating_accessPolicy = GetAccessPolicy.CatchBail(null, newRating_accessPolicyID);
+							return (
+								<Column p="10px 0">
+									<RowLR splitAt={splitAt}>
+										<Text>Rating:</Text>
+										<Spinner min={minLabel} max={maxLabel} style={{width: 60}}
+											value={newRating_label} onChange={val=>Change(newRating_label = val)}/>
+									</RowLR>
+									<RowLR mt={5} splitAt={splitAt}>
+										<Pre>Access policy: </Pre>
+										<PolicyPicker value={newRating_accessPolicyID} onChange={val=>Change(newRating_accessPolicyID = val)}>
+											<Button text={newRating_accessPolicy ? `${newRating_accessPolicy.name} (id: ${newRating_accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
+										</PolicyPicker>
+									</RowLR>
+								</Column>
+							);
+						}),
 						onOK: ()=>{
-							// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
 							let newRating_value = GetValueForLabel(newRating_label);
 							newRating_value = TransformRatingForContext(newRating_value, reverseRatings);
-							new SetNodeRating({nodeID: node.id, ratingType, value: newRating_value}).RunOnServer();
+							const newRating = new NodeRating({
+								accessPolicy: newRating_accessPolicyID,
+								node: node.id,
+								type: ratingType,
+								value: newRating_value,
+							});
+							new SetNodeRating({rating: newRating}).RunOnServer();
 						},
 					});
 				}}
 				onContextMenu={e=>{
-					if (myRating == null || ratingType === "impact") return;
+					if (myRating_raw == null || ratingType === "impact") return;
 					MarkHandled(e);
 					const boxController = ShowMessageBox({
 						title: "Delete rating", cancelButton: true,
 						message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
 						onOK: ()=>{
-							new SetNodeRating({nodeID: node.id, ratingType, value: null}).RunOnServer();
+							new DeleteNodeRating({id: myRating_raw.id}).RunOnServer();
 						},
 					});
 				}}>
@@ -143,7 +165,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
-						{myRating != null && <ReferenceLine x={GetLabelForValue(myRating)} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
+						{myRating_displayVal != null && <ReferenceLine x={GetLabelForValue(myRating_displayVal)} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
 					</AreaChart>}
 			</div>
@@ -152,7 +174,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 	PostRender() {
 		if (this.lastRender_source == RenderSource.SetState) return;
 
-		const dom = this.refs.root;
+		const dom = this.root;
 		if (!dom) return;
 
 		const size = new Vector2(dom.clientWidth, dom.clientHeight);
@@ -175,7 +197,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}, {}> {
 	render() {
 		const {active, payload, external, label} = this.props;
-    	if (!active) return null;
+		if (!active) return null;
 
 		const style = {
 			padding: 6,

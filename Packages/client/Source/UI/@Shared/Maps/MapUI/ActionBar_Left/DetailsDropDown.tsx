@@ -3,7 +3,7 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
-import {MapNodeRevision_Defaultable, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeChildLinks} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeChildLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";

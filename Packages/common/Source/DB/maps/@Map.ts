@@ -1,6 +1,5 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {DB, Field, GetSchemaJSON, MGLClass, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_DefaultsForMap, MapNodeRevision_Defaultable_props} from "../nodes/@MapNodeRevision.js";
+import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 /*export enum MapType {
 	private = "private",
@@ -18,9 +17,9 @@ export class Map {
 		/*if (!("requireMapEditorsCanEdit" in initialData)) {
 			this.requireMapEditorsCanEdit = this.type == MapType.private;
 		}*/
-		if (!("nodeDefaults" in initialData)) {
+		/*if (!("nodeDefaults" in initialData)) {
 			this.nodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap();
-		}
+		}*/
 	}
 
 	@DB((t, n)=>t.text(n).primary())
@@ -63,11 +62,19 @@ export class Map {
 	@Field({type: "boolean"}, {opt: true})
 	requireMapEditorsCanEdit?: boolean;*/
 
-	@DB((t, n)=>t.jsonb(n).nullable())
+	/*@DB((t, n)=>t.jsonb(n).nullable())
 	@Field(()=>NewSchema({
 		properties: CE(GetSchemaJSON("MapNodeRevision").properties!).IncludeKeys(...MapNodeRevision_Defaultable_props),
 	}))
-	nodeDefaults?: MapNodeRevision_Defaultable;
+	nodeDefaults?: MapNodeRevision_Defaultable;*/
+
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`accessPolicies`).DeferRef())
+	@Field({$ref: "UUID"}, {opt: true})
+	nodeAccessPolicy?: string;
+
+	/*@DB((t, n)=>t.boolean(n))
+	@Field({$ref: "UUID"})
+	nodeAccessPolicy_required = false;*/
 
 	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})

@@ -6,13 +6,13 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer} from "web-vcore";
 
 @Observer
-export class PolicyPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any}, {}) {
+export class PolicyPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}) {
 	dropDown: DropDown|n;
 	render() {
-		const {value, onChange, children} = this.props;
+		const {value, onChange, containerStyle, children} = this.props;
 		const policies = GetAccessPolicies().OrderBy(a=>a.name);
 		return (
-			<DropDown ref={c=>this.dropDown = c} style={{flex: 1}}>
+			<DropDown ref={c=>this.dropDown = c} style={E({flex: 1}, containerStyle)}>
 				<DropDownTrigger>{children}</DropDownTrigger>
 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
 					<Row style={{alignItems: "flex-start"}}>

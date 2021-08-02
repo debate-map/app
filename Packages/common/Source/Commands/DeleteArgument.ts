@@ -25,7 +25,7 @@ export class DeleteArgument extends Command<{mapID?: string|n, argumentID: strin
 			this.sub_deleteClaim = this.sub_deleteClaim ?? new DeleteNode({mapID, nodeID: claimID}).MarkAsSubcommand(this);
 			this.sub_deleteClaim.Validate();
 		} else {
-			this.sub_unlinkClaim = this.sub_unlinkClaim ?? new UnlinkNode({mapID, parentID: argumentID, childID: claimID});
+			this.sub_unlinkClaim = this.sub_unlinkClaim ?? new UnlinkNode({mapID, parentID: argumentID, childID: claimID}).MarkAsSubcommand(this);
 			this.sub_unlinkClaim.Validate();
 		}
 

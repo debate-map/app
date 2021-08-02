@@ -1,7 +1,6 @@
 import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, CreateAccessor, GetDocs, NoID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {observable} from "web-vcore/nm/mobx.js";
-
 import {NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
 import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
@@ -12,6 +11,10 @@ import {MapNodeType} from "./nodes/@MapNodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
+
+export const GetNodeRating = CreateAccessor((id: string)=>{
+	return GetDoc({}, a=>a.nodeRatings.get(id!));
+});
 
 export const GetRatings = CreateAccessor(<
 	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">|n, userID?: string|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
@@ -35,7 +38,7 @@ export const GetRatings = CreateAccessor(<
 		params: {filter: {
 			node: {equalTo: nodeID},
 			type: {equalTo: ratingType},
-			user: userID && {equalTo: userID},
+			creator: userID && {equalTo: userID},
 		}},
 	}, a=>a.nodeRatings);
 }));

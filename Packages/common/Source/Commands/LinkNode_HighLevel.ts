@@ -1,7 +1,6 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
-import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
@@ -118,10 +117,11 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			newPolarity = newPolarity || Polarity.supporting; // if new-polarity isn't supplied, just default to Supporting (this can happen if a claim is copied from search-results)
 			const argumentWrapper = new MapNode({
 				//ownerMapID: OmitIfFalsy(this.newParent_data.ownerMapID),
-				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+				accessPolicy: this.node_data.accessPolicy,
 				type: MapNodeType.argument,
 			});
-			const argumentWrapperRevision = new MapNodeRevision(this.map_data.nodeDefaults);
+			const argumentWrapperRevision = new MapNodeRevision();
 
 			this.sub_addArgumentWrapper = this.sub_addArgumentWrapper ?? new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,

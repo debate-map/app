@@ -1,47 +1,38 @@
-import {AddSchema, AssertValidate, BU, Command, CommandMeta, DBHelper, dbp, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
-import {GetDefaultAccessPolicyID_ForNodeRating} from "../DB/accessPolicies.js";
+import {AddSchema, AssertValidate, BU, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatings} from "../DB/nodeRatings.js";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {DeleteNodeRating} from "./DeleteNodeRating.js";
 
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			nodeID: {type: "string"},
-			ratingType: {$ref: "NodeRatingType"},
-			value: {type: ["number", "null"]},
-		},
-		required: ["nodeID", "ratingType", "value"],
+	payloadSchema: ()=>SimpleSchema({
+		$rating: {$ref: NodeRating.name},
 	}),
 })
-export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, value: number|n}, {}> {
-	oldRating: NodeRating;
-	newRating: NodeRating;
+export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
+	sub_deleteOldRating: DeleteNodeRating;
 	Validate() {
-		const {nodeID, ratingType, value} = this.payload;
+		const {rating} = this.payload;
 
-		const oldRatings = GetRatings(nodeID, ratingType, this.userInfo.id);
-		BU(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
-		this.oldRating = oldRatings[0];
-
-		if (value != null) {
-			this.newRating = new NodeRating({
-				accessPolicy: GetDefaultAccessPolicyID_ForNodeRating(),
-				node: nodeID, type: ratingType, user: this.userInfo.id,
-				editedAt: Date.now(),
-				value,
-			});
-			this.newRating.id = this.GenerateUUID_Once("newRating.id");
+		Assert(rating.type != "impact", "Cannot set impact rating directly.");
+		const oldRatings = GetRatings(rating.node, rating.type, this.userInfo.id);
+		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
+		if (oldRatings.length) {
+			this.sub_deleteOldRating = new DeleteNodeRating({id: oldRatings[0].id}).MarkAsSubcommand(this);
 		}
+
+		rating.id = this.GenerateUUID_Once("rating.id");
+		rating.creator = this.userInfo.id;
+		rating.createdAt = Date.now();
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		if (this.oldRating) {
-			db.set(dbp`nodeRatings/${this.oldRating.id}`, null);
+		const {rating} = this.payload;
+		if (this.sub_deleteOldRating) {
+			db.add(this.sub_deleteOldRating.GetDBUpdates(db));
 		}
-		if (this.newRating) {
-			db.set(dbp`nodeRatings/${this.newRating.id}`, this.newRating);
-		}
+		db.set(dbp`nodeRatings/${rating.id}`, rating);
 	}
 }

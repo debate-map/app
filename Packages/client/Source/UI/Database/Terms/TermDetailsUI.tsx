@@ -1,17 +1,23 @@
-import {AddTerm, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
+import {AddTerm, GetAccessPolicy, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
+import React from "react";
+import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
-import {ES, InfoButton, observer_simple} from "web-vcore";
+import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
 import {DEL, E, GetEntries} from "web-vcore/nm/js-vextensions.js";
-import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {Button, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GetNiceNameForTermType} from "../../Database/TermsUI.js";
+import {PolicyPicker} from "../Policies/PolicyPicker.js";
 
+@Observer
 export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 	render() {
 		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
 		const {Change, creating, enabled} = this.helpers;
+		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 
 		const splitAt = 140, width = 400;
 		return (
@@ -72,13 +78,24 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 					<TextArea autoSize={true} enabled={enabled} style={ES({flex: 1})}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}>
+					<Pre>Access policy: </Pre>
+					<PolicyPicker value={newData.accessPolicy} onChange={val=>Change(newData.accessPolicy = val)}>
+						<Button enabled={enabled} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
+					</PolicyPicker>
+				</RowLR>
 			</Column>
 		);
 	}
 }
 
-export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: string)=>void) {
+export async function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: string)=>void) {
+	const prep = await GetAsync(()=>{
+		return {accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy};
+	});
+
 	let newEntry = new Term(E({
+		accessPolicy: prep.accessPolicy,
 		name: "",
 		forms: [""],
 		type: TermType.commonNoun,

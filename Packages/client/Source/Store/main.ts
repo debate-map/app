@@ -60,13 +60,14 @@ export class MainState {
 	@O topRightOpenPanel: string|n;
 	// set topRightOpenPanel_set(val) { this.topRightOpenPanel = val; }
 
-	// non-page-specific sections/components (corresponds to @Shared folder)
+	// non-page-specific sections/components (roughly corresponds to @Shared folder)
 	// ==========
 
 	@O maps = new MapsState();
 	@O timelines = new TimelinesState();
 	@O shareUI = new ShareUIState();
 	@O ratingUI = new RatingUIState();
+	//@O lastAccessPolicy: string|n;
 }
 
 export const GetOpenMapID = CreateAccessor(function() {

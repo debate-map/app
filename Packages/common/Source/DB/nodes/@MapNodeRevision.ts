@@ -40,11 +40,11 @@ export class NodeRevisionDisplayDetails {
 
 /*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/
-export const MapNodeRevision_Defaultable_props = [] as const;
+/*export const MapNodeRevision_Defaultable_props = [] as const;
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, never>;
 export function MapNodeRevision_Defaultable_DefaultsForMap(): MapNodeRevision_Defaultable {
 	return {};
-}
+}*/
 
 //export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
 export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace

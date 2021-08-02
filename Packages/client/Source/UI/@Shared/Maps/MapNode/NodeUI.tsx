@@ -164,7 +164,7 @@ export class NodeUI extends BaseComponentPlus(
 			}*/
 		}
 
-		const {width, expectedHeight} = this.GetMeasurementInfo();
+		const {width} = this.GetMeasurementInfo();
 
 		const showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.supporting;
@@ -331,13 +331,13 @@ export class NodeUI extends BaseComponentPlus(
 	lastDividePoint = 0;
 
 	// GetMeasurementInfo(/*props: Props, state: State*/) {
-	measurementInfo_cache;
+	measurementInfo_cache: MeasurementInfo;
 	measurementInfo_cache_lastUsedProps;
 	/* ComponentWillReceiveProps(newProps) {
 		this.GetMeasurementInfo(newProps, false); // refresh measurement-info when props change
 	} */
 	// GetMeasurementInfo(useCached: boolean) {
-	GetMeasurementInfo() {
+	GetMeasurementInfo(): MeasurementInfo {
 		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
 
 		const {props} = this;
@@ -347,7 +347,8 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {map, node, path} = props_used;
 		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
-		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path);
+		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path);
+		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
 
 		/*for (const subnode of subnodes) {
 			const subnodeMeasurementInfo = GetMeasurementInfoForNode(subnode, `${subnode.id}`);
@@ -367,6 +368,7 @@ export class NodeUI extends BaseComponentPlus(
 		return this.measurementInfo_cache;
 	}
 }
+type MeasurementInfo = {expectedBoxWidth: number, width: number};
 
 export enum LimitBarPos {
 	above = "above",

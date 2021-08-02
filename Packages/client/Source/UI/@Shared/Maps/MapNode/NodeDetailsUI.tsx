@@ -59,9 +59,12 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 		return (
 			<Column style={E({padding: 5}, style)}>
 				<Row mb={5}>
-					<Select displayType="button bar" options={GetEntries(DetailsPanel_Subpanel, "ui")} value={subpanel} onChange={val=>{
-						RunInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
-					}}/>
+					<Select displayType="button bar"
+						// only show permissions panel when first creating node (afterward, setting is changed in node's Others panel)
+						options={GetEntries(DetailsPanel_Subpanel, "ui").filter(a=>a.value != DetailsPanel_Subpanel.permissions || forNew)}
+						value={subpanel} onChange={val=>{
+							RunInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
+						}}/>
 				</Row>
 				{subpanel == DetailsPanel_Subpanel.text &&
 					<TextPanel {...sharedProps}/>}

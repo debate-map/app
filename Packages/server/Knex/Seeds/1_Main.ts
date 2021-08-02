@@ -1,4 +1,4 @@
-import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria} from "dm_common";
+import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink.js";
@@ -50,7 +50,7 @@ const PC_NoOne = ()=>new PermitCriteria({minApprovals: -1, minApprovalPercent: -
 const accessPolicies = TypeCheck(AccessPolicy, {
 	public_ungoverned: {
 		id: GenerateUUID(),
-		name: "Public, ungoverned (standard)",
+		name: systemPolicy_publicUngoverned_name,
 		creator: systemUserID,
 		createdAt: Date.now(),
 		permissions: Store(new PermissionSet({
@@ -64,7 +64,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 	},
 	public_governed: {
 		id: GenerateUUID(),
-		name: "Public, governed (standard)",
+		name: systemPolicy_publicGoverned_name,
 		creator: systemUserID,
 		createdAt: Date.now(),
 		permissions: Store(new PermissionSet({
@@ -78,7 +78,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 	},
 	private_governed: {
 		id: GenerateUUID(),
-		name: "Private, governed (standard)",
+		name: systemPolicy_privateGoverned_name,
 		creator: systemUserID,
 		createdAt: Date.now(),
 		permissions: Store(new PermissionSet({

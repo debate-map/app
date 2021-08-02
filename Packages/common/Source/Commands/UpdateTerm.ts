@@ -13,7 +13,7 @@ const MTName = MTClass.name;
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$id: {$ref: "UUID"},
-		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["name", "forms", "disambiguation", "type", "definition", "note"], makeOptional_all: true}),
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["accessPolicy", "name", "forms", "disambiguation", "type", "definition", "note"], makeOptional_all: true}),
 	}),
 })
 export class UpdateTerm extends Command<{id: string, updates: Partial<MT>}, {}> {

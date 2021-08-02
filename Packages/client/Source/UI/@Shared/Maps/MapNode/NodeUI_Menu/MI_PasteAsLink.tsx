@@ -1,4 +1,4 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, UseMemo} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
@@ -32,14 +32,15 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 			}
 		}
 
-		const linkCommand = new LinkNode_HighLevel({
+		// use memo, so we don't keep recreating command each render (since that causes new id's to be generated, causing new db-requests, making cycle keep repeating)
+		const linkCommand = UseMemo(()=>new LinkNode_HighLevel({
 			mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode.id,
 			newForm: copiedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
 			//createWrapperArg: childGroup != ChildGroup.generic || !node.multiPremiseArgument,
 			childGroup,
 			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
-		}.OmitNull());
+		}.OmitNull()), [childGroup, contributeInfo_polarity?.hostNodeID, contributeInfo_polarity?.reversePolarities, copiedNode.id, copiedNode.type, copiedNodePath, copiedNode_asCut, formForClaimChildren, map?.id, newPolarity, node.id]);
 		const error = linkCommand.Validate_Safe();
 
 		return (

@@ -54,4 +54,8 @@ export class UserHidden {
 	@DB((t, n)=>t.boolean(n))
 	@Field({type: "boolean"})
 	addToStream = true;
+
+	@DB((t, n)=>t.string(n).nullable().references("id").inTable(`accessPolicies`).DeferRef())
+	@Field({$ref: "UUID"}, {opt: true})
+	lastAccessPolicy?: string;
 }

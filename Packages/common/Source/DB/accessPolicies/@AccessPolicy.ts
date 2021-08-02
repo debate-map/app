@@ -61,6 +61,7 @@ export class PermissionSet {
 	@Field({$ref: "PermissionSetForType"})
 	nodes = new PermissionSetForType();
 
+	// most node-related rows use their node's access-policy as their own; node-ratings is an exception, because individual entries can be kept hidden without disrupting collaboration significantly
 	@Field({$ref: "PermissionSetForType"})
 	nodeRatings = new PermissionSetForType();
 }

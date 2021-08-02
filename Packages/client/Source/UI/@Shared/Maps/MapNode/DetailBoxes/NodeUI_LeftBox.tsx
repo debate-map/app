@@ -133,7 +133,13 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 						}
 						return (
 							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path: pathForRatingType, openPanel}}
-								panel={ratingInfo.type} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0, borderRadius: "5px 5px 0 0"})}>
+									panel={ratingInfo.type} text={ratingTypeInfo.displayText}
+									style={E(
+										// font-size adjustments to keep rating-type labels from going past edge
+										ratingInfo.type == NodeRatingType.significance && {fontSize: 12},
+										ratingInfo.type == NodeRatingType.relevance && {fontSize: 13},
+										index == 0 && {marginTop: 0, borderRadius: "5px 5px 0 0"},
+									)}>
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
 									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>

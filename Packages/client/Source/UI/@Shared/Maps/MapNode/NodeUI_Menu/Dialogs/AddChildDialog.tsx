@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID} from "dm_common";
 import {BailMessage, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
@@ -22,13 +22,16 @@ export class AddChildHelper {
 		const parentNode = GetNode(this.Node_ParentID);
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
 
+		//const defaultPolicyID = GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
+		const userHidden = GetUserHidden.NN(MeID());
 		this.node = new MapNode({
-			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+			accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 			//parents: {[this.Node_ParentID]: {_: true}},
 			type: childType,
 			//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
 		});
-		this.node_revision = new MapNodeRevision(this.map.nodeDefaults);
+		this.node_revision = new MapNodeRevision();
 		this.node_link = E(
 			{slot: 0}, // todo
 			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base},
@@ -39,10 +42,11 @@ export class AddChildHelper {
 			this.node.argumentType = ArgumentType.all;
 			this.subNode = new MapNode({
 				//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
-				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+				accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 				type: MapNodeType.claim, creator: userID,
 			});
-			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: title})}));
+			this.subNode_revision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: title})});
 			this.subNode_link = new NodeChildLink({
 				slot: 0,
 				form: ClaimForm.base,

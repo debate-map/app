@@ -217,7 +217,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "noteInline", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "rootNode", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef({enforceAtTransactionEnd: true}));
 		RunFieldInit(t, "defaultExpandDepth", (t, n)=>t.integer(n));
-		RunFieldInit(t, "nodeDefaults", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "nodeAccessPolicy", (t, n)=>t.text(n).nullable().references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "featured", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "editors", (t, n)=>t.specificType(n, "text[]"));
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
@@ -271,8 +271,8 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "type", (t, n)=>t.text(n));
-		RunFieldInit(t, "user", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "editedAt", (t, n)=>t.bigInteger(n).nullable());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "value", (t, n)=>t.float(n));
 	});
 
@@ -348,6 +348,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "backgroundCustom_url", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "backgroundCustom_position", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "addToStream", (t, n)=>t.boolean(n));
+		RunFieldInit(t, "lastAccessPolicy", (t, n)=>t.string(n).nullable().references("id").inTable(v + `accessPolicies`).DeferRef());
 	});
 
 	await knex.schema.createTable(`${v}users`, t=>{

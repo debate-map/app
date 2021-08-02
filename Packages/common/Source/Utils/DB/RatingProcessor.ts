@@ -48,8 +48,8 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 		//accessPolicy: null,
 		node: argument.id,
 		type: NodeRatingType.impact,
-		user: userID,
-		editedAt: Date.now(),
+		creator: userID,
+		createdAt: Date.now(),
 		value: CE(result * 100).RoundTo(1),
 	};
 });
@@ -82,11 +82,11 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL
 	for (const userID of argRatingSet.VKeys()) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	} */
-	for (const userID of GetRatings(argument.id, NodeRatingType.relevance).map(a=>a.user)) {
+	for (const userID of GetRatings(argument.id, NodeRatingType.relevance).map(a=>a.creator)) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	}
 	for (const premise of premises) {
-		for (const userID of GetRatings(premise.id, NodeRatingType.truth).map(a=>a.user)) {
+		for (const userID of GetRatings(premise.id, NodeRatingType.truth).map(a=>a.creator)) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}
@@ -94,7 +94,7 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL
 	for (const child of premises) {
 		const childRatings = GetRatings(child.id, GetMainRatingType(child));
 		//for (const userID of childRatingSet.VKeys()) {
-		for (const userID of childRatings.map(a=>a.user)) {
+		for (const userID of childRatings.map(a=>a.creator)) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}

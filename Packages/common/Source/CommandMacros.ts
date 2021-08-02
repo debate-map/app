@@ -6,7 +6,7 @@ import {AddAccessPolicy} from "./Commands/AddAccessPolicy.js";
 import {SetUserData_Hidden} from "./Commands/SetUserData_Hidden.js";
 import {AddUser} from "./Commands/AddUser.js";
 import {AddArgumentAndClaim} from "./Commands/AddArgumentAndClaim.js";
-import {AddChildNode, AddMap} from "./Commands.js";
+import {AddChildNode, AddMap, DeleteNodeRating} from "./Commands.js";
 import {AddMedia} from "./Commands/AddMedia.js";
 import {AddNode} from "./Commands/AddNode.js";
 import {AddNodeRevision} from "./Commands/AddNodeRevision.js";
@@ -32,7 +32,7 @@ import {SetNodeRating} from "./Commands/SetNodeRating.js";
 import {UnlinkNode} from "./Commands/UnlinkNode.js";
 import {UpdateLink} from "./Commands/UpdateLink.js";
 import {UpdateMapDetails} from "./Commands/UpdateMapDetails.js";
-import {UpdateMediaData} from "./Commands/UpdateMediaData.js";
+import {UpdateMedia} from "./Commands/UpdateMedia.js";
 import {UpdateNodeChildrenOrder} from "./Commands/UpdateNodeChildrenOrder.js";
 import {UpdateNodeTag} from "./Commands/UpdateNodeTag.js";
 import {UpdatePhrasing} from "./Commands/UpdatePhrasing.js";
@@ -40,19 +40,20 @@ import {UpdateShare} from "./Commands/UpdateShare.js";
 import {UpdateTerm} from "./Commands/UpdateTerm.js";
 import {CommandRun} from "./DB/commandRuns/@CommandRun.js";
 import {GetUserHidden} from "./DB/userHiddens.js";
+import {UpdateNodeAccessPolicy} from "./Commands/UpdateNodeAccessPolicy.js";
 
 // general augmentations
 // ==========
 
-const commandsToCompletelyIgnore: Array<typeof Command> = [
+const commandsToNotEvenRecord: Array<typeof Command> = [
 	// these are server-internal commands, with no need to be seen in website UI
 	AddUser,
 ];
-const commandsToMakePublic: Array<typeof Command> = [
+const commandsShowableInStream: Array<typeof Command> = [
 	// terms
 	AddTerm, UpdateTerm,
 	// media
-	AddMedia, DeleteMedia, UpdateMediaData,
+	AddMedia, DeleteMedia, UpdateMedia,
 	// maps
 	AddMap, AddShare, DeleteMap, DeleteShare, DeleteTerm, UpdateMapDetails, UpdateShare,
 	// timelines
@@ -60,12 +61,12 @@ const commandsToMakePublic: Array<typeof Command> = [
 	// nodes
 	AddArgumentAndClaim, AddChildNode, AddNode, AddNodeRevision, AddNodeTag, AddPhrasing, ChangeClaimType, CloneNode,
 	DeleteNode, DeleteNodeTag, DeletePhrasing, LinkNode_HighLevel, LinkNode, ReverseArgumentPolarity, SetNodeIsMultiPremiseArgument,
-	SetNodeRating, UnlinkNode, UpdateLink, UpdateNodeChildrenOrder, UpdateNodeTag, UpdatePhrasing,
+	SetNodeRating, DeleteNodeRating, UnlinkNode, UpdateLink, UpdateNodeAccessPolicy, UpdateNodeChildrenOrder, UpdateNodeTag, UpdatePhrasing,
 ];
 Command.augmentValidate = (command: Command<any>)=>{
 	if (command.parentCommand != null) return; // ignore subcommands (it would be redundant)
 	const commandClass = command.constructor as typeof Command;
-	if (commandsToCompletelyIgnore.includes(commandClass)) return;
+	if (commandsToNotEvenRecord.includes(commandClass)) return;
 
 	const userHidden = GetUserHidden.NN(command.userInfo.id);
 	command["user_addToStream"] = userHidden.addToStream;
@@ -76,9 +77,9 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 
 	if (command.parentCommand != null) return; // ignore subcommands (it would be redundant)
 	const commandClass = command.constructor as typeof Command;
-	if (commandsToCompletelyIgnore.includes(commandClass)) return;
+	if (commandsToNotEvenRecord.includes(commandClass)) return;
 
-	const makePublic_base = commandsToMakePublic.includes(commandClass)
+	const makePublic_base = commandsShowableInStream.includes(commandClass)
 		&& command["user_addToStream"]; // field set in augmentValidate
 
 	const id = GenerateUUID();
