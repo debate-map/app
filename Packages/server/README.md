@@ -30,16 +30,7 @@ TODO
 
 ### Environment variables
 
-Create a `.env` file in the repo root, following this template:
-```
-# GCP web-client key/id
-CLIENT_ID=XXX
-CLIENT_SECRET=XXX
-
-# local database
-LOCALDB_USERNAME=XXX
-LOCALDB_PASSWORD=XXX
-```
+Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables.
 
 ## Editing + running
 
