@@ -113,6 +113,11 @@ Object.assign(scripts, {
 
 		// second terminal
 		run: GetStartServerCommand(),
+
+		// docker
+		//dockerBuild: "docker build -f ./Packages/server/Dockerfile -t dm_server .",
+		dockerBuild: "cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm_server .", // variant which preserves complete log
+		//dockerBuild: "cross-env DOCKER_BUILDKIT=0 docker build --no-cache -f ./Packages/server/Dockerfile -t dm_server .", // with cache disabled
 	},
 });
 

@@ -26,7 +26,18 @@ max_replication_slots = 10
 
 ### Remote server
 
-TODO
+Note: These instructions are for OVH-cloud's Public Cloud servers.
+
+1) Create a Public Cloud project on OVH cloud. (in the US, us.ovhcloud.com is recommended for their in-country servers)
+2) Follow the instructions here to setup a Kubernetes cluster: https://youtu.be/vZOj59Oer7U?t=586
+2.1) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)
+2.2) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
+3) Install Docker Desktop: https://docs.docker.com/desktop/
+4) Install K3D: https://k3d.io/#installation
+5) Install the Docker "dive" tool (helps for inspecting image contents without starting contianer): https://github.com/wagoodman/dive
+5.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
+6) Install Skaffold (trying it out): https://skaffold.dev/docs/install
+7) TODO
 
 ### Environment variables
 

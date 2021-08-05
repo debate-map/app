@@ -1,0 +1,40 @@
+{
+  "name": "@debate-map/app",
+  "description": "Monorepo for the client, server, etc. of the Debate Map website (debatemap.app).",
+  "version": "0.0.1",
+  "author": "Venryx (https://venryx.com)",
+  "private": true,
+  "workspaces": [
+    "Packages/server",
+    "Packages/client",
+    "Packages/common"
+  ],
+  "scripts": {
+    "start": "nps",
+    "preinstall": "npx only-allow yarn"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nps": "^5.10.0",
+    "ts-loader": "9.2.3",
+    "ts-node": "^10.0.0",
+    "ts-node-dev": "1.1.6",
+    "tsc-watch": "^4.4.0",
+    "typescript": "^4.3.2"
+  },
+  "@resolutions_c": "The 'version locks' below (after portals) are for deps that are also subdeps (eg. under symlinked deps), 'locking' to the 'as subdep' version, to keep their types aligned. [not sure if actually needed/useful]",
+  "#resolutions": {
+    "###web-vcore": "portal:./Portals/web-vcore",
+    "###@pg-lq/postgraphile-plugin": "portal:./Portals/@pg-lq_postgraphile-plugin",
+    "web-vcore": "link:../../@Modules/web-vcore/Main",
+    "@pg-lq/postgraphile-plugin": "link:../../@Modules/postgraphile-live-query/Main/Packages/postgraphile-plugin",
+    "@types/react": "17.0.9",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "web-vcore": "0.0.4"
+  },
+  "packageManager": "yarn@3.0.0-rc.2"
+}
