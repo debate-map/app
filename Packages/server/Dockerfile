@@ -7,6 +7,7 @@ WORKDIR "/dm_server"
 # bundle just the files here that yarn needs to do its job (else files change will force yarn to re-run)
 COPY package.json .
 COPY yarn.lock .
+#COPY node_modules node_modules
 COPY Packages/client/package.json Packages/client/package.json
 COPY Packages/common/package.json Packages/common/package.json
 COPY Packages/server/package.json Packages/server/package.json
@@ -47,9 +48,6 @@ RUN yarn install
 #RUN yarn install --check-files --force
 #RUN yarn install --check-files --force --production=false
 #RUN yarn install --check-files --production=false
-
-# test
-#RUN yarn rebuild
 
 # bundle app source
 #COPY ./Dist ./Dist
