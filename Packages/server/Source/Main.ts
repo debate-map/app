@@ -61,6 +61,7 @@ const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${pr
 const dbPort = process.env.PORT || 3105 as number;
 
 const pluginHook = makePluginHook([
+	// todo: turn this variant on, and add the client-side plugin, for more efficient list-change messages
 	variant == "patches" && new GeneratePatchesPlugin(),
 ] as any[]);
 

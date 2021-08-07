@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "start": "nps",
-    "preinstall": "npx only-allow yarn"
+    "preinstall": "npx only-allow yarn",
+    "postinstall": "patch-package --patch-dir ./node_modules/web-vcore/patches"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -34,7 +35,9 @@
   },
   "dependencies": {
     "chalk": "^4.1.1",
-    "web-vcore": "0.0.4"
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
+    "web-vcore": "0.0.15"
   },
   "packageManager": "yarn@3.0.0-rc.2"
 }

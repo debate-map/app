@@ -2,7 +2,8 @@ import {ApolloClient, ApolloLink, from, HttpLink, InMemoryCache, NormalizedCache
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 
 // @ts-ignore // temp fix for import error
-import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep_cjs.js";
+//import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep_cjs.js";
+import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 
 const GRAPHQL_URL = "http://localhost:3105/graphql";
 
