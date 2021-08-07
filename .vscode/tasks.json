@@ -56,6 +56,22 @@
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
+		},
+		{
+			"label": "## server.dockerBuild_fullLog",
+			"type": "shell",
+			"command": "npm start server.dockerBuild_fullLog",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},
+		{
+			"label": "## server.dockerBuild_ignoreCache",
+			"type": "shell",
+			"command": "npm start server.dockerBuild_ignoreCache",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
 		}
 	]
 }

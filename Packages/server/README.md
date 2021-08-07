@@ -37,7 +37,8 @@ Note: These instructions are for OVH-cloud's Public Cloud servers.
 5) Install the Docker "dive" tool (helps for inspecting image contents without starting contianer): https://github.com/wagoodman/dive
 5.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
 6) Install Skaffold (trying it out): https://skaffold.dev/docs/install
-7) TODO
+7) For builds, run `npm start server.dockerBuild`. (If yarn gives an error about being unable to create acquire a lock file, you could try running `server.dockerBuild_noCache` -- though doesn't seem to resolve fix it anyway.)
+8) TODO
 
 ### Environment variables
 

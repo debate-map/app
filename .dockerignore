@@ -1,5 +1,7 @@
-node_modules
+node_modules/**
+!node_modules/web-vcore/.yarn/cache
+!node_modules/web-vcore/.yarn/cache/**
+!node_modules/test1
+
 npm-debug.log
 .git
-# lock file is already generated when `COPY . .` is run, so no point copying
-yarn.lock
