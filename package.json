@@ -37,7 +37,7 @@
     "chalk": "^4.1.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
-    "web-vcore": "0.0.15"
+    "web-vcore": "0.0.17"
   },
   "packageManager": "yarn@3.0.0-rc.2"
 }
