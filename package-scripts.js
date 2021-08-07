@@ -120,6 +120,8 @@ Object.assign(scripts, {
 		//dockerBuild: "xcopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm_server .",
 		// using robocopy works, but it's not much faster, if at all; seems slowdown is throughout the yarn install process (~3 minutes in docker, ~1s in Windows :/)
 		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm_server .",
+		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm_server .",
+		//dockerBuild: "robocopy \"node_modules\" \".yarn/test1\" /s /e /NFL /NDL /NJH /NJS /nc /ns /np && docker build -f ./Packages/server/Dockerfile -t dm_server .", // this takes even longer than yarn install...
 		//dockerBuild: "tar -czh . | docker build -",
 		dockerBuild_fullLog: "cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm_server .", // variant which preserves complete log (may increase build time)
 		dockerBuild_ignoreCache: "docker build --no-cache -f ./Packages/server/Dockerfile -t dm_server .", // with cache disabled

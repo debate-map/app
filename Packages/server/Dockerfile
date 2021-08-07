@@ -8,6 +8,7 @@ WORKDIR "/dm_server"
 COPY package.json .
 COPY yarn.lock .
 #COPY node_modules node_modules
+#COPY .yarn/test1 node_modules
 COPY Packages/client/package.json Packages/client/package.json
 COPY Packages/common/package.json Packages/common/package.json
 COPY Packages/server/package.json Packages/server/package.json
@@ -49,7 +50,7 @@ RUN yarn install
 #RUN yarn install --check-files --force --production=false
 #RUN yarn install --check-files --production=false
 
-# bundle app source
+# bundle app source (the .dockerignore file excludes large, unrelated folders like node_modules)
 #COPY ./Dist ./Dist
 COPY . .
 
