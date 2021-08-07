@@ -1272,7 +1272,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
-    web-vcore: 0.0.16
+    web-vcore: 0.0.18
   languageName: unknown
   linkType: soft
 
@@ -1365,6 +1365,17 @@ __metadata:
   resolution: "@pg-lq/postgraphile-plugin@link:../../@Modules/postgraphile-live-query/Main/Packages/postgraphile-plugin::locator=%40debate-map%2Fapp%40workspace%3A."
   languageName: node
   linkType: soft
+
+"@pg-lq/postgraphile-plugin@npm:0.0.6":
+  version: 0.0.6
+  resolution: "@pg-lq/postgraphile-plugin@npm:0.0.6"
+  dependencies:
+    "@n1ru4l/graphql-live-query-patch": ^0.3.1
+    fast-json-patch: ^3.0.0-1
+    jsondiffpatch: ^0.4.1
+  checksum: c18c9d6f0fd2a8b07dc9e98284e2fc957fd74cfdaa81535d92dcb22cc2db0995ce2aa8cf020abf7b759afa0da532be0e2b5f2523d175b7a2d299e03a40c3a844
+  languageName: node
+  linkType: hard
 
 "@pyramation/postgraphile-plugin-fulltext-filter@npm:^2.0.0":
   version: 2.0.0
@@ -2291,7 +2302,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:2.4.2, chalk@npm:^2.0.0, chalk@npm:^2.0.1, chalk@npm:^2.4.2":
+"chalk@npm:2.4.2, chalk@npm:^2.0.0, chalk@npm:^2.0.1, chalk@npm:^2.3.0, chalk@npm:^2.4.2":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
   dependencies:
@@ -3051,6 +3062,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff-match-patch@npm:^1.0.0":
+  version: 1.0.5
+  resolution: "diff-match-patch@npm:1.0.5"
+  checksum: 841522d01b09cccbc4e4402cf61514a81b906349a7d97b67222390f2d35cf5df277cb23959eeed212d5e46afb5629cebab41b87918672c5a05c11c73688630e3
+  languageName: node
+  linkType: hard
+
 "diff@npm:^4.0.1":
   version: 4.0.2
   resolution: "diff@npm:4.0.2"
@@ -3498,7 +3516,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-json-patch@npm:3.0.0-1":
+"fast-json-patch@npm:3.0.0-1, fast-json-patch@npm:^3.0.0-1":
   version: 3.0.0-1
   resolution: "fast-json-patch@npm:3.0.0-1"
   checksum: d4a8dff174357a90f3e2b79812df4bcc179143524e7eb1ab84a3bd5a80bd283f6be53996abe5c38527aeb28e994f0d03084c9ce5fcd8eb3e2881986e991105aa
@@ -4548,6 +4566,18 @@ fsevents@~2.3.2:
   bin:
     json5: lib/cli.js
   checksum: e88fc5274bb58fc99547baa777886b069d2dd96d9cfc4490b305fd16d711dabd5979e35a4f90873cefbeb552e216b041a304fe56702bedba76e19bc7845f208d
+  languageName: node
+  linkType: hard
+
+"jsondiffpatch@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "jsondiffpatch@npm:0.4.1"
+  dependencies:
+    chalk: ^2.3.0
+    diff-match-patch: ^1.0.0
+  bin:
+    jsondiffpatch: ./bin/jsondiffpatch
+  checksum: 2062d188cc7f60f9d84e7bf497a7d89233d2f8ec21d085c26cdb24c2b7c5f4f7231ad9b978355e319c00820de0863499ba881c6c6b1bd92313db1a7d16d6ab1d
   languageName: node
   linkType: hard
 

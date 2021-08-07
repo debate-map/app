@@ -1,7 +1,5 @@
 node_modules
 npm-debug.log
 .git
-
-# temp
-package.json
+# lock file is already generated when `COPY . .` is run, so no point copying
 yarn.lock
