@@ -30,18 +30,23 @@ max_replication_slots = 10
 
 ### 2) Local server, using docker
 
+Note: The docker images produced directly will have the name `dm_server`.
+
 1) Install Docker Desktop: https://docs.docker.com/desktop
 2) Install the Docker "dive" tool (helps for inspecting image contents without starting contianer): https://github.com/wagoodman/dive
 2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
 3) For direct docker builds, run `npm start server.dockerBuild`. (image-name: `dm_server`)
 
-### 3) Local server, using docker+kubernetes
+### 3) Local server, using docker+kubernetes (+skaffold, as helper)
+
+Note: The docker images produced by skaffold will have the name `packages-server`.
 
 1) Install Skaffold (trying it out): https://skaffold.dev/docs/install
 2) Install K3D: https://k3d.io/#installation
 3) Set up local kubernetes cluster, using k3d: `k3d cluster create main-1`
-4) For docker->kubernetes builds, run `npm start server.kbnBuild`. (image-name: `packages-server`)
-5) For docker->kubernetes build+run, run `npm start server.kbnRun`. (image-name: `packages-server`)
+4) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, wait for previous build to finish, then press enter in the terminal)
+4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `packages-server`)
+5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `packages-server`)
 
 ### 4) Remote server, using docker+kubernetes
 

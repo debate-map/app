@@ -17,10 +17,10 @@ npm-debug.log
 # ==========
 
 # client
-Packages/server/Source
+Packages/client/Source
 
 # common
-Packages/server/Source
+Packages/common/Source
 
 # server
 Packages/server/Source
