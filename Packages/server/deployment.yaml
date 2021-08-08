@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: packages-server
+  labels:
+    app: packages-server
+spec:
+  clusterIP: None
+  selector:
+    app: packages-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: packages-server
+  labels:
+    app: packages-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: packages-server
+  template:
+    metadata:
+      labels:
+        app: packages-server
+    spec:
+      containers:
+      - name: packages-server
+        image: packages-server

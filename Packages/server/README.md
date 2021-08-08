@@ -6,7 +6,11 @@ Codebase for the Debate Map website's backend ([debatemap.app](https://debatemap
 
 > Continued from: https://github.com/debate-map/app#setup
 
-### Local server
+### Environment variables
+
+Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. (The sections below will show which of those environment variables are needed, and how to supply them.)
+
+### 1) Local server, base
 
 1) Ensure [PostgreSQL](https://www.postgresql.org/) (v10+) is installed.
 
@@ -24,7 +28,22 @@ max_replication_slots = 10
 
 5) Init `debate-map` db in PostgreSQL, by running `yarn start server.initDB`.
 
-### Remote server
+### 2) Local server, using docker
+
+1) Install Docker Desktop: https://docs.docker.com/desktop
+2) Install the Docker "dive" tool (helps for inspecting image contents without starting contianer): https://github.com/wagoodman/dive
+2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
+3) For direct docker builds, run `npm start server.dockerBuild`. (image-name: `dm_server`)
+
+### 3) Local server, using docker+kubernetes
+
+1) Install Skaffold (trying it out): https://skaffold.dev/docs/install
+2) Install K3D: https://k3d.io/#installation
+3) Set up local kubernetes cluster, using k3d: `k3d cluster create main-1`
+4) For docker->kubernetes builds, run `npm start server.kbnBuild`. (image-name: `packages-server`)
+5) For docker->kubernetes build+run, run `npm start server.kbnRun`. (image-name: `packages-server`)
+
+### 4) Remote server, using docker+kubernetes
 
 Note: These instructions are for OVH-cloud's Public Cloud servers.
 
@@ -32,17 +51,7 @@ Note: These instructions are for OVH-cloud's Public Cloud servers.
 2) Follow the instructions here to setup a Kubernetes cluster: https://youtu.be/vZOj59Oer7U?t=586
 2.1) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)
 2.2) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
-3) Install Docker Desktop: https://docs.docker.com/desktop/
-4) Install K3D: https://k3d.io/#installation
-5) Install the Docker "dive" tool (helps for inspecting image contents without starting contianer): https://github.com/wagoodman/dive
-5.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
-6) Install Skaffold (trying it out): https://skaffold.dev/docs/install
-7) For builds, run `npm start server.dockerBuild`. (If yarn gives an error about being unable to create acquire a lock file, you could try running `server.dockerBuild_ignoreCache` -- though doesn't seem to reliably fix it anyway.)
-8) TODO
-
-### Environment variables
-
-Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables.
+3) TODO
 
 ## Editing + running
 

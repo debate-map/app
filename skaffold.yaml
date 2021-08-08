@@ -1,0 +1,21 @@
+apiVersion: skaffold/v2beta20
+kind: Config
+metadata:
+  name: main
+build:
+  artifacts:
+  - image: packages-server
+
+# custom replaced
+#    context: Packages/server
+#    docker:
+#      dockerfile: Dockerfile
+    context: .
+    docker:
+      dockerfile: Packages/server/Dockerfile
+
+
+deploy:
+  kubectl:
+    manifests:
+    - packages\server\deployment.yaml

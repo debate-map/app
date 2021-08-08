@@ -125,6 +125,9 @@ Object.assign(scripts, {
 		//dockerBuild: "tar -czh . | docker build -",
 		dockerBuild_fullLog: "cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm_server .", // variant which preserves complete log (may increase build time)
 		dockerBuild_ignoreCache: "docker build --no-cache -f ./Packages/server/Dockerfile -t dm_server .", // with cache disabled
+
+		kbnBuild: "skaffold build",
+		kbnRun: "skaffold run --tail",
 	},
 });
 
