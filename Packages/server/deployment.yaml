@@ -1,33 +1,33 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: packages-server
+  name: dm-server
   labels:
-    app: packages-server
+    app: dm-server
 spec:
   clusterIP: None
   selector:
-    app: packages-server
+    app: dm-server
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: packages-server
+  name: dm-server
   labels:
-    app: packages-server
+    app: dm-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: packages-server
+      app: dm-server
   template:
     metadata:
       labels:
-        app: packages-server
+        app: dm-server
     spec:
       containers:
-      - name: packages-server
-        image: packages-server
+      - name: dm-server
+        image: dm-server
         # disable liveness-probe for now, to see if its cause of sync not working
         #livenessProbe:
         #  initialDelaySeconds: 111222333444

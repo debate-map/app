@@ -5,7 +5,7 @@ import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import expressSession from "express-session";
-import {Assert} from "web-vcore/nm/js-vextensions";
+import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {pgClient, pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 

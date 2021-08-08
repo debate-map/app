@@ -1,7 +1,41 @@
 # anywhere
 # ==========
 
-**/node_modules
+#**/node_modules
+#**/node_modules/**
+
+# node-modules (special group)
+# ==========
+
+# own-module reinclusions (for fast changing, through yarn symlinks)
+node_modules/**
+#!node_modules/web-vcore
+#!node_modules/web-vcore/**
+!node_modules/web-vcore/nm
+!node_modules/web-vcore/nm/**
+!node_modules/web-vcore/nm/js-vextensions.js
+!node_modules/web-vcore/Dist
+#!node_modules/web-vcore/Dist/**
+!node_modules/@pg-lq/postgraphile-plugin/Build
+# through web-vcore
+!node_modules/graphql-feedback/Dist
+!node_modules/web-vcore/node_modules/graphql-feedback/Dist
+!node_modules/js-vextensions/Dist
+!node_modules/web-vcore/node_modules/js-vextensions/Dist
+!node_modules/js-vextensions/Helpers
+!node_modules/web-vcore/node_modules/js-vextensions/Helpers
+!node_modules/react-vextensions/Dist
+!node_modules/web-vcore/node_modules/react-vextensions/Dist
+!node_modules/react-vcomponents/Dist
+!node_modules/web-vcore/node_modules/react-vcomponents/Dist
+!node_modules/react-vmenu/Dist
+!node_modules/web-vcore/node_modules/react-vmenu/Dist
+!node_modules/react-vmessagebox/Dist
+!node_modules/web-vcore/node_modules/react-vmessagebox/Dist
+!node_modules/mobx-graphlink/Dist
+!node_modules/web-vcore/node_modules/mobx-graphlink/Dist
+!node_modules/eslint-config-vbase
+!node_modules/web-vcore/node_modules/eslint-config-vbase
 
 # root
 # ==========

@@ -4,19 +4,62 @@ metadata:
   name: main
 build:
   artifacts:
-  - image: packages-server
-    sync:
-      manual:
+  - image: dm-server
+    #sync:
+    #  manual:
         # sync server's transpiled code (we don't want image re-deploy just from these changes)
         #- src: 'Packages/server/Dist/**/*.*'
         #  strip: 'Packages/server/Dist'
-        #  dest: 'Dist' # relative to "/dm_server/Packages/server"
+        #  dest: 'Dist' # relative to "/dm-server/Packages/server"
 
         # test; have sync try to sync all folders/files
         #- src: '**/*.*'
+        #- src: 'Packages/server/**/*.*'
+        #  strip: 'Packages/server'
+        #  dest: '/dm-server/Packages/server'
+        #- src: 'node_modules/web-vcore/nm/**/*.*'
+        #  dest: '/dm-server'
+        #- src: 'node_modules/web-vcore/Dist/**/*.*'
+        #  dest: '/dm-server'
+
+        # - src: 'Packages/server/**/*.*'
+        #   dest: '/dm-server'
+        # - src: 'Packages/server/**/*'
+        #   dest: '/dm-server'
+        # - src: 'Packages/server/**/*.*'
+        #   strip: 'Packages/server'
+        #   dest: '/dm-server/Packages/server'
+        # - src: 'node_modules/**/*.*'
+        #   dest: '/dm-server'
+        # - src: 'node_modules/**/*'
+        #   dest: '/dm-server'
+        #- src: '.'
+        #  dest: '/dm-server'
+        #- src: 'node_modules/web-vcore/nm/js-vextensions.js'
+        #  dest: '/dm-server/node_modules/web-vcore/nm/js-vextensions.js'
+
+    sync:
+      manual:
         - src: 'Packages/server/**/*.*'
-          strip: 'Packages/server'
-          dest: '/dm_server/Packages/server'
+          dest: '/dm_server'
+        - src: 'node_modules/web-vcore/nm/js-vextensions.js'
+          dest: '/dm_server'
+
+    # sync:
+    #   infer:
+    #     - 'Packages/server/**/*.*'
+    #     - 'node_modules/web-vcore/nm/js-vextensions.js'
+    #     - 'node_modules/web-vcore/nm/**/*.*'
+    #     - 'node_modules/web-vcore/nm/**'
+    #     - 'node_modules/web-vcore/**'
+    #     - 'node_modules/web-vcore'
+        # # don't worry, this only actually syncs specific subpaths, specified in .dockerignore
+        # - 'node_modules/**'
+        # - 'node_modules/**/*'
+        # - 'node_modules/web-vcore/nm'
+        # - 'node_modules/web-vcore/nm/*'
+        # - 'node_modules/web-vcore/nm/js-vextensions.js'
+        #- '.'
 
 # custom replaced
 #    context: Packages/server

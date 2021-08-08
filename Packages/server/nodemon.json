@@ -1,0 +1,4 @@
+{
+  "@ignoreRoot_comment": "Needed so that node_modules folders are also watched. (root list normally includes it, but list below does not)",
+  "ignoreRoot": [".git"]
+}

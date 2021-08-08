@@ -74,9 +74,9 @@
 			"group": "build",
 		},
 		{
-			"label": "## server.skaffoldDev",
+			"label": "## server.skaffoldDev_manual",
 			"type": "shell",
-			"command": "npm start server.skaffoldDev",
+			"command": "npm start server.skaffoldDev_manual",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",

@@ -30,16 +30,16 @@ max_replication_slots = 10
 
 ### 2) Local server, using docker
 
-Note: The docker images produced directly will have the name `dm_server`.
+Note: The docker images produced directly will have the name `dm-server-direct`.
 
 1) Install Docker Desktop: https://docs.docker.com/desktop
 2) Install the Docker "dive" tool (helps for inspecting image contents without starting contianer): https://github.com/wagoodman/dive
 2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
-3) For direct docker builds, run `npm start server.dockerBuild`. (image-name: `dm_server`)
+3) For direct docker builds, run `npm start server.dockerBuild`.
 
 ### 3) Local server, using docker + kubernetes (k3d/kind) + skaffold (helper)
 
-Note: The docker images produced by skaffold will have the name `packages-server`.
+Note: The docker images produced by skaffold will have the name `dm-server`.
 
 1) Create your Kubernetes cluster in Docker Desktop, k3d, or kind. (For now, Docker Desktop is recommended since its image loading is instant, rather than ~3m for k3d/kind. You can speed up image-loading for k3d/kind by setting up a local registry, but I haven't learned that yet. More info here: https://docs.tilt.dev/choosing_clusters.html)
 1.A.1) For Docker Desktop, simply check the "Enable Kubernetes" setting, and apply/restart it.
@@ -49,9 +49,9 @@ Note: The docker images produced by skaffold will have the name `packages-server
 1.C.2) Set up local kubernetes cluster, using kind: `kind create cluster main-1` (in the future, use regular docker commands to start/stop the cluster nodes, eg. `kubectl cluster-info --context kind-main-1`)
 1.D) To switch between docker-desktop/k3d/kind, you can use `kubectl config use-context [docker-desktop/k3d-main-1/kind-main-1]`. (or use the "Kubernetes" selector in Docker Desktop's tray-icon)
 2) Install Skaffold (trying it out): https://skaffold.dev/docs/install)
-3) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, wait for previous build to finish, then press enter in the terminal)
-4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `packages-server`)
-5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `packages-server`)
+3) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, just press enter in the terminal)
+4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `dm-server`)
+5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `dm-server`)
 6) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
 7) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
 ```

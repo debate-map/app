@@ -52,6 +52,25 @@ RUN yarn install
 
 # bundle app source (the .dockerignore file excludes large, unrelated folders like node_modules)
 #COPY ./Dist ./Dist
+#COPY . .
+
+# don't worry, this only actually copies specific subpaths, specified in .dockerignore
+#COPY node_modules node_modules
+#COPY node_modules/**/* ./
+COPY node_modules/web-vcore/nm/ ./node_modules/web-vcore/nm/
+# COPY node_modules/web-vcore/Dist/ ./
+# COPY node_modules/@pg-lq/postgraphile-plugin/Build/ ./
+# # through web-vcore
+# COPY node_modules/graphql-feedback/Dist*				node_modules/web-vcore/node_modules/graphql-feedback/Dist*				./
+# COPY node_modules/js-vextensions/Dist*					node_modules/web-vcore/node_modules/js-vextensions/Dist*					./
+# COPY node_modules/js-vextensions/Helpers*				node_modules/web-vcore/node_modules/js-vextensions/Helpers*				./
+# COPY node_modules/react-vextensions/Dist*				node_modules/web-vcore/node_modules/react-vextensions/Dist*				./
+# COPY node_modules/react-vcomponents/Dist*				node_modules/web-vcore/node_modules/react-vcomponents/Dist*				./
+# COPY node_modules/react-vmenu/Dist*						node_modules/web-vcore/node_modules/react-vmenu/Dist*						./
+# COPY node_modules/react-vmessagebox/Dist*				node_modules/web-vcore/node_modules/react-vmessagebox/Dist*				./
+# #COPY node_modules/mobx-graphlink/Dist*				node_modules/web-vcore/node_modules/mobx-graphlink/Dist*				./
+# COPY node_modules/eslint-config-vbase/index.js*		node_modules/web-vcore/node_modules/eslint-config-vbase/index.js*		./
+
 COPY . .
 
 EXPOSE 8080
@@ -62,4 +81,7 @@ EXPOSE 8080
 WORKDIR "/dm_server/Packages/server"
 
 #CMD ../../node_modules/.bin/cross-env TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
-CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+#CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --legacy-watch --watch Dist --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+#CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+#CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --ignore 'nothing' --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --legacy-watch --ignore 'nothing' --watch Dist --watch node_modules/web-vcore/nm --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js

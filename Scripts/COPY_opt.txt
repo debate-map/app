@@ -1,0 +1,1 @@
+Helper file, to allow for optional COPY commands in Dockerfile. (see here for details: https://github.com/GoogleContainerTools/skaffold/issues/741)

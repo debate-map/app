@@ -11,7 +11,7 @@ import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
 import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions";
+import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import type {User} from "dm_common";
 import {SetUpAuthHandling} from "./AuthHandling.js";
@@ -23,10 +23,14 @@ import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.js";
 //import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
-console.log("Test1234");
+//console.log("Test12");
+console.log("Test12:", FancyFormat({}, "fancy-formatted_1"));
+import fs from "fs";
+console.log("Contents:", fs.readFileSync("/dm_server/node_modules/web-vcore/nm/js-vextensions.js").toString());
+
 // loop forever, to keep process alive, so kubernetes doesn't kill the container, so skaffold-sync can work
 while (true) {
-	console.log("TestUpdate2:", Date.now());
+	console.log("TestUpdate12:", FancyFormat({}, Date.now()));
 	await new Promise(resolve=>setTimeout(resolve, 1000));
 }
 
