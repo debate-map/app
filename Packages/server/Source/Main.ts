@@ -23,6 +23,13 @@ import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.js";
 //import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
+console.log("Test1234");
+// loop forever, to keep process alive, so kubernetes doesn't kill the container, so skaffold-sync can work
+while (true) {
+	console.log("TestUpdate:", Date.now());
+	await new Promise(resolve=>setTimeout(resolve, 1000));
+}
+
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
 const require = createRequire(import.meta.url);
@@ -249,5 +256,3 @@ app.get("/", (req, res)=>{
 
 app.listen(dbPort);
 console.log("Server started.");
-
-console.log("Test123456");

@@ -127,6 +127,7 @@ Object.assign(scripts, {
 		dockerBuild_ignoreCache: "docker build --no-cache -f ./Packages/server/Dockerfile -t dm_server .", // with cache disabled
 
 		skaffoldDev: "skaffold dev --trigger manual",
+		skaffoldDev_info: "skaffold dev --trigger manual -v info",
 		skaffoldBuild: "skaffold build",
 		skaffoldRun: "skaffold run --tail",
 	},

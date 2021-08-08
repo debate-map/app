@@ -28,3 +28,7 @@ spec:
       containers:
       - name: packages-server
         image: packages-server
+        # disable liveness-probe for now, to see if its cause of sync not working
+        #livenessProbe:
+        #  initialDelaySeconds: 111222333444
+        #  periodSeconds: 3
