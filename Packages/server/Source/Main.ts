@@ -249,3 +249,5 @@ app.get("/", (req, res)=>{
 
 app.listen(dbPort);
 console.log("Server started.");
+
+console.log("Test1234");

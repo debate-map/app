@@ -1,8 +1,26 @@
-node_modules
+# anywhere
+# ==========
+
+**/node_modules
+
+# root
+# ==========
+
 #node_modules/**
 #!node_modules/web-vcore/.yarn/cache
 #!node_modules/web-vcore/.yarn/cache/**
 #!node_modules/test1
-
 npm-debug.log
 .git
+
+# package-specific
+# ==========
+
+# client
+Packages/server/Source
+
+# common
+Packages/server/Source
+
+# server
+Packages/server/Source
