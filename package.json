@@ -23,11 +23,12 @@
     "tsc-watch": "^4.4.0",
     "typescript": "^4.3.2"
   },
-  "@resolutions_c1": "The 'version locks' below are for deps that are also subdeps (eg. under symlinked deps), 'locking' to the 'as subdep' version, to keep their types aligned. [not sure if actually needed/useful]",
+  "@resolutions_c": "The 'version locks' below are for deps that are also subdeps (eg. under symlinked deps), 'locking' to the 'as subdep' version, to keep their types aligned. [not sure if actually needed/useful]",
   "resolutions": {
     "@types/react": "17.0.9",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "mathjs": "1.0.1"
   },
   "dependencies": {
     "chalk": "^4.1.1",
