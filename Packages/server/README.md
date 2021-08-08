@@ -37,18 +37,21 @@ Note: The docker images produced directly will have the name `dm_server`.
 2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
 3) For direct docker builds, run `npm start server.dockerBuild`. (image-name: `dm_server`)
 
-### 3) Local server, using docker+kubernetes (+skaffold, as helper)
+### 3) Local server, using docker + kubernetes (k3d/kind) + skaffold (helper)
 
 Note: The docker images produced by skaffold will have the name `packages-server`.
 
-1) Install Skaffold (trying it out): https://skaffold.dev/docs/install
-2) Install K3D: https://k3d.io/#installation
-3) Set up local kubernetes cluster, using k3d: `k3d cluster create main-1`
-4) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, wait for previous build to finish, then press enter in the terminal)
+1) Create your cluster in k3d or kind.
+1.A.1) For k3d, install from here: https://k3d.io/#installation
+1.A.2) Set up local kubernetes cluster, using k3d: `k3d cluster create main-1` (in the future, run `k3d cluster start main-1` to start the cluster, and `k3d cluster stop main-1` to stop)
+1.B.1) For kind, install from here: https://kind.sigs.k8s.io/docs/user/quick-start
+1.B.2) Set up local kubernetes cluster, using kind: `kind create cluster main-1` (in the future, use regular docker commands to start/stop the cluster nodes, eg. `kubectl cluster-info --context kind-main-1`)
+2) Install Skaffold (trying it out): https://skaffold.dev/docs/install)
+3) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, wait for previous build to finish, then press enter in the terminal)
 4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `packages-server`)
 5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `packages-server`)
 
-### 4) Remote server, using docker+kubernetes
+### 4) Remote server, using docker + kubernetes
 
 Note: These instructions are for OVH-cloud's Public Cloud servers.
 
