@@ -52,6 +52,13 @@ Note: The docker images produced by skaffold will have the name `packages-server
 3) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, wait for previous build to finish, then press enter in the terminal)
 4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `packages-server`)
 5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `packages-server`)
+6) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
+7) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
+```
+$containers = (docker container list -a).Split("`n") | % { [regex]::split($_, "\s+") | Select -Last 1 }
+$containersToRemove = $containers | Where { ([regex]"^[a-z]+_[a-z]+$").IsMatch($_) }
+foreach ($container in $containersToRemove) { docker container rm $container }
+```
 
 ### 4) Remote server, using docker + kubernetes
 
