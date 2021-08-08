@@ -41,12 +41,13 @@ Note: The docker images produced directly will have the name `dm_server`.
 
 Note: The docker images produced by skaffold will have the name `packages-server`.
 
-1) Create your cluster in k3d or kind.
-1.A.1) For k3d, install from here: https://k3d.io/#installation
-1.A.2) Set up local kubernetes cluster, using k3d: `k3d cluster create main-1` (in the future, run `k3d cluster start main-1` to start the cluster, and `k3d cluster stop main-1` to stop)
-1.B.1) For kind, install from here: https://kind.sigs.k8s.io/docs/user/quick-start
-1.B.2) Set up local kubernetes cluster, using kind: `kind create cluster main-1` (in the future, use regular docker commands to start/stop the cluster nodes, eg. `kubectl cluster-info --context kind-main-1`)
-1.C) To switch between k3d and kind, you can use `kubectl config use-context k3d-main-1` and `kubectl config use-context kind-main-1`. (I think this'll work anyway)
+1) Create your Kubernetes cluster in Docker Desktop, k3d, or kind. (For now, Docker Desktop is recommended since its image loading is instant, rather than ~3m for k3d/kind. You can speed up image-loading for k3d/kind by setting up a local registry, but I haven't learned that yet. More info here: https://docs.tilt.dev/choosing_clusters.html)
+1.A.1) For Docker Desktop, simply check the "Enable Kubernetes" setting, and apply/restart it.
+1.B.1) For k3d, install from here: https://k3d.io/#installation
+1.B.2) Set up local kubernetes cluster, using k3d: `k3d cluster create main-1` (in the future, run `k3d cluster start main-1` to start the cluster, and `k3d cluster stop main-1` to stop)
+1.C.1) For kind, install from here: https://kind.sigs.k8s.io/docs/user/quick-start
+1.C.2) Set up local kubernetes cluster, using kind: `kind create cluster main-1` (in the future, use regular docker commands to start/stop the cluster nodes, eg. `kubectl cluster-info --context kind-main-1`)
+1.D) To switch between docker-desktop/k3d/kind, you can use `kubectl config use-context [docker-desktop/k3d-main-1/kind-main-1]`. (or use the "Kubernetes" selector in Docker Desktop's tray-icon)
 2) Install Skaffold (trying it out): https://skaffold.dev/docs/install)
 3) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, wait for previous build to finish, then press enter in the terminal)
 4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `packages-server`)

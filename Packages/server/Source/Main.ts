@@ -26,7 +26,7 @@ import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.j
 console.log("Test1234");
 // loop forever, to keep process alive, so kubernetes doesn't kill the container, so skaffold-sync can work
 while (true) {
-	console.log("TestUpdate:", Date.now());
+	console.log("TestUpdate2:", Date.now());
 	await new Promise(resolve=>setTimeout(resolve, 1000));
 }
 
