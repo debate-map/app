@@ -1,3 +1,10 @@
+# =============================================================
+# =============================================================
+# ========== THIS IS A GENERATED FILE; DO NOT MODIFY ==========
+# =============================================================
+# =============================================================
+# (Instead, modify template.dockerignore, then run `npm start dockerUpdateFiles`; or just run one of the docker-related commands in package-scripts.js.)
+
 # anywhere
 # ==========
 
@@ -7,17 +14,16 @@
 # node-modules (special group)
 # ==========
 
-# own-module reinclusions (for fast changing, through yarn symlinks)
+# use this "/**" variant, because without it we can't add reinclusions under node_modules (like how .gitignore works)
 node_modules/**
-#!node_modules/web-vcore
-#!node_modules/web-vcore/**
+
+# own-module reinclusions (for fast changing, through yarn symlinks)
+# (do not modify the line below; it is needed by UpdateDockerIgnore.js)
 !node_modules/web-vcore/nm
 !node_modules/web-vcore/nm/**
 !node_modules/web-vcore/nm/js-vextensions.js
 !node_modules/web-vcore/Dist
-#!node_modules/web-vcore/Dist/**
 !node_modules/@pg-lq/postgraphile-plugin/Build
-# through web-vcore
 !node_modules/graphql-feedback/Dist
 !node_modules/web-vcore/node_modules/graphql-feedback/Dist
 !node_modules/js-vextensions/Dist

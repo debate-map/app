@@ -24,13 +24,13 @@ import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.j
 //import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
 //console.log("Test12");
-console.log("Test12:", FancyFormat({}, "fancy-formatted_1"));
+console.log("Test3:", FancyFormat({}, "fancy-formatted_1"));
 import fs from "fs";
 console.log("Contents:", fs.readFileSync("/dm_server/node_modules/web-vcore/nm/js-vextensions.js").toString());
 
 // loop forever, to keep process alive, so kubernetes doesn't kill the container, so skaffold-sync can work
 while (true) {
-	console.log("TestUpdate12:", FancyFormat({}, Date.now()));
+	console.log("TestUpdate3:", FancyFormat({}, Date.now()));
 	await new Promise(resolve=>setTimeout(resolve, 1000));
 }
 

@@ -115,22 +115,23 @@ Object.assign(scripts, {
 		run: GetStartServerCommand(),
 
 		// docker
+		dockerPrep: "node Scripts/PrepareDocker.js",
 		//dockerBuild: "cross-env DOCKER_BUILDKIT=1 docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
-		dockerBuild: "docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
+		dockerBuild: DockerCommand("docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."),
 		//dockerBuild: "xcopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
 		// using robocopy works, but it's not much faster, if at all; seems slowdown is throughout the yarn install process (~3 minutes in docker, ~1s in Windows :/)
 		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
 		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
 		//dockerBuild: "robocopy \"node_modules\" \".yarn/test1\" /s /e /NFL /NDL /NJH /NJS /nc /ns /np && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .", // this takes even longer than yarn install...
 		//dockerBuild: "tar -czh . | docker build -",
-		dockerBuild_fullLog: "cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm-server-direct .", // variant which preserves complete log (may increase build time)
-		dockerBuild_ignoreCache: "docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct .", // with cache disabled
+		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."), // variant which preserves complete log (may increase build time)
+		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct ."), // with cache disabled
 
-		skaffoldDev_manual: "skaffold dev --trigger manual",
-		//skaffoldDev_manual_info: "skaffold dev --trigger manual -v info",
-		skaffoldDev_auto: "skaffold dev",
-		skaffoldBuild: "skaffold build",
-		skaffoldRun: "skaffold run --tail",
+		skaffoldDev_manual: DockerCommand("skaffold dev --trigger manual"),
+		//skaffoldDev_manual_info: DockerCommand("skaffold dev --trigger manual -v info"),
+		skaffoldDev_auto: DockerCommand("skaffold dev"),
+		skaffoldBuild: DockerCommand("skaffold build"),
+		skaffoldRun: DockerCommand(`skaffold run --tail`),
 	},
 });
 
@@ -154,4 +155,9 @@ function GetStartServerCommand() {
 	//return `cd Packages/server && node -r esm ./Dist/Main.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
 	//return TSScript("server", "Source/Main.ts");
 	return TSScript({pkg: "server", envStrAdd: "DEV=true"}, "Dist/Main.js"); // use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
+}
+
+function DockerCommand(commandStr) {
+	//return `npm start dockerPrep && ${commandStr}`;
+	return `node Scripts/PrepareDocker.js && ${commandStr}`;
 }

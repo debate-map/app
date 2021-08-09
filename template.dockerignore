@@ -1,0 +1,37 @@
+# anywhere
+# ==========
+
+#**/node_modules
+#**/node_modules/**
+
+# node-modules (special group)
+# ==========
+
+# use this "/**" variant, because without it we can't add reinclusions under node_modules (like how .gitignore works)
+node_modules/**
+
+# own-module reinclusions (for fast changing, through yarn symlinks)
+# (do not modify the line below; it is needed by UpdateDockerIgnore.js)
+# [[[PLACEHOLDER FOR NODE_MODULES WATCH PATHS]]]
+
+# root
+# ==========
+
+#node_modules/**
+#!node_modules/web-vcore/.yarn/cache
+#!node_modules/web-vcore/.yarn/cache/**
+#!node_modules/test1
+npm-debug.log
+.git
+
+# package-specific
+# ==========
+
+# client
+Packages/client/Source
+
+# common
+Packages/common/Source
+
+# server
+Packages/server/Source

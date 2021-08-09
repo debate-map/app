@@ -84,4 +84,17 @@ WORKDIR "/dm_server/Packages/server"
 #CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --legacy-watch --watch Dist --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
 #CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
 #CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --ignore 'nothing' --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
-CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --legacy-watch --ignore 'nothing' --watch Dist --watch node_modules/web-vcore/nm --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+#CMD TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/nodemon --legacy-watch --ignore 'nothing' --watch Dist --watch node_modules/web-vcore/nm --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+
+# we can use "pm2" or "pm2-runtime" here; not sure which is better, but going with pm2 atm (for consistency between dev and prod, until I understand the pm2-runtime's prod advantages)
+# pm2 options: https://github.com/Unitech/pm2/blob/master/lib/binaries/CLI.js, pm2-runtime options: https://github.com/Unitech/pm2/blob/master/lib/binaries/Runtime4Docker.js
+#CMD PM2_DISCRETE_MODE=true TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+#CMD PM2_DISCRETE_MODE=true TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true; ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+#CMD export PM2_DISCRETE_MODE=true TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true && ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+#CMD PM2_DISCRETE_MODE=true DEV=true ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+
+ENV DEV=true
+ENV PM2_DISCRETE_MODE=true
+ENV TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true
+#CMD ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --ignore-watch="nothing" --no-daemon --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon

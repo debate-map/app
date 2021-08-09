@@ -40,10 +40,13 @@ build:
 
     sync:
       manual:
-        - src: 'Packages/server/**/*.*'
+        - src: 'Packages/server/**/*'
           dest: '/dm_server'
-        - src: 'node_modules/web-vcore/nm/js-vextensions.js'
+        # don't worry, this only actually syncs the specific subpaths listed in .dockerignore (source: NodeModuleWatchPaths.js)
+        - src: 'node_modules/**/*'
           dest: '/dm_server'
+        #- src: 'node_modules/web-vcore/nm/js-vextensions.js'
+        #  dest: '/dm_server'
 
     # sync:
     #   infer:
