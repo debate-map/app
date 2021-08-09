@@ -1,12 +1,10 @@
 // this list is used for both .dockerignore (through UpdateDockerIgnore.js) and ecosystem.config.cjs
 const nmWatchPaths = [
-	//"node_modules/web-vcore",
-	//"node_modules/web-vcore/**",
-	"node_modules/web-vcore/nm",
-	"node_modules/web-vcore/nm/**",
-	"node_modules/web-vcore/nm/js-vextensions.js",
 	"node_modules/web-vcore/Dist",
 	//"node_modules/web-vcore/Dist/**",
+	"node_modules/web-vcore/nm",
+	//"node_modules/web-vcore/nm/**",
+	//"node_modules/web-vcore/nm/js-vextensions.js",
 	"node_modules/@pg-lq/postgraphile-plugin/Build",
 ];
 

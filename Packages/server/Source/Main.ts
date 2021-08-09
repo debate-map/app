@@ -23,22 +23,18 @@ import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.js";
 //import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
-//console.log("Test12");
-console.log("Test3:", FancyFormat({}, "fancy-formatted_1"));
-import fs from "fs";
-console.log("Contents:", fs.readFileSync("/dm_server/node_modules/web-vcore/nm/js-vextensions.js").toString());
-
-// loop forever, to keep process alive, so kubernetes doesn't kill the container, so skaffold-sync can work
-while (true) {
-	console.log("TestUpdate3:", FancyFormat({}, Date.now()));
-	await new Promise(resolve=>setTimeout(resolve, 1000));
-}
-
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
 const require = createRequire(import.meta.url);
 
 //program.option("-v, --variant <type>", "Which server variant to use (base, patches)");
+
+// for testing scaffold-sync
+/*while (true) {
+	//console.log("TestUpdate_early:", fs.readFileSync("/dm_server/node_modules/web-vcore/nm/js-vextensions.js").toString());
+	console.log("TestUpdate:", FancyFormat({}, Date.now()));
+	await new Promise(resolve=>setTimeout(resolve, 1000));
+}*/
 
 program.parse(process.argv);
 export const launchOpts = program.opts();

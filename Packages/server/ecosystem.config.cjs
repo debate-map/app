@@ -14,42 +14,16 @@ module.exports = {
 		script: "./Dist/Main.js",
 		node_args: "--loader ts-node/esm.mjs --experimental-specifier-resolution=node",
 
-		/*watch: true,
-		ignore_watch: [],
-		watch_options: {
-			cwd: '../../', // cwd is "Packages/server" folder, so move up to monorepo-root
-		},*/
+		exp_backoff_restart_delay: 500,
 
 		watch: [
 			"Packages/server",
-			/*"node_modules/web-vcore/nm/*",
-			"node_modules/web-vcore/nm/**",
-			"node_modules/web-vcore/nm/js-vextensions.js",*/
 			...nodeModuleWatchPaths,
 		],
 		ignore: null,
-		ignore_watch: ["*.log"],
+		ignore_watch: [],
 		watch_options: {
-			persistent: true,
-
-			ignored: '*.txt',
-			ignoreInitial: false,
-			followSymlinks: true,
 			cwd: '/dm_server',
-			disableGlobbing: false,
-
-			usePolling: false,
-			interval: 100,
-			binaryInterval: 300,
-			alwaysStat: false,
-			depth: 99,
-			awaitWriteFinish: {
-				stabilityThreshold: 2000,
-				pollInterval: 100
-			},
-
-			ignorePermissionErrors: false,
-			atomic: true // or a custom 'atomicity delay', in milliseconds (default 100)
 		},
 		
 		/*env_production: {
