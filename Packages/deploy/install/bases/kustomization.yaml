@@ -1,0 +1,14 @@
+namespace: dm-pg-operator
+
+commonLabels:
+  dm-pg-operator.crunchydata.com/control-plane: dm-pg-operator
+
+bases:
+- crd
+- rbac/cluster
+- manager
+
+images:
+- name: dm-pg-operator
+  newName: registry.developers.crunchydata.com/crunchydata/dm-pg-operator
+  newTag: ubi8-5.0.1-0

@@ -19,10 +19,8 @@ node_modules/**
 
 # own-module reinclusions (for fast changing, through yarn symlinks)
 # (do not modify the line below; it is needed by UpdateDockerIgnore.js)
-!node_modules/web-vcore/nm
-!node_modules/web-vcore/nm/**
-!node_modules/web-vcore/nm/js-vextensions.js
 !node_modules/web-vcore/Dist
+!node_modules/web-vcore/nm
 !node_modules/@pg-lq/postgraphile-plugin/Build
 !node_modules/graphql-feedback/Dist
 !node_modules/web-vcore/node_modules/graphql-feedback/Dist

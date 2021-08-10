@@ -1,0 +1,2 @@
+resources:
+- bases/dm-pg-operator.crunchydata.com_postgresclusters.yaml

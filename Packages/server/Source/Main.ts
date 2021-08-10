@@ -64,8 +64,15 @@ app.use(express.json()); // application/json
 //app.use(express.urlencoded({extended: false})); // application/x-www-form-urlencoded
 app.use(express.urlencoded({extended: true})); // application/x-www-form-urlencoded
 
-const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/debate-map`;
-const dbPort = process.env.PORT || 3105 as number;
+const env = process.env;
+let dbURL = env.DATABASE_URL;
+const inK8s = env.DB_USER != null;
+if (dbURL == null) {
+	//if (inK8s) dbURL = `postgres://${env.DB_USER}:${env.DB_PASSWORD}@${env.DB_ADDR}:${env.DB_PORT}/debate-map`;
+	if (inK8s) dbURL = `postgres://${env.DB_USER}:${env.DB_PASSWORD}@${env.DB_ADDR}:${env.DB_PORT}/hippo`;
+	else dbURL = `postgres://${env.PGUSER}:${env.PGPASSWORD}@localhost:5432/debate-map`;
+}
+const dbPort = process.env.DB_PORT || process.env.PORT || 3105 as number;
 
 const pluginHook = makePluginHook([
 	// todo: turn this variant on, and add the client-side plugin, for more efficient list-change messages
@@ -256,3 +263,6 @@ app.get("/", (req, res)=>{
 
 app.listen(dbPort);
 console.log("Server started.");
+
+const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "KEYCLOAK_USER", "KEYCLOAK_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
+console.log("Env vars:", envVars_k8s.map(key=>`${key}: ${process.env[key]}`).join(", "));

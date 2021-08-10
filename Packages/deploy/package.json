@@ -1,0 +1,10 @@
+{
+	"name": "dm_deploy",
+	"version": "0.0.1",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"start": "cd ../.. && npx nps",
+		"preinstall": "npx only-allow yarn"
+	}
+}

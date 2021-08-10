@@ -38,6 +38,32 @@ const memLimit = 8192; // in megabytes
 const scripts = {};
 module.exports.scripts = scripts;
 
+const child_process = require("child_process");
+// secretsStr is a text string like the below (except with SOME_STR being the value in base64)
+//map[dbname:SOME_STR host:SOME_STR password:SOME_STR port:SOME_STR uri:SOME_STR user:SOME_STR verifier:SOME_STR]
+const secretsStr = child_process.execSync("kubectl get secrets -n dm-pg-operator debate-map-pguser-debate-map -o go-template='{{.data}}'").toString();
+const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
+// from: Packages/server/deployment.yaml
+const envMapping = {
+	host: "DB_ADDR",
+	port: "DB_PORT",
+	dbname: "DB_DATABASE",
+	user: "DB_USER",
+	password: "DB_PASSWORD",
+};
+//const fromBase64 = str=>atob(str);
+const fromBase64 = str=>Buffer.from(str, "base64");
+const setk8sEnvVars_commandStr = `cross-env ${keyValuePairs.map(pair=>{
+	let key = pair[0];
+	let endKey = envMapping[pair[0]];
+	let val = fromBase64(pair[1]);
+	// we're using proxy, so supply its values
+	if (key == "host") val = "localhost";
+	if (key == "port") val = "8081";
+	return `${endKey}="${val}"`;
+}).join(" ")} NODE_TLS_REJECT_UNAUTHORIZED='0' `; // tls change needed atm, till I figure out how to copy over signing data
+console.log("CommandStr:", setk8sEnvVars_commandStr);
+
 function GetServeCommand(nodeEnv = null) {
 	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "npm start client.dev.part2"`;
 }
@@ -95,6 +121,11 @@ Object.assign(scripts, {
 		//initDB: TSScript("server", "Scripts/InitDB.ts"),
 		initDB: TSScript({pkg: "server"}, "Scripts/KnexWrapper.ts", "initDB"),
 		initDB_freshScript: `nps server.buildInitDBScript && nps server.initDB`,
+		// k8s variants
+		initDB_k8s: setk8sEnvVars_commandStr + `nps server.initDB`,
+		initDB_freshScript_k8s: setk8sEnvVars_commandStr + `nps server.initDB_freshScript`,
+		//k8s_local_proxyOn8081: "wsl kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l dm-pg-operator.crunchydata.com/cluster=debate-map,dm-pg-operator.crunchydata.com/role=master) 8081:5432",
+		k8s_local_proxyOn8081: "wsl kubectl -n dm-pg-operator port-forward debate-map-instance1-hsgl-0 8081:5432",
 		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "

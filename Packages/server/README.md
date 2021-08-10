@@ -6,9 +6,11 @@ Codebase for the Debate Map website's backend ([debatemap.app](https://debatemap
 
 > Continued from: https://github.com/debate-map/app#setup
 
-### Environment variables
+### General
 
-Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. (The sections below will show which of those environment variables are needed, and how to supply them.)
+1) Set up WSL2 and Docker Desktop on Windows: https://kubernetes.io/blog/2020/05/21/wsl-docker-kubernetes-on-the-windows-desktop/#kind-counting-1-2-3
+2) Temp: Add "type:module" to a number of packages, till they're fixed. (see here: https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662)
+3) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. (The sections below will show which of those environment variables are needed, and how to supply them.)
 
 ### 1) Local server, base
 
@@ -60,15 +62,9 @@ $containersToRemove = $containers | Where { ([regex]"^[a-z]+_[a-z]+$").IsMatch($
 foreach ($container in $containersToRemove) { docker container rm $container }
 ```
 
-### 4) Remote server, using docker + kubernetes
+### 4) Deployment (using Crunchydata PGO, Pulumi, ArgoCD, etc.)
 
-Note: These instructions are for OVH-cloud's Public Cloud servers.
-
-1) Create a Public Cloud project on OVH cloud. (in the US, us.ovhcloud.com is recommended for their in-country servers)
-2) Follow the instructions here to setup a Kubernetes cluster: https://youtu.be/vZOj59Oer7U?t=586
-2.1) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)
-2.2) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
-3) TODO
+1) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/client#setup>
 
 ## Editing + running
 
