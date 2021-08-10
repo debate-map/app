@@ -64,7 +64,7 @@ foreach ($container in $containersToRemove) { docker container rm $container }
 
 ### 4) Deployment (using Crunchydata PGO, Pulumi, ArgoCD, etc.)
 
-1) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/client#setup>
+1) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/deploy#setup>
 
 ## Editing + running
 
