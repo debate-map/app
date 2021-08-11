@@ -47,7 +47,7 @@ Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-gene
 
 ## Package: client
 
-Guide modules for "client" package:
+Guide modules for ["client" package](https://github.com/debate-map/app/tree/master/Packages/client):
 * [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
 * [client/dev-enhance](https://github.com/debate-map/app/tree/master/Packages/client#dev-enhance)
 
@@ -55,7 +55,7 @@ Guide modules for "client" package:
 
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-Guide modules for "web-server" package: (provider of the static html, css, js, etc. files)
+Guide modules for ["web-server" package](https://github.com/debate-map/app/tree/master/Packages/web-server): (provider of the static html, css, js, etc. files)
 * [web-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/web-server#local-docker)
 * [web-server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/web-server#local-k8s)
 
@@ -63,7 +63,7 @@ Guide modules for "web-server" package: (provider of the static html, css, js, e
 
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-Guide modules for "server" package: (the app-server that runs graphql, the database, etc.)
+Guide modules for ["server" package](https://github.com/debate-map/app/tree/master/Packages/server): (the app-server that runs graphql, the database, etc.)
 * [server/general](https://github.com/debate-map/app/tree/master/Packages/server#general)
 * [server/local-base](https://github.com/debate-map/app/tree/master/Packages/server#local-base)
 * [server/local-docker](https://github.com/debate-map/app/tree/master/Packages/server#local-docker)
@@ -75,7 +75,7 @@ Guide modules for "server" package: (the app-server that runs graphql, the datab
 
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-Guide modules for "deploy" package: (things relating to Kubernetes, etc.)
+Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/master/Packages/deploy): (things relating to Kubernetes, etc.)
 * [deploy/k8s-local](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-local)
 * [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
