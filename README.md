@@ -49,8 +49,8 @@ Reasons:
 * A separate `tasks.json` file has been set up for the two folders, so having vscode windows open in them both makes it is easier to follow the guide-module instructions. That said, a single vscode-window should work, but you'll need to reference the `tasks.json` or `package-scripts.js` files to manually run certain scripts/commands. 
 
 Steps:
-1) Open one VSCode window in the `Packages` folder, for the ui and other frontend code. (different folders mainly just so they can have/keep separate tab-sets)
-2) Open a second VSCode window in the repo root, for everything else. (helps separate the concerns/contexts into roughly two halves)
+1) Open one VSCode window in the `Packages` folder, for the ui and other frontend code.
+2) Open a second VSCode window in the repo root, for everything else.
 
 ## Package: client
 
