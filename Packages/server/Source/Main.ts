@@ -68,9 +68,11 @@ const env = process.env;
 let dbURL = env.DATABASE_URL;
 const inK8s = env.DB_USER != null;
 if (dbURL == null) {
-	//if (inK8s) dbURL = `postgres://${env.DB_USER}:${env.DB_PASSWORD}@${env.DB_ADDR}:${env.DB_PORT}/debate-map`;
-	if (inK8s) dbURL = `postgres://${env.DB_USER}:${env.DB_PASSWORD}@${env.DB_ADDR}:${env.DB_PORT}/hippo`;
-	else dbURL = `postgres://${env.PGUSER}:${env.PGPASSWORD}@localhost:5432/debate-map`;
+	if (inK8s) {
+		dbURL = `postgres://${env.DB_USER}:${encodeURIComponent(env.DB_PASSWORD!)}@${env.DB_ADDR}:${env.DB_PORT}/debate-map`;
+	} else {
+		dbURL = `postgres://${env.PGUSER}:${encodeURIComponent(env.DBPASSWORD!)}@localhost:5432/debate-map`;
+	}
 }
 const dbPort = process.env.DB_PORT || process.env.PORT || 3105 as number;
 
@@ -264,5 +266,5 @@ app.get("/", (req, res)=>{
 app.listen(dbPort);
 console.log("Server started.");
 
-const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "KEYCLOAK_USER", "KEYCLOAK_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
+const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
 console.log("Env vars:", envVars_k8s.map(key=>`${key}: ${process.env[key]}`).join(", "));

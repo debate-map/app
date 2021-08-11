@@ -36,6 +36,12 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 3.4) To access `psql`, as the "postgres" user: I don't know how yet. (I couldn't find a "secrets" entry for it using kubectl)  
 3.5) Run the init-db script: `npm start initDB_freshScript_k8s`  
 
+Note: To view the `postgresql.conf` file:
+1) Run: `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
+2) Run (in new bash): `cat /pgdata/pg13/postgresql.conf`
+
+* Other files of interest, in same folder: `pg_hba.conf`
+
 ### 2) Remote server, using docker + kubernetes
 
 Note: These instructions are for OVH-cloud's Public Cloud servers.

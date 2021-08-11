@@ -27,6 +27,16 @@ spec:
             resources:
               requests:
                 storage: 1Gi
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        #parameters:
+        #  max_parallel_workers: 2
+        #  max_worker_processes: 2
+        #  shared_buffers: 1GB
+        #  work_mem: 2MB
+        pg_hba:
+          - host all all 0.0.0.0/0 md5
   users:
     - name: admin
       databases:
