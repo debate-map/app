@@ -8,8 +8,8 @@ Codebase for the [Debate Map](https://debatemap.app) website's app-server. (ie. 
 
 ## General
 
-### [server/general] General
 <!----><a name="general"></a>
+### [server/general] General
 
 1) Set up WSL2 and Docker Desktop on Windows: https://kubernetes.io/blog/2020/05/21/wsl-docker-kubernetes-on-the-windows-desktop
 2) Temp: Add "type:module" to a number of packages, till they're fixed. (see here: https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662)
@@ -17,8 +17,8 @@ Codebase for the [Debate Map](https://debatemap.app) website's app-server. (ie. 
 
 ## Local
 
-### [server/dev] Get dev-server running for Packages/server
 <!----><a name="dev"></a>
+### [server/dev] Get dev-server running for Packages/server
 
 Prerequisite steps: [vscode](https://github.com/debate-map/app#vscode)
 
@@ -26,8 +26,8 @@ Prerequisite steps: [vscode](https://github.com/debate-map/app#vscode)
 2) In vscode #2, start db-shape tracker: ctrl+shift+b, then `#2 server.buildInitDBScript_watch`. (optional)
 3) In vscode #2, start backend: ctrl+shift+b, then `#3 server.run`.
 
-### [server/local-base] Local server, base
 <!----><a name="local-base"></a>
+### [server/local-base] Local server, base
 
 1) Ensure [PostgreSQL](https://www.postgresql.org/) (v10+) is installed.
 
@@ -45,8 +45,8 @@ max_replication_slots = 10
 
 5) Init `debate-map` db in PostgreSQL, by running `yarn start server.initDB`.
 
-### [server/local-docker] Local server, using docker
 <!----><a name="local-docker"></a>
+### [server/local-docker] Local server, using docker
 
 Note: The docker images produced directly will have the name `dm-server-direct`.
 
@@ -55,8 +55,8 @@ Note: The docker images produced directly will have the name `dm-server-direct`.
 2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
 3) For direct docker builds, run `npm start server.dockerBuild`.
 
-### [server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
 <!----><a name="local-k8s"></a>
+### [server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
 
 Note: The docker images produced by skaffold will have the name `dm-server`.
 
@@ -66,8 +66,8 @@ Note: The docker images produced by skaffold will have the name `dm-server`.
 4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `dm-server`)
 5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `dm-server`)
 
-### [docker-trim] Docker image/container trimming
 <!----><a name="docker-trim"></a>
+### [docker-trim] Docker image/container trimming
 
 1) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
 2) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
@@ -83,8 +83,8 @@ Handling of remote instances of the app-server is explained in the [deploy packa
 
 ## Shared
 
-### [db-migrate] Database migrations
 <!----><a name="db-migrate"></a>
+### [db-migrate] Database migrations
 
 See here for overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
 
