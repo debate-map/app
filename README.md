@@ -43,8 +43,8 @@ For more information, visit the website at: <https://debatemap.app>
 Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-general)
 
 It's recommended to split your dev setup into two vscode windows:
-1) Open in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/common` is also fine)
-2) Open a second VSCode window in the repo root, for everything else. (server development, deployment, etc.)
+1) Window #1 in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/common` is also fine)
+2) Window #2 in the repo root, for everything else. (server development, deployment, etc.)
 
 Reasons:
 * About half of the development work is done in `Packages/client`, since it is the "driver" of most changes/functionality. And having the workload split between the two windows (by "area of concern"), helps maintain tab-count sanity, and clarity of where a given file/tab should be located.
