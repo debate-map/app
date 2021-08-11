@@ -17,6 +17,14 @@ The maps are constructed from "theses" (blue) which make claims, and "arguments"
 
 For more information, visit the website at: <https://debatemap.app>
 
+# Freeform documentation
+
+* [Client/server infrastructure](https://github.com/debate-map/app/tree/master/Docs/ClientServerInfrastructure.md)
+* [Authentication](https://github.com/debate-map/app/tree/master/Docs/Authentication.md)
+* [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
+* [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md)
+* [Node revisions](https://github.com/debate-map/app/tree/master/Docs/NodeRevisions.md)
+
 # Guide modules
 
 ## General
@@ -76,11 +84,3 @@ Guide modules for "deploy" package: (things relating to Kubernetes, etc.)
 * [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
 * [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)
-
-# Additional documentation
-
-* [Client/server infrastructure](https://github.com/debate-map/app/tree/master/Docs/ClientServerInfrastructure.md)
-* [Authentication](https://github.com/debate-map/app/tree/master/Docs/Authentication.md)
-* [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
-* [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md)
-* [Node revisions](https://github.com/debate-map/app/tree/master/Docs/NodeRevisions.md)
