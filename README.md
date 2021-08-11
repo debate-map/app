@@ -42,6 +42,13 @@ For more information, visit the website at: <https://debatemap.app>
 
 Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-general)
 
+It's recommended to split your dev setup into two windows: one for `Packages/client` and one for everything else.
+
+Reasons:
+* About half of the development work is done in `Packages/client`, since it is the "driver" of most changes/functionality. And having the workload split between the two windows (by "area of concern"), helps maintain tab-count sanity, and clarity of where a given file/tab should be located.
+* A separate `tasks.json` file has been set up for the two folders, so having vscode windows open in them both makes it is easier to follow the guide-module instructions. That said, a single vscode-window should work, but you'll need to reference the `tasks.json` or `package-scripts.js` files to manually run certain scripts/commands. 
+
+Steps:
 1) Open one VSCode window in the `Packages` folder, for the ui and other frontend code. (different folders mainly just so they can have/keep separate tab-sets)
 2) Open a second VSCode window in the repo root, for everything else. (helps separate the concerns/contexts into roughly two halves)
 
