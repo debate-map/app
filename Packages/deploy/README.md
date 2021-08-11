@@ -16,9 +16,8 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 1.2) Run: `kubectl apply -k postgres`  
 1.3) To make future kubectl commands more convenient, run: `kubectl config set-context --current --namespace=dm-pg-operator`  
 1.4) If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
-2) Init the db.  
-3) Start the proxy, so we can make postgres calls from Windows (and NodeJS pg plugin): `npm start server.k8s_local_proxyOn8081`  
-4) Run the init-db script: `npm start initDB_freshScript_k8s`  
+2) Start the proxy, so we can make postgres calls from Windows (and the NodeJS pg plugin): `npm start server.k8s_local_proxyOn8081`  
+3) Run the init-db script: `npm start initDB_freshScript_k8s`  
 
 ## Remote
 
