@@ -56,12 +56,8 @@ Guide modules for "client" package:
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
 Guide modules for "web-server" package: (provider of the static html, css, js, etc. files)
-* [server/general](https://github.com/debate-map/app/tree/master/Packages/server#general)
-* [server/local-base](https://github.com/debate-map/app/tree/master/Packages/server#local-base)
-* [server/local-docker](https://github.com/debate-map/app/tree/master/Packages/server#local-docker)
-* [server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/server#local-k8s)
-* [server/docker-trim](https://github.com/debate-map/app/tree/master/Packages/server#docker-trim)
-* [server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/server#db-migrate)
+* [web-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/web-server#local-docker)
+* [web-server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/web-server#local-k8s)
 
 ## Package: server
 

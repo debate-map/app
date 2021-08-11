@@ -19,7 +19,7 @@ Note: The docker images produced directly will have the name `dm-web-server-dire
 3) For direct docker builds, run `npm start server.dockerBuild`.
 
 <!----><a name="local-k8s"></a>
-### [server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
+### [web-server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
 
 Note: The docker images produced by skaffold will have the name `dm-web-server`.
 
