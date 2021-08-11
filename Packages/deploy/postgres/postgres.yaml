@@ -27,3 +27,8 @@ spec:
             resources:
               requests:
                 storage: 1Gi
+  users:
+    - name: admin
+      databases:
+        - debate-map
+      options: "SUPERUSER"

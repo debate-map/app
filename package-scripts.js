@@ -41,7 +41,7 @@ module.exports.scripts = scripts;
 const child_process = require("child_process");
 // secretsStr is a text string like the below (except with SOME_STR being the value in base64)
 //map[dbname:SOME_STR host:SOME_STR password:SOME_STR port:SOME_STR uri:SOME_STR user:SOME_STR verifier:SOME_STR]
-const secretsStr = child_process.execSync("kubectl get secrets -n dm-pg-operator debate-map-pguser-debate-map -o go-template='{{.data}}'").toString();
+const secretsStr = child_process.execSync("kubectl get secrets -n dm-pg-operator debate-map-pguser-admin -o go-template='{{.data}}'").toString();
 const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
 // from: Packages/server/deployment.yaml
 const envMapping = {
@@ -58,8 +58,8 @@ const setk8sEnvVars_commandStr = `cross-env ${keyValuePairs.map(pair=>{
 	let endKey = envMapping[pair[0]];
 	let val = fromBase64(pair[1]);
 	// we're using proxy, so supply its values
-	if (key == "user") val = "postgres";
-	if (key == "password") val = "admin";
+	/*if (key == "user") val = "postgres";
+	if (key == "password") val = "admin";*/
 	if (key == "host") val = "localhost";
 	if (key == "port") val = "8081";
 	return `${endKey}="${val}"`;

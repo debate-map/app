@@ -8,7 +8,7 @@ Codebase for the Debate Map website's backend ([debatemap.app](https://debatemap
 
 ### General
 
-1) Set up WSL2 and Docker Desktop on Windows: https://kubernetes.io/blog/2020/05/21/wsl-docker-kubernetes-on-the-windows-desktop/#kind-counting-1-2-3
+1) Set up WSL2 and Docker Desktop on Windows: https://kubernetes.io/blog/2020/05/21/wsl-docker-kubernetes-on-the-windows-desktop
 2) Temp: Add "type:module" to a number of packages, till they're fixed. (see here: https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662)
 3) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. (The sections below will show which of those environment variables are needed, and how to supply them.)
 

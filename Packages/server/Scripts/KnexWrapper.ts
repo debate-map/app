@@ -21,14 +21,15 @@ async function ConnectToDB_CreatingIfNonExistent(dbName: string) {
 	if (!dbExisted) {
 		console.log(`DB "${dbName}" not found. Creating now...`);
 		await knex_early.raw("CREATE DATABASE ??", dbName);
-		await knex_early.raw("ALTER DATABASE ?? SET search_path TO app_public, public;", dbName); // must do this in knex_early, else it doesn't apply for knex instance
 	}
+	await knex_early.raw("ALTER DATABASE ?? SET search_path TO app_public, public;", dbName); // must do this in knex_early, else it doesn't apply for knex instance
+	await knex_early.raw("CREATE SCHEMA IF NOT EXISTS app_public");
 	await knex_early.destroy();
 
 	// create new connection, inside the new database, so we can initialize some things
 	const knex = Knex(config.development);
 	if (!dbExisted) {
-		await knex.raw("CREATE SCHEMA app_public");
+		//await knex.raw("CREATE SCHEMA app_public");
 	}
 
 	return knex;
