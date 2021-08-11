@@ -17,39 +17,65 @@ The maps are constructed from "theses" (blue) which make claims, and "arguments"
 
 For more information, visit the website at: <https://debatemap.app>
 
-# Development
+# Guide modules
 
-## Setup
+## General
 
-### Part 1 (general)
+### [setup-general] General repo setup
+<a name="setup-general"></a>
 
 1) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
-
 2) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
+3) Install this repo's dependencies by running: `yarn install`
+4) [temp] Fix the typing issue in recharts `node_modules/recharts/types/polar/Radar.d.ts`, replacing the `<P, T>` sections with `<any, any>`.
 
-3) Install this repo's dependencies by running: `yarn`
+### [vscode] VSCode window setup
+<a name="vscode"></a>
 
-### Part 2 (client)
+Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-general)
 
-4) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/client#setup>
+1) Open one VSCode window in the `Packages` folder, for the ui and other frontend code. (different folders mainly just so they can have/keep separate tab-sets)
+2) Open a second VSCode window in the repo root, for everything else. (helps separate the concerns/contexts into roughly two halves)
 
-### Part 3 (server)
+## Package: client
 
-> This part is only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
+Guide modules for "client" package:
+* [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
+* [client/dev-enhance](https://github.com/debate-map/app/tree/master/Packages/client#dev-enhance)
 
-5) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/server#setup>
+## Package: web-server
 
-## Editing + running
+> These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-1) It's recommended to open two VSCode windows:
-   * The first in the `Packages` folder, for the ui and other frontend code. (different folders mainly just so they can have/keep separate tab-sets)
-   * The second in the repo root, for everything else. (helps separate the concerns/contexts into roughly two halves)
-2) In vscode #1, start frontend ts-compiler: ctrl+shift+b, then `#1 tsc`.
-3) In vscode #1, start frontend webpack/dev-server: ctrl+shift+b, then `#2 webpack`.
-4) In vscode #2, start backend compiler: ctrl+shift+b, then `#1 server.dev`.
-5) In vscode #2, start db-shape tracker: ctrl+shift+b, then `#2 server.buildInitDBScript_watch`. (optional)
-6) In vscode #2, start backend: ctrl+shift+b, then `#3 server.run`.
-7) Open website locally at: `localhost:3005`
+Guide modules for "web-server" package: (provider of the static html, css, js, etc. files)
+* [server/general](https://github.com/debate-map/app/tree/master/Packages/server#general)
+* [server/local-base](https://github.com/debate-map/app/tree/master/Packages/server#local-base)
+* [server/local-docker](https://github.com/debate-map/app/tree/master/Packages/server#local-docker)
+* [server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/server#local-k8s)
+* [server/docker-trim](https://github.com/debate-map/app/tree/master/Packages/server#docker-trim)
+* [server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/server#db-migrate)
+
+## Package: server
+
+> These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
+
+Guide modules for "server" package: (the app-server that runs graphql, the database, etc.)
+* [server/general](https://github.com/debate-map/app/tree/master/Packages/server#general)
+* [server/local-base](https://github.com/debate-map/app/tree/master/Packages/server#local-base)
+* [server/local-docker](https://github.com/debate-map/app/tree/master/Packages/server#local-docker)
+* [server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/server#local-k8s)
+* [server/docker-trim](https://github.com/debate-map/app/tree/master/Packages/server#docker-trim)
+* [server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/server#db-migrate)
+
+## Package: deploy
+
+> These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
+
+Guide modules for "deploy" package: (things relating to Kubernetes, etc.)
+* [deploy/k8s-local](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-local)
+* [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
+* [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
+* [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)
 
 # Additional documentation
 

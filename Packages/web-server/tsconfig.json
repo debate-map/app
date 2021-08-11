@@ -1,0 +1,22 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		// general
+		"rootDir": "Source",
+		"baseUrl": "Source",
+		"outDir": "Dist",
+
+		// compilation
+		"esModuleInterop": true,
+	},
+	"include": [
+		"Source/**/*.ts",
+		"Source/**/*.tsx"
+	],
+	"references": [
+		// in-repo packages
+		{"path": "../common"},
+		// external packages
+		{"path": "../../node_modules/web-vcore"},
+	]
+}

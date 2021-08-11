@@ -3347,7 +3347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dm_client@workspace:Packages/client":
+"dm_client@workspace:*, dm_client@workspace:Packages/client":
   version: 0.0.0-use.local
   resolution: "dm_client@workspace:Packages/client"
   dependencies:
@@ -3362,7 +3362,6 @@ __metadata:
     dm_common: "workspace:*"
     katex: ^0.9.0
     keycode: ^2.1.8
-    nps: ^5.10.0
     react: 16.9.0
     react-color: ^2.14.1
     react-katex: ^2.0.2
@@ -3379,6 +3378,12 @@ __metadata:
 "dm_common@workspace:*, dm_common@workspace:Packages/common":
   version: 0.0.0-use.local
   resolution: "dm_common@workspace:Packages/common"
+  languageName: unknown
+  linkType: soft
+
+"dm_deploy@workspace:Packages/deploy":
+  version: 0.0.0-use.local
+  resolution: "dm_deploy@workspace:Packages/deploy"
   languageName: unknown
   linkType: soft
 
@@ -3414,13 +3419,23 @@ __metadata:
     ip-address: ^8.1.0
     knex: ^0.95.6
     node-fetch: ^2.6.1
-    nps: ^5.10.0
     passport: ^0.4.1
     passport-google-oauth20: ^2.0.0
     pm2: ^5.1.0
     postgraphile: ^4.11.0
     postgraphile-plugin-connection-filter: ^2.2.1
     ws: ^7.5.2
+  languageName: unknown
+  linkType: soft
+
+"dm_web-server@workspace:Packages/web-server":
+  version: 0.0.0-use.local
+  resolution: "dm_web-server@workspace:Packages/web-server"
+  dependencies:
+    "@types/express": ^4.17.12
+    "@types/node": ^15.3.0
+    dm_client: "workspace:*"
+    express: ^4.17.1
   languageName: unknown
   linkType: soft
 

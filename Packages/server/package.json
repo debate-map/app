@@ -10,8 +10,7 @@
 	"devDependencies": {
 		"@types/passport": "^1.0.6",
 		"@types/passport-google-oauth20": "^2.0.8",
-		"concurrently": "^6.1.0",
-		"nps": "^5.10.0"
+		"concurrently": "^6.1.0"
 	},
 	"dependencies": {
 		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",

@@ -1,0 +1,16 @@
+{
+	"name": "dm_web-server",
+	"version": "0.0.1",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"start": "cd ../.. && npx nps",
+		"preinstall": "npx only-allow yarn"
+	},
+	"dependencies": {
+		"@types/express": "^4.17.12",
+		"@types/node": "^15.3.0",
+		"dm_client": "workspace:*",
+		"express": "^4.17.1"
+	}
+}

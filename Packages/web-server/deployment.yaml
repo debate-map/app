@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dm-web-server
+  namespace: dm-pg-operator
+  labels:
+    app: dm-web-server
+spec:
+  clusterIP: None
+  selector:
+    app: dm-web-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dm-web-server
+  namespace: dm-pg-operator
+  labels:
+    app: dm-web-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dm-web-server
+  template:
+    metadata:
+      labels:
+        app: dm-web-server
+    spec:
+      containers:
+      - name: dm-web-server
+        image: dm-web-server
+        #livenessProbe: TODO

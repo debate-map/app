@@ -76,6 +76,10 @@ if (dbURL == null) {
 }
 const dbPort = process.env.DB_PORT || process.env.PORT || 3105 as number;
 
+if (inK8s) {
+	
+}
+
 const pluginHook = makePluginHook([
 	// todo: turn this variant on, and add the client-side plugin, for more efficient list-change messages
 	variant == "patches" && new GeneratePatchesPlugin(),

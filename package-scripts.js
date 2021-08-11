@@ -51,15 +51,11 @@ const envMapping = {
 	user: "DB_USER",
 	password: "DB_PASSWORD",
 };
-//const fromBase64 = str=>atob(str);
 const fromBase64 = str=>Buffer.from(str, "base64");
 const setk8sEnvVars_commandStr = `cross-env ${keyValuePairs.map(pair=>{
 	let key = pair[0];
 	let endKey = envMapping[pair[0]];
 	let val = fromBase64(pair[1]);
-	// we're using proxy, so supply its values
-	/*if (key == "user") val = "postgres";
-	if (key == "password") val = "admin";*/
 	if (key == "host") val = "localhost";
 	if (key == "port") val = "8081";
 	return `${endKey}="${val}"`;
@@ -158,6 +154,17 @@ Object.assign(scripts, {
 		//dockerBuild: "tar -czh . | docker build -",
 		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."), // variant which preserves complete log (may increase build time)
 		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct ."), // with cache disabled
+
+		skaffoldDev_manual: DockerCommand("skaffold dev --trigger manual"),
+		//skaffoldDev_manual_info: DockerCommand("skaffold dev --trigger manual -v info"),
+		skaffoldDev_auto: DockerCommand("skaffold dev"),
+		skaffoldBuild: DockerCommand("skaffold build"),
+		skaffoldRun: DockerCommand(`skaffold run --tail`),
+	},
+	"web-server": {
+		dockerBuild: DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."),
+		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."), // variant which preserves complete log (may increase build time)
+		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."), // with cache disabled
 
 		skaffoldDev_manual: DockerCommand("skaffold dev --trigger manual"),
 		//skaffoldDev_manual_info: DockerCommand("skaffold dev --trigger manual -v info"),

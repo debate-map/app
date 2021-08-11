@@ -2,15 +2,23 @@
 
 Codebase for the Debate Map website's frontend ([debatemap.app](https://debatemap.app)).
 
-## Setup
+# Guide modules
 
-> Continued from: https://github.com/debate-map/app#setup
+> Continued from: https://github.com/debate-map/app#guide-modules
 
-1) [opt] If you want easier debugging in the browser, it's recommended to install these extensions:
-	* [React Development Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
-	* [MobX Development Tools](https://chrome.google.com/webstore/detail/mobx-developer-tools/pfgnfdagidkfgccljigdamigbcnndkod) (or [my fork](https://github.com/Venryx/mobx-devtools-advanced))
-2) Fix the typing issue in recharts "recharts\types\polar\Radar.d.ts", replacing the `<P, T>` sections with `<any, any>`.
+### [client/dev] Get dev-server running for Packages/client
+<a name="dev"></a>
 
-## Editing + running
+Prerequisite steps: [vscode](https://github.com/debate-map/app#vscode)
 
-See here: <https://github.com/debate-map/app#editing--running>
+1) In vscode #1, start frontend ts-compiler: ctrl+shift+b, then `#1 tsc`.
+2) In vscode #1, start frontend webpack/dev-server: ctrl+shift+b, then `#2 webpack`.
+3) Open website locally at: `localhost:3005`
+
+### [client/dev-enhance] Enhance the local web-server dev experience
+<a name="dev-enhance"></a>
+
+Prerequisite steps: [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
+
+1) [opt] Install: [React Development Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+2) [opt] Install: [MobX Development Tools](https://chrome.google.com/webstore/detail/mobx-developer-tools/pfgnfdagidkfgccljigdamigbcnndkod) (or [my fork](https://github.com/Venryx/mobx-devtools-advanced))
