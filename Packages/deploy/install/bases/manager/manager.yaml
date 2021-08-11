@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: operator
-        image: dm-pg-operator
+        image: postgres-operator
         env:
         - name: CRUNCHY_DEBUG
           value: "true"

@@ -58,6 +58,8 @@ const setk8sEnvVars_commandStr = `cross-env ${keyValuePairs.map(pair=>{
 	let endKey = envMapping[pair[0]];
 	let val = fromBase64(pair[1]);
 	// we're using proxy, so supply its values
+	if (key == "user") val = "postgres";
+	if (key == "password") val = "admin";
 	if (key == "host") val = "localhost";
 	if (key == "port") val = "8081";
 	return `${endKey}="${val}"`;
@@ -124,8 +126,7 @@ Object.assign(scripts, {
 		// k8s variants
 		initDB_k8s: setk8sEnvVars_commandStr + `nps server.initDB`,
 		initDB_freshScript_k8s: setk8sEnvVars_commandStr + `nps server.initDB_freshScript`,
-		//k8s_local_proxyOn8081: "wsl kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l dm-pg-operator.crunchydata.com/cluster=debate-map,dm-pg-operator.crunchydata.com/role=master) 8081:5432",
-		k8s_local_proxyOn8081: "wsl kubectl -n dm-pg-operator port-forward debate-map-instance1-hsgl-0 8081:5432",
+		k8s_local_proxyOn8081: "wsl kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
 		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "

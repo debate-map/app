@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: postgresclusters.dm-pg-operator.crunchydata.com
+  name: postgresclusters.postgres-operator.crunchydata.com
 spec:
-  group: dm-pg-operator.crunchydata.com
+  group: postgres-operator.crunchydata.com
   names:
     kind: PostgresCluster
     listKind: PostgresClusterList

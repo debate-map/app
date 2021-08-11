@@ -9,12 +9,14 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ### 1) Local server, setup of Crunchydata PGO, Pulumi, and ArgoCD
 
 1) Set up your Postgres Operator. (based on this guide: https://access.crunchydata.com/documentation/postgres-operator/5.0.1/quickstart)  
-1.1) Run (in `Packages/deploy`): `kubectl apply -k kustomize/install`  
-1.2) Run: `kubectl create namespace dm-pg-operator`  
-1.3) Run: `kubectl apply -k kustomize/postgres`
+1.1) Run (in `Packages/deploy`): `kubectl apply -k install`  
+1.2) Run: `kubectl apply -k postgres`  
+1.3) To make future kubectl commands more convenient, run: `kubectl config set-context --current --namespace=dm-pg-operator`  
+1.4) If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
 2) Init the db.  
-2.1) Start the proxy, so we can make postgres calls directly from Windows: `npm start server.k8s_local_proxyOn8081`  
-2.2) Run the init-db script: `npm start initDB_freshScript_k8s`
+2.1) Start the proxy, so we can make postgres calls from Windows (and NodeJS pg plugin): `npm start server.k8s_local_proxyOn8081`  
+2.2) To access `psql`, run this (in host or vm): `psql "postgresql://debate-map:$(kubectl -n dm-pg-operator get secrets debate-map-pguser-debate-map -o go-template='{{.data.password | base64decode}}')@localhost:8081/debate-map"`
+2.3) Run the init-db script: `npm start initDB_freshScript_k8s`  
 3) Make the `psql` command available in WSL (you will use it in future):
 	```
 	sudo apt install postgresql-client-common
