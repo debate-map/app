@@ -119,8 +119,6 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 	// set up app_user role for postgraphile connection, set up RLS, etc.
 	await knex.raw(`
-		
-
 		DO $$ BEGIN
 			CREATE ROLE app_user WITH NOLOGIN;
 		EXCEPTION WHEN DUPLICATE_OBJECT THEN
