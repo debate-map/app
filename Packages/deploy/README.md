@@ -9,7 +9,7 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ## Local
 
 ### [k8s-local] Local app-server, setup of Crunchydata PGO, Pulumi, and ArgoCD
-<a name="k8s-local"></a>
+<!----><a name="k8s-local"></a>
 
 1) Set up your Postgres Operator. (based on this guide: https://access.crunchydata.com/documentation/postgres-operator/5.0.1/quickstart)  
 1.1) Run (in `Packages/deploy`): `kubectl apply -k install`  
@@ -23,7 +23,7 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ## Remote
 
 ### [k8s-remote] Remote web+app server, using docker + kubernetes
-<a name="k8s-remote"></a>
+<!----><a name="k8s-remote"></a>
 
 Note: These instructions are for OVH-cloud's Public Cloud servers.
 
@@ -36,7 +36,7 @@ Note: These instructions are for OVH-cloud's Public Cloud servers.
 ## Shared
 
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
-<a name="k8s-psql"></a>
+<!----><a name="k8s-psql"></a>
 
 1) To access `psql`, as the "admin" user, run the below...  
 1.1) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 8081 -U admin -d debate-map`  
@@ -60,7 +60,7 @@ sudo apt -y install postgresql-client-13
 ```
 
 ### [k8s-view-pg-config] How to view various postgres config files in the kubernetes cluster
-<a name="k8s-view-pg-config"></a>
+<!----><a name="k8s-view-pg-config"></a>
 
 To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 1) Run: `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`

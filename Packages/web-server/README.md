@@ -8,8 +8,8 @@ Codebase for the [Debate Map](https://debatemap.app) website's web-server. (ie. 
 
 ## Local
 
+<!----><a name="local-docker"></a>
 ### [web-server/local-docker] Local server, using docker
-<a name="local-docker"></a>
 
 Note: The docker images produced directly will have the name `dm-web-server-direct`.
 
@@ -18,8 +18,8 @@ Note: The docker images produced directly will have the name `dm-web-server-dire
 2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
 3) For direct docker builds, run `npm start server.dockerBuild`.
 
+<!----><a name="local-k8s"></a>
 ### [server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
-<a name="local-k8s"></a>
 
 Note: The docker images produced by skaffold will have the name `dm-web-server`.
 

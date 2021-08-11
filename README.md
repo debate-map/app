@@ -22,7 +22,7 @@ For more information, visit the website at: <https://debatemap.app>
 ## General
 
 ### [setup-general] General repo setup
-<a name="setup-general"></a>
+<!----><a name="setup-general"></a>
 
 1) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
 2) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
@@ -30,7 +30,7 @@ For more information, visit the website at: <https://debatemap.app>
 4) [temp] Fix the typing issue in recharts `node_modules/recharts/types/polar/Radar.d.ts`, replacing the `<P, T>` sections with `<any, any>`.
 
 ### [vscode] VSCode window setup
-<a name="vscode"></a>
+<!----><a name="vscode"></a>
 
 Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-general)
 

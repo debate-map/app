@@ -7,7 +7,7 @@ Codebase for the Debate Map website's frontend ([debatemap.app](https://debatema
 > Continued from: https://github.com/debate-map/app#guide-modules
 
 ### [client/dev] Get dev-server running for Packages/client
-<a name="dev"></a>
+<!----><a name="dev"></a>
 
 Prerequisite steps: [vscode](https://github.com/debate-map/app#vscode)
 
@@ -16,7 +16,7 @@ Prerequisite steps: [vscode](https://github.com/debate-map/app#vscode)
 3) Open website locally at: `localhost:3005`
 
 ### [client/dev-enhance] Enhance the local web-server dev experience
-<a name="dev-enhance"></a>
+<!----><a name="dev-enhance"></a>
 
 Prerequisite steps: [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
 
