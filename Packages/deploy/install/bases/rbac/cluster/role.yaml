@@ -89,7 +89,7 @@ rules:
   - patch
   - watch
 - apiGroups:
-  - dm-pg-operator.crunchydata.com
+  - postgres-operator.crunchydata.com
   resources:
   - postgresclusters
   verbs:
@@ -98,13 +98,13 @@ rules:
   - patch
   - watch
 - apiGroups:
-  - dm-pg-operator.crunchydata.com
+  - postgres-operator.crunchydata.com
   resources:
   - postgresclusters/finalizers
   verbs:
   - update
 - apiGroups:
-  - dm-pg-operator.crunchydata.com
+  - postgres-operator.crunchydata.com
   resources:
   - postgresclusters/status
   verbs:

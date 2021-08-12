@@ -62,7 +62,6 @@ Guide modules for ["client" package](https://github.com/debate-map/app/tree/mast
 
 Guide modules for ["web-server" package](https://github.com/debate-map/app/tree/master/Packages/web-server): (provider of the static html, css, js, etc. files)
 * [web-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/web-server#local-docker)
-* [web-server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/web-server#local-k8s)
 
 ## Package: server
 
@@ -72,8 +71,6 @@ Guide modules for ["server" package](https://github.com/debate-map/app/tree/mast
 * [server/general](https://github.com/debate-map/app/tree/master/Packages/server#general)
 * [server/local-base](https://github.com/debate-map/app/tree/master/Packages/server#local-base)
 * [server/local-docker](https://github.com/debate-map/app/tree/master/Packages/server#local-docker)
-* [server/local-k8s](https://github.com/debate-map/app/tree/master/Packages/server#local-k8s)
-* [server/docker-trim](https://github.com/debate-map/app/tree/master/Packages/server#docker-trim)
 * [server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/server#db-migrate)
 
 ## Package: deploy
@@ -83,6 +80,7 @@ Guide modules for ["server" package](https://github.com/debate-map/app/tree/mast
 Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/master/Packages/deploy): (things relating to Kubernetes, etc.)
 * [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 * [deploy/k8s-local](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-local)
+* [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim)
 * [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
 * [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)

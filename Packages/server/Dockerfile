@@ -40,8 +40,8 @@ RUN yarn install
 COPY . .
 
 # these shouldn't be needed, but are fsr
-COPY node_modules/web-vcore/nm/ ./node_modules/web-vcore/nm/
-COPY node_modules/web-vcore/node_modules/mobx-graphlink/Dist/ ./node_modules/web-vcore/node_modules/mobx-graphlink/Dist/
+#COPY node_modules/web-vcore/nm/ ./node_modules/web-vcore/nm/
+#COPY node_modules/web-vcore/node_modules/mobx-graphlink/Dist/ ./node_modules/web-vcore/node_modules/mobx-graphlink/Dist/
 
 EXPOSE 8080
 

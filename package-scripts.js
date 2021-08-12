@@ -57,7 +57,8 @@ const setk8sEnvVars_commandStr = `cross-env ${keyValuePairs.map(pair=>{
 	let endKey = envMapping[pair[0]];
 	let val = fromBase64(pair[1]);
 	if (key == "host") val = "localhost";
-	if (key == "port") val = "8081";
+	//if (key == "port") val = "8081";
+	if (key == "port") val = "3205";
 	return `${endKey}="${val}"`;
 }).join(" ")} NODE_TLS_REJECT_UNAUTHORIZED='0' `; // tls change needed atm, till I figure out how to copy over signing data
 console.log("CommandStr:", setk8sEnvVars_commandStr);
@@ -156,11 +157,7 @@ Object.assign(scripts, {
 		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct ."), // with cache disabled
 
 		// these commands also deploy the web-server
-		skaffoldDev_manual: DockerCommand("skaffold dev --trigger manual"),
-		//skaffoldDev_manual_info: DockerCommand("skaffold dev --trigger manual -v info"),
-		skaffoldDev_auto: DockerCommand("skaffold dev"),
-		skaffoldBuild: DockerCommand("skaffold build"),
-		skaffoldRun: DockerCommand(`skaffold run --tail`),
+		tiltUp: DockerCommand("tilt up"),
 	},
 	"web-server": {
 		dev: "tsc --build --watch Packages/web-server/tsconfig.json",

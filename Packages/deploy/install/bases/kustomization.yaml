@@ -1,7 +1,7 @@
 namespace: dm-pg-operator
 
 commonLabels:
-  dm-pg-operator.crunchydata.com/control-plane: dm-pg-operator
+  postgres-operator.crunchydata.com/control-plane: dm-pg-operator
 
 bases:
 - crd

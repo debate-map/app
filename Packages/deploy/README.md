@@ -12,24 +12,51 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 
 1) Install Docker Desktop: https://docs.docker.com/desktop
 2) Install Lens, as a general k8s inspection tool: https://k8slens.dev
-3) [opt] Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
-3.1) [opt] In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
-4) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-5) [old:] Install Skaffold: https://skaffold.dev/docs/install
+3) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+4) [opt] Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
+4.1) [opt] In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
+5) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
 6) Install Tilt: https://github.com/tilt-dev/tilt
+7) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 ## Local
 
-<!----><a name="k8s-local"></a>
-### [k8s-local] Local app-server, setup of Crunchydata PGO, Pulumi, and ArgoCD
+<!----><a name="local-k8s"></a>
+### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
 
-1) Set up your Postgres Operator. (based on this guide: https://access.crunchydata.com/documentation/postgres-operator/5.0.1/quickstart)  
-1.1) Run (in `Packages/deploy`): `kubectl apply -k install`  
-1.2) Run: `kubectl apply -k postgres`  
-1.3) To make future kubectl commands more convenient, run: `kubectl config set-context --current --namespace=dm-pg-operator`  
-1.4) If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
-2) Start the proxy, so we can make postgres calls from Windows (and the NodeJS pg plugin): `npm start server.k8s_local_proxyOn8081`  
-3) Run the init-db script: `npm start initDB_freshScript_k8s`  
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
+1) Run (in repo root): `tilt up`
+2) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+3) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
+
+Notes:
+* To make future kubectl commands more convenient, run: `kubectl config set-context --current --namespace=dm-pg-operator`  
+* If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
+* When the list of images/containers in Docker Desktop gets too long, see the [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim) module.
+
+<!----><a name="docker-trim"></a>
+### [docker-trim] Docker image/container trimming
+
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
+1) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
+2) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
+```
+$containers = (docker container list -a).Split("`n") | % { [regex]::split($_, "\s+") | Select -Last 1 }
+$containersToRemove = $containers | Where { ([regex]"^[a-z]+_[a-z]+$").IsMatch($_) }
+
+# it's recommended to delete in batches, as too many at once can cause issues
+$containersToRemove = $containersToRemove | Select-Object -First 30
+
+foreach ($container in $containersToRemove) {
+	# sync/wait-based version (slow)
+	# docker container rm $container
+
+	# async/background-process version (fast)
+	Start-Process -FilePath docker -ArgumentList "container rm $container" -NoNewWindow
+}
+```
 
 ## Remote
 
@@ -50,10 +77,10 @@ Note: These instructions are for OVH-cloud's Public Cloud servers.
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
 
 1) To access `psql`, as the "admin" user, run the below...  
-1.1) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 8081 -U admin -d debate-map`  
-1.2) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:8081/debate-map"`  
-1.3) In Linux/WSL, option A: `PGPASSWORD="$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 8081 -U admin -d debate-map`  
-1.4) In Linux/WSL, option B: `psql "postgresql://admin:$(printf %s "$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:8081/debate-map"`  
+1.1) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 3205 -U admin -d debate-map`  
+1.2) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:3205/debate-map"`  
+1.3) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 3205 -U admin -d debate-map`  
+1.4) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:3205/debate-map"`  
 2) To access `psql`, as the "debate-map" user, replace "admin" with "debate-map" and "debate-map-pguser-admin" with "debate-map-pguser-debate-map" in commands above.  
 3) To access `psql`, as the "postgres" user: I don't know how yet. (I couldn't find a "secrets" entry for it using kubectl)  
 

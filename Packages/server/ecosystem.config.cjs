@@ -8,13 +8,27 @@ const nodeModuleWatchPathLines = dockerIgnore_lines.slice(
 const nodeModuleWatchPaths = nodeModuleWatchPathLines.map(a=>a.slice(1)); // remove the "!" at the start*/
 const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").default;
 
+console.log("Preparing to run server. @devMode:", process.env.DEV != null);
 module.exports = {
 	apps: [{
 		name: "main",
-		script: "./Dist/Main.js",
-		node_args: "--loader ts-node/esm.mjs --experimental-specifier-resolution=node",
 
-		exp_backoff_restart_delay: 500,
+		...process.env.DEV ? {
+			script: "node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
+			interpreter: null,
+		} : {
+			script: "./Dist/Main.js",
+			node_args: "--loader ts-node/esm.mjs --experimental-specifier-resolution=node",
+		},
+
+		//exp_backoff_restart_delay: 500,
+		// disable restart-on-error (that's kubernetes' job);
+		//stop_exit_codes: [0],
+		stop_exit_codes: (()=>{
+			const result = [0];
+			result.includes = ()=>true; // have pm2 view *every* exit-code as a "stop"/to-ignore one
+			return result;
+		})(),
 
 		watch: [
 			"Packages/server",

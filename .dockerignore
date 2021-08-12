@@ -10,6 +10,7 @@
 
 #**/node_modules
 #**/node_modules/**
+**/*.md
 
 # node-modules (special group)
 # ==========

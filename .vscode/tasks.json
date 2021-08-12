@@ -74,9 +74,9 @@
 			"group": "build",
 		},*/
 		{
-			"label": "## server.skaffoldDev_manual",
+			"label": "## server.tiltUp",
 			"type": "shell",
-			"command": "npm start server.skaffoldDev_manual",
+			"command": "npm start server.tiltUp",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
@@ -98,22 +98,14 @@
 			"isBackground": true,
 			"group": "build"
 		},*/
-		/*{
-			"label": "## web-server.skaffoldDev_manual",
-			"type": "shell",
-			"command": "npm start web-server.skaffoldDev_manual",
-			"problemMatcher": [],
-			"isBackground": true,
-			"group": "build",
-		},*/
 		
-		{
+		/*{
 			"label": "## server.k8s_local_proxyOn8081",
 			"type": "shell",
 			"command": "npm start server.k8s_local_proxyOn8081",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
-		},
+		},*/
 	]
 }

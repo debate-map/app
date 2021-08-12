@@ -290,4 +290,4 @@ console.log("Server started.");
 
 /*const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
 console.log("Env vars:", envVars_k8s.map(key=>`${key}: ${process.env[key]}`).join(", "));*/
-console.log("Env vars:", process.env);
+//console.log("Env vars:", process.env);

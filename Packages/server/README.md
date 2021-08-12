@@ -54,33 +54,9 @@ Note: The docker images produced directly will have the name `dm-server-direct`.
 
 1) For direct docker builds, run `npm start server.dockerBuild`.
 
-<!----><a name="local-k8s"></a>
-### [server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
+## Deployment
 
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
-
-Note: The docker images produced by skaffold will have the name `dm-server`.
-
-1) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, just press enter in the terminal)
-2) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `dm-server`)
-3) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `dm-server`)
-
-<!----><a name="docker-trim"></a>
-### [docker-trim] Docker image/container trimming
-
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
-
-1) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
-2) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
-```
-$containers = (docker container list -a).Split("`n") | % { [regex]::split($_, "\s+") | Select -Last 1 }
-$containersToRemove = $containers | Where { ([regex]"^[a-z]+_[a-z]+$").IsMatch($_) }
-foreach ($container in $containersToRemove) { docker container rm $container }
-```
-
-## Remote
-
-Handling of remote instances of the app-server is explained in the [deploy package's readme](https://github.com/Venryx/web-vcore/tree/master/Packages/deploy#guide-modules).
+Handling of deployment to kubernetes (whether locally or remote) is explained in the [deploy package's readme](https://github.com/Venryx/web-vcore/tree/master/Packages/deploy#guide-modules).
 
 ## Shared
 
