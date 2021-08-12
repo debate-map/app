@@ -37,7 +37,7 @@ module.exports = {
 		ignore: null,
 		ignore_watch: [],
 		watch_options: {
-			cwd: '/dm_server',
+			cwd: '/dm_repo',
 		},
 		
 		/*env_production: {

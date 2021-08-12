@@ -9,7 +9,12 @@ const port = 8080;
 app.listen(port);
 console.log("Web-server started.");*/
 
-import {Serve} from "web-vcore/Scripts/Bin/Server.js";
+// temp fix
+//import {Serve} from "web-vcore/Scripts/Bin/Server.js";
+import {createRequire} from "module";
+const require = createRequire(import.meta.url);
+const {Serve} = require("web-vcore/Scripts/Bin/Server.js");
+
 import {webpackConfig} from "dm_client/Scripts/Build/WebpackConfig.js";
 import {config} from "dm_client/Scripts/Config.js";
 

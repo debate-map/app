@@ -31,7 +31,7 @@ const require = createRequire(import.meta.url);
 
 // for testing scaffold-sync
 /*while (true) {
-	//console.log("TestUpdate_early:", fs.readFileSync("/dm_server/node_modules/web-vcore/nm/js-vextensions.js").toString());
+	//console.log("TestUpdate_early:", fs.readFileSync("/dm_repo/node_modules/web-vcore/nm/js-vextensions.js").toString());
 	console.log("TestUpdate:", FancyFormat({}, Date.now()));
 	await new Promise(resolve=>setTimeout(resolve, 1000));
 }*/
