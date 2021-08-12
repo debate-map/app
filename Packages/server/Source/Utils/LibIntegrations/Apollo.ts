@@ -4,8 +4,24 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 // @ts-ignore // temp fix for import error
 //import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep_cjs.js";
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
+import {Assert} from "web-vcore/nm/js-vextensions";
 
-const GRAPHQL_URL = "http://localhost:3105/graphql";
+const inK8s = process.env.KUBERNETES_SERVICE_HOST != null;
+//const inK8s = process.env.DB_ADDR;
+export function GetWebServerURL(subpath: string) {
+	Assert(subpath.startsWith("/"));
+	if (process.env.DEV != null && !inK8s) return `http://localhost:3005/${subpath.slice(1)}`;
+	if (process.env.DEV != null && inK8s) return `http://localhost:31005/${subpath.slice(1)}`;
+	return `https://debatemap.app/${subpath.slice(1)}`;
+}
+export function GetDBServerURL(subpath: string) {
+	Assert(subpath.startsWith("/"));
+	if (process.env.DEV != null && !inK8s) return `http://localhost:3105/${subpath.slice(1)}`;
+	if (process.env.DEV != null && inK8s) return `http://localhost:31105/${subpath.slice(1)}`;
+	return `https://db.debatemap.app/${subpath.slice(1)}`;
+}
+
+const GRAPHQL_URL = GetDBServerURL("/graphql");
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;

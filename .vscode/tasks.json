@@ -49,7 +49,7 @@
 			"isBackground": true,
 			"group": "build",
 		},
-		{
+		/*{
 			"label": "## server.dockerBuild",
 			"type": "shell",
 			"command": "npm start server.dockerBuild",
@@ -72,7 +72,7 @@
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
-		},
+		},*/
 		{
 			"label": "## server.skaffoldDev_manual",
 			"type": "shell",
@@ -80,6 +80,40 @@
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
-		}
+		},
+
+		{
+			"label": "## web-server.dev",
+			"type": "shell",
+			"command": "npm start web-server.dev",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": "build"
+		},
+		/*{
+			"label": "#3 web-server.run",
+			"type": "shell",
+			"command": "npm start web-server.run",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},*/
+		/*{
+			"label": "## web-server.skaffoldDev_manual",
+			"type": "shell",
+			"command": "npm start web-server.skaffoldDev_manual",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},*/
+		
+		{
+			"label": "## server.k8s_local_proxyOn8081",
+			"type": "shell",
+			"command": "npm start server.k8s_local_proxyOn8081",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": "build"
+		},
 	]
 }

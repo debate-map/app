@@ -20,7 +20,33 @@ build:
     #     - 'Packages/server/**/*'
     #     # don't worry, this only actually syncs the specific subpaths listed in .dockerignore (source: NodeModuleWatchPaths.js)
     #     - 'node_modules/**/*'
+  - image: dm-web-server
+    context: .
+    docker:
+      dockerfile: Packages/web-server/Dockerfile
+    sync:
+      manual:
+        - src: 'Packages/web-server/**/*'
+          dest: '/dm_web-server'
+        # don't worry, this only actually syncs the specific subpaths listed in .dockerignore (source: NodeModuleWatchPaths.js)
+        - src: 'node_modules/**/*'
+          dest: '/dm_web-server'
+
+# this is not working for some reason
+# portForward:
+#   - resourceType: deployment
+#     resourceName: dm-server
+#     port: 31105
+#     localPort: 4105
+#     namespace: dm-pg-operator
+#   - resourceType: deployment
+#     resourceName: dm-web-server
+#     port: 31005
+#     localPort: 4005
+#     namespace: dm-pg-operator
+    
 deploy:
   kubectl:
     manifests:
     - packages\server\deployment.yaml
+    - packages\web-server\deployment.yaml

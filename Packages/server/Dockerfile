@@ -10,6 +10,8 @@ COPY yarn.lock .
 COPY Packages/client/package.json Packages/client/package.json
 COPY Packages/common/package.json Packages/common/package.json
 COPY Packages/server/package.json Packages/server/package.json
+#COPY Packages/web-server/package.json Packages/web-server/package.json
+#COPY Packages/deploy/package.json Packages/deploy/package.json
 COPY .yarn .yarn
 COPY .yarnrc.yml .
 
@@ -37,6 +39,10 @@ RUN yarn install
 # bundle app source (the .dockerignore file excludes large, unrelated folders like node_modules)
 COPY . .
 
+# these shouldn't be needed, but are fsr
+COPY node_modules/web-vcore/nm/ ./node_modules/web-vcore/nm/
+COPY node_modules/web-vcore/node_modules/mobx-graphlink/Dist/ ./node_modules/web-vcore/node_modules/mobx-graphlink/Dist/
+
 EXPOSE 8080
 
 #CMD [ "/bin/sh", "-c", "cd Packages/server && ../../node_modules/.bin/cross-env TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js" ]
@@ -53,6 +59,7 @@ WORKDIR "/dm_server/Packages/server"
 
 ENV DEV=true
 ENV PM2_DISCRETE_MODE=true
-ENV TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true
+#ENV TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true
+ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 #CMD ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --ignore-watch="nothing" --no-daemon --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
 CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon

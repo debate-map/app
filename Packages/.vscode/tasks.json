@@ -28,5 +28,13 @@
 			"isBackground": true,
 			"group": "build"
 		},
+		{
+			"label": "## client.build.prodQuick",
+			"type": "shell",
+			"command": "npm start client.build.prodQuick",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
 	]
 }

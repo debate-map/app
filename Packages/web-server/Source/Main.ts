@@ -13,4 +13,6 @@ import {Serve} from "web-vcore/Scripts/Bin/Server.js";
 import {webpackConfig} from "dm_client/Scripts/Build/WebpackConfig.js";
 import {config} from "dm_client/Scripts/Config.js";
 
+console.log("Web-server starting...");
 Serve(config, webpackConfig);
+console.log("Web-server started.");

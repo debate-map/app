@@ -6,9 +6,16 @@ metadata:
   labels:
     app: dm-web-server
 spec:
-  clusterIP: None
+  #clusterIP: None
   selector:
     app: dm-web-server
+  # to make it accessible outside of cluster
+  type: NodePort
+  ports:
+    - port: 3005
+      targetPort: 3005
+      nodePort: 31005
+      protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment

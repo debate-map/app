@@ -10,10 +10,10 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
-import type {User} from "dm_common";
+import {GetUserHiddensWithEmail, User} from "dm_common";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
@@ -74,11 +74,6 @@ if (dbURL == null) {
 		dbURL = `postgres://${env.PGUSER}:${encodeURIComponent(env.DBPASSWORD!)}@localhost:5432/debate-map`;
 	}
 }
-const dbPort = process.env.DB_PORT || process.env.PORT || 3105 as number;
-
-if (inK8s) {
-	
-}
 
 const pluginHook = makePluginHook([
 	// todo: turn this variant on, and add the client-side plugin, for more efficient list-change messages
@@ -93,6 +88,27 @@ pgPool.on("connect", client=>{
 	console.warn(`pgClient ${pgClient != null ? "re" : ""}created...`);
 	pgClient = client;
 	graph.subs.pgClient = pgClient;
+});
+
+app.get("/health-check", async(req, res)=>{
+	console.log("Starting health-check.");
+	try {
+		const usersCount = await pgClient.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+		Assert(usersCount.rowCount >= 1, "Could not find any users in database. (at least the system user should exist)");
+		console.log("Health-check: Passed 1");
+
+		//const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
+		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
+		console.log("Health-check: Passed 2");
+		Assert(existingUser_hidden != null, "Could not find system-user's user-hidden data, which we know should exist.");
+		console.log("Health-check: Passed 3");
+
+		console.log("Health-check: Good");
+		res.sendStatus(200); // status: 200 OK
+	} catch (ex) {
+		console.log("Health-check: Bad", ex);
+		res.sendStatus(500); // status: 500 Internal Server Error
+	}
 });
 
 // set up auth-handling before postgraphile; this way postgraphile resolvers have access to request.user
@@ -263,12 +279,15 @@ AddWVCSchemas(AddSchema); // while we don't want to initialize the full web-vcor
 app.get("/", (req, res)=>{
 	res.send(`
 		<p>This is the URL for the database server, which is not meant to be opened directly by your browser.</p>
-		<p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or <a href="http://localhost:3005">localhost:3005</a> if running Debate Map locally)</p>
+		<p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or <a href="http://localhost:3005">localhost:3005</a> or <a href="http://localhost:31005">localhost:31005</a>, if running Debate Map locally)</p>
 	`.AsMultiline(0));
 });
 
-app.listen(dbPort);
+const serverPort = env.PORT || 3105 as number;
+//if (inK8s) {}
+app.listen(serverPort);
 console.log("Server started.");
 
-const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
-console.log("Env vars:", envVars_k8s.map(key=>`${key}: ${process.env[key]}`).join(", "));
+/*const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
+console.log("Env vars:", envVars_k8s.map(key=>`${key}: ${process.env[key]}`).join(", "));*/
+console.log("Env vars:", process.env);

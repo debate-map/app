@@ -2,11 +2,25 @@ import {store} from "Store";
 import {RunInAction} from "web-vcore";
 import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {runInAction} from "web-vcore/nm/mobx";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {graph} from "./MobXGraphlink";
 
-const GRAPHQL_URL = "http://localhost:3105/graphql";
+export function GetWebServerURL(subpath: string) {
+	Assert(subpath.startsWith("/"));
+	if (location.host == "localhost:3005") return subpath;
+	if (location.host == "localhost:31005") return subpath;
+	return `https://debatemap.app/${subpath.slice(1)}`;
+}
+export function GetDBServerURL(subpath: string) {
+	Assert(subpath.startsWith("/"));
+	if (location.host == "localhost:3005") return `http://localhost:3105/${subpath.slice(1)}`;
+	if (location.host == "localhost:31005") return `http://localhost:31105/${subpath.slice(1)}`;
+	return `https://db.debatemap.app/${subpath.slice(1)}`;
+}
+
+const GRAPHQL_URL = GetDBServerURL("/graphql");
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;

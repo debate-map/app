@@ -122,7 +122,7 @@ Object.assign(scripts, {
 		// k8s variants
 		initDB_k8s: setk8sEnvVars_commandStr + `nps server.initDB`,
 		initDB_freshScript_k8s: setk8sEnvVars_commandStr + `nps server.initDB_freshScript`,
-		k8s_local_proxyOn8081: "wsl kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
+		k8s_local_proxyOn8081: "kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
 		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "
@@ -155,6 +155,7 @@ Object.assign(scripts, {
 		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."), // variant which preserves complete log (may increase build time)
 		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct ."), // with cache disabled
 
+		// these commands also deploy the web-server
 		skaffoldDev_manual: DockerCommand("skaffold dev --trigger manual"),
 		//skaffoldDev_manual_info: DockerCommand("skaffold dev --trigger manual -v info"),
 		skaffoldDev_auto: DockerCommand("skaffold dev"),
@@ -162,15 +163,11 @@ Object.assign(scripts, {
 		skaffoldRun: DockerCommand(`skaffold run --tail`),
 	},
 	"web-server": {
+		dev: "tsc --build --watch Packages/web-server/tsconfig.json",
+
 		dockerBuild: DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."),
 		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."), // variant which preserves complete log (may increase build time)
 		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."), // with cache disabled
-
-		skaffoldDev_manual: DockerCommand("skaffold dev --trigger manual"),
-		//skaffoldDev_manual_info: DockerCommand("skaffold dev --trigger manual -v info"),
-		skaffoldDev_auto: DockerCommand("skaffold dev"),
-		skaffoldBuild: DockerCommand("skaffold build"),
-		skaffoldRun: DockerCommand(`skaffold run --tail`),
 	},
 });
 

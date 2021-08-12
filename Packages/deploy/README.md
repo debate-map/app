@@ -6,6 +6,18 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 
 > Continued from: https://github.com/debate-map/app#guide-modules
 
+## General
+
+### [setup-base] Setting up base tools needed for local/remote k8s deployments
+
+1) Install Docker Desktop: https://docs.docker.com/desktop
+2) Install Lens, as a general k8s inspection tool: https://k8slens.dev
+3) [opt] Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
+3.1) [opt] In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
+4) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+5) [old:] Install Skaffold: https://skaffold.dev/docs/install
+6) Install Tilt: https://github.com/tilt-dev/tilt
+
 ## Local
 
 <!----><a name="k8s-local"></a>
@@ -64,3 +76,33 @@ sudo apt -y install postgresql-client-13
 To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 1) Run: `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
 2) Run (in new bash): `cat /pgdata/pg13/XXX`
+
+<!----><a name="k8s-view-locals"></a>
+### [k8s-view-locals] How to view local files of server/web-server/etc. pods
+
+1) Run (replacing `app=dm-server` with the base name of the pod you want): `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l app=dm-server) -- bash`
+
+<!----><a name="oauth-setup"></a>
+### [oauth-setup] How to set up oauth
+
+In order to use the oauth options for sign-in (eg. Google Sign-in), the frontend either must be running on `localhost:[3005/31005]`, or you have to create your own online "application" configs/entries on each of the oauth-providers' platforms. The below instructions are for creating those "application" configs/entries.
+
+Google Sign-in:
+1) Create a Google Cloud project for your fork.
+2) Go to: https://console.cloud.google.com/apis/credentials?project=YOUR_PROJECT_NAME
+3) In the "Credentials->OAuth 2.0 Client IDs" section, create a new "Web Application" entry.
+4) Set the values below:
+```
+Authorized JavaScript Origins:
+* http://localhost
+* http://localhost:3005
+* http://localhost:31005
+* http://[::1]:3005
+* http://[::1]:31005
+
+Authorized redirect URIs:
+* http://localhost:3105/auth/google/callback
+* http://localhost:31105/auth/google/callback
+* http://[::1]:3105/auth/google/callback
+* http://[::1]:31105/auth/google/callback
+```

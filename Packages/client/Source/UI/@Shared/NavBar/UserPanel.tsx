@@ -6,6 +6,7 @@ import {HandleError, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {Assert} from "../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
+import {GetDBServerURL} from "Utils/LibIntegrations/Apollo";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -146,17 +147,6 @@ export const googleID_handleCredentialResponse = async(response: GoogleID_Creden
 		}),
 	});
 };
-
-export function GetAppServerURL(subpath: string) {
-	Assert(subpath.startsWith("/"));
-	if (location.hostname == "localhost") return subpath;
-	return `https://debatemap.app/${subpath.slice(1)}`;
-}
-export function GetDBServerURL(subpath: string) {
-	Assert(subpath.startsWith("/"));
-	if (location.hostname == "localhost") return `http://localhost:3105/${subpath.slice(1)}`;
-	return `https://db.debatemap.app/${subpath.slice(1)}`;
-}
 
 /*@SimpleShouldUpdate
 // @ApplyBasicStyles

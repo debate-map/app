@@ -8,6 +8,7 @@ import expressSession from "express-session";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {pgClient, pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
+import {GetDBServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
 
 //type ExpressApp = Express.Application;
 type ExpressApp = ReturnType<typeof express>;
@@ -21,24 +22,44 @@ type GoogleAuth_ProviderData = {
 	uid: string;
 };
 
+function Timeout<T extends Function>(func: T, timeout: number, onTimeout: (resolve: (value: any)=>any, reject: (reason?: any)=>any)=>any) {
+	return function(...args) {
+		const promise = func.apply(this, args);
+		return Promise.race([
+			promise,
+			new Promise((resolve, reject)=>{
+				setTimeout(()=>onTimeout(resolve, reject), timeout);
+			}),
+		]);
+	};
+}
+
 passport.use(new GoogleStrategy(
 	{
 		clientID: process.env.CLIENT_ID as string,
 		clientSecret: process.env.CLIENT_SECRET as string,
-		callbackURL: "http://localhost:3105/auth/google/callback",
+		callbackURL: GetDBServerURL("/auth/google/callback"),
 	},
 	async(accessToken, refreshToken, profile, done)=>{
 		//console.log("Test1");
 		const profile_firstEmail = profile.emails?.map(a=>a.value).find(a=>a);
 		if (profile_firstEmail == null) return void done("Account must have associated email-address to sign-in.");
+		const Timeout_5s = <T extends Function>(message: number|string, func: T)=>Timeout(func, 5000, (resolve, reject)=>{
+			const finalMessage = `Database query timed out. [${message}]`;
+			reject(finalMessage);
+			done(finalMessage);
+		});
 
 		//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
 
+		const test1 = await pgClient.query(`SELECT * FROM "userHiddens"`);
+		console.log("Test1:", test1.rows);
+
 		//const existingUser = await GetAsync(()=>GetUsers()));
-		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling_final: "log"});
+		const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling_final: "log"});
 		if (existingUser_hidden != null) {
 			console.log("Found existing user for email:", profile_firstEmail);
-			const existingUser = await GetAsync(()=>GetUser(existingUser_hidden.id), {errorHandling_final: "log"});
+			const existingUser = await Timeout_5s(2, GetAsync)(()=>GetUser(existingUser_hidden.id), {errorHandling_final: "log"});
 			console.log("Also found user-data:", existingUser);
 			Assert(existingUser != null, `Could not find user with id matching that of the entry in userHiddens (${existingUser_hidden.id}), which was found based on your provided account's email (${existingUser_hidden.email}).`);
 			return void done(null, existingUser);
@@ -60,7 +81,7 @@ passport.use(new GoogleStrategy(
 			permissionGroups,
 			photoURL: profile.photos?.[0]?.value,
 		});
-		const defaultPolicyID = await GetAsync(()=>GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name));
+		const defaultPolicyID = await Timeout_5s(3, GetAsync)(()=>GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name));
 		const userHidden = new UserHidden({
 			email: profile_firstEmail,
 			providerData: [profile._json],
@@ -73,7 +94,7 @@ passport.use(new GoogleStrategy(
 
 		//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
-		const result = await GetAsync(()=>GetUser(newID), {errorHandling_final: "log"});
+		const result = await Timeout_5s(4, GetAsync)(()=>GetUser(newID), {errorHandling_final: "log"});
 		console.log("User result:", result);
 		done(null, result!);
 	},
@@ -146,14 +167,19 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		}));
 	//includeUserIDAsResponseCookie);
 	app.get("/auth/google/callback",
+		/*(req, res, next)=>{
+			console.log("Received callback...");
+			next();
+		},*/
 		passport.authenticate("google"),
 		//setUserIDResponseCookie,
 		(req, res, next)=>{
+			console.log("User:", req.user);
 			// if success
 			if (req.user) {
-				res.redirect("http://localhost:3005");
+				res.redirect(GetWebServerURL("/"));
 			} else {
-				res.redirect("http://localhost:3005/login-failed");
+				res.redirect(GetWebServerURL("/login-failed"));
 			}
 			next();
 		});
@@ -162,10 +188,10 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		req.logOut();
 		if (req.session?.destroy) {
 			req.session.destroy(()=>{
-				res.redirect("http://localhost:3005");
+				res.redirect(GetWebServerURL("/"));
 			});
 		} else {
-			res.redirect("http://localhost:3005");
+			res.redirect(GetWebServerURL("/"));
 		}
 	});
 

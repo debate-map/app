@@ -81,7 +81,10 @@ Guide modules for ["server" package](https://github.com/debate-map/app/tree/mast
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
 Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/master/Packages/deploy): (things relating to Kubernetes, etc.)
+* [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 * [deploy/k8s-local](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-local)
 * [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
 * [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)
+* [deploy/k8s-view-locals](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-locals)
+* [deploy/oauth-setup](https://github.com/debate-map/app/tree/master/Packages/deploy#oauth-setup)

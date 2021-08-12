@@ -48,26 +48,27 @@ max_replication_slots = 10
 <!----><a name="local-docker"></a>
 ### [server/local-docker] Local server, using docker
 
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
 Note: The docker images produced directly will have the name `dm-server-direct`.
 
-1) Install Docker Desktop: https://docs.docker.com/desktop
-2) Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
-2.1) In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
-3) For direct docker builds, run `npm start server.dockerBuild`.
+1) For direct docker builds, run `npm start server.dockerBuild`.
 
 <!----><a name="local-k8s"></a>
 ### [server/local-k8s] Local server, using docker + kubernetes + skaffold (helper)
 
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
 Note: The docker images produced by skaffold will have the name `dm-server`.
 
-1) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-2) Install Skaffold: https://skaffold.dev/docs/install
-3) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, just press enter in the terminal)
-4) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `dm-server`)
-5) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `dm-server`)
+1) For docker->kubernetes build+rebuilds, run `npm start server.skaffoldDev`. (whenever you want a rebuild, just press enter in the terminal)
+2) For docker->kubernetes builds, run `npm start server.skaffoldBuild`. (image-name: `dm-server`)
+3) For docker->kubernetes build+run, run `npm start server.skaffoldRun`. (image-name: `dm-server`)
 
 <!----><a name="docker-trim"></a>
 ### [docker-trim] Docker image/container trimming
+
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
 1) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
 2) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)

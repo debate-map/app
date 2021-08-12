@@ -11,6 +11,8 @@
 		"@types/express": "^4.17.12",
 		"@types/node": "^15.3.0",
 		"dm_client": "workspace:*",
-		"express": "^4.17.1"
+		"express": "^4.17.1",
+		"dotenv": "^10.0.0",
+		"pm2": "^5.1.0"
 	}
 }
