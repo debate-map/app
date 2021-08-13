@@ -1,4 +1,4 @@
-//const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
+const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
 
 console.log("Preparing to run server. @devMode:", process.env.DEV != null);
 module.exports = {
@@ -24,11 +24,12 @@ module.exports = {
 			return result;
 		})(),
 
+		//watch: true,
+		watch: "**", // watch:true doesn't work fsr (it ignores node_modules)
 		/*watch: [
 			"Packages/server",
 			...nodeModuleWatchPaths,
 		],*/
-		watch: true,
 		ignore: null,
 		ignore_watch: [],
 		watch_options: {
