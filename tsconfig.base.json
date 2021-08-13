@@ -39,6 +39,9 @@
 		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules
 		// paths are relative to "baseUrl" (ie. ./Packages/XXX/Source)
 		"paths": {
+			"pg": ["../../../node_modules/pg"],
+			"postgraphile": ["../../../node_modules/postgraphile"],
+			"graphile-utils": ["../../../node_modules/graphile-utils"],
 			// from web-vcore
 			// ==========
 			"react": [
@@ -55,18 +58,6 @@
 			"mobx-graphlink/*": [
 				"../../../node_modules/web-vcore/node_modules/mobx-graphlink/*",
 				"../../../node_modules/mobx-graphlink/*",
-			],
-			"pg": [
-				"../../../node_modules/web-vcore/node_modules/pg",
-				"../../../node_modules/pg",
-			],
-			"postgraphile": [
-				"../../../node_modules/web-vcore/node_modules/postgraphile",
-				"../../../node_modules/postgraphile",
-			],
-			"graphile-utils": [
-				"../../../node_modules/web-vcore/node_modules/graphile-utils",
-				"../../../node_modules/graphile-utils",
 			],
 			// temp; fixes odd import bug in CodeMirrorConfig.ts
 			"codemirror": [

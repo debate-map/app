@@ -1,4 +1,4 @@
-import {CreateConfig} from "web-vcore/Scripts/Config.js";
+import {CreateConfig} from "web-vcore/Scripts_Dist/Config.js";
 import path, {dirname} from "path";
 import {createRequire} from "module";
 

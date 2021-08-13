@@ -1,4 +1,4 @@
-import {CreateNPMPatchesConfig} from "web-vcore/Scripts/Build/NPMPatches.js";
+import {CreateNPMPatchesConfig} from "web-vcore/Scripts_Dist/Build/NPMPatches.js";
 
 //import {config} from "../../../../.env";
 /*import {createRequire} from "module";

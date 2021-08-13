@@ -1,5 +1,5 @@
-import {Serve} from "web-vcore/Scripts/Bin/Server.js";
+import {Compile} from "web-vcore/Scripts_Dist/Bin/Compile.js";
 import {webpackConfig} from "../Build/WebpackConfig.js";
 import {config} from "../Config.js";
 
-Serve(config, webpackConfig);
+Compile(config, webpackConfig);

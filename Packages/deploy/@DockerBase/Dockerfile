@@ -2,21 +2,21 @@
 
 # note: source paths are relative to repo-root; target paths are relative to vm drive-root (well, until the WORKDIR "/dm_repo" line below)
 
-#FROM node:14
-FROM node:16
+FROM node:14
+#FROM node:16
 
 WORKDIR "/dm_repo"
 
 # bundle just the files here that yarn needs to do its job (else files change will force yarn to re-run)
 COPY package.json .
+COPY .yarn/ .yarn/
+COPY .yarnrc.yml .
 COPY yarn.lock .
 COPY Packages/client/package.json Packages/client/package.json
 COPY Packages/common/package.json Packages/common/package.json
 COPY Packages/server/package.json Packages/server/package.json
 COPY Packages/web-server/package.json Packages/web-server/package.json
 COPY Packages/deploy/package.json Packages/deploy/package.json
-COPY .yarn .yarn
-COPY .yarnrc.yml .
 
 # also copy cache contents from node_modules/web-vcore/.yarn/cache (if wvc is symlinked, the dm's cache will lack many of the libs)
 # this should work, except docker refuses to allow symlink-following (https://github.com/moby/moby/issues/1676)
@@ -38,3 +38,15 @@ RUN yarn install
 #RUN yarn install --check-files --force
 #RUN yarn install --check-files --force --production=false
 #RUN yarn install --check-files --production=false
+
+#COPY ./node_modules/ajv/dist/ ./node_modules/ajv/dist/
+#COPY ./node_modules/amp/lib/ ./node_modules/amp/lib/
+#COPY ./node_modules/axios/dist/ ./node_modules/axios/dist/
+
+#COPY ./node_modules/web-vcore/nm ./node_modules/web-vcore/nm
+#COPY node_modules node_modules
+#COPY node_modules\\web-vcore\\nm\\ .\\node_modules\\web-vcore\\nm\\
+#COPY .\\node_modules\\web-vcore\\** ./node_modules/web-vcore/
+
+# todo: maybe move this to package-specific dockerfiles, as "update base docker image" may have more overhead than "copy HardLinked/ folder" in each package, and HardLinked/ can change frequently 
+COPY HardLinked/ /dm_repo/

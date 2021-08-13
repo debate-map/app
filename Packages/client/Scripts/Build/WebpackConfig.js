@@ -1,4 +1,4 @@
-import {CreateWebpackConfig, FindNodeModule_FromUserProjectRoot} from "web-vcore/Scripts/Build/WebpackConfig.js";
+import {CreateWebpackConfig, FindNodeModule_FromUserProjectRoot} from "web-vcore/Scripts_Dist/Build/WebpackConfig.js";
 import {config} from "../Config.js";
 import {npmPatch_replacerConfig} from "./NPMPatches.js";
 
@@ -51,8 +51,8 @@ export const webpackConfig = CreateWebpackConfig({
 });
 /*webpackConfig.resolve.alias["postgraphile"] = FindNodeModule_FromUserProjectRoot(config, "postgraphile");
 webpackConfig.resolve.alias["graphile-utils"] = FindNodeModule_FromUserProjectRoot(config, "graphile-utils");*/
-webpackConfig.resolve!.alias!["eventemitter3"] = FindNodeModule_FromUserProjectRoot(config, "eventemitter3"); // temp; while using recharts
+webpackConfig.resolve.alias["eventemitter3"] = FindNodeModule_FromUserProjectRoot(config, "eventemitter3"); // temp; while using recharts
 // we don't use pg, postgraphile, and graphile-utils from frontend, so resolve to nothing
-webpackConfig.resolve!.alias!["pg"] = false;
-webpackConfig.resolve!.alias!["postgraphile"] = false;
-webpackConfig.resolve!.alias!["graphile-utils"] = false;
+webpackConfig.resolve.alias["pg"] = false;
+webpackConfig.resolve.alias["postgraphile"] = false;
+webpackConfig.resolve.alias["graphile-utils"] = false;

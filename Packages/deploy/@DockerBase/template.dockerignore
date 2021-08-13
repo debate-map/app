@@ -1,8 +1,11 @@
 # anywhere
 # ==========
 
-#**/node_modules
-#**/node_modules/**
+**/Dockerfile
+**/.dockerignore
+**/*.md
+**/template.dockerignore
+**/.dockerignore
 
 # node-modules (special group)
 # ==========
@@ -17,21 +20,9 @@ node_modules/**
 # root
 # ==========
 
-#node_modules/**
-#!node_modules/web-vcore/.yarn/cache
-#!node_modules/web-vcore/.yarn/cache/**
-#!node_modules/test1
-npm-debug.log
+# most of these are excluded just so that Tilt doesn't update resources based on their being changed
 .git
-
-# package-specific
-# ==========
-
-# client
-Packages/client/Source
-
-# common
-Packages/common/Source
-
-# server
-Packages/server/Source
+.gitignore
+.eslintrc.cjs
+package-scripts.js
+Tiltfile

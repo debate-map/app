@@ -28,6 +28,7 @@ Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/m
 
 1) Run (in repo root): `tilt up`
 2) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+2.1) `tilt up` can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/postgres` runs before `deploy/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
 3) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
 
 Notes:

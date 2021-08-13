@@ -17,6 +17,7 @@ exports.config = {
 				//"@pg-lq/postgraphile-plugin": "portal:./Portals/@pg-lq_postgraphile-plugin",
 				"web-vcore": "link:../../@Modules/web-vcore/Main",
 				"@pg-lq/postgraphile-plugin": "link:../../@Modules/postgraphile-live-query/Main/Packages/postgraphile-plugin",
+			   "file-syncer": "link:C:/Root/Apps/@V/@Modules/file-syncer/Main"
 			}
 		}
 	],

@@ -8,7 +8,7 @@ import config from "../Knex/knexfile";
 const require = createRequire(import.meta.url);
 const config = require("../Knex/knexfile");*/
 
-async function ConnectToDB_CreatingIfNonExistent(dbName: string) {
+async function ConnectToDB_CreatingIfNonExistent(dbName) {
 	// use knex object without db-name in connection-config at first, in case db doesn't exist yet
 	let knex_early = Knex({
 		...config.development,

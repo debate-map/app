@@ -1,12 +1,4 @@
-/*const fs = require("fs");
-const dockerIgnore_str = fs.readFileSync("../../.dockerignore").toString();
-const dockerIgnore_lines = dockerIgnore_str.split("\n");
-const nodeModuleWatchPathLines = dockerIgnore_lines.slice(
-	dockerIgnore_lines.findIndex(a=>a.includes("START NODE_MODULES WATCH PATHS")) + 1,
-	dockerIgnore_lines.findIndex(a=>a.includes("END NODE_MODULES WATCH PATHS")),
-).filter(a=>!a.startsWith("#"));
-const nodeModuleWatchPaths = nodeModuleWatchPathLines.map(a=>a.slice(1)); // remove the "!" at the start*/
-const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").default;
+//const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
 
 console.log("Preparing to run server. @devMode:", process.env.DEV != null);
 module.exports = {
@@ -14,11 +6,13 @@ module.exports = {
 		name: "main",
 
 		...process.env.DEV ? {
-			script: "node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
+			//script: "node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
+			script: "node --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
 			interpreter: null,
 		} : {
 			script: "./Dist/Main.js",
-			node_args: "--loader ts-node/esm.mjs --experimental-specifier-resolution=node",
+			//node_args: "--loader ts-node/esm.mjs --experimental-specifier-resolution=node",
+			node_args: "--experimental-specifier-resolution=node",
 		},
 
 		//exp_backoff_restart_delay: 500,
@@ -30,10 +24,11 @@ module.exports = {
 			return result;
 		})(),
 
-		watch: [
+		/*watch: [
 			"Packages/server",
 			...nodeModuleWatchPaths,
-		],
+		],*/
+		watch: true,
 		ignore: null,
 		ignore_watch: [],
 		watch_options: {

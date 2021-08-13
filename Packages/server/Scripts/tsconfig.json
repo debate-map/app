@@ -23,7 +23,9 @@
 	},
 	"include": [
 		"../Typings/**/*.d.ts",
+		"../Scripts/**/*.js",
+		//"../Scripts/**/*.jsx",
 		"../Scripts/**/*.ts",
-		"../Scripts/**/*.tsx",
+		//"../Scripts/**/*.tsx",
 	]
 }

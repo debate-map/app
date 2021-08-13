@@ -1,6 +1,43 @@
 {
 	"version": "2.0.0",
 	"tasks": [
+		// common
+		{
+			"label": "## common.tsc (typecheck)",
+			"type": "shell",
+			"command": "npm start common.tsc",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": "build"
+		},
+
+		// backend
+		{
+			"label": "## backend.tiltUp",
+			"type": "shell",
+			"command": "npm start backend.tiltUp",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},
+		{
+			"label": "## backend.dockerPrep",
+			"type": "shell",
+			"command": "npm start backend.dockerPrep",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "## backend.buildHardLinked",
+			"type": "shell",
+			"command": "npm start backend.buildHardLinked",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": "build"
+		},
+
+		// server
 		{
 			"label": "#1 server.dev",
 			"type": "shell",
@@ -30,14 +67,6 @@
 			"type": "shell",
 			"command": "npm start server.initDB_freshScript",
 			"problemMatcher": [],
-			"isBackground": true,
-			"group": "build"
-		},
-		{
-			"label": "## common.tsc (typecheck)",
-			"type": "shell",
-			"command": "npm start common.tsc",
-			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
 		},
@@ -73,15 +102,17 @@
 			"isBackground": true,
 			"group": "build",
 		},*/
-		{
-			"label": "## server.tiltUp",
+	
+		/*{
+			"label": "## server.k8s_local_proxyOn8081",
 			"type": "shell",
-			"command": "npm start server.tiltUp",
-			"problemMatcher": [],
+			"command": "npm start server.k8s_local_proxyOn8081",
+			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
-			"group": "build",
-		},
+			"group": "build"
+		},*/
 
+		// web-server
 		{
 			"label": "## web-server.dev",
 			"type": "shell",
@@ -95,15 +126,6 @@
 			"type": "shell",
 			"command": "npm start web-server.run",
 			"problemMatcher": [],
-			"isBackground": true,
-			"group": "build"
-		},*/
-		
-		/*{
-			"label": "## server.k8s_local_proxyOn8081",
-			"type": "shell",
-			"command": "npm start server.k8s_local_proxyOn8081",
-			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
 		},*/

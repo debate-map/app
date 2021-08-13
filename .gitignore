@@ -1,4 +1,5 @@
 /node_modules
+/HardLinked
 /.env
 /Packages/*/node_modules
 /Packages/*/Dist
