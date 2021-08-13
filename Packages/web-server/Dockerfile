@@ -1,6 +1,8 @@
 # source: Packages/deploy/@DockerBase/Dockerfile
 FROM local.tilt.dev/dm-repo-shared-base
 
+COPY NMOverwrites/ /dm_repo/
+
 # bundle app source (the .dockerignore file excludes large, unrelated folders like node_modules)
 #COPY . .
 COPY Packages/ Packages/

@@ -17,9 +17,9 @@ nmWatchPaths = str(nmWatchPathsStr).strip().split(",")
 for path in nmWatchPaths:
 	liveUpdateEntries_shared.append(sync('./' + path, '/dm_repo/' + path))'''
 
-# this keeps the HardLinked folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
-#local(['node', 'Scripts/HardLinked/Build.js', '--async'])
-local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'HardLinked', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
+# this keeps the NMOverwrites folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
+#local(['node', 'Scripts/NMOverwrites/Build.js', '--async'])
+local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
 
 # this is the base dockerfile used for all the subsequent ones
 docker_build('local.tilt.dev/dm-repo-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
@@ -37,7 +37,7 @@ docker_build('dm-web-server', '.', dockerfile='Packages/web-server/Dockerfile')
 	# test
 	sync('./node_modules/web-vcore/node_modules/mobx-graphlink/Dist', '/dm_repo/node_modules/mobx-graphlink/Dist'),
 	#sync('./node_modules/web-vcore/nm', '/dm_repo/node_modules/web-vcore/nm'),
-	sync('./HardLinked/node_modules/web-vcore/nm', '/dm_repo/node_modules/web-vcore/nm'),
+	sync('./NMOverwrites/node_modules/web-vcore/nm', '/dm_repo/node_modules/web-vcore/nm'),
 	sync('./node_modules', '/dm_repo/node_modules'),
 	#sync('C:\\Root\\Apps\\@V\\@Modules\\web-vcore\\Main\\nm', '/dm_repo/node_modules/web-vcore/nm'),
 ])'''

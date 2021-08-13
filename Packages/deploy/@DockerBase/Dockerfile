@@ -7,6 +7,8 @@ FROM node:14
 
 WORKDIR "/dm_repo"
 
+# test
+
 # bundle just the files here that yarn needs to do its job (else files change will force yarn to re-run)
 COPY package.json .
 COPY .yarn/ .yarn/
@@ -48,5 +50,5 @@ RUN yarn install
 #COPY node_modules\\web-vcore\\nm\\ .\\node_modules\\web-vcore\\nm\\
 #COPY .\\node_modules\\web-vcore\\** ./node_modules/web-vcore/
 
-# todo: maybe move this to package-specific dockerfiles, as "update base docker image" may have more overhead than "copy HardLinked/ folder" in each package, and HardLinked/ can change frequently 
-COPY HardLinked/ /dm_repo/
+# moved this to package-specific dockerfiles, as "update base docker image" has (a lot) more overhead than "copy NMOverwrites/ folder" in each package, and NMOverwrites/ can change frequently 
+#COPY NMOverwrites/ /dm_repo/

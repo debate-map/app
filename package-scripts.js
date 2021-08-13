@@ -80,8 +80,8 @@ function GetServeCommand(nodeEnv = null) {
 }
 
 /*const {nmWatchPaths_notUnderWVC, nmWatchPaths_underWVC} = require("./Scripts/NodeModuleWatchPaths.js");
-const group1 = `--from ${nmWatchPaths_notUnderWVC.map(a=>`"${a}"`).join(" ")} --to HardLinked`;
-const group2 = `--from-2 ${nmWatchPaths_underWVC.map(a=>`"${a.replace("node_modules/web-vcore/", "")}"`).join(" ")} --to-2 HardLinked`;*/
+const group1 = `--from ${nmWatchPaths_notUnderWVC.map(a=>`"${a}"`).join(" ")} --to NMOverwrites`;
+const group2 = `--from-2 ${nmWatchPaths_underWVC.map(a=>`"${a.replace("node_modules/web-vcore/", "")}"`).join(" ")} --to-2 NMOverwrites`;*/
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 
 Object.assign(scripts, {
@@ -135,8 +135,8 @@ Object.assign(scripts, {
 	// for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)
 	backend: {
 		// general
-		//buildHardLinked: `npx file-syncer ${group1} ${group2}`,
-		buildHardLinked: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to HardLinked --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
+		//buildNMOverwrites: `npx file-syncer ${group1} ${group2}`,
+		buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
 	
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",

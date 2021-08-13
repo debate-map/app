@@ -1,28 +1,4 @@
-# anywhere
-# ==========
+NMOverwrites/
 
-**/Dockerfile
-**/.dockerignore
-**/*.md
-**/template.dockerignore
-**/.dockerignore
-
-# node-modules (special group)
-# ==========
-
-# use this "/**" variant, because without it we can't add reinclusions under node_modules (like how .gitignore works)
-node_modules/**
-
-# own-module reinclusions (for fast changing, through yarn symlinks)
-# (do not modify the line below; it is needed by UpdateDockerIgnore.js)
-# [[[PLACEHOLDER FOR NODE_MODULES WATCH PATHS]]]
-
-# root
-# ==========
-
-# most of these are excluded just so that Tilt doesn't update resources based on their being changed
-.git
-.gitignore
-.eslintrc.cjs
-package-scripts.js
-Tiltfile
+# for this base image, we can completely ignore the node_modules/ folder (we aren't the one -- actually, we don't need it for any of the docker-images, because we have NMOverwrites)
+#node_modules/

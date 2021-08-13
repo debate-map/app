@@ -1,0 +1,23 @@
+# anywhere
+# ==========
+
+**/*.md
+**/Dockerfile
+**/template.dockerignore
+**/.dockerignore
+**/Dockerfile.dockerignore
+
+# any node-module overrides (eg. symlinked packages) are now handled at start of final-layer docker-images through "COPY NMOverwrites/ /dm_repo/" command
+node_modules
+Packages/**/node_modules
+
+# root
+# ==========
+
+# most of these are excluded just so that Tilt doesn't update resources based on their being changed
+.git
+.gitignore
+.eslintrc.cjs
+package-scripts.js
+Tiltfile
+templateBase.dockerignore

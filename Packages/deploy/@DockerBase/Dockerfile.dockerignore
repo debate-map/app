@@ -1,0 +1,43 @@
+# =============================================================
+# =============================================================
+# ========== THIS IS A GENERATED FILE; DO NOT MODIFY ==========
+# =============================================================
+# =============================================================
+# (Instead, modify the template.dockerignore files, then run `npm start backend.dockerPrep`; or just run one of the docker-related commands in package-scripts.js.)
+
+# ==================================================================
+# ========== SECTION FROM templateBase.dockerignore BELOW ==========
+# ==================================================================
+
+# anywhere
+# ==========
+
+**/*.md
+**/Dockerfile
+**/template.dockerignore
+**/.dockerignore
+**/Dockerfile.dockerignore
+
+# any node-module overrides (eg. symlinked packages) are now handled at start of final-layer docker-images through "COPY NMOverwrites/ /dm_repo/" command
+node_modules
+Packages/**/node_modules
+
+# root
+# ==========
+
+# most of these are excluded just so that Tilt doesn't update resources based on their being changed
+.git
+.gitignore
+.eslintrc.cjs
+package-scripts.js
+Tiltfile
+templateBase.dockerignore
+
+# ===========================================================================
+# ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
+# ===========================================================================
+
+NMOverwrites/
+
+# for this base image, we can completely ignore the node_modules/ folder (we aren't the one -- actually, we don't need it for any of the docker-images, because we have NMOverwrites)
+#node_modules/
