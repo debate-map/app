@@ -36,13 +36,14 @@ spec:
     spec:
       containers:
       - name: dm-server
-        image: dm-server
+        image: local.tilt.dev/dm-server
         livenessProbe:
           httpGet:
             path: /health-check
             port: 3105
-          initialDelaySeconds: 10999999
-          periodSeconds: 5
+          #initialDelaySeconds: 10999999
+          initialDelaySeconds: 20
+          periodSeconds: 10
           timeoutSeconds: 3
         env:
         - name: DB_VENDOR

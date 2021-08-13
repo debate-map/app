@@ -13,11 +13,20 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 1) Install Docker Desktop: https://docs.docker.com/desktop
 2) Install Lens, as a general k8s inspection tool: https://k8slens.dev
 3) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-4) [opt] Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
-4.1) [opt] In addition, make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
-5) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-6) Install Tilt: https://github.com/tilt-dev/tilt
-7) See here for more helpful tools: https://collabnix.github.io/kubetools
+4) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+<!-- 5) Create an alias/copy of the "docker-desktop" k8s context, renaming it to "local". -->
+5) Install Tilt: https://github.com/tilt-dev/tilt
+6) See here for more helpful tools: https://collabnix.github.io/kubetools
+
+<!----><a name="docker-trim"></a>
+### [image-inspect] Docker image/container inspection
+
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
+Tools:
+* Make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
+* Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
+* To inspect the full file-contents of an image: `docker image save IMAGE_NAME > output.tar` (followed by extraction, eg. using [7-zip](https://www.7-zip.org))
 
 ## Local
 
@@ -62,15 +71,31 @@ foreach ($container in $containersToRemove) {
 ## Remote
 
 <!----><a name="k8s-remote"></a>
+### [docker-remote] Docker remote image repository
+
+Note: We use Gitlab's private image repository here, but others could be used.
+
+1) Create a user-account on Gitlab. (if new)
+2) Ensure that a Gitlab project exists for the docker-image storage. (ours is here: https://gitlab.com/Venryx/debate-map)
+3) Sign in to your Gitlab account, using docker-cli: `docker login registry.gitlab.com -u YOUR_USERNAME`
+4) Run the image-deploy scripts for the given image: `npm start backend.dockerBuildAndPush_gitlab.[base/server/web-server]`
+5) TODO
+
+<!----><a name="k8s-remote"></a>
 ### [k8s-remote] Remote web+app server, using docker + kubernetes
 
-Note: These instructions are for OVH-cloud's Public Cloud servers.
+Prerequisite steps: [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote)
+
+Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 
 1) Create a Public Cloud project on OVH cloud. (in the US, us.ovhcloud.com is recommended for their in-country servers)
 2) Follow the instructions here to setup a Kubernetes cluster: https://youtu.be/vZOj59Oer7U?t=586  
 2.1) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)  
 2.2) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
-3) TODO
+3) Run the commands needed to integrate the kubeconfig file into your local kube config.
+4) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh".
+5) TODO
+6) Run: `npm start backend.tiltUp_ovh`
 
 ## Shared
 

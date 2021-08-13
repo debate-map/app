@@ -12,7 +12,6 @@
     "@types/react-list": "0.8.5",
     "commander": "2.19.0",
     "cross-env": "6.0.3",
-    "cypress": "3.4.1",
     "shx": "0.3.2",
     "ts-node": "^10.0.0",
     "ts-node-dev": "1.1.6"

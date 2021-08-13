@@ -36,5 +36,5 @@ spec:
     spec:
       containers:
       - name: dm-web-server
-        image: dm-web-server
+        image: local.tilt.dev/dm-web-server
         #livenessProbe: TODO

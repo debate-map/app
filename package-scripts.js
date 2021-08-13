@@ -150,10 +150,21 @@ Object.assign(scripts, {
 		//dockerBuild: "tar -czh . | docker build -",
 		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."), // variant which preserves complete log (may increase build time)
 		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct ."), // with cache disabled
-
-		// these commands also deploy the web-server
-		tiltUp: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up"),
-		//tiltUp: DockerCommand("tilt up"),
+		dockerBuild_gitlab: {
+			"base": DockerCommand("docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
+			"server": DockerCommand("docker build -f ./Packages/server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
+			"web-server": DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
+		},
+		dockerBuildAndPush_gitlab: {
+			"base": "npm start backend.dockerBuild_gitlab.base && docker push registry.gitlab.com/venryx/debate-map",
+			"server": "npm start backend.dockerBuild_gitlab.server && docker push registry.gitlab.com/venryx/debate-map",
+			"web-server": "npm start backend.dockerBuild_gitlab.web-server && docker push registry.gitlab.com/venryx/debate-map",
+		},
+		
+		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
+		//tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context local"),
+		tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context docker-desktop"),
+		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context ovh"),
 	},
 	server: {
 		// setup

@@ -1,4 +1,4 @@
-const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
+//const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
 
 console.log("Preparing to run server. @devMode:", process.env.DEV != null);
 module.exports = {
