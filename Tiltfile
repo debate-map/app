@@ -23,14 +23,16 @@ docker_build('dm-server', '.', dockerfile='Packages/server/Dockerfile',
 	#live_update=liveUpdateEntries_shared + [
 	live_update=[
 		sync('./NMOverwrites/', '/dm_repo/'),
-		sync('./Packages/server/Dist/', '/dm_repo/Packages/server/Dist/'),
+		#sync('./Packages/server/Dist/', '/dm_repo/Packages/server/Dist/'),
+		sync('./Packages/server/', '/dm_repo/Packages/server/'),
 	])
 docker_build('dm-web-server', '.', dockerfile='Packages/web-server/Dockerfile',
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	#live_update=liveUpdateEntries_shared + [
 	live_update=[
 		sync('./NMOverwrites/', '/dm_repo/'),
-		sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
+		#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
+		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
 	])
 
 #k8s_resource('debate-map-primary', port_forwards='5432:5432') # db

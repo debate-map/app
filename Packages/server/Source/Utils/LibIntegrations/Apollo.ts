@@ -21,7 +21,8 @@ export function GetDBServerURL(subpath: string) {
 	return `https://db.debatemap.app/${subpath.slice(1)}`;
 }
 
-const GRAPHQL_URL = GetDBServerURL("/graphql");
+//const GRAPHQL_URL = GetDBServerURL("/graphql");
+const GRAPHQL_URL = "http://localhost:3105/graphql"; // use the internal ip, not the external one
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;
@@ -30,6 +31,7 @@ let link_withErrorHandling: ApolloLink;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 export function InitApollo(serverLaunchID: string) {
+	console.log("Connecting server's Apollo client to:", GRAPHQL_URL);
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
 	});

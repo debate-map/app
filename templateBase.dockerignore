@@ -21,3 +21,11 @@ Packages/**/node_modules
 package-scripts.js
 Tiltfile
 templateBase.dockerignore
+
+# within packages
+# ==========
+
+Packages/client/Source
+Packages/common/Source
+Packages/server/Source
+Packages/web-server/Source
