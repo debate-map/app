@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app.kubernetes.io/name: coredns
+    k8s-app: coredns
   name: coredns
   namespace: monitoring
 spec:
@@ -10,7 +10,7 @@ spec:
   - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     interval: 15s
     port: metrics
-  jobLabel: app.kubernetes.io/name
+  jobLabel: k8s-app
   namespaceSelector:
     matchNames:
     - kube-system

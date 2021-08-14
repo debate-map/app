@@ -3,11 +3,6 @@ items:
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
-    labels:
-      app.kubernetes.io/component: prometheus
-      app.kubernetes.io/name: prometheus
-      app.kubernetes.io/part-of: kube-prometheus
-      app.kubernetes.io/version: 2.28.1
     name: prometheus-k8s
     namespace: default
   rules:
@@ -21,30 +16,9 @@ items:
     - get
     - list
     - watch
-  - apiGroups:
-    - extensions
-    resources:
-    - ingresses
-    verbs:
-    - get
-    - list
-    - watch
-  - apiGroups:
-    - networking.k8s.io
-    resources:
-    - ingresses
-    verbs:
-    - get
-    - list
-    - watch
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
-    labels:
-      app.kubernetes.io/component: prometheus
-      app.kubernetes.io/name: prometheus
-      app.kubernetes.io/part-of: kube-prometheus
-      app.kubernetes.io/version: 2.28.1
     name: prometheus-k8s
     namespace: kube-system
   rules:
@@ -58,30 +32,9 @@ items:
     - get
     - list
     - watch
-  - apiGroups:
-    - extensions
-    resources:
-    - ingresses
-    verbs:
-    - get
-    - list
-    - watch
-  - apiGroups:
-    - networking.k8s.io
-    resources:
-    - ingresses
-    verbs:
-    - get
-    - list
-    - watch
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
-    labels:
-      app.kubernetes.io/component: prometheus
-      app.kubernetes.io/name: prometheus
-      app.kubernetes.io/part-of: kube-prometheus
-      app.kubernetes.io/version: 2.28.1
     name: prometheus-k8s
     namespace: monitoring
   rules:
@@ -91,22 +44,6 @@ items:
     - services
     - endpoints
     - pods
-    verbs:
-    - get
-    - list
-    - watch
-  - apiGroups:
-    - extensions
-    resources:
-    - ingresses
-    verbs:
-    - get
-    - list
-    - watch
-  - apiGroups:
-    - networking.k8s.io
-    resources:
-    - ingresses
     verbs:
     - get
     - list

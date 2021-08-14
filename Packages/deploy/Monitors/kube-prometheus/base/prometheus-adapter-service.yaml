@@ -2,10 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app.kubernetes.io/component: metrics-adapter
-    app.kubernetes.io/name: prometheus-adapter
-    app.kubernetes.io/part-of: kube-prometheus
-    app.kubernetes.io/version: 0.8.4
+    name: prometheus-adapter
   name: prometheus-adapter
   namespace: monitoring
 spec:
@@ -14,6 +11,4 @@ spec:
     port: 443
     targetPort: 6443
   selector:
-    app.kubernetes.io/component: metrics-adapter
-    app.kubernetes.io/name: prometheus-adapter
-    app.kubernetes.io/part-of: kube-prometheus
+    name: prometheus-adapter
