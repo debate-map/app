@@ -1,0 +1,238 @@
+# (C) Copyright 2020 Hewlett Packard Enterprise Development LP
+
+def ToLPath(path):
+    return path.replace("\\", "/").replace("C:/", "/mnt/c/")
+def ToWPath(path):
+    return path.replace("/", "\\").replace("\\mnt\\c\\", "C:\\")
+    
+def listDir(path, recursive = False):
+    result = []
+    for file in listdir(ToWPath(path), recursive):
+        result.append(ToLPath(file))
+    print("listDir.result-0:", result[0] if len(result) > 0 else "none")
+    return result
+def PathExists(path):
+    return os.path.exists(ToWPath(path))
+def PathJoin(path1, path2):
+    return ToLPath(os.path.join(ToWPath(path1), ToWPath(path2)))
+def AbsPath(path):
+    return ToLPath(os.path.abspath(ToWPath(path)))
+def DirName(path):
+    return ToLPath(os.path.dirname(ToWPath(path)))
+def BaseName(path):
+    return ToLPath(os.path.basename(ToWPath(path)))
+
+def _find_root_tiltfile_dir():
+    # Find top-level Tilt path
+    current = AbsPath('./')
+    while current != '/':
+        if PathExists(PathJoin(current, 'Tiltfile')):
+            print("FoundAt:", current)
+            return current
+
+        current = ToLPath(DirName(current))
+
+    fail('Could not find root Tiltfile')
+    print("NotFound:", current)
+
+def _find_cache_dir():
+    cachedir = os.getenv('TILT_CACHE_DIR', '')
+    print("FromEnv:", cachedir)
+    cachedir = ''
+
+    if cachedir == '':
+        cachedir = ToLPath(PathJoin(_find_root_tiltfile_dir(), '.tilt-cache'))
+
+    if not PathExists(cachedir):
+        local(["bash", "-c", 'mkdir -p %s' % cachedir], echo_off=True)
+
+    #os.putenv('TILT_CACHE_DIR', cachedir)
+    return ToLPath(cachedir)
+
+def _create_temp_dir():
+    from_env = os.getenv('TILT_COREOS_PROMETHEUS_TEMP_DIR', '')
+
+    #if from_env != '':
+    #    return ToLPath(from_env)
+
+    #tmpdir = str(local(["bash", "-c", "mktemp -d"], echo_off=True, quiet=True)).strip()
+    #tmpdir = '/mnt/c/temp/' + str(local(["cmd", "-c", "%random%"], echo_off=True, quiet=True)).strip()
+    tmpdir = '/mnt/c/temp/' + str(local(["node", "-e", "console.log(Date.now())"], echo_off=True, quiet=True)).strip()
+    local(["node", "-e", "require('fs').mkdirSync('" + tmpdir.replace("/mnt/c/", "C:/") + "')"], echo_off=True, quiet=True)
+    os.putenv('TILT_COREOS_PROMETHEUS_TEMP_DIR', tmpdir)
+
+    return tmpdir
+
+def name(c):
+    return c['metadata']['name']
+
+def replace_target(src, target):
+    print("Running:PathExists('" + src + "')")
+    print("Running:PathExists('" + target + "')")
+    if not PathExists(src):
+        fail("src path '%s' not found!" % src)
+
+    if not PathExists(target):
+        fail("target path '%s' not found!" % target)
+
+    local(["bash", "-c", "cp %s %s" % (src, target)])
+
+def download_files():
+    cachedir = _find_cache_dir()
+
+    kube_prometheus_version = '0.5.0'
+    kube_prometheus_tarball = ToLPath(PathJoin(cachedir, 'coreos-kube-prometheus-%s.tar.gz' % kube_prometheus_version))
+
+    tmpdir = _create_temp_dir()
+    extract_path = ToLPath(PathJoin(tmpdir, 'prometheus-operator-kube-prometheus-%s' % kube_prometheus_version))
+
+    if not PathExists(kube_prometheus_tarball):
+        local(["bash", "-c", "curl -sSL https://github.com/prometheus-operator/kube-prometheus/archive/refs/tags/v%s.tar.gz -o %s.tmp" % (kube_prometheus_version, kube_prometheus_tarball)], echo_off=True)
+        # only copy file to final location to prevent redoing the above if the above
+        # have completed successfully.
+        local(["bash", "-c", "mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball)], echo_off=True)
+
+    local(["bash", "-c", "rm -rf %s.tmp && mkdir %s.tmp" % (extract_path, extract_path)], echo_off=True)
+    local(["bash", "-c", "tar -C %s.tmp -xzf \"%s\" --strip-components=1 'kube-prometheus-%s/manifests'" % (extract_path, kube_prometheus_tarball, kube_prometheus_version)], echo_off=True)
+
+    # only move path to final location if extraction completed successfully
+    local(["bash", "-c", "rm -rf %s && mv %s.tmp %s" % (extract_path, extract_path, extract_path)], echo_off=True)
+
+    # return path containing manifests directory
+    return extract_path
+
+def patch_prometheus(path):
+    manifestsPath = ToLPath(PathJoin(path, 'manifests'))
+    prometheusPatchesPath = PathJoin(DirName(__file__), 'prometheus')
+
+    # patches to modify certain behaviour
+    #  modify clusterrole for greater access
+    #  ensure all namespaces are scanned for alerts
+    localFiles = listDir(prometheusPatchesPath, recursive=True)
+
+    for f in localFiles:
+        target = ToLPath(PathJoin(manifestsPath, BaseName(f)))
+        for i in range(1,3):
+            print("Checking:", f)
+            print("Checking:", target)
+            if PathExists(f) and PathExists(target): break
+            local(["node", "--input-type=module", "-e", "await new Promise(resolve=>setTimeout(resolve, 5000))"])
+        replace_target(f, target)
+
+def setup_monitoring():
+    print("Manifests-0:" + setupManifests[0])
+    k8s_yaml([ToWPath(a) for a in setupManifests])
+
+    # Wait until the CRDs are ready.
+    local_resource(
+        'prometheus-crds-ready',
+        cmd=' && '.join([('kubectl wait --for=condition=Established crd %s' % name(c)) for c in crds]),
+        resource_deps=['prometheus-crds'],
+    )
+
+    k8s_yaml([ToWPath(a) for a in mainManifests])
+
+    crdResources = {}
+    for yDoc in mainManifests:
+        r = read_yaml(ToWPath(yDoc))
+        if r['kind'] in crdTypes:
+            rname = name(r)
+            if rname not in crdResources:
+                crdResources[rname] = []
+
+            crdResources[rname].append('%s:%s' % (rname, r['kind']))
+
+    k8s_resource(
+        new_name='prometheus-crds',
+        objects = [('%s' % name(c)) for c in crds],
+        resource_deps=['prometheus-operator'],
+    )
+
+    resources = {
+        'grafana': {
+            'port_forwards': ["3000"],
+        },
+        'node-exporter': {},
+        'kube-state-metrics': {},
+        'prometheus': {
+            'new_name': 'prometheus',
+            'objects': ['prometheus-k8s:service'],
+            'crdResources': ['prometheus', 'k8s'],
+            'extra_pod_selectors': [{'prometheus': 'k8s'}],
+            'port_forwards': ["9090"],
+        },
+        'alertmanager': {
+            'new_name': 'alertmanager',
+            'objects': ['alertmanager-main:service'],
+            'crdResources': ['main'],
+            'extra_pod_selectors': [{'alertmanager': 'main'}],
+            'port_forwards': ["9093"],
+        }
+    }
+
+    for rname, resource in resources.items():
+        args = []
+
+        if 'new_name' not in resource:
+            args.append(rname)
+
+        for crd in resource.pop('crdResources', []):
+            resource['objects'].extend(crdResources.pop(crd, []))
+
+        k8s_resource(*args, resource_deps=['prometheus-crds'], **resource)
+
+    remainingCrdResources = []
+    for res in crdResources.values():
+        remainingCrdResources.extend(res)
+
+    k8s_resource(
+        new_name='uncategorized-prometheus-resources-requiring-crds',
+        objects=remainingCrdResources,
+        resource_deps=['prometheus-crds'],
+    )
+
+def list_prometheus_crd_types():
+    return crdTypes
+
+def get_prometheus_dependencies():
+    return ['prometheus-crds']
+
+def get_prometheus_resources(yaml, name):
+    results = []
+    for crd in list_prometheus_crd_types():
+        found, _ = filter_yaml(yaml, name="^%s$" % name, kind="^%s$" % crd)
+        if found:
+            results.append('%s:%s' % (name, crd))
+
+    return results
+
+
+# To allow resources that require CRDs created by this extension to be selectively
+# pruned from other components if deploying of prometheus is disabled by the
+# file loading this one, need to always download and unpack the required files
+# and perform a limited amount of parsing.
+
+basedir = download_files()
+patch_prometheus(basedir)
+
+# Namespace and CRDs
+print("BaseDir:", basedir)
+setupManifests = listDir(PathJoin(basedir, 'manifests/setup'), recursive=True)
+
+print("Path:", PathJoin(basedir, 'manifests/setup'))
+print("Result-0:", setupManifests[0])
+
+# Main resources depending on setup
+mainManifests = listDir(PathJoin(basedir, 'manifests'))
+
+crds = []
+for doc in setupManifests:
+    #print("Old:", doc)
+    #print("New:", ToWPath(doc))
+    r = read_yaml(ToWPath(doc))
+    if r['kind'] == 'CustomResourceDefinition':
+        crds.append(r)
+
+# crdTypes must be known to allow filtering out of these resources to allow
+# enabling/disabling use of prometheus in an environment
+crdTypes = [crd['spec']['names']['kind'] for crd in crds]

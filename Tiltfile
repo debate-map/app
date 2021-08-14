@@ -7,13 +7,45 @@
 allow_k8s_contexts('ovh')
 
 #k8s_yaml('./Packages/deploy/k8s_entry.yaml')
-# todo: integrate these into the entry-file above (probably)
-k8s_yaml(kustomize('./Packages/deploy/install'))
-k8s_yaml(kustomize('./Packages/deploy/postgres'))
-k8s_yaml('./Packages/app-server/deployment.yaml')
-k8s_yaml('./Packages/web-server/deployment.yaml')
 
-#k8s_yaml('./Packages/deploy/Monitors/kube-prometheus/manifests/setup/prometheus-operator-0probeCustomResourceDefinition.yaml')
+# prometheus
+# ==========
+
+#k8s_yaml(kustomize('./Packages/deploy/Monitors/kube-prometheus/overlay'))
+load(
+    'ext://coreos_prometheus',
+    'setup_monitoring',
+    'get_prometheus_resources',
+    'get_prometheus_dependencies',
+)
+setup_monitoring()
+'''k8s_resource(
+    'my-resource',
+    objects=get_prometheus_resources(my_deployment, 'my-resource'),
+    resource_deps=get_prometheus_dependencies(),
+)'''
+
+# crunchydata postgres operator
+# ==========
+
+'''k8s_yaml(kustomize('./Packages/deploy/install'))
+k8s_yaml(kustomize('./Packages/deploy/postgres'))
+
+#k8s_resource('debate-map-primary', port_forwards='5432:5432') # db
+#k8s_resource('pgo', port_forwards='3205:5432') # db
+k8s_resource('pgo',
+	extra_pod_selectors={
+		"postgres-operator.crunchydata.com/cluster": "debate-map",
+		"postgres-operator.crunchydata.com/role": "master"
+	},
+	port_forwards='3205:5432') # db#k8s_yaml(kustomize('./Packages/deploy/postgres'))'''
+
+# own app
+# ==========
+
+#k8s_yaml('./Packages/app-server/deployment.yaml')
+#k8s_yaml('./Packages/web-server/deployment.yaml')
+
 
 '''def k8s_yaml_folder(folderPath):
 	fileNames = str(local(['powershell', '-c', 'Get-ChildItem ' + folderPath + ' -file | Select -exp Name'])).strip().replace('\r', '').split("\n")
@@ -25,13 +57,14 @@ k8s_yaml_folder('./Packages/deploy/Monitors/kube-prometheus/manifests/setup');
 # for now, comment out the line below until everything shows green in tilt; then uncomment it, and `tilt up` again
 k8s_yaml_folder('./Packages/deploy/Monitors/kube-prometheus/manifests');'''
 
-k8s_yaml(kustomize('./Packages/deploy/Monitors/kube-prometheus/overlay'))
+# rest
+# ==========
 
-nmWatchPathsStr = local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"])
+'''nmWatchPathsStr = local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"])
 nmWatchPaths = str(nmWatchPathsStr).strip().split(",")
-'''liveUpdateEntries_shared = []
+''###'liveUpdateEntries_shared = []
 for path in nmWatchPaths:
-	liveUpdateEntries_shared.append(sync('./' + path, '/dm_repo/' + path))'''
+	liveUpdateEntries_shared.append(sync('./' + path, '/dm_repo/' + path))''###'
 
 # this keeps the NMOverwrites folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
 #local(['node', 'Scripts/NMOverwrites/Build.js', '--async'])
@@ -61,25 +94,17 @@ docker_build('local.tilt.dev/dm-web-server', '.', dockerfile='Packages/web-serve
 # ==========
 
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
-'''k8s_resource('dm-web-server', 
+''##'k8s_resource('dm-web-server', 
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
 	port_forwards='3005')
 k8s_resource('dm-app-server', 
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	#port_forwards='3105:31105')
-	port_forwards='3105')'''
+	port_forwards='3105')''##'
 
 # prometheus monitoring tool; open localhost:9090 in browser to view
-'''k8s_resource('prometheus-operator',
+''##'k8s_resource('prometheus-operator',
 	#port_forwards='9090:9090')
-	port_forwards='9090')'''
-
-#k8s_resource('debate-map-primary', port_forwards='5432:5432') # db
-#k8s_resource('pgo', port_forwards='3205:5432') # db
-k8s_resource('pgo',
-	extra_pod_selectors={
-		"postgres-operator.crunchydata.com/cluster": "debate-map",
-		"postgres-operator.crunchydata.com/role": "master"
-	},
-	port_forwards='3205:5432') # db
+	port_forwards='9090')''##'
+'''
