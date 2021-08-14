@@ -103,10 +103,13 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 <!----><a name="k8s-monitors"></a>
 ### [k8s-monitors] Various commands/info on monitoring system (prometheus, etc.)
 
-* To open a bash shell in the main prometheus pod: `kubectl exec -it prometheus-k8s-0 -n monitoring -- sh` (or `prometheus-k8s-1`)
-* To view the Prometheus monitor webpage, open (not currently working): `localhost:32000`
+* To open a bash shell in the main prometheus pod: `kubectl exec -it prometheus-k8s-[0/1] -n monitoring -- sh` (or just use Lens)
+<!-- * To view the Grafana monitor webpage, open: `localhost:32001` -->
+* To view the Grafana monitor webpage, open the k8s cluster in Lens, find the "grafana" service, then click it's "Connection->Ports" link.
 	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
-* To view the Grafana monitor webpage, open: `localhost:32001`
+<!-- * To view the Prometheus monitor webpage, open (not currently working): `localhost:32002` -->
+* To view the Prometheus monitor webpage, open the k8s cluster in Lens, find the "prometheus-operated" service, then click it's "Connection->Ports" link.
+	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
 
 <!----><a name="k8s-psql"></a>
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
