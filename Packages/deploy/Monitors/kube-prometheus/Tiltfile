@@ -31,9 +31,6 @@ def setup_monitoring():
 		resource_deps=['prometheus-crds'],
 	)
 
-	for a in mainManifests:
-		#if 'name' in a['metadata']:
-		print("Name:", a, "@path:", str(a))
 	k8s_yaml([ToWPath(a) for a in mainManifests])
 
 	crdResources = {}
@@ -115,11 +112,19 @@ finalManifestPaths_withPatches = [PathJoin(finalManifestsPath, BaseName(path)) f
 firstRun = not os.path.exists(ToWPath(finalManifestsPath))
 print("FirstRun:", firstRun, "@at:", finalManifestsPath)
 
+gitBashExists = os.path.exists("C:/Program Files/Git/bin/bash.exe")
+
 # copy the base files to finalManifests_cache
-local(["bash", "-c", "cp " + ("-R" if firstRun else "-Ru") + " %s %s" % (baseManifestsPath + "/.", finalManifestsPath)])
+if gitBashExists:
+	local([ToWPath("C:/Program Files/Git/bin/bash.exe"), "-c", "cp " + ("-R" if firstRun else "-Ru") + " %s %s" % (baseManifestsPath.replace("/mnt/c/", "/c/"), finalManifestsPath.replace("/mnt/c/", "/c/"))])
+else:
+	local(["bash", "-c", "cp " + ("-R" if firstRun else "-Ru") + " %s %s" % (baseManifestsPath + "/.", finalManifestsPath)])
 
 # then copy the patches (see readme for list of changed behaviors)
-local(["bash", "-c", "cp " + ("-R" if firstRun else "-Ru") + " %s %s" % (patchedManifestsPath + "/.", finalManifestsPath)])
+if gitBashExists:
+	local([ToWPath("C:/Program Files/Git/bin/bash.exe"), "-c", "cp " + ("-R" if firstRun else "-Ru") + " %s %s" % (patchedManifestsPath.replace("/mnt/c/", "/c/"), finalManifestsPath.replace("/mnt/c/", "/c/"))])
+else:
+	local(["bash", "-c", "cp " + ("-R" if firstRun else "-Ru") + " %s %s" % (patchedManifestsPath + "/.", finalManifestsPath)])
 
 # namespace and CRDs
 setupManifests = [doc for doc in ListDir(PathJoin(finalManifestsPath, 'setup'), recursive=True) if doc.endswith(".yaml") and not doc.endswith("/kustomization.yaml")]

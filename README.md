@@ -80,6 +80,7 @@ Guide modules for ["app-server" package](https://github.com/debate-map/app/tree/
 Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/master/Packages/deploy): (things relating to Kubernetes, etc.)
 * [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 * [deploy/image-inspect](https://github.com/debate-map/app/tree/master/Packages/deploy#image-inspect)
+* [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
 * [deploy/k8s-local](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-local)
 * [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim)
 * [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote)

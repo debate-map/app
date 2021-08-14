@@ -8,15 +8,15 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 
 ## General
 
+<!----><a name="setup-base"></a>
 ### [setup-base] Setting up base tools needed for local/remote k8s deployments
 
 1) Install Docker Desktop: https://docs.docker.com/desktop
 2) Install Lens, as a general k8s inspection tool: https://k8slens.dev
 3) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-4) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-<!-- 5) Create an alias/copy of the "docker-desktop" k8s context, renaming it to "local". -->
-5) Install Tilt: https://github.com/tilt-dev/tilt
-6) See here for more helpful tools: https://collabnix.github.io/kubetools
+<!-- 4) Create an alias/copy of the "docker-desktop" k8s context, renaming it to "local". -->
+4) Install Tilt: https://github.com/tilt-dev/tilt
+5) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 <!----><a name="docker-trim"></a>
 ### [image-inspect] Docker image/container inspection
@@ -30,6 +30,44 @@ Tools:
 
 ## Local
 
+<!----><a name="setup-k8s"></a>
+### [setup-k8s] Setting up local k8s cluster
+
+Options:
+* K3d
+* Kind
+* Docker Desktop (component)
+
+Notes:
+* Docker Desktop has the advantage of not needing built docker-images to be "loaded" into the cluster; they were built there to begin with. This can save a lot of time, if full builds are slow.
+* K3d has the fastest deletion and recreation of clusters. (so restarting from scratch frequently is more doable)
+* Docker Desktop seems to be the slowest running; I'd estimate that k3d is ~2x, at least for the parts I saw (eg. startup time).
+* Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
+* Docker Desktop also seems to sometimes gets semi-stuck during building (where it seems to be doing nothing for ~20 or 30 seconds).
+
+#### Setup for K3d [recommended]
+
+1) Download and install from here: https://k3d.io/#installation
+2) Run: `k3d cluster create main-1` (resulting image will be named `k3d-main-1`)
+
+> To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
+
+#### Setup for Docker Desktop (k8s component)
+
+1) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+
+> To delete and recreate the cluster, use the settings panel.
+
+#### Setup for Kind
+
+1) Download and install from here: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
+2) Run: `kind create cluster --name main-1` (resulting image will be named `kind-main-1`)
+
+> To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
+
+Notes:
+* To make future kubectl commands more convenient, it may be worth setting the default namespace with: `kubectl config set-context --current --namespace=dm-pg-operator`
+
 <!----><a name="local-k8s"></a>
 ### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
 
@@ -42,7 +80,6 @@ Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/m
 3) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
 
 Notes:
-* To make future kubectl commands more convenient, run: `kubectl config set-context --current --namespace=dm-pg-operator`  
 * If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
 * When the list of images/containers in Docker Desktop gets too long, see the [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim) module.
 
