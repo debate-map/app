@@ -47,7 +47,11 @@ Notes:
 #### Setup for K3d [recommended]
 
 1) Download and install from here: https://k3d.io/#installation
-2) Run: `k3d cluster create main-1` (resulting image will be named `k3d-main-1`)
+2) Create a local registry: `k3d registry create reg.localhost --port 5000`
+3) Create a local cluster: `k3d cluster create main-1 --registry-use k3d-reg.localhost:5000` (resulting image will be named `k3d-main-1`)
+4) Add an entry to your hosts file, to be able to resolve `reg.localhost`:
+4.1) For Windows: Add line `127.0.0.1 k3d-reg.localhost` to `C:\Windows\System32\Drivers\etc\hosts`.
+4.2) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
 
 > To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
 

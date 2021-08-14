@@ -2,10 +2,12 @@
 # ==========
 
 **/*.md
+**/*.d.ts
 **/Dockerfile
 **/template.dockerignore
 **/.dockerignore
 **/Dockerfile.dockerignore
+**/tsconfig.tsbuildinfo
 
 # any node-module overrides (eg. symlinked packages) are now handled at start of final-layer docker-images through "COPY NMOverwrites/ /dm_repo/" command
 node_modules
