@@ -1,0 +1,24 @@
+apiVersion: v1
+data:
+  # converted to base64 using: https://www.base64encode.org
+  # datasources.yaml: |
+  # {
+  #   "apiVersion": 1,
+  #   "datasources": [
+  #     {
+  #       "access": "proxy",
+  #       "editable": true,
+  #       "name": "prometheus",
+  #       "orgId": 1,
+  #       "type": "prometheus",
+  #       "url": "http://prometheus-k8s:9090",
+  #       "version": 1
+  #     }
+  #   ]
+  # }
+  datasources.yaml: ewogICAgICAiYXBpVmVyc2lvbiI6IDEsCiAgICAgICJkYXRhc291cmNlcyI6IFsKICAgICAgICB7CiAgICAgICAgICAiYWNjZXNzIjogInByb3h5IiwKICAgICAgICAgICJlZGl0YWJsZSI6IHRydWUsCiAgICAgICAgICAibmFtZSI6ICJwcm9tZXRoZXVzIiwKICAgICAgICAgICJvcmdJZCI6IDEsCiAgICAgICAgICAidHlwZSI6ICJwcm9tZXRoZXVzIiwKICAgICAgICAgICJ1cmwiOiAiaHR0cDovL3Byb21ldGhldXMtazhzOjkwOTAiLAogICAgICAgICAgInZlcnNpb24iOiAxCiAgICAgICAgfQogICAgICBdCiAgICB9
+kind: Secret
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+type: Opaque

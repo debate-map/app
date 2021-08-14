@@ -1,15 +1,17 @@
-# id
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    prometheus: k8s
   name: prometheus-k8s
   namespace: monitoring
-
-# patches
 spec:
-  type: NodePort
-  ports:
-    - name: web
-      port: 9090
-      targetPort: web
-      nodePort: 32000
+  #ports:
+  #- name: web
+  #  port: 9090
+  #  targetPort: web
+  selector:
+    app: prometheus
+    prometheus: k8s
+  sessionAffinity: ClientIP
+  clusterIP: None
