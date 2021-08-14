@@ -14,7 +14,6 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 1) Install Docker Desktop: https://docs.docker.com/desktop
 2) Install Lens, as a general k8s inspection tool: https://k8slens.dev
 3) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-<!-- 4) Create an alias/copy of the "docker-desktop" k8s context, renaming it to "local". -->
 4) Install Tilt: https://github.com/tilt-dev/tilt
 5) See here for more helpful tools: https://collabnix.github.io/kubetools
 
@@ -65,8 +64,10 @@ Notes:
 
 > To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
 
-Notes:
-* To make future kubectl commands more convenient, it may be worth setting the default namespace with: `kubectl config set-context --current --namespace=dm-pg-operator`
+#### After steps
+
+1) Create an alias/copy of the k8s context you just created, renaming it to "local". (edit `$HOME/.kube/config`)
+2) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=dm-pg-operator`
 
 <!----><a name="local-k8s"></a>
 ### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
@@ -131,7 +132,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 2.1) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)  
 2.2) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
 3) Run the commands needed to integrate the kubeconfig file into your local kube config.
-4) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh".
+4) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (edit `$HOME/.kube/config`)
 5) TODO
 6) Run: `npm start backend.tiltUp_ovh`
 

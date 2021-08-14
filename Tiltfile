@@ -1,6 +1,4 @@
-# this is supposed to let us use the "local" k8s context;
-#		problem is that tilt doesn't recognize it as local, so tries to push images to "local.tilt.dev", which fails;
-#		so just using the base "docker-desktop" context instead, for now
+# allows using tilt to push to the "local" k8s cluster
 #allow_k8s_contexts('local')
 
 # allow using tilt to push to the remote OVHcloud k8s cluster
