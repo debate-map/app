@@ -13,7 +13,8 @@ allow_k8s_contexts('ovh')
 
 #k8s_yaml(kustomize('./Packages/deploy/Monitors/kube-prometheus/overlay'))
 load(
-    'ext://coreos_prometheus',
+    #'ext://coreos_prometheus',
+    'Packages/deploy/Monitors/kube-prometheus/Tiltfile',
     'setup_monitoring',
     'get_prometheus_resources',
     'get_prometheus_dependencies',

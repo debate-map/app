@@ -1,9 +1,0 @@
-{
-  "Extensions": [
-    {
-      "Name": "coreos_prometheus",
-      "ExtensionRegistry": "https://github.com/tilt-dev/tilt-extensions",
-      "TimeFetched": "2021-08-13T23:12:09.9220817-07:00"
-    }
-  ]
-}
