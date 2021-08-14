@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Root\Apps\Global\kompose.exe convert -f docker-compose.yml
+    kompose.version: 1.23.0 (bc7d9f4f)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: grafana
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: grafana
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\Root\Apps\Global\kompose.exe convert -f docker-compose.yml
+        kompose.version: 1.23.0 (bc7d9f4f)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: grafana
+    spec:
+      containers:
+        - env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  key: GF_SECURITY_ADMIN_PASSWORD
+                  name: grafana-config-monitoring
+            - name: GF_USERS_ALLOW_SIGN_UP
+              valueFrom:
+                configMapKeyRef:
+                  key: GF_USERS_ALLOW_SIGN_UP
+                  name: grafana-config-monitoring
+          image: grafana/grafana
+          name: grafana
+          ports:
+            - containerPort: 3000
+          resources: {}
+          securityContext:
+            runAsUser: 104
+      restartPolicy: Always
+status: {}

@@ -38,13 +38,19 @@ Options:
 * Docker Desktop (component)
 
 Notes:
-* Docker Desktop has the advantage of not needing built docker-images to be "loaded" into the cluster; they were built there to begin with. This can save a lot of time, if full builds are slow.
+* Docker Desktop has the advantage of not needing built docker-images to be "loaded" into the cluster; they were built there to begin with. This can save a *lot* of time, if full builds are slow. (for me, the deploy process takes ~3m on K3d, which Docker Desktop cuts out completely)
 * K3d has the fastest deletion and recreation of clusters. (so restarting from scratch frequently is more doable)
 * Docker Desktop seems to be the slowest running; I'd estimate that k3d is ~2x, at least for the parts I saw (eg. startup time).
 * Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
-* Docker Desktop also seems to sometimes gets semi-stuck during building (where it seems to be doing nothing for ~20 or 30 seconds).
+* Docker Desktop also seems to sometimes gets semi-stuck during building (where it seems to be doing nothing for ~20 or 30 seconds); not sure if it's a reliable pattern yet though.
 
-#### Setup for K3d [recommended]
+#### Setup for Docker Desktop (k8s component) [recommended]
+
+1) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+
+> To delete and recreate the cluster, use the settings panel.
+
+#### Setup for K3d
 
 1) Download and install from here: https://k3d.io/#installation
 2) Create a local registry: `k3d registry create reg.localhost --port 5000`
@@ -54,12 +60,6 @@ Notes:
 4.2) For Linux: Add line `127.0.0.1 k3d-reg.localhost` to `/etc/hosts`. (on some Linux distros, this step isn't actually necessary)
 
 > To delete and recreate the cluster: `k3d cluster delete main-1 && k3d cluster create main-1`
-
-#### Setup for Docker Desktop (k8s component)
-
-1) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-
-> To delete and recreate the cluster, use the settings panel.
 
 #### Setup for Kind
 

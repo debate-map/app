@@ -10,19 +10,25 @@ allow_k8s_contexts('ovh')
 # ==========
 
 #k8s_yaml(kustomize('./Packages/deploy/Monitors/kube-prometheus/overlay'))
-load(
+'''load(
     #'ext://coreos_prometheus',
     'Packages/deploy/Monitors/kube-prometheus/Tiltfile',
     'setup_monitoring',
     'get_prometheus_resources',
     'get_prometheus_dependencies',
 )
-setup_monitoring()
+setup_monitoring()'''
 # k8s_resource(
 #     'my-resource',
 #     objects=get_prometheus_resources(my_deployment, 'my-resource'),
 #     resource_deps=get_prometheus_dependencies(),
 # )
+
+load(
+    'Packages/deploy/Monitors/prometheus-pack/Tiltfile',
+    'install'
+)
+install()
 
 # crunchydata postgres operator
 # ==========
