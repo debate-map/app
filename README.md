@@ -63,15 +63,15 @@ Guide modules for ["client" package](https://github.com/debate-map/app/tree/mast
 Guide modules for ["web-server" package](https://github.com/debate-map/app/tree/master/Packages/web-server): (provider of the static html, css, js, etc. files)
 * [web-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/web-server#local-docker)
 
-## Package: server
+## Package: app-server
 
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-Guide modules for ["server" package](https://github.com/debate-map/app/tree/master/Packages/server): (the app-server that runs graphql, the database, etc.)
-* [server/general](https://github.com/debate-map/app/tree/master/Packages/server#general)
-* [server/local-base](https://github.com/debate-map/app/tree/master/Packages/server#local-base)
-* [server/local-docker](https://github.com/debate-map/app/tree/master/Packages/server#local-docker)
-* [server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/server#db-migrate)
+Guide modules for ["app-server" package](https://github.com/debate-map/app/tree/master/Packages/app-server): (the app-server that runs graphql, the database, etc.)
+* [app-server/general](https://github.com/debate-map/app/tree/master/Packages/app-server#general)
+* [app-server/local-base](https://github.com/debate-map/app/tree/master/Packages/app-server#local-base)
+* [app-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/app-server#local-docker)
+* [app-server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/app-server#db-migrate)
 
 ## Package: deploy
 

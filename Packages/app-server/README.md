@@ -18,7 +18,7 @@ Codebase for the [Debate Map](https://debatemap.app) website's app-server. (ie. 
 ## Local
 
 <!----><a name="dev"></a>
-### [server/dev] Get dev-server running for Packages/server
+### [server/dev] Get dev-server running for Packages/app-server
 
 Prerequisite steps: [vscode](https://github.com/debate-map/app#vscode)
 
@@ -50,7 +50,7 @@ max_replication_slots = 10
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
-Note: The docker images produced directly will have the name `dm-server-direct`.
+Note: The docker images produced directly will have the name `dm-app-server-direct`.
 
 1) For direct docker builds, run `npm start server.dockerBuild`.
 

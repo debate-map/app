@@ -3496,9 +3496,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"dm_server@workspace:Packages/server":
+"dm_app-server@workspace:Packages/app-server":
   version: 0.0.0-use.local
-  resolution: "dm_server@workspace:Packages/server"
+  resolution: "dm_app-server@workspace:Packages/app-server"
   dependencies:
     "@graphile-contrib/pg-simplify-inflector": ^6.1.0
     "@graphile/subscriptions-lds": ^4.11.0

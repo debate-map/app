@@ -51,7 +51,7 @@ try {
 	//map[dbname:SOME_STR host:SOME_STR password:SOME_STR port:SOME_STR uri:SOME_STR user:SOME_STR verifier:SOME_STR]
 	const secretsStr = child_process.execSync("kubectl get secrets -n dm-pg-operator debate-map-pguser-admin -o go-template='{{.data}}'").toString();
 	const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
-	// from: Packages/server/deployment.yaml
+	// from: Packages/app-server/deployment.yaml
 	const envMapping = {
 		host: "DB_ADDR",
 		port: "DB_PORT",
@@ -128,7 +128,7 @@ Object.assign(scripts, {
 	},
 	common: {
 		// helps for spotting typescript errors in the "Packages/common" (client.dev script can work too, but it's nice to have one just for errors in "common")
-		// (not really useful anymore; just use server.dev instead)
+		// (not really useful anymore; just use app-server.dev instead)
 		//tsc: "cd Packages/common && tsc --noEmit",
 		tsc: "tsc --noEmit --project Packages/common/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 	},
@@ -140,24 +140,24 @@ Object.assign(scripts, {
 	
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",
-		//dockerBuild: "cross-env DOCKER_BUILDKIT=1 docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
-		dockerBuild: DockerCommand("docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."),
-		//dockerBuild: "xcopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
+		//dockerBuild: "cross-env DOCKER_BUILDKIT=1 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
+		dockerBuild: DockerCommand("docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct ."),
+		//dockerBuild: "xcopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
 		// using robocopy works, but it's not much faster, if at all; seems slowdown is throughout the yarn install process (~3 minutes in docker, ~1s in Windows :/)
-		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
-		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .",
-		//dockerBuild: "robocopy \"node_modules\" \".yarn/test1\" /s /e /NFL /NDL /NJH /NJS /nc /ns /np && docker build -f ./Packages/server/Dockerfile -t dm-server-direct .", // this takes even longer than yarn install...
+		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
+		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
+		//dockerBuild: "robocopy \"node_modules\" \".yarn/test1\" /s /e /NFL /NDL /NJH /NJS /nc /ns /np && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .", // this takes even longer than yarn install...
 		//dockerBuild: "tar -czh . | docker build -",
-		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/server/Dockerfile -t dm-server-direct ."), // variant which preserves complete log (may increase build time)
-		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/server/Dockerfile -t dm-server-direct ."), // with cache disabled
+		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct ."), // variant which preserves complete log (may increase build time)
+		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/app-server/Dockerfile -t dm-app-server-direct ."), // with cache disabled
 		dockerBuild_gitlab: {
 			"base": DockerCommand("docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
-			"server": DockerCommand("docker build -f ./Packages/server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
+			"app-server": DockerCommand("docker build -f ./Packages/app-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
 			"web-server": DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
 		},
 		dockerBuildAndPush_gitlab: {
 			"base": "npm start backend.dockerBuild_gitlab.base && docker push registry.gitlab.com/venryx/debate-map",
-			"server": "npm start backend.dockerBuild_gitlab.server && docker push registry.gitlab.com/venryx/debate-map",
+			"app-server": "npm start backend.dockerBuild_gitlab.app-server && docker push registry.gitlab.com/venryx/debate-map",
 			"web-server": "npm start backend.dockerBuild_gitlab.web-server && docker push registry.gitlab.com/venryx/debate-map",
 		},
 		
@@ -166,17 +166,17 @@ Object.assign(scripts, {
 		tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context docker-desktop"),
 		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context ovh"),
 	},
-	server: {
+	"app-server": {
 		// setup
-		//initDB: "psql -f ./Packages/server/Scripts/InitDB.sql debate-map",
-		//initDB: TSScript("server", "Scripts/InitDB.ts"),
-		initDB: TSScript({pkg: "server"}, "Scripts/KnexWrapper.js", "initDB"),
-		initDB_freshScript: `nps server.buildInitDBScript && nps server.initDB`,
+		//initDB: "psql -f ./Packages/app-server/Scripts/InitDB.sql debate-map",
+		//initDB: TSScript("app-server", "Scripts/InitDB.ts"),
+		initDB: TSScript({pkg: "app-server"}, "Scripts/KnexWrapper.js", "initDB"),
+		initDB_freshScript: `nps app-server.buildInitDBScript && nps app-server.initDB`,
 		// k8s variants
-		initDB_k8s: setk8sEnvVars_commandStr + `nps server.initDB`,
-		initDB_freshScript_k8s: setk8sEnvVars_commandStr + `nps server.initDB_freshScript`,
+		initDB_k8s: setk8sEnvVars_commandStr + `nps app-server.initDB`,
+		initDB_freshScript_k8s: setk8sEnvVars_commandStr + `nps app-server.initDB_freshScript`,
 		k8s_local_proxyOn8081: "kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
-		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
+		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "
 			SELECT pg_terminate_backend(pg_stat_activity.pid)
@@ -188,9 +188,9 @@ Object.assign(scripts, {
 		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
 
 		// first terminal
-		//dev: "cd Packages/server && snowpack build --watch",
-		//dev: "cd Packages/server && tsc --build --watch",
-		dev: "tsc --build --watch Packages/server/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
+		//dev: "cd Packages/app-server && snowpack build --watch",
+		//dev: "cd Packages/app-server && tsc --build --watch",
+		dev: "tsc --build --watch Packages/app-server/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 
 		// second terminal
 		run: GetStartServerCommand(),
@@ -205,7 +205,7 @@ Object.assign(scripts, {
 });
 
 function GetBuildInitDBScriptCommand(watch) {
-	return TSScript({pkg: "server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
+	return TSScript({pkg: "app-server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
 		`--classFolders ../../Packages/common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
 		`--templateFile ./Scripts/InitDB_Template.ts`,
 		`--outFile ./Scripts/InitDB_Generated.ts`,
@@ -216,18 +216,18 @@ function GetBuildInitDBScriptCommand(watch) {
 function GetStartServerCommand() {
 	/*const variantPath = serverVariantPaths[server];
 	return `node ${variantPath}`;*/
-	//return `node ./Packages/server/Build/esm/Source/Main.js`;
-	//return `cd Packages/server && node ./Build/esm/Source/Main.js`;
+	//return `node ./Packages/app-server/Build/esm/Source/Main.js`;
+	//return `cd Packages/app-server && node ./Build/esm/Source/Main.js`;
 
-	//return `cd Packages/server && node ./Dist/Main.js`;
-	//return `cd Packages/server && node --experimental-modules ./Dist/Main.js`;
-	//return `cd Packages/server && node -r esm ./Dist/Main.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
-	//return TSScript("server", "Source/Main.ts");
+	//return `cd Packages/app-server && node ./Dist/Main.js`;
+	//return `cd Packages/app-server && node --experimental-modules ./Dist/Main.js`;
+	//return `cd Packages/app-server && node -r esm ./Dist/Main.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
+	//return TSScript("app-server", "Source/Main.ts");
 
 	// use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
-	//return TSScript({pkg: "server", envStrAdd: "DEV=true"}, "Dist/Main.js");
-	//return `cd Packages/server && node --experimental-modules --experimental-specifier-resolution=node ./Dist/Main.js`;
-	return `cd Packages/server && node --experimental-specifier-resolution=node ./Dist/Main.js`;
+	//return TSScript({pkg: "app-server", envStrAdd: "DEV=true"}, "Dist/Main.js");
+	//return `cd Packages/app-server && node --experimental-modules --experimental-specifier-resolution=node ./Dist/Main.js`;
+	return `cd Packages/app-server && node --experimental-specifier-resolution=node ./Dist/Main.js`;
 }
 
 function DockerCommand(commandStr) {

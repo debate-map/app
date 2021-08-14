@@ -27,7 +27,7 @@ module.exports = {
 		//watch: true,
 		watch: "**", // watch:true doesn't work fsr (it ignores node_modules)
 		/*watch: [
-			"Packages/server",
+			"Packages/app-server",
 			...nodeModuleWatchPaths,
 		],*/
 		ignore: null,

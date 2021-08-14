@@ -1,6 +1,6 @@
 # Debate Map (Deploy)
 
-This subrepo/package is for deployment-related configuration and scripts. (other than the generation of the Docker image file, which is currently handled by the "server" package)
+This subrepo/package is for deployment-related configuration and scripts. (other than the generation of the Docker image file, which is currently handled by the "app-server" package)
 
 ## Guide modules
 
@@ -133,7 +133,7 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 <!----><a name="k8s-view-locals"></a>
 ### [k8s-view-locals] How to view local files of server/web-server/etc. pods
 
-1) Run (replacing `app=dm-server` with the base name of the pod you want): `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l app=dm-server) -- bash`
+1) Run (replacing `app=dm-app-server` with the base name of the pod you want): `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l app=dm-app-server) -- bash`
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth

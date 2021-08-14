@@ -38,7 +38,7 @@ templateBase.dockerignore
 
 Packages/client/Source
 Packages/common/Source
-Packages/server/Source
+Packages/app-server/Source
 Packages/web-server/Source
 
 # ===========================================================================

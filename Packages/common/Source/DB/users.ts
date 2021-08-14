@@ -14,7 +14,7 @@ export const MeID = CreateAccessor(function(): string|n {
 	// return State(a=>a.firebase.auth) ? State(a=>a.firebase.auth.uid) : null;
 	//return IsAuthValid(GetAuth()) ? GetAuth().id : null;
 	/*if (DMCommon_InServer()) return systemUserID;
-	return GetCookie("debate-map-userid"); // set by dm_server's AuthHandling.ts*/
+	return GetCookie("debate-map-userid"); // set by dm_app-server's AuthHandling.ts*/
 	return this!.graph.userInfo?.id;
 });
 export const Me = CreateAccessor(()=>{

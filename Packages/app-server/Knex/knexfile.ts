@@ -26,7 +26,7 @@ export default {
 		migrations: {
 			schemaName: "public",
 			tableName: "knex_migrations",
-			//directory: "./Knex/Migrations", // paths are relative to "Packages/server"
+			//directory: "./Knex/Migrations", // paths are relative to "Packages/app-server"
 			directory: `${__dirname}/Migrations`,
 		},
 		seeds: {

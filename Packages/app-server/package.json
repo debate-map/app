@@ -1,5 +1,5 @@
 {
-	"name": "dm_server",
+	"name": "dm_app-server",
 	"version": "0.0.1",
 	"type": "module",
 	"private": true,

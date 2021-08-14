@@ -71,74 +71,74 @@
 
 		// server
 		{
-			"label": "#1 server.dev",
+			"label": "#1 app-server.dev",
 			"type": "shell",
-			"command": "npm start server.dev",
+			"command": "npm start app-server.dev",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
 		},
 		{
-			"label": "#2 server.buildInitDBScript_watch",
+			"label": "#2 app-server.buildInitDBScript_watch",
 			"type": "shell",
-			"command": "npm start server.buildInitDBScript_watch",
+			"command": "npm start app-server.buildInitDBScript_watch",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
-			"label": "#3 server.run",
+			"label": "#3 app-server.run",
 			"type": "shell",
-			"command": "npm start server.run",
+			"command": "npm start app-server.run",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
-			"label": "## server.initDB_freshScript",
+			"label": "## app-server.initDB_freshScript",
 			"type": "shell",
-			"command": "npm start server.initDB_freshScript",
+			"command": "npm start app-server.initDB_freshScript",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
-			"label": "## server.dcAllDBSessions",
+			"label": "## app-server.dcAllDBSessions",
 			"type": "shell",
-			"command": "npm start server.dcAllDBSessions",
+			"command": "npm start app-server.dcAllDBSessions",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
 		},
 		/*{
-			"label": "## server.dockerBuild",
+			"label": "## app-server.dockerBuild",
 			"type": "shell",
-			"command": "npm start server.dockerBuild",
+			"command": "npm start app-server.dockerBuild",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
 		},
 		{
-			"label": "## server.dockerBuild_fullLog",
+			"label": "## app-server.dockerBuild_fullLog",
 			"type": "shell",
-			"command": "npm start server.dockerBuild_fullLog",
+			"command": "npm start app-server.dockerBuild_fullLog",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
 		},
 		{
-			"label": "## server.dockerBuild_ignoreCache",
+			"label": "## app-server.dockerBuild_ignoreCache",
 			"type": "shell",
-			"command": "npm start server.dockerBuild_ignoreCache",
+			"command": "npm start app-server.dockerBuild_ignoreCache",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
 		},*/
 	
 		/*{
-			"label": "## server.k8s_local_proxyOn8081",
+			"label": "## app-server.k8s_local_proxyOn8081",
 			"type": "shell",
-			"command": "npm start server.k8s_local_proxyOn8081",
+			"command": "npm start app-server.k8s_local_proxyOn8081",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
