@@ -15,14 +15,17 @@ k8s_yaml('./Packages/web-server/deployment.yaml')
 
 #k8s_yaml('./Packages/deploy/Monitors/kube-prometheus/manifests/setup/prometheus-operator-0probeCustomResourceDefinition.yaml')
 
-def k8s_yaml_folder(folderPath):
+'''def k8s_yaml_folder(folderPath):
 	fileNames = str(local(['powershell', '-c', 'Get-ChildItem ' + folderPath + ' -file | Select -exp Name'])).strip().replace('\r', '').split("\n")
 	for fileName in fileNames:
 		k8s_yaml(folderPath + '/' + fileName)
 
-#k8s_yaml_folder('./Packages/deploy/Monitors/kube-prometheus/manifests/setup');
+k8s_yaml_folder('./Packages/deploy/Monitors/kube-prometheus/manifests/setup');
 #local('wsl until kubectl get servicemonitors --all-namespaces ; do date; sleep 1; echo ""; done')
-#k8s_yaml_folder('./Packages/deploy/Monitors/kube-prometheus/manifests');
+# for now, comment out the line below until everything shows green in tilt; then uncomment it, and `tilt up` again
+k8s_yaml_folder('./Packages/deploy/Monitors/kube-prometheus/manifests');'''
+
+k8s_yaml(kustomize('./Packages/deploy/Monitors/kube-prometheus/overlay'))
 
 nmWatchPathsStr = local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"])
 nmWatchPaths = str(nmWatchPathsStr).strip().split(",")

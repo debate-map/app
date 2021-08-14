@@ -1,0 +1,15 @@
+# id
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+
+# patches
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+    nodePort: 32001
