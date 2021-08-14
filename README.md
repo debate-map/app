@@ -84,6 +84,7 @@ Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/mast
 * [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim)
 * [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote)
 * [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
+* [deploy/k8s-monitors](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-monitors)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
 * [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)
 * [deploy/k8s-view-locals](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-locals)

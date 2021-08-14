@@ -93,6 +93,8 @@ pgPool.on("connect", client=>{
 app.get("/health-check", async(req, res)=>{
 	console.log("Starting health-check.");
 	try {
+		Assert(pgClient != null, "No pgClient has been initialized/connected yet.");
+		
 		const usersCount = await pgClient.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
 		Assert(usersCount.rowCount >= 1, "Could not find any users in database. (at least the system user should exist)");
 		console.log("Health-check: Passed 1");

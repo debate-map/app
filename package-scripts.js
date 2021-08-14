@@ -44,37 +44,6 @@ const memLimit = 8192; // in megabytes
 const scripts = {};
 module.exports.scripts = scripts;
 
-let setk8sEnvVars_commandStr;
-try {
-	const child_process = require("child_process");
-	// secretsStr is a text string like the below (except with SOME_STR being the value in base64)
-	//map[dbname:SOME_STR host:SOME_STR password:SOME_STR port:SOME_STR uri:SOME_STR user:SOME_STR verifier:SOME_STR]
-	const secretsStr = child_process.execSync("kubectl get secrets -n dm-pg-operator debate-map-pguser-admin -o go-template='{{.data}}'").toString();
-	const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
-	// from: Packages/app-server/deployment.yaml
-	const envMapping = {
-		host: "DB_ADDR",
-		port: "DB_PORT",
-		dbname: "DB_DATABASE",
-		user: "DB_USER",
-		password: "DB_PASSWORD",
-	};
-	const fromBase64 = str=>Buffer.from(str, "base64");
-	setk8sEnvVars_commandStr = `cross-env ${keyValuePairs.map(pair=>{
-		let key = pair[0];
-		let endKey = envMapping[pair[0]];
-		let val = fromBase64(pair[1]);
-		if (key == "host") val = "localhost";
-		//if (key == "port") val = "8081";
-		if (key == "port") val = "3205";
-		return `${endKey}="${val}"`;
-	}).join(" ")} NODE_TLS_REJECT_UNAUTHORIZED='0' `; // tls change needed atm, till I figure out how to copy over signing data
-	console.log("CommandStr345:", setk8sEnvVars_commandStr);
-} catch (ex) {
-	// ignore error; can be just when k8s hasn't been set up yet
-	setk8sEnvVars_commandStr = `[command-prep error: ${ex}]`
-}
-
 function GetServeCommand(nodeEnv = null) {
 	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "npm start client.dev.part2"`;
 }
@@ -84,9 +53,18 @@ const group1 = `--from ${nmWatchPaths_notUnderWVC.map(a=>`"${a}"`).join(" ")} --
 const group2 = `--from-2 ${nmWatchPaths_underWVC.map(a=>`"${a.replace("node_modules/web-vcore/", "")}"`).join(" ")} --to-2 NMOverwrites`;*/
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 
+const pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
+	let path = `./node_modules/.bin/${binaryName}`;
+	for (let i = 0; i < depth; i++) {
+		path = "../" + path;
+	}
+	if (normalize) path = paths.normalize(path);
+	if (abs) path = paths.resolve(path);
+	return path;
+};
 Object.assign(scripts, {
 	client: {
-		tsc: `cd Packages/client && ${paths.normalize("../../node_modules/.bin/tsc")} --build --watch`,
+		tsc: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		dev: {
 			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit} --experimental-modules" "npm start dev-part2"`,
 			default: GetServeCommand("development"),
@@ -173,8 +151,8 @@ Object.assign(scripts, {
 		initDB: TSScript({pkg: "app-server"}, "Scripts/KnexWrapper.js", "initDB"),
 		initDB_freshScript: `nps app-server.buildInitDBScript && nps app-server.initDB`,
 		// k8s variants
-		initDB_k8s: setk8sEnvVars_commandStr + `nps app-server.initDB`,
-		initDB_freshScript_k8s: setk8sEnvVars_commandStr + `nps app-server.initDB_freshScript`,
+		initDB_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`,
+		initDB_freshScript_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`,
 		k8s_local_proxyOn8081: "kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
