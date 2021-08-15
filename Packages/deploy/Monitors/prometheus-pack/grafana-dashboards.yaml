@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  #namespace: monitoring
+data:
+  dashboards.yaml: |-
+    {
+        "apiVersion": 1,
+        "providers": [
+            {
+                "folder": "Default",
+                "name": "0",
+                "options": {
+                    "path": "/etc/grafana/provisioning/dashboards/list/node-exporter-full.json"
+                },
+                "orgId": 1,
+                "type": "file"
+            }
+        ]
+    }

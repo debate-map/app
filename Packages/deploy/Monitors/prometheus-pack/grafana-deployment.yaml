@@ -23,6 +23,8 @@ spec:
       labels:
         io.kompose.service: grafana
     spec:
+
+
       containers:
         - env:
             - name: GF_SECURITY_ADMIN_PASSWORD
@@ -39,8 +41,47 @@ spec:
           name: grafana
           ports:
             - containerPort: 3000
+
+              # v-added
+              #nodePort: 32101
+          #type: NodePort
+            
           resources: {}
           securityContext:
             runAsUser: 104
+
+          # v-added
+          volumeMounts:
+          # - mountPath: /var/lib/grafana
+          #   name: grafana-storage
+          #   readOnly: false
+          - mountPath: /etc/grafana/provisioning/datasources
+            name: grafana-datasources
+            readOnly: false
+          - mountPath: /etc/grafana/provisioning/dashboards
+            name: grafana-dashboards
+            readOnly: false
+          - mountPath: /etc/grafana/provisioning/dashboards/list
+            name: grafana-dashboard-node-exporter-full
+            readOnly: false
+
       restartPolicy: Always
+
+
+      # v-added
+      volumes:
+      #- emptyDir: {}
+      #  name: grafana-storage
+      - name: grafana-datasources
+        #secret:
+        #  secretName: grafana-datasources
+        configMap:
+          name: grafana-datasources
+      - name: grafana-dashboards
+        configMap:
+          name: grafana-dashboards
+      - name: grafana-dashboard-node-exporter-full
+        configMap:
+          name: grafana-dashboard-node-exporter-full
+
 status: {}

@@ -146,12 +146,15 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 ### [k8s-monitors] Various commands/info on monitoring system (prometheus, etc.)
 
 * To open a bash shell in the main prometheus pod: `kubectl exec -it prometheus-k8s-[0/1] -n monitoring -- sh` (or just use Lens)
-<!-- * To view the Grafana monitor webpage, open: `localhost:32001` -->
-* To view the Grafana monitor webpage, open the k8s cluster in Lens, find the "grafana" service, then click it's "Connection->Ports" link.
+* To view the Grafana monitor webpage, open: `localhost:31000`
 	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
-<!-- * To view the Prometheus monitor webpage, open (not currently working): `localhost:32002` -->
-* To view the Prometheus monitor webpage, open the k8s cluster in Lens, find the "prometheus-operated" service, then click it's "Connection->Ports" link.
+	>
+	> The Grafana instance has been preconfigured with some useful dashboards, which can be accessed through: Dashboards (in sidebar) -> Manage -> Default -> [dashboard name]. You can import additional plugins/dashboards from the Grafana [plugin library](https://grafana.com/grafana/plugins) and [dashboard library](https://grafana.com/grafana/dashboards).
+<!-- * To view the Prometheus monitor webpage, open (not currently working): `localhost:31002` -->
+* To view the Prometheus monitor webpage, open the k8s cluster in Lens, find the `prometheus` service, then click it's "Connection->Ports" link.
 	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
+<!-- * To view the cAdvisor monitor webpage, open (not currently working): `localhost:31001` -->
+* To view the cAdvisor monitor webpage, open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
 
 <!----><a name="k8s-psql"></a>
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql

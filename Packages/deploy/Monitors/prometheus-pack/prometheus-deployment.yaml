@@ -55,6 +55,9 @@ status: {}
 # v-added
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vfiles-configmap
 data:
   Config.yaml: |
     # my global config
@@ -118,6 +121,3 @@ data:
 
         static_configs:
         - targets: ['10.0.75.1:7071']
-kind: ConfigMap
-metadata:
-  name: vfiles-configmap
