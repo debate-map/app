@@ -73,7 +73,7 @@ Notes:
 1) Create an alias/copy of the k8s context you just created, renaming it to "local". (edit `$HOME/.kube/config`)
 2) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=dm-pg-operator`
 
-<!----><a name="local-k8s"></a>
+<!----><a name="k8s-local"></a>
 ### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
