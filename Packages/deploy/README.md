@@ -32,6 +32,8 @@ Tools:
 <!----><a name="setup-k8s"></a>
 ### [setup-k8s] Setting up local k8s cluster
 
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
 Options:
 * K3d
 * Kind
@@ -76,12 +78,12 @@ Notes:
 <!----><a name="k8s-local"></a>
 ### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
 
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
 
-* 1\) Run (in repo root): `tilt up`
+* 1\) Run (in repo root): `npm start backend.tiltUp_local`
 * 2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
-	* 2.1\) `tilt up` can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/postgres` runs before `deploy/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
-	* 2.2\) `tilt up` can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `tilt up`. More info: https://stackoverflow.com/a/68779828
+	* 2.1\) Tilt-up can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/postgres` runs before `deploy/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
+	* 2.2\) Tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `tilt up`. More info: https://stackoverflow.com/a/68779828
 * 3\) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
 
 Notes:
@@ -139,6 +141,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 * 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (edit `$HOME/.kube/config`)
 * 5\) TODO
 * 6\) Run: `npm start backend.tiltUp_ovh`
+* 7\) [temp] Run the init-db script: `npm start app-server.initDB_freshScript_k8s`
 
 ## Shared
 

@@ -103,6 +103,14 @@
 			"group": "build"
 		},
 		{
+			"label": "## app-server.initDB_freshScript_k8s",
+			"type": "shell",
+			"command": "npm start app-server.initDB_freshScript_k8s",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
 			"label": "## app-server.dcAllDBSessions",
 			"type": "shell",
 			"command": "npm start app-server.dcAllDBSessions",
