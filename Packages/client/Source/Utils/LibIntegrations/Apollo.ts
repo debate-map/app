@@ -10,13 +10,13 @@ import {graph} from "./MobXGraphlink";
 export function GetWebServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
 	if (location.host == "localhost:3005") return subpath;
-	if (location.host == "localhost:31005") return subpath;
+	if (location.host == "localhost:31005") return subpath; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
 	return `https://debatemap.app/${subpath.slice(1)}`;
 }
 export function GetDBServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
 	if (location.host == "localhost:3005") return `http://localhost:3105/${subpath.slice(1)}`;
-	if (location.host == "localhost:31005") return `http://localhost:31105/${subpath.slice(1)}`;
+	if (location.host == "localhost:31005") return `http://localhost:31105/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
 	return `https://db.debatemap.app/${subpath.slice(1)}`;
 }
 
