@@ -4,7 +4,7 @@ metadata:
   name: grafana-dashboard-node-exporter-full
   #namespace: monitoring
 data:
-  node-exporter-full.json: |-
+  data.json: |-
     {
       "__inputs": [
         {

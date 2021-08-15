@@ -61,8 +61,11 @@ spec:
           - mountPath: /etc/grafana/provisioning/dashboards
             name: grafana-dashboards
             readOnly: false
-          - mountPath: /etc/grafana/provisioning/dashboards/list
+          - mountPath: /etc/grafana/provisioning/dashboards/node-exporter-full
             name: grafana-dashboard-node-exporter-full
+            readOnly: false
+          - mountPath: /etc/grafana/provisioning/dashboards/kubernetes-cluster
+            name: grafana-dashboard-kubernetes-cluster
             readOnly: false
 
       restartPolicy: Always
@@ -83,5 +86,8 @@ spec:
       - name: grafana-dashboard-node-exporter-full
         configMap:
           name: grafana-dashboard-node-exporter-full
+      - name: grafana-dashboard-kubernetes-cluster
+        configMap:
+          name: grafana-dashboard-kubernetes-cluster
 
 status: {}
