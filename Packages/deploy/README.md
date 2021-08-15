@@ -78,11 +78,11 @@ Notes:
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
-1) Run (in repo root): `tilt up`
-2) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
-2.1) `tilt up` can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/postgres` runs before `deploy/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
-2.2) `tilt up` can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `tilt up`. More info: https://stackoverflow.com/a/68779828
-3) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
+* 1\) Run (in repo root): `tilt up`
+* 2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+	* 2.1) `tilt up` can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/postgres` runs before `deploy/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
+	* 2.2) `tilt up` can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `tilt up`. More info: https://stackoverflow.com/a/68779828
+* 3\) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
 
 Notes:
 * If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
