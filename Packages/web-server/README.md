@@ -15,7 +15,7 @@ Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/m
 
 Note: The docker images produced directly will have the name `dm-web-server-direct`.
 
-1) For direct docker builds, run `npm start server.dockerBuild`.
+* 1\) For direct docker builds, run `npm start server.dockerBuild`.
 
 ## Deployment
 

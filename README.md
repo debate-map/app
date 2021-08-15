@@ -32,10 +32,10 @@ For more information, visit the website at: <https://debatemap.app>
 <!----><a name="setup-general"></a>
 ### [setup-general] General repo setup
 
-1) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
-2) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
-3) Install this repo's dependencies by running: `yarn install`
-4) [temp] Fix the typing issue in recharts `node_modules/recharts/types/polar/Radar.d.ts`, replacing the `<P, T>` sections with `<any, any>`.
+* 1\) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
+* 2\) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
+* 3\) Install this repo's dependencies by running: `yarn install`
+* 4\) [temp] Fix the typing issue in recharts `node_modules/recharts/types/polar/Radar.d.ts`, replacing the `<P, T>` sections with `<any, any>`.
 
 <!----><a name="vscode"></a>
 ### [vscode] VSCode window setup
@@ -43,8 +43,8 @@ For more information, visit the website at: <https://debatemap.app>
 Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-general)
 
 It's recommended to split your dev setup into two vscode windows:
-1) Window #1 in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/common` is also fine)
-2) Window #2 in the repo root, for everything else. (server development, deployment, etc.)
+* 1\) Window #1 in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/common` is also fine)
+* 2\) Window #2 in the repo root, for everything else. (server development, deployment, etc.)
 
 Reasons:
 * About half of the development work is done in `Packages/client`, since it is the "driver" of most changes/functionality. And having the workload split between the two windows (by "area of concern"), helps maintain tab-count sanity, and clarity of where a given file/tab should be located.
