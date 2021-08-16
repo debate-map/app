@@ -96,7 +96,7 @@ k8s_resource('dm-web-server',
 	port_forwards='3005')
 k8s_resource('dm-app-server', 
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
-	#port_forwards='3105:31105')
+	#port_forwards='3105:31006')
 	port_forwards='3105')
 
 # prometheus monitoring tool; open localhost:9090 in browser to view

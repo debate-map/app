@@ -18,7 +18,7 @@ export function GetWebServerURL(subpath: string) {
 export function GetDBServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
 	if (process.env.DEV != null && !inK8s) return `http://localhost:3105/${subpath.slice(1)}`;
-	//if (process.env.DEV != null && inK8s) return `http://localhost:31105/${subpath.slice(1)}`;
+	//if (process.env.DEV != null && inK8s) return `http://localhost:31006/${subpath.slice(1)}`;
 	if (process.env.DEV != null && inK8s) return `http://localhost:3105/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
 	return `https://db.debatemap.app/${subpath.slice(1)}`;
 }

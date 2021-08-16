@@ -168,7 +168,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
 		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote))
-		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
+		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace dm-pg-operator generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
 	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
 * 6\) Run: `npm start backend.tiltUp_ovh`
 * 7\) Verify that the program has been deployed correctly, by visiting TODO.
@@ -247,7 +247,7 @@ Authorized JavaScript Origins:
 
 Authorized redirect URIs:
 * http://localhost:3105/auth/google/callback
-* http://localhost:31105/auth/google/callback
+* http://localhost:31006/auth/google/callback
 * http://[::1]:3105/auth/google/callback
-* http://[::1]:31105/auth/google/callback
+* http://[::1]:31006/auth/google/callback
 ```

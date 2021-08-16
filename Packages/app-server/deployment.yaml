@@ -14,7 +14,7 @@ spec:
   ports:
     - port: 3105
       targetPort: 3105
-      nodePort: 31105
+      nodePort: 31006
       protocol: TCP
 ---
 apiVersion: apps/v1
