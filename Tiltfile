@@ -49,12 +49,21 @@ k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
 k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
 
 #k8s_resource('debate-map-primary', port_forwards='5432:5432') # db
-#k8s_resource('pgo', port_forwards='3205:5432') # db
-k8s_resource('pgo',
+k8s_resource(new_name="database",
+	objects=["debate-map:PostgresCluster:postgres-operator"],
+	#objects=["postgres-operator:ClusterRole:default"],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
-	},
+	}
+) # db
+
+#k8s_resource('pgo', port_forwards='3205:5432') # db
+k8s_resource('pgo',
+	# extra_pod_selectors={
+	# 	"postgres-operator.crunchydata.com/cluster": "debate-map",
+	# 	"postgres-operator.crunchydata.com/role": "master"
+	# },
 	port_forwards='3205:5432') # db#k8s_yaml(kustomize('./Packages/deploy/postgres'))
 
 # own app
