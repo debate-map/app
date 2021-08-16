@@ -34,6 +34,8 @@ spec:
       labels:
         app: dm-app-server
     spec:
+      imagePullSecrets:
+        - name: registry-credentials
       containers:
       - name: dm-app-server
         image: gcr.io/debate-map-prod/dm-app-server

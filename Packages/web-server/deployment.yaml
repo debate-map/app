@@ -34,7 +34,9 @@ spec:
       labels:
         app: dm-web-server
     spec:
+      imagePullSecrets:
+        - name: registry-credentials
       containers:
-      - name: dm-web-server
-        image: gcr.io/debate-map-prod/dm-web-server
-        #livenessProbe: TODO
+        - name: dm-web-server
+          image: gcr.io/debate-map-prod/dm-web-server
+          #livenessProbe: TODO

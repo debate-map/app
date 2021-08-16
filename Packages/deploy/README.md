@@ -164,10 +164,16 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 2.2\) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
 * 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (edit `$HOME/.kube/config`)
-* 5\) Run: `npm start backend.tiltUp_ovh`
-* 6\) Verify that the program has been deployed correctly, by visiting TODO.
-* 7\) If you haven't yet, initialize the DB by running: `npm start app-server.initDB_freshScript_k8s`
-* 8\) You should now be able to visit the website at TODO, and sign in. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
+* 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
+	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
+		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
+		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote))
+		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
+	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
+* 6\) Run: `npm start backend.tiltUp_ovh`
+* 7\) Verify that the program has been deployed correctly, by visiting TODO.
+* 8\) If you haven't yet, initialize the DB by running: `npm start app-server.initDB_freshScript_k8s`
+* 9\) You should now be able to visit the website at TODO, and sign in. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 ## Shared
 
