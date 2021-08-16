@@ -123,29 +123,33 @@ Note: We use GCP's container-registry service here, but others could be used.
 * 1\) Ensure you have a user-account on Google Cloud Platform: https://cloud.google.com/
 * 2\) Install the Google Cloud SDK: https://cloud.google.com/sdk/docs/install
 * 3\) Authenticate the gcloud sdk/cli by providing it with the key-file for a service-account with access to the image-registry you want to deploy to.
-* 3.1\) For the main image-registry, you'll need to be supplied with the service-account key-file. (contact Venryx)
-* 3.2\) If you're creating your own fork/deployment, you'll need to:
-* 3.2.1\) Create a GCP project.
-* 3.2.2\) Enable the Container Registry API for your GCP project: https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
-* 3.2.3\) Create a service-account: (it's possible a user account could also be granted access directly, but service-accounts are recommended anyway)
-* 3.2.3.1\) Go to: https://console.cloud.google.com/iam-admin/serviceaccounts/create
-* 3.2.3.2\) Choose a service-account name, and add the role "Container Registry Service Agent" and "Storage Admin" (*not* the weaker "Storage Object Admin").
-* 3.2.3.3\) In the "Service account admins role" box, enter your email.
-* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
-* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts (Of course, keep this file secure.)
-* 3.3\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=PATH_TO_KEY_FILE`
-* 3.4\) Add the service-account to your Docker authentication, in a similar way: `Get-Content PATH_TO_KEY_FILE | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+	* 3.1\) For the main image-registry, you'll need to be supplied with the service-account key-file. (contact Venryx)
+	* 3.2\) If you're creating your own fork/deployment, you'll need to:
+		* 3.2.1\) Create a GCP project.
+		* 3.2.2\) Enable the Container Registry API for your GCP project: https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
+		* 3.2.3\) Create a service-account: (it's possible a user account could also be granted access directly, but service-accounts are recommended anyway)
+			* 3.2.3.1\) Go to: https://console.cloud.google.com/iam-admin/serviceaccounts/create
+			* 3.2.3.2\) Choose a service-account name, and add the role "Container Registry Service Agent" and "Storage Admin" (*not* the weaker "Storage Object Admin").
+			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
+			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
+			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts (Of course, keep this file secure.)
+	* 3.3\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=PATH_TO_KEY_FILE`
+	* 3.4\) Add the service-account to your Docker authentication, in a similar way: `Get-Content PATH_TO_KEY_FILE | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
 * 4\) Install the Pulumi cli: `https://www.pulumi.com/docs/get-started/install`
 * 5\) Ensure your local Docker images are up-to-date. (usually just keep `npm start tiltUp_local` running in the background)
 * 6\) Ensure that a Pulumi project is set up, to hold the Pulumi deployment "stack".
-* 6.1\) Collaborators on the main release can contact Stephen (aka Venryx) to be added as project members (you can view it online [here](https://app.pulumi.com/Venryx/debate-map) if you have access).
-* 6.2\) If you're creating your own fork/deployment:
-* 6.2.1\) Create a new Pulumi project [here](https://app.pulumi.com). Make sure your project is named `debate-map`, so that it matches the name in `Pulumi.yaml`.
-* 6.2.2\) Open `Tiltfile` (in repo root), and change the path `gcr.io/debate-map-prod/dm_shared-base` to match where you'll be uploading the shared-base docker-image. (also, update the dependency name in `Packages/XXX/Dockerfile`, for each package that you'll be deploying)
+	* 6.1\) Collaborators on the main release can contact Stephen (aka Venryx) to be added as project members (you can view it online [here](https://app.pulumi.com/Venryx/debate-map) if you have access).
+	* 6.2\) If you're creating your own fork/deployment:
+		* 6.2.1\) Create a new Pulumi project [here](https://app.pulumi.com). Make sure your project is named `debate-map`, so that it matches the name in `Pulumi.yaml`.
+		* 6.2.2\) Open `Tiltfile` (in repo root), and change the path `gcr.io/debate-map-prod/dm_shared-base` to match where you'll be uploading the shared-base docker-image. (also, update the dependency name in `Packages/XXX/Dockerfile`, for each package that you'll be deploying)
 * 7\) Run: `npm start pulumiUp` (`pulumi up` also works, *if* the last result of `npm start backend.dockerPrep` is up-to-date)
 * 8\) Select the stack you want to deploy to. (for now, we always deploy to `prod`)
 * 9\) Review the changes it prepared, then proceed with "yes".
 * 10\) After a couple minutes, the build should complete. The docker-image is now accessible in the cloud at the URL shown at the bottom of the output.
+* 11\) Sounds slow? Well:
+	* Much of that is one-time setup of accounts and such.
+	* What about the slowness of the builds? Future ones are faster, due to layer caching.
+	* What about the interruption of switching between Tilt and Pulumi? You don't have to! Tilt apparently is able to push to the GCP registry as well, once you have the steps above done once.
 
 <!----><a name="k8s-remote"></a>
 ### [k8s-remote] Remote web+app server, using docker + kubernetes
@@ -160,9 +164,10 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 2.2\) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
 * 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (edit `$HOME/.kube/config`)
-* 5\) TODO
-* 6\) Run: `npm start backend.tiltUp_ovh`
-* 7\) [temp] Run the init-db script: `npm start app-server.initDB_freshScript_k8s`
+* 5\) Run: `npm start backend.tiltUp_ovh`
+* 6\) Verify that the program has been deployed correctly, by visiting TODO.
+* 7\) If you haven't yet, initialize the DB by running: `npm start app-server.initDB_freshScript_k8s`
+* 8\) You should now be able to visit the website at TODO, and sign in. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 ## Shared
 

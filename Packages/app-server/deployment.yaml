@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: dm-app-server
-        image: local.tilt.dev/dm-app-server
+        image: gcr.io/debate-map-prod/dm-app-server
         livenessProbe:
           httpGet:
             path: /health-check
