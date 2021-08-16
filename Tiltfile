@@ -9,13 +9,13 @@ allow_k8s_contexts('ovh')
 # extensions
 # ==========
 
-'''load('ext://helm_remote', 'helm_remote')
+load('ext://helm_remote', 'helm_remote')
 helm_remote('reflector',
 	#repo_name='stable',
 	#repo_url='https://charts.helm.sh/stable',
 	repo_url='https://emberstack.github.io/helm-charts',
 	version='5.4.17'
-)'''
+)
 
 # prometheus
 # ==========
@@ -46,6 +46,7 @@ install()
 
 k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
 k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
+k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
 
 #k8s_resource('debate-map-primary', port_forwards='5432:5432') # db
 #k8s_resource('pgo', port_forwards='3205:5432') # db

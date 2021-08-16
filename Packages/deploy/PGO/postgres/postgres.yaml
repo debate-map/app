@@ -3,7 +3,7 @@ kind: PostgresCluster
 metadata:
   name: debate-map
 spec:
-  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.3-1
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.3-1pguser
   postgresVersion: 13
   instances:
     - name: instance1
@@ -42,3 +42,10 @@ spec:
       databases:
         - debate-map
       options: "SUPERUSER"
+  metadata:
+    annotations:
+      # make-so the user-secret can be mirrored to the "app" namespace (see user-secret-mirror.yaml for the annotation on the "pulling" end)
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "app"
+      #reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      #reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "app"
