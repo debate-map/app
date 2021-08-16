@@ -34,7 +34,7 @@ let link_withErrorHandling: ApolloLink;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 export function InitApollo(serverLaunchID: string) {
-	console.log("Connecting server's Apollo client to:", GRAPHQL_URL);
+	console.log("Connecting app-server's Apollo client to:", GRAPHQL_URL);
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
 	});

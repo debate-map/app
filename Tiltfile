@@ -33,8 +33,8 @@ install()
 # crunchydata postgres operator
 # ==========
 
-k8s_yaml(kustomize('./Packages/deploy/install'))
-k8s_yaml(kustomize('./Packages/deploy/postgres'))
+k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
+k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
 
 #k8s_resource('debate-map-primary', port_forwards='5432:5432') # db
 #k8s_resource('pgo', port_forwards='3205:5432') # db
