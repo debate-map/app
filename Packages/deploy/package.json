@@ -3,8 +3,17 @@
 	"version": "0.0.1",
 	"type": "module",
 	"private": true,
+	"main": "./Pulumi/index.ts",
 	"scripts": {
 		"start": "cd ../.. && npx nps",
 		"preinstall": "npx only-allow yarn"
+	},
+	"devDependencies": {
+		"@types/node": "^10.0.0"
+	},
+	"dependencies": {
+		"@pulumi/docker": "^3.0.0",
+		"@pulumi/gcp": "^5.0.0",
+		"@pulumi/pulumi": "^3.0.0"
 	}
 }

@@ -1,5 +1,6 @@
 # source: Packages/deploy/@DockerBase/Dockerfile
-FROM local.tilt.dev/dm-repo-shared-base
+#FROM local.tilt.dev/dm-repo-shared-base
+FROM gcr.io/debate-map-prod/dm-shared-base
 
 COPY NMOverwrites/ /dm_repo/
 

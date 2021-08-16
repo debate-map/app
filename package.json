@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "author": "Venryx (https://venryx.com)",
   "private": true,
+  "main": "./Packages/deploy/Pulumi/index.ts",
   "workspaces": [
     "Packages/client",
     "Packages/common",

@@ -53,6 +53,14 @@
 			"group": "build"
 		},
 		{
+			"label": "## backend.pulumiUp",
+			"type": "shell",
+			"command": "npm start backend.pulumiUp",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},
+		{
 			"label": "## backend.tiltUp_local",
 			"type": "shell",
 			"command": "npm start backend.tiltUp_local",

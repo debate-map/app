@@ -65,7 +65,9 @@ nmWatchPaths = str(nmWatchPathsStr).strip().split(",")
 local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
 
 # this is the base dockerfile used for all the subsequent ones
-docker_build('local.tilt.dev/dm-repo-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
+#docker_build('local.tilt.dev/dm-repo-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
+# use gcr... as the name, so that when we're doing an actual deploy, the name of this dependency (in the images below, eg. dm-web-server) does not need changing
+docker_build('gcr.io/debate-map-prod/dm-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
 
 docker_build('local.tilt.dev/dm-web-server', '.', dockerfile='Packages/web-server/Dockerfile',
 	# this lets Tilt update the listed files directly, without involving Docker at all

@@ -133,11 +133,12 @@ Object.assign(scripts, {
 			"app-server": DockerCommand("docker build -f ./Packages/app-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
 			"web-server": DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
 		},
-		dockerBuildAndPush_gitlab: {
+		/*dockerBuildAndPush_gitlab: {
 			"base": "npm start backend.dockerBuild_gitlab.base && docker push registry.gitlab.com/venryx/debate-map",
 			"app-server": "npm start backend.dockerBuild_gitlab.app-server && docker push registry.gitlab.com/venryx/debate-map",
 			"web-server": "npm start backend.dockerBuild_gitlab.web-server && docker push registry.gitlab.com/venryx/debate-map",
-		},
+		},*/
+		pulumiUp: DockerCommand("pulumi up"),
 		
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
 		tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context local"),

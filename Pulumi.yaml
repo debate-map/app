@@ -1,0 +1,3 @@
+name: debate-map
+runtime: nodejs
+description: The Pulumi project file for deploying debate-map to the cloud.
