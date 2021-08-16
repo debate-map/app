@@ -12,10 +12,12 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ### [setup-base] Setting up base tools needed for local/remote k8s deployments
 
 * 1\) Install Docker Desktop: https://docs.docker.com/desktop
-* 2\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
-* 3\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-* 4\) Install Tilt: https://github.com/tilt-dev/tilt
-* 5\) See here for more helpful tools: https://collabnix.github.io/kubetools
+* 2\) Install Chocolatey: https://chocolatey.org/install
+* 3\) Install Helm (eg. for some Tilt extensions): `choco install kubernetes-helm`
+* 4\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
+* 5\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+* 6\) Install Tilt: https://github.com/tilt-dev/tilt
+* 7\) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 <!----><a name="docker-trim"></a>
 ### [image-inspect] Docker image/container inspection
@@ -73,7 +75,7 @@ Notes:
 #### After steps
 
 * 1\) Create an alias/copy of the k8s context you just created, renaming it to "local". (edit `$HOME/.kube/config`)
-* 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=dm-pg-operator`
+* 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
 <!----><a name="k8s-local"></a>
 ### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
@@ -168,7 +170,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
 		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote))
-		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace dm-pg-operator generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
+		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
 	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
 * 6\) Run: `npm start backend.tiltUp_ovh`
 * 7\) Verify that the program has been deployed correctly, by visiting TODO.
@@ -195,10 +197,10 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
 
 * 1\) To access `psql`, as the "admin" user, run the below...  
-	* 1.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 3205 -U admin -d debate-map`  
-	* 1.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:3205/debate-map"`  
-	* 1.3\) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 3205 -U admin -d debate-map`  
-	* 1.4\) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl -n dm-pg-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:3205/debate-map"`  
+	* 1.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 3205 -U admin -d debate-map`  
+	* 1.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:3205/debate-map"`  
+	* 1.3\) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 3205 -U admin -d debate-map`  
+	* 1.4\) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:3205/debate-map"`  
 * 2\) To access `psql`, as the "debate-map" user, replace "admin" with "debate-map" and "debate-map-pguser-admin" with "debate-map-pguser-debate-map" in commands above.  
 * 3\) To access `psql`, as the "postgres" user: I don't know how yet. (I couldn't find a "secrets" entry for it using kubectl)  
 
@@ -219,13 +221,13 @@ sudo apt -y install postgresql-client-13
 ### [k8s-view-pg-config] How to view various postgres config files in the kubernetes cluster
 
 To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
-* 1\) Run: `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
+* 1\) Run: `kubectl exec -it $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
 * 2\) Run (in new bash): `cat /pgdata/pg13/XXX`
 
 <!----><a name="k8s-view-locals"></a>
 ### [k8s-view-locals] How to view local files of server/web-server/etc. pods
 
-* 1\) Run (replacing `app=dm-app-server` with the base name of the pod you want): `kubectl exec -it $(kubectl get pod -n dm-pg-operator -o name -l app=dm-app-server) -- bash`
+* 1\) Run (replacing `app=dm-app-server` with the base name of the pod you want): `kubectl exec -it $(kubectl get pod -n app -o name -l app=dm-app-server) -- bash`
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth

@@ -145,7 +145,7 @@ Object.assign(scripts, {
 		tiltUp_docker: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context docker-desktop"),
 		tiltUp_k3d: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context k3d-main-1"),
 		tiltUp_kind: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context kind-main-1"),
-		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set PROD=true&& tilt up --context ovh --port 10351"),
+		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set PROD=true&& tilt up --context ovh --port 10351"), // tilt-port +1, so can coexist with tilt dev-instance
 	},
 	"app-server": {
 		// setup
@@ -156,8 +156,8 @@ Object.assign(scripts, {
 		// k8s variants
 		initDB_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`,
 		initDB_freshScript_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`,
-		k8s_local_proxyOn8081: "kubectl -n dm-pg-operator port-forward $(kubectl get pod -n dm-pg-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
+		k8s_local_proxyOn8081: "kubectl -n postgres-operator port-forward $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "
 			SELECT pg_terminate_backend(pg_stat_activity.pid)

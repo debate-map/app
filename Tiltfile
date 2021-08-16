@@ -6,6 +6,17 @@ allow_k8s_contexts('ovh')
 
 #k8s_yaml('./Packages/deploy/k8s_entry.yaml')
 
+# extensions
+# ==========
+
+'''load('ext://helm_remote', 'helm_remote')
+helm_remote('reflector',
+	#repo_name='stable',
+	#repo_url='https://charts.helm.sh/stable',
+	repo_url='https://emberstack.github.io/helm-charts',
+	version='5.4.17'
+)'''
+
 # prometheus
 # ==========
 
@@ -48,6 +59,7 @@ k8s_resource('pgo',
 # own app
 # ==========
 
+k8s_yaml('./namespace.yaml')
 k8s_yaml('./Packages/web-server/deployment.yaml')
 k8s_yaml('./Packages/app-server/deployment.yaml')
 

@@ -1,5 +1,6 @@
 /node_modules
-#/tilt_modules
+/tilt_modules
+/.helm
 /NMOverwrites
 /.env
 /Packages/*/node_modules

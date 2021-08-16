@@ -1,7 +1,7 @@
 const child_process = require("child_process");
 // secretsStr is a text string like the below (except with SOME_STR being the value in base64)
 //map[dbname:SOME_STR host:SOME_STR password:SOME_STR port:SOME_STR uri:SOME_STR user:SOME_STR verifier:SOME_STR]
-const secretsStr = child_process.execSync("kubectl get secrets -n dm-pg-operator debate-map-pguser-admin -o go-template='{{.data}}'").toString();
+const secretsStr = child_process.execSync("kubectl get secrets -n postgres-operator debate-map-pguser-admin -o go-template='{{.data}}'").toString();
 const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
 
 // from: Packages/app-server/deployment.yaml
