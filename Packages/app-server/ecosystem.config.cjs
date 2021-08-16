@@ -1,11 +1,16 @@
 //const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
 
-console.log("Preparing to run server. @devMode:", process.env.DEV != null);
+const DEV = process.env.DEV == "true";
+const k8sServiceHost = process.env.KUBERNETES_SERVICE_HOST;
+const inLocalK8s = DEV;
+console.log("Preparing to run app-server. @devMode:", DEV, "@serverHost:", k8sServiceHost, "@inLocalK8s:", inLocalK8s);
+//console.log("Env:", process.env);
+
 module.exports = {
 	apps: [{
 		name: "main",
 
-		...process.env.DEV ? {
+		...DEV ? {
 			//script: "node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
 			script: "node --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
 			interpreter: null,
@@ -24,8 +29,9 @@ module.exports = {
 			return result;
 		})(),
 
-		//watch: true,
-		watch: "**", // watch:true doesn't work fsr (it ignores node_modules)
+		//watch: true, // watch:true doesn't work fsr (it ignores node_modules)
+		// disable watching in remote k8s instances, because not all support it (eg. ovh)
+		watch: inLocalK8s ? "**" : false,
 		/*watch: [
 			"Packages/app-server",
 			...nodeModuleWatchPaths,

@@ -141,11 +141,11 @@ Object.assign(scripts, {
 		pulumiUp: DockerCommand("pulumi up"),
 		
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context local"),
-		tiltUp_docker: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context docker-desktop"),
-		tiltUp_k3d: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context k3d-main-1"),
-		tiltUp_kind: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context kind-main-1"),
-		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& tilt up --context ovh --port 10351"),
+		tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context local"),
+		tiltUp_docker: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context docker-desktop"),
+		tiltUp_k3d: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context k3d-main-1"),
+		tiltUp_kind: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context kind-main-1"),
+		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set PROD=true&& tilt up --context ovh --port 10351"),
 	},
 	"app-server": {
 		// setup

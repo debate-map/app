@@ -33,7 +33,8 @@ WORKDIR "/dm_repo/Packages/app-server"
 #CMD ../../node_modules/.bin/nodemon --ignore 'nothing' --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
 #CMD ../../node_modules/.bin/nodemon --legacy-watch --ignore 'nothing' --watch Dist --watch node_modules/web-vcore/nm --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
 
-ENV DEV=true
+ARG env_DEV
+ENV DEV=$env_DEV
 ENV PM2_DISCRETE_MODE=true
 ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 #ENV TS_NODE_PROJECT=../../tsconfig.base.json

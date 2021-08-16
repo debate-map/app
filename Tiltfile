@@ -54,6 +54,9 @@ k8s_yaml('./Packages/app-server/deployment.yaml')
 # rest
 # ==========
 
+print("DEV:", os.getenv("DEV"))
+print("PROD:", os.getenv("PROD"))
+
 nmWatchPathsStr = local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"])
 nmWatchPaths = str(nmWatchPathsStr).strip().split(",")
 # liveUpdateEntries_shared = []
@@ -70,6 +73,7 @@ local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites',
 docker_build('gcr.io/debate-map-prod/dm-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
 
 docker_build('gcr.io/debate-map-prod/dm-web-server', '.', dockerfile='Packages/web-server/Dockerfile',
+	build_args={'env_DEV': os.getenv("DEV") or "false"},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	#live_update=liveUpdateEntries_shared + [
 	live_update=[
@@ -78,6 +82,7 @@ docker_build('gcr.io/debate-map-prod/dm-web-server', '.', dockerfile='Packages/w
 		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
 	])
 docker_build('gcr.io/debate-map-prod/dm-app-server', '.', dockerfile='Packages/app-server/Dockerfile',
+	build_args={'env_DEV': os.getenv("DEV") or "false"},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	#live_update=liveUpdateEntries_shared + [
 	live_update=[
