@@ -204,13 +204,16 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 <!----><a name="k8s-psql"></a>
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
 
-* 1\) To access `psql`, as the "admin" user, run the below...  
-	* 1.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 3205 -U admin -d debate-map`  
-	* 1.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:3205/debate-map"`  
-	* 1.3\) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 3205 -U admin -d debate-map`  
-	* 1.4\) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:3205/debate-map"`  
-* 2\) To access `psql`, as the "debate-map" user, replace "admin" with "debate-map" and "debate-map-pguser-admin" with "debate-map-pguser-debate-map" in commands above.  
-* 3\) To access `psql`, as the "postgres" user: I don't know how yet. (I couldn't find a "secrets" entry for it using kubectl)  
+* 1\) Set up a proxy from `localhost:3205` to k8s pod `debate-map-instance1-XXXXX` (port 5432):
+	* 1.1\) If you have tilt (local) running, a port-forward should already be set up.
+	* 1.2\) Otherwise (eg. for remote cluster), set it up manually using kubectl: `kubectl port-forward $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 3205:5432` (if you want this proxy to co-exist with your local-cluster's proxy, replace `3205` with something else -- within this command, and those below)
+* 2\) To access `psql`, as the "admin" user, run the below...
+	* 2.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 3205 -U admin -d debate-map`
+	* 2.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:3205/debate-map"`
+	* 2.3\) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 3205 -U admin -d debate-map`
+	* 2.4\) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:3205/debate-map"`
+* 3\) To access `psql`, as the "debate-map" user, replace "admin" with "debate-map" and "debate-map-pguser-admin" with "debate-map-pguser-debate-map" in commands above.
+* 4\) To access `psql`, as the "postgres" user: I don't know how yet. (I couldn't find a "secrets" entry for it using kubectl)
 
 Note: The `psql` binary is not installed in Linux/WSL at the start. If you want `psql` runnable from within WSL, run the below setup:
 ```

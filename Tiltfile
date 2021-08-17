@@ -52,7 +52,7 @@ k8s_resource(new_name="database",
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='3205:5432',
+	port_forwards='3205:5432' if DEV else None,
 	resource_deps=["pgo"],
 )'''
 k8s_resource(new_name="database",
@@ -61,7 +61,7 @@ k8s_resource(new_name="database",
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='3205:5432',
+	port_forwards='3205:5432' if DEV else None,
 )
 
 # reflector
@@ -130,7 +130,7 @@ docker_build('gcr.io/debate-map-prod/dm-app-server', '.', dockerfile='Packages/a
 k8s_resource('dm-app-server', 
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	#port_forwards='3105:31006')
-	port_forwards='3105',
+	port_forwards='3105' if DEV else None,
 	resource_deps=["reflector"],
 )
 
@@ -138,7 +138,7 @@ k8s_resource('dm-app-server',
 k8s_resource('dm-web-server', 
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
-	port_forwards='3005',
+	port_forwards='3005' if DEV else None,
 	#resource_deps=["dm-app-server"],
 	resource_deps=["reflector"],
 )
