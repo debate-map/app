@@ -1,6 +1,6 @@
 import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
-import express, {RequestHandler} from "express";
+import express, {Request, RequestHandler} from "express";
 import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
@@ -8,7 +8,7 @@ import expressSession from "express-session";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {pgClient, pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
-import {GetDBServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
+import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
 
 const DEV = process.env.ENV == "dev";
 
@@ -36,11 +36,27 @@ function Timeout<T extends Function>(func: T, timeout: number, onTimeout: (resol
 	};
 }
 
+/*const callbackURL_proxy = new String("[callback-url-proxy]");
+callbackURL_proxy.toString = ()=>{
+	const referrerURL = currentAuthRequest?.get("Referrer");
+	console.log("Referrer url for auth request:", referrerURL);
+	return GetAppServerURL("/auth/google/callback", referrerURL);
+};*/
+
+let currentAuthRequest: Request<{}, any, any, any, Record<string, any>>; 
 passport.use(new GoogleStrategy(
 	{
 		clientID: process.env.CLIENT_ID as string,
 		clientSecret: process.env.CLIENT_SECRET as string,
-		callbackURL: GetDBServerURL("/auth/google/callback"),
+		//callbackURL: GetAppServerURL("/auth/google/callback"),
+		/*get callbackURL() {
+			const referrerURL = currentAuthRequest?.get("Referrer");
+			console.log("Referrer url for auth request:", referrerURL);
+			return GetAppServerURL("/auth/google/callback", referrerURL);
+		},*/
+		//callbackURL: callbackURL_proxy as any,
+		// use relative url here; apparently passport-oauth supports this: https://github.com/jaredhanson/passport-oauth2/blob/86a6ae476e09c0864aef97456822d3e2915727f3/lib/strategy.js#L142
+		callbackURL: "/auth/google/callback",
 	},
 	async(accessToken, refreshToken, profile, done)=>{
 		//console.log("Test1");
@@ -164,6 +180,12 @@ export function SetUpAuthHandling(app: ExpressApp) {
 
 	// server-side access-token-retrieval approach
 	app.get("/auth/google",
+		(req, res, next)=>{
+			//console.log("Got auth request. URL:", req.url);
+			console.log("Got auth request. URL:", req.get("Referrer"));
+			currentAuthRequest = req;
+			next();
+		},
 		passport.authenticate("google", {
 			scope: ["profile", "email"],
 		}));

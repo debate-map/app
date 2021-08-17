@@ -35,7 +35,6 @@ For more information, visit the website at: <https://debatemap.app>
 * 1\) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
 * 2\) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
 * 3\) Install this repo's dependencies by running: `yarn install`
-* 4\) [temp] Fix the typing issue in recharts `node_modules/recharts/types/polar/Radar.d.ts`, replacing the `<P, T>` sections with `<any, any>`.
 
 <!----><a name="vscode"></a>
 ### [vscode] VSCode window setup

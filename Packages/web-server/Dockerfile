@@ -4,12 +4,13 @@ FROM gcr.io/debate-map-prod/dm-shared-base
 
 COPY NMOverwrites/ /dm_repo/
 
-# bundle app source (the .dockerignore file excludes large, unrelated folders like node_modules)
-#COPY . .
-COPY Packages/ Packages/
+# note: the exclusion of large, unrelated folders (like node_modules) under the given paths is handled by the .dockerignore files
+
+# split up the copying into multiple layers, for better caching
+COPY Packages/common/ Packages/common/
+COPY Packages/client/ Packages/client/
+COPY Packages/web-server/ Packages/web-server/
 COPY Scripts/ Scripts/
-# copy just the files in the root folder
-#COPY ./* ./
 COPY tsconfig.base.json .
 
 # these shouldn't be needed, but are fsr

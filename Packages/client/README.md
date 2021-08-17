@@ -22,3 +22,14 @@ Prerequisite steps: [client/dev](https://github.com/debate-map/app/tree/master/P
 
 * 1\) [opt] Install: [React Development Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
 * 2\) [opt] Install: [MobX Development Tools](https://chrome.google.com/webstore/detail/mobx-developer-tools/pfgnfdagidkfgccljigdamigbcnndkod) (or [my fork](https://github.com/Venryx/mobx-devtools-advanced))
+
+<!----><a name="dev-enhance"></a>
+### [client/build] Build the webpack bundle file
+
+Prerequisite steps: [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
+
+* 1\) Make sure the `Source_JS` folder is up-to-date. (easiest way is by running tsc, as seen in step 1 of [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev))
+* 2\) Run one of the scripts for creating webpack-builds:
+	* 2.1\) For development builds (not used atm; for development, use [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev) guide): `npm start client.build.dev`
+	* 2.2\) For production builds, without minification (most common, since minification is so slow): `npm start client.build.prodQuick`
+	* 2.3\) For production builds, with minification: `npm start client.build.prod`

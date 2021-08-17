@@ -53,7 +53,19 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
-NMOverwrites/
-
 # for this base image, we can completely ignore the node_modules/ folder (we aren't the one -- actually, we don't need it for any of the docker-images, because we have NMOverwrites)
 #node_modules/
+
+NMOverwrites/
+
+# ignore everything other than the package.json files
+Packages/client/**
+!Packages/client/package.json
+Packages/common/**
+!Packages/common/package.json
+Packages/app-server/**
+!Packages/app-server/package.json
+Packages/web-server/**
+!Packages/web-server/package.json
+Packages/deploy/**
+!Packages/deploy/package.json

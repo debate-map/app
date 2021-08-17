@@ -1,5 +1,5 @@
 import {feedback_manager, Feedback_store} from "web-vcore/nm/graphql-feedback.js";
-import Moment from "moment";
+import Moment from "web-vcore/nm/moment.js";
 import {store} from "Store";
 import {logTypes} from "Utils/General/Logging";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";

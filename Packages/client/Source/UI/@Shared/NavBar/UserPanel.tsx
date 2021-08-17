@@ -6,7 +6,7 @@ import {HandleError, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {Assert} from "../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
-import {GetDBServerURL} from "Utils/LibIntegrations/Apollo";
+import {GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -47,7 +47,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<Button text="Edit profile" style={{width: 100}}/>
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 100}} onClick={()=>{
-						window.location.href = GetDBServerURL("/signOut");
+						window.location.href = GetAppServerURL("/signOut");
 					}}/>
 				</Row>
 			</Column>
@@ -100,7 +100,7 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 					g.google.accounts.id.renderButton(c, options, ()=>{
 						// rather than using client-side retrieval of access-token, use server-side retrieval (it's safer)
 						//window.location.href = `${window.location.origin}/auth/google`;
-						window.location.href = GetDBServerURL("/auth/google");
+						window.location.href = GetAppServerURL("/auth/google");
 						// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
 						// todo: make sure the access-token data that server retrieves is never made accessible to frontend code (eg. use cookies, and set to http-only)
 						// todo: make this sign-in flow not require our main page to redirect (instead use a new-tab or popup-window)
@@ -137,7 +137,7 @@ export function EnsureGoogleIDAPIReady() {
 export type GoogleID_CredentialResponse = {clientId: string, credential: string, select_by: "string"};
 export const googleID_handleCredentialResponse = async(response: GoogleID_CredentialResponse)=>{
 	console.log("Data:", response);
-	await fetch(GetDBServerURL("/auth/google/callback"), {
+	await fetch(GetAppServerURL("/auth/google/callback"), {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

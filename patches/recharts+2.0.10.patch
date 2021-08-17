@@ -1,0 +1,17 @@
+diff --git a/node_modules/recharts/types/polar/Radar.d.ts b/node_modules/recharts/types/polar/Radar.d.ts
+index b36f3cf..c580d90 100644
+--- a/node_modules/recharts/types/polar/Radar.d.ts
++++ b/node_modules/recharts/types/polar/Radar.d.ts
+@@ -63,10 +63,10 @@ export declare class Radar extends PureComponent<Props, State> {
+         animationEasing: string;
+     };
+     static getComposedData: ({ radiusAxis, angleAxis, displayedData, dataKey, bandSize, }: {
+-        radiusAxis: React.AriaAttributes & import("../util/types").DOMAttributesAdaptChildEvent<any, SVGElement> & Omit<React.SVGProps<SVGElement>, keyof import("../util/types").DOMAttributesAdaptChildEvent<P, T>> & import("./PolarRadiusAxis").PolarRadiusAxisProps & {
++        radiusAxis: React.AriaAttributes & import("../util/types").DOMAttributesAdaptChildEvent<any, SVGElement> & Omit<React.SVGProps<SVGElement>, keyof import("../util/types").DOMAttributesAdaptChildEvent<any, any>> & import("./PolarRadiusAxis").PolarRadiusAxisProps & {
+             scale: (value: any) => number;
+         };
+-        angleAxis: React.AriaAttributes & import("../util/types").DOMAttributesAdaptChildEvent<any, SVGTextElement> & Omit<React.SVGProps<SVGTextElement>, keyof import("../util/types").DOMAttributesAdaptChildEvent<P, T>> & import("./PolarAngleAxis").PolarAngleAxisProps & {
++        angleAxis: React.AriaAttributes & import("../util/types").DOMAttributesAdaptChildEvent<any, SVGTextElement> & Omit<React.SVGProps<SVGTextElement>, keyof import("../util/types").DOMAttributesAdaptChildEvent<any, any>> & import("./PolarAngleAxis").PolarAngleAxisProps & {
+             scale: (value: any) => number;
+         };
+         displayedData: any[];

@@ -15,7 +15,7 @@
   "scripts": {
     "start": "nps",
     "preinstall": "npx only-allow yarn",
-    "postinstall": "patch-package --patch-dir ./node_modules/web-vcore/patches"
+    "postinstall": "patch-package --patch-dir ./node_modules/web-vcore/patches && patch-package --patch-dir ./patches"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
