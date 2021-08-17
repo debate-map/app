@@ -1,0 +1,30 @@
+--- 
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata: 
+  name: main-ingress
+spec: 
+  rules: 
+    - 
+      host: new.debatemap.app
+      http: 
+        paths: 
+          - 
+            backend: 
+              serviceName: dm-web-server
+              servicePort: 3005
+            path: /
+    - 
+      host: app-server.debatemap.app
+      http: 
+        paths: 
+          - 
+            backend: 
+              serviceName: dm-app-server
+              servicePort: 3105
+            path: /
+  tls: 
+    - 
+      hosts: 
+        - debatemap.app
+      secretName: tls-secret

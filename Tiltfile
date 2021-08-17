@@ -80,6 +80,20 @@ k8s_resource("reflector",
 	resource_deps=["database"],
 )
 
+# load-balancer/reverse-proxy (traefik)
+# ==========
+
+#k8s_yaml("./Packages/deploy/LoadBalancer/traefik.yaml")
+load('ext://helm_remote', 'helm_remote')
+helm_remote('traefik', repo_url='https://helm.traefik.io/traefik',
+	values=['Packages/deploy/LoadBalancer/traefik-config.yaml'])
+k8s_resource("traefik",
+	resource_deps=["reflector"],
+)
+
+# commented till I get traefik working in general
+#k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
+
 # own app
 # ==========
 
@@ -131,7 +145,7 @@ k8s_resource('dm-app-server',
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	#port_forwards='3105:31006')
 	port_forwards='3105' if DEV else '4105',
-	resource_deps=["reflector"],
+	resource_deps=["traefik"],
 )
 
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
@@ -140,5 +154,5 @@ k8s_resource('dm-web-server',
 	#port_forwards='3005:31005')
 	port_forwards='3005' if DEV else '4005',
 	#resource_deps=["dm-app-server"],
-	resource_deps=["reflector"],
+	resource_deps=["traefik"],
 )
