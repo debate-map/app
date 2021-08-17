@@ -217,7 +217,7 @@ Object.assign(scripts, {
 	},
 });
 function SetTileEnvCmd(prod) {
-	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set PROD=true&&" : "set DEV=true&&"}`;
+	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"}`;
 }
 
 Object.assign(scripts, {

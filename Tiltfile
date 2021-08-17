@@ -6,16 +6,10 @@ allow_k8s_contexts('ovh')
 
 #k8s_yaml('./Packages/deploy/k8s_entry.yaml')
 
-# extensions
-# ==========
-
-load('ext://helm_remote', 'helm_remote')
-helm_remote('reflector',
-	#repo_name='stable',
-	#repo_url='https://charts.helm.sh/stable',
-	repo_url='https://emberstack.github.io/helm-charts',
-	version='5.4.17'
-)
+ENV = os.getenv("ENV")
+DEV = ENV == "dev"
+PROD = ENV == "prod"
+print("Env:", ENV)
 
 # prometheus
 # ==========
@@ -48,7 +42,9 @@ k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
 k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
 k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
 
-#k8s_resource('debate-map-primary', port_forwards='5432:5432') # db
+'''k8s_resource('pgo',
+	resource_deps=["reflector"],
+)
 k8s_resource(new_name="database",
 	objects=["debate-map:PostgresCluster:postgres-operator"],
 	#objects=["postgres-operator:ClusterRole:default"],
@@ -56,17 +52,28 @@ k8s_resource(new_name="database",
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='3205:5432'
-) # db
+	port_forwards='3205:5432',
+	resource_deps=["pgo"],
+)'''
+k8s_resource(new_name="database",
+	objects=["postgres-operator:Namespace:default"],
+	extra_pod_selectors={
+		"postgres-operator.crunchydata.com/cluster": "debate-map",
+		"postgres-operator.crunchydata.com/role": "master"
+	},
+	port_forwards='3205:5432',
+)
 
-#k8s_resource('pgo', port_forwards='3205:5432') # db
-k8s_resource('pgo',
-	# extra_pod_selectors={
-	# 	"postgres-operator.crunchydata.com/cluster": "debate-map",
-	# 	"postgres-operator.crunchydata.com/role": "master"
-	# },
-	
-	#port_forwards='3205:5432'
+# reflector
+# ==========
+
+load('ext://helm_remote', 'helm_remote')
+helm_remote('reflector',
+	#repo_name='stable',
+	#repo_url='https://charts.helm.sh/stable',
+	repo_url='https://emberstack.github.io/helm-charts',
+	version='5.4.17',
+	resource_deps=["database"],
 )
 
 # own app
@@ -78,9 +85,6 @@ k8s_yaml('./Packages/app-server/deployment.yaml')
 
 # rest
 # ==========
-
-print("DEV:", os.getenv("DEV"))
-print("PROD:", os.getenv("PROD"))
 
 nmWatchPathsStr = local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"])
 nmWatchPaths = str(nmWatchPathsStr).strip().split(",")
@@ -98,7 +102,7 @@ local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites',
 docker_build('gcr.io/debate-map-prod/dm-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
 
 docker_build('gcr.io/debate-map-prod/dm-web-server', '.', dockerfile='Packages/web-server/Dockerfile',
-	build_args={'env_DEV': os.getenv("DEV") or "false"},
+	build_args={'env_ENV': os.getenv("ENV") or "dev"},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	#live_update=liveUpdateEntries_shared + [
 	live_update=[
@@ -107,7 +111,7 @@ docker_build('gcr.io/debate-map-prod/dm-web-server', '.', dockerfile='Packages/w
 		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
 	])
 docker_build('gcr.io/debate-map-prod/dm-app-server', '.', dockerfile='Packages/app-server/Dockerfile',
-	build_args={'env_DEV': os.getenv("DEV") or "false"},
+	build_args={'env_ENV': os.getenv("ENV") or "dev"},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	#live_update=liveUpdateEntries_shared + [
 	live_update=[
@@ -119,17 +123,18 @@ docker_build('gcr.io/debate-map-prod/dm-app-server', '.', dockerfile='Packages/a
 # port forwards
 # ==========
 
+k8s_resource('dm-app-server', 
+	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
+	#port_forwards='3105:31006')
+	port_forwards='3105',
+	resource_deps=["database"],
+)
+
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
 k8s_resource('dm-web-server', 
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
-	port_forwards='3005')
-k8s_resource('dm-app-server', 
-	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
-	#port_forwards='3105:31006')
-	port_forwards='3105')
-
-# prometheus monitoring tool; open localhost:9090 in browser to view
-# k8s_resource('prometheus-operator',
-# 	#port_forwards='9090:9090')
-# 	port_forwards='9090')
+	port_forwards='3005',
+	#resource_deps=["dm-app-server"],
+	resource_deps=["database"],
+)

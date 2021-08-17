@@ -1,10 +1,10 @@
 //const nodeModuleWatchPaths = require("../../Scripts/NodeModuleWatchPaths.js").nmWatchPaths_notUnderWVC;
 
-const DEV = process.env.DEV == "true";
+const DEV = process.env.ENV == "dev";
 const k8sServiceHost = process.env.KUBERNETES_SERVICE_HOST;
 const inLocalK8s = DEV;
 console.log("Preparing to run app-server. @devMode:", DEV, "@serverHost:", k8sServiceHost, "@inLocalK8s:", inLocalK8s);
-//console.log("Env:", process.env);
+console.log("Env:", process.env);
 
 module.exports = {
 	apps: [{

@@ -25,8 +25,8 @@ EXPOSE 8080
 
 WORKDIR "/dm_repo/Packages/web-server"
 
-ARG env_DEV
-ENV DEV=$env_DEV
+ARG env_ENV
+ENV ENV=$env_ENV
 ENV PM2_DISCRETE_MODE=true
 ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 #ENV TS_NODE_PROJECT=../../tsconfig.base.json
