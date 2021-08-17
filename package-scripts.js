@@ -3,9 +3,9 @@ const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
 
 /*
-Why are some scripts '.ts' and some '.js'?
-Well, the default is '.js', because it makes scripts easier to use in 'one off' terminal runs. (and usable by 'runtime' codebases, eg. Packages/web-server)
-However, if there are enough useful type-notations in a file, it's also okay to use '.ts'. In that case, set up an entry in this file, using the TSScript() helper.
+Why are some "Scripts/XXX" files ".ts" and some ".js"?
+Well, the default is ".js", because it makes scripts easier to use in "one off" terminal runs. (and usable by "runtime" codebases, eg. Packages/web-server)
+However, if there are enough useful type-notations in a file, it's also okay to use ".ts". In that case, set up an entry in this file, using the TSScript() helper.
 */
 
 const _packagesRootStr = "{packagesRoot}"; // useful for setting working-directory to "./Packages/", eg. so when running webpack, its error paths are "resolvable" by vscode window #1
@@ -70,11 +70,6 @@ module.exports.scripts = scripts;
 
 const commandName = process.argv[2];
 const commandArgs = process.argv.slice(3);
-
-/*const {nmWatchPaths_notUnderWVC, nmWatchPaths_underWVC} = require("./Scripts/NodeModuleWatchPaths.js");
-const group1 = `--from ${nmWatchPaths_notUnderWVC.map(a=>`"${a}"`).join(" ")} --to NMOverwrites`;
-const group2 = `--from-2 ${nmWatchPaths_underWVC.map(a=>`"${a.replace("node_modules/web-vcore/", "")}"`).join(" ")} --to-2 NMOverwrites`;*/
-const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 
 const pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
 	let path = `./node_modules/.bin/${binaryName}`;
@@ -169,6 +164,7 @@ function GetServeCommand(nodeEnv = null) {
 	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "npm start client.dev.part2"`;
 }
 
+const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 Object.assign(scripts, {
 	ssh: {
 		"db": Dynamic(()=>{
@@ -192,10 +188,6 @@ Object.assign(scripts, {
 		// general
 		//buildNMOverwrites: `npx file-syncer ${group1} ${group2}`,
 		buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
-		/*get test1() {
-			console.log("hmm");
-			return "";
-		},*/
 
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",
@@ -214,11 +206,6 @@ Object.assign(scripts, {
 			"app-server": `${PrepDockerCmd()} docker build -f ./Packages/app-server/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
 			"web-server": `${PrepDockerCmd()} docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
 		},
-		/*dockerBuildAndPush_gitlab: {
-			"base": "npm start backend.dockerBuild_gitlab.base && docker push registry.gitlab.com/venryx/debate-map",
-			"app-server": "npm start backend.dockerBuild_gitlab.app-server && docker push registry.gitlab.com/venryx/debate-map",
-			"web-server": "npm start backend.dockerBuild_gitlab.web-server && docker push registry.gitlab.com/venryx/debate-map",
-		},*/
 		pulumiUp: `${PrepDockerCmd()} pulumi up`,
 		
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
@@ -259,7 +246,6 @@ Object.assign(scripts, {
 		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
 
 		// first terminal
-		//dev: "cd Packages/app-server && snowpack build --watch",
 		//dev: "cd Packages/app-server && tsc --build --watch",
 		dev: "tsc --build --watch Packages/app-server/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 
@@ -285,18 +271,9 @@ function GetBuildInitDBScriptCommand(watch) {
 
 // if server-start command/flags change, update the entry in "launch.json" as well
 function GetStartServerCommand() {
-	/*const variantPath = serverVariantPaths[server];
-	return `node ${variantPath}`;*/
-	//return `node ./Packages/app-server/Build/esm/Source/Main.js`;
-	//return `cd Packages/app-server && node ./Build/esm/Source/Main.js`;
-
-	//return `cd Packages/app-server && node ./Dist/Main.js`;
-	//return `cd Packages/app-server && node --experimental-modules ./Dist/Main.js`;
-	//return `cd Packages/app-server && node -r esm ./Dist/Main.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
 	//return TSScript("app-server", "Source/Main.ts");
-
 	// use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
 	//return TSScript({pkg: "app-server", envStrAdd: "DEV=true"}, "Dist/Main.js");
-	//return `cd Packages/app-server && node --experimental-modules --experimental-specifier-resolution=node ./Dist/Main.js`;
+
 	return `cd Packages/app-server && node --experimental-specifier-resolution=node ./Dist/Main.js`;
 }
