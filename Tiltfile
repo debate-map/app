@@ -67,12 +67,16 @@ k8s_resource(new_name="database",
 # reflector
 # ==========
 
-load('ext://helm_remote', 'helm_remote')
+'''load('ext://helm_remote', 'helm_remote')
 helm_remote('reflector',
 	#repo_name='stable',
 	#repo_url='https://charts.helm.sh/stable',
 	repo_url='https://emberstack.github.io/helm-charts',
 	version='5.4.17',
+)'''
+# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v5.4.17
+k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
+k8s_resource("reflector",
 	resource_deps=["database"],
 )
 
@@ -127,7 +131,7 @@ k8s_resource('dm-app-server',
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	#port_forwards='3105:31006')
 	port_forwards='3105',
-	resource_deps=["database"],
+	resource_deps=["reflector"],
 )
 
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
@@ -136,5 +140,5 @@ k8s_resource('dm-web-server',
 	#port_forwards='3005:31005')
 	port_forwards='3005',
 	#resource_deps=["dm-app-server"],
-	resource_deps=["database"],
+	resource_deps=["reflector"],
 )

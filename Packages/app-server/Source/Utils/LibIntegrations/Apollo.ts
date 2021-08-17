@@ -6,22 +6,22 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 
-const dev = process.env.DEV == "true";
+const DEV = process.env.ENV == "dev";
 const inK8s = process.env.KUBERNETES_SERVICE_HOST != null;
 //const inK8s = process.env.DB_ADDR;
 export function GetWebServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
-	if (dev && !inK8s) return `http://localhost:3005/${subpath.slice(1)}`;
-	//if (dev && inK8s) return `http://localhost:31005/${subpath.slice(1)}`;
-	if (dev && inK8s) return `http://localhost:3005/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
+	if (DEV && !inK8s) return `http://localhost:3005/${subpath.slice(1)}`;
+	//if (DEV && inK8s) return `http://localhost:31005/${subpath.slice(1)}`;
+	if (DEV && inK8s) return `http://localhost:3005/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
 	return `https://debatemap.app/${subpath.slice(1)}`;
 }
 export function GetDBServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
-	if (dev && !inK8s) return `http://localhost:3105/${subpath.slice(1)}`;
-	//if (dev && inK8s) return `http://localhost:31006/${subpath.slice(1)}`;
-	if (dev && inK8s) return `http://localhost:3105/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
-	return `https://db.debatemap.app/${subpath.slice(1)}`;
+	if (DEV && !inK8s) return `http://localhost:3105/${subpath.slice(1)}`;
+	//if (DEV && inK8s) return `http://localhost:31006/${subpath.slice(1)}`;
+	if (DEV && inK8s) return `http://localhost:3105/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
+	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");

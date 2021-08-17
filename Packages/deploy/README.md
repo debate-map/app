@@ -255,4 +255,5 @@ Authorized redirect URIs:
 * http://localhost:31006/auth/google/callback
 * http://[::1]:3105/auth/google/callback
 * http://[::1]:31006/auth/google/callback
+* https://app-server.debate-map.app/auth/google/callback
 ```

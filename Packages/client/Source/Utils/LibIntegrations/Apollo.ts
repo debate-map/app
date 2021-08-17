@@ -17,7 +17,7 @@ export function GetDBServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
 	if (location.host == "localhost:3005") return `http://localhost:3105/${subpath.slice(1)}`;
 	if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
-	return `https://db.debatemap.app/${subpath.slice(1)}`;
+	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 }
 
 const GRAPHQL_URL = GetDBServerURL("/graphql");

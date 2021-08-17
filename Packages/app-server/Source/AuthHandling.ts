@@ -10,6 +10,8 @@ import {pgClient, pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {GetDBServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
 
+const DEV = process.env.ENV == "dev";
+
 //type ExpressApp = Express.Application;
 type ExpressApp = ReturnType<typeof express>;
 
@@ -68,7 +70,7 @@ passport.use(new GoogleStrategy(
 		console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
 
 		let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
-		if (process.env.DEV == "true") {
+		if (DEV) {
 			const usersCount = await pgClient.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
 			if (usersCount.rowCount <= 1) {
 				console.log("First non-system user signing-in; marking as admin.");
