@@ -1,120 +1,16 @@
 const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
+const {_packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
 
-/*
-Why are some "Scripts/XXX" files ".ts" and some ".js"?
-Well, the default is ".js", because it makes scripts easier to use in "one off" terminal runs. (and usable by "runtime" codebases, eg. Packages/web-server)
-However, if there are enough useful type-notations in a file, it's also okay to use ".ts". In that case, set up an entry in this file, using the TSScript() helper.
-*/
-
-const _packagesRootStr = "{packagesRoot}"; // useful for setting working-directory to "./Packages/", eg. so when running webpack, its error paths are "resolvable" by vscode window #1
-function TSScript(/** @type {{pkg: string, envStrAdd: string}} */ opts, scriptSubpath, ...args) {
-	let cdCommand = "";
-	let tsConfigPath = "";
-	if (opts.pkg) {
-		if (opts.pkg == _packagesRootStr) {
-			cdCommand = `cd Packages && `;
-			tsConfigPath = "client/Scripts/tsconfig.json";
-		} else {
-			cdCommand = `cd Packages/${opts.pkg} && `;
-			tsConfigPath = "Scripts/tsconfig.json";
-		}
-	}
-
-	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true ${opts.envStrAdd ?? ""}`;
-	const nodeFlags = `--loader ts-node/esm.mjs --experimental-specifier-resolution=node`;
-	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
-}
-function FindPackagePath(packageName, asAbsolute = true) {
-	const pathsToCheck = [
-		`./node_modules/web-vcore/node_modules/${packageName}`, // if web-vcore is symlinked
-		`./node_modules/${packageName}`, // if web-vcore is not symlinked
-	];
-	for (const path of pathsToCheck) {
-		if (fs.existsSync(path)) {
-			return asAbsolute ? paths.resolve(path) : path;
-		}
-	}
-	throw new Error(`Could not find package: "${packageName}"`);
-}
-
-// monkey-patch needed so that given "npm start my-script args: scriptArg1 scriptArg2", nps ignores the "args: ..." part
-/*const indexOf_orig = Array.prototype.indexOf;
-Array.prototype.indexOf = function(...args) {
-	// Here is the relevant location in the nps source code: https://github.com/sezna/nps/blob/57989a24ff6876b3d5245f7e00b76aaf39296d31/src/index.js#L22
-	// monkey-patch [].indexOf so that when nps calls "scriptNames.indexOf('--')", the array is modified to remove any strings after the "args:" string
-	//		(nps thinks those additional strings are command-names, but instead we're using those slots as arguments for the nps scripts -- as read within this package-scripts.js)
-	if (args.length == 1 && args[0] == '--') {
-		const argsStrIndex = this.indexOf("args:");
-		if (argsStrIndex != -1) {
-			this.length = argsStrIndex;
-		}
-	}
-	return indexOf_orig.apply(this, args);
-};*/
-//console.log("Argv:", process.argv);
-// process.argv example: ["XXX/node.exe", "XXX/nps.js", "app-server.initDB_k8s ovh"]
-const commandNameAndArgs = process.argv[2];
-const argsStr_start = commandNameAndArgs.includes(" ") ? commandNameAndArgs.indexOf(" ") : null;
-const commandName = argsStr_start != null ? commandNameAndArgs.slice(0, argsStr_start) : commandNameAndArgs;
-const commandArgs = argsStr_start != null ? commandNameAndArgs.slice(argsStr_start).trimStart().split(" ") : "";
-
-// monkey-patch needed for Dynamic() function below
-const join_orig = Array.prototype.join;
-Array.prototype.join = function(...args) {
-	// Here is the relevant location in the nps source code: https://github.com/sezna/nps/blob/57989a24ff6876b3d5245f7e00b76aaf39296d31/src/index.js#L59
-	// If we're concatenating the script-entry with its args (just before execution)...
-	//	...and we find a String object produced by the Dynamic function above (rather than a primitive string like normal)...
-	//	...then intercept and replace the String object with the result of its commandStrGetter().
-	if (this[0] instanceof String && this[0].commandStrGetter != null) {
-		this[0] = this[0].commandStrGetter();
-		this.length = 1; // also chop off any arguments (we are already handling the arguments through the commandArgs variable in this package-scripts.js)
-	}
-	return join_orig.apply(this, args);
-};
-const Dynamic = commandStrGetter=>{
-	const result = new String("[placeholder for dynamically-evaluated command-string]");
-	result.commandStrGetter = ()=>{
-		let commandStr = commandStrGetter();
-		// if there are command-args, add something to the end of the command-str so that they're ignored (we have already handled the command-args within this package-scripts.js)
-		/*if (commandArgs.length) {
-			if (commandStr != null) commandStr += " && rem Dynamic-script execution completed. Arguments were:";
-			else commandStr = "rem Dynamic-script execution completed. Arguments were:";
-		}*/
-		return commandStr;
-	}
-	return result;
-};
-const Dynamic_Async = asyncCommandRunnerFunc=>{
-	return Dynamic(()=>{
-		asyncCommandRunnerFunc();
-		// just return an empty command
-	});
-};
-
-//const memLimit = 4096;
-const memLimit = 8192; // in megabytes
-
-const scripts = {
-	initDB_k8s: "echo Hi"
-};
+const scripts = {};
 module.exports.scripts = scripts;
 
-const pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
-	let path = `./node_modules/.bin/${binaryName}`;
-	for (let i = 0; i < depth; i++) {
-		path = "../" + path;
-	}
-	if (normalize) path = paths.normalize(path);
-	if (abs) path = paths.resolve(path);
-	return path;
-};
 Object.assign(scripts, {
 	client: {
 		tsc: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		dev: {
-			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit} --experimental-modules" "npm start dev-part2"`,
+			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "npm start dev-part2"`,
 			default: GetServeCommand("development"),
 			staticServe: GetServeCommand(), // same as above, except with NODE_ENV=null (for static-serving of files in Dist folder)
 			noDebug: `nps "dev --no_debug"`,
@@ -124,8 +20,8 @@ Object.assign(scripts, {
 			//part2: TSScript("client", "Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
 			part2: TSScript({pkg: _packagesRootStr}, "client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
 
-			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit} --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
-			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
+			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
+			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
 		},
 		cypress: {
 			open: "cd Packages/client && cypress open",
@@ -160,38 +56,18 @@ Object.assign(scripts, {
 	},
 });
 
-/*const GetPSQLScript = contextName=>{
-	return [
-		`$env:PGPASSWORD=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`,
-		`$env:PGHOST=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.host | base64decode}}')`,
-		`$env:PGPORT=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.port | base64decode}}')`,
-		`psql -h $env:PGHOST -p $env:PGPORT -U admin -d debate-map`,
-	].join("; ")
-}*/
 const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
 const GetPodNameCmd_DB =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n postgres-operator -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master`;
 const GetPodNameCmd_WebServer =	contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n app -l app=dm-web-server`;
 const GetPodNameCmd_AppServer =	contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n app -l app=dm-app-server`;
-/*const GetPSQLScript = contextName=>{
-	// for windows
-	/*return [
-		`$env:dbPodName=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.port | base64decode}}')`,
-		`kubectl --context ${contextName} exec -i -t -n postgres-operator $env:dbPodName -c database "--" sh -c "clear; (bash || ash || sh)"`,
-	].join("; ")*#/
-	return `kubectl --context ${contextName} exec -i -t -n postgres-operator $(${CommandStr_GetPodName_DB(contextName)}) -c database "--" sh -c "clear; (bash || ash || sh)"`;
-}*/
-
 
 const PrepDockerCmd = ()=>{
 	//return `npm start dockerPrep &&`;
 	return `node Scripts/PrepareDocker.js &&`;
 };
 
-//console.log("CommandName:", commandName, "@args:", commandArgs);
-//if (commandName.startsWith("backend.ssh.") && commandArgs[0] == null) console.error("Must supply context after command-name. (options: local, ovh)")
-
 function GetServeCommand(nodeEnv = null) {
-	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "npm start client.dev.part2"`;
+	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start client.dev.part2"`;
 }
 
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
