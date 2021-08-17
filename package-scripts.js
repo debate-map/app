@@ -39,9 +39,51 @@ function FindPackagePath(packageName, asAbsolute = true) {
 	throw new Error(`Could not find package: "${packageName}"`);
 }
 
+// monkey-patch needed so that given "npm start my-script args: scriptArg1 scriptArg2", nps ignores the "args: ..." part
+/*const indexOf_orig = Array.prototype.indexOf;
+Array.prototype.indexOf = function(...args) {
+	// Here is the relevant location in the nps source code: https://github.com/sezna/nps/blob/57989a24ff6876b3d5245f7e00b76aaf39296d31/src/index.js#L22
+	// monkey-patch [].indexOf so that when nps calls "scriptNames.indexOf('--')", the array is modified to remove any strings after the "args:" string
+	//		(nps thinks those additional strings are command-names, but instead we're using those slots as arguments for the nps scripts -- as read within this package-scripts.js)
+	if (args.length == 1 && args[0] == '--') {
+		const argsStrIndex = this.indexOf("args:");
+		if (argsStrIndex != -1) {
+			this.length = argsStrIndex;
+		}
+	}
+	return indexOf_orig.apply(this, args);
+};*/
+//console.log("Argv:", process.argv);
+// process.argv example: ["XXX/node.exe", "XXX/nps.js", "app-server.initDB_k8s ovh"]
+const commandNameAndArgs = process.argv[2];
+const argsStr_start = commandNameAndArgs.includes(" ") ? commandNameAndArgs.indexOf(" ") : null;
+const commandName = argsStr_start != null ? commandNameAndArgs.slice(0, argsStr_start) : commandNameAndArgs;
+const commandArgs = argsStr_start != null ? commandNameAndArgs.slice(argsStr_start).trimStart().split(" ") : "";
+
+// monkey-patch needed for Dynamic() function below
+const join_orig = Array.prototype.join;
+Array.prototype.join = function(...args) {
+	// Here is the relevant location in the nps source code: https://github.com/sezna/nps/blob/57989a24ff6876b3d5245f7e00b76aaf39296d31/src/index.js#L59
+	// If we're concatenating the script-entry with its args (just before execution)...
+	//	...and we find a String object produced by the Dynamic function above (rather than a primitive string like normal)...
+	//	...then intercept and replace the String object with the result of its commandStrGetter().
+	if (this[0] instanceof String && this[0].commandStrGetter != null) {
+		this[0] = this[0].commandStrGetter();
+		this.length = 1; // also chop off any arguments (we are already handling the arguments through the commandArgs variable in this package-scripts.js)
+	}
+	return join_orig.apply(this, args);
+};
 const Dynamic = commandStrGetter=>{
 	const result = new String("[placeholder for dynamically-evaluated command-string]");
-	result.commandStrGetter = commandStrGetter;
+	result.commandStrGetter = ()=>{
+		let commandStr = commandStrGetter();
+		// if there are command-args, add something to the end of the command-str so that they're ignored (we have already handled the command-args within this package-scripts.js)
+		/*if (commandArgs.length) {
+			if (commandStr != null) commandStr += " && rem Dynamic-script execution completed. Arguments were:";
+			else commandStr = "rem Dynamic-script execution completed. Arguments were:";
+		}*/
+		return commandStr;
+	}
 	return result;
 };
 const Dynamic_Async = asyncCommandRunnerFunc=>{
@@ -50,26 +92,14 @@ const Dynamic_Async = asyncCommandRunnerFunc=>{
 		// just return an empty command
 	});
 };
-const join_orig = Array.prototype.join;
-Array.prototype.join = function(...args) {
-	// If we're concatenating the script-entry with its args (just before execution)...
-	//	...and we find a String object produced by the Dynamic function above (rather than a primitive string like normal)...
-	//	...then intercept and replace the String object with the result of its commandStrGetter().
-	// Here is the relevant location in the nps source code: https://github.com/sezna/nps/blob/57989a24ff6876b3d5245f7e00b76aaf39296d31/src/index.js#L59
-	if (this[0] instanceof String && this[0].commandStrGetter != null) {
-		this[0] = this[0].commandStrGetter();
-	}
-	return join_orig.apply(this, args);
-};
 
 //const memLimit = 4096;
 const memLimit = 8192; // in megabytes
 
-const scripts = {};
+const scripts = {
+	initDB_k8s: "echo Hi"
+};
 module.exports.scripts = scripts;
-
-const commandName = process.argv[2];
-const commandArgs = process.argv.slice(3);
 
 const pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
 	let path = `./node_modules/.bin/${binaryName}`;
@@ -220,6 +250,31 @@ function SetTileEnvCmd(prod) {
 	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"}`;
 }
 
+function GetSecretsInfo(context) {
+	const secretsStr = execSync(`kubectl${context ? ` --context ${context}` : ""} get secrets -n postgres-operator debate-map-pguser-admin -o go-template='{{.data}}'`).toString();
+	const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
+	return {secretsStr, keyValuePairs};
+}
+function ImportPGUserSecretAsEnvVars(context) {
+	const {keyValuePairs} = GetSecretsInfo(context);
+	const fromBase64 = str=>Buffer.from(str, "base64");
+	const GetEnvVal = name=>fromBase64(keyValuePairs.find(a=>a[0] == name)[1]);
+	const newEnvVars = {
+		// node-js flag
+		NODE_TLS_REJECT_UNAUTHORIZED: 0, // tls change needed atm, till I figure out how to copy over signing data
+
+		// app-level
+		//DB_ADDR: GetEnvVal("host"),
+		DB_ADDR: "localhost",
+		//DB_PORT: GetEnvVal("port"),
+		DB_PORT: context == "ovh" ? 4205 : 3205,
+		DB_DATABASE: GetEnvVal("dbname"),
+		DB_USER: GetEnvVal("user"),
+		DB_PASSWORD: GetEnvVal("password"),
+	};
+	Object.assign(process.env, newEnvVars);
+}
+
 Object.assign(scripts, {
 	"app-server": {
 		// setup
@@ -228,13 +283,19 @@ Object.assign(scripts, {
 		initDB: TSScript({pkg: "app-server"}, "Scripts/KnexWrapper.js", "initDB"),
 		initDB_freshScript: `nps app-server.buildInitDBScript && nps app-server.initDB`,
 		// k8s variants
-		initDB_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`,
-		initDB_freshScript_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`,
+		initDB_k8s: Dynamic(()=>{
+			ImportPGUserSecretAsEnvVars(commandArgs[0]);
+			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`;
+		}),
+		initDB_freshScript_k8s: Dynamic(()=>{
+			ImportPGUserSecretAsEnvVars(commandArgs[0]);
+			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`;
+		}),
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
-		k8s_proxyOn8081: Dynamic(()=>{
+		/*k8s_proxyOn8081: Dynamic(()=>{
 			console.log("Test");
 			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
-		}),
+		}),*/
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "
 			SELECT pg_terminate_backend(pg_stat_activity.pid)

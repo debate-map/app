@@ -85,8 +85,8 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 * 1\) Run (in repo root): `npm start backend.tiltUp_local`
 * 2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
 	* 2.1\) Tilt-up can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/PGO/postgres` runs before `deploy/PGO/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
-	* 2.2\) Tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `tilt up`. More info: https://stackoverflow.com/a/68779828
-* 3\) [temp] Run the init-db script: `npm start initDB_freshScript_k8s`
+	* 2.2\) Tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `npm start backend.tiltUp_local`. More info: https://stackoverflow.com/a/68779828
+* 3\) Run the init-db script: `npm start initDB_freshScript_k8s local`
 
 Notes:
 * If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
@@ -173,9 +173,10 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
 	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
 * 6\) Run: `npm start backend.tiltUp_ovh`
-* 7\) Verify that the program has been deployed correctly, by visiting TODO.
-* 8\) If you haven't yet, initialize the DB by running: `npm start app-server.initDB_freshScript_k8s`
-* 9\) You should now be able to visit the website at TODO, and sign in. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
+* 7\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:31005`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
+* 8\) If you haven't yet, initialize the DB:
+	* 8.1\) Set up a port-forward by running the following (then refreshing the web-server page): `npm start app-server.initDB_freshScript_k8s ovh`
+* 9\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 ## Shared
 
@@ -204,14 +205,23 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 <!----><a name="k8s-psql"></a>
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
 
-* 1\) Set up a proxy from `localhost:3205` to k8s pod `debate-map-instance1-XXXXX` (port 5432):
-	* 1.1\) If you have tilt (local) running, a port-forward should already be set up.
-	* 1.2\) Otherwise (eg. for remote cluster), set it up manually using kubectl: `kubectl port-forward $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 3205:5432` (if you want this proxy to co-exist with your local-cluster's proxy, replace `3205` with something else -- within this command, and those below)
+Note: The instructions below are written to work for both the local and remote k8s clusters. Some substitutions are thus needed:
+* Anywhere you see `[local/ovh]`, replace it with `local` for your local cluster, and `ovh` for your remote cluster.
+* Anywhere you see `[3205/4205]`, replace it with `3205` for your local cluster, and `4205` for your remote cluster.
+
+The easy way:
+* 1\) Run: `npm start "ssh.db [linux/ovh]"`
+* 2\) Run (in vm shell that opens): `psql`
+
+The hard way: (ie. avoiding `npm start XXX` helpers)
+* 1\) Set up a port-forward from `localhost:[3205/4205]` to k8s pod `debate-map-instance1-XXXXX` (port 5432):
+	* 1.1\) If you have tilt running, a port-forward should already be set up, on the correct port. (as described in step 1)
+	* 1.2\) You can also set it up manually using kubectl: `kubectl port-forward $(kubectl --context [local/ovh] get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) [3205/4205]:5432`
 * 2\) To access `psql`, as the "admin" user, run the below...
-	* 2.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p 3205 -U admin -d debate-map`
-	* 2.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:3205/debate-map"`
-	* 2.3\) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p 3205 -U admin -d debate-map`
-	* 2.4\) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:3205/debate-map"`
+	* 2.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p [3205/4205] -U admin -d debate-map`
+	* 2.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:[3205/4205]/debate-map"`
+	* 2.3\) In Linux/WSL, option A (not working atm; can't access tilt's port-forwards): `PGPASSWORD="$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')" psql -h localhost -p [3205/4205] -U admin -d debate-map`
+	* 2.4\) In Linux/WSL, option B (not working atm; same reason): `psql "postgresql://admin:$(printf %s "$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"|jq -sRr @uri)@localhost:[3205/4205]/debate-map"`
 * 3\) To access `psql`, as the "debate-map" user, replace "admin" with "debate-map" and "debate-map-pguser-admin" with "debate-map-pguser-debate-map" in commands above.
 * 4\) To access `psql`, as the "postgres" user: I don't know how yet. (I couldn't find a "secrets" entry for it using kubectl)
 
