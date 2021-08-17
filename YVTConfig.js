@@ -12,6 +12,7 @@ exports.config = {
 	//dependencyOverrideGroups: yvtConfigObj.dependencyOverrideGroups,
 	dependencyOverrideGroups: [
 		!inDocker && process.env.VLIBS_USER == "venryx" && {
+			name: "venryx",
 			overrides_forSelf: {
 				//"web-vcore": "portal:./Portals/web-vcore",
 				//"@pg-lq/postgraphile-plugin": "portal:./Portals/@pg-lq_postgraphile-plugin",

@@ -193,6 +193,14 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 <!-- * To view the cAdvisor monitor webpage, open (not currently working): `localhost:31001` -->
 * To view the cAdvisor monitor webpage, open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
 
+<!----><a name="k8s-ssh"></a>
+### [k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)
+
+* For web-server: `npm start ssh.web-server`
+* For app-server: `npm start ssh.app-server`
+* For database: `npm start ssh.db`
+* For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
+
 <!----><a name="k8s-psql"></a>
 ### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
 
@@ -223,11 +231,6 @@ sudo apt -y install postgresql-client-13
 To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 * 1\) Run: `kubectl exec -it $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
 * 2\) Run (in new bash): `cat /pgdata/pg13/XXX`
-
-<!----><a name="k8s-view-locals"></a>
-### [k8s-view-locals] How to view local files of server/web-server/etc. pods
-
-* 1\) Run (replacing `app=dm-app-server` with the base name of the pod you want): `kubectl exec -it $(kubectl get pod -n app -o name -l app=dm-app-server) -- bash`
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth

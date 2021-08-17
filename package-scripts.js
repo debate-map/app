@@ -1,5 +1,6 @@
 const fs = require("fs");
 const paths = require("path");
+const {spawn, exec, execSync} = require("child_process");
 
 /*
 Why are some scripts '.ts' and some '.js'?
@@ -38,15 +39,37 @@ function FindPackagePath(packageName, asAbsolute = true) {
 	throw new Error(`Could not find package: "${packageName}"`);
 }
 
+const Dynamic = commandStrGetter=>{
+	const result = new String("[placeholder for dynamically-evaluated command-string]");
+	result.commandStrGetter = commandStrGetter;
+	return result;
+};
+const Dynamic_Async = asyncCommandRunnerFunc=>{
+	return Dynamic(()=>{
+		asyncCommandRunnerFunc();
+		// just return an empty command
+	});
+};
+const join_orig = Array.prototype.join;
+Array.prototype.join = function(...args) {
+	// If we're concatenating the script-entry with its args (just before execution)...
+	//	...and we find a String object produced by the Dynamic function above (rather than a primitive string like normal)...
+	//	...then intercept and replace the String object with the result of its commandStrGetter().
+	// Here is the relevant location in the nps source code: https://github.com/sezna/nps/blob/57989a24ff6876b3d5245f7e00b76aaf39296d31/src/index.js#L59
+	if (this[0] instanceof String && this[0].commandStrGetter != null) {
+		this[0] = this[0].commandStrGetter();
+	}
+	return join_orig.apply(this, args);
+};
+
 //const memLimit = 4096;
 const memLimit = 8192; // in megabytes
 
 const scripts = {};
 module.exports.scripts = scripts;
 
-function GetServeCommand(nodeEnv = null) {
-	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "npm start client.dev.part2"`;
-}
+const commandName = process.argv[2];
+const commandArgs = process.argv.slice(3);
 
 /*const {nmWatchPaths_notUnderWVC, nmWatchPaths_underWVC} = require("./Scripts/NodeModuleWatchPaths.js");
 const group1 = `--from ${nmWatchPaths_notUnderWVC.map(a=>`"${a}"`).join(" ")} --to NMOverwrites`;
@@ -110,43 +133,107 @@ Object.assign(scripts, {
 		//tsc: "cd Packages/common && tsc --noEmit",
 		tsc: "tsc --noEmit --project Packages/common/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 	},
+});
+
+/*const GetPSQLScript = contextName=>{
+	return [
+		`$env:PGPASSWORD=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`,
+		`$env:PGHOST=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.host | base64decode}}')`,
+		`$env:PGPORT=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.port | base64decode}}')`,
+		`psql -h $env:PGHOST -p $env:PGPORT -U admin -d debate-map`,
+	].join("; ")
+}*/
+const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
+const GetPodNameCmd_DB =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n postgres-operator -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master`;
+const GetPodNameCmd_WebServer =	contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n app -l app=dm-web-server`;
+const GetPodNameCmd_AppServer =	contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n app -l app=dm-app-server`;
+/*const GetPSQLScript = contextName=>{
+	// for windows
+	/*return [
+		`$env:dbPodName=$(kubectl --context ${contextName} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.port | base64decode}}')`,
+		`kubectl --context ${contextName} exec -i -t -n postgres-operator $env:dbPodName -c database "--" sh -c "clear; (bash || ash || sh)"`,
+	].join("; ")*#/
+	return `kubectl --context ${contextName} exec -i -t -n postgres-operator $(${CommandStr_GetPodName_DB(contextName)}) -c database "--" sh -c "clear; (bash || ash || sh)"`;
+}*/
+
+
+const PrepDockerCmd = ()=>{
+	//return `npm start dockerPrep &&`;
+	return `node Scripts/PrepareDocker.js &&`;
+};
+
+//console.log("CommandName:", commandName, "@args:", commandArgs);
+//if (commandName.startsWith("backend.ssh.") && commandArgs[0] == null) console.error("Must supply context after command-name. (options: local, ovh)")
+
+function GetServeCommand(nodeEnv = null) {
+	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "npm start client.dev.part2"`;
+}
+
+Object.assign(scripts, {
+	ssh: {
+		"db": Dynamic(()=>{
+			const podName = execSync(GetPodNameCmd_DB(commandArgs[0])).toString().trim();
+			//console.log("podName:", podName);
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- bash`;
+			/*const commandStr = `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- bash`;
+			spawn(commandStr.split(" ")[0], commandStr.split(" ").slice(1), {stdio: "inherit"});*/
+		}),
+		"web-server": Dynamic(()=>{
+			const podName = execSync(GetPodNameCmd_WebServer(commandArgs[0])).toString().trim();
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n app ${podName} -c dm-web-server -- bash`;
+		}),
+		"app-server": Dynamic(()=>{
+			const podName = execSync(GetPodNameCmd_AppServer(commandArgs[0])).toString().trim();
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n app ${podName} -c dm-app-server -- bash`;
+		}),
+	},
 	// for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)
 	backend: {
 		// general
 		//buildNMOverwrites: `npx file-syncer ${group1} ${group2}`,
 		buildNMOverwrites: `npx file-syncer --from ${nmWatchPaths.map(a=>`"${a}"`).join(" ")} --to NMOverwrites --replacements "node_modules/web-vcore/node_modules/" "node_modules/" --clearAtLaunch`,
-	
+		/*get test1() {
+			console.log("hmm");
+			return "";
+		},*/
+
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",
 		//dockerBuild: "cross-env DOCKER_BUILDKIT=1 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
-		dockerBuild: DockerCommand("docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct ."),
+		dockerBuild: `${PrepDockerCmd()} docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .`,
 		//dockerBuild: "xcopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
 		// using robocopy works, but it's not much faster, if at all; seems slowdown is throughout the yarn install process (~3 minutes in docker, ~1s in Windows :/)
 		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
 		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
 		//dockerBuild: "robocopy \"node_modules\" \".yarn/test1\" /s /e /NFL /NDL /NJH /NJS /nc /ns /np && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .", // this takes even longer than yarn install...
 		//dockerBuild: "tar -czh . | docker build -",
-		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct ."), // variant which preserves complete log (may increase build time)
-		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/app-server/Dockerfile -t dm-app-server-direct ."), // with cache disabled
+		dockerBuild_fullLog: `${PrepDockerCmd()} cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .`, // variant which preserves complete log (may increase build time)
+		dockerBuild_ignoreCache: `${PrepDockerCmd()} docker build --no-cache -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .`, // with cache disabled
 		dockerBuild_gitlab: {
-			"base": DockerCommand("docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
-			"app-server": DockerCommand("docker build -f ./Packages/app-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
-			"web-server": DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map ."),
+			"base": `${PrepDockerCmd()} docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
+			"app-server": `${PrepDockerCmd()} docker build -f ./Packages/app-server/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
+			"web-server": `${PrepDockerCmd()} docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
 		},
 		/*dockerBuildAndPush_gitlab: {
 			"base": "npm start backend.dockerBuild_gitlab.base && docker push registry.gitlab.com/venryx/debate-map",
 			"app-server": "npm start backend.dockerBuild_gitlab.app-server && docker push registry.gitlab.com/venryx/debate-map",
 			"web-server": "npm start backend.dockerBuild_gitlab.web-server && docker push registry.gitlab.com/venryx/debate-map",
 		},*/
-		pulumiUp: DockerCommand("pulumi up"),
+		pulumiUp: `${PrepDockerCmd()} pulumi up`,
 		
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context local"),
-		tiltUp_docker: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context docker-desktop"),
-		tiltUp_k3d: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context k3d-main-1"),
-		tiltUp_kind: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set DEV=true&& tilt up --context kind-main-1"),
-		tiltUp_ovh: DockerCommand("set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& set PROD=true&& tilt up --context ovh --port 10351"), // tilt-port +1, so can coexist with tilt dev-instance
+		tiltUp_local: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context local`,
+		tiltUp_docker: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context docker-desktop`,
+		tiltUp_k3d: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context k3d-main-1`,
+		tiltUp_kind: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context kind-main-1`,
+		tiltUp_ovh: `${PrepDockerCmd()} ${SetTileEnvCmd(true)} tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
 	},
+});
+function SetTileEnvCmd(prod) {
+	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set PROD=true&&" : "set DEV=true&&"}`;
+}
+
+Object.assign(scripts, {
 	"app-server": {
 		// setup
 		//initDB: "psql -f ./Packages/app-server/Scripts/InitDB.sql debate-map",
@@ -157,7 +244,10 @@ Object.assign(scripts, {
 		initDB_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`,
 		initDB_freshScript_k8s: `node Scripts/Run_WithPGEnvVars.js ${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`,
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
-		k8s_local_proxyOn8081: "kubectl -n postgres-operator port-forward $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) 8081:5432",
+		k8s_proxyOn8081: Dynamic(()=>{
+			console.log("Test");
+			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
+		}),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "
 			SELECT pg_terminate_backend(pg_stat_activity.pid)
@@ -179,9 +269,9 @@ Object.assign(scripts, {
 	"web-server": {
 		dev: "tsc --build --watch Packages/web-server/tsconfig.json",
 
-		dockerBuild: DockerCommand("docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."),
-		dockerBuild_fullLog: DockerCommand("cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."), // variant which preserves complete log (may increase build time)
-		dockerBuild_ignoreCache: DockerCommand("docker build --no-cache -f ./Packages/web-server/Dockerfile -t dm-web-server-direct ."), // with cache disabled
+		dockerBuild: `${PrepDockerCmd()} docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct .`,
+		dockerBuild_fullLog: `${PrepDockerCmd()} cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct .`, // variant which preserves complete log (may increase build time)
+		dockerBuild_ignoreCache: `${PrepDockerCmd()} docker build --no-cache -f ./Packages/web-server/Dockerfile -t dm-web-server-direct .`, // with cache disabled
 	},
 });
 
@@ -209,9 +299,4 @@ function GetStartServerCommand() {
 	//return TSScript({pkg: "app-server", envStrAdd: "DEV=true"}, "Dist/Main.js");
 	//return `cd Packages/app-server && node --experimental-modules --experimental-specifier-resolution=node ./Dist/Main.js`;
 	return `cd Packages/app-server && node --experimental-specifier-resolution=node ./Dist/Main.js`;
-}
-
-function DockerCommand(commandStr) {
-	//return `npm start dockerPrep && ${commandStr}`;
-	return `node Scripts/PrepareDocker.js && ${commandStr}`;
 }

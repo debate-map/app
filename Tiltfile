@@ -55,7 +55,8 @@ k8s_resource(new_name="database",
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
-	}
+	},
+	port_forwards='3205:5432'
 ) # db
 
 #k8s_resource('pgo', port_forwards='3205:5432') # db
@@ -64,7 +65,9 @@ k8s_resource('pgo',
 	# 	"postgres-operator.crunchydata.com/cluster": "debate-map",
 	# 	"postgres-operator.crunchydata.com/role": "master"
 	# },
-	port_forwards='3205:5432') # db#k8s_yaml(kustomize('./Packages/deploy/postgres'))
+	
+	#port_forwards='3205:5432'
+)
 
 # own app
 # ==========
