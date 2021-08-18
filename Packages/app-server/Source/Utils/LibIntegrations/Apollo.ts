@@ -14,7 +14,10 @@ export function GetWebServerURL(subpath: string) {
 	if (DEV && !inK8s) return `http://localhost:3005/${subpath.slice(1)}`;
 	//if (DEV && inK8s) return `http://localhost:31005/${subpath.slice(1)}`;
 	if (DEV && inK8s) return `http://localhost:3005/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
-	return `https://debatemap.app/${subpath.slice(1)}`;
+
+	//return `https://debatemap.app/${subpath.slice(1)}`;
+	// temp
+	return `https://dm.venryx.org/${subpath.slice(1)}`;
 }
 export function GetAppServerURL(subpath: string, referrerURLStr?: string) {
 	Assert(subpath.startsWith("/"));
@@ -23,11 +26,13 @@ export function GetAppServerURL(subpath: string, referrerURLStr?: string) {
 	if (DEV && inK8s) return `http://localhost:3105/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
 	
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
-	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
-	if (referrerURL && referrerURL.host.endsWith(":31005")) return `http://${referrerURL.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
+	/*const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
+	if (referrerURL && referrerURL.host.endsWith(":31005")) return `http://${referrerURL.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;*/
 	//if (currentURL.endsWith(":31006")) return `http://${currentURL.host}/${subpath.slice(1)}`;
 
-	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
+	//return `https://app-server.debatemap.app/${subpath.slice(1)}`;
+	// temp
+	return `https://dm.venryx.org/app-server/${subpath.slice(1)}`;
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");

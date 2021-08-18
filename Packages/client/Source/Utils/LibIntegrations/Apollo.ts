@@ -22,6 +22,9 @@ export function GetAppServerURL(subpath: string) {
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
 	if (location.host.endsWith(":31005")) return `http://${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
 
+	// temp
+	if (location.host == "dm.venryx.org") return `http://dm.venryx.org/app-server/${subpath.slice(1)}`;
+
 	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 }
 

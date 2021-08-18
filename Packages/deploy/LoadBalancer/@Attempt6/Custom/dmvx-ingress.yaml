@@ -10,9 +10,26 @@ spec:
   rules:
     - host: dm.venryx.org
       http:
+        middlewares:
+          test-stripprefix:
+            stripPrefix:
+              prefixes:
+                - "/app-server"
         paths:
-          - backend:
+          - path: "/"
+            backend:
               #serviceName: dmvx-service
               serviceName: dm-web-server
               #servicePort: 8765
               servicePort: 8080
+          - path: "/app-server/"
+            pathType: "Prefix"
+            backend:
+              serviceName: dm-app-server
+              servicePort: 3105
+    # - host: app-server.dm.venryx.org
+    #   http:
+    #     paths:
+    #       - backend:
+    #           serviceName: dm-app-server
+    #           servicePort: 3105
