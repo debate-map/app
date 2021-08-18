@@ -107,11 +107,13 @@ app.get("/health-check", async(req, res)=>{
 		Assert(existingUser_hidden != null, "Could not find system-user's user-hidden data, which we know should exist.");
 		console.log("Health-check: Passed 3");
 
-		console.log("Health-check: Good");
+		console.log("Health-check: Good. Error:");
 		res.sendStatus(200); // status: 200 OK
 	} catch (ex) {
-		console.log("Health-check: Bad", ex);
+		console.log("Health-check: Bad. Error:", ex);
 		res.sendStatus(500); // status: 500 Internal Server Error
+		// try to reconnect the pool
+		pgPool.connect();
 	}
 });
 
