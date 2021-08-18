@@ -162,10 +162,14 @@ k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-roles.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-service.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")'''
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part1.yaml")
+
+'''k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part1.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part2.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part3.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part4.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part4.yaml")'''
+
+k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
+
 '''k8s_resource(new_name="traefik_early",
 	objects=[
 		#"traefik-attempt4:namespace",
@@ -198,7 +202,7 @@ k8s_resource(new_name="general",
 		#"app:namespace",
 		"debate-map:postgrescluster",
 	],
-	resource_deps=["traefik"],
+	resource_deps=["reflector"],
 )
 
 k8s_yaml('./namespace.yaml')

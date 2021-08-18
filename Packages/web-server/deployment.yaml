@@ -17,7 +17,7 @@ spec:
       nodePort: 31005
       protocol: TCP
       #name: web
-      name: websecure
+      #name: websecure
 ---
 apiVersion: apps/v1
 kind: Deployment
