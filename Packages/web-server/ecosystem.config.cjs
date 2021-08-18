@@ -27,7 +27,8 @@ module.exports = {
 		//stop_exit_codes: [0],
 		stop_exit_codes: (()=>{
 			const result = [0];
-			result.includes = ()=>true; // have pm2 view *every* exit-code as a "stop"/to-ignore one
+			// have pm2 view *every* exit-code as a "stop"/to-ignore one (other than 42; that's our restart code)
+			result.includes = stopCodeFound=>stopCodeFound != 42;
 			return result;
 		})(),
 

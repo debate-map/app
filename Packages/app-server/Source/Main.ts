@@ -295,6 +295,11 @@ app.get("/test", (req, res)=>{
 app.get("/app-server/test", (req, res)=>{
 	res.send(`This shouldn't be received...`); // yet it is (better than not at all I guess)
 });
+// temp (obviously); as fallback for early-dev-version end-user fixing
+app.get("/restart", (req, res)=>{
+	res.send("Restarting app-server...");
+	process.exit(42);
+});
 
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}
