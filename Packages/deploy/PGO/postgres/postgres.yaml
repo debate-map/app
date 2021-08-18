@@ -46,6 +46,7 @@ spec:
     annotations:
       # make-so the user-secret can be mirrored to the "app" namespace (see user-secret-mirror.yaml for the annotation on the "pulling" end)
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "app"
+      #reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "app"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "default"
       #reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
       #reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "app"

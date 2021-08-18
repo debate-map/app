@@ -54,3 +54,4 @@ Packages/deploy/**
 # ===========================================================================
 
 Packages/app-server
+Packages/deploy

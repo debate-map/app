@@ -268,6 +268,6 @@ Authorized redirect URIs:
 * http://localhost:31006/auth/google/callback
 * http://[::1]:3105/auth/google/callback
 * http://[::1]:31006/auth/google/callback
-* https://app-server.debate-map.app/auth/google/callback
+* https://app-server.debatemap.app/auth/google/callback
 * https://9m2x1z.nodes.c1.or1.k8s.ovh.us:31006/auth/google/callback (temp; and update the ovh cluster-url if it's different)
 ```
