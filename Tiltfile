@@ -18,7 +18,7 @@ print("Env:", ENV)
 k8s_resource(new_name="namespaces",
 	objects=[
 		"postgres-operator:Namespace:default",
-		"traefik-attempt4:namespace",
+		#"traefik-attempt4:namespace",
 		"app:namespace",
 	],
 )
@@ -159,23 +159,28 @@ k8s_resource("traefik",
 
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-definitions.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-roles.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-service.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")
-k8s_resource("traefik",
+k8s_resource(new_name="traefik_early",
 	objects=[
 		#"traefik-attempt4:namespace",
 		"ingressroutes.traefik.containo.us:customresourcedefinition",
 		"ingressroutetcps.traefik.containo.us:customresourcedefinition",
 		"middlewares.traefik.containo.us:customresourcedefinition",
 		"tlsoptions.traefik.containo.us:customresourcedefinition",
+	],
+	resource_deps=["reflector"],
+)
+k8s_resource("traefik",
+	objects=[
 		"traefik-ingress-controller:serviceaccount",
 		"traefik-ingress-controller:clusterrole",
 		"traefik-ingress-controller:clusterrolebinding",
 		"simpleingressroute:ingressroute",
 		"ingressroutetls:ingressroute",
 	],
-	resource_deps=["reflector"],
+	resource_deps=["traefik_early"],
 )
 
 # commented till I get traefik working in general

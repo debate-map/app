@@ -1,15 +1,15 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: traefik-attempt4
----
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: traefik-attempt4
+# ---
 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: traefik-ingress-controller
   #namespace: traefik-attempt4
-automountServiceAccountToken: true
+#automountServiceAccountToken: true
 
 ---
 kind: Deployment
@@ -53,3 +53,29 @@ spec:
               containerPort: 4443
             - name: admin
               containerPort: 8080
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: whoami
+  labels:
+    app: whoami
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: whoami
+  template:
+    metadata:
+      labels:
+        app: whoami
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami
+          ports:
+            - name: web
+              containerPort: 80
