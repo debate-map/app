@@ -70,14 +70,14 @@ k8s_resource("node-exporter",
 	],
 	resource_deps=["prometheus"],
 )
-k8s_resource("cadvisor",
+'''k8s_resource("cadvisor",
 	objects=[
 		"cadvisor-claim0:persistentvolumeclaim",
 		"cadvisor-claim1:persistentvolumeclaim",
 		"cadvisor-claim2:persistentvolumeclaim",
 	],
 	resource_deps=["prometheus"],
-)
+)'''
 
 # crunchydata postgres operator
 # ==========

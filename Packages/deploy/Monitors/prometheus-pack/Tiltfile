@@ -16,7 +16,11 @@ def DirName(path):
 def BaseName(path):
 	return ToLPath(os.path.basename(ToWPath(path)))
 
-setupManifests = [doc for doc in ListDir(".", recursive=True) if doc.endswith(".yaml")]
+setupManifests = [
+	doc for doc in ListDir(".", recursive=True)
+	if doc.endswith(".yaml")
+		and "cadvisor" not in doc # temp
+]
 
 def name(c):
 	return c['metadata']['name']
