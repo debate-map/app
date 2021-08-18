@@ -89,7 +89,7 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 * 3\) Run the init-db script: `npm start initDB_freshScript_k8s local`
 
 Notes:
-* If your namespace gets messed up, delete it using this (regular kill command gets stuck): https://github.com/ctron/kill-kube-ns (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
+* If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"` (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
 * When the list of images/containers in Docker Desktop gets too long, see the [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim) module.
 
 <!----><a name="docker-trim"></a>
@@ -215,7 +215,7 @@ The easy way:
 
 The hard way: (ie. avoiding `npm start XXX` helpers)
 * 1\) Set up a port-forward from `localhost:[3205/4205]` to k8s pod `debate-map-instance1-XXXXX` (port 5432):
-	* 1.1\) If you have tilt running, a port-forward should already be set up, on the correct port. (as described in step 1)
+	* 1.1\) If you have tilt running, a port-forward should already be set up, on the correct port. (`3205` for your local cluster, and `4205` for your remote cluster)
 	* 1.2\) You can also set it up manually using kubectl: `kubectl port-forward $(kubectl --context [local/ovh] get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) [3205/4205]:5432`
 * 2\) To access `psql`, as the "admin" user, run the below...
 	* 2.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p [3205/4205] -U admin -d debate-map`

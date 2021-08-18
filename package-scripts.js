@@ -120,6 +120,12 @@ Object.assign(scripts, {
 		tiltUp_k3d: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context k3d-main-1`,
 		tiltUp_kind: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context kind-main-1`,
 		tiltUp_ovh: `${PrepDockerCmd()} ${SetTileEnvCmd(true)} tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+
+		forceKillNS: Dynamic(()=>{
+			const pathToKillScript = paths.resolve("./Scripts/KillKubeNS.sh");
+			const pathToKillScript_wsl = pathToKillScript.replace(/\\/g, "/").replace("C:/", "/mnt/c/");
+			return `wsl ${pathToKillScript_wsl} ${commandArgs.join(" ")}`;
+		}),
 	},
 });
 function SetTileEnvCmd(prod) {

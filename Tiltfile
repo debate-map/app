@@ -11,6 +11,18 @@ DEV = ENV == "dev"
 PROD = ENV == "prod"
 print("Env:", ENV)
 
+# namespaces
+# ==========
+
+# Never manually-restart this "namespaces" group! (deletion of namespaces can get frozen, and it's a pain to manually restart)
+k8s_resource(new_name="namespaces",
+	objects=[
+		"postgres-operator:Namespace:default",
+		"traefik-attempt4:namespace",
+		"app:namespace",
+	],
+)
+
 # prometheus
 # ==========
 
@@ -35,19 +47,60 @@ load(
 )
 install()
 
+k8s_resource("prometheus",
+	objects=[
+		"vfiles-configmap:configmap",
+	],
+	resource_deps=["namespaces"],
+)
+k8s_resource("grafana",
+	objects=[
+		"grafana-config-monitoring:configmap",
+		"grafana-dashboards:configmap",
+		"grafana-datasources:configmap",
+		"grafana-dashboard-kubernetes-cluster:configmap",
+		"grafana-dashboard-node-exporter-full:configmap",
+	],
+	resource_deps=["prometheus"],
+)
+k8s_resource("node-exporter",
+	objects=[
+		"node-exporter-claim0:persistentvolumeclaim",
+		"node-exporter-claim1:persistentvolumeclaim",
+	],
+	resource_deps=["prometheus"],
+)
+k8s_resource("cadvisor",
+	objects=[
+		"cadvisor-claim0:persistentvolumeclaim",
+		"cadvisor-claim1:persistentvolumeclaim",
+		"cadvisor-claim2:persistentvolumeclaim",
+	],
+	resource_deps=["prometheus"],
+)
+
 # crunchydata postgres operator
 # ==========
 
 k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
 k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
 
-'''k8s_resource('pgo',
+k8s_resource('pgo',
+	objects=[
+		#"postgres-operator:Namespace:default",
+		"postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition",
+		"postgres-operator:clusterrole",
+		"postgres-operator:clusterrolebinding",
+		"pgo:serviceaccount",
+		"debate-map-pguser-admin:secret",
+	],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
 	port_forwards='3205:5432' if DEV else '4205:5432',
-)'''
+	resource_deps=["namespaces"],
+)
 '''k8s_resource(new_name="database",
 	objects=["debate-map:PostgresCluster:postgres-operator"],
 	#objects=["postgres-operator:ClusterRole:default"],
@@ -58,17 +111,17 @@ k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
 	port_forwards='3205:5432' if DEV else None,
 	resource_deps=["pgo"],
 )'''
-k8s_resource(new_name="database",
+'''k8s_resource(new_name="database",
 	objects=[
-		"postgres-operator:Namespace:default",
+		"pgo:serviceaccount",
 	],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
 	port_forwards='3205:5432' if DEV else '4205:5432',
-	#resource_deps=["pgo"],
-)
+	resource_deps=["pgo"],
+)'''
 
 # reflector
 # ==========
@@ -84,6 +137,11 @@ helm_remote('reflector',
 k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
 k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
 k8s_resource("reflector",
+	objects=[
+		"reflector:clusterrole",
+		"reflector:clusterrolebinding",
+		"reflector:serviceaccount",
+	],
 	#resource_deps=["database"],
 	resource_deps=["pgo"],
 )
@@ -105,15 +163,34 @@ k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-service.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")
 k8s_resource("traefik",
+	objects=[
+		#"traefik-attempt4:namespace",
+		"ingressroutes.traefik.containo.us:customresourcedefinition",
+		"ingressroutetcps.traefik.containo.us:customresourcedefinition",
+		"middlewares.traefik.containo.us:customresourcedefinition",
+		"tlsoptions.traefik.containo.us:customresourcedefinition",
+		"traefik-ingress-controller:serviceaccount",
+		"traefik-ingress-controller:clusterrole",
+		"traefik-ingress-controller:clusterrolebinding",
+		"simpleingressroute:ingressroute",
+		"ingressroutetls:ingressroute",
+	],
 	resource_deps=["reflector"],
 )
-
 
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
 
 # own app
 # ==========
+
+k8s_resource(new_name="general",
+	objects=[
+		#"app:namespace",
+		"debate-map:postgrescluster",
+	],
+	resource_deps=["traefik"],
+)
 
 k8s_yaml('./namespace.yaml')
 k8s_yaml('./Packages/web-server/deployment.yaml')
@@ -163,7 +240,7 @@ k8s_resource('dm-app-server',
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	#port_forwards='3105:31006')
 	port_forwards='3105' if DEV else '4105',
-	resource_deps=["traefik"],
+	resource_deps=["general"],
 )
 
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
@@ -172,5 +249,5 @@ k8s_resource('dm-web-server',
 	#port_forwards='3005:31005')
 	port_forwards='3005' if DEV else '4005',
 	#resource_deps=["dm-app-server"],
-	resource_deps=["traefik"],
+	resource_deps=["general"],
 )
