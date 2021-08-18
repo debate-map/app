@@ -20,7 +20,9 @@ module.exports = {
 			node_args: "--experimental-specifier-resolution=node",
 		},
 
-		//exp_backoff_restart_delay: 500,
+		// temp; the stop_exit_codes solution doesn't seem to work for every case, so use back-off on retries at least
+		exp_backoff_restart_delay: 500,
+		
 		// disable restart-on-error (that's kubernetes' job);
 		//stop_exit_codes: [0],
 		stop_exit_codes: (()=>{

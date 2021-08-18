@@ -40,12 +40,15 @@ install()
 
 k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
 k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
-k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
 
 '''k8s_resource('pgo',
-	resource_deps=["reflector"],
-)
-k8s_resource(new_name="database",
+	extra_pod_selectors={
+		"postgres-operator.crunchydata.com/cluster": "debate-map",
+		"postgres-operator.crunchydata.com/role": "master"
+	},
+	port_forwards='3205:5432' if DEV else '4205:5432',
+)'''
+'''k8s_resource(new_name="database",
 	objects=["debate-map:PostgresCluster:postgres-operator"],
 	#objects=["postgres-operator:ClusterRole:default"],
 	extra_pod_selectors={
@@ -56,12 +59,15 @@ k8s_resource(new_name="database",
 	resource_deps=["pgo"],
 )'''
 k8s_resource(new_name="database",
-	objects=["postgres-operator:Namespace:default"],
+	objects=[
+		"postgres-operator:Namespace:default",
+	],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
 	port_forwards='3205:5432' if DEV else '4205:5432',
+	#resource_deps=["pgo"],
 )
 
 # reflector
@@ -76,20 +82,32 @@ helm_remote('reflector',
 )'''
 # from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v5.4.17
 k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
+k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
 k8s_resource("reflector",
-	resource_deps=["database"],
+	#resource_deps=["database"],
+	resource_deps=["pgo"],
 )
 
 # load-balancer/reverse-proxy (traefik)
 # ==========
 
 #k8s_yaml("./Packages/deploy/LoadBalancer/traefik.yaml")
-load('ext://helm_remote', 'helm_remote')
+'''load('ext://helm_remote', 'helm_remote')
 helm_remote('traefik', repo_url='https://helm.traefik.io/traefik',
 	values=['Packages/deploy/LoadBalancer/traefik-config.yaml'])
 k8s_resource("traefik",
 	resource_deps=["reflector"],
+)'''
+
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-definitions.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-roles.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-service.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")
+k8s_resource("traefik",
+	resource_deps=["reflector"],
 )
+
 
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")

@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: traefik
+  labels:
+    k8s-app: traefik-api-ingress-lb
+    #chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
+    app: traefik-api-ingress-controller
+spec:
+  #replicas: {{ $replicas }}
+  selector:
+    matchLabels:
+      k8s-app: traefik-api-ingress-lb
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-api-ingress-lb
+        name: traefik-api-ingress-lb
+        #version: {{ $version }}
+        app: traefik-api-ingress-controller
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+      - name: traefik-api-ingress-lb
+        #image: traefik:{{ $version }}
+        image: traefik
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        readinessProbe:
+          tcpSocket:
+            port: 80
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        volumeMounts:
+          - mountPath: /config
+            name: config
+          #- mountPath: /ssl
+          #  name: ssl
+
+        ports:
+          - containerPort: 80
+            hostPort: 80
+          - name: "https"
+            containerPort: 80
+            hostPort: 443
+          - name: admin
+            containerPort: 8080
+        #env:
+        #- name: UPDATE_CONFIG
+        #  value: {{ $.Release.Time }}
+        args:
+        - --configfile=/config/traefik.yaml
+      volumes:
+      - name: config
+        configMap:
+          name: traefik-api-files
+      #- name: ssl
+      #  secret:
+      #    secretName: traefik-default-cert
+
+# v-added
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-api-files
+  namespace: traefik
+data:
+  traefik.yaml: |
+    providers:
+      kubernetesIngress: {}

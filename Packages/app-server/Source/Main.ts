@@ -287,6 +287,10 @@ app.get("/", (req, res)=>{
 	`.AsMultiline(0));
 });
 
+app.get("/test", (req, res)=>{
+	res.send(`Placeholder response for /test route.`);
+});
+
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}
 app.listen(serverPort);

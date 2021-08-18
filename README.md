@@ -54,6 +54,7 @@ Reasons:
 Guide modules for ["client" package](https://github.com/debate-map/app/tree/master/Packages/client):
 * [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
 * [client/dev-enhance](https://github.com/debate-map/app/tree/master/Packages/client#dev-enhance)
+* [client/build](https://github.com/debate-map/app/tree/master/Packages/client#build)
 
 ## Package: web-server
 

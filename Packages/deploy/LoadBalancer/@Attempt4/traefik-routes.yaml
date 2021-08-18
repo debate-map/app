@@ -1,0 +1,44 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: simpleingressroute
+  #namespace: traefik-attempt4
+  namespace: app
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`new.debatemap.app`)
+    kind: Rule
+    services:
+    - name: dm-web-server
+      port: 3005
+  - match: Host(`app-server.debatemap.app`)
+    kind: Rule
+    services:
+    - name: dm-app-server
+      port: 3105
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroutetls
+  #namespace: traefik-attempt4
+  namespace: app
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    certResolver: default
+  routes:
+  - match: Host(`new.debatemap.app`)
+    kind: Rule
+    services:
+    - name: dm-web-server
+      port: 3005
+  - match: Host(`app-server.debatemap.app`)
+    kind: Rule
+    services:
+    - name: dm-app-server
+      port: 3105
