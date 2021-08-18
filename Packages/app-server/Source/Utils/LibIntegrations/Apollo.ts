@@ -32,7 +32,7 @@ export function GetAppServerURL(subpath: string, referrerURLStr?: string) {
 
 	//return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 	// temp
-	return `https://dm.venryx.org/app-server/${subpath.slice(1)}`;
+	return `https://dm-app.venryx.org/${subpath.slice(1)}`;
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");

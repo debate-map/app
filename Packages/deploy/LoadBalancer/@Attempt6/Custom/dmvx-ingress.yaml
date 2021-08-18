@@ -17,46 +17,42 @@ spec:
   rules:
     - host: dm.venryx.org
       http:
-        middlewares:
-          test-stripprefix:
-            stripPrefix:
-              prefixes:
-                - "/app-server"
-                - "/app-server/"
-          testHeader:
-            headers:
-              accessControlAllowMethods:
-                - CONNECT
-                - DELETE
-                - GET
-                - HEAD
-                - OPTIONS
-                - PATCH
-                - POST
-                - PUT
-              # accessControlAllowOriginList:
-              #   - https://foo.bar.org
-              #   - https://example.org
-              #accessControlMaxAge: 100
-              #addVaryHeader: true
+        # middlewares:
+        #   test-stripprefix:
+        #     stripPrefix:
+        #       prefixes:
+        #         - "/app-server"
+        #         - "/app-server/"
+        #   testHeader:
+        #     headers:
+        #       accessControlAllowMethods:
+        #         - CONNECT
+        #         - DELETE
+        #         - GET
+        #         - HEAD
+        #         - OPTIONS
+        #         - PATCH
+        #         - POST
+        #         - PUT
         paths:
-          - path: "/"
-            pathType: "Prefix"
-            priority: 1
+          -
+            # path: "/"
+            # pathType: "Prefix"
+            # priority: 1
             backend:
               #serviceName: dmvx-service
               serviceName: dm-web-server
               #servicePort: 8765
               servicePort: 8080
-          - path: "/app-server/"
-            pathType: "Prefix"
-            priority: 2
-            backend:
+          # - path: "/app-server/"
+          #   pathType: "Prefix"
+          #   priority: 2
+          #   backend:
+          #     serviceName: dm-app-server
+          #     servicePort: 3105
+    - host: dm-app.venryx.org
+      http:
+        paths:
+          - backend:
               serviceName: dm-app-server
               servicePort: 3105
-    # - host: app-server.dm.venryx.org
-    #   http:
-    #     paths:
-    #       - backend:
-    #           serviceName: dm-app-server
-    #           servicePort: 3105
