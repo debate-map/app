@@ -20,10 +20,10 @@ export function GetAppServerURL(subpath: string) {
 	if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
 	
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
-	if (location.host.endsWith(":31005")) return `http://${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
+	if (location.host.endsWith(":31005")) return `${location.protocol}//${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
 
 	// temp
-	if (location.host == "dm.venryx.org") return `http://dm.venryx.org/app-server/${subpath.slice(1)}`;
+	if (location.host == "dm.venryx.org") return `https://dm.venryx.org/app-server/${subpath.slice(1)}`;
 
 	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 }

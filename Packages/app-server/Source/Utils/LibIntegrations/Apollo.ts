@@ -50,7 +50,7 @@ export function InitApollo(serverLaunchID: string) {
 		uri: GRAPHQL_URL,
 	});
 	wsLink = new WebSocketLink({
-		uri: GRAPHQL_URL.replace(/^http/, "ws"),
+		uri: GRAPHQL_URL.replace(/^http/, "ws"), // upgrade to wss?
 		options: {
 			reconnect: true,
 			//lazy: true, // needed for async connectionParams()

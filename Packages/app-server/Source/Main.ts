@@ -290,6 +290,9 @@ app.get("/", (req, res)=>{
 app.get("/test", (req, res)=>{
 	res.send(`Placeholder response for /test route.`);
 });
+app.get("/app-server/test", (req, res)=>{
+	res.send(`This shouldn't be received...`); // yet it is (better than not at all I guess)
+});
 
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}

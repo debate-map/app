@@ -6,6 +6,13 @@ metadata:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: default
+
+    # ingress.kubernetes.io/hsts-max-age: "315360000"
+    # ingress.kubernetes.io/hsts-include-subdomains: "true"
+    # ingress.kubernetes.io/custom-frame-options-value: "SAMEORIGIN"
+    # ingress.kubernetes.io/content-type-nosniff: "true"
+    # ingress.kubernetes.io/browser-xss-filter: "true"
+    #traefik.ingress.kubernetes.io/custom-response-headers: "Server:||X-Application-Context:||X-Powered-By:||exception:||Access-Control-Allow-Headers:CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
 spec:
   rules:
     - host: dm.venryx.org
@@ -15,8 +22,27 @@ spec:
             stripPrefix:
               prefixes:
                 - "/app-server"
+                - "/app-server/"
+          testHeader:
+            headers:
+              accessControlAllowMethods:
+                - CONNECT
+                - DELETE
+                - GET
+                - HEAD
+                - OPTIONS
+                - PATCH
+                - POST
+                - PUT
+              # accessControlAllowOriginList:
+              #   - https://foo.bar.org
+              #   - https://example.org
+              #accessControlMaxAge: 100
+              #addVaryHeader: true
         paths:
           - path: "/"
+            pathType: "Prefix"
+            priority: 1
             backend:
               #serviceName: dmvx-service
               serviceName: dm-web-server
@@ -24,6 +50,7 @@ spec:
               servicePort: 8080
           - path: "/app-server/"
             pathType: "Prefix"
+            priority: 2
             backend:
               serviceName: dm-app-server
               servicePort: 3105

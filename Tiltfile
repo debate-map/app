@@ -169,6 +169,15 @@ k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part3.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part4.yaml")'''
 
 k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
+k8s_resource(new_name="traefik",
+	objects=[
+		"traefik-ingress-controller:serviceaccount",
+   	"traefik-ingress-controller:clusterrole",
+   	"traefik-ingress-controller:clusterrolebinding",
+   	"dmvx-ingress:ingress",
+	],
+	resource_deps=["reflector"],
+)
 
 '''k8s_resource(new_name="traefik_early",
 	objects=[
@@ -202,7 +211,7 @@ k8s_resource(new_name="general",
 		#"app:namespace",
 		"debate-map:postgrescluster",
 	],
-	resource_deps=["reflector"],
+	resource_deps=["traefik"],
 )
 
 k8s_yaml('./namespace.yaml')
