@@ -12,12 +12,13 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ### [setup-base] Setting up base tools needed for local/remote k8s deployments
 
 * 1\) Install Docker Desktop: https://docs.docker.com/desktop
-* 2\) Install Chocolatey: https://chocolatey.org/install
-* 3\) Install Helm (eg. for some Tilt extensions): `choco install kubernetes-helm`
-* 4\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
-* 5\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-* 6\) Install Tilt: https://github.com/tilt-dev/tilt
-* 7\) See here for more helpful tools: https://collabnix.github.io/kubetools
+* 2\) Install Tilt: https://github.com/tilt-dev/tilt
+* 3\) Install Chocolatey: https://chocolatey.org/install
+* 4\) Install Helm (eg. for some Tilt extensions): `choco install kubernetes-helm`
+* 5\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
+* 6\) Install DBeaver (ui for remote psql db's): https://dbeaver.io/download
+* 7\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+* 8\) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 <!----><a name="docker-trim"></a>
 ### [image-inspect] Docker image/container inspection

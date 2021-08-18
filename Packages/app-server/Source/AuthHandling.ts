@@ -43,6 +43,16 @@ callbackURL_proxy.toString = ()=>{
 	return GetAppServerURL("/auth/google/callback", referrerURL);
 };*/
 
+Object.defineProperty(Object.prototype, "callbackURL", {
+	get() {
+		/*const referrerURL = currentAuthRequest?.get("Referrer");
+		console.log("Referrer url for auth request:", referrerURL);
+		return GetAppServerURL("/auth/google/callback", referrerURL);*/
+		if (process.env.ENV == "prod") return "https://dm-app.venryx.org/auth/google/callback"; // temp fix (shouldn't be needed, but apparently the rel-to-abs code passport uses is wrong)
+		return "/auth/google/callback";
+	},
+});
+
 let currentAuthRequest: Request<{}, any, any, any, Record<string, any>>; 
 passport.use(new GoogleStrategy(
 	{
@@ -56,7 +66,7 @@ passport.use(new GoogleStrategy(
 		},*/
 		//callbackURL: callbackURL_proxy as any,
 		// use relative url here; apparently passport-oauth supports this: https://github.com/jaredhanson/passport-oauth2/blob/86a6ae476e09c0864aef97456822d3e2915727f3/lib/strategy.js#L142
-		callbackURL: "/auth/google/callback",
+		//callbackURL: "/auth/google/callback",
 	},
 	async(accessToken, refreshToken, profile, done)=>{
 		//console.log("Test1");
