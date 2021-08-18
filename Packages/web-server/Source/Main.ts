@@ -28,4 +28,4 @@ import {config} from "dm_client/Scripts/Config.js";
 
 console.log("Web-server starting...");
 Serve(config, webpackConfig);
-console.log("Web-server started.");
+console.log("Web-server started on:", process.env.PORT ?? 3005);

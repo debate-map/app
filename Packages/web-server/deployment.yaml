@@ -12,12 +12,18 @@ spec:
   # to make it accessible outside of cluster
   type: NodePort
   ports:
-    - port: 3005
-      targetPort: 3005
-      nodePort: 31005
-      protocol: TCP
+    # - port: 3005
+    #   targetPort: 3005
+    #   nodePort: 31005
+    #   protocol: TCP
       #name: web
       #name: websecure
+
+    - name: http
+      #port: 8765
+      #targetPort: 3005
+      port: 8080
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -41,7 +47,10 @@ spec:
       containers:
         - name: dm-web-server
           image: gcr.io/debate-map-prod/dm-web-server
+          env:
+            - name: PORT
+              value: "8080"
           #livenessProbe: TODO
-          ports:
-            - name: websecure
-              containerPort: 3005
+          # ports:
+          #   - name: websecure
+          #     containerPort: 3005
