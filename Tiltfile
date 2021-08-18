@@ -157,12 +157,16 @@ k8s_resource("traefik",
 	resource_deps=["reflector"],
 )'''
 
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-definitions.yaml")
+'''k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-definitions.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-roles.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-service.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")
-k8s_resource(new_name="traefik_early",
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")'''
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part1.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part2.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part3.yaml")
+k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part4.yaml")
+'''k8s_resource(new_name="traefik_early",
 	objects=[
 		#"traefik-attempt4:namespace",
 		"ingressroutes.traefik.containo.us:customresourcedefinition",
@@ -181,7 +185,7 @@ k8s_resource("traefik",
 		"ingressroutetls:ingressroute",
 	],
 	resource_deps=["traefik_early"],
-)
+)'''
 
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
