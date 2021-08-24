@@ -95,16 +95,16 @@ passport.use(new GoogleStrategy(
 
 		console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
 
-		let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
+		/*let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
 		if (DEV) {
 			const usersCount = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
-			//if (usersCount.rowCount <= 1) {
-			// temp; make every new user who signs up an admin
-			if (true) {
+			if (usersCount.rowCount <= 1) {
 				console.log("First non-system user signing-in; marking as admin.");
 				permissionGroups = {basic: true, verified: true, mod: true, admin: true};
 			}
-		}
+		}*/
+		// temp; make every new user who signs up an admin
+		let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
 
 		const user = new User({
 			displayName: profile.displayName,
