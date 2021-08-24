@@ -10,11 +10,11 @@ spec:
   selector:
     app: dm-app-server
   # to make it accessible outside of cluster
-  type: NodePort
+  #type: NodePort
   ports:
     - port: 3105
-      targetPort: 3105
-      nodePort: 31006
+      #targetPort: 3105
+      #nodePort: 31006
       protocol: TCP
 ---
 apiVersion: apps/v1

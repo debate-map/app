@@ -5,6 +5,7 @@ import React from "react";
 import Knex from "knex";
 import {RootState, store} from "../Store/Store.js";
 import {apolloClient} from "./Apollo.js";
+import {pgPool} from "../../Main.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface UT_StoreShape extends RootState {}
@@ -24,6 +25,7 @@ export function InitGraphlink() {
 		// server-specific
 		knexModule: Knex,
 		//pgClient, // rather than set it here, update the field each time pgClient is recreated (ie. in pgPool's "connect" handler) 
+		pgPool,
 	});
 	//graph.userInfo = {id: systemUserID, displayName: systemUserName};
 	graph.SetUserInfo({id: systemUserID});

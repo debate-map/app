@@ -1,23 +1,51 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-	  {
-		 "name": "server.run (debug)",
-		 "type": "node",
-		 "request": "launch",
-		 "runtimeExecutable": "node",
-		 //"runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
-		 "runtimeArgs": [
-			 "--nolazy", // necessary for breakpoints to hit more reliably
-			 "--loader", "ts-node/esm.mjs", "--experimental-specifier-resolution=node" // from package-scripts.json
+		{
+			"name": "server.run (debug)",
+			"type": "node",
+			"request": "launch",
+			"runtimeExecutable": "node",
+			"runtimeArgs": [
+				"--nolazy",
+				"--loader",
+				"ts-node/esm.mjs",
+				"--experimental-specifier-resolution=node"
 			],
- 
-		 "args": ["Source\\Main.ts"],
-		 //"args": ["Dist\\Main.js"], // this works, but means breakpoints set in .ts files aren't hit
-		 
-		 "cwd": "${workspaceFolder}\\Packages\\server",
-		 "internalConsoleOptions": "openOnSessionStart",
-		 "skipFiles": ["<node_internals>/**", "node_modules/**"]
-	  }
+			"args": [
+				"Source\\Main.ts"
+			],
+			"cwd": "${workspaceFolder}\\Packages\\server",
+			"internalConsoleOptions": "openOnSessionStart",
+			"skipFiles": [
+				"<node_internals>/**",
+				"node_modules/**"
+			]
+		},
+		{
+			"name": "server.run (debug) with Kubernetes [not yet working]",
+			"type": "node",
+			"request": "launch",
+			"runtimeExecutable": "node",
+			"runtimeArgs": [
+				"--nolazy",
+				"--loader",
+				"ts-node/esm.mjs",
+				"--experimental-specifier-resolution=node"
+			],
+			"args": [
+				"Source\\Main.ts"
+			],
+			"cwd": "${workspaceFolder}\\Packages\\server",
+			"internalConsoleOptions": "openOnSessionStart",
+			"skipFiles": [
+				"<node_internals>/**",
+				"node_modules/**"
+			],
+			"preLaunchTask": "bridge-to-kubernetes.resource",
+			"env": {
+				"GRPC_DNS_RESOLVER": "native"
+			}
+		},
 	]
  }

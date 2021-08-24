@@ -18,7 +18,8 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 * 5\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
 * 6\) Install DBeaver (ui for remote psql db's): https://dbeaver.io/download
 * 7\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-* 8\) See here for more helpful tools: https://collabnix.github.io/kubetools
+* 8\) [opt] Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
+* 9\) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 <!----><a name="docker-trim"></a>
 ### [image-inspect] Docker image/container inspection

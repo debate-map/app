@@ -82,22 +82,31 @@ const pluginHook = makePluginHook([
 	variant == "patches" && new GeneratePatchesPlugin(),
 ] as any[]);
 
+pg.defaults.poolSize = 10;
 export const pgPool = new Pool({
 	connectionString: dbURL,
 });
-export var pgClient: PoolClient;
+graph.subs.pgPool = pgPool;
+//export var pgClient: PoolClient;
 pgPool.on("connect", client=>{
-	console.warn(`pgClient ${pgClient != null ? "re" : ""}created...`);
-	pgClient = client;
-	graph.subs.pgClient = pgClient;
+	console.log(`A pgClient has been created in the pool. New pool size:`, pgPool.totalCount);
+	//pgClient = client;
+	//graph.subs.pgPool = pgClient;
+});
+pgPool.on("remove", async client=>{
+	console.log("A pgClient in the pool has been disconnected. New pool size:", pgPool.totalCount, pgPool.totalCount == 0 ? "[attempting new connection...]" : "");
+	if (pgPool.totalCount == 0) {
+		await pgPool.connect();
+		//console.log("A pgClient in the pool has been disconnected. New pool size:", pgPool.totalCount);
+	}
 });
 
 app.get("/health-check", async(req, res)=>{
 	console.log("Starting health-check.");
 	try {
-		Assert(pgClient != null, "No pgClient has been initialized/connected yet.");
+		Assert(pgPool.totalCount > 0, "No pgClient has been initialized/connected within the pool yet.");
 		
-		const usersCount = await pgClient.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+		const usersCount = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
 		Assert(usersCount.rowCount >= 1, "Could not find any users in database. (at least the system user should exist)");
 		console.log("Health-check: Passed 1");
 
@@ -107,7 +116,7 @@ app.get("/health-check", async(req, res)=>{
 		Assert(existingUser_hidden != null, "Could not find system-user's user-hidden data, which we know should exist.");
 		console.log("Health-check: Passed 3");
 
-		console.log("Health-check: Good. Error:");
+		console.log("Health-check: Good.");
 		res.sendStatus(200); // status: 200 OK
 	} catch (ex) {
 		console.log("Health-check: Bad. Error:", ex);

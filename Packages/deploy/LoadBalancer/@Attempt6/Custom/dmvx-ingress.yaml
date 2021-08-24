@@ -43,7 +43,8 @@ spec:
               #serviceName: dmvx-service
               serviceName: dm-web-server
               #servicePort: 8765
-              servicePort: 8080
+              #servicePort: 8080
+              servicePort: 3005
           # - path: "/app-server/"
           #   pathType: "Prefix"
           #   priority: 2

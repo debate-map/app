@@ -6,7 +6,7 @@ import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, s
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import expressSession from "express-session";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {pgClient, pgPool} from "./Main.js";
+import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
 
@@ -80,7 +80,7 @@ passport.use(new GoogleStrategy(
 
 		//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
 
-		const test1 = await pgClient.query(`SELECT * FROM "userHiddens"`);
+		const test1 = await pgPool.query(`SELECT * FROM "userHiddens"`);
 		console.log("Test1:", test1.rows);
 
 		//const existingUser = await GetAsync(()=>GetUsers()));
@@ -97,7 +97,7 @@ passport.use(new GoogleStrategy(
 
 		let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
 		if (DEV) {
-			const usersCount = await pgClient.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+			const usersCount = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
 			//if (usersCount.rowCount <= 1) {
 			// temp; make every new user who signs up an admin
 			if (true) {
