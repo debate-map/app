@@ -107,7 +107,7 @@ k8s_resource('pgo',
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	#port_forwards='4205:5432' if REMOTE else '3205:5432',
+	port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["namespaces"],
 )
 '''k8s_resource(new_name="database",
