@@ -96,33 +96,23 @@ k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
 k8s_resource('pgo',
 	objects=[
 		#"postgres-operator:Namespace:default",
-		"postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition",
+		"postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition", # the CRD definition?
+		"debate-map:postgrescluster", # the CRD instance?
 		"postgres-operator:clusterrole",
 		"postgres-operator:clusterrolebinding",
 		"pgo:serviceaccount",
-		"debate-map-pguser-admin:secret",
-		"debate-map:postgrescluster",
+		#"debate-map-pguser-admin:secret",
 	],
-	extra_pod_selectors={
-		"postgres-operator.crunchydata.com/cluster": "debate-map",
-		"postgres-operator.crunchydata.com/role": "master"
-	},
-	port_forwards='4205:5432' if REMOTE else '3205:5432',
+	# extra_pod_selectors={
+	# 	"postgres-operator.crunchydata.com/cluster": "debate-map",
+	# 	"postgres-operator.crunchydata.com/role": "master"
+	# },
+	# port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["namespaces"],
 )
-'''k8s_resource(new_name="database",
-	objects=["debate-map:PostgresCluster:postgres-operator"],
-	#objects=["postgres-operator:ClusterRole:default"],
-	extra_pod_selectors={
-		"postgres-operator.crunchydata.com/cluster": "debate-map",
-		"postgres-operator.crunchydata.com/role": "master"
-	},
-	port_forwards=None if REMOTE else '3205:5432',
-	resource_deps=["pgo"],
-)'''
-'''k8s_resource(new_name="database",
+k8s_resource(new_name='pgo_late',
 	objects=[
-		"pgo:serviceaccount",
+		"debate-map-pguser-admin:secret",
 	],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
@@ -130,7 +120,7 @@ k8s_resource('pgo',
 	},
 	port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["pgo"],
-)'''
+)
 
 # reflector
 # ==========
@@ -152,7 +142,8 @@ k8s_resource("reflector",
 		"reflector:serviceaccount",
 	],
 	#resource_deps=["database"],
-	resource_deps=["pgo"],
+	#resource_deps=["pgo"],
+	resource_deps=["pgo_late"],
 )
 
 # load-balancer/reverse-proxy (traefik)

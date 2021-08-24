@@ -31,6 +31,16 @@ Tools:
 * Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
 * To inspect the full file-contents of an image: `docker image save IMAGE_NAME > output.tar` (followed by extraction, eg. using [7-zip](https://www.7-zip.org))
 
+<!----><a name="tilt-notes"></a>
+### [tilt-notes] Notes on using Tilt
+
+Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+
+Notes:
+* Tilt-up can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/PGO/postgres` runs before `deploy/PGO/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "pgo" resource loads without error.
+* For local cluster, tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `npm start backend.tiltUp_local`. More info: https://stackoverflow.com/a/6877982
+* **Manually restarting the "pgo" resource will clear the database contents! Use with caution.**
+
 ## Local
 
 <!----><a name="setup-k8s"></a>
@@ -86,9 +96,9 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 
 * 1\) Run (in repo root): `npm start backend.tiltUp_local`
 * 2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
-	* 2.1\) Tilt-up can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/PGO/postgres` runs before `deploy/PGO/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "uncategorized" resource shows green.
-	* 2.2\) Tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `npm start backend.tiltUp_local`. More info: https://stackoverflow.com/a/68779828
-* 3\) Run the init-db script: `npm start initDB_freshScript_k8s local`
+* 3\) Run the init-db script: `npm start "initDB_freshScript_k8s local"`
+
+> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
 
 Notes:
 * If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"` (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
@@ -177,8 +187,10 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 * 6\) Run: `npm start backend.tiltUp_ovh`
 * 7\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:31005`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
 * 8\) If you haven't yet, initialize the DB:
-	* 8.1\) Set up a port-forward by running the following (then refreshing the web-server page): `npm start app-server.initDB_freshScript_k8s ovh`
+	* 8.1\) Run: `npm start "app-server.initDB_freshScript_k8s ovh"`
 * 9\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
+
+> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
 
 ## Shared
 

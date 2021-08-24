@@ -104,7 +104,7 @@ passport.use(new GoogleStrategy(
 			}
 		}*/
 		// temp; make every new user who signs up an admin
-		let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
+		let permissionGroups = {basic: true, verified: true, mod: true, admin: true};
 
 		const user = new User({
 			displayName: profile.displayName,
