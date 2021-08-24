@@ -6,10 +6,18 @@ allow_k8s_contexts('ovh')
 
 #k8s_yaml('./Packages/deploy/k8s_entry.yaml')
 
+#print("Env vars:", os.environ)
+
 ENV = os.getenv("ENV")
 DEV = ENV == "dev"
 PROD = ENV == "prod"
 print("Env:", ENV)
+
+CONTEXT = os.getenv("CONTEXT")
+#CONTEXT = str(local(["kubectl", "config", "current-context"]))
+#REMOTE = CONTEXT == "ovh"
+REMOTE = CONTEXT != "local"
+print("Context:", CONTEXT, "Remote:", REMOTE)
 
 # namespaces
 # ==========
@@ -93,12 +101,13 @@ k8s_resource('pgo',
 		"postgres-operator:clusterrolebinding",
 		"pgo:serviceaccount",
 		"debate-map-pguser-admin:secret",
+		"debate-map:postgrescluster",
 	],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='3205:5432' if DEV else '4205:5432',
+	#port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["namespaces"],
 )
 '''k8s_resource(new_name="database",
@@ -108,7 +117,7 @@ k8s_resource('pgo',
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='3205:5432' if DEV else None,
+	port_forwards=None if REMOTE else '3205:5432',
 	resource_deps=["pgo"],
 )'''
 '''k8s_resource(new_name="database",
@@ -119,7 +128,7 @@ k8s_resource('pgo',
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='3205:5432' if DEV else '4205:5432',
+	port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["pgo"],
 )'''
 
@@ -206,13 +215,13 @@ k8s_resource("traefik",
 # own app
 # ==========
 
-k8s_resource(new_name="general",
-	objects=[
-		#"app:namespace",
-		"debate-map:postgrescluster",
-	],
-	resource_deps=["traefik"],
-)
+# k8s_resource(new_name="general",
+# 	objects=[
+# 		#"app:namespace",
+# 		"debate-map:postgrescluster",
+# 	],
+# 	resource_deps=["traefik"],
+# )
 
 k8s_yaml('./namespace.yaml')
 k8s_yaml('./Packages/web-server/deployment.yaml')
@@ -221,8 +230,8 @@ k8s_yaml('./Packages/app-server/deployment.yaml')
 # rest
 # ==========
 
-nmWatchPathsStr = local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"])
-nmWatchPaths = str(nmWatchPathsStr).strip().split(",")
+nmWatchPathsStr = str(local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"]))
+nmWatchPaths = nmWatchPathsStr.strip().split(",")
 # liveUpdateEntries_shared = []
 # for path in nmWatchPaths:
 # 	liveUpdateEntries_shared.append(sync('./' + path, '/dm_repo/' + path))
@@ -261,15 +270,15 @@ docker_build('gcr.io/debate-map-prod/dm-app-server', '.', dockerfile='Packages/a
 k8s_resource('dm-app-server', 
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	#port_forwards='3105:31006')
-	port_forwards='3105' if DEV else '4105',
-	resource_deps=["general"],
+	port_forwards='4105' if REMOTE else '3105',
+	resource_deps=["traefik"],
 )
 
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
 k8s_resource('dm-web-server', 
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
-	port_forwards='3005' if DEV else '4005',
+	port_forwards='4005' if REMOTE else '3005',
 	#resource_deps=["dm-app-server"],
-	resource_deps=["general"],
+	resource_deps=["traefik"],
 )

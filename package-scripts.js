@@ -115,11 +115,11 @@ Object.assign(scripts, {
 		pulumiUp: `${PrepDockerCmd()} pulumi up`,
 		
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context local`,
-		tiltUp_docker: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context docker-desktop`,
-		tiltUp_k3d: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context k3d-main-1`,
-		tiltUp_kind: `${PrepDockerCmd()} ${SetTileEnvCmd(false)} tilt up --context kind-main-1`,
-		tiltUp_ovh: `${PrepDockerCmd()} ${SetTileEnvCmd(true)} tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltUp_local:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt up --context local`,
+		tiltUp_docker:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "docker-desktop")}		tilt up --context docker-desktop`,
+		tiltUp_k3d:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "k3d-main-1")}			tilt up --context k3d-main-1`,
+		tiltUp_kind:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "kind-main-1")}			tilt up --context kind-main-1`,
+		tiltUp_ovh:		`${PrepDockerCmd()}		${SetTileEnvCmd(true, "ovh")}						tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
 
 		forceKillNS: Dynamic(()=>{
 			const pathToKillScript = paths.resolve("./Scripts/KillKubeNS.sh");
@@ -128,8 +128,8 @@ Object.assign(scripts, {
 		}),
 	},
 });
-function SetTileEnvCmd(prod) {
-	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"}`;
+function SetTileEnvCmd(prod, context) {
+	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"} ${context ? `set CONTEXT=${context}&&` : ""}`;
 }
 
 function GetSecretsInfo(context) {
@@ -149,12 +149,16 @@ function ImportPGUserSecretAsEnvVars(context) {
 		//DB_ADDR: GetEnvVal("host"),
 		DB_ADDR: "localhost",
 		//DB_PORT: GetEnvVal("port"),
-		DB_PORT: context == "ovh" ? 4205 : 3205,
+		DB_PORT: context != "local" ? 4205 : 3205,
 		DB_DATABASE: GetEnvVal("dbname"),
 		DB_USER: GetEnvVal("user"),
 		DB_PASSWORD: GetEnvVal("password"),
 	};
 	Object.assign(process.env, newEnvVars);
+}
+
+function GetKubectlContext() {
+	return execSync(`kubectl config current-context`).toString().trim();
 }
 
 Object.assign(scripts, {
@@ -166,11 +170,11 @@ Object.assign(scripts, {
 		initDB_freshScript: `nps app-server.buildInitDBScript && nps app-server.initDB`,
 		// k8s variants
 		initDB_k8s: Dynamic(()=>{
-			ImportPGUserSecretAsEnvVars(commandArgs[0]);
+			ImportPGUserSecretAsEnvVars(commandArgs[0] ?? GetKubectlContext());
 			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`;
 		}),
 		initDB_freshScript_k8s: Dynamic(()=>{
-			ImportPGUserSecretAsEnvVars(commandArgs[0]);
+			ImportPGUserSecretAsEnvVars(commandArgs[0] ?? GetKubectlContext());
 			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`;
 		}),
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
