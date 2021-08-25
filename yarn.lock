@@ -1242,7 +1242,7 @@ __metadata:
   dependencies:
     chalk: ^4.1.1
     cross-env: ^7.0.3
-    file-syncer: ^0.0.5
+    file-syncer: ^0.0.8
     nps: ^5.10.0
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0

@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "file-syncer": "^0.0.5",
+    "file-syncer": "^0.0.8",
     "nps": "^5.10.0",
     "ts-loader": "9.2.3",
     "ts-node": "^10.0.0",
@@ -27,19 +27,21 @@
     "tsc-watch": "^4.4.0",
     "typescript": "^4.3.2"
   },
-  "@resolutions_c": "The 'version locks' below are for deps that are also subdeps (eg. under symlinked deps), 'locking' to the 'as subdep' version, to keep their types aligned. [not sure if actually needed/useful]",
+  "@resolutions_c": "The 'version locks' below (other than mathjs toggle) are for version-sensitive deps (eg. those with patches specified) where ci-builds would/may otherwise get the 'wrong' versions (ie. differing from dev/symlink-enabled environment).",
   "resolutions": {
+    "mathjs": "1.0.0",
     "@types/react": "17.0.9",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "mathjs": "1.0.1"
+    "tslib": "2.3.0",
+    "zen-observable-ts": "1.1.0"
   },
   "dependencies": {
     "chalk": "^4.1.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
-    "web-vcore": "0.0.19"
+    "web-vcore": "0.0.23"
   },
   "packageManager": "yarn@3.0.0-rc.2"
 }

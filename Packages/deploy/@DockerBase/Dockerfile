@@ -7,8 +7,6 @@ FROM node:14
 
 WORKDIR "/dm_repo"
 
-# test
-
 # bundle just the files here that yarn needs to do its job (else files change will force yarn to re-run)
 COPY package.json .
 COPY .yarn/ .yarn/
@@ -20,13 +18,17 @@ COPY Packages/app-server/package.json Packages/app-server/package.json
 COPY Packages/web-server/package.json Packages/web-server/package.json
 COPY Packages/deploy/package.json Packages/deploy/package.json
 
+COPY patches/ patches/
+#COPY node_modules/web-vcore/patches/ node_modules/web-vcore/patches/
+
 # also copy cache contents from node_modules/web-vcore/.yarn/cache (if wvc is symlinked, the dm's cache will lack many of the libs)
 # this should work, except docker refuses to allow symlink-following (https://github.com/moby/moby/issues/1676)
 #COPY node_modules/web-vcore/.yarn/cache .yarn/cache
 #COPY C:/Root/Apps/@V/@Modules/web-vcore/Main/.yarn/cache .yarn/cache
 
 # now that yarn has the info it needs, have it install all the node-modules
-RUN yarn install
+# (--inline-builds lets us see the output of the build-scripts [eg. the post-install for patch-package] to confirm that they're being applied properly)
+RUN yarn install --inline-builds
 #RUN yarn install --cache-folder ./cross-build-yarn-cache
 #RUN --mount=type=cache,target=.yarn/cache yarn install
 #ENV YARN_CACHE_FOLDER=../.yarn_cache

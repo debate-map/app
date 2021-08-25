@@ -6,6 +6,8 @@ const inLocalK8s = DEV;
 console.log("Preparing to run app-server. @devMode:", DEV, "@serverHost:", k8sServiceHost, "@inLocalK8s:", inLocalK8s);
 //console.log("Env:", process.env);
 
+//console.log("Contents of /dm_repo/node_modules/zen-observable-ts/package.json:", require("fs").readFileSync("/dm_repo/node_modules/zen-observable-ts/package.json").toString());
+
 module.exports = {
 	apps: [{
 		name: "main",

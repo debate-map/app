@@ -60,6 +60,7 @@ k8s_resource("prometheus",
 		"vfiles-configmap:configmap",
 	],
 	resource_deps=["namespaces"],
+	labels=["monitoring"],
 )
 k8s_resource("grafana",
 	objects=[
@@ -70,6 +71,7 @@ k8s_resource("grafana",
 		"grafana-dashboard-node-exporter-full:configmap",
 	],
 	resource_deps=["prometheus"],
+	labels=["monitoring"],
 )
 k8s_resource("node-exporter",
 	objects=[
@@ -77,6 +79,7 @@ k8s_resource("node-exporter",
 		"node-exporter-claim1:persistentvolumeclaim",
 	],
 	resource_deps=["prometheus"],
+	labels=["monitoring"],
 )
 '''k8s_resource("cadvisor",
 	objects=[
@@ -109,6 +112,7 @@ k8s_resource('pgo',
 	# },
 	# port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["namespaces"],
+	labels=["database_DO-NOT-RESTART-THESE"],
 )
 k8s_resource(new_name='pgo_late',
 	objects=[
@@ -120,6 +124,7 @@ k8s_resource(new_name='pgo_late',
 	},
 	port_forwards='4205:5432' if REMOTE else '3205:5432',
 	resource_deps=["pgo"],
+	labels=["database_DO-NOT-RESTART-THESE"],
 )
 
 # reflector
@@ -169,6 +174,9 @@ k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part3.yaml")
 k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part4.yaml")'''
 
 k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
+k8s_resource("traefik-daemon-set",
+	labels=["traefik"],
+)
 k8s_resource(new_name="traefik",
 	objects=[
 		"traefik-ingress-controller:serviceaccount",
@@ -177,6 +185,7 @@ k8s_resource(new_name="traefik",
    	"dmvx-ingress:ingress",
 	],
 	resource_deps=["reflector"],
+	labels=["traefik"],
 )
 
 '''k8s_resource(new_name="traefik_early",
@@ -263,6 +272,7 @@ k8s_resource('dm-app-server',
 	#port_forwards='3105:31006')
 	port_forwards='4105' if REMOTE else '3105',
 	resource_deps=["traefik"],
+	labels=["app"],
 )
 
 # the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
@@ -272,4 +282,5 @@ k8s_resource('dm-web-server',
 	port_forwards='4005' if REMOTE else '3005',
 	#resource_deps=["dm-app-server"],
 	resource_deps=["traefik"],
+	labels=["app"],
 )
