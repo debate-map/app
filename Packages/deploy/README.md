@@ -12,6 +12,7 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ### [setup-base] Setting up base tools needed for local/remote k8s deployments
 
 * 1\) Install Docker Desktop: https://docs.docker.com/desktop
+* 1.1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards. See [here](https://superuser.com/a/1671710/231129) for the fix.
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt
 * 3\) Install Chocolatey: https://chocolatey.org/install
 * 4\) Install Helm (eg. for some Tilt extensions): `choco install kubernetes-helm`
@@ -258,6 +259,11 @@ sudo apt -y install postgresql-client-13
 To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 * 1\) Run: `kubectl exec -it $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
 * 2\) Run (in new bash): `cat /pgdata/pg13/XXX`
+
+<!----><a name="pg-backups"></a>
+### [pg-backups] How to set up backups for your in-kubernetes database
+
+* 1\) TODO
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth

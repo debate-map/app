@@ -90,4 +90,5 @@ Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/mast
 * [deploy/k8s-ssh](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-ssh)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
 * [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)
+* [deploy/pg-backups](https://github.com/debate-map/app/tree/master/Packages/deploy#pg-backups)
 * [deploy/oauth-setup](https://github.com/debate-map/app/tree/master/Packages/deploy#oauth-setup)
