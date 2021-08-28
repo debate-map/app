@@ -38,7 +38,7 @@ spec:
         - name: registry-credentials
       containers:
       - name: dm-app-server
-        image: gcr.io/debate-map-prod/dm-app-server
+        image: "TILT_PLACEHOLDER:imageURL_appServer"
         livenessProbe:
           httpGet:
             path: /health-check

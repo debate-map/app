@@ -130,15 +130,15 @@ foreach ($container in $containersToRemove) {
 
 ## Remote
 
-<!----><a name="k8s-remote"></a>
-### [docker-remote] Docker remote image repository
+<!----><a name="cloud-project-init"></a>
+### [cloud-project-init] Cloud-projects initialization (eg. creating Google Cloud project for Pulumi to work within)
 
-Note: We use GCP's container-registry service here, but others could be used.
+Note: We use Google Cloud here, but others could be used.
 
 * 1\) Ensure you have a user-account on Google Cloud Platform: https://cloud.google.com/
 * 2\) Install the Google Cloud SDK: https://cloud.google.com/sdk/docs/install
-* 3\) Authenticate the gcloud sdk/cli by providing it with the key-file for a service-account with access to the image-registry you want to deploy to.
-	* 3.1\) For the main image-registry, you'll need to be supplied with the service-account key-file. (contact Venryx)
+* 3\) Authenticate the gcloud sdk/cli by providing it with the key-file for a service-account with access to the project you want to deploy to.
+	* 3.1\) For the main Google Cloud project instance, you'll need to be supplied with the service-account key-file. (contact Venryx)
 	* 3.2\) If you're creating your own fork/deployment, you'll need to:
 		* 3.2.1\) Create a GCP project.
 		* 3.2.2\) Enable the Container Registry API for your GCP project: https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
@@ -147,29 +147,35 @@ Note: We use GCP's container-registry service here, but others could be used.
 			* 3.2.3.2\) Choose a service-account name, and add the role "Container Registry Service Agent" and "Storage Admin" (*not* the weaker "Storage Object Admin").
 			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
 			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
-			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts (Of course, keep this file secure.)
-	* 3.3\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=PATH_TO_KEY_FILE`
-	* 3.4\) Add the service-account to your Docker authentication, in a similar way: `Get-Content PATH_TO_KEY_FILE | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
-* 4\) Install the Pulumi cli: `https://www.pulumi.com/docs/get-started/install`
-* 5\) Ensure your local Docker images are up-to-date. (usually just keep `npm start tiltUp_local` running in the background)
-* 6\) Ensure that a Pulumi project is set up, to hold the Pulumi deployment "stack".
-	* 6.1\) Collaborators on the main release can contact Stephen (aka Venryx) to be added as project members (you can view it online [here](https://app.pulumi.com/Venryx/debate-map) if you have access).
-	* 6.2\) If you're creating your own fork/deployment:
-		* 6.2.1\) Create a new Pulumi project [here](https://app.pulumi.com). Make sure your project is named `debate-map`, so that it matches the name in `Pulumi.yaml`.
-		* 6.2.2\) Open `Tiltfile` (in repo root), and change the path `gcr.io/debate-map-prod/dm_shared-base` to match where you'll be uploading the shared-base docker-image. (also, update the dependency name in `Packages/XXX/Dockerfile`, for each package that you'll be deploying)
-* 7\) Run: `npm start pulumiUp` (`pulumi up` also works, *if* the last result of `npm start backend.dockerPrep` is up-to-date)
-* 8\) Select the stack you want to deploy to. (for now, we always deploy to `prod`)
-* 9\) Review the changes it prepared, then proceed with "yes".
-* 10\) After a couple minutes, the build should complete. The docker-image is now accessible in the cloud at the URL shown at the bottom of the output.
-* 11\) Sounds slow? Well:
-	* Much of that is one-time setup of accounts and such.
-	* What about the slowness of the builds? Future ones are faster, due to layer caching.
-	* What about the interruption of switching between Tilt and Pulumi? You don't have to! Tilt apparently is able to push to the GCP registry as well, once you have the steps above done once.
+			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
+	* 3.3\) Move (or copy) the JSON file to the following path: `Packages/deploy/PGO/postgres/gcs-key.json`
+	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Packages/deploy/PGO/postgres/gcs-key.json`
+	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Packages/deploy/PGO/postgres/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+
+<!----><a name="pulumi-init"></a>
+### [pulumi-init] Pulumi initialization (provisioning GCS bucket, container registry, etc.)
+
+Prerequisite steps: [deploy/cloud-project-init](https://github.com/debate-map/app/tree/master/Packages/deploy#cloud-project-init)
+
+Note: We use Google Cloud here, but others could be used.
+
+* 1\) Install the Pulumi cli: `https://www.pulumi.com/docs/get-started/install`
+* 2\) Ensure that a Pulumi project is set up, to hold the Pulumi deployment "stack".
+	* 2.1\) Collaborators on the main release can contact Stephen (aka Venryx) to be added as project members (you can view it online [here](https://app.pulumi.com/Venryx/debate-map) if you have access).
+	* 2.2\) If you're creating your own fork/deployment:
+		* 2.2.1\) Create a new Pulumi project [here](https://app.pulumi.com). Make sure your project is named `debate-map`, so that it matches the name in `Pulumi.yaml`.
+* 3\) Run: `npm start pulumiUp` (`pulumi up` also works, *if* the last result of `npm start backend.dockerPrep` is up-to-date)
+* 4\) Select the stack you want to deploy to. (for now, we always deploy to `prod`)
+* 5\) Review the changes it prepared, then proceed with "yes".
+* 6\) After a bit, the provisioning/updating process should complete. There should now be a GCS bucket, container registry, etc. provisioned, within the Google Cloud project whose service-account was associated with Pulumi earlier.
+* 7\) If the deploy went successfully, a `PulumiOutput_Public.json` file should be created in the repo root. This contains the url for your image registry, storage bucket, etc. The Tiltfile will insert these values into the Kubernetes YAML files in various places; to locate each of these insert points, you can search for the `TILT_PLACEHOLDER:` prefix.
+* 8\) However, there are currently still a couple places where those creating their own fork/deployment will need to change hard-coded values:
+	* 8.1\) For each package that you'll be deploying, update the `SHARED_BASE_URL` variable to match the image-url for `dm-shared-base` seen in the Tiltfile (ie. `${registryURL}/dm-shared-base`). Unfortunately the argument's value cannot be set from the Tiltfile yet, because otherwise Tilt thinks the shared-base image is unused. (ie. it doesn't see the link between the shared-base image and the server images, unless the shared-base's image-url is hard-coded in the latter's Dockerfiles)
 
 <!----><a name="k8s-remote"></a>
-### [k8s-remote] Remote web+app server, using docker + kubernetes
+### [k8s-remote] Deploy remote web+app server, using docker + kubernetes
 
-Prerequisite steps: [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote)
+Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/master/Packages/deploy#pulumi-init)
 
 Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 
@@ -263,7 +269,9 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 <!----><a name="pg-backups"></a>
 ### [pg-backups] How to set up backups for your in-kubernetes database
 
-* 1\) TODO
+* 1\) Ensure that you have a Google Cloud Storage bucket set up. (I use the default `debate-map-prod.appspot.com` bucket. Though, I pressed "Prevent public access", which changed the bucket to use uniformly private permissions, to ensure individual entries aren't accidentally made publicly accessible.)
+* 2\) Ensure a folder exists within the GCS bucket, for storing the backups. (I use a `db-backups-pgbackrest/ovh` folder)
+* 3\) Download your GCS key secret (which is a JSON file) into the `Packages/deploy/PGO/postgres` folder, with the filaneme `gcs-key.json`.
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth

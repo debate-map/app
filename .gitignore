@@ -3,6 +3,7 @@
 /.helm
 /NMOverwrites
 /.env
+/PulumiOutput_Private.json
 /Packages/*/node_modules
 /Packages/*/Dist
 /Packages/*/tsconfig.tsbuildinfo

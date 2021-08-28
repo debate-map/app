@@ -47,7 +47,7 @@ spec:
         - name: registry-credentials
       containers:
         - name: dm-web-server
-          image: gcr.io/debate-map-prod/dm-web-server
+          image: "TILT_PLACEHOLDER:imageURL_webServer"
 
           # env:
           #   - name: PORT

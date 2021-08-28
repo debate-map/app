@@ -1,7 +1,3 @@
-# image name: local.tilt.dev/dm-repo-shared-base
-
-# note: source paths are relative to repo-root; target paths are relative to vm drive-root (well, until the WORKDIR "/dm_repo" line below)
-
 FROM node:14
 #FROM node:16
 

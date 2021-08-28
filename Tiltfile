@@ -1,10 +1,5 @@
-# allows using tilt to push to the "local" k8s cluster
-#allow_k8s_contexts('local')
-
-# allow using tilt to push to the remote OVHcloud k8s cluster
+# allow using tilt to also push to the remote OVHcloud k8s cluster
 allow_k8s_contexts('ovh')
-
-#k8s_yaml('./Packages/deploy/k8s_entry.yaml')
 
 #print("Env vars:", os.environ)
 
@@ -14,8 +9,6 @@ PROD = ENV == "prod"
 print("Env:", ENV)
 
 CONTEXT = os.getenv("CONTEXT")
-#CONTEXT = str(local(["kubectl", "config", "current-context"]))
-#REMOTE = CONTEXT == "ovh"
 REMOTE = CONTEXT != "local"
 print("Context:", CONTEXT, "Remote:", REMOTE)
 
@@ -93,8 +86,25 @@ k8s_resource("node-exporter",
 # crunchydata postgres operator
 # ==========
 
+def ReplaceInBlob(fileBlob, replacements):
+	blobAsStr = str(fileBlob)
+	for key, value in replacements.items():
+		blobAsStr = blobAsStr.replace(key, value)
+	return blob(blobAsStr)
+def ReadFileWithReplacements(filePath, replacements):
+	fileBlob = read_file(filePath)
+	fileBlob = ReplaceInBlob(fileBlob, replacements)
+	return fileBlob
+
+pulumiOutput = decode_json(str(read_file("./PulumiOutput_Public.json")))
+registryURL = pulumiOutput["registryURL"]
+bucket_uniformPrivate_url = pulumiOutput["bucket_uniformPrivate_url"]
+#print("Test1:", pulumiOutput)
+
 k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
-k8s_yaml(kustomize('./Packages/deploy/PGO/postgres'))
+k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
+	"TILT_PLACEHOLDER:bucket_uniformPrivate_url": bucket_uniformPrivate_url,
+}))
 
 k8s_resource('pgo',
 	objects=[
@@ -117,6 +127,7 @@ k8s_resource('pgo',
 k8s_resource(new_name='pgo_late',
 	objects=[
 		"debate-map-pguser-admin:secret",
+		"pgo-gcs-creds:secret",
 	],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
@@ -154,25 +165,6 @@ k8s_resource("reflector",
 # load-balancer/reverse-proxy (traefik)
 # ==========
 
-#k8s_yaml("./Packages/deploy/LoadBalancer/traefik.yaml")
-'''load('ext://helm_remote', 'helm_remote')
-helm_remote('traefik', repo_url='https://helm.traefik.io/traefik',
-	values=['Packages/deploy/LoadBalancer/traefik-config.yaml'])
-k8s_resource("traefik",
-	resource_deps=["reflector"],
-)'''
-
-'''k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-definitions.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-roles.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-service.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt4/traefik-routes.yaml")'''
-
-'''k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part1.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part2.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part3.yaml")
-k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt5/part4.yaml")'''
-
 k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
 k8s_resource("traefik-daemon-set",
 	labels=["traefik"],
@@ -188,81 +180,56 @@ k8s_resource(new_name="traefik",
 	labels=["traefik"],
 )
 
-'''k8s_resource(new_name="traefik_early",
-	objects=[
-		#"traefik-attempt4:namespace",
-		"ingressroutes.traefik.containo.us:customresourcedefinition",
-		"ingressroutetcps.traefik.containo.us:customresourcedefinition",
-		"middlewares.traefik.containo.us:customresourcedefinition",
-		"tlsoptions.traefik.containo.us:customresourcedefinition",
-	],
-	resource_deps=["reflector"],
-)
-k8s_resource("traefik",
-	objects=[
-		"traefik-ingress-controller:serviceaccount",
-		"traefik-ingress-controller:clusterrole",
-		"traefik-ingress-controller:clusterrolebinding",
-		"simpleingressroute:ingressroute",
-		"ingressroutetls:ingressroute",
-	],
-	resource_deps=["traefik_early"],
-)'''
-
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
 
-# own app
-# ==========
-
-# k8s_resource(new_name="general",
-# 	objects=[
-# 		#"app:namespace",
-# 		"debate-map:postgrescluster",
-# 	],
-# 	resource_deps=["traefik"],
-# )
-
-k8s_yaml('./namespace.yaml')
-k8s_yaml('./Packages/web-server/deployment.yaml')
-k8s_yaml('./Packages/app-server/deployment.yaml')
-
-# rest
+# own app (docker build and such)
 # ==========
 
 nmWatchPathsStr = str(local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"]))
 nmWatchPaths = nmWatchPathsStr.strip().split(",")
-# liveUpdateEntries_shared = []
-# for path in nmWatchPaths:
-# 	liveUpdateEntries_shared.append(sync('./' + path, '/dm_repo/' + path))
-
 # this keeps the NMOverwrites folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
-#local(['node', 'Scripts/NMOverwrites/Build.js', '--async'])
 local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
 
 # this is the base dockerfile used for all the subsequent ones
-#docker_build('local.tilt.dev/dm-repo-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
-# use gcr... as the name, so that when we're doing an actual deploy, the name of this dependency (in the images below, eg. dm-web-server) does not need changing
-docker_build('gcr.io/debate-map-prod/dm-shared-base', '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
+imageURL_sharedBase = registryURL + '/dm-shared-base'
+docker_build(imageURL_sharedBase, '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
 
-docker_build('gcr.io/debate-map-prod/dm-web-server', '.', dockerfile='Packages/web-server/Dockerfile',
-	build_args={'env_ENV': os.getenv("ENV") or "dev"},
+imageURL_webServer = registryURL + '/dm-web-server'
+docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile',
+	build_args={
+		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
+		"env_ENV": os.getenv("ENV") or "dev",
+	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
-	#live_update=liveUpdateEntries_shared + [
 	live_update=[
 		sync('./NMOverwrites/', '/dm_repo/'),
 		#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
 		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
 	])
-docker_build('gcr.io/debate-map-prod/dm-app-server', '.', dockerfile='Packages/app-server/Dockerfile',
-	build_args={'env_ENV': os.getenv("ENV") or "dev"},
+imageURL_appServer = registryURL + '/dm-app-server'
+docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile',
+	build_args={
+		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
+		"env_ENV": os.getenv("ENV") or "dev"
+	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
-	#live_update=liveUpdateEntries_shared + [
 	live_update=[
 		sync('./NMOverwrites/', '/dm_repo/'),
 		#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
 		sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
 	])
+
+# own app (deploy to kubernetes)
+# ==========
+
+k8s_yaml('./namespace.yaml')
+k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
+	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
+}))
+k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
+	"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
+}))
 
 # port forwards
 # ==========

@@ -1,6 +1,7 @@
-# source: Packages/deploy/@DockerBase/Dockerfile
-#FROM local.tilt.dev/dm-repo-shared-base
-FROM gcr.io/debate-map-prod/dm-shared-base
+# see: ./Tiltfile (or source: Packages/deploy/@DockerBase/Dockerfile)
+#ARG SHARED_BASE_URL
+ARG SHARED_BASE_URL=gcr.io/debate-map-prod/dm-shared-base
+FROM $SHARED_BASE_URL
 
 COPY NMOverwrites/ /dm_repo/
 
