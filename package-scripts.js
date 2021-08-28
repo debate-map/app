@@ -133,8 +133,72 @@ Object.assign(scripts, {
 			return `start "" "https://console.cloud.google.com/storage/browser/${bucket_uniformPrivate_name}/db-backups-pgbackrest/backup/db?project=debate-map-prod"`;
 		}),
 		makeDBBackup: Dynamic(()=>{
-			const backupName = new Date().toISOString();
-			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="${backupName}"`;
+			const backupID = new Date().toISOString();
+			return `${KubeCTLCmd(commandArgs[0])} annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="${backupID}"`;
+		}),
+		makeDBBackup_retry: Dynamic(()=>{
+			const jobNames_rawStr = execSync(`${KubeCTLCmd(commandArgs[0])} -n postgres-operator get jobs -o custom-columns=:.metadata.name`).toString().trim();
+			const dbBackupJobNames = jobNames_rawStr.split(" ").filter(a=>a.startsWith("debate-map-backup-"));
+			return `${KubeCTLCmd(commandArgs[0])} -n postgres-operator delete jobs ${dbBackupJobNames.join(" ")}`;
+		}),
+		makeDBBackup_cancel: Dynamic(()=>{
+			// todo
+		}),
+		restoreDBBackup_prep: Dynamic(()=>{
+			const backupLabel = commandArgs[0]; // example: "20200102-012030F"
+			if (backupLabel == null) {
+				throw new Error(`
+					You must specify the label for the backup you want to restore. (ie. the folder name under "/db-backups/pgbackrest/backup/db" in the cloud-storage bucket)
+					Example: npm start "backend.restoreDBBackup 20200102-012030F" (restores the backup created at 1:20:30am on January 2nd, 2020)
+				`.trim());
+			}
+
+			//const sl = (start, end)=>backupLabel.slice(start, end);
+			//const labelAsTimeStr = `${sl(0, 4)}-${sl(4, 6)}-${sl(6, 8)} ${sl(9, 11)}:${sl(11, 13)}:${sl(13, 15)} UTC`; // example: "2020-01-02 01:20:30 UTC"
+			const patchJSON = JSON.stringify({
+				spec: {backups: {pgbackrest: {
+					restore: {
+						enabled: true,
+						repoName: "repo2",
+						options: [
+							//`--delta`, // this enables the restore to work even if the pgo resource/pods/etc. are recreated
+							//`--force`, // this enables the restore to work even if the pgo resource/pods/etc. are recreated
+							`--set ${backupLabel}`,
+							//`--type=time`,
+							//`--target="${labelAsTimeStr}"`,
+						],
+					},
+				}}}
+			});
+			const patchJSON_escaped = patchJSON
+				.replace(/\\/g, `\\\\`) // escape [backslash] into [backslash]+[backslash]
+				.replace(/"/g, `\\"`); // escape [quotation-mark] into [backslash]+[quotation-mark]
+			return `${KubeCTLCmd(commandArgs[1])} patch -n postgres-operator postgrescluster debate-map --type=merge --patch "${patchJSON_escaped}"`;
+
+			// The PGO recommended restore approach, which is declarative, is given here: https://access.crunchydata.com/documentation/postgres-operator/5.0.2/tutorial/disaster-recovery/#perform-an-in-place-point-in-time-recovery-pitr
+			// However, we will instead by sending a restore command to the database pod directly, because imo a restore operation is just confusing to try to fit into the declarative mold.
+			// commented; couldn't get to work in a way that would be safe (pod restarts after enough seconds, and I think the restore would fail if it didn't complete before that restart)
+			/*const podName = execSync(GetPodNameCmd_DB(commandArgs[1])).toString().trim();
+			return `${KubeCTLCmd(commandArgs[1])} exec -ti -n postgres-operator ${podName} -c database -- bash -c "kill -INT `head -1 /pgdata/pg13/postmaster.pid`; pgbackrest restore --stanza=db --repo=2 --set=${backupLabel}"`;*/
+		}),
+		restoreDBBackup_cancel: Dynamic(()=>{
+			const patchJSON = JSON.stringify({
+				spec: {backups: {pgbackrest: {
+					restore: {
+						enabled: false,
+						repoName: "repo2",
+						options: [],
+					},
+				}}}
+			});
+			const patchJSON_escaped = patchJSON
+				.replace(/\\/g, `\\\\`) // escape [backslash] into [backslash]+[backslash]
+				.replace(/"/g, `\\"`); // escape [quotation-mark] into [backslash]+[quotation-mark]
+			return `${KubeCTLCmd(commandArgs[1])} patch -n postgres-operator postgrescluster debate-map --type=merge --patch "${patchJSON_escaped}"`;
+		}),
+		restoreDBBackup_apply: Dynamic(()=>{
+			const restoreID = new Date().toISOString();
+			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-restore=${restoreID}`;
 		}),
 	},
 });

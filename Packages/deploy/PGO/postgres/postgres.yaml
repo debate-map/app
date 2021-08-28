@@ -13,6 +13,10 @@ spec:
         resources:
           requests:
             storage: 1Gi
+  # dataSource:
+  #   postgresCluster:
+  #     clusterName: debate-map
+  #     repoName: repo2
   backups:
     pgbackrest:
       image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.33-1
@@ -44,7 +48,26 @@ spec:
       manual:
         repoName: repo2
         options:
-         - --type=full
+        - --type=full
+
+      # configuration for the next restore to be triggered # commented; now set using the restoreDBBackup_prep script
+      # restore:
+      #   enabled: true
+      #   repoName: repo2
+      #   options:
+      #   - --set 20210828-044420F
+      #   - --type=time
+      #   - --target="2021-08-28 04:44:20 UTC"
+
+      # restore: {
+      #   enabled: true,
+      #   repoName: "repo2",
+      #   options: [
+      #     "--delta",
+      #     "--force",
+      #     "--set 20210828-074206F"
+      #   ]
+      # }
   patroni:
     dynamicConfiguration:
       postgresql:

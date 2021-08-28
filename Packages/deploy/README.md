@@ -275,7 +275,21 @@ Notes:
 
 Actions:
 * To view the list of backups in the Google Cloud UI, run: `npm start backend.viewDBBackups`
-* To manually trigger the creation of a full backup, run: `npm start backend.makeDBBackup`
+
+To manually trigger the creation of a full backup:
+* 1\) Run: `npm start backend.makeDBBackup`
+* 2\) Confirm that the backup was created by viewing the list of backups. (using `viewDBBackups` command above)
+	* 2.1\) If the backup failed (which is problematic because it seems to block subsequent backup attempts), you can:
+		* 2.1.1\) Trigger a retry by running `npm start backend.makeDBBackup_retry` PGO will then notice the unfinished job is missing and recreate it, which should hopefully work this time.
+		* 2.1.2\) Or cancel the manual backup by running: `npm start backend.makeDBBackup_cancel` (not yet implemented)
+
+To restore a backup:
+* 1\) Find the label of the target backup in the Google Cloud UI. (use the `viewDBBackups` script above to open it)
+* 2\) Run: `npm start "backend.restoreDBBackup_prep BACKUP_LABEL"` The postgres-operator deployment/configuration will now contain [the fields](https://access.crunchydata.com/documentation/postgres-operator/5.0.2/tutorial/disaster-recovery/#perform-an-in-place-point-in-time-recovery-pitr) that mark restoration as active, and specify which backup to use.
+* 3\) To actually activate the restore operation, run: `npm start backend.restoreDBBackup_apply` This will update the `.../pgbackrest-restore` annotation on the postgres-operator CRD to the current-time, which the operator interprets as the "go signal" to apply the specifying restoration operation.
+* 4\) Check if the restore operation succeeded, by loading up the website. (you may have to wait a bit for the app-server to reconnect; you can restart it manually to speed this up)
+	* 4.1\) If the restore operation did not succeed, you'll want to either make sure it does complete, or run `npm start backend.restoreDBBackup_cancel`. (else it will keep trying to apply the restore, which may succeed later on when you don't want or expect it to, causing data loss)
+* 5\) After the restore is complete, no action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied. If you want, you can be extra sure restores won't be automatically attempted in the future by running `npm start backend.restoreDBBackup_cancel` (though this shouldn't be necessary).
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth
