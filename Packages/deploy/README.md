@@ -267,11 +267,15 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 * 2\) Run (in new bash): `cat /pgdata/pg13/XXX`
 
 <!----><a name="pg-backups"></a>
-### [pg-backups] How to set up backups for your in-kubernetes database
+### [pg-backups] Information on backups for your in-kubernetes database
 
-* 1\) Ensure that you have a Google Cloud Storage bucket set up. (I use the default `debate-map-prod.appspot.com` bucket. Though, I pressed "Prevent public access", which changed the bucket to use uniformly private permissions, to ensure individual entries aren't accidentally made publicly accessible.)
-* 2\) Ensure a folder exists within the GCS bucket, for storing the backups. (I use a `db-backups-pgbackrest/ovh` folder)
-* 3\) Download your GCS key secret (which is a JSON file) into the `Packages/deploy/PGO/postgres` folder, with the filaneme `gcs-key.json`.
+Notes:
+* Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
+* Schedule: Once a week, a "full" backup is created; once a day, a "differential" backup is created.
+
+Actions:
+* To view the list of backups in the Google Cloud UI, run: `npm start backend.viewDBBackups`
+* To manually trigger the creation of a full backup, run: `npm start backend.makeDBBackup`
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth

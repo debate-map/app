@@ -15,11 +15,14 @@ spec:
             storage: 1Gi
   backups:
     pgbackrest:
-      global:
-        repo2-path: /db-backups-pgbackrest
       image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.33-1
       repoHost:
         dedicated: {}
+      configuration:
+      - secret:
+          name: pgo-gcs-creds
+      global:
+        repo2-path: /db-backups-pgbackrest
       repos:
       - name: repo1
         volume:
@@ -31,7 +34,17 @@ spec:
                 storage: 1Gi
       - name: repo2
         gcs:
-          bucket: "TILT_PLACEHOLDER:bucket_uniformPrivate_url"
+          bucket: "TILT_PLACEHOLDER:bucket_uniformPrivate_name"
+        schedules:
+          # at 3am, each Sunday (cron schedule syntax)
+          full: "0 3 * * 0"
+          # at 3:10am, each day (cron schedule syntax)
+          differential: "10 3 * * *"
+      # configuration for the next manual backup to be triggered (see deploy/pg-backups guide-module for more info)
+      manual:
+        repoName: repo2
+        options:
+         - --type=full
   patroni:
     dynamicConfiguration:
       postgresql:

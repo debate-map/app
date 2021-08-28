@@ -99,11 +99,12 @@ def ReadFileWithReplacements(filePath, replacements):
 pulumiOutput = decode_json(str(read_file("./PulumiOutput_Public.json")))
 registryURL = pulumiOutput["registryURL"]
 bucket_uniformPrivate_url = pulumiOutput["bucket_uniformPrivate_url"]
+bucket_uniformPrivate_name = pulumiOutput["bucket_uniformPrivate_name"]
 #print("Test1:", pulumiOutput)
 
 k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
 k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
-	"TILT_PLACEHOLDER:bucket_uniformPrivate_url": bucket_uniformPrivate_url,
+	"TILT_PLACEHOLDER:bucket_uniformPrivate_name": bucket_uniformPrivate_name,
 }))
 
 k8s_resource('pgo',

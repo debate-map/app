@@ -126,6 +126,16 @@ Object.assign(scripts, {
 			const pathToKillScript_wsl = pathToKillScript.replace(/\\/g, "/").replace("C:/", "/mnt/c/");
 			return `wsl ${pathToKillScript_wsl} ${commandArgs.join(" ")}`;
 		}),
+
+		// backups
+		viewDBBackups: Dynamic(()=>{
+			const {bucket_uniformPrivate_name} = require("./PulumiOutput_Public.json");
+			return `start "" "https://console.cloud.google.com/storage/browser/${bucket_uniformPrivate_name}/db-backups-pgbackrest/backup/db?project=debate-map-prod"`;
+		}),
+		makeDBBackup: Dynamic(()=>{
+			const backupName = new Date().toISOString();
+			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-backup="${backupName}"`;
+		}),
 	},
 });
 function SetTileEnvCmd(prod, context) {

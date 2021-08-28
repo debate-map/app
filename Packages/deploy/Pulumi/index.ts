@@ -9,7 +9,7 @@ import {bucketName} from "./SetUpGCSBucket_UniformPrivate";
 // ==========
 
 function GetValue<T>(output: Output<T>) {
-	return new Promise((resolve, reject)=>{
+	return new Promise<T>((resolve, reject)=>{
 		output.apply(value=>{
 			resolve(value);
 		});
@@ -18,8 +18,11 @@ function GetValue<T>(output: Output<T>) {
 
 (async()=>{
 	//fs.writeFileSync("./PulumiOutput_Private.json", JSON.stringify({}));
+	const bucket_uniformPrivate_gsPseudoURL = await GetValue(bucketName);
 	fs.writeFileSync("./PulumiOutput_Public.json", JSON.stringify({
 		registryURL: await GetValue(registryUrl),
-		bucket_uniformPrivate_url: await GetValue(bucketName),
-	}));
+		bucket_uniformPrivate_gsPseudoURL,
+		bucket_uniformPrivate_url: bucket_uniformPrivate_gsPseudoURL.replace("gs://", "https://storage.googleapis.com/"),
+		bucket_uniformPrivate_name: bucket_uniformPrivate_gsPseudoURL.replace("gs://", ""),
+	}, null, "\t"));
 })();
