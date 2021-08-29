@@ -237,6 +237,10 @@ Object.assign(scripts, {
 			const restoreID = new Date().toISOString();
 			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-restore=${restoreID}`;
 		}),
+
+		/*restoreDBBackup_removeAnnotation: Dynamic(()=>{
+			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-restore-`;
+		}),*/
 	},
 });
 function SetTileEnvCmd(prod, context) {

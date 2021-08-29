@@ -269,27 +269,43 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 <!----><a name="pg-backups"></a>
 ### [pg-backups] Information on backups for your in-kubernetes database
 
-Notes:
+General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
 * Schedule: Once a week, a "full" backup is created; once a day, a "differential" backup is created.
+
+Backup structure:
+* Backups in pgbackrest are split into two parts: base-backups (the `db-backups-pgbackrest/backup` cloud-folder), and wal-archives (the `db-backups-pgbackrest/archive` cloud-folder).
+	* Base-backups are complete physical copies of the database, as seen during the given generation period. (well, complete copies if of type `full`; `differential` backups rely on the last `full` backup to be complete, and `incremental` backups rely on the last `full` backup, the last `differential` (if any), along with the in-between series of `incremental` backups)
+	* Wal-archives are small files that are frequently being created, which is basically a streaming "changelog" of database updates. Wal-archives allow you to do point-in-time restores to arbitrary times, by augmenting the base-backups with the detailed sequence of changes since them.
 
 Actions:
 * To view the list of backups in the Google Cloud UI, run: `npm start backend.viewDBBackups`
 
 To manually trigger the creation of a full backup:
 * 1\) Run: `npm start backend.makeDBBackup`
-* 2\) Confirm that the backup was created by viewing the list of backups. (using `viewDBBackups` command above)
+* 2\) Confirm that the backup was created by viewing the list of backups. (using `npm start backend.viewDBBackups`)
 	* 2.1\) If the backup failed (which is problematic because it seems to block subsequent backup attempts), you can:
 		* 2.1.1\) Trigger a retry by running `npm start backend.makeDBBackup_retry` PGO will then notice the unfinished job is missing and recreate it, which should hopefully work this time.
 		* 2.1.2\) Or cancel the manual backup by running: `npm start backend.makeDBBackup_cancel` (not yet implemented)
 
 To restore a backup:
-* 1\) Find the label of the target backup in the Google Cloud UI. (use the `viewDBBackups` script above to open it)
-* 2\) Run: `npm start "backend.restoreDBBackup_prep BACKUP_LABEL"` The postgres-operator deployment/configuration will now contain [the fields](https://access.crunchydata.com/documentation/postgres-operator/5.0.2/tutorial/disaster-recovery/#perform-an-in-place-point-in-time-recovery-pitr) that mark restoration as active, and specify which backup to use.
+* 1\) Find the point in time that you want to restore the database to. Viewing the list of base-backups in the Google Cloud UI (using `npm start backend.viewDBBackups`) can help with this, as a reference point (eg. if you made a backup just before a set of changes you now want to revert).
+* 2\) Prepare the postgres-operator to restore the backup, into either a new or the current postgres instance/pod-set:
+	* 2.1\) Option 1, into a new postgres instance/pod-set that then gets promoted to master (PGO recommended way):
+		* 2.1.1\) Ensure that the tilt-up script is running for the target context.
+		* 2.1.2\) Uncomment the `dataSource` field in `postgres.yaml`, uncomment + fill-in the section matching the restore-type you want (then save the file):
+			* 2.1.2.1\) If you want to restore exactly to a base-backup (without any wal-archive replaying), use the first section. (modifying "set" to the base-backup folder-name seen in the cloud-bucket) [NOTE: Not currently working. See [here](https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977).]
+			* 2.1.2.2\) If you want to restore to a specific point-in-time (with wal-archive replaying), use the second section. (modifying "target" to the time you want to restore to, with a specified timezone [UTC recommended])
+	* 2.2\) Option 2, into the existing postgres instance/pod-set (imperative, arguably cleaner way -- but not yet working/reliable):
+		* 2.2.1\) Run: `npm start "backend.restoreDBBackup_prep BACKUP_LABEL"` This script patches the postgres-operator deployment/configuration to contain [the fields](https://access.crunchydata.com/documentation/postgres-operator/5.0.2/tutorial/disaster-recovery/#perform-an-in-place-point-in-time-recovery-pitr) that mark a restoration as active, and specify which backup to use.
 * 3\) To actually activate the restore operation, run: `npm start backend.restoreDBBackup_apply` This will update the `.../pgbackrest-restore` annotation on the postgres-operator CRD to the current-time, which the operator interprets as the "go signal" to apply the specifying restoration operation.
-* 4\) Check if the restore operation succeeded, by loading up the website. (you may have to wait a bit for the app-server to reconnect; you can restart it manually to speed this up)
-	* 4.1\) If the restore operation did not succeed, you'll want to either make sure it does complete, or run `npm start backend.restoreDBBackup_cancel`. (else it will keep trying to apply the restore, which may succeed later on when you don't want or expect it to, causing data loss)
-* 5\) After the restore is complete, no action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied. If you want, you can be extra sure restores won't be automatically attempted in the future by running `npm start backend.restoreDBBackup_cancel` (though this shouldn't be necessary).
+	* 3.1\) If using approach 1, you also have to restart [possibly twice, if it gets stuck] the `pgo` resource using the Tilt UI here. (this clears the old instance/pod-set, and creates a new one, which then tries to load from the specified data-source)
+* 4\) Observe the logs in the Tilt UI, to track the progress of the restore. (it takes about 2.5 minutes just to start, so be patient; also, you can ignore the `WARN: --delta or --force specified but unable to find...` message, as that just means it's a fresh cluster that has to restore from scratch, which the restore module finds odd since it notices the useless [automatically added] delta/force flag)
+* 5\) Check whether the restore operation succeeded, by loading up the website. (you may have to wait a bit for the app-server to reconnect; you can restart it manually to speed this up)
+* 6\) If the restore operation did not succeed, you'll want to either make sure it does complete, or cancel the restore operation (else it will keep trying to apply the restore, which may succeed later on when you don't want or expect it to, causing data loss). To cancel the restore:
+	* 6.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file.
+	* 6.2\) If option 2 was taken: Run: `npm start backend.restoreDBBackup_cancel`.
+* 7\) After the restore is complete, no action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied.
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth
