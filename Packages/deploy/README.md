@@ -272,6 +272,7 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
 * Schedule: Once a week, a "full" backup is created; once a day, a "differential" backup is created.
+* If you ever get the error `command terminated with exit code 28: ERROR: [028]: backup and archive info files exist but do not match the database HINT: is this the correct stanza? HINT: did an error occur during stanza-upgrade?`, see [here](https://github.com/pgbackrest/pgbackrest/issues/1066#issuecomment-907802025) for an explanation/solution.
 
 Backup structure:
 * Backups in pgbackrest are split into two parts: base-backups (the `db-backups-pgbackrest/backup` cloud-folder), and wal-archives (the `db-backups-pgbackrest/archive` cloud-folder).
@@ -286,7 +287,7 @@ To manually trigger the creation of a full backup:
 * 2\) Confirm that the backup was created by viewing the list of backups. (using `npm start backend.viewDBBackups`)
 	* 2.1\) If the backup failed (which is problematic because it seems to block subsequent backup attempts), you can:
 		* 2.1.1\) Trigger a retry by running `npm start backend.makeDBBackup_retry` PGO will then notice the unfinished job is missing and recreate it, which should hopefully work this time.
-		* 2.1.2\) Or cancel the manual backup by running: `npm start backend.makeDBBackup_cancel` (not yet implemented)
+		* 2.1.2\) Or cancel the manual backup by running: `npm start backend.makeDBBackup_cancel`
 
 To restore a backup:
 * 1\) Find the point in time that you want to restore the database to. Viewing the list of base-backups in the Google Cloud UI (using `npm start backend.viewDBBackups`) can help with this, as a reference point (eg. if you made a backup just before a set of changes you now want to revert).

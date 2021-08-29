@@ -13,22 +13,19 @@ spec:
         resources:
           requests:
             storage: 1Gi
-  dataSource:
-    postgresCluster:
-      clusterName: debate-map
-      repoName: repo2
-      options:
-      #- --delta
-      #- --force
-      # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
-      # NOTE: This approach is not currently working. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
-      #- --set 20210828-074206F
-      #- --type=immediate
-      #- --target-action=promote
-      # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
-      - --type=time
-      - --target="2021-08-28 07:42:06+00"
-      #- --target-action=promote
+  # dataSource:
+  #   postgresCluster:
+  #     clusterName: debate-map
+  #     repoName: repo2
+  #     options:
+  #     # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
+  #     # NOTE: This approach is not currently working. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+  #     #- --set 20210828-074206F
+  #     #- --type=immediate
+  #     #- --target-action=promote
+  #     # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
+  #     - --type=time
+  #     - --target="2021-08-28 07:42:06+00"
   backups:
     pgbackrest:
       image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.33-1
@@ -38,7 +35,7 @@ spec:
       - secret:
           name: pgo-gcs-creds
       global:
-       repo2-path: /db-backups-pgbackrest
+        repo2-path: /db-backups-pgbackrest
       repos:
       - name: repo1
         volume:

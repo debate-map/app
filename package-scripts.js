@@ -71,6 +71,10 @@ const GetPodsMatchingPartialName = (partialName, contextName)=>{
 	});
 };
 
+function GetKubectlContext() {
+	return execSync(`kubectl config current-context`).toString().trim();
+}
+
 const PrepDockerCmd = ()=>{
 	//return `npm start dockerPrep &&`;
 	return `node Scripts/PrepareDocker.js &&`;
@@ -166,7 +170,9 @@ Object.assign(scripts, {
 
 		// backups
 		viewDBBackups: Dynamic(()=>{
-			const {bucket_uniformPrivate_name} = require("./PulumiOutput_Public.json");
+			const devEnv = commandArgs[0] == "dev" || GetKubectlContext() == "local";
+			const {bucket_dev_uniformPrivate_name, bucket_prod_uniformPrivate_name} = require("./PulumiOutput_Public.json");
+			const bucket_uniformPrivate_name = devEnv ? bucket_dev_uniformPrivate_name : bucket_prod_uniformPrivate_name;
 			return `start "" "https://console.cloud.google.com/storage/browser/${bucket_uniformPrivate_name}/db-backups-pgbackrest/backup/db?project=debate-map-prod"`;
 		}),
 		makeDBBackup: Dynamic(()=>{
@@ -179,8 +185,9 @@ Object.assign(scripts, {
 			return `${KubeCTLCmd(commandArgs[0])} -n postgres-operator delete jobs ${dbBackupJobNames.join(" ")}`;
 		}),
 		makeDBBackup_cancel: Dynamic(()=>{
-			// todo
+			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-backup-`;
 		}),
+
 		restoreDBBackup_prep: Dynamic(()=>{
 			const backupLabel = commandArgs[0]; // example: "20200102-012030F"
 			if (backupLabel == null) {
@@ -237,10 +244,10 @@ Object.assign(scripts, {
 			const restoreID = new Date().toISOString();
 			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-restore=${restoreID}`;
 		}),
-
-		/*restoreDBBackup_removeAnnotation: Dynamic(()=>{
+		// called "removeAnnotation" rather than "cancel", because it's not reliable as a cancel (ie. even without the annotation, a restore will be performed in a fresh cluster, if a valid restore config is set)
+		restoreDBBackup_removeAnnotation: Dynamic(()=>{
 			return `kubectl annotate -n postgres-operator postgrescluster debate-map --overwrite postgres-operator.crunchydata.com/pgbackrest-restore-`;
-		}),*/
+		}),
 	},
 });
 function SetTileEnvCmd(prod, context) {
@@ -270,10 +277,6 @@ function ImportPGUserSecretAsEnvVars(context) {
 		DB_PASSWORD: GetEnvVal("password"),
 	};
 	Object.assign(process.env, newEnvVars);
-}
-
-function GetKubectlContext() {
-	return execSync(`kubectl config current-context`).toString().trim();
 }
 
 Object.assign(scripts, {

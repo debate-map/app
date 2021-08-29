@@ -98,8 +98,8 @@ def ReadFileWithReplacements(filePath, replacements):
 
 pulumiOutput = decode_json(str(read_file("./PulumiOutput_Public.json")))
 registryURL = pulumiOutput["registryURL"]
-bucket_uniformPrivate_url = pulumiOutput["bucket_uniformPrivate_url"]
-bucket_uniformPrivate_name = pulumiOutput["bucket_uniformPrivate_name"]
+bucket_uniformPrivate_url = pulumiOutput["bucket_prod_uniformPrivate_url" if PROD else "bucket_dev_uniformPrivate_url"]
+bucket_uniformPrivate_name = pulumiOutput["bucket_prod_uniformPrivate_name" if PROD else "bucket_dev_uniformPrivate_name"]
 #print("Test1:", pulumiOutput)
 
 k8s_yaml(kustomize('./Packages/deploy/PGO/install'))

@@ -1,6 +1,7 @@
 {
 	"registryURL": "gcr.io/debate-map-prod",
-	"bucket_uniformPrivate_gsPseudoURL": "gs://debate-map-prod-uniform-private-5269e8b",
-	"bucket_uniformPrivate_url": "https://storage.googleapis.com/debate-map-prod-uniform-private-5269e8b",
-	"bucket_uniformPrivate_name": "debate-map-prod-uniform-private-5269e8b"
+	"bucket_dev_uniformPrivate_url": "https://storage.googleapis.com/debate-map-dev-uniform-private-22390b2",
+	"bucket_dev_uniformPrivate_name": "debate-map-dev-uniform-private-22390b2",
+	"bucket_prod_uniformPrivate_url": "https://storage.googleapis.com/debate-map-prod-uniform-private-5269e8b",
+	"bucket_prod_uniformPrivate_name": "debate-map-prod-uniform-private-5269e8b"
 }
