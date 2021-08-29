@@ -112,46 +112,9 @@ Object.assign(scripts, {
 				} catch {}
 			}
 			fs.writeFileSync(`./Temp/EtcdDump_${Date.now()}.json`, JSON.stringify(data, null, "\t"));
-
-			/*
-				Some notes for things beyond those used above:
-				* Path where etcd data seems to be stored: \\wsl$\docker-desktop-data\version-pack-data\community\etcd\member\snap
-				* Path where kubeadm seems to write the apiserver/scheduler configs after application: \\wsl$\docker-desktop-data\version-pack-data\community\kubeadm
-					(unfortunately, editing these files is pointless since that causes k8s to not start up, and resetting the cluster doesn't help since that resets those files as well)
-			*/
-		}),
-		// if you mess up your local kubernetes cluster with this, you'll likely have to run Docker Desktop's "Clean / Purge Data" -> "WSL" command (as I did)
-		"etcd_importNewEntry": Dynamic(()=>{
-			//const [key, value] = commandArgs;
-			const newEntry = JSON.parse(fs.readFileSync("./Temp/NewEntry.json").toString()); // user should create this file, by copying the entry from the EtcdDump_XXX.json file (created using etcd_dumpAsJSON)
-
-			/*const key_base64 = Buffer.from(key).toString("base64");
-			const value_base64 = Buffer.from(value).toString("base64");
-			const etcdCommand_importantPart = `put ${key_base64} ${value_base64}`; // it's base-64, so we don't need to put quotes around it (thankfully!)
-			const etcdCommand = `ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/run/config/pki/etcd/ca.crt --cert=/run/config/pki/etcd/server.crt --key=/run/config/pki/etcd/server.key ${etcdCommand_importantPart}`;
-			//execSync(`kubectl exec -it -n kube-system etcd-docker-desktop -- /bin/sh -ec "${etcdCommand}"`);
-			return `kubectl exec -it -n kube-system etcd-docker-desktop -- /bin/sh -ec "${etcdCommand}"`;*/
-			
-			/*const {key, value} = newEntry;
-			const etcdCommand_importantPart = `put ${key} \\"${value.replace(/\\/g, `\\\\`).replace(/"/g, `\\"`).replace(/\\/g, `\\\\`).replace(/"/g, `\\"`)}\\"`;
-			const etcdCommand = `ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/run/config/pki/etcd/ca.crt --cert=/run/config/pki/etcd/server.crt --key=/run/config/pki/etcd/server.key ${etcdCommand_importantPart}`;
-			//execSync(`kubectl exec -it -n kube-system etcd-docker-desktop -- /bin/sh -ec "${etcdCommand}"`);
-			return `kubectl exec -it -n kube-system etcd-docker-desktop -- /bin/sh -ec "${etcdCommand}"`;*/
-
-			const {key, value} = newEntry;
-			const shellInEtcdPod = spawn("kubectl", "exec -it -n kube-system etcd-docker-desktop -- /bin/sh".split(" "));
-			shellInEtcdPod.stdin.setEncoding('utf-8');
-			shellInEtcdPod.stdout.pipe(process.stdout);
-			shellInEtcdPod.stdin.write(`ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/run/config/pki/etcd/ca.crt --cert=/run/config/pki/etcd/server.crt --key=/run/config/pki/etcd/server.key put ${key}\n`);
-			shellInEtcdPod.stdin.write(value);
-			shellInEtcdPod.stdin.end(); /// this call seems necessary, at least with plain node.js executable
-		}),
-		"etcd_deleteKey": Dynamic(()=>{
-			const [key] = commandArgs;
-			const etcdCommand = `ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/run/config/pki/etcd/ca.crt --cert=/run/config/pki/etcd/server.crt --key=/run/config/pki/etcd/server.key del ${key}`;
-			return `kubectl exec -it -n kube-system etcd-docker-desktop -- /bin/sh -ec "${etcdCommand}"`;
 		}),
 
+		// for this to work, you have to enable EphemeralContainers in your k8s cluster, as seen here: https://stackoverflow.com/a/68971526
 		"debugPod": Dynamic(()=>{
 			const podNameSearchStr = commandArgs[0];
 			const podsMatchingSearchStr = GetPodsMatchingPartialName(podNameSearchStr);
@@ -160,11 +123,7 @@ Object.assign(scripts, {
 				console.log(`Could not find pod with the exact name "${podNameSearchStr}", so selecting first from matches:`, podsMatchingSearchStr.map(a=>a.name));
 				targetPod = podsMatchingSearchStr[0];
 			}
-			// can't use this, since ephemeral-containers can't be enabled in docker-desktop atm (https://stackoverflow.com/questions/65615647/enable-k8s-experimental-features-in-docker-desktop)
 			return `${KubeCTLCmd(commandArgs[1])} debug -n ${targetPod.namespace} -it ${targetPod.name} --image=busybox --target=${targetPod}`;
-
-			// instead, we'll make a copy of the pod named "debug-pod-1" (which should stay alive even after the target-pod is destroyed)
-			//return `${KubeCTLCmd(commandArgs[1])} debug -n ${targetPod.namespace} ${targetPod.name} -it --image=ubuntu --share-processes --copy-to=debug-pod-1`;
 		}),
 	},
 	// for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)

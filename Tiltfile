@@ -24,15 +24,6 @@ k8s_resource(new_name="namespaces",
 	],
 )
 
-# kubernetes dashboard
-# ==========
-
-# this works, but not really useful, since Lens does everything it can do and more (without needing to include anything in the cluster itself)
-#k8s_yaml('./Packages/deploy/Monitors/kubernetes-dashboard/kubernetes-dashboard.yaml')
-#k8s_resource("kubernetes-dashboard",
-#	labels=["monitoring"],
-#)
-
 # prometheus
 # ==========
 
@@ -116,29 +107,29 @@ k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
 	"TILT_PLACEHOLDER:bucket_uniformPrivate_name": bucket_uniformPrivate_name,
 }))
 
-k8s_resource('pgo',
+# todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
+k8s_resource(new_name='pgo_early',
 	objects=[
 		#"postgres-operator:Namespace:default",
 		"postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition", # the CRD definition?
+	],
+	resource_deps=["namespaces"],
+	labels=["database_DO-NOT-RESTART-THESE"],
+)
+k8s_resource('pgo',
+	objects=[
 		"debate-map:postgrescluster", # the CRD instance?
 		"postgres-operator:clusterrole",
 		"postgres-operator:clusterrolebinding",
 		"pgo:serviceaccount",
-		#"debate-map-pguser-admin:secret",
-	],
-	# extra_pod_selectors={
-	# 	"postgres-operator.crunchydata.com/cluster": "debate-map",
-	# 	"postgres-operator.crunchydata.com/role": "master"
-	# },
-	# port_forwards='4205:5432' if REMOTE else '3205:5432',
-	resource_deps=["namespaces"],
-	labels=["database_DO-NOT-RESTART-THESE"],
-)
-k8s_resource(new_name='pgo_late',
-	objects=[
 		"debate-map-pguser-admin:secret",
 		"pgo-gcs-creds:secret",
 	],
+	resource_deps=["pgo_early"],
+	labels=["database_DO-NOT-RESTART-THESE"],
+)
+k8s_resource(new_name='pgo_late',
+	objects=["empty1"],
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
@@ -167,8 +158,6 @@ k8s_resource("reflector",
 		"reflector:clusterrolebinding",
 		"reflector:serviceaccount",
 	],
-	#resource_deps=["database"],
-	#resource_deps=["pgo"],
 	resource_deps=["pgo_late"],
 )
 

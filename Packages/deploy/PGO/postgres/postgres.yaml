@@ -31,7 +31,7 @@ spec:
       - secret:
           name: pgo-gcs-creds
       global:
-        repo2-path: /db-backups-pgbackrest
+       repo2-path: /db-backups-pgbackrest
       repos:
       - name: repo1
         volume:
