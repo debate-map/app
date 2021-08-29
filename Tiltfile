@@ -24,6 +24,15 @@ k8s_resource(new_name="namespaces",
 	],
 )
 
+# kubernetes dashboard
+# ==========
+
+# this works, but not really useful, since Lens does everything it can do and more (without needing to include anything in the cluster itself)
+#k8s_yaml('./Packages/deploy/Monitors/kubernetes-dashboard/kubernetes-dashboard.yaml')
+#k8s_resource("kubernetes-dashboard",
+#	labels=["monitoring"],
+#)
+
 # prometheus
 # ==========
 

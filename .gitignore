@@ -2,6 +2,7 @@
 /tilt_modules
 /.helm
 /NMOverwrites
+/Temp
 /.env
 /PulumiOutput_Private.json
 /Packages/*/node_modules
