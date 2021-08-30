@@ -11,7 +11,7 @@ COPY NMOverwrites/ /dm_repo/
 COPY Packages/common/ Packages/common/
 COPY Packages/client/ Packages/client/
 COPY Packages/web-server/ Packages/web-server/
-COPY Scripts/ Scripts/
+#COPY Scripts/COPY_opt.txt Scripts/COPY_opt.txt
 COPY tsconfig.base.json .
 
 # these shouldn't be needed, but are fsr

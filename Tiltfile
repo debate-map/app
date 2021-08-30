@@ -43,8 +43,8 @@ setup_monitoring()'''
 # )
 
 load(
-    'Packages/deploy/Monitors/prometheus-pack/Tiltfile',
-    'install'
+	'Packages/deploy/Monitors/prometheus-pack/Tiltfile',
+	'install'
 )
 install()
 
@@ -250,3 +250,9 @@ k8s_resource('dm-web-server',
 	resource_deps=["traefik"],
 	labels=["app"],
 )
+
+# extras
+# ==========
+
+# this is just for developer convenience, eg. for referencing to see when they last updated the remote k8s cluster
+local(["node", "./Scripts/RecordTiltfileRun.js", ENV])
