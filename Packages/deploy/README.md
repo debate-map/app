@@ -50,9 +50,9 @@ Notes:
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
 Options:
+* Docker Desktop Kubernetes [recommended]
 * K3d
 * Kind
-* Docker Desktop (component)
 
 Notes:
 * Docker Desktop has the advantage of not needing built docker-images to be "loaded" into the cluster; they were built there to begin with. This can save a *lot* of time, if full builds are slow. (for me, the deploy process takes ~3m on K3d, which Docker Desktop cuts out completely)
@@ -61,7 +61,7 @@ Notes:
 * Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
 * Docker Desktop also seems to sometimes gets semi-stuck during building (where it seems to be doing nothing for ~20 or 30 seconds); not sure if it's a reliable pattern yet though.
 
-#### Setup for Docker Desktop (k8s component) [recommended]
+#### Setup for Docker Desktop Kubernetes [recommended]
 
 * 1\) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
 
@@ -95,9 +95,10 @@ Notes:
 
 Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
 
-* 1\) Run (in repo root): `npm start backend.tiltUp_local`
-* 2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
-* 3\) Run the init-db script: `npm start "initDB_freshScript_k8s local"`
+* 1\) If you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package. (see the changed packages' readmes for more info)
+* 2\) Run (in repo root): `npm start backend.tiltUp_local`
+* 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+* 4\) Run the init-db script: `npm start "initDB_freshScript_k8s local"`
 
 > For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
 
@@ -172,10 +173,8 @@ Note: We use Google Cloud here, but others could be used.
 * 8\) However, there are currently still a couple places where those creating their own fork/deployment will need to change hard-coded values:
 	* 8.1\) For each package that you'll be deploying, update the `SHARED_BASE_URL` variable to match the image-url for `dm-shared-base` seen in the Tiltfile (ie. `${registryURL}/dm-shared-base`). Unfortunately the argument's value cannot be set from the Tiltfile yet, because otherwise Tilt thinks the shared-base image is unused. (ie. it doesn't see the link between the shared-base image and the server images, unless the shared-base's image-url is hard-coded in the latter's Dockerfiles)
 
-<!----><a name="k8s-remote"></a>
-### [k8s-remote] Deploy remote web+app server, using docker + kubernetes
-
-Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/master/Packages/deploy#pulumi-init)
+<!----><a name="ovh-init"></a>
+### [ovh-init] OVH initialization (provisioning remote kubernetes cluster)
 
 Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 
@@ -191,11 +190,18 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote))
 		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
 	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
-* 6\) Run: `npm start backend.tiltUp_ovh`
-* 7\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:31005`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
-* 8\) If you haven't yet, initialize the DB:
-	* 8.1\) Run: `npm start "app-server.initDB_freshScript_k8s ovh"`
-* 9\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
+
+<!----><a name="k8s-remote"></a>
+### [k8s-remote] Deploy remote web+app server, using docker + kubernetes
+
+Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/master/Packages/deploy#pulumi-init), [deploy/ovh-init](https://github.com/debate-map/app/tree/master/Packages/deploy#ovh-init)
+
+* 1\) If you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package. (see the changed packages' readmes for more info)
+* 2\) Run: `npm start backend.tiltUp_ovh` (reminder: if you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package)
+* 3\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:31005`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
+* 4\) If you haven't yet, initialize the DB:
+	* 4.1\) Run: `npm start "app-server.initDB_freshScript_k8s ovh"`
+* 5\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 > For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
 
@@ -213,7 +219,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 * To view the Prometheus monitor webpage, open the k8s cluster in Lens, find the `prometheus` service, then click it's "Connection->Ports" link.
 	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
 <!-- * To view the cAdvisor monitor webpage, open (not currently working): `localhost:31001` -->
-* To view the cAdvisor monitor webpage, open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
+* To view the cAdvisor monitor webpage [not currently working/enabled], open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
 
 <!----><a name="k8s-ssh"></a>
 ### [k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)
@@ -293,7 +299,7 @@ To restore a backup:
 * 1\) Find the point in time that you want to restore the database to. Viewing the list of base-backups in the Google Cloud UI (using `npm start backend.viewDBBackups`) can help with this, as a reference point (eg. if you made a backup just before a set of changes you now want to revert).
 * 2\) Prepare the postgres-operator to restore the backup, into either a new or the current postgres instance/pod-set:
 	* 2.1\) Option 1, into a new postgres instance/pod-set that then gets promoted to master (PGO recommended way):
-		* 2.1.1\) Ensure that the tilt-up script is running for the target context.
+		* 2.1.1\) Ensure that the tilt-up script is running for the target context. (and disable any tilt-up scripts running for other contexts)
 		* 2.1.2\) Uncomment the `dataSource` field in `postgres.yaml`, uncomment + fill-in the section matching the restore-type you want (then save the file):
 			* 2.1.2.1\) If you want to restore exactly to a base-backup (without any wal-archive replaying), use the first section. (modifying "set" to the base-backup folder-name seen in the cloud-bucket) [NOTE: Not currently working. See [here](https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977).]
 			* 2.1.2.2\) If you want to restore to a specific point-in-time (with wal-archive replaying), use the second section. (modifying "target" to the time you want to restore to, with a specified timezone [UTC recommended])
@@ -306,12 +312,26 @@ To restore a backup:
 * 6\) If the restore operation did not succeed, you'll want to either make sure it does complete, or cancel the restore operation (else it will keep trying to apply the restore, which may succeed later on when you don't want or expect it to, causing data loss). To cancel the restore:
 	* 6.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file.
 	* 6.2\) If option 2 was taken: Run: `npm start backend.restoreDBBackup_cancel`.
-* 7\) After the restore is complete, no action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied.
+* 7\) After the restore is complete, clean things up:
+	* 7.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file. (needed so the restore operation is not attempted for other contexts, when their tilt-up scripts are run)
+	* 7.2\) If option 2 was taken: No action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied, and the restore config was only placed into the target context. (If you want to be extra sure, though, you could follow step 6.2; this is fine, because the restore has already taken place, so it will not be reverted or the like.)
+
+<!----><a name="dns-setup"></a>
+### [dns-setup] How to set up DNS and CDN (if creating own fork/deployment)
+
+Note: We use Cloudflare here, but others could be used.
+
+* 1\) If not done already, update the domain-names in the code and k8s YAML files (eg. `dmvx-ingress.yaml`) to point to your chosen domain-names.
+* 2\) Create a Cloudflare account, and start the add-website process on it. Follow the instructions for basic setup.
+	* 2.1\) On your domain registrar manager/website, make sure that you configure Cloudflare as the DNS Name Servers.
+	* 2.2\) On Cloudflare, make sure that you add an entry for both the web-server and app-server. (both pointing to the OVH kubernetes cluster host-name)
+* 3\) Set up a redirect from `www.YOUR_DOMAIN.YOUR_TLD` to `YOUR_DOMAIN.YOUR_TLD`. (using the Rules section, as [seen here](https://community.cloudflare.com/t/redirecting-www-to-non-www/2949/28))
+* 4\) Enable the "SSL/TLS" -> "Edge Certificates" -> "Always Use HTTPS" option. (seems to not really be necessary, presumably because Traefik doesn't respond for non-https requests so Chrome retries with https automatically, but good practice)
 
 <!----><a name="oauth-setup"></a>
 ### [oauth-setup] How to set up oauth
 
-In order to use the oauth options for sign-in (eg. Google Sign-in), the frontend either must be running on `localhost:[3005/31005]`, or you have to create your own online "application" configs/entries on each of the oauth-providers' platforms. The below instructions are for creating those "application" configs/entries.
+In order to use the oauth options for sign-in (eg. Google Sign-in), the frontend either must be running on `localhost:[3005/31005]`, or you have to create your own online "application" configs/entries on each of the oauth-providers' platforms. The below instructions are for creating those "application" configs/entries. (replace the domains with your own, of course)
 
 Google Sign-in:
 * 1\) Create a Google Cloud project for your fork.
@@ -320,17 +340,16 @@ Google Sign-in:
 * 4\) Set the values below:
 ```
 Authorized JavaScript Origins:
-* http://localhost
 * http://localhost:3005
-* http://localhost:31005
 * http://[::1]:3005
-* http://[::1]:31005
+* https://9m2x1z.nodes.c1.or1.k8s.ovh.us
+* https://debates.app
+* https://debatemap.app
 
 Authorized redirect URIs:
 * http://localhost:3105/auth/google/callback
-* http://localhost:31006/auth/google/callback
 * http://[::1]:3105/auth/google/callback
-* http://[::1]:31006/auth/google/callback
+* https://app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us/auth/google/callback
+* https://app-server.debates.app/auth/google/callback
 * https://app-server.debatemap.app/auth/google/callback
-* https://9m2x1z.nodes.c1.or1.k8s.ovh.us:31006/auth/google/callback (temp; and update the ovh cluster-url if it's different)
 ```

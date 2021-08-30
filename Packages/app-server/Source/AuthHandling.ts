@@ -48,7 +48,7 @@ Object.defineProperty(Object.prototype, "callbackURL", {
 		/*const referrerURL = currentAuthRequest?.get("Referrer");
 		console.log("Referrer url for auth request:", referrerURL);
 		return GetAppServerURL("/auth/google/callback", referrerURL);*/
-		if (process.env.ENV == "prod") return "https://dm-app.venryx.org/auth/google/callback"; // temp fix (shouldn't be needed, but apparently the rel-to-abs code passport uses is wrong)
+		if (process.env.ENV == "prod") return "https://app-server.debates.app/auth/google/callback"; // temp fix (shouldn't be needed, but apparently the rel-to-abs code passport uses is wrong)
 		return "/auth/google/callback";
 	},
 });

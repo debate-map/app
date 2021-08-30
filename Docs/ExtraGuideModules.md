@@ -1,0 +1,1 @@
+This file is for guide-modules that "shouldn't ever be needed, for those following the recommended path", but which are kept around in case they become needed.

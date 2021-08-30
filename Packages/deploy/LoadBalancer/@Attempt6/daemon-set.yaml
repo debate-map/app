@@ -36,16 +36,19 @@ spec:
 
         # Define two entrypoint ports, and setup a redirect from HTTP to HTTPS.
         - --entryPoints.web.address=:80
+        # commented, to fix this issue: https://community.cloudflare.com/t/community-tip-fixing-err-too-many-redirects/42335
+        # end users don't need this anyway, since Cloudflare takes care of it (also, I like the idea of retaining the ability to serve http from the cluster, for direct/dev connections)
+        #- --entryPoints.web.http.redirections.entryPoint.to=websecure
+        #- --entryPoints.web.http.redirections.entryPoint.scheme=https
         - --entryPoints.websecure.address=:443
-        - --entrypoints.web.http.redirections.entryPoint.to=websecure
-        - --entrypoints.web.http.redirections.entryPoint.scheme=https
+        - --entryPoints.websecure.http.tls=true
 
         # Enable debug logging. Useful to work out why something might not beworking. Fetch logs of the pod.
         - --log.level=debug
 
         # Let's Encrypt Configurtion.
-        - --certificatesresolvers.default.acme.email=venryx@gmail.com
-        - --certificatesresolvers.default.acme.storage=acme_3.json
-        - --certificatesresolvers.default.acme.tlschallenge
-        # Use the staging ACME server. Uncomment this while testing to prevent hitting rate limits in production.
-        - --certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+        # - --certificatesresolvers.default.acme.email=venryx@gmail.com
+        # - --certificatesresolvers.default.acme.storage=acme_3.json
+        # - --certificatesresolvers.default.acme.tlschallenge
+        # # Use the staging ACME server. Uncomment this while testing to prevent hitting rate limits in production.
+        # - --certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory

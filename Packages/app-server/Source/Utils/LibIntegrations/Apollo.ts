@@ -17,12 +17,11 @@ export function GetWebServerURL(subpath: string) {
 
 	//return `https://debatemap.app/${subpath.slice(1)}`;
 	// temp
-	return `https://dm.venryx.org/${subpath.slice(1)}`;
+	return `https://debates.app/${subpath.slice(1)}`;
 }
 export function GetAppServerURL(subpath: string, referrerURLStr?: string) {
 	Assert(subpath.startsWith("/"));
 	if (DEV && !inK8s) return `http://localhost:3105/${subpath.slice(1)}`;
-	//if (DEV && inK8s) return `http://localhost:31006/${subpath.slice(1)}`;
 	if (DEV && inK8s) return `http://localhost:3105/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
 	
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
@@ -32,7 +31,7 @@ export function GetAppServerURL(subpath: string, referrerURLStr?: string) {
 
 	//return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 	// temp
-	return `https://dm-app.venryx.org/${subpath.slice(1)}`;
+	return `https://app-server.debates.app/${subpath.slice(1)}`;
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");

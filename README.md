@@ -27,6 +27,8 @@ For more information, visit the website at: <https://debatemap.app>
 
 # Guide modules
 
+> The below is for the "active guide modules" that are likely to be used. Ones unlikely to be used are placed in the `ExtraGuideModules.md` files of these packages: [(root)](https://github.com/debate-map/app/tree/master/Docs/ExtraGuideModules.md), [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server/Docs/ExtraGuideModules.md), [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server/Docs/ExtraGuideModules.md)
+
 ## General
 
 <!----><a name="setup-general"></a>
@@ -61,7 +63,6 @@ Guide modules for ["client" package](https://github.com/debate-map/app/tree/mast
 > These modules are only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
 Guide modules for ["web-server" package](https://github.com/debate-map/app/tree/master/Packages/web-server): (provider of the static html, css, js, etc. files)
-* [web-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/web-server#local-docker)
 
 ## Package: app-server
 
@@ -69,8 +70,6 @@ Guide modules for ["web-server" package](https://github.com/debate-map/app/tree/
 
 Guide modules for ["app-server" package](https://github.com/debate-map/app/tree/master/Packages/app-server): (the app-server that runs graphql, the database, etc.)
 * [app-server/general](https://github.com/debate-map/app/tree/master/Packages/app-server#general)
-* [app-server/local-base](https://github.com/debate-map/app/tree/master/Packages/app-server#local-base)
-* [app-server/local-docker](https://github.com/debate-map/app/tree/master/Packages/app-server#local-docker)
 * [app-server/db-migrate](https://github.com/debate-map/app/tree/master/Packages/app-server#db-migrate)
 
 ## Package: deploy
@@ -86,10 +85,12 @@ Guide modules for ["deploy" package](https://github.com/debate-map/app/tree/mast
 * [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim)
 * [deploy/cloud-project-init](https://github.com/debate-map/app/tree/master/Packages/deploy#cloud-project-init)
 * [deploy/pulumi-init](https://github.com/debate-map/app/tree/master/Packages/deploy#pulumi-init)
+* [deploy/ovh-init](https://github.com/debate-map/app/tree/master/Packages/deploy#ovh-init)
 * [deploy/k8s-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-remote)
 * [deploy/k8s-monitors](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-monitors)
 * [deploy/k8s-ssh](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-ssh)
 * [deploy/k8s-psql](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-psql)
 * [deploy/k8s-view-pg-config](https://github.com/debate-map/app/tree/master/Packages/deploy#k8s-view-pg-config)
 * [deploy/pg-backups](https://github.com/debate-map/app/tree/master/Packages/deploy#pg-backups)
+* [deploy/dns-setup](https://github.com/debate-map/app/tree/master/Packages/deploy#dns-setup)
 * [deploy/oauth-setup](https://github.com/debate-map/app/tree/master/Packages/deploy#oauth-setup)

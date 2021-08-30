@@ -4,8 +4,10 @@ metadata:
   name: dmvx-ingress
   annotations:
     kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.tls.certresolver: default
+    # commented; this was forcing all routes (including "web") to use tls, even though only the "websecure" route supports it (which was making non-https requests unresolvable, ie. always returning 404)
+    # (note that with this commented, the websecure route now requires the tls:true flag, else it has the same issue in the opposite direction)
+    #traefik.ingress.kubernetes.io/router.tls: "true"
+    #traefik.ingress.kubernetes.io/router.tls.certresolver: default
 
     # ingress.kubernetes.io/hsts-max-age: "315360000"
     # ingress.kubernetes.io/hsts-include-subdomains: "true"
@@ -15,7 +17,21 @@ metadata:
     #traefik.ingress.kubernetes.io/custom-response-headers: "Server:||X-Application-Context:||X-Powered-By:||exception:||Access-Control-Allow-Headers:CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
 spec:
   rules:
-    - host: dm.venryx.org
+    # these allow you to open the site directly, using the ovh cluster domain-name
+    - host: 9m2x1z.nodes.c1.or1.k8s.ovh.us
+      http:
+        paths:
+          - backend:
+              serviceName: dm-web-server
+              servicePort: 3005
+    - host: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us
+      http:
+        paths:
+          - backend:
+              serviceName: dm-app-server
+              servicePort: 3105
+    # these are the domains end-users should be accessing the site from
+    - host: debates.app
       http:
         # middlewares:
         #   test-stripprefix:
@@ -51,7 +67,7 @@ spec:
           #   backend:
           #     serviceName: dm-app-server
           #     servicePort: 3105
-    - host: dm-app.venryx.org
+    - host: app-server.debates.app
       http:
         paths:
           - backend:

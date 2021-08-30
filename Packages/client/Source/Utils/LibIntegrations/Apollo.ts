@@ -23,7 +23,7 @@ export function GetAppServerURL(subpath: string) {
 	if (location.host.endsWith(":31005")) return `${location.protocol}//${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
 
 	// temp
-	if (location.host == "dm.venryx.org") return `https://dm-app.venryx.org/${subpath.slice(1)}`;
+	if (location.host == "debates.app") return `https://app-server.debates.app/${subpath.slice(1)}`;
 
 	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 }
