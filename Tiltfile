@@ -27,61 +27,69 @@ k8s_resource(new_name="namespaces",
 # prometheus
 # ==========
 
-#k8s_yaml(kustomize('./Packages/deploy/Monitors/kube-prometheus/overlay'))
-'''load(
-    #'ext://coreos_prometheus',
-    'Packages/deploy/Monitors/kube-prometheus/Tiltfile',
-    'setup_monitoring',
-    'get_prometheus_resources',
-    'get_prometheus_dependencies',
-)
-setup_monitoring()'''
-# k8s_resource(
-#     'my-resource',
-#     objects=get_prometheus_resources(my_deployment, 'my-resource'),
-#     resource_deps=get_prometheus_dependencies(),
+# load(
+# 	'Packages/deploy/Monitors/prometheus-pack/Tiltfile',
+# 	'install'
 # )
+# install()
 
-load(
-	'Packages/deploy/Monitors/prometheus-pack/Tiltfile',
-	'install'
-)
-install()
+# k8s_resource("prometheus",
+# 	objects=[
+# 		"vfiles-configmap:configmap",
+# 	],
+# 	resource_deps=["namespaces"],
+# 	labels=["monitoring"],
+# )
+# k8s_resource("grafana",
+# 	objects=[
+# 		"grafana-config-monitoring:configmap",
+# 		"grafana-dashboards:configmap",
+# 		"grafana-datasources:configmap",
+# 		"grafana-dashboard-kubernetes-cluster:configmap",
+# 		"grafana-dashboard-node-exporter-full:configmap",
+# 	],
+# 	resource_deps=["prometheus"],
+# 	labels=["monitoring"],
+# )
+# k8s_resource("node-exporter",
+# 	objects=[
+# 		"node-exporter-claim0:persistentvolumeclaim",
+# 		"node-exporter-claim1:persistentvolumeclaim",
+# 	],
+# 	resource_deps=["prometheus"],
+# 	labels=["monitoring"],
+# )
+# '''k8s_resource("cadvisor",
+# 	objects=[
+# 		"cadvisor-claim0:persistentvolumeclaim",
+# 		"cadvisor-claim1:persistentvolumeclaim",
+# 		"cadvisor-claim2:persistentvolumeclaim",
+# 	],
+# 	resource_deps=["prometheus"],
+# )'''
 
-k8s_resource("prometheus",
-	objects=[
-		"vfiles-configmap:configmap",
-	],
-	resource_deps=["namespaces"],
+k8s_yaml(kustomize('./Packages/deploy/Monitors/pg-monitor-pack'))
+k8s_resource("crunchy-prometheus", labels=["monitoring"])
+k8s_resource("crunchy-alertmanager", labels=["monitoring"])
+k8s_resource("crunchy-grafana", labels=["monitoring"])
+k8s_resource(new_name="crunchy-others",
 	labels=["monitoring"],
-)
-k8s_resource("grafana",
 	objects=[
-		"grafana-config-monitoring:configmap",
+		"alertmanager:serviceaccount",
+		"grafana:serviceaccount",
+		"prometheus-sa:serviceaccount",
+		"prometheus-cr:clusterrole",
+		"prometheus-crb:clusterrolebinding",
+		"alertmanagerdata:persistentvolumeclaim",
+		"grafanadata:persistentvolumeclaim",
+		"prometheusdata:persistentvolumeclaim",
+		"alertmanager-config:configmap",
+		"alertmanager-rules-config:configmap",
+		"crunchy-prometheus:configmap",
 		"grafana-dashboards:configmap",
 		"grafana-datasources:configmap",
-		"grafana-dashboard-kubernetes-cluster:configmap",
-		"grafana-dashboard-node-exporter-full:configmap",
-	],
-	resource_deps=["prometheus"],
-	labels=["monitoring"],
-)
-k8s_resource("node-exporter",
-	objects=[
-		"node-exporter-claim0:persistentvolumeclaim",
-		"node-exporter-claim1:persistentvolumeclaim",
-	],
-	resource_deps=["prometheus"],
-	labels=["monitoring"],
-)
-'''k8s_resource("cadvisor",
-	objects=[
-		"cadvisor-claim0:persistentvolumeclaim",
-		"cadvisor-claim1:persistentvolumeclaim",
-		"cadvisor-claim2:persistentvolumeclaim",
-	],
-	resource_deps=["prometheus"],
-)'''
+		"grafana-secret:secret",
+	])
 
 # crunchydata postgres operator
 # ==========

@@ -19,7 +19,7 @@ def BaseName(path):
 setupManifests = [
 	doc for doc in ListDir(".", recursive=True)
 	if doc.endswith(".yaml")
-		and "cadvisor" not in doc # temp
+		and "cadvisor" not in doc # temp; cadvisor fails to start (issue with PVC)
 ]
 
 def name(c):

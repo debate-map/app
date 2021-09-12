@@ -15,7 +15,11 @@
   "scripts": {
     "start": "nps",
     "preinstall": "npx only-allow yarn",
-    "postinstall": "patch-package --patch-dir ./node_modules/web-vcore/patches && patch-package --patch-dir ./patches"
+    "postinstall_old": "patch-package --patch-dir ./node_modules/web-vcore/patches && patch-package --patch-dir ./patches",
+    "postinstall_old2": "patch-package --patch-dir ./patches",
+    "postinstall_old3": "node ./node_modules/web-vcore/Scripts_Dist/ApplyPatches.js && patch-package --patch-dir ./patches",
+    "postinstall": "patch-package --patch-dir ./patches && cd ./node_modules/web-vcore && node ./Scripts_Dist/ApplyPatches.js"
+
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -34,14 +38,15 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "tslib": "2.3.0",
-    "zen-observable-ts": "1.1.0"
+    "zen-observable-ts": "1.1.0",
+    "graphql-tag": "2.12.5"
   },
   "dependencies": {
     "chalk": "^4.1.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
-    "web-vcore": "0.0.23"
+    "web-vcore": "0.0.35"
   },
   "packageManager": "yarn@3.0.0-rc.2"
 }
