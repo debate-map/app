@@ -211,7 +211,7 @@ Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/
 ### [k8s-monitors] Various commands/info on monitoring system (prometheus, etc.)
 
 * To open a bash shell in the main prometheus pod: `kubectl exec -it prometheus-k8s-[0/1] -n monitoring -- sh` (or just use Lens)
-* To view the Grafana monitor webpage, open: `localhost:31000`
+* To view the Grafana monitor webpage, open: `localhost:[3405/4405]` (`3405` for local, `4405` for remote, if using Tilt; if not, manually launch using Lens)
 	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
 	>
 	> The Grafana instance has been preconfigured with some useful dashboards, which can be accessed through: Dashboards (in sidebar) -> Manage -> Default -> [dashboard name]. You can import additional plugins/dashboards from the Grafana [plugin library](https://grafana.com/grafana/plugins) and [dashboard library](https://grafana.com/grafana/dashboards).

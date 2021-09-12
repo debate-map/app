@@ -71,7 +71,9 @@ k8s_resource(new_name="namespaces",
 k8s_yaml(kustomize('./Packages/deploy/Monitors/pg-monitor-pack'))
 k8s_resource("crunchy-prometheus", labels=["monitoring"])
 k8s_resource("crunchy-alertmanager", labels=["monitoring"])
-k8s_resource("crunchy-grafana", labels=["monitoring"])
+k8s_resource("crunchy-grafana", labels=["monitoring"],
+	port_forwards='4405:3000' if REMOTE else '3405:3000',
+)
 k8s_resource(new_name="crunchy-others",
 	labels=["monitoring"],
 	objects=[

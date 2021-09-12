@@ -25,10 +25,19 @@ metadata:
     name: crunchy-grafana
   name: crunchy-grafana
 spec:
+
+  # v-replaced
   type: ClusterIP
+  #type: NodePort
+
   ports:
   - name: grafana
     port: 3000
+    
+    # v-added
+    #nodePort: 31000
+    #containerPort: 4123
+
   selector:
     name: crunchy-grafana
 
