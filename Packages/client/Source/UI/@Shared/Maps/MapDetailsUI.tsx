@@ -20,7 +20,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 		const nodeAccessPolicy = GetAccessPolicy(newData.nodeAccessPolicy);
 
-		const splitAt = 105;
+		const splitAt = 150;
 		const width = 600;
 		return (
 			<Column style={style}>
