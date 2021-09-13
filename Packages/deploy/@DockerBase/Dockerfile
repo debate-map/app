@@ -32,47 +32,21 @@ RUN yarn install --inline-builds
 #RUN --mount=type=cache,mode=0777,target=../.yarn_cache yarn install
 #RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --prefer-offline --frozen-lockfile
 #RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --frozen-lockfile
-# from: https://stackoverflow.com/a/52805882/2441655
-#RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
-#RUN yarn install --production --non-interactive --cache-folder ./ycache; rm -rf ./ycache
-#RUN yarn install --check-files --force
-#RUN yarn install --check-files --force --production=false
-#RUN yarn install --check-files --production=false
-
-#COPY ./node_modules/ajv/dist/ ./node_modules/ajv/dist/
-#COPY ./node_modules/amp/lib/ ./node_modules/amp/lib/
-#COPY ./node_modules/axios/dist/ ./node_modules/axios/dist/
-
-#COPY ./node_modules/web-vcore/nm ./node_modules/web-vcore/nm
-#COPY node_modules node_modules
-#COPY node_modules\\web-vcore\\nm\\ .\\node_modules\\web-vcore\\nm\\
-#COPY .\\node_modules\\web-vcore\\** ./node_modules/web-vcore/
 
 # moved this to package-specific dockerfiles, as "update base docker image" has (a lot) more overhead than "copy NMOverwrites/ folder" in each package, and NMOverwrites/ can change frequently 
 #COPY NMOverwrites/ /dm_repo/
 
-# fsr, "yarn install" is installing some of web-vcore's deps (eg. mobx-graphlink) under "web-vcore/node_modules", rather than hoisting;
+# fsr, "yarn install" is installing some of web-vcore's deps (eg. mobx-graphlink) under "web-vcore/node_modules", rather than hoisting (perhaps yarn is trying to avoid conflict with the "link:XXX" entry in yarn.lock);
 #		we need those deps hoisted (so that NMOverwrites can be applied), so manually re-hoist them
 # ==========
-
-# move
-# RUN mv /dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink /dm_repo/node_modules/mobx-graphlink
-# RUN mv /dm_repo/node_modules/web-vcore/node_modules/graphql-feedback /dm_repo/node_modules/graphql-feedback
-# # others (needed by mobx-graphlink and such)
-# RUN mv /dm_repo/node_modules/web-vcore/node_modules/graphql-tag /dm_repo/node_modules/graphql-tag
-# check
-# RUN if [ ! -d "/dm_repo/node_modules/mobx-graphlink" ]; then echo										"The mobx-graphlink package was not found in the root node_modules folder. Fix this! (hoisting needed for NMOverwrites)"; exit 1; fi
-# RUN if [ -d "/dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink" ]; then echo			"The mobx-graphlink package was found as web-vcore subdep, rather than hoisted. Fix this! (hoisting needed for NMOverwrites)"; exit 1; fi
-# RUN if [ ! -d "/dm_repo/node_modules/graphql-feedback" ]; then echo									"The graphql-feedback package was not found in the root node_modules folder. Fix this! (hoisting needed for NMOverwrites)"; exit 1; fi
-# RUN if [ -d "/dm_repo/node_modules/web-vcore/node_modules/graphql-feedback" ]; then echo		"The graphql-feedback package was found as web-vcore subdep, rather than hoisted. Fix this! (hoisting needed for NMOverwrites)"; exit 1; fi
-
-
 
 # pre-check (fails currently, which is okay -- that's why we do the below)
 #RUN if [ ! -d "/dm_repo/node_modules/mobx-graphlink" ]; then echo										"The mobx-graphlink package was not found in the root node_modules folder. Fix this! (hoisting needed for NMOverwrites)"; else echo "-1GoodA"; fi
 #RUN if [ -d "/dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink" ]; then echo			"The mobx-graphlink package was found as web-vcore subdep, rather than hoisted. Fix this! (hoisting needed for NMOverwrites)"; else echo "-1GoodB"; fi
 
-#RUN mv /dm_repo/node_modules/web-vcore/node_modules/ /dm_repo/node_modules/
+#RUN mv /dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink /dm_repo/node_modules/mobx-graphlink
+#RUN mv /dm_repo/node_modules/web-vcore/node_modules/graphql-feedback /dm_repo/node_modules/graphql-feedback
+# RUN mv /dm_repo/node_modules/web-vcore/node_modules/ /dm_repo/node_modules/
 RUN cp -rl --force /dm_repo/node_modules/web-vcore/node_modules/ /dm_repo/ \
 	&& rm -r /dm_repo/node_modules/web-vcore/node_modules/
 
