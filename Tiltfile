@@ -24,6 +24,11 @@ k8s_resource(new_name="namespaces",
 	],
 )
 
+# others (early)
+# ==========
+
+k8s_yaml('./Packages/deploy/NodeSetup/node-setup-daemon-set.yaml')
+
 # prometheus
 # ==========
 

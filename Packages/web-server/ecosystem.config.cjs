@@ -34,7 +34,8 @@ module.exports = {
 
 		//watch: true, // watch:true doesn't work fsr (it ignores node_modules)
 		// disable watching in remote k8s instances, because not all support it (eg. ovh)
-		watch: inLocalK8s ? "**" : false,
+		//watch: inLocalK8s ? "**" : false,
+		watch: "**",
 		/*watch: [
 			"Packages/web-server",
 			"Packages/client/Source_JS",
