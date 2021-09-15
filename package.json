@@ -19,7 +19,6 @@
     "postinstall_old2": "patch-package --patch-dir ./patches",
     "postinstall_old3": "node ./node_modules/web-vcore/Scripts_Dist/ApplyPatches.js && patch-package --patch-dir ./patches",
     "postinstall": "patch-package --patch-dir ./patches && cd ./node_modules/web-vcore && node ./Scripts_Dist/ApplyPatches.js"
-
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

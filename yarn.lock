@@ -1252,7 +1252,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
-    web-vcore: 0.0.19
+    web-vcore: 0.0.35
   languageName: unknown
   linkType: soft
 
@@ -1686,6 +1686,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cookie-session@npm:^2.0.43":
+  version: 2.0.43
+  resolution: "@types/cookie-session@npm:2.0.43"
+  dependencies:
+    "@types/express": "*"
+    "@types/keygrip": "*"
+  checksum: 7dc2451aba20ca6e92575b0a2fe009ee759034e11702048bb71038d71a6d4ddf241fd39164cd4452548a29cdb7a1a4bdf9a90775ac8d68953ce7cf51f43623c8
+  languageName: node
+  linkType: hard
+
 "@types/cors@npm:^2.8.11":
   version: 2.8.11
   resolution: "@types/cors@npm:2.8.11"
@@ -1733,15 +1743,6 @@ __metadata:
     "@types/qs": "*"
     "@types/range-parser": "*"
   checksum: 71f61a1e024ed2ffa9edb0f49d1a347c6ddbfbfb07f3a68c00926a29ad5a1adc368992d8e9ca85e7f678e8f5a97fa4669f7a96e24aeed06f1fb8c462da70ec01
-  languageName: node
-  linkType: hard
-
-"@types/express-session@npm:^1.17.4":
-  version: 1.17.4
-  resolution: "@types/express-session@npm:1.17.4"
-  dependencies:
-    "@types/express": "*"
-  checksum: 3047c30e3eafec89a670445ca7162ff595e25d8baa9490a2e1a0dfcb41eb09d0fb680515b8ba9ab36abfe7303438833ef90f6cbbce319b5be0d80b09ae4f795f
   languageName: node
   linkType: hard
 
@@ -1803,6 +1804,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 068722d228b1d1cc10139b9a9e71df75db2579bc036d6c9680792c6711b53bd111bbdfb22b3031b266dfe284b9c91a411d8d63f70ace18804549240e87e9f4b3
+  languageName: node
+  linkType: hard
+
+"@types/keygrip@npm:*":
+  version: 1.0.2
+  resolution: "@types/keygrip@npm:1.0.2"
+  checksum: 60bc2738a4f107070ee3d96f44709cb38f3a96c7ccabab09f56c1b2b4d85f869fd8fb9f1f2937e863d0e9e781f005c2223b823bf32b859185b4f52370c352669
   languageName: node
   linkType: hard
 
@@ -3318,9 +3326,9 @@ __metadata:
     "@pg-lq/postgraphile-plugin": 0.0.6
     "@pyramation/postgraphile-plugin-fulltext-filter": ^2.0.0
     "@types/body-parser": ^1.19.1
+    "@types/cookie-session": ^2.0.43
     "@types/cors": ^2.8.11
     "@types/express": ^4.17.12
-    "@types/express-session": ^1.17.4
     "@types/node": ^15.3.0
     "@types/passport": ^1.0.6
     "@types/passport-google-oauth20": ^2.0.8
@@ -8101,21 +8109,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"tslib@npm:1.9.3":
-  version: 1.9.3
-  resolution: "tslib@npm:1.9.3"
-  checksum: 56ef6325adb72c6477fb48256304507a2c475d69d7ead4644d61f5685fac2a275a38cf217c556e63fc3c177e729426d730e2c2e71c8042dc6cc57338a849edb2
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^1.9.0":
-  version: 1.14.1
-  resolution: "tslib@npm:1.14.1"
-  checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.0.1, tslib@npm:^2.1.0":
+"tslib@npm:2.3.0":
   version: 2.3.0
   resolution: "tslib@npm:2.3.0"
   checksum: 8869694c26e4a7b56d449662fd54a4f9ba872c889d991202c74462bd99f10e61d5bd63199566c4284c0f742277736292a969642cc7b590f98727a7cae9529122

@@ -29,6 +29,7 @@ Packages/**/node_modules
 
 # most of these are excluded just so that Tilt doesn't update resources based on their being changed
 .git
+Temp
 .gitignore
 .eslintrc.cjs
 package-scripts.js

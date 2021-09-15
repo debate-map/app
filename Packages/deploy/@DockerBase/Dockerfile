@@ -24,14 +24,18 @@ COPY patches/ patches/
 
 # now that yarn has the info it needs, have it install all the node-modules
 # (--inline-builds lets us see the output of the build-scripts [eg. the post-install for patch-package] to confirm that they're being applied properly)
-RUN yarn install --inline-builds
-#RUN yarn install --cache-folder ./cross-build-yarn-cache
-#RUN --mount=type=cache,target=.yarn/cache yarn install
-#ENV YARN_CACHE_FOLDER=../.yarn_cache
-#RUN --mount=type=cache,target=../.yarn_cache yarn install
-#RUN --mount=type=cache,mode=0777,target=../.yarn_cache yarn install
-#RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --prefer-offline --frozen-lockfile
-#RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --frozen-lockfile
+#	RUN yarn install --inline-builds
+#RUN yarn install --inline-builds --production=true
+#	RUN yarn install --cache-folder ./cross-build-yarn-cache
+#	RUN --mount=type=cache,target=.yarn/cache yarn install
+#	ENV YARN_CACHE_FOLDER=../.yarn_cache
+#	RUN --mount=type=cache,target=../.yarn_cache yarn install
+#	RUN --mount=type=cache,mode=0777,target=../.yarn_cache yarn install
+#	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --prefer-offline --frozen-lockfile
+#	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --frozen-lockfile
+
+# equivalent of yarn-v1's "yarn install --production" (as per: https://yarnpkg.com/cli/workspaces/focus#details)
+RUN yarn workspaces focus --all --production
 
 # moved this to package-specific dockerfiles, as "update base docker image" has (a lot) more overhead than "copy NMOverwrites/ folder" in each package, and NMOverwrites/ can change frequently 
 #COPY NMOverwrites/ /dm_repo/
