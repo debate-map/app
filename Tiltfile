@@ -243,15 +243,14 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 # port forwards
 # ==========
 
-k8s_resource('dm-app-server', 
+k8s_resource('dm-app-server',
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	port_forwards='4105' if REMOTE else '3105',
 	resource_deps=["traefik"],
 	labels=["app"],
 )
 
-# the web-server forward works, but it makes 31005 unusuable then (I guess can only forward to one port at once); app-server forward didn't work
-k8s_resource('dm-web-server', 
+k8s_resource('dm-web-server',
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
 	port_forwards='4005' if REMOTE else '3005',

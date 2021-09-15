@@ -198,7 +198,7 @@ Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/
 
 * 1\) If you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package. (see the changed packages' readmes for more info)
 * 2\) Run: `npm start backend.tiltUp_ovh` (reminder: if you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package)
-* 3\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:31005`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
+* 3\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:4105`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
 * 4\) If you haven't yet, initialize the DB:
 	* 4.1\) Run: `npm start "app-server.initDB_freshScript_k8s ovh"`
 * 5\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
