@@ -1,5 +1,7 @@
 import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
+import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
+import {Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
@@ -16,6 +18,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 	oldData: Map;
 	userMapInfoSets: UserMapInfoSet[];
 	sub_deleteNode: DeleteNode;
+	nodeEdits: Map_NodeEdit[];
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetMap.NN(id);
@@ -26,6 +29,8 @@ export class DeleteMap extends Command<{id: string}, {}> {
 		this.sub_deleteNode.asPartOfMapDelete = true;
 		this.sub_deleteNode.Validate();
 		// todo: use parents recursion on l2 nodes to make sure they're all connected to at least one other map root
+
+		this.nodeEdits = GetMapNodeEdits(id);
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
@@ -40,7 +45,10 @@ export class DeleteMap extends Command<{id: string}, {}> {
 				}
 			}
 		}*/
-		// delete entry in mapNodeEditTimes
-		db.set(dbp`mapNodeEditTimes/${id}`, null);
+		
+		// delete entries in mapNodeEdits
+		for (const edit of this.nodeEdits) {
+			db.set(dbp`mapNodeEdits/${edit.id}`, null);
+		}
 	}
 }
