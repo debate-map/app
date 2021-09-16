@@ -1,4 +1,7 @@
-FROM node:14
+# options (largest to smallest): 14 (~900mb), 14-slim (~150mb), 14-alpine (~100mb)
+#FROM node:14
+#FROM node:14-slim
+FROM node:14-alpine
 #FROM node:16
 
 WORKDIR "/dm_repo"
@@ -35,7 +38,16 @@ COPY patches/ patches/
 #	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --frozen-lockfile
 
 # equivalent of yarn-v1's "yarn install --production" (as per: https://yarnpkg.com/cli/workspaces/focus#details)
-RUN yarn workspaces focus --all --production
+RUN yarn workspaces focus --all --production \
+# exclude just-created caches (the caches can't be used anyway)
+	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
+# delete folders that had to be marked as deps (eg. under web-vcore), but which are actually only needed at development time
+	&& rm -r /dm_repo/node_modules/typescript \
+# we can't exclude @babel quite yet, unfortunately, because some packages runtime-require it (eg. "react-textarea-autosize" requires "@babel/runtime/helpers/extends")
+#	&& rm -r /dm_repo/node_modules/@babel
+# exclude every folder under "@babel" other than "runtime"
+#	&& cd /dm_repo/node_modules/@babel && rm -r !(runtime)
+	&& cd /dm_repo/node_modules/@babel && find . -mindepth 1 -maxdepth 1 -type d ! -name "runtime" -exec rm -r {} \;
 
 # moved this to package-specific dockerfiles, as "update base docker image" has (a lot) more overhead than "copy NMOverwrites/ folder" in each package, and NMOverwrites/ can change frequently 
 #COPY NMOverwrites/ /dm_repo/

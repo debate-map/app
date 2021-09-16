@@ -20,6 +20,13 @@ exports.config = {
 				"@pg-lq/postgraphile-plugin": "link:../../@Modules/postgraphile-live-query/Main/Packages/postgraphile-plugin",
 			   "file-syncer": "link:C:/Root/Apps/@V/@Modules/file-syncer/Main"
 			}
-		}
+		},
+		/*inDocker && {
+			name: "docker_ignoreWVCSortOfDevDeps",
+			overrides_forSelf: {
+				"typescript": "link:../../../../link/to/nowhere",
+				"@docker/...": "link:../../../../link/to/nowhere",
+			}
+		}*/
 	],
 };

@@ -18,6 +18,9 @@ Packages/**/node_modules
 
 # most of these are excluded just so that Tilt doesn't update resources based on their being changed
 .git
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
 Temp
 .gitignore
 .eslintrc.cjs
