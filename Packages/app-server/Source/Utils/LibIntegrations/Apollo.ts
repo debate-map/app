@@ -6,32 +6,56 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 
+const allowedHosts = ["localhost:3005", "debatemap.app", "debates.app"];
+//const prodDomain = "debatemap.app";
+const prodDomain = "debates.app"; // temp
+
 const DEV = process.env.ENV == "dev";
 const inK8s = process.env.KUBERNETES_SERVICE_HOST != null;
 //const inK8s = process.env.DB_ADDR;
-export function GetWebServerURL(subpath: string) {
-	Assert(subpath.startsWith("/"));
-	if (DEV && !inK8s) return `http://localhost:3005/${subpath.slice(1)}`;
-	//if (DEV && inK8s) return `http://localhost:31005/${subpath.slice(1)}`;
-	if (DEV && inK8s) return `http://localhost:3005/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
 
-	//return `https://debatemap.app/${subpath.slice(1)}`;
-	// temp
-	return `https://debates.app/${subpath.slice(1)}`;
+export function GetWebServerURL(subpath: string, referrerURLStr: string|n, forceLocalhost = false) {
+	Assert(subpath.startsWith("/"));
+
+	// if this app-server is DEV, only localhost frontends will ever connect
+	if (DEV || forceLocalhost) return `http://localhost:3005/${subpath.slice(1)}`;
+
+	// if this app-server is PROD, it can connect to either the production frontend, or a localhost frontend (if url has "?db=prod")
+	console.log("GetWebServerURL_referrer:", referrerURLStr);
+	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
+	// this handling is needed for the "?db=prod" helper
+	if (referrerURL) {
+		Assert(allowedHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
+		//if (referrerURL.host == "localhost:3105") referrerURL.host = "localhost:3005";
+		referrerURL.pathname = subpath;
+		return referrerURL.toString();
+	}
+	return `https://${prodDomain}/${subpath.slice(1)}`; // temp
 }
-export function GetAppServerURL(subpath: string, referrerURLStr?: string) {
+export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 	Assert(subpath.startsWith("/"));
-	if (DEV && !inK8s) return `http://localhost:3105/${subpath.slice(1)}`;
-	if (DEV && inK8s) return `http://localhost:3105/${subpath.slice(1)}`; // tilt proxies our 3005 to k8s 31005
-	
-	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
-	/*const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
-	if (referrerURL && referrerURL.host.endsWith(":31005")) return `http://${referrerURL.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;*/
-	//if (currentURL.endsWith(":31006")) return `http://${currentURL.host}/${subpath.slice(1)}`;
 
-	//return `https://app-server.debatemap.app/${subpath.slice(1)}`;
-	// temp
-	return `https://app-server.debates.app/${subpath.slice(1)}`;
+	if (DEV) return `http://localhost:3105/${subpath.slice(1)}`;
+
+	// if this app-server is PROD, it can connect to either the production frontend, or a localhost frontend (if url has "?db=prod")
+	console.log("GetAppServerURL_referrer:", referrerURLStr);
+	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
+	// this handling is needed for the "?db=prod" helper
+	if (referrerURL) {
+		Assert(allowedHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
+		// this branch is only hit if the app-server is PROD, thus if we hit a "localhost:3005" host, it must have the "?db=prod" flag
+		if (referrerURL.host == "localhost:3005") {
+			//referrerURL.host = "localhost:3105";
+			//referrerURL.host = `app-server.${prodDomain}`;
+			if (subpath == "/auth/google/callback") {
+				subpath = "/auth/google/callback_returnToLocalhost";
+			}
+		}
+		/*referrerURL.pathname = subpath;
+		return referrerURL.toString();*/
+	}
+
+	return `https://app-server.${prodDomain}/${subpath.slice(1)}`;
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");

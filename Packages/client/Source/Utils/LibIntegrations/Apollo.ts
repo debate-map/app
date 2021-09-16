@@ -7,6 +7,7 @@ import {runInAction} from "web-vcore/nm/mobx";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {graph} from "./MobXGraphlink";
 
+// todo: clean these functions up, and make them consistent with the app-server versions
 export function GetWebServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
 	/*if (location.host == "localhost:3005") return subpath;

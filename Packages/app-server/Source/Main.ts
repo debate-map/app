@@ -55,6 +55,8 @@ app.use(cors({
 	//origin: "debatemap.app",
 	//origin: "*", // let any origin make calls to our server (that's fine)
 	origin: true, // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
+	// todo: change "origin" to be a function, that only accepts CORS from a hard-coded list of origins
+	
 	credentials: true, // allows cookies to be sent with requests (eg. for passing passportjs session-token with mutation/command calls)
 }));
 

@@ -30,7 +30,7 @@ Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/m
 Tools:
 * Make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
 * Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
-* To inspect the full file-contents of an image: `docker image save IMAGE_NAME > output.tar` (followed by extraction, eg. using [7-zip](https://www.7-zip.org))
+* To inspect the full file-contents of an image: `docker save IMAGE_NAME -o ./Temp/output.tar` (followed by extraction, eg. using [7-zip](https://www.7-zip.org))
 
 <!----><a name="tilt-notes"></a>
 ### [tilt-notes] Notes on using Tilt
@@ -338,19 +338,22 @@ Google Sign-in:
 * 1\) Create a Google Cloud project for your fork.
 * 2\) Go to: https://console.cloud.google.com/apis/credentials?project=YOUR_PROJECT_NAME
 * 3\) In the "Credentials->OAuth 2.0 Client IDs" section, create a new "Web Application" entry.
-* 4\) Set the values below:
+* 4\) Set the values below: (yes, the plain `localhost` one is [also needed](https://stackoverflow.com/a/68469319))
 ```
 Authorized JavaScript Origins:
+* http://localhost
 * http://localhost:3005
 * http://[::1]:3005
 * https://9m2x1z.nodes.c1.or1.k8s.ovh.us
-* https://debates.app
 * https://debatemap.app
+* https://debates.app
 
 Authorized redirect URIs:
 * http://localhost:3105/auth/google/callback
 * http://[::1]:3105/auth/google/callback
 * https://app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us/auth/google/callback
-* https://app-server.debates.app/auth/google/callback
 * https://app-server.debatemap.app/auth/google/callback
+* https://app-server.debates.app/auth/google/callback
+* https://app-server.debatemap.app/auth/google/callback_returnToLocalhost
+* https://app-server.debates.app/auth/google/callback_returnToLocalhost
 ```

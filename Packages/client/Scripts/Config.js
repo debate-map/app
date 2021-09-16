@@ -22,4 +22,7 @@ const S = JSON.stringify;
 	//"process.env.CLIENT_ID": S(process.env.CLIENT_ID), // modify existing entry instead
 });*/
 //console.log("Found:", process.env);
-config.codeVarReplacements["process.env"]["CLIENT_ID"] = S(process.env.CLIENT_ID);
+
+/*const googleClientID_randomPart = S(process.env.CLIENT_ID)?.replace(".apps.googleusercontent.com", "");
+console.log("GClientID:", `${googleClientID_randomPart.slice(0, 2)}...${googleClientID_randomPart.slice(-2)}`);*/
+config.codeVarReplacements["process.env"]["CLIENT_ID"] = S(process.env.CLIENT_ID); // CLIENT_ID is supplied by the ".env" file

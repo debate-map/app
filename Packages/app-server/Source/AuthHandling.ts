@@ -4,11 +4,11 @@ import express, {Request, RequestHandler} from "express";
 import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
-import expressSession from "express-session";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
+import cookieLib from "cookie";
 
 const DEV = process.env.ENV == "dev";
 
@@ -45,11 +45,11 @@ callbackURL_proxy.toString = ()=>{
 
 Object.defineProperty(Object.prototype, "callbackURL", {
 	get() {
-		/*const referrerURL = currentAuthRequest?.get("Referrer");
+		const referrerURL = currentAuthRequest?.get("Referrer");
 		console.log("Referrer url for auth request:", referrerURL);
-		return GetAppServerURL("/auth/google/callback", referrerURL);*/
-		if (process.env.ENV == "prod") return "https://app-server.debates.app/auth/google/callback"; // temp fix (shouldn't be needed, but apparently the rel-to-abs code passport uses is wrong)
-		return "/auth/google/callback";
+		return GetAppServerURL("/auth/google/callback", referrerURL);
+		/*if (process.env.ENV == "prod") return "https://app-server.debates.app/auth/google/callback"; // temp fix (shouldn't be needed, but apparently the rel-to-abs code passport uses is wrong)
+		return "/auth/google/callback";*/
 	},
 });
 
@@ -172,7 +172,17 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 	next();
 };*/
 
+let inCrossOriginAuth = false;
 export function SetUpAuthHandling(app: ExpressApp) {
+	//app.set('trust proxy', '127.0.0.1');
+	// trust-proxy needed, so that "req.protocol" becomes "https", so that cookie-session allows setting a secure cookie
+	//app.set('trust proxy', 1); // proxy info can be trusted, since users access the server through the cloudflare proxy
+	// actually, just manually modify the flag (test)
+	/*app.use((req, res, next)=>{
+		Object.defineProperty(req, "protocol", {value: "https"});
+		next();
+	});*/
+
 	//app.use(express.session({ secret: 'keyboard cat' }));
 	app.use(cookieSession({
 		name: "debate-map-session",
@@ -181,7 +191,22 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		//domain: ".app.localhost", // explicitly set domain to ".app.localhost", so that it ignores the port segment, letting cookie be seen by both [app.]localhost:3005 and [db.app.]localhost:3105
 		//domain: ".localhost",
 		//domain: "localhost",
+
+		
+		httpOnly: true, // already the default
+		/*get secure() { console.log("Secure:", inCrossOriginAuth); return inCrossOriginAuth; },
+		get sameSite() { console.log("Secure:", inCrossOriginAuth); return inCrossOriginAuth ? "none" : undefined; },*/
+		// needed so that cookies can be received by localhost frontend (when "?db=prod" flag is used)
+		secure: true,
+		sameSite: "none",
+		//maxAge: 60 * 60 * 24 * 1000,
 	}));
+	// actually, just enable the "secure" flag on the sessionCookies object (see nm/cookie-session/index.js and nm/cookies/index.js)
+	app.use((req, res, next)=>{
+		req["sessionCookies"].secure = true;
+		next();
+	});
+
 	/*app.use(expressSession({
 		secret: "debate-map-session-123123",
 		resave: false,
@@ -210,12 +235,71 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		passport.authenticate("google"),
 		//setUserIDResponseCookie,
 		(req, res, next)=>{
-			console.log("User:", req.user);
+			console.log("User_RM:", req.user);
 			// if success
 			if (req.user) {
-				res.redirect(GetWebServerURL("/"));
+				res.redirect(GetWebServerURL("/", req?.get("Referrer")));
 			} else {
-				res.redirect(GetWebServerURL("/login-failed"));
+				res.redirect(GetWebServerURL("/login-failed", req?.get("Referrer")));
+			}
+			next();
+		});
+	app.get("/auth/google/callback_returnToLocalhost",
+		/*(req, res, next)=>{
+			/*console.log("Pre");
+			inCrossOriginAuth = true;*#/
+			// needed so that cookies can be received by localhost frontend (when "?db=prod" flag is used)
+			console.log("Old:", req["sessionOptions"]);
+			req["sessionOptions"].secure = true;
+			req["sessionOptions"].sameSite = "none";
+			console.log("New:", req["sessionOptions"]);
+			next();
+		},*/
+		passport.authenticate("google"),
+		(req, res, next)=>{
+			console.log("New_Session_Cookie:", req.sessionOptions, req.protocol, req.url, req.baseUrl, req.originalUrl, req.ip, req.ips);
+			/*inCrossOriginAuth = false;
+			console.log("Post");*/
+			// since we're returning to local-host, session cookies must be modified to have "SameSite=None"
+			const cookiesToChange = ["debate-map-session", "debate-map-session.sig"];
+			//const GetCookieValue = name=>{
+				const fields = [
+					res.getHeader("Set-Cookie"),
+					res.getHeader("set-cookie"),
+					res.get("Set-Cookie"),
+					res.header["Set-Cookie"],
+					res.getHeaderNames(),
+					res.getHeaders(),
+				];
+				console.log("Fields:", fields);
+				/*const cookies = cookieLib.parse(fields[0]);
+				console.log("Cookies:", cookies);
+				return cookies[name];
+			};
+			for (const name of cookiesToChange) {
+				res.cookie(name, GetCookieValue(name), {sameSite: "none", secure: true});
+			}*/
+			
+			/*if (req.session) {
+				req.session.save(err=>{
+					if (err) {
+						console.log(err);
+						return;
+					}
+
+					proceed();
+				});
+			} else {
+				proceed();
+			}*
+			function proceed() {*/
+			
+			console.log("User_LH:", req.user);
+			// if success
+			if (req.user) {
+				res.redirect(GetWebServerURL("/", req?.get("Referrer"), true));
+			} else {
+				res.redirect(GetWebServerURL("/login-failed", req?.get("Referrer"), true));
 			}
 			next();
 		});
@@ -224,10 +308,10 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		req.logOut();
 		if (req.session?.destroy) {
 			req.session.destroy(()=>{
-				res.redirect(GetWebServerURL("/"));
+				res.redirect(GetWebServerURL("/", req?.get("Referrer")));
 			});
 		} else {
-			res.redirect(GetWebServerURL("/"));
+			res.redirect(GetWebServerURL("/", req?.get("Referrer")));
 		}
 	});
 

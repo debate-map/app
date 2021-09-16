@@ -125,9 +125,11 @@ type GsiButtonConfiguration = {
 	width?: number; // The button width, in pixels.
 	locale?: string; // If set, then the button language is rendered.
 }
-export const googleClientID = process.env.CLIENT_ID; // supplied by NPMPatches.ts
+export const googleClientID = process.env.CLIENT_ID; // supplied by ./Scripts/Config.js
 export function EnsureGoogleIDAPIReady() {
 	if (g.google.accounts.id._initCalled) return;
+	/*const googleClientID_randomPart = googleClientID?.replace(".apps.googleusercontent.com", "");
+	console.log("GClientID:", `${googleClientID_randomPart?.slice(0, 2)}...${googleClientID_randomPart?.slice(-2)}`);*/
 	g.google.accounts.id.initialize({
       client_id: googleClientID,
       callback: googleID_handleCredentialResponse,
