@@ -13,6 +13,7 @@ import {SourceChainsEditorUI} from "../../SourceChainsEditorUI.js";
 import {TermDefinitionPanel} from "../../DetailBoxes/Panels/DefinitionsPanel.js";
 
 type Props = {baseData: MediaAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: MediaAttachment)=>void};
+@Observer
 export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: MediaAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
