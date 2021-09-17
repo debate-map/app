@@ -8,7 +8,6 @@ import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
-import cookieLib from "cookie";
 
 const DEV = process.env.ENV == "dev";
 
@@ -245,54 +244,9 @@ export function SetUpAuthHandling(app: ExpressApp) {
 			next();
 		});
 	app.get("/auth/google/callback_returnToLocalhost",
-		/*(req, res, next)=>{
-			/*console.log("Pre");
-			inCrossOriginAuth = true;*#/
-			// needed so that cookies can be received by localhost frontend (when "?db=prod" flag is used)
-			console.log("Old:", req["sessionOptions"]);
-			req["sessionOptions"].secure = true;
-			req["sessionOptions"].sameSite = "none";
-			console.log("New:", req["sessionOptions"]);
-			next();
-		},*/
 		passport.authenticate("google"),
 		(req, res, next)=>{
 			console.log("New_Session_Cookie:", req.sessionOptions, req.protocol, req.url, req.baseUrl, req.originalUrl, req.ip, req.ips);
-			/*inCrossOriginAuth = false;
-			console.log("Post");*/
-			// since we're returning to local-host, session cookies must be modified to have "SameSite=None"
-			const cookiesToChange = ["debate-map-session", "debate-map-session.sig"];
-			//const GetCookieValue = name=>{
-				const fields = [
-					res.getHeader("Set-Cookie"),
-					res.getHeader("set-cookie"),
-					res.get("Set-Cookie"),
-					res.header["Set-Cookie"],
-					res.getHeaderNames(),
-					res.getHeaders(),
-				];
-				console.log("Fields:", fields);
-				/*const cookies = cookieLib.parse(fields[0]);
-				console.log("Cookies:", cookies);
-				return cookies[name];
-			};
-			for (const name of cookiesToChange) {
-				res.cookie(name, GetCookieValue(name), {sameSite: "none", secure: true});
-			}*/
-			
-			/*if (req.session) {
-				req.session.save(err=>{
-					if (err) {
-						console.log(err);
-						return;
-					}
-
-					proceed();
-				});
-			} else {
-				proceed();
-			}*
-			function proceed() {*/
 			
 			console.log("User_LH:", req.user);
 			// if success

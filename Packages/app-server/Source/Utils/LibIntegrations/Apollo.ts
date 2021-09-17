@@ -6,7 +6,7 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 
-const allowedHosts = ["localhost:3005", "debatemap.app", "debates.app"];
+const webServerHosts = ["localhost:3005", "debatemap.app", "debates.app"];
 //const prodDomain = "debatemap.app";
 const prodDomain = "debates.app"; // temp
 
@@ -24,12 +24,13 @@ export function GetWebServerURL(subpath: string, referrerURLStr: string|n, force
 	console.log("GetWebServerURL_referrer:", referrerURLStr);
 	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
 	// this handling is needed for the "?db=prod" helper
-	if (referrerURL) {
-		Assert(allowedHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-		//if (referrerURL.host == "localhost:3105") referrerURL.host = "localhost:3005";
+	if (referrerURL && webServerHosts.includes(referrerURL.host)) {
+		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
+
 		referrerURL.pathname = subpath;
 		return referrerURL.toString();
 	}
+	
 	return `https://${prodDomain}/${subpath.slice(1)}`; // temp
 }
 export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
@@ -41,18 +42,15 @@ export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 	console.log("GetAppServerURL_referrer:", referrerURLStr);
 	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
 	// this handling is needed for the "?db=prod" helper
-	if (referrerURL) {
-		Assert(allowedHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
+	if (referrerURL && webServerHosts.includes(referrerURL.host)) {
+		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
+
 		// this branch is only hit if the app-server is PROD, thus if we hit a "localhost:3005" host, it must have the "?db=prod" flag
 		if (referrerURL.host == "localhost:3005") {
-			//referrerURL.host = "localhost:3105";
-			//referrerURL.host = `app-server.${prodDomain}`;
 			if (subpath == "/auth/google/callback") {
 				subpath = "/auth/google/callback_returnToLocalhost";
 			}
 		}
-		/*referrerURL.pathname = subpath;
-		return referrerURL.toString();*/
 	}
 
 	return `https://app-server.${prodDomain}/${subpath.slice(1)}`;
