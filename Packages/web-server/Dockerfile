@@ -9,7 +9,7 @@ COPY NMOverwrites/ /dm_repo/
 
 # split up the copying into multiple layers, for better caching
 COPY Packages/common/ Packages/common/
-COPY Packages/client/ Packages/client/
+COPY Packages/client/Scripts/ Packages/client/Scripts/
 COPY Packages/web-server/ Packages/web-server/
 #COPY Scripts/COPY_opt.txt Scripts/COPY_opt.txt
 COPY tsconfig.base.json .

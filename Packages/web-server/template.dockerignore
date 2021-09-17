@@ -1,2 +1,4 @@
+Packages/client/*
+!Packages/client/Scripts
 Packages/app-server
 Packages/deploy

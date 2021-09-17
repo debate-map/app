@@ -8,7 +8,7 @@ const __dirname = path.join(path.dirname(decodeURI(new URL(import.meta.url).path
 const require = createRequire(import.meta.url);
 require("dotenv").config({path: `${__dirname}/../../../.env`});
 
-const {NODE_ENV, PORT, USE_TSLOADER, BASENAME} = process.env;
+const {NODE_ENV, PORT, USE_TSLOADER} = process.env;
 
 // modify the imported config-base, then return it (that's fine/intended)
 export const config = CreateConfig({

@@ -57,5 +57,7 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
+Packages/client/*
+!Packages/client/Scripts
 Packages/app-server
 Packages/deploy

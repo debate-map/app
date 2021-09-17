@@ -1,21 +1,15 @@
-import {E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {Assert, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {HandleError, Link, Observer} from "web-vcore";
+import {Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
-import {Assert} from "../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 import {GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
 	render() {
-		// authError: pathToJS(state.firebase, "authError"),
-		// auth: helpers.pathToJS(state.firebase, "auth"),
-		// const auth = State((a) => a.firebase.auth);
-		// account: helpers.pathToJS(state.firebase, "profile")
-
 		const user = Me();
 		//if (graph.userInfo?.id == null) {
 		if (user == null) {
@@ -35,10 +29,6 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 					<div>Name: {Me()?.displayName ?? "n/a"}</div>
 					<div>ID: {MeID()}</div>
 				</Column>
-				{/* DEV &&
-					<Row>
-						<CheckBox value={State().main.
-					</Row> */}
 				<Row mt={5}>
 					<Link ml="auto" mr={5} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 						s.main.page = "profile";
