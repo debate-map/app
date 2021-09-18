@@ -58,6 +58,7 @@ Packages/deploy/**
 # ===========================================================================
 
 Packages/client/*
+!Packages/client/Dist
 !Packages/client/Scripts
 Packages/app-server
 Packages/deploy

@@ -18,8 +18,7 @@ import {Serve} from "web-vcore/Scripts_Dist/Bin/Server.js";
 //import {webpackConfig} from "dm_client/Scripts/Build/WebpackConfig.js";
 import {config} from "dm_client/Scripts/Config.js";
 
-console.log("Web-server starting...");
+import {DEV} from "web-vcore/Scripts/@CJS/EnvHelper.js";
 //Serve(config, webpackConfig);
-declare const DEV;
 Serve(config, DEV ? require("../Build/WebpackConfig.js").webpackConfig : null);
-console.log("Web-server started on:", process.env.PORT ?? 3005);
+console.log("Web-server started on:", process.env.PORT ?? 3005, "@dev:", DEV);
