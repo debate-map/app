@@ -48,6 +48,7 @@ RUN yarn workspaces focus --all --production \
 # exclude every folder under "@babel" other than "runtime"
 #	&& cd /dm_repo/node_modules/@babel && rm -r !(runtime)
 	&& cd /dm_repo/node_modules/@babel && find . -mindepth 1 -maxdepth 1 -type d ! -name "runtime" -exec rm -r {} \;
+# for additional options (such as enableInlineBuilds), modify the .yarnrc.yml file
 
 # moved this to package-specific dockerfiles, as "update base docker image" has (a lot) more overhead than "copy NMOverwrites/ folder" in each package, and NMOverwrites/ can change frequently 
 #COPY NMOverwrites/ /dm_repo/

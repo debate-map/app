@@ -18,7 +18,8 @@
     "postinstall_old": "patch-package --patch-dir ./node_modules/web-vcore/patches && patch-package --patch-dir ./patches",
     "postinstall_old2": "patch-package --patch-dir ./patches",
     "postinstall_old3": "node ./node_modules/web-vcore/Scripts_Dist/ApplyPatches.js && patch-package --patch-dir ./patches",
-    "postinstall": "patch-package --patch-dir ./patches && cd ./node_modules/web-vcore && node ./Scripts_Dist/ApplyPatches.js"
+    "postinstall": "patch-package --patch-dir ./patches && cd ./node_modules/web-vcore && node ./Scripts_Dist/ApplyPatches.js",
+    "postinstall_test": "echo 'Test101'; exit(1)"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
