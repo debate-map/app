@@ -17,8 +17,8 @@ export const GetNodeRating = CreateAccessor((id: string)=>{
 });
 
 export const GetRatings = CreateAccessor(<
-	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">|n, userID?: string|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
-	((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n)=>NodeRating_MaybePseudo[]) // else, some results may lack the "id" field
+	((nodeID: string, ratingType?: Exclude<NodeRatingType, "impact">|n, userID?: string|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
+	((nodeID: string, ratingType?: NodeRatingType|n, userID?: string|n)=>NodeRating_MaybePseudo[]) // else, some results may lack the "id" field
 >((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n): NodeRating_MaybePseudo[]=>{
 	if (ratingType == "impact") {
 		const node = GetNodeL2(nodeID);
@@ -37,7 +37,7 @@ export const GetRatings = CreateAccessor(<
 	return GetDocs({
 		params: {filter: {
 			node: {equalTo: nodeID},
-			type: {equalTo: ratingType},
+			type: ratingType && {equalTo: ratingType},
 			creator: userID && {equalTo: userID},
 		}},
 	}, a=>a.nodeRatings);

@@ -1,7 +1,7 @@
 import {BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {CanGetBasicPermissions, GetMaps, MeID} from "dm_common";
 import {store} from "Store";
-import {GetSelectedDebatesPageMap} from "Store/main/debates";
+import {GetSelectedDebatesPageMap, GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -43,11 +43,11 @@ class MapListUI extends BaseComponentPlus({}, {}) {
 		const maps_featured = maps_visible.filter(a=>a.featured);
 		const maps_toShow = storeNode.listType == "featured" ? maps_featured : maps_visible;
 
-		const selectedMap = GetSelectedDebatesPageMap();
-		if (selectedMap) {
+		const selectedMapID = GetSelectedDebatesPageMapID();
+		if (selectedMapID) {
 			return (
 				<PageContainer preset="full" style={{margin: 0}}>
-					<MapUI map={selectedMap}/>
+					<MapUI mapID={selectedMapID}/>
 				</PageContainer>
 			);
 		}

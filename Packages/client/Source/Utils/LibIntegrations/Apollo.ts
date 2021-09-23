@@ -92,6 +92,13 @@ export function InitApollo() {
 						...GetTypePolicyFieldsMappingSingleDocQueriesToCache(),
 					},
 				},
+				// temp fix for: https://github.com/apollographql/apollo-client/issues/8677#issuecomment-925661998
+				Map: {
+					fields: {
+						featured(rawVal: boolean, {args}) { return rawVal ?? null; },
+						note(rawVal: string, {args}) { return rawVal ?? null; },
+					},
+				},
 			},
 		}),
 	});

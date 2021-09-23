@@ -1,5 +1,6 @@
-import {GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
+import {GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
 import {GetOpenMapID} from "Store/main.js";
+import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
@@ -88,7 +89,7 @@ export function GetMapUICSSFilter() {
 }
 
 type Props = {
-	map: Map, rootNode?: MapNodeL3, withinPage?: boolean,
+	mapID: string, rootNode?: MapNodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
 } & HTMLProps<"div">;
@@ -113,20 +114,25 @@ export class MapUI extends BaseComponentPlus({
 	mapUIEl: HTMLDivElement|n;
 	downPos: Vector2|n;
 	render() {
-		const {map, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
+		const {mapID, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		Assert(padding && subNavBarWidth != null); // nn: default-values set
-		Assert(map.id, "map.id is null!");
+		Assert(mapID, "mapID is null!");
 
-		if (!GetMapState(map.id)?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
-		if (GetMapView(map.id) == null) return <MapUIWaitMessage message="Initializing map view..."/>;
+		const map = GetMap(mapID);
+		GetPreloadData_ForMapLoad(mapID);
+		const mapState = GetMapState(mapID);
+		const mapView = GetMapView(mapID);
+		
+		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
+		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
 		if (map == null) return <MapUIWaitMessage message="Loading map..."/>;
+
 		const rootNode = (()=>{
 			let result: MapNodeL3|n = rootNode_passed;
 			if (result == null && map && map.rootNode) {
 				result = GetNodeL3(`${map.rootNode}`);
 			}
 			if (isBot && map) {
-				const mapView = GetMapView(map.id);
 				if (mapView) {
 					const nodeID = mapView.bot_currentNodeID;
 					if (nodeID) {
@@ -234,6 +240,10 @@ export class MapUI extends BaseComponentPlus({
 		);
 	}
 
+	get Map() {
+		return GetMap(this.props.mapID);
+	}
+
 	async ComponentDidMount() {
 		MapUI.currentMapUI = this;
 
@@ -241,9 +251,8 @@ export class MapUI extends BaseComponentPlus({
 		/* NodeUI.lastRenderTime = Date.now();
 		let lastRenderCount = 0; */
 
-		for (let i = 0; i < 30 && this.props.map == null; i++) await SleepAsync(100);
-		const {map} = this.props;
-		if (map == null) return;
+		for (let i = 0; i < 30 && this.Map == null; i++) await SleepAsync(100);
+		if (this.Map == null) return;
 
 		this.StartLoadingScroll();
 	}
@@ -255,7 +264,8 @@ export class MapUI extends BaseComponentPlus({
 	loadFocusedNodeTimer = new Timer(100, ()=>{
 		if (!this.mounted) return this.loadFocusedNodeTimer.Stop();
 
-		const {map} = this.props;
+		const map = this.Map;
+		if (map == null) return this.loadFocusedNodeTimer.Stop();
 		const focusNodePath = GetFocusedNodePath(map.id);
 
 		// if more nodes have been rendered, along the path to the focus-node
@@ -289,7 +299,8 @@ export class MapUI extends BaseComponentPlus({
 	}
 
 	PostRender() {
-		const {map, withinPage} = this.props;
+		const {withinPage} = this.props;
+		const map = this.Map;
 		/* if (withinPage && this.scrollView) {
 			this.scrollView.vScrollableDOM = $('#HomeScrollView').children('.content')[0];
 		} */
@@ -300,7 +311,8 @@ export class MapUI extends BaseComponentPlus({
 
 	// load scroll from store
 	LoadStoredScroll() {
-		const {map} = this.props;
+		const map = this.Map;
+		if (map == null) return false;
 		if (this.scrollView == null) return false;
 		// if user is already scrolling manually, don't interrupt (but count as successful scroll)
 		if (this.scrollView.state.scrollOp_bar) return true;
@@ -337,7 +349,8 @@ export class MapUI extends BaseComponentPlus({
 		return targetNodeUI;
 	}
 	ScrollToNode(nodePath: string) {
-		const {map} = this.props;
+		const map = this.Map;
+		if (map == null) return;
 
 		const viewOffset_target = GetViewOffset(GetMapView(map.id)); // || new Vector2(200, 0);
 		// Log(`LoadingScroll:${nodePath};${ToJSON(viewOffset_target)}`);

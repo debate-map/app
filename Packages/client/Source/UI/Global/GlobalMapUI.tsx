@@ -7,11 +7,11 @@ import {MapUI} from "../@Shared/Maps/MapUI.js";
 @Observer
 export class GlobalMapUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		const map = GetMap(globalMapID);
-		if (map == null) return null;
+		/*const map = GetMap(globalMapID);
+		if (map == null) return null;*/
 		return (
 			<PageContainer preset="full" style={{margin: 0}}>
-				<MapUI map={map} subNavBarWidth={/* 104 */ 54}/>
+				<MapUI mapID={globalMapID} subNavBarWidth={/* 104 */ 54}/>
 			</PageContainer>
 		);
 	}
