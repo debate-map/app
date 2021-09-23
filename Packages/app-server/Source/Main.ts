@@ -16,6 +16,7 @@ import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {GetUserHiddensWithEmail, User} from "dm_common";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
+import {DBPreloadPlugin} from "./Mutations/DBPreloadPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
@@ -162,6 +163,7 @@ app.use(
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,
 				AuthExtrasPlugin,
+				//DBPreloadPlugin,
 				//OtherResolversPlugin,
 				CreateCommandsPlugin({
 					schemaDeps_auto: true,
