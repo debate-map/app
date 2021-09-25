@@ -41,7 +41,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const parent = GetParentNodeL3(path);
 		const combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 
-		const backgroundFillPercent = GetFillPercent_AtPath(node, path, group);
+		//const backgroundFillPercent = GetFillPercent_AtPath(node, path, group);
+		const backgroundFillPercent = 100;
 		const markerPercent = GetMarkerPercent_AtPath(node, path, group);
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
@@ -155,10 +156,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 									width, minWidth: (widthOverride ?? 0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
 									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 								}}>
-									{(()=>{
-										const ratings = GetRatings(node.id, childGroupStr as NodeRatingType);
-										return <RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType} ratings={ratings}/>;
-									})()}
+									<RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType}/>
 								</div>}
 							<NodeUI_Menu_Stub {...{map, node, path}} childGroup={group}/>
 						</>}

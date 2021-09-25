@@ -120,11 +120,9 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.claim) {
 						const argumentNode = NN(parent);
 						const argumentPath = NN(SlicePath(path, 1));
-						const ratings = GetRatings(argumentNode.id, panelToShow as NodeRatingType);
-						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
+						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as NodeRatingType}/>;
 					}
-					const ratings = GetRatings(node.id, panelToShow as NodeRatingType);
-					return <RatingsPanel node={node} path={path} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
+					return <RatingsPanel node={node} path={path} ratingType={panelToShow as NodeRatingType}/>;
 				})()}
 				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermID}}
 						openTermID={nodeView?.openTermID}

@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy} from "dm_common";
+import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
@@ -16,14 +16,15 @@ import uPlot from "web-vcore/nm/uplot.js";
 import useResizeObserver from "use-resize-observer";
 import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
 
-type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, ratings: NodeRating_MaybePseudo[]};
+type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};
 
 @Observer
 export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
 	root: HTMLDivElement|n;
 	render() {
-		const {node, path, ratingType, ratings} = this.props;
+		const {node, path, ratingType, asNodeUIOverlay} = this.props;
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
+		const ratings = GetRatings(node.id, ratingType);
 
 		const userID = MeID();
 		const myDefaultAccessPolicy = GetUserHidden(userID)?.lastAccessPolicy;
@@ -78,17 +79,24 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 				myRating_displayVal != null && {
 					type: "line",
 					x: {value: myRating_displayVal},
-					color: "rgba(0,255,0,1)",
-					lineWidth: 1,
+					//color: "rgba(0,255,0,1)",
+					//lineWidth: 1,
+					color: "rgba(0,255,0,.5)",
+					lineWidth: 2,
 					drawType: "source-over",
 				},
 			] as Annotation[]).filter(a=>a);
 		}, [myRating_displayVal]);
 		//const chartOptions = GetChartOptions(width, height, lineTypes);
-		const chartOptions = GetChartOptions(width, 250, lineTypes, annotations);
+		const chartOptions = GetChartOptions(width, asNodeUIOverlay ? height : 250, lineTypes, annotations, !!asNodeUIOverlay);
 		return (
-			<div ref={c=>this.root = c} style={{position: "relative"/* , minWidth: 496 */}}
+			<div ref={c=>this.root = c}
+				style={ES(
+					{position: "relative"}, //minWidth: 496
+					asNodeUIOverlay && {width: "100%", height: "100%", pointerEvents: "none"},
+				)}
 				onClick={e=>{
+					if (asNodeUIOverlay) return;
 					if (ratingType == "impact") return;
 					const target = e.target as HTMLElement;
 					//const chartHolder = (target as any).plusParents().filter("div.uplotHolder");
@@ -146,6 +154,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 					});
 				}}
 				onContextMenu={e=>{
+					if (asNodeUIOverlay) return;
 					if (myRating_raw == null || ratingType === "impact") return;
 					MarkHandled(e);
 					const boxController = ShowMessageBox({
@@ -156,11 +165,13 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 						},
 					});
 				}}>
+				{!asNodeUIOverlay &&
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
 					{typeof ratingTypeInfo.description === "function"
 						? ratingTypeInfo.description(node, parentNode, path)
 						: ratingTypeInfo.description}
-				</div>
+				</div>}
+				{!asNodeUIOverlay &&
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
 						{ratingType == "impact"
@@ -169,10 +180,12 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 					</Pre>
 					{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
-				</div>
+				</div>}
 				
 				<div ref={rootRef as any} className="uplotHolder" style={ES({
-					position: "relative", width: "100%", height: "calc(100% - 53px)", // we need to cut off some height, for the legend
+					position: "relative", width: "100%",
+					//height: "calc(100% - 53px)", // we need to cut off some height, for the legend
+					height: "100%",
 				})}>
 					{width != -1 &&
 					<>
@@ -189,7 +202,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 	chart = createRef<uPlot>();
 }
 
-function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[], annotations: Annotation[]) {
+function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[], annotations: Annotation[], asNodeUIOverlay: boolean) {
 	const legendHeight = 33; // from dev-tools
 	const chartOptions: uPlot.Options = {
 		class: "ratingsChart",
@@ -207,11 +220,13 @@ function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[
 		axes: [
 			{
 				label: "Rating value",
+				show: !asNodeUIOverlay,
 				...uplotDefaults.axis_props_horizontal,
 				//time: false,
 			},
 			{
 				label: "Rating count",
+				show: !asNodeUIOverlay,
 				...uplotDefaults.axis_props_vertical,
 				size: 30,
 				incrs: [1],

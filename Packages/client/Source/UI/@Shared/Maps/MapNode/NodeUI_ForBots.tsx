@@ -66,8 +66,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 						indexInNodeList={0} map={map} node={nodeL3} path={path} width={null} widthOverride={null}/>
 					Panels:
 					{GetRatingTypesForNode(nodeL3).map((ratingInfo, index)=>{
-						const ratings = GetRatings(node.id, ratingInfo.type);
-						return <RatingsPanel key={index} node={nodeL3} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
+						return <RatingsPanel key={index} node={nodeL3} path={path} ratingType={ratingInfo.type}/>;
 					})}
 					{/*<PhrasingsPanel show={true} node={node} path={path}/>*/}
 					<DefinitionsPanel show={true} map={map} node={node} path={path}/>

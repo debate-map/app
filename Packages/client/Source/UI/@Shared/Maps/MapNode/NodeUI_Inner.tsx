@@ -24,6 +24,7 @@ import {TitlePanel} from "./NodeUI_Inner/TitlePanel.js";
 import {MapNodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
+import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 
 // drag and drop
 // ==========
@@ -328,6 +329,20 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					</>}
 					onTextHolderClick={onTextHolderClick}
 					text={<>
+						{!GADDemo && (()=>{
+							// include this in "text" prop, because that makes the sizing exclude the +/- button
+							let ratingsPanel: JSX.Element;
+							if (node.type == MapNodeType.claim && combinedWithParentArgument) {
+								const argumentNode = NN(parent);
+								const argumentPath = NN(SlicePath(path, 1));
+								ratingsPanel = <RatingsPanel node={argumentNode} path={argumentPath} ratingType={NodeRatingType.impact} asNodeUIOverlay={true}/>;
+							} else {
+								ratingsPanel = <RatingsPanel node={node} path={path} ratingType={NodeRatingType.truth} asNodeUIOverlay={true}/>;
+							}
+							return <div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
+								{ratingsPanel}
+							</div>;
+						})()}
 						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
 							ref={c=>this.titlePanel = c}
 							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/})}/>
@@ -337,12 +352,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					{...E(
 						{backgroundFillPercent, backgroundColor, markerPercent},
 						GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as Color},
-						!GADDemo && {
-							overlay:
-							<>
-								
-							</>
-						}
 					)}
 					toggleExpanded={toggleExpanded}
 					afterChildren={<>
