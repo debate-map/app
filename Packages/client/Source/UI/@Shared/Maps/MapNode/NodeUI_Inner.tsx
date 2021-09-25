@@ -140,7 +140,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const useReasonScoreValuesForThisNode = store.main.maps.weighting == WeightingType.reasonScore && (node.type == MapNodeType.argument || node.type == MapNodeType.claim);
 		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node.id, path, true) as ReasonScoreValues_RSPrefix;
 
-		const backgroundFillPercent = backgroundFillPercentOverride ?? GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
+		//const backgroundFillPercent = backgroundFillPercentOverride ?? GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
+		const backgroundFillPercent = backgroundFillPercentOverride ?? 100;
 		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
 
 		const form = GetNodeForm(node, path);
@@ -336,6 +337,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					{...E(
 						{backgroundFillPercent, backgroundColor, markerPercent},
 						GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as Color},
+						!GADDemo && {
+							overlay:
+							<>
+								
+							</>
+						}
 					)}
 					toggleExpanded={toggleExpanded}
 					afterChildren={<>
