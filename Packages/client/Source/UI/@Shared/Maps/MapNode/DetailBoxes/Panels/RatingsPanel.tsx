@@ -82,8 +82,13 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 			},
 			{
 				label: "Rating count",
-				stroke: chroma(0, 1, .5, "hsl").css(),
+				//stroke: chroma(0, 1, .5, "hsl").css(),
+				stroke: "#ff7300",
+				fill: "#ff730077",
+				//fill: "#ff7300FF",
 				points: {show: false},
+				paths: uPlot.paths.spline!(),
+				//paths: uPlot.paths.spline2,
 			},
 		];
 		
