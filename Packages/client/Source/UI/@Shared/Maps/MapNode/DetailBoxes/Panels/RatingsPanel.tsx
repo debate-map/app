@@ -1,17 +1,20 @@
-import {DN, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {DN, Lerp, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {GetViewportRect, Observer, observer_simple} from "web-vcore";
+import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
 import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, GetNodeChildren, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
-import React from "react";
-import {AreaChart, XAxis, YAxis, CartesianGrid, Area, ReferenceLine, Tooltip} from "recharts";
+import React, {createRef} from "react";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 import {PolicyPicker} from "../../../../../../UI/Database/Policies/PolicyPicker.js";
+import {UPlot} from "web-vcore/nm/react-uplot.js";
+import uPlot from "web-vcore/nm/uplot.js";
+import useResizeObserver from "use-resize-observer";
+import chroma from "chroma-js";
 
 /*let sampleData = [
 	{rating: 0, count: 0},
@@ -24,11 +27,11 @@ import {PolicyPicker} from "../../../../../../UI/Database/Policies/PolicyPicker.
 type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, ratings: NodeRating_MaybePseudo[]};
 
 @Observer
-export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2|n}) {
+export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
 	root: HTMLDivElement|n;
 	render() {
 		const {node, path, ratingType, ratings} = this.props;
-		const {size} = this.state;
+		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
 
 		const userID = MeID();
 		const myDefaultAccessPolicy = GetUserHidden(userID)?.lastAccessPolicy;
@@ -43,17 +46,17 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		const {labels, values} = ratingTypeInfo;
-		function GetValueForLabel(label) { return values[labels.indexOf(label)]; }
-		function GetLabelForValue(value) { return labels[values.indexOf(value)]; }
+		/*function GetValueForLabel(label) { return values[labels.indexOf(label)]; }
+		function GetLabelForValue(value) { return labels[values.indexOf(value)]; }*/
 		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
 		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
 
-		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100]; // .concat(labels.Max(null, true) == 200 ? [200] : []);
+		/*const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100]; // .concat(labels.Max(null, true) == 200 ? [200] : []);
 		const minLabel = labels.Min(undefined, true); const maxLabel = labels.Max(undefined, true); const
 			range = maxLabel - minLabel;
 		smoothing = smoothing.KeepAtMost(labels.Max(undefined, true)); // smoothing might have been set higher, from when on another rating-type
-		const ticksForChart = labels.Select(a=>a.RoundTo(smoothing)).Distinct();
-		const dataFinal = ticksForChart.Select(tick=>{
+		const ticksForChart = labels.map(a=>a.RoundTo(smoothing)).Distinct();
+		const dataFinal = ticksForChart.map(tick=>{
 			const rating = tick;
 			return {label: tick, value: GetValueForLabel(tick), count: 0};
 		});
@@ -61,7 +64,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 			const ratingVal = TransformRatingForContext(entry.value, reverseRatings);
 			const closestRatingSlot = dataFinal.OrderBy(a=>a.value.Distance(ratingVal)).First();
 			closestRatingSlot.count++;
-		}
+		}*/
 
 		/* if (ratingType == "strength") {
 			let nodeChildren = GetNodeChildren(node);
@@ -73,25 +76,57 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		/* let marginTop = myRating != null ? 20 : 10;
 		let height = myRating != null ? 260 : 250; */
 
+		const lineTypes: uPlot.Series[] = [
+			{
+				label: "Rating value",
+			},
+			{
+				label: "Rating count",
+				stroke: chroma(0, 1, .5, "hsl").css(),
+				points: {show: false},
+			},
+		];
+		
+		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100];
+		//smoothing = smoothing.KeepAtMost(labels.Max(undefined, true)); // smoothing might have been set higher, from when on another rating-type
+		const xValues_min = 0;
+		const xValues_max = 100;
+
+		const ticks = Range(0, 100, smoothing);
+		const xValues = ticks.slice();
+		const yValues_ratings = ticks.map(a=>0); // start out values as 0 (will increment values in next section)
+		const uplotData = [xValues, yValues_ratings] as uPlot.AlignedData;
+
+		for (const entry of ratings) {
+			const ratingVal = TransformRatingForContext(entry.value, reverseRatings);
+			const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingVal)).First();
+			const closestXValueStep_index = xValues.indexOf(closestXValueStep);
+			yValues_ratings[closestXValueStep_index]++;
+		}
+
+		//const chartOptions = GetChartOptions(width, height, lineTypes);
+		const chartOptions = GetChartOptions(width, 250, lineTypes);
 		return (
 			<div ref={c=>this.root = c} style={{position: "relative"/* , minWidth: 496 */}}
 				onClick={e=>{
 					if (ratingType == "impact") return;
 					const target = e.target as HTMLElement;
-					// let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
-					//const chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
-					const chartHolder = target.GetSelfAndParents().filter(a=>a.matches("div.recharts-wrapper"))[0];
+					//const chartHolder = (target as any).plusParents().filter("div.uplotHolder");
+					const underActualGridPart = target.GetSelfAndParents().filter(a=>a.matches(".u-over")).length > 0;
+					if (!underActualGridPart) return;
+					const chartHolder = target.GetSelfAndParents().filter(a=>a.matches("div.uplotHolder"))[0];
 					if (chartHolder == null) return;
 
 					if (userID == null) return ShowSignInPopup();
 
-					const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
-					const chartRect = GetViewportRect(chart);
-					const posOnChart = new Vector2(e.clientX, e.clientY).Minus(chartRect);
-					const percentOnChart = posOnChart.x / chartRect.width;
-					const ratingOnChart_exact = minLabel + (percentOnChart * range);
-					const closestRatingSlot = dataFinal.OrderBy(a=>a.label.Distance(ratingOnChart_exact)).First();
-					let newRating_label = closestRatingSlot.label;
+					//const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
+					const gridPart = chartHolder.querySelector(".u-over") as HTMLDivElement;
+					const gridPartRect = GetViewportRect(gridPart);
+					const posOnChart = new Vector2(e.clientX, e.clientY).Minus(gridPartRect);
+					const percentOnChart = posOnChart.x / gridPartRect.width;
+					const ratingOnChart_exact = Lerp(xValues_min, xValues_max, percentOnChart);
+					const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingOnChart_exact)).First();
+					let newRating_xValue = closestXValueStep;
 					let newRating_accessPolicyID = myRating_raw?.accessPolicy ?? myDefaultAccessPolicy;
 
 					// let finalRating = GetRatingForForm(rating, form);
@@ -105,8 +140,8 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 								<Column p="10px 0">
 									<RowLR splitAt={splitAt}>
 										<Text>Rating:</Text>
-										<Spinner min={minLabel} max={maxLabel} style={{width: 60}}
-											value={newRating_label} onChange={val=>Change(newRating_label = val)}/>
+										<Spinner min={xValues_min} max={xValues_max} style={{width: 60}}
+											value={newRating_xValue} onChange={val=>Change(newRating_xValue = val)}/>
 									</RowLR>
 									<RowLR mt={5} splitAt={splitAt}>
 										<Pre>Access policy: </Pre>
@@ -118,13 +153,13 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 							);
 						}),
 						onOK: ()=>{
-							let newRating_value = GetValueForLabel(newRating_label);
-							newRating_value = TransformRatingForContext(newRating_value, reverseRatings);
+							let newRating_xValue_final = newRating_xValue;
+							newRating_xValue_final = TransformRatingForContext(newRating_xValue_final, reverseRatings);
 							const newRating = new NodeRating({
 								accessPolicy: newRating_accessPolicyID,
 								node: node.id,
 								type: ratingType,
-								value: newRating_value,
+								value: newRating_xValue_final,
 							});
 							new SetNodeRating({rating: newRating}).RunOnServer();
 						},
@@ -155,32 +190,36 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 					{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
 				</div>
-				{this.lastRender_source == RenderSource.SetState && size != null &&
+				{/*this.lastRender_source == RenderSource.SetState && size != null &&
 					<AreaChart width={size.x} height={250} data={dataFinal}
-						margin={{top: 20, right: 10, bottom: 0, left: 10}} /* viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}} */>
-						<XAxis dataKey="label" type="number" /* label={<XAxisLabel ratingType={ratingType}/>} */ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
+						margin={{top: 20, right: 10, bottom: 0, left: 10}} /* viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}} *#/>
+						<XAxis dataKey="label" type="number" /* label={<XAxisLabel ratingType={ratingType}/>} *#/ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
 							tick={ratingTypeInfo.tickRender}
 							domain={[minLabel, maxLabel]} minTickGap={0}/>
-						{/* <YAxis tickCount={7} hasTick width={50}/> */}
+						{/* <YAxis tickCount={7} hasTick width={50}/> *#/}
 						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
 						{myRating_displayVal != null && <ReferenceLine x={GetLabelForValue(myRating_displayVal)} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
-					</AreaChart>}
+					</AreaChart>*/}
+				
+				<div ref={rootRef as any} className="uplotHolder" style={ES({
+					position: "relative", width: "100%", height: "calc(100% - 53px)", // we need to cut off some height, for the legend
+				})}>
+					{width != -1 &&
+					<>
+						<style>{`
+						.u-legend { font-size: 12px; }
+						.u-legend .hideLegend { display: none; }
+						`}</style>
+						<UPlot chartRef={this.chart} options={chartOptions} data={uplotData} ignoreDoubleClick={true}/>
+					</>}
+				</div>
 			</div>
 		);
 	}
-	PostRender() {
-		if (this.lastRender_source == RenderSource.SetState) return;
-
-		const dom = this.root;
-		if (!dom) return;
-
-		const size = new Vector2(dom.clientWidth, dom.clientHeight);
-		// if (!size.Equals(this.state.size))
-		this.SetState({size}, undefined, false);
-	}
+	chart = createRef<uPlot>();
 }
 
 /* const XAxisLabel = props=> {
@@ -216,12 +255,51 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 	}
 }
 
-/* interface JQuery {
-	plusParents(topDown?: boolean): JQuery;
+function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[]) {
+	const legendHeight = 33; // from dev-tools
+	const chartOptions: uPlot.Options = /*useMemo(()=>{
+	return*/ {
+		//id: `ratingsChart`,
+		class: "ratingsChart",
+		width,
+		//height: height - legendHeight,
+		height,
+		cursor: {
+			drag: {x: false, setScale: false},
+		},
+		axes: [
+			{
+				label: "Rating value",
+				...uplotDefaults.axis_props_horizontal,
+				//time: false,
+			},
+			{
+				label: "Rating count",
+				...uplotDefaults.axis_props_vertical,
+				size: 30,
+				incrs: [1],
+			},
+		],
+		scales: {
+			x: {
+				time: false,
+				/*range(u, dataMin, dataMax): [number, number] {
+					return [-10 * EEGChart_live_graphedSamplesPerSecond, 0];
+				},*/
+			},
+			y: {
+				/*auto: false,
+				//min: -100, max: 100,
+				range: (u, dataMin, dataMax)=>{ // use func, since stable
+					return [-100, 100] as [number, number];
+				},*/
+			},
+		},
+		legend: {
+			show: false,
+		},
+		series: lineTypes,
+	};
+	//}, [width, height, lineTypes]);
+	return chartOptions;
 }
-$.fn.plusParents = function(topDown = false) { */
-/*($.fn as any).plusParents = function(topDown = false) {
-	const parentsAndSelf = this.parents().addBack().toArray(); // addBack concats lists, and orders it top-down
-	if (!topDown) { parentsAndSelf.reverse(); }
-	return $(parentsAndSelf);
-};*/

@@ -17,7 +17,7 @@ export const GetNodeIDsVisibleInNodeViewExpansionState = CreateAccessor((nodeVie
 });
 
 export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
-	console.log("Starting");
+	//console.log("Starting");
 
 	const mapView = GetMapView(mapID);
 	if (mapView == null) return;
@@ -25,14 +25,8 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 	let nodeIDs = Object.entries(mapView.rootNodeViews).SelectMany(([id, nodeView])=>{
 		return GetNodeIDsVisibleInNodeViewExpansionState(nodeView, id, true);
 	}).Distinct();
-	// also include the children of the visible nodes (since these are loaded to find the displayed child-counts)
-	/*const nodes_childIDs = nodeIDs.SelectMany(a=>GetNodeChildLinks(a).map(b=>b.child));
-	nodeIDs = nodeIDs.concat(nodes_childIDs).Distinct();*/
 
 	for (const nodeID of nodeIDs) {
-		/*TryCatch_Log(()=>GetNode(nodeID));
-		TryCatch_Log(()=>GetNodeChildLinks(nodeID));*/
-
 		// catch bails, so that all requests are made at once
 
 		const node = GetNode.CatchBail(null, nodeID);
@@ -51,14 +45,5 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 		CatchBail(null, ()=>GetNodeChildrenL3.CatchItemBails(null, nodeID));
 	}
 
-	console.log("Done @nodeCount:", nodeIDs.length, "@nodeIDs:", nodeIDs);
+	//console.log("Done @nodeCount:", nodeIDs.length, "@nodeIDs:", nodeIDs);
 });
-
-/*function TryCatch_Log(func: ()=>any) {
-	try {
-		return func();
-	} catch (ex) {
-		console.error("TryCatch_Log_error:", ex, "@func:", func);
-		throw ex;
-	}
-}*/

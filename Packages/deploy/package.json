@@ -9,10 +9,9 @@
 		"preinstall": "npx only-allow yarn"
 	},
 	"devDependencies": {
-		"@types/node": "^10.0.0",
 		"@pulumi/docker": "^3.0.0",
 		"@pulumi/gcp": "^5.0.0",
-		"@pulumi/pulumi": "^3.0.0"
-	},
-	"dependencies": {}
+		"@pulumi/pulumi": "^3.0.0",
+		"@types/node": "^10.0.0"
+	}
 }

@@ -25,8 +25,8 @@
     "react-color": "^2.14.1",
     "react-katex": "^2.0.2",
     "react-list": "0.8.11",
-    "recharts": "^2.0.10",
     "ua-parser-js": "^0.7.12",
-    "updeep": "^1.0.0"
+    "updeep": "^1.0.0",
+    "use-resize-observer": "^8.0.0"
   }
 }
