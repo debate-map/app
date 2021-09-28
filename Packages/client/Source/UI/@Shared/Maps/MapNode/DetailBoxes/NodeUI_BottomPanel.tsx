@@ -23,6 +23,9 @@ import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeUI_LeftBox_width} from "./NodeUI_LeftBox.js";
 import {PhrasingsPanel} from "./Panels/PhrasingsPanel.js";
 
+//export const nodeBottomPanel_minWidth = 550;
+export const nodeBottomPanel_minWidth = 600;
+
 @Observer
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
@@ -103,7 +106,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 				{
 					position: "absolute",
 					zIndex: hovered ? 6 : 5,
-					minWidth: (widthOverride ?? 0).KeepAtLeast(550),
+					minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth),
 					padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 				},
 				panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdowns},

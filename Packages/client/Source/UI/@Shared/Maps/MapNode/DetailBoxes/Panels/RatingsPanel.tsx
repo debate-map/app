@@ -1,6 +1,6 @@
 import {Lerp, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
@@ -20,226 +20,119 @@ type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRating
 
 @Observer
 export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
-	root: HTMLDivElement|n;
 	render() {
-		const {node, path, ratingType, asNodeUIOverlay} = this.props;
-		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
-		const ratings = GetRatings(node.id, ratingType);
-
-		const userID = MeID();
-		const myDefaultAccessPolicy = GetUserHidden(userID)?.lastAccessPolicy;
-		const form = GetNodeForm(node, path);
-		let smoothing = GetRatingUISmoothing();
-
-		const parentNode = GetNodeL3(SlicePath(path, 1));
-
-		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
-		const nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.displayPolarity);
-
-		const ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
-		const {labels, values} = ratingTypeInfo;
-		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
-		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
-
-		const lineTypes: uPlot.Series[] = [
-			{
-				label: "Rating value",
-			},
-			{
-				label: "Rating count",
-				//stroke: chroma(0, 1, .5, "hsl").css(),
-				stroke: "#ff7300",
-				fill: "#ff730077",
-				//fill: "#ff7300FF",
-				points: {show: false},
-				paths: uPlot.paths.spline!(),
-				//paths: uPlot.paths.spline2,
-			},
-		];
-		
-		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100];
-		//smoothing = smoothing.KeepAtMost(labels.Max(undefined, true)); // smoothing might have been set higher, from when on another rating-type
-		const xValues_min = 0;
-		const xValues_max = 100;
-
-		const ticks = Range(0, 100, smoothing);
-		const xValues = ticks.slice();
-		const yValues_ratings = ticks.map(a=>0); // start out values as 0 (will increment values in next section)
-		const uplotData = [xValues, yValues_ratings] as uPlot.AlignedData;
-
-		for (const entry of ratings) {
-			const ratingVal = TransformRatingForContext(entry.value, reverseRatings);
-			const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingVal)).First();
-			const closestXValueStep_index = xValues.indexOf(closestXValueStep);
-			yValues_ratings[closestXValueStep_index]++;
-		}
-
-		const annotations = useMemo(()=>{
-			return ([
-				myRating_displayVal != null && {
-					type: "line",
-					x: {value: myRating_displayVal},
-					//color: "rgba(0,255,0,1)",
-					//lineWidth: 1,
-					color: "rgba(0,255,0,.5)",
-					lineWidth: 2,
-					drawType: "source-over",
-				},
-			] as Annotation[]).filter(a=>a);
-		}, [myRating_displayVal]);
-		//const chartOptions = GetChartOptions(width, height, lineTypes);
-		const chartOptions = GetChartOptions(width, asNodeUIOverlay ? height : 250, lineTypes, annotations, !!asNodeUIOverlay);
-		return (
-			<div ref={c=>this.root = c}
-				style={ES(
-					{position: "relative"}, //minWidth: 496
-					asNodeUIOverlay && {width: "100%", height: "100%", pointerEvents: "none"},
-				)}
-				onClick={e=>{
-					if (asNodeUIOverlay) return;
-					if (ratingType == "impact") return;
-					const target = e.target as HTMLElement;
-					//const chartHolder = (target as any).plusParents().filter("div.uplotHolder");
-					const underActualGridPart = target.GetSelfAndParents().filter(a=>a.matches(".u-over")).length > 0;
-					if (!underActualGridPart) return;
-					const chartHolder = target.GetSelfAndParents().filter(a=>a.matches("div.uplotHolder"))[0];
-					if (chartHolder == null) return;
-
-					if (userID == null) return ShowSignInPopup();
-
-					//const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
-					const gridPart = chartHolder.querySelector(".u-over") as HTMLDivElement;
-					const gridPartRect = GetViewportRect(gridPart);
-					const posOnChart = new Vector2(e.clientX, e.clientY).Minus(gridPartRect);
-					const percentOnChart = posOnChart.x / gridPartRect.width;
-					const ratingOnChart_exact = Lerp(xValues_min, xValues_max, percentOnChart);
-					const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingOnChart_exact)).First();
-					let newRating_xValue = closestXValueStep;
-					let newRating_accessPolicyID = myRating_raw?.accessPolicy ?? myDefaultAccessPolicy;
-
-					// let finalRating = GetRatingForForm(rating, form);
-					const splitAt = 100;
-					const Change = (..._)=>boxController.UpdateUI();
-					const boxController = ShowMessageBox({
-						title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
-						message: observer_simple(()=>{
-							const newRating_accessPolicy = GetAccessPolicy.CatchBail(null, newRating_accessPolicyID);
-							return (
-								<Column p="10px 0">
-									<RowLR splitAt={splitAt}>
-										<Text>Rating:</Text>
-										<Spinner min={xValues_min} max={xValues_max} style={{width: 60}}
-											value={newRating_xValue} onChange={val=>Change(newRating_xValue = val)}/>
-									</RowLR>
-									<RowLR mt={5} splitAt={splitAt}>
-										<Pre>Access policy: </Pre>
-										<PolicyPicker value={newRating_accessPolicyID} onChange={val=>Change(newRating_accessPolicyID = val)}>
-											<Button text={newRating_accessPolicy ? `${newRating_accessPolicy.name} (id: ${newRating_accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
-										</PolicyPicker>
-									</RowLR>
-								</Column>
-							);
-						}),
-						onOK: ()=>{
-							let newRating_xValue_final = newRating_xValue;
-							newRating_xValue_final = TransformRatingForContext(newRating_xValue_final, reverseRatings);
-							const newRating = new NodeRating({
-								accessPolicy: newRating_accessPolicyID,
-								node: node.id,
-								type: ratingType,
-								value: newRating_xValue_final,
-							});
-							new SetNodeRating({rating: newRating}).RunOnServer();
-						},
-					});
-				}}
-				onContextMenu={e=>{
-					if (asNodeUIOverlay) return;
-					if (myRating_raw == null || ratingType === "impact") return;
-					MarkHandled(e);
-					const boxController = ShowMessageBox({
-						title: "Delete rating", cancelButton: true,
-						message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
-						onOK: ()=>{
-							new DeleteNodeRating({id: myRating_raw.id}).RunOnServer();
-						},
-					});
-				}}>
-				{!asNodeUIOverlay &&
-				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-					{typeof ratingTypeInfo.description === "function"
-						? ratingTypeInfo.description(node, parentNode, path)
-						: ratingTypeInfo.description}
-				</div>}
-				{!asNodeUIOverlay &&
-				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
-					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
-						{ratingType == "impact"
-							? 'Cannot rate impact directly. Instead, rate the "truth" and "relevance".'
-							: "Click to rate. Right-click to remove rating."}
-					</Pre>
-					{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
-					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
-				</div>}
-				
-				<div ref={rootRef as any} className="uplotHolder" style={ES({
-					position: "relative", width: "100%",
-					//height: "calc(100% - 53px)", // we need to cut off some height, for the legend
-					height: "100%",
-				})}>
-					{width != -1 &&
+		const {ratingType, asNodeUIOverlay} = this.props;
+		if (asNodeUIOverlay) return null;
+		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
+		/*return (
+			{<Row style={ES({position: "relative"})}>
+				<Column mr={2} /*style={{flex: "0 50px", minWidth: 0}}*#/>
+					{/*<Text style={{height: 21, fontSize: 11, transform: "translateX(0%) translateY(210%) rotate(90deg)"}}>(user agreement)</Text>*#/}
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Position:</Text>
+					{ratingType == "truth" &&
 					<>
-						<style>{`
-						.u-legend { font-size: 12px; }
-						.u-legend .hideLegend { display: none; }
-						`}</style>
-						<UPlot chartRef={this.chart} options={chartOptions} data={uplotData} ignoreDoubleClick={true}/>
+						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
+						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
+						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
+						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
+						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
+						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
 					</>}
-				</div>
-			</div>
+					{/*<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Response:</Text>
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
+					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>*#/}
+				</Column>
+				{Object.entries(ratingTypeInfo.values).map(([value, label])=>{
+					return <RatingColumn key={value} ratingType={ratingType} text={label}/>;
+				})}
+			</Row>}
+		);*/
+		return (
+			<>
+				<Column>
+					<Text style={{fontSize: 12}}>Your response: (ie. level of agreement)</Text>
+					<Row>
+						{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
+							return <CheckBox key={value} ml={index == 0 ? 0 : 5} value={false} text={label} checkboxProps={{type: "radio"}} style={{fontSize: 11}}
+								ref={checkBox=>{
+									const el = checkBox?.DOM.querySelector("input");
+									if (el) {
+										el.type = "radio";
+										el.style.margin = "0px";
+									}
+								}}/>;
+						})}
+					</Row>
+				</Column>
+				<Column mt={5}>
+					<Text style={{fontSize: 12}}>Of the remaining responses, which do you view as at least being "reasonable"?</Text>
+					<Row>
+						{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
+							return <CheckBox key={value} ml={index == 0 ? 0 : 5} value={false} text={label} style={{fontSize: 11}}/>;
+						})}
+					</Row>
+				</Column>
+				<Column mt={5}>
+					<Text style={{fontSize: 12}}>What probability do you give to one of the "unreasonable" responses somehow ending up the most appropriate?</Text>
+					<Text style={{fontSize: 12}}>(for example, if you were to find large amounts of supporting data you hadn't known of previously)</Text>
+					<Row>
+						<Text>1 out of </Text>
+						<Button p="3px 7px" style={{fontSize: 11}} text="5"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="10"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="20"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="50"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="75"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="100"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="500"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="1000"/>
+						<Button p="3px 7px" style={{fontSize: 11}} text="Custom"/>
+						<Spinner onChange={val=>{}} style={{fontSize: 12}}/>
+						{/*<Slider min={0} max={100} step={1} value={0} onChange={val=>{}}/>*/}
+					</Row>
+				</Column>
+			</>
 		);
 	}
-	chart = createRef<uPlot>();
 }
 
-function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[], annotations: Annotation[], asNodeUIOverlay: boolean) {
-	const legendHeight = 33; // from dev-tools
-	const chartOptions: uPlot.Options = {
-		class: "ratingsChart",
-		width,
-		//height: height - legendHeight,
-		height,
-		plugins: [
-			AnnotationsPlugin({
-				annotations,
-			}),
-		],
-		cursor: {
-			drag: {x: false, setScale: false},
-		},
-		axes: [
-			{
-				label: "Rating value",
-				show: !asNodeUIOverlay,
-				...uplotDefaults.axis_props_horizontal,
-				//time: false,
-			},
-			{
-				label: "Rating count",
-				show: !asNodeUIOverlay,
-				...uplotDefaults.axis_props_vertical,
-				size: 30,
-				incrs: [1],
-			},
-		],
-		scales: {
-			x: {time: false,},
-			y: {},
-		},
-		legend: {
-			show: false,
-		},
-		series: lineTypes,
-	};
-	return chartOptions;
+class RatingColumn extends BaseComponent<{ratingType: NodeRatingType, text: string}, {}> {
+	render() {
+		let {ratingType, text} = this.props;
+		if (ratingType == "truth") {
+			return (
+				<Column ml={3} style={{flex: 20, minWidth: 0}}>
+					<Text style={{height: 21, fontSize: text == "Completely irrelevant" ? 9.5 : 11}}>"{text}"</Text>
+					{/*<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Proven"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="High likelihood"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Reasonable"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Understandable"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Highly unlikely"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Irrational"/>*/}
+					{/*<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Conclusive"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Strong"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Substantial"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Fair"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Weak"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="None"/>*/}
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Conclusive"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Well founded"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Reasonable"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Understandable"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Insubstantial"/>
+					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Irrational"/>
+				</Column>
+			);
+		}
+
+		//const ratingTypeInfo = GetRatingTypeInfo(ratingType);
+		return (
+			<Column ml={3} style={{flex: 20, minWidth: 0}}>
+				<Button style={{height: 21, fontSize: text == "Completely irrelevant" ? 9.5 : 11}} text={text}/>
+			</Column>
+		);
+	}
 }

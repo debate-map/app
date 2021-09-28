@@ -14,6 +14,7 @@ import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
 import {Squiggle} from "../NodeConnectorBackground.js";
 import {ExpandableBox} from "../ExpandableBox.js";
+import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -153,7 +154,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							{ratingPanelShow &&
 								<div ref={c=>this.ratingPanelHolder = c} style={{
 									position: "absolute", left: 0, top: "calc(100% + 1px)",
-									width, minWidth: (widthOverride ?? 0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
+									width, minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth), zIndex: hovered_main ? 6 : 5,
 									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 								}}>
 									<RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType}/>

@@ -35,7 +35,7 @@ export class MapNodeType_Info {
 		}),
 		[MapNodeType.claim]: new MapNodeType_Info({
 			childTypes: [MapNodeType.argument],
-			minWidth: 350, maxWidth: 550,
+			minWidth: 350, maxWidth: 600,
 			// mainRatingTypes: ["probability", "intensity"],
 			// mainRatingTypes: ["probability", "support"],
 			/* mainRatingTypes: ["probability", "truth"],
