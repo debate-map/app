@@ -268,29 +268,47 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 		// const currentPage = State(a => a.main.page);
 		const {page} = store.main;
 		const background = GetUserBackground(MeID());
+		const firstExtantBackgroundURL_1920Plus = background.url_1920 || background.url_3840 || background.url_max;
+		const firstExtantBackgroundURL_3840Plus = background.url_3840 || background.url_max;
+		const firstExtantBackgroundURL_max = background.url_max;
+		
 		return (
 			<Column className='background'/* 'unselectable' */ style={{height: "100%"}}>
 				{/* <div className='background' style={{
 					position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
 				}}/> */}
-				<style>{`
-				.background {
-					background-color: ${background.color};
-					background-image: url(${background.url_1920 || background.url_3840 || background.url_max});
-					background-position: ${background.position || "center center"};
-					background-size: ${background.size || "cover"};
-				}
-				@media (min-width: 1921px) {
+				<style>{
+					`
 					.background {
-						background-image: url(${background.url_3840 || background.url_max});
+						${
+							firstExtantBackgroundURL_1920Plus?.startsWith("background: ")
+							? `background: ${firstExtantBackgroundURL_1920Plus.replace("background: ", "")}`
+							: `background-color: ${background.color};
+								background-image: url(${firstExtantBackgroundURL_1920Plus});
+								background-position: ${background.position || "center center"};
+								background-size: ${background.size || "cover"};`
+						}
 					}
-				}
-				@media (min-width: 3841px) {
-					.background {
-						background-image: url(${background.url_max});
+					@media (min-width: 1921px) {
+						.background {
+							${
+								firstExtantBackgroundURL_3840Plus?.startsWith("background: ")
+								? `background: ${firstExtantBackgroundURL_3840Plus.replace("background: ", "")}`
+								: `background-image: url(${firstExtantBackgroundURL_3840Plus});`
+							}
+						}
 					}
-				}
-				`}</style>
+					@media (min-width: 3841px) {
+						.background {
+							${
+								firstExtantBackgroundURL_max?.startsWith("background: ")
+								? `background: ${firstExtantBackgroundURL_max.replace("background: ", "")}`
+								: `background-image: url(${firstExtantBackgroundURL_max});`
+							}
+						}
+					}
+					`
+				}</style>
 				<ErrorBoundary>
 					<AddressBarWrapper/>
 					<OverlayUI/>

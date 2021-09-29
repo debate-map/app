@@ -15,7 +15,7 @@ import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup,
+	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, minWidth?: number,
 	onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
@@ -49,10 +49,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {currentNodeBeingAdded_path} = store.main.maps;
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
-		let nodeChildrenToShowInRelevanceBox;
+		//let nodeChildrenToShowInRelevanceBox;
 		if (IsMultiPremiseArgument(node) && group != ChildGroup.relevance) {
 			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.argument);
-			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
+			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
 		}
 
 		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
@@ -174,11 +174,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
-				{IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
+				{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
 					<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
-						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>}
+						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>*/}
 				{!separateChildren &&
 					RenderPolarityGroup("all")}
 				{separateChildren &&
@@ -241,8 +241,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	get Expanded() {
-		const {map, path, group} = this.props;
-		const expandKey = group != ChildGroup.generic ? `expanded_${ChildGroup[group].toLowerCase()}` : "expanded";
+		const {map, path, group, usesGenericExpandedField} = this.props;
+		const expandKey = usesGenericExpandedField ? "expanded" : `expanded_${ChildGroup[group].toLowerCase()}`;
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}

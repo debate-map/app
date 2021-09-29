@@ -16,19 +16,19 @@ export class MapNodeType_Info {
 	static for = {
 		[MapNodeType.category]: new MapNodeType_Info({
 			childTypes: [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim],
-			minWidth: 100, maxWidth: 250,
+			minWidth: 150, maxWidth: 250,
 			/*mainRatingTypes: ["significance"],
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.package]: new MapNodeType_Info({
 			childTypes: [MapNodeType.claim],
-			minWidth: 100, maxWidth: 250,
+			minWidth: 150, maxWidth: 250,
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
 		[MapNodeType.multiChoiceQuestion]: new MapNodeType_Info({
 			childTypes: [MapNodeType.claim],
-			minWidth: 100, maxWidth: 250,
+			minWidth: 150, maxWidth: 250,
 			// minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
@@ -43,7 +43,7 @@ export class MapNodeType_Info {
 		}),
 		[MapNodeType.argument]: new MapNodeType_Info({
 			childTypes: [MapNodeType.claim, MapNodeType.argument],
-			minWidth: 100, maxWidth: 300,
+			minWidth: 150, maxWidth: 300,
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
 		}),

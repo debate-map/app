@@ -85,10 +85,10 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		});
 
 		return (
-			<Row className="clickThrough" style={E(
+			<Row ml={30} className="clickThrough" style={E(
 				{position: "relative", alignItems: "flex-start"},
 				//! isMultiPremiseArgument && {alignSelf: "flex-end"},
-				!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
+				//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
 				expanded && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
@@ -170,6 +170,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				{nodeView[expandKey] &&
 					<NodeChildHolder ref={c=>this.childHolder = c}
 						{...{map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
+						usesGenericExpandedField={false}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}
 						onHeightOrDividePointChange={this.CheckForChanges}/>}
 			</Row>

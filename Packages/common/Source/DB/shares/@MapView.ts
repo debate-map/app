@@ -42,13 +42,13 @@ export class MapNodeView {
 	}*/
 
 	@Field({type: "boolean"}, {opt: true})
-	@O expanded?: boolean;
+	@O expanded? = false;
 
 	@Field({type: "boolean"}, {opt: true})
-	@O expanded_truth? = true;
+	@O expanded_truth? = false;
 
 	@Field({type: "boolean"}, {opt: true})
-	@O expanded_relevance? = true;
+	@O expanded_relevance? = false;
 
 	/** True for node which is selected (ie. has its hover-panel locked open). */
 	@Field({type: "boolean"}, {opt: true})

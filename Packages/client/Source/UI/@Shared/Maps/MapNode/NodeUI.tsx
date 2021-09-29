@@ -1,4 +1,4 @@
-import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
+import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity, GetNodeForm, ClaimForm} from "dm_common";
 import React from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
@@ -73,6 +73,7 @@ export class NodeUI extends BaseComponentPlus(
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		const argumentNode = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
+		const nodeForm = GetNodeForm(node, path);
 
 		/* const initialChildLimit = State(a => a.main.initialChildLimit);
 		const form = GetNodeForm(node, GetParentNodeL2(path)); */
@@ -170,12 +171,24 @@ export class NodeUI extends BaseComponentPlus(
 		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.supporting;
 		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.above : LimitBarPos.below) : LimitBarPos.none;
 
+		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
+				widthOfNode={widthOverride || width}
+				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
+				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
+		const nodeChildHolderBox_relevance = (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg) && //boxExpanded &&
+			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
+				widthOfNode={widthOverride || width}
+				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
+				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
+		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
 		let nodeChildHolder_direct: JSX.Element|n;
-		if (!isPremiseOfSinglePremiseArg && boxExpanded) {
+		if ((!usingBox || isMultiPremiseArgument) && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
+				usesGenericExpandedField={true}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
@@ -188,16 +201,6 @@ export class NodeUI extends BaseComponentPlus(
 					this.SetState({dividePoint});
 				}, [isMultiPremiseArgument])}/>;
 		}
-		const nodeChildHolderBox_truth = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
-				widthOfNode={widthOverride || width}
-				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
-		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
-				widthOfNode={widthOverride || width}
-				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 
 		// const hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
 
@@ -225,6 +228,7 @@ export class NodeUI extends BaseComponentPlus(
 			</>
 		); */
 		return (
+			<>
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough" style={E(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
 				style,
@@ -242,11 +246,7 @@ export class NodeUI extends BaseComponentPlus(
 						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 						</div>*/}
-						{nodeChildHolderBox_truth}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
-						{nodeChildHolderBox_relevance}
-						{isMultiPremiseArgument &&
-							nodeChildHolder_direct}
 					</Column>
 					{!limitBar_above && children}
 				</div>
@@ -259,9 +259,14 @@ export class NodeUI extends BaseComponentPlus(
 					<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
 				{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
-				{!isMultiPremiseArgument &&
-					nodeChildHolder_direct}
+				<Column className="clickThrough">
+					{nodeChildHolderBox_truth}
+					{!isMultiPremiseArgument && nodeChildHolder_direct}
+					{nodeChildHolderBox_relevance}
+				</Column>
 			</div>
+			{isMultiPremiseArgument && nodeChildHolder_direct}
+			</>
 		);
 	}
 	proxyDisplayedNodeUI: NodeUI|n;

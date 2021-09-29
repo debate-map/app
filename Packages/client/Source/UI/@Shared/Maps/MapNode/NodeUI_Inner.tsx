@@ -1,4 +1,4 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
 import {A, DEL, DoNothing, E, GetValues, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
@@ -16,7 +16,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer, RunInAction} from "web-vcore";
+import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
@@ -196,6 +196,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const barSize = 5;
 		const pathNodeIDs = GetPathNodeIDs(path);
 		//const isSubnode = IsNodeSubnode(node);
+		const isSinglePremiseArg = IsSinglePremiseArgument(node);
+		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+		const isMultiPremiseArg = IsMultiPremiseArgument(node);
+		const nodeForm = GetNodeForm(node, path);
 
 		const nodeReversed = form == ClaimForm.negation;
 
@@ -297,7 +301,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						asDragPreview && {zIndex: zIndexes.draggable},
 						//outerNode.link._mirrorLink && {border: `solid ${HSLA(0, 0, 1, .3)}`, borderWidth: "0 0 0 1px"}, // if mirror-child, show white border at left
 					)}
-					padding={GetPaddingForNode(node/*, isSubnode*/)}
+					//padding={GetPaddingForNode(node/*, isSubnode*/)}
+					padding={0}
 					onClick={onClick}
 					onDirectClick={onDirectClick}
 					beforeChildren={<>
@@ -347,8 +352,49 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						})()}
 						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
 							ref={c=>this.titlePanel = c}
-							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/})}/>
+							style={E(
+								{padding: GetPaddingForNode(node/*, isSubnode*/)},
+								GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/}
+							)}/>
 						{subPanelShow && <SubPanel node={node}/>}
+						<Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
+							{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
+							<div style={{
+								flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+								//border: "1px solid rgba(255,255,255,.1)",
+								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+								//borderRadius: "0 0 0 5px",
+								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0",
+							}}>
+								{node.type == MapNodeType.claim ? "Agreement" : <InfoButton text="TODO"/>}
+							</div>}
+							{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
+							<div style={{
+								flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+								//border: "1px solid rgba(255,255,255,.1)",
+								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 1px",
+							}}>
+								{node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? "Relevance" : <InfoButton text="TODO"/>}
+							</div>}
+							<div style={{
+								flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+								//border: "1px solid rgba(255,255,255,.1)",
+								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 1px",
+							}}>
+								Phrasings (3)
+							</div>
+							<div style={{
+								width: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+								//border: "1px solid rgba(255,255,255,.1)",
+								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+								//borderRadius: "0 0 5px 0",
+								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 1px",
+							}}>
+								...
+							</div>
+						</Row>
 						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</>}
 					{...E(
@@ -367,30 +413,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
 					</>}
 				/>
-				<Row mt={1} style={{height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
-					<div style={{
-						flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-						//border: "1px solid rgba(255,255,255,.1)",
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-						borderRadius: "0 0 0 5px",
-					}}>Agreement</div>
-					<div style={{
-						flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-						//border: "1px solid rgba(255,255,255,.1)",
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-					}}>Relevance</div>
-					<div style={{
-						flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-						//border: "1px solid rgba(255,255,255,.1)",
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-					}}>Phrasings (3)</div>
-					<div style={{
-						width: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-						//border: "1px solid rgba(255,255,255,.1)",
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-						borderRadius: "0 0 5px 0",
-					}}>...</div>
-				</Row>
 				</>
 			);
 		};

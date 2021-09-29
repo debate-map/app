@@ -3,9 +3,15 @@ import {BackgroundConfig} from "Store/db_ext/users/$user";
 // To test out backgrounds, run this in console: S = a=>document.querySelector(".background").style.backgroundImage = `url(${a.split("?")[0]})`;
 // Then run: S("IMAGE_URL")
 
-export const defaultPresetBackground = "3dUKlcMOSN6ENstC_YIN8g";
+export const defaultPresetBackground = "n60KYTsHSZqUuyEQxSn000";
 export const presetBackgrounds = {
-	n60KYTsHSZqUuyEQxSnmew: {
+	n60KYTsHSZqUuyEQxSn000: {
+		/*color: "#eee",
+		url_max: "none",
+		position: "0 0",*/
+		url_max: "background: repeat 0/5px 5px linear-gradient(90deg,rgba(0,0,0,.05) 1px,transparent 0), repeat 0/5px 5px linear-gradient(180deg,rgba(0,0,0,.05) 1px,transparent 0), #eee",
+	},
+	n60KYTsHSZqUuyEQxSn001: {
 		color: "#E5E8EC",
 	},
 	irZEimSpTpu_TCCiejBAfA: {
@@ -17,6 +23,7 @@ export const presetBackgrounds = {
 		url_3840: "https://firebasestorage.googleapis.com/v0/b/canonical-debate-prod.appspot.com/o/backgrounds%2FCIhC7K5qRAyjj7uxoEf3sA_x3840.jpg?alt=media&token=79e2e9b6-b5ae-47a8-8e8e-b1eabee65238",
 		position: "center bottom",
 	},
+	// the entries without fields provided are filled-in by the code at the bottom of this file
 	"3dUKlcMOSN6ENstC_YIN8g": {},
 	tspvGTFhR9uSXoIErUwnSQ: {
 		position: "center bottom",
