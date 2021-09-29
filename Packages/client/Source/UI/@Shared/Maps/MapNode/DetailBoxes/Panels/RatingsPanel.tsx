@@ -24,37 +24,9 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		const {ratingType, asNodeUIOverlay} = this.props;
 		if (asNodeUIOverlay) return null;
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
-		/*return (
-			{<Row style={ES({position: "relative"})}>
-				<Column mr={2} /*style={{flex: "0 50px", minWidth: 0}}*#/>
-					{/*<Text style={{height: 21, fontSize: 11, transform: "translateX(0%) translateY(210%) rotate(90deg)"}}>(user agreement)</Text>*#/}
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Position:</Text>
-					{ratingType == "truth" &&
-					<>
-						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
-						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
-						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
-						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
-						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
-						<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Backing:</Text>
-					</>}
-					{/*<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Response:</Text>
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>
-					<Text mt={1} style={{height: 21, fontSize: 11, justifyContent: "right"}}>Support:</Text>*#/}
-				</Column>
-				{Object.entries(ratingTypeInfo.values).map(([value, label])=>{
-					return <RatingColumn key={value} ratingType={ratingType} text={label}/>;
-				})}
-			</Row>}
-		);*/
 		return (
 			<>
-				<Column>
-					<Text style={{fontSize: 12}}>Your response: (ie. level of agreement)</Text>
+				<Group title="Rating 1: Your response (ie. level of agreement)">
 					<Row>
 						{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
 							return <CheckBox key={value} ml={index == 0 ? 0 : 5} value={false} text={label} checkboxProps={{type: "radio"}} style={{fontSize: 11}}
@@ -67,72 +39,79 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 								}}/>;
 						})}
 					</Row>
-				</Column>
-				<Column mt={5}>
-					<Text style={{fontSize: 12}}>Of the remaining responses, which do you view as at least being "reasonable"?</Text>
+				</Group>
+				<Group mt={5} title="Rating 2: Level of research/knowledge (optional)">
+					<Text style={{fontSize: 12}}>What do you consider your level of research/knowledge on the subject to be?</Text>
+					<Row>
+						{["Negligible", "Low", "Fairly low", "Moderate", "Fairly high", "High", "Extensive"].map((label, index)=>{
+							return <CheckBox key={index} ml={index == 0 ? 0 : 5} value={false} text={label} style={{fontSize: 11}}
+								ref={checkBox=>{
+									const el = checkBox?.DOM.querySelector("input");
+									if (el) {
+										el.type = "radio";
+										el.style.margin = "0px";
+									}
+								}}/>;
+						})}
+					</Row>
+				</Group>
+				<Group mt={5} title="Rating 3: Reasonability of other responses (optional)" headerChildren={
+					<Button ml={5} p="3px 7px" style={{fontSize: 11}} text="Submit"/>
+				}>
+					<Text style={{fontSize: 12}}>Which responses do you consider "reasonable", for those with your level of research/knowledge (or better)?</Text>
 					<Row>
 						{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
 							return <CheckBox key={value} ml={index == 0 ? 0 : 5} value={false} text={label} style={{fontSize: 11}}/>;
 						})}
 					</Row>
-				</Column>
-				<Column mt={5}>
-					<Text style={{fontSize: 12}}>What probability do you give to one of the "unreasonable" responses somehow ending up the most appropriate?</Text>
-					<Text style={{fontSize: 12}}>(for example, if you were to find large amounts of supporting data you hadn't known of previously)</Text>
+				</Group>
+				<Group mt={5} title={`Rating 4: Probability of the "unreasonable" responses (optional)`}>
+					<Text style={{fontSize: 11}}>What probability do you give to one of the "unreasonable" responses (rating 3) somehow ending up the most appropriate?</Text>
+					<Text style={{fontSize: 11}}>(for example, if you were to find large amounts of supporting data you hadn't known of previously)</Text>
 					<Row>
 						<Text>1 out of </Text>
-						<Button p="3px 7px" style={{fontSize: 11}} text="5"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="10"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="20"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="50"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="75"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="100"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="500"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="1000"/>
-						<Button p="3px 7px" style={{fontSize: 11}} text="Custom"/>
-						<Spinner onChange={val=>{}} style={{fontSize: 12}}/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="5"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="10"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="20"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="50"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="75"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="100"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="500"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="1000"/>
+						<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="Custom"/>
+						<Spinner ml={1} onChange={val=>{}} style={{fontSize: 12}}/>
 						{/*<Slider min={0} max={100} step={1} value={0} onChange={val=>{}}/>*/}
 					</Row>
-				</Column>
+				</Group>
 			</>
 		);
 	}
 }
 
-class RatingColumn extends BaseComponent<{ratingType: NodeRatingType, text: string}, {}> {
+class Group extends BaseComponent<{mt?: number, title: string, headerChildren?: JSX.Element}, {}> {
 	render() {
-		let {ratingType, text} = this.props;
-		if (ratingType == "truth") {
-			return (
-				<Column ml={3} style={{flex: 20, minWidth: 0}}>
-					<Text style={{height: 21, fontSize: text == "Completely irrelevant" ? 9.5 : 11}}>"{text}"</Text>
-					{/*<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Proven"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="High likelihood"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Reasonable"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Understandable"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Highly unlikely"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Irrational"/>*/}
-					{/*<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Conclusive"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Strong"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Substantial"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Fair"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Weak"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="None"/>*/}
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Conclusive"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Well founded"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Reasonable"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Understandable"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Insubstantial"/>
-					<Button mt={1} p="3px 7px" style={{height: 21, fontSize: 11}} text="Irrational"/>
-				</Column>
-			);
-		}
-
-		//const ratingTypeInfo = GetRatingTypeInfo(ratingType);
+		let {mt, title, children, headerChildren} = this.props;
 		return (
-			<Column ml={3} style={{flex: 20, minWidth: 0}}>
-				<Button style={{height: 21, fontSize: text == "Completely irrelevant" ? 9.5 : 11}} text={text}/>
+			<Column mt={mt} style={{/*padding: 5, borderRadius: 5, background: "rgba(150,150,150,.3)", border: "1px solid rgba(255,255,255,.1)"*/}}>
+				<Header text={title}>
+					<Row ml="auto">
+						{headerChildren}
+					</Row>
+				</Header>
+				{children}
 			</Column>
+		);
+	}
+}
+
+class Header extends BaseComponent<{text: string}, {}> {
+	render() {
+		let {text, children} = this.props;
+		return (
+			<Row style={{marginBottom: 5, height: 18, borderRadius: 3, paddingLeft: 5, background: "rgba(255,255,255,.1)"}}>
+				<Text style={{fontSize: 12}}>{text}</Text>
+				{children}
+			</Row>
 		);
 	}
 }
