@@ -25,6 +25,7 @@ import {MapNodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
+import {Button, Row} from "web-vcore/nm/react-vcomponents";
 
 // drag and drop
 // ==========
@@ -278,6 +279,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				local_openPanel = null;
 			}
 			return (
+				<>
 				<ExpandableBox ref={c=>DoNothing(dragInfo?.provided.innerRef(GetDOM(c) as any), this.root = c)}
 					{...{width, widthOverride, outlineColor, expanded}} parent={this}
 					className={
@@ -365,6 +367,31 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
 					</>}
 				/>
+				<Row mt={1} style={{height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
+					<div style={{
+						flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+						//border: "1px solid rgba(255,255,255,.1)",
+						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+						borderRadius: "0 0 0 5px",
+					}}>Agreement</div>
+					<div style={{
+						flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+						//border: "1px solid rgba(255,255,255,.1)",
+						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					}}>Relevance</div>
+					<div style={{
+						flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+						//border: "1px solid rgba(255,255,255,.1)",
+						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					}}>Phrasings (3)</div>
+					<div style={{
+						width: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+						//border: "1px solid rgba(255,255,255,.1)",
+						boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+						borderRadius: "0 0 5px 0",
+					}}>...</div>
+				</Row>
+				</>
 			);
 		};
 
