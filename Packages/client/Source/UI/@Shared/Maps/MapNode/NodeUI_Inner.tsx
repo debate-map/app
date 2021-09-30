@@ -1,4 +1,4 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument, GetNodePhrasings} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
 import {A, DEL, DoNothing, E, GetValues, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
@@ -147,6 +147,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
 
 		const form = GetNodeForm(node, path);
+		//const phrasings = GetNodePhrasings(node.id);
 		const {showReasonScoreValues} = store.main.maps;
 
 		/*/*const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
@@ -375,7 +376,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 									{node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? "Relevance" : <InfoButton text="TODO"/>}
 								</div>}
 								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 1px"}} onClick={()=>onPanelButtonClick("phrasings")}>
-									Phrasings (3)
+									Phrasings{/*} ({1 + phrasings.length})*/}
 								</div>
 								<div style={{...baseButtonStyle, width: 40, borderWidth: "1px 0 0 1px"}}>
 									...

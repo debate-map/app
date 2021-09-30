@@ -19,18 +19,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 
 		return (
 			<>
-				{/*<Group title="Rating 1: Your response (ie. level of agreement)">*/}
 				<Row>
-					{/*Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
-						return <CheckBox key={value} ml={index == 0 ? 0 : 5} value={false} text={label} checkboxProps={{type: "radio"}} style={{fontSize: 11}}
-							ref={checkBox=>{
-								const el = checkBox?.DOM.querySelector("input");
-								if (el) {
-									el.type = "radio";
-									el.style.margin = "0px";
-								}
-							}}/>;
-					})*/}
 					<Select displayType="button bar" options={Object.values(ratingTypeInfo.values)}
 						style={{fontSize: 12, display: "flex", width: "100%"}}
 						childStyle={{display: "inline-flex", flex: 1, minWidth: 0, /*padding: "5px 0",*/ whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"}}
@@ -39,8 +28,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 							// todo
 						}}/>
 				</Row>
-				{/*</Group>*/}
-				<Button mt={5}
+				{/*<Button mt={5}
 					p="3px 10px"
 					//faIcon="chevron-down"
 					text={
@@ -64,10 +52,10 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 											el.style.margin = "0px";
 										}
 									}}/>;
-							})*/}
+							})*#/}
 							<Select mt={5} displayType="button bar" options={["Negligible", "Low", "Fairly Low", "Moderate", "Fairly High", "High", "Extensive"]}
 								style={{fontSize: 12, display: "flex", width: "100%"}}
-								childStyle={{display: "inline-flex", flex: 1, minWidth: 0, /*padding: "5px 0",*/ whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"}}
+								childStyle={{display: "inline-flex", flex: 1, minWidth: 0, whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"}}
 								value={null}
 								onChange={val=>{
 									// todo
@@ -101,10 +89,10 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 							<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="1000"/>
 							<Button ml={1} p="3px 7px" style={{fontSize: 11}} text="Custom"/>
 							<Spinner ml={1} onChange={val=>{}} style={{fontSize: 12}}/>
-							{/*<Slider min={0} max={100} step={1} value={0} onChange={val=>{}}/>*/}
+							{/*<Slider min={0} max={100} step={1} value={0} onChange={val=>{}}/>*#/}
 						</Row>
 					</Group>
-				</>}
+				</>*/}
 			</>
 		);
 	}
