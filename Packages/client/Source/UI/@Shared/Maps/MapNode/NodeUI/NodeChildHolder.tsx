@@ -2,10 +2,10 @@ import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecial
 import * as React from "react";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {ChildBoxInfo, ChildConnectorBackground} from "UI/@Shared/Maps/MapNode/ChildConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
-import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction} from "web-vcore";
+import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction, WaitXThenRun_Deduped} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
@@ -15,6 +15,7 @@ import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "chroma-js";
+import {NodeUI_Inner} from "../NodeUI_Inner.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
@@ -36,6 +37,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	} */
 
 	childBoxes: {[key: number]: NodeUI} = {};
+	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
 	render() {
 		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth, onHeightOrDividePointChange} = this.props;
 		let {childrenWidthOverride, lastChildBoxOffsets, placeholderRect} = this.state;
@@ -95,7 +97,15 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			return (
 				// <ErrorBoundary errorUI={props=>props.defaultUI(E(props, {style: {width: 500, height: 300}}))}>
 				// <ErrorBoundary key={child.id} errorUIStyle={{ width: 500, height: 300 }}>
-				<NodeUI key={child.id} ref={c=>this.childBoxes[child.id] = c} indexInNodeList={index} map={map} node={child}
+				<NodeUI key={child.id}
+					ref={c=>this.childBoxes[child.id] = c}
+					ref_innerUI={c=>{
+						//this.childInnerUIs[child.id] = c;
+						//this.OnChildHeightOrPosChange();
+						//this.UpdateChildBoxOffsets();
+						WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
+					}}
+					indexInNodeList={index} map={map} node={child}
 					path={`${path}/${child.id}`}
 					leftMarginForLines={belowNodeUI ? 20 : 0}
 					widthOverride={childrenWidthOverride}
@@ -169,7 +179,12 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		}
 
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
-		this.childBoxes = {};
+		//this.childBoxes = {};
+		// only clear this.childBoxes when first mounting // actually, no need to clear; the ref-funcs already clear their own entries
+		/*UseEffect(()=>{
+			this.childBoxes = {};
+			//this.childInnerUIs = {};
+		}, []);*/
 		return (
 			<Column ref={c=>this.childHolder = c} className="NodeChildHolder clickThrough" style={E(
 				{
@@ -281,6 +296,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		// if (this.lastRender_source == RenderSource.SetState) return;
 		const {node, onHeightOrDividePointChange} = this.props;
 
+		//const height = GetDOM(this)!.getBoundingClientRect().height;
 		const height = this.DOM_HTML.offsetHeight;
 		const dividePoint = this.GetDividePoint();
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
@@ -305,24 +321,18 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		this.lastOrderStr = orderStr;
 	}
 
-	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange = ()=>{
 		const {node} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
 			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}\ncenterY:${this.GetDividePoint()}`);
 
 		// this.OnHeightOrPosChange();
-		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
-		if (!this.OnChildHeightOrPosChange_updateStateQueued) {
-			this.OnChildHeightOrPosChange_updateStateQueued = true;
-			requestAnimationFrame(()=>{
-				this.OnChildHeightOrPosChange_updateStateQueued = false;
-				if (!this.mounted) return;
-				this.UpdateChildrenWidthOverride();
-				this.UpdateChildBoxOffsets();
-				this.CheckForLocalChanges();
-			});
-		}
+		WaitXThenRun_Deduped(this, "OnChildHeightOrPosChange_lastPart", 0, ()=>{
+			if (!this.mounted) return;
+			this.UpdateChildrenWidthOverride();
+			this.UpdateChildBoxOffsets();
+			this.CheckForLocalChanges();
+		});
 	};
 
 	GetDividePoint() {
@@ -348,7 +358,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		// Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 	UpdateChildBoxOffsets(forceUpdate = false) {
-		const childBoxes = this.childBoxes.VValues().filter(a=>a != null);
+		//const childBoxes = this.childBoxes.VValues().filter(a=>a != null);
 		const newState = {} as any;
 
 		const showAddArgumentButtons = false; // node.type == MapNodeType.claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
@@ -356,13 +366,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.Expanded && this.childHolder) {
 			const holderRect = VRect.FromLTWH(this.childHolder.DOM.getBoundingClientRect());
 
-			const lastChildBoxOffsets = this.childBoxes.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
-				// let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				// let childBox = $(GetDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
-				// not sure why this is needed... (bad sign!)
-				if (pair.value.NodeUIForDisplayedNode.innerUI == null) return null;
+			const lastChildBoxOffsets = this.childBoxes.Pairs().ToMapObj(pair=>pair.key, pair=>{
+			//const lastChildBoxOffsets = this.childInnerUIs.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
+				const childBox = pair.value?.NodeUIForDisplayedNode.innerUI?.DOM;
+				if (childBox == null) return null; // can be null in certain cases (eg. while inner-ui still data-loading)
 
-				const childBox = pair.value.NodeUIForDisplayedNode.innerUI.DOM;
 				// Assert(childBox.length, 'Could not find inner-ui of child-box.');
 				if (childBox == null) return null; // if can't find child-node's box, don't draw line for it (can happen if dragging child-node)
 				if (childBox.matches(".DragPreview")) return null; // don't draw line to node-box being dragged

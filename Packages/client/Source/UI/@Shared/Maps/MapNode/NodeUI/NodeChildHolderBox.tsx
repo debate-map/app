@@ -32,7 +32,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[node.id] != null), "Supplied node is not a parent of all the supplied node-children!");
 		}*/
 	}
-	lineHolder: HTMLDivElement|n;
+	//lineHolder: HTMLDivElement|n;
 	render() {
 		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
@@ -108,7 +108,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
-				expanded && nodeChildrenToShow.length && innerBoxOffset != null && {opacity: 0, pointerEvents: "none"},
+				expanded && nodeChildrenToShow.length && innerBoxOffset == null && {opacity: 0, pointerEvents: "none"},
 			)}>
 				<Row className="clickThrough" style={E(
 					{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
@@ -204,23 +204,24 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		this.CheckForChanges();
 	}
 
-	lastLineHolderHeight = 0;
+	//lastLineHolderHeight = 0;
 	lastHeight = 0;
 	lastDividePoint = 0;
 	CheckForChanges = ()=>{
-		if (this.lineHolder == null) return;
 		const {onHeightOrDividePointChange} = this.props;
 
+		/*if (this.lineHolder == null) return;
 		//const lineHolderHeight = $(this.lineHolder).outerHeight();
-		//const lineHolderHeight = this.lineHolder.height.height + /*this.lineHolder.marginTop + this.lineHolder.marginBottom*/ + document.body.borderTop + document.body.borderBottom;
+		//const lineHolderHeight = this.lineHolder.height.height + /*this.lineHolder.marginTop + this.lineHolder.marginBottom*#/ + document.body.borderTop + document.body.borderBottom;
 		const lineHolderHeight = this.lineHolder.getBoundingClientRect().height;
 		if (lineHolderHeight != this.lastLineHolderHeight) {
 			this.SetState({lineHolderHeight});
 		}
-		this.lastLineHolderHeight = lineHolderHeight;
+		this.lastLineHolderHeight = lineHolderHeight;*/
 
 		//const height = $(GetDOM(this)).outerHeight();
-		const height = GetDOM(this)!.getBoundingClientRect().height;
+		//const height = GetDOM(this)!.getBoundingClientRect().height;
+		const height = this.DOM_HTML.offsetHeight;
 		const dividePoint = this.childHolder && this.Expanded ? this.childHolder.GetDividePoint() : 0;
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			/* if (height != this.lastHeight) {

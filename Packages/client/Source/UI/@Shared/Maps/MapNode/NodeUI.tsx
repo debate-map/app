@@ -28,6 +28,7 @@ export class NodeUI extends BaseComponentPlus(
 		leftMarginForLines?: number|n,
 		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
+		ref_innerUI?: (c: NodeUI_Inner|n)=>any,
 	},
 	{
 		expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0,
@@ -49,11 +50,12 @@ export class NodeUI extends BaseComponentPlus(
 	nodeUI: HTMLDivElement|n;
 	innerUI: NodeUI_Inner|n;
 	rightColumn: Column|n;
-	childBoxes: {[key: string]: ExpandableBox|n} = {};
+	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
+	nodeChildHolder_direct: NodeChildHolder|n;
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, children} = this.props;
+		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, children} = this.props;
 		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
@@ -181,32 +183,43 @@ export class NodeUI extends BaseComponentPlus(
 		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.above : LimitBarPos.below) : LimitBarPos.none;
 
 		//this.childBoxes = {};
-		// only clear this.childBoxes when first mounting
-		UseEffect(()=>{
+		// only clear this.childBoxes when first mounting // actually, no need to clear; the ref-funcs already clear their own entries
+		/*UseEffect(()=>{
+			console.log("Clearing childBoxes. @old:", this.childBoxes);
 			this.childBoxes = {};
-		}, []);
+		}, []);*/
 		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
-				ref_expandableBox={UseCallback(c=>{
+				ref={UseCallback(c=>{
 					this.childBoxes["truth"] = c;
 					console.log("Truth ref triggered:", c, c?.DOM, this.childBoxes);
-					WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>void console.log("Truth ref waitx -- childBoxes:", this.childBoxes) || this.UpdateChildBoxOffsets());
+					//WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
+				}, [])}
+				ref_expandableBox={UseCallback(c=>{
+					//this.childBoxes["truth"] = c;
+					console.log("Truth subref triggered:", c, c?.DOM, this.childBoxes);
+					WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
 					//WaitXThenRun_Deduped(this, "CheckForChanges", 0, ()=>this.CheckForChanges());
 				}, [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
-				/*onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}*//>;
+				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
-				ref_expandableBox={UseCallback(c=>{
+				ref={UseCallback(c=>{
 					this.childBoxes["relevance"] = c;
 					console.log("Relevance ref triggered:", c, c?.DOM, this.childBoxes);
-					WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>void console.log("Relevance ref waitx -- childBoxes:", this.childBoxes) || this.UpdateChildBoxOffsets());
+					//WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
+				}, [])}
+				ref_expandableBox={UseCallback(c=>{
+					//this.childBoxes["relevance"] = c;
+					console.log("Relevance subref triggered:", c, c?.DOM, this.childBoxes);
+					WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
 					//WaitXThenRun_Deduped(this, "CheckForChanges", 0, ()=>this.CheckForChanges());
 				}, [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
-				/*onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}*//>;
+				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
 		let childConnectorBackground: JSX.Element|n;
 		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
@@ -230,6 +243,7 @@ export class NodeUI extends BaseComponentPlus(
 		if ((!usingBox || isMultiPremiseArgument) && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
+				ref={c=>this.nodeChildHolder_direct = c}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
 				usesGenericExpandedField={true}
@@ -239,11 +253,10 @@ export class NodeUI extends BaseComponentPlus(
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
-					if (isMultiPremiseArgument) {
-						// this.SetState({dividePoint: selfHeight / 2});
-						return;
+					if (!isMultiPremiseArgument) {
+						this.SetState({dividePoint});
 					}
-					this.SetState({dividePoint});
+					this.CheckForChanges();
 				}, [isMultiPremiseArgument])}/>;
 		}
 
@@ -295,7 +308,10 @@ export class NodeUI extends BaseComponentPlus(
 					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 					</div>*/}
-					<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
+					<NodeUI_Inner ref={c=>{
+						this.innerUI = GetInnerComp(c);
+						if (ref_innerUI) ref_innerUI(c);
+					}} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
 					{/* these are for components shown just to the right of the NodeUI_Inner box */}
 					{nodeChildrenToShow == emptyArray_forLoading &&
 						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
@@ -332,11 +348,14 @@ export class NodeUI extends BaseComponentPlus(
 	// CheckForChanges = _.debounce(() => {
 	CheckForChanges = ()=>{
 		const {node, onHeightOrPosChange, dividePoint} = this.PropsState;
+		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
 
 		// if (this.lastRender_source == RenderSource.SetState) return;
 
 		// see UseSize_Method for difference between offsetHeight and the alternatives
-		const height = this.DOM_HTML.offsetHeight;
+		const height = this.DOM_HTML.offsetHeight
+			// if multi-premise-arg, the nodeChildHolder_direct element is not "within" this.DOM_HTML; so add its height manually
+			+ (isMultiPremiseArgument && this.nodeChildHolder_direct != null ? this.nodeChildHolder_direct.DOM_HTML.offsetHeight : 0);
 		if (height != this.lastHeight) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
 				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${height}`);
@@ -401,16 +420,8 @@ export class NodeUI extends BaseComponentPlus(
 			const holderRect = VRect.FromLTWH(this.rightColumn.DOM.getBoundingClientRect());
 
 			const lastChildBoxOffsets = this.childBoxes.Pairs().ToMapObj(pair=>pair.key, pair=>{
-				// not sure why this is needed... (bad sign!)
-				if (pair.value?.DOM == null) {
-					console.warn(`Expandable box not found. (for: ${pair.key})`, pair.value, pair.value?.DOM);
-					return null;
-				}
-				console.warn(`Found: (for: ${pair.key})`, pair.value, pair.value?.DOM);
-
-				const childBox = pair.value.DOM;
-				//if (childBox == null) return null; // if can't find child-node's box, don't draw line for it (can happen if dragging child-node)
-				//if (childBox.matches(".DragPreview")) return null; // don't draw line to node-box being dragged
+				const childBox = pair.value?.expandableBox?.DOM;
+				if (childBox == null) return null; // can be null in certain cases (eg. while inner-ui still data-loading)
 
 				let childBoxOffset = VRect.FromLTWH(childBox.getBoundingClientRect()).Position.Minus(holderRect.Position);
 				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");
