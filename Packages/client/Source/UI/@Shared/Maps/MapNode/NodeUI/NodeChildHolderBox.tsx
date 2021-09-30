@@ -113,7 +113,11 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 				)}>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
-						ref={c=>this.expandableBox = c}
+						ref={c=>{
+							this.expandableBox = c;
+							console.log("Ref called in expandable box, for type:", group);
+							//if (expandableBox_ref)
+						}}
 						style={{marginTop: innerBoxOffset_safe}}
 						padding="3px 5px 2px"
 						text={<span style={ES(

@@ -183,14 +183,18 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
 				ref={UseCallback(c=>{
-					console.log("Truth ref triggered:", c, c?.expandableBox);
-					setTimeout(()=>console.log("Truth ref triggered[2]:", c, c?.expandableBox));
-					requestAnimationFrame(()=>console.log("Truth ref triggered[2]:", c, c?.expandableBox));
-					setTimeout(()=>void console.log("T1") || requestAnimationFrame(()=>void console.log("T2") || setTimeout(()=>void console.log("T3") || console.log("Truth ref triggered[3]:", c, c?.expandableBox))));
-					setTimeout(()=>console.log("Truth ref triggered[W1]:", c, c?.expandableBox), 1);
-					setTimeout(()=>console.log("Truth ref triggered[W10]:", c, c?.expandableBox), 10);
-					setTimeout(()=>console.log("Truth ref triggered[W100]:", c, c?.expandableBox), 100);
-					setTimeout(()=>console.log("Truth ref triggered[W1000]:", c, c?.expandableBox), 1000);
+					const logInfo = (name: string)=>{
+						console.log(`Truth ref triggered[${name}]:`, c, c?.expandableBox, c?.DOM, (c?.DOM as HTMLElement).querySelectorAll(".NodeChildHolderBox").length);
+					};
+					logInfo("base");
+					
+					setTimeout(()=>logInfo("2"));
+					requestAnimationFrame(()=>logInfo("2"));
+					setTimeout(()=>void console.log("T1") || requestAnimationFrame(()=>void console.log("T2") || setTimeout(()=>void console.log("T3") || logInfo("3"))));
+					setTimeout(()=>logInfo("W1"), 1);
+					setTimeout(()=>logInfo("W10"), 10);
+					setTimeout(()=>logInfo("W100"), 100);
+					setTimeout(()=>logInfo("W1000"), 1000);
 					c && (this.childBoxes["truth"] = c);
 				}, [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
