@@ -99,12 +99,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				// <ErrorBoundary key={child.id} errorUIStyle={{ width: 500, height: 300 }}>
 				<NodeUI key={child.id}
 					ref={c=>this.childBoxes[child.id] = c}
-					ref_innerUI={c=>{
-						//this.childInnerUIs[child.id] = c;
-						//this.OnChildHeightOrPosChange();
-						//this.UpdateChildBoxOffsets();
-						WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
-					}}
+					ref_innerUI={c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets())}
 					indexInNodeList={index} map={map} node={child}
 					path={`${path}/${child.id}`}
 					leftMarginForLines={belowNodeUI ? 20 : 0}

@@ -190,33 +190,15 @@ export class NodeUI extends BaseComponentPlus(
 		}, []);*/
 		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
-				ref={UseCallback(c=>{
-					this.childBoxes["truth"] = c;
-					console.log("Truth ref triggered:", c, c?.DOM, this.childBoxes);
-					//WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
-				}, [])}
-				ref_expandableBox={UseCallback(c=>{
-					//this.childBoxes["truth"] = c;
-					console.log("Truth subref triggered:", c, c?.DOM, this.childBoxes);
-					WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
-					//WaitXThenRun_Deduped(this, "CheckForChanges", 0, ()=>this.CheckForChanges());
-				}, [])}
+				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
+				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
-				ref={UseCallback(c=>{
-					this.childBoxes["relevance"] = c;
-					console.log("Relevance ref triggered:", c, c?.DOM, this.childBoxes);
-					//WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
-				}, [])}
-				ref_expandableBox={UseCallback(c=>{
-					//this.childBoxes["relevance"] = c;
-					console.log("Relevance subref triggered:", c, c?.DOM, this.childBoxes);
-					WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets());
-					//WaitXThenRun_Deduped(this, "CheckForChanges", 0, ()=>this.CheckForChanges());
-				}, [])}
+				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
+				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
@@ -429,13 +411,11 @@ export class NodeUI extends BaseComponentPlus(
 				return childBoxOffset;
 			});
 			newState.lastChildBoxOffsets = lastChildBoxOffsets;
-		} else {
-			console.log("RightColumn not ready!");
 		}
 
 		const cancelIfStateSame = !forceUpdate;
 		const changedState = this.SetState(newState, undefined, cancelIfStateSame, true);
-		Log(`Changed state? (${this.props.node.id}): ` + changedState);
+		//Log(`Changed state? (${this.props.node.id}): ` + changedState);
 	}
 
 	lastHeight = 0;
