@@ -34,11 +34,11 @@ export class RatingType_Info {
 export const baseRatingTypeInfo = {
 	[NodeRatingType.significance]: new RatingType_Info({
 		displayText: "Significance",
-		values: {0: "Pointless", 25: "Unimportant", 50: "Somewhat important", 75: "Important", 100: "Extremely important"},
+		values: {0: "Pointless", 25: "Unimportant", 50: "Somewhat Important", 75: "Important", 100: "Extremely Important"},
 	}),
 	[NodeRatingType.neutrality]: new RatingType_Info({
 		displayText: "Neutrality",
-		values: {0: "Completely biased", 25: "Heavily biased", 50: "Somewhat biased", 75: "Mostly impartial", 100: "Completely impartial"},
+		values: {0: "Unbiased", 25: "Slightly Biased", 50: "Moderately Biased", 75: "Highly Biased", 100: "Extremely Biased"},
 	}),
 	[NodeRatingType.truth]: new RatingType_Info({
 		displayText: "Agreement",
@@ -49,11 +49,11 @@ export const baseRatingTypeInfo = {
 	}),
 	[NodeRatingType.relevance]: new RatingType_Info({
 		displayText: "Relevance",
-		values: {0: "Completely irrelevant", 25: "Slightly relevant", 50: "Relevant", 75: "Highly relevant", 100: "Extremely relevant"},
+		values: {0: "Completely Irrelevant", 25: "Slightly Relevant", 50: "Moderately Relevant", 75: "Highly Relevant", 100: "Extremely Relevant"},
 	}),
 	[NodeRatingType.impact]: new RatingType_Info({
 		displayText: "Impact",
-		values: {0: "Thoroughly false", 25: "Mostly false", 50: "Somewhat true", 75: "Mostly true", 100: "Game-changer"},
+		values: {0: "Thoroughly False", 25: "Mostly False", 50: "Somewhat True", 75: "Mostly True", 100: "Game-Changer"},
 	}),
 };
 

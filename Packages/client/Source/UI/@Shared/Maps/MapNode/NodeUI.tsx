@@ -22,7 +22,9 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 @Observer
 export class NodeUI extends BaseComponentPlus(
 	{} as {
-		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, widthOverride?: number|n, style?,
+		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, style?,
+		leftMarginForLines?: number|n,
+		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
 	},
 	{expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0},
@@ -190,8 +192,9 @@ export class NodeUI extends BaseComponentPlus(
 				group={node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
 				usesGenericExpandedField={true}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
-				vertical={isMultiPremiseArgument}
+				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
+				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
 					if (isMultiPremiseArgument) {
@@ -346,13 +349,13 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
 
 		const {props} = this;
-		const props_used = this.props.IncludeKeys("map", "node", "path") as typeof props;
+		const props_used = this.props.IncludeKeys("map", "node", "path", "leftMarginForLines") as typeof props;
 		// Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 
-		const {map, node, path} = props_used;
+		const {map, node, path, leftMarginForLines} = props_used;
 		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
-		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path);
+		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, leftMarginForLines);
 		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
 
 		/*for (const subnode of subnodes) {
@@ -365,7 +368,7 @@ export class NodeUI extends BaseComponentPlus(
 			// expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
 			width = width.KeepAtLeast(350);
 			// expectedBoxWidth += 20;
-			width += 20; // give extra space for left-margin
+			//width += 20; // give extra space for left-margin
 		}
 
 		this.measurementInfo_cache = {expectedBoxWidth, width/* , expectedHeight */};

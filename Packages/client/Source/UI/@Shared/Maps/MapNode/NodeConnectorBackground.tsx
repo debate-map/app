@@ -23,7 +23,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 		const outerNode = IsPremiseOfSinglePremiseArgument(node, parent) ? parent : node;*/
 
 		return (
-			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
+			<svg className="clickThroughChain" style={{position: "absolute", top: 0, overflow: "visible", zIndex: -1}}>
 				{childBoxOffsets.Pairs().OrderBy(a=>a.key).map(({key: childID, value: childOffset})=>{
 					if (childOffset == null) return null;
 

@@ -12,8 +12,10 @@ import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 }); */
 
-export const GetMeasurementInfoForNode = CreateAccessor((node: MapNodeL3, path: string)=>{
+export const GetMeasurementInfoForNode = CreateAccessor((node: MapNodeL3, path: string, leftMarginForLines?: number|n)=>{
 	const nodeTypeInfo = MapNodeType_Info.for[node.type];
+	const maxWidth_normal = nodeTypeInfo.maxWidth;
+	const maxWidth_final = maxWidth_normal - (leftMarginForLines != null ? leftMarginForLines : 0);
 
 	const displayText = GetNodeDisplayText(node, path);
 	const fontSize = GetFontSizeForNode(node);
@@ -41,10 +43,10 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: MapNodeL3, path: 
 	}
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 	if (node.current.quote) { // quotes are often long, so just always do full-width
-		expectedBoxWidth = nodeTypeInfo.maxWidth;
+		expectedBoxWidth = maxWidth_final;
 	}
 
-	const width = node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
+	const width = node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, maxWidth_final);
 
 	const maxTextWidth = width - expectedOtherStuffWidth;
 	const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='${ConvertStyleObjectToCSSString({whiteSpace: "initial", display: "inline-block"})}'>`) as HTMLElement;

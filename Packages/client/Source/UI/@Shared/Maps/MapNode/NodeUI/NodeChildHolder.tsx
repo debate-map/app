@@ -16,7 +16,7 @@ import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
-	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, minWidth?: number,
+	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, belowNodeUI?: boolean, minWidth?: number,
 	onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 const initialState = {
@@ -35,7 +35,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, minWidth, onHeightOrDividePointChange} = this.props;
+		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth, onHeightOrDividePointChange} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets, placeholderRect} = this.state;
 		childrenWidthOverride = (childrenWidthOverride ?? 0).KeepAtLeast(minWidth ?? 0);
 
@@ -94,7 +94,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				// <ErrorBoundary errorUI={props=>props.defaultUI(E(props, {style: {width: 500, height: 300}}))}>
 				// <ErrorBoundary key={child.id} errorUIStyle={{ width: 500, height: 300 }}>
 				<NodeUI key={child.id} ref={c=>this.childBoxes[child.id] = c} indexInNodeList={index} map={map} node={child}
-					path={`${path}/${child.id}`} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+					path={`${path}/${child.id}`}
+					leftMarginForLines={belowNodeUI ? 20 : 0}
+					widthOverride={childrenWidthOverride}
+					onHeightOrPosChange={this.OnChildHeightOrPosChange}>
 					{isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit) &&
 						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection_untrimmed.length}/>}
 				</NodeUI>
@@ -160,16 +163,17 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{
 					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
 					// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
-					marginLeft: vertical ? 20 : 30,
+					marginLeft: belowNodeUI ? 20 : 30,
 					// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 				},
+				belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
 				//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 				// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
 				oldChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 			)}>
 				{linkSpawnPoint > 0 && oldChildBoxOffsets &&
 					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
-					<NodeConnectorBackground node={node} path={path} linkSpawnPoint={vertical ? new Vector2(-10, 0) : new Vector2(-30, linkSpawnPoint)} straightLines={vertical}
+					<NodeConnectorBackground node={node} path={path} linkSpawnPoint={belowNodeUI ? new Vector2(-10, 0) : new Vector2(-30, linkSpawnPoint)} straightLines={belowNodeUI}
 						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 

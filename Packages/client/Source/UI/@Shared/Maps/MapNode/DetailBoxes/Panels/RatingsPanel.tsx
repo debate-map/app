@@ -1,6 +1,7 @@
 import {GetRatingTypeInfo, MapNodeL3, NodeRatingType} from "dm_common";
 import React, {useState} from "react";
-import {Observer} from "web-vcore";
+import {store} from "Store";
+import {Observer, RunInAction_Set} from "web-vcore";
 import {Button, CheckBox, Column, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 
@@ -13,7 +14,8 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		if (asNodeUIOverlay) return null;
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
 		
-		const [expanded, setExpanded] = useState(false);
+		//const [showOptionalRatings, setExpanded] = useState(false);
+		const showOptionalRatings = store.main.ratingUI.showOptionalRatings;
 
 		return (
 			<>
@@ -42,13 +44,13 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 					p="3px 10px"
 					//faIcon="chevron-down"
 					text={
-						!expanded
+						!showOptionalRatings
 							? [<i className="fa fa-chevron-down" style={{marginRight: 5}}></i>, "Show optional ratings"] as any
 							: [<i className="fa fa-chevron-up" style={{marginRight: 5}}></i>, "Hide optional ratings"] as any
 					}
 					style={{fontSize: 12}}
-					onClick={()=>setExpanded(!expanded)}/>
-				{expanded &&
+					onClick={()=>RunInAction_Set(this, ()=>store.main.ratingUI.showOptionalRatings = !showOptionalRatings)}/>
+				{showOptionalRatings &&
 				<>
 					<Group mt={5} title="Rating 2: Level of research/knowledge">
 						<Text style={{fontSize: 12}}>What do you consider your level of research/knowledge on the subject to be?</Text>
@@ -76,7 +78,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 						<Button ml={5} p="3px 7px" style={{fontSize: 11}} text="Submit"/>
 					}>
 						<Text style={{fontSize: 12, whiteSpace: "normal"}}>
-							Which levels of agreement expressed by other people do you find understandable given the arguments they may have for holding that opinion? (ie. responses which could be argued for without being overtly irrational)
+							Which levels of agreement expressed by other people do you find understandable given the arguments they may have for holding that opinion? (ie. responses which could be held without being overtly irrational)
 						</Text>
 						<Row mt={5}>
 							{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{

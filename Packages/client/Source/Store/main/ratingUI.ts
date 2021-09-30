@@ -4,6 +4,7 @@ import {makeObservable} from "web-vcore/nm/mobx";
 
 export class RatingUIState {
 	constructor() { makeObservable(this); }
+	@O showOptionalRatings = false;
 	@O smoothing = 5;
 }
 
