@@ -1,16 +1,17 @@
 import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity, GetNodeForm, ClaimForm} from "dm_common";
 import React from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
-import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
+import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
-import {EB_ShowError, EB_StoreError, ES, MaybeLog, Observer, ShouldLog} from "web-vcore";
-import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl} from "web-vcore/nm/js-vextensions.js";
+import {EB_ShowError, EB_StoreError, ES, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
+import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ObjectCE, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
@@ -27,7 +28,10 @@ export class NodeUI extends BaseComponentPlus(
 		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
 	},
-	{expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0},
+	{
+		expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0,
+		lastChildBoxOffsets: null as {[key: string]: Vector2}|n,
+	},
 ) {
 	/* static renderCount = 0;
 	static lastRenderTime = -1; */
@@ -43,11 +47,13 @@ export class NodeUI extends BaseComponentPlus(
 
 	nodeUI: HTMLDivElement|n;
 	innerUI: NodeUI_Inner|n;
+	rightColumn: Column|n;
+	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, children} = this.props;
-		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight} = this.state;
+		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
 		//path = path || node.id.toString();
@@ -173,17 +179,51 @@ export class NodeUI extends BaseComponentPlus(
 		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.supporting;
 		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.above : LimitBarPos.below) : LimitBarPos.none;
 
+		this.childBoxes = {};
 		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
+				ref={UseCallback(c=>{
+					console.log("Truth ref triggered:", c, c?.expandableBox);
+					setTimeout(()=>console.log("Truth ref triggered[2]:", c, c?.expandableBox));
+					requestAnimationFrame(()=>console.log("Truth ref triggered[2]:", c, c?.expandableBox));
+					setTimeout(()=>void console.log("T1") || requestAnimationFrame(()=>void console.log("T2") || setTimeout(()=>void console.log("T3") || console.log("Truth ref triggered[3]:", c, c?.expandableBox))));
+					setTimeout(()=>console.log("Truth ref triggered[W1]:", c, c?.expandableBox), 1);
+					setTimeout(()=>console.log("Truth ref triggered[W10]:", c, c?.expandableBox), 10);
+					setTimeout(()=>console.log("Truth ref triggered[W100]:", c, c?.expandableBox), 100);
+					setTimeout(()=>console.log("Truth ref triggered[W1000]:", c, c?.expandableBox), 1000);
+					c && (this.childBoxes["truth"] = c);
+				}, [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
+				/*onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}*//>;
 		const nodeChildHolderBox_relevance = (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
+				ref={UseCallback(c=>{
+					console.log("Relevance ref triggered:", c, c?.expandableBox);
+					c && (this.childBoxes["relevance"] = c);
+				}, [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
+				/*onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}*//>;
 		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
+		let childConnectorBackground: JSX.Element|n;
+		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
+			childConnectorBackground = (
+				<ChildConnectorBackground node={node} path={path}
+					linkSpawnPoint={new Vector2(0, selfHeight / 2)} straightLines={false}
+					shouldUpdate={true}
+					childBoxInfos={([
+						!!nodeChildHolderBox_truth && {
+							offset: lastChildBoxOffsets?.["truth"],
+							color: GetNodeColor({type: "claim"} as any, "raw"),
+						},
+						!!nodeChildHolderBox_relevance && {
+							offset: lastChildBoxOffsets?.["relevance"],
+							color: GetNodeColor({type: "claim"} as any, "raw"),
+						},
+					] as ChildBoxInfo[]).filter(a=>a)}/>
+			);
+		}
 		let nodeChildHolder_direct: JSX.Element|n;
 		if ((!usingBox || isMultiPremiseArgument) && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
@@ -232,7 +272,11 @@ export class NodeUI extends BaseComponentPlus(
 		); */
 		return (
 			<>
-			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough" style={E(
+			<div ref={c=>{
+				this.nodeUI = c;
+				//WaitXThenRun_Deduped([this, "checkForChanges"], 0, ()=>this.CheckForChanges());
+				if (c) requestAnimationFrame(()=>this.CheckForChanges());
+			}} className="NodeUI clickThrough" style={E(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
 				style,
 			)}>
@@ -262,7 +306,8 @@ export class NodeUI extends BaseComponentPlus(
 
 					{!limitBar_above && children}
 				</Column>
-				<Column className="rightColumn clickThrough">
+				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough">
+					{childConnectorBackground}
 					{nodeChildHolderBox_truth}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
 					{nodeChildHolderBox_relevance}
@@ -277,9 +322,9 @@ export class NodeUI extends BaseComponentPlus(
 		return this.proxyDisplayedNodeUI || this;
 	}
 
-	PostRender() {
+	/*PostRender() {
 		this.CheckForChanges();
-	}
+	}*/
 
 	// don't actually check for changes until re-rendering has stopped for 500ms
 	// CheckForChanges = _.debounce(() => {
@@ -296,6 +341,7 @@ export class NodeUI extends BaseComponentPlus(
 
 			// this.UpdateState(true);
 			// this.UpdateState();
+			this.UpdateChildBoxOffsets();
 			if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 		this.lastHeight = height;
@@ -308,6 +354,7 @@ export class NodeUI extends BaseComponentPlus(
 			// this.UpdateState(true);
 			// this.UpdateState();
 			// setSelfHeight(selfHeight);
+			this.UpdateChildBoxOffsets();
 			this.SetState({selfHeight});
 			// if (onHeightOrPosChange) onHeightOrPosChange();
 		}
@@ -333,6 +380,48 @@ export class NodeUI extends BaseComponentPlus(
 			new NotifyNodeViewed({ nodeID: node.id }).RunOnServer();
 		}
 	} */
+
+	OnChildHeightOrPosChange_updateStateQueued = false;
+	OnChildHeightOrPosChange = ()=>{
+		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
+		if (this.OnChildHeightOrPosChange_updateStateQueued) return;
+		this.OnChildHeightOrPosChange_updateStateQueued = true;
+		requestAnimationFrame(()=>{
+			this.OnChildHeightOrPosChange_updateStateQueued = false;
+			if (!this.mounted) return;
+			this.UpdateChildBoxOffsets();
+		});
+	};
+	UpdateChildBoxOffsets(forceUpdate = false) {
+		const newState = {} as any;
+
+		if (this.rightColumn) {
+			const holderRect = VRect.FromLTWH(this.rightColumn.DOM.getBoundingClientRect());
+
+			const lastChildBoxOffsets = this.childBoxes.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
+				// not sure why this is needed... (bad sign!)
+				if (pair.value?.expandableBox?.DOM == null) {
+					console.warn(`Expandable box not found. (for: ${pair.key})`, pair.value, pair.value?.expandableBox, pair.value?.expandableBox?.DOM);
+					return null;
+				}
+				console.warn(`Found: (for: ${pair.key})`, pair.value, pair.value?.expandableBox, pair.value?.expandableBox?.DOM);
+
+				const childBox = pair.value?.expandableBox?.DOM;
+				if (childBox == null) return null; // if can't find child-node's box, don't draw line for it (can happen if dragging child-node)
+				//if (childBox.matches(".DragPreview")) return null; // don't draw line to node-box being dragged
+
+				let childBoxOffset = VRect.FromLTWH(childBox.getBoundingClientRect()).Position.Minus(holderRect.Position);
+				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");
+				childBoxOffset = childBoxOffset.Plus(new Vector2(0, childBox.getBoundingClientRect().height / 2));
+				return childBoxOffset;
+			});
+			newState.lastChildBoxOffsets = lastChildBoxOffsets;
+		}
+
+		const cancelIfStateSame = !forceUpdate;
+		const changedState = this.SetState(newState, undefined, cancelIfStateSame, true);
+		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
+	}
 
 	lastHeight = 0;
 	lastSelfHeight = 0;

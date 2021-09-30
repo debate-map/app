@@ -12,7 +12,7 @@ import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
 import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
-import {Squiggle} from "../NodeConnectorBackground.js";
+import {Squiggle} from "../ChildConnectorBackground.js";
 import {ExpandableBox} from "../ExpandableBox.js";
 import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 
@@ -23,7 +23,7 @@ type Props = {
 
 @WarnOfTransientObjectProps
 @Observer
-export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBoxOffset: 0, lineHolderHeight: 0, hovered: false, hovered_button: false}) {
+export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBoxOffset: null as number|n, lineHolderHeight: 0, hovered: false, hovered_button: false}) {
 	static ValidateProps(props: Props) {
 		const {node, nodeChildren} = props;
 		// ms only asserts in dev for now (and only as warning); causes error sometimes when cut+pasting otherwise (firebase doesn`t send DB updates atomically?)
@@ -35,6 +35,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	render() {
 		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
+		const innerBoxOffset_safe = innerBoxOffset ?? 0;
 
 		// const nodeView = GetNodeView(map.id, path) ?? new MapNodeView();
 		// const nodeView = GetNodeView(map.id, path, true);
@@ -86,7 +87,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 
 		return (
 			<>
-			<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{
+			{/*<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{
 				position: "absolute",
 				//right: "100%",
 				top: 0, bottom: 0, width: 30, // these aren't actually necessary, but make dev-tools rectangles a bit less confusing
@@ -99,21 +100,21 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						end={new Vector2(30, innerBoxOffset + (height / 2))} endControl_offset={new Vector2(-10, 0)} color={lineColor}/>}
 				{group == ChildGroup.relevance && isMultiPremiseArgument &&
 					<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
-			</div>
+			</div>*/}
 			<Row ml={30} className="clickThrough NodeChildHolderBox" style={E(
 				{position: "relative", alignItems: "flex-start"},
 				//! isMultiPremiseArgument && {alignSelf: "flex-end"},
 				//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
-				expanded && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
+				expanded && nodeChildrenToShow.length && innerBoxOffset != null && {opacity: 0, pointerEvents: "none"},
 			)}>
 				<Row className="clickThrough" style={E(
 					{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 				)}>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
 						ref={c=>this.expandableBox = c}
-						style={{marginTop: innerBoxOffset}}
+						style={{marginTop: innerBoxOffset_safe}}
 						padding="3px 5px 2px"
 						text={<span style={ES(
 							{position: "relative", fontSize: 13},
@@ -176,7 +177,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					<NodeChildHolder ref={c=>this.childHolder = c}
 						{...{map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
 						usesGenericExpandedField={false}
-						linkSpawnPoint={innerBoxOffset + (height / 2)}
+						linkSpawnPoint={innerBoxOffset_safe + (height / 2)}
 						onHeightOrDividePointChange={this.CheckForChanges}/>}
 			</Row>
 			</>

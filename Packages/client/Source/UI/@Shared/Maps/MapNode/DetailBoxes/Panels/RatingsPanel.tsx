@@ -45,15 +45,15 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 					//faIcon="chevron-down"
 					text={
 						!showOptionalRatings
-							? [<i className="fa fa-chevron-down" style={{marginRight: 5}}></i>, "Show optional ratings"] as any
-							: [<i className="fa fa-chevron-up" style={{marginRight: 5}}></i>, "Hide optional ratings"] as any
+							? <><i className="fa fa-chevron-down" style={{marginRight: 5}}></i>Show optional ratings</>
+							: <><i className="fa fa-chevron-up" style={{marginRight: 5}}></i>Hide optional ratings</>
 					}
 					style={{fontSize: 12}}
 					onClick={()=>RunInAction_Set(this, ()=>store.main.ratingUI.showOptionalRatings = !showOptionalRatings)}/>
 				{showOptionalRatings &&
 				<>
 					<Group mt={5} title="Rating 2: Level of research/knowledge">
-						<Text style={{fontSize: 12}}>What do you consider your level of research/knowledge on the subject to be?</Text>
+						<Text style={{fontSize: 12}}>What do you consider your level of research/knowledge on the subject?</Text>
 						<Row>
 							{/*["Negligible", "Low", "Fairly low", "Moderate", "Fairly high", "High", "Extensive"].map((label, index)=>{
 								return <CheckBox key={index} ml={index == 0 ? 0 : 5} value={false} text={label} style={{fontSize: 11}}
@@ -78,7 +78,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 						<Button ml={5} p="3px 7px" style={{fontSize: 11}} text="Submit"/>
 					}>
 						<Text style={{fontSize: 12, whiteSpace: "normal"}}>
-							Which levels of agreement expressed by other people do you find understandable given the arguments they may have for holding that opinion? (ie. responses which could be held without being overtly irrational)
+							Which levels of agreement expressed by other people do you find understandable given the arguments they may have for holding that opinion? (ie. responses which could be held without being plainly irrational)
 						</Text>
 						<Row mt={5}>
 							{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{

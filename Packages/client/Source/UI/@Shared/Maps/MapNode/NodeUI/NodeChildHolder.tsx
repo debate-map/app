@@ -3,7 +3,7 @@ import * as React from "react";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground.js";
+import {ChildBoxInfo, ChildConnectorBackground} from "UI/@Shared/Maps/MapNode/ChildConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
@@ -13,6 +13,8 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
+import {GetNodeColor} from "Store/db_ext/nodes.js";
+import chroma from "chroma-js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
@@ -21,7 +23,7 @@ type Props = {
 };
 const initialState = {
 	childrenWidthOverride: null as number|n,
-	oldChildBoxOffsets: null as {[key: number]: Vector2}|n,
+	lastChildBoxOffsets: null as {[key: number]: Vector2}|n,
 	placeholderRect: null as VRect|n,
 };
 
@@ -36,7 +38,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
 		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth, onHeightOrDividePointChange} = this.props;
-		let {childrenWidthOverride, oldChildBoxOffsets, placeholderRect} = this.state;
+		let {childrenWidthOverride, lastChildBoxOffsets, placeholderRect} = this.state;
 		childrenWidthOverride = (childrenWidthOverride ?? 0).KeepAtLeast(minWidth ?? 0);
 
 		const nodeView = GetNodeView(map.id, path);
@@ -156,6 +158,16 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			);
 		};
 
+		const childBoxInfos = [] as ChildBoxInfo[];
+		for (const [nodeID, offset] of Object.entries(lastChildBoxOffsets ?? {})) {
+			const node = nodeChildrenToShowHere.find(a=>a.id == nodeID);
+			childBoxInfos.push({
+				node,
+				offset: offset,
+				color: node ? GetNodeColor(node, "raw") : chroma("transparent"),
+			});
+		}
+
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		this.childBoxes = {};
 		return (
@@ -169,13 +181,13 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
 				//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 				// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
-				oldChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
+				lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 			)}>
-				{linkSpawnPoint > 0 && oldChildBoxOffsets &&
+				{linkSpawnPoint > 0 && lastChildBoxOffsets &&
 					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
-					<NodeConnectorBackground node={node} path={path} linkSpawnPoint={belowNodeUI ? new Vector2(-10, 0) : new Vector2(-30, linkSpawnPoint)} straightLines={belowNodeUI}
+					<ChildConnectorBackground node={node} path={path} linkSpawnPoint={belowNodeUI ? new Vector2(-10, 0) : new Vector2(-30, linkSpawnPoint)} straightLines={belowNodeUI}
 						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
-						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
+						childBoxInfos={childBoxInfos}/>}
 
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
 				{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
@@ -344,7 +356,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.Expanded && this.childHolder) {
 			const holderRect = VRect.FromLTWH(this.childHolder.DOM.getBoundingClientRect());
 
-			const oldChildBoxOffsets = this.childBoxes.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
+			const lastChildBoxOffsets = this.childBoxes.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
 				// let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
 				// let childBox = $(GetDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
 				// not sure why this is needed... (bad sign!)
@@ -360,7 +372,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				childBoxOffset = childBoxOffset.Plus(new Vector2(0, childBox.getBoundingClientRect().height / 2));
 				return childBoxOffset;
 			});
-			newState.oldChildBoxOffsets = oldChildBoxOffsets;
+			newState.lastChildBoxOffsets = lastChildBoxOffsets;
 		}
 
 		const cancelIfStateSame = !forceUpdate;
