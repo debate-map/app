@@ -259,7 +259,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
 		}, [combinedWithParentArgument, node.id, parent]);
-		const onTextHolderClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
+		const onTextCompClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
 			/* let pathToApplyTo = path;
 			// if collapsing subtree, and this node is premise of single-premise arg, start collapsing from parent (the argument node), so that its relevance args are collapsed as well
@@ -282,6 +282,23 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				hovered = false;
 				local_openPanel = null;
 			}
+			const onPanelButtonClick = (panel: string)=>{
+				if (useLocalPanelState) {
+					this.SetState({local_openPanel: panel, hoverPanel: null});
+					return;
+				}
+
+				RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
+					const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
+					if (nodeView_final.openPanel != panel) {
+						nodeView_final.VSet("openPanel", panel ?? DEL);
+					} else {
+						//delete nodeView_final.openPanel;
+						nodeView_final.openPanel = undefined;
+						this.SetState({hoverPanel: null});
+					}
+				});
+			};
 			return (
 				<>
 				<ExpandableBox ref={c=>DoNothing(dragInfo?.provided.innerRef(GetDOM(c) as any), this.root = c)}
@@ -311,30 +328,14 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							ref={c=>this.leftPanel = c}
 							usePortal={usePortalForDetailBoxes} nodeUI={this}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-							onPanelButtonClick={panel=>{
-								if (useLocalPanelState) {
-									this.SetState({local_openPanel: panel, hoverPanel: null});
-									return;
-								}
-
-								RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
-									const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
-									if (nodeView_final.openPanel != panel) {
-										nodeView_final.VSet("openPanel", panel ?? DEL);
-									} else {
-										//delete nodeView_final.openPanel;
-										nodeView_final.openPanel = undefined;
-										this.SetState({hoverPanel: null});
-									}
-								});
-							}}>
+							onPanelButtonClick={onPanelButtonClick}>
 							{/* fixes click-gap */}
 							{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 						</MapNodeUI_LeftBox>}
 						{/* fixes click-gap */}
 						{leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 					</>}
-					onTextHolderClick={onTextHolderClick}
+					//onTextHolderClick={onTextHolderClick}
 					text={<>
 						{!GADDemo && (()=>{
 							// include this in "text" prop, because that makes the sizing exclude the +/- button
@@ -352,49 +353,35 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						})()}
 						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
 							ref={c=>this.titlePanel = c}
+							//onClick={onTextHolderClick} // not needed; TitlePanel already handles double-clicks
 							style={E(
 								{padding: GetPaddingForNode(node/*, isSubnode*/)},
 								GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/}
 							)}/>
-						{subPanelShow && <SubPanel node={node}/>}
-						<Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
-							{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
-							<div style={{
-								flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-								//border: "1px solid rgba(255,255,255,.1)",
-								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-								//borderRadius: "0 0 0 5px",
-								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0",
-							}}>
-								{node.type == MapNodeType.claim ? "Agreement" : <InfoButton text="TODO"/>}
-							</div>}
-							{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
-							<div style={{
-								flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-								//border: "1px solid rgba(255,255,255,.1)",
-								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 1px",
-							}}>
-								{node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? "Relevance" : <InfoButton text="TODO"/>}
-							</div>}
-							<div style={{
-								flex: 50, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-								//border: "1px solid rgba(255,255,255,.1)",
-								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 1px",
-							}}>
-								Phrasings (3)
-							</div>
-							<div style={{
-								width: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-								//border: "1px solid rgba(255,255,255,.1)",
-								//boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-								//borderRadius: "0 0 5px 0",
-								border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 1px",
-							}}>
-								...
-							</div>
-						</Row>
+						{subPanelShow &&
+						<SubPanel node={node} /*onClick={onTextCompClick}*//>}
+						{(()=>{
+							const baseButtonStyle = {
+								display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+								border: "solid rgba(0,0,0,.5)",
+							};
+							return <Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
+								{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
+								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 0"}} onClick={node.type == MapNodeType.claim ? ()=>onPanelButtonClick("truth") : ()=>{}}>
+									{node.type == MapNodeType.claim ? "Agreement" : <InfoButton text="TODO"/>}
+								</div>}
+								{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
+								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 1px"}} onClick={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? ()=>onPanelButtonClick("relevance") : ()=>{}}>
+									{node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? "Relevance" : <InfoButton text="TODO"/>}
+								</div>}
+								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 1px"}} onClick={()=>onPanelButtonClick("phrasings")}>
+									Phrasings (3)
+								</div>
+								<div style={{...baseButtonStyle, width: 40, borderWidth: "1px 0 0 1px"}}>
+									...
+								</div>
+							</Row>
+						})()}
 						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</>}
 					{...E(

@@ -39,7 +39,7 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 						* Standard: Variants meant to "compete" as the node's main display text. These should strive to be straightforward, concise, and neutral (ie. avoiding rhetoric).
 						* Simple: Simplified versions of the node's title, for easier comprehension. (at the possible loss of some precision, naturally)
 						* Technical: Variants with the highest precision, but with greater use of specialized jargon. (which may cause frequent definition-lookups for laypeople)
-						* Humor: Variants which use humorous language to explain a concept. (only allowed for "governed" nodes, for )
+						* Humor: Variants which use humorous language to explain a concept. (only allowed for "governed" nodes)
 						* Web: Variants which are taken directly from online sources; these provide examples of how the given claim/argument has been expressed "in the wild".
 					`.AsMultiline(0)}/>
 					<Button ml="auto" text="Add phrasing" enabled={CanAddPhrasing(MeID(), accessPolicy.id)} title="Add phrasing-variant for this node, of the selected type." onClick={()=>{

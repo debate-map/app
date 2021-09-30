@@ -1,13 +1,13 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID} from "web-vcore";
+import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed} from "web-vcore";
 import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "dm_common";
 import {SourcesUI} from "./SourcesUI.js";
 
-export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
+export class SubPanel extends BaseComponent<{node: MapNodeL2} & HTMLProps_Fixed<"div">, {}> {
 	render() {
-		const {node} = this.props;
+		const {node, ...rest} = this.props;
 		return (
-			<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
+			<div {...rest} style={{position: "relative", margin: "5px -5px -5px -5px", padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>

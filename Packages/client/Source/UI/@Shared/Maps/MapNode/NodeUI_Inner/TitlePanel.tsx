@@ -2,12 +2,12 @@ import {Assert, Clone, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import _ from "lodash";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Pre, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey} from "dm_common";
-import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
+import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {NodeMathUI} from "../NodeMathUI.js";
@@ -57,7 +57,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @WarnOfTransientObjectProps
 @Observer
 export class TitlePanel extends BaseComponentPlus(
-	{} as {parent: NodeUI_Inner, map: Map|n, node: MapNodeL2, path: string, indexInNodeList: number, style},
+	{} as {parent: NodeUI_Inner, map: Map|n, node: MapNodeL2, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
 	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{
@@ -90,7 +90,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 	render() {
 		// const { map, parent, node, nodeView, path, displayText, equationNumber, style, ...rest } = this.props;
-		const {map, parent, node, path, style, ...rest} = this.props;
+		const {map, parent, node, path, style, onClick, ...rest} = this.props;
 		const {editing, edit_newTitle, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
@@ -155,7 +155,10 @@ export class TitlePanel extends BaseComponentPlus(
 					},
 					style,
 				)}
-				onClick={e=>void IsDoubleClick(e) && this.OnDoubleClick()}
+				onClick={e=>{
+					if (IsDoubleClick(e)) this.OnDoubleClick();
+					if (onClick) return onClick(e);
+				}}
 			>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
