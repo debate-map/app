@@ -1,20 +1,8 @@
-import {Lerp, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {store} from "Store";
-import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
-import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings} from "dm_common";
-import {MarkHandled} from "Utils/UI/General.js";
-import React, {createRef, useMemo} from "react";
-import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
-import {PolicyPicker} from "../../../../../../UI/Database/Policies/PolicyPicker.js";
-import {UPlot} from "web-vcore/nm/react-uplot.js";
-import uPlot from "web-vcore/nm/uplot.js";
-import useResizeObserver from "use-resize-observer";
-import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
+import {GetRatingTypeInfo, MapNodeL3, NodeRatingType} from "dm_common";
+import React from "react";
+import {Observer} from "web-vcore";
+import {Button, CheckBox, Column, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 
 type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};
 
@@ -28,7 +16,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 			<>
 				<Group title="Rating 1: Your response (ie. level of agreement)">
 					<Row>
-						{Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
+						{/*Object.entries(ratingTypeInfo.values).map(([value, label], index)=>{
 							return <CheckBox key={value} ml={index == 0 ? 0 : 5} value={false} text={label} checkboxProps={{type: "radio"}} style={{fontSize: 11}}
 								ref={checkBox=>{
 									const el = checkBox?.DOM.querySelector("input");
@@ -37,7 +25,14 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 										el.style.margin = "0px";
 									}
 								}}/>;
-						})}
+						})*/}
+						<Select displayType="button bar" options={Object.values(ratingTypeInfo.values)}
+							style={{fontSize: 12, display: "flex", width: "100%"}}
+							childStyle={{display: "inline-flex", flex: 1, minWidth: 0, /*padding: "5px 0",*/ whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"}}
+							value={null}
+							onChange={val=>{
+								// todo
+							}}/>
 					</Row>
 				</Group>
 				<Group mt={5} title="Rating 2: Level of research/knowledge (optional)">

@@ -43,7 +43,9 @@ export const baseRatingTypeInfo = {
 	[NodeRatingType.truth]: new RatingType_Info({
 		displayText: "Agreement",
 		//values: {0: "Thoroughly false", 25: "Mostly false", 50: "Somewhat true", 75: "Mostly true", 100: "Thoroughly true"},
-		values: {0: "Strongly disagree", 20: "Disagree", 35: "Somewhat disagree", 50: "Neutral", 65: "Somewhat agree", 80: "Agree", 100: "Strongly agree"},
+		//values: {0: "Strongly disagree", 20: "Disagree", 35: "Somewhat disagree", 50: "Neutral", 65: "Somewhat agree", 80: "Agree", 100: "Strongly agree"},
+		values: {0: "Strongly Disagree", 20: "Disagree", 35: "Somewhat Disagree", 50: "Neutral", 65: "Somewhat Agree", 80: "Agree", 100: "Strongly Agree"},
+		//values: {0: "Disagree (strongly)", 20: "Disagree", 35: "Disagree (somewhat)", 50: "Neutral", 65: "Agree (somewhat)", 80: "Agree", 100: "Agree (strongly)"},
 	}),
 	[NodeRatingType.relevance]: new RatingType_Info({
 		displayText: "Relevance",
