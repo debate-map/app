@@ -19,6 +19,7 @@ import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
 	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
 
 @WarnOfTransientObjectProps
@@ -33,7 +34,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	}
 	lineHolder: HTMLDivElement|n;
 	render() {
-		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride} = this.props;
+		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 		const innerBoxOffset_safe = innerBoxOffset ?? 0;
 
@@ -115,8 +116,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
 						ref={c=>{
 							this.expandableBox = c;
-							console.log("Ref called in expandable box, for type:", group);
-							//if (expandableBox_ref)
+							if (ref_expandableBox) ref_expandableBox(c);
 						}}
 						style={{marginTop: innerBoxOffset_safe}}
 						padding="3px 5px 2px"
