@@ -9,18 +9,21 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 		if (childCount == 0) return <div/>;
 
 		return (
-			<div style={E(
-				{
-					margin: "auto 0 auto 9px", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.8)",
-					// filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
-					textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
-				},
-				/* showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
-				showBelowMessage && {paddingBottom: 13}, */
-				limitBarPos == LimitBarPos.above && {paddingTop: ChildLimitBar.HEIGHT},
-				{paddingBottom: 0 + /* (showBelowMessage ? 13 : 0) +*/ (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
-			)}>
-				{childCount}
+			// this zero-width wrapper keeps the component from bumping the node-child-holder-boxes to the right
+			<div style={{position: "absolute", left: "100%", top: 0, bottom: 0, display: "flex"}}>
+				<div style={E(
+					{
+						margin: "auto 0 auto 9px", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.8)",
+						// filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
+						textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
+					},
+					/* showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
+					showBelowMessage && {paddingBottom: 13}, */
+					limitBarPos == LimitBarPos.above && {paddingTop: ChildLimitBar.HEIGHT},
+					{paddingBottom: 0 + /* (showBelowMessage ? 13 : 0) +*/ (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
+				)}>
+					{childCount}
+				</div>
 			</div>
 		);
 	}

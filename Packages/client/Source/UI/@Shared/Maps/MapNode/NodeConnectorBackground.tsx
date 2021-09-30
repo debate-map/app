@@ -94,24 +94,21 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	}
 }
 
-type Position = [number, number];
-export class Squiggle extends BaseComponent<{start: Position, startControl_offset: Position, end: Position, endControl_offset: Position, color: chroma.Color, usePercents?: boolean, style?}, {}> {
+export class Squiggle extends BaseComponent<{start: Vector2, startControl_offset: Vector2, end: Vector2, endControl_offset: Vector2, color: chroma.Color, usePercents?: boolean, style?}, {}> {
 	render() {
 		const {start, startControl_offset, end, endControl_offset, color, usePercents, style} = this.props;
 
-		const startPos = new Vector2(start[0], start[1]);
-		let startControl = startPos.Plus(startControl_offset[0], startControl_offset[1]);
-		const endPos = new Vector2(end[0], end[1]);
-		let endControl = endPos.Plus(endControl_offset[0], endControl_offset[1]);
+		let startControl = start.Plus(startControl_offset);
+		let endControl = end.Plus(endControl_offset);
 
-		const middleControl = startPos.Plus(endPos).Times(0.5); // average start-and-end to get middle-control
+		const middleControl = start.Plus(end).Times(0.5); // average start-and-end to get middle-control
 		startControl = startControl.Plus(middleControl).Times(0.5); // average with middle-control
 		endControl = endControl.Plus(middleControl).Times(0.5); // average with middle-control
 
 		return (
 			<svg viewBox={usePercents ? "0 0 100 100" : null as any} preserveAspectRatio="none" style={E({position: "absolute", overflow: "visible", zIndex: -1}, style)}>
 				<path style={ES({stroke: color.css(), strokeWidth: 3, fill: "none"}, usePercents && {vectorEffect: "non-scaling-stroke"})}
-					d={`M${startPos.x},${startPos.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${endPos.x},${endPos.y}`}/>
+					d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>
 			</svg>
 		);
 	}

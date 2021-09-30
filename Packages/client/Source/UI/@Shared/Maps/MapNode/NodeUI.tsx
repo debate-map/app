@@ -175,12 +175,12 @@ export class NodeUI extends BaseComponentPlus(
 
 		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
-				widthOfNode={widthOverride || width}
+				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg) && //boxExpanded &&
 			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
-				widthOfNode={widthOverride || width}
+				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
@@ -236,7 +236,7 @@ export class NodeUI extends BaseComponentPlus(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
 				style,
 			)}>
-				<div className="innerBoxAndSuchHolder clickThrough" style={ES(
+				<Column className="innerBoxColumn clickThrough" style={ES(
 					{position: "relative"},
 					/* useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset}, */
@@ -244,25 +244,25 @@ export class NodeUI extends BaseComponentPlus(
 					{marginTop: boxExpanded && !isMultiPremiseArgument ? (dividePoint! - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
 				)}>
 					{limitBar_above && children}
-					<Column className="innerBoxHolder clickThrough" style={{position: "relative"}}>
-						{/*node.current.accessLevel != AccessLevel.basic &&
-						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
-							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
-						</div>*/}
-						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
-					</Column>
-					{!limitBar_above && children}
-				</div>
 
-				{nodeChildrenToShow == emptyArray_forLoading &&
-					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
-					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
-				{!boxExpanded &&
-					<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
-				{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&
-					<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
-				<Column className="clickThrough">
+					{/*node.current.accessLevel != AccessLevel.basic &&
+					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
+						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
+					</div>*/}
+					<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
+					{/* these are for components shown just to the right of the NodeUI_Inner box */}
+					{nodeChildrenToShow == emptyArray_forLoading &&
+						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
+					{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
+						<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
+					{!boxExpanded &&
+						<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
+					{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&
+						<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
+
+					{!limitBar_above && children}
+				</Column>
+				<Column className="rightColumn clickThrough">
 					{nodeChildHolderBox_truth}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
 					{nodeChildHolderBox_relevance}

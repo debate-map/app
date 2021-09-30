@@ -1,5 +1,5 @@
 import chroma from "chroma-js";
-import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-vextensions.js";
+import {AssertWarn, emptyArray, emptyArray_forLoading, E, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
@@ -18,7 +18,7 @@ import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	group: ChildGroup, widthOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 
 @WarnOfTransientObjectProps
@@ -33,7 +33,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	}
 	lineHolder: HTMLDivElement|n;
 	render() {
-		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, widthOverride} = this.props;
+		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 
 		// const nodeView = GetNodeView(map.id, path) ?? new MapNodeView();
@@ -59,7 +59,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		// let lineColor = GetNodeColor(node, "raw");
 		const lineColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3, "raw");
 
-		const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
+		//const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
 		// let expandKey = type == ChildGroup.truth ? "expanded_truth" : "expanded_relevance";
 		const childGroupStr = ChildGroup[group].toLowerCase();
 		const expandKey = `expanded_${childGroupStr}`;
@@ -85,7 +85,22 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		});
 
 		return (
-			<Row ml={30} className="clickThrough" style={E(
+			<>
+			<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{
+				position: "absolute",
+				//right: "100%",
+				top: 0, bottom: 0, width: 30, // these aren't actually necessary, but make dev-tools rectangles a bit less confusing
+			}}>
+				{group == ChildGroup.truth &&
+					<Squiggle start={new Vector2(0, heightOfNode / 2)} startControl_offset={new Vector2(10, 0)}
+						end={new Vector2(30, innerBoxOffset + (height / 2))} endControl_offset={new Vector2(-10, 0)} color={lineColor}/>}
+				{group == ChildGroup.relevance && !isMultiPremiseArgument &&
+					<Squiggle start={new Vector2(0, heightOfNode / 2)} startControl_offset={new Vector2(10, 0)}
+						end={new Vector2(30, innerBoxOffset + (height / 2))} endControl_offset={new Vector2(-10, 0)} color={lineColor}/>}
+				{group == ChildGroup.relevance && isMultiPremiseArgument &&
+					<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
+			</div>
+			<Row ml={30} className="clickThrough NodeChildHolderBox" style={E(
 				{position: "relative", alignItems: "flex-start"},
 				//! isMultiPremiseArgument && {alignSelf: "flex-end"},
 				//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
@@ -94,18 +109,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				expanded && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
 			)}>
 				<Row className="clickThrough" style={E(
-					{/* position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
+					{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 				)}>
-					<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
-						{group == ChildGroup.truth &&
-							<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
-								end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
-						{group == ChildGroup.relevance && !isMultiPremiseArgument &&
-							<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
-								end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
-						{group == ChildGroup.relevance && isMultiPremiseArgument &&
-							<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
-					</div>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
 						ref={c=>this.expandableBox = c}
 						style={{marginTop: innerBoxOffset}}
@@ -174,6 +179,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						linkSpawnPoint={innerBoxOffset + (height / 2)}
 						onHeightOrDividePointChange={this.CheckForChanges}/>}
 			</Row>
+			</>
 		);
 	}
 

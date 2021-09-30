@@ -159,7 +159,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		this.childBoxes = {};
 		return (
-			<Column ref={c=>this.childHolder = c} className="childHolder clickThrough" style={E(
+			<Column ref={c=>this.childHolder = c} className="NodeChildHolder clickThrough" style={E(
 				{
 					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
 					// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
