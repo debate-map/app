@@ -19,7 +19,7 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 		const commandRuns = GetCommandRuns(commandTypesToShow.map(a=>a.name), undefined, store.main.social.showAll).OrderByDescending(a=>a.runTime);
 
 		return (
-			<Column>
+			<Column style={{height: "100%"}}>
 				<Row center mb={5}>
 					<Text>Recent changes:</Text>
 					<CheckBox ml="auto" text="Add to stream" enabled={userHidden != null} value={userHidden?.addToStream ?? false} onChange={val=>{

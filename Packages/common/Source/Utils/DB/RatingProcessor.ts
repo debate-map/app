@@ -76,7 +76,6 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 	return result;
 } */
 
-// export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
 export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], useAverageForMissing = false): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
@@ -118,8 +117,6 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL
 		}
 	}
 	return result;
-	/* });
-	return result; */
 });
 
 /* export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
