@@ -113,6 +113,10 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 				!usePortal && {
 					left: panelsPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
 					width: width ?? "100%",
+					//boxShadow: "rgba(255,255,255,.3) 0px 3px 3px",
+					//filter: "drop-shadow(rgba(255,255,255,.3) 0px 3px 3px)",
+					//filter: "drop-shadow(rgba(0,0,0,1) 0px 12px 12px)",
+					filter: "drop-shadow(rgba(0,0,0,1) 0px 10px 10px)",
 				},
 				usePortal && {
 					display: "none", // wait for UseEffect func to align position and make visible

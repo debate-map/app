@@ -60,11 +60,12 @@ export const baseRatingTypeInfo = {
 	[NodeRatingType.relevance]: new RatingType_Info({
 		displayText: "Relevance",
 		//valueRanges: GenerateValRangesFromLabels(["Completely Irrelevant", "Slightly Relevant", "Moderately Relevant", "Highly Relevant", "Extremely Relevant"]),
-		valueRanges: GenerateValRangesFromLabels(["Completely Irrelevant", "Slightly Relevant", "Somewhat Relevant", "Relevant", "Substantially Relevant", "Highly Relevant", "Extremely Relevant"]),
+		valueRanges: GenerateValRangesFromLabels(["Not Relevant", "Slightly Relevant", "Somewhat Relevant", "Relevant", "Substantially Relevant", "Highly Relevant", "Extremely Relevant"]),
 	}),
 	[NodeRatingType.impact]: new RatingType_Info({
 		displayText: "Impact",
-		valueRanges: GenerateValRangesFromLabels(["Thoroughly False", "Mostly False", "Somewhat True", "Mostly True", "Game-Changer"]),
+		//valueRanges: GenerateValRangesFromLabels(["Thoroughly False", "Mostly False", "Somewhat True", "Mostly True", "Game-Changer"]),
+		valueRanges: [],
 	}),
 };
 

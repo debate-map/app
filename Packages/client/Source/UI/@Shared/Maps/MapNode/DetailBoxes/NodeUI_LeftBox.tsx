@@ -21,6 +21,7 @@ type Props = {
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 	usePortal?: boolean, nodeUI?: NodeUI_Inner,
+	onHoverChange?: (hovered: boolean)=>any,
 };
 @Observer
 export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} as Props, {}) {
@@ -36,6 +37,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,
 			usePortal, nodeUI,
+			onHoverChange,
 		} = this.props;
 		const nodeView = GetNodeView(map?.id, path);
 		const openPanel = local_openPanel || nodeView?.openPanel;
@@ -99,22 +101,32 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 
 		let uiRoot: HTMLDivElement;
 		return MaybeCreatePortal(
-			<div ref={c=>uiRoot = c!} className="NodeUI_LeftBox" style={E(
-				{flexDirection: "column", whiteSpace: "nowrap", width: 110, zIndex: asHover ? 6 : 5},
-				!inList && panelsPosition == "left" && {position: "absolute", right: "calc(100% + 1px)"},
-				!inList && panelsPosition == "below" && {
-					position: "absolute", top: "calc(100% + 1px)", width: NodeUI_LeftBox_width,
-					zIndex: zIndexes.overNavBarDropdowns,
-				},
-				!usePortal && {
-					display: "flex",
-				},
-				usePortal && {
-					display: "none", // wait for UseEffect func to align position and make visible
-					filter: GetMapUICSSFilter(),
-				},
-				style,
-			)}>
+			<div ref={c=>uiRoot = c!} className="NodeUI_LeftBox"
+				onMouseEnter={e=>onHoverChange?.(true)}
+				onMouseLeave={e=>onHoverChange?.(false)}
+				style={E(
+					{flexDirection: "column", whiteSpace: "nowrap", width: 110, zIndex: asHover ? 6 : 5},
+					!inList && panelsPosition == "left" && {
+						position: "absolute",
+						//right: "calc(100% + 1px)",
+						right: "100%", paddingRight: 1,
+					},
+					!inList && panelsPosition == "below" && {
+						position: "absolute", width: NodeUI_LeftBox_width,
+						//top: "calc(100% + 1px)",
+						top: "100%", paddingTop: 1,
+						zIndex: zIndexes.overNavBarDropdowns,
+					},
+					!usePortal && {
+						display: "flex",
+					},
+					usePortal && {
+						display: "none", // wait for UseEffect func to align position and make visible
+						filter: GetMapUICSSFilter(),
+					},
+					style,
+				)}
+			>
 				{children}
 				<div style={{position: "relative", background: backgroundColor.alpha(0.95).css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 					{ratingTypes.map((ratingInfo, index)=>{
@@ -137,7 +149,8 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 									style={E(
 										// font-size adjustments to keep rating-type labels from going past edge
 										ratingInfo.type == NodeRatingType.significance && {fontSize: 12},
-										ratingInfo.type == NodeRatingType.relevance && {fontSize: 13},
+										//ratingInfo.type == NodeRatingType.relevance && {fontSize: 13},
+										{fontSize: 13},
 										index == 0 && {marginTop: 0, borderRadius: "5px 5px 0 0"},
 									)}>
 								<Span ml={5} style={{float: "right"}}>

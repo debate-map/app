@@ -21,6 +21,7 @@ import React from "react";
 
 @Observer
 export class NavBar_GAD extends BaseComponentPlus({}, {}) {
+	//loadingUI = ()=>null; // UI looks bad when nav-bar shows loading text (size changes)
 	render() {
 		const {topRightOpenPanel} = store.main;
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later

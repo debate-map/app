@@ -16,7 +16,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, ES, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction} from "web-vcore";
+import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, ES, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction, RunInAction_Set} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
@@ -62,11 +62,16 @@ type Props = {
 	};
 }) */
 
+export type PanelOpenSource = "toolbar" | "left-panel";
+
 // @ExpensiveComponent
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
 	{panelsPosition: "left"} as Props,
-	{hovered: false, hoverPanel: null as string|n, hoverTermID: null as string|n, local_selected: false as boolean|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0},
+	{
+		hovered: false, moreButtonHovered: false, leftPanelHovered: false, openPanelSource: null as PanelOpenSource|n,
+		hoverPanel: null as string|n, hoverTermID: null as string|n, local_selected: false as boolean|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0,
+	},
 ) {
 	root: ExpandableBox|n;
 	titlePanel: TitlePanel|n;
@@ -102,7 +107,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 	render() {
 		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
-		let {hovered, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
+		let {hovered, moreButtonHovered, leftPanelHovered, openPanelSource, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
 		// ==========
@@ -203,10 +208,11 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		const nodeReversed = nodeForm == ClaimForm.negation;
 
-		const leftPanelShow = nodeView?.selected || hovered || local_selected;
+		const selected = nodeView?.selected || local_selected || false;
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
+		const leftPanelShow = ((selected || hovered) && store.main.maps.nodeLeftBoxEnabled) || moreButtonHovered || leftPanelHovered || (selected && panelToShow != null && openPanelSource == "left-panel");
 		const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
-		const bottomPanelShow = leftPanelShow && panelToShow;
+		const bottomPanelShow = (selected || hovered) && panelToShow;
 		let expanded = nodeView?.expanded ?? false;
 
 		// const parentNodeView = GetNodeView(map.id, parentPath);
@@ -282,7 +288,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				hovered = false;
 				local_openPanel = null;
 			}
-			const onPanelButtonClick = (panel: string)=>{
+			const onPanelButtonClick = (panel: string, source: PanelOpenSource)=>{
+				this.SetState({openPanelSource: source});
+				
 				if (useLocalPanelState) {
 					this.SetState({local_openPanel: panel, hoverPanel: null});
 					return;
@@ -328,12 +336,14 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							ref={c=>this.leftPanel = c}
 							usePortal={usePortalForDetailBoxes} nodeUI={this}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-							onPanelButtonClick={onPanelButtonClick}>
+							onPanelButtonClick={panel=>onPanelButtonClick(panel, "left-panel")}
+							onHoverChange={hovered=>this.SetState({leftPanelHovered: hovered})}
+						>
 							{/* fixes click-gap */}
 							{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 						</MapNodeUI_LeftBox>}
 						{/* fixes click-gap */}
-						{leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
+						{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
 					</>}
 					//onTextHolderClick={onTextHolderClick}
 					text={<>
@@ -360,7 +370,16 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							)}/>
 						{subPanelShow &&
 						<SubPanel node={node} /*onClick={onTextCompClick}*//>}
-						<ToolBar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={onPanelButtonClick}/>
+						<ToolBar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
+							leftPanelShow={leftPanelShow}
+							onMoreClick={()=>{
+								//onClick();
+								RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
+							}}
+							onMoreHoverChange={hovered=>{
+								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
+								this.SetState({moreButtonHovered: hovered});
+							}}/>
 						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</>}
 					{...E(
@@ -423,18 +442,22 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	definitionsPanel: DefinitionsPanel;
 }
 
-class ToolBar extends BaseComponent<{backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any} & Props, {}> {
+class ToolBar extends BaseComponent<{
+	backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
+	onMoreClick?: (e: any)=>any, onMoreHoverChange?: (hovered: boolean)=>any,
+	leftPanelShow: boolean,
+} & Props, {}> {
 	render() {
-		let {node, path, backgroundColor, panelToShow, onPanelButtonClick} = this.props;
+		let {node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const nodeForm = GetNodeForm(node, path);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		
-		const sharedProps = {panelToShow, onPanelButtonClick};
+		const sharedProps = {panelToShow, onPanelButtonClick, leftPanelShow};
 		return (
 			<Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
-				<ToolBarButton {...sharedProps} text="<<" first={true}/>
+				<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>
 				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
 				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
 					enabled={node.type == MapNodeType.claim} disabledInfo="TODO"/>}
@@ -446,10 +469,16 @@ class ToolBar extends BaseComponent<{backgroundColor: Color, panelToShow?: strin
 		);
 	}
 }
-class ToolBarButton extends BaseComponent<{text: string, enabled?: boolean, disabledInfo?: string, panel?: string, first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any}, {}> {
+class ToolBarButton extends BaseComponent<{
+	text: string, enabled?: boolean, disabledInfo?: string, panel?: string,
+	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
+	onClick?: (e: any)=>any, onHoverChange?: (hovered: boolean)=>any,
+	leftPanelShow: boolean,
+}, {}> {
 	render() {
-		let {text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick} = this.props;
+		let {text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
 		let [hovered, setHovered] = useState(false);
+		let highlight = panel && panelToShow == panel;
 
 		let icon: string|n;
 		if (text == "<<") {
@@ -457,13 +486,21 @@ class ToolBarButton extends BaseComponent<{text: string, enabled?: boolean, disa
 			//icon = "dots-vertical";
 			icon = "transfer-left";
 			text = "";
+			highlight = highlight || leftPanelShow;
 		}
 		
-		const highlight = panel && panelToShow == panel;
 		return (
 			<div
-				onMouseEnter={()=>{ if (enabled) setHovered(true); }}
-				onMouseLeave={()=>{ if (enabled) setHovered(false); }}
+				onMouseEnter={()=>{
+					if (!enabled) return;
+					setHovered(true);
+					onHoverChange?.(true);
+				}}
+				onMouseLeave={()=>{
+					if (!enabled) return;
+					setHovered(false);
+					onHoverChange?.(false);
+				}}
 				className={icon ? `mdi mdi-icon mdi-${icon}` : undefined}
 				style={ES(
 					{
@@ -476,8 +513,9 @@ class ToolBarButton extends BaseComponent<{text: string, enabled?: boolean, disa
 					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
 					icon && {width: 40, fontSize: 16},
 				)}
-				onClick={()=>{
+				onClick={e=>{
 					if (!enabled) return;
+					if (onClick) onClick(e);
 					if (panel) {
 						onPanelButtonClick(panel);
 					}

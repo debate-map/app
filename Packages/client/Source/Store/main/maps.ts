@@ -33,6 +33,7 @@ export class MapsState {
 	@O initialChildLimit = 5;
 	@O showReasonScoreValues = false;
 	@O weighting = WeightingType.votes;
+	@O nodeLeftBoxEnabled = false;
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
