@@ -1,7 +1,9 @@
-import {GetRatingTypeInfo, MapNodeL3, NodeRatingType} from "dm_common";
+import {DeleteNodeRating, GetAccessPolicy, GetRatings, GetRatingTypeInfo, GetSystemAccessPolicyID, MapNodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, systemPolicy_publicUngoverned_name, TransformRatingForContext} from "dm_common";
 import React, {useState} from "react";
 import {store} from "Store";
-import {Observer, RunInAction_Set} from "web-vcore";
+import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
+import {ES, Observer, RunInAction_Set, Slider} from "web-vcore";
+import {ToInt} from "web-vcore/nm/js-vextensions";
 import {Button, CheckBox, Column, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 
@@ -10,24 +12,78 @@ type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRating
 @Observer
 export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
 	render() {
-		const {ratingType, asNodeUIOverlay} = this.props;
+		const {node, ratingType, asNodeUIOverlay} = this.props;
 		if (asNodeUIOverlay) return null;
+		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
+		const systemPolicy_publicGoverned_id = GetSystemAccessPolicyID(systemPolicy_publicGoverned_name);
+
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
+		const ratings = GetRatings(node.id, ratingType);
+		const userID = MeID();
+		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
+		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
+		const myRating_accessPolicy = GetAccessPolicy(myRating_raw?.accessPolicy);
 		
 		//const [showOptionalRatings, setExpanded] = useState(false);
 		const showOptionalRatings = store.main.ratingUI.showOptionalRatings;
 
+		function SetRating(newDisplayValue: number, accessPolicyID?: string) {
+			let newRating_xValue_final = newDisplayValue;
+			newRating_xValue_final = TransformRatingForContext(newRating_xValue_final, reverseRatings);
+			const newRating = new NodeRating({
+				accessPolicy: accessPolicyID ?? systemPolicy_publicGoverned_id,
+				node: node.id,
+				type: ratingType,
+				value: newRating_xValue_final,
+			});
+			new SetNodeRating({rating: newRating}).RunOnServer();
+		}
+
 		return (
 			<>
 				<Row>
-					<Select displayType="button bar" options={Object.values(ratingTypeInfo.values)}
+					<Select displayType="button bar" options={ratingTypeInfo.valueRanges.map(range=>({name: range.label, value: range.center}))}
 						style={{fontSize: 12, display: "flex", width: "100%"}}
-						childStyle={{display: "inline-flex", flex: 1, minWidth: 0, /*padding: "5px 0",*/ whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"}}
-						value={null}
+						childStyle={index=>{
+							const valueRange = ratingTypeInfo.valueRanges[index];
+							return ES(
+								{display: "inline-flex", /*flex: 1,*/ minWidth: 0, /*padding: "5px 0",*/ whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"},
+								//(index == 0 || index == ratingTypeInfo.valueRanges.length - 1) && {flex:}
+								{flex: `0 0 ${valueRange.max - valueRange.min}%`}
+							);
+						}}
+						value={myRating_displayVal}
 						onChange={val=>{
-							// todo
+							SetRating(val);
 						}}/>
 				</Row>
+				{myRating_raw != null && myRating_displayVal != null && myRating_accessPolicy != null &&
+				<>
+					<Row>
+						<Slider min={0} max={100} value={myRating_displayVal} onChange={val=>{
+							SetRating(val);
+						}}/>
+					</Row>
+					<Row center>
+						<Text mr={5}>Your rating: {myRating_displayVal}</Text>
+						<Button mdIcon="delete" title="Delete your rating." onClick={()=>{
+							new DeleteNodeRating({id: myRating_raw.id}).RunOnServer();
+						}}/>
+						<Text ml={10} mr={5}>Access-policy:</Text>
+						<PolicyPicker containerStyle={{flex: null}}
+							value={myRating_raw.accessPolicy}
+							onChange={policyID=>{
+								SetRating(myRating_displayVal, policyID);
+							}}
+						>
+							<Button text={
+								//`${myRating_accessPolicy.name} (id: ${myRating_accessPolicy.id})`
+								`${myRating_accessPolicy.name} [${myRating_accessPolicy.id.slice(0, 2)}]`
+								//myRating_accessPolicy.name
+							} style={{padding: "3px 10px"}}/>
+						</PolicyPicker>
+					</Row>
+				</>}
 				{/*<Button mt={5}
 					p="3px 10px"
 					//faIcon="chevron-down"

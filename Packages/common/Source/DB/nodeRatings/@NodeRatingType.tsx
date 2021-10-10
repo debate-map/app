@@ -1,4 +1,4 @@
-import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema, GetValues, ToInt, IsInt} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node.js";
 import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode.js";
@@ -19,6 +19,16 @@ export function PropNameToTitle(propName: NodeRatingType) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
 }
 
+export class ValueRange {
+	constructor(data: Partial<ValueRange>) {
+		Object.assign(this, data);
+	}
+	min: number;
+	max: number;
+	center: number; // if range is not even, round toward the global mid-point (ie. 50)
+	label: string;
+}
+
 export class RatingType_Info {
 	constructor(initialData?: Partial<RatingType_Info>) {
 		CE(this).VSet(initialData);
@@ -29,34 +39,76 @@ export class RatingType_Info {
 	labels: number[];
 	values: number[];
 	tickInterval: number;*/
-	values: {[key: number]: string};
+	valueRanges: ValueRange[];
 }
 export const baseRatingTypeInfo = {
 	[NodeRatingType.significance]: new RatingType_Info({
 		displayText: "Significance",
-		values: {0: "Pointless", 25: "Unimportant", 50: "Somewhat Important", 75: "Important", 100: "Extremely Important"},
+		valueRanges: GenerateValRangesFromLabels(["Pointless", "Unimportant", "Somewhat Important", "Important", "Extremely Important"]),
 	}),
 	[NodeRatingType.neutrality]: new RatingType_Info({
 		displayText: "Neutrality",
-		values: {0: "Unbiased", 25: "Slightly Biased", 50: "Moderately Biased", 75: "Highly Biased", 100: "Extremely Biased"},
+		valueRanges: GenerateValRangesFromLabels(["Unbiased", "Slightly Biased", "Moderately Biased", "Highly Biased", "Extremely Biased"]),
 	}),
 	[NodeRatingType.truth]: new RatingType_Info({
 		displayText: "Agreement",
-		//values: {0: "Thoroughly false", 25: "Mostly false", 50: "Somewhat true", 75: "Mostly true", 100: "Thoroughly true"},
-		//values: {0: "Strongly disagree", 20: "Disagree", 35: "Somewhat disagree", 50: "Neutral", 65: "Somewhat agree", 80: "Agree", 100: "Strongly agree"},
-		values: {0: "Strongly Disagree", 20: "Disagree", 35: "Somewhat Disagree", 50: "Neutral", 65: "Somewhat Agree", 80: "Agree", 100: "Strongly Agree"},
-		//values: {0: "Disagree (strongly)", 20: "Disagree", 35: "Disagree (somewhat)", 50: "Neutral", 65: "Agree (somewhat)", 80: "Agree", 100: "Agree (strongly)"},
+		//valueLabels: {0: "Thoroughly false", 25: "Mostly false", 50: "Somewhat true", 75: "Mostly true", 100: "Thoroughly true"},
+		//valueLabels: {0: "Strongly disagree", 20: "Disagree", 35: "Somewhat disagree", 50: "Neutral", 65: "Somewhat agree", 80: "Agree", 100: "Strongly agree"},
+		valueRanges: GenerateValRangesFromLabels(["Strongly Disagree", "Disagree", "Somewhat Disagree", "Neutral", "Somewhat Agree", "Agree", "Strongly Agree"]),
+		//valueLabels: {0: "Disagree (strongly)", 20: "Disagree", 35: "Disagree (somewhat)", 50: "Neutral", 65: "Agree (somewhat)", 80: "Agree", 100: "Agree (strongly)"},
 	}),
 	[NodeRatingType.relevance]: new RatingType_Info({
 		displayText: "Relevance",
-		values: {0: "Completely Irrelevant", 25: "Slightly Relevant", 50: "Moderately Relevant", 75: "Highly Relevant", 100: "Extremely Relevant"},
+		//valueRanges: GenerateValRangesFromLabels(["Completely Irrelevant", "Slightly Relevant", "Moderately Relevant", "Highly Relevant", "Extremely Relevant"]),
+		valueRanges: GenerateValRangesFromLabels(["Completely Irrelevant", "Slightly Relevant", "Somewhat Relevant", "Relevant", "Substantially Relevant", "Highly Relevant", "Extremely Relevant"]),
 	}),
 	[NodeRatingType.impact]: new RatingType_Info({
 		displayText: "Impact",
-		values: {0: "Thoroughly False", 25: "Mostly False", 50: "Somewhat True", 75: "Mostly True", 100: "Game-Changer"},
+		valueRanges: GenerateValRangesFromLabels(["Thoroughly False", "Mostly False", "Somewhat True", "Mostly True", "Game-Changer"]),
 	}),
 };
 
 export function GetRatingTypeInfo(ratingType: NodeRatingType, node?: MapNodeL3, parent?: MapNodeL3|n, path?: string) {
 	return baseRatingTypeInfo[ratingType];
+}
+
+function GenerateValRangesFromLabels(labels: string[]) {
+	let ranges: [number, number][];
+	if (labels.length == 5) {
+		// range covered by each entry: 20 [100/5 = 20]
+		ranges = [
+			[0, 20],		// center: 10
+			[20, 40],	// center: 30
+			[40, 60],	// center: 50
+			[60, 80],	// center: 70
+			[80, 100],	// center: 90
+		];
+	} else if (labels.length == 7) {
+		// range covered by each entry: 14 (other than first and last, which each cover 15) [100/5 = 14.2857142857]
+		ranges = [
+			[0, 15],		// center: 8 (rounded up, since 50 is anchor)
+			[15, 29],	// center: 22
+			[29, 43],	// center: 36
+			[43, 57],	// center: 50
+			[57, 71],	// center: 64
+			[71, 85],	// center: 78
+			[85, 100],	// center: 92 (rounded down, since 50 is anchor)
+		];
+	} else {
+		Assert(false, "Not yet implemented.");
+	}
+	return ranges.map((range, index)=>{
+		const label = labels[index];
+		//const rangeDist = range[1] - range[0];
+		const center_fractional = range.Average();
+		return new ValueRange({
+			min: range[0],
+			max: range[1],
+			center:
+				IsInt(center_fractional) ? center_fractional : // if average is int, use that
+				range[0] < 50 ? ToInt(center_fractional) + 1 : // else, if below 50 (anchor), round up toward it
+				ToInt(center_fractional), // else, must be below 50 (anchor), so round down toward it
+			label,
+		});
+	});
 }

@@ -1,10 +1,10 @@
 import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument, GetNodePhrasings} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
-import {A, DEL, DoNothing, E, GetValues, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {A, DEL, DoNothing, E, GetValues, NN, string, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Bail, BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import React from "react";
+import React, {useState} from "react";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
@@ -16,7 +16,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction} from "web-vcore";
+import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, ES, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
@@ -146,7 +146,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const backgroundFillPercent = backgroundFillPercentOverride ?? 100;
 		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
 
-		const form = GetNodeForm(node, path);
+		const nodeForm = GetNodeForm(node, path);
 		//const phrasings = GetNodePhrasings(node.id);
 		const {showReasonScoreValues} = store.main.maps;
 
@@ -200,9 +200,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const isSinglePremiseArg = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isMultiPremiseArg = IsMultiPremiseArgument(node);
-		const nodeForm = GetNodeForm(node, path);
 
-		const nodeReversed = form == ClaimForm.negation;
+		const nodeReversed = nodeForm == ClaimForm.negation;
 
 		const leftPanelShow = nodeView?.selected || hovered || local_selected;
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
@@ -361,28 +360,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							)}/>
 						{subPanelShow &&
 						<SubPanel node={node} /*onClick={onTextCompClick}*//>}
-						{(()=>{
-							const baseButtonStyle = {
-								display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-								border: "solid rgba(0,0,0,.5)",
-							};
-							return <Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
-								{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
-								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 0"}} onClick={node.type == MapNodeType.claim ? ()=>onPanelButtonClick("truth") : ()=>{}}>
-									{node.type == MapNodeType.claim ? "Agreement" : <InfoButton text="TODO"/>}
-								</div>}
-								{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
-								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 1px"}} onClick={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? ()=>onPanelButtonClick("relevance") : ()=>{}}>
-									{node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg ? "Relevance" : <InfoButton text="TODO"/>}
-								</div>}
-								<div style={{...baseButtonStyle, flex: 50, borderWidth: "1px 0 0 1px"}} onClick={()=>onPanelButtonClick("phrasings")}>
-									Phrasings{/*} ({1 + phrasings.length})*/}
-								</div>
-								<div style={{...baseButtonStyle, width: 40, borderWidth: "1px 0 0 1px"}}>
-									...
-								</div>
-							</Row>
-						})()}
+						<ToolBar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={onPanelButtonClick}/>
 						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</>}
 					{...E(
@@ -443,6 +421,74 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		);
 	}
 	definitionsPanel: DefinitionsPanel;
+}
+
+class ToolBar extends BaseComponent<{backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any} & Props, {}> {
+	render() {
+		let {node, path, backgroundColor, panelToShow, onPanelButtonClick} = this.props;
+		const parentPath = SlicePath(path, 1);
+		const parent = GetNodeL3(parentPath);
+		const nodeForm = GetNodeForm(node, path);
+		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+		
+		const sharedProps = {panelToShow, onPanelButtonClick};
+		return (
+			<Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
+				<ToolBarButton {...sharedProps} text="<<" first={true}/>
+				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
+				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
+					enabled={node.type == MapNodeType.claim} disabledInfo="TODO"/>}
+				{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
+				<ToolBarButton {...sharedProps} text="Relevance" panel="relevance"
+					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg} disabledInfo="TODO"/>}
+				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings" last={true}/>
+			</Row>
+		);
+	}
+}
+class ToolBarButton extends BaseComponent<{text: string, enabled?: boolean, disabledInfo?: string, panel?: string, first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any}, {}> {
+	render() {
+		let {text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick} = this.props;
+		let [hovered, setHovered] = useState(false);
+
+		let icon: string|n;
+		if (text == "<<") {
+			//icon = "chevron-double-left";
+			//icon = "dots-vertical";
+			icon = "transfer-left";
+			text = "";
+		}
+		
+		const highlight = panel && panelToShow == panel;
+		return (
+			<div
+				onMouseEnter={()=>{ if (enabled) setHovered(true); }}
+				onMouseLeave={()=>{ if (enabled) setHovered(false); }}
+				className={icon ? `mdi mdi-icon mdi-${icon}` : undefined}
+				style={ES(
+					{
+						display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
+						border: "solid rgba(0,0,0,.5)",
+					},
+					(highlight || hovered) && {background: "rgba(255,255,255,.2)"},
+					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
+					!first && {borderWidth: "1px 0 0 1px"},
+					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
+					icon && {width: 40, fontSize: 16},
+				)}
+				onClick={()=>{
+					if (!enabled) return;
+					if (panel) {
+						onPanelButtonClick(panel);
+					}
+				}}
+			>
+				{enabled
+					? text
+					: <InfoButton text={disabledInfo!}/>}
+			</div>
+		);
+	}
 }
 
 let portal: HTMLElement;
