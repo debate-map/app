@@ -6,6 +6,7 @@ import {ES, Observer, RunInAction_Set, Slider} from "web-vcore";
 import {ToInt} from "web-vcore/nm/js-vextensions";
 import {Button, CheckBox, Column, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {RatingsPanel_Old} from "./RatingsPanel_Old";
 
 type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};
 
@@ -14,6 +15,8 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 	render() {
 		const {node, ratingType, asNodeUIOverlay} = this.props;
 		if (asNodeUIOverlay) return null;
+		if (ratingType == "impact") return <RatingsPanel_Old {...this.props}/>;
+
 		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
 		const systemPolicy_publicGoverned_id = GetSystemAccessPolicyID(systemPolicy_publicGoverned_name);
 
@@ -21,7 +24,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		const ratings = GetRatings(node.id, ratingType);
 		const userID = MeID();
 		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
-		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
+		const myRating_raw = /*ratingType == "impact" ? null :*/ ratings.find(a=>a.creator == userID) as NodeRating;
 		const myRating_accessPolicy = GetAccessPolicy(myRating_raw?.accessPolicy);
 		
 		//const [showOptionalRatings, setExpanded] = useState(false);

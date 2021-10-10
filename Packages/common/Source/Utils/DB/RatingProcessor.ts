@@ -7,22 +7,28 @@ import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/no
 import {ClaimForm, MapNodeL2} from "../../DB/nodes/@MapNode.js";
 import {ArgumentType} from "../../DB/nodes/@MapNodeRevision.js";
 
-export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], userID: string): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
+export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
-	const premiseProbabilities = premises.map(premise=>{
+	const premiseProbabilities = [] as number[];
+	for (const premise of premises) {
 		const ratingType = GetRatingTypesForNode(premise)[0].type;
 		let ratingValue = GetRatingValue(premise.id, ratingType, userID, null);
 		// if user didn't rate this premise, just use the average rating
 		if (ratingValue == null) {
-			ratingValue = GetRatingAverage(premise.id, ratingType, undefined) || 0;
+			if (useAverageForMissing) {
+				ratingValue = GetRatingAverage(premise.id, ratingType, undefined) || 0;
+			} else {
+				return null;
+			}
 		}
 
 		const form = GetNodeForm(premise, argument);
 		const probability = form == ClaimForm.negation ? 1 - (ratingValue / 100) : (ratingValue / 100);
-		return probability;
-	});
+		premiseProbabilities.push(probability);
+	}
+
 	let combinedTruthOfPremises;
 	if (argument.argumentType == ArgumentType.all) {
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
@@ -37,8 +43,13 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 	let relevance = GetRatingValue(argument.id, NodeRatingType.relevance, userID, null);
 	// if user didn't rate the relevance, just use the average rating
 	if (relevance == null) {
-		relevance = GetRatingAverage(argument.id, NodeRatingType.relevance) || 0;
+		if (useAverageForMissing) {
+			relevance = GetRatingAverage(argument.id, NodeRatingType.relevance) || 0;
+		} else {
+			return null;
+		}
 	}
+	
 	// let strengthForType = adjustment.Distance(50) / 50;
 	const result = combinedTruthOfPremises * (relevance / 100);
 	Assert(IsNumber(result), `Impact pseudo-rating is null. @combinedTruthOfPremises:${combinedTruthOfPremises} @relevance:${relevance}`);
@@ -66,7 +77,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 } */
 
 // export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
-export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[]): NodeRating_MaybePseudo[]=>{
+export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], useAverageForMissing = false): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 
@@ -101,7 +112,10 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL
 
 	const result = [] as NodeRating_MaybePseudo[];
 	for (const userID of CE(usersWhoRatedArgOrPremise).VKeys()) {
-		result.push(GetArgumentImpactPseudoRating(argument, premises, userID)!);
+		const impactRating = GetArgumentImpactPseudoRating(argument, premises, userID, useAverageForMissing);
+		if (impactRating) {
+			result.push(impactRating);
+		}
 	}
 	return result;
 	/* });
