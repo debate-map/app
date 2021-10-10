@@ -1,12 +1,11 @@
 import chroma from "chroma-js";
-import {CreateLinkCommand, GetNodeDisplayText, GetNodeL3, Me, MeID, Polarity} from "dm_common";
+import {CreateLinkCommand, GetNodeDisplayText, GetNodeL3, GetPathNodeIDs, Me, MeID, Polarity} from "dm_common";
 import keycode from "keycode";
 import {hasHotReloaded} from "Main";
 import React from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
 import {GetUserBackground} from "Store/db_ext/users/$user";
-import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView.js";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, RunInAction} from "web-vcore";
 import {Assert, Clone, FromJSON, NN, Vector2} from "web-vcore/nm/js-vextensions.js";

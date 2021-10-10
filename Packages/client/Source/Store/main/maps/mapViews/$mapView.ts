@@ -3,21 +3,7 @@ import {observable} from "web-vcore/nm/mobx.js";
 import {O, StoreAction, LogWarning} from "web-vcore";
 import {store} from "Store";
 import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges} from "web-vcore/nm/mobx-graphlink.js";
-import {PathSegmentToNodeID, MapView, MapNodeView} from "dm_common";
-
-export function GetPathNodes(path: string) {
-	const pathSegments = SplitStringBySlash_Cached(path);
-	Assert(pathSegments.every(a=>Validate("UUID", a) == null || a[0] == "*"), `Path contains non-uuid, non-*-prefixed segments: ${path}`);
-	// return pathSegments.map(ToInt);
-	return pathSegments;
-}
-export function ToPathNodes(pathOrPathNodes: string | string[]) {
-	return IsString(pathOrPathNodes) ? GetPathNodes(pathOrPathNodes) : pathOrPathNodes;
-}
-export function GetPathNodeIDs(path: string): UUID[] {
-	const nodes = GetPathNodes(path);
-	return nodes.map(a=>PathSegmentToNodeID(a));
-}
+import {PathSegmentToNodeID, MapView, MapNodeView, GetNode, MapNodeType, GetDefaultExpansionFieldsForNodeView, ToPathNodes} from "dm_common";
 
 export const GetSelectedNodePathNodes = CreateAccessor((mapViewOrMapID: string | MapView)=>{
 	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
@@ -136,14 +122,14 @@ export const ACTMapNodeSelect = StoreAction((mapID: string, path: string|n)=>{
 
 // export const GetNodeView_Advanced = StoreAccessor({ cache_unwrapArgs: [1] }, (s) => (mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = false): MapNodeView[] => {
 // export const GetNodeViewsAlongPath = StoreAccessor({ cache_unwrapArgs: [1] }, (s) => (mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = false): MapNodeView[] => {
-export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing: true): MapNodeView[];
-export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing?: boolean): (MapNodeView|n)[];
-export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing = false) {
-	if (pathOrPathNodes == null) return emptyArray as (MapNodeView|n)[];
+export function GetNodeViewsAlongPath(mapID: string|n, path: string | string[] | n, createNodeViewsIfMissing: true): MapNodeView[];
+export function GetNodeViewsAlongPath(mapID: string|n, path: string | string[] | n, createNodeViewsIfMissing?: boolean): (MapNodeView|n)[];
+export function GetNodeViewsAlongPath(mapID: string|n, path: string | string[] | n, createNodeViewsIfMissing = false) {
+	if (path == null) return emptyArray as (MapNodeView|n)[];
 	const rootNodeViews = GetMapView(mapID)?.rootNodeViews ?? {};
-	const pathNodes = ToPathNodes(pathOrPathNodes);
+	const pathNodes = ToPathNodes(path);
 	const nodeViews = [] as (MapNodeView|n)[];
-	for (const pathNode of pathNodes) {
+	for (const [i, pathNode] of pathNodes.entries()) {
 		if (nodeViews.length && nodeViews.Last() == null) {
 			nodeViews.push(null);
 			continue;
@@ -160,7 +146,7 @@ export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string |
 
 			if (childGroup[pathNode] == null) {
 				//Assert(MobX_AllowStateChanges(), "GetNodeViewsAlongPath cannot create-node-views-if-missing, as call-stack is in mobx reaction.");
-				childGroup[pathNode] = new MapNodeView();
+				childGroup[pathNode] = new MapNodeView(pathNodes.Take(i + 1).join("/"));
 			}
 		}
 		//return childGroup[pathNode];
@@ -168,15 +154,21 @@ export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string |
 	}
 	return nodeViews;
 }
-export const GetNodeViewsBelowPath = CreateAccessor((mapID: string|n, pathOrPathNodes: string | string[]): MapNodeView[]=>{
-	if (mapID == null) return EA<MapNodeView>();
-	//if (pathOrPathNodes == null) return null;
+export const GetNodeViewsBelowPath = CreateAccessor((mapID: string|n, pathOrPathNodes: string | string[], includeSelf = false): Map<string, MapNodeView>=>{
+	const result = new Map<string, MapNodeView>();
+	if (mapID == null) return result;
+
 	const pathNodes = ToPathNodes(pathOrPathNodes);
 	const nodeView = GetNodeView(mapID, pathOrPathNodes);
-	const result = [] as MapNodeView[];
-	for (const {key, value: child} of nodeView?.children?.Pairs() ?? []) {
-		result.push(child);
-		result.push(...GetNodeViewsBelowPath(mapID, pathNodes.concat(key)));
+	if (includeSelf) result.set(pathNodes.join("/"), nodeView);
+
+	for (const {key: childID, value: child} of nodeView?.children?.Pairs() ?? []) {
+		result.set(pathNodes.concat(childID).join("/"), child);
+
+		const nodeViewsBelowChild = GetNodeViewsBelowPath(mapID, pathNodes.concat(childID));
+		for (const [subChildPath, subChild] of nodeViewsBelowChild.entries()) {
+			result.set(subChildPath, subChild);
+		}
 	}
 	return result;
 });
@@ -197,15 +189,12 @@ export const ACTMapNodeExpandedSet = StoreAction((opt: {
 	const expandKeysPresent = (["expanded", "expanded_truth", "expanded_relevance"] as const).filter(key=>opt[key] != null);
 	if (nodeView) nodeView.Extend(opt.IncludeKeys(...expandKeysPresent));
 
-	// and action is recursive (ie. supposed to apply past target-node), with expansion being set to false
-	if (opt.resetSubtree && opt.IncludeKeys(...expandKeysPresent).VValues().every(newVal=>newVal == false)) {
+	// if "resetting" subtree, traverse descendent node-views and reset their expansion-fields to their defaults
+	if (opt.resetSubtree) {
 		const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
-		for (const descendantNodeView of descendantNodeViews) {
-			// set all expansion keys to false (key might be different on clicked node than descendants)
-			// state = { ...state, expanded: false, expanded_truth: false, expanded_relevance: false };
-			// if recursively collapsing, collapse the main node box itself, but reset the [truth/relevance]-box expansions to their default state (of expanded)
-			descendantNodeView.Extend({expanded: false, expanded_truth: true, expanded_relevance: true});
-			// state = { ...state, ...action.payload.IncludeKeys(...expandKeysPresent) };
+		for (const [descendantPath, descendantNodeView] of descendantNodeViews.entries()) {
+			//descendantNodeView.Extend({expanded: false, expanded_truth: true, expanded_relevance: true});
+			descendantNodeView.Extend(GetDefaultExpansionFieldsForNodeView(descendantPath));
 		}
 	}
 });

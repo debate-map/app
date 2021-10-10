@@ -332,15 +332,17 @@ export function JumpToNode(mapID: string, path: string) {
 		const pathNodeIDs = path.split("/");
 
 		const mapView = new MapView();
-		const rootNodeView = new MapNodeView();
+		const rootNodeView = new MapNodeView(path);
 		mapView.rootNodeViews[pathNodeIDs[0]] = rootNodeView;
 
 		let currentParentView = rootNodeView;
-		for (const childID of pathNodeIDs.Skip(1)) {
+		for (const [i, descendantID] of pathNodeIDs.entries()) {
+			if (i == 0) continue;
+			const descendantPath = pathNodeIDs.Take(i + 1).join("/");
 			currentParentView.expanded = true;
 
-			const childView = new MapNodeView();
-			currentParentView.children[childID] = childView;
+			const childView = new MapNodeView(descendantPath);
+			currentParentView.children[descendantID] = childView;
 			currentParentView = childView;
 		}
 		currentParentView.focused = true;

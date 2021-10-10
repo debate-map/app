@@ -1,6 +1,8 @@
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {Vector2, Clone} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, DB, Field, MGLClass, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
+import {accessorMetadata, AddSchema, CreateAccessor, DB, defaultGraphOptions, Field, MGLClass, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
+import {GetNode, GetNodeID, GetParentNodeID, ToPathNodes} from "../../DB/nodes.js";
+import {MapNodeType} from "../../DB/nodes/@MapNodeType.js";
 
 // this module is in "dm_common", so avoid import from web-vcore (just be careful, since the new @O doesn't warn about classes with missing makeObservable calls)
 //import {O} from "web-vcore";
@@ -28,9 +30,42 @@ export class MapView {
 	@O bot_currentNodeID?: string;
 }
 
+export const GetDefaultExpansionFieldsForNodeView = CreateAccessor((path: string)=>{
+	//const pathNodes = ToPathNodes(path);
+	const nodeID = GetNodeID(path);
+	const parentID = GetParentNodeID(path);
+	const node = GetNode(nodeID);
+	const parentNode = GetNode(parentID);
+	//console.log("Checking. @nodeID:", nodeID, "@parentID:", parentID, "@node:", node, "@parentNode:", parentNode);
+
+	const result = {expanded: false, expanded_truth: false, expanded_relevance: false};
+	if (node?.type == MapNodeType.argument && !node.multiPremiseArgument) {
+		result.expanded = true;
+	} else if (node?.type == MapNodeType.claim && parentNode?.multiPremiseArgument) {
+		result.expanded = true;
+	}
+	return result;
+});
+
 @MGLClass()
 export class MapNodeView {
-	constructor() { makeObservable(this); }
+	constructor(path: string|n, tryUseNodeDataForExpansionFields = true) {
+		makeObservable(this);
+		//const pathNodes = path ? ToPathNodes(path) : null;
+		if (tryUseNodeDataForExpansionFields && path) {
+			// if bail occurs, leave the fields as is (this call-stack is not necessarily reactive, so we can't risk having the error bubble-up)
+			const defaultExpansionFields = GetDefaultExpansionFieldsForNodeView.CatchBail({}, path);
+			this.Extend(defaultExpansionFields);
+
+			// we have to read from the metadata fields directly, to avoid the infinite-recursion issue that can otherwise occur
+			/*const GetDefaultExpansionFieldsForNodeView_meta = accessorMetadata.get("GetDefaultExpansionFieldsForNodeView")!;
+			const callPlan = GetDefaultExpansionFieldsForNodeView_meta.GetCallPlan(defaultGraphOptions.graph, defaultGraphOptions.graph.rootStore, false, null, [nodeID], true);
+			if (callPlan.cachedResult_wrapper != null) {
+				const defaultExpansionFields = callPlan.cachedResult_wrapper.get();
+				this.Extend(defaultExpansionFields);
+			}*/
+		}
+	}
 
 	// constructor(childLimit?: number) {
 	// constructor(childLimit: number) {
@@ -78,7 +113,7 @@ export class MapNodeView {
 	@Field({type: "number"}, {opt: true})
 	@O childLimit_down?: number;
 }
-export const emptyNodeView = new MapNodeView();
+export const emptyNodeView = new MapNodeView(null, false);
 //RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("MapNodeView")));
 
 // export type MapNodeView_SelfOnly = Omit<MapNodeView, 'children'>;

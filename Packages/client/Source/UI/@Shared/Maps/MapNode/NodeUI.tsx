@@ -306,12 +306,13 @@ export class NodeUI extends BaseComponentPlus(
 
 					{!limitBar_above && children}
 				</Column>
+				{boxExpanded &&
 				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough">
 					{childConnectorBackground}
 					{nodeChildHolderBox_truth}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
 					{nodeChildHolderBox_relevance}
-				</Column>
+				</Column>}
 			</div>
 			{isMultiPremiseArgument && nodeChildHolder_direct}
 			</>

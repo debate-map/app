@@ -1,5 +1,5 @@
-import {Assert, CE, emptyArray_forLoading, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, CreateAccessor, GetDoc, SlicePath, SplitStringBySlash_Cached, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, CE, emptyArray_forLoading, GetValues, IsString} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, CreateAccessor, GetDoc, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
@@ -19,6 +19,22 @@ export enum ChildGroup {
 }
 AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
 
+export function GetPathNodes(path: string) {
+	const pathSegments = SplitStringBySlash_Cached(path);
+	Assert(pathSegments.every(a=>Validate("UUID", a) == null || a[0] == "*"), `Path contains non-uuid, non-*-prefixed segments: ${path}`);
+	// return pathSegments.map(ToInt);
+	return pathSegments;
+}
+export function ToPathStr(pathOrPathNodes: string | string[]) {
+	return IsString(pathOrPathNodes) ? pathOrPathNodes : pathOrPathNodes.join("/");
+}
+export function ToPathNodes(pathOrPathNodes: string | string[]) {
+	return IsString(pathOrPathNodes) ? GetPathNodes(pathOrPathNodes) : pathOrPathNodes;
+}
+export function GetPathNodeIDs(path: string): UUID[] {
+	const nodes = GetPathNodes(path);
+	return nodes.map(a=>PathSegmentToNodeID(a));
+}
 export function PathSegmentToNodeID(segment: string|n): UUID {
 	if (segment?.length == 22) return segment; // if raw UUID
 	if (segment?.length == 23) return segment.slice(1); // if UUID, but with marker at front (marking as subnode, I believe)
