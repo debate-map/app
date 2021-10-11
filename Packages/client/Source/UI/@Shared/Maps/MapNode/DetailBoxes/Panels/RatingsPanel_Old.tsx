@@ -47,7 +47,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
 		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
 
-		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
+		//let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
+		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? 1 : 1;
 		const lineTypes: uPlot.Series[] = [
 			{
 				label: "Rating value",
@@ -92,7 +93,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					x: {value: myRating_displayVal, finalize: drawPos=>(drawPos - 1).KeepAtLeast(0).KeepAtMost(width - 3)}, // max sure line is not cut-off by container bounds
 					//color: "rgba(0,255,0,1)",
 					//lineWidth: 1,
-					color: chroma("rgb(0,255,0)").alpha(ownRatingOpacity ?? (.5 * (asNodeUIOverlay ? .5 : 1))).css(),
+					color: chroma("rgb(0,255,0)").alpha(ownRatingOpacity ?? (.5 * asNodeUIOverlay_alphaMultiplier)).css(),
 					lineWidth: 2,
 					drawType: "source-over",
 				},

@@ -55,6 +55,7 @@ class ToolBarButton extends BaseComponent<{
 		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
 		let [hovered, setHovered] = useState(false);
 		let highlight = panel && panelToShow == panel;
+		const highlightOrHovered = highlight || hovered;
 
 		let icon: string|n;
 		if (text == "<<") {
@@ -64,6 +65,10 @@ class ToolBarButton extends BaseComponent<{
 			text = "";
 			highlight = highlight || leftPanelShow;
 		}
+
+		const textComp = enabled
+			? <Text style={{position: "relative"}}>{text}</Text>
+			: <InfoButton text={disabledInfo!}/>;
 
 		return (
 			<div
@@ -84,11 +89,14 @@ class ToolBarButton extends BaseComponent<{
 						//border: "solid rgba(0,0,0,.5)",
 						border: "solid rgba(0,0,0,1)",
 					},
-					(highlight || hovered) && {background: "rgba(255,255,255,.2)"},
+					highlightOrHovered && {background: "rgba(255,255,255,.2)"},
 					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
 					!first && {borderWidth: "1px 0 0 1px"},
 					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
 					icon && {width: 40, fontSize: 16},
+					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
+					(panel == "truth" || panel == "relevance") && !highlightOrHovered && {color: "rgba(255,255,255,.1)"},
+					//(panel == "truth" || panel == "relevance") && {color: "transparent"},
 				)}
 				onClick={e=>{
 					if (!enabled) return;
@@ -98,11 +106,10 @@ class ToolBarButton extends BaseComponent<{
 					}
 				}}
 			>
+				{!highlightOrHovered && textComp}
 				{enabled && (panel == "truth" || panel == "relevance") &&
 				<RatingsPreviewBackground {...this.props} path={path} node={node} ratingType={panel as NodeRatingType}/>}
-				{enabled
-					? <Text style={{position: "relative"}}>{text}</Text>
-					: <InfoButton text={disabledInfo!}/>}
+				{highlightOrHovered && textComp}
 			</div>
 		);
 	}
