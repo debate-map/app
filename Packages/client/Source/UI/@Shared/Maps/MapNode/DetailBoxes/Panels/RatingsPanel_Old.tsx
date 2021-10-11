@@ -15,14 +15,15 @@ import {UPlot} from "web-vcore/nm/react-uplot.js";
 import uPlot from "web-vcore/nm/uplot.js";
 import useResizeObserver from "use-resize-observer";
 import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
+import chroma from "chroma-js";
 
-type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};
+type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean, uplotData_override?: uPlot.AlignedData};
 
 @Observer
 export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
 	root: HTMLDivElement|n;
 	render() {
-		const {node, path, ratingType, asNodeUIOverlay} = this.props;
+		const {node, path, ratingType, asNodeUIOverlay, uplotData_override} = this.props;
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
 		const ratings = GetRatings(node.id, ratingType);
 
@@ -48,8 +49,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			{
 				label: "Rating count",
 				//stroke: chroma(0, 1, .5, "hsl").css(),
-				stroke: "#ff7300",
-				fill: "#ff730077",
+				stroke: chroma("#ff7300").alpha(1 * (asNodeUIOverlay ? .5 : 1)).css(),
+				fill: chroma("#ff7300").alpha(.5 * (asNodeUIOverlay ? .5 : 1)).css(),
 				//fill: "#ff7300FF",
 				points: {show: false},
 				paths: uPlot.paths.spline!(),
@@ -62,38 +63,42 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const xValues_min = 0;
 		const xValues_max = 100;
 
-		const ticks = Range(0, 100, smoothing);
-		const xValues = ticks.slice();
-		const yValues_ratings = ticks.map(a=>0); // start out values as 0 (will increment values in next section)
-		const uplotData = [xValues, yValues_ratings] as uPlot.AlignedData;
-
-		for (const entry of ratings) {
-			const ratingVal = TransformRatingForContext(entry.value, reverseRatings);
-			const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingVal)).First();
-			const closestXValueStep_index = xValues.indexOf(closestXValueStep);
-			yValues_ratings[closestXValueStep_index]++;
+		let uplotData: uPlot.AlignedData;
+		if (uplotData_override) {
+			uplotData = uplotData_override;
+		} else {
+			const ticks = Range(0, 100, smoothing);
+			var xValues = ticks.slice();
+			const yValues_ratings = ticks.map(a=>0); // start out values as 0 (will increment values in next section)
+			uplotData = [xValues, yValues_ratings] as uPlot.AlignedData;
+			for (const entry of ratings) {
+				const ratingVal = TransformRatingForContext(entry.value, reverseRatings);
+				const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingVal)).First();
+				const closestXValueStep_index = xValues.indexOf(closestXValueStep);
+				yValues_ratings[closestXValueStep_index]++;
+			}
 		}
 
 		const annotations = useMemo(()=>{
 			return ([
 				myRating_displayVal != null && {
 					type: "line",
-					x: {value: myRating_displayVal},
+					x: {value: myRating_displayVal, finalize: drawPos=>drawPos.KeepAtLeast(0).KeepAtMost(width - 3)}, // max sure line is not cut-off by container bounds
 					//color: "rgba(0,255,0,1)",
 					//lineWidth: 1,
-					color: "rgba(0,255,0,.5)",
+					color: chroma("rgba(0,255,0,.5)").alpha(.5 * (asNodeUIOverlay ? .5 : 1)).css(),
 					lineWidth: 2,
 					drawType: "source-over",
 				},
 			] as Annotation[]).filter(a=>a);
-		}, [myRating_displayVal]);
+		}, [myRating_displayVal, width]);
 		//const chartOptions = GetChartOptions(width, height, lineTypes);
 		const chartOptions = GetChartOptions(width, asNodeUIOverlay ? height : 250, lineTypes, annotations, !!asNodeUIOverlay);
 		return (
 			<div ref={c=>this.root = c}
 				style={ES(
 					{position: "relative"}, //minWidth: 496
-					asNodeUIOverlay && {width: "100%", height: "100%", pointerEvents: "none"},
+					asNodeUIOverlay && {position: "absolute", left: 0, right: 0, top: 0, bottom: 0, pointerEvents: "none"},
 				)}
 				onClick={e=>{
 					if (asNodeUIOverlay) return;
@@ -105,7 +110,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					const chartHolder = target.GetSelfAndParents().filter(a=>a.matches("div.uplotHolder"))[0];
 					if (chartHolder == null) return;
 
-					if (userID == null) return ShowSignInPopup();
+					if (userID == null) return void ShowSignInPopup();
 
 					//const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
 					const gridPart = chartHolder.querySelector(".u-over") as HTMLDivElement;
@@ -233,7 +238,7 @@ function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[
 			},
 		],
 		scales: {
-			x: {time: false,},
+			x: {time: false},
 			y: {},
 		},
 		legend: {

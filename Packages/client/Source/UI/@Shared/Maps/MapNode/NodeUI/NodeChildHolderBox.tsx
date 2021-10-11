@@ -15,6 +15,8 @@ import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
 import {Squiggle} from "../ChildConnectorBackground.js";
 import {ExpandableBox} from "../ExpandableBox.js";
 import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
+import React from "react";
+import {RatingsPreviewBackground} from "../NodeUI_Inner/NodeToolbar.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -46,7 +48,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 
 		//const backgroundFillPercent = GetFillPercent_AtPath(node, path, group);
 		const backgroundFillPercent = 100;
-		const markerPercent = GetMarkerPercent_AtPath(node, path, group);
+		//const markerPercent = GetMarkerPercent_AtPath(node, path, group);
+		const markerPercent = null;
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		let text = group == ChildGroup.truth ? "True?" : "Relevant?";
@@ -76,7 +79,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		}
 
 		const hovered_main = hovered && !hovered_button;
-		const ratingPanelShow = (nodeView && nodeView[`selected_${childGroupStr}`]) || hovered_main; // || local_selected;
+		//const ratingPanelShow = (nodeView && nodeView[`selected_${childGroupStr}`]) || hovered_main; // || local_selected;
+		const ratingPanelShow = false; // disabled for now, since arguably too distracting for new users
 
 		UseEffect(()=>{
 			if (this.expandableBox?.DOM == null) return; // can be null if, for example, an error occurred during the box's rendering
@@ -120,12 +124,19 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						}}
 						style={{marginTop: innerBoxOffset_safe}}
 						padding="3px 5px 2px"
-						text={<span style={ES(
-							{position: "relative", fontSize: 13},
-							GADDemo && {
-								color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, //fontSize: 11, letterSpacing: 1
-							},
-						)}>{text}</span>}
+						text={
+							<>
+								{/* for now, leave out the ratings-preview for these child-holder boxes; it has usefulness, but it's arguably too distracting atm */}
+								{/*(group == ChildGroup.truth || group == ChildGroup.relevance) &&
+								<RatingsPreviewBackground path={path} node={node} ratingType={group == ChildGroup.truth ? NodeRatingType.truth : NodeRatingType.relevance}/>*/}
+								<span style={ES(
+									{position: "relative", fontSize: 13},
+									GADDemo && {
+										color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, //fontSize: 11, letterSpacing: 1
+									},
+								)}>{text}</span>
+							</>
+						}
 						{...E(
 							{backgroundFillPercent: backgroundFillPercent ?? 0, backgroundColor, markerPercent},
 							GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as chroma.Color},

@@ -1,6 +1,7 @@
 import {DeleteNodeRating, GetAccessPolicy, GetRatings, GetRatingTypeInfo, GetSystemAccessPolicyID, MapNodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, systemPolicy_publicUngoverned_name, TransformRatingForContext} from "dm_common";
 import React, {useState} from "react";
 import {store} from "Store";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {ES, Observer, RunInAction_Set, Slider} from "web-vcore";
 import {ToInt} from "web-vcore/nm/js-vextensions";
@@ -31,6 +32,8 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		const showOptionalRatings = store.main.ratingUI.showOptionalRatings;
 
 		function SetRating(newDisplayValue: number, accessPolicyID?: string) {
+			if (userID == null) return void ShowSignInPopup();
+
 			let newRating_xValue_final = newDisplayValue;
 			newRating_xValue_final = TransformRatingForContext(newRating_xValue_final, reverseRatings);
 			const newRating = new NodeRating({

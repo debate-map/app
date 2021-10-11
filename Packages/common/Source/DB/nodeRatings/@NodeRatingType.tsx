@@ -28,6 +28,18 @@ export class ValueRange {
 	center: number; // if range is not even, round toward the global mid-point (ie. 50)
 	label: string;
 }
+export function RatingValueIsInRange(value: number, range: ValueRange) {
+	const leftSide = range.max < 50;
+	const rightSide = range.min > 50;
+
+	let min_adjusted = range.min;
+	let max_adjusted = range.max;
+	// we use different logic on left and right sides; when value is exactly between two ranges, categorize it as being in the range farther from 50 (the mid-point)
+	if (leftSide && min_adjusted != 0) min_adjusted += .001;
+	if (rightSide && max_adjusted != 100) max_adjusted -= .001;
+	
+	return value >= min_adjusted && value <= max_adjusted;
+}
 
 export class RatingType_Info {
 	constructor(initialData?: Partial<RatingType_Info>) {

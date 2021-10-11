@@ -423,3 +423,12 @@ export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNodeL3
 	if (parent == null) return null;
 	return node.type == MapNodeType.claim && IsMultiPremiseArgument(parent);
 }
+
+export function GetArgumentNode(node: MapNode, parent: MapNode|n) {
+	const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+	const argumentNode =
+		node.type == MapNodeType.argument ? node :
+		isPremiseOfSinglePremiseArg ? parent :
+		null;
+	return argumentNode;
+}

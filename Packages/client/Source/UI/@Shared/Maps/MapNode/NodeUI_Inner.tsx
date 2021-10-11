@@ -1,4 +1,4 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument, GetNodePhrasings, GetPathNodeIDs} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument, GetNodePhrasings, GetPathNodeIDs, GetRatingTypeInfo, NodeRating, GetNodeRating, RatingValueIsInRange, GetParentNode, GetParentNodeID, GetNode, GetParentPath, GetNodeID, GetArgumentNode, MapNode} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
 import {A, DEL, DoNothing, E, GetValues, NN, string, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
@@ -25,7 +25,9 @@ import {MapNodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
-import {Button, Row} from "web-vcore/nm/react-vcomponents";
+import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
+import {RatingsPanel_Old} from "./DetailBoxes/Panels/RatingsPanel_Old.js";
+import {NodeToolbar} from "./NodeUI_Inner/NodeToolbar.js";
 
 // drag and drop
 // ==========
@@ -45,7 +47,7 @@ import {Button, Row} from "web-vcore/nm/react-vcomponents";
 
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
-type Props = {
+export type NodeUI_Inner_Props = {
 	indexInNodeList: number, node: MapNodeL3, path: string, map?: Map,
 	width?: number|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
@@ -67,7 +69,7 @@ export type PanelOpenSource = "toolbar" | "left-panel";
 // @ExpensiveComponent
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
-	{panelsPosition: "left"} as Props,
+	{panelsPosition: "left"} as NodeUI_Inner_Props,
 	{
 		hovered: false, moreButtonHovered: false, leftPanelHovered: false, openPanelSource: null as PanelOpenSource|n,
 		hoverPanel: null as string|n, hoverTermID: null as string|n, local_selected: false as boolean|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0,
@@ -149,7 +151,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		//const backgroundFillPercent = backgroundFillPercentOverride ?? GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
 		const backgroundFillPercent = backgroundFillPercentOverride ?? 100;
-		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
+		//const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
+		const markerPercent = null; // marker is too distracting to be enabled for-now/by-default
 
 		const nodeForm = GetNodeForm(node, path);
 		//const phrasings = GetNodePhrasings(node.id);
@@ -370,7 +373,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							)}/>
 						{subPanelShow &&
 						<SubPanel node={node} /*onClick={onTextCompClick}*//>}
-						<ToolBar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
+						<NodeToolbar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
 							leftPanelShow={leftPanelShow}
 							onMoreClick={()=>{
 								//onClick();
@@ -440,93 +443,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		);
 	}
 	definitionsPanel: DefinitionsPanel;
-}
-
-class ToolBar extends BaseComponent<{
-	backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
-	onMoreClick?: (e: any)=>any, onMoreHoverChange?: (hovered: boolean)=>any,
-	leftPanelShow: boolean,
-} & Props, {}> {
-	render() {
-		let {node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
-		const parentPath = SlicePath(path, 1);
-		const parent = GetNodeL3(parentPath);
-		const nodeForm = GetNodeForm(node, path);
-		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-		
-		const sharedProps = {panelToShow, onPanelButtonClick, leftPanelShow};
-		return (
-			<Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
-				<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>
-				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
-				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
-					enabled={node.type == MapNodeType.claim} disabledInfo="TODO"/>}
-				{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
-				<ToolBarButton {...sharedProps} text="Relevance" panel="relevance"
-					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg} disabledInfo="TODO"/>}
-				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings" last={true}/>
-			</Row>
-		);
-	}
-}
-class ToolBarButton extends BaseComponent<{
-	text: string, enabled?: boolean, disabledInfo?: string, panel?: string,
-	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
-	onClick?: (e: any)=>any, onHoverChange?: (hovered: boolean)=>any,
-	leftPanelShow: boolean,
-}, {}> {
-	render() {
-		let {text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
-		let [hovered, setHovered] = useState(false);
-		let highlight = panel && panelToShow == panel;
-
-		let icon: string|n;
-		if (text == "<<") {
-			//icon = "chevron-double-left";
-			//icon = "dots-vertical";
-			icon = "transfer-left";
-			text = "";
-			highlight = highlight || leftPanelShow;
-		}
-		
-		return (
-			<div
-				onMouseEnter={()=>{
-					if (!enabled) return;
-					setHovered(true);
-					onHoverChange?.(true);
-				}}
-				onMouseLeave={()=>{
-					if (!enabled) return;
-					setHovered(false);
-					onHoverChange?.(false);
-				}}
-				className={icon ? `mdi mdi-icon mdi-${icon}` : undefined}
-				style={ES(
-					{
-						display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-						border: "solid rgba(0,0,0,.5)",
-					},
-					(highlight || hovered) && {background: "rgba(255,255,255,.2)"},
-					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
-					!first && {borderWidth: "1px 0 0 1px"},
-					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
-					icon && {width: 40, fontSize: 16},
-				)}
-				onClick={e=>{
-					if (!enabled) return;
-					if (onClick) onClick(e);
-					if (panel) {
-						onPanelButtonClick(panel);
-					}
-				}}
-			>
-				{enabled
-					? text
-					: <InfoButton text={disabledInfo!}/>}
-			</div>
-		);
-	}
 }
 
 let portal: HTMLElement;
