@@ -48,7 +48,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
 
 		//let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
-		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? 1 : 1;
+		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .8 : 1;
 		const lineTypes: uPlot.Series[] = [
 			{
 				label: "Rating value",
