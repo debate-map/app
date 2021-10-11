@@ -50,7 +50,6 @@ export const GetRatingValue = CreateAccessor(<T>(nodeID: string, ratingType: Nod
 	return rating ? rating.value : resultIfNoData as T;
 });
 export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userID?: string|n): number|null=>{
-	// return CachedTransform_WithStore('GetRatingAverage', [nodeID, ratingType, resultIfNoData].concat((filter || {}).VValues()), {}, () => {
 	// if voting disabled, always show full bar
 	/* let node = GetNodeL2(nodeID);
 	if (node && node.current.votingDisabled) return 100;

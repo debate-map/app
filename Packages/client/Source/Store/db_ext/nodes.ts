@@ -1,9 +1,10 @@
-import chroma from "chroma-js";
+import chroma, {Color} from "chroma-js";
 import {GetNodeChildrenL3, GetNodeRevisions, MapNodeL3, MapNodeRevision, MapNodeType, Polarity} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
 export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {
-	let result;
+	let result: chroma.Color;
 	if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)");
 	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)");
 	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("rgb(90,50,180)");
@@ -11,13 +12,19 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 	else if (node.type == MapNodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = chroma("rgb(30,100,30)");
 		else result = chroma("rgb(100,30,30)");
+	} else {
+		Assert(false);
 	}
 
 	if (type == "background") {
-		result = chroma.mix(result, "black", 0.3); // mix background-color with black some
-		result = result.alpha(0.9);
+		result = GetNodeBackgroundColorFromRawColor(result);
 	}
 
+	return result;
+}
+export function GetNodeBackgroundColorFromRawColor(color: Color) {
+	let result = chroma.mix(color, "black", 0.3); // mix background-color with black some
+	result = result.alpha(0.9);
 	return result;
 }
 

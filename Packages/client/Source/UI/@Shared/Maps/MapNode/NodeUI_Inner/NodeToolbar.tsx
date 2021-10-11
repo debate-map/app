@@ -1,18 +1,25 @@
 import {Color} from "chroma-js";
-import {ClaimForm, GetArgumentNode, GetNodeForm, GetNodeID, GetNodeL3, GetParentNode, GetParentPath, GetRatings, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNode, MapNodeL3, MapNodeType, NodeRatingType, RatingValueIsInRange} from "dm_common";
+import {ClaimForm, GetArgumentNode, GetFillPercent_AtPath, GetNodeForm, GetNodeID, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatings, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNode, MapNodeL3, MapNodeType, NodeRatingType, Polarity, RatingValueIsInRange} from "dm_common";
 import React, {useState} from "react";
+import {GetNodeColor} from "Store/db_ext/nodes.js";
+import {store} from "Store/index.js";
+import {RatingPreviewType} from "Store/main/maps.js";
 import {ES, InfoButton, Observer} from "web-vcore";
+import {E} from "web-vcore/nm/js-vextensions";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
 
-export class NodeToolbar extends BaseComponent<{
+//export type NodeToolbar_SharedProps = NodeUI_Inner_Props & {backgroundColor: Color};
+export type NodeToolbar_Props = {
 	backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onMoreClick?: (e: any)=>any, onMoreHoverChange?: (hovered: boolean)=>any,
 	leftPanelShow: boolean,
-} & NodeUI_Inner_Props, {}> {
+} & NodeUI_Inner_Props;
+
+export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
 		let {node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
 		const parentPath = SlicePath(path, 1);
@@ -43,7 +50,7 @@ class ToolBarButton extends BaseComponent<{
 	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onClick?: (e: any)=>any, onHoverChange?: (hovered: boolean)=>any,
 	leftPanelShow: boolean,
-} & NodeUI_Inner_Props, {}> {
+} & NodeToolbar_Props, {}> {
 	render() {
 		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
 		let [hovered, setHovered] = useState(false);
@@ -74,7 +81,8 @@ class ToolBarButton extends BaseComponent<{
 				style={ES(
 					{
 						position: "relative", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
-						border: "solid rgba(0,0,0,.5)",
+						//border: "solid rgba(0,0,0,.5)",
+						border: "solid rgba(0,0,0,1)",
 					},
 					(highlight || hovered) && {background: "rgba(255,255,255,.2)"},
 					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
@@ -91,7 +99,7 @@ class ToolBarButton extends BaseComponent<{
 				}}
 			>
 				{enabled && (panel == "truth" || panel == "relevance") &&
-				<RatingsPreviewBackground path={path} node={node} ratingType={panel as NodeRatingType}/>}
+				<RatingsPreviewBackground {...this.props} path={path} node={node} ratingType={panel as NodeRatingType}/>}
 				{enabled
 					? <Text style={{position: "relative"}}>{text}</Text>
 					: <InfoButton text={disabledInfo!}/>}
@@ -101,25 +109,24 @@ class ToolBarButton extends BaseComponent<{
 }
 
 @Observer
-export class RatingsPreviewBackground extends BaseComponent<{path: string, node: MapNode, ratingType: NodeRatingType}, {}> {
+export class RatingsPreviewBackground extends BaseComponent<{path: string, node: MapNodeL3, ratingType: NodeRatingType} & NodeToolbar_Props, {}> {
 	render() {
-		let {path, node, ratingType} = this.props;
+		let {path, node, ratingType, backgroundColor} = this.props;
+		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.none) return null;
 		
 		const parentNode = GetParentNode(path);
 		const argumentNode = GetArgumentNode(node, parentNode);
 		const argumentPath = argumentNode == null ? null : (argumentNode == node ? path : GetParentPath(path));
 
 		const ratingNodePath = ratingType == "relevance" ? argumentPath! : path;
-		const ratingNodeID = GetNodeID(ratingNodePath);
-		const ratingNode = GetNodeL3(ratingNodeID);
+		const ratingNode = GetNodeL3(ratingNodePath);
 		if (ratingNode == null) return null; // why does this happen sometimes?
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
-		const ratings = GetRatings(ratingNodeID, ratingType);
+		const ratings = GetRatings(ratingNode.id, ratingType);
 		const ratingsInEachRange = ratingTypeInfo.valueRanges.map(range=>{
 			return ratings.filter(a=>RatingValueIsInRange(a.value, range));
 		});
-		if (ratings.length == 0) return null;
 		
 		/*ratingsPreview = (
 			<Row style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
@@ -134,17 +141,43 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 				})}
 			</Row>
 		);*/
+		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.chart) {
+			//if (ratings.length == 0) return null;
+
+			/*const nodeColor = GetNodeColor(node, "raw");
+			const redNodeColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: Polarity.opposing} as MapNodeL3, "raw");*/
+			const redNodeBackgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: Polarity.opposing} as MapNodeL3, "background");
+
+			const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
+			return (
+				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
+					uplotData_override={[
+						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
+						//[ratingsInEachRange[0].length, ...ratingsInEachRange.map(a=>a.length), ratingsInEachRange.Last().length],
+						//[0, ...ratingsInEachRange.map(a=>a.length), 0],
+						window["test1"] ?? [baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
+					]}
+					// if background is red, decrease alpha of our orange fill-color (else it shows up too prominently, relative to when the background is green, blue, etc.)
+					//customAlphaMultiplier={nodeColor.css() == redNodeColor.css() ? .5 : 1}
+					customAlphaMultiplier={backgroundColor.css() == redNodeBackgroundColor.css() ? .7 : 1}
+				/>
+			);
+		}
+		
+		//const backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
+		const backgroundFillPercent = GetRatingAverage(ratingNode.id, ratingType, null) ?? 0;
 		return (
-			<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
-				/*ticks_override={
-					ratingTypeInfo.valueRanges.map(a=>a.center)
-					//[0].concat(ratingTypeInfo.valueRanges.map(a=>a.center)).concat(100)
-				}*/
-				uplotData_override={[
-					ratingTypeInfo.valueRanges.map(a=>a.center),
-					ratingsInEachRange.map(a=>a.length),
-				]}
-			/>
+			<>
+				<div style={{position: "absolute", top: 0, bottom: 0, right: 0, width: `${100 - backgroundFillPercent}%`, background: "black"}}/>
+				{/* chart just for the my-rating bars */}
+				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
+					uplotData_override={[
+						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
+						[0, ...ratingsInEachRange.map(a=>0), 0],
+					]}
+					ownRatingOpacity={.5} // increase opacity of own-rating marker (else can be hard to see near filled/unfilled border -- using a shape rather than line should make this unnecessary in future)
+				/>
+			</>
 		);
 	}
 }

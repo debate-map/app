@@ -8,6 +8,13 @@ import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
 
+export enum RatingPreviewType {
+	none = "none",
+	bar_average = "bar_average",
+	//bar_median = "bar_median",
+	chart = "chart",
+}
+
 export class MapsState {
 	constructor() { makeObservable(this); }
 	// @Oervable maps = observable.map<string, MapState>();
@@ -32,6 +39,7 @@ export class MapsState {
 	@O lockMapScrolling = true;
 	@O initialChildLimit = 5;
 	@O showReasonScoreValues = false;
+	@O toolbarRatingPreviews = RatingPreviewType.chart;
 	@O weighting = WeightingType.votes;
 	@O nodeLeftBoxEnabled = false;
 

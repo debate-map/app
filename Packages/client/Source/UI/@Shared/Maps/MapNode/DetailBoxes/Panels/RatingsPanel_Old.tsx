@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings} from "dm_common";
+import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
@@ -16,14 +16,19 @@ import uPlot from "web-vcore/nm/uplot.js";
 import useResizeObserver from "use-resize-observer";
 import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
 import chroma from "chroma-js";
+import {GetNodeColor} from "Store/db_ext/nodes.js";
 
-type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean, uplotData_override?: uPlot.AlignedData};
+type RatingsPanel_Props = {
+	node: MapNodeL3, path: string, ratingType: NodeRatingType,
+	asNodeUIOverlay?: boolean, uplotData_override?: uPlot.AlignedData,
+	ownRatingOpacity?: number, customAlphaMultiplier?: number,
+};
 
 @Observer
 export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
 	root: HTMLDivElement|n;
 	render() {
-		const {node, path, ratingType, asNodeUIOverlay, uplotData_override} = this.props;
+		const {node, path, ratingType, asNodeUIOverlay, uplotData_override, ownRatingOpacity, customAlphaMultiplier = 1} = this.props;
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
 		const ratings = GetRatings(node.id, ratingType);
 
@@ -42,6 +47,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
 		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
 
+		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
 		const lineTypes: uPlot.Series[] = [
 			{
 				label: "Rating value",
@@ -49,8 +55,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			{
 				label: "Rating count",
 				//stroke: chroma(0, 1, .5, "hsl").css(),
-				stroke: chroma("#ff7300").alpha(1 * (asNodeUIOverlay ? .5 : 1)).css(),
-				fill: chroma("#ff7300").alpha(.5 * (asNodeUIOverlay ? .5 : 1)).css(),
+				stroke: chroma("#ff7300").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: chroma("#ff7300").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
 				//fill: "#ff7300FF",
 				points: {show: false},
 				paths: uPlot.paths.spline!(),
@@ -83,17 +89,17 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			return ([
 				myRating_displayVal != null && {
 					type: "line",
-					x: {value: myRating_displayVal, finalize: drawPos=>drawPos.KeepAtLeast(0).KeepAtMost(width - 3)}, // max sure line is not cut-off by container bounds
+					x: {value: myRating_displayVal, finalize: drawPos=>(drawPos - 1).KeepAtLeast(0).KeepAtMost(width - 3)}, // max sure line is not cut-off by container bounds
 					//color: "rgba(0,255,0,1)",
 					//lineWidth: 1,
-					color: chroma("rgba(0,255,0,.5)").alpha(.5 * (asNodeUIOverlay ? .5 : 1)).css(),
+					color: chroma("rgb(0,255,0)").alpha(ownRatingOpacity ?? (.5 * (asNodeUIOverlay ? .5 : 1))).css(),
 					lineWidth: 2,
 					drawType: "source-over",
 				},
 			] as Annotation[]).filter(a=>a);
-		}, [myRating_displayVal, width]);
+		}, [myRating_displayVal, width, ownRatingOpacity]);
 		//const chartOptions = GetChartOptions(width, height, lineTypes);
-		const chartOptions = GetChartOptions(width, asNodeUIOverlay ? height : 250, lineTypes, annotations, !!asNodeUIOverlay);
+		const chartOptions = GetChartOptions(width, asNodeUIOverlay ? height : 250, lineTypes, uplotData, annotations, !!asNodeUIOverlay);
 		return (
 			<div ref={c=>this.root = c}
 				style={ES(
@@ -207,7 +213,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 	chart = createRef<uPlot>();
 }
 
-function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[], annotations: Annotation[], asNodeUIOverlay: boolean) {
+function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[], uplotData: uPlot.AlignedData, annotations: Annotation[], asNodeUIOverlay: boolean) {
 	const legendHeight = 33; // from dev-tools
 	const chartOptions: uPlot.Options = {
 		class: "ratingsChart",
@@ -239,7 +245,13 @@ function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[
 		],
 		scales: {
 			x: {time: false},
-			y: {},
+			y: {
+				/*auto: false,
+				min: 0,
+				max: (uplotData[1].Max() ?? 0).KeepAtLeast(10),*/
+				//range: [0, (uplotData[1].Max() ?? 0).KeepAtLeast(10)],
+				range: ()=>[0, (uplotData[1].Max() ?? 0).KeepAtLeast(1)],
+			},
 		},
 		legend: {
 			show: false,
