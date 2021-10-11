@@ -57,10 +57,11 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 									return (
 										<Div key={prop.index}
 											style={ES(
-												{
-													width: 100, height: 100, border: "1px solid black", cursor: "pointer",
+												{width: 100, height: 100, border: "1px solid black", cursor: "pointer"},
+												background.url_max?.startsWith("background: ") && {background: background.url_max.replace("background: ", "")},
+												!background.url_max?.startsWith("background: ") && {
 													backgroundColor: background.color, backgroundImage: `url(${background.url_256 || background.url_1920 || background.url_3840 || background.url_max})`,
-													backgroundPosition: "center", backgroundSize: "cover",
+													backgroundPosition: "center", backgroundSize: "cover"
 												},
 												selected && {border: "1px solid rgba(255,255,255,.7)"},
 											)}

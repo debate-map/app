@@ -20,10 +20,13 @@ const MTName = MTClass.name;
 	payloadSchema: ()=>({
 		properties: {
 			id: {$ref: "UUID"},
-			updates: DeriveJSONSchema(MTClass, {includeOnly: [
-				"email", "providerData",
-				"backgroundID", "backgroundCustom_enabled", "backgroundCustom_color", "backgroundCustom_url", "backgroundCustom_position",
-			]}),
+			updates: DeriveJSONSchema(MTClass, {
+				includeOnly: [
+					"email", "providerData",
+					"backgroundID", "backgroundCustom_enabled", "backgroundCustom_color", "backgroundCustom_url", "backgroundCustom_position",
+				],
+				makeOptional_all: true,
+			}),
 		},
 		required: ["id", "updates"],
 	}),
