@@ -56,6 +56,7 @@ class ToolBarButton extends BaseComponent<{
 		let [hovered, setHovered] = useState(false);
 		let highlight = panel && panelToShow == panel;
 		const highlightOrHovered = highlight || hovered;
+		const {toolbarRatingPreviews} = store.main.maps;
 
 		let icon: string|n;
 		if (text == "<<") {
@@ -69,6 +70,7 @@ class ToolBarButton extends BaseComponent<{
 		const textComp = enabled
 			? <Text style={{position: "relative"}}>{text}</Text>
 			: <InfoButton text={disabledInfo!}/>;
+		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
 		return (
 			<div
@@ -95,7 +97,9 @@ class ToolBarButton extends BaseComponent<{
 					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
 					icon && {width: 40, fontSize: 16},
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
-					(panel == "truth" || panel == "relevance") && !highlightOrHovered && {color: "rgba(255,255,255,.1)"},
+					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
+						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .1})`,
+					},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},
 				)}
 				onClick={e=>{
@@ -106,10 +110,10 @@ class ToolBarButton extends BaseComponent<{
 					}
 				}}
 			>
-				{!highlightOrHovered && textComp}
+				{!textAfter && textComp}
 				{enabled && (panel == "truth" || panel == "relevance") &&
 				<RatingsPreviewBackground {...this.props} path={path} node={node} ratingType={panel as NodeRatingType}/>}
-				{highlightOrHovered && textComp}
+				{textAfter && textComp}
 			</div>
 		);
 	}
