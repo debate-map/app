@@ -6,7 +6,7 @@ import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
-import {EB_ShowError, EB_StoreError, ES, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
+import {EB_ShowError, EB_StoreError, ES, GetSize, GetSize_Method, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
 import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ObjectCE, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
@@ -307,7 +307,7 @@ export class NodeUI extends BaseComponentPlus(
 					{!limitBar_above && children}
 				</Column>
 				{boxExpanded &&
-				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough">
+				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough" style={{position: "relative"}}>
 					{childConnectorBackground}
 					{nodeChildHolderBox_truth}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
