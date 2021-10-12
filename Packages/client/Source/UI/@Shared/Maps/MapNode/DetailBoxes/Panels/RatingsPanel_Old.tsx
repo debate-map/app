@@ -94,7 +94,11 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			return ([
 				myRating_displayVal != null && {
 					type: "line",
-					x: {value: myRating_displayVal, finalize: drawPos=>(drawPos - 1).KeepAtLeast(0).KeepAtMost(width - 3)}, // max sure line is not cut-off by container bounds
+					x: {
+						value: myRating_displayVal,
+						// max sure line is not cut-off by container bounds (we scale by device-pixel-ratio, because the canvas' width uses that scaling)
+						finalize: drawPos=>(drawPos - 1).KeepAtLeast(0).KeepAtMost((width - 3) * devicePixelRatio)
+					},
 					//color: "rgba(0,255,0,1)",
 					//lineWidth: 1,
 					color: chroma("rgb(0,255,0)").alpha(ownRatingOpacity ?? (.5 * asNodeUIOverlay_alphaMultiplier)).css(),
