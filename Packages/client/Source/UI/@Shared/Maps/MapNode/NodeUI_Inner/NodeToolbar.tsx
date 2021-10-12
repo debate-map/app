@@ -55,7 +55,6 @@ class ToolBarButton extends BaseComponent<{
 		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
 		let [hovered, setHovered] = useState(false);
 		let highlight = panel && panelToShow == panel;
-		const highlightOrHovered = highlight || hovered;
 		const {toolbarRatingPreviews} = store.main.maps;
 
 		let icon: string|n;
@@ -66,6 +65,7 @@ class ToolBarButton extends BaseComponent<{
 			text = "";
 			highlight = highlight || leftPanelShow;
 		}
+		const highlightOrHovered = highlight || hovered;
 
 		const textComp = enabled
 			? <Text style={{position: "relative"}}>{text}</Text>
