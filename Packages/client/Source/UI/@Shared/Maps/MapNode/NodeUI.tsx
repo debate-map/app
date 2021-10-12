@@ -332,6 +332,7 @@ export class NodeUI extends BaseComponentPlus(
 	CheckForChanges = ()=>{
 		const {node, onHeightOrPosChange, dividePoint} = this.PropsState;
 		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
+		if (this.DOM_HTML == null) return;
 
 		// if (this.lastRender_source == RenderSource.SetState) return;
 
