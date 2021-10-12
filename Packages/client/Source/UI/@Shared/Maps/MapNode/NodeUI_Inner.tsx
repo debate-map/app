@@ -28,6 +28,8 @@ import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
 import {RatingsPanel_Old} from "./DetailBoxes/Panels/RatingsPanel_Old.js";
 import {NodeToolbar} from "./NodeUI_Inner/NodeToolbar.js";
+import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
+import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 
 // drag and drop
 // ==========
@@ -115,18 +117,11 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// ==========
 
 		const nodeView = GetNodeView(map?.id, path);
-		//let sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
-		let sinceTime = 0;
-		/* let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
+		let sinceTime = GetTimeFromWhichToShowChangedNodes(map?.id);
+		/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 		let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
-		let changeType = ownNodeChanged ? GetNodeChangeType(node, sinceTime) : null; */
-
-		const lastAcknowledgementTime = GetLastAcknowledgementTime(node.id);
-		sinceTime = sinceTime.KeepAtLeast(lastAcknowledgementTime);
-
-		let changeType: ChangeType|n;
-		if (node.createdAt > sinceTime) changeType = ChangeType.add;
-		else if (node.current.createdAt > sinceTime) changeType = ChangeType.edit;
+		let changeType = ownNodeChanged ? GetNodeChangeType(node, sinceTime) : null;*/
+		let changeType = GetNodeChangeType(node, sinceTime);
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);

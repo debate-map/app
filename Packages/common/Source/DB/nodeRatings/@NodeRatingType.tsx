@@ -29,8 +29,9 @@ export class ValueRange {
 	label: string;
 }
 export function RatingValueIsInRange(value: number, range: ValueRange) {
-	const leftSide = range.max < 50;
-	const rightSide = range.min > 50;
+	// mid-point is intentionally part of both leftSide and rightSide; this causes its range to be shrunk on both sides (achieving target behavior)
+	const leftSide = range.min < 50;
+	const rightSide = range.max > 50;
 
 	let min_adjusted = range.min;
 	let max_adjusted = range.max;

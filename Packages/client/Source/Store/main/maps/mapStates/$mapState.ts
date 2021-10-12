@@ -3,6 +3,7 @@ import {O} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetNodesRevealedInSteps, GetMap} from "dm_common";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
+import {store} from "Store/index.js";
 
 export const GetMapState = CreateAccessor(function(mapID: string|n) {
 	return this!.store.main.maps.mapStates.get(mapID!); // nn: get() actually accepts undefined
@@ -121,18 +122,20 @@ export const GetTimeSinceNodeRevealedByPlayingTimeline = CreateAccessor((mapID: 
 		result = result.KeepBetween(0, GetNodeRevealHighlightTime() + 1); // cap to 0 through [highlight-time]+1, to prevent unneeded re-renders after X+1
 	}
 	return result;
-});
+});*/
 
-export const GetTimeFromWhichToShowChangedNodes = CreateAccessor((mapID: string)=>{
-	const type = s.main.maps.mapStates.get(mapID).showChangesSince_type;
+export const GetTimeFromWhichToShowChangedNodes = CreateAccessor((mapID: string|n)=>{
+	if (mapID == null) return Number.MAX_SAFE_INTEGER; // if not in a map, don't calculate/show changes
+
+	const type = store.main.maps.mapStates.get(mapID)?.showChangesSince_type;
 	if (type == ShowChangesSinceType.none) return Number.MAX_SAFE_INTEGER; // from end of time (nothing)
 	if (type == ShowChangesSinceType.allUnseenChanges) return 0; // from start of time (everything)
 	if (PROD && !GetValues(ShowChangesSinceType).Contains(type)) return Number.MAX_SAFE_INTEGER; // defensive
 
-	const visitOffset = s.main.maps.mapStates.get(mapID).showChangesSince_visitOffset;
+	const visitOffset = store.main.maps.mapStates.get(mapID)?.showChangesSince_visitOffset ?? 1;
 	const lastMapViewTimes = FromJSON(localStorage.getItem(`lastMapViewTimes_${mapID}`) || "[]") as number[];
 	if (lastMapViewTimes.length == 0) return Number.MAX_SAFE_INTEGER; // our first visit, so don't show anything
 
 	const timeOfSpecifiedVisit = lastMapViewTimes[visitOffset.KeepAtMost(lastMapViewTimes.length - 1)];
 	return timeOfSpecifiedVisit;
-});*/
+});

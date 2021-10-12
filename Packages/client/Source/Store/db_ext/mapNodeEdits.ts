@@ -1,8 +1,9 @@
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray, CE, eal} from "web-vcore/nm/js-vextensions.js";
-import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "dm_common";
+import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType, MapNodeL3, GetNodeL2, MapNodeL2} from "dm_common";
 import {GetLastAcknowledgementTime} from "../main/maps.js";
 
+// Why is this needed, when we can just directly call GetNodeChangeType() for each node? Well, because we also want to see change-markers for not-yet-expanded descendant paths.
 export const GetNodeIDsChangedSinceX = CreateAccessor((mapID: string, sinceTime: number, includeAcknowledgement = true): string[]=>{
 	const nodeEdits = GetMapNodeEdits(mapID);
 	if (nodeEdits == null) return emptyArray;
@@ -65,15 +66,18 @@ export const GetPathsToChangedDescendantNodes_WithChangeTypes = CreateAccessor(/
 	}).filter(a=>a);*/
 	//const changeTypesOfChangedDescendantNodes = pathsToChangedDescendantNodes.map(path=>GetNodeChangeType(GetNode(GetNodeID(path))!, sinceTime));
 	const changeTypesOfChangedDescendantNodes = pathsToChangedDescendantNodes.map(path=>{
-		const node = GetNode(GetNodeID(path))!; // we know node exists, because of the fk-constraint on mapNodeEdit.node
+		//const node = GetNode(GetNodeID(path))!; // we know node exists, because of the fk-constraint on mapNodeEdit.node
+		const node = GetNodeL2(GetNodeID(path))!; // we know node exists, because of the fk-constraint on mapNodeEdit.node
 		return GetNodeChangeType(node, sinceTime);
 	});
 	return changeTypesOfChangedDescendantNodes;
 });
 
-export const GetNodeChangeType = CreateAccessor((node: MapNode, sinceTime: number, includeAcknowledgement = true)=>{
+export const GetNodeChangeType = CreateAccessor((node: MapNodeL2, sinceTime: number, includeAcknowledgement = true)=>{
 	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node.id) : 0;
 	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 	if (node.createdAt >= sinceTimeForNode) return ChangeType.add;
-	return ChangeType.edit;
+	else if (node.current.createdAt > sinceTime) return ChangeType.edit;
+	//if (?) return ChangeType.remove;
+	return null;
 });
