@@ -77,7 +77,7 @@ export const GetNodeChangeType = CreateAccessor((node: MapNodeL2, sinceTime: num
 	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node.id) : 0;
 	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 	if (node.createdAt >= sinceTimeForNode) return ChangeType.add;
-	else if (node.current.createdAt > sinceTime) return ChangeType.edit;
+	else if (node.current.createdAt > sinceTimeForNode) return ChangeType.edit;
 	//if (?) return ChangeType.remove;
 	return null;
 });
