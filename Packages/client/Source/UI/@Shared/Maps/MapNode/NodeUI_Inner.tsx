@@ -1,5 +1,5 @@
 import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType, IsMultiPremiseArgument, IsSinglePremiseArgument, GetNodePhrasings, GetPathNodeIDs, GetRatingTypeInfo, NodeRating, GetNodeRating, RatingValueIsInRange, GetParentNode, GetParentNodeID, GetNode, GetParentPath, GetNodeID, GetArgumentNode, MapNode} from "dm_common";
-import chroma, {Color} from "chroma-js";
+import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 //import classNames from "classnames";
 import {A, DEL, DoNothing, E, GetValues, NN, string, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";

@@ -14,7 +14,7 @@ import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetFillPercent_AtPat
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 
 type Props = {

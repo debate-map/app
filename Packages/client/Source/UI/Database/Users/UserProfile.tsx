@@ -1,13 +1,14 @@
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "web-vcore/nm/react-vcomponents.js";
+import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text, Spinner} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
-import {PageContainer, Observer, ES} from "web-vcore";
-import {Fragment} from "react";
+import {PageContainer, Observer, ES, Chroma_Safe} from "web-vcore";
+import React, {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {MeID, GetUser, GetUserHidden, GetUserPermissionGroups, SetUserData, SetUserData_Hidden, User} from "dm_common";
+import {MeID, GetUser, GetUserHidden, GetUserPermissionGroups, SetUserData, SetUserData_Hidden, User, GetUserFollows_List, SetUserFollowData, UserFollow} from "dm_common";
+import chroma from "web-vcore/nm/chroma-js.js";
 
 @Observer
 export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}, {}) {
@@ -20,6 +21,8 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 		const userID = MeID();
 		const profileUserPermissionGroups = GetUserPermissionGroups(profileUser ? profileUser.id : null);
 		const currentUser = GetUser(userID);
+		const currentUser_follows = GetUserFollows_List(userID);
+		const profileUserFollow = currentUser_follows.find(a=>a.targetUser == profileUser.id);
 
 		return (
 			<PageContainer>
@@ -43,6 +46,46 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 						);
 					})}
 				</Row>
+				{profileUser != currentUser &&
+				<Row mt={3}>
+					<CheckBox text="Follow" value={profileUserFollow != null} onChange={val=>{
+						if (val) {
+							new SetUserFollowData({targetUser: profileUser.id, userFollow: new UserFollow()}).RunOnServer();
+						} else {
+							new SetUserFollowData({targetUser: profileUser.id, userFollow: null}).RunOnServer();
+						}
+					}}/>
+					{profileUserFollow &&
+					<>
+						<CheckBox ml={5} text="Mark ratings" value={profileUserFollow.markRatings} onChange={val=>{
+							new SetUserFollowData({
+								targetUser: profileUser.id,
+								userFollow: {...profileUserFollow, markRatings: val},
+							}).RunOnServer();
+						}}/>
+						<Text ml={5}>Symbol:</Text>
+						<TextInput ml={5} style={{width: 30}} value={profileUserFollow.markRatings_symbol} onChange={val=>{
+							new SetUserFollowData({
+								targetUser: profileUser.id,
+								userFollow: {...profileUserFollow, markRatings_symbol: val},
+							}).RunOnServer();
+						}}/>
+						<Text ml={5} mr={5}>Color:</Text>
+						<ColorPickerBox color={Chroma_Safe(profileUserFollow.markRatings_color).rgba()} onChange={val=>{
+							new SetUserFollowData({
+								targetUser: profileUser.id,
+								userFollow: {...profileUserFollow, markRatings_color: chroma(val).css()},
+							}).RunOnServer();
+						}}/>
+						<Text ml={5}>Size:</Text>
+						<Spinner ml={5} value={profileUserFollow.markRatings_size} onChange={val=>{
+							new SetUserFollowData({
+								targetUser: profileUser.id,
+								userFollow: {...profileUserFollow, markRatings_size: val},
+							}).RunOnServer();
+						}}/>
+					</>}
+				</Row>}
 
 				{profileUser == currentUser && profileUser_p &&
 					<Fragment>
@@ -80,8 +123,8 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 						</Row>
 						<Row mt={5}>
 							<Pre>Color: </Pre>
-							<ColorPickerBox color={profileUser_p.backgroundCustom_color || "#FFFFFF"} onChange={val=>{
-								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: val}}).RunOnServer();
+							<ColorPickerBox color={Chroma_Safe(profileUser_p.backgroundCustom_color ?? "#FFFFFF").rgba()} onChange={val=>{
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: chroma(val).css()}}).RunOnServer();
 							}}/>
 							<Button ml={5} text="Clear" onClick={()=>{
 								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: null}}).RunOnServer();

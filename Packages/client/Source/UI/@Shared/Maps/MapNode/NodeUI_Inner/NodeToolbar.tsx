@@ -1,4 +1,4 @@
-import {Color} from "chroma-js";
+import {Color} from "web-vcore/nm/chroma-js.js";
 import {ClaimForm, GetArgumentNode, GetFillPercent_AtPath, GetNodeForm, GetNodeID, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatings, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNode, MapNodeL3, MapNodeType, NodeRatingType, Polarity, RatingValueIsInRange} from "dm_common";
 import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";

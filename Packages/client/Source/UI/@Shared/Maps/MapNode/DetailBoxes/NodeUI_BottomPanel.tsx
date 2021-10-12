@@ -1,4 +1,4 @@
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {GetRatings, Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";

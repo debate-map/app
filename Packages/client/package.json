@@ -7,7 +7,6 @@
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "4.1.0",
-    "@types/chroma-js": "^1.3.3",
     "@types/history": "4.7.3",
     "@types/react-list": "0.8.5",
     "commander": "2.19.0",
@@ -17,7 +16,6 @@
     "ts-node-dev": "1.1.6"
   },
   "dependencies": {
-    "chroma-js": "^1.3.6",
     "dm_common": "workspace:*",
     "katex": "^0.9.0",
     "keycode": "^2.1.8",

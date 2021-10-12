@@ -1,4 +1,4 @@
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {CreateLinkCommand, GetNodeDisplayText, GetNodeL3, GetPathNodeIDs, Me, MeID, Polarity} from "dm_common";
 import keycode from "keycode";
 import {hasHotReloaded} from "Main";

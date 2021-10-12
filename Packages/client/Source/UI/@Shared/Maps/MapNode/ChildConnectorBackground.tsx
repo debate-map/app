@@ -4,7 +4,7 @@ import {ES, HSLA} from "web-vcore";
 import {Fragment} from "react";
 import {MapNodeL3} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 
 export type ChildBoxInfo = {
 	//nodeID: string|n;

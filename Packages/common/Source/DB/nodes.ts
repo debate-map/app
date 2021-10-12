@@ -59,7 +59,7 @@ export const GetNodesL2 = StoreAccessor((s) => (): MapNodeL2[] => {
 	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
 } */
 export const GetNodesByIDs = CreateAccessor((ids: string[]): MapNode[]=>{
-	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "normal"](id));
+	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "Normal"](id));
 	return ids.map(id=>GetNode.BIN(id));
 });
 export const GetNodesByTitle = CreateAccessor((title: string, titleKey: TitleKey): MapNode[]=>{

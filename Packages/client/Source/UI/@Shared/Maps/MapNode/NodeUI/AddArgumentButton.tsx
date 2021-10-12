@@ -6,11 +6,10 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
 import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "dm_common";
-
-
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
+import {Chroma_Mix} from "Utils/ClassExtensions/CE_General.js";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',
@@ -84,7 +83,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						border: "none", boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 						// width: 150, padding: "2px 12px",
 						width: 60, padding: "2px 12px",
-						":hover": {backgroundColor: backgroundColor.Mix("white", 0.05).alpha(0.9).css()},
+						":hover": {backgroundColor: Chroma_Mix(backgroundColor, "white", 0.05).alpha(0.9).css()},
 					},
 					/* polarity == Polarity.supporting && {marginBottom: 5},
 					polarity == Polarity.opposing && {marginTop: 5}, */

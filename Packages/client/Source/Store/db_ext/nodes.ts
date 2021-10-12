@@ -1,4 +1,4 @@
-import chroma, {Color} from "chroma-js";
+import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 import {GetNodeChildrenL3, GetNodeRevisions, MapNodeL3, MapNodeRevision, MapNodeType, Polarity} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";

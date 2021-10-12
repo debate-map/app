@@ -2,7 +2,7 @@
 /* let FindReact = require("react-vextensions");
 let chroma = require("chroma-js"); */
 import {FindReact} from "web-vcore/nm/react-vextensions.js";
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 
 // groups
 // ==========
@@ -62,7 +62,7 @@ Array.prototype._AddFunction_Inline = function AutoKey(this: any[]) {
 // ChromaJS color
 // ==========
 
-declare module "chroma-js" {
+/*declare module "chroma-js" {
 	interface Color {
 		Mix(otherColor: any, otherColorRatio?: number, colorSpace?: any): chroma.Color;
 	}
@@ -70,4 +70,7 @@ declare module "chroma-js" {
 const ColorPrototype = Object.getPrototypeOf(chroma("rgb(255,0,0)"));
 CE(ColorPrototype)._AddFunction("Mix", function Mix(otherColor: any, otherColorRatio = 0.5, colorSpace = "rgb" as any) {
 	return chroma.mix(this, otherColor, otherColorRatio, colorSpace);
-});
+});*/
+export function Chroma_Mix(selfColor: any, otherColor: any, otherColorRatio = 0.5, colorSpace = "rgb" as any) {
+	return chroma.mix(selfColor, otherColor, otherColorRatio, colorSpace);
+}

@@ -15,7 +15,7 @@ import {UPlot} from "web-vcore/nm/react-uplot.js";
 import uPlot from "web-vcore/nm/uplot.js";
 import useResizeObserver from "use-resize-observer";
 import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 
 type RatingsPanel_Props = {

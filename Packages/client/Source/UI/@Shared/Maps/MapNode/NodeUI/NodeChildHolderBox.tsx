@@ -1,4 +1,4 @@
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {AssertWarn, emptyArray, emptyArray_forLoading, E, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";

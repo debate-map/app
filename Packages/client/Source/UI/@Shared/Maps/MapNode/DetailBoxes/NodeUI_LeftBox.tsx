@@ -1,4 +1,4 @@
-import chroma from "chroma-js";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingAverage_AtPath, GetRatings, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MeID, NodeRatingType} from "dm_common";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {DefaultLoadingUI, Observer} from "web-vcore";

@@ -2,6 +2,7 @@ import {Button, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import React from "react";
+import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
 
 type Props = {
 	parent?,
@@ -64,9 +65,9 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 							padding: 0,
 							fontSize: expanded ? 23 : 17,
 							lineHeight: "1px", // keeps text from making meta-theses too tall
-							backgroundColor: backgroundColor.Mix("black", 0.2).alpha(0.9).css(),
+							backgroundColor: Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
 							border: "none",
-							":hover": {backgroundColor: backgroundColor.Mix("black", 0.1).alpha(0.9).css()},
+							":hover": {backgroundColor: Chroma_Mix(backgroundColor, "black", 0.1).alpha(0.9).css()},
 						}}
 						onClick={toggleExpanded}/>
 				</Row>

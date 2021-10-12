@@ -38,6 +38,7 @@ export * from "./Commands/SetNodeIsMultiPremiseArgument.js";
 export * from "./Commands/SetNodeRating.js";
 export * from "./Commands/SetUserData.js";
 export * from "./Commands/SetUserData_Hidden.js";
+export * from "./Commands/SetUserFollowData.js";
 export * from "./Commands/UnlinkNode.js";
 export * from "./Commands/UpdateAccessPolicy.js";
 export * from "./Commands/UpdateMedia.js";

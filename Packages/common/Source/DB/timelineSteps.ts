@@ -10,7 +10,7 @@ export const GetTimelineStep = CreateAccessor((id: string): TimelineStep|n=>{
 	return null;
 });
 export const GetTimelineSteps = CreateAccessor((timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
-	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "normal" : "BIN"](id)) ?? [];
+	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "Normal" : "BIN"](id)) ?? [];
 });
 
 export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{

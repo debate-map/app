@@ -1,3 +1,4 @@
+import chroma from "web-vcore/nm/chroma-js.js";
 import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 // temp replaced
@@ -58,4 +59,32 @@ export class UserHidden {
 	@DB((t, n)=>t.string(n).nullable().references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	lastAccessPolicy?: string;
+
+	@DB((t, n)=>t.jsonb(n))
+	@Field({$ref: "UserHidden_Extras"})
+	extras: UserHidden_Extras;
+}
+
+@MGLClass()
+export class UserHidden_Extras {
+	constructor(data?: Partial<UserHidden_Extras>) {
+		this.VSet(data);
+	}
+
+	@Field({patternProperties: {".{22}": {$ref: "UserFollow"}}})
+	userFollows = {} as {[key: string]: UserFollow};
+}
+@MGLClass()
+export class UserFollow {
+	@Field({type: "boolean"})
+	markRatings = true;
+	
+	@Field({type: "string"})
+	markRatings_symbol = "X";
+	
+	@Field({type: "string"})
+	markRatings_color = chroma("yellow").css();
+	
+	@Field({type: "number"})
+	markRatings_size = 10;
 }

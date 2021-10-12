@@ -349,6 +349,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "backgroundCustom_position", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "addToStream", (t, n)=>t.boolean(n));
 		RunFieldInit(t, "lastAccessPolicy", (t, n)=>t.string(n).nullable().references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "extras", (t, n)=>t.jsonb(n));
 	});
 
 	await knex.schema.createTable(`${v}users`, t=>{
