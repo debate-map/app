@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity} from "dm_common";
+import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
@@ -46,6 +46,10 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		//const {labels, values} = ratingTypeInfo;
 		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
 		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
+
+		const userFollows = GetUserFollows_List(userID);
+		const markRatingUsers = userFollows.filter(a=>a.markRatings).map(a=>a.targetUser);
+		const ratingsToMark = ratings.filter(a=>markRatingUsers.includes(a.creator));
 
 		//let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
 		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .8 : 1;
@@ -206,6 +210,38 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 						.u-legend .hideLegend { display: none; }
 						`}</style>
 						<UPlot chartRef={this.chart} options={chartOptions} data={uplotData} ignoreDoubleClick={true}/>
+						{ratingsToMark.map((rating, index)=>{
+							const markOpts = userFollows.find(a=>a.targetUser == rating.creator)!;
+							return (
+								<div key={index} style={{
+									position: "absolute",
+									display: "flex", alignItems: "center", justifyContent: "center",
+									// using font-size (pixel-value is not always respected)
+									/*left: (rating.value / 100).ToPercentStr(), bottom: 1,
+									width: 0, height: 0,
+									fontSize: markOpts.markRatings_size,
+									color: markOpts.markRatings_color,*/
+									// using box-size, and font auto-resize to match (more consistent sizing)
+									left: `calc(${(rating.value / 100).ToPercentStr()} - ${markOpts.markRatings_size / 2}px)`, bottom: 1,
+									width: markOpts.markRatings_size, height: markOpts.markRatings_size,
+								}}>
+									{/*markOpts.markRatings_symbol*/}
+									<svg width="100%" height="100%" viewBox={`0 0 ${markOpts.markRatings_size} ${markOpts.markRatings_size}`} preserveAspectRatio="xMinYMid meet" //style={{backgroundColor: "green"}}
+										//xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+									>
+										{/*<text x="0" y={markOpts.markRatings_size} font-size={markOpts.markRatings_size} fill={markOpts.markRatings_color}>{markOpts.markRatings_symbol}</text>*/}
+										<foreignObject width="100%" height="100%">
+											<div style={{
+												width: "100%", height: "100%", color: markOpts.markRatings_color,
+												display: "flex", alignItems: "center", justifyContent: "center",
+											}}>
+												{markOpts.markRatings_symbol}
+											</div>
+										</foreignObject>
+									</svg>
+								</div>
+							);
+						})}
 					</>}
 				</div>
 			</div>
