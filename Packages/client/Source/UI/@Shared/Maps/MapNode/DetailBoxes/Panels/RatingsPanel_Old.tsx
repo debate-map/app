@@ -216,29 +216,12 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 								<div key={index} style={{
 									position: "absolute",
 									display: "flex", alignItems: "center", justifyContent: "center",
-									// using font-size (pixel-value is not always respected -- but seems there is no way to auto-size font to fit a container)
 									left: (rating.value / 100).ToPercentStr(), bottom: 0,
 									width: 0, //height: 0,
 									fontSize: markOpts.markRatings_size,
 									color: markOpts.markRatings_color,
-									// using box-size, and font auto-resize to match (not working)
-									/*left: `calc(${(rating.value / 100).ToPercentStr()} - ${markOpts.markRatings_size / 2}px)`, bottom: 1,
-									width: markOpts.markRatings_size, height: markOpts.markRatings_size,*/
 								}}>
 									{markOpts.markRatings_symbol}
-									{/*<svg width="100%" height="100%" viewBox={`0 0 ${markOpts.markRatings_size} ${markOpts.markRatings_size}`} preserveAspectRatio="xMinYMid meet" //style={{backgroundColor: "green"}}
-										//xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-									>
-										{/*<text x="0" y={markOpts.markRatings_size} font-size={markOpts.markRatings_size} fill={markOpts.markRatings_color}>{markOpts.markRatings_symbol}</text>*#/}
-										<foreignObject width="100%" height="100%">
-											<div style={{
-												width: "100%", height: "100%", color: markOpts.markRatings_color,
-												display: "flex", alignItems: "center", justifyContent: "center",
-											}}>
-												{markOpts.markRatings_symbol}
-											</div>
-										</foreignObject>
-									</svg>*/}
 								</div>
 							);
 						})}
