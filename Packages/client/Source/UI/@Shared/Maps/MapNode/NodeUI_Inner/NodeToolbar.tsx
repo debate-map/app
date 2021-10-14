@@ -1,16 +1,18 @@
 import {Color} from "web-vcore/nm/chroma-js.js";
-import {ClaimForm, GetArgumentNode, GetFillPercent_AtPath, GetNodeForm, GetNodeID, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatings, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNode, MapNodeL3, MapNodeType, NodeRatingType, Polarity, RatingValueIsInRange} from "dm_common";
-import React, {useState} from "react";
+import {ChildGroup, ClaimForm, GetArgumentNode, GetFillPercent_AtPath, GetNodeForm, GetNodeID, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatings, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNode, MapNodeL3, MapNodeType, NodeRatingType, Polarity, RatingValueIsInRange} from "dm_common";
+import React, {useMemo, useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
-import {ES, InfoButton, Observer} from "web-vcore";
+import {ES, InfoButton, Observer, UseDocumentEventListener} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
+import {NodeUI_Menu} from "../NodeUI_Menu.js";
+import {VMenuUI} from "web-vcore/nm/react-vmenu";
 
 //export type NodeToolbar_SharedProps = NodeUI_Inner_Props & {backgroundColor: Color};
 export type NodeToolbar_Props = {
@@ -21,11 +23,15 @@ export type NodeToolbar_Props = {
 
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
-		let {node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
+		let {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
+		const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const nodeForm = GetNodeForm(node, path);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+
+		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
+		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));
 		
 		//const sharedProps = {node, panelToShow, onPanelButtonClick, leftPanelShow};
 		const sharedProps = this.props;
@@ -38,7 +44,17 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
 				<ToolBarButton {...sharedProps} text="Relevance" panel="relevance"
 					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg} disabledInfo="TODO"/>}
-				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings" last={true}/>
+				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings"/>
+				<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
+					processedMouseEvents.add(e.nativeEvent);
+					setContextMenuOpen(!contextMenuOpen);
+				}}/>
+				{contextMenuOpen &&
+				<div style={{position: "relative"}}>
+					<VMenuUI style={{left: -30, top: "100%"}} onOtherVMenuOpen={()=>setContextMenuOpen(false)}>
+						<NodeUI_Menu map={map} node={node} path={path} childGroup={ChildGroup.generic}/>
+					</VMenuUI>
+				</div>}
 			</Row>
 		);
 	}
@@ -48,7 +64,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 class ToolBarButton extends BaseComponent<{
 	node: MapNodeL3, text: string, enabled?: boolean, disabledInfo?: string, panel?: string,
 	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
-	onClick?: (e: any)=>any, onHoverChange?: (hovered: boolean)=>any,
+	onClick?: (e: React.MouseEvent)=>any, onHoverChange?: (hovered: boolean)=>any,
 	leftPanelShow: boolean,
 } & NodeToolbar_Props, {}> {
 	render() {
@@ -64,6 +80,10 @@ class ToolBarButton extends BaseComponent<{
 			icon = "transfer-left";
 			text = "";
 			highlight = highlight || leftPanelShow;
+		} else if (text == "...") {
+			icon = "dots-vertical";
+			text = "";
+			//highlight = highlight || leftPanelShow;
 		}
 		const highlightOrHovered = highlight || hovered;
 
@@ -95,7 +115,11 @@ class ToolBarButton extends BaseComponent<{
 					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
 					!first && {borderWidth: "1px 0 0 1px"},
 					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
-					icon && {width: 40, fontSize: 16},
+					icon && {
+						//width: icon == "transfer-left" ? 40 : 25,
+						width: icon == "transfer-left" ? 35 : 30,
+						fontSize: 16,
+					},
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
 					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
 						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .1})`,

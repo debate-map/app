@@ -41,7 +41,7 @@ export class MapsState {
 	@O showReasonScoreValues = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
 	@O weighting = WeightingType.votes;
-	@O nodeLeftBoxEnabled = false;
+	//@O nodeLeftBoxEnabled = false;
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();

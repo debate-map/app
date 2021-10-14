@@ -76,7 +76,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (
-			<div>
+			<>
 				{/*CanContributeToNode(userID, node.id) &&*/ !inList && validChildTypes.map(childType=>{
 					const childTypeInfo = MapNodeType_Info.for[childType];
 					// let displayName = GetMapNodeTypeDisplayName(childType, node, form);
@@ -191,7 +191,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 				<MI_UnlinkNode {...sharedProps}/>
 				<MI_DeleteContainerArgument {...sharedProps}/>
 				<MI_DeleteNode {...sharedProps}/>
-			</div>
+			</>
 		);
 	}
 }

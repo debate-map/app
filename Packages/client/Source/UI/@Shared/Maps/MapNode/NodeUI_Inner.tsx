@@ -4,7 +4,7 @@ import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 import {A, DEL, DoNothing, E, GetValues, NN, string, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Bail, BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
@@ -207,8 +207,14 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const nodeReversed = nodeForm == ClaimForm.negation;
 
 		const selected = nodeView?.selected || local_selected || false;
+		const [leftPanelPinned, setLeftPanelPinned] = useState(false);
+		useEffect(()=>{
+			// if left-panel is pinned, but node is no longer selected or hovered, reset its "pinned" state to false
+			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
+		}, [selected, leftPanelPinned]);
+
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
-		const leftPanelShow = ((selected || hovered) && store.main.maps.nodeLeftBoxEnabled) || moreButtonHovered || leftPanelHovered || (selected && panelToShow != null && openPanelSource == "left-panel");
+		const leftPanelShow = ((selected || hovered) && leftPanelPinned) || moreButtonHovered || leftPanelHovered || (selected && panelToShow != null && openPanelSource == "left-panel");
 		const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const bottomPanelShow = (selected || hovered) && panelToShow;
 		let expanded = nodeView?.expanded ?? false;
@@ -372,7 +378,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							leftPanelShow={leftPanelShow}
 							onMoreClick={()=>{
 								//onClick();
-								RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
+								//RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
+								setLeftPanelPinned(!leftPanelPinned);
 							}}
 							onMoreHoverChange={hovered=>{
 								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
