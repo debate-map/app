@@ -309,7 +309,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						this.SetState({hoverPanel: null});
 					}
 
-					nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
+					//nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
+					nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : undefined);
 				});
 			};
 			return (
