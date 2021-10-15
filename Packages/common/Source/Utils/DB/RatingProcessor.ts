@@ -77,6 +77,17 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNode, 
 	return result;
 } */
 
+export function RatingListAfterRemovesAndAdds(baseList: NodeRating[], ratingsToRemove?: string[], ratingsToAdd?: NodeRating[], ratingsToAdd_filter?: {nodeID: string, ratingType: NodeRatingType, userIDs?: string[]|n}) {
+	let result = baseList.slice();
+	if (ratingsToRemove) result = result.filter(a=>!ratingsToRemove.includes(a.id));
+	if (ratingsToAdd) {
+		const filter = ratingsToAdd_filter;
+		Assert(filter != null, "If supplying ratingsToAdd, must also supply ratingsToAdd_filter.");
+		result.push(...ratingsToAdd.filter(a=>a.node == filter.nodeID && a.type == filter.ratingType && (filter.userIDs == null || filter.userIDs.includes(a.creator))));
+	}
+	return result;
+}
+
 export const GetArgumentImpactPseudoRatings = CreateAccessor((
 	argument: MapNode, premises: MapNode[], userIDs?: string[]|n,
 	useAverageForMissing = false, ratingsBeingRemoved?: string[], ratingsBeingAdded?: NodeRating[],
@@ -85,14 +96,12 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((
 	if (premises.length == 0) return emptyArray as any;
 
 	let argumentRelevanceRatings = GetRatings(argument.id, NodeRatingType.relevance, userIDs);
-	if (ratingsBeingRemoved) argumentRelevanceRatings = argumentRelevanceRatings.filter(a=>!ratingsBeingRemoved.includes(a.id));
-	if (ratingsBeingAdded) argumentRelevanceRatings.push(...ratingsBeingAdded.filter(a=>a.node == argument.id && a.type == NodeRatingType.relevance && (userIDs == null || userIDs.includes(a.creator))));
+	argumentRelevanceRatings = RatingListAfterRemovesAndAdds(argumentRelevanceRatings, ratingsBeingRemoved, ratingsBeingAdded, {nodeID: argument.id, ratingType: NodeRatingType.relevance, userIDs});
 
 	const usersWhoRatedArgAndPremises = new Set(argumentRelevanceRatings.map(a=>a.creator));
 	for (const premise of premises) {
 		let premiseTruthRatings = GetRatings(premise.id, NodeRatingType.truth, userIDs);
-		if (ratingsBeingRemoved) premiseTruthRatings = premiseTruthRatings.filter(a=>!ratingsBeingRemoved.includes(a.id));
-		if (ratingsBeingAdded) premiseTruthRatings.push(...ratingsBeingAdded.filter(a=>a.node == premise.id && a.type == NodeRatingType.truth && (userIDs == null || userIDs.includes(a.creator))));
+		premiseTruthRatings = RatingListAfterRemovesAndAdds(premiseTruthRatings, ratingsBeingRemoved, ratingsBeingAdded, {nodeID: premise.id, ratingType: NodeRatingType.truth, userIDs});
 
 		const usersWhoRatedPremise = new Set(premiseTruthRatings.map(a=>a.creator));
 		for (const userID of usersWhoRatedArgAndPremises) {

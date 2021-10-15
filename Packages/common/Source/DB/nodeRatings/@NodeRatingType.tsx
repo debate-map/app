@@ -78,7 +78,7 @@ export const baseRatingTypeInfo = {
 	[NodeRatingType.impact]: new RatingType_Info({
 		displayText: "Impact",
 		//valueRanges: GenerateValRangesFromLabels(["Thoroughly False", "Mostly False", "Somewhat True", "Mostly True", "Game-Changer"]),
-		valueRanges: [],
+		valueRanges: GenerateValRangesFromLabels(["[unnamed range]"]), // must have one range entry, so UpdateNodeRatingSummaries() can store the impact-rating count, with consistent code
 	}),
 };
 
@@ -88,7 +88,11 @@ export function GetRatingTypeInfo(ratingType: NodeRatingType, node?: MapNodeL3, 
 
 function GenerateValRangesFromLabels(labels: string[]) {
 	let ranges: [number, number][];
-	if (labels.length == 5) {
+	if (labels.length == 1) {
+		ranges = [
+			[0, 100],		// center: 50
+		];
+	} else if (labels.length == 5) {
 		// range covered by each entry: 20 [100/5 = 20]
 		ranges = [
 			[0, 20],		// center: 10
@@ -109,7 +113,7 @@ function GenerateValRangesFromLabels(labels: string[]) {
 			[85, 100],	// center: 92 (rounded down, since 50 is anchor)
 		];
 	} else {
-		Assert(false, "Not yet implemented.");
+		Assert(false, `Label-count (${labels.length}) doesn't match any of the implemented values (1,5,7).`);
 	}
 	return ranges.map((range, index)=>{
 		const label = labels[index];

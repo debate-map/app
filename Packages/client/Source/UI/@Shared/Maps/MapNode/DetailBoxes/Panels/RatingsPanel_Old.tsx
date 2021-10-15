@@ -1,11 +1,11 @@
-import {emptyArray, Lerp, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {emptyArray, Lerp, Range, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, UseEffect, UseState} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
+import {ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, uplotDefaults} from "web-vcore";
 import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
@@ -27,9 +27,22 @@ type RatingsPanel_Props = {
 @Observer
 export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props, {}) {
 	root: HTMLDivElement|n;
+	chart = createRef<uPlot>();
 	render() {
 		const {node, path, ratingType, asNodeUIOverlay, uplotData_override, ownRatingOpacity, customAlphaMultiplier = 1} = this.props;
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
+
+		const [rootRect, setRootRect] = UseState<VRect|n>(null);
+		const [chartBodyRect, setChartBodyRect] = UseState<VRect|n>(null);
+		UseEffect(()=>{
+			// after each render, find the chart-body subrect, and store it in state (so rating-markers can adjust to it)
+			const newRootRect = this.DOM_HTML ? GetPageRect(this.DOM_HTML) : null;
+			const newChartBodyRect = this.chart.current?.under ? GetViewportRect(this.chart.current?.under) : null;
+			if (newRootRect && newRootRect.width && newChartBodyRect && newChartBodyRect.width) {
+				if (!newRootRect.Equals(rootRect)) setRootRect(newRootRect);
+				if (!newChartBodyRect.Equals(chartBodyRect)) setChartBodyRect(newChartBodyRect);
+			}
+		});
 
 		const meID = MeID();
 		//const ratings = GetRatings(node.id, ratingType);
@@ -199,13 +212,20 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				</div>}
 				{!asNodeUIOverlay &&
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
-					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
+					<Pre style={{fontSize: 12, color: "rgba(255,255,255,.5)"}}>
 						{ratingType == "impact"
-							? 'Cannot rate impact directly. Instead, rate the "truth" and "relevance".'
+							? `Cannot rate impact directly. Instead, rate the "truth/agreement" and "relevance".`
 							: "Click to rate. Right-click to remove rating."}
 					</Pre>
-					{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
-					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
+					{ratingType == "impact" &&
+					<InfoButton ml={5} text={`
+						Note also that the "average impact" score (shown in panel-button to the left) will sometimes not seem to match the ratings shown in the chart.
+						This is because the chart ignores ratings that are missing one of the truth/relevance scores (eg. rating the argument's relevance, but not all the premises), whereas the "average" includes them.
+					`.AsMultiline(0)}/>}
+					<Row ml="auto">
+						{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
+						<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
+					</Row>
 				</div>}
 				
 				<div ref={rootRef as any} className="uplotHolder" style={ES({
@@ -220,17 +240,24 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 						.u-legend .hideLegend { display: none; }
 						`}</style>
 						<UPlot chartRef={this.chart} options={chartOptions} data={uplotData} ignoreDoubleClick={true}/>
-						{ratingsToMark.map((rating, index)=>{
+						{//(asNodeUIOverlay || (rootRect != null && chartBodyRect != null)) &&
+						rootRect != null && chartBodyRect != null && 
+						ratingsToMark.map((rating, index)=>{
 							const markOpts = userFollows.find(a=>a.targetUser == rating.creator)!;
+							const chartBodySizeRelToRoot = chartBodyRect.width / rootRect.width;
 							return (
-								<div key={index} style={{
-									position: "absolute",
-									display: "flex", alignItems: "center", justifyContent: "center",
-									left: (rating.value / 100).ToPercentStr(), bottom: 0,
-									width: 0, //height: 0,
-									fontSize: markOpts.markRatings_size,
-									color: markOpts.markRatings_color,
-								}}>
+								<div key={index} style={ES(
+									{
+										position: "absolute",
+										display: "flex", alignItems: "center", justifyContent: "center",
+										width: 0, //height: 0,
+										fontSize: markOpts.markRatings_size,
+										color: markOpts.markRatings_color,
+										pointerEvents: "none",
+									},
+									//asNodeUIOverlay && {left: (rating.value / 100).ToPercentStr(), bottom: 0},
+									{left: `calc(${chartBodyRect.x - rootRect.x}px + ${((rating.value / 100) * chartBodySizeRelToRoot).ToPercentStr()}`, bottom: rootRect.Bottom - chartBodyRect.Bottom},
+								)}>
 									{markOpts.markRatings_symbol}
 								</div>
 							);
@@ -240,7 +267,6 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			</div>
 		);
 	}
-	chart = createRef<uPlot>();
 }
 
 function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[], uplotData: uPlot.AlignedData, annotations: Annotation[], asNodeUIOverlay: boolean) {
