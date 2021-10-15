@@ -16,7 +16,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, ES, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction, RunInAction_Set} from "web-vcore";
+import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, ES, HSLA, InfoButton, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
@@ -249,16 +249,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			}
 		}, [local_selected, map, nodeView?.selected, path, useLocalPanelState]);
 		if (usePortalForDetailBoxes) {
-			UseEffect(()=>{
-				const doc_onClick = (e: MouseEvent)=>{
-					const uiRoots = [this.root?.DOM, this.leftPanel?.DOM, this.bottomPanel?.DOM].filter(a=>a);
-					// if user clicked outside of node-ui-inner's descendant tree, close the detail-boxes
-					if (uiRoots.every(a=>!a!.contains(e.target as HTMLElement))) {
-						this.SetState({local_selected: false, local_openPanel: null});
-					}
-				};
-				document.addEventListener("click", doc_onClick);
-				return ()=>document.removeEventListener("click", doc_onClick);
+			UseDocumentEventListener("click", e=>{
+				const uiRoots = [this.root?.DOM, this.leftPanel?.DOM, this.bottomPanel?.DOM].filter(a=>a);
+				// if user clicked outside of node-ui-inner's descendant tree, close the detail-boxes
+				if (uiRoots.every(a=>!a!.contains(e.target as HTMLElement))) {
+					this.SetState({local_selected: false, local_openPanel: null});
+				}
 			});
 		}
 		const onDirectClick = UseCallback(e=>{

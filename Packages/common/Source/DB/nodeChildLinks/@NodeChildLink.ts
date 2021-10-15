@@ -56,11 +56,11 @@ export class NodeChildLink {
 
 	@DB((t, n)=>t.text(n))
 	@Field({$ref: "MapNodeType"}, {opt: true})
-	c_parentType?: MapNodeType;
+	c_parentType?: MapNodeType; // derived from "nodes" table
 
 	@DB((t, n)=>t.text(n))
 	@Field({$ref: "MapNodeType"}, {opt: true})
-	c_childType?: MapNodeType;
+	c_childType?: MapNodeType; // derived from "nodes" table
 
 	// runtime only
 	declare _mirrorLink?: boolean;

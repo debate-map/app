@@ -62,7 +62,7 @@ export class UserHidden {
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "UserHidden_Extras"})
-	extras: UserHidden_Extras;
+	extras = new UserHidden_Extras();
 }
 
 @MGLClass()
@@ -72,7 +72,7 @@ export class UserHidden_Extras {
 	}
 
 	@Field({patternProperties: {".{22}": {$ref: "UserFollow"}}})
-	userFollows = {} as {[key: string]: UserFollow};
+	userFollows? = {} as {[key: string]: UserFollow};
 }
 @MGLClass()
 export class UserFollow {

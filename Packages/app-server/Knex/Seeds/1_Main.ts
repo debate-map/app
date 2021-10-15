@@ -40,6 +40,7 @@ const users = TypeCheck(User as new()=>(User & {hidden: UserHidden}), {
 			id: systemUserID,
 			email: "debatemap@gmail.com",
 			providerData: [],
+			extras: {},
 		},
 	},
 });
@@ -127,7 +128,8 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 				terms: [],
 			}) as any,
 		},
-		c_currentRevision: LastUUID(),
+		c_currentRevision: LastUUID(), // derived from "nodeRevisions" table
+		extras: {},
 	},
 });
 

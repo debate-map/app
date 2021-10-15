@@ -5,6 +5,7 @@ import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 import {DeleteNodeRating} from "./DeleteNodeRating.js";
+import {UpdateNodeRatingSummaries} from "./UpdateNodeRatingSummaries.js";
 
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
@@ -13,6 +14,7 @@ import {DeleteNodeRating} from "./DeleteNodeRating.js";
 })
 export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 	sub_deleteOldRating: DeleteNodeRating;
+	sub_updateRatingSummaries: UpdateNodeRatingSummaries;
 	Validate() {
 		const {rating} = this.payload;
 
@@ -21,11 +23,18 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
 		if (oldRatings.length) {
 			this.sub_deleteOldRating = new DeleteNodeRating({id: oldRatings[0].id}).MarkAsSubcommand(this);
+			this.sub_deleteOldRating.Validate();
 		}
 
 		rating.id = this.GenerateUUID_Once("rating.id");
 		rating.creator = this.userInfo.id;
 		rating.createdAt = Date.now();
+
+		this.sub_updateRatingSummaries = new UpdateNodeRatingSummaries({
+			node: rating.node, ratingType: rating.type,
+			ratingsBeingRemoved: [this.sub_deleteOldRating?.payload.id], ratingsBeingAdded: [rating],
+		}).MarkAsSubcommand(this);
+		this.sub_updateRatingSummaries.Validate();
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
@@ -34,5 +43,6 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 			db.add(this.sub_deleteOldRating.GetDBUpdates(db));
 		}
 		db.set(dbp`nodeRatings/${rating.id}`, rating);
+		db.add(this.sub_updateRatingSummaries.GetDBUpdates(db));
 	}
 }

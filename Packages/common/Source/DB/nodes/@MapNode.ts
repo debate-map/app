@@ -75,6 +75,10 @@ export class MapNode {
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ArgumentType"}, {opt: true})
 	argumentType?: ArgumentType;
+
+	@DB((t, n)=>t.jsonb(n))
+	@Field({$ref: "MapNode_Extras"})
+	extras = new MapNode_Extras();
 }
 AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 	const schema = GetSchemaJSON("MapNode");
@@ -90,6 +94,30 @@ AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 		}
 	}
 });*/
+
+@MGLClass()
+export class MapNode_Extras {
+	constructor(data?: Partial<MapNode_Extras>) {
+		this.VSet(data);
+	}
+
+	@Field({patternProperties: {".+": {$ref: "RatingSummary"}}})
+	ratingSummaries? = {} as {[key: string]: RatingSummary}; // derived from "nodeRatings" table
+}
+@MGLClass()
+export class RatingSummary {
+	constructor(data?: Partial<RatingSummary>) {
+		this.VSet(data);
+	}
+
+	declare _key: string; // rating-type
+
+	@Field({type: ["number", "null"]})
+	average: number|n;
+
+	@Field({items: {type: "number"}})
+	countsByRange: number[];
+}
 
 // helpers
 // export type MapNodeL2 = MapNode & {finalType: MapNodeType};
