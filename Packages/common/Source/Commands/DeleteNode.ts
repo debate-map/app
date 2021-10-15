@@ -1,3 +1,4 @@
+import {GetRatings} from "../DB/nodeRatings.js";
 import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
@@ -10,6 +11,7 @@ import {GetNodeL2} from "../DB/nodes/$node.js";
 import {MapNodeL2} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
+import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 
 @MapEdit
 @UserEdit
@@ -29,6 +31,7 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 
 	oldData: MapNodeL2|n;
 	oldRevisions: MapNodeRevision[];
+	oldRatings: NodeRating[];
 	//oldParentChildrenOrders: string[][];
 	linksAsParent: NodeChildLink[];
 	linksAsChild: NodeChildLink[];
@@ -46,6 +49,8 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 		this.oldRevisions = await GetAsync(() => oldRevisionIDs.map(id => GetNodeRevision(id)));*/
 		this.oldRevisions = GetNodeRevisions(nodeID);
 		AssertV(this.oldRevisions.every(a=>a != null) && this.oldRevisions.length, "oldRevisions has null entries, or length of zero.");
+
+		this.oldRatings = GetRatings(nodeID);
 
 		/*const parentIDs = CE(this.oldData.parents || {}).VKeys();
 		this.oldParentChildrenOrders = parentIDs.map(parentID=>GetNode(parentID)?.childrenOrder);
@@ -66,7 +71,9 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 		const {nodeID} = this.payload;
 
 		//db.set(dbp`nodeExtras/${nodeID}`, null);
-		db.set(dbp`nodeRatings/${nodeID}`, null);
+		for (const rating of this.oldRatings) {
+			db.set(dbp`nodeRatings/${rating.id}`, null);
+		}
 
 		for (const link of this.linksAsParent) {
 			db.set(dbp`nodeChildLinks/${link.id}`, null);
