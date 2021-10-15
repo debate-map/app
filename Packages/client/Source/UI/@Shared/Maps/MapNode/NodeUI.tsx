@@ -31,7 +31,8 @@ export class NodeUI extends BaseComponentPlus(
 		ref_innerUI?: (c: NodeUI_Inner|n)=>any,
 	},
 	{
-		expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0,
+		//expectedBoxWidth: 0, expectedBoxHeight: 0,
+		dividePoint: null as number|n, selfHeight: 0,
 		lastChildBoxOffsets: null as {[key: string]: Vector2}|n,
 	},
 ) {
@@ -56,7 +57,7 @@ export class NodeUI extends BaseComponentPlus(
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, children} = this.props;
-		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight, lastChildBoxOffsets} = this.state;
+		const {dividePoint, selfHeight, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
 		//path = path || node.id.toString();

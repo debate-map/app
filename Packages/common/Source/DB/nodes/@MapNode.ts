@@ -101,7 +101,10 @@ export class MapNode_Extras {
 		this.VSet(data);
 	}
 
-	@Field({patternProperties: {".+": {$ref: "RatingSummary"}}})
+	@Field({
+		$gqlType: "JSON", // graphql doesn't support key-value-pair structures, so just mark as JSON
+		patternProperties: {".+": {$ref: "RatingSummary"}},
+	}, {opt: true})
 	ratingSummaries? = {} as {[key: string]: RatingSummary}; // derived from "nodeRatings" table
 }
 @MGLClass()

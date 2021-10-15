@@ -28,7 +28,7 @@ export class MapNodeType_Info {
 		}),
 		[MapNodeType.multiChoiceQuestion]: new MapNodeType_Info({
 			childTypes: [MapNodeType.claim],
-			minWidth: 150, maxWidth: 250,
+			minWidth: 150, maxWidth: 600,
 			// minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
@@ -43,7 +43,7 @@ export class MapNodeType_Info {
 		}),
 		[MapNodeType.argument]: new MapNodeType_Info({
 			childTypes: [MapNodeType.claim, MapNodeType.argument],
-			minWidth: 150, maxWidth: 300,
+			minWidth: 150, maxWidth: 600,
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
 		}),

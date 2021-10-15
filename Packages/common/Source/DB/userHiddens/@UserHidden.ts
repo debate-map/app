@@ -71,7 +71,10 @@ export class UserHidden_Extras {
 		this.VSet(data);
 	}
 
-	@Field({patternProperties: {".{22}": {$ref: "UserFollow"}}})
+	@Field({
+		$gqlType: "JSON", // graphql doesn't support key-value-pair structures, so just mark as JSON
+		patternProperties: {".{22}": {$ref: "UserFollow"}},
+	}, {opt: true})
 	userFollows? = {} as {[key: string]: UserFollow};
 }
 @MGLClass()
