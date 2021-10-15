@@ -31,7 +31,7 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 		rating.createdAt = Date.now();
 
 		this.sub_updateRatingSummaries = new UpdateNodeRatingSummaries({
-			node: rating.node, ratingType: rating.type,
+			nodeID: rating.node, ratingType: rating.type,
 			ratingsBeingRemoved: [this.sub_deleteOldRating?.payload.id], ratingsBeingAdded: [rating],
 		}).MarkAsSubcommand(this);
 		this.sub_updateRatingSummaries.Validate();

@@ -22,7 +22,7 @@ export class DeleteNodeRating extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 		
 		this.sub_updateRatingSummaries = new UpdateNodeRatingSummaries({
-			node: this.oldData.node, ratingType: this.oldData.type,
+			nodeID: this.oldData.node, ratingType: this.oldData.type,
 			ratingsBeingRemoved: [id], ratingsBeingAdded: [],
 		}).MarkAsSubcommand(this);
 		this.sub_updateRatingSummaries.Validate();

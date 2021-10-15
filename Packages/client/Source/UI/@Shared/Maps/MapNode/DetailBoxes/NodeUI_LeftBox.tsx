@@ -142,7 +142,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 						const average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);*/
 						const ratingSummary = GetRatingSummary(nodeForRatingType.id, ratingInfo.type);
 						if (ratingSummary.average != null) {
-							percentStr = `${ratingSummary.average}%`;
+							percentStr = `${ratingSummary.average.RoundTo(1)}%`;
 						}
 						return (
 							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path: pathForRatingType, openPanel}}

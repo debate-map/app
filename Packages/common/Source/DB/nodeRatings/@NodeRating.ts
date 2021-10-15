@@ -34,6 +34,6 @@ export class NodeRating {
 
 	@DB((t, n)=>t.float(n))
 	@Field({type: "number"})
-	value: number;
+	value: number; // range: 0-100
 }
 export type NodeRating_MaybePseudo = PartialBy<NodeRating, "id" | "accessPolicy">;

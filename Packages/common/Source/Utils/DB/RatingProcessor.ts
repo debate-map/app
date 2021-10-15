@@ -4,16 +4,17 @@ import {GetRating, GetRatingAverage, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/nodes/$node.js";
-import {ClaimForm, MapNodeL2} from "../../DB/nodes/@MapNode.js";
+import {ClaimForm, MapNode, MapNodeL2} from "../../DB/nodes/@MapNode.js";
 import {ArgumentType} from "../../DB/nodes/@MapNodeRevision.js";
 
-export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
+export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNode, premises: MapNode[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
 	const premiseProbabilities = [] as number[];
 	for (const premise of premises) {
-		const ratingType = GetRatingTypesForNode(premise)[0].type;
+		//const ratingType = GetRatingTypesForNode(premise)[0].type;
+		const ratingType = NodeRatingType.truth;
 		let ratingValue = GetRating(premise.id, ratingType, userID)?.value ?? null;
 		// if user didn't rate this premise, just use the average rating
 		if (ratingValue == null) {
@@ -76,41 +77,33 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 	return result;
 } */
 
-export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], userIDs?: string[]|n, useAverageForMissing = false): NodeRating_MaybePseudo[]=>{
+export const GetArgumentImpactPseudoRatings = CreateAccessor((
+	argument: MapNode, premises: MapNode[], userIDs?: string[]|n,
+	useAverageForMissing = false, ratingsBeingRemoved?: string[], ratingsBeingAdded?: NodeRating[],
+): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 
-	const childForms_map = CE(premises).ToMapObj((child, index)=>`childForm_${index}`, child=>{
-		return GetNodeForm(child, argument);
-	});
-	// let dataUsedInCalculation = {...childRatingSets, ...childForms_map};
-	const dataUsedInCalculation = {...childForms_map} as any;
-	dataUsedInCalculation.argumentType = argument.argumentType;
+	let argumentRelevanceRatings = GetRatings(argument.id, NodeRatingType.relevance, userIDs);
+	if (ratingsBeingRemoved) argumentRelevanceRatings = argumentRelevanceRatings.filter(a=>!ratingsBeingRemoved.includes(a.id));
+	if (ratingsBeingAdded) argumentRelevanceRatings.push(...ratingsBeingAdded.filter(a=>a.node == argument.id && a.type == NodeRatingType.relevance && (userIDs == null || userIDs.includes(a.creator))));
 
-	const usersWhoRatedArgOrPremise = {};
-	/* const argRatingSet = GetRatingSet(argument.id, GetMainRatingType(argument)) || emptyObj;
-	for (const userID of argRatingSet.VKeys()) {
-		usersWhoRatedArgOrPremise[userID] = true;
-	} */
-	for (const userID of GetRatings(argument.id, NodeRatingType.relevance, userIDs).map(a=>a.creator)) {
-		usersWhoRatedArgOrPremise[userID] = true;
-	}
+	const usersWhoRatedArgAndPremises = new Set(argumentRelevanceRatings.map(a=>a.creator));
 	for (const premise of premises) {
-		for (const userID of GetRatings(premise.id, NodeRatingType.truth, userIDs).map(a=>a.creator)) {
-			usersWhoRatedArgOrPremise[userID] = true;
-		}
-	}
+		let premiseTruthRatings = GetRatings(premise.id, NodeRatingType.truth, userIDs);
+		if (ratingsBeingRemoved) premiseTruthRatings = premiseTruthRatings.filter(a=>!ratingsBeingRemoved.includes(a.id));
+		if (ratingsBeingAdded) premiseTruthRatings.push(...ratingsBeingAdded.filter(a=>a.node == premise.id && a.type == NodeRatingType.truth && (userIDs == null || userIDs.includes(a.creator))));
 
-	for (const child of premises) {
-		const childRatings = GetRatings(child.id, GetMainRatingType(child), userIDs);
-		//for (const userID of childRatingSet.VKeys()) {
-		for (const userID of childRatings.map(a=>a.creator)) {
-			usersWhoRatedArgOrPremise[userID] = true;
+		const usersWhoRatedPremise = new Set(premiseTruthRatings.map(a=>a.creator));
+		for (const userID of usersWhoRatedArgAndPremises) {
+			if (!usersWhoRatedPremise.has(userID)) {
+				usersWhoRatedArgAndPremises.delete(userID);
+			}
 		}
 	}
 
 	const result = [] as NodeRating_MaybePseudo[];
-	for (const userID of CE(usersWhoRatedArgOrPremise).VKeys()) {
+	for (const userID of usersWhoRatedArgAndPremises) {
 		const impactRating = GetArgumentImpactPseudoRating(argument, premises, userID, useAverageForMissing);
 		if (impactRating) {
 			result.push(impactRating);

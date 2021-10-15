@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MapNodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
 import React, {useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -9,7 +9,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, UseDocumentEventListener} from "web-vcore";
+import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 //import classNames from "classnames";
 import {DEL, DoNothing, E, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
@@ -62,15 +62,18 @@ export type NodeUI_Inner_Props = {
 	};
 }) */
 
-export type PanelOpenSource = "toolbar" | "left-panel";
+
 
 // @ExpensiveComponent
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
 	{panelsPosition: "left"} as NodeUI_Inner_Props,
 	{
-		hovered: false, moreButtonHovered: false, leftPanelHovered: false, openPanelSource: null as PanelOpenSource|n,
-		hoverPanel: null as string|n, hoverTermID: null as string|n, local_selected: false as boolean|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0,
+		hovered: false, moreButtonHovered: false, leftPanelHovered: false, //openPanelSource: null as PanelOpenSource|n,
+		hoverPanel: null as string|n, hoverTermID: null as string|n, lastWidthWhenNotPreview: 0,
+		// maybe todo: replace with local_nodeView
+		local_selected: false as boolean|n, local_openPanel: null as string|n,
+		//local_nodeView: null as MapNodeView|n, 
 	},
 ) {
 	root: ExpandableBox|n;
@@ -107,7 +110,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 	render() {
 		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
-		let {hovered, moreButtonHovered, leftPanelHovered, openPanelSource, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
+		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
 		// ==========
@@ -203,16 +206,17 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const nodeReversed = nodeForm == ClaimForm.negation;
 
 		const selected = nodeView?.selected || local_selected || false;
-		const [leftPanelPinned, setLeftPanelPinned] = useState(false);
+		const leftPanelPinned = nodeView?.leftPanelPinned ?? false;
+		/*const [leftPanelPinned, setLeftPanelPinned] = useState(false);
 		useEffect(()=>{
 			// if left-panel is pinned, but node is no longer selected or hovered, reset its "pinned" state to false
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
-		}, [selected, leftPanelPinned]);
+		}, [selected, leftPanelPinned]);*/
 
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
-		const leftPanelShow = ((selected || hovered) && leftPanelPinned) || moreButtonHovered || leftPanelHovered || (selected && panelToShow != null && openPanelSource == "left-panel");
+		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered; // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
 		const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
-		const bottomPanelShow = (selected || hovered) && panelToShow;
+		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
 		let expanded = nodeView?.expanded ?? false;
 
 		// const parentNodeView = GetNodeView(map.id, parentPath);
@@ -284,8 +288,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				hovered = false;
 				local_openPanel = null;
 			}
-			const onPanelButtonClick = (panel: string, source: PanelOpenSource)=>{
-				this.SetState({openPanelSource: source});
+			const onPanelButtonClick = (panel: string, source: "toolbar" | "left-panel")=>{
+				//this.SetState({openPanelSource: source});
 				
 				if (useLocalPanelState) {
 					this.SetState({local_openPanel: panel, hoverPanel: null});
@@ -294,13 +298,18 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 				RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
 					const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
-					if (nodeView_final.openPanel != panel) {
-						nodeView_final.VSet("openPanel", panel ?? DEL);
+
+					// if clicking on a not-currently open panel, set panel to that; else, must be clicking on currently-open panel, so clear
+					const newPanel = panel != nodeView_final.openPanel ? panel : null;
+					if (newPanel) {
+						nodeView_final.VSet("openPanel", panel);
 					} else {
 						//delete nodeView_final.openPanel;
 						nodeView_final.openPanel = undefined;
 						this.SetState({hoverPanel: null});
 					}
+
+					nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
 				});
 			};
 			return (
@@ -371,7 +380,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							onMoreClick={()=>{
 								//onClick();
 								//RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
-								setLeftPanelPinned(!leftPanelPinned);
+								//setLeftPanelPinned(!leftPanelPinned);
+								RunInAction_Set(this, ()=>nodeView.leftPanelPinned = !nodeView.leftPanelPinned);
 							}}
 							onMoreHoverChange={hovered=>{
 								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;

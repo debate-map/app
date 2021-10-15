@@ -34,7 +34,6 @@ export const GetRatings = CreateAccessor(<
 	if (ratingType == "impact") {
 		//Assert(userIDs == null, `Cannot currently use a userIDs filter for getting ratings of type "impact". (query-level optimization not yet added for that case)`);
 		const node = GetNodeL2(nodeID);
-		if (node === undefined) return emptyArray_forLoading;
 		if (node === null) return emptyArray;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
 		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.claim);
@@ -105,32 +104,32 @@ export function AssertBetween0And100OrNull(val: number|n) {
 }
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
-// export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: ChildGroup, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, resultIfNoData = null)=>{
+export const GetOrderingScores_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, resultIfNoData = null)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
 
-	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
-		const result = GetRatingAverage_AtPath(node, ratingType, null, resultIfNoData);
+	const useReasonScoreValues = weighting == WeightingType.reasonScore && rsCompatibleNodeTypes?.includes(node.type);
+	if (useReasonScoreValues) {
+		const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node.id, path);
+
+		// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
+		let result: number|n;
+		if (node.type == MapNodeType.claim) {
+			result = claimTruthScore * 100;
+		} else if (node.type == MapNodeType.argument) {
+			if (boxType == ChildGroup.relevance) {
+				// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
+				result = Lerp(0, 100, argWeightMultiplier);
+			} else {
+				result = argTruthScoreComposite * 100;
+			}
+		}
+
 		AssertBetween0And100OrNull(result);
 		return result;
 	}
 
-	const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node.id, path);
-
-	// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
-	let result: number|n;
-	if (node.type == MapNodeType.claim) {
-		result = claimTruthScore * 100;
-	} else if (node.type == MapNodeType.argument) {
-		if (boxType == ChildGroup.relevance) {
-			// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
-			result = Lerp(0, 100, argWeightMultiplier);
-		} else {
-			result = argTruthScoreComposite * 100;
-		}
-	}
-
+	const result = GetRatingAverage_AtPath(node, ratingType, null, resultIfNoData);
 	AssertBetween0And100OrNull(result);
 	return result;
 });

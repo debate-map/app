@@ -10,7 +10,7 @@ import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
+import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -30,7 +30,7 @@ const initialState = {
 
 @WarnOfTransientObjectProps
 @Observer
-export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, initialState, {} as {nodeChildren_fillPercents: {[key: string]: number}}) {
+export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, initialState, {} as {nodeChildren_orderingScores: {[key: string]: number}}) {
 	/* static ValidateProps(props) {
 		let {node, path} = props;
 		//Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
@@ -44,10 +44,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		childrenWidthOverride = (childrenWidthOverride ?? 0).KeepAtLeast(minWidth ?? 0);
 
 		const nodeView = GetNodeView(map.id, path);
-		const nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
-			return GetFillPercent_AtPath(child, `${path}/${child.id}`);
+		const nodeChildren_orderingScores = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
+			return GetOrderingScores_AtPath(child, `${path}/${child.id}`);
 		});
-		this.Stash({nodeChildren_fillPercents});
+		this.Stash({nodeChildren_orderingScores});
 
 		const {initialChildLimit} = store.main.maps;
 		const {currentNodeBeingAdded_path} = store.main.maps;
@@ -64,15 +64,15 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		// apply sorting (regardless of direction, both are ordered by score/priority; "up" reordering is applied on the *child-ui list*, not the child-node list)
 		if (separateChildren) {
-			upChildren = upChildren.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
-			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
+			upChildren = upChildren.OrderByDescending(child=>nodeChildren_orderingScores[child.id]);
+			downChildren = downChildren.OrderByDescending(child=>nodeChildren_orderingScores[child.id]);
 			// this is really not recommended, but I guess there could be use-cases (only admins are allowed to manually order this type anyway)
 			/*if (node.childrenOrder) {
 				upChildren = upChildren.OrderByDescending(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER)); // descending, since index0 of upChildren group shows at bottom
 				downChildren = downChildren.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}*/
 		} else {
-			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
+			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_orderingScores[child.id]);
 			// if (IsArgumentNode(node)) {
 			//const isArgument_any = node.type == MapNodeType.argument && node.current.argumentType == ArgumentType.any;
 			/*if (node.childrenOrder) {
@@ -274,7 +274,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	get ChildOrderStr() {
-		const {nodeChildrenToShow, nodeChildren_fillPercents} = this.PropsStash;
+		const {nodeChildrenToShow, nodeChildren_orderingScores: nodeChildren_fillPercents} = this.PropsStash;
 		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents?.[a.id] ?? 0).map(a=>a.id).join(",");
 	}
 

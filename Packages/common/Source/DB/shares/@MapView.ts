@@ -1,5 +1,5 @@
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
-import {Vector2, Clone} from "web-vcore/nm/js-vextensions.js";
+import {Vector2, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {accessorMetadata, AddSchema, CreateAccessor, DB, defaultGraphOptions, Field, MGLClass, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetNodeID, GetParentNodeID, ToPathNodes} from "../../DB/nodes.js";
 import {MapNodeType} from "../../DB/nodes/@MapNodeType.js";
@@ -46,6 +46,12 @@ export const GetDefaultExpansionFieldsForNodeView = CreateAccessor((path: string
 	}
 	return result;
 });
+
+/*export enum PanelOpenSource {
+	"toolbar" = "toolbar",
+	"left-panel" = "left-panel",
+}
+AddSchema("PanelOpenSource", {enum: GetValues(PanelOpenSource)});*/
 
 @MGLClass()
 export class MapNodeView {
@@ -97,8 +103,14 @@ export class MapNodeView {
 	@Field({$ref: "Vector2"}, {opt: true})
 	@O viewOffset?: Vector2;
 
+	@Field({type: "boolean"}, {opt: true})
+	@O leftPanelPinned?: boolean;
+
 	@Field({type: "string"}, {opt: true})
 	@O openPanel?: string;
+
+	/*@Field({$ref: "PanelOpenSource"}, {opt: true})
+	@O openPanel_source?: PanelOpenSource;*/
 
 	@Field({type: "string"}, {opt: true})
 	@O openTermID?: string;

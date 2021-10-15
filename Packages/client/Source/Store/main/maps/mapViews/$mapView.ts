@@ -110,6 +110,7 @@ export const ACTMapNodeSelect = StoreAction((mapID: string, path: string|n)=>{
 		// fsr, mobx has errors when deleting (https://github.com/mobxjs/mobx/issues/2375) -- so just set to undefined
 		selectedNode.selected = undefined;
 		selectedNode.openPanel = undefined;
+		selectedNode.leftPanelPinned = undefined;
 	}
 
 	if (path != null) {

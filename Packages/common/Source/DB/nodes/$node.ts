@@ -203,12 +203,12 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 }*/
-export const GetNodeForm = CreateAccessor((node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
+export const GetNodeForm = CreateAccessor((node: MapNode, pathOrParent?: string | MapNode): ClaimForm=>{
 	if (IsNodeL3(node) && node.link) {
 		return node.link.form ?? ClaimForm.base;
 	}
 
-	const parent = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
+	const parent = IsString(pathOrParent) ? GetParentNode(pathOrParent as string) : pathOrParent as MapNode;
 	const link = GetLinkUnderParent(node.id, parent);
 	return link?.form ?? ClaimForm.base;
 });
