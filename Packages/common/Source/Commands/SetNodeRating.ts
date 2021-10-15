@@ -19,7 +19,7 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 		const {rating} = this.payload;
 
 		Assert(rating.type != "impact", "Cannot set impact rating directly.");
-		const oldRatings = GetRatings(rating.node, rating.type, this.userInfo.id);
+		const oldRatings = GetRatings(rating.node, rating.type, [this.userInfo.id]);
 		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
 		if (oldRatings.length) {
 			this.sub_deleteOldRating = new DeleteNodeRating({id: oldRatings[0].id}).MarkAsSubcommand(this);

@@ -1,22 +1,19 @@
-import chroma from "web-vcore/nm/chroma-js.js";
-import {AssertWarn, emptyArray, emptyArray_forLoading, E, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {ArgumentType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
+import React from "react";
+import {GetNodeColor} from "Store/db_ext/nodes";
+import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
-import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {MapNodeL3, ChildGroup, GetParentNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings, ArgumentType, MapNodeType, NodeRatingType, Map} from "dm_common";
-import {GetNodeColor} from "Store/db_ext/nodes";
-import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
-import {NodeChildHolder} from "./NodeChildHolder.js";
-import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
-import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
-import {Squiggle} from "../ChildConnectorBackground.js";
-import {ExpandableBox} from "../ExpandableBox.js";
+import chroma from "web-vcore/nm/chroma-js.js";
+import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
+import {Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
-import React from "react";
-import {RatingsPreviewBackground} from "../NodeUI_Inner/NodeToolbar.js";
+import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
+import {ExpandableBox} from "../ExpandableBox.js";
+import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
+import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
+import {NodeChildHolder} from "./NodeChildHolder.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],

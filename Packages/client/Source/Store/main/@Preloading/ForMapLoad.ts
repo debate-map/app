@@ -1,4 +1,4 @@
-import {GetNode, GetNodeChildLinks, GetNodeChildren, GetNodeChildrenL3, GetNodeL2, GetNodePhrasings, GetNodeRevisions, GetNodeTags, GetRatings, MapNodeType, MapNodeView, NodeRatingType} from "dm_common";
+import {GetNode, GetNodeChildLinks, GetNodeChildrenL3, GetNodeL2, GetNodeRevisions, GetNodeTags, MapNodeView} from "dm_common";
 import {CatchBail, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMapView} from "../maps/mapViews/$mapView";
 

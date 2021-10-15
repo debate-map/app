@@ -110,7 +110,7 @@ export class RatingSummary {
 		this.VSet(data);
 	}
 
-	declare _key: string; // rating-type
+	//declare _key: string; // rating-type
 
 	@Field({type: ["number", "null"]})
 	average: number|n;

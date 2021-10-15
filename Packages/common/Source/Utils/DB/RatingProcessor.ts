@@ -1,6 +1,6 @@
 import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor, NoID, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
-import {GetRatingAverage, GetRatingValue, GetRatings} from "../../DB/nodeRatings.js";
+import {GetRating, GetRatingAverage, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/nodes/$node.js";
@@ -14,7 +14,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 	const premiseProbabilities = [] as number[];
 	for (const premise of premises) {
 		const ratingType = GetRatingTypesForNode(premise)[0].type;
-		let ratingValue = GetRatingValue(premise.id, ratingType, userID, null);
+		let ratingValue = GetRating(premise.id, ratingType, userID)?.value ?? null;
 		// if user didn't rate this premise, just use the average rating
 		if (ratingValue == null) {
 			if (useAverageForMissing) {
@@ -40,7 +40,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 		combinedTruthOfPremises = CE(premiseProbabilities).Max(undefined, true);
 	}
 
-	let relevance = GetRatingValue(argument.id, NodeRatingType.relevance, userID, null);
+	let relevance = GetRating(argument.id, NodeRatingType.relevance, userID)?.value ?? null;
 	// if user didn't rate the relevance, just use the average rating
 	if (relevance == null) {
 		if (useAverageForMissing) {
@@ -76,7 +76,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2
 	return result;
 } */
 
-export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], useAverageForMissing = false): NodeRating_MaybePseudo[]=>{
+export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], userIDs?: string[]|n, useAverageForMissing = false): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 
@@ -92,17 +92,17 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL
 	for (const userID of argRatingSet.VKeys()) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	} */
-	for (const userID of GetRatings(argument.id, NodeRatingType.relevance).map(a=>a.creator)) {
+	for (const userID of GetRatings(argument.id, NodeRatingType.relevance, userIDs).map(a=>a.creator)) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	}
 	for (const premise of premises) {
-		for (const userID of GetRatings(premise.id, NodeRatingType.truth).map(a=>a.creator)) {
+		for (const userID of GetRatings(premise.id, NodeRatingType.truth, userIDs).map(a=>a.creator)) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}
 
 	for (const child of premises) {
-		const childRatings = GetRatings(child.id, GetMainRatingType(child));
+		const childRatings = GetRatings(child.id, GetMainRatingType(child), userIDs);
 		//for (const userID of childRatingSet.VKeys()) {
 		for (const userID of childRatings.map(a=>a.creator)) {
 			usersWhoRatedArgOrPremise[userID] = true;

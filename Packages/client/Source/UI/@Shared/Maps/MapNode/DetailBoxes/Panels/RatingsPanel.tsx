@@ -1,11 +1,10 @@
-import {DeleteNodeRating, GetAccessPolicy, GetRatings, GetRatingTypeInfo, GetSystemAccessPolicyID, MapNodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, systemPolicy_publicUngoverned_name, TransformRatingForContext} from "dm_common";
-import React, {useState} from "react";
+import {DeleteNodeRating, GetAccessPolicy, GetRating, GetRatingTypeInfo, GetSystemAccessPolicyID, MapNodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, TransformRatingForContext} from "dm_common";
+import React from "react";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
-import {ES, Observer, RunInAction_Set, Slider} from "web-vcore";
-import {ToInt} from "web-vcore/nm/js-vextensions";
-import {Button, CheckBox, Column, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {ES, Observer, Slider} from "web-vcore";
+import {Button, Column, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "./RatingsPanel_Old";
 
@@ -21,18 +20,20 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
 		const systemPolicy_publicGoverned_id = GetSystemAccessPolicyID(systemPolicy_publicGoverned_name);
 
+		const meID = MeID();
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
-		const ratings = GetRatings(node.id, ratingType);
-		const userID = MeID();
-		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
-		const myRating_raw = /*ratingType == "impact" ? null :*/ ratings.find(a=>a.creator == userID) as NodeRating;
+		//const ratings = GetRatings(node.id, ratingType);
+		//const ratingSummary = GetRatingSummary(node.id, ratingType);
+		//const ratingsOfSelfAndFollowed = GetRatings.CatchBail(emptyArray, node.id, ratingType, [...meID ? [meID] : [], ...markRatingUsers]); // catch bail (ie. allow lazy-load)
+		const myRating_raw = GetRating.CatchBail(null, node.id, ratingType, meID); // catch bail (ie. allow lazy-load)
+		const myRating_displayVal = TransformRatingForContext(myRating_raw?.value, reverseRatings);
 		const myRating_accessPolicy = GetAccessPolicy(myRating_raw?.accessPolicy);
 		
 		//const [showOptionalRatings, setExpanded] = useState(false);
 		const showOptionalRatings = store.main.ratingUI.showOptionalRatings;
 
 		function SetRating(newDisplayValue: number, accessPolicyID?: string) {
-			if (userID == null) return void ShowSignInPopup();
+			if (meID == null) return void ShowSignInPopup();
 
 			let newRating_xValue_final = newDisplayValue;
 			newRating_xValue_final = TransformRatingForContext(newRating_xValue_final, reverseRatings);
@@ -73,7 +74,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 					<Row center>
 						<Text mr={5}>Your rating: {myRating_displayVal}</Text>
 						<Button mdIcon="delete" title="Delete your rating." onClick={()=>{
-							new DeleteNodeRating({id: myRating_raw.id}).RunOnServer();
+							new DeleteNodeRating({id: myRating_raw.id!}).RunOnServer();
 						}}/>
 						<Text ml={10} mr={5}>Access-policy:</Text>
 						<PolicyPicker containerStyle={{flex: null}}

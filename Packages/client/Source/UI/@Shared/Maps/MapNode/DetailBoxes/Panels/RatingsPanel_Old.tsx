@@ -1,4 +1,4 @@
-import {Lerp, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {emptyArray, Lerp, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Pre, Row, RowLR, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {ES, GetViewportRect, Observer, observer_simple, uplotDefaults} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List} from "dm_common";
+import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
@@ -30,10 +30,15 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 	render() {
 		const {node, path, ratingType, asNodeUIOverlay, uplotData_override, ownRatingOpacity, customAlphaMultiplier = 1} = this.props;
 		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
-		const ratings = GetRatings(node.id, ratingType);
 
-		const userID = MeID();
-		const myDefaultAccessPolicy = GetUserHidden(userID)?.lastAccessPolicy;
+		const meID = MeID();
+		//const ratings = GetRatings(node.id, ratingType);
+		//const ratingSummary = GetRatingSummary(node.id, ratingType); // used by parent ui
+		const userFollows = GetUserFollows_List(meID);
+		const markRatingUsers = userFollows.filter(a=>a.markRatings).map(a=>a.targetUser);
+		const ratingsOfSelfAndFollowed = GetRatings.CatchBail(emptyArray, node.id, ratingType, [...meID ? [meID] : [], ...markRatingUsers]); // catch bail (ie. allow lazy-load)
+
+		const myDefaultAccessPolicy = GetUserHidden(meID)?.lastAccessPolicy;
 		const form = GetNodeForm(node, path);
 		let smoothing = GetRatingUISmoothing();
 
@@ -44,12 +49,10 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		//const {labels, values} = ratingTypeInfo;
-		const myRating_displayVal = TransformRatingForContext(ratings.find(a=>a.creator == userID)?.value, reverseRatings);
-		const myRating_raw = ratingType == "impact" ? null : ratings.find(a=>a.creator == userID) as NodeRating;
+		const myRating_displayVal = TransformRatingForContext(ratingsOfSelfAndFollowed.find(a=>a.creator == meID)?.value, reverseRatings);
+		const myRating_raw = ratingType == "impact" ? null : ratingsOfSelfAndFollowed.find(a=>a.creator == meID) as NodeRating;
 
-		const userFollows = GetUserFollows_List(userID);
-		const markRatingUsers = userFollows.filter(a=>a.markRatings).map(a=>a.targetUser);
-		const ratingsToMark = ratings.filter(a=>markRatingUsers.includes(a.creator));
+		const ratingsToMark = ratingsOfSelfAndFollowed.filter(a=>markRatingUsers.includes(a.creator));
 
 		//let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
 		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .8 : 1;
@@ -78,6 +81,9 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		if (uplotData_override) {
 			uplotData = uplotData_override;
 		} else {
+			// if uplotData_override is not set, it means we're showing the full, "detailed" version of this panel, which can have custom smoothing; thus we need the full rating-set
+			const ratings = GetRatings(node.id, ratingType);
+
 			const ticks = Range(0, 100, smoothing);
 			var xValues = ticks.slice();
 			const yValues_ratings = ticks.map(a=>0); // start out values as 0 (will increment values in next section)
@@ -125,7 +131,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					const chartHolder = target.GetSelfAndParents().filter(a=>a.matches("div.uplotHolder"))[0];
 					if (chartHolder == null) return;
 
-					if (userID == null) return void ShowSignInPopup();
+					if (meID == null) return void ShowSignInPopup();
 
 					//const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
 					const gridPart = chartHolder.querySelector(".u-over") as HTMLDivElement;

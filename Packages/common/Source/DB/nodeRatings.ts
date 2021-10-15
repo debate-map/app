@@ -1,32 +1,44 @@
 import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, CreateAccessor, GetDocs, NoID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {observable} from "web-vcore/nm/mobx.js";
-import {NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
+import {GetRatingTypeInfo, NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
 import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
-import {GetNodeChildrenL2, ChildGroup} from "./nodes.js";
+import {GetNodeChildrenL2, ChildGroup, GetNode} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
-import {ClaimForm, MapNodeL3} from "./nodes/@MapNode.js";
+import {ClaimForm, MapNodeL3, RatingSummary} from "./nodes/@MapNode.js";
 import {MapNodeType} from "./nodes/@MapNodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
+
+export const GetRatingSummary = CreateAccessor((nodeID: string, ratingType: NodeRatingType)=>{
+	const node = GetNode(nodeID);
+	const ratingTypeInfo = GetRatingTypeInfo(ratingType);
+	return node?.extras.ratingSummaries?.[ratingType]
+		// if rating-summary entry is missing, it must mean no one has rated the node yet, so return a corresponding RatingSummary object
+		?? new RatingSummary({
+			average: null,
+			countsByRange: ratingTypeInfo.valueRanges.map(a=>0),
+		});
+});
 
 export const GetNodeRating = CreateAccessor((id: string)=>{
 	return GetDoc({}, a=>a.nodeRatings.get(id!));
 });
 
 export const GetRatings = CreateAccessor(<
-	((nodeID: string, ratingType?: Exclude<NodeRatingType, "impact">|n, userID?: string|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
-	((nodeID: string, ratingType?: NodeRatingType|n, userID?: string|n)=>NodeRating_MaybePseudo[]) // else, some results may lack the "id" field
->((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n): NodeRating_MaybePseudo[]=>{
+	((nodeID: string, ratingType?: Exclude<NodeRatingType, "impact">|n, userIDs?: string[]|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
+	((nodeID: string, ratingType?: NodeRatingType|n, userIDs?: string[]|n)=>NodeRating_MaybePseudo[]) // else, some results may lack the "id" field
+>((nodeID: string, ratingType: NodeRatingType|n, userIDs?: string[]|n): NodeRating_MaybePseudo[]=>{
 	if (ratingType == "impact") {
+		//Assert(userIDs == null, `Cannot currently use a userIDs filter for getting ratings of type "impact". (query-level optimization not yet added for that case)`);
 		const node = GetNodeL2(nodeID);
 		if (node === undefined) return emptyArray_forLoading;
 		if (node === null) return emptyArray;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
 		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.claim);
-		return GetArgumentImpactPseudoRatings(node, premises);
+		return GetArgumentImpactPseudoRatings(node, premises, userIDs);
 	}
 
 	/*const ratings = GetRatings(nodeID, ratingType);
@@ -38,36 +50,37 @@ export const GetRatings = CreateAccessor(<
 		params: {filter: {
 			node: {equalTo: nodeID},
 			type: ratingType && {equalTo: ratingType},
-			creator: userID && {equalTo: userID},
+			//creator: userID && {equalTo: userID},
+			creator: userIDs != null && {in: userIDs},
 		}},
 	}, a=>a.nodeRatings);
 }));
-export const GetRating = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userID: string)=>{
-	return GetRatings(nodeID, ratingType, userID)[0];
+export const GetRating = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userID: string|n)=>{
+	if (userID == null) return null;
+	return GetRatings(nodeID, ratingType, [userID])[0];
 });
-export const GetRatingValue = CreateAccessor(<T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
+/*export const GetRatingValue = CreateAccessor(<T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
 	const rating = GetRating(nodeID, ratingType, userID);
 	return rating ? rating.value : resultIfNoData as T;
-});
-export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userID?: string|n): number|null=>{
-	// if voting disabled, always show full bar
-	/* let node = GetNodeL2(nodeID);
-	if (node && node.current.votingDisabled) return 100;
-
-	let ratings = GetRatings(nodeID, ratingType, filter);
-	if (ratings.length == 0) return resultIfNoData as any; */
-
+});*/
+export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userIDs?: string[]|n): number|n=>{
 	const node = GetNodeL2(nodeID);
 	if (node && PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return 100;
 
-	const ratings = GetRatings(nodeID, ratingType, userID);
-	if (ratings.length == 0) return null;
-	const result = CE(CE(ratings.map(a=>a.value)).Average()).RoundTo(1);
-	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
-	return result;
+	// if rating-set restricted to specific users, get the raw rating-set
+	if (userIDs) {
+		const ratings = GetRatings(nodeID, ratingType, userIDs);
+		if (ratings.length == 0) return null;
+		const result = CE(CE(ratings.map(a=>a.value)).Average()).RoundTo(1);
+		Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
+		return result;
+	} else {
+		const ratingSummary = GetRatingSummary(nodeID, ratingType);
+		return ratingSummary?.average;
+	}
 });
-export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
-	let result = GetRatingAverage(node.id, ratingType, userID);
+export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userIDs?: string[]|n, resultIfNoData?: T): number|T=>{
+	let result = GetRatingAverage(node.id, ratingType, userIDs);
 	if (result == null) return resultIfNoData as T;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
 		result = 100 - result;
@@ -93,12 +106,12 @@ export function AssertBetween0And100OrNull(val: number|n) {
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: ChildGroup, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
+export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, resultIfNoData = null)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
 
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
-		const result = GetRatingAverage_AtPath(node, ratingType, userID, resultIfNoData);
+		const result = GetRatingAverage_AtPath(node, ratingType, null, resultIfNoData);
 		AssertBetween0And100OrNull(result);
 		return result;
 	}
@@ -125,9 +138,12 @@ export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: stri
 export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
+	const meID = MeID();
+	if (meID == null) return null;
+
 	if (PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return null;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {
-		return GetRatingAverage_AtPath(node, ratingType, MeID());
+		return GetRatingAverage_AtPath(node, ratingType, [meID]);
 	}
 });
 

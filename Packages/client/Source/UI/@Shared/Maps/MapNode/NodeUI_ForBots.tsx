@@ -1,4 +1,4 @@
-import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetParentNodeL2, GetRatings, GetRatingTypesForNode, Map, MapNodeL2} from "dm_common";
+import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetRatingTypesForNode, Map, MapNodeL2} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Link} from "web-vcore";

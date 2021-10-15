@@ -1,17 +1,17 @@
-import chroma from "web-vcore/nm/chroma-js.js";
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingAverage_AtPath, GetRatings, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MeID, NodeRatingType} from "dm_common";
+import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {DefaultLoadingUI, Observer} from "web-vcore";
-import {E, Timer} from "web-vcore/nm/js-vextensions.js";
+import chroma from "web-vcore/nm/chroma-js.js";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import ReactDOM from "web-vcore/nm/react-dom.js";
 import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
-import ReactDOM from "web-vcore/nm/react-dom.js";
-import React from "react";
-import {zIndexes} from "Utils/UI/ZIndexes";
+import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
-import {GetMapUICSSFilter} from "../../MapUI.js";
 
 export const NodeUI_LeftBox_width = 130;
 
@@ -138,10 +138,11 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
-						const ratings = GetRatings(nodeForRatingType.id, ratingInfo.type);
-						const average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);
-						if (average != -1) {
-							percentStr = `${average}%`;
+						/*const ratings = GetRatings(nodeForRatingType.id, ratingInfo.type);
+						const average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);*/
+						const ratingSummary = GetRatingSummary(nodeForRatingType.id, ratingInfo.type);
+						if (ratingSummary.average != null) {
+							percentStr = `${ratingSummary.average}%`;
 						}
 						return (
 							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path: pathForRatingType, openPanel}}
@@ -157,7 +158,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 									{percentStr}
 									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
 										{/* ratingSet ? ratingSet.VKeys().length /*- 1*#/ : 0 */}
-										{ratings.length}
+										{(ratingSummary?.countsByRange ?? []).Sum()}
 									</sup>
 								</Span>
 							</PanelButton>

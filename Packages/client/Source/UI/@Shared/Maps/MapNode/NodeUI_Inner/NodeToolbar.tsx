@@ -1,18 +1,17 @@
-import {Color} from "web-vcore/nm/chroma-js.js";
-import {ChildGroup, ClaimForm, GetArgumentNode, GetFillPercent_AtPath, GetNodeForm, GetNodeID, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatings, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNode, MapNodeL3, MapNodeType, NodeRatingType, Polarity, RatingValueIsInRange} from "dm_common";
+import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
 import {ES, InfoButton, Observer, UseDocumentEventListener} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions";
+import {Color} from "web-vcore/nm/chroma-js.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {VMenuUI} from "web-vcore/nm/react-vmenu";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
 import {NodeUI_Menu} from "../NodeUI_Menu.js";
-import {VMenuUI} from "web-vcore/nm/react-vmenu";
 
 //export type NodeToolbar_SharedProps = NodeUI_Inner_Props & {backgroundColor: Color};
 export type NodeToolbar_Props = {
@@ -158,10 +157,11 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 		if (ratingNode == null) return null; // why does this happen sometimes?
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
-		const ratings = GetRatings(ratingNode.id, ratingType);
+		/*const ratings = GetRatings(ratingNode.id, ratingType);
 		const ratingsInEachRange = ratingTypeInfo.valueRanges.map(range=>{
 			return ratings.filter(a=>RatingValueIsInRange(a.value, range));
-		});
+		});*/
+		const ratingSummary = GetRatingSummary(ratingNode.id, ratingType);
 		
 		/*ratingsPreview = (
 			<Row style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
@@ -183,14 +183,16 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 			const redNodeColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: Polarity.opposing} as MapNodeL3, "raw");*/
 			const redNodeBackgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: Polarity.opposing} as MapNodeL3, "background");
 
-			const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
+			//const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
+			const baselineValue = (ratingSummary.countsByRange.Max() / 10).KeepAtLeast(.1);
 			return (
 				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
 						//[ratingsInEachRange[0].length, ...ratingsInEachRange.map(a=>a.length), ratingsInEachRange.Last().length],
 						//[0, ...ratingsInEachRange.map(a=>a.length), 0],
-						window["test1"] ?? [baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
+						//[baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
+						[baselineValue, ...ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)), baselineValue],
 					]}
 					// if background is red, decrease alpha of our orange fill-color (else it shows up too prominently, relative to when the background is green, blue, etc.)
 					//customAlphaMultiplier={nodeColor.css() == redNodeColor.css() ? .5 : 1}
@@ -208,7 +210,8 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
-						[0, ...ratingsInEachRange.map(a=>0), 0],
+						//[0, ...ratingsInEachRange.map(a=>0), 0],
+						[0, ...ratingSummary.countsByRange.map(a=>0), 0],
 					]}
 					ownRatingOpacity={.5} // increase opacity of own-rating marker (else can be hard to see near filled/unfilled border -- using a shape rather than line should make this unnecessary in future)
 				/>
