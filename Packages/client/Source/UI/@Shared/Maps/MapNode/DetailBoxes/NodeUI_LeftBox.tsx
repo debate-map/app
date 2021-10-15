@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MapNodeView, MeID, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {zIndexes} from "Utils/UI/ZIndexes";
@@ -17,7 +17,7 @@ export const NodeUI_LeftBox_width = 130;
 
 type Props = {
 	map: Map|n, path: string, node: MapNodeL3,
-	panelsPosition?: "left" | "below", local_openPanel?: string|n,
+	panelsPosition?: "left" | "below", local_nodeView?: MapNodeView|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 	usePortal?: boolean, nodeUI?: NodeUI_Inner,
@@ -33,14 +33,16 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 	render() {
 		const {
 			map, path, node,
-			panelsPosition, local_openPanel,
+			panelsPosition, local_nodeView,
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,
 			usePortal, nodeUI,
 			onHoverChange,
 		} = this.props;
-		const nodeView = GetNodeView(map?.id, path);
-		const openPanel = local_openPanel || nodeView?.openPanel;
+		/*const nodeView = GetNodeView(map?.id, path);
+		const openPanel = local_nodeView?.openPanel || nodeView?.openPanel;*/
+		const nodeView = local_nodeView ?? GetNodeView(map?.id, path);
+		const openPanel = nodeView.openPanel;
 
 		const form = GetNodeForm(node, path);
 		const parentNode = GetParentNodeL3(path);

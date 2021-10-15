@@ -71,9 +71,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	{
 		hovered: false, moreButtonHovered: false, leftPanelHovered: false, //openPanelSource: null as PanelOpenSource|n,
 		hoverPanel: null as string|n, hoverTermID: null as string|n, lastWidthWhenNotPreview: 0,
-		// maybe todo: replace with local_nodeView
-		local_selected: false as boolean|n, local_openPanel: null as string|n,
-		//local_nodeView: null as MapNodeView|n, 
 	},
 ) {
 	root: ExpandableBox|n;
@@ -110,12 +107,20 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 	render() {
 		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
-		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
+		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermID, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
 		// ==========
 
-		const nodeView = GetNodeView(map?.id, path);
+		const [local_nodeView, setLocal_nodeView] = useState({} as MapNodeView);
+		const nodeView = useLocalPanelState ? local_nodeView : GetNodeView(map?.id, path);
+		const UpdateLocalNodeView = (updates: Partial<MapNodeView>)=>{
+			//setLocal_nodeView({...local_nodeView, ...updates});
+			// rather than call setLocal_nodeView, mutate the existing object, then force-update; this way multiple UpdateLocalNodeView calls in the same tick will succeed (eg. onClick and onPanelButtonClick)
+			local_nodeView.VSet(updates);
+			this.Update();
+		};
+		
 		let sinceTime = GetTimeFromWhichToShowChangedNodes(map?.id);
 		/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 		let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
@@ -205,7 +210,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		const nodeReversed = nodeForm == ClaimForm.negation;
 
-		const selected = nodeView?.selected || local_selected || false;
+		const selected = nodeView?.selected || false;
 		const leftPanelPinned = nodeView?.leftPanelPinned ?? false;
 		/*const [leftPanelPinned, setLeftPanelPinned] = useState(false);
 		useEffect(()=>{
@@ -213,7 +218,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
-		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
+		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered; // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
 		const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
@@ -239,21 +244,21 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}, []);
 		const onClick = UseCallback(e=>{
 			if ((e.nativeEvent as any).ignore) return;
-			if (useLocalPanelState && !local_selected) {
-				this.SetState({local_selected: true});
+			if (useLocalPanelState && !local_nodeView.selected) {
+				UpdateLocalNodeView({selected: true});
 				return;
 			}
 
 			if (!nodeView?.selected && map) {
 				ACTMapNodeSelect(map.id, path);
 			}
-		}, [local_selected, map, nodeView?.selected, path, useLocalPanelState]);
+		}, [local_nodeView.selected, map, nodeView?.selected, path, useLocalPanelState]);
 		if (usePortalForDetailBoxes) {
 			UseDocumentEventListener("click", e=>{
 				const uiRoots = [this.root?.DOM, this.leftPanel?.DOM, this.bottomPanel?.DOM].filter(a=>a);
 				// if user clicked outside of node-ui-inner's descendant tree, close the detail-boxes
 				if (uiRoots.every(a=>!a!.contains(e.target as HTMLElement))) {
-					this.SetState({local_selected: false, local_openPanel: null});
+					UpdateLocalNodeView({selected: undefined, openPanel: undefined, leftPanelPinned: undefined});
 				}
 			});
 		}
@@ -286,31 +291,33 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			// const offsetByAnotherDrag = dragInfo?.provided.draggableProps.style.transform;
 			if (asDragPreview) {
 				hovered = false;
-				local_openPanel = null;
+				//local_openPanel = null; // todo: reimplement equivalent (if still needed)
 			}
 			const onPanelButtonClick = (panel: string, source: "toolbar" | "left-panel")=>{
 				//this.SetState({openPanelSource: source});
 				
-				if (useLocalPanelState) {
-					this.SetState({local_openPanel: panel, hoverPanel: null});
+				/*if (useLocalPanelState) {
+					UpdateLocalNodeView({openPanel: undefined});
+					this.SetState({hoverPanel: null});
 					return;
-				}
+				}*/
 
 				RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
 					const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
 
 					// if clicking on a not-currently open panel, set panel to that; else, must be clicking on currently-open panel, so clear
-					const newPanel = panel != nodeView_final.openPanel ? panel : null;
-					if (newPanel) {
-						nodeView_final.VSet("openPanel", panel);
-					} else {
-						//delete nodeView_final.openPanel;
-						nodeView_final.openPanel = undefined;
+					const newPanel = panel != nodeView_final.openPanel ? panel : undefined;
+					nodeView_final.openPanel = newPanel;
+
+					//nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
+					nodeView_final.leftPanelPinned = source == "left-panel" && newPanel != null ? true : undefined;
+
+					if (newPanel == null) {
 						this.SetState({hoverPanel: null});
 					}
 
-					//nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : DEL);
-					nodeView_final.VSet("leftPanelPinned", source == "left-panel" && newPanel != null ? true : undefined);
+					// if using local-panel-state, manually trigger update at end (since mobx not activated for the local-node-view object)
+					if (useLocalPanelState) this.Update();
 				});
 			};
 			return (
@@ -338,7 +345,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					onDirectClick={onDirectClick}
 					beforeChildren={<>
 						{leftPanelShow &&
-						<MapNodeUI_LeftBox {...{map, path, node, panelsPosition, local_openPanel, backgroundColor}} asHover={hovered}
+						<MapNodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
 							ref={c=>this.leftPanel = c}
 							usePortal={usePortalForDetailBoxes} nodeUI={this}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}

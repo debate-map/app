@@ -18,6 +18,7 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 		const userHidden = GetUserHidden(MeID());
 		const commandRuns = GetCommandRuns(commandTypesToShow.map(a=>a.name), undefined, store.main.social.showAll).OrderByDescending(a=>a.runTime);
 
+		const entryLimit = 30; // for now, only show the last 30 command-runs (need a paging system or the like)
 		return (
 			<Column style={{height: "100%"}}>
 				<Row center mb={5}>
@@ -32,7 +33,7 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 					</>}
 				</Row>
 				<ScrollView>
-					{commandRuns.map((run, index)=>{
+					{commandRuns.Take(entryLimit).map((run, index)=>{
 						return <CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1} panel={panel ?? false}/>;
 					})}
 				</ScrollView>
