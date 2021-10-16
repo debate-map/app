@@ -25,7 +25,8 @@ export class RootState {
 	@O @ignore graphlink: Graphlink<RootState, GraphDBShape>;
 
 	// modules
-	@O.ref feedback = Feedback_store; // @O.ref needed due to details of how mobx/immer work -- will probably make unneeded later
+	//@O.ref feedback = Feedback_store; // @O.ref needed due to details of how mobx/immer work -- will probably make unneeded later
+	@O feedback = Feedback_store;
 	//@O @ignore feedback_graphlink = feedback_graph;
 
 	// @O @ignore vMenu: VMenuState;
