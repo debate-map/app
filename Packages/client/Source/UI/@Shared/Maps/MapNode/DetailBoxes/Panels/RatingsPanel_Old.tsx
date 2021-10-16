@@ -255,8 +255,9 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 										color: markOpts.markRatings_color,
 										pointerEvents: "none",
 									},
-									//asNodeUIOverlay && {left: (rating.value / 100).ToPercentStr(), bottom: 0},
-									{left: `calc(${chartBodyRect.x - rootRect.x}px + ${((rating.value / 100) * chartBodySizeRelToRoot).ToPercentStr()}`, bottom: rootRect.Bottom - chartBodyRect.Bottom},
+									// when as node-ui overlay, we know the root-rect is the same as the chart-body-rect, so make more reliable by using a plain %-based positioning (defensive, and helped at least once)
+									asNodeUIOverlay && {left: (rating.value / 100).ToPercentStr(), bottom: 0},
+									!asNodeUIOverlay && {left: `calc(${chartBodyRect.x - rootRect.x}px + ${((rating.value / 100) * chartBodySizeRelToRoot).ToPercentStr()}`, bottom: rootRect.Bottom - chartBodyRect.Bottom},
 								)}>
 									{markOpts.markRatings_symbol}
 								</div>
