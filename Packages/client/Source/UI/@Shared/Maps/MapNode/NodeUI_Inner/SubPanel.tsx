@@ -7,7 +7,7 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2} & HTMLProps_Fixed<
 	render() {
 		const {node, ...rest} = this.props;
 		return (
-			<div {...rest} style={{position: "relative", margin: "5px -5px -5px -5px", padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
+			<div {...rest} style={{position: "relative", margin: "5px 0 -5px 0", padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>
