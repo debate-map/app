@@ -17,7 +17,7 @@ import {NodeChildHolder} from "./NodeChildHolder.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (height: number, dividePoint: number)=>void,
 	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
 
@@ -242,7 +242,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				this.SetState({innerBoxOffset});
 			}
 
-			if (onHeightOrDividePointChange) onHeightOrDividePointChange(dividePoint);
+			if (onHeightOrDividePointChange) onHeightOrDividePointChange(height, dividePoint);
 		}
 		this.lastHeight = height;
 		this.lastDividePoint = dividePoint;

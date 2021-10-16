@@ -189,26 +189,40 @@ export class NodeUI extends BaseComponentPlus(
 			console.log("Clearing childBoxes. @old:", this.childBoxes);
 			this.childBoxes = {};
 		}, []);*/
-		const nodeChildHolderBox_truth = (node.type == MapNodeType.claim && nodeForm != ClaimForm.question) && //boxExpanded &&
+		const truthBoxVisible = node.type == MapNodeType.claim && nodeForm != ClaimForm.question;
+		const relevanceBoxVisible = node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg;
+		const nodeChildHolderBox_truth = truthBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
 				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
-		const nodeChildHolderBox_relevance = (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg) && //boxExpanded &&
+				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
+					if (truthBoxVisible && relevanceBoxVisible) {
+						this.SetState({dividePoint: height}); // if truth and relevance boxes are both visible, divide-point is between them (so just below truth-box's height)
+					} else if (truthBoxVisible) {
+						this.SetState({dividePoint}); // if only truth box is visible, the divide-point is the truth box's own divide-point (ie. at same height as the add-pro/add-con buttons)
+					}
+					this.CheckForChanges();
+				}, [])}/>;
+		const nodeChildHolderBox_relevance = relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
+				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
+					if (relevanceBoxVisible && !truthBoxVisible) {
+						this.SetState({dividePoint}); // if only relevance box is visible, the divide-point is the relevance box's own divide-point (ie. at same height as the add-pro/add-con buttons)
+					}
+					this.CheckForChanges();
+				}, [])}/>;
 		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
 		let childConnectorBackground: JSX.Element|n;
 		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
-					linkSpawnPoint={new Vector2(0, selfHeight / 2)} straightLines={false}
+					linkSpawnPoint={new Vector2(0, (dividePoint ?? 0).KeepAtLeast(selfHeight / 2))} straightLines={false}
 					shouldUpdate={true}
 					childBoxInfos={([
 						!!nodeChildHolderBox_truth && {
