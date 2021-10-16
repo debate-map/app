@@ -5,10 +5,10 @@ import {E} from "web-vcore/nm/js-vextensions.js";
 import {GetChangeTypeOutlineColor, ChangeType} from "dm_common";
 import {ChildLimitBar} from "./NodeChildHolder.js";
 
-export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}> {
+export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string}, {}> {
 	static defaultProps = {textOutline: "rgba(10,10,10,1)"};
 	render() {
-		const {addedDescendants, editedDescendants, textOutline, limitBarPos} = this.props;
+		const {addedDescendants, editedDescendants, textOutline} = this.props;
 		return (
 			<Column style={E(
 				{
@@ -16,8 +16,6 @@ export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, 
 					// filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
 					textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
 				},
-				limitBarPos == LimitBarPos.above && {paddingTop: ChildLimitBar.HEIGHT},
-				{paddingBottom: 0 + (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
 			)}>
 				{addedDescendants > 0 &&
 					<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.add)},.8)`}}>{addedDescendants} new</Row>}

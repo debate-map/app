@@ -3,9 +3,9 @@ import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {ChildLimitBar} from "./NodeChildHolder.js";
 
-export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(10,10,10,1)"} as {childCount: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}) {
+export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(10,10,10,1)"} as {childCount: number, textOutline?: string}, {}) {
 	render() {
-		const {childCount, textOutline, limitBarPos} = this.props;
+		const {childCount, textOutline} = this.props;
 		if (childCount == 0) return <div/>;
 
 		return (
@@ -17,10 +17,7 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 						// filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
 						textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
 					},
-					/* showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
-					showBelowMessage && {paddingBottom: 13}, */
-					limitBarPos == LimitBarPos.above && {paddingTop: ChildLimitBar.HEIGHT},
-					{paddingBottom: 0 + /* (showBelowMessage ? 13 : 0) +*/ (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
+					//showBelowMessage && {paddingBottom: 13},
 				)}>
 					{childCount}
 				</div>

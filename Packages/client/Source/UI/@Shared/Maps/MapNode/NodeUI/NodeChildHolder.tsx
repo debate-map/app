@@ -87,28 +87,35 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		const RenderChild = (child: MapNodeL3, index: number, collection_untrimmed: MapNodeL3[], direction = "down" as "up" | "down")=>{
-			/* if (pack.node.premiseAddHelper) {
+			/*if (pack.node.premiseAddHelper) {
 				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
-			} */
+			}*/
 
 			const childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			const isFarthestChildFromDivider = index == (direction == "down" ? childLimit - 1 : 0);
-			// const isFarthestChildFromDivider = index == childLimit - 1;
-			return (
-				// <ErrorBoundary errorUI={props=>props.defaultUI(E(props, {style: {width: 500, height: 300}}))}>
-				// <ErrorBoundary key={child.id} errorUIStyle={{ width: 500, height: 300 }}>
-				<NodeUI key={child.id}
-					ref={c=>this.childBoxes[child.id] = c}
-					ref_innerUI={c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets())}
-					indexInNodeList={index} map={map} node={child}
-					path={`${path}/${child.id}`}
-					leftMarginForLines={belowNodeUI ? 20 : 0}
-					widthOverride={childrenWidthOverride}
-					onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-					{isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit) &&
-						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection_untrimmed.length}/>}
-				</NodeUI>
-			);
+			//const isFarthestChildFromDivider = index == childLimit - 1;
+			const showLimitBar = isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit);
+			
+			const nodeUI = <NodeUI key={child.id}
+				ref={c=>this.childBoxes[child.id] = c}
+				ref_innerUI={c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets())}
+				indexInNodeList={index} map={map} node={child}
+				path={`${path}/${child.id}`}
+				leftMarginForLines={belowNodeUI ? 20 : 0}
+				widthOverride={childrenWidthOverride}
+				onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+			const limitBar = <ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection_untrimmed.length}/>;
+
+			if (showLimitBar) {
+				return (
+					<React.Fragment key={child.id}>
+						{direction == "up" && limitBar}
+						{nodeUI}
+						{direction == "down" && limitBar}
+					</React.Fragment>
+				);
+			}
+			return nodeUI;
 		};
 
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
@@ -393,7 +400,9 @@ export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: stri
 		return (
 			<Row style={{
 				// position: "absolute", marginTop: -30,
-				[direction == "up" ? "marginBottom" : "marginTop"]: 10, width: childrenWidthOverride, cursor: "default",
+				//[direction == "up" ? "marginBottom" : "marginTop"]: 10,
+				margin: "5px 0",
+				width: childrenWidthOverride, cursor: "default",
 			}}>
 				<Button text={
 					<Row>

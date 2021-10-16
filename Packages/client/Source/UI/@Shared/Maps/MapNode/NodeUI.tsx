@@ -179,10 +179,6 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
-		const showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.supporting;
-		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.above : LimitBarPos.below) : LimitBarPos.none;
-
 		//this.childBoxes = {};
 		// only clear this.childBoxes when first mounting // actually, no need to clear; the ref-funcs already clear their own entries
 		/*UseEffect(()=>{
@@ -220,7 +216,7 @@ export class NodeUI extends BaseComponentPlus(
 		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
 		let childConnectorBackground: JSX.Element|n;
 		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
-			const linkSpawnHeight = (limitBarPos == LimitBarPos.above ? 37 : 0) + (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
+			const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
 					linkSpawnPoint={new Vector2(0, linkSpawnHeight)} straightLines={false}
@@ -300,8 +296,6 @@ export class NodeUI extends BaseComponentPlus(
 					// {paddingTop: innerBoxOffset},
 					{marginTop: boxExpanded && !isMultiPremiseArgument ? (dividePoint! - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
 				)}>
-					{limitBar_above && children}
-
 					{/*node.current.accessLevel != AccessLevel.basic &&
 					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
@@ -316,11 +310,9 @@ export class NodeUI extends BaseComponentPlus(
 					{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
 						<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 					{!boxExpanded &&
-						<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
+						<NodeChildCountMarker childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
 					{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&
-						<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
-
-					{!limitBar_above && children}
+						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 				</Column>
 				{boxExpanded &&
 				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough" style={{position: "relative"}}>
