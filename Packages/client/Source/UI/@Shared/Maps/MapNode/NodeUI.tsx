@@ -220,9 +220,10 @@ export class NodeUI extends BaseComponentPlus(
 		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
 		let childConnectorBackground: JSX.Element|n;
 		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
+			const linkSpawnHeight = (limitBarPos == LimitBarPos.above ? 37 : 0) + (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
-					linkSpawnPoint={new Vector2(0, (dividePoint ?? 0).KeepAtLeast(selfHeight / 2))} straightLines={false}
+					linkSpawnPoint={new Vector2(0, linkSpawnHeight)} straightLines={false}
 					shouldUpdate={true}
 					childBoxInfos={([
 						!!nodeChildHolderBox_truth && {
