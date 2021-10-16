@@ -2,7 +2,7 @@ import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, 
 import {observable} from "web-vcore/nm/mobx.js";
 import {O, StoreAction, LogWarning} from "web-vcore";
 import {store} from "Store";
-import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges} from "web-vcore/nm/mobx-graphlink.js";
+import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges, WaitTillResolvedThenExecuteSideEffects, RunInAction, BailError} from "web-vcore/nm/mobx-graphlink.js";
 import {PathSegmentToNodeID, MapView, MapNodeView, GetNode, MapNodeType, GetDefaultExpansionFieldsForNodeView, ToPathNodes} from "dm_common";
 
 export const GetSelectedNodePathNodes = CreateAccessor((mapViewOrMapID: string | MapView)=>{
@@ -174,31 +174,44 @@ export const GetNodeViewsBelowPath = CreateAccessor((mapID: string|n, pathOrPath
 	return result;
 });
 
-export const ACTMapNodeExpandedSet = StoreAction((opt: {
+export function ACTMapNodeExpandedSet(opt: {
 	mapID: string|n, path: string,
 	expanded?: boolean, expanded_truth?: boolean, expanded_relevance?: boolean,
 	expandAncestors?: boolean, resetSubtree?: boolean,
-})=>{
-	// CreateMapViewIfMissing(opt.mapID);
+}) {
+	//CreateMapViewIfMissing(opt.mapID);
 	const pathNodes = ToPathNodes(opt.path);
 	const nodeViews = GetNodeViewsAlongPath(opt.mapID, pathNodes, true);
 
-	if (opt.expandAncestors) {
-		nodeViews.Take(nodeViews.length - 1).forEach(a=>a && (a.expanded = true));
-	}
-	const nodeView = nodeViews.Last();
-	const expandKeysPresent = (["expanded", "expanded_truth", "expanded_relevance"] as const).filter(key=>opt[key] != null);
-	if (nodeView) nodeView.Extend(opt.IncludeKeys(...expandKeysPresent));
-
-	// if "resetting" subtree, traverse descendent node-views and reset their expansion-fields to their defaults
-	if (opt.resetSubtree) {
-		const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
-		for (const [descendantPath, descendantNodeView] of descendantNodeViews.entries()) {
-			//descendantNodeView.Extend({expanded: false, expanded_truth: true, expanded_relevance: true});
-			descendantNodeView.Extend(GetDefaultExpansionFieldsForNodeView(descendantPath));
+	// first, expand/collapse the node-views that we know the final state of immediately
+	RunInAction("ACTMapNodeExpandedSet", ()=>{
+		if (opt.expandAncestors) {
+			nodeViews.slice(0, -1).forEach(a=>a && (a.expanded = true));
 		}
+		const nodeView = nodeViews.Last();
+		const expandKeysPresent = (["expanded", "expanded_truth", "expanded_relevance"] as const).filter(key=>opt[key] != null);
+		if (nodeView) nodeView.Extend(opt.IncludeKeys(...expandKeysPresent));
+	});
+
+	// then, if "resetting" subtree, traverse descendent node-views and reset their expansion-fields to their defaults
+	// (it can take a moment to retrieve the default-expansion-states of all nodes in the node-view subtree, hence the resolve-waiter wrapper)
+	if (opt.resetSubtree) {
+		WaitTillResolvedThenExecuteSideEffects({onTimeout: "do nothing"}, addEffect=>{
+			let defaultExpansionStatesStillLoading = 0;
+			const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
+			for (const [descendantPath, descendantNodeView] of descendantNodeViews.entries()) {
+				//descendantNodeView.Extend({expanded: false, expanded_truth: true, expanded_relevance: true});
+
+				// catch bail for retriving node's expansion state, so it doesn't stop our other expansion-state retrievals from starting (ie. parallel rather than sequential)
+				const defaultExpansionState = GetDefaultExpansionFieldsForNodeView.CatchBail(undefined, descendantPath);
+				if (defaultExpansionState === undefined) defaultExpansionStatesStillLoading++;
+				addEffect(()=>descendantNodeView.Extend(defaultExpansionState));
+			}
+
+			if (defaultExpansionStatesStillLoading) throw new BailError(`Still loading the default-expansion-states for ${defaultExpansionStatesStillLoading} nodes.`);
+		});
 	}
-});
+}
 
 /* export const ACTMapNodePanelOpen = StoreAction((mapID: string, path: string, panel: string)=> {
 	GetNodeView(mapID, path).openPanel = panel;

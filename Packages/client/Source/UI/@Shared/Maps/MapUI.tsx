@@ -241,7 +241,7 @@ export class MapUI extends BaseComponentPlus({
 	}
 
 	get Map() {
-		return GetMap(this.props.mapID);
+		return GetMap.CatchBail(null, this.props.mapID);
 	}
 
 	async ComponentDidMount() {

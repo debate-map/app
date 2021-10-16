@@ -6,7 +6,7 @@ import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
 import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID} from "dm_common";
-import {BailMessage, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
@@ -162,7 +162,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 					title: tempCommand.ValidateErrorStr as any,
 				};
 			} catch (ex) {
-				if (ex instanceof BailMessage) {
+				if (ex instanceof BailError) {
 					boxController.options.okButtonProps = {
 						enabled: false,
 						title: ex.message,
