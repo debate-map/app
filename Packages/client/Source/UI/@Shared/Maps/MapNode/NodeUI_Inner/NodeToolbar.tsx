@@ -188,11 +188,15 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 			return (
 				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
+						// for splines style
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
-						//[ratingsInEachRange[0].length, ...ratingsInEachRange.map(a=>a.length), ratingsInEachRange.Last().length],
 						//[0, ...ratingsInEachRange.map(a=>a.length), 0],
 						//[baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
 						[baselineValue, ...ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)), baselineValue],
+						
+						// for bars style
+						/*ratingTypeInfo.valueRanges.map(a=>a.center),
+						ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)),*/
 					]}
 					// if background is red, decrease alpha of our orange fill-color (else it shows up too prominently, relative to when the background is green, blue, etc.)
 					//customAlphaMultiplier={nodeColor.css() == redNodeColor.css() ? .5 : 1}

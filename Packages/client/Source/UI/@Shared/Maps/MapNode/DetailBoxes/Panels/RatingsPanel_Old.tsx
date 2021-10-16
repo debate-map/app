@@ -80,8 +80,9 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				fill: chroma("#ff7300").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
 				//fill: "#ff7300FF",
 				points: {show: false},
-				paths: uPlot.paths.spline!(),
 				//paths: uPlot.paths.spline2,
+				paths: uPlot.paths.spline!(),
+				//paths: uPlot.paths.bars!({size: [1, 100], gap: 1}),
 			},
 		];
 		
@@ -301,7 +302,10 @@ function GetChartOptions(width: number, height: number, lineTypes: uPlot.Series[
 			},
 		],
 		scales: {
-			x: {time: false},
+			x: {
+				time: false,
+				range: ()=>[0, 100],
+			},
 			y: {
 				/*auto: false,
 				min: 0,
