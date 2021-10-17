@@ -8,6 +8,7 @@ import {NotificationMessage} from "./main/@NotificationMessage.js";
 import {DatabaseState} from "./main/database.js";
 import {DebatesPageState} from "./main/debates.js";
 import {MapsState} from "./main/maps.js";
+import {ProfileState} from "./main/profile.js";
 import {RatingUIState} from "./main/ratingUI.js";
 import {SearchState} from "./main/search.js";
 import {ShareUIState} from "./main/shareUI.js";
@@ -53,7 +54,7 @@ export class MainState {
 
 	@O search = new SearchState();
 	// guide: {subpage: string};
-	@O profile = {} as {subpage: string};
+	@O profile = new ProfileState();
 
 	@O topLeftOpenPanel: string|n;
 	// set topLeftOpenPanel_set(val) { this.topLeftOpenPanel = val; }

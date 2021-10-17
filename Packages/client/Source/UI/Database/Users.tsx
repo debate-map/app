@@ -20,7 +20,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 
 		// if (userExtraInfoMap == null) return <div/>;
 		if (selectedUser) {
-			return <UserProfileUI profileUser={selectedUser}/>;
+			return <UserProfileUI user={selectedUser}/>;
 		}
 
 		users = users.filter(a=>a);

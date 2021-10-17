@@ -337,7 +337,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 
 						{/*<Route path='/search'><SearchUI/></Route>
 						<Route path='/guide'><GuideUI/></Route>*/}
-						{page == "profile" && <UserProfileUI profileUser={Me()}/>}
+						{page == "profile" && <UserProfileUI user={Me()}/>}
 					</main>
 				</ErrorBoundary>
 			</Column>
