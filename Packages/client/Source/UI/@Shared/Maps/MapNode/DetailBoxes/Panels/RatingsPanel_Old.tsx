@@ -43,6 +43,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				if (!newChartBodyRect.Equals(chartBodyRect)) setChartBodyRect(newChartBodyRect);
 			}
 		});
+		const rectsResolved = rootRect != null && chartBodyRect != null;
 
 		const meID = MeID();
 		//const ratings = GetRatings(node.id, ratingType);
@@ -241,11 +242,11 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 						.u-legend .hideLegend { display: none; }
 						`}</style>
 						<UPlot chartRef={this.chart} options={chartOptions} data={uplotData} ignoreDoubleClick={true}/>
-						{//(asNodeUIOverlay || (rootRect != null && chartBodyRect != null)) &&
-						rootRect != null && chartBodyRect != null && 
+						{(asNodeUIOverlay || rectsResolved) &&
+						//rootRect != null && chartBodyRect != null && 
 						ratingsToMark.map((rating, index)=>{
 							const markOpts = userFollows.find(a=>a.targetUser == rating.creator)!;
-							const chartBodySizeRelToRoot = chartBodyRect.width / rootRect.width;
+							const chartBodySizeRelToRoot = rectsResolved ? chartBodyRect!.width / rootRect!.width : null;
 							return (
 								<div key={index} style={ES(
 									{
@@ -258,7 +259,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 									},
 									// when as node-ui overlay, we know the root-rect is the same as the chart-body-rect, so make more reliable by using a plain %-based positioning (defensive, and helped at least once)
 									asNodeUIOverlay && {left: (rating.value / 100).ToPercentStr(), bottom: 0},
-									!asNodeUIOverlay && {left: `calc(${chartBodyRect.x - rootRect.x}px + ${((rating.value / 100) * chartBodySizeRelToRoot).ToPercentStr()}`, bottom: rootRect.Bottom - chartBodyRect.Bottom},
+									!asNodeUIOverlay && {left: `calc(${chartBodyRect!.x - rootRect!.x}px + ${((rating.value / 100) * chartBodySizeRelToRoot!).ToPercentStr()}`, bottom: rootRect!.Bottom - chartBodyRect!.Bottom},
 								)}>
 									{markOpts.markRatings_symbol}
 								</div>
