@@ -223,6 +223,70 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 	}
 }
 
+/*
+Attempt 1
+==========
+class NotificationGroup {
+	name: string;
+	type: AddMap|AddNode|etc.;
+	filters: [{actorID: string}];
+	level: number;
+	behaviors: Behavior[];
+}
+class Behavior {
+	type: "site_notify" | "email_digest" | "email_instant";
+	// if site_notify
+	obvious: boolean;
+}
+const GetStartGroupsForType = type=>[
+	new NotificationGroup({name: "L1", type, level: 1, behaviors: [
+		new Behavior({type: "site_notify"}),
+		new Behavior({type: "email_digest"}),
+	]}),
+	new NotificationGroup({name: "L2", type, level: 2, behaviors: [
+		new Behavior({type: "site_notify", obvious: true}),
+		new Behavior({type: "email_digest"}),
+	]}),
+	new NotificationGroup({name: "L3", type, level: 3, behaviors: [
+		new Behavior({type: "site_notify", obvious: true}),
+		new Behavior({type: "email_digest"}),
+		new Behavior({type: "email_instant"}),
+	]}),
+];
+
+Attempt 2
+==========
+class User {
+	actionSignificances_base: {
+		[key: ActionType]: "default" | "keepAtLeast:X" | "set:X";
+	};
+	userFollows: {[key: string]: UserFollow}
+}
+class UserFollow {
+	targetUser: string;
+	actionSignificances_forThisUser: {
+		[key: ActionType]: "default" | "keepAtLeast:X" | "set:X";
+	};
+}
+
+class Behavior {}
+const behaviors = {
+	site_notify_silent: {minLevel: 1, maxLevel: 1},
+	site_notify_obvious: {minLevel: 2, maxLevel: 2},
+	email_digest: {minLevel: 3, maxLevel: 3},
+	email_instant: {minLevel: 4, maxLevel: 4},
+};
+
+class Event {
+	defaultLevel: number;
+}
+const events = [
+	AddMap: {defaultLevel: 4},
+	EditNode: {defaultLevel: 1},
+	DeleteNode: {defaultLevel: 4},
+];
+*/
+
 @Observer
 class UserProfileUI_Notifications extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
