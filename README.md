@@ -53,7 +53,7 @@ For more information, visit the website at: <https://debatemap.app>
 <!----><a name="vscode"></a>
 <details><summary><b>[vscode] VSCode window setup</b></summary>
 
-Prerequisite steps: [setup-general](https://github.com/debate-map/app#setup-general)
+Prerequisite steps: [setup-general](#setup-general)
 
 It's recommended to split your dev setup into two vscode windows:
 * 1\) Window #1 in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/common` is also fine)
@@ -98,8 +98,6 @@ Reasons:
 <!----><a name="dev-enhance"></a>
 <details><summary><b>[dev-enhance] Enhance the local web-server dev experience</b></summary>
 
-Prerequisite steps: [client/dev](https://github.com/debate-map/app/tree/master/Packages/client#dev)
-
 * 1\) [opt] Install: [React Development Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
 * 2\) [opt] Install: [MobX Development Tools](https://chrome.google.com/webstore/detail/mobx-developer-tools/pfgnfdagidkfgccljigdamigbcnndkod) (or [my fork](https://github.com/Venryx/mobx-devtools-advanced))
 
@@ -120,7 +118,7 @@ Prerequisite steps: [client/dev](https://github.com/debate-map/app/tree/master/P
 <!----><a name="run-frontend-local"></a>
 <details><summary><b>[run-frontend-local] How to run frontend codebase, for local development</b></summary>
 
-Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
+Prerequisite steps: [setup-k8s](#setup-k8s)
 
 * 1\) If you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, for the frontend files.
 	* 1.1\) Start task `#1 tsc` in vscode-1 (or run `npm start client.tsc`), for the ts->js transpilation.
@@ -135,7 +133,7 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 * 3\) Open the locally-served frontend, by opening in your browser: `localhost:3005`
 * 4\) If changes were made that affect the db schema (and you have a local k8s app-server that needs these changes applied), then switch k8s context to the local cluster (using tray icon), and run: `npm start "initDB_freshScript_k8s local"`
 
-> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
+> For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
 
 </details>
 
@@ -148,7 +146,7 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 <!----><a name="tilt-notes"></a>
 <details><summary><b>[tilt-notes] Notes on using Tilt</b></summary>
 
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+Prerequisite steps: [setup-base](#setup-base)
 
 Notes:
 * Tilt-up can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/PGO/postgres` runs before `deploy/PGO/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "pgo" resource loads without error.
@@ -188,7 +186,7 @@ Notes:
 <!----><a name="setup-k8s"></a>
 <details><summary><b>[setup-k8s] Setting up local k8s cluster</b></summary>
 
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+Prerequisite steps: [setup-base](#setup-base)
 
 Options:
 * Docker Desktop Kubernetes [recommended]
@@ -234,7 +232,7 @@ Notes:
 #### Troubleshooting
 
 * If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"` (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
-* When the list of images/containers in Docker Desktop gets too long, see the [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim) module.
+* When the list of images/containers in Docker Desktop gets too long, see the [docker-trim](#docker-trim) module.
 
 </details>
 
@@ -255,7 +253,7 @@ Notes:
 <!----><a name="docker-trim"></a>
 <details><summary><b>[image-inspect] Docker image/container inspection</b></summary>
 
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+Prerequisite steps: [setup-base](#setup-base)
 
 Tools:
 * Make a shortcut to `\\wsl$\docker-desktop-data\version-pack-data\community\docker\overlay2`; this is the path you can open in Windows Explorer to view the raw files in the docker-built "layers". (ie. your project's output-files, as seen in the docker builds)
@@ -267,7 +265,7 @@ Tools:
 <!----><a name="docker-trim"></a>
 <details><summary><b>[docker-trim] Docker image/container trimming</b></summary>
 
-Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
+Prerequisite steps: [setup-base](#setup-base)
 
 * 1\) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
 * 2\) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
@@ -298,10 +296,10 @@ foreach ($container in $containersToRemove) {
 <!----><a name="run-backend-local"></a>
 <details><summary><b>[run-backend-local] How to run backend codebase, for local development</b></summary>
 
-Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
+Prerequisite steps: [setup-k8s](#setup-k8s)
 
 * 1\) Run the `dev` script for the package you're working on. (usually `npm start [app/web]-server.dev`, which equates to the `#1 app-server.dev` and `## web-server.dev` vscode tasks)
-* 2\) Start the web-server (ie. the serving of frontend files), by following the [deploy/run-frontend-local](https://github.com/debate-map/app/tree/master/Packages/deploy#run-frontend-local) module above.
+* 2\) Start the web-server (ie. the serving of frontend files), by following the [run-frontend-local](#run-frontend-local) module above.
 * 3\) Start the app-server:
 	* 3.1\) Option 1, using node directly: (not recommended atm)
 		* 3.1.1\) Run: `npm start app-server.dev` (vscode task: `#1 app-server.dev`)
@@ -310,7 +308,7 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 		* 3.2.2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
 * 4\) If changes were made that affect the db schema, switch k8s context to the local cluster, then run: `npm start "initDB_freshScript_k8s local"`
 
-> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
+> For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
 
 </details>
 
@@ -327,7 +325,7 @@ Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/ma
 <!----><a name="pulumi-init"></a>
 <details><summary><b>[pulumi-init] Pulumi initialization (provisioning GCS bucket, container registry, etc.)</b></summary>
 
-Prerequisite steps: [deploy/cloud-project-init](https://github.com/debate-map/app/tree/master/Packages/deploy#cloud-project-init)
+Prerequisite steps: [cloud-project-init](#cloud-project-init)
 
 Note: We use Google Cloud here, but others could be used.
 
@@ -360,7 +358,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 * 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
-		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [deploy/docker-remote](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-remote))
+		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [docker-remote](#docker-remote))
 		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
 	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
 
@@ -491,7 +489,7 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 </details>
 
 <!----><a name="db-migrate"></a>
-<details><summary><b>[app-server/db-migrate] Database migrations</b></summary>
+<details><summary><b>[db-migrate] Database migrations</b></summary>
 
 See here for overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
 
@@ -509,7 +507,7 @@ Actions:
 <!----><a name="k8s-remote"></a>
 <details><summary><b>[k8s-remote] How to deploy web+app server packages to remote server, using docker + kubernetes</b></summary>
 
-Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/master/Packages/deploy#pulumi-init), [deploy/ovh-init](https://github.com/debate-map/app/tree/master/Packages/deploy#ovh-init)
+Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
 * 1\) Ensure that the distribution files are ready for any packages you've made changes to:
 	1.1\) If you've changed files in `client`, then follow its ts->js transpilation instructions, then build the webpack bundle into an actual file, in production mode, by starting task `## client.build.prodQuick` in vscode-1 (or running `npm start client.build.prodQuick`).
@@ -520,7 +518,7 @@ Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/
 	* 4.1\) Run: `npm start "app-server.initDB_freshScript_k8s ovh"`
 * 5\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
-> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
+> For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
 
 </details>
 
