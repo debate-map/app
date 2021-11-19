@@ -9,10 +9,10 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 ## General
 
 <!----><a name="setup-base"></a>
-### [setup-base] Setting up base tools needed for local/remote k8s deployments
+<details><summary><b>[setup-base] Setting up base tools needed for local/remote k8s deployments</b></summary>
 
 * 1\) Install Docker Desktop: https://docs.docker.com/desktop
-* 1.1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards. See [here](https://superuser.com/a/1671710/231129) for the fix.
+	* 1.1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards. See [here](https://superuser.com/a/1671710/231129) for the fix.
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt
 * 3\) Install Chocolatey: https://chocolatey.org/install
 * 4\) Install Helm (eg. for some Tilt extensions): `choco install kubernetes-helm`
@@ -22,8 +22,10 @@ This subrepo/package is for deployment-related configuration and scripts. (other
 * 8\) [opt] Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
 * 9\) See here for more helpful tools: https://collabnix.github.io/kubetools
 
+</details>
+
 <!----><a name="docker-trim"></a>
-### [image-inspect] Docker image/container inspection
+<details><summary><b>[image-inspect] Docker image/container inspection</b></summary>
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
@@ -32,8 +34,10 @@ Tools:
 * Install the Docker "dive" tool (helps for inspecting image contents without starting container): https://github.com/wagoodman/dive
 * To inspect the full file-contents of an image: `docker save IMAGE_NAME -o ./Temp/output.tar` (followed by extraction, eg. using [7-zip](https://www.7-zip.org))
 
+</details>
+
 <!----><a name="tilt-notes"></a>
-### [tilt-notes] Notes on using Tilt
+<details><summary><b>[tilt-notes] Notes on using Tilt</b></summary>
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
@@ -42,10 +46,12 @@ Notes:
 * For local cluster, tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `npm start backend.tiltUp_local`. More info: https://stackoverflow.com/a/6877982
 * **Manually restarting the "pgo" resource will clear the database contents! Use with caution.**
 
+</details>
+
 ## Local
 
 <!----><a name="setup-k8s"></a>
-### [setup-k8s] Setting up local k8s cluster
+<details><summary><b>[setup-k8s] Setting up local k8s cluster</b></summary>
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
@@ -90,24 +96,54 @@ Notes:
 * 1\) Create an alias/copy of the k8s context you just created, renaming it to "local". (edit `$HOME/.kube/config`)
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
-<!----><a name="k8s-local"></a>
-### [deploy/k8s-local] Local server, using docker + kubernetes (built-in) + tilt (helper)
+#### Troubleshooting
 
-Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
-
-* 1\) If you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package. (see the changed packages' readmes for more info)
-* 2\) Run (in repo root): `npm start backend.tiltUp_local`
-* 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
-* 4\) Run the init-db script: `npm start "initDB_freshScript_k8s local"`
-
-> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
-
-Notes:
 * If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"` (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
 * When the list of images/containers in Docker Desktop gets too long, see the [deploy/docker-trim](https://github.com/debate-map/app/tree/master/Packages/deploy#docker-trim) module.
 
+</details>
+
+<!----><a name="run-frontend-local"></a>
+<details><summary><b>[deploy/run-frontend-local] How to run frontend codebase, for local development</b></summary>
+
+Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
+
+* 1\) If you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, for the frontend files.
+	* 1.1\) Run `npm start client.tsc` (or vscode task `#1 tsc`), for the ts->js transpilation.
+	* 1.2\) Run `npm start client.dev` (or vscode task `#2 webpack`), for the webpack bundle-building (and serving to `localhost:3005`).
+* 2\) Start the serving of the frontend files. (ie. the files generated by step 1)
+	* 2.1\) Option 1, using webpack directly: (faster, and recommended atm)
+		* 2.1.1\) Do nothing. Webpack will already be serving the frontend files to `localhost:3005` (from step 1.2). If you want to connect to the remote db, add `?db=prod` to the end of the url.
+	* 2.2\) Option 2, using the web-server package within k8s:
+		* 2.2.1\) Run (in repo root): `npm start backend.tiltUp_local`
+		* 2.2.2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+* 3\) If changes were made that affect the db schema, switch k8s context to the local cluster, then run: `npm start "initDB_freshScript_k8s local"`
+
+> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
+
+</details>
+
+<!----><a name="run-backend-local"></a>
+<details><summary><b>[deploy/run-backend-local] How to run backend codebase, for local development</b></summary>
+
+Prerequisite steps: [deploy/setup-k8s](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-k8s)
+
+* 1\) Run the `dev` script for the package you're working on. (usually `npm start [app/web]-server.dev`, which equates to the `#1 app-server.dev` and `## web-server.dev` vscode tasks)
+* 2\) Start the web-server (ie. the serving of frontend files), by following the [deploy/run-frontend-local](https://github.com/debate-map/app/tree/master/Packages/deploy#run-frontend-local) module above.
+* 3\) Start the app-server:
+	* 3.1\) Option 1, using node directly: (not recommended atm)
+		* 3.1.1\) Run: `npm start app-server.dev` (vscode task: `#1 app-server.dev`)
+	* 3.2\) Option 2, using the app-server package within k8s:
+		* 3.2.1\) Run (in repo root): `npm start backend.tiltUp_local`
+		* 3.2.2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+* 4\) If changes were made that affect the db schema, switch k8s context to the local cluster, then run: `npm start "initDB_freshScript_k8s local"`
+
+> For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
+
+</details>
+
 <!----><a name="docker-trim"></a>
-### [docker-trim] Docker image/container trimming
+<details><summary><b>[docker-trim] Docker image/container trimming</b></summary>
 
 Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/master/Packages/deploy#setup-base)
 
@@ -129,10 +165,12 @@ foreach ($container in $containersToRemove) {
 }
 ```
 
+</details>
+
 ## Remote
 
 <!----><a name="cloud-project-init"></a>
-### [cloud-project-init] Cloud-projects initialization (eg. creating Google Cloud project for Pulumi to work within)
+<details><summary><b>[cloud-project-init] Cloud-projects initialization (eg. creating Google Cloud project for Pulumi to work within)</b></summary>
 
 Note: We use Google Cloud here, but others could be used.
 
@@ -153,8 +191,10 @@ Note: We use Google Cloud here, but others could be used.
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Packages/deploy/PGO/postgres/gcs-key.json`
 	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Packages/deploy/PGO/postgres/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
 
+</details>
+
 <!----><a name="pulumi-init"></a>
-### [pulumi-init] Pulumi initialization (provisioning GCS bucket, container registry, etc.)
+<details><summary><b>[pulumi-init] Pulumi initialization (provisioning GCS bucket, container registry, etc.)</b></summary>
 
 Prerequisite steps: [deploy/cloud-project-init](https://github.com/debate-map/app/tree/master/Packages/deploy#cloud-project-init)
 
@@ -173,8 +213,10 @@ Note: We use Google Cloud here, but others could be used.
 * 8\) However, there are currently still a couple places where those creating their own fork/deployment will need to change hard-coded values:
 	* 8.1\) For each package that you'll be deploying, update the `SHARED_BASE_URL` variable to match the image-url for `dm-shared-base` seen in the Tiltfile (ie. `${registryURL}/dm-shared-base`). Unfortunately the argument's value cannot be set from the Tiltfile yet, because otherwise Tilt thinks the shared-base image is unused. (ie. it doesn't see the link between the shared-base image and the server images, unless the shared-base's image-url is hard-coded in the latter's Dockerfiles)
 
+</details>
+
 <!----><a name="ovh-init"></a>
-### [ovh-init] OVH initialization (provisioning remote kubernetes cluster)
+<details><summary><b>[ovh-init] OVH initialization (provisioning remote kubernetes cluster)</b></summary>
 
 Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 
@@ -191,8 +233,10 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
 	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
 
+</details>
+
 <!----><a name="k8s-remote"></a>
-### [k8s-remote] Deploy remote web+app server, using docker + kubernetes
+<details><summary><b>[k8s-remote] Deploy remote web+app server, using docker + kubernetes</b></summary>
 
 Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/master/Packages/deploy#pulumi-init), [deploy/ovh-init](https://github.com/debate-map/app/tree/master/Packages/deploy#ovh-init)
 
@@ -205,10 +249,12 @@ Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/
 
 > For additional notes on using Tilt, see here: [deploy/tilt-notes](https://github.com/debate-map/app/tree/master/Packages/deploy#tilt-notes)
 
+</details>
+
 ## Shared
 
 <!----><a name="k8s-monitors"></a>
-### [k8s-monitors] Various commands/info on monitoring system (prometheus, etc.)
+<details><summary><b>[k8s-monitors] Various commands/info on monitoring system (prometheus, etc.)</b></summary>
 
 * To open a bash shell in the main prometheus pod: `kubectl exec -it prometheus-k8s-[0/1] -n monitoring -- sh` (or just use Lens)
 * To view the Grafana monitor webpage, open: `localhost:[3405/4405]` (`3405` for local, `4405` for remote, if using Tilt; if not, manually launch using Lens)
@@ -221,16 +267,20 @@ Prerequisite steps: [deploy/pulumi-init](https://github.com/debate-map/app/tree/
 <!-- * To view the cAdvisor monitor webpage, open (not currently working): `localhost:31001` -->
 * To view the cAdvisor monitor webpage [not currently working/enabled], open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
 
+</details>
+
 <!----><a name="k8s-ssh"></a>
-### [k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)
+<details><summary><b>[k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)</b></summary>
 
 * For web-server: `npm start ssh.web-server`
 * For app-server: `npm start ssh.app-server`
 * For database: `npm start ssh.db`
 * For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
 
+</details>
+
 <!----><a name="k8s-psql"></a>
-### [k8s-psql] How to connect to postgres in your kubernetes cluster, using psql
+<details><summary><b>[k8s-psql] How to connect to postgres in your kubernetes cluster, using psql</b></summary>
 
 Note: The instructions below are written to work for both the local and remote k8s clusters. Some substitutions are thus needed:
 * Anywhere you see `[local/ovh]`, replace it with `local` for your local cluster, and `ovh` for your remote cluster. (can also be omitted, if current context matches your target)
@@ -265,15 +315,19 @@ sudo apt update
 sudo apt -y install postgresql-client-13
 ```
 
+</details>
+
 <!----><a name="k8s-view-pg-config"></a>
-### [k8s-view-pg-config] How to view various postgres config files in the kubernetes cluster
+<details><summary><b>[k8s-view-pg-config] How to view various postgres config files in the kubernetes cluster</b></summary>
 
 To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 * 1\) Run: `kubectl exec -it $(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) -- bash`
 * 2\) Run (in new bash): `cat /pgdata/pg13/XXX`
 
+</details>
+
 <!----><a name="pg-backups"></a>
-### [pg-backups] Information on backups for your in-kubernetes database
+<details><summary><b>[pg-backups] Information on backups for your in-kubernetes database</b></summary>
 
 General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
@@ -317,8 +371,10 @@ To restore a backup:
 	* 7.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file. (needed so the restore operation is not attempted for other contexts, when their tilt-up scripts are run)
 	* 7.2\) If option 2 was taken: No action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied, and the restore config was only placed into the target context. (If you want to be extra sure, though, you could follow step 6.2; this is fine, because the restore has already taken place, so it will not be reverted or the like.)
 
+</details>
+
 <!----><a name="dns-setup"></a>
-### [dns-setup] How to set up DNS and CDN (if creating own fork/deployment)
+<details><summary><b>[dns-setup] How to set up DNS and CDN (if creating own fork/deployment)</b></summary>
 
 Note: We use Cloudflare here, but others could be used.
 
@@ -329,8 +385,10 @@ Note: We use Cloudflare here, but others could be used.
 * 3\) Set up a redirect from `www.YOUR_DOMAIN.YOUR_TLD` to `YOUR_DOMAIN.YOUR_TLD`. (using the Rules section, as [seen here](https://community.cloudflare.com/t/redirecting-www-to-non-www/2949/28))
 * 4\) Enable the "SSL/TLS" -> "Edge Certificates" -> "Always Use HTTPS" option. (seems to not really be necessary, presumably because Traefik doesn't respond for non-https requests so Chrome retries with https automatically, but good practice)
 
+</details>
+
 <!----><a name="oauth-setup"></a>
-### [oauth-setup] How to set up oauth
+<details><summary><b>[oauth-setup] How to set up oauth</b></summary>
 
 In order to use the oauth options for sign-in (eg. Google Sign-in), the frontend either must be running on `localhost:[3005/31005]`, or you have to create your own online "application" configs/entries on each of the oauth-providers' platforms. The below instructions are for creating those "application" configs/entries. (replace the domains with your own, of course)
 
@@ -357,3 +415,5 @@ Authorized redirect URIs:
 * https://app-server.debatemap.app/auth/google/callback_returnToLocalhost
 * https://app-server.debates.app/auth/google/callback_returnToLocalhost
 ```
+
+</details>
