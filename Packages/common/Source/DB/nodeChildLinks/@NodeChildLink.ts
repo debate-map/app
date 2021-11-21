@@ -36,6 +36,10 @@ export class NodeChildLink {
 	@Field({type: "number"})
 	slot: number;
 
+	@DB((t, n)=>t.boolean(n))
+	@Field({type: "boolean"})
+	freeform: boolean;
+
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ClaimForm"}, {opt: true})
 	form?: ClaimForm|n;

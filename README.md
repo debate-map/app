@@ -441,6 +441,15 @@ Authorized redirect URIs:
 
 </details>
 
+<!----><a name="port-forwarding"></a>
+<details><summary><b>[port-forwarding] How to set up port-forwarding for your k8s db, etc.</b></summary>
+
+For database pod:
+* 1\) If you have tilt running, a port-forward should already be set up, on the correct port. (`3205` for your local cluster, and `4205` for your remote cluster)
+* 2\) You can also set up the port-forwarding by running the script: `npm start backend.forward_[local/remote]DB`
+
+</details>
+
 <!----><a name="k8s-psql"></a>
 <details><summary><b>[k8s-psql] How to connect to postgres in your kubernetes cluster, using psql</b></summary>
 
@@ -452,10 +461,8 @@ The easy way:
 * 1\) Run: `npm start "ssh.db [linux/ovh]"`
 * 2\) Run (in vm shell that opens): `psql`
 
-The hard way: (ie. avoiding `npm start XXX` helpers)
-* 1\) Set up a port-forward from `localhost:[3205/4205]` to k8s pod `debate-map-instance1-XXXXX` (port 5432):
-	* 1.1\) If you have tilt running, a port-forward should already be set up, on the correct port. (`3205` for your local cluster, and `4205` for your remote cluster)
-	* 1.2\) You can also set it up manually using kubectl: `kubectl --context [local/ovh] -n postgres-operator port-forward $(kubectl --context [local/ovh] get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master) [3205/4205]:5432`
+The hard way: (using external psql with port-forwarding, rather than ssh'ing into the pod directly)
+* 1\) Set up a port-forward from `localhost:[3205/4205]` to your k8s database pod. (see: [port-forwarding](#port-forwarding))
 * 2\) To access `psql`, as the "admin" user, run the below...
 	* 2.1\) In Windows (PS), option A: `$env:PGPASSWORD=$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}'); psql -h localhost -p [3205/4205] -U admin -d debate-map`
 	* 2.2\) In Windows (PS), option B: `Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("$(kubectl --context [local/ovh] -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')"))@localhost:[3205/4205]/debate-map"`

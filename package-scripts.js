@@ -80,6 +80,7 @@ const PrepDockerCmd = ()=>{
 	return `node Scripts/PrepareDocker.js &&`;
 };
 
+
 function GetServeCommand(nodeEnv = null) {
 	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start client.dev.part2"`;
 }
@@ -139,7 +140,21 @@ Object.assign(scripts, {
 		// docker
 		dockerPrep: "node Scripts/PrepareDocker.js",
 		pulumiUp: `${PrepDockerCmd()} pulumi up`,
-		
+
+		// port-forwarding (standalone; without tilt)
+		forward_localDB: Dynamic(()=>{
+			const podName = execSync(GetPodNameCmd_DB("local")).toString().trim();
+			return `${KubeCTLCmd("local")} -n postgres-operator port-forward ${podName} 3205:5432`;
+		}),
+		forward_remoteDB: Dynamic(()=>{
+			const podName = execSync(GetPodNameCmd_DB("ovh")).toString().trim();
+			return `${KubeCTLCmd("ovh")} -n postgres-operator port-forward ${podName} 4205:5432`;
+		}),
+		/*k8s_proxyOn8081: Dynamic(()=>{
+			console.log("Test");
+			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
+		}),*/
+
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
 		tiltUp_local:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt up --context local`,
 		tiltUp_docker:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "docker-desktop")}		tilt up --context docker-desktop`,
@@ -281,10 +296,6 @@ Object.assign(scripts, {
 			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`;
 		}),
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
-		/*k8s_proxyOn8081: Dynamic(()=>{
-			console.log("Test");
-			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
-		}),*/
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions: `psql -c "
 			SELECT pg_terminate_backend(pg_stat_activity.pid)
