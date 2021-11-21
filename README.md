@@ -170,16 +170,22 @@ Notes:
 <!----><a name="setup-base"></a>
 <details><summary><b>[setup-base] Setting up base tools needed for local/remote k8s deployments</b></summary>
 
+Required:
 * 1\) Install Docker Desktop: https://docs.docker.com/desktop
 	* 1.1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards. See [here](https://superuser.com/a/1671710/231129) for the fix.
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt
-* 3\) Install Chocolatey: https://chocolatey.org/install
+* 3\) Install Chocolatey (optional if you install Helm another way): https://chocolatey.org/install
 * 4\) Install Helm (eg. for some Tilt extensions): `choco install kubernetes-helm`
-* 5\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
-* 6\) Install DBeaver (ui for remote psql db's): https://dbeaver.io/download
-* 7\) [opt] Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
-* 8\) [opt] Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
-* 9\) See here for more helpful tools: https://collabnix.github.io/kubetools
+
+Highly recommended: (eg. used in multiple guide-modules)
+* 1\) Install Lens, as a general k8s inspection tool: https://k8slens.dev
+* 2\) Install DBeaver (ui for remote psql db's): https://dbeaver.io/download
+* 3\) Install the VSCode [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools), and connect it with your kubeconfig file (eg. `$HOME/.kube/config`).
+	* 3.1\) Also install the [Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) component, enabling the Kubernetes extension to display the file-tree of running pods, and open their files.
+
+Additional:
+* 1\) Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
+* 2\) See here for more helpful tools: https://collabnix.github.io/kubetools
 
 </details>
 
@@ -438,6 +444,8 @@ Authorized redirect URIs:
 * For app-server: `npm start ssh.app-server`
 * For database: `npm start ssh.db`
 * For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
+
+Note: If you merely want to explore the file-system of a running pod, it's recommended to use the [Kubernetes Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) VSCode extension, as it's faster and easier. For editing files, see here: https://github.com/sandipchitale/kubernetes-file-system-explorer/issues/4
 
 </details>
 

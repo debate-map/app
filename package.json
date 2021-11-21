@@ -46,7 +46,7 @@
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
-    "web-vcore": "0.0.42"
+    "web-vcore": "0.0.43"
   },
   "packageManager": "yarn@3.0.0-rc.2"
 }
