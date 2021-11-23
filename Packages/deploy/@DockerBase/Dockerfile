@@ -19,6 +19,8 @@ COPY Packages/deploy/package.json Packages/deploy/package.json
 
 COPY patches/ patches/
 #COPY node_modules/web-vcore/patches/ node_modules/web-vcore/patches/
+COPY .yalc/ .yalc/
+#COPY yalc.lock .
 
 # also copy cache contents from node_modules/web-vcore/.yarn/cache (if wvc is symlinked, the dm's cache will lack many of the libs)
 # this should work, except docker refuses to allow symlink-following (https://github.com/moby/moby/issues/1676)
@@ -37,7 +39,7 @@ COPY patches/ patches/
 #	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --prefer-offline --frozen-lockfile
 #	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --frozen-lockfile
 
-# equivalent of yarn-v1's "yarn install --production" (as per: https://yarnpkg.com/cli/workspaces/focus#details)
+# equivalent of yarn-v1's "yarn install --production" (as per: https://yarnpkg.com/cli/workspaces/focus#details) -- which avoids installing dev-deps, cutting down on image size
 RUN yarn workspaces focus --all --production \
 # exclude just-created caches (the caches can't be used anyway)
 	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
@@ -64,9 +66,10 @@ RUN yarn workspaces focus --all --production \
 #RUN mv /dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink /dm_repo/node_modules/mobx-graphlink
 #RUN mv /dm_repo/node_modules/web-vcore/node_modules/graphql-feedback /dm_repo/node_modules/graphql-feedback
 # RUN mv /dm_repo/node_modules/web-vcore/node_modules/ /dm_repo/node_modules/
-RUN cp -rl --force /dm_repo/node_modules/web-vcore/node_modules/ /dm_repo/ \
-	&& rm -r /dm_repo/node_modules/web-vcore/node_modules/
+
+#RUN cp -rl --force /dm_repo/node_modules/web-vcore/node_modules/ /dm_repo/ \
+#	&& rm -r /dm_repo/node_modules/web-vcore/node_modules/
 
 # post-check
-RUN if [ ! -d "/dm_repo/node_modules/mobx-graphlink" ]; then echo										"The mobx-graphlink package was not found in the root node_modules folder. Fix this! (hoisting needed for NMOverwrites)"; exit 1; else echo "Passed."; fi
-RUN if [ -d "/dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink" ]; then echo			"The mobx-graphlink package was found as web-vcore subdep, rather than hoisted. Fix this! (hoisting needed for NMOverwrites)"; exit 1; else echo "Passed."; fi
+#RUN if [ ! -d "/dm_repo/node_modules/mobx-graphlink" ]; then echo										"The mobx-graphlink package was not found in the root node_modules folder. Fix this! (hoisting needed for NMOverwrites)"; exit 1; else echo "Passed."; fi
+#RUN if [ -d "/dm_repo/node_modules/web-vcore/node_modules/mobx-graphlink" ]; then echo			"The mobx-graphlink package was found as web-vcore subdep, rather than hoisted. Fix this! (hoisting needed for NMOverwrites)"; exit 1; else echo "Passed."; fi

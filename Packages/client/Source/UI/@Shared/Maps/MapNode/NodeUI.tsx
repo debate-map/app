@@ -409,7 +409,7 @@ export class NodeUI extends BaseComponentPlus(
 		const newState = {} as any;
 
 		if (this.rightColumn) {
-			const holderRect = VRect.FromLTWH(this.rightColumn.DOM.getBoundingClientRect());
+			const holderRect = VRect.FromLTWH(this.rightColumn.DOM!.getBoundingClientRect());
 
 			const lastChildBoxOffsets = this.childBoxes.Pairs().ToMapObj(pair=>pair.key, pair=>{
 				const childBox = pair.value?.expandableBox?.DOM;

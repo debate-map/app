@@ -57,7 +57,7 @@ app.use(cors({
 	//origin: "*", // let any origin make calls to our server (that's fine)
 	origin: true, // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
 	// todo: change "origin" to be a function, that only accepts CORS from a hard-coded list of origins
-	
+
 	credentials: true, // allows cookies to be sent with requests (eg. for passing passportjs session-token with mutation/command calls)
 }));
 
@@ -72,10 +72,10 @@ let dbURL = env.DATABASE_URL;
 const inK8s = env.DB_USER != null;
 if (dbURL == null) {
 	if (inK8s) {
-		console.log(`Connecting app-server's pg-client to: postgres://${env.DB_USER}:<redacted>@${env.DB_ADDR}:${env.DB_PORT}/debate-map`)
+		console.log(`Connecting app-server's pg-client to: postgres://${env.DB_USER}:<redacted>@${env.DB_ADDR}:${env.DB_PORT}/debate-map`);
 		dbURL = `postgres://${env.DB_USER}:${encodeURIComponent(env.DB_PASSWORD!)}@${env.DB_ADDR}:${env.DB_PORT}/debate-map`;
 	} else {
-		console.log(`Connecting app-server's pg-client to: postgres://${env.PGUSER}:<redacted>@localhost:5432/debate-map`)
+		console.log(`Connecting app-server's pg-client to: postgres://${env.PGUSER}:<redacted>@localhost:5432/debate-map`);
 		dbURL = `postgres://${env.PGUSER}:${encodeURIComponent(env.DBPASSWORD!)}@localhost:5432/debate-map`;
 	}
 }
@@ -108,7 +108,7 @@ app.get("/health-check", async(req, res)=>{
 	console.log("Starting health-check.");
 	try {
 		Assert(pgPool.totalCount > 0, "No pgClient has been initialized/connected within the pool yet.");
-		
+
 		const usersCount = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
 		Assert(usersCount.rowCount >= 1, "Could not find any users in database. (at least the system user should exist)");
 		console.log("Health-check: Passed 1");

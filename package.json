@@ -10,7 +10,8 @@
     "Packages/common",
     "Packages/web-server",
     "Packages/app-server",
-    "Packages/deploy"
+    "Packages/deploy",
+    ".yalc/*"
   ],
   "scripts": {
     "start": "nps",
@@ -31,7 +32,7 @@
     "tsc-watch": "^4.4.0",
     "typescript": "^4.3.2"
   },
-  "@resolutions_c": "The 'version locks' below (other than mathjs toggle) are for version-sensitive deps (eg. those with patches specified) where ci-builds would/may otherwise get the 'wrong' versions (ie. differing from dev/symlink-enabled environment).",
+  "@resolutions_c": "The 'version locks' below (other than mathjs toggle) are for version-sensitive (or duplicate-sensitive) deps (eg. those with patches specified), for which updates should only happen after deliberation.",
   "resolutions": {
     "mathjs": "1.0.0",
     "@types/react": "17.0.9",
@@ -39,14 +40,19 @@
     "react-dom": "17.0.2",
     "tslib": "2.3.0",
     "zen-observable-ts": "1.1.0",
-    "graphql-tag": "2.12.5"
+    "graphql-tag": "2.12.5",
+    "graphql": "15.5.1",
+    "postgraphile": "4.12.2",
+    "graphile-utils": "4.12.2",
+    "graphile-build": "4.12.2",
+    "graphile-build-pg": "4.12.2"
   },
   "dependencies": {
     "chalk": "^4.1.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
-    "web-vcore": "0.0.43"
+    "web-vcore": "0.0.44"
   },
   "packageManager": "yarn@3.0.0-rc.2"
 }

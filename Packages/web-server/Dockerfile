@@ -3,7 +3,7 @@
 ARG SHARED_BASE_URL=gcr.io/debate-map-prod/dm-shared-base
 FROM $SHARED_BASE_URL
 
-COPY NMOverwrites/ /dm_repo/
+#COPY NMOverwrites/ /dm_repo/
 
 # note: the exclusion of large, unrelated folders (like node_modules) under the given paths is handled by the .dockerignore files
 

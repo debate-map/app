@@ -83,8 +83,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 			if (this.expandableBox?.DOM == null) return; // can be null if, for example, an error occurred during the box's rendering
 			this.expandableBox!.DOM!.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
 			this.expandableBox!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered: false}));
-			this.expandableBox!.expandButton!.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
-			this.expandableBox!.expandButton!.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
+			this.expandableBox!.expandButton!.DOM!.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
+			this.expandableBox!.expandButton!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
 		});
 
 		return (

@@ -200,10 +200,10 @@ k8s_resource(new_name="traefik",
 # own app (docker build and such)
 # ==========
 
-nmWatchPathsStr = str(local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"]))
-nmWatchPaths = nmWatchPathsStr.strip().split(",")
+#nmWatchPathsStr = str(local(['node', '-e', "console.log(require('./Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"]))
+#nmWatchPaths = nmWatchPathsStr.strip().split(",")
 # this keeps the NMOverwrites folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
-local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
+#local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
 
 # this is the base dockerfile used for all the subsequent ones
 imageURL_sharedBase = registryURL + '/dm-shared-base'
@@ -217,7 +217,8 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	live_update=[
-		sync('./NMOverwrites/', '/dm_repo/'),
+		#sync('./NMOverwrites/', '/dm_repo/'),
+		sync('.yalc', '/dm_repo/.yalc'),
 		#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
 		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
 	])
@@ -229,7 +230,8 @@ docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile
 	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	live_update=[
-		sync('./NMOverwrites/', '/dm_repo/'),
+		#sync('./NMOverwrites/', '/dm_repo/'),
+		sync('.yalc', '/dm_repo/.yalc'),
 		#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
 		sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
 	])

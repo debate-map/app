@@ -8,6 +8,8 @@
 /Packages/*/node_modules
 /Packages/*/Dist
 /Packages/*/tsconfig.tsbuildinfo
+/.yalc
+/yalc.lock
 
 # yarn
 .yarn/*

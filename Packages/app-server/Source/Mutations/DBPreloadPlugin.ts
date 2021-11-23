@@ -4,9 +4,9 @@ import {PoolClient} from "pg";
 import {Context as Context_base} from "postgraphile";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import express, {Request, Response} from "express";
-const {makeExtendSchemaPlugin, gql} = graphileUtils;
 
 import {createRequire} from "module";
+const {makeExtendSchemaPlugin, gql} = graphileUtils;
 const require = createRequire(import.meta.url);
 
 type Context = Context_base<any> & {
@@ -44,7 +44,7 @@ export const DBPreloadPlugin = makeExtendSchemaPlugin(build=>{
 				GetPreloadData: async(parent, args: {preloads: PreloadRequest[]}, ctx: Context, info)=>{
 					const {preloads} = args;
 					Assert(Array.isArray(preloads));
-					let preloadResults = [] as PreloadResult[];
+					const preloadResults = [] as PreloadResult[];
 					for (const preload of preloads) {
 						let result;
 						if (preload.forMap != null) {

@@ -11,10 +11,10 @@ import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
-import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
-import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "web-vcore/nm/chroma-js.js";
+import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
+import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 
 type Props = {
@@ -95,7 +95,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const isFarthestChildFromDivider = index == (direction == "down" ? childLimit - 1 : 0);
 			//const isFarthestChildFromDivider = index == childLimit - 1;
 			const showLimitBar = isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit);
-			
+
 			const nodeUI = <NodeUI key={child.id}
 				ref={c=>this.childBoxes[child.id] = c}
 				ref_innerUI={c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets())}
@@ -175,7 +175,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const node = nodeChildrenToShowHere.find(a=>a.id == nodeID);
 			childBoxInfos.push({
 				node,
-				offset: offset,
+				offset,
 				color: node ? GetNodeColor(node, "raw") : chroma("rgba(0,0,0,0)"),
 			});
 		}
@@ -238,7 +238,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			return;
 		}
 
-		const childHolderRect = VRect.FromLTWH(childHolder.DOM.getBoundingClientRect());
+		const childHolderRect = VRect.FromLTWH(childHolder.DOM!.getBoundingClientRect());
 		/* const match = firstOffsetInner.style.transform.match(/([0-9]+).+?([0-9]+)/);
 		const dragBoxSize = new Vector2(match[1].ToInt(), match[2].ToInt());
 		// delete dragInfo.provided.draggableProps.style.transform; */
@@ -246,7 +246,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (dragBox == null) return; // this can happen at end of drag
 		const dragBoxRect = VRect.FromLTWH(dragBox.getBoundingClientRect());
 
-		const siblingNodeUIs = (Array.from(childHolder.DOM.childNodes) as HTMLElement[]).filter(a=>a.classList.contains("NodeUI"));
+		const siblingNodeUIs = (Array.from(childHolder.DOM!.childNodes) as HTMLElement[]).filter(a=>a.classList.contains("NodeUI"));
 		const siblingNodeUIInnerDOMs = siblingNodeUIs.map(nodeUI=>nodeUI.QuerySelector_BreadthFirst(".NodeUI_Inner")).filter(a=>a != null) as HTMLElement[]; // entry can be null if inner-ui still loading
 		const firstOffsetInner = siblingNodeUIInnerDOMs.find(a=>a && a.style.transform && a.style.transform.includes("translate("));
 
@@ -341,11 +341,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.argumentsControlBar) {
 			// return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
 			return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden"
-				? GetViewportRect(this.argumentsControlBar.DOM!).Center.y + 1 - GetViewportRect(this.childHolder.DOM).y
+				? GetViewportRect(this.argumentsControlBar.DOM!).Center.y + 1 - GetViewportRect(this.childHolder.DOM!).y
 				: 0;
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM).height / 2 : 0;
+		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM!).height / 2 : 0;
 	}
 
 	UpdateChildrenWidthOverride(forceUpdate = false) {
@@ -366,7 +366,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const showAddArgumentButtons = false; // node.type == MapNodeType.claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
 		// if (this.lastRender_source == RenderSource.SetState && this.childHolder) {
 		if (this.Expanded && this.childHolder) {
-			const holderRect = VRect.FromLTWH(this.childHolder.DOM.getBoundingClientRect());
+			const holderRect = VRect.FromLTWH(this.childHolder.DOM!.getBoundingClientRect());
 
 			const lastChildBoxOffsets = this.childBoxes.Pairs().ToMapObj(pair=>pair.key, pair=>{
 			//const lastChildBoxOffsets = this.childInnerUIs.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{

@@ -1,6 +1,6 @@
 import {AddWVCSchemas, ExposeModuleExports, Log} from "web-vcore";
-import {WRR} from "web-vcore/node_modules/webpack-runtime-require";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {WRR} from "webpack-runtime-require";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {InitWVC} from "./WVC.js";
 import {InitReactJS} from "./ReactJS.js";
 import {InitSentry} from "./Sentry.js";
