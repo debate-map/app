@@ -218,7 +218,8 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	live_update=[
 		#sync('./NMOverwrites/', '/dm_repo/'),
-		sync('.yalc', '/dm_repo/.yalc'),
+		sync('./.yalc/', '/dm_repo/.yalc/'),
+		sync('./Packages/common/', '/dm_repo/Packages/common/'),
 		#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
 		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
 	])
@@ -231,7 +232,8 @@ docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	live_update=[
 		#sync('./NMOverwrites/', '/dm_repo/'),
-		sync('.yalc', '/dm_repo/.yalc'),
+		sync('./.yalc/', '/dm_repo/.yalc/'),
+		sync('./Packages/common/', '/dm_repo/Packages/common/'),
 		#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
 		sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
 	])

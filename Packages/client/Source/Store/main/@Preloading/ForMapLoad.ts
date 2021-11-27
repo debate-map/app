@@ -8,10 +8,10 @@ export const GetNodeIDsVisibleInNodeViewExpansionState = CreateAccessor((nodeVie
 	result.add(nodeID);
 	const descendantsToAdd =
 		//nodeView.expanded
-		(nodeView.expanded_truth || nodeView.expanded_relevance)
+		(nodeView.expanded_truth || nodeView.expanded_relevance || nodeView.expanded_freeform)
 			? Object.entries(nodeView.children).SelectMany(([childID, childView])=>GetNodeIDsVisibleInNodeViewExpansionState(childView, childID, includeOneLevelInCollapsed)) :
-		includeOneLevelInCollapsed ? Object.keys(nodeView.children) :
-		[];
+			includeOneLevelInCollapsed ? Object.keys(nodeView.children) :
+			[];
 	for (const descendantID of descendantsToAdd) {
 		result.add(descendantID);
 	}
@@ -24,7 +24,7 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 	const mapView = GetMapView(mapID);
 	if (mapView == null) return;
 
-	let nodeIDs = Object.entries(mapView.rootNodeViews).SelectMany(([id, nodeView])=>{
+	const nodeIDs = Object.entries(mapView.rootNodeViews).SelectMany(([id, nodeView])=>{
 		return GetNodeIDsVisibleInNodeViewExpansionState(nodeView, id, true);
 	}).Distinct();
 
@@ -36,7 +36,7 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 		GetNodeRevisions.CatchBail(null, nodeID);
 		GetNodeTags.CatchBail(null, nodeID);
 		//GetNodePhrasings.CatchBail(null, nodeID);
-		
+
 		/*if (node) {
 			if (node.type == MapNodeType.claim) {
 			}

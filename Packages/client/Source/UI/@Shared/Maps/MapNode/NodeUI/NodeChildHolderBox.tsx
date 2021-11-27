@@ -49,15 +49,20 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const markerPercent = null;
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		let text = group == ChildGroup.truth ? "True?" : "Relevant?";
-		if (isMultiPremiseArgument) {
+		const text =
+			group == ChildGroup.truth ? "True?" :
+			group == ChildGroup.relevance ? "Relevant?" :
+			group == ChildGroup.neutrality ? "Neutral?" :
+			group == ChildGroup.freeform ? "Freeform" :
+			"n/a";
+		/*if (group == ChildGroup.relevance && isMultiPremiseArgument) {
 			//text = "When taken together, are these claims relevant?";
 			if (node.argumentType == ArgumentType.all) text = "If all these claims were true, would they be relevant?";
 			else if (node.argumentType == ArgumentType.any) text = "If 1 (or more) of these claims were true, would they be relevant?";
 			else if (node.argumentType == ArgumentType.anyTwo) text = "If 2 (or more) of these claims were true, would they be relevant?";
-		}
+		}*/
 		// let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
-		const backgroundColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3);
+		const backgroundColor = GetNodeColor({type: group == ChildGroup.freeform ? MapNodeType.category : MapNodeType.claim} as any as MapNodeL3);
 		// let lineColor = GetNodeColor(node, "raw");
 		const lineColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3, "raw");
 
@@ -67,8 +72,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const expandKey = `expanded_${childGroupStr}`;
 		const expanded = nodeView[expandKey]; // this.Expanded
 
-		const separateChildren = node.type == MapNodeType.claim || node.type == MapNodeType.argument;
-		const showArgumentsControlBar = /* (node.type == MapNodeType.claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading;
+		//const separateChildren = (node.type == MapNodeType.claim || node.type == MapNodeType.argument) && group != ChildGroup.freeform;
+		const separateChildren = group == ChildGroup.truth || group == ChildGroup.relevance;
+		const showArgumentsControlBar = /* (node.type == MapNodeType.claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading && group != ChildGroup.freeform;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {
@@ -120,7 +126,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							if (ref_expandableBox) ref_expandableBox(c);
 						}}
 						style={{marginTop: innerBoxOffset_safe}}
-						padding="3px 5px 2px"
+						padding="2px 5px"
 						text={
 							<>
 								{/* for now, leave out the ratings-preview for these child-holder boxes; it has usefulness, but it's arguably too distracting atm */}

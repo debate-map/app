@@ -1,63 +1,68 @@
-import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper, SimpleSchema, DeriveJSONSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {E} from "js-vextensions";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {ClaimForm, Polarity, MapNode} from "../DB/nodes/@MapNode.js";
 import {GetNode} from "../DB/nodes.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {AddArgumentAndClaim, AddChildNode} from "../Commands.js";
+
+/*declare global {
+	interface Object {
+		Is<T>(type: new(..._)=>T): NonNullable<T>;
+	}
+}*/
 
 @MapEdit
 @UserEdit
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
-		$parentID: {$ref: "UUID"},
-		$childID: {$ref: "UUID"},
-		childForm: {$ref: "ClaimForm"},
-		childPolarity: {$ref: "Polarity"},
+		$link: DeriveJSONSchema(NodeChildLink, {makeOptional_all: true, makeRequired: ["parent", "child"]}),
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$linkID: {type: "string"},
 	}),
 })
-export class LinkNode extends Command<{mapID: string|n, parentID: string, childID: string, childForm?: ClaimForm|n, childPolarity?: Polarity|n}, {linkID: string}> {
+export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child">}, {linkID: string}> {
 	child_oldData: MapNode|n;
 	parent_oldData: MapNode;
-	link: NodeChildLink;
 	Validate() {
-		const {parentID, childID, childForm, childPolarity} = this.payload;
-		AssertV(parentID != childID, "Parent-id and child-id cannot be the same!");
+		this.payload.link = E(new NodeChildLink(), this.payload.link); // for props the caller didn't specify, but which have default values, use them
+		const {link} = this.payload;
+		AssertV(link.parent != link.child, "Parent-id and child-id cannot be the same!");
 
-		this.child_oldData = GetNode(childID);
+		this.child_oldData =
+			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.payload.node
+			?? GetNode(link.child);
 		AssertV(this.child_oldData, "Cannot link child-node that does not exist!");
 		this.parent_oldData =
-			(this.parentCommand instanceof LinkNode_HighLevel && this == this.parentCommand.sub_linkToNewParent ? this.parentCommand.sub_addArgumentWrapper?.payload.node : null)
+			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this.up)?.payload.argumentNode
+			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_linkToNewParent == this)?.sub_addArgumentWrapper.payload.node
 			//?? (this.parentCommand instanceof ImportSubtree_Old ? "" as any : null) // hack; use empty-string to count as non-null for this chain, but count as false for if-statements (ye...)
-			?? GetNode.NN(parentID);
+			?? GetNode.NN(link.parent);
 		AssertV(this.parent_oldData, "Cannot link child-node to parent that does not exist!");
 
-		const parentToChildLinks = GetNodeChildLinks(parentID, childID);
-		AssertV(parentToChildLinks.length == 0, `Node #${childID} is already a child of node #${parentID}.`);
+		const parentToChildLinks =
+			(this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this) ? [] : null)
+			?? GetNodeChildLinks(link.parent, link.child);
+		AssertV(parentToChildLinks.length == 0, `Node #${link.child} is already a child of node #${link.parent}.`);
 
-		this.link = new NodeChildLink({
-			creator: this.userInfo.id,
-			createdAt: Date.now(),
-			parent: parentID,
-			child: childID,
-			form: childForm,
-			polarity: childPolarity,
-			slot: 0,
+		link.id = this.GenerateUUID_Once("link.id");
+		link.creator = this.userInfo.id;
+		link.createdAt = Date.now();
+		link.c_parentType = this.parent_oldData.type;
+		link.c_childType = this.child_oldData.type;
+		if (this.child_oldData.type == MapNodeType.argument) {
+			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.");
+		}
 
-			// cache data
-			c_parentType: this.parent_oldData.type,
-			c_childType: this.child_oldData.type,
-		});
-		this.link.id = this.GenerateUUID_Once("link.id");
-
-		this.returnData = {linkID: this.link.id};
+		this.returnData = {linkID: link.id};
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		db.set(dbp`nodeChildLinks/${this.link.id}`, this.link);
+		db.set(dbp`nodeChildLinks/${this.payload.link.id!}`, this.payload.link);
 	}
 }

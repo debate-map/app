@@ -1,4 +1,4 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
@@ -72,6 +72,10 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 			validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
 		}
 
+		if (childGroup == ChildGroup.freeform) {
+			validChildTypes = GetValues(MapNodeType);
+		}
+
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
@@ -89,7 +93,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 									if (e.button != 0) return;
 									if (userID == null) return ShowSignInPopup();
 
-									ShowAddChildDialog(path, childType, polarity, userID, mapID);
+									ShowAddChildDialog(path, childType, polarity, userID, mapID, childGroup == ChildGroup.freeform);
 								}}/>
 						);
 					});

@@ -204,7 +204,6 @@ Notes:
 * K3d has the fastest deletion and recreation of clusters. (so restarting from scratch frequently is more doable)
 * Docker Desktop seems to be the slowest running; I'd estimate that k3d is ~2x, at least for the parts I saw (eg. startup time).
 * Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
-* Docker Desktop also seems to sometimes gets semi-stuck during building (where it seems to be doing nothing for ~20 or 30 seconds); not sure if it's a reliable pattern yet though.
 
 #### Setup for Docker Desktop Kubernetes [recommended]
 
@@ -434,6 +433,7 @@ Authorized redirect URIs:
 	> The page will ask for username and password. On first launch, this will be `admin` and `admin`.
 <!-- * To view the cAdvisor monitor webpage, open (not currently working): `localhost:31001` -->
 * To view the cAdvisor monitor webpage [not currently working/enabled], open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
+* To view cpu and memory usage for pods using k8s directly (no external tools), run: `kubectl top pods --all-namespaces` (for additional commands, see [here](https://raaviblog.com/how-to-find-the-current-cpu-and-memory-usage-of-all-the-pods-in-kubernetes-cluster))
 
 </details>
 
@@ -581,6 +581,16 @@ To restore a backup:
 * 7\) After the restore is complete, clean things up:
 	* 7.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file. (needed so the restore operation is not attempted for other contexts, when their tilt-up scripts are run)
 	* 7.2\) If option 2 was taken: No action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied, and the restore config was only placed into the target context. (If you want to be extra sure, though, you could follow step 6.2; this is fine, because the restore has already taken place, so it will not be reverted or the like.)
+
+</details>
+
+<!----><a name="k8s-troubleshooting"></a>
+<details><summary><b>[k8s-troubleshooting] How to resolve various k8s-related issues</b></summary>
+
+* 1\) In some cases, when pushing a new pod version to your k8s cluster, the pod will fail to be added, with the message `0/1 nodes are available: 1 node(s) had taint {node.kubernetes.io/memory-pressure: }, that the pod didn't tolerate.`
+	* 1.1\) You can manually remove the taint by running (as seen [here](https://stackoverflow.com/a/63471551/2441655)): `kubectl taint node <nodename> node.kubernetes.io/memory-pressure:NoSchedule-`
+		1.1.1\) Update: This didn't actually seem to work for me. Perhaps k8s is instantly re-applying the taint, since it's based on a persistent memory shortage? Anyway, currently I just wait for the memory shortage to resolve (somehow).
+		1.1.2\) For now, another workaround that *seems* to help (from a couple tries), is opening pod-list in Lens, searching for all pods of the given type, selecting-all, then removing/killing all.
 
 </details>
 

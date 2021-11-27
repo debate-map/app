@@ -63,7 +63,7 @@ export abstract class TagComp {
 	GetFinalTagComps(): TagComp[] {
 		//const compClass = GetTagCompClassByKey(this["_key"]);
 		const compClass = this.constructor;
-		if (compClass) return [CE(this).As(compClass as any)];
+		if (compClass) return [CE(this).Cast(compClass as any)];
 		return [this];
 	}
 }

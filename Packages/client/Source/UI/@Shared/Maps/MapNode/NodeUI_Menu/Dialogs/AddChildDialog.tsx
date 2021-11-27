@@ -5,15 +5,15 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
-	constructor(public payload: {parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string|n}) {}
+	constructor(public payload: {parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string|n, asFreeformChild: boolean}) {}
 
 	Prepare() {
-		const {parentPath, childType, title, childPolarity, userID, mapID} = this.payload;
+		const {parentPath, childType, title, childPolarity, userID, mapID, asFreeformChild} = this.payload;
 
 		this.mapID = mapID;
 		this.node_parentPath = parentPath;
@@ -36,6 +36,7 @@ export class AddChildHelper {
 			{slot: 0}, // todo
 			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base},
 			childType == MapNodeType.argument && {polarity: childPolarity},
+			asFreeformChild && {freeform: true},
 		) as NodeChildLink;
 
 		if (childType == MapNodeType.argument) {
@@ -134,8 +135,8 @@ enum AddChildDialogTab {
 	Argument,
 	Claim,
 }
-export async function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: string|n) {
-	const helper = new AddChildHelper({parentPath, childType, title: "", childPolarity, userID, mapID});
+export async function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: string|n, asFreeformChild: boolean) {
+	const helper = new AddChildHelper({parentPath, childType, title: "", childPolarity, userID, mapID, asFreeformChild});
 	const prep = await GetAsync(()=>{
 		helper.Prepare();
 		const parentNode = GetNodeL3(parentPath);

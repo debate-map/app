@@ -14,7 +14,10 @@ const MTName = MTClass.name;
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$id: {$ref: "UUID"},
-		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["accessPolicy", "name", "note", "noteInline", "defaultExpandDepth", "nodeAccessPolicy", /*"nodeAccessPolicy_required",*/ "editors"]}),
+		$updates: DeriveJSONSchema(MTClass, {
+			includeOnly: ["accessPolicy", "name", "note", "noteInline", "defaultExpandDepth", "nodeAccessPolicy", /*"nodeAccessPolicy_required",*/ "editors", "extras"],
+			makeOptional_all: true,
+		}),
 	}),
 })
 export class UpdateMapDetails extends Command<{id: string, updates: Partial<MT>}, {}> {

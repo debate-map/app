@@ -16,6 +16,9 @@ export enum ChildGroup {
 	generic = "generic",
 	truth = "truth",
 	relevance = "relevance",
+	// testing
+	neutrality = "neutrality",
+	freeform = "freeform",
 }
 AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
 

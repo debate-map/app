@@ -108,4 +108,18 @@ export class Map {
 	@DB((t,n)=>t.specificType(n, "text[]"))
 	@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
 	timelines: {[key: string]: boolean};*/
+
+	@DB((t, n)=>t.jsonb(n))
+	@Field({$ref: "Map_Extras"})
+	extras = new Map_Extras();
+}
+
+@MGLClass()
+export class Map_Extras {
+	constructor(data?: Partial<Map_Extras>) {
+		this.VSet(data);
+	}
+
+	@Field({type: "boolean"}, {opt: true})
+	defaultShowFreeform? = false;
 }

@@ -91,6 +91,9 @@ export class MapNodeView {
 	@Field({type: "boolean"}, {opt: true})
 	@O expanded_relevance? = false;
 
+	@Field({type: "boolean"}, {opt: true})
+	@O expanded_freeform? = false;
+
 	/** True for node which is selected (ie. has its hover-panel locked open). */
 	@Field({type: "boolean"}, {opt: true})
 	@O selected?: boolean;

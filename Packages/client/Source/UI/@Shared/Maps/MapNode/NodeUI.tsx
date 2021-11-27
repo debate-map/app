@@ -32,7 +32,7 @@ export class NodeUI extends BaseComponentPlus(
 	},
 	{
 		//expectedBoxWidth: 0, expectedBoxHeight: 0,
-		dividePoint: null as number|n, selfHeight: 0,
+		dividePoint: null as number|n, selfHeight: 0, selfHeight_plusRightContent: 0,
 		lastChildBoxOffsets: null as {[key: string]: Vector2}|n,
 	},
 ) {
@@ -57,7 +57,7 @@ export class NodeUI extends BaseComponentPlus(
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, children} = this.props;
-		const {dividePoint, selfHeight, lastChildBoxOffsets} = this.state;
+		const {dividePoint, selfHeight, selfHeight_plusRightContent, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
 		//path = path || node.id.toString();
@@ -80,11 +80,14 @@ export class NodeUI extends BaseComponentPlus(
 		// const parentNodeView = GetNodeView(map.id, parentPath) || new MapNodeView();
 		// const parentNodeView = Watch(() => GetNodeView(map.id, parentPath) || new MapNodeView(), [map.id, parentPath]);
 		const parentNodeView = GetNodeView(map.id, parentPath);
+		const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
 
 		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		const argumentNode = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
+		const argumentNode = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : ea;
+		const argumentNodePath = argumentNode == node ? path : argumentNode == parent ? parentPath : null;
+		const argumentChildren = argumentNode == node ? nodeChildren : argumentNode == parent ? parentChildren : ea;
 		const nodeForm = GetNodeForm(node, path);
 
 		/* const initialChildLimit = State(a => a.main.initialChildLimit);
@@ -163,19 +166,16 @@ export class NodeUI extends BaseComponentPlus(
 
 		const separateChildren = node.type == MapNodeType.claim;
 
-		const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
-		let relevanceArguments: MapNodeL3[] = [];
-		if (isPremiseOfSinglePremiseArg) {
-			const argument = parent;
-			const argumentPath = SlicePath(path, 1);
-			relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.argument);
-			// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.claim), "Single-premise argument has more than one premise!");
-			/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-				// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
-				// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
-				relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child.id}`)));
-			}*/
-		}
+		const ncToShow_nonFreeform = nodeChildrenToShow.filter(a=>!a.link?.freeform);
+		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.freeform);
+		const truthArguments = ncToShow_nonFreeform.filter(a=>a.type == MapNodeType.argument);
+		const relevanceArguments: MapNodeL3[] = argumentChildren.filter(a=>a && !a.link?.freeform && a.type == MapNodeType.argument);
+		// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.claim), "Single-premise argument has more than one premise!");
+		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
+			// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
+			// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
+			relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child.id}`)));
+		}*/
 
 		const {width} = this.GetMeasurementInfo();
 
@@ -185,14 +185,16 @@ export class NodeUI extends BaseComponentPlus(
 			console.log("Clearing childBoxes. @old:", this.childBoxes);
 			this.childBoxes = {};
 		}, []);*/
-		const truthBoxVisible = node.type == MapNodeType.claim && nodeForm != ClaimForm.question;
+		const truthBoxVisible = node.type == MapNodeType.claim; //&& nodeForm != ClaimForm.question;
 		const relevanceBoxVisible = node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg;
-		const nodeChildHolderBox_truth = truthBoxVisible &&
+		const freeformBoxVisible = (node.type == MapNodeType.claim || node.type == MapNodeType.argument) && map.extras.defaultShowFreeform;
+		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
+		const nodeChildHolderBox_truth = //truthBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
 				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
-				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
+				nodeChildren={nodeChildren} nodeChildrenToShow={truthArguments}
 				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
 					if (truthBoxVisible && relevanceBoxVisible) {
 						this.SetState({dividePoint: height}); // if truth and relevance boxes are both visible, divide-point is between them (so just below truth-box's height)
@@ -201,19 +203,26 @@ export class NodeUI extends BaseComponentPlus(
 					}
 					this.CheckForChanges();
 				}, [])}/>;
-		const nodeChildHolderBox_relevance = relevanceBoxVisible &&
-			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
+		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
+			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
+				node={isSinglePremiseArgument ? parent! : node} path={isSinglePremiseArgument ? parentPath! : path}
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
-				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
+				nodeChildren={argumentChildren} nodeChildrenToShow={relevanceArguments!}
 				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
 					if (relevanceBoxVisible && !truthBoxVisible) {
 						this.SetState({dividePoint}); // if only relevance box is visible, the divide-point is the relevance box's own divide-point (ie. at same height as the add-pro/add-con buttons)
 					}
 					this.CheckForChanges();
 				}, [])}/>;
-		const usingBox = !!nodeChildHolderBox_truth || !!nodeChildHolderBox_relevance;
+		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
+				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
+				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
+				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
+				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}/>;
+		const usingBox = truthBoxVisible || relevanceBoxVisible || freeformBoxVisible;
 		let childConnectorBackground: JSX.Element|n;
 		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
 			const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
@@ -230,21 +239,32 @@ export class NodeUI extends BaseComponentPlus(
 							offset: lastChildBoxOffsets?.["relevance"],
 							color: GetNodeColor({type: "claim"} as any, "raw"),
 						},
+						/*!!nodeChildHolderBox_truth && {
+							offset: lastChildBoxOffsets?.["neutrality"],
+							color: GetNodeColor({type: "claim"} as any, "raw"),
+						},*/
+						!!nodeChildHolderBox_truth && {
+							offset: lastChildBoxOffsets?.["freeform"],
+							color: GetNodeColor({type: MapNodeType.category} as any, "raw"),
+						},
 					] as ChildBoxInfo[]).filter(a=>a)}/>
 			);
 		}
 		let nodeChildHolder_direct: JSX.Element|n;
 		if ((!usingBox || isMultiPremiseArgument) && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
-			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
+			const dividePoint_safe = dividePoint || (selfHeight / 2);
+			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren, showArgumentsControlBar}}
 				ref={c=>this.nodeChildHolder_direct = c}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
 				usesGenericExpandedField={true}
-				linkSpawnPoint={dividePoint || (selfHeight / 2)}
+				//linkSpawnPoint={isMultiPremiseArgument ? -selfHeight_plusRightContent + (selfHeight / 2) : dividePoint || (selfHeight / 2)}
+				linkSpawnPoint={isMultiPremiseArgument ? -(selfHeight_plusRightContent - dividePoint_safe) : dividePoint_safe}
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
+				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={ncToShow_nonFreeform}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
 					if (!isMultiPremiseArgument) {
@@ -294,7 +314,7 @@ export class NodeUI extends BaseComponentPlus(
 					/* useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset}, */
 					// {paddingTop: innerBoxOffset},
-					{marginTop: boxExpanded && !isMultiPremiseArgument ? (dividePoint! - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
+					{marginTop: boxExpanded ? (dividePoint! - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
 				)}>
 					{/*node.current.accessLevel != AccessLevel.basic &&
 					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
@@ -317,9 +337,15 @@ export class NodeUI extends BaseComponentPlus(
 				{boxExpanded &&
 				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough" style={{position: "relative"}}>
 					{childConnectorBackground}
-					{nodeChildHolderBox_truth}
+					{truthBoxVisible && nodeChildHolderBox_truth}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
-					{nodeChildHolderBox_relevance}
+					{relevanceBoxVisible && nodeChildHolderBox_relevance}
+					{/*<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.neutrality}
+						ref={UseCallback(c=>this.childBoxes["neutrality"] = c, [])}
+						ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
+						widthOfNode={widthOverride || width} heightOfNode={selfHeight}
+						nodeChildren={ea} nodeChildrenToShow={ea}/>*/}
+					{freeformBoxVisible && nodeChildHolderBox_freeform}
 				</Column>}
 			</div>
 			{isMultiPremiseArgument && nodeChildHolder_direct}
@@ -337,12 +363,33 @@ export class NodeUI extends BaseComponentPlus(
 
 	// don't actually check for changes until re-rendering has stopped for 500ms
 	// CheckForChanges = _.debounce(() => {
+	lastSelfHeight = 0;
+	lastSelfHeight_plusRightContent = 0;
+	lastHeight = 0;
+	lastDividePoint = 0;
 	CheckForChanges = ()=>{
 		const {node, onHeightOrPosChange, dividePoint} = this.PropsState;
 		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
 		if (this.DOM_HTML == null) return;
 
 		// if (this.lastRender_source == RenderSource.SetState) return;
+
+		const selfHeight = this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0);
+		if (selfHeight != this.lastSelfHeight) {
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewSelfHeight:${selfHeight}`);
+
+			// this.UpdateState(true);
+			// this.UpdateState();
+			// setSelfHeight(selfHeight);
+			this.UpdateChildBoxOffsets();
+			this.SetState({selfHeight});
+			// if (onHeightOrPosChange) onHeightOrPosChange();
+		}
+		this.lastSelfHeight = selfHeight;
+
+		const selfHeight_plusRightContent = this.DOM_HTML.offsetHeight;
+		this.SetState({selfHeight_plusRightContent});
 
 		// see UseSize_Method for difference between offsetHeight and the alternatives
 		const height = this.DOM_HTML.offsetHeight
@@ -358,20 +405,6 @@ export class NodeUI extends BaseComponentPlus(
 			if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 		this.lastHeight = height;
-
-		const selfHeight = this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0);
-		if (selfHeight != this.lastSelfHeight) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewSelfHeight:${selfHeight}`);
-
-			// this.UpdateState(true);
-			// this.UpdateState();
-			// setSelfHeight(selfHeight);
-			this.UpdateChildBoxOffsets();
-			this.SetState({selfHeight});
-			// if (onHeightOrPosChange) onHeightOrPosChange();
-		}
-		this.lastSelfHeight = selfHeight;
 
 		if (dividePoint != this.lastDividePoint) {
 			if (onHeightOrPosChange) onHeightOrPosChange();
@@ -427,10 +460,6 @@ export class NodeUI extends BaseComponentPlus(
 		const changedState = this.SetState(newState, undefined, cancelIfStateSame, true);
 		//Log(`Changed state? (${this.props.node.id}): ` + changedState);
 	}
-
-	lastHeight = 0;
-	lastSelfHeight = 0;
-	lastDividePoint = 0;
 
 	// GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache: MeasurementInfo;

@@ -33,12 +33,12 @@ export class NodeChildLink {
 	child: string;
 
 	@DB((t, n)=>t.integer(n))
-	@Field({type: "number"})
-	slot: number;
+	@Field({type: "number"}) // should "{opt: true}" be added?
+	slot = 0;
 
 	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
-	freeform: boolean;
+	@Field({type: "boolean"}, {opt: true}) // should "{opt: true}" be added?
+	freeform = false;
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ClaimForm"}, {opt: true})

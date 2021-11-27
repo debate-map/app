@@ -1,7 +1,7 @@
 import {AddMap, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
-import {Observer} from "web-vcore";
+import {Observer, TextPlus} from "web-vcore";
 import {DEL, ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {Button, CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -20,7 +20,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 		const nodeAccessPolicy = GetAccessPolicy(newData.nodeAccessPolicy);
 
-		const splitAt = 150;
+		const splitAt = 180;
 		const width = 600;
 		return (
 			<Column style={style}>
@@ -56,9 +56,14 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 				</RowLR>*/}
 				{!creating &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Default expand depth:</Pre>
+					<Pre>Expand depth (default):</Pre>
 					<Spinner min={1} max={3} enabled={enabled}
 						value={ToNumber(newData.defaultExpandDepth, 0)} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
+				</RowLR>}
+				{!creating &&
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<TextPlus info="Whether to show the 'freeform' node-subtrees by default.">Show freeform (default):</TextPlus>
+					<CheckBox enabled={enabled} value={newData.extras.defaultShowFreeform ?? false} onChange={val=>Change(newData.extras.defaultShowFreeform = val)}/>
 				</RowLR>}
 				{/*!forNew &&
 				<RowLR mt={5} splitAt={splitAt}>

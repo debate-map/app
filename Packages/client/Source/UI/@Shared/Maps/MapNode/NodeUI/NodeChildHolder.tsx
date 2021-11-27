@@ -200,9 +200,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
 				lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 			)}>
-				{linkSpawnPoint > 0 && lastChildBoxOffsets &&
+				{(linkSpawnPoint > 0 || belowNodeUI) && lastChildBoxOffsets &&
 					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
-					<ChildConnectorBackground node={node} path={path} linkSpawnPoint={belowNodeUI ? new Vector2(-10, 0) : new Vector2(-30, linkSpawnPoint)} straightLines={belowNodeUI}
+					<ChildConnectorBackground node={node} path={path} linkSpawnPoint={new Vector2(belowNodeUI ? -10 : -30, linkSpawnPoint)} straightLines={belowNodeUI}
 						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
 						childBoxInfos={childBoxInfos}/>}
 

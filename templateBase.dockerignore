@@ -21,6 +21,7 @@ Packages/**/node_modules
 .yarn/*
 !.yarn/releases
 !.yarn/plugins
+yalc.lock
 Temp
 .gitignore
 .eslintrc.cjs
