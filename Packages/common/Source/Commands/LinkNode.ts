@@ -40,7 +40,7 @@ export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial
 		AssertV(this.child_oldData, "Cannot link child-node that does not exist!");
 		this.parent_oldData =
 			this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this.up)?.payload.argumentNode
-			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_linkToNewParent == this)?.sub_addArgumentWrapper.payload.node
+			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_linkToNewParent == this)?.sub_addArgumentWrapper?.payload.node
 			//?? (this.parentCommand instanceof ImportSubtree_Old ? "" as any : null) // hack; use empty-string to count as non-null for this chain, but count as false for if-statements (ye...)
 			?? GetNode.NN(link.parent);
 		AssertV(this.parent_oldData, "Cannot link child-node to parent that does not exist!");
