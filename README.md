@@ -327,6 +327,30 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 
 ### Tasks (one-time, or very rare)
 
+<!----><a name="cloud-project-init"></a>
+<details><summary><b>[cloud-project-init] Cloud-projects initialization (eg. creating Google Cloud project for Pulumi to work within)</b></summary>
+
+Note: We use Google Cloud here, but others could be used.
+
+* 1\) Ensure you have a user-account on Google Cloud Platform: https://cloud.google.com/
+* 2\) Install the Google Cloud SDK: https://cloud.google.com/sdk/docs/install
+* 3\) Authenticate the gcloud sdk/cli by providing it with the key-file for a service-account with access to the project you want to deploy to.
+	* 3.1\) For the main Google Cloud project instance, you'll need to be supplied with the service-account key-file. (contact Venryx)
+	* 3.2\) If you're creating your own fork/deployment, you'll need to:
+		* 3.2.1\) Create a GCP project.
+		* 3.2.2\) Enable the Container Registry API for your GCP project: https://console.cloud.google.com/apis/library/containerregistry.googleapis.com
+		* 3.2.3\) Create a service-account: (it's possible a user account could also be granted access directly, but service-accounts are recommended anyway)
+			* 3.2.3.1\) Go to: https://console.cloud.google.com/iam-admin/serviceaccounts/create
+			* 3.2.3.2\) Choose a service-account name, and add the role "Container Registry Service Agent" and "Storage Admin" (*not* the weaker "Storage Object Admin").
+			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
+			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
+			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
+	* 3.3\) Move (or copy) the JSON file to the following path: `Packages/deploy/PGO/postgres/gcs-key.json`
+	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Packages/deploy/PGO/postgres/gcs-key.json`
+	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Packages/deploy/PGO/postgres/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+
+</details>
+
 <!----><a name="pulumi-init"></a>
 <details><summary><b>[pulumi-init] Pulumi initialization (provisioning GCS bucket, container registry, etc.)</b></summary>
 
@@ -357,15 +381,15 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 * 1\) Create a Public Cloud project on OVH cloud. (in the US, us.ovhcloud.com is recommended for their in-country servers)
 * 2\) Follow the instructions here to setup a Kubernetes cluster: https://youtu.be/vZOj59Oer7U?t=586  
 	* 2.1\) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)  
-	* 2.2\) In the "node type" step, select the cheapest option, Discovery d2-4. (~$12/mo)
+	* 2.2\) In the "node type" step, select an option. (cheapest is Discovery d2-4 at ~$12/mo, but I use d2-8 at ~$22/mo to avoid occasional OOM issues)
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
 * 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (edit `$HOME/.kube/config`)
 * 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
-		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.4 of [docker-remote](#docker-remote))
+		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.5 of [cloud-project-init](#cloud-project-init))
 		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
-	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get -o json secret registry-credentials`
+	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get --namespace default -o json secret registry-credentials` (currently we are pushing the secret to the `default` namespace, as that's where the `web-server` and `app-server` pods currently are; if these pods are moved to another namespace, adjust this line accordingly)
 
 </details>
 
@@ -575,6 +599,9 @@ To restore a backup:
 	* 3.1\) If using approach 1, you also have to restart [possibly twice, if it gets stuck] the `pgo` resource using the Tilt UI here. (this clears the old instance/pod-set, and creates a new one, which then tries to load from the specified data-source)
 * 4\) Observe the logs in the Tilt UI, to track the progress of the restore. (it takes about 2.5 minutes just to start, so be patient; also, you can ignore the `WARN: --delta or --force specified but unable to find...` message, as that just means it's a fresh cluster that has to restore from scratch, which the restore module finds odd since it notices the useless [automatically added] delta/force flag)
 * 5\) Check whether the restore operation succeeded, by loading up the website. (you may have to wait a bit for the app-server to reconnect; you can restart it manually to speed this up)
+	* 5.1\) If you get an error in the `app-server` pod about `error: password authentication failed for user "admin"`, then it seems the `debate-map-pguser-admin` secret was already created (by pgo) prior to the restore, which may have made it invalid after the restore was completed (if the credentials differ). To resolve this, you can either:
+		5.1.1\) Delete the `debate-map-pguser-admin` secret in the `postgres-operator` namespace; pgo will recreate it in a few seconds, with a working set of credentials (and the reflected version of the secret, in the `default` namespace, will be updated a few seconds later). Note that in this process, the admin user's password is actually reset to a new (random) value, so you will have to copy the secret's password value for use in third-party programs accessing the database (eg. DBeaver).
+		5.1.2\) Alternately, you can modify the `debate-map-pguser-admin` secret (in the `postgres-operator` namespace) to hold the password value that was stored in the postgres backup that was just restored (this approach not yet tested, but presumably should work). One place you may have the old password stored is in DBeaver's password store, which can you decrept using [these instructions](https://stackoverflow.com/a/58223703).
 * 6\) If the restore operation did not succeed, you'll want to either make sure it does complete, or cancel the restore operation (else it will keep trying to apply the restore, which may succeed later on when you don't want or expect it to, causing data loss). To cancel the restore:
 	* 6.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file.
 	* 6.2\) If option 2 was taken: Run: `npm start backend.restoreDBBackup_cancel`.
@@ -591,6 +618,15 @@ To restore a backup:
 	* 1.1\) You can manually remove the taint by running (as seen [here](https://stackoverflow.com/a/63471551/2441655)): `kubectl taint node <nodename> node.kubernetes.io/memory-pressure:NoSchedule-`
 		1.1.1\) Update: This didn't actually seem to work for me. Perhaps k8s is instantly re-applying the taint, since it's based on a persistent memory shortage? Anyway, currently I just wait for the memory shortage to resolve (somehow).
 		1.1.2\) For now, another workaround that *seems* to help (from a couple tries), is opening pod-list in Lens, searching for all pods of the given type, selecting-all, then removing/killing all.
+* 2\) If you get the error "Unable to attach or mount volumes: unmounted volumes [...]" (in my case, after replacing a 4gb node-pool with an 8gb one), the issue may be that the stale persistent-volume-claims requested by the old nodes are still sticking around, causing new claims for the new node to not get created (issue [described here](https://veducate.co.uk/kubelet-unable-attach-volumes/)). To fix this:
+	* 2.1\) Run `npm start backend.tiltDown_ovh`.
+	* 2.2\) Tilt-down appears to not delete everything, so complete the job by using Tilt to manually delete anything added by our project: basically everything except what's in the `kube-node-lease`, `kube-public`, and `kube-system` namespaces.
+		* 2.2.1\) Regular deletion (eg. through the Lens UI) works fine for the following found leftovers: stateful sets, config maps, secrets, and services.
+		* 2.2.2\) For leftover namespaces: this deadlocks for me, seemingly due to the postgres-operator CRD having a deadlock occuring during its "finalizer", as [described here](https://stackoverflow.com/a/52012367) (causing its `postgres-operator` namespace to stick around in a bad "terminating" state). See [here](https://stackoverflow.com/a/52377328) to confirm what resources underneath that namespace are causing it to stick around, and then follow the steps below (assuming it's the CRD and/or PV/PVCs) to remove them, then the deadlocked namespace deletion task itself should complete. 
+		* 2.2.3\) For the postgres-operator CRD, edit the manifest (eg. using the Lens UI's "Edit" option) to have its "finalizers" commented out, then delete like normal.
+		* 2.2.4\) For the persistent-volumes and persistent-volume-claims, due the same thing: comment out its "finalizers", then delete like normal.
+	* 2.3\) Rerun the tilt-up script.
+	* 2.4\) EDIT: After doing the above, the issue still remains :(. Based on my reading, the above "should" fix it, but it hasn't. For now, I'm resolving this issue by just completely resetting the cluster. (with "Computing nodes" option set to "Keep and reinstall nodes" -- the "Delete nodes" option appears to not be necessary)
 
 </details>
 

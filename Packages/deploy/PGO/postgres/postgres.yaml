@@ -19,8 +19,8 @@ spec:
   #     repoName: repo2
   #     options:
   #     # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
-  #     # NOTE: This approach is not currently working. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
-  #     - --set 20210830-153214F
+  #     # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+  #     - --set 20211205-030018F
   #     - --type=immediate
   #     #- --target-action=promote
   #     # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])

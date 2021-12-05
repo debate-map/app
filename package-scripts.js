@@ -80,7 +80,6 @@ const PrepDockerCmd = ()=>{
 	return `node Scripts/PrepareDocker.js &&`;
 };
 
-
 function GetServeCommand(nodeEnv = null) {
 	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start client.dev.part2"`;
 }
@@ -88,7 +87,7 @@ function GetServeCommand(nodeEnv = null) {
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 Object.assign(scripts, {
 	ssh: {
-		"db": Dynamic(()=>{
+		db: Dynamic(()=>{
 			const podName = execSync(GetPodNameCmd_DB(commandArgs[0])).toString().trim();
 			//console.log("podName:", podName);
 			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- bash`;
@@ -104,7 +103,7 @@ Object.assign(scripts, {
 			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n app ${podName} -c dm-app-server -- bash`;
 		}),
 
-		"etcd_dumpAsJSON": Dynamic(()=>{
+		etcd_dumpAsJSON: Dynamic(()=>{
 			const etcdCommand = `ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/run/config/pki/etcd/ca.crt --cert=/run/config/pki/etcd/server.crt --key=/run/config/pki/etcd/server.key get '' --prefix=true -w json`;
 			const jsonStr = execSync(`kubectl exec -it -n kube-system etcd-docker-desktop -- /bin/sh -ec "${etcdCommand}"`).toString().trim();
 			const data = JSON.parse(jsonStr);
@@ -120,7 +119,7 @@ Object.assign(scripts, {
 		}),
 
 		// for this to work, you have to enable EphemeralContainers in your k8s cluster, as seen here: https://stackoverflow.com/a/68971526
-		"debugPod": Dynamic(()=>{
+		debugPod: Dynamic(()=>{
 			const podNameSearchStr = commandArgs[0];
 			const podsMatchingSearchStr = GetPodsMatchingPartialName(podNameSearchStr);
 			let targetPod = podsMatchingSearchStr.find(a=>a.name == podNameSearchStr);
@@ -156,11 +155,13 @@ Object.assign(scripts, {
 		}),*/
 
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt up --context local`,
-		tiltUp_docker:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "docker-desktop")}		tilt up --context docker-desktop`,
-		tiltUp_k3d:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "k3d-main-1")}			tilt up --context k3d-main-1`,
-		tiltUp_kind:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "kind-main-1")}			tilt up --context kind-main-1`,
-		tiltUp_ovh:		`${PrepDockerCmd()}		${SetTileEnvCmd(true, "ovh")}						tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltUp_local:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt up --context local`,
+		tiltDown_local:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt down --context local`,
+		tiltUp_docker:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "docker-desktop")}		tilt up --context docker-desktop`,
+		tiltUp_k3d:			`${PrepDockerCmd()}		${SetTileEnvCmd(false, "k3d-main-1")}			tilt up --context k3d-main-1`,
+		tiltUp_kind:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "kind-main-1")}			tilt up --context kind-main-1`,
+		tiltUp_ovh:			`${PrepDockerCmd()}		${SetTileEnvCmd(true, "ovh")}						tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltDown_ovh:		`${PrepDockerCmd()}		${SetTileEnvCmd(true, "ovh")}						tilt down --context ovh`,
 
 		forceKillNS: Dynamic(()=>{
 			const pathToKillScript = paths.resolve("./Scripts/KillKubeNS.sh");
@@ -212,7 +213,7 @@ Object.assign(scripts, {
 							//`--target="${labelAsTimeStr}"`,
 						],
 					},
-				}}}
+				}}},
 			});
 			const patchJSON_escaped = patchJSON
 				.replace(/\\/g, `\\\\`) // escape [backslash] into [backslash]+[backslash]
@@ -233,7 +234,7 @@ Object.assign(scripts, {
 						repoName: "repo2",
 						options: [],
 					},
-				}}}
+				}}},
 			});
 			const patchJSON_escaped = patchJSON
 				.replace(/\\/g, `\\\\`) // escape [backslash] into [backslash]+[backslash]
