@@ -22,7 +22,7 @@ export type NodeToolbar_Props = {
 
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
-		let {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
+		const {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
 		const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
@@ -31,7 +31,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
 		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));
-		
+
 		//const sharedProps = {node, panelToShow, onPanelButtonClick, leftPanelShow};
 		const sharedProps = this.props;
 		return (
@@ -39,10 +39,10 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>
 				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
 				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
-					enabled={node.type == MapNodeType.claim} disabledInfo="TODO"/>}
+					enabled={node.type == MapNodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>}
 				{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
 				<ToolBarButton {...sharedProps} text="Relevance" panel="relevance"
-					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg} disabledInfo="TODO"/>}
+					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg} disabledInfo="This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises."/>}
 				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings"/>
 				<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
 					processedMouseEvents.add(e.nativeEvent);
@@ -68,7 +68,7 @@ class ToolBarButton extends BaseComponent<{
 } & NodeToolbar_Props, {}> {
 	render() {
 		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
-		let [hovered, setHovered] = useState(false);
+		const [hovered, setHovered] = useState(false);
 		let highlight = panel && panelToShow == panel;
 		const {toolbarRatingPreviews} = store.main.maps;
 
@@ -145,9 +145,9 @@ class ToolBarButton extends BaseComponent<{
 @Observer
 export class RatingsPreviewBackground extends BaseComponent<{path: string, node: MapNodeL3, ratingType: NodeRatingType} & NodeToolbar_Props, {}> {
 	render() {
-		let {path, node, ratingType, backgroundColor} = this.props;
+		const {path, node, ratingType, backgroundColor} = this.props;
 		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.none) return null;
-		
+
 		const parentNode = GetParentNode(path);
 		const argumentNode = GetArgumentNode(node, parentNode);
 		const argumentPath = argumentNode == null ? null : (argumentNode == node ? path : GetParentPath(path));
@@ -162,7 +162,7 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 			return ratings.filter(a=>RatingValueIsInRange(a.value, range));
 		});*/
 		const ratingSummary = GetRatingSummary(ratingNode.id, ratingType);
-		
+
 		/*ratingsPreview = (
 			<Row style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
 				{ratingTypeInfo.valueRanges.map((range, index)=>{
@@ -193,7 +193,7 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 						//[0, ...ratingsInEachRange.map(a=>a.length), 0],
 						//[baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
 						[baselineValue, ...ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)), baselineValue],
-						
+
 						// for bars style
 						/*ratingTypeInfo.valueRanges.map(a=>a.center),
 						ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)),*/
@@ -204,7 +204,7 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 				/>
 			);
 		}
-		
+
 		//const backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
 		const backgroundFillPercent = GetRatingAverage(ratingNode.id, ratingType, null) ?? 0;
 		return (
