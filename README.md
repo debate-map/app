@@ -338,6 +338,7 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 	* 2.2\) Open a shell in the target pod. (see [k8s-ssh](#k8s-ssh))
 	* 2.3\) Create a symbolic link, such that the target path now points to that temp-folder: `ln -sf /dm_repo/Temp_Synced/MODULE_NAME /dm_repo/node_modules`
 	* 2.4\) To confirm link was created, run: `ls -l /dm_repo/node_modules/MODULE_NAME`
+	* Note: These symlinks will be cleared whenever `yarn install` is run again in the pod. (eg. if your app's `package.json` is changed)
 
 </details>
 

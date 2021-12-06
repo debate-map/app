@@ -52,7 +52,7 @@ Object.defineProperty(Object.prototype, "callbackURL", {
 	},
 });
 
-let currentAuthRequest: Request<{}, any, any, any, Record<string, any>>; 
+let currentAuthRequest: Request<{}, any, any, any, Record<string, any>>;
 passport.use(new GoogleStrategy(
 	{
 		clientID: process.env.CLIENT_ID as string,
@@ -79,8 +79,9 @@ passport.use(new GoogleStrategy(
 
 		//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
 
-		const test1 = await pgPool.query(`SELECT * FROM "userHiddens"`);
-		console.log("Test1:", test1.rows);
+		const userHiddensData = await pgPool.query(`SELECT * FROM "userHiddens"`);
+		const existingUserHiddens = userHiddensData.rows as UserHidden[];
+		console.log("Existing user emails:", existingUserHiddens.map(a=>a.email));
 
 		//const existingUser = await GetAsync(()=>GetUsers()));
 		const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling_final: "log"});
@@ -94,16 +95,18 @@ passport.use(new GoogleStrategy(
 
 		console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
 
-		/*let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
-		if (DEV) {
-			const usersCount = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
-			if (usersCount.rowCount <= 1) {
-				console.log("First non-system user signing-in; marking as admin.");
-				permissionGroups = {basic: true, verified: true, mod: true, admin: true};
-			}
-		}*/
-		// temp; make every new user who signs up an admin
-		let permissionGroups = {basic: true, verified: true, mod: true, admin: true};
+		const permissionGroups = {basic: true, verified: true, mod: false, admin: false};
+
+		// temp; make every new user who signs up a mod
+		permissionGroups.mod = true;
+
+		// maybe temp; make first (non-system) user an admin
+		//if (existingUserHiddens.length <= 1) {
+		const usersCountData = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+		if (usersCountData.rowCount <= 1) {
+			console.log("First non-system user signing-in; marking as admin.");
+			permissionGroups.VSet({mod: true, admin: true});
+		}
 
 		const user = new User({
 			displayName: profile.displayName,
@@ -171,7 +174,7 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 	next();
 };*/
 
-let inCrossOriginAuth = false;
+const inCrossOriginAuth = false;
 export function SetUpAuthHandling(app: ExpressApp) {
 	//app.set('trust proxy', '127.0.0.1');
 	// trust-proxy needed, so that "req.protocol" becomes "https", so that cookie-session allows setting a secure cookie
@@ -191,7 +194,6 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		//domain: ".localhost",
 		//domain: "localhost",
 
-		
 		httpOnly: true, // already the default
 		/*get secure() { console.log("Secure:", inCrossOriginAuth); return inCrossOriginAuth; },
 		get sameSite() { console.log("Secure:", inCrossOriginAuth); return inCrossOriginAuth ? "none" : undefined; },*/
@@ -247,7 +249,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		passport.authenticate("google"),
 		(req, res, next)=>{
 			console.log("New_Session_Cookie:", req.sessionOptions, req.protocol, req.url, req.baseUrl, req.originalUrl, req.ip, req.ips);
-			
+
 			console.log("User_LH:", req.user);
 			// if success
 			if (req.user) {

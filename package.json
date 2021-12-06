@@ -34,7 +34,7 @@
   },
   "@resolutions_c": "The 'version locks' below (other than mathjs toggle) are for version-sensitive (or duplicate-sensitive) deps (eg. those with patches specified), for which updates should only happen after deliberation.",
   "resolutions": {
-    "mathjs": "1.0.0",
+    "mathjs": "1.0.1",
     "@types/react": "17.0.9",
     "react": "17.0.2",
     "react-dom": "17.0.2",
