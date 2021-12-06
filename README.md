@@ -292,31 +292,6 @@ foreach ($container in $containersToRemove) {
 
 </details>
 
-<!----><a name="docker-trim"></a>
-<details><summary><b>[docker-trim] Docker image/container trimming</b></summary>
-
-Prerequisite steps: [setup-base](#setup-base)
-
-* 1\) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
-* 2\) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
-```
-$containers = (docker container list -a).Split("`n") | % { [regex]::split($_, "\s+") | Select -Last 1 }
-$containersToRemove = $containers | Where { ([regex]"^[a-z]+_[a-z]+$").IsMatch($_) }
-
-# it's recommended to delete in batches, as too many at once can cause issues
-$containersToRemove = $containersToRemove | Select-Object -First 30
-
-foreach ($container in $containersToRemove) {
-	# sync/wait-based version (slow)
-	# docker container rm $container
-
-	# async/background-process version (fast)
-	Start-Process -FilePath docker -ArgumentList "container rm $container" -NoNewWindow
-}
-```
-
-</details>
-
 <!----><a name="k8s-ssh"></a>
 <details><summary><b>[k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)</b></summary>
 
