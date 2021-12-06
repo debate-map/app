@@ -56,10 +56,11 @@ Object.assign(scripts, {
 	},
 });
 
+const appNamespace = "default"; //"app";
 const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
 const GetPodNameCmd_DB =					contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n postgres-operator -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master`;
-const GetPodNameCmd_WebServer =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n app -l app=dm-web-server`;
-const GetPodNameCmd_AppServer =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n app -l app=dm-app-server`;
+const GetPodNameCmd_WebServer =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n ${appNamespace} -l app=dm-web-server`;
+const GetPodNameCmd_AppServer =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n ${appNamespace} -l app=dm-app-server`;
 const GetPodsMatchingPartialName = (partialName, contextName)=>{
 	const entryStrings = execSync(`${KubeCTLCmd(contextName)} get pods --all-namespaces | findstr ${partialName}`).toString().trim().split("\n");
 	return entryStrings.map(str=>{
@@ -85,22 +86,23 @@ function GetServeCommand(nodeEnv = null) {
 }
 
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
+const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
 	ssh: {
 		db: Dynamic(()=>{
 			const podName = execSync(GetPodNameCmd_DB(commandArgs[0])).toString().trim();
 			//console.log("podName:", podName);
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- bash`;
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- ${startBestShellCmd}`;
 			/*const commandStr = `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- bash`;
 			spawn(commandStr.split(" ")[0], commandStr.split(" ").slice(1), {stdio: "inherit"});*/
 		}),
 		"web-server": Dynamic(()=>{
 			const podName = execSync(GetPodNameCmd_WebServer(commandArgs[0])).toString().trim();
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n app ${podName} -c dm-web-server -- bash`;
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${podName} -c dm-web-server -- ${startBestShellCmd}`;
 		}),
 		"app-server": Dynamic(()=>{
 			const podName = execSync(GetPodNameCmd_AppServer(commandArgs[0])).toString().trim();
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n app ${podName} -c dm-app-server -- bash`;
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${podName} -c dm-app-server -- ${startBestShellCmd}`;
 		}),
 
 		etcd_dumpAsJSON: Dynamic(()=>{

@@ -292,6 +292,55 @@ foreach ($container in $containersToRemove) {
 
 </details>
 
+<!----><a name="docker-trim"></a>
+<details><summary><b>[docker-trim] Docker image/container trimming</b></summary>
+
+Prerequisite steps: [setup-base](#setup-base)
+
+* 1\) When the list of images in Docker Desktop gets too long, press "Clean up" in the UI, check "Unused", uncheck non-main-series images, then press "Remove". (run after container-trimming to get more matches)
+* 2\) When the list of containers in Docker Desktop gets too long, you can trim them using a Powershell script like the below: (based on: https://stackoverflow.com/a/68702985)
+```
+$containers = (docker container list -a).Split("`n") | % { [regex]::split($_, "\s+") | Select -Last 1 }
+$containersToRemove = $containers | Where { ([regex]"^[a-z]+_[a-z]+$").IsMatch($_) }
+
+# it's recommended to delete in batches, as too many at once can cause issues
+$containersToRemove = $containersToRemove | Select-Object -First 30
+
+foreach ($container in $containersToRemove) {
+	# sync/wait-based version (slow)
+	# docker container rm $container
+
+	# async/background-process version (fast)
+	Start-Process -FilePath docker -ArgumentList "container rm $container" -NoNewWindow
+}
+```
+
+</details>
+
+<!----><a name="k8s-ssh"></a>
+<details><summary><b>[k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)</b></summary>
+
+* For web-server: `npm start ssh.web-server`
+* For app-server: `npm start ssh.app-server`
+* For database: `npm start ssh.db`
+* For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
+
+Note: If you merely want to explore the file-system of a running pod, it's recommended to use the [Kubernetes Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) VSCode extension, as it's faster and easier. For editing files, see here: https://github.com/sandipchitale/kubernetes-file-system-explorer/issues/4
+
+</details>
+
+<!----><a name="pod-quick-edits"></a>
+<details><summary><b>[pod-quick-edits] How to modify code of running pod quickly</b></summary>
+
+* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/common, Packages/web-server (in web-server pod), Packages/app-server (in app-server pod)
+* 2\) If you want to quickly synchronize changes to an arbitrary node-module (or other location), do the following:
+	* 2.1\) Copy the node-module's folder, and paste it into the `Temp_Synced` folder.
+	* 2.2\) Open a shell in the target pod. (see [k8s-ssh](#k8s-ssh))
+	* 2.3\) Create a symbolic link, such that the target path now points to that temp-folder: `ln -sf /dm_repo/Temp_Synced/MODULE_NAME /dm_repo/node_modules`
+	* 2.4\) To confirm link was created, run: `ls -l /dm_repo/node_modules/MODULE_NAME`
+
+</details>
+
 
 
 
@@ -458,18 +507,6 @@ Authorized redirect URIs:
 <!-- * To view the cAdvisor monitor webpage, open (not currently working): `localhost:31001` -->
 * To view the cAdvisor monitor webpage [not currently working/enabled], open the k8s cluster in Lens, find the `cadvisor` service, then click it's "Connection->Ports" link.
 * To view cpu and memory usage for pods using k8s directly (no external tools), run: `kubectl top pods --all-namespaces` (for additional commands, see [here](https://raaviblog.com/how-to-find-the-current-cpu-and-memory-usage-of-all-the-pods-in-kubernetes-cluster))
-
-</details>
-
-<!----><a name="k8s-ssh"></a>
-<details><summary><b>[k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)</b></summary>
-
-* For web-server: `npm start ssh.web-server`
-* For app-server: `npm start ssh.app-server`
-* For database: `npm start ssh.db`
-* For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
-
-Note: If you merely want to explore the file-system of a running pod, it's recommended to use the [Kubernetes Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) VSCode extension, as it's faster and easier. For editing files, see here: https://github.com/sandipchitale/kubernetes-file-system-explorer/issues/4
 
 </details>
 

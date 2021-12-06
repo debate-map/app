@@ -26,6 +26,7 @@ Temp
 .gitignore
 .eslintrc.cjs
 package-scripts.js
+README.md
 Tiltfile
 templateBase.dockerignore
 

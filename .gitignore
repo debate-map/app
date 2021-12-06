@@ -3,6 +3,7 @@
 /.helm
 /NMOverwrites
 /Temp
+/Temp_Synced
 /.env
 /PulumiOutput_Private.json
 /Packages/*/node_modules

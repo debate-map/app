@@ -8,6 +8,7 @@ FROM $SHARED_BASE_URL
 # note: the exclusion of large, unrelated folders (like node_modules) under the given paths is handled by the .dockerignore files
 
 # split up the copying into multiple layers, for better caching
+COPY Temp_Synced/ Temp_Synced/
 COPY Packages/common/ Packages/common/
 COPY Packages/app-server/ Packages/app-server/
 #COPY Scripts/COPY_opt.txt Scripts/COPY_opt.txt
