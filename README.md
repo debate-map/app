@@ -236,8 +236,11 @@ Notes:
 
 #### Troubleshooting
 
-* If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"` (and if that is insufficient, just reset the whole Kubernetes cluster using Docker Desktop UI)
-* When the list of images/containers in Docker Desktop gets too long, see the [docker-trim](#docker-trim) module.
+* 1\) If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"`
+	* 1.1\) If that is insufficient, you can either:
+		* 1.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
+		* 1.1.2\) Reset the whole Kubernetes cluster using Docker Desktop UI.
+* 2\) When the list of images/containers in Docker Desktop gets too long, see the [docker-trim](#docker-trim) module.
 
 </details>
 
