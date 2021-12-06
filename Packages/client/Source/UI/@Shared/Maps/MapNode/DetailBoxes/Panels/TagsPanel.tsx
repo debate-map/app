@@ -1,7 +1,12 @@
-import {DeleteNodeTag, GetNodeTags, GetTagCompClassByTag, HasModPermissions, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeTag, MeID, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
+import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasModPermissions, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
+import {Assert, Clone, E, emptyArray, GetEntries, GetValues} from "js-vextensions";
+import React, {useState} from "react";
+import {store} from "Store";
+import {TagsPanel_Subpanel} from "Store/main/maps";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
-import {GetUpdates, HSLA, Observer} from "web-vcore";
-import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
+import {GetUpdates, HSLA, Observer, RunInAction_Set} from "web-vcore";
+import {Button, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
@@ -9,23 +14,114 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {}) {
 	render() {
 		const {show, node} = this.props;
+		const uiState = store.main.maps.tagsPanel;
 		const tags = GetNodeTags(node.id);
+
+		const labelCounts = GetNodeLabelCounts(tags);
+		const labels = [...labelCounts.entries()]
+			.OrderBy(a=>a[0]) // first order alphabetically
+			.OrderByDescending(a=>a[1]) // then order by count (thus within a certain count-bucket, they are ordered alphabetically)
+			.map(a=>a[0]);
+		const myLabelsTag = tags.find(a=>a.creator == MeID() && a.labels != null);
+		const myLabels = myLabelsTag?.labels!.labels ?? [];
+
+		const [addLabelMode, setAddLabelMode] = useState(false);
+		const [newLabelText, setNewLabelText] = useState("");
+
+		const AddOwnLabel = (label: string)=>{
+			if (myLabelsTag == null) {
+				const tag = new MapNodeTag({
+					labels: new TagComp_Labels({nodeX: node.id}),
+					nodes: [node.id],
+				});
+				tag.labels!.labels = [label];
+				new AddNodeTag({tag}).RunOnServer();
+			} else {
+				const newLabelsComp = Clone(myLabelsTag.labels) as TagComp_Labels;
+				newLabelsComp.labels.push(label);
+				new UpdateNodeTag({
+					id: myLabelsTag!.id,
+					updates: {labels: newLabelsComp},
+				}).RunOnServer();
+			}
+		};
+		const RemoveOwnLabel = (label: string)=>{
+			Assert(myLabelsTag != null);
+			const newLabelsComp = Clone(myLabelsTag.labels) as TagComp_Labels;
+			newLabelsComp.labels.Remove(label);
+			new UpdateNodeTag({
+				id: myLabelsTag!.id,
+				updates: {labels: newLabelsComp},
+			}).RunOnServer();
+		};
+
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<Row center mt={5}>
-					<Text style={{fontWeight: "bold"}}>Tags:</Text>
-					<Button ml={5} p="3px 7px" text="+" enabled={HasModPermissions(MeID())} onClick={()=>{
-						ShowAddTagDialog({
-							mirrorChildrenFromXToY: new TagComp_MirrorChildrenFromXToY({nodeY: node.id}),
-							nodes: [node.id],
-						} as Partial<MapNodeTag>);
-					}}/>
+					<Select displayType="button bar" options={GetEntries(TagsPanel_Subpanel, "ui")} value={uiState.subpanel} onChange={val=>RunInAction_Set(this, ()=>uiState.subpanel = val)}/>
 				</Row>
-				{tags.map((tag, index)=>{
-					return (
-						<TagRow key={index} tag={tag} index={index} node={node}/>
-					);
-				})}
+				{uiState.subpanel == TagsPanel_Subpanel.basic &&
+				<>
+					<Row center mt={5}>
+						<Text style={{fontWeight: "bold"}}>Labels:</Text>
+						{!addLabelMode &&
+						<Button ml={5} p="3px 7px" text="+" enabled={HasModPermissions(MeID())} onClick={()=>{
+							setAddLabelMode(true);
+						}}/>}
+						{addLabelMode &&
+						<>
+							<TextInput ml={5} instant={true} value={newLabelText} onChange={val=>setNewLabelText(val)}/>
+							<Button ml={5} p="3px 7px" text="Add" enabled={newLabelText.trim().length > 0} onClick={()=>{
+								AddOwnLabel(newLabelText);
+								setAddLabelMode(false);
+								setNewLabelText("");
+							}}/>
+							<Button ml={5} p="3px 7px" text="Cancel" onClick={()=>{
+								setAddLabelMode(false);
+								setNewLabelText("");
+							}}/>
+						</>}
+					</Row>
+					<Row mt={5} style={{flexWrap: "wrap", gap: 5}}>
+						{labels.map((label, index)=>{
+							const labelSetForSelf = myLabels.includes(label);
+							return (
+								<Text key={index} /*ml={index == 0 ? 0 : 5} mt={5}*/ p="0 5px 3px"
+										style={E(
+											{display: "inline-block", background: HSLA(0, 0, 1, .3), borderRadius: 5, cursor: "pointer"},
+											labelSetForSelf && {background: "rgba(100,200,100,.5)"},
+										)}
+										onClick={()=>{
+											if (MeID() == null) return ShowSignInPopup();
+											if (labelSetForSelf) {
+												RemoveOwnLabel(label);
+											} else {
+												AddOwnLabel(label);
+											}
+										}}>
+									{label}<sup>{labelCounts.get(label)}</sup>
+								</Text>
+							);
+						})}
+					</Row>
+				</>}
+				{uiState.subpanel == TagsPanel_Subpanel.advanced &&
+				<>
+					<Row center mt={5}>
+						<Text style={{fontWeight: "bold"}}>Tags:</Text>
+						<Button ml={5} p="3px 7px" text="+" enabled={HasModPermissions(MeID())} onClick={()=>{
+							ShowAddTagDialog({
+								mirrorChildrenFromXToY: new TagComp_MirrorChildrenFromXToY({nodeY: node.id}),
+								nodes: [node.id],
+							} as Partial<MapNodeTag>);
+						}}/>
+					</Row>
+					{tags.filter(a=>a.labels == null).map((tag, index)=>{
+						return (
+							<TagRow key={index} tag={tag} index={index} node={node}/>
+						);
+					})}
+				</>}
 			</Column>
 		);
 	}

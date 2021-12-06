@@ -26,13 +26,18 @@ export class TagDetailsUI extends DetailsUI_Base<MapNodeTag, TagDetailsUI> {
 					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
 				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
-					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=>{
-						delete newData[compClass.key];
-						newData[newCompClass.key] = new newCompClass();
-						Change();
-					}}/>
+					<Select options={TagComp_classes.filter(a=>a.key != "labels").map(a=>({name: a.displayName, value: a}))}
+						enabled={enabled} style={ES({flex: 1})}
+						value={compClass}
+						onChange={(newCompClass: TagComp_Class)=>{
+							delete newData[compClass.key];
+							newData[newCompClass.key] = new newCompClass();
+							Change();
+						}}/>
 					<InfoButton ml={5} text={compClass.description}/>
 				</RowLR>
+				{/*compClass == TagComp_Labels &&
+					<TagCompUI_Labels {...sharedProps}/>*/}
 				{compClass == TagComp_MirrorChildrenFromXToY &&
 					<TagCompUI_MirrorChildrenFromXToY {...sharedProps}/>}
 				{compClass == TagComp_XIsExtendedByY &&

@@ -33,6 +33,10 @@ export class MapNodeTag {
 	// ==========
 
 	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "TagComp_Labels"}, {opt: true})
+	labels?: TagComp_Labels;
+
+	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_MirrorChildrenFromXToY"}, {opt: true})
 	mirrorChildrenFromXToY?: TagComp_MirrorChildrenFromXToY;
 
@@ -66,6 +70,22 @@ export abstract class TagComp {
 		if (compClass) return [CE(this).Cast(compClass as any)];
 		return [this];
 	}
+}
+
+@MGLClass()
+export class TagComp_Labels extends TagComp {
+	//static key = "labels";
+	static displayName = "labels";
+	static description = "Generic container for attaching arbitrary text labels to a node. (eg. as annotations for third-party tools)";
+	static nodeKeys = ["nodeX"];
+
+	constructor(initialData?: Partial<TagComp_Labels>) { super(); CE(this).VSet(initialData); }
+
+	@Field({$ref: "UUID"})
+	nodeX: string;
+
+	@Field({items: {type: "string"}})
+	labels = [] as string[];
 }
 
 /*export class TagComp_ExampleBasedClaim extends TagComp {
@@ -218,6 +238,7 @@ AddSchema("TagComp_RestrictMirroringOfX", {
 // ==========
 
 export const TagComp_classes = [
+	TagComp_Labels,
 	TagComp_MirrorChildrenFromXToY,
 	TagComp_XIsExtendedByY,
 	TagComp_MutuallyExclusiveGroup,
@@ -258,7 +279,7 @@ export function GetTagCompClassByDisplayName(displayName: string) {
 	return TagComp_classes.find(a=>a.displayName == displayName);
 }
 export function GetTagCompClassByTag(tag: MapNodeTag) {
-	return TagComp_classes.find(a=>a.key in tag)!;
+	return TagComp_classes.find(a=>tag[a.key] != null)!;
 	/*Assert(tag.constructor.name.startsWith("TagComp_"), "Tag-comp must have prototype re-applied before this point.");
 	return tag.constructor as TagComp_Class;*/
 }

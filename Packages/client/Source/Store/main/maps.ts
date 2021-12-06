@@ -45,6 +45,7 @@ export class MapsState {
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
+	@O tagsPanel = new TagsPanelState();
 	@O addChildDialog = new AddChildDialogState();
 	@O exportSubtreeDialog = new ExportSubtreeDialogState();
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
@@ -59,6 +60,15 @@ export enum DetailsPanel_Subpanel {
 export class DetailsPanelState {
 	constructor() { makeObservable(this); }
 	@O subpanel = DetailsPanel_Subpanel.text;
+}
+
+export enum TagsPanel_Subpanel {
+	"basic" = "basic",
+	"advanced" = "advanced",
+}
+export class TagsPanelState {
+	constructor() { makeObservable(this); }
+	@O subpanel = TagsPanel_Subpanel.basic;
 }
 
 export class AddChildDialogState {
