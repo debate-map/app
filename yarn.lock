@@ -2415,7 +2415,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
-    web-vcore: 0.0.44
+    web-vcore: 0.0.45
   languageName: unknown
   linkType: soft
 
@@ -9535,11 +9535,18 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"js-vextensions@1.0.67, js-vextensions@^1.0.65, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
+"js-vextensions@^1.0.65, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
   version: 0.0.0-use.local
   resolution: "js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions"
   languageName: unknown
   linkType: soft
+
+"js-vextensions@npm:1.0.69":
+  version: 1.0.69
+  resolution: "js-vextensions@npm:1.0.69"
+  checksum: 0f7d42a99d7aba10d2e789a88beea97689974b38d7500bb93770a263a6f29a2d3cf8b516731a4e0e57bc1082fd56d6c76ceac5ffb357811defd970807e4050a3
+  languageName: node
+  linkType: hard
 
 "js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.0, js-yaml@npm:^3.9.0":
   version: 3.14.1
@@ -10710,7 +10717,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.18, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
+"mobx-graphlink@0.0.19, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
   version: 0.0.0-use.local
   resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
   dependencies:
@@ -13387,17 +13394,16 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-vextensions@npm:1.0.11":
-  version: 1.0.11
-  resolution: "react-vextensions@npm:1.0.11"
+"react-vextensions@1.0.11, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
+  version: 0.0.0-use.local
+  resolution: "react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions"
   dependencies:
     classnames: ^2.2.5
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-  checksum: bd23e743bd99862e93ea97d5fc73d22370c516ac9c53f78defeef10142af4ea4a0f54f064402479b9442fd0e3e3e3ec5766ec044aabf405f293b7015259c0e1a
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "react-vmarkdown@npm:1.0.3, react-vmarkdown@npm:^1.0.3":
   version: 1.0.3
@@ -16457,7 +16463,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.44, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.45, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -16505,11 +16511,11 @@ typescript@~3.7.3:
     html-webpack-plugin: ^5.3.1
     immer: ^7.0.7
     ip: ^1.1.5
-    js-vextensions: 1.0.67
+    js-vextensions: 1.0.69
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.18
+    mobx-graphlink: 0.0.19
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0

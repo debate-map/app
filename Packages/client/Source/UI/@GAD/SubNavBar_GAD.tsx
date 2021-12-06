@@ -34,13 +34,11 @@ export class SubNavBarButton_GAD extends BaseComponent<{page: string, subpage: s
 		const currentSubpage = store.main[page].subpage || rootPageDefaultChilds[page];
 		const active = subpage == currentSubpage;
 
-		let actionFunc: ActionFunc<RootState>;
+		let actionFunc: ActionFunc<RootState>|n;
 		if (!active) {
 			actionFunc = s=>s.main[page].subpage = subpage;
 		} else if (actionFuncIfAlreadyActive) {
 			actionFunc = actionFuncIfAlreadyActive;
-		} else {
-			Assert(false);
 		}
 
 		const style = {

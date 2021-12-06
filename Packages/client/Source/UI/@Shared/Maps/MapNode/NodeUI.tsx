@@ -233,19 +233,19 @@ export class NodeUI extends BaseComponentPlus(
 					childBoxInfos={([
 						!!nodeChildHolderBox_truth && {
 							offset: lastChildBoxOffsets?.["truth"],
-							color: GetNodeColor({type: "claim"} as any, "raw"),
+							color: GetNodeColor({type: "claim"} as any, "raw", false),
 						},
 						!!nodeChildHolderBox_relevance && {
 							offset: lastChildBoxOffsets?.["relevance"],
-							color: GetNodeColor({type: "claim"} as any, "raw"),
+							color: GetNodeColor({type: "claim"} as any, "raw", false),
 						},
 						/*!!nodeChildHolderBox_truth && {
 							offset: lastChildBoxOffsets?.["neutrality"],
-							color: GetNodeColor({type: "claim"} as any, "raw"),
+							color: GetNodeColor({type: "claim"} as any, "raw", false),
 						},*/
 						!!nodeChildHolderBox_truth && {
 							offset: lastChildBoxOffsets?.["freeform"],
-							color: GetNodeColor({type: MapNodeType.category} as any, "raw"),
+							color: GetNodeColor({type: MapNodeType.category} as any, "raw", false),
 						},
 					] as ChildBoxInfo[]).filter(a=>a)}/>
 			);

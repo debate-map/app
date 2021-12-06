@@ -1,9 +1,11 @@
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 import {GetNodeChildrenL3, GetNodeRevisions, MapNodeL3, MapNodeRevision, MapNodeType, Polarity} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert} from "../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
+import {GADDemo} from "UI/@GAD/GAD";
+import {HSLA} from "web-vcore";
+import {Assert} from "js-vextensions";
 
-export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {
+export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background", allowDemoOverride = true): chroma.Color {
 	let result: chroma.Color;
 	if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)");
 	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)");
@@ -18,6 +20,11 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 
 	if (type == "background") {
 		result = GetNodeBackgroundColorFromRawColor(result);
+	}
+
+	if (allowDemoOverride && GADDemo) {
+		//result = chroma.mix(result, HSLA(0, 0, 1), .7); // mix result with white (70% white, 30% normal color)
+		result = chroma(HSLA(0, 0, 1));
 	}
 
 	return result;

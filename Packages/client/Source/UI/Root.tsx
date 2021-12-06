@@ -7,13 +7,13 @@ import * as ReactColor from "react-color";
 import {store} from "Store";
 import {GetUserBackground} from "Store/db_ext/users/$user";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, RunInAction} from "web-vcore";
+import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, PageContainer, RunInAction} from "web-vcore";
 import {Assert, Clone, FromJSON, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
-import {Button, ColorPickerBox, Column} from "web-vcore/nm/react-vcomponents.js";
+import {Button, ColorPickerBox, Column, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuLayer} from "web-vcore/nm/react-vmenu.js";
 import {MessageBoxLayer, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -117,7 +117,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 
 		return (
 			<DragDropContext_Beautiful onDragEnd={this.OnDragEnd}>
-				<RootUI/>
+				<RootUI />
 			</DragDropContext_Beautiful>
 		);
 	}
@@ -169,15 +169,15 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 						if (argumentWrapperID) {
 							RunInAction("OnDragEnd.Copy.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
-					}}/>
+					}} />
 					<Button ml={5} text="Move" enabled={moveCommand.Validate_Safe() == null} title={moveCommand.ValidateErrorStr} onClick={async()=>{
 						controller.Close();
 						const {argumentWrapperID} = await moveCommand.RunOnServer();
 						if (argumentWrapperID) {
 							RunInAction("OnDragEnd.Move.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
-					}}/>
-					<Button ml={5} text="Cancel" onClick={()=>controller.Close()}/>
+					}} />
+					<Button ml={5} text="Cancel" onClick={()=>controller.Close()} />
 				</>,
 			});
 		} /*else if (targetDroppableInfo.type == "TimelineStepList") {
@@ -238,7 +238,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		}
 
 		if (GADDemo) {
-			const linkEl = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet"/>;
+			const linkEl = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet" />;
 			ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head
 
 			//const linkEl2 = <link rel="stylesheet" media="screen" href="//fontlibrary.org/face/bebasneueregular" type="text/css"/>;
@@ -246,7 +246,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue-Regular.css" type="text/css"/>;
 			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue.css" type="text/css"/>;
 			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue-Thin.css" type="text/css"/>;
-			const linkEl2 = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet"/>;
+			const linkEl2 = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />;
 			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head
 		}
 	}
@@ -270,7 +270,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 		const firstExtantBackgroundURL_1920Plus = background.url_1920 || background.url_3840 || background.url_max;
 		const firstExtantBackgroundURL_3840Plus = background.url_3840 || background.url_max;
 		const firstExtantBackgroundURL_max = background.url_max;
-		
+
 		return (
 			<Column className='background'/* 'unselectable' */ style={{height: "100%"}}>
 				{/* <div className='background' style={{
@@ -279,42 +279,39 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 				<style>{
 					`
 					.background {
-						${
-							firstExtantBackgroundURL_1920Plus?.startsWith("background: ")
-							? `background: ${firstExtantBackgroundURL_1920Plus.replace("background: ", "")}`
-							: `background-color: ${background.color};
+						${firstExtantBackgroundURL_1920Plus?.startsWith("background: ")
+						? `background: ${firstExtantBackgroundURL_1920Plus.replace("background: ", "")}`
+						: `background-color: ${background.color};
 								background-image: url(${firstExtantBackgroundURL_1920Plus});
 								background-position: ${background.position || "center center"};
 								background-size: ${background.size || "cover"};`
-						}
+					}
 					}
 					@media (min-width: 1921px) {
 						.background {
-							${
-								firstExtantBackgroundURL_3840Plus?.startsWith("background: ")
-								? `background: ${firstExtantBackgroundURL_3840Plus.replace("background: ", "")}`
-								: `background-image: url(${firstExtantBackgroundURL_3840Plus});`
-							}
+							${firstExtantBackgroundURL_3840Plus?.startsWith("background: ")
+						? `background: ${firstExtantBackgroundURL_3840Plus.replace("background: ", "")}`
+						: `background-image: url(${firstExtantBackgroundURL_3840Plus});`
+					}
 						}
 					}
 					@media (min-width: 3841px) {
 						.background {
-							${
-								firstExtantBackgroundURL_max?.startsWith("background: ")
-								? `background: ${firstExtantBackgroundURL_max.replace("background: ", "")}`
-								: `background-image: url(${firstExtantBackgroundURL_max});`
-							}
+							${firstExtantBackgroundURL_max?.startsWith("background: ")
+						? `background: ${firstExtantBackgroundURL_max.replace("background: ", "")}`
+						: `background-image: url(${firstExtantBackgroundURL_max});`
+					}
 						}
 					}
 					`
 				}</style>
 				<ErrorBoundary>
-					<AddressBarWrapper/>
-					<OverlayUI/>
+					<AddressBarWrapper />
+					<OverlayUI />
 				</ErrorBoundary>
 				<ErrorBoundary>
-					{!GADDemo && <NavBar/>}
-					{GADDemo && <NavBar_GAD/>}
+					{!GADDemo && <NavBar />}
+					{GADDemo && <NavBar_GAD />}
 				</ErrorBoundary>
 				{/* <InfoButton_TooltipWrapper/> */}
 				<ErrorBoundary
@@ -325,19 +322,23 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						<Route path='/chat'><ChatUI/></Route>
 						<Route path='/reputation'><ReputationUI/></Route>*/}
 
-						{page == "database" && <DatabaseUI/>}
-						{page == "forum" && <ForumUI/>}
-						{page == "feedback" && <FeedbackUI/>}
-						{page == "more" && <MoreUI/>}
-						{page == "home" && !GADDemo && <HomeUI/>}
-						{page == "home" && GADDemo && <HomeUI_GAD/>}
-						{page == "social" && <SocialUI/>}
-						{page == "debates" && <DebatesUI/>}
-						{page == "global" && <GlobalUI/>}
+						{/* special, for login */}
+						{page == "login-succeeded" && <PostLoginAttemptUI success={true}/>}
+						{page == "login-failed" && <PostLoginAttemptUI success={false}/>}
+
+						{page == "database" && <DatabaseUI />}
+						{page == "forum" && <ForumUI />}
+						{page == "feedback" && <FeedbackUI />}
+						{page == "more" && <MoreUI />}
+						{page == "home" && !GADDemo && <HomeUI />}
+						{page == "home" && GADDemo && <HomeUI_GAD />}
+						{page == "social" && <SocialUI />}
+						{page == "debates" && <DebatesUI />}
+						{page == "global" && <GlobalUI />}
 
 						{/*<Route path='/search'><SearchUI/></Route>
 						<Route path='/guide'><GuideUI/></Route>*/}
-						{page == "profile" && <UserProfileUI user={Me()}/>}
+						{page == "profile" && <UserProfileUI user={Me()} />}
 					</main>
 				</ErrorBoundary>
 			</Column>
@@ -349,10 +350,44 @@ class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
-				<NodeDetailBoxesLayer/>
-				<MessageBoxLayer/>
-				<VMenuLayer/>
+				<NodeDetailBoxesLayer />
+				<MessageBoxLayer />
+				<VMenuLayer />
 			</div>
+		);
+	}
+}
+
+function GetOpenerWindow(): Window | null {
+	if (window.opener != null && window.opener.constructor?.name == "Window") {
+		return window.opener;
+	}
+	return null;
+}
+
+//@Observer
+class PostLoginAttemptUI extends BaseComponent<{success: boolean}, {}> {
+	ComponentDidMount() {
+		const {success} = this.props;
+		if (!success) return; // if login failed, do nothing (since login state has not changed)
+
+		//window.opener.open(url, '_self');
+		const opener = GetOpenerWindow();
+		if (opener) {
+			opener.location.reload();
+			opener.focus();
+			window.close();
+		}
+	}
+
+	render() {
+		const {success} = this.props;
+		const opener = GetOpenerWindow();
+		return (
+			<PageContainer>
+				<Text>Login {success ? "succeeded" : "failed"}.</Text>
+				{success && <Text>{opener ? "Reloading main window." : "However, main window was unable to be reloaded; you can close this popup, then reload it manually."}</Text>}
+			</PageContainer>
 		);
 	}
 }

@@ -9,6 +9,10 @@ import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
+	// special, for login
+	"login-succeeded": new Page(),
+	"login-failed": new Page(),
+
 	//stream, chat, reputation
 	database: new Page({}, {
 		users: new Page(),

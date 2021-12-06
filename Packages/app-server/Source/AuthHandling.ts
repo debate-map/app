@@ -226,6 +226,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		},
 		passport.authenticate("google", {
 			scope: ["profile", "email"],
+			//display: "popup",
 		}));
 	//includeUserIDAsResponseCookie);
 	app.get("/auth/google/callback",
@@ -239,7 +240,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 			console.log("User_RM:", req.user);
 			// if success
 			if (req.user) {
-				res.redirect(GetWebServerURL("/", req?.get("Referrer")));
+				res.redirect(GetWebServerURL("/login-succeeded", req?.get("Referrer")));
 			} else {
 				res.redirect(GetWebServerURL("/login-failed", req?.get("Referrer")));
 			}
@@ -253,7 +254,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 			console.log("User_LH:", req.user);
 			// if success
 			if (req.user) {
-				res.redirect(GetWebServerURL("/", req?.get("Referrer"), true));
+				res.redirect(GetWebServerURL("/login-succeeded", req?.get("Referrer"), true));
 			} else {
 				res.redirect(GetWebServerURL("/login-failed", req?.get("Referrer"), true));
 			}

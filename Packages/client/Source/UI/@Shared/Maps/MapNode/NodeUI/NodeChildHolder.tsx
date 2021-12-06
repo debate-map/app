@@ -176,7 +176,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			childBoxInfos.push({
 				node,
 				offset,
-				color: node ? GetNodeColor(node, "raw") : chroma("rgba(0,0,0,0)"),
+				color: node ? GetNodeColor(node, "raw", false) : chroma("rgba(0,0,0,0)"),
 			});
 		}
 

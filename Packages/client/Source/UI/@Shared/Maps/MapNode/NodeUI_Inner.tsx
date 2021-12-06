@@ -62,8 +62,6 @@ export type NodeUI_Inner_Props = {
 	};
 }) */
 
-
-
 // @ExpensiveComponent
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
@@ -120,12 +118,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			local_nodeView.VSet(updates);
 			this.Update();
 		};
-		
-		let sinceTime = GetTimeFromWhichToShowChangedNodes(map?.id);
+
+		const sinceTime = GetTimeFromWhichToShowChangedNodes(map?.id);
 		/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 		let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
 		let changeType = ownNodeChanged ? GetNodeChangeType(node, sinceTime) : null;*/
-		let changeType = GetNodeChangeType(node, sinceTime);
+		const changeType = GetNodeChangeType(node, sinceTime);
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
@@ -295,7 +293,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			}
 			const onPanelButtonClick = (panel: string, source: "toolbar" | "left-panel")=>{
 				//this.SetState({openPanelSource: source});
-				
+
 				/*if (useLocalPanelState) {
 					UpdateLocalNodeView({openPanel: undefined});
 					this.SetState({hoverPanel: null});
@@ -377,10 +375,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
 							ref={c=>this.titlePanel = c}
 							//onClick={onTextHolderClick} // not needed; TitlePanel already handles double-clicks
-							style={E(
-								{padding: GetPaddingForNode(node/*, isSubnode*/)},
-								GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/}
-							)}/>
+							style={{padding: GetPaddingForNode(node/*, isSubnode*/)}}/>
 						{subPanelShow &&
 						<SubPanel node={node} /*onClick={onTextCompClick}*//>}
 						<NodeToolbar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
@@ -399,7 +394,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					</>}
 					{...E(
 						{backgroundFillPercent, backgroundColor, markerPercent},
-						GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as Color},
+						GADDemo && {backgroundFillPercent: 100},
 					)}
 					toggleExpanded={toggleExpanded}
 					afterChildren={<>

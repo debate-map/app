@@ -65,7 +65,7 @@ type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style
 export class AddArgumentButton extends BaseComponent<Props> {
 	render() {
 		const {map, node, path, polarity, style} = this.props;
-		const backgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: polarity} as MapNodeL3);
+		const backgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: polarity} as MapNodeL3, "background", false);
 		const parent = GetParentNodeL3(path);
 
 		const polarity_short = GetPolarityShortStr(polarity);

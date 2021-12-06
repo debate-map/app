@@ -16,7 +16,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 			return (
 				<Column style={{padding: 10, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
-					<SignInPanel/>
+					<SignInPanel />
 				</Column>
 			);
 		}
@@ -34,11 +34,11 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						s.main.page = "profile";
 						s.main.topRightOpenPanel = null;
 					}}>
-						<Button text="Edit profile" style={{width: 100}}/>
+						<Button text="Edit profile" style={{width: 100}} />
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 100}} onClick={()=>{
 						window.location.href = GetAppServerURL("/signOut");
-					}}/>
+					}} />
 				</Row>
 			</Column>
 		);
@@ -52,7 +52,7 @@ export function ShowSignInPopup() {
 			return (
 				<div>
 					<div>Takes under 30 seconds.</div>
-					<SignInPanel style={{marginTop: 5}} onSignIn={()=>boxController.Close()}/>
+					<SignInPanel style={{marginTop: 5}} onSignIn={()=>boxController.Close()} />
 				</div>
 			);
 		},
@@ -60,7 +60,7 @@ export function ShowSignInPopup() {
 }
 
 @SimpleShouldUpdate
-export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}> {
+export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, {}> {
 	render() {
 		const {style, onSignIn} = this.props;
 		return (
@@ -90,12 +90,25 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 					g.google.accounts.id.renderButton(c, options, ()=>{
 						// rather than using client-side retrieval of access-token, use server-side retrieval (it's safer)
 						//window.location.href = `${window.location.origin}/auth/google`;
-						window.location.href = GetAppServerURL("/auth/google");
+						//window.location.href = GetAppServerURL("/auth/google");
 						// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
 						// todo: make sure the access-token data that server retrieves is never made accessible to frontend code (eg. use cookies, and set to http-only)
 						// todo: make this sign-in flow not require our main page to redirect (instead use a new-tab or popup-window)
+
+						const url = GetAppServerURL("/auth/google");
+						const name = "google_login";
+
+						//const specs = "width=500,height=500";
+						//var width = 500, height = 370;
+						var width = 470, height = 580;
+						var w = window.outerWidth - width, h = window.outerHeight - height;
+						var left = Math.round(window.screenX + (w / 2));
+						var top = Math.round(window.screenY + (h / 2.5));
+						const specs = `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0`;
+
+						window.open(url, name, specs);
 					});
-				}}/>
+				}} />
 				{/* <SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/> */}
@@ -121,8 +134,8 @@ export function EnsureGoogleIDAPIReady() {
 	/*const googleClientID_randomPart = googleClientID?.replace(".apps.googleusercontent.com", "");
 	console.log("GClientID:", `${googleClientID_randomPart?.slice(0, 2)}...${googleClientID_randomPart?.slice(-2)}`);*/
 	g.google.accounts.id.initialize({
-      client_id: googleClientID,
-      callback: googleID_handleCredentialResponse,
+		client_id: googleClientID,
+		callback: googleID_handleCredentialResponse,
 	});
 	g.google.accounts.id._initCalled = true;
 }
