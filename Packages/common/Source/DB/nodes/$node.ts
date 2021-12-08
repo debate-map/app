@@ -379,7 +379,11 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 
 		if (form) {
 			if (form == ClaimForm.negation) return phrasing.text_negation || missingTitleStrings[1];
-			if (form == ClaimForm.question) return phrasing.text_question || missingTitleStrings[2];
+			if (form == ClaimForm.question) {
+				//return phrasing.text_question || missingTitleStrings[2];
+				// for now at least, allow fallback to the base title
+				return phrasing.text_question || phrasing.text_base || missingTitleStrings[2];
+			}
 		}
 	}
 	return phrasing.text_base || missingTitleStrings[0];

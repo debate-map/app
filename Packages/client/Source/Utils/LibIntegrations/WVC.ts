@@ -68,7 +68,7 @@ export function InitWVC() {
 		PostHandleError: (error, errorStr)=>{
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
-				RunInAction("VWAF.PostHandleError", ()=>AddNotificationMessage(errorStr));
+				RunInAction("WVC.PostHandleError", ()=>AddNotificationMessage(errorStr));
 			});
 		},
 

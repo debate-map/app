@@ -23,7 +23,10 @@ export class AddChildHelper {
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
 
 		//const defaultPolicyID = GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
-		const userHidden = GetUserHidden.NN(MeID());
+		const userHidden = GetUserHidden(MeID());
+		if (userHidden == null) {
+			throw new Error("Child-adding helper could not query user's default access-policy. (The websocket connection to the server was probably lost; refreshing the page should resolve it.)");
+		}
 		this.node = new MapNode({
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,

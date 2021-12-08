@@ -110,14 +110,14 @@ The detailed version of the argument will be embodied in its premises/child-clai
 	}
 }
 
-function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: NodeChildLink|n) {
+function WillNodePreferQuestionTitleHere(node: MapNodeL2, linkData: NodeChildLink|n) {
 	return node.type == MapNodeType.claim && !node.current.quote && linkData && linkData.form == ClaimForm.question;
 }
 
 class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	render() {
 		const {forNew, node, splitAt, Change} = this.props;
-		const willUseQuestionTitleHere = WillNodeUseQuestionTitleHere(node, node.link);
+		const willPreferQuestionTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
 		return (
 			<>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
@@ -130,9 +130,9 @@ class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 						value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
 					<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
 				</RowLR>
-				{willUseQuestionTitleHere && forNew &&
+				{willPreferQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the (yes or no) question title.</Pre>
+						<Pre allowWrap={true}>At this location (under a category node), this node will be displayed with its (yes or no) question title, if specified.</Pre>
 					</Row>}
 			</>
 		);
@@ -146,9 +146,9 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 		if (titleKey == "text_base") {
 			//const hasOtherTitles = newDataAsL2.type == MapNodeType.claim && newDataAsL2 == AttachmentType.none;
 			const hasOtherTitlesEntered = newData.text_negation || newData.text_question;
-			const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(node, node.link);
+			const willPreferYesNoTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
 			extraProps = {
-				required: !hasOtherTitlesEntered && !willUseYesNoTitleHere,
+				required: !hasOtherTitlesEntered && !willPreferYesNoTitleHere,
 				ref: this.props.innerRef, // if supplied
 			};
 		}
