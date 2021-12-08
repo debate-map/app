@@ -1,9 +1,9 @@
 import {store} from "Store";
+import {SubscriptionClient} from "subscriptions-transport-ws";
 import {RunInAction} from "web-vcore";
 import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
-import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
+import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {graph} from "./MobXGraphlink";
 
@@ -23,7 +23,7 @@ export function GetAppServerURL(subpath: string) {
 
 	if (location.host == "localhost:3005") return `http://localhost:3105/${subpath.slice(1)}`;
 	if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
-	
+
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
 	if (location.host.endsWith(":31005")) return `${location.protocol}//${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
 
@@ -46,12 +46,35 @@ export function InitApollo() {
 			credentials: "include",
 		},
 	});
-	wsLink = new WebSocketLink({
-		uri: GRAPHQL_URL.replace(/^http/, "ws"),
-		options: {
-			reconnect: true,
-		},
+
+	const wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
+		reconnect: true,
 	});
+	// could also detect general web dc/rc (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events), but doesn't seem necessary
+	wsClient.onConnected(()=>{
+		console.log("WebSocket connected.");
+		RunInAction("wsClient.onConnected", ()=>store.main.webSocketConnected = true);
+	});
+	wsClient.onReconnected(()=>{
+		console.log("WebSocket reconnected.");
+		RunInAction("wsClient.onReconnected", ()=>store.main.webSocketConnected = true);
+	});
+	wsClient.onReconnecting(()=>{
+		console.log("WebSocket reconnecting.");
+		//RunInAction("wsClient.onReconnecting", ()=>store.main.webSocketConnected = false);
+	});
+	wsClient.onDisconnected(()=>{
+		// only log the "disconnection" if it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
+		if (store.main.webSocketConnected) {
+			console.log("WebSocket disconnected.");
+		}
+		RunInAction("wsClient.onDisconnected", ()=>{
+			store.main.webSocketConnected = false;
+			store.main.webSocketLastDCTime = Date.now();
+		});
+	});
+	wsClient.onError(error=>console.error("WebSocket error:", error.message));
+	wsLink = new WebSocketLink(wsClient);
 
 	// using the ability to split links, you can send data to each link depending on what kind of operation is being sent
 	link = split(

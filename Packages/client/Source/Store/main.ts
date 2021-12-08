@@ -31,6 +31,9 @@ export class MainState {
 	// topLeftOpenPanel: string;
 	// topRightOpenPanel: string;
 	@O @ignore notificationMessages = [] as NotificationMessage[];
+	@O @ignore webSocketConnected = false;
+	//@O @ignore webSocketError = false;
+	@O @ignore webSocketLastDCTime: number;
 	@O @ignore shareBeingLoaded: string|n;
 
 	/*@O @ignore userID_apollo: string|n; // maybe rework

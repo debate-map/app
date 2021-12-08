@@ -82,7 +82,10 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, 
 				</div>*/}
 				<div ref={c=>{
 					if (!c) return;
-					if (g.google == null) WaitXThenRun(100, ()=>this.Update()); // wait until google-id api is loaded
+					if (g.google == null) {
+						WaitXThenRun(100, ()=>this.Update()); // wait until google-id api is loaded
+						return;
+					}
 					EnsureGoogleIDAPIReady();
 
 					const options: GsiButtonConfiguration = {};
@@ -130,6 +133,11 @@ type GsiButtonConfiguration = {
 }
 export const googleClientID = process.env.CLIENT_ID; // supplied by ./Scripts/Config.js
 export function EnsureGoogleIDAPIReady() {
+	/*if (g.google == null) {
+		console.error("Cannot initialize Google ID api, because its script has not been loaded.");
+		return;
+	}*/
+
 	if (g.google.accounts.id._initCalled) return;
 	/*const googleClientID_randomPart = googleClientID?.replace(".apps.googleusercontent.com", "");
 	console.log("GClientID:", `${googleClientID_randomPart?.slice(0, 2)}...${googleClientID_randomPart?.slice(-2)}`);*/

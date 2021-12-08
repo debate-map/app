@@ -24,11 +24,11 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 
 		//const mapAccessPolicy = GetAccessPolicy.NN(map.accessPolicy);
 		const accessPolicy = GetAccessPolicy.NN(node.accessPolicy);
-		let phrasingTypeOptions = GetEntries(MapNodePhrasingType, "ui");
+		const phrasingTypeOptions = GetEntries(MapNodePhrasingType, "ui");
 		// unless phrasing-adding is restricted to a hand-picked user-list, disallow "humor" type
-		if (!PermitCriteriaPermitsNoOne(accessPolicy.permissions.nodes.addPhrasing)) {
+		/*if (!PermitCriteriaPermitsNoOne(accessPolicy.permissions.nodes.addPhrasing)) {
 			phrasingTypeOptions = phrasingTypeOptions.filter(a=>a.value != MapNodePhrasingType.humor);
-		}
+		}*/
 
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
