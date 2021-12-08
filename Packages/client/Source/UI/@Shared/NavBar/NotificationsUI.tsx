@@ -2,7 +2,7 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {Observer, RunInAction} from "web-vcore";
+import {GetTimeSinceLoad, loadTime, Observer, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {NotificationMessage} from "Store/main/@NotificationMessage.js";
 import moment from "web-vcore/nm/moment";
@@ -26,7 +26,7 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 		return (
 			<ScrollView ref={c=>this.scrollView = c} className="NotificationScrollView" scrollVBarStyle={{width: 10}} style={{height: "100%"}} contentStyle={{willChange: "transform"}}>
 				<Column ct style={{maxWidth: "calc(100% - 10px)", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
-					{!store.main.webSocketConnected && store.main.webSocketLastDCTime != null &&
+					{!store.main.webSocketConnected && store.main.webSocketLastDCTime != null && GetTimeSinceLoad() > 10000 &&
 					<Div ml={10} mt={10} mb={10} style={{position: "relative", borderRadius: 5, cursor: "default", boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 						<div style={{display: "flex", background: "rgba(0,0,0,.7)", borderRadius: 5 /* cursor: "pointer" */}}>
 							<Div sel style={{position: "relative", padding: 5, fontSize: 14, background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}>

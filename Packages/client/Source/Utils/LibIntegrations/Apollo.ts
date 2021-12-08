@@ -54,18 +54,24 @@ export function InitApollo() {
 	wsClient.onConnected(()=>{
 		console.log("WebSocket connected.");
 		RunInAction("wsClient.onConnected", ()=>store.main.webSocketConnected = true);
+
+		// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data)
+		AuthenticateWebSocketConnection();
 	});
 	wsClient.onReconnected(()=>{
 		console.log("WebSocket reconnected.");
 		RunInAction("wsClient.onReconnected", ()=>store.main.webSocketConnected = true);
+
+		// whenever our web-socket reconnects, we have to authenticate the new websocket connection
+		AuthenticateWebSocketConnection();
 	});
 	wsClient.onReconnecting(()=>{
 		console.log("WebSocket reconnecting.");
 		//RunInAction("wsClient.onReconnecting", ()=>store.main.webSocketConnected = false);
 	});
 	wsClient.onDisconnected(()=>{
-		// only log the "disconnection" if it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
-		if (store.main.webSocketConnected) {
+		// only log the "disconnection" if this is the first one, or we know it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
+		if (store.main.webSocketLastDCTime == null || store.main.webSocketConnected) {
 			console.log("WebSocket disconnected.");
 		}
 		RunInAction("wsClient.onDisconnected", ()=>{
@@ -125,59 +131,57 @@ export function InitApollo() {
 			},
 		}),
 	});
+}
 
-	// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data); we do this using the hack below
-	(async()=>{
-		const fetchResult = await apolloClient.mutate({
-			mutation: gql`
-				mutation _GetConnectionID {
-					_GetConnectionID {
-						id
-					}
+async function AuthenticateWebSocketConnection() {
+	const fetchResult = await apolloClient.mutate({
+		mutation: gql`
+			mutation _GetConnectionID {
+				_GetConnectionID {
+					id
 				}
-			`,
-			//variables: this.payload,
-		});
-		const result = fetchResult.data["_GetConnectionID"];
-		const connectionID = result.id;
-		console.log("Got connection id:", connectionID);
-
-		// associate connection-id with websocket-connection
-		const fetchResult2_subscription = await apolloClient.subscribe({
-			query: gql`
-				subscription _PassConnectionID($connectionID: String) {
-					_PassConnectionID(connectionID: $connectionID) {
-						userID
-					}
-				}
-			`,
-			variables: {connectionID},
-		});
-		const fetchResult2 = await new Promise<FetchResult<any>>(resolve=>{
-			const subscription = fetchResult2_subscription.subscribe(data=>{
-				subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
-				resolve(data);
-			});
-		});
-		const result2 = fetchResult2.data["_PassConnectionID"];
-		const userID = result2.userID;
-		console.log("After passing connection id, got user id:", userID);
-
-		//apolloSignInPromise_resolve({userID});
-		RunInAction("ApolloSignInDone", ()=>{
-			/*store.main.userID_apollo = userID;
-			store.main.userID_apollo_ready = true;*/
-			// rather than getting user-id from cookie, get it from the server's websocket-helper response
-			if (graph.userInfo == null) {
-				graph.SetUserInfo({
-					//id: store.main.userID_apollo!,
-					id: userID,
-				});
 			}
-		});
-	})();
+		`,
+		//variables: this.payload,
+	});
+	const result = fetchResult.data["_GetConnectionID"];
+	const connectionID = result.id;
+	console.log("Got connection id:", connectionID);
 
-	//return {userID};
+	// associate connection-id with websocket-connection
+	const fetchResult2_subscription = await apolloClient.subscribe({
+		query: gql`
+			subscription _PassConnectionID($connectionID: String) {
+				_PassConnectionID(connectionID: $connectionID) {
+					userID
+				}
+			}
+		`,
+		variables: {connectionID},
+	});
+	const fetchResult2 = await new Promise<FetchResult<any>>(resolve=>{
+		const subscription = fetchResult2_subscription.subscribe(data=>{
+			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+			resolve(data);
+		});
+	});
+	const result2 = fetchResult2.data["_PassConnectionID"];
+	const userID = result2.userID;
+	console.log("After passing connection id, got user id:", userID);
+
+	//apolloSignInPromise_resolve({userID});
+	RunInAction("ApolloSignInDone", ()=>{
+		/*store.main.userID_apollo = userID;
+		store.main.userID_apollo_ready = true;*/
+
+		// rather than getting user-id from cookie, get it from the server's websocket-helper response
+		// (and supply the user-data to mobx-graphlink every time, because this is needed to clear out any non-authenticated data/responses it had previously cached)
+		//if (graph.userInfo == null) {
+		graph.SetUserInfo({
+			//id: store.main.userID_apollo!,
+			id: userID,
+		});
+	});
 }
 
 /*let apolloSignInPromise_resolve;
