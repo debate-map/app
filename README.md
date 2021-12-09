@@ -577,8 +577,8 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
 </details>
 
-<!----><a name="pg-dumps"></a>
-<details><summary><b>[pg-dumps] Basic postgres backup/restore using pg_dump (logical, local-storage focused)</b></summary>
+<!----><a name="pg-dump"></a>
+<details><summary><b>[pg-dump] Basic backups using pg_dump (type: logical, focus: local-storage)</b></summary>
 
 To create a backup:
 * 1\) Option 1, using basic script:
@@ -593,8 +593,8 @@ To restore a backup:
 
 </details>
 
-<!----><a name="pg-backup-info"></a>
-<details><summary><b>[pg-backup-info] Rich postgres backup/restore using PGBackRest ("physical", remote-storage focused), general info</b></summary>
+<!----><a name="pgbackrest"></a>
+<details><summary><b>[pgbackrest] Rich backups using PGBackRest (type: physical, focus: remote-storage)</b></summary>
 
 General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
@@ -631,8 +631,8 @@ To manually trigger the creation of a full backup:
 
 </details>
 
-<!----><a name="pg-backup-restore"></a>
-<details><summary><b>[pg-backup-restore] Restore PGBackRest backup</b></summary>
+<!----><a name="pgbackrest-restore"></a>
+<details><summary><b>[pgbackrest-restore] Restoring from PGBackrest backups</b></summary>
 
 * 1\) Find the point in time that you want to restore the database to. Viewing the list of base-backups in the Google Cloud UI (using `npm start backend.viewDBBackups`) can help with this, as a reference point (eg. if you made a backup just before a set of changes you now want to revert).
 * 2\) Prepare the postgres-operator to restore the backup, into either a new or the current postgres instance/pod-set:
