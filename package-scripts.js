@@ -171,6 +171,21 @@ Object.assign(scripts, {
 			return `wsl ${pathToKillScript_wsl} ${commandArgs.join(" ")}`;
 		}),
 
+		// dumps (ie. pg_dump backups)
+		makeDBDump: Dynamic(()=>{
+			/*const part1 = `Get-Date -date (Get-Date).ToUniversalTime() -uformat "%Y-%m-%dT%H-%M-%SZ"`;
+			const part2 = `kubectl exec -n postgres-operator debate-map-instance1-hfj5-0 -- bash -c "pg_dump -U postgres debate-map" > ../Others/@Backups/DBDumps/%f.sql`;
+			return `for /f "tokens=*" %f in ('${part1}') do @(${part2})`;*/
+
+			const dumpCmd = `kubectl exec -n postgres-operator debate-map-instance1-hfj5-0 -- bash -c "pg_dump -U postgres debate-map"`;
+			// this also works, but it's ugly -- and besides, nodejs is better as a "shell language" than cmd or powershell anyway
+			// (basically, whenever something's too complicated to use cross-platform "basic shell" syntax: just use nodejs)
+			//return `powershell -command $a = (${dumpCmd}) -join """\`n"""; new-item -force -type file -path ../Others/@Backups/DBDumps/test2.sql -value $a`;
+
+			const dbDumpStr = execSync(dumpCmd).toString().trim();
+			fs.writeFileSync(`../Others/@Backups/DBDumps/${new Date().toISOString().replace(/:/g, "-")}.sql`, dbDumpStr);
+		}),
+
 		// backups
 		viewDBBackups: Dynamic(()=>{
 			const devEnv = commandArgs[0] == "dev" || GetKubectlContext() == "local";
