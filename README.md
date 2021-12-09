@@ -613,7 +613,7 @@ To restore a backup:
 </details>
 
 <!----><a name="pgbackrest"></a>
-<details><summary><b>[pgbackrest] Rich backups using PGBackRest (type: physical, focus: remote-storage)</b></summary>
+<details><summary><b>[pgbackrest] Rich backups using pgBackRest (type: physical, focus: remote-storage)</b></summary>
 
 General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
@@ -637,7 +637,7 @@ To manually trigger the creation of a full backup:
 </details>
 
 <!----><a name="pgbackrest-restore"></a>
-<details><summary><b>[pgbackrest-restore] Restoring from PGBackrest backups</b></summary>
+<details><summary><b>[pgbackrest-restore] Restoring from pgBackRest backups</b></summary>
 
 * 1\) Find the point in time that you want to restore the database to. Viewing the list of base-backups in the Google Cloud UI (using `npm start backend.viewDBBackups`) can help with this, as a reference point (eg. if you made a backup just before a set of changes you now want to revert).
 * 2\) Prepare the postgres-operator to restore the backup, into either a new or the current postgres instance/pod-set:
@@ -666,7 +666,7 @@ To manually trigger the creation of a full backup:
 </details>
 
 <!----><a name="pgbackrest-troubleshooting"></a>
-<details><summary><b>[pgbackrest-troubleshooting] How to resolve various pgbackrest issues</b></summary>
+<details><summary><b>[pgbackrest-troubleshooting] How to resolve various pgBackRest issues</b></summary>
 
 * 1\) If you ever get the error `command terminated with exit code 28: ERROR: [028]: backup and archive info files exist but do not match the database HINT: is this the correct stanza? HINT: did an error occur during stanza-upgrade?`, do the following:
 	* 1.1\) First reference [this comment](https://github.com/pgbackrest/pgbackrest/issues/1066#issuecomment-907802025) for some general info. (in retrospect, I think my observations there were only partly true, so take with a grain of salt)
