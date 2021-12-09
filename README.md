@@ -29,10 +29,9 @@ For more information, visit the website at: <https://debatemap.app>
 
 # Guide modules
 
-> The below is for the "active guide modules" that are likely to be used. Ones unlikely to be used are placed in the [ExtraGuideModules.md](https://github.com/debate-map/app/tree/master/Docs/ExtraGuideModules.md) file.
->
-> * Tip: You can link someone to a specific guide-module by adding `#MODULE_NAME` to the end of the url. (eg: `https://github.com/debate-map/app/#setup-general`)
-> * Tip: If you want to search the text of collapsed guide-modules, you can either view the [readme's source text](https://github.com/debate-map/app/blob/master/README.md?plain=1), or open the dev-tools "Elements" tab and use its ctrl+f search function.
+* Note: The section below is for the "active guide modules" that are likely to be used. Ones unlikely to be used are placed in the [ExtraGuideModules.md](https://github.com/debate-map/app/tree/master/Docs/ExtraGuideModules.md) file.
+* Tip: You can link someone to a specific guide-module by adding `#MODULE_NAME` to the end of the url. (eg: `https://github.com/debate-map/app#setup-general`)
+* Tip: If you want to search the text of collapsed guide-modules, you can either view the [readme's source text](https://github.com/debate-map/app/blob/master/README.md?plain=1), or open the dev-tools "Elements" tab and use its ctrl+f search function.
 
 
 
