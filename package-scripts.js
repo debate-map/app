@@ -210,7 +210,7 @@ Object.assign(scripts, {
 			const backupLabel = commandArgs[0]; // example: "20200102-012030F"
 			if (backupLabel == null) {
 				throw new Error(`
-					You must specify the label for the backup you want to restore. (ie. the folder name under "/db-backups/pgbackrest/backup/db" in the cloud-storage bucket)
+					You must specify the label for the backup you want to restore. (ie. the folder name under "/db-backups-pgbackrest/backup/db" in the cloud-storage bucket)
 					Example: npm start "backend.restoreDBBackup 20200102-012030F" (restores the backup created at 1:20:30am on January 2nd, 2020)
 				`.trim());
 			}

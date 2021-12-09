@@ -593,13 +593,26 @@ To restore a backup:
 
 </details>
 
-<!----><a name="pg-backups"></a>
-<details><summary><b>[pg-backups] Rich postgres backup/restore using PGBackRest ("physical", remote-storage focused)</b></summary>
+<!----><a name="pg-backup-info"></a>
+<details><summary><b>[pg-backup-info] Rich postgres backup/restore using PGBackRest ("physical", remote-storage focused), general info</b></summary>
 
 General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
 * Schedule: Once a week, a "full" backup is created; once a day, a "differential" backup is created.
-* If you ever get the error `command terminated with exit code 28: ERROR: [028]: backup and archive info files exist but do not match the database HINT: is this the correct stanza? HINT: did an error occur during stanza-upgrade?`, see [here](https://github.com/pgbackrest/pgbackrest/issues/1066#issuecomment-907802025) for an explanation/solution.
+
+If you ever get the error `command terminated with exit code 28: ERROR: [028]: backup and archive info files exist but do not match the database HINT: is this the correct stanza? HINT: did an error occur during stanza-upgrade?`, do the following:
+* 1\) First reference [this comment](https://github.com/pgbackrest/pgbackrest/issues/1066#issuecomment-907802025) for some general info. (in retrospect, I think my observations there were only partly true, so take with a grain of salt)
+* 2\) Open a shell in the `debate-map-instance1-XXX` pod (using Lens or `npm start ssh.db`).
+* 3\) Run `pgbackrest info`. This should tell you which repos are having backup issues. Note that if repo1 (in-k8s backup) is having an issue, this appears to block backups to repo2 (cloud storage backup), so you'll likely have to debug/resolve repo1 issues first before making progress on repo2's.
+* 4\) Run `pgbackrest check --stanza=db` (note the stanza name: `db`). This should give the same error message that was encountered in the general pgo logs (the `[028] backup and archive files exist but do not match the database` error).
+* 5\) For actually resolving the issue:
+	* 5.1\) First, think about what caused the backups to start failing. The reasons so far have been due to, eg. swapping out my k8s node for another one (4gb variant to 8gb). If that's the case, the changes needed to get the backups working again are probably minimal.
+	* 5.2\) I don't know exactly what got the backups working again, but here the main actions I took, and in roughly the order I attempted (with something in there apparently resolving the issue):
+		* 5.2.1\) Changing the `repo2-path` field in `postgres.yaml` from `/db-backups-pgbackrest` to `/db-backups-pgbackrest-X` for a while (with various actions, including the below, then taken), then changing it back. (with tilt-up running during this time)
+		* 5.2.2\) Changing the `shutdown` field in `postgres.yaml` to `true` for a while; once I saw the database pods shut-down (other than `pgo` and the metrics-collectors), I commented the field again, causing the db pods to restart.
+		* 5.2.3\) Attempting to run a manual backup, by running: `npm start backend.makeDBBackup`. (The pods attempting to make this backup did not start right away, iirc. When it did start [while messing with some of the steps below], it hit various errors [50, 82, then 62]. Eventually it succeeded, after the `pgbackrest start` command I believe -- at which point the regular cron-jobs showed up in Lens, and from those a full-backup job was created and completed.)
+		* 5.2.4\) In the `debate-map-instance1-XXX` pod, run: `pgbackrest stanza-upgrade --stanza=db`. (failed with `ERROR: [055]: unable to load info file '/db-backups-pgbackrest-2/archive/db/archive.info' or '/db-backups-pgbackrest-2/archive/db/archive.info.copy': [...]`, but maybe it kickstarted something)
+		* 5.2.5\) In the same pod, run `pgbackrest stop`, followed by `pgbackrest start` a few minutes later. (the `stop` command's effects didn't seem to complete when I tried it, so I ran `start` later to get things up and running again, after trying the other steps)
 
 Backup structure:
 * Backups in pgbackrest are split into two parts: base-backups (the `db-backups-pgbackrest/backup` cloud-folder), and wal-archives (the `db-backups-pgbackrest/archive` cloud-folder).
@@ -616,7 +629,11 @@ To manually trigger the creation of a full backup:
 		* 2.1.1\) Trigger a retry by running `npm start backend.makeDBBackup_retry` PGO will then notice the unfinished job is missing and recreate it, which should hopefully work this time.
 		* 2.1.2\) Or cancel the manual backup by running: `npm start backend.makeDBBackup_cancel`
 
-To restore a backup:
+</details>
+
+<!----><a name="pg-backup-restore"></a>
+<details><summary><b>[pg-backup-restore] Restore PGBackRest backup</b></summary>
+
 * 1\) Find the point in time that you want to restore the database to. Viewing the list of base-backups in the Google Cloud UI (using `npm start backend.viewDBBackups`) can help with this, as a reference point (eg. if you made a backup just before a set of changes you now want to revert).
 * 2\) Prepare the postgres-operator to restore the backup, into either a new or the current postgres instance/pod-set:
 	* 2.1\) Option 1, into a new postgres instance/pod-set that then gets promoted to master (PGO recommended way):
