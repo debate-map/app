@@ -171,7 +171,7 @@ Object.assign(scripts, {
 			return `wsl ${pathToKillScript_wsl} ${commandArgs.join(" ")}`;
 		}),
 
-		// dumps (ie. pg_dump backups)
+		// dumps (ie. pg_dump backups) [you can also use DBeaver to make a dump; see readme for details]
 		makeDBDump: Dynamic(()=>{
 			/*const part1 = `Get-Date -date (Get-Date).ToUniversalTime() -uformat "%Y-%m-%dT%H-%M-%SZ"`;
 			const part2 = `kubectl exec -n postgres-operator debate-map-instance1-hfj5-0 -- bash -c "pg_dump -U postgres debate-map" > ../Others/@Backups/DBDumps/%f.sql`;

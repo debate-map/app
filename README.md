@@ -577,8 +577,24 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
 </details>
 
+<!----><a name="pg-dumps"></a>
+<details><summary><b>[pg-dumps] Basic postgres backup/restore using pg_dump (logical, local-storage focused)</b></summary>
+
+To create a backup:
+* 1\) Option 1, using basic script:
+	* 1.1\) Run: `npm start backend.makeDBDump`
+	* 1.2\) A backup dump will be created at: `../Others/@Backups/DBDumps/XXX.sql`
+* 2\) Option 2, using DBeaver:
+	* 2.1\) Right-click DB in list. (this assumes you already are connected)
+	* 2.2\) Press Tools->Backup, select "app_public", press Next, set format to "Tar", and press Start.
+
+To restore a backup:
+* 1\) TODO
+
+</details>
+
 <!----><a name="pg-backups"></a>
-<details><summary><b>[pg-backups] Information on backups for your in-kubernetes database</b></summary>
+<details><summary><b>[pg-backups] Rich postgres backup/restore using PGBackRest ("physical", remote-storage focused)</b></summary>
 
 General notes:
 * Automatic backups are already set up, writing to the `debate-map-prod-uniform-private` bucket provisioned by Pulumi in the Google Cloud, at the path: `/db-backups-pgbackrest`.
