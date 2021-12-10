@@ -54,6 +54,7 @@ export class AddChildHelper {
 			});
 			this.subNode_revision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: title})});
 			this.subNode_link = new NodeChildLink({
+				group: ChildGroup.generic,
 				slot: 0,
 				form: ClaimForm.base,
 			});

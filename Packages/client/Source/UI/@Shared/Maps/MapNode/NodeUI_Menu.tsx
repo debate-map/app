@@ -8,7 +8,7 @@ import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildrenLayout, InvertChildrenLayout, MapNodeRevision, AddNodeRevision} from "dm_common";
-import {Observer, RunInAction} from "web-vcore";
+import {ES, Observer, RunInAction} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
@@ -75,7 +75,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 			return <>
 				{validChildTypes.map(childType=>{
 					const childTypeInfo = MapNodeType_Info.for[childType];
-					// let displayName = GetMapNodeTypeDisplayName(childType, node, form);
+					//let displayName = GetMapNodeTypeDisplayName(childType, node, form);
 					const polarities = childType == MapNodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
 					return polarities.map(polarity=>{
 						const displayName = GetMapNodeTypeDisplayName(childType, node, ClaimForm.base, polarity);
@@ -84,26 +84,36 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								onClick={e=>{
 									if (e.button != 0) return;
 									if (userID == null) return ShowSignInPopup();
-									ShowAddChildDialog(path, childType, polarity, userID, childGroup, mapID);
+									ShowAddChildDialog(path, childType, polarity, userID, childGroupForItems, mapID);
 								}}/>
 						);
 					});
 				})}
 			</>;
 		};
+		const addChildItems_structured_generic = GetAddChildItems(ChildGroup.generic);
 		const addChildItems_structured_truth = GetAddChildItems(ChildGroup.truth);
 		const addChildItems_structured_relevance = GetAddChildItems(ChildGroup.relevance);
 		const addChildItems_freeform = GetAddChildItems(ChildGroup.freeform);
-		const addChildGroups = [addChildItems_structured_truth, addChildItems_structured_relevance, addChildItems_freeform].filter(a=>a);
+		const addChildGroups = [addChildItems_structured_generic, addChildItems_structured_truth, addChildItems_structured_relevance, addChildItems_freeform].filter(a=>a);
 		const multipleAddChildGroups = addChildGroups.length > 1;
 
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
+		const headerStyle = ES(styles.vMenuItem, {opacity: 1});
 		return (
 			<>
-				{multipleAddChildGroups && addChildItems_structured_truth && <VMenuItem text={`Add structured child (re. truth)`} style={styles.vMenuItem}>{addChildItems_structured_truth}</VMenuItem>}
-				{multipleAddChildGroups && addChildItems_structured_relevance && <VMenuItem text={`Add structured child (re. relevance)`} style={styles.vMenuItem}>{addChildItems_structured_relevance}</VMenuItem>}
-				{multipleAddChildGroups && addChildItems_freeform && <VMenuItem text={`Add freeform child`} style={styles.vMenuItem}>{addChildItems_freeform}</VMenuItem>}
-				{!multipleAddChildGroups && (addChildItems_structured_truth ?? addChildItems_structured_relevance ?? addChildItems_freeform)}
+				{multipleAddChildGroups && addChildItems_structured_generic &&
+					<VMenuItem text={`Add structured child`} childLayout="below" enabled={false} style={headerStyle}>{addChildItems_structured_generic}</VMenuItem>}
+				{multipleAddChildGroups && addChildItems_structured_truth &&
+					<VMenuItem text={`Add structured child (re. truth)`} childLayout="below" enabled={false} style={headerStyle}>{addChildItems_structured_truth}</VMenuItem>}
+				{multipleAddChildGroups && addChildItems_structured_relevance &&
+					<VMenuItem text={`Add structured child (re. relevance)`} childLayout="below" enabled={false} style={headerStyle}>{addChildItems_structured_relevance}</VMenuItem>}
+				{multipleAddChildGroups && addChildItems_freeform &&
+					<VMenuItem text={`Add freeform child ->`} enabled={false} style={headerStyle}>{addChildItems_freeform}</VMenuItem>}
+				{/*!multipleAddChildGroups &&
+					<VMenuItem text={`Add child`} style={styles.vMenuItem}>{addChildGroups[0]}</VMenuItem>*/}
+				{!multipleAddChildGroups &&
+					addChildGroups[0]}
 				{/* // IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("*") && !componentBox &&
 				// for now, only let mods add layer-subnodes (confusing otherwise)
 					HasModPermissions(userID) && !inList && path.includes('/') && !path.includes('*') && !componentBox &&
