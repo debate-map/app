@@ -36,6 +36,16 @@ export class NodeRevisionDisplayDetails {
 
 	@Field({type: ["number", "null"]}, {opt: true})
 	widthOverride?: number;
+
+	@Field({type: ["boolean", "null"]}, {opt: true})
+	childrenLayout_flat?: boolean;
+}
+
+export function GetChildrenLayout(revision: MapNodeRevision) {
+	return revision.displayDetails?.childrenLayout_flat ? "flat" : "structured";
+}
+export function InvertChildrenLayout(layout: "structured" | "flat") {
+	return layout == "structured" ? "flat" : "structured";
 }
 
 /*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;

@@ -33,6 +33,11 @@ export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<Spinner step={10} max={1000} enabled={enabled} value={ToNumber(newRevisionData.displayDetails?.widthOverride, 0)} onChange={val=>SetDisplayDetail("widthOverride", val != 0 ? val : null)}/>
 					<Pre> px (0 for auto)</Pre>
 				</Row>
+				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+					<Pre>Children layout: </Pre>
+					<Select options={[{name: "Structured", value: false}, {name: "Flat", value: true}]} enabled={enabled}
+						value={newRevisionData.displayDetails?.childrenLayout_flat} onChange={val=>SetDisplayDetail("childrenLayout_flat", val)}/>
+				</Row>
 			</>
 		);
 	}

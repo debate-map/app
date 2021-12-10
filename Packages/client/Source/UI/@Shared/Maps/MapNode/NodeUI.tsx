@@ -66,9 +66,6 @@ export class NodeUI extends BaseComponentPlus(
 		// let nodeChildrenToShow: MapNodeL3[] = nodeChildren.Any(a => a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
 		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node.id, path, map.id, true, undefined, true, true);
 
-		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node.id);
-		subnodes = subnodes.Any(a => a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded */
-
 		//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		const sinceTime = 0;
 		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes(map.id, sinceTime, path);
@@ -164,8 +161,6 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 
-		const separateChildren = node.type == MapNodeType.claim;
-
 		const ncToShow_nonFreeform = nodeChildrenToShow.filter(a=>!a.link?.freeform);
 		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.freeform);
 		const truthArguments = ncToShow_nonFreeform.filter(a=>a.type == MapNodeType.argument);
@@ -179,15 +174,13 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
-		//this.childBoxes = {};
-		// only clear this.childBoxes when first mounting // actually, no need to clear; the ref-funcs already clear their own entries
-		/*UseEffect(()=>{
-			console.log("Clearing childBoxes. @old:", this.childBoxes);
-			this.childBoxes = {};
-		}, []);*/
-		const truthBoxVisible = node.type == MapNodeType.claim; //&& nodeForm != ClaimForm.question;
-		const relevanceBoxVisible = node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg;
-		const freeformBoxVisible = (node.type == MapNodeType.claim || node.type == MapNodeType.argument) && map.extras.defaultShowFreeform;
+		const layoutFlat = node.current.displayDetails?.childrenLayout_flat ?? false;
+		const separateChildren = !layoutFlat && node.type == MapNodeType.claim;
+		const truthBoxVisible = !layoutFlat && node.type == MapNodeType.claim; //&& nodeForm != ClaimForm.question;
+		const relevanceBoxVisible = !layoutFlat && (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg);
+		const freeformBoxVisible = !layoutFlat && (node.type == MapNodeType.claim || node.type == MapNodeType.argument) && map.extras.defaultShowFreeform;
+		const usingBoxes = truthBoxVisible || relevanceBoxVisible || freeformBoxVisible;
+
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
@@ -222,9 +215,8 @@ export class NodeUI extends BaseComponentPlus(
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}/>;
-		const usingBox = truthBoxVisible || relevanceBoxVisible || freeformBoxVisible;
 		let childConnectorBackground: JSX.Element|n;
-		if (usingBox /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
+		if (usingBoxes /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
 			const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
@@ -251,20 +243,20 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 		let nodeChildHolder_direct: JSX.Element|n;
-		if ((!usingBox || isMultiPremiseArgument) && boxExpanded) {
-			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
+		if ((!usingBoxes || isMultiPremiseArgument) && boxExpanded) {
+			const showArgumentsControlBar = separateChildren && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			const dividePoint_safe = dividePoint || (selfHeight / 2);
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren, showArgumentsControlBar}}
 				ref={c=>this.nodeChildHolder_direct = c}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
-				group={node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
+				group={!layoutFlat && node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
 				usesGenericExpandedField={true}
 				//linkSpawnPoint={isMultiPremiseArgument ? -selfHeight_plusRightContent + (selfHeight / 2) : dividePoint || (selfHeight / 2)}
 				linkSpawnPoint={isMultiPremiseArgument ? -(selfHeight_plusRightContent - dividePoint_safe) : dividePoint_safe}
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
-				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={ncToShow_nonFreeform}
+				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={layoutFlat ? nodeChildrenToShow : ncToShow_nonFreeform}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
 					if (!isMultiPremiseArgument) {
@@ -274,31 +266,11 @@ export class NodeUI extends BaseComponentPlus(
 				}, [isMultiPremiseArgument])}/>;
 		}
 
-		// const hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
-
 		performance.mark("NodeUI_3");
 		performance.measure("NodeUI_Part1", "NodeUI_1", "NodeUI_2");
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
-		// useEffect(() => CheckForChanges());
-
-		/* return (
-			<>
-				{...}
-				{hasExtraWrapper && <>
-					{subnodes.map((subnode, index) => (
-						<NodeUI key={index} indexInNodeList={index} map={map} node={subnode} asSubnode={true} style={E({ marginTop: -5 })}
-							path={`${path}/L${subnode.id}`} widthOverride={widthOverride} onHeightOrPosChange={onHeightOrPosChange}/>
-					))}
-					<div className="clickThrough" style={E({ marginTop: -5 })}>
-						{isMultiPremiseArgument
-							&& nodeChildHolder_direct}
-					</div>
-					{!limitBar_above && children}
-				</>}
-			</>
-		); */
 		return (
 			<>
 			<div ref={c=>{
@@ -417,16 +389,6 @@ export class NodeUI extends BaseComponentPlus(
 		} */
 	};
 
-	/* ComponentDidMount() {
-		const { node, userViewedNodes } = this.props;
-		if (MeID() == null) return;
-
-		const userViewedNodes_doneLoading = userViewedNodes !== undefined;
-		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys().Contains(node.id)) {
-			new NotifyNodeViewed({ nodeID: node.id }).RunOnServer();
-		}
-	} */
-
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange = ()=>{
 		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
@@ -480,11 +442,6 @@ export class NodeUI extends BaseComponentPlus(
 		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, leftMarginForLines);
 		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
-
-		/*for (const subnode of subnodes) {
-			const subnodeMeasurementInfo = GetMeasurementInfoForNode(subnode, `${subnode.id}`);
-			expectedBoxWidth = Math.max(expectedBoxWidth, subnodeMeasurementInfo.expectedBoxWidth);
-		}*/
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		if (isMultiPremiseArgument) {

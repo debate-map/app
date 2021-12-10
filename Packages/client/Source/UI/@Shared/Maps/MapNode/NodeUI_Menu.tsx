@@ -1,4 +1,4 @@
-import {E, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {Clone, E, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildrenLayout, InvertChildrenLayout, MapNodeRevision, AddNodeRevision} from "dm_common";
 import {Observer, RunInAction} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
@@ -72,7 +72,8 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 			validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
 		}
 
-		if (childGroup == ChildGroup.freeform) {
+		const addChildrenAsFreeform = childGroup == ChildGroup.freeform || !!node.current.displayDetails?.childrenLayout_flat;
+		if (addChildrenAsFreeform) {
 			validChildTypes = GetValues(MapNodeType);
 		}
 
@@ -93,7 +94,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 									if (e.button != 0) return;
 									if (userID == null) return ShowSignInPopup();
 
-									ShowAddChildDialog(path, childType, polarity, userID, mapID, childGroup == ChildGroup.freeform);
+									ShowAddChildDialog(path, childType, polarity, userID, mapID, addChildrenAsFreeform);
 								}}/>
 						);
 					});
@@ -189,6 +190,14 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).RunOnServer();
 						}
 					}}/> */}
+				{IsUserCreatorOrMod(userID, node) && !componentBox &&
+					<VMenuItem text={`Toggle children layout (${GetChildrenLayout(node.current)} -> ${InvertChildrenLayout(GetChildrenLayout(node.current))})`} style={styles.vMenuItem}
+						onClick={async e=>{
+							const newRevision = Clone(node.current) as MapNodeRevision;
+							newRevision.displayDetails = {...newRevision.displayDetails, childrenLayout_flat: !newRevision.displayDetails?.childrenLayout_flat};
+							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
+							RunInAction("ToggleChildrenLayout", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
+						}}/>}
 				<MI_ExportSubtree {...sharedProps}/>
 				{/*<MI_ImportSubtree {...sharedProps}/>*/}
 				<MI_UnlinkContainerArgument {...sharedProps}/>

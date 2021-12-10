@@ -68,7 +68,7 @@ export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode
 	if (type == MapNodeType.package) return "package";
 	if (type == MapNodeType.multiChoiceQuestion) return "multi-choice question";
 	if (type == MapNodeType.claim) {
-		if (parentNode && parentNode.type == MapNodeType.category) { return "claim (in question form)"; }
+		if (parentNode && parentNode.type == MapNodeType.category) { return "claim / binary question"; }
 		return "claim";
 	}
 	if (type == MapNodeType.argument) {
