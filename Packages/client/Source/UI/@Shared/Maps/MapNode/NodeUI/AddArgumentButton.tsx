@@ -11,7 +11,7 @@ import {Chroma_Mix} from "Utils/ClassExtensions/CE_General.js";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
-type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
+type Props = {map: Map, node: MapNodeL3, path: string, group: ChildGroup, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',
 	{
 		canDrop(props: Props, monitor) {
@@ -64,7 +64,7 @@ type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style
 @Observer
 export class AddArgumentButton extends BaseComponent<Props> {
 	render() {
-		const {map, node, path, polarity, style} = this.props;
+		const {map, node, path, group, polarity, style} = this.props;
 		const backgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: polarity} as MapNodeL3, "background", false);
 		const parent = GetParentNodeL3(path);
 
@@ -109,15 +109,15 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						if (node.link?.form == ClaimForm.negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, userID, map.id, false);
+						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, userID, group, map.id);
 					} else {
 						let newChildPolarity = polarity;
 						if (contributeInfo_polarity.reversePolarities) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, userID, map.id, false);
+						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, userID, group, map.id);
 					}
-				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map.id, node.id, node.link?.form, path, polarity])}/>
+				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, group, map.id, node.id, node.link?.form, path, polarity])}/>
 		);
 	}
 }

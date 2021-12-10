@@ -15,7 +15,7 @@ export const config = CreateConfig({
 	path_base: path.resolve(__dirname, ".."),
 	//path_base: path.resolve(".."), // if cwd is Scripts
 	//path_base: path.resolve("."), // if cwd is root
-	server_port: PORT || 3005,
+	server_port: PORT || 3055, // webpack serves to 3055; k8s web-server serves to 3005 (see Tiltfile for full details)
 });
 const S = JSON.stringify;
 /*Object.assign(config.codeVarReplacements, {

@@ -10,10 +10,10 @@ import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
-	constructor(public payload: {parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string|n, asFreeformChild: boolean}) {}
+	constructor(public payload: {parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n}) {}
 
 	Prepare() {
-		const {parentPath, childType, title, childPolarity, userID, mapID, asFreeformChild} = this.payload;
+		const {parentPath, childType, title, childPolarity, userID, group, mapID} = this.payload;
 
 		this.mapID = mapID;
 		this.node_parentPath = parentPath;
@@ -36,10 +36,12 @@ export class AddChildHelper {
 		});
 		this.node_revision = new MapNodeRevision();
 		this.node_link = E(
-			{slot: 0}, // todo
+			{
+				group,
+				slot: 0, // todo
+			},
 			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base},
 			childType == MapNodeType.argument && {polarity: childPolarity},
-			asFreeformChild && {freeform: true},
 		) as NodeChildLink;
 
 		if (childType == MapNodeType.argument) {
@@ -138,8 +140,8 @@ enum AddChildDialogTab {
 	Argument,
 	Claim,
 }
-export async function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: string|n, asFreeformChild: boolean) {
-	const helper = new AddChildHelper({parentPath, childType, title: "", childPolarity, userID, mapID, asFreeformChild});
+export async function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n) {
+	const helper = new AddChildHelper({parentPath, childType, title: "", childPolarity, userID, group, mapID});
 	const prep = await GetAsync(()=>{
 		helper.Prepare();
 		const parentNode = GetNodeL3(parentPath);

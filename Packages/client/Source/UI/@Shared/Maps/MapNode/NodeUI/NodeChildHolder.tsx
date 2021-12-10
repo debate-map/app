@@ -217,7 +217,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{separateChildren &&
 					RenderPolarityGroup("up")}
 				{showArgumentsControlBar &&
-					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} node={node} path={path} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
+					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} node={node} path={path} group={group} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
 				{separateChildren &&
 					RenderPolarityGroup("down")}
 			</Column>

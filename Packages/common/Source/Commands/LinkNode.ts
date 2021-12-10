@@ -20,13 +20,13 @@ import {AddArgumentAndClaim, AddChildNode} from "../Commands.js";
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
-		$link: DeriveJSONSchema(NodeChildLink, {makeOptional_all: true, makeRequired: ["parent", "child"]}),
+		$link: DeriveJSONSchema(NodeChildLink, {makeOptional_all: true, makeRequired: ["parent", "child", "group"]}),
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$linkID: {type: "string"},
 	}),
 })
-export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child">}, {linkID: string}> {
+export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group">}, {linkID: string}> {
 	child_oldData: MapNode|n;
 	parent_oldData: MapNode;
 	Validate() {

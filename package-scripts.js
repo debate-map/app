@@ -1,10 +1,14 @@
 const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
+const {env} = require("process");
 const {_packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
 
 const scripts = {};
 module.exports.scripts = scripts;
+
+//const CurrentTime_SafeStr = ()=>new Date().toISOString().replace(/:/g, "-");
+const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 
 Object.assign(scripts, {
 	client: {
@@ -58,11 +62,11 @@ Object.assign(scripts, {
 
 const appNamespace = "default"; //"app";
 const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
-const GetPodNameCmd_DB =					contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n postgres-operator -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master`;
-const GetPodNameCmd_WebServer =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n ${appNamespace} -l app=dm-web-server`;
-const GetPodNameCmd_AppServer =			contextName=>`${KubeCTLCmd(contextName)} get pod -o name -n ${appNamespace} -l app=dm-app-server`;
-const GetPodsMatchingPartialName = (partialName, contextName)=>{
-	const entryStrings = execSync(`${KubeCTLCmd(contextName)} get pods --all-namespaces | findstr ${partialName}`).toString().trim().split("\n");
+const GetPodNameCmd_DB =					context=>`${KubeCTLCmd(context)} get pod -o name -n postgres-operator -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master`;
+const GetPodNameCmd_WebServer =			context=>`${KubeCTLCmd(context)} get pod -o name -n ${appNamespace} -l app=dm-web-server`;
+const GetPodNameCmd_AppServer =			context=>`${KubeCTLCmd(context)} get pod -o name -n ${appNamespace} -l app=dm-app-server`;
+const GetPodsMatchingPartialName = (partialName, context)=>{
+	const entryStrings = execSync(`${KubeCTLCmd(context)} get pods --all-namespaces | findstr ${partialName}`).toString().trim().split("\n");
 	return entryStrings.map(str=>{
 		const parts = str.split("   ").map(a=>a.trim());
 		return {
@@ -72,9 +76,24 @@ const GetPodsMatchingPartialName = (partialName, contextName)=>{
 	});
 };
 
-function GetKubectlContext() {
+/** Gets the k8s context that is selected as the "current" one, in Docker Desktop. */
+function K8sContext_Current() {
 	return execSync(`kubectl config current-context`).toString().trim();
 }
+/** Gets the k8s context passed to the current nps script. (for example, "local", if this was run: npm start "db.psql_k8s local") */
+function K8sContext_Arg(throwErrorIfNotPassed = false) {
+	let contextArg;
+	if (commandArgs[0] && !commandArgs[0].includes(":")) {
+		contextArg = commandArgs[0];
+	}
+
+	if (contextArg == null && throwErrorIfNotPassed) {
+		throw new Error("Must explicitly specify context for this command.");
+	}
+
+	return contextArg;
+}
+function K8sContext_Arg_Required() { return K8sContext_Arg(true); }
 
 const PrepDockerCmd = ()=>{
 	//return `npm start dockerPrep &&`;
@@ -173,22 +192,23 @@ Object.assign(scripts, {
 
 		// dumps (ie. pg_dump backups) [you can also use DBeaver to make a dump; see readme for details]
 		makeDBDump: Dynamic(()=>{
-			/*const part1 = `Get-Date -date (Get-Date).ToUniversalTime() -uformat "%Y-%m-%dT%H-%M-%SZ"`;
-			const part2 = `kubectl exec -n postgres-operator debate-map-instance1-hfj5-0 -- bash -c "pg_dump -U postgres debate-map" > ../Others/@Backups/DBDumps/%f.sql`;
-			return `for /f "tokens=*" %f in ('${part1}') do @(${part2})`;*/
+			const context = commandArgs[0] ?? K8sContext_Current();
+			const dbPodName = GetPodsMatchingPartialName("debate-map-instance1-", context)[0].name;
 
-			const dumpCmd = `kubectl exec -n postgres-operator debate-map-instance1-hfj5-0 -- bash -c "pg_dump -U postgres debate-map"`;
-			// this also works, but it's ugly -- and besides, nodejs is better as a "shell language" than cmd or powershell anyway
-			// (basically, whenever something's too complicated to use cross-platform "basic shell" syntax: just use nodejs)
-			//return `powershell -command $a = (${dumpCmd}) -join """\`n"""; new-item -force -type file -path ../Others/@Backups/DBDumps/test2.sql -value $a`;
-
+			const dumpCmd = `${KubeCTLCmd(context)} exec -n postgres-operator ${dbPodName} -- bash -c "pg_dump -U postgres debate-map"`;
 			const dbDumpStr = execSync(dumpCmd).toString().trim();
-			fs.writeFileSync(`../Others/@Backups/DBDumps/${new Date().toISOString().replace(/:/g, "-")}.sql`, dbDumpStr);
+
+			const filePath_rel = `../Others/@Backups/DBDumps_${context}/${CurrentTime_SafeStr()}.sql`;
+			const folderPath_rel = paths.dirname(filePath_rel);
+			fs.mkdirSync(folderPath_rel, {recursive: true});
+			fs.writeFileSync(filePath_rel, dbDumpStr);
+			console.log(`DB dump (of context: ${context}) created at: ${paths.resolve(filePath_rel)}`);
+			execSync(`start "" "${paths.dirname(paths.resolve(filePath_rel))}"`);
 		}),
 
 		// backups
 		viewDBBackups: Dynamic(()=>{
-			const devEnv = commandArgs[0] == "dev" || GetKubectlContext() == "local";
+			const devEnv = commandArgs[0] == "dev" || K8sContext_Current() == "local";
 			const {bucket_dev_uniformPrivate_name, bucket_prod_uniformPrivate_name} = require("./PulumiOutput_Public.json");
 			const bucket_uniformPrivate_name = devEnv ? bucket_dev_uniformPrivate_name : bucket_prod_uniformPrivate_name;
 			return `start "" "https://console.cloud.google.com/storage/browser/${bucket_uniformPrivate_name}/db-backups-pgbackrest/backup/db?project=debate-map-prod"`;
@@ -268,62 +288,41 @@ Object.assign(scripts, {
 		}),
 	},
 });
+scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
 function SetTileEnvCmd(prod, context) {
 	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"} ${context ? `set CONTEXT=${context}&&` : ""}`;
 }
 
-function GetSecretsInfo(context) {
+function GetK8sPGUserAdminSecretData(context) {
+	const fromBase64 = str=>Buffer.from(str, "base64");
 	const secretsStr = execSync(`kubectl${context ? ` --context ${context}` : ""} get secrets -n postgres-operator debate-map-pguser-admin -o go-template='{{.data}}'`).toString();
 	const keyValuePairs = secretsStr.match(/\[(.+)\]/)[1].split(" ").map(keyValPairStr=>keyValPairStr.split(":"));
-	return {secretsStr, keyValuePairs};
+	const GetField = name=>fromBase64(keyValuePairs.find(a=>a[0] == name)[1]);
+	return {secretsStr, keyValuePairs, GetField};
 }
 function ImportPGUserSecretAsEnvVars(context) {
-	const {keyValuePairs} = GetSecretsInfo(context);
-	const fromBase64 = str=>Buffer.from(str, "base64");
-	const GetEnvVal = name=>fromBase64(keyValuePairs.find(a=>a[0] == name)[1]);
+	const secret = GetK8sPGUserAdminSecretData(context);
 	const newEnvVars = {
 		// node-js flag
 		NODE_TLS_REJECT_UNAUTHORIZED: 0, // tls change needed atm, till I figure out how to copy over signing data
 
 		// app-level
-		//DB_ADDR: GetEnvVal("host"),
+		//DB_ADDR: secret.GetField("host"),
 		DB_ADDR: "localhost",
-		//DB_PORT: GetEnvVal("port"),
-		DB_PORT: context != "local" ? 4205 : 3205,
-		DB_DATABASE: GetEnvVal("dbname"),
-		DB_USER: GetEnvVal("user"),
-		DB_PASSWORD: GetEnvVal("password"),
+		//DB_PORT: secret.GetField("port"),
+		DB_PORT:
+			context == "ovh" ? 4205 :
+			context == "local" ? 3205 :
+			null,
+		DB_DATABASE: secret.GetField("dbname"),
+		DB_USER: secret.GetField("user"),
+		DB_PASSWORD: secret.GetField("password"),
 	};
 	Object.assign(process.env, newEnvVars);
 }
 
 Object.assign(scripts, {
 	"app-server": {
-		// setup
-		//initDB: "psql -f ./Packages/app-server/Scripts/InitDB.sql debate-map",
-		//initDB: TSScript("app-server", "Scripts/InitDB.ts"),
-		initDB: TSScript({pkg: "app-server"}, "Scripts/KnexWrapper.js", "initDB"),
-		initDB_freshScript: `nps app-server.buildInitDBScript && nps app-server.initDB`,
-		// k8s variants
-		initDB_k8s: Dynamic(()=>{
-			ImportPGUserSecretAsEnvVars(commandArgs[0] ?? GetKubectlContext());
-			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB`;
-		}),
-		initDB_freshScript_k8s: Dynamic(()=>{
-			ImportPGUserSecretAsEnvVars(commandArgs[0] ?? GetKubectlContext());
-			return `${pathToNPMBin("nps.cmd", 0, true, true)} app-server.initDB_freshScript`;
-		}),
-		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
-		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
-		dcAllDBSessions: `psql -c "
-			SELECT pg_terminate_backend(pg_stat_activity.pid)
-			FROM pg_stat_activity
-			WHERE datname = "debate-map";"`,
-
-		// db-shape and migrations
-		buildInitDBScript: GetBuildInitDBScriptCommand(false),
-		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
-
 		// first terminal
 		//dev: "cd Packages/app-server && tsc --build --watch",
 		dev: "tsc --build --watch Packages/app-server/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
@@ -352,7 +351,90 @@ Object.assign(scripts, {
 		dockerBuild_gitlab: `${PrepDockerCmd()} docker build -f ./Packages/web-server/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
 	},
 });
-scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
+
+// todo: clean up the initDB stuff, to be more certain to be safe
+function StartPSQLInK8s(context, database = "debate-map", spawnOptions) {
+	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
+	const password = execSync(getPasswordCmd).toString().trim();
+	
+	execSync(`$env:PGPASSWORD=${password}; psql -h localhost -p [3205/4205] -U admin -d debate-map`);
+	execSync(`Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("${password}"))@localhost:[3205/4205]/debate-map"`);*/
+
+	//ImportPGUserSecretAsEnvVars(context);
+	const secret = GetK8sPGUserAdminSecretData(context);
+
+	const argsStr = `-h localhost -p ${context == "ovh" ? 4205 : 3205} -U admin -d ${database}`;
+
+	const env = {
+		//...process.env,
+		//PGDATABASE: "debate-map",
+		//PGUSER: "admin",
+		PGPASSWORD: secret.GetField("password"),
+	};
+	//if (startType == "spawn") {
+	return spawn(`psql`, argsStr.split(" "), {
+		env,
+		// default stdio field to where input is piped (ie. sent from caller of this func), and output is written to console
+		stdio: ["pipe", "inherit", "inherit"], // pipe stdin, inherit stdout, inherit stderr
+		...spawnOptions,
+	});
+	/*} else if (startType == "exec") {
+		execSync(`psql ${argsStr}` + (command ? " -c " : ""));
+	}*/
+}
+Object.assign(scripts, {
+	db: {
+		// general
+		psql_k8s: Dynamic(()=>{
+			const database = commandArgs.find(a=>a.startsWith("db:"))?.slice("db:".length) ?? "debate-map";
+			console.log("Connecting psql to database:", database);
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"});
+		}),
+
+		// db-shape and such
+		buildInitDBScript: GetBuildInitDBScriptCommand(false),
+		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
+
+		// db setup
+		//initDB: "psql -f ./Packages/app-server/Scripts/InitDB.sql debate-map",
+		//initDB: TSScript("app-server", "Scripts/InitDB.ts"),
+		// init-db, base (without env-vars set, this controls port-5432/native/non-k8s postgres instance -- which is not recommended)
+		initDB: TSScript({pkg: "app-server"}, "Scripts/KnexWrapper.js", "initDB"),
+		initDB_freshScript: `nps db.buildInitDBScript && nps db.initDB`,
+		// init-db, for k8s postgres instance (standard)
+		initDB_k8s: Dynamic(()=>{
+			ImportPGUserSecretAsEnvVars(K8sContext_Arg_Required());
+			return `${pathToNPMBin("nps.cmd", 0, true, true)} db.initDB`;
+		}),
+		initDB_freshScript_k8s: Dynamic(()=>{
+			ImportPGUserSecretAsEnvVars(K8sContext_Arg_Required());
+			return `${pathToNPMBin("nps.cmd", 0, true, true)} db.initDB_freshScript`;
+		}),
+
+		// db clearing/reset
+		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
+		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
+		dcAllDBSessions_nonK8s: `psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';"`,
+		//dcAllDBSessions_k8s: `psql TODO -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';"`,
+		dcAllDBSessions_k8s: Dynamic(()=>{
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
+			psqlProcess.stdin.write(`SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';\n`);
+			psqlProcess.stdin.write(`exit\n`);
+		}),
+		// this script "deletes" the "debate-map" database within the specified k8s-cluster's postgres instance (for safety, it technically renames it rather than deletes it)
+		deposeDebateMapDB_k8s: Dynamic(()=>{
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
+			psqlProcess.stdin.write(`SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';\n`);
+			const newName = `debate-map-old-${CurrentTime_SafeStr()}`;
+
+			console.log("Renaming debate-map database to:", newName);
+			psqlProcess.stdin.write(`ALTER DATABASE "debate-map" RENAME TO "${newName}";\n`);
+			// if you need to find the list of databases, run query (in psql or DBeaver): SELECT datname FROM pg_database WHERE datistemplate = false;
+
+			psqlProcess.stdin.write(`exit\n`);
+		}),
+	},
+});
 
 function GetBuildInitDBScriptCommand(watch) {
 	return TSScript({pkg: "app-server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,

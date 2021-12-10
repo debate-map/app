@@ -1,5 +1,6 @@
 import {Assert, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {ChildGroup} from "../nodes.js";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode.js";
 
 export enum MapNodeType {
@@ -12,29 +13,43 @@ export enum MapNodeType {
 //AddSchema("MapNodeType", {enum: GetValues(MapNodeType)});
 AddSchema("MapNodeType", {enum: GetValues(MapNodeType)});
 
+const freeformTypes = [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim, MapNodeType.argument];
+
 export class MapNodeType_Info {
 	static for = {
 		[MapNodeType.category]: new MapNodeType_Info({
-			childTypes: [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim],
+			childGroup_childTypes: new Map([
+				[ChildGroup.generic, [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim]],
+				[ChildGroup.freeform, freeformTypes],
+			]),
 			minWidth: 150, maxWidth: 250,
 			/*mainRatingTypes: ["significance"],
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.package]: new MapNodeType_Info({
-			childTypes: [MapNodeType.claim],
+			childGroup_childTypes: new Map([
+				[ChildGroup.generic, [MapNodeType.claim]],
+				[ChildGroup.freeform, freeformTypes],
+			]),
 			minWidth: 150, maxWidth: 250,
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
 		[MapNodeType.multiChoiceQuestion]: new MapNodeType_Info({
-			childTypes: [MapNodeType.claim],
+			childGroup_childTypes: new Map([
+				[ChildGroup.generic, [MapNodeType.claim]],
+				[ChildGroup.freeform, freeformTypes],
+			]),
 			minWidth: 150, maxWidth: 600,
 			// minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
 		[MapNodeType.claim]: new MapNodeType_Info({
-			childTypes: [MapNodeType.argument],
+			childGroup_childTypes: new Map([
+				[ChildGroup.truth, [MapNodeType.argument]],
+				[ChildGroup.freeform, freeformTypes],
+			]),
 			minWidth: 350, maxWidth: 600,
 			// mainRatingTypes: ["probability", "intensity"],
 			// mainRatingTypes: ["probability", "support"],
@@ -42,7 +57,11 @@ export class MapNodeType_Info {
 			otherRatingTypes: [], */
 		}),
 		[MapNodeType.argument]: new MapNodeType_Info({
-			childTypes: [MapNodeType.claim, MapNodeType.argument],
+			childGroup_childTypes: new Map([
+				[ChildGroup.generic, [MapNodeType.claim]],
+				[ChildGroup.relevance, [MapNodeType.argument]],
+				[ChildGroup.freeform, freeformTypes],
+			]),
 			minWidth: 150, maxWidth: 600,
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
@@ -54,7 +73,7 @@ export class MapNodeType_Info {
 	}
 
 	// displayName: (parentNode: MapNodeL2)=>string;
-	childTypes: MapNodeType[];
+	childGroup_childTypes: Map<ChildGroup, MapNodeType[]>;
 	minWidth: number;
 	maxWidth: number;
 	// fontSize?: number;

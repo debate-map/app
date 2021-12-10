@@ -1,3 +1,4 @@
+import {ChildGroup} from "DB.js";
 import {MapNodeType} from "DB/nodes/@MapNodeType.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
@@ -32,13 +33,13 @@ export class NodeChildLink {
 	@Field({type: "string"}, {opt: true})
 	child: string;
 
+	@DB((t, n)=>t.text(n))
+	@Field({$ref: "ChildGroup"})
+	group: ChildGroup;
+
 	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"}) // should "{opt: true}" be added?
 	slot = 0;
-
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"}, {opt: true}) // should "{opt: true}" be added?
-	freeform = false;
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ClaimForm"}, {opt: true})

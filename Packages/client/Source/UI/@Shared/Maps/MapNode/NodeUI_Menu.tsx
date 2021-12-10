@@ -61,28 +61,19 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const copiedNode_asCut = store.main.maps.copiedNodePath_asCut;
 
 		const mapID = map ? map.id : null;
-		// let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
-		let validChildTypes = GetValidNewChildTypes(node, childGroup, permissions);
-		const componentBox = childGroup != ChildGroup.generic;
-		// if in relevance or truth group, claims cannot be direct children (must be within argument)
-		if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {
-			validChildTypes = validChildTypes.Exclude(MapNodeType.claim);
-		} else {
-			// in the other cases, arguments cannot be direct children (those are only meant for in relevance/truth groups)
-			validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
-		}
-
-		const addChildrenAsFreeform = childGroup == ChildGroup.freeform || !!node.current.displayDetails?.childrenLayout_flat;
-		if (addChildrenAsFreeform) {
-			validChildTypes = GetValues(MapNodeType);
-		}
+		const forChildHolderBox = childGroup != ChildGroup.generic;
 
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
-		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
-		return (
-			<>
-				{/*CanContributeToNode(userID, node.id) &&*/ !inList && validChildTypes.map(childType=>{
+		const GetAddChildItems = (childGroupForItems: ChildGroup)=>{
+			const validChildTypes = GetValidNewChildTypes(node, childGroupForItems, permissions);
+			if (validChildTypes.length == 0) return null;
+
+			//if (!CanContributeToNode(userID, node.id)) return null;
+			if (inList) return null;
+
+			return <>
+				{validChildTypes.map(childType=>{
 					const childTypeInfo = MapNodeType_Info.for[childType];
 					// let displayName = GetMapNodeTypeDisplayName(childType, node, form);
 					const polarities = childType == MapNodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
@@ -93,12 +84,26 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								onClick={e=>{
 									if (e.button != 0) return;
 									if (userID == null) return ShowSignInPopup();
-
-									ShowAddChildDialog(path, childType, polarity, userID, mapID, addChildrenAsFreeform);
+									ShowAddChildDialog(path, childType, polarity, userID, childGroup, mapID);
 								}}/>
 						);
 					});
 				})}
+			</>;
+		};
+		const addChildItems_structured_truth = GetAddChildItems(ChildGroup.truth);
+		const addChildItems_structured_relevance = GetAddChildItems(ChildGroup.relevance);
+		const addChildItems_freeform = GetAddChildItems(ChildGroup.freeform);
+		const addChildGroups = [addChildItems_structured_truth, addChildItems_structured_relevance, addChildItems_freeform].filter(a=>a);
+		const multipleAddChildGroups = addChildGroups.length > 1;
+
+		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
+		return (
+			<>
+				{multipleAddChildGroups && addChildItems_structured_truth && <VMenuItem text={`Add structured child (re. truth)`} style={styles.vMenuItem}>{addChildItems_structured_truth}</VMenuItem>}
+				{multipleAddChildGroups && addChildItems_structured_relevance && <VMenuItem text={`Add structured child (re. relevance)`} style={styles.vMenuItem}>{addChildItems_structured_relevance}</VMenuItem>}
+				{multipleAddChildGroups && addChildItems_freeform && <VMenuItem text={`Add freeform child`} style={styles.vMenuItem}>{addChildItems_freeform}</VMenuItem>}
+				{!multipleAddChildGroups && (addChildItems_structured_truth ?? addChildItems_structured_relevance ?? addChildItems_freeform)}
 				{/* // IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("*") && !componentBox &&
 				// for now, only let mods add layer-subnodes (confusing otherwise)
 					HasModPermissions(userID) && !inList && path.includes('/') && !path.includes('*') && !componentBox &&
@@ -108,7 +113,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(mapID, node, path);
 						}}/> */}
-				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !componentBox &&
+				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
 					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
 						onClick={async e=>{
 							if (e.button != 0) return;
@@ -116,14 +121,14 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).RunOnServer();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
-					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !componentBox &&
+					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !forChildHolderBox &&
 					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
 						onClick={async e=>{
 							if (e.button !== 0) return;
 
 							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
 						}}/>}
-				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !componentBox &&
+				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
 						onClick={e=>{
 							if (e.button != 0) return;
@@ -140,7 +145,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								store.main.search.findNode_resultPaths = [];
 							});
 						}}/>}
-				{!inList && !componentBox &&
+				{!inList && !forChildHolderBox &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Cut"}
 						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
 						style={styles.vMenuItem}
@@ -157,7 +162,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							} */
 							ACTCopyNode(path, true);
 						}}/>}
-				{!componentBox &&
+				{!forChildHolderBox &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
 						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=>{
@@ -190,7 +195,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).RunOnServer();
 						}
 					}}/> */}
-				{IsUserCreatorOrMod(userID, node) && !componentBox &&
+				{IsUserCreatorOrMod(userID, node) && !forChildHolderBox &&
 					<VMenuItem text={`Toggle children layout (${GetChildrenLayout(node.current)} -> ${InvertChildrenLayout(GetChildrenLayout(node.current))})`} style={styles.vMenuItem}
 						onClick={async e=>{
 							const newRevision = Clone(node.current) as MapNodeRevision;

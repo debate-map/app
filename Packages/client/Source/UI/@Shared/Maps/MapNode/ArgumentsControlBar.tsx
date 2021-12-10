@@ -1,12 +1,11 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton.js";
-import {MapNodeL3, Polarity} from "dm_common";
-import {Map} from "dm_common";
+import {MapNodeL3, Polarity, Map, ChildGroup} from "dm_common";
 
-export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, childBeingAdded: boolean}, {premiseTitle: ""}) {
+export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
 	render() {
-		const {map, node, path, childBeingAdded} = this.props;
+		const {map, node, path, group, childBeingAdded} = this.props;
 		// const backgroundColor = GetNodeColor({ type: MapNodeType.category } as MapNodeL3);
 
 		return (
@@ -25,8 +24,8 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 					<Row>Opposing arguments</Row>
 				</Column> */}
 				<Column ml={0}> {/* vertical */}
-					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.supporting}/>
-					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.opposing} style={{marginTop: 1}}/>
+					<AddArgumentButton map={map} node={node} path={path} group={group} polarity={Polarity.supporting}/>
+					<AddArgumentButton map={map} node={node} path={path} group={group} polarity={Polarity.opposing} style={{marginTop: 1}}/>
 				</Column>
 				{/* <Row ml={0}> // horizontal
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.supporting}/>

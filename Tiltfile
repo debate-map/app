@@ -251,7 +251,7 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
 }))
 
-# port forwards
+# port forwards (see readme's [project-service-urls] guide-module for details)
 # ==========
 
 k8s_resource('dm-app-server',

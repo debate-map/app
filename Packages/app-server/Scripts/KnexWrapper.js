@@ -10,27 +10,29 @@ const config = require("../Knex/knexfile");*/
 
 async function ConnectToDB_CreatingIfNonExistent(dbName) {
 	// use knex object without db-name in connection-config at first, in case db doesn't exist yet
-	let knex_early = Knex({
+	const knex_early = Knex({
 		...config.development,
 		connection: {
 			...config.development.connection,
-			database: null,
+			//database: null,
+			database: "postgres",
 		},
 	});
-	let dbExisted = (await knex_early.raw(`SELECT FROM pg_database WHERE datname = '${dbName}'`)).rows.length >= 1; // fsr, "rows" is empty if we use knex's var-substitution; so use string-concatenation
+	const dbExisted = (await knex_early.raw(`SELECT FROM pg_database WHERE datname = '${dbName}'`)).rows.length >= 1; // fsr, "rows" is empty if we use knex's var-substitution; so use string-concatenation
 	if (!dbExisted) {
 		console.log(`DB "${dbName}" not found. Creating now...`);
 		await knex_early.raw("CREATE DATABASE ??", dbName);
 	}
 	await knex_early.raw("ALTER DATABASE ?? SET search_path TO app_public, public;", dbName); // must do this in knex_early, else it doesn't apply for knex instance
-	await knex_early.raw("CREATE SCHEMA IF NOT EXISTS app_public");
+	//await knex_early.raw("CREATE SCHEMA IF NOT EXISTS app_public");
 	await knex_early.destroy();
 
 	// create new connection, inside the new database, so we can initialize some things
 	const knex = Knex(config.development);
-	if (!dbExisted) {
-		//await knex.raw("CREATE SCHEMA app_public");
-	}
+	/*if (!dbExisted) {
+		await knex.raw("CREATE SCHEMA app_public");
+	}*/
+	await knex.raw("CREATE SCHEMA IF NOT EXISTS app_public");
 
 	return knex;
 }
@@ -58,7 +60,7 @@ async function InitDB() {
 		await seed(transaction); // add seed data
 		console.log("Committing transaction...");
 		await transaction.commit();
-	} catch(ex) {
+	} catch (ex) {
 		console.error(ex);
 	} finally {
 		await knex.destroy();
@@ -76,7 +78,7 @@ async function SeedDB() {
 		await seed(transaction); // add seed data
 		console.log("Committing transaction...");
 		await transaction.commit();
-	} catch(ex) {
+	} catch (ex) {
 		console.error(ex);
 	} finally {
 		await knex.destroy();

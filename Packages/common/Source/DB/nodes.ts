@@ -271,11 +271,11 @@ export function GetChildGroup(childType: MapNodeType, parentType: MapNodeType|n)
 	return ChildGroup.generic;
 }
 
-export const ForLink_GetError = CreateAccessor((parentType: MapNodeType, childType: MapNodeType)=>{
-	const parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
-	if (!parentTypeInfo?.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid for the parent's type (${MapNodeType[parentType]}).`;
+export const ForLink_GetError = CreateAccessor((parentType: MapNodeType, childType: MapNodeType, childGroup: ChildGroup)=>{
+	const validChildTypes = MapNodeType_Info.for[parentType].childGroup_childTypes.get(childGroup) ?? [];
+	if (!validChildTypes.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid here. (parent type: ${MapNodeType[parentType]}, child group: ${ChildGroup[childGroup]}).`;
 });
-export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newChildGroup?: ChildGroup|n)=>{
+export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newChildGroup: ChildGroup)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -286,14 +286,17 @@ export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: P
 	// if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != MeID()) return false;
 	if (parent.id == newChild.id) return "Cannot link node as its own child.";
 
-	const parentChildLinks = GetNodeChildLinks(parentID);
+	const parentChildLinks = GetNodeChildLinks(parentID, null, newChildGroup); // query it with "childID" null, so it's cached once for all such calls
 	const isAlreadyChild = parentChildLinks.Any(a=>a.child == newChild.id);
+
 	// if new-holder-type is not specified, consider "any" and so don't check
-	if (newChildGroup !== undefined) {
+	/*if (newChildGroup !== undefined) {
 		const currentChildGroup = GetChildGroup(newChild.type, parent.type);
 		if (isAlreadyChild && currentChildGroup == newChildGroup) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
-	}
-	return ForLink_GetError(parent.type, newChild.type);
+	}*/
+	if (isAlreadyChild) return false;
+
+	return ForLink_GetError(parent.type, newChild.type, newChildGroup);
 });
 
 export const ForDelete_GetError = CreateAccessor((userID: string|n, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{

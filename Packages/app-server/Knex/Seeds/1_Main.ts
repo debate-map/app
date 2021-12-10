@@ -105,6 +105,7 @@ const maps = TypeCheck(Map, {
 		editors: [],
 		edits: 0,
 		editedAt: Date.now(),
+		extras: {},
 	},
 });
 

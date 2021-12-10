@@ -2415,7 +2415,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
-    web-vcore: 0.0.45
+    web-vcore: 0.0.46
   languageName: unknown
   linkType: soft
 
@@ -9535,18 +9535,11 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"js-vextensions@^1.0.65, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
+"js-vextensions@1.0.69, js-vextensions@^1.0.65, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
   version: 0.0.0-use.local
   resolution: "js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions"
   languageName: unknown
   linkType: soft
-
-"js-vextensions@npm:1.0.69":
-  version: 1.0.69
-  resolution: "js-vextensions@npm:1.0.69"
-  checksum: 0f7d42a99d7aba10d2e789a88beea97689974b38d7500bb93770a263a6f29a2d3cf8b516731a4e0e57bc1082fd56d6c76ceac5ffb357811defd970807e4050a3
-  languageName: node
-  linkType: hard
 
 "js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.0, js-yaml@npm:^3.9.0":
   version: 3.14.1
@@ -13394,7 +13387,19 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-vextensions@1.0.11, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
+"react-vextensions@npm:1.0.12":
+  version: 1.0.12
+  resolution: "react-vextensions@npm:1.0.12"
+  dependencies:
+    classnames: ^2.2.5
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+  checksum: 57309c1ed187f15ad6efc719847ec4a09dbb555e569ae799ec8dfc051bee40803f9ccdb3ec1771e9fd615150f478e6e5e21f71cd4f6687e30241ee6522ef24a2
+  languageName: node
+  linkType: hard
+
+"react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
   version: 0.0.0-use.local
   resolution: "react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions"
   dependencies:
@@ -13420,9 +13425,9 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-vmenu@npm:1.0.11":
-  version: 1.0.11
-  resolution: "react-vmenu@npm:1.0.11"
+"react-vmenu@1.0.11, react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu":
+  version: 0.0.0-use.local
+  resolution: "react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu"
   dependencies:
     classnames: ^2.2.5
   peerDependencies:
@@ -13430,9 +13435,8 @@ fsevents@~2.3.2:
     mobx-react: ^7.2.0
     react: ^17.0.2
     react-dom: ^17.0.2
-  checksum: 961180f731034bc924e9becc5dacba84c95bd31e1f005a5ab933b65437b5b0c65e4789b78b99753556169e4827f4ce935bb3917517c8568856da1661c0a63aa7
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "react-vmessagebox@npm:1.0.10":
   version: 1.0.10
@@ -16180,15 +16184,6 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"updeep@npm:1.1.0":
-  version: 1.1.0
-  resolution: "updeep@npm:1.1.0"
-  dependencies:
-    lodash: ^4.2.0
-  checksum: 9bae56fefdcd8444de7ed3c9cc384e9145dfbe9246d80a4a304bb17c60f59383f8cc4a149e30dd307d324bb78f11204ce6a230b6edb3886b25b597a04232d95e
-  languageName: node
-  linkType: hard
-
 "updeep@npm:^1.0.0":
   version: 1.2.0
   resolution: "updeep@npm:1.2.0"
@@ -16198,7 +16193,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"updeep@npm:^1.2.0":
+"updeep@npm:^1.2.0, updeep@npm:^1.2.1":
   version: 1.2.1
   resolution: "updeep@npm:1.2.1"
   dependencies:
@@ -16463,7 +16458,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.45, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.46, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -16482,6 +16477,7 @@ typescript@~3.7.3:
     "@types/react-beautiful-dnd": ^13.1.1
     "@types/react-dom": ^17.0.6
     "@types/webpack": ^5.28.0
+    ajv: ^8.8.1
     babel-cli: ^6.4.5
     babel-loader: ^8.2.2
     chroma-js: ^2.1.2
@@ -16533,7 +16529,7 @@ typescript@~3.7.3:
     react-universal-hooks: 0.5.1
     react-uplot: 0.0.7
     react-vcomponents: 1.0.36
-    react-vextensions: 1.0.11
+    react-vextensions: 1.0.12
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.11
     react-vmessagebox: 1.0.10
@@ -16546,7 +16542,7 @@ typescript@~3.7.3:
     svg-sprite-loader: ^6.0.7
     ts-loader: ^9.2.3
     typescript: ^4.3.2
-    updeep: 1.1.0
+    updeep: ^1.2.1
     uplot: ^1.6.5
     uplot-vplugins: 0.0.7
     webpack: ^5.41.1

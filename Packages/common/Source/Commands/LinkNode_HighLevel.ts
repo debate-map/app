@@ -137,8 +137,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({
 			mapID,
 			link: {
-				parent: newParentID_forClaim, child: nodeID, form: newForm, polarity: newPolarity,
-				freeform: childGroup == ChildGroup.freeform,
+				parent: newParentID_forClaim, child: nodeID, group: childGroup,
+				form: newForm, polarity: newPolarity,
 			},
 		}).MarkAsSubcommand(this);
 		this.sub_linkToNewParent.Validate();

@@ -87,9 +87,9 @@
 			"group": "build"
 		},
 		{
-			"label": "#2 app-server.buildInitDBScript_watch",
+			"label": "#2 db.buildInitDBScript_watch",
 			"type": "shell",
-			"command": "npm start app-server.buildInitDBScript_watch",
+			"command": "npm start db.buildInitDBScript_watch",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
@@ -103,25 +103,17 @@
 			"group": "build"
 		},
 		{
-			"label": "## app-server.initDB_freshScript",
+			"label": "## db.initDB_freshScript_k8s local",
 			"type": "shell",
-			"command": "npm start app-server.initDB_freshScript",
+			"command": "npm start 'db.initDB_freshScript_k8s local'",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
-			"label": "## app-server.initDB_freshScript_k8s",
+			"label": "## db.dcAllDBSessions",
 			"type": "shell",
-			"command": "npm start app-server.initDB_freshScript_k8s",
-			"problemMatcher": [],
-			"isBackground": true,
-			"group": "build"
-		},
-		{
-			"label": "## app-server.dcAllDBSessions",
-			"type": "shell",
-			"command": "npm start app-server.dcAllDBSessions",
+			"command": "npm start db.dcAllDBSessions",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",

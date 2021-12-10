@@ -390,14 +390,23 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 });
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 
-export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
+export function GetValidChildTypes(nodeType: MapNodeType, path: string, group: ChildGroup) {
 	const nodeTypes = GetValues(MapNodeType);
-	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type) == null);
+	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type, group) == null);
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parent: MapNodeL2, childGroup: ChildGroup|n, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parent: MapNodeL2, childGroup: ChildGroup, permissions: PermissionGroupSet) {
 	const nodeTypes = GetValues(MapNodeType);
 	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, childGroup) == null);
+
+	// if in relevance or truth group, claims cannot be direct children (must be within argument)
+	/*if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {
+		validChildTypes = validChildTypes.Exclude(MapNodeType.claim);
+	} else {
+		// in the other cases, arguments cannot be direct children (those are only meant for in relevance/truth groups)
+		validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
+	}*/
+
 	return validChildTypes;
 }
 

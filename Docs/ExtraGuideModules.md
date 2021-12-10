@@ -45,3 +45,19 @@ Prerequisite steps: [deploy/setup-base](https://github.com/debate-map/app/tree/m
 Note: The docker images produced directly will have the name `dm-web-server-direct`.
 
 * 1\) For direct docker builds, run `npm start web-server.dockerBuild`.
+
+<!----><a name="psql-in-wsl"></a>
+### [psql-in-wsl] Set up psql for use in wsl
+
+The `psql` binary is not installed in Linux/WSL at the start. If you want `psql` runnable from within WSL, run the below setup:
+```
+sudo apt install postgresql-client-common
+# make above usable by providing implementation (from: https://stackoverflow.com/a/60923031)
+sudo apt update
+sudo apt -y upgrade
+sudo apt -y install vim bash-completion wget
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+sudo apt update
+sudo apt -y install postgresql-client-13
+```

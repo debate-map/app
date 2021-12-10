@@ -60,11 +60,14 @@ export class NodeUI extends BaseComponentPlus(
 		const {dividePoint, selfHeight, selfHeight_plusRightContent, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
-		//path = path || node.id.toString();
 
-		const nodeChildren = GetNodeChildrenL3(node.id, path);
-		// let nodeChildrenToShow: MapNodeL3[] = nodeChildren.Any(a => a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
-		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node.id, path, map.id, true, undefined, true, true);
+		const GetNodeChildren = (node2: MapNodeL3|n, path2: string|n)=>(node2 && path2 ? GetNodeChildrenL3(node2.id, path2) : ea);
+		const GetNodeChildrenToShow = (node2: MapNodeL3|n, path2: string|n)=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true, true) : ea);
+
+		const nodeChildren = GetNodeChildren(node, path);
+		const nodeChildrenToShow = GetNodeChildrenToShow(node, path);
+		const nodeForm = GetNodeForm(node, path);
+		const nodeView = GetNodeView(map.id, path);
 
 		//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		const sinceTime = 0;
@@ -74,25 +77,16 @@ export class NodeUI extends BaseComponentPlus(
 
 		const parent = GetParentNodeL3(path);
 		const parentPath = GetParentPath(path);
-		// const parentNodeView = GetNodeView(map.id, parentPath) || new MapNodeView();
-		// const parentNodeView = Watch(() => GetNodeView(map.id, parentPath) || new MapNodeView(), [map.id, parentPath]);
 		const parentNodeView = GetNodeView(map.id, parentPath);
 		const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
 
 		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		const argumentNode = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : ea;
-		const argumentNodePath = argumentNode == node ? path : argumentNode == parent ? parentPath : null;
-		const argumentChildren = argumentNode == node ? nodeChildren : argumentNode == parent ? parentChildren : ea;
-		const nodeForm = GetNodeForm(node, path);
-
-		/* const initialChildLimit = State(a => a.main.initialChildLimit);
-		const form = GetNodeForm(node, GetParentNodeL2(path)); */
-		/* const nodeView_early = GetNodeView(map.id, path) || new MapNodeView();
-		const nodeView = CachedTransform('nodeView_transform1', [map.id, path], nodeView_early.ExcludeKeys('focused', 'viewOffset', 'children'), () => nodeView_early); */
-		// const nodeView = Watch(() => GetNodeView(map.id, path) || new MapNodeView(), [map.id, path]);
-		const nodeView = GetNodeView(map.id, path);
+		const mergedArg = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
+		const mergedArgNodePath = mergedArg == node ? path : mergedArg == parent ? parentPath : null;
+		const mergedArgChildren = mergedArg ? GetNodeChildren(mergedArg, mergedArgNodePath) : null;
+		const mergedArgChildrenToShow = mergedArg ? GetNodeChildrenToShow(mergedArg, mergedArgNodePath) : null;
 		const boxExpanded = (isPremiseOfSinglePremiseArg ? parentNodeView?.expanded : nodeView?.expanded) ?? false;
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
@@ -112,8 +106,8 @@ export class NodeUI extends BaseComponentPlus(
 				Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node.id}`, "\nPropsChanged:", this.GetPropChanges().map(a=>a.key), "\nStateChanged:", this.GetStateChanges().map(a=>a.key));
 			}
 		}
-		// NodeUI.renderCount++;
-		// NodeUI.lastRenderTime = Date.now();
+		//NodeUI.renderCount++;
+		//NodeUI.lastRenderTime = Date.now();
 
 		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
 		if (isSinglePremiseArgument) {
@@ -161,10 +155,6 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 
-		const ncToShow_nonFreeform = nodeChildrenToShow.filter(a=>!a.link?.freeform);
-		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.freeform);
-		const truthArguments = ncToShow_nonFreeform.filter(a=>a.type == MapNodeType.argument);
-		const relevanceArguments: MapNodeL3[] = argumentChildren.filter(a=>a && !a.link?.freeform && a.type == MapNodeType.argument);
 		// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.claim), "Single-premise argument has more than one premise!");
 		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 			// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
@@ -187,7 +177,7 @@ export class NodeUI extends BaseComponentPlus(
 				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
-				nodeChildren={nodeChildren} nodeChildrenToShow={truthArguments}
+				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth)}
 				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
 					if (truthBoxVisible && relevanceBoxVisible) {
 						this.SetState({dividePoint: height}); // if truth and relevance boxes are both visible, divide-point is between them (so just below truth-box's height)
@@ -202,7 +192,7 @@ export class NodeUI extends BaseComponentPlus(
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
-				nodeChildren={argumentChildren} nodeChildrenToShow={relevanceArguments!}
+				nodeChildren={mergedArgChildren ?? ea} nodeChildrenToShow={mergedArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea}
 				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
 					if (relevanceBoxVisible && !truthBoxVisible) {
 						this.SetState({dividePoint}); // if only relevance box is visible, the divide-point is the relevance box's own divide-point (ie. at same height as the add-pro/add-con buttons)
@@ -214,7 +204,7 @@ export class NodeUI extends BaseComponentPlus(
 				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
-				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}/>;
+				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform)}/>;
 		let childConnectorBackground: JSX.Element|n;
 		if (usingBoxes /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
 			const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
@@ -256,7 +246,7 @@ export class NodeUI extends BaseComponentPlus(
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
-				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={layoutFlat ? nodeChildrenToShow : ncToShow_nonFreeform}
+				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={layoutFlat ? nodeChildrenToShow : nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic)}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
 					if (!isMultiPremiseArgument) {
@@ -302,7 +292,7 @@ export class NodeUI extends BaseComponentPlus(
 					{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
 						<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 					{!boxExpanded &&
-						<NodeChildCountMarker childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
+						<NodeChildCountMarker childCount={nodeChildrenToShow.length + (mergedArgChildrenToShow?.length ?? 0)}/>}
 					{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&
 						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 				</Column>
