@@ -1,23 +1,30 @@
 import {A, GetEntries, NN} from "web-vcore/nm/js-vextensions.js";
 import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment, MapNodeType} from "dm_common";
+import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment, MapNodeType, MapNode} from "dm_common";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
 import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
 
+export function CanNodeHaveAttachments(node: MapNode) {
+	//return node.type == MapNodeType.claim;
+	// maybe temp; allow attachments on everything except arguments (disallowed since attachment should just be added to its premise in that case)
+	return node.type != MapNodeType.argument;
+}
+
 export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {
 		const {newData, newDataAsL2, newRevisionData, forNew, enabled, Change} = this.props;
 		const attachmentType = GetAttachmentType(newDataAsL2);
 
+		const canHaveAttachments = CanNodeHaveAttachments(newData);
 		return (
 			<>
-				{newData.type != MapNodeType.claim &&
-					<Text>Only claim nodes can have attachments.</Text>}
-				{newData.type == MapNodeType.claim &&
+				{/*!canHaveAttachments && <Text>Only claim nodes can have attachments.</Text>*/}
+				{!canHaveAttachments && <Text>Argument nodes cannot have attachments. (add attachments to its premises instead)</Text>}
+				{canHaveAttachments &&
 				<>
 					<Row mb={attachmentType == AttachmentType.none ? 0 : 5}>
 						<Text>Type:</Text>
