@@ -188,7 +188,7 @@ export class NodeUI extends BaseComponentPlus(
 				}, [])}/>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
-				node={isSinglePremiseArgument ? parent! : node} path={isSinglePremiseArgument ? parentPath! : path}
+				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}

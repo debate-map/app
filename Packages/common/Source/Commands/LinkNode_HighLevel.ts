@@ -107,7 +107,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		let newParentID_forClaim = newParentID;
 
-		const wrapperArgNeeded = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument);
+		const wrapperArgNeeded = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument) && childGroup != ChildGroup.freeform;
 		if (wrapperArgNeeded) {
 			AssertV(childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth,
 				`Claim is being linked under parent that requires a wrapper-argument, but the specified child-group (${childGroup}) is incompatible with that.`);

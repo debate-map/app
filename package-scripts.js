@@ -151,7 +151,20 @@ Object.assign(scripts, {
 			return `${KubeCTLCmd(commandArgs[1])} debug -n ${targetPod.namespace} -it ${targetPod.name} --image=busybox --target=${targetPod}`;
 		}),
 	},
-	// for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)
+});
+
+function GetPortForwardCommandsStr(context) {
+	const fd = context == "ovh" ? "4" : "3"; // first-digit of port-numbers
+	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${execSync(GetPodNameCmd_DB(context)).toString().trim()} ${fd}205:5432`;
+	if (commandArgs.includes("onlyDB")) return forDB;
+
+	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${execSync(GetPodNameCmd_WebServer(context)).toString().trim()} ${fd}005`;
+	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${execSync(GetPodNameCmd_AppServer(context)).toString().trim()} ${fd}105`;
+	return `concurrently --kill-others --names db,ws,as "${forDB}" "${forAppServer}" "${forWebServer}"`;
+}
+
+// for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)
+Object.assign(scripts, {
 	backend: {
 		// general
 		//buildNMOverwrites: `npx file-syncer ${group1} ${group2}`,
@@ -162,13 +175,11 @@ Object.assign(scripts, {
 		pulumiUp: `${PrepDockerCmd()} pulumi up`,
 
 		// port-forwarding (standalone; without tilt)
-		forward_localDB: Dynamic(()=>{
-			const podName = execSync(GetPodNameCmd_DB("local")).toString().trim();
-			return `${KubeCTLCmd("local")} -n postgres-operator port-forward ${podName} 3205:5432`;
+		forward_local: Dynamic(()=>{
+			return GetPortForwardCommandsStr("local");
 		}),
-		forward_remoteDB: Dynamic(()=>{
-			const podName = execSync(GetPodNameCmd_DB("ovh")).toString().trim();
-			return `${KubeCTLCmd("ovh")} -n postgres-operator port-forward ${podName} 4205:5432`;
+		forward_remote: Dynamic(()=>{
+			return GetPortForwardCommandsStr("ovh");
 		}),
 		/*k8s_proxyOn8081: Dynamic(()=>{
 			console.log("Test");

@@ -40,7 +40,9 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const {map, node, path, inList, childGroup} = this.props;
 
 		const parent = GetParentNodeL3(path);
-		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
+		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+		const outerNode = isPremiseOfSinglePremiseArg ? parent : node;
+		const outerPath = isPremiseOfSinglePremiseArg ? SlicePath(path, 1) : path;
 		let pathsToChangedInSubtree = [] as string[];
 		if (map) {
 			//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
@@ -65,8 +67,13 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
-		const GetAddChildItems = (childGroupForItems: ChildGroup)=>{
-			const validChildTypes = GetValidNewChildTypes(node, childGroupForItems, permissions);
+		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
+		//const childLayout_forStructuredHeaders = addChildGroups_structured.length <= 1 ? "below" : "right";
+		const childLayout_forStructuredHeaders = "right";
+		const headerStyle = ES(styles.vMenuItem, {opacity: 1});
+
+		const GetAddChildItems = (node2: MapNodeL3, path2: string, childGroup2: ChildGroup)=>{
+			const validChildTypes = GetValidNewChildTypes(node2, childGroup2, permissions);
 			if (validChildTypes.length == 0) return null;
 
 			//if (!CanContributeToNode(userID, node.id)) return null;
@@ -78,38 +85,46 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 					//let displayName = GetMapNodeTypeDisplayName(childType, node, form);
 					const polarities = childType == MapNodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
 					return polarities.map(polarity=>{
-						const displayName = GetMapNodeTypeDisplayName(childType, node, ClaimForm.base, polarity);
+						const displayName = GetMapNodeTypeDisplayName(childType, node2, ClaimForm.base, polarity);
 						return (
-							<VMenuItem key={`${childType}_${polarity}`} text={`Add ${displayName}`} style={styles.vMenuItem}
+							<VMenuItem key={`${childType}_${polarity}`} text={`New ${displayName}`} style={styles.vMenuItem}
 								onClick={e=>{
 									if (e.button != 0) return;
 									if (userID == null) return ShowSignInPopup();
-									ShowAddChildDialog(path, childType, polarity, userID, childGroupForItems, mapID);
+									ShowAddChildDialog(path2, childType, polarity, userID, childGroup2, mapID);
 								}}/>
 						);
 					});
 				})}
+				<MI_PasteAsLink {...sharedProps} node={node2} path={path2} childGroup={childGroup2}/>
+				{/*<VMenuItem text={`Paste (advanced)`} enabled={false} style={headerStyle}>
+					<VMenuItem text={`As link, directly`} style={styles.vMenuItem}/>
+					<VMenuItem text={`As link, in new argument`} style={styles.vMenuItem}/>
+					<VMenuItem text={`As clone, in new argument`} style={styles.vMenuItem}/>
+				</VMenuItem>*/}
 			</>;
 		};
-		const addChildItems_structured_generic = GetAddChildItems(ChildGroup.generic);
-		const addChildItems_structured_truth = GetAddChildItems(ChildGroup.truth);
-		const addChildItems_structured_relevance = GetAddChildItems(ChildGroup.relevance);
-		const addChildItems_freeform = GetAddChildItems(ChildGroup.freeform);
-		const addChildGroups = [addChildItems_structured_generic, addChildItems_structured_truth, addChildItems_structured_relevance, addChildItems_freeform].filter(a=>a);
-		const multipleAddChildGroups = addChildGroups.length > 1;
+		const addChildItems_structured_generic = childGroup.IsOneOf("generic") && GetAddChildItems(node, path, ChildGroup.generic);
+		const addChildItems_structured_truth = childGroup.IsOneOf("generic", "truth") && GetAddChildItems(node, path, ChildGroup.truth);
+		const addChildItems_structured_relevance =
+			(childGroup.IsOneOf("generic", "relevance") && GetAddChildItems(node, path, ChildGroup.relevance)) ||
+			(childGroup == "generic" && isPremiseOfSinglePremiseArg && GetAddChildItems(outerNode!, outerPath!, ChildGroup.relevance));
+		const addChildItems_freeform = childGroup.IsOneOf("generic", "freeform") && GetAddChildItems(node, path, ChildGroup.freeform);
+		const addChildGroups_structured = [addChildItems_structured_generic, addChildItems_structured_truth, addChildItems_structured_relevance].filter(a=>a);
+		const addChildGroups = [...addChildGroups_structured, addChildItems_freeform].filter(a=>a);
+		//const multipleAddChildGroups = addChildGroups.length > 1;
+		const multipleAddChildGroups = true;
 
-		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
-		const headerStyle = ES(styles.vMenuItem, {opacity: 1});
 		return (
 			<>
 				{multipleAddChildGroups && addChildItems_structured_generic &&
-					<VMenuItem text={`Add structured child`} childLayout="below" enabled={false} style={headerStyle}>{addChildItems_structured_generic}</VMenuItem>}
+					<VMenuItem text={`Add structured child`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_generic}</VMenuItem>}
 				{multipleAddChildGroups && addChildItems_structured_truth &&
-					<VMenuItem text={`Add structured child (re. truth)`} childLayout="below" enabled={false} style={headerStyle}>{addChildItems_structured_truth}</VMenuItem>}
+					<VMenuItem text={`Add structured child (re. truth)`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_truth}</VMenuItem>}
 				{multipleAddChildGroups && addChildItems_structured_relevance &&
-					<VMenuItem text={`Add structured child (re. relevance)`} childLayout="below" enabled={false} style={headerStyle}>{addChildItems_structured_relevance}</VMenuItem>}
+					<VMenuItem text={`Add structured child (re. relevance)`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>{addChildItems_structured_relevance}</VMenuItem>}
 				{multipleAddChildGroups && addChildItems_freeform &&
-					<VMenuItem text={`Add freeform child ->`} enabled={false} style={headerStyle}>{addChildItems_freeform}</VMenuItem>}
+					<VMenuItem text={`Add freeform child`} enabled={false} style={headerStyle}>{addChildItems_freeform}</VMenuItem>}
 				{/*!multipleAddChildGroups &&
 					<VMenuItem text={`Add child`} style={styles.vMenuItem}>{addChildGroups[0]}</VMenuItem>*/}
 				{!multipleAddChildGroups &&
@@ -188,7 +203,21 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							} */
 							ACTCopyNode(path, false);
 						}}/>}
-				<MI_PasteAsLink {...sharedProps}/>
+				{/*<VMenuItem text={`Paste: "Pro2"`} enabled={false} style={headerStyle}>
+					{/*<VMenuItem text={`As structured child (re. truth)`} style={styles.vMenuItem}/>
+					<VMenuItem text={`As structured child (re. relevance)`} style={styles.vMenuItem}/>
+					<VMenuItem text={`As freeform child`} style={styles.vMenuItem}/>*#/}
+					<VMenuItem text={`Paste as-is (link)`} childLayout="below" enabled={false} style={headerStyle}>
+						<VMenuItem text={`As structured child (re. truth)`} style={styles.vMenuItem}/>
+						<VMenuItem text={`As structured child (re. relevance)`} style={styles.vMenuItem}/>
+						<VMenuItem text={`As freeform child`} style={styles.vMenuItem}/>
+					</VMenuItem>
+					<VMenuItem text={`Paste a copy (clone)`} childLayout="below" enabled={false} style={headerStyle}>
+						<VMenuItem text={`As structured child (re. truth)`} style={styles.vMenuItem}/>
+						<VMenuItem text={`As structured child (re. relevance)`} style={styles.vMenuItem}/>
+						<VMenuItem text={`As freeform child`} style={styles.vMenuItem}/>
+					</VMenuItem>
+				</VMenuItem>*/}
 				{/* // disabled for now, since I need to create a new command to wrap the logic. One route: create a CloneNode_HighLevel command, modeled after LinkNode_HighLevel (or containing it as a sub)
 					IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(GetParentNodeID(path), copiedNode.Extended({ _key: -1 }), permissions, childGroup) && !copiedNode_asCut &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async (e) => {

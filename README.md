@@ -87,15 +87,15 @@ Reasons:
 <details><summary><b>[vscode] Project service urls (ie. where app contents are served) </b></summary>
 
 Local:
-* `localhost:3005`: Web-server, local, served from kubernetes [`backend.tiltUp_local` must be running]
-* `localhost:3055`: Web-server, local, served from webpack [`client.dev` must be running]
-* `localhost:3105`: App-server, local, served from kubernetes [`backend.tiltUp_local` must be running]
-* `localhost:3205`: Postgres instance, local, served from kubernetes [`backend.tiltUp_local` or `backend.forward_localDB` must be running]
+* `localhost:3005`: Web-server, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:3055`: Web-server, local, served from webpack (`client.dev` must be running)
+* `localhost:3105`: App-server, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:3205`: Postgres instance, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (private port-forwards/proxies):
-* `localhost:4005`: Web-server, remote, served from kubernetes [`backend.tiltUp_ovh` must be running]
-* `localhost:4105`: App-server, remote, served from kubernetes [`backend.tiltUp_ovh` must be running]
-* `localhost:4205`: Postgres instance, remote, served from kubernetes [`backend.tiltUp_ovh` or `backend.forward_remoteDB` must be running]
+* `localhost:4005`: Web-server, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:4105`: App-server, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:4205`: Postgres instance, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
 
 Remote (public):
 * `debates.app`: Web-server, remote, served from kubernetes
@@ -534,7 +534,7 @@ Authorized redirect URIs:
 
 For database pod:
 * 1\) If you have tilt running, a port-forward should already be set up, on the correct port. (`3205` for your local cluster, and `4205` for your remote cluster)
-* 2\) You can also set up the port-forwarding by running the script: `npm start backend.forward_[local/remote]DB`
+* 2\) You can also set up the port-forwarding by running the script: `npm start backend.forward_[local/remote]` (to only port-forward the db pod, add arg: `onlyDB`)
 
 </details>
 

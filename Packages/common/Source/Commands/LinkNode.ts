@@ -3,7 +3,7 @@ import {E} from "js-vextensions";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {ClaimForm, Polarity, MapNode} from "../DB/nodes/@MapNode.js";
-import {GetNode} from "../DB/nodes.js";
+import {ForLink_GetError, ForNewLink_GetError, GetNode} from "../DB/nodes.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
@@ -49,6 +49,11 @@ export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial
 			(this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this) ? [] : null)
 			?? GetNodeChildLinks(link.parent, link.child);
 		AssertV(parentToChildLinks.length == 0, `Node #${link.child} is already a child of node #${link.parent}.`);
+
+		// confirm that the parent-child combination is valid
+		//const forNewLink_error = ForNewLink_GetError(link.parent); // can't use this atm, since not "pure" enough
+		const forLink_error = ForLink_GetError(this.parent_oldData.type, this.child_oldData.type, link.group);
+		AssertV(forLink_error == null, forLink_error);
 
 		link.id = this.GenerateUUID_Once("link.id");
 		link.creator = this.userInfo.id;
