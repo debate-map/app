@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildrenLayout, InvertChildrenLayout, MapNodeRevision, AddNodeRevision} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, InvertChildLayout, MapNodeRevision, AddNodeRevision} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
@@ -115,6 +115,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		//const multipleAddChildGroups = addChildGroups.length > 1;
 		const multipleAddChildGroups = true;
 
+		const childLayout = GetChildLayout_Final(node.current, map);
 		return (
 			<>
 				{multipleAddChildGroups && addChildItems_structured_generic &&
@@ -210,11 +211,11 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								store.main.search.findNode_resultPaths = [];
 							});
 						}}/>}
-				{IsUserCreatorOrMod(userID, node) && !forChildHolderBox &&
-					<VMenuItem text={`Toggle children layout (${GetChildrenLayout(node.current)} -> ${InvertChildrenLayout(GetChildrenLayout(node.current))})`} style={styles.vMenuItem}
+				{IsUserCreatorOrMod(userID, node) && !forChildHolderBox && map?.extras.allowSpecialChildLayouts &&
+					<VMenuItem text={`Toggle children layout (${childLayout} -> ${InvertChildLayout(childLayout)})`} style={styles.vMenuItem}
 						onClick={async e=>{
 							const newRevision = Clone(node.current) as MapNodeRevision;
-							newRevision.displayDetails = {...newRevision.displayDetails, childrenLayout_flat: !newRevision.displayDetails?.childrenLayout_flat};
+							newRevision.displayDetails = {...newRevision.displayDetails, childLayout: InvertChildLayout(childLayout)};
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							RunInAction("ToggleChildrenLayout", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 						}}/>}

@@ -1,5 +1,6 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {Map} from "DB.js";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment.js";
 import {MediaAttachment} from "../nodeRevisions/@MediaAttachment.js";
 import {AccessLevel} from "./@MapNode.js";
@@ -37,15 +38,30 @@ export class NodeRevisionDisplayDetails {
 	@Field({type: ["number", "null"]}, {opt: true})
 	widthOverride?: number;
 
-	@Field({type: ["boolean", "null"]}, {opt: true})
-	childrenLayout_flat?: boolean;
+	@Field({$ref: "ChildLayout"}, {opt: true})
+	childLayout?: ChildLayout;
 }
 
-export function GetChildrenLayout(revision: MapNodeRevision) {
-	return revision.displayDetails?.childrenLayout_flat ? "flat" : "structured";
+export enum ChildLayout {
+	structured = "structured",
+	flat = "flat",
 }
-export function InvertChildrenLayout(layout: "structured" | "flat") {
-	return layout == "structured" ? "flat" : "structured";
+AddSchema("ChildLayout", {enum: GetValues(ChildLayout)});
+
+export function GetChildLayout_Final(revision: MapNodeRevision, map?: Map): ChildLayout {
+	let result = ChildLayout.structured;
+	if (map?.extras.allowSpecialChildLayouts) {
+		if (map.extras.defaultChildLayout) {
+			result = map.extras.defaultChildLayout;
+		}
+		if (revision.displayDetails?.childLayout) {
+			result = revision.displayDetails.childLayout;
+		}
+	}
+	return result;
+}
+export function InvertChildLayout(layout: ChildLayout): ChildLayout {
+	return layout == ChildLayout.structured ? ChildLayout.flat : ChildLayout.structured;
 }
 
 /*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;

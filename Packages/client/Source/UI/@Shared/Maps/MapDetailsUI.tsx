@@ -1,10 +1,10 @@
-import {AddMap, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID} from "dm_common";
+import {AddMap, ChildLayout, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {Observer, TextPlus} from "web-vcore";
-import {DEL, ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {DEL, GetEntries, ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
@@ -62,9 +62,22 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 				</RowLR>}
 				{!creating &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<TextPlus info="Whether to show the 'freeform' node-subtrees by default.">Show freeform (default):</TextPlus>
+					<TextPlus info="Whether to show the 'freeform' box under claim/argument nodes, even when they have no freeform children yet.">Show freeform (default):</TextPlus>
 					<CheckBox enabled={enabled} value={newData.extras.defaultShowFreeform ?? false} onChange={val=>Change(newData.extras.defaultShowFreeform = val)}/>
 				</RowLR>}
+
+				{!creating &&
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<TextPlus>Node child-layouts:</TextPlus>
+					<TextPlus info="Whether nodes are allowed to be displayed with the flat-layout rather than the default structured-layout.">Allow special:</TextPlus>
+					<CheckBox ml={5} enabled={enabled} value={newData.extras.allowSpecialChildLayouts ?? false} onChange={val=>Change(newData.extras.allowSpecialChildLayouts = val)}/>
+					{newData.extras.allowSpecialChildLayouts &&
+					<>
+						<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Default:</TextPlus>
+						<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
+					</>}
+				</RowLR>}
+
 				{/*!forNew &&
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Default timeline:</Pre>

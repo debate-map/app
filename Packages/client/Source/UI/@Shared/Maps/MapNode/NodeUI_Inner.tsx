@@ -221,15 +221,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		//const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const subPanelShow = node.current.references || node.current.quote || node.current.media;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
-		let expanded = nodeView?.expanded ?? false;
+		const expanded = nodeView?.expanded ?? false;
 
-		// const parentNodeView = GetNodeView(map.id, parentPath);
-		// const parentNodeView = Watch(() => parentPath && GetNodeView_SelfOnly(map.id, parentPath), [map.id, parentPath]);
-		const parentNodeView = GetNodeView(map?.id, parentPath);
+		/*const parentNodeView = GetNodeView(map?.id, parentPath);
 		// if combined with parent arg (ie. premise of single-premise arg), use parent's expansion state for this box
 		if (combinedWithParentArgument) {
 			expanded = parentNodeView?.expanded ?? false;
-		}
+		}*/
 
 		const onMouseEnter = UseCallback(e=>{
 			if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
@@ -271,18 +269,17 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}, [combinedWithParentArgument, node.id, parent]);
 		const onTextCompClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
-			/* let pathToApplyTo = path;
-			// if collapsing subtree, and this node is premise of single-premise arg, start collapsing from parent (the argument node), so that its relevance args are collapsed as well
-			if (expanded && e.altKey && combinedWithParentArgument) {
-				pathToApplyTo = parentPath;
-			}
-			store.dispatch(new ACTMapNodeExpandedSet({ mapID: map.id, path: pathToApplyTo, expanded: !expanded, recursive: expanded && e.altKey })); */
+			const newExpanded = !expanded;
+			const recursivelyCollapsing = newExpanded == false && e.altKey;
+			ACTMapNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 
-			// if collapsing subtree, and this node is premise of single-premise arg, start collapsing from parent (the argument node), so that its relevance args are collapsed as well
-			const recursivelyCollapsing = expanded && e.altKey;
-			ACTMapNodeExpandedSet({mapID: map?.id, path: combinedWithParentArgument ? parentPath! : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
+			// if this node is premise of single-premise arg, change the expansion state of the parent-node (the wrapper argument) as well
+			if (combinedWithParentArgument) {
+				ACTMapNodeExpandedSet({mapID: map?.id, path: parentPath!, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
+			}
+
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
-			// return false;
+			//return false;
 		}, [combinedWithParentArgument, expanded, map?.id, parentPath, path]);
 
 		const renderInner = (dragInfo?: DragInfo)=>{

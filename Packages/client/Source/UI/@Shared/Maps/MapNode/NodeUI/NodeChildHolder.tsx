@@ -41,7 +41,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	render() {
 		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth, onHeightOrDividePointChange} = this.props;
 		let {childrenWidthOverride, lastChildBoxOffsets, placeholderRect} = this.state;
-		childrenWidthOverride = (childrenWidthOverride ?? 0).KeepAtLeast(minWidth ?? 0);
+		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
 
 		const nodeView = GetNodeView(map.id, path);
 		const nodeChildren_orderingScores = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
@@ -54,8 +54,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		//let nodeChildrenToShowInRelevanceBox;
-		if (IsMultiPremiseArgument(node) && group != ChildGroup.relevance) {
-			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.argument);
+		if (IsMultiPremiseArgument(node) && group == ChildGroup.generic) {
+			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a.type == MapNodeType.claim);
 			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
 		}
 

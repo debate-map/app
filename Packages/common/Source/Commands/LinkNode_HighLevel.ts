@@ -68,7 +68,7 @@ type Payload = {
 	//defaultPayload: {createWrapperArg: true},
 })
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {
-	map_data: Map;
+	map_data: Map|n;
 	node_data: MapNode;
 	newParent_data: MapNode;
 
@@ -84,7 +84,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		this.returnData = {};
 
-		this.map_data = GetMap.NN(mapID);
+		this.map_data = GetMap(mapID);
 		this.node_data = GetNodeL2.NN(nodeID);
 		const oldParent = GetNodeL2(oldParentID);
 		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");

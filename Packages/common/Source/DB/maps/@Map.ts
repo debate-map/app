@@ -1,3 +1,4 @@
+import {ChildLayout} from "DB";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
@@ -119,6 +120,12 @@ export class Map_Extras {
 	constructor(data?: Partial<Map_Extras>) {
 		this.VSet(data);
 	}
+
+	@Field({type: "boolean"}, {opt: true})
+	allowSpecialChildLayouts? = false;
+
+	@Field({$ref: "ChildLayout"}, {opt: true})
+	defaultChildLayout?: ChildLayout;
 
 	@Field({type: "boolean"}, {opt: true})
 	defaultShowFreeform? = false;
