@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper, SimpleSchema, DeriveJSONSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper, SimpleSchema, DeriveJSONSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
 import {E} from "js-vextensions";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
@@ -65,6 +65,7 @@ export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial
 		}
 
 		this.returnData = {linkID: link.id};
+		AssertValidate("NodeChildLink", link, "Node-child-link invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

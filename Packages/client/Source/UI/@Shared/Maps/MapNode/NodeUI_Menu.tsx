@@ -129,47 +129,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 					<VMenuItem text={`Add child`} style={styles.vMenuItem}>{addChildGroups[0]}</VMenuItem>*/}
 				{!multipleAddChildGroups &&
 					addChildGroups[0]}
-				{/* // IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("*") && !componentBox &&
-				// for now, only let mods add layer-subnodes (confusing otherwise)
-					HasModPermissions(userID) && !inList && path.includes('/') && !path.includes('*') && !componentBox &&
-					<VMenuItem text="Add subnode (in layer)" style={styles.vMenuItem}
-						onClick={(e) => {
-							if (e.button != 0) return;
-							if (userID == null) return ShowSignInPopup();
-							ShowAddSubnodeDialog(mapID, node, path);
-						}}/> */}
-				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
-					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
-						onClick={async e=>{
-							if (e.button != 0) return;
-
-							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).RunOnServer();
-						}}/>}
-				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
-					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !forChildHolderBox &&
-					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
-						onClick={async e=>{
-							if (e.button !== 0) return;
-
-							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
-						}}/>}
-				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
-					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
-						onClick={e=>{
-							if (e.button != 0) return;
-							for (const path of pathsToChangedInSubtree) {
-								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
-							}
-						}}/>}
-				{inList &&
-					<VMenuItem text="Find in maps" style={styles.vMenuItem}
-						onClick={e=>{
-							RunInAction("NodeUIMenu.FindInCurrentMap", ()=>{
-								store.main.search.findNode_state = "activating";
-								store.main.search.findNode_node = node.id;
-								store.main.search.findNode_resultPaths = [];
-							});
-						}}/>}
 				{!inList && !forChildHolderBox &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Cut"}
 						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
@@ -203,21 +162,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							} */
 							ACTCopyNode(path, false);
 						}}/>}
-				{/*<VMenuItem text={`Paste: "Pro2"`} enabled={false} style={headerStyle}>
-					{/*<VMenuItem text={`As structured child (re. truth)`} style={styles.vMenuItem}/>
-					<VMenuItem text={`As structured child (re. relevance)`} style={styles.vMenuItem}/>
-					<VMenuItem text={`As freeform child`} style={styles.vMenuItem}/>*#/}
-					<VMenuItem text={`Paste as-is (link)`} childLayout="below" enabled={false} style={headerStyle}>
-						<VMenuItem text={`As structured child (re. truth)`} style={styles.vMenuItem}/>
-						<VMenuItem text={`As structured child (re. relevance)`} style={styles.vMenuItem}/>
-						<VMenuItem text={`As freeform child`} style={styles.vMenuItem}/>
-					</VMenuItem>
-					<VMenuItem text={`Paste a copy (clone)`} childLayout="below" enabled={false} style={headerStyle}>
-						<VMenuItem text={`As structured child (re. truth)`} style={styles.vMenuItem}/>
-						<VMenuItem text={`As structured child (re. relevance)`} style={styles.vMenuItem}/>
-						<VMenuItem text={`As freeform child`} style={styles.vMenuItem}/>
-					</VMenuItem>
-				</VMenuItem>*/}
 				{/* // disabled for now, since I need to create a new command to wrap the logic. One route: create a CloneNode_HighLevel command, modeled after LinkNode_HighLevel (or containing it as a sub)
 					IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(GetParentNodeID(path), copiedNode.Extended({ _key: -1 }), permissions, childGroup) && !copiedNode_asCut &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async (e) => {
@@ -234,6 +178,38 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).RunOnServer();
 						}
 					}}/> */}
+				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
+					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
+						onClick={async e=>{
+							if (e.button != 0) return;
+
+							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).RunOnServer();
+						}}/>}
+				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
+					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !forChildHolderBox &&
+					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
+						onClick={async e=>{
+							if (e.button !== 0) return;
+
+							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
+						}}/>}
+				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
+					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
+						onClick={e=>{
+							if (e.button != 0) return;
+							for (const path of pathsToChangedInSubtree) {
+								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
+							}
+						}}/>}
+				{inList &&
+					<VMenuItem text="Find in maps" style={styles.vMenuItem}
+						onClick={e=>{
+							RunInAction("NodeUIMenu.FindInCurrentMap", ()=>{
+								store.main.search.findNode_state = "activating";
+								store.main.search.findNode_node = node.id;
+								store.main.search.findNode_resultPaths = [];
+							});
+						}}/>}
 				{IsUserCreatorOrMod(userID, node) && !forChildHolderBox &&
 					<VMenuItem text={`Toggle children layout (${GetChildrenLayout(node.current)} -> ${InvertChildrenLayout(GetChildrenLayout(node.current))})`} style={styles.vMenuItem}
 						onClick={async e=>{

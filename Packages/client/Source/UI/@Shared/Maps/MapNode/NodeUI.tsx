@@ -86,7 +86,7 @@ export class NodeUI extends BaseComponentPlus(
 		const mergedArg = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
 		const mergedArgNodePath = mergedArg == node ? path : mergedArg == parent ? parentPath : null;
 		const mergedArgChildren = mergedArg ? GetNodeChildren(mergedArg, mergedArgNodePath) : null;
-		const mergedArgChildrenToShow = mergedArg ? GetNodeChildrenToShow(mergedArg, mergedArgNodePath) : null;
+		const mergedArgChildrenToShow = mergedArg ? GetNodeChildrenToShow(mergedArg, mergedArgNodePath).filter(a=>a.id != node.id) : null;
 		const boxExpanded = (isPremiseOfSinglePremiseArg ? parentNodeView?.expanded : nodeView?.expanded) ?? false;
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
@@ -167,9 +167,14 @@ export class NodeUI extends BaseComponentPlus(
 		const layoutFlat = node.current.displayDetails?.childrenLayout_flat ?? false;
 		const separateChildren = !layoutFlat && node.type == MapNodeType.claim;
 		const truthBoxVisible = !layoutFlat && node.type == MapNodeType.claim; //&& nodeForm != ClaimForm.question;
-		const relevanceBoxVisible = !layoutFlat && (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg);
+		let relevanceBoxVisible = !layoutFlat && (node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg);
+		// if there are relevance arguments under the parent (merged) single-premise-arg, relevance-box must remain visible (even if layoutFlat is true)
+		if (isPremiseOfSinglePremiseArg && mergedArgChildrenToShow?.length) {
+			relevanceBoxVisible = true;
+		}
 		const freeformBoxVisible = !layoutFlat && (node.type == MapNodeType.claim || node.type == MapNodeType.argument) && map.extras.defaultShowFreeform;
-		const usingBoxes = truthBoxVisible || relevanceBoxVisible || freeformBoxVisible;
+		const groupsUsingBoxes = (truthBoxVisible ? 1 : 0) + (relevanceBoxVisible ? 1 : 0) + (freeformBoxVisible ? 1 : 0);
+		const usingDirect = isMultiPremiseArgument || groupsUsingBoxes == 0 || layoutFlat;
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
@@ -206,7 +211,7 @@ export class NodeUI extends BaseComponentPlus(
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform)}/>;
 		let childConnectorBackground: JSX.Element|n;
-		if (usingBoxes /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
+		if (groupsUsingBoxes > 0 /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
 			const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
@@ -233,7 +238,7 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 		let nodeChildHolder_direct: JSX.Element|n;
-		if ((!usingBoxes || isMultiPremiseArgument) && boxExpanded) {
+		if (usingDirect && boxExpanded) {
 			const showArgumentsControlBar = separateChildren && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			const dividePoint_safe = dividePoint || (selfHeight / 2);
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren, showArgumentsControlBar}}
@@ -246,7 +251,11 @@ export class NodeUI extends BaseComponentPlus(
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
-				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={layoutFlat ? nodeChildrenToShow : nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic)}
+				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={
+					//layoutFlat ? nodeChildrenToShow.concat(mergedArgChildrenToShow ?? []) : nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic)
+					// even in flat mode, we don't include marged-arg-children, because that messes up the path extend/concat logic (could be fixed, but not high priority, since relevance-args are rare in flat-layout mode; just use box)
+					layoutFlat ? nodeChildrenToShow : nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic)
+				}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
 					if (!isMultiPremiseArgument) {

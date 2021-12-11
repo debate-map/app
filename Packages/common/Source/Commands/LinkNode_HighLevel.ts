@@ -54,7 +54,7 @@ type Payload = {
 		newForm: {$ref: "ClaimForm"},
 		newPolarity: {$ref: "Polarity"},
 		//createWrapperArg: {type: "boolean"},
-		childGroup: {$ref: "ChildGroup"},
+		$childGroup: {$ref: "ChildGroup"},
 		unlinkFromOldParent: {type: "boolean"},
 		deleteEmptyArgumentWrapper: {type: "boolean"},
 	}),
@@ -126,7 +126,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_addArgumentWrapper = this.sub_addArgumentWrapper ?? new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-				link: new NodeChildLink({slot: 0, polarity: newPolarity}),
+				link: new NodeChildLink({group: childGroup, slot: 0, polarity: newPolarity}),
 			}).MarkAsSubcommand(this);
 			this.sub_addArgumentWrapper.Validate();
 
@@ -137,7 +137,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({
 			mapID,
 			link: {
-				parent: newParentID_forClaim, child: nodeID, group: childGroup,
+				parent: newParentID_forClaim, child: nodeID, group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
 				form: newForm, polarity: newPolarity,
 			},
 		}).MarkAsSubcommand(this);
