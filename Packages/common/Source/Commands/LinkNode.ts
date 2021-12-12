@@ -62,6 +62,8 @@ export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial
 		link.c_childType = this.child_oldData.type;
 		if (this.child_oldData.type == MapNodeType.argument) {
 			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.");
+		} else {
+			AssertV(this.payload.link.polarity == null, "Only argument nodes should have a polarity value specified in its parent-link.");
 		}
 
 		this.returnData = {linkID: link.id};

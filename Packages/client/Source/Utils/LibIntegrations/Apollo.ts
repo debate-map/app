@@ -15,11 +15,11 @@ export function GetWebServerURL(subpath: string) {
 	return `https://debatemap.app/${subpath.slice(1)}`;*/
 	return subpath;
 }
-export function GetAppServerURL(subpath: string) {
+export function GetAppServerURL(subpath: string): string {
 	Assert(subpath.startsWith("/"));
 
 	// temp
-	if (location.host == "debates.app" || DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
+	/*if (location.host == "debates.app" || DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
 
 	if (location.host == "localhost:3005" || location.host == "localhost:3055") return `http://localhost:3105/${subpath.slice(1)}`;
 	//if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
@@ -27,7 +27,11 @@ export function GetAppServerURL(subpath: string) {
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
 	//if (location.host.endsWith(":31005")) return `${location.protocol}//${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
 
-	return `https://app-server.debatemap.app/${subpath.slice(1)}`;
+	return `https://app-server.debatemap.app/${subpath.slice(1)}`;*/
+
+	if (DB == "development") return `http://localhost:3105/${subpath.slice(1)}`;
+	if (DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
+	Assert(false, `Invalid database specified:${DB}`);
 }
 
 const GRAPHQL_URL = GetAppServerURL("/graphql");

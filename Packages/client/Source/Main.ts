@@ -34,7 +34,7 @@ let storeTemp = {} as RootState;
 if (storeTemp_json) {
 	try { // defensive
 		storeTemp = JSON.parse(storeTemp_json);
-	} catch(ex) {}
+	} catch (ex) {}
 }
 function AsNotNull(val: any) {
 	if (val == null || val == "null") return null;
@@ -69,6 +69,9 @@ if (ENV_COMPILE_TIME != "production") {
 declare global { var DB: string; var DB_SHORT: string; }
 
 g.DB = g.ENV;
+if (location.host == "localhost:3005" || location.host == "localhost:3055") {
+	g.DB = "development";
+}
 const dbStr = AsNotNull(startURL.GetQueryVar("db")) || storeTemp.main?.dbOverride;
 if (dbStr) {
 	g.DB = {dev: "development", prod: "production"}[dbStr] || dbStr;

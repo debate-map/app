@@ -579,12 +579,12 @@ New steps:
 * 4\) Execute the migration script against the draft copy of the database.
 	* 4.1\) Run: `TODO`
 * 5\) Confirm that the draft database's contents are correct.
-	* 5.1\) Open the (locally-served) new frontend's code, connecting to the draft database (by adding the `?db=prod-draft` flag to the url), and confirm that things work correctly.
+	* 5.1\) Open the (locally-served) new frontend's code, connecting to the draft database (by adding the `?db=prod-draft` flag to the url -- not yet implemented), and confirm that things work correctly.
 	* 5.2\) You could also connect to the draft database using a tool like DBeaver, and confirm that the contents look correct there.
 * 6\) Demote the main `debate-map` database. (ie. renaming it to `debate-map-old-XXX`)
 	* 6.1\) Run: `npm start "db.demoteDebateMapDB_k8s ovh"`
 * 7\) Promote the draft `debate-map-draft` database. (ie. renaming it to `debate-map`)
-	* 7.1\) Run: `npm start "db.promoteDebateMapDraftDB_k8s ovh"`
+	* 7.1\) Run: `npm start "db.promoteDebateMapDraftDB_k8s ovh"` [not yet implemented]
 
 </details>
 
