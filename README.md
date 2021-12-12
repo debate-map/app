@@ -585,6 +585,7 @@ New steps:
 	* 6.1\) Run: `npm start "db.demoteDebateMapDB_k8s ovh"`
 * 7\) Promote the draft `debate-map-draft` database. (ie. renaming it to `debate-map`)
 	* 7.1\) Run: `npm start "db.promoteDebateMapDraftDB_k8s ovh"` [not yet implemented]
+* 8\) Disable the `dbReadOnly` flag in the `globalData` table. (see step 2)
 
 </details>
 
