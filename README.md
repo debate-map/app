@@ -357,7 +357,7 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
-* 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.deposeDebateMapDB_k8s local"`
+* 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s local"`
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s local db:postgres"`)
 * 2\) Run: `npm start "db.initDB_freshScript_k8s local"`
 
@@ -565,10 +565,25 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 <!----><a name="db-migrate"></a>
 <details><summary><b>[db-migrate] Database migrations</b></summary>
 
-See here for overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
+Old overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
 
-Actions:
-* To create a new migration, make a copy of the latest migration in `Knex/Migrations`, rename it (incrementing the number), then clear the up/down functions.
+New steps:
+* 1\) Write a KnexJS script that modifies the db contents to match the new desired shape. (using native PG commands, for fast execution)
+	* 1.1\) Make a copy of the latest migration in `Knex/Migrations`, and give it an appropriate name.
+	* 1.2\) Write the migration code. (reference the older migration scripts to see patterns used)
+* 2\) Enable a flag on the main `debate-map` database, blocking writes, and causing a message to display in the frontend saying `Database is under maintenance. Estimated completion: XXX`.
+	* 2.1\) Run: `TODO`
+* 3\) Create a copy of the database, named `debate-map-draft`.
+	* 3.1\) Run: `TODO`
+* 4\) Execute the migration script against the draft copy of the database.
+	* 4.1\) Run: `TODO`
+* 5\) Confirm that the draft database's contents are correct.
+	* 5.1\) Open the (locally-served) new frontend's code, connecting to the draft database (by adding the `?db=prod-draft` flag to the url), and confirm that things work correctly.
+	* 5.2\) You could also connect to the draft database using a tool like DBeaver, and confirm that the contents look correct there.
+* 6\) Demote the main `debate-map` database. (ie. renaming it to `debate-map-old-XXX`)
+	* 6.1\) Run: `npm start "db.demoteDebateMapDB_k8s ovh"`
+* 7\) Promote the draft `debate-map-draft` database. (ie. renaming it to `debate-map`)
+	* 7.1\) Run: `npm start "db.promoteDebateMapDraftDB_k8s ovh"`
 
 </details>
 

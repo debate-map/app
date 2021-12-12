@@ -62,19 +62,27 @@ Object.assign(scripts, {
 
 const appNamespace = "default"; //"app";
 const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
-const GetPodNameCmd_DB =					context=>`${KubeCTLCmd(context)} get pod -o name -n postgres-operator -l postgres-operator.crunchydata.com/cluster=debate-map,postgres-operator.crunchydata.com/role=master`;
-const GetPodNameCmd_WebServer =			context=>`${KubeCTLCmd(context)} get pod -o name -n ${appNamespace} -l app=dm-web-server`;
-const GetPodNameCmd_AppServer =			context=>`${KubeCTLCmd(context)} get pod -o name -n ${appNamespace} -l app=dm-app-server`;
-const GetPodsMatchingPartialName = (partialName, context)=>{
-	const entryStrings = execSync(`${KubeCTLCmd(context)} get pods --all-namespaces | findstr ${partialName}`).toString().trim().split("\n");
-	return entryStrings.map(str=>{
-		const parts = str.split("   ").map(a=>a.trim());
-		return {
-			namespace: parts[0],
-			name: parts[1],
-		};
+const GetPodInfos = (context = "", namespace = "", requiredLabels = [], filterOutEvicted = true)=>{
+	const cmdArgs = [
+		KubeCTLCmd(context), "get", "pods",
+		...(namespace ? ["-n", namespace] : ["--all-namespaces"]),
+		...(requiredLabels.length ? ["-l", requiredLabels.join(",")] : []),
+	];
+	const entryStrings = execSync(cmdArgs.join(" ")).toString().trim().split("\n").slice(1);
+	let result = entryStrings.map(str=>{
+		// example source string: "dm-app-server-69b55c8dfc-k5zrq   1/1     Running   0          2d"
+		const [sourceStr, name, ready, status, restarts, age] = /^(\S+)\s{3,}(\S+)\s{3,}(\S+)\s{3,}(\S+)\s{3,}(\S+)$/.exec(str);
+		return {sourceStr, name, ready, status, restarts, age};
 	});
+	if (filterOutEvicted) result = result.filter(a=>a.status != "Evicted");
+	return result;
 };
+const GetPodName_DB = context=>{
+	//return GetPodInfos(context).find(a=>a.name.startsWith("debate-map-instance1-")).name;
+	return GetPodInfos(context, "postgres-operator", ["postgres-operator.crunchydata.com/cluster=debate-map", "postgres-operator.crunchydata.com/role=master"])[0].name;
+};
+const GetPodName_WebServer = context=>GetPodInfos(context, appNamespace, ["app=dm-web-server"])[0].name;
+const GetPodName_AppServer = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server"])[0].name;
 
 /** Gets the k8s context that is selected as the "current" one, in Docker Desktop. */
 function K8sContext_Current() {
@@ -109,19 +117,15 @@ const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
 	ssh: {
 		db: Dynamic(()=>{
-			const podName = execSync(GetPodNameCmd_DB(commandArgs[0])).toString().trim();
-			//console.log("podName:", podName);
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- ${startBestShellCmd}`;
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${GetPodName_DB(commandArgs[0])} -c database -- ${startBestShellCmd}`;
 			/*const commandStr = `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${podName} -c database -- bash`;
 			spawn(commandStr.split(" ")[0], commandStr.split(" ").slice(1), {stdio: "inherit"});*/
 		}),
 		"web-server": Dynamic(()=>{
-			const podName = execSync(GetPodNameCmd_WebServer(commandArgs[0])).toString().trim();
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${podName} -c dm-web-server -- ${startBestShellCmd}`;
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_WebServer(commandArgs[0])} -c dm-web-server -- ${startBestShellCmd}`;
 		}),
 		"app-server": Dynamic(()=>{
-			const podName = execSync(GetPodNameCmd_AppServer(commandArgs[0])).toString().trim();
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${podName} -c dm-app-server -- ${startBestShellCmd}`;
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServer(commandArgs[0])} -c dm-app-server -- ${startBestShellCmd}`;
 		}),
 
 		etcd_dumpAsJSON: Dynamic(()=>{
@@ -141,25 +145,25 @@ Object.assign(scripts, {
 
 		// for this to work, you have to enable EphemeralContainers in your k8s cluster, as seen here: https://stackoverflow.com/a/68971526
 		debugPod: Dynamic(()=>{
-			const podNameSearchStr = commandArgs[0];
-			const podsMatchingSearchStr = GetPodsMatchingPartialName(podNameSearchStr);
-			let targetPod = podsMatchingSearchStr.find(a=>a.name == podNameSearchStr);
+			const [podNameSearchStr, context] = commandArgs;
+			const podsContainingSearchStr = GetPodInfos(context).filter(a=>a.name.includes(podNameSearchStr));
+			let targetPod = podsContainingSearchStr.find(a=>a.name == podNameSearchStr);
 			if (targetPod == null) {
-				console.log(`Could not find pod with the exact name "${podNameSearchStr}", so selecting first from matches:`, podsMatchingSearchStr.map(a=>a.name));
-				targetPod = podsMatchingSearchStr[0];
+				console.log(`Could not find pod with the exact name "${podNameSearchStr}", so selecting first from these pods containing the provided string:`, podsContainingSearchStr.map(a=>a.name));
+				targetPod = podsContainingSearchStr[0];
 			}
-			return `${KubeCTLCmd(commandArgs[1])} debug -n ${targetPod.namespace} -it ${targetPod.name} --image=busybox --target=${targetPod}`;
+			return `${KubeCTLCmd(context)} debug -n ${targetPod.namespace} -it ${targetPod.name} --image=busybox --target=${targetPod}`;
 		}),
 	},
 });
 
 function GetPortForwardCommandsStr(context) {
 	const fd = context == "ovh" ? "4" : "3"; // first-digit of port-numbers
-	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${execSync(GetPodNameCmd_DB(context)).toString().trim()} ${fd}205:5432`;
+	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} ${fd}205:5432`;
 	if (commandArgs.includes("onlyDB")) return forDB;
 
-	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${execSync(GetPodNameCmd_WebServer(context)).toString().trim()} ${fd}005`;
-	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${execSync(GetPodNameCmd_AppServer(context)).toString().trim()} ${fd}105`;
+	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} ${fd}005`;
+	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}105`;
 	return `concurrently --kill-others --names db,ws,as "${forDB}" "${forAppServer}" "${forWebServer}"`;
 }
 
@@ -204,9 +208,7 @@ Object.assign(scripts, {
 		// dumps (ie. pg_dump backups) [you can also use DBeaver to make a dump; see readme for details]
 		makeDBDump: Dynamic(()=>{
 			const context = commandArgs[0] ?? K8sContext_Current();
-			const dbPodName = GetPodsMatchingPartialName("debate-map-instance1-", context)[0].name;
-
-			const dumpCmd = `${KubeCTLCmd(context)} exec -n postgres-operator ${dbPodName} -- bash -c "pg_dump -U postgres debate-map"`;
+			const dumpCmd = `${KubeCTLCmd(context)} exec -n postgres-operator ${GetPodName_DB(context)} -- bash -c "pg_dump -U postgres debate-map"`;
 			const dbDumpStr = execSync(dumpCmd).toString().trim();
 
 			const filePath_rel = `../Others/@Backups/DBDumps_${context}/${CurrentTime_SafeStr()}.sql`;
@@ -433,7 +435,7 @@ Object.assign(scripts, {
 			psqlProcess.stdin.write(`exit\n`);
 		}),
 		// this script "deletes" the "debate-map" database within the specified k8s-cluster's postgres instance (for safety, it technically renames it rather than deletes it)
-		deposeDebateMapDB_k8s: Dynamic(()=>{
+		demoteDebateMapDB_k8s: Dynamic(()=>{
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
 			psqlProcess.stdin.write(`SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';\n`);
 			const newName = `debate-map-old-${CurrentTime_SafeStr()}`;
