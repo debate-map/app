@@ -4,7 +4,7 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, ChildGroup} from "../DB/nodes.js";
+import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, ChildGroup, ForLink_GetError} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -107,7 +107,11 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		let newParentID_forClaim = newParentID;
 
-		const wrapperArgNeeded = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument) && childGroup != ChildGroup.freeform;
+		//const wrapperArgNeeded = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument) && childGroup != ChildGroup.freeform;
+		const parentIsExpectingArgument = childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance);
+		const nodeIsClaimThatCanBeWrappedAsArgument = this.node_data.type == MapNodeType.claim;
+		//const wrapperArgNeeded = parentIsExpectingArgument && nodeCanBeWrappedAsArgument && ForLink_GetError(this.newParent_data.type, this.node_data.type, childGroup) != null;
+		const wrapperArgNeeded = parentIsExpectingArgument && nodeIsClaimThatCanBeWrappedAsArgument;
 		if (wrapperArgNeeded) {
 			AssertV(childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth,
 				`Claim is being linked under parent that requires a wrapper-argument, but the specified child-group (${childGroup}) is incompatible with that.`);
@@ -137,8 +141,10 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({
 			mapID,
 			link: {
-				parent: newParentID_forClaim, child: nodeID, group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
-				form: newForm, polarity: newPolarity,
+				parent: newParentID_forClaim, child: nodeID,
+				group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
+				form: newForm,
+				polarity: this.node_data.type == MapNodeType.argument ? newPolarity : null,
 			},
 		}).MarkAsSubcommand(this);
 		this.sub_linkToNewParent.Validate();

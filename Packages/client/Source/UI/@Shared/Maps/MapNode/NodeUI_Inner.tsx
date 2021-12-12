@@ -223,12 +223,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
 		const expanded = nodeView?.expanded ?? false;
 
-		/*const parentNodeView = GetNodeView(map?.id, parentPath);
-		// if combined with parent arg (ie. premise of single-premise arg), use parent's expansion state for this box
-		if (combinedWithParentArgument) {
-			expanded = parentNodeView?.expanded ?? false;
-		}*/
-
 		const onMouseEnter = UseCallback(e=>{
 			if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
 			this.SetState({hovered: true});

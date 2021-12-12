@@ -87,7 +87,7 @@ export class NodeUI extends BaseComponentPlus(
 		const mergedArgNodePath = mergedArg == node ? path : mergedArg == parent ? parentPath : null;
 		const mergedArgChildren = mergedArg ? GetNodeChildren(mergedArg, mergedArgNodePath) : null;
 		const mergedArgChildrenToShow = mergedArg ? GetNodeChildrenToShow(mergedArg, mergedArgNodePath).filter(a=>a.id != node.id) : null;
-		const boxExpanded = (isPremiseOfSinglePremiseArg ? parentNodeView?.expanded : nodeView?.expanded) ?? false;
+		const boxExpanded = nodeView?.expanded ?? false;
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
