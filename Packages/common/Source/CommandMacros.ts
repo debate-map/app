@@ -1,5 +1,6 @@
 import {GetAsync, GetDoc, Command, dbp, DBHelper, GenerateUUID, CommandRunInfo} from "web-vcore/nm/mobx-graphlink.js";
 import {IsString, IsFunction, Assert} from "web-vcore/nm/js-vextensions.js";
+import {GetDBReadOnlyMessage, IsDBReadOnly} from "./DB/globalData.js";
 import {GetMap} from "./DB/maps.js";
 import {GetUser} from "./DB/users.js";
 import {AddAccessPolicy} from "./Commands/AddAccessPolicy.js";
@@ -64,12 +65,16 @@ const commandsShowableInStream: Array<typeof Command> = [
 	SetNodeRating, DeleteNodeRating, UnlinkNode, UpdateLink, UpdateNodeAccessPolicy, UpdateNodeChildrenOrder, UpdateNodeTag, UpdatePhrasing,
 ];
 Command.augmentValidate = (command: Command<any>)=>{
-	if (command.parentCommand != null) return; // ignore subcommands (it would be redundant)
-	const commandClass = command.constructor as typeof Command;
-	if (commandsToNotEvenRecord.includes(commandClass)) return;
+	if (IsDBReadOnly()) throw new Error(`Database is currently read-only. Reason: ${GetDBReadOnlyMessage()}`);
 
-	const userHidden = GetUserHidden.NN(command.userInfo.id);
-	command["user_addToStream"] = userHidden.addToStream;
+	// if this is a root command (ie. not subcommand), add the below validation augmentations
+	if (command.parentCommand == null) {
+		const commandClass = command.constructor as typeof Command;
+		if (commandsToNotEvenRecord.includes(commandClass)) return;
+
+		const userHidden = GetUserHidden.NN(command.userInfo.id);
+		command["user_addToStream"] = userHidden.addToStream;
+	}
 };
 Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 	// some commands (eg. AddNodeRevision) need contraint-deferring till end of transaction, so just do that always (instant-checking doesn't really improve debugging in this context anyway)

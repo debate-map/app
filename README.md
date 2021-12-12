@@ -571,8 +571,9 @@ New steps:
 * 1\) Write a KnexJS script that modifies the db contents to match the new desired shape. (using native PG commands, for fast execution)
 	* 1.1\) Make a copy of the latest migration in `Knex/Migrations`, and give it an appropriate name.
 	* 1.2\) Write the migration code. (reference the older migration scripts to see patterns used)
-* 2\) Enable a flag on the main `debate-map` database, blocking writes, and causing a message to display in the frontend saying `Database is under maintenance. Estimated completion: XXX`.
-	* 2.1\) Run: `TODO`
+* 2\) Enable a flag on the main `debate-map` database, which makes it read-only, and displays an explanation message to users.
+	* 2.1\) Using DBeaver, create/modify the single row in the `globalData` table, setting `extras.dbReadOnly` to `true`.
+	* 2.2\) If you want to customize the message that is shown to the users, set/modify the `extras.dbReadOnly_message` field. (default: `Maintenance.`)
 * 3\) Create a copy of the database, named `debate-map-draft`.
 	* 3.1\) Run: `TODO`
 * 4\) Execute the migration script against the draft copy of the database.

@@ -16,6 +16,7 @@ import {User} from "./DB/users/@User.js";
 import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 import {MapNodePhrasing} from "./DB/nodePhrasings/@MapNodePhrasing.js";
+import {GlobalData} from "./DB/globalData/@GlobalData.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface UT_DBShape extends GraphDBShape {}
@@ -28,6 +29,7 @@ function DefineCollection<T>(typeConstructor: new(..._)=>T): Collection<T> {
 
 export class GraphDBShape {
 	//general: Collection_Closed<{data: GeneralData}>;
+	globalData = DefineCollection(GlobalData);
 
 	// from modules
 	/*modules: Collection_Closed<{
@@ -58,7 +60,6 @@ export class GraphDBShape {
 	users = DefineCollection(User);
 	userHiddens = DefineCollection(UserHidden);
 	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
-	//userViewedNodes = DefineCollection(ViewedNodeSet); // removed due to privacy concerns
 	visibilityDirectives = DefineCollection(VisibilityDirective);
 }
 

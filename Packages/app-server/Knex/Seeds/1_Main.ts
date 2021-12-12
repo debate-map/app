@@ -1,4 +1,5 @@
 import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
+import {GlobalData} from "dm_common/Dist/DB/globalData/@GlobalData";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink.js";
@@ -25,6 +26,16 @@ const rand = ()=>Math.random();
 function TypeCheck<T, T2 extends {[key: string]: T}>(__: new(..._)=>T, collection: T2) {
 	return collection;
 }
+
+const globalDatas = TypeCheck(GlobalData, {
+	main: {
+		id: "main",
+		extras: {
+			dbReadOnly: false,
+			dbReadOnly_message: undefined,
+		},
+	},
+});
 
 const users = TypeCheck(User as new()=>(User & {hidden: UserHidden}), {
 	system: {
@@ -137,6 +148,11 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 export default async function seed(knex: Knex.Transaction) {
 	// needed, since "maps" and "nodeRevisions" both have fk-refs to each other, so whichever is added first would error (without this flag)
 	await knex.raw("SET CONSTRAINTS ALL DEFERRED;");
+
+	console.log(`Adding globalData entry...`);
+	for (const globalData of Object.values(globalDatas)) {
+		await knex("globalData").insert(globalData);
+	}
 
 	console.log(`Adding users and userHiddens...`);
 	for (const user of Object.values(users)) {

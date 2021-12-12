@@ -201,6 +201,11 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "returnData", (t, n)=>t.jsonb(n));
 	});
 
+	await knex.schema.createTable(`${v}globalData`, t=>{
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "extras", (t, n)=>t.jsonb(n));
+	});
+
 	await knex.schema.createTable(`${v}mapNodeEdits`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "map", (t, n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());

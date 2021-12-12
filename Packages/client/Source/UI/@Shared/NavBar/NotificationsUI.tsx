@@ -7,13 +7,14 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {NotificationMessage} from "Store/main/@NotificationMessage.js";
 import moment from "web-vcore/nm/moment";
 import React from "react";
+import {GetDBReadOnlyMessage, IsDBReadOnly} from "dm_common";
 
-AddGlobalStyle(`
-.NotificationScrollView > * { pointer-events: auto; }
+/*AddGlobalStyle(`
 .NotificationScrollView { pointer-events: none; }
-.NotificationScrollView > .content > * { pointer-events: auto; }
+.NotificationScrollView > * { pointer-events: auto; }
 .NotificationScrollView > .content { pointer-events: none; }
-`);
+.NotificationScrollView > .content > * { pointer-events: auto; }
+`);*/
 
 @Observer
 export class NotificationsUI extends BaseComponent<{}, {}> {
@@ -22,19 +23,22 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 	scrollView: ScrollView;
 	render() {
 		const messages = store.main.notificationMessages;
-		const backgroundColor = "40,60,80";
 		return (
-			<ScrollView ref={c=>this.scrollView = c} className="NotificationScrollView" scrollVBarStyle={{width: 10}} style={{height: "100%"}} contentStyle={{willChange: "transform"}}>
+			<ScrollView ref={c=>this.scrollView = c}
+				className="NotificationScrollView" scrollVBarStyle={{width: 10}}
+				style={{height: "100%", pointerEvents: "none"}}
+				contentStyle={{willChange: "transform", pointerEvents: "none"}}
+			>
 				<Column ct style={{maxWidth: "calc(100% - 10px)", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
 					{!store.main.webSocketConnected && store.main.webSocketLastDCTime != null && GetTimeSinceLoad() > 10000 &&
-					<Div ml={10} mt={10} mb={10} style={{position: "relative", borderRadius: 5, cursor: "default", boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
-						<div style={{display: "flex", background: "rgba(0,0,0,.7)", borderRadius: 5 /* cursor: "pointer" */}}>
-							<Div sel style={{position: "relative", padding: 5, fontSize: 14, background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}>
-								<Row>Websocket connection to server lost.</Row>
-								<Row>Attempting reconnection... (last attempt: {moment(store.main.webSocketLastDCTime).format("HH:mm:ss")})</Row>
-							</Div>
-						</div>
-					</Div>}
+					<MessageUI_Static>
+						<Row>Websocket connection to server lost.</Row>
+						<Row>Attempting reconnection... (last attempt: {moment(store.main.webSocketLastDCTime).format("HH:mm:ss")})</Row>
+					</MessageUI_Static>}
+					{IsDBReadOnly.CatchBail(false) &&
+					<MessageUI_Static>
+						<Row>Database is currently read-only. Reason: {GetDBReadOnlyMessage()}</Row>
+					</MessageUI_Static>}
 					{messages.map((message, index)=>{
 						return <MessageUI key={index} message={message}/>;
 					})}
@@ -44,6 +48,23 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 	}
 	PostRender() {
 		this.scrollView.UpdateSize();
+	}
+}
+
+// todo: merge this with regular MessageUI
+class MessageUI_Static extends BaseComponent<{}, {}> {
+	render() {
+		const {children} = this.props;
+		const backgroundColor = "40,60,80";
+		return (
+			<Div ml={10} mt={10} style={{position: "relative", borderRadius: 5, cursor: "default", boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
+				<div style={{display: "flex", background: "rgba(0,0,0,.7)", borderRadius: 5 /* cursor: "pointer" */}}>
+					<Div sel style={{position: "relative", padding: 5, fontSize: 14, background: `rgba(${backgroundColor},.7)`, borderRadius: 5}}>
+						{children}
+					</Div>
+				</div>
+			</Div>
+		);
 	}
 }
 
