@@ -429,13 +429,13 @@ export function IsPublicNode(node: MapNode) {
 }*/
 
 export const IsPremiseOfSinglePremiseArgument = CreateAccessor((node: MapNode, parent: MapNode|n)=>{
-	if (parent == null) return false; // if parent is null, we'll assume there is no parent (most callers will already have bailed if parent-node was merely still-loading)
+	if (parent == null) return false;
 	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
 });
-export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNodeL3) {
-	if (parent == null) return null;
+export const IsPremiseOfMultiPremiseArgument = CreateAccessor((node: MapNode, parent: MapNode|n)=>{
+	if (parent == null) return false;
 	return node.type == MapNodeType.claim && IsMultiPremiseArgument(parent);
-}
+});
 
 export function GetArgumentNode(node: MapNode, parent: MapNode|n) {
 	const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);

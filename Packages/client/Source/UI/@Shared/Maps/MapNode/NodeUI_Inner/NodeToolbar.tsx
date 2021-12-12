@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
+import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
@@ -28,7 +28,9 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const nodeForm = GetNodeForm(node, path);
+		const isPremiseOfMultiPremiseArg = IsPremiseOfMultiPremiseArgument(node, parent);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+		const isPremiseOfArg = isPremiseOfSinglePremiseArg || isPremiseOfMultiPremiseArg;
 
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
 		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));
@@ -41,9 +43,13 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
 				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
 					enabled={node.type == MapNodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>}
-				{((node.type == MapNodeType.claim && nodeForm != ClaimForm.question) || node.type == MapNodeType.argument) &&
+				{(node.type == MapNodeType.argument || isPremiseOfArg) &&
 				<ToolBarButton {...sharedProps} text="Relevance" panel="relevance"
-					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg} disabledInfo="This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises."/>}
+					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg}
+					disabledInfo={
+						isPremiseOfMultiPremiseArg ? "This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises." :
+						undefined
+					}/>}
 				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings"/>
 				<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
 					processedMouseEvents.add(e.nativeEvent);
