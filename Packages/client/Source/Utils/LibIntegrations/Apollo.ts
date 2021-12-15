@@ -37,6 +37,8 @@ export function GetAppServerURL(subpath: string): string {
 const GRAPHQL_URL = GetAppServerURL("/graphql");
 
 let httpLink: HttpLink;
+let wsClient: SubscriptionClient;
+let wsClient_connectCount = 0;
 let wsLink: WebSocketLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
@@ -51,19 +53,21 @@ export function InitApollo() {
 		},
 	});
 
-	const wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
+	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
 		reconnect: true,
 	});
 	// could also detect general web dc/rc (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events), but doesn't seem necessary
 	wsClient.onConnected(()=>{
-		console.log("WebSocket connected.");
+		wsClient_connectCount++;
+		console.log(`WebSocket connected. (count: ${wsClient_connectCount})`);
 		RunInAction("wsClient.onConnected", ()=>store.main.webSocketConnected = true);
 
 		// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data)
 		AuthenticateWebSocketConnection();
 	});
 	wsClient.onReconnected(()=>{
-		console.log("WebSocket reconnected.");
+		wsClient_connectCount++;
+		console.log(`WebSocket reconnected. (count: ${wsClient_connectCount})`);
 		RunInAction("wsClient.onReconnected", ()=>store.main.webSocketConnected = true);
 
 		// whenever our web-socket reconnects, we have to authenticate the new websocket connection
@@ -138,6 +142,10 @@ export function InitApollo() {
 }
 
 async function AuthenticateWebSocketConnection() {
+	const wsConnectCountAtStart = wsClient_connectCount;
+	// if ws-client reconnects during auth process, we must cancel this run of it (so server doesn't receive then reject a 2nd attempt per ws)
+	const WSReconnected = ()=>wsClient_connectCount != wsConnectCountAtStart;
+
 	const fetchResult = await apolloClient.mutate({
 		mutation: gql`
 			mutation _GetConnectionID {
@@ -148,6 +156,7 @@ async function AuthenticateWebSocketConnection() {
 		`,
 		//variables: this.payload,
 	});
+	if (WSReconnected()) return;
 	const result = fetchResult.data["_GetConnectionID"];
 	const connectionID = result.id;
 	console.log("Got connection id:", connectionID);
@@ -163,12 +172,14 @@ async function AuthenticateWebSocketConnection() {
 		`,
 		variables: {connectionID},
 	});
+	if (WSReconnected()) return;
 	const fetchResult2 = await new Promise<FetchResult<any>>(resolve=>{
 		const subscription = fetchResult2_subscription.subscribe(data=>{
 			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
 			resolve(data);
 		});
 	});
+	if (WSReconnected()) return;
 	const result2 = fetchResult2.data["_PassConnectionID"];
 	const userID = result2.userID;
 	console.log("After passing connection id, got user id:", userID);

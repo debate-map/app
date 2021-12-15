@@ -10,7 +10,7 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, CreateCommandsPlugin, DBUpdate, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {GetUserHiddensWithEmail, User} from "dm_common";
@@ -228,6 +228,7 @@ app.use(
 							}}, info.command);
 							console.error(`Command "${info.command.constructor.name}" errored!`,
 								`\n@Command:`, commandInfoStr_deep, // NodeJS logging doesn't show deep enough
+								`\n@DBUpdates:\n${(info["dbUpdates"] as DBUpdate[] ?? []).map(a=>`\t${a.path} -> set to -> ${JSON.stringify(a.value)}`).join("\n") || "none (eg. error during Validate function)"}`,
 								`\n@error:`, info.error);
 						} else {
 							console.log(`Command "${info.command.constructor.name}" done! @returnData:`, info.returnData);
