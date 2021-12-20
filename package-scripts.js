@@ -208,15 +208,29 @@ Object.assign(scripts, {
 		// dumps (ie. pg_dump backups) [you can also use DBeaver to make a dump; see readme for details]
 		makeDBDump: Dynamic(()=>{
 			const context = commandArgs[0] ?? K8sContext_Current();
-			const dumpCmd = `${KubeCTLCmd(context)} exec -n postgres-operator ${GetPodName_DB(context)} -- bash -c "pg_dump -U postgres debate-map"`;
-			const dbDumpStr = execSync(dumpCmd).toString().trim();
+			const inPodCmd = "pg_dump -U postgres debate-map";
+			const dumpCmd_withoutInPodCMD = `${KubeCTLCmd(context)} exec -n postgres-operator ${GetPodName_DB(context)} -- bash -c`;
 
-			const filePath_rel = `../Others/@Backups/DBDumps_${context}/${CurrentTime_SafeStr()}.sql`;
-			const folderPath_rel = paths.dirname(filePath_rel);
-			fs.mkdirSync(folderPath_rel, {recursive: true});
-			fs.writeFileSync(filePath_rel, dbDumpStr);
-			console.log(`DB dump (of context: ${context}) created at: ${paths.resolve(filePath_rel)}`);
-			execSync(`start "" "${paths.dirname(paths.resolve(filePath_rel))}"`);
+			// had to switch from execSync to spawn,
+			//const dbDumpStr = execSync(`${dumpCmd_withoutInPodCMD} "${inPodCmd}"`).toString().trim();
+			const dumpCmd_withoutInPodCMD_parts = dumpCmd_withoutInPodCMD.split(" ");
+			const dumpProcess = spawn(dumpCmd_withoutInPodCMD_parts[0], [...dumpCmd_withoutInPodCMD_parts.slice(1), inPodCmd]);
+			let dbDumpStr = "";
+			dumpProcess.stdout.on("data", chunk=>{
+				dbDumpStr += chunk.toString();
+			});
+
+			dumpProcess.on("error", e=>{
+				console.log("DB dump process failed. Error:", e);
+			});
+			dumpProcess.on("exit", ()=>{
+				const filePath_rel = `../Others/@Backups/DBDumps_${context}/${CurrentTime_SafeStr()}.sql`;
+				const folderPath_rel = paths.dirname(filePath_rel);
+				fs.mkdirSync(folderPath_rel, {recursive: true});
+				fs.writeFileSync(filePath_rel, dbDumpStr);
+				console.log(`DB dump (of context: ${context}) created at: ${paths.resolve(filePath_rel)}`);
+				execSync(`start "" "${paths.dirname(paths.resolve(filePath_rel))}"`);
+			});
 		}),
 
 		// backups
