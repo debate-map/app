@@ -11,7 +11,7 @@ import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
 import {AddSchema, CreateCommandsPlugin, DBUpdate, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions.js";
+import {Assert, FancyFormat, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {GetUserHiddensWithEmail, User} from "dm_common";
 import {SetUpAuthHandling} from "./AuthHandling.js";
@@ -105,24 +105,28 @@ pgPool.on("remove", async client=>{
 });
 
 app.get("/health-check", async(req, res)=>{
+	const checkStart = Date.now();
+	const TimeSinceCheckStart = ()=>`${((Date.now() - checkStart) / 1000).toFixed(1)}s`;
+
 	console.log("Starting health-check.");
 	try {
 		Assert(pgPool.totalCount > 0, "No pgClient has been initialized/connected within the pool yet.");
 
-		const usersCount = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
-		Assert(usersCount.rowCount >= 1, "Could not find any users in database. (at least the system user should exist)");
-		console.log("Health-check: Passed 1");
+		const usersCountData = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+		const usersCount = ToInt(usersCountData.rows[0].count);
+		Assert(usersCount >= 1, "Could not find any users in database. (at least the system user should exist)");
+		console.log(`Health-check: Passed 1 (time: ${TimeSinceCheckStart()}) [user count: ${usersCount}]`);
 
 		//const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
 		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
-		console.log("Health-check: Passed 2");
+		console.log(`Health-check: Passed 2 (time: ${TimeSinceCheckStart()})`);
 		Assert(existingUser_hidden != null, "Could not find system-user's user-hidden data, which we know should exist.");
-		console.log("Health-check: Passed 3");
+		console.log(`Health-check: Passed 3 (time: ${TimeSinceCheckStart()})`);
 
-		console.log("Health-check: Good.");
+		console.log(`Health-check: Good. (time: ${TimeSinceCheckStart()})`);
 		res.sendStatus(200); // status: 200 OK
 	} catch (ex) {
-		console.log("Health-check: Bad. Error:", ex);
+		console.log(`Health-check: Bad. (time: ${TimeSinceCheckStart()}) Error:`, ex);
 		res.sendStatus(500); // status: 500 Internal Server Error
 		// try to reconnect the pool
 		pgPool.connect();

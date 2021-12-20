@@ -46,7 +46,8 @@ spec:
           #initialDelaySeconds: 10999999
           initialDelaySeconds: 20
           periodSeconds: 10
-          timeoutSeconds: 3
+          #timeoutSeconds: 3
+          timeoutSeconds: 7 # temporarily increasing this to 7s; it seems the health-check responses have become too slow sometimes! (not sure how; need to investigate)
         env:
         - name: DB_VENDOR
           value: "postgres"
