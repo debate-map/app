@@ -122,10 +122,10 @@ export class MapUI extends BaseComponentPlus({
 		GetPreloadData_ForMapLoad(mapID);
 		const mapState = GetMapState(mapID);
 		const mapView = GetMapView(mapID);
-		
+
 		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
 		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
-		if (map == null) return <MapUIWaitMessage message="Loading map..."/>;
+		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
 
 		const rootNode = (()=>{
 			let result: MapNodeL3|n = rootNode_passed;
@@ -142,7 +142,7 @@ export class MapUI extends BaseComponentPlus({
 			}
 			return result;
 		})();
-		if (rootNode == null) return <MapUIWaitMessage message="Loading root node..."/>;
+		if (rootNode == null) return <MapUIWaitMessage message="Map's content is private/deleted."/>;
 		// if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
 		/*if (rootNode.current.accessLevel > GetUserAccessLevel(MeID())) {
 			return <Column style={ES({flex: 1})}>
