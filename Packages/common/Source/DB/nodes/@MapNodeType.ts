@@ -81,6 +81,9 @@ export class MapNodeType_Info {
 	/* mainRatingTypes: RatingType[];
 	otherRatingTypes: RatingType[]; */
 }
+/*export function GetMapNodeTypeInfo(type: MapNodeType) {
+	return MapNodeType_Info.for[type];
+}*/
 
 export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode, parentNodeForm: ClaimForm, polarity: Polarity) {
 	if (type == MapNodeType.category) return "category";

@@ -132,15 +132,20 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 		alter table app_public."userHiddens" enable row level security;
 		do $$ begin
+			drop policy if exists "userHiddens_rls" on app_public."userHiddens";
 			create policy "userHiddens_rls" on app_public."userHiddens" as permissive for all using (id = current_setting('app.current_user_id'));
 		end $$;
 
 		alter table app_public."commandRuns" enable row level security;
 		do $$ begin
+			drop policy if exists "commandRuns_rls" on app_public."commandRuns";
 			create policy "commandRuns_rls" on app_public."commandRuns" as permissive for all using (
 				public_base = true
-				or actor = current_setting('app.current_user_id')
-				or current_setting('app.current_user_admin') = 'true'
+				and (
+					actor = current_setting('app.current_user_id')
+					or current_setting('app.current_user_admin') = 'true'
+					-- todo: make-so this also allows access if the associated objects' access-policies allow access
+				)
 			);
 		end $$;
 

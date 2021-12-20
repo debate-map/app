@@ -1,4 +1,4 @@
-import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity, GetNodeForm, ClaimForm, GetChildLayout_Final} from "dm_common";
+import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity, GetNodeForm, ClaimForm, GetChildLayout_Final, MapNodeType_Info} from "dm_common";
 import React from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -68,6 +68,7 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeChildrenToShow = GetNodeChildrenToShow(node, path);
 		const nodeForm = GetNodeForm(node, path);
 		const nodeView = GetNodeView(map.id, path);
+		const nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		const sinceTime = 0;
@@ -172,10 +173,14 @@ export class NodeUI extends BaseComponentPlus(
 		if (isPremiseOfSinglePremiseArg && mergedArgChildrenToShow?.length) {
 			relevanceBoxVisible = true;
 		}
+		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
 		const freeformBoxVisible = map.extras.defaultShowFreeform || (ncToShow_freeform.length > 0 && childLayout != "flat"); // if show box by default, or if FF nodes exist and the box is the only way they're accessible
 		const groupsUsingBoxes = (truthBoxVisible ? 1 : 0) + (relevanceBoxVisible ? 1 : 0) + (freeformBoxVisible ? 1 : 0);
-		const usingDirect = isMultiPremiseArgument || groupsUsingBoxes == 0 || childLayout == "flat";
+		//const usingDirect = isMultiPremiseArgument || groupsUsingBoxes == 0 || childLayout == "flat";
+		/*const nodeCanHaveGenericChildren = [...nodeTypeInfo.childGroup_childTypes.keys()].Any(a=>a == ChildGroup.generic);
+		const usingDirect = nodeCanHaveGenericChildren || childLayout == "flat";*/
+		const usingDirect = ncToShow_generic.length > 0 || childLayout == "flat";
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
@@ -255,7 +260,7 @@ export class NodeUI extends BaseComponentPlus(
 				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={
 					//childLayout == "flat" ? nodeChildrenToShow.concat(mergedArgChildrenToShow ?? []) : nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic)
 					// even in flat mode, we don't include merged-arg-children, because that messes up the path extend/concat logic (could be fixed, but not high priority, since relevance-args are rare in flat-layout mode; just use box)
-					childLayout == "flat" ? nodeChildrenToShow : nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic)
+					childLayout == "flat" ? nodeChildrenToShow : ncToShow_generic
 				}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>{
 					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
