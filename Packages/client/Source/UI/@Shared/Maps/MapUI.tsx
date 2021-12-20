@@ -119,13 +119,14 @@ export class MapUI extends BaseComponentPlus({
 		Assert(mapID, "mapID is null!");
 
 		const map = GetMap(mapID);
+		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
+
 		GetPreloadData_ForMapLoad(mapID);
 		const mapState = GetMapState(mapID);
-		const mapView = GetMapView(mapID);
-
 		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
+
+		const mapView = GetMapView(mapID);
 		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
-		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
 
 		const rootNode = (()=>{
 			let result: MapNodeL3|n = rootNode_passed;

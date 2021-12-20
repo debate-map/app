@@ -28,7 +28,8 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	let mapState = GetMapState(mapID);
 	if (mapState?.initDone && GetMapView(mapID) != null) return; // 2nd-check for version-clearing
 	const map = await GetAsync(()=>GetMap(mapID));
-	Assert(map);
+	//Assert(map);
+	if (map == null) return; // map must be private/deleted
 
 	// ACTEnsureMapStateInit(action.payload.id);
 	// storeM.ACTEnsureMapStateInit(action.payload.id);
@@ -48,7 +49,9 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 		for (const path of pathsToExpand) {
 			const nodeID = path.split("/").Last();
 			const node = await GetAsync(()=>GetNodeL2(nodeID));
-			Assert(node);
+			//Assert(node);
+			if (node == null) return; // node must be private/deleted
+
 			// console.log('NodeView:', path, GetNodeView(map.id, path, false));
 			if (GetNodeView(map.id, path, false) == null) {
 				// console.log('Expanding:', path);

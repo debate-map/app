@@ -41,7 +41,7 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 				<Row center>
 					<Text>Permissions:</Text>
 					<InfoButton ml={5} text={`
-						These are the permissions that are granted to all visitors, including those not signed in.
+						These are the permissions that are granted to all visitors. (for mere viewing/access, this includes those not signed in)
 						
 						Note that there are a few additional permission-grants:
 						* The creator of an entry can always access an entry (and currently, modify it), so long as they still have basic permissions.
