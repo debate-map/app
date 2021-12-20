@@ -47,9 +47,12 @@ export const HasAdminPermissions = CreateAccessor((userIDOrPermissions: string |
 	return permissions ? permissions.admin : false;
 });
 /** If user is the creator, also requires that they (still) have basic permissions. */
-//export const IsUserCreatorOrMod = CreateAccessor((userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
 export const IsUserCreatorOrMod = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
 	return (entity?.creator === userID && HasBasicPermissions(userID)) || HasModPermissions(userID);
+});
+/** If user is the creator, also requires that they (still) have basic permissions. */
+export const IsUserCreatorOrAdmin = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
+	return (entity?.creator === userID && HasBasicPermissions(userID)) || HasAdminPermissions(userID);
 });
 
 /*export const CanSubmitRevisions = CreateAccessor((userID: string, nodeID: string): boolean=>{

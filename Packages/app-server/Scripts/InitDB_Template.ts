@@ -73,14 +73,14 @@ async function Start(knex: Knex.Transaction) {
 
 	// create custom english dictionary, with all stop-words excluded; this makes searching a bit more powerful, by letting you include/exclude words like "the", "other", "might", "over", etc.
 	await knex.raw(`
-		CREATE TEXT SEARCH DICTIONARY english_stem_nostop (
+		create text search dictionary english_stem_nostop (
 			Template = snowball,
 			Language = english
 		);
 
-		CREATE TEXT SEARCH CONFIGURATION public.english_nostop ( COPY = pg_catalog.english );
-		ALTER TEXT SEARCH CONFIGURATION public.english_nostop
-			ALTER MAPPING FOR asciiword, asciihword, hword_asciipart, hword, hword_part, word WITH english_stem_nostop;
+		create text search configuration public.english_nostop (COPY = pg_catalog.english);
+		alter text search configuration public.english_nostop
+			alter mapping for asciiword, asciihword, hword_asciipart, hword, hword_part, word with english_stem_nostop;
 	`);
 
 	return {v: vPrefix};
@@ -92,11 +92,11 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		//const constraintName = `fk @from(${RemoveVPrefix(ref.fromTable)}.${ref.fromColumn}) @to(${RemoveVPrefix(ref.toTable)}.${ref.toColumn})`;
 		const constraintName = `fk @from(${ref.fromColumn}) @to(${RemoveVPrefix(ref.toTable)}.${ref.toColumn})`;
 		await knex.schema.raw(`
-			ALTER TABLE "${ref.fromTable}"
-			ADD CONSTRAINT "${constraintName}"
-			FOREIGN KEY ("${ref.fromColumn}") 
-			REFERENCES "${ref.toTable}" ("${ref.toColumn}")
-			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : "DEFERRABLE INITIALLY IMMEDIATE;"}
+			alter table "${ref.fromTable}"
+			add constraint "${constraintName}"
+			foreign key ("${ref.fromColumn}") 
+			references "${ref.toTable}" ("${ref.toColumn}")
+			${ref.enforceAtTransactionEnd ? "deferrable initially deferred;" : "deferrable initially immediate;"}
 		`);
 		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"
@@ -113,42 +113,85 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 	// set up indexes
 	await knex.raw(`
-		CREATE INDEX ON "nodeRevisions"
-		USING gin (phrasing_tsvector);
+		create index on "nodeRevisions"
+		using gin (phrasing_tsvector);
 	`);
 
 	// set up app_user role for postgraphile connection, set up RLS, etc.
 	await knex.raw(`
-		DO $$ BEGIN
-			CREATE ROLE app_user WITH NOLOGIN;
-		EXCEPTION WHEN DUPLICATE_OBJECT THEN
-			RAISE NOTICE 'Role app_user already exists, not re-creating';
-		END $$;
+		do $$ begin
+			create role app_user with nologin;
+		end $$;
 		grant connect on database "debate-map" to app_user;
 		grant usage on schema app_public to app_user;
-		--grant ALL on schema app_public to app_user;
+		--grant all on schema app_public to app_user;
 
 		--alter default privileges in schema app_public grant select, insert, update, delete on tables to app_user;
 		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
 		alter table app_public."userHiddens" enable row level security;
-		DO $$ BEGIN
-			create policy "userHiddens_rls" on app_public."userHiddens" as PERMISSIVE for all using (id = current_setting('app.current_user_id'));
-		EXCEPTION WHEN DUPLICATE_OBJECT THEN
-			RAISE NOTICE 'RLS policy userHiddens_rls already exists, not re-creating';
-		END $$;
+		do $$ begin
+			create policy "userHiddens_rls" on app_public."userHiddens" as permissive for all using (id = current_setting('app.current_user_id'));
+		end $$;
 
 		alter table app_public."commandRuns" enable row level security;
-		DO $$ BEGIN
-			create policy "commandRuns_rls" on app_public."commandRuns" as PERMISSIVE for all using (
+		do $$ begin
+			create policy "commandRuns_rls" on app_public."commandRuns" as permissive for all using (
 				public_base = true
-				OR actor = current_setting('app.current_user_id')
-				OR current_setting('app.current_user_admin') = 'true'
+				or actor = current_setting('app.current_user_id')
+				or current_setting('app.current_user_admin') = 'true'
 			);
-		EXCEPTION WHEN DUPLICATE_OBJECT THEN
-			RAISE NOTICE 'RLS policy commandRuns_rls already exists, not re-creating';
-		END $$;
+		end $$;
+
+		-- regular RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access, or entry's policy allows access for the user)
+
+		create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar) returns boolean as $$ begin 
+			return (
+				current_setting('app.current_user_id') = entry_creator
+				or current_setting('app.current_user_admin') = 'true'
+				/*or (
+					policyFields[0] -> 'nodes' -> 'access' = 'true'
+					or policyFields[1] -> current_setting('app.current_user_id') -> 'access' = 'true'
+				)*/
+				or exists (
+					select 1 from app_public."accessPolicies" where id = policyID and (
+						"permissions" -> 'nodes' -> 'access' = 'true'
+						or "permissions_userExtends" -> current_setting('app.current_user_id') -> 'access' = 'true'
+					)
+				)
+			);
+		end $$ language plpgsql;
+
+		alter table app_public."terms" enable row level security;
+		do $$ begin
+			drop policy if exists "terms_rls" on app_public."terms";
+			create policy "terms_rls" on app_public."terms" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+		end $$;
+
+		alter table app_public."medias" enable row level security;
+		do $$ begin
+			drop policy if exists "medias_rls" on app_public."medias";
+			create policy "medias_rls" on app_public."medias" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+		end $$;
+
+		alter table app_public."maps" enable row level security;
+		do $$ begin
+			drop policy if exists "maps_rls" on app_public."maps";
+			create policy "maps_rls" on app_public."maps" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+		end $$;
+
+		alter table app_public."nodes" enable row level security;
+		do $$ begin
+			drop policy if exists "nodes_rls" on app_public."nodes";
+			create policy "nodes_rls" on app_public."nodes" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+		end $$;
+
+		alter table app_public."nodeRatings" enable row level security;
+		do $$ begin
+			drop policy if exists "nodeRatings_rls" on app_public."nodeRatings";
+			create policy "nodeRatings_rls" on app_public."nodeRatings" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+		end $$;
 	`);
 
 	console.log("Done");

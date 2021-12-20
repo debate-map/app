@@ -73,10 +73,10 @@ export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: Node
 		const result = CE(CE(ratings.map(a=>a.value)).Average()).RoundTo(1);
 		Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 		return result;
-	} else {
-		const ratingSummary = GetRatingSummary(nodeID, ratingType);
-		return ratingSummary?.average;
 	}
+
+	const ratingSummary = GetRatingSummary(nodeID, ratingType);
+	return ratingSummary?.average;
 });
 export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userIDs?: string[]|n, resultIfNoData?: T): number|T=>{
 	let result = GetRatingAverage(node.id, ratingType, userIDs);

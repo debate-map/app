@@ -359,7 +359,8 @@ class OverlayUI extends BaseComponent<{}, {}> {
 }
 
 function GetOpenerWindow(): Window | null {
-	if (window.opener != null && window.opener.constructor?.name == "Window") {
+	//if (window.opener != null && window.opener.constructor?.name == "Window") {
+	if (window.opener != null) { // Firefox blocks access to window.opener.constructor, so don't check
 		return window.opener;
 	}
 	return null;

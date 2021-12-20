@@ -4,7 +4,7 @@ import express, {Request, RequestHandler} from "express";
 import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {Assert, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
@@ -98,12 +98,13 @@ passport.use(new GoogleStrategy(
 		const permissionGroups = {basic: true, verified: true, mod: false, admin: false};
 
 		// temp; make every new user who signs up a mod
-		permissionGroups.mod = true;
+		//permissionGroups.mod = true;
 
 		// maybe temp; make first (non-system) user an admin
 		//if (existingUserHiddens.length <= 1) {
 		const usersCountData = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
-		if (usersCountData.rowCount <= 1) {
+		const usersCount = ToInt(usersCountData.rows[0].count);
+		if (usersCount <= 1) {
 			console.log("First non-system user signing-in; marking as admin.");
 			permissionGroups.VSet({mod: true, admin: true});
 		}

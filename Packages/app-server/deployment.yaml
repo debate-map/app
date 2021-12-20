@@ -45,9 +45,7 @@ spec:
             port: 3105
           #initialDelaySeconds: 10999999
           initialDelaySeconds: 20
-          #periodSeconds: 10
-          # for now, have this check every 5 seconds (until the random db<>app-server disconnect bug is fixed)
-          periodSeconds: 5
+          periodSeconds: 10
           timeoutSeconds: 3
         env:
         - name: DB_VENDOR

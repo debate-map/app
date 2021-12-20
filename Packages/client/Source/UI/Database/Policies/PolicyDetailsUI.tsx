@@ -5,7 +5,7 @@ import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {userIDPlaceholder} from "UI/@Shared/Maps/MapUI/ActionBar_Left/PeopleDropDown";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
 import {styles} from "Utils/UI/GlobalStyles";
-import {Observer, observer_simple, TextPlus} from "web-vcore";
+import {InfoButton, Observer, observer_simple, TextPlus} from "web-vcore";
 import {Clone, E} from "web-vcore/nm/js-vextensions.js";
 import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
@@ -38,7 +38,17 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 						<Button enabled={enabled} text={basePolicy ? `${basePolicy.id} (id: ${basePolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
 					</PolicyPicker>
 				</RowLR>*/}
-				<Row>Permissions:</Row>
+				<Row center>
+					<Text>Permissions:</Text>
+					<InfoButton ml={5} text={`
+						These are the permissions that are granted to all visitors, including those not signed in.
+						
+						Note that there are a few additional permission-grants:
+						* The creator of an entry can always access an entry (and currently, modify it), so long as they still have basic permissions.
+						* Admins can always access and modify any entry.
+						* Moderators can modify any entry *that they have access to*. (ie. if something is made accessible/visible to the general public, then mods can modify it)
+					`.AsMultiline(0)}/>
+				</Row>
 				<PermissionSetEditor enabled={enabled} value={newData.permissions} onChange={val=>Change(newData.permissions = val)}/>
 				<Row mt={5}>
 					<Text>User overrides:</Text>

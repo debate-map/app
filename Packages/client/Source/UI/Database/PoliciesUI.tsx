@@ -1,4 +1,4 @@
-import {AccessPolicy, CanGetBasicPermissions, DeleteAccessPolicy, GetAccessPolicies, IsUserCreatorOrMod, MeID, UpdateAccessPolicy} from "dm_common";
+import {AccessPolicy, CanGetBasicPermissions, DeleteAccessPolicy, GetAccessPolicies, IsUserCreatorOrAdmin, IsUserCreatorOrMod, MeID, UpdateAccessPolicy} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {GetSelectedPolicy, GetSelectedPolicyID} from "Store/main/database";
@@ -20,7 +20,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 		const userID = MeID();
 		const policies = GetAccessPolicies();
 		const selectedPolicy = GetSelectedPolicy();
-		const creatorOrMod = selectedPolicy != null && IsUserCreatorOrMod(userID, selectedPolicy);
+		const creatorOrAdmin = selectedPolicy != null && IsUserCreatorOrAdmin(userID, selectedPolicy);
 
 		// whenever selectedPolicy changes, reset the derivative states (there's probably a better way to do this, but I don't know how yet)
 		UseEffect(()=>{
@@ -65,7 +65,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 									{selectedPolicy.name}
 								</Text>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
-								{creatorOrMod &&
+								{creatorOrAdmin &&
 									<Button ml="auto" text="Save details" enabled={selectedPolicy_newData != null && selectedPolicy_newDataError == null}
 										onClick={async e=>{
 											Assert(selectedPolicy); // nn: button would be disabled otherwise
@@ -73,7 +73,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 											await new UpdateAccessPolicy({id: selectedPolicy.id, updates}).RunOnServer();
 											// this.SetState({selectedPolicy_newData: null});
 										}}/>}
-								{creatorOrMod &&
+								{creatorOrAdmin &&
 									<Button text="Delete policy" ml={10} enabled={selectedPolicy != null}
 										onClick={async e=>{
 											Assert(selectedPolicy); // nn: button would be disabled otherwise
@@ -88,7 +88,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 							</Div>
 						</Row>
 						{selectedPolicy
-							? <PolicyDetailsUI baseData={selectedPolicy} phase={creatorOrMod ? "edit" : "view"} style={{padding: 10}}
+							? <PolicyDetailsUI baseData={selectedPolicy} phase={creatorOrAdmin ? "edit" : "view"} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedPolicy_newData: data, selectedPolicy_newDataError: error})}/>
 							: <div style={{padding: 10}}>No policy selected.</div>}
 					</Column>
