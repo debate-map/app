@@ -130,39 +130,20 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
-		alter table app_public."userHiddens" enable row level security;
-		do $$ begin
-			drop policy if exists "userHiddens_rls" on app_public."userHiddens";
-			create policy "userHiddens_rls" on app_public."userHiddens" as permissive for all using (id = current_setting('app.current_user_id'));
-		end $$;
-
-		alter table app_public."commandRuns" enable row level security;
-		do $$ begin
-			drop policy if exists "commandRuns_rls" on app_public."commandRuns";
-			create policy "commandRuns_rls" on app_public."commandRuns" as permissive for all using (
-				public_base = true
-				and (
-					actor = current_setting('app.current_user_id')
-					or current_setting('app.current_user_admin') = 'true'
-					-- todo: make-so this also allows access if the associated objects' access-policies allow access
-				)
-			);
-		end $$;
-
-		-- regular RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access, or entry's policy allows access for the user)
+		-- simple RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access [without user-specific block], or entry's policy has user-specific grant)
 
 		create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar, policyField varchar) returns boolean as $$ begin 
 			return (
 				current_setting('app.current_user_id') = entry_creator
 				or current_setting('app.current_user_admin') = 'true'
 				/*or (
-					policyFields[0] -> 'nodes' -> 'access' = 'true'
+					policyFields[0] -> policyField -> 'access' = 'true'
 					or policyFields[1] -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
 				)*/
 				or exists (
 					select 1 from app_public."accessPolicies" where id = policyID and (
 						(
-							"permissions" -> 'nodes' -> 'access' = 'true'
+							"permissions" -> policyField -> 'access' = 'true'
 							and "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' != 'false'
 						)
 						or "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
@@ -195,10 +176,66 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			create policy "nodes_rls" on app_public."nodes" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'nodes'));
 		end $$;
 
+		-- derivative RLS policies (where to access an entry, the RLS policies of its associated objects must all pass)
+
+		alter table app_public."mapNodeEdits" enable row level security;
+		do $$ begin
+			drop policy if exists "mapNodeEdits_rls" on app_public."mapNodeEdits";
+			create policy "mapNodeEdits_rls" on app_public."mapNodeEdits" as permissive for all using (TODO);
+		end $$;
+
+		alter table app_public."nodeChildLinks" enable row level security;
+		do $$ begin
+			drop policy if exists "nodeChildLinks_rls" on app_public."nodeChildLinks";
+			create policy "nodeChildLinks_rls" on app_public."nodeChildLinks" as permissive for all using (TODO);
+		end $$;
+
+		alter table app_public."nodePhrasings" enable row level security;
+		do $$ begin
+			drop policy if exists "nodePhrasings_rls" on app_public."nodePhrasings";
+			create policy "nodePhrasings_rls" on app_public."nodePhrasings" as permissive for all using (TODO);
+		end $$;
+
 		alter table app_public."nodeRatings" enable row level security;
 		do $$ begin
 			drop policy if exists "nodeRatings_rls" on app_public."nodeRatings";
-			create policy "nodeRatings_rls" on app_public."nodeRatings" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'nodeRatings'));
+			create policy "nodeRatings_rls" on app_public."nodeRatings" as permissive for all using (
+				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'nodeRatings')
+				and TODO
+			);
+		end $$;
+
+		alter table app_public."nodeRevisions" enable row level security;
+		do $$ begin
+			drop policy if exists "nodeRevisions_rls" on app_public."nodeRevisions";
+			create policy "nodeRevisions_rls" on app_public."nodeRevisions" as permissive for all using (TODO);
+		end $$;
+
+		alter table app_public."nodeTags" enable row level security;
+		do $$ begin
+			drop policy if exists "nodeTags_rls" on app_public."nodeTags";
+			create policy "nodeTags_rls" on app_public."nodeTags" as permissive for all using (TODO);
+		end $$;
+
+		-- unique RLS policies
+
+		alter table app_public."userHiddens" enable row level security;
+		do $$ begin
+			drop policy if exists "userHiddens_rls" on app_public."userHiddens";
+			create policy "userHiddens_rls" on app_public."userHiddens" as permissive for all using (id = current_setting('app.current_user_id'));
+		end $$;
+
+		alter table app_public."commandRuns" enable row level security;
+		do $$ begin
+			drop policy if exists "commandRuns_rls" on app_public."commandRuns";
+			create policy "commandRuns_rls" on app_public."commandRuns" as permissive for all using (
+				public_base = true
+				and (
+					actor = current_setting('app.current_user_id')
+					or current_setting('app.current_user_admin') = 'true'
+					-- TODO: make-so this also allows access if the associated objects' access-policies allow access
+				)
+			);
 		end $$;
 	`);
 
