@@ -256,7 +256,10 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 
 k8s_resource('dm-app-server',
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
-	port_forwards='4105' if REMOTE else '3105',
+	port_forwards=[
+		'4105:3105' if REMOTE else '3105',
+		'4155:3155' if REMOTE else '3155' # for nodejs-inspector
+	],
 	resource_deps=["traefik"],
 	labels=["app"],
 )
@@ -264,7 +267,7 @@ k8s_resource('dm-app-server',
 k8s_resource('dm-web-server',
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
-	port_forwards='4005' if REMOTE else '3005',
+	port_forwards='4005:3005' if REMOTE else '3005',
 	#resource_deps=["dm-app-server"],
 	resource_deps=["traefik"],
 	labels=["app"],

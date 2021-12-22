@@ -12,9 +12,14 @@ spec:
   # to make it accessible outside of cluster
   #type: NodePort
   ports:
-    - port: 3105
+    - name: main
+      port: 3105
       #targetPort: 3105
       #nodePort: 31006
+      protocol: TCP
+    # this port is for the NodeJS inspector
+    - name: nodejs-inspector
+      port: 3155
       protocol: TCP
 ---
 apiVersion: apps/v1
@@ -43,8 +48,8 @@ spec:
           httpGet:
             path: /health-check
             port: 3105
-          #initialDelaySeconds: 10999999
-          initialDelaySeconds: 20
+          #initialDelaySeconds: 10999999 # mode: profiling
+          initialDelaySeconds: 20 # mode: normal
           periodSeconds: 10
           #timeoutSeconds: 3
           timeoutSeconds: 60 # temporarily increasing this to 60s; it seems the health-check responses have become too slow [~25s] sometimes! (not sure how; need to investigate)

@@ -90,11 +90,13 @@ Local:
 * `localhost:3005`: Web-server, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:3055`: Web-server, local, served from webpack (`client.dev` must be running)
 * `localhost:3105`: App-server, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:3155`: App-server, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:3205`: Postgres instance, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (private port-forwards/proxies):
 * `localhost:4005`: Web-server, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:4105`: App-server, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:4155`: App-server, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:4205`: Postgres instance, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
 
 Remote (public):
@@ -383,6 +385,22 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 
 </details>
 
+<!----><a name="profiling"></a>
+<details><summary><b>[profiling] How to profile the NodeJS pods</b></summary>
+
+Prerequisite steps: [setup-k8s](#setup-k8s)
+
+Chrome dev-tools profiler:
+1) Open the `Packages/app-server/[Dockerfile/deployment.yaml]` files, comment the `mode: normal` lines, and uncomment the `mode: profiling` lines. (and have tilt-up running, so these changes get applied)
+2) Open the page `chrome:inspect` in Chrome, and make sure "Discover network targets" is enabled.
+3) Press "Configure", and add `localhost:3155` and `localhost:4155` to the list.
+4) Ensure a port-forward is set up for one of those ports, to the running/target app-server pod. (see: [port-forwarding](#port-forwarding))
+5) The remote target should show up in the list. (if it doesn't, try refreshing the page and waiting; you can also press "Open dedicated DevTools for Node", which seems to connect faster)
+6) The dev-tools should work as expected. (though note that I hit issues of the pod crashing in some cases [eg. memory dumps when memory usage was high], presumably from running out of memory; I'm not yet sure how to make this more reliable)
+7) When you're done with profiling, revert the changes made in step 1.
+
+</details>
+
 
 
 
@@ -620,6 +638,7 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 	* 1.1\) You can manually remove the taint by running (as seen [here](https://stackoverflow.com/a/63471551/2441655)): `kubectl taint node <nodename> node.kubernetes.io/memory-pressure:NoSchedule-`
 		1.1.1\) Update: This didn't actually seem to work for me. Perhaps k8s is instantly re-applying the taint, since it's based on a persistent memory shortage? Anyway, currently I just wait for the memory shortage to resolve (somehow).
 		1.1.2\) For now, another workaround that *seems* to help (from a couple tries), is opening pod-list in Lens, searching for all pods of the given type, selecting-all, then removing/killing all.
+		1.1.3\) Another partial workaround seems to be to use Lens->Deployment, set Scale to 0, wait till entry updates, then set Scale to 1 again; in a couple cases this seemed to resolve the taint issue (maybe just coincidence though). 
 * 2\) If you get the error "Unable to attach or mount volumes: unmounted volumes [...]" (in my case, after replacing a 4gb node-pool with an 8gb one), the issue may be that the stale persistent-volume-claims requested by the old nodes are still sticking around, causing new claims for the new node to not get created (issue [described here](https://veducate.co.uk/kubelet-unable-attach-volumes/)). To fix this:
 	* 2.1\) Run `npm start backend.tiltDown_ovh`.
 	* 2.2\) Tilt-down appears to not delete everything, so complete the job by using Tilt to manually delete anything added by our project: basically everything except what's in the `kube-node-lease`, `kube-public`, and `kube-system` namespaces.

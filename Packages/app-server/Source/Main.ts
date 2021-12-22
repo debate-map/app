@@ -14,6 +14,8 @@ import {AddSchema, CreateCommandsPlugin, DBUpdate, GenerateUUID, GetAsync, GetSc
 import {Assert, FancyFormat, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {GetUserHiddensWithEmail, User} from "dm_common";
+import fs from "fs";
+import v8 from "v8";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {DBPreloadPlugin} from "./Mutations/DBPreloadPlugin.js";
@@ -317,6 +319,15 @@ app.get("/app-server/test", (req, res)=>{
 app.get("/restart", (req, res)=>{
 	res.send("Restarting app-server...");
 	process.exit(42);
+});
+
+// temp; perf debugging
+app.get("/dump-mem", async(req, res)=>{
+	console.log("Starting memory dump...");
+	const dumpPath = `${new Date().toLocaleString("sv").replace(/[ :]/g, "-")}.heapsnapshot`;
+	await fs.promises.writeFile(dumpPath, v8.getHeapSnapshot());
+	console.log("Memory dump saved to:", dumpPath);
+	res.send(`Memory dump saved.`);
 });
 
 const serverPort = env.PORT || 3105 as number;

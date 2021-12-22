@@ -42,4 +42,10 @@ ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 #ENV TS_NODE_PROJECT=../../tsconfig.base.json
 #ENV TS_NODE_PROJECT=Scripts/tsconfig.json
 #CMD ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --ignore-watch="nothing" --no-daemon --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+
+# mode: normal
 CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
+
+# mode: profiling
+#CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=1024 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=8192 ./Dist/Main.js

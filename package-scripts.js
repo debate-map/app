@@ -162,9 +162,10 @@ function GetPortForwardCommandsStr(context) {
 	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} ${fd}205:5432`;
 	if (commandArgs.includes("onlyDB")) return forDB;
 
-	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} ${fd}005`;
-	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}105`;
-	return `concurrently --kill-others --names db,ws,as "${forDB}" "${forAppServer}" "${forWebServer}"`;
+	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} ${fd}005:3005`;
+	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}105:3105`;
+	const forAppServerInspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}155:3155`;
+	return `concurrently --kill-others --names db,ws,as,asi "${forDB}" "${forAppServer}" "${forWebServer}" "${forAppServerInspector}"`;
 }
 
 // for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)

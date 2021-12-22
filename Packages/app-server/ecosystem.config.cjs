@@ -8,23 +8,30 @@ console.log("Preparing to run app-server. @devMode:", DEV, "@serverHost:", k8sSe
 
 //console.log("Contents of /dm_repo/node_modules/zen-observable-ts/package.json:", require("fs").readFileSync("/dm_repo/node_modules/zen-observable-ts/package.json").toString());
 
+const nodeArgs = [
+	`--experimental-specifier-resolution=node`,
+	`--heapsnapshot-near-heap-limit=3`,
+	//`--inspect`,
+];
+//console.log("Updated2!");
+
 module.exports = {
 	apps: [{
 		name: "main",
 
 		...DEV ? {
 			//script: "node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
-			script: "node --experimental-specifier-resolution=node ./Dist/Main.js; sleep infinity", // sleep forever after, so if errors, kubernetes doesn't instantly restart it
+			script: `node ${nodeArgs.join(" ")} ./Dist/Main.js; sleep infinity`, // sleep forever after, so if errors, kubernetes doesn't instantly restart it
 			interpreter: null,
 		} : {
 			script: "./Dist/Main.js",
 			//node_args: "--loader ts-node/esm.mjs --experimental-specifier-resolution=node",
-			node_args: "--experimental-specifier-resolution=node",
+			node_args: nodeArgs.join(" "),
 		},
 
 		// temp; the stop_exit_codes solution doesn't seem to work for every case, so use back-off on retries at least
 		exp_backoff_restart_delay: 500,
-		
+
 		// disable restart-on-error (that's kubernetes' job);
 		//stop_exit_codes: [0],
 		stop_exit_codes: (()=>{
@@ -45,9 +52,9 @@ module.exports = {
 		ignore: null,
 		ignore_watch: [],
 		watch_options: {
-			cwd: '/dm_repo',
+			cwd: "/dm_repo",
 		},
-		
+
 		/*env_production: {
 			NODE_ENV: "production"
 		},
