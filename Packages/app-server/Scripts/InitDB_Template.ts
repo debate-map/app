@@ -151,18 +151,21 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 		-- regular RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access, or entry's policy allows access for the user)
 
-		create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar) returns boolean as $$ begin 
+		create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar, policyField varchar) returns boolean as $$ begin 
 			return (
 				current_setting('app.current_user_id') = entry_creator
 				or current_setting('app.current_user_admin') = 'true'
 				/*or (
 					policyFields[0] -> 'nodes' -> 'access' = 'true'
-					or policyFields[1] -> current_setting('app.current_user_id') -> 'access' = 'true'
+					or policyFields[1] -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
 				)*/
 				or exists (
 					select 1 from app_public."accessPolicies" where id = policyID and (
-						"permissions" -> 'nodes' -> 'access' = 'true'
-						or "permissions_userExtends" -> current_setting('app.current_user_id') -> 'access' = 'true'
+						(
+							"permissions" -> 'nodes' -> 'access' = 'true'
+							and "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' != 'false'
+						)
+						or "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
 					)
 				)
 			);
@@ -171,31 +174,31 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		alter table app_public."terms" enable row level security;
 		do $$ begin
 			drop policy if exists "terms_rls" on app_public."terms";
-			create policy "terms_rls" on app_public."terms" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+			create policy "terms_rls" on app_public."terms" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'terms'));
 		end $$;
 
 		alter table app_public."medias" enable row level security;
 		do $$ begin
 			drop policy if exists "medias_rls" on app_public."medias";
-			create policy "medias_rls" on app_public."medias" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+			create policy "medias_rls" on app_public."medias" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'medias'));
 		end $$;
 
 		alter table app_public."maps" enable row level security;
 		do $$ begin
 			drop policy if exists "maps_rls" on app_public."maps";
-			create policy "maps_rls" on app_public."maps" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+			create policy "maps_rls" on app_public."maps" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'maps'));
 		end $$;
 
 		alter table app_public."nodes" enable row level security;
 		do $$ begin
 			drop policy if exists "nodes_rls" on app_public."nodes";
-			create policy "nodes_rls" on app_public."nodes" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+			create policy "nodes_rls" on app_public."nodes" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'nodes'));
 		end $$;
 
 		alter table app_public."nodeRatings" enable row level security;
 		do $$ begin
 			drop policy if exists "nodeRatings_rls" on app_public."nodeRatings";
-			create policy "nodeRatings_rls" on app_public."nodeRatings" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy"));
+			create policy "nodeRatings_rls" on app_public."nodeRatings" as permissive for all using (IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'nodeRatings'));
 		end $$;
 	`);
 
