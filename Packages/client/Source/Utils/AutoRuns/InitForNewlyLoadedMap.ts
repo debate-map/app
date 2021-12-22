@@ -12,24 +12,29 @@ import {JustBeforeUI_listeners} from "Main";
 import {RunInAction} from "web-vcore";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
-let lastMapID;
+let lastMapID: string|n;
+//let lastMapID_initWasSuccess: boolean|n;
 AutoRun_HandleBail(()=>{
 	const mapID = GetOpenMapID();
-	if (mapID != lastMapID) {
+	if (mapID != lastMapID /*|| !lastMapID_initWasSuccess*/) {
 		lastMapID = mapID;
+		//lastMapID_initWasSuccess = null;
 		if (mapID) {
-			StartInitForNewlyLoadedMap(mapID);
+			StartInitForNewlyLoadedMap(mapID);/*.then(success=>{
+				lastMapID_initWasSuccess = success;
+			});*/
 		}
 	}
 }, {name: "InitForNewlyLoadedMap"});
 
+/** Returns true if the map state (including map-view) was successfully initialized. */
 async function StartInitForNewlyLoadedMap(mapID: string) {
 	Assert(mapID != null, "mapID cannot be null.");
 	let mapState = GetMapState(mapID);
-	if (mapState?.initDone && GetMapView(mapID) != null) return; // 2nd-check for version-clearing
+	if (mapState?.initDone && GetMapView(mapID) != null) return true; // 2nd-check for version-clearing
 	const map = await GetAsync(()=>GetMap(mapID));
 	//Assert(map);
-	if (map == null) return; // map must be private/deleted
+	if (map == null) return false; // map must be private/deleted
 
 	// ACTEnsureMapStateInit(action.payload.id);
 	// storeM.ACTEnsureMapStateInit(action.payload.id);
@@ -50,7 +55,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 			const nodeID = path.split("/").Last();
 			const node = await GetAsync(()=>GetNodeL2(nodeID));
 			//Assert(node);
-			if (node == null) return; // node must be private/deleted
+			if (node == null) continue; // node must be private/deleted
 
 			// console.log('NodeView:', path, GetNodeView(map.id, path, false));
 			if (GetNodeView(map.id, path, false) == null) {
@@ -76,4 +81,6 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	if (mapUI) {
 		mapUI.StartLoadingScroll();
 	}
+
+	return true;
 }
