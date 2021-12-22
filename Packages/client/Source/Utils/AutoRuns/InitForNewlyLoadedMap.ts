@@ -1,28 +1,21 @@
 import {GetMap, GetNodeChildLinks, GetNodeL2, MapView} from "dm_common";
-import {A, Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {autorun, runInAction} from "web-vcore/nm/mobx.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState.js";
-import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTMapNodeExpandedSet, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
-import {JustBeforeUI_listeners} from "Main";
 import {RunInAction} from "web-vcore";
+import {Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastMapID: string|n;
-//let lastMapID_initWasSuccess: boolean|n;
 AutoRun_HandleBail(()=>{
 	const mapID = GetOpenMapID();
-	if (mapID != lastMapID /*|| !lastMapID_initWasSuccess*/) {
+	if (mapID != lastMapID) {
 		lastMapID = mapID;
-		//lastMapID_initWasSuccess = null;
 		if (mapID) {
-			StartInitForNewlyLoadedMap(mapID);/*.then(success=>{
-				lastMapID_initWasSuccess = success;
-			});*/
+			StartInitForNewlyLoadedMap(mapID);
 		}
 	}
 }, {name: "InitForNewlyLoadedMap"});
@@ -36,8 +29,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	//Assert(map);
 	if (map == null) return false; // map must be private/deleted
 
-	// ACTEnsureMapStateInit(action.payload.id);
-	// storeM.ACTEnsureMapStateInit(action.payload.id);
+	//ACTEnsureMapStateInit(action.payload.id);
 	let mapView: MapView|n;
 	RunInAction("StartInitForNewlyLoadedMap_part1", ()=>{
 		({mapState, mapView} = ACTEnsureMapStateInit(mapID));
@@ -54,12 +46,11 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 		for (const path of pathsToExpand) {
 			const nodeID = path.split("/").Last();
 			const node = await GetAsync(()=>GetNodeL2(nodeID));
-			//Assert(node);
 			if (node == null) continue; // node must be private/deleted
 
-			// console.log('NodeView:', path, GetNodeView(map.id, path, false));
+			//console.log('NodeView:', path, GetNodeView(map.id, path, false));
 			if (GetNodeView(map.id, path, false) == null) {
-				// console.log('Expanding:', path);
+				//console.log('Expanding:', path);
 				ACTMapNodeExpandedSet({mapID: map.id, path, expanded: true, resetSubtree: false});
 			}
 			const childLinks = await GetAsync(()=>GetNodeChildLinks(node.id));
@@ -77,7 +68,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 
 	// probably temp (find more elegant way)
 	const mapUI = MapUI.CurrentMapUI;
-	// console.log('MapUI:', mapUI);
+	//console.log('MapUI:', mapUI);
 	if (mapUI) {
 		mapUI.StartLoadingScroll();
 	}
