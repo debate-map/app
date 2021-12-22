@@ -1,4 +1,4 @@
-import {GetMap, GetNodeChildLinks, GetNodeL2, MapView} from "dm_common";
+import {GetMap, GetNodeChildLinks, GetNodeL2, MapView, Me} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
@@ -9,14 +9,13 @@ import {Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
-let lastMapID: string|n;
+//let lastMapID: string|n;
 AutoRun_HandleBail(()=>{
+	Me(); // watch for user-login-data changes
+
 	const mapID = GetOpenMapID();
-	if (mapID != lastMapID) {
-		lastMapID = mapID;
-		if (mapID) {
-			StartInitForNewlyLoadedMap(mapID);
-		}
+	if (mapID) {
+		StartInitForNewlyLoadedMap(mapID);
 	}
 }, {name: "InitForNewlyLoadedMap"});
 
