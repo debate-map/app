@@ -1,6 +1,7 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {Map} from "../DB/maps/@Map.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
@@ -39,8 +40,7 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		});
 		//const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: "Root"})}));
 		const newRootNodeRevision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: "Root"})});
-		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}).MarkAsSubcommand(this);
-		this.sub_addNode.Validate();
+		this.IntegrateSubcommand(()=>this.sub_addNode, ()=>new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}));
 
 		map.rootNode = this.sub_addNode.payload.node.id;
 		AssertValidate("Map", map, "Map invalid");

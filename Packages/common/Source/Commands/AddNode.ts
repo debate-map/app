@@ -6,7 +6,11 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 /** Do not try to use this from client. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
 @CommandMeta({
 	exposeToGraphQL: false, // server-internal
-	payloadSchema: ()=>SimpleSchema({}), // not needed
+	payloadSchema: ()=>SimpleSchema({
+		$mapID: {$ref: "UUID"},
+		$node: {$ref: "MapNode_Partial"},
+		$revision: {$ref: "MapNodeRevision_Partial"},
+	}),
 })
 export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
 	sub_addRevision: AddNodeRevision;
@@ -26,8 +30,7 @@ export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: 
 		node.createdAt = Date.now();
 		revision.node = node.id;
 
-		this.sub_addRevision = this.sub_addRevision ?? new AddNodeRevision({mapID, revision}).MarkAsSubcommand(this);
-		this.sub_addRevision.Validate();
+		this.IntegrateSubcommand(()=>this.sub_addRevision, ()=>new AddNodeRevision({mapID, revision}));
 
 		// if sub of AddChildNode for new argument, ignore the "childrenOrder" prop requirement (gets added by later link-impact-node subcommand)
 		if (this.parentCommand) {

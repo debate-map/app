@@ -1,6 +1,8 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {ChangeType, Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
@@ -21,6 +23,14 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 
 @MapEdit
 @UserEdit
+@CommandRunMeta({
+	record: true,
+	record_cancelIfAncestorInStream: true,
+	canShowInStream: true,
+	rlsTargetPaths: [
+		{table: "nodes", fieldPath: ["payload", "revision", "node"]},
+	],
+})
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {type: "string"},

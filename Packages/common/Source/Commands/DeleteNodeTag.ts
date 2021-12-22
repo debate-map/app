@@ -1,8 +1,8 @@
-import {AV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 @CommandMeta({

@@ -1,6 +1,6 @@
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {Share} from "../DB.js";
-import {UserEdit} from "../CommandMacros.js";
 
 /*
 ID-generation schemes

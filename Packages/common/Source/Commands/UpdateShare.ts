@@ -1,8 +1,7 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {Media} from "../DB/media/@Media.js";
-import {GetMedia, Share, GetShare} from "../DB.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
+import {GetShare, Share} from "../DB.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = Share;

@@ -1,8 +1,7 @@
-import {Assert, CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, AddSchema, GetSchemaJSON, NewSchema, WrapDBValue, dbp, GetAsync, Command, AssertV, CommandMeta, DBHelper, DeriveJSONSchema, SimpleSchema, ClassKeys} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {Term} from "../DB/terms/@Term.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetTerm} from "../DB/terms.js";
+import {Term} from "../DB/terms/@Term.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 const MTClass = Term;

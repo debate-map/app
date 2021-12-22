@@ -122,7 +122,7 @@ passport.use(new GoogleStrategy(
 		});
 		const command = new AddUser({user, userHidden});
 		command._userInfo_override = graph.userInfo; // use system-user to run the AddUser command
-		const {id: newID} = await command.RunLocally();
+		const {id: newID} = (await command.RunLocally()).returnData;
 		console.log("AddUser done! NewID:", newID);
 
 		//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)

@@ -1,12 +1,7 @@
-import {AddSchema, AssertValidate, GetAsync, Command, AssertV, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
-
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {Command, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {GetNode} from "../DB/nodes.js";
-import {HasAdminPermissions, IsUserCreatorOrMod} from "../DB/users/$user.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
-import {IsMultiPremiseArgument} from "../DB/nodes/$node.js";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @MapEdit
 @UserEdit

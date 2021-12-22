@@ -1,9 +1,8 @@
-import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {Command, AssertV, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
+import {GetNode} from "../DB/nodes.js";
 import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
 import {HasModPermissions} from "../DB/users/$user.js";
-import {GetNode} from "../DB/nodes.js";
 
 @UserEdit
 @CommandMeta({

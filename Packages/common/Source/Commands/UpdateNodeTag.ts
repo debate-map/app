@@ -1,6 +1,6 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
 import {MapNodeTag, TagComp_keys} from "../DB/nodeTags/@MapNodeTag.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";

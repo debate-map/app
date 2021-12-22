@@ -1,5 +1,5 @@
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";

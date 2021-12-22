@@ -1,7 +1,8 @@
 import {MapNodeRevision} from "DB/nodes/@MapNodeRevision.js";
 import {Clone} from "web-vcore/nm/js-vextensions.js";
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeChildren} from "../DB/nodes.js";
 import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {MapNode, MapNodeL2} from "../DB/nodes/@MapNode.js";
@@ -38,8 +39,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 				const oldChildNode = GetNodeL3.NN(oldChildNode_partialPath);
 				newRevision.phrasing.text_base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
 
-				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision}).MarkAsSubcommand(this);
-				this.sub_addRevision.Validate();
+				this.IntegrateSubcommand(()=>this.sub_addRevision, new AddNodeRevision({mapID, revision: newRevision}));
 			}
 		} else {
 			//this.newNodeData.childrenOrderType = ChildOrderType.ByRating;

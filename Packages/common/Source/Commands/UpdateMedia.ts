@@ -1,8 +1,7 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, AssertValidate, ClassKeys, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, GetSchemaJSON, NewSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {Media} from "../DB/media/@Media.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMedia} from "../DB.js";
+import {Media} from "../DB/media/@Media.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 const MTClass = Media;

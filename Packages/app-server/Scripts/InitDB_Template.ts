@@ -130,7 +130,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
-		-- simple RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access [without user-specific block], or entry's policy has user-specific grant)
+		-- RLS helper functions
 
 		create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar, policyField varchar) returns boolean as $$ begin 
 			return (
@@ -151,6 +151,20 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 				)
 			);
 		end $$ language plpgsql;
+
+		create or replace function CanCurrentUserAccessAllNodesInArray(nodes varchar[]) returns boolean as $$
+		declare
+			node varchar;
+		begin 
+			foreach node in array nodes loop
+				if not IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = node), 'nodes') then
+					return false;
+				end if;
+			end loop;
+			return true;
+		end $$ language plpgsql;
+
+		-- simple RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access [without user-specific block], or entry's policy has user-specific grant)
 
 		alter table app_public."terms" enable row level security;
 		do $$ begin
@@ -181,19 +195,27 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		alter table app_public."mapNodeEdits" enable row level security;
 		do $$ begin
 			drop policy if exists "mapNodeEdits_rls" on app_public."mapNodeEdits";
-			create policy "mapNodeEdits_rls" on app_public."mapNodeEdits" as permissive for all using (TODO);
+			create policy "mapNodeEdits_rls" on app_public."mapNodeEdits" as permissive for all using (
+				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.maps where id = "map"), 'maps')
+				and IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "node"), 'nodes')
+			);
 		end $$;
 
 		alter table app_public."nodeChildLinks" enable row level security;
 		do $$ begin
 			drop policy if exists "nodeChildLinks_rls" on app_public."nodeChildLinks";
-			create policy "nodeChildLinks_rls" on app_public."nodeChildLinks" as permissive for all using (TODO);
+			create policy "nodeChildLinks_rls" on app_public."nodeChildLinks" as permissive for all using (
+				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "parent"), 'nodes')
+				and IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "child"), 'nodes')
+			);
 		end $$;
 
 		alter table app_public."nodePhrasings" enable row level security;
 		do $$ begin
 			drop policy if exists "nodePhrasings_rls" on app_public."nodePhrasings";
-			create policy "nodePhrasings_rls" on app_public."nodePhrasings" as permissive for all using (TODO);
+			create policy "nodePhrasings_rls" on app_public."nodePhrasings" as permissive for all using (
+				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "node"), 'nodes')
+			);
 		end $$;
 
 		alter table app_public."nodeRatings" enable row level security;
@@ -201,20 +223,24 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			drop policy if exists "nodeRatings_rls" on app_public."nodeRatings";
 			create policy "nodeRatings_rls" on app_public."nodeRatings" as permissive for all using (
 				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(creator, "accessPolicy", 'nodeRatings')
-				and TODO
+				and IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "node"), 'nodes')
 			);
 		end $$;
 
 		alter table app_public."nodeRevisions" enable row level security;
 		do $$ begin
 			drop policy if exists "nodeRevisions_rls" on app_public."nodeRevisions";
-			create policy "nodeRevisions_rls" on app_public."nodeRevisions" as permissive for all using (TODO);
+			create policy "nodeRevisions_rls" on app_public."nodeRevisions" as permissive for all using (
+				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "node"), 'nodes')
+			);
 		end $$;
 
 		alter table app_public."nodeTags" enable row level security;
 		do $$ begin
 			drop policy if exists "nodeTags_rls" on app_public."nodeTags";
-			create policy "nodeTags_rls" on app_public."nodeTags" as permissive for all using (TODO);
+			create policy "nodeTags_rls" on app_public."nodeTags" as permissive for all using (
+				CanCurrentUserAccessAllNodesInArray("nodes")
+			);
 		end $$;
 
 		-- unique RLS policies
@@ -229,11 +255,13 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		do $$ begin
 			drop policy if exists "commandRuns_rls" on app_public."commandRuns";
 			create policy "commandRuns_rls" on app_public."commandRuns" as permissive for all using (
-				public_base = true
-				and (
-					actor = current_setting('app.current_user_id')
-					or current_setting('app.current_user_admin') = 'true'
-					-- TODO: make-so this also allows access if the associated objects' access-policies allow access
+				current_setting('app.current_user_admin') = 'true'
+				or (
+					-- public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
+					public_base = true
+					and (
+						CanCurrentUserAccessAllNodesInArray(array(select jsonb_array_elements_text("rlsTargets" -> 'nodes')))
+					)
 				)
 			);
 		end $$;

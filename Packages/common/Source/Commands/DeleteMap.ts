@@ -1,5 +1,5 @@
 import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetMap} from "../DB/maps.js";
@@ -25,9 +25,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 		//this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 
-		this.sub_deleteNode = this.sub_deleteNode ?? new DeleteNode({mapID: id, nodeID: this.oldData.rootNode}).MarkAsSubcommand(this);
-		this.sub_deleteNode.asPartOfMapDelete = true;
-		this.sub_deleteNode.Validate();
+		this.IntegrateSubcommand(()=>this.sub_deleteNode, ()=>new DeleteNode({mapID: id, nodeID: this.oldData.rootNode}), a=>a.asPartOfMapDelete = true);
 		// todo: use parents recursion on l2 nodes to make sure they're all connected to at least one other map root
 
 		this.nodeEdits = GetMapNodeEdits(id);
@@ -45,7 +43,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 				}
 			}
 		}*/
-		
+
 		// delete entries in mapNodeEdits
 		for (const edit of this.nodeEdits) {
 			db.set(dbp`mapNodeEdits/${edit.id}`, null);

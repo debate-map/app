@@ -6,21 +6,11 @@ import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
 import {MapNode, MapNodeL2, Polarity} from "./nodes/@MapNode.js";
-import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType.js";
+import {ChildGroup, MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@MapNodeTag.js";
 import {CanGetBasicPermissions, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
 import {PermissionGroupSet} from "./users/@User.js";
-
-export enum ChildGroup {
-	generic = "generic",
-	truth = "truth",
-	relevance = "relevance",
-	// testing
-	neutrality = "neutrality",
-	freeform = "freeform",
-}
-AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);

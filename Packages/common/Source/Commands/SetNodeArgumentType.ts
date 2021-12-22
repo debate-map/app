@@ -1,6 +1,7 @@
 import {ArgumentType} from "DB/nodes/@MapNodeRevision.js";
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, GetNodeL2} from "../DB/nodes/$node.js";
 import {MapNode, MapNodeL2} from "../DB/nodes/@MapNode.js";
 

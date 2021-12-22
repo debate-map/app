@@ -1,6 +1,8 @@
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetNode} from "../DB/nodes.js";
@@ -12,6 +14,14 @@ import {LinkNode} from "./LinkNode.js";
 
 @MapEdit
 @UserEdit
+@CommandRunMeta({
+	record: true,
+	canShowInStream: true,
+	rlsTargetPaths: [
+		{table: "nodes", fieldPath: ["payload", "parentID"]},
+		{table: "nodes", fieldPath: ["returnData", "nodeID"]},
+	],
+})
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$mapID: {$ref: "UUID"},
@@ -38,20 +48,15 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 		this.payload.link = E(new NodeChildLink(), this.payload.link);
 		this.payload.link.parent = parentID;
 
-		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node, revision}).MarkAsSubcommand(this);
-		this.sub_addNode.Validate();
+		this.IntegrateSubcommand(()=>this.sub_addNode, ()=>new AddNode({mapID, node, revision}));
 		this.payload.link.child = this.sub_addNode.payload.node.id;
 
-		this.sub_addLink = this.sub_addLink ?? new LinkNode({mapID, link: this.payload.link}).MarkAsSubcommand(this);
-		this.sub_addLink.Validate();
+		this.IntegrateSubcommand(()=>this.sub_addLink, ()=>new LinkNode({mapID, link: this.payload.link!}));
 
-		const isAddClaimSub = this.parentCommand instanceof AddArgumentAndClaim && this.parentCommand.sub_addClaim == this;
-		if (isAddClaimSub) {
-			Assert(this.parent_oldData != null);
-		} else {
-			// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
-			this.parent_oldData = GetNode.NN(parentID)!;
-		}
+		// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
+		this.parent_oldData =
+			this.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this)?.payload.argumentNode
+			?? GetNode.NN(parentID)!;
 
 		this.returnData = {
 			nodeID: this.sub_addNode.payload.node.id,

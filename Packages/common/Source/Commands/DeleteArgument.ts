@@ -1,5 +1,6 @@
 import {Command, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
 
@@ -22,16 +23,12 @@ export class DeleteArgument extends Command<{mapID?: string|n, argumentID: strin
 		const {mapID, argumentID, claimID, deleteClaim} = this.payload;
 
 		if (deleteClaim) {
-			this.sub_deleteClaim = this.sub_deleteClaim ?? new DeleteNode({mapID, nodeID: claimID}).MarkAsSubcommand(this);
-			this.sub_deleteClaim.Validate();
+			this.IntegrateSubcommand(()=>this.sub_deleteClaim, ()=>new DeleteNode({mapID, nodeID: claimID}));
 		} else {
-			this.sub_unlinkClaim = this.sub_unlinkClaim ?? new UnlinkNode({mapID, parentID: argumentID, childID: claimID}).MarkAsSubcommand(this);
-			this.sub_unlinkClaim.Validate();
+			this.IntegrateSubcommand(()=>this.sub_unlinkClaim, ()=>new UnlinkNode({mapID, parentID: argumentID, childID: claimID}));
 		}
 
-		this.sub_deleteContainerArgument = this.sub_deleteContainerArgument ?? new DeleteNode({mapID, nodeID: argumentID}).MarkAsSubcommand(this);
-		this.sub_deleteContainerArgument.childrenToIgnore = [claimID];
-		this.sub_deleteContainerArgument.Validate();
+		this.IntegrateSubcommand(()=>this.sub_deleteContainerArgument, ()=>new DeleteNode({mapID, nodeID: argumentID}), a=>a.childrenToIgnore = [claimID]);
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

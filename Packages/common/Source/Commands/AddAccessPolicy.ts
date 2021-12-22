@@ -1,10 +1,10 @@
-import {AccessPolicy} from "DB/accessPolicies/@AccessPolicy.js";
 import {AssertValidate, dbp, GenerateUUID, WrapDBValue, Command, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>SimpleSchema({$policy: {$ref: "AccessPolicy"}}),
+	payloadSchema: ()=>SimpleSchema({$policy: {$ref: AccessPolicy.name}}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddAccessPolicy extends Command<{policy: AccessPolicy}, {id: string}> {
@@ -15,7 +15,7 @@ export class AddAccessPolicy extends Command<{policy: AccessPolicy}, {id: string
 		policy.createdAt = Date.now();
 
 		this.returnData = {id: policy.id};
-		AssertValidate("AccessPolicy", policy, "Access-policy invalid");
+		AssertValidate(AccessPolicy.name, policy, "Access-policy invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

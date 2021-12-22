@@ -1,7 +1,7 @@
-import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {User} from "../DB/users/@User.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
+import {User} from "../DB/users/@User.js";
 import {systemUserID} from "../DB_Constants.js";
 
 @UserEdit

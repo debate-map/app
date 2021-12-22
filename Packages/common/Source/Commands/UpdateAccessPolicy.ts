@@ -1,6 +1,5 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, GetSchemaJSON, NewSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetAccessPolicy} from "../DB/accessPolicies.js";
 import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";

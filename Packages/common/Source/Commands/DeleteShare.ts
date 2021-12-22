@@ -1,8 +1,7 @@
-import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {Media} from "../DB/media/@Media.js";
-import {GetMedia, IsUserCreatorOrMod, GetShare, Share} from "../DB.js";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
+import {GetShare, Share} from "../DB.js";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 @CommandMeta({

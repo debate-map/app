@@ -1,8 +1,8 @@
-import {GetAsync, Command, AssertV, WrapDBValue, dbp, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
-import {Term} from "../DB/terms/@Term.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetTerm} from "../DB/terms.js";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {Term} from "../DB/terms/@Term.js";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 @CommandMeta({

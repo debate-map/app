@@ -1,7 +1,16 @@
 import {Assert, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {ChildGroup} from "../nodes.js";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode.js";
+
+export enum ChildGroup {
+	generic = "generic",
+	truth = "truth",
+	relevance = "relevance",
+	// testing
+	neutrality = "neutrality",
+	freeform = "freeform",
+}
+AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
 
 export enum MapNodeType {
 	category = "category",

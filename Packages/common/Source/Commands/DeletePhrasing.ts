@@ -1,5 +1,5 @@
 import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";

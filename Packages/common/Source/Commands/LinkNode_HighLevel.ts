@@ -4,11 +4,11 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, ChildGroup, ForLink_GetError} from "../DB/nodes.js";
+import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, ForLink_GetError} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {ChildGroup, MapNodeType} from "../DB/nodes/@MapNodeType.js";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
@@ -127,18 +127,17 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			});
 			const argumentWrapperRevision = new MapNodeRevision();
 
-			this.sub_addArgumentWrapper = this.sub_addArgumentWrapper ?? new AddChildNode({
+			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, ()=>new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
 				link: new NodeChildLink({group: childGroup, slot: 0, polarity: newPolarity}),
-			}).MarkAsSubcommand(this);
-			this.sub_addArgumentWrapper.Validate();
+			}));
 
 			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
 			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
 		}
 
-		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({
+		this.IntegrateSubcommand(()=>this.sub_linkToNewParent, ()=>new LinkNode({
 			mapID,
 			link: {
 				parent: newParentID_forClaim, child: nodeID,
@@ -146,20 +145,19 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				form: newForm,
 				polarity: this.node_data.type == MapNodeType.argument ? newPolarity : null,
 			},
-		}).MarkAsSubcommand(this);
-		this.sub_linkToNewParent.Validate();
+		}));
 
 		if (unlinkFromOldParent && oldParent) {
-			this.sub_unlinkFromOldParent = this.sub_unlinkFromOldParent ?? new UnlinkNode({mapID, parentID: oldParentID!, childID: nodeID}).MarkAsSubcommand(this);
-			this.sub_unlinkFromOldParent.allowOrphaning = true; // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
-			this.sub_unlinkFromOldParent.Validate();
+			this.IntegrateSubcommand(()=>this.sub_unlinkFromOldParent,
+				()=>new UnlinkNode({mapID, parentID: oldParentID!, childID: nodeID}),
+				a=>a.allowOrphaning = true); // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 
 			// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
 			const children = GetNodeChildLinks(oldParentID);
 			if (oldParent.type == MapNodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
-				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID!}).MarkAsSubcommand(this);
-				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
-				this.sub_deleteOldParent.Validate();
+				this.IntegrateSubcommand(()=>this.sub_deleteOldParent,
+					()=>new DeleteNode({mapID, nodeID: oldParentID!}),
+					a=>a.childrenToIgnore = [nodeID]); // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 			}
 		}
 	}

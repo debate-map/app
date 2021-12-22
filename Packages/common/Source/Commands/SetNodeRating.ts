@@ -22,19 +22,17 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 		const oldRatings = GetRatings(rating.node, rating.type, [this.userInfo.id]);
 		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
 		if (oldRatings.length) {
-			this.sub_deleteOldRating = new DeleteNodeRating({id: oldRatings[0].id}).MarkAsSubcommand(this);
-			this.sub_deleteOldRating.Validate();
+			this.IntegrateSubcommand(()=>this.sub_deleteOldRating, new DeleteNodeRating({id: oldRatings[0].id}));
 		}
 
 		rating.id = this.GenerateUUID_Once("rating.id");
 		rating.creator = this.userInfo.id;
 		rating.createdAt = Date.now();
 
-		this.sub_updateRatingSummaries = new UpdateNodeRatingSummaries({
+		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, new UpdateNodeRatingSummaries({
 			nodeID: rating.node, ratingType: rating.type,
 			ratingsBeingRemoved: [this.sub_deleteOldRating?.payload.id], ratingsBeingAdded: [rating],
-		}).MarkAsSubcommand(this);
-		this.sub_updateRatingSummaries.Validate();
+		}));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
