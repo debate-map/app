@@ -24,6 +24,7 @@ const MTName = MTClass.name;
 				includeOnly: [
 					"email", "providerData",
 					"backgroundID", "backgroundCustom_enabled", "backgroundCustom_color", "backgroundCustom_url", "backgroundCustom_position",
+					"addToStream",
 				],
 				makeOptional_all: true,
 			}),

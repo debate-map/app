@@ -38,9 +38,12 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 	//if (commandsToNotEvenRecord.includes(commandClass)) return;
 	const commandRunMeta = GetCommandRunMetaForClass(commandClass);
 
-	const ancestorCommandInStream = CommandXOrAncestorCanShowInStream(command.parentCommand) && command["user_addToStream"];
-	console.log("@Class:", commandClass.name, "Record:", commandRunMeta?.record, "Record_CancelIfX:", commandRunMeta?.record_cancelIfAncestorInStream, "ancestorCommandInStream:", ancestorCommandInStream, "user_addToStream:", command["user_addToStream"]);
-	if (commandRunMeta?.record && (!commandRunMeta.record_cancelIfAncestorInStream || !ancestorCommandInStream)) {
+	//const ancestorCommandInStream = CommandXOrAncestorCanShowInStream(command.parentCommand) && command["user_addToStream"];
+	const ancestorCommandCanBeInStream = CommandXOrAncestorCanShowInStream(command.parentCommand);
+	console.log("@Class:", commandClass.name,
+		"Record:", commandRunMeta?.record, "Record_CancelIfX:", commandRunMeta?.record_cancelIfAncestorCanBeInStream,
+		"ancestorCommandCanBeInStream:", ancestorCommandCanBeInStream, "user_addToStream:", command["user_addToStream"]);
+	if (commandRunMeta?.record && (!commandRunMeta.record_cancelIfAncestorCanBeInStream || !ancestorCommandCanBeInStream)) {
 		const makePublic_base = Boolean(commandRunMeta.canShowInStream && command["user_addToStream"]); // user_addToStream set in augmentValidate
 
 		const rlsTargets = new RLSTargetSet();

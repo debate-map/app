@@ -24,7 +24,7 @@ export class CommandRunMetadata {
 
 	record: boolean;
 	/** If true, recording will only occur if there is no ancestor command which is already going to get added to the stream (ie. recorded, with public_base:true). */
-	record_cancelIfAncestorInStream = false;
+	record_cancelIfAncestorCanBeInStream = false;
 	canShowInStream = false;
 	/** This only needs to be specified if canShowInStream is true. (when that field is false, no one but admins can access anyway, for whom the rls-target-paths array has no effect) */
 	rlsTargetPaths = [] as RLSTargetPath[];

@@ -25,7 +25,7 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 @UserEdit
 @CommandRunMeta({
 	record: true,
-	record_cancelIfAncestorInStream: true,
+	record_cancelIfAncestorCanBeInStream: true,
 	canShowInStream: true,
 	rlsTargetPaths: [
 		{table: "nodes", fieldPath: ["payload", "revision", "node"]},
