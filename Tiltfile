@@ -162,7 +162,6 @@ NEXT_k8s_resource_batch([
 # 	objects=[
 # 		"vfiles-configmap:configmap",
 # 	],
-# 	resource_deps=["namespaces"],
 # 	labels=["monitoring"],
 # )
 # NEXT_k8s_resource("grafana",
@@ -173,7 +172,6 @@ NEXT_k8s_resource_batch([
 # 		"grafana-dashboard-kubernetes-cluster:configmap",
 # 		"grafana-dashboard-node-exporter-full:configmap",
 # 	],
-# 	resource_deps=["prometheus"],
 # 	labels=["monitoring"],
 # )
 # NEXT_k8s_resource("node-exporter",
@@ -181,7 +179,6 @@ NEXT_k8s_resource_batch([
 # 		"node-exporter-claim0:persistentvolumeclaim",
 # 		"node-exporter-claim1:persistentvolumeclaim",
 # 	],
-# 	resource_deps=["prometheus"],
 # 	labels=["monitoring"],
 # )
 # '''NEXT_k8s_resource("cadvisor",
@@ -190,7 +187,6 @@ NEXT_k8s_resource_batch([
 # 		"cadvisor-claim1:persistentvolumeclaim",
 # 		"cadvisor-claim2:persistentvolumeclaim",
 # 	],
-# 	resource_deps=["prometheus"],
 # )'''
 
 # crunchydata postgres operator
@@ -225,7 +221,6 @@ NEXT_k8s_resource(new_name='pgo_crd-definition',
 		pgo_crdName, # the CRD definition?
 	],
 	pod_readiness='ignore',
-	#resource_deps=["namespaces"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 
@@ -241,7 +236,6 @@ NEXT_k8s_resource(new_name='pgo_crd-instance',
 	objects=[
 		"debate-map:postgrescluster", # the CRD instance?
 	],
-	#resource_deps=["pgo_early"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 NEXT_k8s_resource('pgo',
@@ -253,7 +247,6 @@ NEXT_k8s_resource('pgo',
 		"debate-map-pguser-admin:secret",
 		"pgo-gcs-creds:secret",
 	],
-	#resource_deps=["pgo_early"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 # this is in separate group, so pod_readiness="ignore" only applies to it
@@ -266,7 +259,6 @@ NEXT_k8s_resource(new_name='pgo_late',
 		"postgres-operator.crunchydata.com/role": "master"
 	},
 	port_forwards='4205:5432' if REMOTE else '3205:5432',
-	#resource_deps=["pgo"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 
@@ -319,7 +311,6 @@ NEXT_k8s_resource("reflector",
 		"reflector:clusterrolebinding",
 		"reflector:serviceaccount",
 	],
-	#resource_deps=["pgo_late"],
 )
 
 # load-balancer/reverse-proxy (traefik)
@@ -409,7 +400,6 @@ NEXT_k8s_resource('dm-app-server',
 		'4105:3105' if REMOTE else '3105',
 		'4155:3155' if REMOTE else '3155' # for nodejs-inspector
 	],
-	#resource_deps=["traefik"],
 	labels=["app"],
 )
 
@@ -417,8 +407,6 @@ NEXT_k8s_resource('dm-web-server',
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
 	port_forwards='4005:3005' if REMOTE else '3005',
-	#resource_deps=["dm-app-server"],
-	#resource_deps=["traefik"],
 	labels=["app"],
 )
 
