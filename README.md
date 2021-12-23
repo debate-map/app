@@ -280,6 +280,26 @@ Notes:
 
 </details>
 
+<!----><a name="continuous-profiling"></a>
+<details><summary><b>[continuous-profiling] How to set up continuous profiling of the NodeJS pods</b></summary>
+
+Note: We use New Relic here, but others could be used.  
+Note: New Relic doesn't, by default, implement actual "continuous profiling"; it may support this as a component however. (will investigate)
+
+* 1\) Create a New Relic account: https://newrelic.com
+* 2\) Create a Kubernetes installation. (I used default settings)
+	* 2.1\) Download the `newrelic-manifest.yaml` file, and place it in the `Packages/deploy/NewRelic` folder.
+	* 2.2\) Proceed; it will take a few minutes, but be patient (without controlling/restarting any pods), and it should eventually start transmitting data to the web console.
+* 3\) Add a NodeJS agent for the app-server pod.
+	* 3.1\) Press "APM -> Add app/agent" from toolbar.
+	* 3.2\) Proceed, and select "manual" for installation type. (manual installation persists past redeploys)
+	* 3.3\) Proceed, setting the name to `app-server`, downloading the configuration file, and placing it in the `Packages/app-server` folder, but with the changes below:
+		* 3.3.1\) Rename the file to `newrelic.cjs` rather than `newrelic.js`.
+	* 3.4\) Let tilt redeploy the app-server pod, then press "See your data" on the New Relic page.
+	* 3.5\) Wait a few minutes; the add-agent page in the New Relic console should eventually say it is receiving data, letting you then view the details.
+
+</details>
+
 
 
 

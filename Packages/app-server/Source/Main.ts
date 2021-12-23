@@ -1,4 +1,7 @@
 import "./Start_0.js"; // this must come first // eslint-disable-line
+//import "./newrelic.js"; // import this next (it may need to come early) // eslint-disable-line
+import "newrelic"; // import this next (it may need to come early) // eslint-disable-line
+
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
 import {program} from "commander";
 import cors from "cors";

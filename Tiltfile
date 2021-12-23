@@ -29,6 +29,29 @@ k8s_resource(new_name="namespaces",
 
 k8s_yaml('./Packages/deploy/NodeSetup/node-setup-daemon-set.yaml')
 
+# new relic
+# ==========
+
+k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml')
+k8s_yaml('./Packages/deploy/NewRelic/olm_crd.yaml')
+# kubectl create namespace newrelic (for now, the "newrelic" namespace is created manually in ./namespace.yaml)
+k8s_yaml('./Packages/deploy/NewRelic/newrelic-manifest.yaml')
+
+# group the resouces under the new-relic group in Tilt
+k8s_resource("nri-bundle-newrelic-infrastructure", labels=["new-relic"])
+k8s_resource("nri-bundle-newrelic-logging", labels=["new-relic"])
+k8s_resource("nri-bundle-newrelic-logging", labels=["new-relic"])
+k8s_resource("nri-bundle-newrelic-pixie", labels=["new-relic"])
+k8s_resource("nri-bundle-nri-metadata-injection-admission-patch", labels=["new-relic"])
+k8s_resource("vizier-deleter", labels=["new-relic"])
+k8s_resource("olm-operator", labels=["new-relic"])
+k8s_resource("catalog-operator", labels=["new-relic"])
+k8s_resource("nri-bundle-kube-state-metrics", labels=["new-relic"])
+k8s_resource("nri-bundle-nri-metadata-injection", labels=["new-relic"])
+k8s_resource("nri-bundle-nri-metadata-injection-admission-create", labels=["new-relic"])
+k8s_resource("nri-bundle-nri-kube-events", labels=["new-relic"])
+k8s_resource("nri-bundle-nri-prometheus", labels=["new-relic"])
+
 # prometheus
 # ==========
 

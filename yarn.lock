@@ -2497,12 +2497,47 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@grpc/grpc-js@npm:^1.2.11":
+  version: 1.4.5
+  resolution: "@grpc/grpc-js@npm:1.4.5"
+  dependencies:
+    "@grpc/proto-loader": ^0.6.4
+    "@types/node": ">=12.12.47"
+  checksum: d3d3aed264fcb72623bf7e6146f1467af060f2eb2c20d58d23d1cc57101a7bece5cea5a7a2b547b089940f9d3576318a1b3cb11ccfb96cc7d6a9a6890e314de5
+  languageName: node
+  linkType: hard
+
 "@grpc/grpc-js@npm:^1.2.7":
   version: 1.3.7
   resolution: "@grpc/grpc-js@npm:1.3.7"
   dependencies:
     "@types/node": ">=12.12.47"
   checksum: 8d02972968afd4c54aaa6acc47d1601c73adc03829370fe4ced6b98679ee0b8cd10bcaa3e1d4d35f4eccdbd5f3e10304a10ef0006798b560226da5979dc84899
+  languageName: node
+  linkType: hard
+
+"@grpc/proto-loader@npm:^0.5.6":
+  version: 0.5.6
+  resolution: "@grpc/proto-loader@npm:0.5.6"
+  dependencies:
+    lodash.camelcase: ^4.3.0
+    protobufjs: ^6.8.6
+  checksum: 13fe76d84ab1a516f3dc47d06df4dd682f6f1515a7a4aa3f8cddcc8f8256f33cbf529bd0b6729946f548f7459acfcd9b5b026c10572e21d40213a358115658b5
+  languageName: node
+  linkType: hard
+
+"@grpc/proto-loader@npm:^0.6.4":
+  version: 0.6.7
+  resolution: "@grpc/proto-loader@npm:0.6.7"
+  dependencies:
+    "@types/long": ^4.0.1
+    lodash.camelcase: ^4.3.0
+    long: ^4.0.0
+    protobufjs: ^6.10.0
+    yargs: ^16.1.1
+  bin:
+    proto-loader-gen-types: build/bin/proto-loader-gen-types.js
+  checksum: af1909ec3697cb3b6ba4eac47c5ecd3dcbfd28e3d95b2a8b0e8cc84edb33e9ec7ed75efbb9f5ec479712ed3c1f23638f2dc5130a28e7da388a59f54ef158ba9c
   languageName: node
   linkType: hard
 
@@ -2564,6 +2599,44 @@ __metadata:
   peerDependencies:
     graphql: ^15.4.0
   checksum: 33f93fee06d874df9e19a545f957bc2a5e637fd90255b7c003cad98ef7a70684c73f8d962319b4d29973b219a6970690dd84498ae253fa446171f8f39228a729
+  languageName: node
+  linkType: hard
+
+"@newrelic/aws-sdk@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@newrelic/aws-sdk@npm:4.0.1"
+  peerDependencies:
+    newrelic: ">=6.11.0"
+  checksum: f506e882c6bcf83decdf086704fe4b9fc02217e8c2731aa03263f4d4c76b273b7f0e331e5ad0ef0121c249fa086ada5d5061437134d8532e76757a8542e73ce5
+  languageName: node
+  linkType: hard
+
+"@newrelic/koa@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "@newrelic/koa@npm:6.0.1"
+  peerDependencies:
+    newrelic: ">=6.11.0"
+  checksum: e729f7cac2066553c72bb13d13dbd55b8bc444cfb163e08c19c3938d5b767276c4583db39be2d4009df9b84c9e6284e6a6f86a8ed0f800ee297abbb68043bded
+  languageName: node
+  linkType: hard
+
+"@newrelic/native-metrics@npm:^7.0.1":
+  version: 7.0.2
+  resolution: "@newrelic/native-metrics@npm:7.0.2"
+  dependencies:
+    nan: ^2.14.2
+    node-gyp: latest
+    semver: ^5.5.1
+  checksum: 501805d29fc5be83a34b5f9b78f9e9b9ccc7ba047ad8dc77a3da90d7606e260607536795b0c75c242880bdd8bb40464f870f82fe4b2cd6b1503576a01aca5269
+  languageName: node
+  linkType: hard
+
+"@newrelic/superagent@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "@newrelic/superagent@npm:5.0.1"
+  peerDependencies:
+    newrelic: ">=6.11.0"
+  checksum: b9887e782d64da845e059cb25d4e2b4795f1ed9b91426dacd4292586bfbab0653d96434ae075a986412397ec85c628325df8315ff9c0b582dd712a050e265c96
   languageName: node
   linkType: hard
 
@@ -3477,6 +3550,13 @@ __metadata:
     "@typescript-eslint/types": 4.33.0
     eslint-visitor-keys: ^2.0.0
   checksum: 59953e474ad4610c1aa23b2b1a964445e2c6201521da6367752f37939d854352bbfced5c04ea539274065e012b1337ba3ffa49c2647a240a4e87155378ba9873
+  languageName: node
+  linkType: hard
+
+"@tyriar/fibonacci-heap@npm:^2.0.7":
+  version: 2.0.9
+  resolution: "@tyriar/fibonacci-heap@npm:2.0.9"
+  checksum: 1781df7370351878a16498778ffd417ac13ddff19a58d59571f8cb93d5884cbba27e1956112820ff37f91fc386aa2d3936099e03e7d5579ff5ba9d4d73209df4
   languageName: node
   linkType: hard
 
@@ -5476,6 +5556,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"concat-stream@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "concat-stream@npm:2.0.0"
+  dependencies:
+    buffer-from: ^1.0.0
+    inherits: ^2.0.3
+    readable-stream: ^3.0.2
+    typedarray: ^0.0.6
+  checksum: d7f75d48f0ecd356c1545d87e22f57b488172811b1181d96021c7c4b14ab8855f5313280263dca44bb06e5222f274d047da3e290a38841ef87b59719bde967c7
+  languageName: node
+  linkType: hard
+
 "concurrently@npm:^6.1.0":
   version: 6.2.0
   resolution: "concurrently@npm:6.2.0"
@@ -6311,6 +6403,7 @@ __metadata:
     get-graphql-from-jsonschema: ^8.0.12
     ip-address: ^8.1.0
     knex: ^0.95.6
+    newrelic: ^8.6.0
     node-fetch: ^2.6.1
     passport: ^0.4.1
     passport-google-oauth20: ^2.0.0
@@ -9636,7 +9729,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"json-stringify-safe@npm:^5.0.1, json-stringify-safe@npm:~5.0.1":
+"json-stringify-safe@npm:^5.0.0, json-stringify-safe@npm:^5.0.1, json-stringify-safe@npm:~5.0.1":
   version: 5.0.1
   resolution: "json-stringify-safe@npm:5.0.1"
   checksum: 48ec0adad5280b8a96bb93f4563aa1667fd7a36334f79149abd42446d0989f2ddc58274b479f4819f1f00617957e6344c886c55d05a4e15ebb4ab931e4a6a8ee
@@ -9984,6 +10077,13 @@ fsevents@~2.3.2:
   version: 4.17.21
   resolution: "lodash-es@npm:4.17.21"
   checksum: 05cbffad6e2adbb331a4e16fbd826e7faee403a1a04873b82b42c0f22090f280839f85b95393f487c1303c8a3d2a010048bf06151a6cbe03eee4d388fb0a12d2
+  languageName: node
+  linkType: hard
+
+"lodash.camelcase@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "lodash.camelcase@npm:4.3.0"
+  checksum: cb9227612f71b83e42de93eccf1232feeb25e705bdb19ba26c04f91e885bfd3dd5c517c4a97137658190581d3493ea3973072ca010aab7e301046d90740393d1
   languageName: node
   linkType: hard
 
@@ -10710,7 +10810,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.19, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
+"mobx-graphlink@0.0.21, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
   version: 0.0.0-use.local
   resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
   dependencies:
@@ -10855,7 +10955,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.12.1, nan@npm:^2.13.2":
+"nan@npm:^2.12.1, nan@npm:^2.13.2, nan@npm:^2.14.2":
   version: 2.15.0
   resolution: "nan@npm:2.15.0"
   dependencies:
@@ -10930,6 +11030,32 @@ fsevents@~2.3.2:
   version: 2.0.2
   resolution: "netmask@npm:2.0.2"
   checksum: c65cb8d3f7ea5669edddb3217e4c96910a60d0d9a4b52d9847ff6b28b2d0277cd8464eee0ef85133cdee32605c57940cacdd04a9a019079b091b6bba4cb0ec22
+  languageName: node
+  linkType: hard
+
+"newrelic@npm:8.6.0, newrelic@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "newrelic@npm:8.6.0"
+  dependencies:
+    "@grpc/grpc-js": ^1.2.11
+    "@grpc/proto-loader": ^0.5.6
+    "@newrelic/aws-sdk": ^4.0.1
+    "@newrelic/koa": ^6.0.1
+    "@newrelic/native-metrics": ^7.0.1
+    "@newrelic/superagent": ^5.0.1
+    "@tyriar/fibonacci-heap": ^2.0.7
+    async: ^3.2.0
+    concat-stream: ^2.0.0
+    https-proxy-agent: ^5.0.0
+    json-stringify-safe: ^5.0.0
+    readable-stream: ^3.6.0
+    semver: ^5.3.0
+  dependenciesMeta:
+    "@newrelic/native-metrics":
+      optional: true
+  bin:
+    newrelic-naming-rules: bin/test-naming-rules.js
+  checksum: 083b65ce8b01b365e901ca3fe989d55fad10157af9df62f3b8b6d2204bedc5b08abde9c1aec4cb8bc0682b60083b1cdc03febd8d95d5f6ee4199aaca4cad24be
   languageName: node
   linkType: hard
 
@@ -12792,7 +12918,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:^6.8.6":
+"protobufjs@npm:^6.10.0, protobufjs@npm:^6.8.6":
   version: 6.11.2
   resolution: "protobufjs@npm:6.11.2"
   dependencies:
@@ -13425,7 +13551,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-vmenu@1.0.11, react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu":
+"react-vmenu@1.0.14, react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu":
   version: 0.0.0-use.local
   resolution: "react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu"
   dependencies:
@@ -13588,7 +13714,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^3.0.0, readable-stream@npm:^3.1.1":
+"readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2, readable-stream@npm:^3.1.1, readable-stream@npm:^3.6.0":
   version: 3.6.0
   resolution: "readable-stream@npm:3.6.0"
   dependencies:
@@ -14257,7 +14383,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"semver@npm:2 || 3 || 4 || 5, semver@npm:^5.3.0, semver@npm:^5.4.0, semver@npm:^5.5.0, semver@npm:^5.6.0":
+"semver@npm:2 || 3 || 4 || 5, semver@npm:^5.3.0, semver@npm:^5.4.0, semver@npm:^5.5.0, semver@npm:^5.5.1, semver@npm:^5.6.0":
   version: 5.7.1
   resolution: "semver@npm:5.7.1"
   bin:
@@ -15890,6 +16016,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"typedarray@npm:^0.0.6":
+  version: 0.0.6
+  resolution: "typedarray@npm:0.0.6"
+  checksum: 33b39f3d0e8463985eeaeeacc3cb2e28bc3dfaf2a5ed219628c0b629d5d7b810b0eb2165f9f607c34871d5daa92ba1dc69f49051cf7d578b4cbd26c340b9d1b1
+  languageName: node
+  linkType: hard
+
 typescript@^4.3.2:
   version: 4.3.5
   resolution: "typescript@npm:4.3.5"
@@ -16511,7 +16644,7 @@ typescript@~3.7.3:
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.19
+    mobx-graphlink: 0.0.21
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0
@@ -16531,7 +16664,7 @@ typescript@~3.7.3:
     react-vcomponents: 1.0.36
     react-vextensions: 1.0.12
     react-vmarkdown: 1.0.3
-    react-vmenu: 1.0.11
+    react-vmenu: 1.0.14
     react-vmessagebox: 1.0.10
     react-vscrollview: 1.0.3
     remarkable: ^2.0.1
@@ -16975,7 +17108,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"yargs@npm:^16.2.0":
+"yargs@npm:^16.1.1, yargs@npm:^16.2.0":
   version: 16.2.0
   resolution: "yargs@npm:16.2.0"
   dependencies:

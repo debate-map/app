@@ -44,6 +44,7 @@ ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 #CMD ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --ignore-watch="nothing" --no-daemon --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
 
 # mode: normal
+# use "--no-daemon" so that the pm2 start command lasts as long as the program itself lasts [I think this is why anyway]
 CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
 
 # mode: profiling

@@ -144,7 +144,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 					select 1 from app_public."accessPolicies" where id = policyID and (
 						(
 							"permissions" -> policyField -> 'access' = 'true'
-							and "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' != 'false'
+							-- the coalesce is needed to handle the case where the deep-field at that path doesn't exist, apparently
+							and coalesce("permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access', 'null'::jsonb) != 'false'
 						)
 						or "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
 					)
