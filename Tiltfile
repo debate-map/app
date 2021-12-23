@@ -12,11 +12,84 @@ CONTEXT = os.getenv("CONTEXT")
 REMOTE = CONTEXT != "local"
 print("Context:", CONTEXT, "Remote:", REMOTE)
 
+# if this chaining system is insufficient to yield reliable/deterministic cluster-initializations, then try adding (or possibly even replacing it with): update_settings(max_parallel_updates=1)
+
+appliedResourceNames_batches = []
+def GetLastResourceNamesBatch():
+	return appliedResourceNames_batches[-1] if len(appliedResourceNames_batches) > 0 else []
+def AddResourceNamesBatch_IfValid(namesBatch):
+	if len(namesBatch) > 0:
+		appliedResourceNames_batches.append(namesBatch)
+
+def NEXT_k8s_resource(workload = '', **args):
+	if "resource_deps" in args:
+		fail("Cannot specify resource_deps, for resource \"" + thisResourceName + "\". (if you want to custom resource_deps, use the regular k8s_resource function)") # throw error
+
+	args["workload"] = workload
+	thisResourceName = args["new_name"] if "new_name" in args else args["workload"]
+	args["resource_deps"] = GetLastResourceNamesBatch()
+
+	AddResourceNamesBatch_IfValid([thisResourceName])
+	return k8s_resource(**args)
+def NEXT_k8s_resource_batch(workloads = [], **args):
+	if "resource_deps" in args:
+		fail("Cannot specify resource_deps, for resource \"" + thisResourceName + "\". (if you want to custom resource_deps, use the regular k8s_resource function)") # throw error
+
+	resource_deps = GetLastResourceNamesBatch()
+	batch_resourceNames = []
+	for workload in workloads:
+		args["workload"] = workload
+		thisResourceName = args["new_name"] if "new_name" in args else args["workload"]
+		args["resource_deps"] = resource_deps
+
+		batch_resourceNames.append(thisResourceName)
+		k8s_resource(**args)
+	AddResourceNamesBatch_IfValid(batch_resourceNames)
+
+def k8s_yaml_grouped(pathOrBlob, groupName, resourcesToIgnore = []):
+	'''blob = read_file(pathOrBlob) else pathOrBlob
+	k8s_yaml(pathOrBlob)
+	objInfos = decode_yaml_stream(blob)'''
+	k8s_yaml(pathOrBlob)
+	objInfos = read_yaml_stream(pathOrBlob) if type(pathOrBlob) == "string" else decode_yaml_stream(pathOrBlob)
+
+	group_finalResourceNames = []
+	for objInfo in objInfos:
+		#if "kind" in objInfo and objInfo["kind"] == "CustomResourceDefinition": continue
+		kind = objInfo["kind"]
+		if "metadata" not in objInfo: continue
+		meta = objInfo["metadata"]
+
+		#print("objInfo:" + str(objInfo))
+		if "name" in meta:
+			stillNeedsAdding = kind not in ["Deployment", "DaemonSet", "StatefulSet", "ReplicaSet", "Service", "Job"] # if its kind is one of these, tilt has already added the resource
+			name = meta["name"]
+			fullyQualifiedName = meta["name"].replace(":", "\\:") + ":" + kind.lower()
+			finalResourceName = fullyQualifiedName if stillNeedsAdding else name
+			ignored = finalResourceName in resourcesToIgnore
+			print("Resource:" + fullyQualifiedName + (" [ignored for now]" if ignored else ""))
+
+			# for some reason, we have to call k8s_resource here for "pixie-operator-subscription:subscription" and such, else the resource can't be found later (which we need to work so we can set its resource_deps)
+			#if ignored: continue
+			if not ignored:
+				group_finalResourceNames.append(finalResourceName)
+
+			k8s_resource(
+				#meta["name"],
+				workload="" if stillNeedsAdding else name,
+				new_name=fullyQualifiedName if stillNeedsAdding else "",
+				objects=[fullyQualifiedName] if stillNeedsAdding else [],
+				resource_deps=GetLastResourceNamesBatch(),
+				labels=[groupName]
+			)
+
+	AddResourceNamesBatch_IfValid(group_finalResourceNames)
+
 # namespaces
 # ==========
 
 # Never manually-restart this "namespaces" group! (deletion of namespaces can get frozen, and it's a pain to manually restart)
-k8s_resource(new_name="namespaces",
+NEXT_k8s_resource(new_name="namespaces",
 	objects=[
 		"postgres-operator:Namespace:default",
 		#"traefik-attempt4:namespace",
@@ -32,25 +105,49 @@ k8s_yaml('./Packages/deploy/NodeSetup/node-setup-daemon-set.yaml')
 # new relic
 # ==========
 
-k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml')
-k8s_yaml('./Packages/deploy/NewRelic/olm_crd.yaml')
-# kubectl create namespace newrelic (for now, the "newrelic" namespace is created manually in ./namespace.yaml)
-k8s_yaml('./Packages/deploy/NewRelic/newrelic-manifest.yaml')
+'''k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml', allow_duplicates=True)
+k8s_yaml('./Packages/deploy/NewRelic/olm_crd.yaml', allow_duplicates=True)
+k8s_yaml('./Packages/deploy/NewRelic/newrelic-manifest.yaml', allow_duplicates=True)'''
 
-# group the resouces under the new-relic group in Tilt
-k8s_resource("nri-bundle-newrelic-infrastructure", labels=["new-relic"])
-k8s_resource("nri-bundle-newrelic-logging", labels=["new-relic"])
-k8s_resource("nri-bundle-newrelic-logging", labels=["new-relic"])
-k8s_resource("nri-bundle-newrelic-pixie", labels=["new-relic"])
-k8s_resource("nri-bundle-nri-metadata-injection-admission-patch", labels=["new-relic"])
-k8s_resource("vizier-deleter", labels=["new-relic"])
-k8s_resource("olm-operator", labels=["new-relic"])
-k8s_resource("catalog-operator", labels=["new-relic"])
-k8s_resource("nri-bundle-kube-state-metrics", labels=["new-relic"])
-k8s_resource("nri-bundle-nri-metadata-injection", labels=["new-relic"])
-k8s_resource("nri-bundle-nri-metadata-injection-admission-create", labels=["new-relic"])
-k8s_resource("nri-bundle-nri-kube-events", labels=["new-relic"])
-k8s_resource("nri-bundle-nri-prometheus", labels=["new-relic"])
+k8s_yaml_grouped('./Packages/deploy/NewRelic/px.dev_viziers.yaml', "new-relic")
+k8s_yaml_grouped('./Packages/deploy/NewRelic/olm_crd.yaml', "new-relic")
+# kubectl create namespace newrelic (for now, the "newrelic" namespace is created manually in ./namespace.yaml)
+k8s_yaml_grouped('./Packages/deploy/NewRelic/newrelic-manifest.yaml', "new-relic", [
+	# stage +1
+	"nri-bundle-nri-metadata-injection-admission-create", # dep: nri-bundle-nri-metadata-injection-admission:serviceaccount
+	# stage +2
+	"nri-bundle-nri-metadata-injection", # dep: X
+	# stage +3
+	"nri-bundle-nri-metadata-injection-admission-patch", # dep: X
+	"pixie-operator-subscription:subscription", # dep: X:namespace
+	"olm-operators:operatorgroup", # dep: X:namespace
+	"olm-operator", # dep: X:namespace
+	"catalog-operator", # dep: X:namespace
+	# to not wait for
+	"nri-bundle-newrelic-pixie", # dep: pl-cluster-secrets->cluster-id, which takes time for other pods to push
+	"vizier-deleter", # dep: some service-account, which takes time for other pods to push
+])
+
+NEXT_k8s_resource_batch([
+	"nri-bundle-nri-metadata-injection-admission-create",
+], labels=["new-relic"])
+
+NEXT_k8s_resource_batch([
+	"nri-bundle-nri-metadata-injection",
+], labels=["new-relic"])
+
+NEXT_k8s_resource_batch([
+	"nri-bundle-nri-metadata-injection-admission-patch",
+	"pixie-operator-subscription:subscription",
+	"olm-operators:operatorgroup",
+	"olm-operator",
+	"catalog-operator",
+], labels=["new-relic"])
+
+NEXT_k8s_resource_batch([
+	"nri-bundle-newrelic-pixie",
+	"vizier-deleter",
+], pod_readiness='ignore', labels=["new-relic"])
 
 # prometheus
 # ==========
@@ -61,14 +158,14 @@ k8s_resource("nri-bundle-nri-prometheus", labels=["new-relic"])
 # )
 # install()
 
-# k8s_resource("prometheus",
+# NEXT_k8s_resource("prometheus",
 # 	objects=[
 # 		"vfiles-configmap:configmap",
 # 	],
 # 	resource_deps=["namespaces"],
 # 	labels=["monitoring"],
 # )
-# k8s_resource("grafana",
+# NEXT_k8s_resource("grafana",
 # 	objects=[
 # 		"grafana-config-monitoring:configmap",
 # 		"grafana-dashboards:configmap",
@@ -79,7 +176,7 @@ k8s_resource("nri-bundle-nri-prometheus", labels=["new-relic"])
 # 	resource_deps=["prometheus"],
 # 	labels=["monitoring"],
 # )
-# k8s_resource("node-exporter",
+# NEXT_k8s_resource("node-exporter",
 # 	objects=[
 # 		"node-exporter-claim0:persistentvolumeclaim",
 # 		"node-exporter-claim1:persistentvolumeclaim",
@@ -87,7 +184,7 @@ k8s_resource("nri-bundle-nri-prometheus", labels=["new-relic"])
 # 	resource_deps=["prometheus"],
 # 	labels=["monitoring"],
 # )
-# '''k8s_resource("cadvisor",
+# '''NEXT_k8s_resource("cadvisor",
 # 	objects=[
 # 		"cadvisor-claim0:persistentvolumeclaim",
 # 		"cadvisor-claim1:persistentvolumeclaim",
@@ -95,31 +192,6 @@ k8s_resource("nri-bundle-nri-prometheus", labels=["new-relic"])
 # 	],
 # 	resource_deps=["prometheus"],
 # )'''
-
-k8s_yaml(kustomize('./Packages/deploy/Monitors/pg-monitor-pack'))
-k8s_resource("crunchy-prometheus", labels=["monitoring"])
-k8s_resource("crunchy-alertmanager", labels=["monitoring"])
-k8s_resource("crunchy-grafana", labels=["monitoring"],
-	port_forwards='4405:3000' if REMOTE else '3405:3000',
-)
-k8s_resource(new_name="crunchy-others",
-	labels=["monitoring"],
-	objects=[
-		"alertmanager:serviceaccount",
-		"grafana:serviceaccount",
-		"prometheus-sa:serviceaccount",
-		"prometheus-cr:clusterrole",
-		"prometheus-crb:clusterrolebinding",
-		"alertmanagerdata:persistentvolumeclaim",
-		"grafanadata:persistentvolumeclaim",
-		"prometheusdata:persistentvolumeclaim",
-		"alertmanager-config:configmap",
-		"alertmanager-rules-config:configmap",
-		"crunchy-prometheus:configmap",
-		"grafana-dashboards:configmap",
-		"grafana-datasources:configmap",
-		"grafana-secret:secret",
-	])
 
 # crunchydata postgres operator
 # ==========
@@ -146,28 +218,46 @@ k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
 }))
 
 # todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
-k8s_resource(new_name='pgo_early',
+pgo_crdName = "postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition"
+NEXT_k8s_resource(new_name='pgo_crd-definition',
 	objects=[
 		#"postgres-operator:Namespace:default",
-		"postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition", # the CRD definition?
+		pgo_crdName, # the CRD definition?
 	],
 	pod_readiness='ignore',
-	resource_deps=["namespaces"],
+	#resource_deps=["namespaces"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
-k8s_resource('pgo',
+
+# Wait until the CRDs are ready.
+#local_resource('pgo_crd-definition_ready', cmd='kubectl wait --for=condition=Established crd ' + pgo_crdName, resource_deps=GetLastResourceNamesBatch(), labels=["database_DO-NOT-RESTART-THESE"])
+local_resource('pgo_crd-definition_ready',
+	cmd="tilt wait --for=condition=Ready uiresource/pgo_crd-definition",
+	resource_deps=GetLastResourceNamesBatch(),
+	labels=["database_DO-NOT-RESTART-THESE"])
+AddResourceNamesBatch_IfValid(["pgo_crd-definition_ready"])
+
+NEXT_k8s_resource(new_name='pgo_crd-instance',
 	objects=[
 		"debate-map:postgrescluster", # the CRD instance?
+	],
+	#resource_deps=["pgo_early"],
+	labels=["database_DO-NOT-RESTART-THESE"],
+)
+NEXT_k8s_resource('pgo',
+	objects=[
+		#"debate-map:postgrescluster", # the CRD instance?
 		"postgres-operator:clusterrole",
 		"postgres-operator:clusterrolebinding",
 		"pgo:serviceaccount",
 		"debate-map-pguser-admin:secret",
 		"pgo-gcs-creds:secret",
 	],
-	resource_deps=["pgo_early"],
+	#resource_deps=["pgo_early"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
-k8s_resource(new_name='pgo_late',
+# this is in separate group, so pod_readiness="ignore" only applies to it
+NEXT_k8s_resource(new_name='pgo_late',
 	#objects=["pgo-gcs-creds:secret"],
 	objects=["empty1"],
 	pod_readiness='ignore',
@@ -176,9 +266,39 @@ k8s_resource(new_name='pgo_late',
 		"postgres-operator.crunchydata.com/role": "master"
 	},
 	port_forwards='4205:5432' if REMOTE else '3205:5432',
-	resource_deps=["pgo"],
+	#resource_deps=["pgo"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
+
+# crunchydata prometheus
+# ==========
+
+k8s_yaml(kustomize('./Packages/deploy/Monitors/pg-monitor-pack'))
+# nothing depends on these pods, so don't wait for them to be "ready"
+NEXT_k8s_resource("crunchy-prometheus", pod_readiness='ignore', labels=["monitoring"])
+NEXT_k8s_resource("crunchy-alertmanager", pod_readiness='ignore', labels=["monitoring"])
+NEXT_k8s_resource("crunchy-grafana", pod_readiness='ignore', labels=["monitoring"],
+	port_forwards='4405:3000' if REMOTE else '3405:3000',
+)
+NEXT_k8s_resource(new_name="crunchy-others",
+	pod_readiness='ignore',
+	labels=["monitoring"],
+	objects=[
+		"alertmanager:serviceaccount",
+		"grafana:serviceaccount",
+		"prometheus-sa:serviceaccount",
+		"prometheus-cr:clusterrole",
+		"prometheus-crb:clusterrolebinding",
+		"alertmanagerdata:persistentvolumeclaim",
+		"grafanadata:persistentvolumeclaim",
+		"prometheusdata:persistentvolumeclaim",
+		"alertmanager-config:configmap",
+		"alertmanager-rules-config:configmap",
+		"crunchy-prometheus:configmap",
+		"grafana-dashboards:configmap",
+		"grafana-datasources:configmap",
+		"grafana-secret:secret",
+	])
 
 # reflector
 # ==========
@@ -193,20 +313,22 @@ helm_remote('reflector',
 # from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v5.4.17
 k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
 k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
-k8s_resource("reflector",
+NEXT_k8s_resource("reflector",
 	objects=[
 		"reflector:clusterrole",
 		"reflector:clusterrolebinding",
 		"reflector:serviceaccount",
 	],
-	resource_deps=["pgo_late"],
+	#resource_deps=["pgo_late"],
 )
 
 # load-balancer/reverse-proxy (traefik)
 # ==========
 
 k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
+traefik_resourceDeps = GetLastResourceNamesBatch()
 k8s_resource("traefik-daemon-set",
+	resource_deps=traefik_resourceDeps,
 	labels=["traefik"],
 )
 k8s_resource(new_name="traefik",
@@ -216,9 +338,10 @@ k8s_resource(new_name="traefik",
    	"traefik-ingress-controller:clusterrolebinding",
    	"dmvx-ingress:ingress",
 	],
-	resource_deps=["reflector"],
+	resource_deps=traefik_resourceDeps,
 	labels=["traefik"],
 )
+AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
 
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
@@ -280,22 +403,22 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 # port forwards (see readme's [project-service-urls] guide-module for details)
 # ==========
 
-k8s_resource('dm-app-server',
+NEXT_k8s_resource('dm-app-server',
 	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
 	port_forwards=[
 		'4105:3105' if REMOTE else '3105',
 		'4155:3155' if REMOTE else '3155' # for nodejs-inspector
 	],
-	resource_deps=["traefik"],
+	#resource_deps=["traefik"],
 	labels=["app"],
 )
 
-k8s_resource('dm-web-server',
+NEXT_k8s_resource('dm-web-server',
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
 	port_forwards='4005:3005' if REMOTE else '3005',
 	#resource_deps=["dm-app-server"],
-	resource_deps=["traefik"],
+	#resource_deps=["traefik"],
 	labels=["app"],
 )
 
