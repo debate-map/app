@@ -151,6 +151,7 @@ k8s_resource(new_name='pgo_early',
 		#"postgres-operator:Namespace:default",
 		"postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition", # the CRD definition?
 	],
+	pod_readiness='ignore',
 	resource_deps=["namespaces"],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
@@ -167,7 +168,9 @@ k8s_resource('pgo',
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 k8s_resource(new_name='pgo_late',
+	#objects=["pgo-gcs-creds:secret"],
 	objects=["empty1"],
+	pod_readiness='ignore',
 	extra_pod_selectors={
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"

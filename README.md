@@ -298,6 +298,9 @@ Note: New Relic doesn't, by default, implement actual "continuous profiling"; it
 	* 3.4\) Let tilt redeploy the app-server pod, then press "See your data" on the New Relic page.
 	* 3.5\) Wait a few minutes; the add-agent page in the New Relic console should eventually say it is receiving data, letting you then view the details.
 
+Troubleshooting:
+* You can try using the [nrdiag tool](https://docs.newrelic.com/docs/new-relic-solutions/solve-common-issues/diagnostics-cli-nrdiag/diagnostics-cli-nrdiag).
+
 </details>
 
 
@@ -722,10 +725,10 @@ To manually trigger the creation of a full backup:
 			* 2.1.2.1\) If you want to restore exactly to a base-backup (without any wal-archive replaying), use the first section. (modifying "set" to the base-backup folder-name seen in the cloud-bucket)
 				* 2.1.2.1.1\) At the moment, you also have to run a `psql` command to complete the restore. See [here](https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977).
 			* 2.1.2.2\) If you want to restore to a specific point-in-time (with wal-archive replaying), use the second section. (modifying "target" to the time you want to restore to, with a specified timezone [UTC recommended])
+		* 2.1.3\) [not sure if this is still needed] Restart [possibly twice, if it gets stuck] the `pgo` resource using the Tilt UI here. (this clears the old instance/pod-set, and creates a new one, which then tries to load from the specified data-source)
 	* 2.2\) Option 2, into the existing postgres instance/pod-set (imperative, arguably cleaner way -- but not yet working/reliable):
 		* 2.2.1\) Run: `npm start "backend.restoreDBBackup_prep BACKUP_LABEL"` This script patches the postgres-operator deployment/configuration to contain [the fields](https://access.crunchydata.com/documentation/postgres-operator/5.0.2/tutorial/disaster-recovery/#perform-an-in-place-point-in-time-recovery-pitr) that mark a restoration as active, and specify which backup to use.
-* 3\) To actually activate the restore operation, run: `npm start backend.restoreDBBackup_apply` This will update the `.../pgbackrest-restore` annotation on the postgres-operator CRD to the current-time, which the operator interprets as the "go signal" to apply the specifying restoration operation.
-	* 3.1\) If using approach 1, you also have to restart [possibly twice, if it gets stuck] the `pgo` resource using the Tilt UI here. (this clears the old instance/pod-set, and creates a new one, which then tries to load from the specified data-source)
+		* 2.2.2\) To actually activate the restore operation, run: `npm start backend.restoreDBBackup_apply` This will update the `.../pgbackrest-restore` annotation on the postgres-operator CRD to the current-time, which the operator interprets as the "go signal" to apply the specifying restoration operation.
 * 4\) Observe the logs in the Tilt UI, to track the progress of the restore. (it takes about 2.5 minutes just to start, so be patient; also, you can ignore the `WARN: --delta or --force specified but unable to find...` message, as that just means it's a fresh cluster that has to restore from scratch, which the restore module finds odd since it notices the useless [automatically added] delta/force flag)
 * 5\) Check whether the restore operation succeeded, by loading up the website. (you may have to wait a bit for the app-server to reconnect; you can restart it manually to speed this up)
 	* 5.1\) If you get an error in the `app-server` pod about `error: password authentication failed for user "admin"`, then it seems the `debate-map-pguser-admin` secret was already created (by pgo) prior to the restore, which may have made it invalid after the restore was completed (if the credentials differ). To resolve this, you can either:

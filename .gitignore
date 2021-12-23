@@ -9,6 +9,7 @@
 /Packages/*/node_modules
 /Packages/*/Dist
 /Packages/*/tsconfig.tsbuildinfo
+/Packages/*/nrdiag-*
 /Packages/app-server/newrelic.cjs
 /Packages/deploy/NewRelic/newrelic-manifest.yaml
 /.yalc
