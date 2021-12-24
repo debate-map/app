@@ -1,7 +1,7 @@
-import {ChildGroup} from "DB.js";
-import {MapNodeType} from "DB/nodes/@MapNodeType.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {ChildGroup} from "../../DB.js";
+import {MapNodeType} from "../../DB/nodes/@MapNodeType.js";
 import {ClaimForm, Polarity} from "../nodes/@MapNode.js";
 
 @MGLClass({table: "nodeChildLinks"})

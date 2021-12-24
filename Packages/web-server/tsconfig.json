@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		// general
 		"rootDir": "Source",
-		"baseUrl": "Source",
+		//"baseUrl": "Source", // commented; relative imports are required for output-as-esm packages
 		"outDir": "Dist",
 
 		// compilation

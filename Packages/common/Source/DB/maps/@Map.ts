@@ -1,6 +1,6 @@
-import {ChildLayout} from "DB";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {ChildLayout} from "../nodes/@MapNodeRevision.js";
 
 /*export enum MapType {
 	private = "private",
@@ -126,7 +126,4 @@ export class Map_Extras {
 
 	@Field({$ref: "ChildLayout"}, {opt: true})
 	defaultChildLayout?: ChildLayout;
-
-	@Field({type: "boolean"}, {opt: true})
-	defaultShowFreeform? = false;
 }

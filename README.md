@@ -740,6 +740,7 @@ To manually trigger the creation of a full backup:
 * 7\) After the restore is complete, clean things up:
 	* 7.1\) If option 1 was taken: Recomment the `dataSource` field in `postgres.yaml`, then save the file. (needed so the restore operation is not attempted for other contexts, when their tilt-up scripts are run)
 	* 7.2\) If option 2 was taken: No action is necessary, because the postgres-operator remembers that the last-set value for the `pgbackrest-restore` annotation has already been applied, and the restore config was only placed into the target context. (If you want to be extra sure, though, you could follow step 6.2; this is fine, because the restore has already taken place, so it will not be reverted or the like.)
+* 8\) Note that after the restore (if using option 1 anyway), the password for the admin user may have changed (it seems to have this time anyway). If that happens, retrieve the new password from the `debate-map-pguser-admin` secret (eg. using Lens, though make sure to press the eye icon to decode it first!), and update the passwords stored in DBeaver and the like.
 
 </details>
 

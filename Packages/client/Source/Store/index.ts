@@ -3,7 +3,7 @@ import {O, HandleError, ConfigureMobX} from "web-vcore";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {Graphlink} from "web-vcore/nm/mobx-graphlink.js";
 import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer.js";
-import {GraphDBShape} from "dm_common/Source/DBShape";
+import {GraphDBShape} from "dm_common";
 import {Feedback_DBShape, Feedback_RootState, Feedback_store} from "web-vcore/nm/graphql-feedback";
 import {MainState} from "./main.js";
 

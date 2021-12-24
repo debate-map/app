@@ -20,7 +20,7 @@ spec:
       - name: node-setup
         image: ubuntu
         command: ["/bin/sh","-c"]
-        args: ["/script/node-setup.sh; while true; do echo Sleeping && sleep 3600; done"]
+        args: ["/script/node-setup.sh"]
         env:
           - name: PARTITION_NUMBER
             valueFrom:
@@ -74,4 +74,8 @@ data:
     sysctl -w fs.inotify.max_user_watches=524288
 
     # check that the new value was applied
+    echo "New value for max_user_watches:"
     cat /proc/sys/fs/inotify/max_user_watches
+
+    echo "Now sleeping forever... (so k8s doesn't think this pod died, and thus restart it)"
+    sleep infinity

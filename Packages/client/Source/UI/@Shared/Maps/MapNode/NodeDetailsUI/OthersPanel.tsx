@@ -1,4 +1,4 @@
-import {ArgumentType, ChildLayout, HasAdminPermissions, MapNodeType, MeID, NodeRevisionDisplayDetails} from "dm_common";
+import {ArgumentType, ChildLayout, ChildLayout_niceNames, HasAdminPermissions, MapNodeType, MeID, NodeRevisionDisplayDetails} from "dm_common";
 import React from "react";
 import {TextPlus} from "web-vcore";
 import {GetEntries, ModifyString, ToNumber} from "web-vcore/nm/js-vextensions.js";
@@ -36,8 +36,17 @@ export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<Pre> px (0 for auto)</Pre>
 				</Row>
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
-					<TextPlus info={`Whether to display children in groups (re. truth, relevance, etc.). Note that this setting only applies in maps that allow special child-layouts.`}>Child layout:</TextPlus>
-					<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} enabled={enabled}
+					<TextPlus info={`
+						How to display children groups (re. truth, relevance, etc.). Note that this setting only applies in maps that allow special child-layouts.
+						
+						Options:
+						* Unchanged: Don't change the child-layout from the global default and/or the map default.
+						* Grouped: truth:group_always, relevance:group_always freeform:group_always
+						* Debate Map standard: truth:group_always, relevance:group_always, freeform:group_whenNonEmpty
+						* Society Library standard: truth:group_always, relevance:group_whenNonEmpty, freeform:flat
+						* Flat: truth:flat, relevance:group_whenNonEmpty, freeform:flat
+					`.AsMultiline(0)}>Child layout:</TextPlus>
+					<Select ml={5} enabled={enabled} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
 						value={newRevisionData.displayDetails?.childLayout} onChange={val=>SetDisplayDetail("childLayout", val)}/>
 				</Row>
 			</>

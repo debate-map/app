@@ -9,3 +9,6 @@ export * from "./DB_Constants.js";
 export * from "./DB.js";
 export * from "./DBShape.js";
 export * from "./Utils.js";
+
+// just a meaningless "runtime line of code", to force tsc to actually output this file into "Dist"!
+var entryPointAnchor;

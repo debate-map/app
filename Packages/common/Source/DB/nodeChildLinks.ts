@@ -1,7 +1,7 @@
-import {ChildGroup} from "DB.js";
 import {IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
+import {ChildGroup} from "./nodes/@MapNodeType.js";
 
 export const GetNodeChildLink = CreateAccessor((id: string)=>{
 	if (id == null || IsNaN(id)) return null;

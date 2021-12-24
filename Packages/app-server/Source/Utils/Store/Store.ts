@@ -1,7 +1,7 @@
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {Graphlink} from "web-vcore/nm/mobx-graphlink.js";
 import {Feedback_store} from "web-vcore/nm/graphql-feedback.js";
-import {GraphDBShape} from "dm_common/Source/DBShape";
+import {GraphDBShape} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 
 const O = observable;

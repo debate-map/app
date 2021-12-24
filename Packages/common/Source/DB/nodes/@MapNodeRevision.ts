@@ -1,13 +1,14 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
-import {Map} from "DB.js";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment.js";
 import {MediaAttachment} from "../nodeRevisions/@MediaAttachment.js";
-import {AccessLevel} from "./@MapNode.js";
+import {Map} from "../maps/@Map.js";
+import {AccessLevel, MapNodeL3} from "./@MapNode.js";
 import {EquationAttachment} from "../nodeRevisions/@EquationAttachment.js";
 import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
 import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment.js";
 import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
+import {ChildGroup, MapNodeType_Info} from "./@MapNodeType.js";
 
 export enum PermissionInfoType {
 	creator = "creator",
@@ -43,13 +44,63 @@ export class NodeRevisionDisplayDetails {
 }
 
 export enum ChildLayout {
-	structured = "structured",
+	grouped = "grouped",
+	dmStandard = "dmStandard",
+	slStandard = "slStandard",
 	flat = "flat",
 }
+export const ChildLayout_niceNames = {
+	grouped: "Grouped",
+	dmStandard: "Debate Map standard",
+	slStandard: "Society Library standard",
+	flat: "Flat",
+};
 AddSchema("ChildLayout", {enum: GetValues(ChildLayout)});
 
+export enum ChildGroupLayout {
+	group_always = "group_always",
+	group_whenNonEmpty = "group_whenNonEmpty",
+	flat = "flat",
+}
+const ChildGroupLayout_mapping = new globalThis.Map<ChildLayout, globalThis.Map<ChildGroup, ChildGroupLayout>>([
+	[ChildLayout.grouped, new globalThis.Map([
+		[ChildGroup.truth, ChildGroupLayout.group_always],
+		[ChildGroup.relevance, ChildGroupLayout.group_always],
+		[ChildGroup.freeform, ChildGroupLayout.group_always],
+	])],
+	[ChildLayout.dmStandard, new globalThis.Map([
+		[ChildGroup.truth, ChildGroupLayout.group_always],
+		[ChildGroup.relevance, ChildGroupLayout.group_always],
+		[ChildGroup.freeform, ChildGroupLayout.group_whenNonEmpty],
+	])],
+	[ChildLayout.slStandard, new globalThis.Map([
+		[ChildGroup.truth, ChildGroupLayout.group_always],
+		[ChildGroup.relevance, ChildGroupLayout.group_whenNonEmpty],
+		[ChildGroup.freeform, ChildGroupLayout.flat],
+	])],
+	[ChildLayout.flat, new globalThis.Map([
+		[ChildGroup.truth, ChildGroupLayout.flat],
+		// even in flat mode, we show relevance-args in separate box, else it messes up the path extend/concat logic (could be fixed, but not high priority, since relevance-args are rare in flat-layout mode; just use box)
+		[ChildGroup.relevance, ChildGroupLayout.group_whenNonEmpty],
+		[ChildGroup.freeform, ChildGroupLayout.flat],
+	])],
+]);
+export function GetChildGroupLayout(group: ChildGroup, overallLayout: ChildLayout) {
+	return ChildGroupLayout_mapping.get(overallLayout)?.get(group);
+}
+export function ShouldChildGroupBoxBeVisible(node: MapNodeL3|n, group: ChildGroup, overallLayout: ChildLayout, nodeChildren: MapNodeL3[]|null) {
+	if (node == null) return false;
+	const groupValidForNode = MapNodeType_Info.for[node.type].childGroup_childTypes.has(group);
+	if (!groupValidForNode) return false;
+
+	const groupLayout = GetChildGroupLayout(group, overallLayout);
+	if (groupLayout == ChildGroupLayout.group_always) return true;
+	if (groupLayout == ChildGroupLayout.group_whenNonEmpty) return nodeChildren?.Any(a=>a.link?.group == group) ?? false;
+	return false;
+}
+
 export function GetChildLayout_Final(revision: MapNodeRevision, map?: Map): ChildLayout {
-	let result = ChildLayout.structured;
+	let result = ChildLayout.dmStandard;
 	if (map?.extras.allowSpecialChildLayouts) {
 		if (map.extras.defaultChildLayout) {
 			result = map.extras.defaultChildLayout;
@@ -60,9 +111,9 @@ export function GetChildLayout_Final(revision: MapNodeRevision, map?: Map): Chil
 	}
 	return result;
 }
-export function InvertChildLayout(layout: ChildLayout): ChildLayout {
-	return layout == ChildLayout.structured ? ChildLayout.flat : ChildLayout.structured;
-}
+/*export function InvertChildLayout(layout: ChildLayout): ChildLayout {
+	return layout == ChildLayout.grouped ? ChildLayout.flat : ChildLayout.grouped;
+}*/
 
 /*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/

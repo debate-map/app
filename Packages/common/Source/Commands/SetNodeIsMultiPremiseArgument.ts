@@ -1,6 +1,6 @@
-import {MapNodeRevision} from "DB/nodes/@MapNodeRevision.js";
 import {Clone} from "web-vcore/nm/js-vextensions.js";
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeChildren} from "../DB/nodes.js";
