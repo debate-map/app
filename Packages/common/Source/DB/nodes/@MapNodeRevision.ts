@@ -1,14 +1,10 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
-import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment.js";
-import {MediaAttachment} from "../nodeRevisions/@MediaAttachment.js";
 import {Map} from "../maps/@Map.js";
 import {AccessLevel, MapNodeL3} from "./@MapNode.js";
-import {EquationAttachment} from "../nodeRevisions/@EquationAttachment.js";
-import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
-import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment.js";
 import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
 import {ChildGroup, MapNodeType_Info} from "./@MapNodeType.js";
+import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment} from "../../DB.js";
 
 export enum PermissionInfoType {
 	creator = "creator",

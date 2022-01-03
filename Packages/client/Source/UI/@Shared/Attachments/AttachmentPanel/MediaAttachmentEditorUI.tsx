@@ -2,35 +2,23 @@ import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "web-v
 import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {MediaAttachment, GetMedia, GetMediasByURL, HasModPermissions, MeID, GetUser, Media} from "dm_common";
+import {MediaAttachment, GetMedia, GetMediasByURL, HasModPermissions, MeID, GetUser, Media, AttachmentTarget} from "dm_common";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-
 import {Link, Observer, InfoButton} from "web-vcore";
-
-
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
-import {SourceChainsEditorUI} from "../../SourceChainsEditorUI.js";
-import {TermDefinitionPanel} from "../../DetailBoxes/Panels/DefinitionsPanel.js";
+import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
+import {SourceChainsEditorUI} from "../../Maps/MapNode/SourceChainsEditorUI.js";
+import {TermDefinitionPanel} from "../../Maps/MapNode/DetailBoxes/Panels/DefinitionsPanel.js";
 
-type Props = {baseData: MediaAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: MediaAttachment)=>void};
 @Observer
-export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: MediaAttachment}> {
-	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-		{ this.SetState({newData: CloneWithPrototypes(props.baseData)}); }
-	}
-
+export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, MediaAttachmentEditorUI, {target: AttachmentTarget}> {
 	scrollView: ScrollView;
 	render() {
-		const {creating, editing, style, onChange} = this.props;
+		const {style, target} = this.props;
 		const {newData} = this.state;
-		const Change = (..._)=>{
-			if (onChange) { onChange(this.GetNewData()); }
-			this.Update();
-		};
+		const {enabled, Change} = this.helpers;
 		const image = Validate("UUID", newData.id) == null ? GetMedia(newData.id) : null;
 
-		const enabled = creating || !!editing;
 		return (
 			<Column style={style}>
 				<Row>
@@ -63,30 +51,27 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 						</Column></DropDownContent>
 					</DropDown>
 				</Row>
+				{target == "node" &&
 				<Row center mt={5} style={{width: "100%"}}>
-					<CheckBox text="Captured" enabled={creating || editing} value={newData.captured} onChange={val=>Change(newData.captured = val)}/>
+					<CheckBox text="Captured" enabled={enabled} value={newData.captured} onChange={val=>Change(newData.captured = val)}/>
 					<InfoButton ml={5} text="Whether the image/video is claimed to be a capturing of real-world footage."/>
-				</Row>
+				</Row>}
+				{target == "node" &&
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Preview width:</Pre>
-					<Spinner ml={5} max={100} enabled={creating || editing}
+					<Spinner ml={5} max={100} enabled={enabled}
 						value={newData.previewWidth ?? 0} onChange={val=>Change(newData.previewWidth = val != 0 ? val : undefined)}/>
 					<Pre>% (0 for auto)</Pre>
-				</Row>
+				</Row>}
 				<Row mt={10}>
-					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={enabled} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 			</Column>
 		);
 	}
 	chainsEditor: SourceChainsEditorUI|n;
-	GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0] ?? this.chainsEditor?.GetValidationError();
-	}
-
-	GetNewData() {
-		const {newData} = this.state;
-		return CloneWithPrototypes(newData) as MediaAttachment;
+	GetValidationError_Extras() {
+		return this.chainsEditor?.GetValidationError();
 	}
 }
 

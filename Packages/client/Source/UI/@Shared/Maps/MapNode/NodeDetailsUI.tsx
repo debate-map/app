@@ -5,14 +5,15 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink, GetAccessPolicy, MapNodeL2} from "dm_common";
+import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeChildLink, GetAccessPolicy, MapNodeL2} from "dm_common";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
-import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
+import React from "react";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
 import {TextPanel} from "./NodeDetailsUI/TextPanel.js";
-import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI.js";
+import {QuoteInfoEditorUI} from "../../Attachments/AttachmentPanel/QuoteInfoEditorUI.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
+import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 
 type Props = {
 	baseData: MapNode,
@@ -38,7 +39,6 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 		}
 	}
 
-	quoteEditor: QuoteInfoEditorUI;
 	render() {
 		const {baseData, parent, forNew, forOldRevision, enabled, style, onChange} = this.props;
 		const {newData, newLinkData, newRevisionData} = this.state;
@@ -52,7 +52,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 		const newDataAsL2 = AsNodeL2(newData, newRevisionData, policy);
 
 		const sharedProps: NodeDetailsUI_SharedProps = {...this.props, Change, newDataAsL2, ...this.state, SetState: this.SetState};
-		const attachmentType = GetAttachmentType(newDataAsL2);
+		const attachmentType = GetAttachmentType_Node(newDataAsL2);
 
 		const splitAt = 170;
 		const subpanel = store.main.maps.detailsPanel.subpanel;

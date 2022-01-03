@@ -177,8 +177,9 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 Prerequisite steps: [setup-base](#setup-base)
 
 Notes:
-* Tilt-up can fail the first several times you try, with error `Build Failed: kubernetes apply: error mapping postgres-operator.crunchydata.com/PostgresCluster3: no matches for kind "PostgresCluster3" in version "postgres-operator.crunchydata.com/v1beta1"`, I think because of a race condition where some of `deploy/PGO/postgres` runs before `deploy/PGO/install`, or something. To fix, just keep restarting, fiddling with Tilt UI, etc. till the "pgo" resource loads without error.
-* For local cluster, tilt-up can also fail with the error `Get "https://kubernetes.docker.internal:6443/api?timeout=32s": net/http: TLS handshake timeout`. This most likely just means docker is out of memory (was the cause for me). To resolve: Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`), restart Docker Desktop, then rerun `npm start backend.tiltUp_local`. More info: https://stackoverflow.com/a/6877982
+* When making changes to files, and with Tilt live-updating the files in the pods, you may occasionally start hitting the error `Build Failed: error during connect` or `Build Failed: [...] Error response from daemon` or `Get "https://kubernetes.docker.internal:6443/api[...]": net/http: TLS handshake timeout`. Not completely sure what causes it (see my SO comment [here](https://stackoverflow.com/a/68779828)), but I'm guessing the tilt-updating mechanism is overwhelming Docker Desktop's kubernetes system somehow. To fix:
+	* Option 1 (recommended): Completely close Docker Desktop, shutdown WSL2 (`wsl --shutdown`) [not always necessary], restart Docker Desktop, then rerun `npm start backend.tiltUp_local`.
+	* Option 2 (sometimes fails): Right click the Docker Desktop tray-icon and press "Restart Docker".
 * **Manually restarting the "pgo" resource will clear the database contents! Use with caution.**
 
 </details>
@@ -575,7 +576,7 @@ Authorized redirect URIs:
 
 For database pod:
 * 1\) If you have tilt running, a port-forward should already be set up, on the correct port. (`3205` for your local cluster, and `4205` for your remote cluster)
-* 2\) You can also set up the port-forwarding by running the script: `npm start backend.forward_[local/remote]` (to only port-forward the db pod, add arg: `onlyDB`)
+* 2\) You can also set up the port-forwarding by running the script (has vsc-2 tasks): `npm start backend.forward_[local/remote]` (to only port-forward the db pod, add arg: `onlyDB`)
 
 </details>
 
@@ -679,7 +680,7 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
 To create a backup:
 * 1\) Option 1, using basic script:
-	* 1.1\) Run: `npm start backend.makeDBDump`
+	* 1.1\) Run: `npm start backend.makeDBDump` (has vsc-2 tasks)
 	* 1.2\) A backup dump will be created at: `../Others/@Backups/DBDumps_[local/ovh]/XXX.sql`
 * 2\) Option 2, using DBeaver:
 	* 2.1\) Right-click DB in list. (this assumes you already are connected)

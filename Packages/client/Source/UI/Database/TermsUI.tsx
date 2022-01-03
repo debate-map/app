@@ -1,4 +1,5 @@
 import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermissionGroups, IsUserCreatorOrMod, MeID, Term, TermType, UpdateTerm} from "dm_common";
+import {useEffect} from "react";
 import {store} from "Store";
 import {GetSelectedTerm, GetSelectedTermID} from "Store/main/database";
 import {ES, GetUpdates, Observer, RunInAction} from "web-vcore";
@@ -23,7 +24,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 		const creatorOrMod = selectedTerm != null && IsUserCreatorOrMod(userID, selectedTerm);
 
 		// whenever selectedTerm changes, reset the derivative states (there's probably a better way to do this, but I don't know how yet)
-		UseEffect(()=>{
+		useEffect(()=>{
 			this.SetState({selectedTerm_newData: null, selectedTerm_newDataError: null});
 		}, [selectedTerm]);
 

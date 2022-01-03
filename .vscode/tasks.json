@@ -21,9 +21,9 @@
 			"group": "build"
 		},
 		{
-			"label": "## backend.buildHardLinked",
+			"label": "## backend.makeDBDump ovh",
 			"type": "shell",
-			"command": "npm start backend.buildHardLinked",
+			"command": "npm start 'backend.makeDBDump ovh'",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
@@ -56,6 +56,22 @@
 			"label": "## backend.pulumiUp",
 			"type": "shell",
 			"command": "npm start backend.pulumiUp",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},
+		{
+			"label": "## backend.forward_local",
+			"type": "shell",
+			"command": "npm start backend.forward_local",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},
+		{
+			"label": "## backend.forward_remote",
+			"type": "shell",
+			"command": "npm start backend.forward_remote",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",

@@ -1,6 +1,6 @@
 import {AddSchema, DB, DeriveJSONSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
+import {TermAttachment} from "../@Shared/Attachments/@TermAttachment.js";
 
 @MGLClass({table: "nodePhrasings"})
 export class MapNodePhrasing {

@@ -1,12 +1,10 @@
-import {A, GetEntries, NN} from "web-vcore/nm/js-vextensions.js";
-import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {GetAttachmentType_Node} from "dm_common";
+import {DEL} from "js-vextensions";
+import React from "react";
+import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
+import {DetailsUI_Phase} from "UI/@Shared/DetailsUI_Base";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment, MapNodeType, MapNode} from "dm_common";
-import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
-import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
-import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
-import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
-import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
+import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 
 /*export function CanNodeHaveAttachments(node: MapNode) {
 	//return node.type == MapNodeType.claim;
@@ -14,36 +12,27 @@ import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachme
 	return node.type != MapNodeType.argument;
 }*/
 
+export function GetPhaseFromNodeDetailsUIProps(props: {forNew: boolean, enabled: boolean}): DetailsUI_Phase {
+	return props.enabled ? (props.forNew ? "create" : "edit") : "view";
+}
+
 export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {
 		const {newData, newDataAsL2, newRevisionData, forNew, enabled, Change} = this.props;
-		const attachmentType = GetAttachmentType(newDataAsL2);
+		//const attachmentType = GetAttachmentType_Node(newDataAsL2);
 
 		//const canHaveAttachments = CanNodeHaveAttachments(newData);
-		return (
-			<>
-				<Row mb={attachmentType == AttachmentType.none ? 0 : 5}>
-					<Text>Type:</Text>
-					<Select ml={5} options={GetEntries(AttachmentType, "ui")} enabled={enabled} value={attachmentType} onChange={val=>{
-						ResetNodeRevisionAttachment(newRevisionData, val);
-						Change();
-					}}/>
-				</Row>
-				{attachmentType == AttachmentType.equation &&
-					<EquationEditorUI creating={forNew} editing={enabled}
-						baseData={NN(newRevisionData.equation)} onChange={val=>Change(newRevisionData.equation = val)}/>}
-				{attachmentType == AttachmentType.quote &&
-					<QuoteInfoEditorUI /*ref={c=>this.quoteEditor = c}*/ creating={forNew} editing={enabled}
-						baseData={NN(newRevisionData.quote)} onChange={val=>Change(newRevisionData.quote = val)}
-						showPreview={false} justShowed={false}/>}
-				{attachmentType == AttachmentType.references &&
-					<ReferencesAttachmentEditorUI creating={forNew} editing={enabled}
-						baseData={NN(newRevisionData.references)} onChange={val=>Change(newRevisionData.references = val)}
-						showPreview={false} justShowed={false}/>}
-				{attachmentType == AttachmentType.media &&
-					<MediaAttachmentEditorUI creating={forNew} editing={enabled}
-						baseData={NN(newRevisionData.media)} onChange={val=>Change(newRevisionData.media = val)}/>}
-			</>
-		);
+		return <AttachmentEditorUI phase={GetPhaseFromNodeDetailsUIProps({forNew, enabled: enabled!})}
+			target="node"
+			baseData={newRevisionData}
+			onChange={val=>{
+				newRevisionData.VSet({
+					equation: val.equation ?? DEL,
+					references: val.references ?? DEL,
+					quote: val.quote ?? DEL,
+					media: val.media ?? DEL,
+				});
+				Change();
+			}}/>;
 	}
 }

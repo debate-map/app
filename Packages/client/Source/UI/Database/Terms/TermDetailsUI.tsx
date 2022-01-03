@@ -1,4 +1,4 @@
-import {AddTerm, GetAccessPolicy, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
+import {AddTerm, AttachmentType, GetAccessPolicy, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
 import React from "react";
 import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
@@ -10,11 +10,12 @@ import {Button, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GetNiceNameForTermType} from "../../Database/TermsUI.js";
 import {PolicyPicker} from "../Policies/PolicyPicker.js";
+import {AttachmentsEditorUI} from "./AttachmentsEditorUI.js";
 
 @Observer
 export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 	render() {
-		const {baseData, style, onChange} = this.props;
+		const {phase, baseData, style, onChange} = this.props;
 		const {newData} = this.state;
 		const {Change, creating, enabled} = this.helpers;
 		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
@@ -84,6 +85,8 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 						<Button enabled={enabled} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
 					</PolicyPicker>
 				</RowLR>
+				<AttachmentsEditorUI phase={phase} baseData={newData.attachments} onChange={val=>Change(newData.attachments = val)}
+					target="term" allowedAttachmentTypes={[AttachmentType.media, AttachmentType.references]}/>
 			</Column>
 		);
 	}

@@ -4,7 +4,7 @@ import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "web-vc
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapNode, MapNodeType, GetAttachmentType, MapNodeL2, AttachmentType, MapNodePhrasing_Embedded, TermAttachment, MapNodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, MapNodeL3} from "dm_common";
+import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapNode, MapNodeType, GetAttachmentType_Node, MapNodeL2, AttachmentType, MapNodePhrasing_Embedded, TermAttachment, MapNodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, MapNodeL3} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES} from "web-vcore";
@@ -40,7 +40,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 	render() {
 		const {baseData, node, forNew, enabled, style} = this.props;
 		const {newData} = this.state;
-		const attachmentType = GetAttachmentType(node);
+		const attachmentType = GetAttachmentType_Node(node);
 
 		const Change = (..._)=>this.OnChange();
 

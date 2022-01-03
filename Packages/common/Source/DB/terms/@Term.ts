@@ -1,5 +1,6 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {Attachment} from "../../DB.js";
 
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
 export const Term_nameFormat = '^[a-zA-Z0-9 ,\'"%-]+$';
@@ -54,6 +55,10 @@ export class Term {
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	note?: string;
+
+	@DB((t, n)=>t.jsonb(n))
+	@Field({items: {$ref: "Attachment"}})
+	attachments: Attachment[] = [];
 }
 
 export enum TermType {
@@ -64,6 +69,3 @@ export enum TermType {
 	adverb = "adverb",
 }
 AddSchema("TermType", {enum: GetValues(TermType)});
-
-/*export type TermComponentSet = ObservableMap<string, boolean>;
-AddSchema("TermComponentSet", {patternProperties: {[UUID_regex]: {type: "boolean"}}});*/

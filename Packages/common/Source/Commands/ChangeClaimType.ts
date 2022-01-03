@@ -2,7 +2,7 @@ import {GetValues} from "web-vcore/nm/js-vextensions.js";
 import {Command, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {AttachmentType} from "../DB/nodeRevisions/@AttachmentType.js";
+import {AttachmentType} from "../DB/@Shared/Attachments/@Attachment.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 
