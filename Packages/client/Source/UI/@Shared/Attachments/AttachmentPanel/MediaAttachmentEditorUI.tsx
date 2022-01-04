@@ -102,6 +102,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 		);
 	}
 }
+@Observer
 export class FoundMediaUI extends BaseComponentPlus({} as {media: Media, index: number, enabled: boolean, onSelect: ()=>void}, {}) {
 	render() {
 		const {media, index, enabled, onSelect} = this.props;
