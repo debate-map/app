@@ -30,7 +30,7 @@ export const nodeBottomPanel_minWidth = 600;
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
 		map: Map|n, node: MapNodeL3, path: string, parent: MapNodeL3|n,
-		width: number|n, widthOverride: number|n, panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string|n, onTermHover: (id: string)=>void,
+		width: number|n, widthOverride: number|n, panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,
 		backgroundColor: chroma.Color,
 		usePortal?: boolean, nodeUI?: NodeUI_Inner,
 	},
@@ -48,7 +48,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {
 			map, node, path, parent,
-			width, widthOverride, panelsPosition, panelToShow, hovered, hoverTermID, onTermHover,
+			width, widthOverride, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
 			backgroundColor,
 			usePortal, nodeUI,
 		} = this.props;
@@ -131,10 +131,10 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 					}
 					return <RatingsPanel node={node} path={path} ratingType={panelToShow as NodeRatingType}/>;
 				})()}
-				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermID}}
-						openTermID={nodeView?.openTermID}
-						onHoverTerm={termID=>onTermHover(termID)}
-						onClickTerm={termID=>RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
+				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermIDs}}
+						openTermIDs={nodeView?.openTermIDs}
+						onHoverTerm={termIDs=>onTermHover(termIDs)}
+						onClickTerm={termIDs=>RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermIDs = termIDs)}/>)}
 				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
 				{renderPanel("social", show=><SocialPanel {...{show}}/>)}

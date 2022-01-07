@@ -68,7 +68,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	{panelsPosition: "left"} as NodeUI_Inner_Props,
 	{
 		hovered: false, moreButtonHovered: false, leftPanelHovered: false, //openPanelSource: null as PanelOpenSource|n,
-		hoverPanel: null as string|n, hoverTermID: null as string|n, lastWidthWhenNotPreview: 0,
+		hoverPanel: null as string|n, hoverTermIDs: null as string[]|n, lastWidthWhenNotPreview: 0,
 	},
 ) {
 	root: ExpandableBox|n;
@@ -105,7 +105,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 	render() {
 		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
-		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermID, lastWidthWhenNotPreview} = this.state;
+		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
 		// ==========
@@ -395,7 +395,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								ref={c=>this.bottomPanel = c}
 								usePortal={usePortalForDetailBoxes} nodeUI={this}
 								panelsPosition={panelsPosition!} panelToShow={panelToShow!}
-								hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>}
+								hoverTermIDs={hoverTermIDs} onTermHover={termIDs=>this.SetState({hoverTermIDs: termIDs})}/>}
 						{reasonScoreValues && showReasonScoreValues
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
 					</>}

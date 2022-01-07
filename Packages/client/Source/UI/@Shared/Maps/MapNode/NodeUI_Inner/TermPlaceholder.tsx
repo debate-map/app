@@ -4,12 +4,15 @@ import {GetTerm} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 
-export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
+export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termIDs: string[], showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
 	render() {
-		const {refText, termID, showKeyStart, onHover, onClick} = this.props;
-		const term = GetTerm(termID);
+		const {refText, termIDs, showKeyStart, onHover, onClick} = this.props;
+		const terms = termIDs.map(id=>GetTerm(id));
 		//const termVariantNumber = term ? GetTermVariantNumber(term) : null;
-		const termKeyStart = term ? term.id.substr(0, 2) : null;
+		const termKeyStart =
+			terms.length == 0 ? null :
+			terms.length == 1 ? (terms[0]?.id.substr(0, 2) ?? "n/a") :
+			"*".repeat(terms.length);
 
 		// if (term == null) return <a>...</a>;
 		// if (term == null) return <a>{refText}</a>;

@@ -115,8 +115,11 @@ export class MapNodeView {
 	/*@Field({$ref: "PanelOpenSource"}, {opt: true})
 	@O openPanel_source?: PanelOpenSource;*/
 
-	@Field({type: "string"}, {opt: true})
-	@O openTermID?: string;
+	@Field({
+		$gqlType: "JSON", // currently needed, because get-graphql-from-jsonschema can't handle the "{items: {...}}" structure, and a MapNodeView gql-type is not currently auto-added by postgraphile 
+		items: {type: "string"},
+	}, {opt: true})
+	@O openTermIDs?: string[];
 
 	@Field({patternProperties: {".{22}": {$ref: "MapNodeView"}}})
 	// @O children? = observable.map<string, MapNodeView>();

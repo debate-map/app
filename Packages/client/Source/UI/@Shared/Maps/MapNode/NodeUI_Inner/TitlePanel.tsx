@@ -7,7 +7,7 @@ import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProp
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey} from "dm_common";
-import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
+import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
@@ -52,7 +52,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 		//const patterns = [{name: "termForm", termForm_termIDs, regex}];
 		patterns = [{name: "termForm", regex}];
 	}
-	return ParseSegmentsForPatterns(text, patterns);
+	return ParseTextForPatternMatchSegments(text, patterns);
 }
 
 @WarnOfTransientObjectProps
@@ -72,11 +72,11 @@ export class TitlePanel extends BaseComponentPlus(
 		}
 	};
 
-	OnTermHover = (termID: string, hovered: boolean)=>{
+	OnTermHover = (termIDs: string[], hovered: boolean)=>{
 		const {parent} = this.props;
-		parent.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null});
+		parent.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermIDs: hovered ? termIDs : null});
 	};
-	OnTermClick = (termID: string)=>{
+	OnTermClick = (termIDs: string[])=>{
 		const {map, path} = this.props;
 		// parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
 		RunInAction("TitlePanel_OnTermClick", ()=>{
@@ -85,7 +85,7 @@ export class TitlePanel extends BaseComponentPlus(
 				nodeView_final = GetNodeViewsAlongPath(map?.id, path, true).Last();
 			}
 			nodeView_final.openPanel = "definitions";
-			nodeView_final.openTermID = termID;
+			nodeView_final.openTermIDs = termIDs;
 		});
 	};
 
@@ -112,8 +112,10 @@ export class TitlePanel extends BaseComponentPlus(
 
 			const elements = [] as (string|JSX.Element)[];
 			for (const [index, segment] of segments.entries()) {
-				if (segment.patternMatched == null) {
-					const segmentText = segment.textParts[0];
+				const mainPatternMatched = [...segment.patternMatches.keys()][0];
+				const mainPattern_match = [...segment.patternMatches.values()][0];
+				if (segment.patternMatches.size == 0) {
+					const segmentText = segment.text;
 					const edgeWhiteSpaceMatch = segmentText.match(/^( *).*?( *)$/);
 					if (edgeWhiteSpaceMatch) {
 						if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
@@ -127,17 +129,19 @@ export class TitlePanel extends BaseComponentPlus(
 						);
 						if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
 					}
-				} else if (segment.patternMatched.name == "termForm") {
+				} else if (mainPatternMatched.name == "termForm") {
 					/*const refText = segment.textParts[1];
 					const termID = segment.textParts[2];*/
-					const termStr = segment.textParts[2];
-					//const termID = segment.patternMatched["termID"] as string;
-					const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).includes(termStr.toLowerCase()))!; // nn: segments were initially found based on termsToSearchFor array
+					//const termStr = segment.textParts[2];
+					const termStr = mainPattern_match[2];
+
+					const terms = termsToSearchFor.filter(a=>a.forms.map(form=>form.toLowerCase()).includes(termStr.toLowerCase()))!; // nn: segments were initially found based on termsToSearchFor array
+					const termIDs = terms.map(a=>a.id);
 					elements.push(
-						segment.textParts[1],
-						<TermPlaceholder key={elements.length} refText={termStr} termID={term.id}
-							onHover={hovered=>this.OnTermHover(term.id, hovered)} onClick={()=>this.OnTermClick(term.id)}/>,
-						segment.textParts[3],
+						mainPattern_match[1],
+						<TermPlaceholder key={elements.length} refText={termStr} termIDs={terms.map(a=>a.id)}
+							onHover={hovered=>this.OnTermHover(termIDs, hovered)} onClick={()=>this.OnTermClick(termIDs)}/>,
+						mainPattern_match[3],
 					);
 				} else {
 					Assert(false);
@@ -170,7 +174,10 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
-						{latex && <NodeMathUI text={node.current.equation!.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick} termsToSearchFor={termsToSearchFor}/>}
+						{latex && <NodeMathUI text={node.current.equation!.text}
+							onTermHover={(id, hovered)=>this.OnTermHover([id], hovered)}
+							onTermClick={id=>this.OnTermClick([id])}
+							termsToSearchFor={termsToSearchFor}/>}
 						{!latex && RenderNodeDisplayText(displayText)}
 					</span>}
 				{editing &&
