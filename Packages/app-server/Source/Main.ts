@@ -332,27 +332,47 @@ app.get("/dump-mem", async(req, res)=>{
 	console.log("Memory dump saved to:", dumpPath);
 	res.send(`Memory dump saved.`);
 });
+function GetMemInfo() {
+	const result = v8.getHeapStatistics();
+	for (const [key, value] of Object.entries(process.memoryUsage())) {
+		result[`extra_${key}`] = value;
+	}
+	return result;
+}
 app.get("/check-mem", async(req, res)=>{
-	console.log("@heapLimit:", v8.getHeapStatistics());
+	console.log("@memInfo:", GetMemInfo());
 	res.send(`Memory info logged on app-server.`);
 });
 // test; allocate memory, to test behavior (from: https://developer.ibm.com/articles/nodejs-memory-management-in-container-environments)
 // Currently this fails after: A) 1 buffer creation, in local Docker Desktop, with WSL mem-limit at 6gb, B) 4 buffer creations, in OVH 8gb cluster
 // (and both numbers remain unchanged when changing the max-old-space-size from the default 2gb to 8gb, suggesting the old [2gb] MOSS value was already set to/near the max of what the nodes currently support)
-/*console.log("MemInfoBeforeBufferAllocate:", v8.getHeapStatistics());
-const bufs = [] as Buffer[];
+console.log("MemInfo_BeforeBufferAllocate:", GetMemInfo());
+const bufs = [] as any[];
 globalThis.bufs = bufs;
+const digits = "0123456789".split("");
 for (let i = 0; i < 10; i++) {
-	const buf = Buffer.alloc(1000 * 1024 * 1024, "x");
-	console.log("BufSize:", Math.round(buf.length / (1024 * 1024)));
-	bufs.push(buf);
+	const mbPerStep = 1000;
+
+	//const buf = Buffer.alloc(mbPerBuffer * 1024 * 1024, "x");
+	// use string rather than Buffer (since string always goes on heap, rather than native/external space)
+	// create multiple strings (each 1MB large) to complete this "step" (since NodeJS has limit on string length)
+	for (let i2 = 0; i2 < mbPerStep; i2++) {
+		let str_1mb = "";
+		const bytesPerMB = 1024 * 1024;
+		while (str_1mb.length < bytesPerMB) {
+			str_1mb += digits.Random().repeat(256);
+		}
+		bufs.push(str_1mb);
+	}
+
+	console.log("Buffers created:", i + 1, " @totalSize_mb:", mbPerStep * (i + 1));
 }
-console.log("MemUsage_RSS:", Math.round(process.memoryUsage().rss / (1024 * 1024)));*/
+//console.log("MemInfo_AfterBufferAllocate:", GetMemInfo());
 
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}
 app.listen(serverPort);
-console.log("App-server started on:", serverPort, "@heapLimit:", v8.getHeapStatistics());
+console.log("App-server started on:", serverPort, "@memInfo:", GetMemInfo());
 
 /*const envVars_k8s = ["DB_VENDOR", "DB_ADDR", "DB_PORT", "DB_DATABASE", "DB_USER", "DB_PASSWORD", "PROXY_ADDRESS_FORWARDING"];
 console.log("Env vars:", envVars_k8s.map(key=>`${key}: ${process.env[key]}`).join(", "));*/
