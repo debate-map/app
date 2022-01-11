@@ -50,3 +50,4 @@ CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
 # mode: profiling
 #CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=1024 ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=8192 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js

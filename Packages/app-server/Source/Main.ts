@@ -350,7 +350,7 @@ console.log("MemInfo_BeforeBufferAllocate:", GetMemInfo());
 const bufs = [] as any[];
 globalThis.bufs = bufs;
 const digits = "0123456789".split("");
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 20; i++) {
 	const mbPerStep = 1000;
 
 	//const buf = Buffer.alloc(mbPerBuffer * 1024 * 1024, "x");
@@ -365,7 +365,7 @@ for (let i = 0; i < 10; i++) {
 		bufs.push(str_1mb);
 	}
 
-	console.log("Buffers created:", i + 1, " @totalSize_mb:", mbPerStep * (i + 1));
+	console.log("Buffers created:", i + 1, ` @totalSize_mb:~${mbPerStep * (i + 1)}`); // mb size approximate, since a small % of random-strings may be the same, and thus be merged by v8
 }
 //console.log("MemInfo_AfterBufferAllocate:", GetMemInfo());
 
