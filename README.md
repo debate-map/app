@@ -524,7 +524,7 @@ Google Sign-in:
 * 1\) Create a Google Cloud project for your fork.
 * 2\) Go to: https://console.cloud.google.com/apis/credentials?project=YOUR_PROJECT_NAME
 * 3\) In the "Credentials->OAuth 2.0 Client IDs" section, create a new "Web Application" entry.
-* 4\) Set the values below: (yes, the plain `localhost` one is [also needed](https://stackoverflow.com/a/68469319))
+* 4\) Set the values below: (yes, the plain `localhost` one is [also needed](https://stackoverflow.com/a/68469319)) [replacing CLUSTER_IP_IN_CLOUD with the URL of your cloud-based Kubernetes cluster, if you want direct access to be possible]
 ```
 Authorized JavaScript Origins:
 * http://localhost
@@ -532,14 +532,14 @@ Authorized JavaScript Origins:
 * http://[::1]:3005
 * http://localhost:3055
 * http://[::1]:3055
-* https://9m2x1z.nodes.c1.or1.k8s.ovh.us
+* https://CLUSTER_IP_IN_CLOUD
 * https://debatemap.app
 * https://debates.app
 
 Authorized redirect URIs:
 * http://localhost:3105/auth/google/callback
 * http://[::1]:3105/auth/google/callback
-* https://app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us/auth/google/callback
+* https://app-server.CLUSTER_IP_IN_CLOUD/auth/google/callback
 * https://app-server.debatemap.app/auth/google/callback
 * https://app-server.debates.app/auth/google/callback
 * https://app-server.debatemap.app/auth/google/callback_returnToLocalhost

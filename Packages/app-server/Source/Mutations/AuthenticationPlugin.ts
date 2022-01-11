@@ -120,6 +120,14 @@ export const AuthExtrasPlugin = makeExtendSchemaPlugin(build=>{
 					Assert(!connectionIDs_usedUp.has(connectionID), "The connection-id provided has already been used to attach a user-id!");
 					const attachInfo = connectionID_attachInfo.get(connectionID);
 					Assert(attachInfo != null, `Could not find user-id for connection-id: ${connectionID}`);
+					/*console.log("IPAddress check in PassConnectionID. @request:", GetIPAddress(ctx.req), "@attachInfo:", attachInfo.ipAddress, "@otherValues:", {
+						a: ctx.req.headers["x-forwarded-for"], // on cloudflare, this gave me the address of the cloudflare cdn/proxy, fsr
+						b: ctx.req.connection.remoteAddress,
+						c: ctx.req.ip,
+						d: ctx.req.ips,
+						e: ctx.req.socket.remoteAddress,
+						f: ctx.req.headers["cf-connecting-ip"], // on cloudflare, this gives the source/original user ip-address
+					});*/
 					Assert(AreIPsEquivalent(GetIPAddress(ctx.req), attachInfo.ipAddress), `Cannot call PassConnectionID; the ip-address does not match the caller of _GetConnectionID!`);
 
 					connectionIDs_usedUp.add(connectionID); // mark as used first; guarantees can't be used twice
@@ -139,7 +147,15 @@ function GetIPAddress(req: Request): string {
 	//var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim(); // commented, since x-forwarded-for can be spoofed
 	//console.log("IPAddress:", req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address);
 	//return req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress; //?? req.connection.address;
-	return req.socket.remoteAddress!;
+	//return req.socket.remoteAddress!;
+
+	// get user's source ip, using header set by the Cloudflare cdn/proxy
+	// (see: https://developers.cloudflare.com/fundamentals/get-started/http-request-headers and https://support.cloudflare.com/hc/en-us/articles/200170786)
+	const sourceIP_cf = req.headers["cf-connecting-ip"] ? `${req.headers["cf-connecting-ip"]}` : null;
+
+	// todo: maybe only use cloudflare's header if we're confirmed to be connected to a cloudflare server (eg. using ip-address range checks: https://github.com/keverw/node_CloudFlare)
+	// (that said, it's probably fine for now, since the only public access route is through cloudflare atm -- and anyway, an impersonator would need to know the user's source ip and intercept/spam the linkage)
+	return sourceIP_cf ?? req.socket.remoteAddress!;
 }
 function AreIPsEquivalent(ip1_str: string, ip2_str: string) {
 	//const ip1_canonical = (ip1.includes(":") ? new Address6(ip1) : new Address4(ip1)).canonicalForm();
