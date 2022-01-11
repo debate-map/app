@@ -346,7 +346,7 @@ app.get("/check-mem", async(req, res)=>{
 // test; allocate memory, to test behavior (from: https://developer.ibm.com/articles/nodejs-memory-management-in-container-environments)
 // Currently this fails after: A) 1 buffer creation, in local Docker Desktop, with WSL mem-limit at 6gb, B) 4 buffer creations, in OVH 8gb cluster
 // (and both numbers remain unchanged when changing the max-old-space-size from the default 2gb to 8gb, suggesting the old [2gb] MOSS value was already set to/near the max of what the nodes currently support)
-console.log("MemInfo_BeforeBufferAllocate:", GetMemInfo());
+/*console.log("MemInfo_BeforeBufferAllocate:", GetMemInfo());
 const bufs = [] as any[];
 globalThis.bufs = bufs;
 const digits = "0123456789".split("");
@@ -366,8 +366,7 @@ for (let i = 0; i < 20; i++) {
 	}
 
 	console.log("Buffers created:", i + 1, ` @totalSize_mb:~${mbPerStep * (i + 1)}`); // mb size approximate, since a small % of random-strings may be the same, and thus be merged by v8
-}
-//console.log("MemInfo_AfterBufferAllocate:", GetMemInfo());
+}*/
 
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}
