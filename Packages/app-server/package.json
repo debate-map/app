@@ -13,6 +13,7 @@
 		"concurrently": "^6.1.0"
 	},
 	"dependencies": {
+		"@airbnb/node-memwatch": "^2.0.0",
 		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
 		"@graphile/subscriptions-lds": "^4.11.0",
 		"@n1ru4l/graphql-live-query": "^0.7.1",

@@ -380,6 +380,17 @@ for (let i = 0; i < 20; i++) {
 	console.log("Buffers created:", i + 1, ` @totalSize_mb:~${mbPerStep * (i + 1)}`); // mb size approximate, since a small % of random-strings may be the same, and thus be merged by v8
 }*/
 
+var memwatch = require("@airbnb/node-memwatch");
+let activeMemWatch_start = new memwatch.HeapDiff();
+app.get("/mem-diff", async(req, res)=>{
+	console.log("Starting diff...");
+	const diff = activeMemWatch_start.end();
+	console.log("@memDiff:", diff);
+	res.send(`Memory diff logged on app-server.`);
+
+	activeMemWatch_start = new memwatch.HeapDiff();
+});
+
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}
 app.listen(serverPort);

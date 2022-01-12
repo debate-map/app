@@ -5,6 +5,17 @@ __metadata:
   version: 4
   cacheKey: 8
 
+"@airbnb/node-memwatch@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@airbnb/node-memwatch@npm:2.0.0"
+  dependencies:
+    bindings: ^1.5.0
+    nan: ^2.14.1
+    node-gyp: latest
+  checksum: 601ca3dffaae55782a14cd113e20084c75da805d97ab458a07257287efada065fed477c217bf066624daef2ea9020fe17b65332f9b93fdc88960b2a1ff01c82a
+  languageName: node
+  linkType: hard
+
 "@apollo/client@npm:3.5.0-beta.4":
   version: 3.5.0-beta.4
   resolution: "@apollo/client@npm:3.5.0-beta.4"
@@ -6394,6 +6405,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dm_app-server@workspace:Packages/app-server"
   dependencies:
+    "@airbnb/node-memwatch": ^2.0.0
     "@graphile-contrib/pg-simplify-inflector": ^6.1.0
     "@graphile/subscriptions-lds": ^4.11.0
     "@n1ru4l/graphql-live-query": ^0.7.1
@@ -10974,7 +10986,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.12.1, nan@npm:^2.13.2, nan@npm:^2.14.2":
+"nan@npm:^2.12.1, nan@npm:^2.13.2, nan@npm:^2.14.1, nan@npm:^2.14.2":
   version: 2.15.0
   resolution: "nan@npm:2.15.0"
   dependencies:
