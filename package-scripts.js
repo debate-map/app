@@ -165,6 +165,8 @@ function GetPortForwardCommandsStr(context) {
 	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} ${fd}005:3005`;
 	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}105:3105`;
 	const forAppServerInspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}155:3155`;
+	if (commandArgs.includes("onlyInspector")) return forAppServerInspector;
+
 	return `concurrently --kill-others --names db,ws,as,asi "${forDB}" "${forAppServer}" "${forWebServer}" "${forAppServerInspector}"`;
 }
 

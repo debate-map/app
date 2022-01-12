@@ -19,6 +19,7 @@ import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {GetUserHiddensWithEmail, User} from "dm_common";
 import fs from "fs";
 import v8 from "v8";
+import SegfaultHandler from "segfault-raub";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {DBPreloadPlugin} from "./Mutations/DBPreloadPlugin.js";
@@ -27,6 +28,7 @@ import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
 import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.js";
+
 //import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
@@ -45,6 +47,16 @@ const require = createRequire(import.meta.url);
 program.parse(process.argv);
 export const launchOpts = program.opts();
 export const variant = launchOpts.variant;
+
+// I found out (using "kubectl describe pod XXX") that segfaults were happening when trying to use chrome's inspector remotely, so added this (import of segfault-raub above)
+/*SegfaultHandler["registerHandler"]("crash.log", (signal, address, stack)=>{
+	console.log("Segfault occurred! @signal:", signal, "@address:", address, "@stack:", stack);
+});*/
+fs.writeFileSync("./segfault.log", "");
+fs.writeFileSync(`StartedAt_${Date.now()}`, "");
+//SegfaultHandler.causeSegfault(); // simulates a buggy native module that dereferences NULL
+
+console.log("Test1:", require("child_process").execSync("sysctl vm.max_map_count").toString());
 
 if (!globalThis.fetch) {
 	globalThis.fetch = fetch;

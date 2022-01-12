@@ -45,9 +45,10 @@ ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 
 # mode: normal
 # use "--no-daemon" so that the pm2 start command lasts as long as the program itself lasts [I think this is why anyway]
-CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
+#CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
 
 # mode: profiling
 #CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=1024 ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=8192 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js
+CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js
+#CMD strace node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js

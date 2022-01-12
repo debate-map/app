@@ -3873,6 +3873,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"addon-tools-raub@npm:5.3.x":
+  version: 5.3.4
+  resolution: "addon-tools-raub@npm:5.3.4"
+  dependencies:
+    adm-zip: 0.5.4
+    node-addon-api: 3.1.0
+    node-gyp: latest
+  checksum: 7c1e463b6042a4b7d19259685440686374b2d99294cec1f8434db4d4b420c55240937df63b76765db0776178cada1abc4877077c8a3e96ff5c5dd55ed99573a6
+  languageName: node
+  linkType: hard
+
+"adm-zip@npm:0.5.4":
+  version: 0.5.4
+  resolution: "adm-zip@npm:0.5.4"
+  checksum: 5ec2141b443f743022255ed8d3252603525536d2f58844d0b1f5eb5768e5d91ddbaf96b7392a6d4f55d8565f4753a2a16abf39730961b2d62fd12396f40d76e5
+  languageName: node
+  linkType: hard
+
 "agent-base@npm:6, agent-base@npm:^6.0.0, agent-base@npm:^6.0.2":
   version: 6.0.2
   resolution: "agent-base@npm:6.0.2"
@@ -6410,6 +6428,7 @@ __metadata:
     pm2: ^5.1.0
     postgraphile: ^4.12.1
     postgraphile-plugin-connection-filter: ^2.2.1
+    segfault-raub: ^1.2.0
     ws: ^7.5.2
   languageName: unknown
   linkType: soft
@@ -11076,6 +11095,15 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"node-addon-api@npm:3.1.0":
+  version: 3.1.0
+  resolution: "node-addon-api@npm:3.1.0"
+  dependencies:
+    node-gyp: latest
+  checksum: 76a32f1e809aacc7d4a05e764bac2a41ba72d07ea859d329f0f0f2b9d5b4e04cbc4889312eae5150e8dad3ea2fe57ebebe63453cb12ac991c0c639a39c0d49c3
+  languageName: node
+  linkType: hard
+
 "node-cleanup@npm:^2.1.2":
   version: 2.1.2
   resolution: "node-cleanup@npm:2.1.2"
@@ -14380,6 +14408,16 @@ resolve@^2.0.0-next.3:
     js-base64: ^2.1.8
     source-map: ^0.4.2
   checksum: ad78bba4466ff7aa6449931a57a980479223c3cad9eccf2180251c2f6fce5b3d982a51f924709e0a0bb2d328dedbb2fad0ccb2a5fdc175513a27cb4e8cf8cfd2
+  languageName: node
+  linkType: hard
+
+"segfault-raub@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "segfault-raub@npm:1.2.0"
+  dependencies:
+    addon-tools-raub: 5.3.x
+    node-gyp: latest
+  checksum: 4d220ec61b0f3a2139e8cbc40ca012a54504b914b31b4d23512369e76904b85b8f71d0bef88bbba24680192be689e12a936ca3cbf9d90467372229fb8a855657
   languageName: node
   linkType: hard
 

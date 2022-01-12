@@ -39,8 +39,14 @@ COPY .yalc/ .yalc/
 #	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --prefer-offline --frozen-lockfile
 #	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --frozen-lockfile
 
+# add python for some npm packages that need it
+# --no-cache: download package index on-the-fly, no need to cleanup afterwards
+# --virtual: bundle packages, remove whole bundle at once, when done
+RUN apk --no-cache --virtual build-dependencies add python3 make g++ libexecinfo-dev \
 # equivalent of yarn-v1's "yarn install --production" (as per: https://yarnpkg.com/cli/workspaces/focus#details) -- which avoids installing dev-deps, cutting down on image size
-RUN yarn workspaces focus --all --production \
+	&& yarn workspaces focus --all --production \
+# remove python (and such) again, since not needed anymore
+	&& apk del build-dependencies \
 # exclude just-created caches (the caches can't be used anyway)
 	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
 # delete folders that had to be marked as deps (eg. under web-vcore), but which are actually only needed at development time
@@ -51,6 +57,14 @@ RUN yarn workspaces focus --all --production \
 #	&& cd /dm_repo/node_modules/@babel && rm -r !(runtime)
 	&& cd /dm_repo/node_modules/@babel && find . -mindepth 1 -maxdepth 1 -type d ! -name "runtime" -exec rm -r {} \;
 # for additional options (such as enableInlineBuilds), modify the .yarnrc.yml file
+
+# strace: for debugging, eg. the "std::bad_alloc" error, as mentioned here: https://stackoverflow.com/a/59923848
+#RUN apk --no-cache add procps strace
+
+# this line-append increases the max # of mmap()'ed ranges, fixing the dreadful issue where trying to create a memory-snapshot using remote Chrome devtools would virtually always cause the pod to crash (or at least for the port-forward to dc)
+# EDIT: this fails atm, saying "RUN sysctl -p → sysctl: error setting key 'vm.max_map_count': Read-only file system"; I'm thus setting it at container startup, in node-setup-daemon-set.yaml
+#RUN echo "vm.max_map_count=65530999" >> /etc/sysctl.conf
+#RUN sysctl -p
 
 # moved this to package-specific dockerfiles, as "update base docker image" has (a lot) more overhead than "copy NMOverwrites/ folder" in each package, and NMOverwrites/ can change frequently 
 #COPY NMOverwrites/ /dm_repo/
