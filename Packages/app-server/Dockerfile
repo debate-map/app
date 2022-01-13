@@ -50,5 +50,7 @@ ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 # mode: profiling
 #CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=1024 ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=8192 ./Dist/Main.js
-CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js
+CMD node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 --max-old-space-size=15000 --max-semi-space-size=5000 ./Dist/Main.js; sleep infinity
 #CMD strace node --experimental-specifier-resolution=node --heapsnapshot-near-heap-limit=3 --inspect=3155 --max-old-space-size=15000 ./Dist/Main.js

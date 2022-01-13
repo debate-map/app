@@ -56,6 +56,10 @@ fs.writeFileSync("./segfault.log", "");
 fs.writeFileSync(`StartedAt_${Date.now()}`, "");
 //SegfaultHandler.causeSegfault(); // simulates a buggy native module that dereferences NULL
 
+// second module, similar to segfault-raub
+require("ofe").call();
+//require('ofe').trigger();
+
 console.log("Test1:", require("child_process").execSync("sysctl vm.max_map_count").toString());
 
 if (!globalThis.fetch) {
@@ -379,17 +383,6 @@ for (let i = 0; i < 20; i++) {
 
 	console.log("Buffers created:", i + 1, ` @totalSize_mb:~${mbPerStep * (i + 1)}`); // mb size approximate, since a small % of random-strings may be the same, and thus be merged by v8
 }*/
-
-var memwatch = require("@airbnb/node-memwatch");
-let activeMemWatch_start = new memwatch.HeapDiff();
-app.get("/mem-diff", async(req, res)=>{
-	console.log("Starting diff...");
-	const diff = activeMemWatch_start.end();
-	console.log("@memDiff:", diff);
-	res.send(`Memory diff logged on app-server.`);
-
-	activeMemWatch_start = new memwatch.HeapDiff();
-});
 
 const serverPort = env.PORT || 3105 as number;
 //if (inK8s) {}
