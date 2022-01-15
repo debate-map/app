@@ -1,8 +1,9 @@
 # options (largest to smallest): 14 (~900mb), 14-slim (~150mb), 14-alpine (~100mb)
 #FROM node:14
 #FROM node:14-slim
-FROM node:14-alpine
+#FROM node:14-alpine
 #FROM node:16
+FROM node:16-alpine
 
 WORKDIR "/dm_repo"
 
