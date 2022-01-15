@@ -14,7 +14,8 @@ import {PermissionGroupSet} from "./users/@User.js";
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);
-	Assert(pathSegments.every(a=>Validate("UUID", a) == null || a[0] == "*"), `Path contains non-uuid, non-*-prefixed segments: ${path}`);
+	//Assert(pathSegments.every(a=>Validate("UUID", a) == null || a[0] == "*"), `Path contains non-uuid, non-*-prefixed segments: ${path}`);
+	Assert(pathSegments.every(a=>a.length == 22 || a[0] == "*"), `Path contains non-uuid, non-*-prefixed segments: ${path}`); // Validate("UUID", a) is too slow, so just check length
 	// return pathSegments.map(ToInt);
 	return pathSegments;
 }

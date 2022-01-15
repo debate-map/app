@@ -314,10 +314,11 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 	live_update=[
 		#sync('./NMOverwrites/', '/dm_repo/'),
 		sync('./.yalc/', '/dm_repo/.yalc/'),
-		sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
 		sync('./Packages/common/', '/dm_repo/Packages/common/'),
 		#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
 		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
+		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
+		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
 	])
 imageURL_appServer = registryURL + '/dm-app-server'
 docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile',
@@ -329,10 +330,12 @@ docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile
 	live_update=[
 		#sync('./NMOverwrites/', '/dm_repo/'),
 		sync('./.yalc/', '/dm_repo/.yalc/'),
-		sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
 		sync('./Packages/common/', '/dm_repo/Packages/common/'),
 		#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
 		sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
+		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
+		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
+		sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
 	])
 
 # own app (deploy to kubernetes)

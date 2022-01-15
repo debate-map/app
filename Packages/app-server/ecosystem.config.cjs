@@ -11,9 +11,9 @@ console.log("Preparing to run app-server. @devMode:", DEV, "@serverHost:", k8sSe
 
 const nodeArgs = [
 	`--experimental-specifier-resolution=node`,
-	//`--heapsnapshot-near-heap-limit=3`,
-	//`--inspect`,
 	`--max-old-space-size=15000`,
+	//`--heapsnapshot-near-heap-limit=3`,
+	`--inspect=3155`,
 ];
 module.exports = {
 	apps: [{
@@ -38,6 +38,8 @@ module.exports = {
 		// this is claimed to be regex-based (https://pm2.keymetrics.io/docs/usage/application-declaration), but appears to actually be blob-based
 		ignore_watch: [
 			"**/newrelic_agent.log",
+			"**/segfault.log",
+			"**/StartedAt*",
 		],
 	}],
 };
