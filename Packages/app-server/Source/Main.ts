@@ -114,14 +114,29 @@ const pluginHook = makePluginHook([
 	variant == "patches" && new GeneratePatchesPlugin(),
 ] as any[]);
 
-pg.defaults.poolSize = 10;
 export const pgPool = new Pool({
 	connectionString: dbURL,
+	max: 50,
 });
+/*const query_orig = pgPool.query;
+pgPool.query = function(str) {
+	const queryAsStr = typeof str == "string" ? str : JSON.stringify(str);
+	if (queryAsStr != "commit" && queryAsStr != "begin") console.log("pgPool.query @length:", queryAsStr.length, "@start:", queryAsStr);
+	return query_orig.apply(this, arguments);
+};*/
+
 graph.subs.pgPool = pgPool;
 //export var pgClient: PoolClient;
 pgPool.on("connect", client=>{
 	console.log(`A pgClient has been created in the pool. New pool size:`, pgPool.totalCount);
+
+	/*const query_orig2 = client.query;
+	client.query = function(str) {
+		const queryAsStr = typeof str == "string" ? str : JSON.stringify(str);
+		if (queryAsStr != "commit" && queryAsStr != "begin") console.log("client.query @length:", queryAsStr.length, "@start:", queryAsStr);
+		return query_orig2.apply(this, arguments);
+	};*/
+
 	//pgClient = client;
 	//graph.subs.pgPool = pgClient;
 });
@@ -131,6 +146,12 @@ pgPool.on("remove", async client=>{
 		await pgPool.connect();
 		//console.log("A pgClient in the pool has been disconnected. New pool size:", pgPool.totalCount);
 	}
+});
+/*pgPool.on("acquire", client=>{
+	console.log("PGPool acquired.");
+});*/
+pgPool.on("error", err=>{
+	console.log("PGPool error:", err);
 });
 
 app.get("/health-check", async(req, res)=>{
@@ -146,11 +167,14 @@ app.get("/health-check", async(req, res)=>{
 		Assert(usersCount >= 1, "Could not find any users in database. (at least the system user should exist)");
 		console.log(`Health-check: Passed 1 (time: ${TimeSinceCheckStart()}) [user count: ${usersCount}]`);
 
+		// disabled this for now, because I think it is the (main) reason for the progressively slower reacting to certain database changes (eg. after adding node);
+		//		suspected reason: these GetAsync() calls are probably creating "ghost subscriptions" of some sort, overloading the subscription plugin with trying to send updates to lots of no-longer-present subscribers;
+		//		I could try to use the WeakRef counting trick to confirm if this is the case, but I'd rather just proceed with a wider rewrite
 		//const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
-		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
+		/*const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail("debatemap@gmail.com")[0], {errorHandling_final: "log"});
 		console.log(`Health-check: Passed 2 (time: ${TimeSinceCheckStart()})`);
 		Assert(existingUser_hidden != null, "Could not find system-user's user-hidden data, which we know should exist.");
-		console.log(`Health-check: Passed 3 (time: ${TimeSinceCheckStart()})`);
+		console.log(`Health-check: Passed 3 (time: ${TimeSinceCheckStart()})`);*/
 
 		console.log(`Health-check: Good. (time: ${TimeSinceCheckStart()})`);
 		res.sendStatus(200); // status: 200 OK
@@ -160,6 +184,19 @@ app.get("/health-check", async(req, res)=>{
 		// try to reconnect the pool
 		pgPool.connect();
 	}
+});
+app.get("/db-user-count", async(req, res)=>{
+	const checkStart = Date.now();
+	const TimeSinceCheckStart = ()=>`${((Date.now() - checkStart) / 1000).toFixed(1)}s`;
+
+	console.log("Starting user-count check.");
+	Assert(pgPool.totalCount > 0, "No pgClient has been initialized/connected within the pool yet.");
+
+	const usersCountData = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+	const usersCount = ToInt(usersCountData.rows[0].count);
+	console.log(`User-count: ${usersCount} @time:${TimeSinceCheckStart()}`);
+
+	res.send(`User-count logged on app-server.`);
 });
 
 // set up auth-handling before postgraphile; this way postgraphile resolvers have access to request.user

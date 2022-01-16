@@ -40,7 +40,7 @@ export class MapsState {
 	@O initialChildLimit = 5;
 	@O showReasonScoreValues = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
-	@O weighting = WeightingType.votes;
+	@O @version(2) weighting = WeightingType.date;
 	//@O nodeLeftBoxEnabled = false;
 
 	// node panels

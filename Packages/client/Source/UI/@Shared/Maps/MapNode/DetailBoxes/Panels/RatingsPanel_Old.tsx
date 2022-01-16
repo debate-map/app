@@ -9,14 +9,14 @@ import {ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple,
 import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
-import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
-import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 import {UPlot} from "web-vcore/nm/react-uplot.js";
 import uPlot from "web-vcore/nm/uplot.js";
 import useResizeObserver from "use-resize-observer";
 import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
+import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
+import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
 type RatingsPanel_Props = {
 	node: MapNodeL3, path: string, ratingType: NodeRatingType,
@@ -50,11 +50,13 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		//const ratingSummary = GetRatingSummary(node.id, ratingType); // used by parent ui
 		const userFollows = GetUserFollows_List(meID);
 		const markRatingUsers = userFollows.filter(a=>a.markRatings).map(a=>a.targetUser);
-		const ratingsOfSelfAndFollowed = GetRatings.CatchBail(emptyArray, node.id, ratingType, [...meID ? [meID] : [], ...markRatingUsers]); // catch bail (ie. allow lazy-load)
+		//const ratingsOfSelfAndFollowed = GetRatings.CatchBail(emptyArray, node.id, ratingType, [...meID ? [meID] : [], ...markRatingUsers]); // catch bail (ie. allow lazy-load)
+		// temp; to mitigate overwhelming of subscription plugin, do not show the rating preview (since this requires a subscription per node)
+		const ratingsOfSelfAndFollowed = [] as NodeRating[];
 
 		const myDefaultAccessPolicy = GetUserHidden(meID)?.lastAccessPolicy;
 		const form = GetNodeForm(node, path);
-		let smoothing = GetRatingUISmoothing();
+		const smoothing = GetRatingUISmoothing();
 
 		const parentNode = GetNodeL3(SlicePath(path, 1));
 
@@ -69,7 +71,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const ratingsToMark = ratingsOfSelfAndFollowed.filter(a=>markRatingUsers.includes(a.creator));
 
 		//let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .5 : 1;
-		let asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .8 : 1;
+		const asNodeUIOverlay_alphaMultiplier = asNodeUIOverlay ? .8 : 1;
 		const lineTypes: uPlot.Series[] = [
 			{
 				label: "Rating value",
@@ -86,7 +88,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				//paths: uPlot.paths.bars!({size: [1, 100], gap: 1}),
 			},
 		];
-		
+
 		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100];
 		//smoothing = smoothing.KeepAtMost(labels.Max(undefined, true)); // smoothing might have been set higher, from when on another rating-type
 		const xValues_min = 0;
@@ -118,7 +120,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					x: {
 						value: myRating_displayVal,
 						// max sure line is not cut-off by container bounds (we scale by device-pixel-ratio, because the canvas' width uses that scaling)
-						finalize: drawPos=>(drawPos - 1).KeepAtLeast(0).KeepAtMost((width - 3) * devicePixelRatio)
+						finalize: drawPos=>(drawPos - 1).KeepAtLeast(0).KeepAtMost((width - 3) * devicePixelRatio),
 					},
 					//color: "rgba(0,255,0,1)",
 					//lineWidth: 1,
@@ -229,7 +231,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 						<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
 					</Row>
 				</div>}
-				
+
 				<div ref={rootRef as any} className="uplotHolder" style={ES({
 					position: "relative", width: "100%",
 					//height: "calc(100% - 53px)", // we need to cut off some height, for the legend

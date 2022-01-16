@@ -88,6 +88,7 @@ export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapN
 });
 
 export enum WeightingType {
+	date = "date",
 	votes = "votes",
 	reasonScore = "reasonScore",
 }
@@ -107,6 +108,8 @@ const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 export const GetOrderingScores_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, resultIfNoData = null)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
+
+	if (weighting == WeightingType.date) return -node.createdAt; // reverse, so that earliest nodes show up first (node sorting-by-score is descending)
 
 	const useReasonScoreValues = weighting == WeightingType.reasonScore && rsCompatibleNodeTypes?.includes(node.type);
 	if (useReasonScoreValues) {

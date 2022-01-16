@@ -8,6 +8,19 @@ export const GetNodeChildLink = CreateAccessor((id: string)=>{
 	return GetDoc({}, a=>a.nodeChildLinks.get(id));
 });
 export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: string|n, group?: ChildGroup|n): NodeChildLink[]=>{
+	// temp; optimization that reduces the number of subscriptions made to the server (the subscriptions plugin can currently get overloaded pretty easily)
+	if (parentID != null) {
+		const linksUnderParent = GetDocs({
+			params: {filter: {
+				parent: parentID && {equalTo: parentID},
+			}},
+		}, a=>a.nodeChildLinks);
+		let result = linksUnderParent;
+		if (childID != null) result = result.filter(a=>a.child == childID);
+		if (group != null) result = result.filter(a=>a.group == group);
+		return result;
+	}
+
 	return GetDocs({
 		params: {filter: {
 			/*and: [
