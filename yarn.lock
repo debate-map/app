@@ -2450,9 +2450,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphile/lds@npm:4.12.1":
-  version: 4.12.1
-  resolution: "@graphile/lds@npm:4.12.1"
+"@graphile/lds@npm:4.12.2":
+  version: 4.12.2
+  resolution: "@graphile/lds@npm:4.12.2"
   dependencies:
     "@types/pg": ">=6 <9"
     "@types/ws": ^6.0.1
@@ -2461,7 +2461,7 @@ __metadata:
     ws: ^7.0.0
   bin:
     graphile-lds: dist/cli.js
-  checksum: 76b34b15a97128631134aa0df1705c1ac0528dcff66d493fbcd97e8cf3d850b623af71afcb4fb8b864077136f46acb7a2fd62cdd356a90a8dc207fd41adfbb75
+  checksum: 067be257f9934ddbc8a1e01449d8f27788abf77e5683e18ee837c7200b08f26d6280bad3c4a7501774e70672f565ac4c1c6eb23ac1a3c07564f5c8771f60046b
   languageName: node
   linkType: hard
 
@@ -2474,17 +2474,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphile/subscriptions-lds@npm:^4.11.0":
-  version: 4.12.1
-  resolution: "@graphile/subscriptions-lds@npm:4.12.1"
+"@graphile/subscriptions-lds@npm:^4.12.2":
+  version: 4.12.2
+  resolution: "@graphile/subscriptions-lds@npm:4.12.2"
   dependencies:
-    "@graphile/lds": 4.12.1
+    "@graphile/lds": 4.12.2
     "@types/ws": ^6.0.1
     tslib: ^2.0.1
     ws: ^7.0.0
   peerDependencies:
     postgraphile-core: ">4.3.1 <5"
-  checksum: 94e04b0974a9a7260f840aa8d61b2525332a23af7600b069aac85a6f8b4d692c9506175c7e64e730f9f2785423e6aaa5c1cf0fdffdca7c8a93f22d288b46628a
+  checksum: e94f929a65166f96c30288b97e237bb67ea05ce37d26833fa200b22dbc49883704e952902bf6c4239fcc1707359aafee7431aa7e42bdbc900a95f2c6ca1cae8d
   languageName: node
   linkType: hard
 
@@ -6395,7 +6395,7 @@ __metadata:
   resolution: "dm_app-server@workspace:Packages/app-server"
   dependencies:
     "@graphile-contrib/pg-simplify-inflector": ^6.1.0
-    "@graphile/subscriptions-lds": ^4.11.0
+    "@graphile/subscriptions-lds": ^4.12.2
     "@n1ru4l/graphql-live-query": ^0.7.1
     "@n1ru4l/graphql-live-query-patch": ^0.3.1
     "@pg-lq/postgraphile-plugin": 0.0.6
@@ -6427,10 +6427,10 @@ __metadata:
     passport: ^0.4.1
     passport-google-oauth20: ^2.0.0
     pm2: ^5.1.0
-    postgraphile: ^4.12.1
-    postgraphile-plugin-connection-filter: ^2.2.1
+    postgraphile: ^4.12.8
+    postgraphile-plugin-connection-filter: ^2.2.2
     segfault-raub: ^1.2.0
-    ws: ^7.5.2
+    ws: ^7.5.6
   languageName: unknown
   linkType: soft
 
@@ -12721,10 +12721,19 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"postgraphile-plugin-connection-filter@npm:^2.0.0, postgraphile-plugin-connection-filter@npm:^2.2.1":
+"postgraphile-plugin-connection-filter@npm:^2.0.0":
   version: 2.2.1
   resolution: "postgraphile-plugin-connection-filter@npm:2.2.1"
   checksum: 225b404d5cf774ac5c7a5c0d79efbbeacf145d5de47742f1136c7e2eabad37643f5a2143c07f78e6c9b9123482c5fc94ad17067b2957b4fd74db6fb0cad1ee90
+  languageName: node
+  linkType: hard
+
+"postgraphile-plugin-connection-filter@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "postgraphile-plugin-connection-filter@npm:2.2.2"
+  dependencies:
+    tslib: ^2.3.0
+  checksum: 1ba30d4165d9f2b58fbd1331a110aef5d52dfd5b4f9c48468ad7463a7b33004219459ee68b1595e4c9f786948a0bb11aa9f0503a5f5160c5fe5c8706dd1eea6d
   languageName: node
   linkType: hard
 
@@ -15318,9 +15327,9 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"subscriptions-transport-ws@npm:^0.9.18, subscriptions-transport-ws@npm:^0.9.19":
-  version: 0.9.19
-  resolution: "subscriptions-transport-ws@npm:0.9.19"
+"subscriptions-transport-ws@npm:0.11.0":
+  version: 0.11.0
+  resolution: "subscriptions-transport-ws@npm:0.11.0"
   dependencies:
     backo2: ^1.0.2
     eventemitter3: ^3.1.0
@@ -15328,8 +15337,8 @@ resolve@^2.0.0-next.3:
     symbol-observable: ^1.0.4
     ws: ^5.2.0 || ^6.0.0 || ^7.0.0
   peerDependencies:
-    graphql: ">=0.10.0"
-  checksum: 6979b36e03c0a48e33836cb412941e41bae8743767dff2aa453159cfffa983b879cc80cd4e744e82afbf11062c66899c37f5dca0281253ee240098ada0078533
+    graphql: ^15.7.2 || ^16.0.0
+  checksum: cc2e98d5c9d89c44d2e15eca188781c6ebae13d1661c42a99cee9d2897aebe2a22bc118eefff83244a79c88ee4ea24d46973ebf26ae7cb47ac1857fb8ee2c947
   languageName: node
   linkType: hard
 
@@ -16683,9 +16692,9 @@ typescript@~3.7.3:
     express: ^4.17.1
     file-loader: ^6.2.0
     fs-extra: ^8.1.0
-    graphql: ^15.5.0
+    graphql: ^15.8.0
     graphql-feedback: ^0.0.3
-    graphql-tag: 2.12.5
+    graphql-tag: 2.12.6
     history: ^4.10.1
     html-webpack-plugin: ^5.3.1
     immer: ^7.0.7
@@ -16721,7 +16730,7 @@ typescript@~3.7.3:
     remarkable-react: ^1.4.3
     sass-loader: ^12.1.0
     source-map-loader: ^3.0.0
-    subscriptions-transport-ws: ^0.9.19
+    subscriptions-transport-ws: ^0.11.0
     svg-sprite-loader: ^6.0.7
     ts-loader: ^9.2.3
     typescript: ^4.3.2
@@ -16995,7 +17004,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"ws@npm:^5.2.0 || ^6.0.0 || ^7.0.0, ws@npm:^7.0.0, ws@npm:^7.4.2, ws@npm:^7.5.2":
+"ws@npm:^5.2.0 || ^6.0.0 || ^7.0.0, ws@npm:^7.0.0, ws@npm:^7.4.2":
   version: 7.5.2
   resolution: "ws@npm:7.5.2"
   peerDependencies:
@@ -17007,6 +17016,21 @@ typescript@~3.7.3:
     utf-8-validate:
       optional: true
   checksum: 23aef9248676d1f2695b85ed52de2b8babc7989f126e4ee60ef4ceaa3dcdf5cb7447822f0341d9ab2907ccad2a232247f59220f2292a30269adc7d0a30bf0e34
+  languageName: node
+  linkType: hard
+
+"ws@npm:^7.5.6":
+  version: 7.5.6
+  resolution: "ws@npm:7.5.6"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ^5.0.2
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 0c2ffc9a539dd61dd2b00ff6cc5c98a3371e2521011fe23da4b3578bb7ac26cbdf7ca8a68e8e08023c122ae247013216dde2a20c908de415a6bcc87bdef68c87
   languageName: node
   linkType: hard
 

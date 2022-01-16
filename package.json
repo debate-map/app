@@ -45,7 +45,8 @@
     "postgraphile": "4.12.2",
     "graphile-utils": "4.12.2",
     "graphile-build": "4.12.2",
-    "graphile-build-pg": "4.12.2"
+    "graphile-build-pg": "4.12.2",
+    "subscriptions-transport-ws": "0.11.0"
   },
   "dependencies": {
     "chalk": "^4.1.1",

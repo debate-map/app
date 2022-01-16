@@ -1,0 +1,43 @@
+diff --git a/node_modules/graphile-build-pg/node8plus/plugins/PgIntrospectionPlugin.js b/node_modules/graphile-build-pg/node8plus/plugins/PgIntrospectionPlugin.js
+index 9659296..5eb728a 100644
+--- a/node_modules/graphile-build-pg/node8plus/plugins/PgIntrospectionPlugin.js
++++ b/node_modules/graphile-build-pg/node8plus/plugins/PgIntrospectionPlugin.js
+@@ -395,17 +395,27 @@ function enumTables(introspectionResults) {
+ /* The argument to this must not contain cyclic references! */
+ 
+ 
+-const deepClone = value => {
+-  if (Array.isArray(value)) {
+-    return value.map(val => deepClone(val));
+-  } else if (typeof value === "object" && value) {
+-    return Object.keys(value).reduce((memo, k) => {
+-      memo[k] = deepClone(value[k]);
+-      return memo;
+-    }, {});
+-  } else {
+-    return value;
+-  }
++// v-fix for very-hard-to-track-down bug: https://github.com/nodejs/node/issues/41539
++const deepClone = value=>{
++	if (Array.isArray(value)) {
++		return value.map(val=>deepClone(val));
++	} if (typeof value === "object" && value) {
++
++		// crash occurs, with this version
++		/*return Object.keys(value).reduce((memo, k)=>{
++			memo[k] = deepClone(value[k]);
++			return memo;
++		}, {});*/
++
++		// crash does not occur, with this version
++		const func = (memo, k, value)=>{
++			memo[k] = deepClone(value[k]);
++			return memo;
++		};
++		return Object.keys(value).reduce((memo, k)=>func(memo, k, value), {});
++
++	}
++	return value;
+ };
+ 
+ var PgIntrospectionPlugin = async function PgIntrospectionPlugin(builder, {

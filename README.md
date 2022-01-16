@@ -415,13 +415,14 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
 Chrome dev-tools profiler:
-1) Open the `Packages/app-server/[Dockerfile/deployment.yaml]` files, comment the `mode: normal` lines, and uncomment the `mode: profiling` lines. (and have tilt-up running, so these changes get applied)
-2) Open the page `chrome:inspect` in Chrome, and make sure "Discover network targets" is enabled.
-3) Press "Configure", and add `localhost:3155` and `localhost:4155` to the list.
-4) Ensure a port-forward is set up for one of those ports, to the running/target app-server pod. (see: [port-forwarding](#port-forwarding))
-5) The remote target should show up in the list. (if it doesn't, try refreshing the page and waiting; you can also press "Open dedicated DevTools for Node", which seems to connect faster)
-6) The dev-tools should work as expected. (Though note that I hit issues of the pod crashing in some cases [eg. memory dumps when memory usage was high], presumably from running out of memory. I'm not yet sure how to make this more reliable; perhaps by [enabling swap memory](https://kubernetes.io/blog/2021/08/09/run-nodes-with-swap-alpha).)
-7) When you're done with profiling, revert the changes made in step 1.
+* 1\) Open the `Packages/app-server/[Dockerfile/deployment.yaml]` files, comment the `mode: normal` lines, and uncomment the `mode: profiling` lines. (and have tilt-up running, so these changes get applied)
+* 2\) Open the page `chrome:inspect` in Chrome, and make sure "Discover network targets" is enabled.
+* 3\) Press "Configure", and add `localhost:3155` and `localhost:4155` to the list.
+* 4\) Ensure a port-forward is set up for one of those ports, to the running/target app-server pod. (see: [port-forwarding](#port-forwarding))
+* 4.1\) It's possible that the port-fowards created by Tilt are not as "robust" as the ones created by `kubectl` (they seem to slightly more often have to "reconnect" during memory profiles, which breaks the transfer). If the kubectl port-forwards are desired, comment out the `... # for nodejs-inspector` line in `Tiltfile`, and then manually start the `npm start "backend.forward_remote onlyInspector"` command for step 4.
+* 5\) The remote target should show up in the list. (if it doesn't, try refreshing the page and waiting; you can also press "Open dedicated DevTools for Node", which seems to connect faster)
+* 6\) The dev-tools should work as expected. (Though note that I hit issues of the pod crashing in some cases [eg. memory dumps when memory usage was high], presumably from running out of memory. I'm not yet sure how to make this more reliable; perhaps by [enabling swap memory](https://kubernetes.io/blog/2021/08/09/run-nodes-with-swap-alpha).)
+* 7\) When you're done with profiling, revert the changes made in step 1.
 
 </details>
 

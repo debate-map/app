@@ -14,7 +14,7 @@
 	},
 	"dependencies": {
 		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
-		"@graphile/subscriptions-lds": "^4.11.0",
+		"@graphile/subscriptions-lds": "^4.12.2",
 		"@n1ru4l/graphql-live-query": "^0.7.1",
 		"@n1ru4l/graphql-live-query-patch": "^0.3.1",
 		"@pg-lq/postgraphile-plugin": "0.0.6",
@@ -43,9 +43,9 @@
 		"passport": "^0.4.1",
 		"passport-google-oauth20": "^2.0.0",
 		"pm2": "^5.1.0",
-		"postgraphile": "^4.12.1",
-		"postgraphile-plugin-connection-filter": "^2.2.1",
+		"postgraphile": "^4.12.8",
+		"postgraphile-plugin-connection-filter": "^2.2.2",
 		"segfault-raub": "^1.2.0",
-		"ws": "^7.5.2"
+		"ws": "^7.5.6"
 	}
 }

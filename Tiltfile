@@ -328,14 +328,15 @@ docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile
 	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	live_update=[
-		# #sync('./NMOverwrites/', '/dm_repo/'),
-		# sync('./.yalc/', '/dm_repo/.yalc/'),
-		# sync('./Packages/common/', '/dm_repo/Packages/common/'),
-		# #sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
-		# sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
-		# # temp-synced folder (eg. for adding temp log-lines to node-modules) 
-		# #sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
-		# sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
+		#sync('./NMOverwrites/', '/dm_repo/'),
+		sync('./.yalc/', '/dm_repo/.yalc/'),
+		sync('./Packages/common/', '/dm_repo/Packages/common/'),
+		#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
+		sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
+		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
+		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
+		#sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
+		#sync('./Temp_Synced/postgraphile', '/dm_repo/node_modules/postgraphile'),
 	])
 
 # own app (deploy to kubernetes)
