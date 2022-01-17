@@ -13,7 +13,7 @@ const nodeArgs = [
 	`--experimental-specifier-resolution=node`,
 	`--max-old-space-size=15000`,
 	//`--heapsnapshot-near-heap-limit=3`,
-	`--inspect=3155`,
+	//`--inspect=3155`,
 ];
 module.exports = {
 	apps: [{

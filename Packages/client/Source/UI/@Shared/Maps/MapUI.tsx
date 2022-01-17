@@ -121,7 +121,7 @@ export class MapUI extends BaseComponentPlus({
 		const map = GetMap(mapID);
 		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
 
-		GetPreloadData_ForMapLoad(mapID);
+		//GetPreloadData_ForMapLoad(mapID);
 		const mapState = GetMapState(mapID);
 		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
 

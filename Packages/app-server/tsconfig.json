@@ -8,6 +8,7 @@
 
 		// compilation
 		"esModuleInterop": true,
+		//"sourceMap": true, // might be needed for lightrun (though I couldn't get lightrun working anyway)
 	},
 	"include": [
 		"Source/**/*.ts",

@@ -21,7 +21,7 @@ import fs from "fs";
 import v8 from "v8";
 import SegfaultHandler from "segfault-raub";
 import {SetUpAuthHandling} from "./AuthHandling.js";
-import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
+import {AuthExtrasPlugin, GetIPAddress} from "./Mutations/AuthenticationPlugin.js";
 import {DBPreloadPlugin} from "./Mutations/DBPreloadPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
@@ -42,6 +42,20 @@ process["exit" as any] = function(code) {
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
 const require = createRequire(import.meta.url);
+
+const rookout = require("rookout");
+rookout.start({
+	token: process.env.ROOKOUT_TOKEN,
+	labels: {env: "dev"},
+});
+
+//require("@google-cloud/debug-agent").start({logLevel: 4});
+/*require("lightrun").start({
+	lightrunSecret: process.env.LIGHTRUN_SECRET,
+	company: "societylibrary",
+	includeNodeModules: true,
+	level: 4,
+});*/
 
 //program.option("-v, --variant <type>", "Which server variant to use (base, patches)");
 
@@ -109,9 +123,35 @@ if (dbURL == null) {
 	}
 }
 
+const liveSubscribeOps_timesSeen = new Map<string, number>();
+const websocketRequestExtras = new WeakMap<Request, WebsocketRequestExtras>();
+class WebsocketRequestExtras {
+	liveSubscribeOps_timesSeen = new Map<string, number>();
+}
+export class LogSubscribeCalls_Hook {
+	"postgraphile:liveSubscribe:executionResult"(result, {contextValue, operationName, variableValues}) {
+		if (!websocketRequestExtras.has(contextValue.req)) websocketRequestExtras.set(contextValue.req, new WebsocketRequestExtras());
+		const reqExtras = websocketRequestExtras.get(contextValue.req)!;
+
+		const opKey = `@opName:${operationName} @vals:${JSON.stringify(variableValues)}`;
+		const timesSeen = (liveSubscribeOps_timesSeen.get(opKey) ?? 0) + 1;
+		const timesSeen_req = (reqExtras.liveSubscribeOps_timesSeen.get(opKey) ?? 0) + 1;
+		// only show entries with variables present atm, since otherwise we can't tell between duplicates and just connection-filter-filtered ones
+		if (Object.keys(variableValues).length > 0) {
+			const wsReqs = reqExtras.liveSubscribeOps_timesSeen;
+			console.log(`Got liveSubscribe exec-result. @reqCalls:(ws:${timesSeen_req},all:${timesSeen}) @wsReqs:(types:${[...wsReqs.keys()].length},calls:${[...wsReqs.values()].Sum()}) @ip:${GetIPAddress(contextValue.req)
+				} ${opKey}`);
+		}
+		liveSubscribeOps_timesSeen.set(opKey, timesSeen);
+		reqExtras.liveSubscribeOps_timesSeen.set(opKey, timesSeen_req);
+
+		return result;
+	}
+}
 const pluginHook = makePluginHook([
 	// todo: turn this variant on, and add the client-side plugin, for more efficient list-change messages
 	variant == "patches" && new GeneratePatchesPlugin(),
+	new LogSubscribeCalls_Hook(),
 ] as any[]);
 
 export const pgPool = new Pool({
@@ -158,7 +198,7 @@ app.get("/health-check", async(req, res)=>{
 	const checkStart = Date.now();
 	const TimeSinceCheckStart = ()=>`${((Date.now() - checkStart) / 1000).toFixed(1)}s`;
 
-	console.log("Starting health-check.");
+	console.log("Starting health-check. @time:", new Date().toLocaleString("sv"));
 	try {
 		Assert(pgPool.totalCount > 0, "No pgClient has been initialized/connected within the pool yet.");
 
@@ -211,11 +251,35 @@ app.use((req, res, next)=>{
 //let serverWS_currentCommandUserID: string|n;
 let serverWS_currentCommandUser: User|n;
 
+const userBlockMiddleware = (req, res, next)=>{
+	// uncomment this if you want to restrict the users that can connect to postgraphile (eg. only you, while testing something)
+	/*const ip = GetIPAddress(req);
+	console.log("Got request. @ip:", ip, "@user:", req["user"]);
+	const ipStr = ip.toString();
+	const allowConditions = [
+		a=>a == "::ffff:127.0.0.1",
+		a=>a.startsWith(process.env.PGLRequiredIPStart ?? "n/a"),
+	] as ((str: string)=>boolean)[];
+	if (!allowConditions.Any(a=>a(ipStr))) {
+		//res.status(403).end("Temporarily blocked for maintenance.");
+		console.log("Blocking connection.");
+		return;
+	}
+	console.log("Proceeding:", ip);*/
+
+	next();
+};
+
 app.use(
+	userBlockMiddleware,
 	postgraphile(
 		pgPool,
 		"app_public",
 		{
+			websocketMiddlewares: [
+				// add WS middlewares here; note that they should only manipulate properties on req/res, they must not sent response data (v: I tried to, and it seemed to overload chrome's WS limit or something, making other tabs stop receiving WS data)
+				userBlockMiddleware,
+			],
 			watchPg: true,
 			graphiql: true,
 			enhanceGraphiql: true,

@@ -52,13 +52,14 @@ ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 
 # mode: normal
 # use "--no-daemon" so that the pm2 start command lasts as long as the program itself lasts [I think this is why anyway]
-#CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
+CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
 
 # mode: profiling
 #CMD node --experimental-specifier-resolution=node --max-old-space-size=1024 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --max-old-space-size=8192 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
-CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception ./Dist/Main.js
 
 # this reliably causes the app-server to crash within a few seconds! (based on: https://github.com/nodejs/node/issues/38985#issuecomment-858795516)
 #CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 --track-heap-objects ./Dist/Main.js

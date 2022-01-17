@@ -37,6 +37,7 @@
 		"get-graphql-from-jsonschema": "^8.0.12",
 		"ip-address": "^8.1.0",
 		"knex": "^0.95.6",
+		"lightrun": "^1.3.0",
 		"newrelic": "^8.6.0",
 		"node-fetch": "^2.6.1",
 		"ofe": "^0.6.0",
@@ -45,6 +46,7 @@
 		"pm2": "^5.1.0",
 		"postgraphile": "^4.12.8",
 		"postgraphile-plugin-connection-filter": "^2.2.2",
+		"rookout": "^0.44.0",
 		"segfault-raub": "^1.2.0",
 		"ws": "^7.5.6"
 	}

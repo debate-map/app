@@ -143,7 +143,7 @@ export const AuthExtrasPlugin = makeExtendSchemaPlugin(build=>{
 	};
 });
 
-function GetIPAddress(req: Request): string {
+export function GetIPAddress(req: Request): string {
 	//var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim(); // commented, since x-forwarded-for can be spoofed
 	//console.log("IPAddress:", req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address);
 	//return req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress; //?? req.connection.address;
