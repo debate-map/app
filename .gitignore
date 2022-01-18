@@ -1,6 +1,7 @@
 /node_modules
 /tilt_modules
 /.helm
+/target
 /NMOverwrites
 /Temp
 /Temp_Synced

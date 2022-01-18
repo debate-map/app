@@ -1,0 +1,5 @@
+[workspace]
+members = [
+	"Packages/app-server-rs",
+	"Packages/graphlink-server",
+]

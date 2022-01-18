@@ -2,7 +2,7 @@
 
 Monorepo for the client, server, etc. of the Debate Map website ([debatemap.app](https://debatemap.app)).
 
-> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, using [Postgraphile](https://github.com/graphile/postgraphile) for its database/backend rather than Firestore. It is still in development, so the <https://debatemap.app> website will have some discrepancies until this new version is ready and published.
+> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, where the backend is written in Rust (+[Postgraphile](https://github.com/graphile/postgraphile), temporarily), rather than using Firestore. It is still in development, so the <https://debatemap.app> website will have some discrepancies until this new version is ready and published.
 
 # Overview
 
@@ -26,6 +26,16 @@ For more information, visit the website at: <https://debatemap.app>
 * [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
 * [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md)
 * [Node revisions](https://github.com/debate-map/app/tree/master/Docs/NodeRevisions.md)
+
+# Packages
+
+* [client](https://github.com/debate-map/app/tree/master/Packages/client): The frontend code that runs in visitors' web browsers. (TypeScript)
+* [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (TypeScript, NodeJS)
+* [app-server-rs](https://github.com/debate-map/app/tree/master/Packages/app-server-rs): Serves database queries and backend commands. (Rust)
+* [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Old version of the app-server, based on [Postgraphile](https://github.com/graphile/postgraphile). (TypeScript, NodeJS) [to be removed]
+* [common](https://github.com/debate-map/app/tree/master/Packages/common): Code shared between various JS packages. (TypeScript)
+* [deploy](https://github.com/debate-map/app/tree/master/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
+* [graphlink-server](https://github.com/debate-map/app/tree/master/Packages/graphlink-server): Library providing a GraphQL endpoint based on a PostgreSQL database, with support for live-queries. (Rust) [to be split into separate repo]
 
 # Guide modules
 
