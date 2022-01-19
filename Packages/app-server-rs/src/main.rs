@@ -1,11 +1,3 @@
-//! Example chat application.
-//!
-//! Run with
-//!
-//! ```not_rust
-//! cargo run -p example-chat
-//! ```
-
 use axum::{
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
