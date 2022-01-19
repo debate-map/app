@@ -2,7 +2,7 @@
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:latest as cargo-build
+FROM rust:1.58 as cargo-build
 
 # install mold linker
 RUN apt-get update \
@@ -16,17 +16,15 @@ RUN apt-get update \
 #RUN apt install mold
 #for alpine: RUN apk add mold --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
-RUN apt-get update
-RUN apt-get install musl-tools -y
-
-RUN rustup target add x86_64-unknown-linux-musl
+#RUN apt-get update
+#RUN apt-get install musl-tools -y
+#RUN rustup target add x86_64-unknown-linux-musl
 
 #WORKDIR /dm_repo/Packages/app-server-rs
 WORKDIR /dm_repo
 
 # this makes-so cargo-build and such uses mold as its linker
-# commented; the integration directive works, but mold has error atm, and I don't have time to debug: "= note: mold: cannot open text \n collect2: error: ld returned 1 exit status"
-#COPY .cargo/config.toml .cargo/config.toml
+COPY .cargo/config.toml .cargo/config.toml
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
@@ -36,7 +34,8 @@ WORKDIR /dm_repo/update-index-helper
 RUN echo "void = \"1\"" >> Cargo.toml
 #RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
 #RUN cargo build --release --target=x86_64-unknown-linux-musl
-RUN cargo build --target=x86_64-unknown-linux-musl
+#RUN cargo build --target=x86_64-unknown-linux-musl
+RUN cargo build
 
 WORKDIR /dm_repo
 COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
@@ -48,30 +47,28 @@ RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packa
 WORKDIR /dm_repo/Packages/app-server-rs
 
 # build the dependencies
-#RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-#RUN cargo build --release --target=x86_64-unknown-linux-musl
-RUN cargo build --target=x86_64-unknown-linux-musl
+RUN cargo build
 # remove the build output of the "dummy version" of app_server_rs
 #RUN rm -f target/x86_64-unknown-linux-musl/release/deps/app_server_rs*
-RUN rm -f target/x86_64-unknown-linux-musl/debug/deps/app_server_rs*
+#RUN rm -f target/x86_64-unknown-linux-musl/debug/deps/app_server_rs*
+RUN rm -f target/debug/deps/app_server_rs*
 
 # now copy the app-server's own code
 COPY Packages/app-server-rs/ .
 # and build the actual app-server program
-#RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-#RUN cargo build --release --target=x86_64-unknown-linux-musl
-RUN cargo build --target=x86_64-unknown-linux-musl
+RUN cargo build
 
 # ------------------------------------------------------------------------------
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM alpine:latest
+FROM rust:1.58-slim-buster
 
 WORKDIR /dm_repo/Packages/app-server-rs
 
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/release/app-server-rs .
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
+#COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
+COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
 
 CMD echo Starting Rust program...; ./app-server-rs; \
 	sleep 1; echo Rust program crashed...
