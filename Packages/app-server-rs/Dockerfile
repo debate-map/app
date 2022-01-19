@@ -4,6 +4,18 @@
 
 FROM rust:latest as cargo-build
 
+# install mold linker
+RUN apt-get update \
+	&& apt-get install -y build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config \
+	&& git clone https://github.com/rui314/mold.git \
+	&& cd mold \
+	&& git checkout v1.0.1 \
+	&& make -j$(nproc) CXX=clang++ \
+	&& make install
+#RUN apt update
+#RUN apt install mold
+#for alpine: RUN apk add mold --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
 RUN apt-get update
 RUN apt-get install musl-tools -y
 
@@ -11,6 +23,10 @@ RUN rustup target add x86_64-unknown-linux-musl
 
 #WORKDIR /dm_repo/Packages/app-server-rs
 WORKDIR /dm_repo
+
+# this makes-so cargo-build and such uses mold as its linker
+# commented; the integration directive works, but mold has error atm, and I don't have time to debug: "= note: mold: cannot open text \n collect2: error: ld returned 1 exit status"
+#COPY .cargo/config.toml .cargo/config.toml
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
