@@ -35,6 +35,7 @@ RUN echo "void = \"1\"" >> Cargo.toml
 #RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
 #RUN cargo build --release --target=x86_64-unknown-linux-musl
 #RUN cargo build --target=x86_64-unknown-linux-musl
+#RUN cargo build -Z timings # can only use this on rust-nightly versions
 RUN cargo build
 
 WORKDIR /dm_repo
