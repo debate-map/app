@@ -493,7 +493,7 @@ for (let i = 0; i < 20; i++) {
 	console.log("Buffers created:", i + 1, ` @totalSize_mb:~${mbPerStep * (i + 1)}`); // mb size approximate, since a small % of random-strings may be the same, and thus be merged by v8
 }*/
 
-const serverPort = env.PORT || 3105 as number;
+const serverPort = env.PORT || 3155 as number;
 //if (inK8s) {}
 app.listen(serverPort);
 console.log("App-server started on:", serverPort, "@memInfo:", GetMemInfo());

@@ -41,18 +41,25 @@ async fn main() {
         .route("/websocket", get(websocket_handler))
         .layer(AddExtensionLayer::new(app_state));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
+    println!("App-server-rs launched.");
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
 }
 
+// Include utf-8 file at **compile** time.
+async fn index() -> Html<&'static str> {
+    Html(std::include_str!("../chat.html"))
+}
+
 async fn websocket_handler(
     ws: WebSocketUpgrade,
     Extension(state): Extension<Arc<AppState>>,
 ) -> impl IntoResponse {
+    println!("Got WS-start request...");
     ws.on_upgrade(|socket| websocket(socket, state))
 }
 
@@ -65,6 +72,7 @@ async fn websocket(stream: WebSocket, state: Arc<AppState>) {
 
     // Loop until a text message is found.
     while let Some(Ok(message)) = receiver.next().await {
+        println!("Got WS message, in wait-for-username loop:{:?}", message);
         if let Message::Text(name) = message {
             // If username that is sent by client is not taken, fill username string.
             check_username(&state, &mut username, &name);
@@ -134,9 +142,4 @@ fn check_username(state: &AppState, string: &mut String, name: &str) {
 
         string.push_str(name);
     }
-}
-
-// Include utf-8 file at **compile** time.
-async fn index() -> Html<&'static str> {
-    Html(std::include_str!("../chat.html"))
 }

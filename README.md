@@ -2,7 +2,7 @@
 
 Monorepo for the client, server, etc. of the Debate Map website ([debatemap.app](https://debatemap.app)).
 
-> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, where the backend is written in Rust (+[Postgraphile](https://github.com/graphile/postgraphile), temporarily), rather than using Firestore. It is still in development, so the <https://debatemap.app> website will have some discrepancies until this new version is ready and published.
+> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, where the backend is written in Rust (+[Postgraphile](https://github.com/graphile/postgraphile) atm), rather than using Firestore. It is still in development, so the <https://debatemap.app> website will have some discrepancies until this new version is ready and published.
 
 # Overview
 
@@ -99,14 +99,16 @@ Reasons:
 Local:
 * `localhost:3005`: Web-server, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:3055`: Web-server, local, served from webpack (`client.dev` must be running)
-* `localhost:3105`: App-server, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
-* `localhost:3155`: App-server, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:3105`: App-server-rs, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:3155`: App-server-js, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:3165`: App-server-js, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:3205`: Postgres instance, local, served from kubernetes (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (private port-forwards/proxies):
 * `localhost:4005`: Web-server, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:4105`: App-server, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:4155`: App-server, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:4105`: App-server-rs, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:4155`: App-server-js, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:4165`: App-server-js, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:4205`: Postgres instance, remote, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
 
 Remote (public):
@@ -116,7 +118,7 @@ Remote (public):
 Rationale for ports chosen: (ie. meaning of each digit in `ABCD`)
 * A) cluster [3: local, 4: remote]
 * B) pod [0: web-server, 1: app-server, 2: postgres instance]
-* C) variant [0: main, 5: served from webpack]
+* C) variant [0: main, 5: served from webpack, etc.]
 * D) app/project [5: debate-map]
 
 </details>
@@ -361,7 +363,8 @@ foreach ($container in $containersToRemove) {
 <details><summary><b>[k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)</b></summary>
 
 * For web-server: `npm start ssh.web-server`
-* For app-server: `npm start ssh.app-server`
+* For app-server-rs: `npm start ssh.app-server-rs`
+* For app-server-js: `npm start ssh.app-server-js`
 * For database: `npm start ssh.db`
 * For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
 

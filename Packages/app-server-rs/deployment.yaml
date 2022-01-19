@@ -1,53 +1,49 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dm-app-server-js
+  name: dm-app-server-rs
   #namespace: app
   labels:
-    app: dm-app-server-js
+    app: dm-app-server-rs
 spec:
   #clusterIP: None
   selector:
-    app: dm-app-server-js
+    app: dm-app-server-rs
   # to make it accessible outside of cluster
   #type: NodePort
   ports:
     - name: main
-      port: 3155
-      protocol: TCP
-    # this port is for the NodeJS inspector
-    - name: nodejs-inspector
-      port: 3165
+      port: 3105
       protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dm-app-server-js
+  name: dm-app-server-rs
   #namespace: app
   labels:
-    app: dm-app-server-js
+    app: dm-app-server-rs
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dm-app-server-js
+      app: dm-app-server-rs
   template:
     metadata:
       labels:
-        app: dm-app-server-js
+        app: dm-app-server-rs
     spec:
       imagePullSecrets:
         - name: registry-credentials
       containers:
-      - name: dm-app-server-js
-        image: "TILT_PLACEHOLDER:imageURL_appServerJS"
+      - name: dm-app-server-rs
+        image: "TILT_PLACEHOLDER:imageURL_appServerRS"
         livenessProbe:
           httpGet:
             path: /health-check
-            port: 3155
-          #initialDelaySeconds: 10999999 # mode: profiling
-          initialDelaySeconds: 20 # mode: normal
+            port: 3105
+          initialDelaySeconds: 10999999 # mode: profiling
+          #initialDelaySeconds: 20 # mode: normal
           periodSeconds: 10
           #timeoutSeconds: 3
           timeoutSeconds: 60 # temporarily increasing this to 60s; it seems the health-check responses have become too slow [~25s] sometimes! (not sure how; need to investigate)

@@ -1,6 +1,6 @@
-# Debate Map (Server)
+# Debate Map (App Server JS)
 
-Codebase for the [Debate Map](https://debatemap.app) website's app-server. (ie. server for graphql, database, etc.)
+Codebase for the [Debate Map](https://debatemap.app) website's NodeJS portion of the app-server. (currently needed for running Command classes)
 
 ## Guide modules
 

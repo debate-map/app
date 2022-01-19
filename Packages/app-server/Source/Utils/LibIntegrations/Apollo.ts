@@ -66,7 +66,7 @@ export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");
-const GRAPHQL_URL = "http://localhost:3105/graphql"; // use the internal ip, not the external one
+const GRAPHQL_URL = "http://localhost:3155/graphql"; // use the internal ip, not the external one
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;

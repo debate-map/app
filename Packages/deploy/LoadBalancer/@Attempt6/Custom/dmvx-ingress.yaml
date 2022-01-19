@@ -28,7 +28,7 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: dm-app-server
+              serviceName: dm-app-server-rs
               servicePort: 3105
     # these are the domains end-users should be accessing the site from
     - host: debates.app
@@ -71,5 +71,5 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: dm-app-server
+              serviceName: dm-app-server-rs
               servicePort: 3105

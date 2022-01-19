@@ -82,7 +82,8 @@ const GetPodName_DB = context=>{
 	return GetPodInfos(context, "postgres-operator", ["postgres-operator.crunchydata.com/cluster=debate-map", "postgres-operator.crunchydata.com/role=master"])[0].name;
 };
 const GetPodName_WebServer = context=>GetPodInfos(context, appNamespace, ["app=dm-web-server"])[0].name;
-const GetPodName_AppServer = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server"])[0].name;
+const GetPodName_AppServerRS = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server-rs"])[0].name;
+const GetPodName_AppServerJS = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server-js"])[0].name;
 
 /** Gets the k8s context that is selected as the "current" one, in Docker Desktop. */
 function K8sContext_Current() {
@@ -124,8 +125,11 @@ Object.assign(scripts, {
 		"web-server": Dynamic(()=>{
 			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_WebServer(commandArgs[0])} -c dm-web-server -- ${startBestShellCmd}`;
 		}),
-		"app-server": Dynamic(()=>{
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServer(commandArgs[0])} -c dm-app-server -- ${startBestShellCmd}`;
+		"app-server-rs": Dynamic(()=>{
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerRS(commandArgs[0])} -c dm-app-server-rs -- ${startBestShellCmd}`;
+		}),
+		"app-server-js": Dynamic(()=>{
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerJS(commandArgs[0])} -c dm-app-server-js -- ${startBestShellCmd}`;
 		}),
 
 		etcd_dumpAsJSON: Dynamic(()=>{
@@ -163,11 +167,12 @@ function GetPortForwardCommandsStr(context) {
 	if (commandArgs.includes("onlyDB")) return forDB;
 
 	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} ${fd}005:3005`;
-	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}105:3105`;
-	const forAppServerInspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} ${fd}155:3155`;
-	if (commandArgs.includes("onlyInspector")) return forAppServerInspector;
+	const forAppServerRS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerRS(context)} ${fd}105:3105`;
+	const forAppServerJS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} ${fd}155:3155`;
+	const forAppServerJS_inspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} ${fd}165:3165`;
+	if (commandArgs.includes("onlyInspector")) return forAppServerJS_inspector;
 
-	return `concurrently --kill-others --names db,ws,as,asi "${forDB}" "${forAppServer}" "${forWebServer}" "${forAppServerInspector}"`;
+	return `concurrently --kill-others --names db,ws,asr,asj,asji "${forDB}" "${forWebServer}" "${forAppServerRS}" "${forAppServerJS}" "${forAppServerJS_inspector}"`;
 }
 
 // for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)

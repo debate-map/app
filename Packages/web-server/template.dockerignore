@@ -1,5 +1,6 @@
 Packages/client/*
 !Packages/client/Dist
 !Packages/client/Scripts
+Packages/app-server-rs
 Packages/app-server
 Packages/deploy

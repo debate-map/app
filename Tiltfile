@@ -320,8 +320,19 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
 		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
 	])
-imageURL_appServer = registryURL + '/dm-app-server'
-docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile',
+imageURL_appServerRS = registryURL + '/dm-app-server-rs'
+docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
+	build_args={
+		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
+		"env_ENV": os.getenv("ENV") or "dev"
+	},
+	# this lets Tilt update the listed files directly, without involving Docker at all
+	# live_update=[
+	# 	sync('./Packages/app-server-rs/', '/dm_repo/Packages/app-server-rs/'),
+	# ]
+)
+imageURL_appServerJS = registryURL + '/dm-app-server-js'
+docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
 		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
 		"env_ENV": os.getenv("ENV") or "dev"
@@ -346,18 +357,27 @@ k8s_yaml('./namespace.yaml')
 k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
 }))
+k8s_yaml(ReadFileWithReplacements('./Packages/app-server-rs/deployment.yaml', {
+	"TILT_PLACEHOLDER:imageURL_appServerRS": imageURL_appServerRS,
+}))
 k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
-	"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
+	"TILT_PLACEHOLDER:imageURL_appServerJS": imageURL_appServerJS,
 }))
 
 # port forwards (see readme's [project-service-urls] guide-module for details)
 # ==========
 
-NEXT_k8s_resource('dm-app-server',
-	#extra_pod_selectors={"app": "dm-app-server"}, # this is needed fsr
+NEXT_k8s_resource('dm-app-server-rs',
 	port_forwards=[
 		'4105:3105' if REMOTE else '3105',
-		'4155:3155' if REMOTE else '3155' # for nodejs-inspector
+	],
+	labels=["app"],
+)
+
+NEXT_k8s_resource('dm-app-server-js',
+	port_forwards=[
+		'4155:3155' if REMOTE else '3155',
+		'4165:3165' if REMOTE else '3165' # for nodejs-inspector
 	],
 	labels=["app"],
 )

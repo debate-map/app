@@ -10,9 +10,9 @@ const nmWatchPaths_notUnderWVC_asDockerIgnoreText = [
 const ignoreText_sharedBase_final = ignoreText_sharedBase_raw.replace("# [[[PLACEHOLDER FOR NODE_MODULES WATCH PATHS]]]", nmWatchPaths_notUnderWVC_asDockerIgnoreText);*/
 const ignoreText_sharedBase_final = ignoreText_sharedBase_raw;
 
-const dockerPackages = ["Packages/deploy/@DockerBase", "Packages/app-server", "Packages/web-server"];
+const dockerPackages = ["Packages/deploy/@DockerBase", "Packages/app-server-rs", "Packages/app-server", "Packages/web-server"];
 for (const path of dockerPackages) {
-	let ignoreText_packageSpecific = fs.readFileSync(`${path}/template.dockerignore`).toString();
+	const ignoreText_packageSpecific = fs.readFileSync(`${path}/template.dockerignore`).toString();
 	const ignoreText_final = [
 		"# =============================================================",
 		"# =============================================================",
