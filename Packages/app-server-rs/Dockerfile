@@ -62,7 +62,8 @@ RUN cargo build
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.58-slim-buster
+#FROM rust:1.58-slim-buster
+FROM debian:buster-slim
 
 WORKDIR /dm_repo/Packages/app-server-rs
 
