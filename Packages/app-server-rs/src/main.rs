@@ -1,16 +1,16 @@
 use axum::{
-    response::{Html, Response},
-    routing::{get, any_service},
+    response::{Html},
+    routing::{get},
     AddExtensionLayer, Router, http::{
-        Request, Method,
+        Method,
         header::{CONTENT_TYPE}
-    }, body::Body,
+    },
 };
-use tower_http::cors::{CorsLayer, Origin, any};
+use tower_http::cors::{CorsLayer, Origin};
 use std::{
     collections::HashSet,
     net::SocketAddr,
-    sync::{Arc, Mutex}, convert::Infallible,
+    sync::{Arc, Mutex},
 };
 use tokio::sync::broadcast;
 mod gql_ws;
@@ -29,32 +29,19 @@ async fn main() {
 
     let app_state = Arc::new(AppState { user_set, tx });
 
-    /*let gql_websocket_handler = tower::service_fn(|request: Request<Body>| async move {
-        println!("Got websocket request-type on /graphql path: {:?}", &request);
-        //ws.on_upgrade(|socket| websocket(socket, state))
-        Ok::<_, Infallible>(Response::new(Body::empty()))
-    });
-    let gql_other_handler = tower::service_fn(|request: Request<Body>| async move {
-        println!("Got other request-type on /graphql path: {:?}", &request);
-        Ok::<_, Infallible>(Response::new(Body::empty()))
-    });*/
-
     let app = Router::new()
         .route("/", get(index))
         .route("/graphql", get(gql_ws::gql_websocket_handler))
-        //.route("/graphql", any_service(gql_ws::gql_websocket_handler))
-        //.route("/graphql", any_service(gql_other_handler).get_service(gql_websocket_handler))
         //.route("/graphql", post(gqp_post_handler))
         .route("/websocket", get(chat::chat_websocket_handler))
-        //.route("/websocket", any_service(gql_other_handler).get_service(gql_websocket_handler))
         .layer(
-            // see this for more details: https://docs.rs/tower-http/latest/tower_http/cors/index.html
+            // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
             CorsLayer::new()
                 //.allow_origin(any())
                 .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
-                //.allow_methods(vec![Method::GET]),
                 //.allow_methods(any()),
-                .allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE]) // to match with express server (probably unnecessary)
+                //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
+                .allow_methods(vec![Method::GET, Method::POST])
                 .allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
                 .allow_credentials(true),
         )
@@ -63,10 +50,7 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
     println!("App-server-rs launched.");
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
 }
 
 // Include utf-8 file at **compile** time.

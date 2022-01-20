@@ -3,9 +3,9 @@ use axum::{
          ws::{Message, WebSocket, WebSocketUpgrade},
          Extension,
     },
-    response::{IntoResponse}, body::Body, http::Request,
+    response::{IntoResponse},
 };
-use futures::{stream::StreamExt, SinkExt};
+use futures::{stream::StreamExt};
 use std::{
     sync::{Arc},
 };
@@ -20,35 +20,13 @@ pub async fn gql_websocket_handler(ws: WebSocketUpgrade, Extension(state): Exten
         .protocols(["graphql-ws", "graphql-transport-ws"])
         .on_upgrade(|socket| websocket(socket, state))
 }
-/*pub async fn gql_websocket_handler(request: Request<Body>, Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
-    match request {
-        WebSocketUpgrade(ws) => {
-            ws.on_upgrade(|socket| websocket(socket, state))
-
-        },
-        _ => return,
-    };
-}*/
-/*pub async fn gql_other_handler(request: Request<Body>, Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
-    println!("Got other request-type on /graphql path.");
-}*/
 
 async fn websocket(stream: WebSocket, _state: Arc<AppState>) {
     // By splitting we can send and receive at the same time.
-    let (mut sender, mut receiver) = stream.split();
-
-    // test
-    let msg1 = receiver.next().await;
-    println!("Got 1st message! (gql) @msg1:{:?}", msg1);
-
-    if sender.send(Message::Text("First websocket response (needed for ws to not be closed)".to_string())).await.is_err() {
-        println!("Client disconnected, from error during send of initial response");
-        return;
-    }
-    println!("Got past sending of initial response.");
+    let (mut _sender, mut receiver) = stream.split();
 
     while let Some(message_raw) = receiver.next().await {
-        println!("Got message_raw:{:?}", message_raw);
+        //println!("Got message_raw:{:?}", message_raw);
         let message = if let Ok(message_temp) = message_raw {
             message_temp
         } else {
