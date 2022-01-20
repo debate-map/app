@@ -44,6 +44,17 @@ let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
+/*function Test1() {
+	const websocket = new WebSocket(GRAPHQL_URL.replace(/^http/, "ws"));
+	websocket.onopen = ()=>{
+		console.log("connection opened");
+		//websocket.send(username.value);
+	};
+	websocket.onclose = ()=>console.log("connection closed");
+	websocket.onmessage = e=>console.log(`received message: ${e.data}`);
+	document.onclick = e=>websocket.send(`Hi:${Date.now()}`);
+}*/
+
 export function InitApollo() {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
@@ -52,6 +63,8 @@ export function InitApollo() {
 			credentials: "include",
 		},
 	});
+
+	//Test1();
 
 	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
 		reconnect: true,

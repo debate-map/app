@@ -25,6 +25,8 @@ WORKDIR /dm_repo
 
 # this makes-so cargo-build and such uses mold as its linker
 COPY .cargo/config.toml .cargo/config.toml
+# this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
+ENV RUSTFLAGS=-Awarnings
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch

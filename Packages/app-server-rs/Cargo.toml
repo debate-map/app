@@ -10,5 +10,7 @@ axum = { version = "0.4.3", features = ["ws"] }
 async-graphql = "3.0.22"
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
+#tower-web = "0.3.7"
+tower-http = { version = "0.2.0", features = ["cors"] }
 tracing = "0.1"
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
