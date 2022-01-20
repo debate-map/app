@@ -5,8 +5,9 @@ edition = "2021"
 publish = false
 
 [dependencies]
-axum = { version = "0.4.3", features = ["ws"] }
 futures = "0.3"
+axum = { version = "0.4.3", features = ["ws"] }
+async-graphql = "3.0.22"
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
 tracing = "0.1"
