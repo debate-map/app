@@ -6,15 +6,17 @@ use axum::{
         header::{CONTENT_TYPE}
     },
 };
+use futures::{TryFutureExt, future::join_all, executor::block_on};
 use tower_http::cors::{CorsLayer, Origin};
 use std::{
     collections::HashSet,
     net::SocketAddr,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex}, thread::{Thread, self},
 };
 use tokio::sync::broadcast;
 mod gql_ws;
 mod chat;
+mod pgclient;
 
 // Our shared state
 pub struct AppState {
@@ -49,8 +51,29 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
+    /*let handler = thread::spawn(|| {
+        println!("Test0");
+        block_on(async {
+            println!("Test1");
+            match pgclient::start_streaming_changes().await {
+                Ok(result) => { println!("Done! {:?}", result); },
+                Err(err) => { println!("Error:{:?}", err); }
+            };
+        })
+    });*/
+    let handler = tokio::spawn(async {
+        println!("Test1");
+        match pgclient::start_streaming_changes().await {
+            Ok(result) => { println!("Done! {:?}", result); },
+            Err(err) => { println!("Error:{:?}", err); }
+        };
+    });
+
     println!("App-server-rs launched.");
     axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+
+    /*let main_server_future = axum::Server::bind(&addr).serve(app.into_make_service()).await;
+    join_all(vec![handler, main_server_future]).await;*/
 }
 
 // Include utf-8 file at **compile** time.
