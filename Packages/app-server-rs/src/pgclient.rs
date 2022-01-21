@@ -5,7 +5,6 @@ use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
-
     msgs.into_iter()
         .filter_map(|msg| match msg {
             SimpleQueryMessage::Row(row) => Some(row),
@@ -22,8 +21,6 @@ async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
  * In this function, we use approach 2.
  */
 pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> {
-    println!("Test1.5");
-
     // get connection info from env-vars
     let ev = |name| { env::var(name).unwrap() };
     println!("Connecting app-server-rs's pg-client to: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
