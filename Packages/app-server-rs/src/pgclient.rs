@@ -20,7 +20,7 @@ async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
  * 3) Connecting to postgres pod through shell, then running "pg_recvlogical".
  * In this function, we use approach 2.
  */
-pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> {
+pub async fn start_streaming_changes() -> Result<(), tokio_postgres::Error> {
     // get connection info from env-vars
     let ev = |name| { env::var(name).unwrap() };
     println!("Connecting app-server-rs's pg-client to: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
@@ -69,6 +69,7 @@ pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> 
             let timeoutImminent = lastByte == &1;
             println!("Got keepalive message:{:x?} @timeoutImminent:{}", event, timeoutImminent);
             if timeoutImminent {
+                // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
                 let SECONDS_FROM_UNIX_EPOCH_TO_2000 = 946684800;
                 let time_since_2000: u64 = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() - (SECONDS_FROM_UNIX_EPOCH_TO_2000 * 1000 * 1000)).try_into().unwrap();
                 
