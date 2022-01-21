@@ -6,12 +6,11 @@ use axum::{
         header::{CONTENT_TYPE}
     },
 };
-use futures::{TryFutureExt, future::join_all, executor::block_on};
 use tower_http::cors::{CorsLayer, Origin};
 use std::{
     collections::HashSet,
     net::SocketAddr,
-    sync::{Arc, Mutex}, thread::{Thread, self},
+    sync::{Arc, Mutex},
 };
 use tokio::sync::broadcast;
 mod gql_ws;
@@ -51,17 +50,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
-    /*let handler = thread::spawn(|| {
-        println!("Test0");
-        block_on(async {
-            println!("Test1");
-            match pgclient::start_streaming_changes().await {
-                Ok(result) => { println!("Done! {:?}", result); },
-                Err(err) => { println!("Error:{:?}", err); }
-            };
-        })
-    });*/
-    let handler = tokio::spawn(async {
+    let _handler = tokio::spawn(async {
         println!("Test1");
         match pgclient::start_streaming_changes().await {
             Ok(result) => { println!("Done! {:?}", result); },
@@ -76,7 +65,7 @@ async fn main() {
     join_all(vec![handler, main_server_future]).await;*/
 }
 
-// Include utf-8 file at **compile** time.
+// include utf-8 HTML file at *compile* time
 async fn index() -> Html<&'static str> {
     Html(std::include_str!("../chat.html"))
 }

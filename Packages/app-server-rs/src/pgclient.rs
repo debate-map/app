@@ -1,8 +1,7 @@
-use std::{pin::Pin, env, time::{SystemTime, UNIX_EPOCH}, task::{Poll, Context}};
-
+use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
 use bytes::Bytes;
-use futures::{future, StreamExt, TryStreamExt, Sink, FutureExt, SinkExt};
-use tokio_postgres::{NoTls, error::SqlState, Client, SimpleQueryMessage, SimpleQueryRow, CopyBothDuplex};
+use futures::{future, StreamExt, Sink, ready};
+use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
@@ -31,84 +30,44 @@ pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> 
     //let db_url = format!("postgres://{}:{}@{}:{}/debate-map", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"));
     let db_config = format!("user={} password={} host={} port={} dbname={} replication=database", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"), "debate-map");
 
-    // Connect to the database.
-    //let (client, connection) = tokio_postgres::connect("host=localhost port=3205 user=postgres replication=database", NoTls).await.unwrap();
+    // connect to the database
     let (client, connection) = tokio_postgres::connect(&db_config, NoTls).await.unwrap();
-    println!("Test2");
 
-    // The connection object performs the actual communication with the database, so spawn it off to run on its own.
+    // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
         }
     });
-    println!("Test3");
 
-    // Now we can execute a simple statement that just returns its parameter.
-    /*let rows = q(&client, "SELECT $1::TEXT", &[&"hello world"]).await.unwrap();
-    // And then check that we got back the same string we sent over.
-    let value: &str = rows[0].get(0);
-    assert_eq!(value, "hello world");*/
+    // now we can execute a simple statement just to confirm the connection was made
     let rows = q(&client, "SELECT '123'").await;
-    let value: &str = rows[0].get(0).unwrap();
-    assert_eq!(value, "123");
-    println!("Test4");
+    assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");
 
     //let slot_name = "slot";
     let slot_name = "slot_".to_owned() + &SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis().to_string();
     let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"wal2json\"", slot_name);
-    let lsn = q(&client, &slot_query).await[0]
-        .get("consistent_point")
-        .unwrap()
-        .to_owned();
-
-    // create transaction, and insert a value; we will attempt to read this from the other end (the replication-slot listener)
-    /*client.query("BEGIN").await;
-    let xid = q(&client, "SELECT txid_current()").await[0]
-        .get("txid_current")
-        .unwrap()
-        .to_owned();
-    q(&client, "INSERT INTO replication VALUES ('processed')").await;
-    q(&client, "COMMIT").await;*/
-    // insert a second row to generate unprocessed messages in the stream
-    //q(&client, "INSERT INTO replication VALUES ('ignored')", &[]).await.unwrap();
+    let lsn = q(&client, &slot_query).await[0].get("consistent_point").unwrap().to_owned();
 
     let query = format!("START_REPLICATION SLOT {} LOGICAL {}", slot_name, lsn);
     let duplex_stream = client.copy_both_simple::<bytes::Bytes>(&query).await.unwrap();
     let mut duplex_stream_pin = Box::pin(duplex_stream);
-    /*let duplex_stream_pin_mut = Box::pin(&mut duplex_stream);
-    let duplex_stream_pin_mut2 = Pin::new(&mut Box::new(duplex_stream));*/
-    //let duplex_stream_pin_mut3 = Pin::new(&mut duplex_stream_pin);
-    //let mut duplex_stream_pin_mut3 = duplex_stream_pin.as_mut();
-    //let duplex_stream_pin_mut4 = Pin::new(&mut duplex_stream_pin);
-    //let duplex_stream_pin_mut5 = duplex_stream_pin.as_mut();
-
-    /*let expected = vec![
-        format!("BEGIN {}", xid),
-        "table public.replication: INSERT: i[text]:'processed'".to_string(),
-        format!("COMMIT {}", xid),
-    ];*/
 
     loop {
-        //let event_res_opt = duplex_stream_pin_mut3.next().await;
-        let event_res_opt = {
-            let mut duplex_stream_pin_mut5 = duplex_stream_pin.as_mut();
-            duplex_stream_pin_mut5.next().await
-        };
-
-        //if event_res_opt.is_none() { break; }
-        // don't break, just continue; an empty result can just mean the timeout was hit (apparently each next() will resolve with None after X seconds, if there are no changes)
-        if event_res_opt.is_none() { continue; }
+        let event_res_opt = duplex_stream_pin.as_mut().next().await;
+        if event_res_opt.is_none() { break; }
+        //if event_res_opt.is_none() { continue; }
         let event_res = event_res_opt.unwrap();
         if event_res.is_err() { continue }
         let event = event_res.unwrap();
 
         // see here for list of message-types: https://www.postgresql.org/docs/10/protocol-replication.html
-        // Process only XLogData messages
-        if event[0] == b'w' { // type: XLogData (WAL data, ie. change of data in db)
+        // type: XLogData (WAL data, ie. change of data in db)
+        if event[0] == b'w' {
             println!("Got XLogData/data-change event:{:?}", event);
-        } else if event[0] == b'k' { // keepalive message
-
+        }
+        // type: keepalive message
+        else if event[0] == b'k' {
             let lastByte = event.last().unwrap();
             let timeoutImminent = lastByte == &1;
             println!("Got keepalive message:{:x?} @timeoutImminent:{}", event, timeoutImminent);
@@ -116,7 +75,7 @@ pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> 
                 let SECONDS_FROM_UNIX_EPOCH_TO_2000 = 946684800;
                 let time_since_2000: u64 = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() - (SECONDS_FROM_UNIX_EPOCH_TO_2000 * 1000 * 1000)).try_into().unwrap();
                 
-                //let data_to_send: &'static [u8] = &[
+                // see here for format details: https://www.postgresql.org/docs/10/protocol-replication.html
                 let mut data_to_send: Vec<u8> = vec![];
                 // Byte1('r'); Identifies the message as a receiver status update.
                 data_to_send.extend_from_slice(&[114]); // "r" in ascii
@@ -134,22 +93,15 @@ pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> 
 
                 let buf = Bytes::from(data_to_send);
 
-                /*let mut context: &mut Context;
-                future::poll_fn(|cx| {
-                    context = cx;
-                    Poll::Ready(())
-                }).await;*/
-
-                //future::poll_fn(|cx| ).await;
                 println!("Trying to send response to keepalive message/warning!:{:x?}", buf);
                 let mut next_step = 1;
                 future::poll_fn(|cx| {
                     loop {
                         println!("Doing step:{}", next_step);
                         match next_step {
-                            1 => { if let Poll::Pending = duplex_stream_pin.as_mut().poll_ready(cx) { return Poll::Pending }; }
+                            1 => { ready!(duplex_stream_pin.as_mut().poll_ready(cx)).unwrap(); }
                             2 => { duplex_stream_pin.as_mut().start_send(buf.clone()).unwrap(); },
-                            3 => { if let Poll::Pending = duplex_stream_pin.as_mut().poll_flush(cx) { return Poll::Pending }; },
+                            3 => { ready!(duplex_stream_pin.as_mut().poll_flush(cx)).unwrap(); },
                             4 => { return Poll::Ready(()) },
                             _ => panic!(),
                         }
@@ -157,15 +109,9 @@ pub async fn start_streaming_changes<'a>() -> Result<(), tokio_postgres::Error> 
                     }
                 }).await;
                 println!("Sent response to keepalive message/warning!:{:x?}", buf);
-                
-                //duplex_stream_pinned.poll_complete().unwrap();
-                //future::poll_fn(|cx| &).await;
             }
         }
     }
-
-    // ensure we can continue issuing queries // can't after the refactor; by time we're here, connection must have closed
-    //assert_eq!(q(&client, "SELECT 1").await[0].get(0), Some("1"));
 
     Ok(())
 }
