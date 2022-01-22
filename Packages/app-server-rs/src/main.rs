@@ -51,7 +51,6 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
     let _handler = tokio::spawn(async {
-        println!("Test1");
         match pgclient::start_streaming_changes().await {
             Ok(result) => { println!("Done! {:?}", result); },
             Err(err) => { println!("Error:{:?}", err); }

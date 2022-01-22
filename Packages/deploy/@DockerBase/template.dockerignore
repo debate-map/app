@@ -8,6 +8,8 @@ Packages/client/**
 !Packages/client/package.json
 Packages/common/**
 !Packages/common/package.json
+Packages/app-server-rs/**
+!Packages/app-server-rs/package.json
 Packages/app-server/**
 !Packages/app-server/package.json
 Packages/web-server/**

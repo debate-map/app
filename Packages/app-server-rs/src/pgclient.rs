@@ -67,7 +67,7 @@ pub async fn start_streaming_changes() -> Result<(), tokio_postgres::Error> {
         else if event[0] == b'k' {
             let last_byte = event.last().unwrap();
             let timeout_imminent = last_byte == &1;
-            println!("Got keepalive message:{:x?} @timeoutImminent:{}", event, timeout_imminent);
+            println!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
             if timeout_imminent {
                 // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
                 const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946684800;
@@ -91,11 +91,10 @@ pub async fn start_streaming_changes() -> Result<(), tokio_postgres::Error> {
 
                 let buf = Bytes::from(data_to_send);
 
-                println!("Trying to send response to keepalive message/warning!:{:x?}", buf);
+                println!("Responding to keepalive message/warning... @response:{:x?}", buf);
                 let mut next_step = 1;
                 future::poll_fn(|cx| {
                     loop {
-                        println!("Doing step:{}", next_step);
                         match next_step {
                             1 => { ready!(duplex_stream_pin.as_mut().poll_ready(cx)).unwrap(); }
                             2 => { duplex_stream_pin.as_mut().start_send(buf.clone()).unwrap(); },
@@ -106,7 +105,6 @@ pub async fn start_streaming_changes() -> Result<(), tokio_postgres::Error> {
                         next_step += 1;
                     }
                 }).await;
-                println!("Sent response to keepalive message/warning!:{:x?}", buf);
             }
         }
     }
