@@ -62,6 +62,8 @@ async fn main() {
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
+        } else {
+            println!("Postgres connection formed, for fulfilling subscriptions.")
         }
     });
 

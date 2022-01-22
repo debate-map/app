@@ -9,36 +9,12 @@ use std::time::Duration;
 
 pub type UsersSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 
-/*#[derive(Clone)]
-pub struct PermissionGroups {
-    basic: bool,
-	verified: bool,
-	r#mod: bool,
-	admin: bool,
-}
-#[Object]
-impl PermissionGroups {
-    async fn basic(&self) -> &bool { &self.basic }
-    async fn verified(&self) -> &bool { &self.verified }
-    async fn r#mod(&self) -> &bool { &self.r#mod }
-    async fn admin(&self) -> &bool { &self.admin }
-}*/
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
     basic: bool,
 	verified: bool,
 	r#mod: bool,
 	admin: bool,
-}
-impl From<tokio_postgres::row::Row> for PermissionGroups {
-	fn from(row: tokio_postgres::row::Row) -> Self {
-		Self {
-            basic: row.get("basic"),
-            verified: row.get("verified"),
-            r#mod: row.get("mod"),
-            admin: row.get("admin"),
-		}
-	}
 }
 
 scalar!(PermissionGroups);
@@ -156,34 +132,6 @@ impl MutationRoot {
     }
 }
 
-/*#[derive(Enum, Eq, PartialEq, Copy, Clone)]
-enum MutationType {
-    Created,
-    Deleted,
-}
-
-#[derive(Clone)]
-struct BookChanged {
-    mutation_type: MutationType,
-    id: ID,
-}
-#[Object]
-impl BookChanged {
-    async fn mutation_type(&self) -> MutationType {
-        self.mutation_type
-    }
-
-    async fn id(&self) -> &ID {
-        &self.id
-    }
-
-    async fn book(&self, ctx: &Context<'_>) -> Result<Option<User>> {
-        let books = ctx.data_unchecked::<Storage>().lock().await;
-        let id = self.id.parse::<usize>()?;
-        Ok(books.get(id).cloned())
-    }
-}*/
-
 pub struct CollectionWrapper<T> {
     nodes: Vec<T>,
 }
@@ -208,21 +156,11 @@ impl SubscriptionRoot {
     }
 
     async fn test(&self, /*mutation_type: Option<MutationType>*/) -> impl Stream<Item = i32> {
-        /*SimpleBroker::<BookChanged>::subscribe().filter(move |event| {
-            let res = if let Some(mutation_type) = mutation_type {
-                event.mutation_type == mutation_type
-            } else {
-                true
-            };
-            async move { res }
-        })*/
         stream::iter(0..100)
     }
 
     async fn users(&self, ctx: &Context<'_>) -> impl Stream<Item = CollectionWrapper<User>> {
-        println!("Test1");
         let client = ctx.data::<Client>().unwrap();
-        println!("Test2:{:?}", client);
 
         /*let rows = client.query("SELECT * FROM \"users\";", &[]).await;
         println!("Users:{:?}", rows);
@@ -241,5 +179,23 @@ impl SubscriptionRoot {
                 nodes: users, 
             }
         })
+    }
+    async fn user(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = User> {
+        let client = ctx.data::<Client>().unwrap();
+
+        /*let row1 = client.query("SELECT * FROM \"users\" WHERE id = $1;", &[&id]).await.unwrap()[0];
+        println!("Users matching:{:?}", row1);
+        //let user: User = rows.get(0).into();
+        let user: User = User::from(row1);*/
+
+        let mut users = client.query("SELECT * FROM \"users\" WHERE id = $1;", &[&id])
+            .map_ok(|rows| rows.into_iter().map(|r| r.into())
+            .collect::<Vec<User>>()).await.unwrap();
+        let user = match users.pop() {
+            Some(x) => x,
+            _ => panic!("No matching user."),
+        };
+
+        stream::once(async { user })
     }
 }
