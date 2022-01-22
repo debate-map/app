@@ -1,58 +1,38 @@
-use axum::{
-    extract::{
-         ws::{Message, WebSocket, WebSocketUpgrade},
-         Extension,
-    },
-    response::{IntoResponse},
-};
-use futures::{stream::StreamExt};
-use std::{
-    sync::{Arc},
-};
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql::Schema;
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+use axum::response::{self, IntoResponse};
+use axum::routing::get;
+use axum::{extract, AddExtensionLayer, Router, Server};
+use tokio_postgres::tls::NoTlsStream;
+use tokio_postgres::{Client, Connection, Socket};
+use crate::db::users::{UsersSchema, MutationRoot, QueryRoot, Storage, SubscriptionRoot};
 
-type AppState = crate::AppState;
-
-pub async fn gql_websocket_handler(ws: WebSocketUpgrade, Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
-    println!("Got websocket request-type on /graphql path.");
-
-    ws
-    // tell client that we support the graphql-ws (and such) protocols (else it will immediately disconnect)
-        .protocols(["graphql-ws", "graphql-transport-ws"])
-        .on_upgrade(|socket| websocket(socket, state))
+async fn graphql_handler(
+    schema: extract::Extension<UsersSchema>,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner()).await.into()
 }
 
-async fn websocket(stream: WebSocket, _state: Arc<AppState>) {
-    // By splitting we can send and receive at the same time.
-    let (mut _sender, mut receiver) = stream.split();
+async fn graphql_playground() -> impl IntoResponse {
+    response::Html(playground_source(
+        GraphQLPlaygroundConfig::new("/gql-playground").subscription_endpoint("/graphql"),
+    ))
+}
 
-    while let Some(message_raw) = receiver.next().await {
-        //println!("Got message_raw:{:?}", message_raw);
-        let message = if let Ok(message_temp) = message_raw {
-            message_temp
-        } else {
-            println!("Client disconnected, early. @message_raw:{:?}", message_raw);
-            // client disconnected
-            return;
-        };
-        
-        if let Message::Text(msg) = message {
-            println!("Got text message: {:?}", &msg)
-        } else if let Message::Binary(msg) = message {
-            println!("Got binary message: {:?}", &msg)
-        } else if let Message::Ping(msg) = message {
-            println!("Got ping message: {:?}", &msg)
-        } else if let Message::Pong(msg) = message {
-            println!("Got pong message: {:?}", &msg)
-        } else if let Message::Close(msg) = message {
-            println!("Got close message: {:?}", &msg)
-        }
+pub fn extend_router(app: Router, client: Client) -> Router {
+    let schema = Schema::build(QueryRoot, MutationRoot, SubscriptionRoot)
+        .data(Storage::default())
+        .data(client)
+        //.data(connection)
+        .finish();
 
-        /*if socket.send(msg).await.is_err() {
-            println!("Client disconnected, from error during send of response");
-            // client disconnected
-            return;
-        }*/
-    }
+    let result = app
+        .route("/gql-playground", get(graphql_playground).post(graphql_handler))
+        .route("/graphql", GraphQLSubscription::new(schema.clone()))
+        .layer(AddExtensionLayer::new(schema));
 
-    println!("Websocket handler closed.")
+    println!("Playground: http://localhost:8000");
+    return result;
 }

@@ -74,6 +74,8 @@ WORKDIR /dm_repo/Packages/app-server-rs
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
 
-CMD echo Starting Rust program...; ./app-server-rs; \
+CMD echo Starting Rust program...; \
+#	./app-server-rs; \
+	RUST_BACKTRACE=1 ./app-server-rs; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456

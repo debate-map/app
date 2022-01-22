@@ -1,7 +1,7 @@
 use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
 use bytes::Bytes;
 use futures::{future, StreamExt, Sink, ready};
-use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow};
+use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
@@ -13,6 +13,21 @@ async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
         .collect()
 }
 
+pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
+    // get connection info from env-vars
+    let ev = |name| { env::var(name).unwrap() };
+    println!("Connecting app-server-rs's pg-client to: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
+    //let db_url = format!("postgres://{}:{}@{}:{}/debate-map", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"));
+    let mut db_config = format!("user={} password={} host={} port={} dbname={}", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"), "debate-map");
+    if for_replication {
+        db_config += " replication=database";
+    }
+
+    // connect to the database
+    let (client, connection) = tokio_postgres::connect(&db_config, NoTls).await.unwrap();
+    (client, connection)
+}
+
 /**
  * There appear to be three ways to use replication slots:
  * 1) "CREATE_REPLICATION_SLOT" followed by "pg_logical_slot_get_changes()".
@@ -20,16 +35,7 @@ async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
  * 3) Connecting to postgres pod through shell, then running "pg_recvlogical".
  * In this function, we use approach 2.
  */
-pub async fn start_streaming_changes() -> Result<(), tokio_postgres::Error> {
-    // get connection info from env-vars
-    let ev = |name| { env::var(name).unwrap() };
-    println!("Connecting app-server-rs's pg-client to: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
-    //let db_url = format!("postgres://{}:{}@{}:{}/debate-map", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"));
-    let db_config = format!("user={} password={} host={} port={} dbname={} replication=database", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"), "debate-map");
-
-    // connect to the database
-    let (client, connection) = tokio_postgres::connect(&db_config, NoTls).await.unwrap();
-
+pub async fn start_streaming_changes(client: Client, connection: Connection<Socket, NoTlsStream>) -> Result<Client, tokio_postgres::Error> {
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -109,5 +115,5 @@ pub async fn start_streaming_changes() -> Result<(), tokio_postgres::Error> {
         }
     }
 
-    Ok(())
+    Ok(client)
 }

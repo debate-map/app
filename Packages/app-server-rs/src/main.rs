@@ -13,9 +13,13 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::sync::broadcast;
+
 mod gql_ws;
 mod chat;
 mod pgclient;
+mod db {
+    pub mod users;
+}
 
 // Our shared state
 pub struct AppState {
@@ -32,8 +36,10 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(index))
-        .route("/graphql", get(gql_ws::gql_websocket_handler))
+        
+        //.route("/graphql", get(gql_ws::gql_websocket_handler))
         //.route("/graphql", post(gqp_post_handler))
+        
         .route("/websocket", get(chat::chat_websocket_handler))
         .layer(
             // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
@@ -50,8 +56,18 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
+    let (client, connection) = pgclient::create_client(false).await;
+    let app = gql_ws::extend_router(app, client);
+    // the connection object performs the actual communication with the database, so spawn it off to run on its own
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let (client2, connection2) = pgclient::create_client(true).await;
     let _handler = tokio::spawn(async {
-        match pgclient::start_streaming_changes().await {
+        match pgclient::start_streaming_changes(client2, connection2).await {
             Ok(result) => { println!("Done! {:?}", result); },
             Err(err) => { println!("Error:{:?}", err); }
         };
