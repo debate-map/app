@@ -15,6 +15,7 @@ use std::{
 use tokio::sync::broadcast;
 
 mod gql_ws;
+mod gql_post;
 mod chat;
 mod pgclient;
 mod db {
@@ -48,6 +49,7 @@ async fn main() {
                 .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
                 //.allow_methods(any()),
                 //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
+                //.allow_methods(vec![Method::GET, Method::POST])
                 .allow_methods(vec![Method::GET, Method::POST])
                 .allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
                 .allow_credentials(true),

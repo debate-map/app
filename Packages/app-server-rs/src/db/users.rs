@@ -73,6 +73,57 @@ impl User {
     async fn lastEditAt(&self) -> &i64 { &self.lastEditAt }
 }
 
+#[derive(Clone)]
+pub struct UserHidden {
+    id: ID,
+    email: String,
+    providerData: serde_json::Value,
+    backgroundID: String,
+    backgroundCustom_enabled: bool,
+    backgroundCustom_color: String,
+    backgroundCustom_url: String,
+    backgroundCustom_position: String,
+    addToStream: bool,
+    lastAccessPolicy: String,
+    extras: serde_json::Value,
+}
+impl From<tokio_postgres::row::Row> for UserHidden {
+	fn from(row: tokio_postgres::row::Row) -> Self {
+        println!("ID as string:{}", row.get::<_, String>("id"));
+		Self {
+            id: ID::from(&row.get::<_, String>("id")),
+            email: row.get("email"),
+            providerData: serde_json::from_value(row.get("providerData")).unwrap(),
+            backgroundID: row.try_get("backgroundID").unwrap_or_else(|_| "n/a").to_string(),
+            backgroundCustom_enabled: row.try_get("backgroundCustom_enabled").unwrap_or_else(|_| false),
+            backgroundCustom_color: row.try_get("backgroundCustom_color").unwrap_or_else(|_| "n/a").to_string(),
+            backgroundCustom_url: row.try_get("backgroundCustom_url").unwrap_or_else(|_| "n/a").to_string(),
+            backgroundCustom_position: row.try_get("backgroundCustom_position").unwrap_or_else(|_| "n/a").to_string(),
+            addToStream: row.get("addToStream"),
+            lastAccessPolicy: row.try_get("lastAccessPolicy").unwrap_or_else(|_| "n/a").to_string(),
+            extras: serde_json::from_value(row.get("extras")).unwrap(),
+		}
+	}
+}
+#[Object]
+impl UserHidden {
+    async fn id(&self) -> &str { &self.id }
+    async fn email(&self) -> &str { &self.email }
+    async fn providerData(&self) -> &serde_json::Value { &self.providerData }
+    async fn backgroundID(&self) -> &str { &self.backgroundID }
+    #[graphql(name = "backgroundCustom_enabled")]
+    async fn backgroundCustom_enabled(&self) -> &bool { &self.backgroundCustom_enabled }
+    #[graphql(name = "backgroundCustom_color")]
+    async fn backgroundCustom_color(&self) -> &str { &self.backgroundCustom_color }
+    #[graphql(name = "backgroundCustom_url")]
+    async fn backgroundCustom_url(&self) -> &str { &self.backgroundCustom_url }
+    #[graphql(name = "backgroundCustom_position")]
+    async fn backgroundCustom_position(&self) -> &str { &self.backgroundCustom_position }
+    async fn addToStream(&self) -> &bool { &self.addToStream }
+    async fn lastAccessPolicy(&self) -> &str { &self.lastAccessPolicy }
+    async fn extras(&self) -> &serde_json::Value { &self.extras }
+}
+
 pub type Storage = Arc<Mutex<Slab<User>>>;
 
 pub struct QueryRoot;
@@ -130,20 +181,51 @@ impl MutationRoot {
             Ok(false)
         }
     }
+
+    #[graphql(name = "_GetConnectionID")]
+    async fn _GetConnectionID(&self, ctx: &Context<'_>) -> Result<GetConnectionID_Result> {
+        Ok(GetConnectionID_Result {
+            id: "todo".to_owned()
+        })
+    }
 }
 
-pub struct CollectionWrapper<T> {
-    nodes: Vec<T>,
+struct GetConnectionID_Result {
+    id: String,
 }
 #[Object]
-impl<T: OutputType> CollectionWrapper<T> {
-    async fn nodes(&self) -> &Vec<T> { &self.nodes }
+impl GetConnectionID_Result {
+    async fn id(&self) -> &str { &self.id }
 }
+
+pub struct CollectionWrapper<T> { nodes: Vec<T> }
+#[Object] impl<T: OutputType> CollectionWrapper<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+
+pub struct CollectionWrapper2<T> { nodes: Vec<T> }
+#[Object] impl<T: OutputType> CollectionWrapper2<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
 
 pub struct SubscriptionRoot;
 
+struct PassConnectionID_Result {
+    userID: String,
+}
+#[Object]
+impl PassConnectionID_Result {
+    async fn userID(&self) -> &str { &self.userID }
+}
+
 #[Subscription]
 impl SubscriptionRoot {
+    #[graphql(name = "_PassConnectionID")]
+    async fn _PassConnectionID(&self, ctx: &Context<'_>, connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
+        println!("Connection-id was passed from client:{}", connectionID);
+
+        stream::once(async { PassConnectionID_Result {
+            //userID: "todo2".to_owned()
+            userID: "DM_SYSTEM_000000000001".to_owned()
+        } })
+    }
+
     async fn interval(&self, #[graphql(default = 1)] n: i32) -> impl Stream<Item = i32> {
         let mut value = 0;
         async_stream::stream! {
@@ -197,5 +279,30 @@ impl SubscriptionRoot {
         };
 
         stream::once(async { user })
+    }
+
+    async fn userHiddens(&self, ctx: &Context<'_>) -> impl Stream<Item = CollectionWrapper2<UserHidden>> {
+        let client = ctx.data::<Client>().unwrap();
+        let userHiddens = client.query("SELECT * FROM \"userHiddens\";", &[])
+            .map_ok(|rows| rows.into_iter().map(|r| r.into())
+            .collect::<Vec<UserHidden>>()).await.unwrap();
+        println!("UserHiddens:{:?}", userHiddens.len());
+        stream::once(async {
+            CollectionWrapper2 {
+                nodes: userHiddens, 
+            }
+        })
+    }
+    async fn userHidden(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = UserHidden> {
+        let client = ctx.data::<Client>().unwrap();
+        let mut userHiddens = client.query("SELECT * FROM \"userHiddens\" WHERE id = $1;", &[&id])
+            .map_ok(|rows| rows.into_iter().map(|r| r.into())
+            .collect::<Vec<UserHidden>>()).await.unwrap();
+        let userHidden = match userHiddens.pop() {
+            Some(x) => x,
+            _ => panic!("No matching user-hidden."),
+        };
+
+        stream::once(async { userHidden })
     }
 }
