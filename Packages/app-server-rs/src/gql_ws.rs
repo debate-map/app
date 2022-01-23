@@ -8,13 +8,13 @@ use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use tokio_postgres::{Client};
 use tower_http::cors::{CorsLayer, Origin};
-use crate::db::user_hiddens::{QueryShard_UserHiddens, MutationShard_UserHiddens, SubscriptionShard_UserHiddens};
+use crate::db::user_hiddens::{SubscriptionShard_UserHiddens};
 use crate::db::users::{QueryShard_Users, MutationShard_Users, SubscriptionShard_Users};
 
 #[derive(MergedObject, Default)]
-struct QueryRoot(QueryShard_Users, QueryShard_UserHiddens);
+struct QueryRoot(QueryShard_Users, /*QueryShard_UserHiddens*/);
 #[derive(MergedObject, Default)]
-struct MutationRoot(MutationShard_Users, MutationShard_UserHiddens);
+struct MutationRoot(MutationShard_Users, /*MutationShard_UserHiddens*/);
 #[derive(MergedSubscription, Default)]
 struct SubscriptionRoot(SubscriptionShard_Users, SubscriptionShard_UserHiddens);
 type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;

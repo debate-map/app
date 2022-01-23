@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar};
+use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use tokio_postgres::{Client};
 use std::time::Duration;
@@ -73,7 +73,8 @@ impl User {
 pub struct QueryShard_Users;
 #[Object]
 impl QueryShard_Users {
-    async fn __(&self) -> &str { &"" }
+    /// async-graphql requires that to be at least one entry under the Query section
+    async fn empty(&self) -> &str { &"" }
 }
 
 #[derive(Default)]

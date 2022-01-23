@@ -55,19 +55,19 @@ impl UserHidden {
     async fn extras(&self) -> &serde_json::Value { &self.extras }
 }
 
-#[derive(Default)]
+/*#[derive(Default)]
 pub struct QueryShard_UserHiddens;
 #[Object]
 impl QueryShard_UserHiddens {
-    async fn __(&self) -> &str { &"" }
-}
+    async fn empty(&self) -> &str { &"" }
+}*/
 
-#[derive(Default)]
+/*#[derive(Default)]
 pub struct MutationShard_UserHiddens;
 #[Object]
 impl MutationShard_UserHiddens {
-    async fn __(&self) -> &str { &"" }
-}
+    async fn empty(&self) -> &str { &"" }
+}*/
 
 pub struct CollectionWrapper2<T> { nodes: Vec<T> }
 #[Object] impl<T: OutputType> CollectionWrapper2<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
