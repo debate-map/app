@@ -134,6 +134,14 @@
 			"isBackground": true,
 			"group": "build",
 		},
+		{
+			"label": "## kget.app-server-rs",
+			"type": "shell",
+			"command": "npm start kget.app-server-rs",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
+		},
 		/*{
 			"label": "## app-server.dockerBuild",
 			"type": "shell",

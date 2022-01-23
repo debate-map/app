@@ -115,6 +115,17 @@ function GetServeCommand(nodeEnv = null) {
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
+	// gets stuff we might want, from the k8s pods
+	kget: {
+		// app-server-rs
+		"app-server-rs": Dynamic(()=>{
+			const localPath = `./Temp/kget_a-s-rs_${CurrentTime_SafeStr()}`;
+			const localPath_timing = `${localPath}/cargo-timing.html`;
+			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${GetPodName_AppServerRS(commandArgs[0])}:/dm_repo/Packages/app-server-rs/cargo-timing.html ${localPath_timing}`);
+			console.log(`File copied to: ${paths.resolve(localPath_timing)}`);
+			execSync(`start "" "${paths.resolve(localPath)}"`);
+		}),
+	},
 	ssh: {
 		db: Dynamic(()=>{
 			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n postgres-operator ${GetPodName_DB(commandArgs[0])} -c database -- ${startBestShellCmd}`;

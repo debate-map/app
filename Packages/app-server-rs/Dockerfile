@@ -51,6 +51,7 @@ WORKDIR /dm_repo/Packages/app-server-rs
 
 # build the dependencies
 RUN cargo build
+#RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
 # remove the build output of the "dummy version" of app_server_rs
 #RUN rm -f target/x86_64-unknown-linux-musl/release/deps/app_server_rs*
 #RUN rm -f target/x86_64-unknown-linux-musl/debug/deps/app_server_rs*
@@ -59,7 +60,8 @@ RUN rm -f target/debug/deps/app_server_rs*
 # now copy the app-server's own code
 COPY Packages/app-server-rs/ .
 # and build the actual app-server program
-RUN cargo build
+#RUN cargo build
+RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
 
 # ------------------------------------------------------------------------------
 # Final Stage
@@ -73,6 +75,7 @@ WORKDIR /dm_repo/Packages/app-server-rs
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/release/app-server-rs .
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
+COPY --from=cargo-build /dm_repo/Packages/app-server-rs/cargo-timing.html .
 
 CMD echo Starting Rust program...; \
 #	./app-server-rs; \
