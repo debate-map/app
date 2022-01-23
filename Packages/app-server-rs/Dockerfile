@@ -61,7 +61,9 @@ RUN rm -f target/debug/deps/app_server_rs*
 COPY Packages/app-server-rs/ .
 # and build the actual app-server program
 #RUN cargo build
-RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
+#RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
+RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile
+RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && cp ./*profdata ./kgetOutput_buildTime/
 
 # ------------------------------------------------------------------------------
 # Final Stage
@@ -75,7 +77,7 @@ WORKDIR /dm_repo/Packages/app-server-rs
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/release/app-server-rs .
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/cargo-timing.html .
+COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
 CMD echo Starting Rust program...; \
 #	./app-server-rs; \

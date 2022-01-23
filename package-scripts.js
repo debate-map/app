@@ -117,13 +117,46 @@ const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
 	// gets stuff we might want, from the k8s pods
 	kget: {
-		// app-server-rs
 		"app-server-rs": Dynamic(()=>{
-			const localPath = `./Temp/kget_a-s-rs_${CurrentTime_SafeStr()}`;
-			const localPath_timing = `${localPath}/cargo-timing.html`;
-			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${GetPodName_AppServerRS(commandArgs[0])}:/dm_repo/Packages/app-server-rs/cargo-timing.html ${localPath_timing}`);
-			console.log(`File copied to: ${paths.resolve(localPath_timing)}`);
+			const localPath = `./Temp/kget_as-rs_${CurrentTime_SafeStr()}`;
+
+			// package up the files we want into a "temp_for_kget" folder, so we can copy the files in one k8s command (see: https://devops.stackexchange.com/a/14563)
+			/*const bundleFilesCmd = `sh -c "mkdir -p ./temp_for_kget && cp cargo-timing.html ./temp_for_kget/ && cp ./*profdata ./temp_for_kget/"`;
+			execSync(`${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerRS(commandArgs[0])} -c dm-app-server-rs -- ${bundleFilesCmd}`);*/
+
+			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${GetPodName_AppServerRS(commandArgs[0])}:/dm_repo/Packages/app-server-rs/kgetOutput_buildTime/. ${localPath}`);
+			console.log(`Files copied to: ${paths.resolve(localPath)}`);
+
 			execSync(`start "" "${paths.resolve(localPath)}"`);
+
+			// now you can do various things with the profiler data; see: https://fasterthanli.me/articles/why-is-my-rust-build-so-slow
+		}),
+
+		// before you can use this, install crox and such (see error message below for details)
+		lastProfData_prep: Dynamic(()=>{
+			/*require("globby")("./Temp/kget_as-rs_*", {onlyFiles: false, stats: true}).then(/** @param {import("globby").Entry[]} folders *#/ folders=>{
+				folders.sort((a, b)=>a.stats.ctimeMs - b.stats.ctimeMs);
+				const latestKGetFolder = folders.slice(-1)[0];
+				const profFile = paths.resolve(latestKGetFolder, "")
+			});*/
+			require("globby")("./Temp/kget_as-rs_*/*profdata", {stats: true}).then(/** @param {import("globby").Entry[]} files */ files=>{
+				files.sort((a, b)=>a.stats.ctimeMs - b.stats.ctimeMs);
+				const latestProfDataFile = paths.resolve(files.slice(-1)[0].path);
+				const folder = paths.dirname(latestProfDataFile);
+				try {
+					//const command = `cd ${folder} && crox ${paths.basename(latestProfDataFile)}`;
+					const command = `cd ${folder} && crox --minimum-duration 100000 ${paths.basename(latestProfDataFile)}`; // only keep entries that are 100ms or longer
+					console.log("Running:", command);
+					execSync(command);
+				} catch (ex) {
+					if (ex.toString().includes("'crox' is not recognized")) {
+						console.error("Crox is not installed. Install using: cargo install --git https://github.com/rust-lang/measureme crox flamegraph summarize");
+						return;
+					}
+					throw ex;
+				}
+				execSync(`start "" "${folder}"`);
+			});
 		}),
 	},
 	ssh: {
