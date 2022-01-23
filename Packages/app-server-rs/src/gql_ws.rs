@@ -1,21 +1,25 @@
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::Schema;
+use async_graphql::{Schema, MergedObject, MergedSubscription};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use axum::http::Method;
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router, Server};
-use tokio_postgres::tls::NoTlsStream;
-use tokio_postgres::{Client, Connection, Socket};
+use axum::{extract, AddExtensionLayer, Router};
+use tokio_postgres::{Client};
 use tower_http::cors::{CorsLayer, Origin};
-use crate::db::users::{UsersSchema, MutationRoot, QueryRoot, Storage, SubscriptionRoot};
-use crate::gql_post;
+use crate::db::user_hiddens::{QueryShard_UserHiddens, MutationShard_UserHiddens, SubscriptionShard_UserHiddens};
+use crate::db::users::{QueryShard_Users, MutationShard_Users, SubscriptionShard_Users};
 
-async fn graphql_handler(
-    schema: extract::Extension<UsersSchema>,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
+#[derive(MergedObject, Default)]
+struct QueryRoot(QueryShard_Users, QueryShard_UserHiddens);
+#[derive(MergedObject, Default)]
+struct MutationRoot(MutationShard_Users, MutationShard_UserHiddens);
+#[derive(MergedSubscription, Default)]
+struct SubscriptionRoot(SubscriptionShard_Users, SubscriptionShard_UserHiddens);
+type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
+
+async fn graphql_handler(schema: extract::Extension<RootSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
@@ -26,8 +30,7 @@ async fn graphql_playground() -> impl IntoResponse {
 }
 
 pub fn extend_router(app: Router, client: Client) -> Router {
-    let schema = Schema::build(QueryRoot, MutationRoot, SubscriptionRoot)
-        .data(Storage::default())
+    let schema = Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         .data(client)
         //.data(connection)
         .finish();

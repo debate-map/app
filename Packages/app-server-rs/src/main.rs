@@ -20,6 +20,10 @@ mod chat;
 mod pgclient;
 mod db {
     pub mod users;
+    pub mod user_hiddens;
+}
+mod utils {
+    pub mod general;
 }
 
 // Our shared state
