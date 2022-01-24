@@ -41,8 +41,6 @@ dependencies = [
  "futures",
  "futures-timer",
  "futures-util",
- "serde",
- "serde_json",
  "slab",
  "tokio",
  "tokio-postgres",
@@ -1036,8 +1034,6 @@ dependencies = [
  "bytes",
  "fallible-iterator",
  "postgres-protocol",
- "serde",
- "serde_json",
 ]
 
 [[package]]

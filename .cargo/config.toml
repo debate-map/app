@@ -1,31 +1,32 @@
 # mold
 # ==========
 
-# # for regular (debian:buster-slim) builds (from: https://github.com/rui314/mold#how-to-use)
-# [target.x86_64-unknown-linux-gnu]
-# linker = "clang"
-# rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
+# for regular (debian:buster-slim) builds (from: https://github.com/rui314/mold#how-to-use)
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
 
-# # for musl-based linux builds (eg. when trying to deploy to an alpine image)
-# [target.x86_64-unknown-linux-musl]
-# linker = "clang"
-# rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
-# #rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/mold", "-C", "link-args=-z text"] # suggested on discord
-# # from: https://stackoverflow.com/a/70378019
-# # this variant doesn't work fsr; get error: "= note: clang: error: unsupported option '--ld-path=/usr/local/bin/mold'"
-# #rustflags = ["-C", "link-arg=--ld-path=/usr/local/bin/mold"]
+# for musl-based linux builds (eg. when trying to deploy to an alpine image)
+[target.x86_64-unknown-linux-musl]
+linker = "clang"
+rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
+#rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold", "-C", "link-args=-z text"] # suggested on discord
+# from: https://stackoverflow.com/a/70378019
+# this variant doesn't work fsr; get error: "= note: clang: error: unsupported option '--ld-path=/usr/local/bin/mold'"
+#rustflags = ["-Awarnings", "-C", "link-arg=--ld-path=/usr/local/bin/mold"]
 
 # lld
 # ==========
 
 [target.x86_64-pc-windows-msvc]
 #linker = "rust-lld.exe"
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=lld"]
 
 [target.x86_64-pc-windows-gnu]
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=lld"]
 
-[target.x86_64-unknown-linux-gnu]
-#rustflags = ["-C", "linker=clang", "-C", "link-arg=-fuse-ld=lld"]
-linker = "/usr/bin/clang"
-rustflags = ["-Clink-arg=-fuse-ld=lld", "-Zshare-generics=y"]
+# [target.x86_64-unknown-linux-gnu]
+# #rustflags = ["-Awarnings", "-C", "linker=clang", "-C", "link-arg=-fuse-ld=lld"]
+# linker = "/usr/bin/clang"
+# rustflags = ["-Awarnings", "-Clink-arg=-fuse-ld=lld"]
+# #rustflags = ["-Awarnings", "-Clink-arg=-fuse-ld=lld", "-Zshare-generics=y"]

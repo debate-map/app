@@ -45,7 +45,7 @@ async fn main() {
         //.route("/graphql", get(gql_ws::gql_websocket_handler))
         //.route("/graphql", post(gqp_post_handler))
         
-        .route("/websocket", get(chat::chat_websocket_handler))
+        //.route("/websocket", get(chat::chat_websocket_handler))
         .layer(
             // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
             CorsLayer::new()
@@ -81,7 +81,7 @@ async fn main() {
         };
     });
 
-    println!("App-server-rs launched.19");
+    println!("App-server-rs launched.35");
     axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
 
     /*let main_server_future = axum::Server::bind(&addr).serve(app.into_make_service()).await;

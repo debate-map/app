@@ -61,19 +61,21 @@ Object.assign(scripts, {
 
 const appNamespace = "default"; //"app";
 const KubeCTLCmd = context=>`kubectl${context ? ` --context ${context}` : ""}`;
-const GetPodInfos = (context = "", namespace = "", requiredLabels = [], filterOutEvicted = true)=>{
+const GetPodInfos = (context = "", namespace = "", requiredLabels = [], filterOutNonRunning = true)=>{
 	const cmdArgs = [
 		KubeCTLCmd(context), "get", "pods",
 		...(namespace ? ["-n", namespace] : ["--all-namespaces"]),
 		...(requiredLabels.length ? ["-l", requiredLabels.join(",")] : []),
 	];
 	const entryStrings = execSync(cmdArgs.join(" ")).toString().trim().split("\n").slice(1);
+	//console.log("Statuses:\n", entryStrings.join("\n"));
 	let result = entryStrings.map(str=>{
 		// example source string: "dm-app-server-69b55c8dfc-k5zrq   1/1     Running   0          2d"
 		const [sourceStr, name, ready, status, restarts, age] = /^(\S+)\s{3,}(\S+)\s{3,}(\S+)\s{3,}(\S+)\s{3,}(\S+)$/.exec(str);
 		return {sourceStr, name, ready, status, restarts, age};
 	});
-	if (filterOutEvicted) result = result.filter(a=>a.status != "Evicted");
+	//if (filterOutEvicted) result = result.filter(a=>a.status != "Evicted");
+	if (filterOutNonRunning) result = result.filter(a=>a.status == "Running");
 	return result;
 };
 const GetPodName_DB = context=>{

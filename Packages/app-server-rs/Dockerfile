@@ -26,7 +26,7 @@ WORKDIR /dm_repo
 # this makes-so cargo-build and such uses mold as its linker
 COPY .cargo/config.toml .cargo/config.toml
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
-ENV RUSTFLAGS=-Awarnings
+#ENV RUSTFLAGS=-Awarnings # moved to config.toml (we cannot set RUSTFLAGS from multiple places, so chose config.toml as the location for now)
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
@@ -55,8 +55,9 @@ RUN rm -f target/debug/deps/app_server_rs*
 # now copy the app-server's own code
 COPY Packages/app-server-rs/ .
 # and build the actual app-server program
-RUN cargo build
+#RUN cargo build
 #RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
+RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes
 #RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes -Z self-profile -Z self-profile-events=default,args
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
