@@ -27,7 +27,7 @@ WORKDIR /dm_repo
 COPY .cargo/config.toml .cargo/config.toml
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
 #ENV RUSTFLAGS=-Awarnings # moved to config.toml (we cannot set RUSTFLAGS from multiple places, so chose config.toml as the location for now)
-ENV CARGO_PROFILE_DEV_DEBUG=0
+ENV CARGO_PROFILE_DEV_DEBUG=1
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
