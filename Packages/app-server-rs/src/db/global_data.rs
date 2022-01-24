@@ -9,6 +9,11 @@ pub struct GlobalData {
     id: ID,
     extras: serde_json::Value,
 }
+#[Object]
+impl GlobalData {
+    async fn id(&self) -> &str { &self.id }
+    async fn extras(&self) -> &serde_json::Value { &self.extras }
+}
 impl From<tokio_postgres::row::Row> for GlobalData {
 	fn from(row: tokio_postgres::row::Row) -> Self {
 		Self {
@@ -16,11 +21,6 @@ impl From<tokio_postgres::row::Row> for GlobalData {
             extras: serde_json::from_value(row.get("extras")).unwrap(),
 		}
 	}
-}
-#[Object]
-impl GlobalData {
-    async fn id(&self) -> &str { &self.id }
-    async fn extras(&self) -> &serde_json::Value { &self.extras }
 }
 
 pub struct GQLSet_GlobalData<T> { nodes: Vec<T> }
@@ -45,9 +45,9 @@ impl SubscriptionShard_GlobalData {
             }
         })
     }
-    async fn globalDatum(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = GlobalData> {
+    async fn globalDatum(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<GlobalData>> {
         let mut wrapper = get_first_item_from_stream_in_result_in_future(self.globalData(ctx, Some(id))).await;
-        let entry = wrapper.nodes.pop().unwrap();
+        let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }
 }

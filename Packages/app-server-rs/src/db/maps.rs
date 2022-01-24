@@ -22,6 +22,24 @@ pub struct Map {
 	editedAt: Option<i64>,
     extras: serde_json::Value,
 }
+#[Object]
+impl Map {
+    async fn id(&self) -> &str { &self.id }
+    async fn accessPolicy(&self) -> &str { &self.accessPolicy }
+    async fn name(&self) -> &str { &self.name }
+    async fn note(&self) -> &Option<String> { &self.note }
+    async fn noteInline(&self) -> &Option<bool> { &self.noteInline }
+    async fn rootNode(&self) -> &str { &self.rootNode }
+    async fn defaultExpandDepth(&self) -> &i32 { &self.defaultExpandDepth }
+    async fn nodeAccessPolicy(&self) -> &Option<String> { &self.nodeAccessPolicy }
+    async fn featured(&self) -> &Option<bool> { &self.featured }
+    async fn editors(&self) -> &Vec<String> { &self.editors }
+    async fn creator(&self) -> &str { &self.creator }
+    async fn createdAt(&self) -> &i64 { &self.createdAt }
+    async fn edits(&self) -> &i32 { &self.edits }
+    async fn editedAt(&self) -> &Option<i64> { &self.editedAt }
+    async fn extras(&self) -> &serde_json::Value { &self.extras }
+}
 impl From<tokio_postgres::row::Row> for Map {
 	fn from(row: tokio_postgres::row::Row) -> Self {
 		Self {
@@ -42,24 +60,6 @@ impl From<tokio_postgres::row::Row> for Map {
             extras: serde_json::from_value(row.get("extras")).unwrap(),
 		}
 	}
-}
-#[Object]
-impl Map {
-    async fn id(&self) -> &str { &self.id }
-    async fn accessPolicy(&self) -> &str { &self.accessPolicy }
-    async fn name(&self) -> &str { &self.name }
-    async fn note(&self) -> &Option<String> { &self.note }
-    async fn noteInline(&self) -> &Option<bool> { &self.noteInline }
-    async fn rootNode(&self) -> &str { &self.rootNode }
-    async fn defaultExpandDepth(&self) -> &i32 { &self.defaultExpandDepth }
-    async fn nodeAccessPolicy(&self) -> &Option<String> { &self.nodeAccessPolicy }
-    async fn featured(&self) -> &Option<bool> { &self.featured }
-    async fn editors(&self) -> &Vec<String> { &self.editors }
-    async fn creator(&self) -> &str { &self.creator }
-    async fn createdAt(&self) -> &i64 { &self.createdAt }
-    async fn edits(&self) -> &i32 { &self.edits }
-    async fn editedAt(&self) -> &Option<i64> { &self.editedAt }
-    async fn extras(&self) -> &serde_json::Value { &self.extras }
 }
 
 pub struct GQLSet_Map<T> { nodes: Vec<T> }
@@ -84,9 +84,9 @@ impl SubscriptionShard_Map {
             }
         })
     }
-    async fn map(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Map> {
+    async fn map(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<Map>> {
         let mut wrapper = get_first_item_from_stream_in_result_in_future(self.maps(ctx, Some(id))).await;
-        let entry = wrapper.nodes.pop().unwrap();
+        let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }
 }

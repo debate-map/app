@@ -1,4 +1,4 @@
-# NOTE: This file is not *currently* being used during/for the Docker builds. (just not needed yet, so left out)
+# NOTE: This file is not *currently* being used during/for the Docker builds (just not needed yet, so left out). See ".cargo/config.toml" for rust build-flags.
 
 [workspace]
 members = [
@@ -7,6 +7,7 @@ members = [
 ]
 
 #[profile.dev]
+#panic = "abort"
 #lto = "off"
 #debug = 1
 #debug = 0 # this changes "debug" val from 2 to 0; this reduced the incremental build time (str change in main.rs) from ~32s to ~27s (still way too slow!)

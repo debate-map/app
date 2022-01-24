@@ -1,3 +1,4 @@
+#![feature(backtrace)]
 use axum::{
     response::{Html},
     routing::{get},
@@ -10,9 +11,9 @@ use tower_http::cors::{CorsLayer, Origin};
 use std::{
     collections::HashSet,
     net::SocketAddr,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex}, panic, backtrace::Backtrace,
 };
-use tokio::sync::broadcast;
+use tokio::{sync::broadcast, runtime::Runtime};
 
 mod gql_ws;
 mod gql_post;
@@ -23,6 +24,9 @@ mod db {
     pub mod user_hiddens;
     pub mod global_data;
     pub mod maps;
+    pub mod terms;
+    pub mod access_policies;
+    pub mod medias;
 }
 mod utils {
     pub mod general;
@@ -34,8 +38,24 @@ pub struct AppState {
     pub tx: broadcast::Sender<String>,
 }
 
+/*#[panic_handler]
+fn panic(info: &PanicInfo) {
+    /*let mut host_stderr = HStderr::new();
+    // logs "panicked at '$reason', src/main.rs:27:4" to the host stderr
+    writeln!(host_stderr, "{}", info).ok();*/
+    println!("Got panic. @info:{} @stackTrace:{:?}", info, Backtrace::capture());
+}*/
+
 #[tokio::main]
 async fn main() {
+    //panic::always_abort();
+    panic::set_hook(Box::new(|info| {
+        //let stacktrace = Backtrace::capture();
+        let stacktrace = Backtrace::force_capture();
+        println!("Got panic. @info:{}\n@stackTrace:{}", info, stacktrace);
+        std::process::abort();
+    }));
+
     let user_set = Mutex::new(HashSet::new());
     let (tx, _rx) = broadcast::channel(100);
 

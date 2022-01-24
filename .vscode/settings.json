@@ -34,4 +34,9 @@
 		  "changeProcessCWD": true
 		},
 	],*/
+
+	"rust-analyzer.server.extraEnv": {
+		// this allows us to use unstable features (as is true for the Docker builds), without rust-analyzer showing an error on the "#![feature(XXX)]" line
+		"RUSTC_BOOTSTRAP": "1",
+	},
 }

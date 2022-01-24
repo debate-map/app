@@ -27,6 +27,7 @@ WORKDIR /dm_repo
 COPY .cargo/config.toml .cargo/config.toml
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
 #ENV RUSTFLAGS=-Awarnings # moved to config.toml (we cannot set RUSTFLAGS from multiple places, so chose config.toml as the location for now)
+# this sets the debugging-info granularity to "per line", rather than the default "2" which is more detailed; this speeds up builds a bit 
 ENV CARGO_PROFILE_DEV_DEBUG=1
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
@@ -79,6 +80,6 @@ COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./
 
 CMD echo Starting Rust program...; \
 #	./app-server-rs; \
-	RUST_BACKTRACE=1 ./app-server-rs; \
+	RUST_BACKTRACE=full ./app-server-rs; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456

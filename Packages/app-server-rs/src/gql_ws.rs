@@ -8,8 +8,11 @@ use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use tokio_postgres::{Client};
 use tower_http::cors::{CorsLayer, Origin};
+use crate::db::access_policies::SubscriptionShard_AccessPolicy;
 use crate::db::global_data::SubscriptionShard_GlobalData;
 use crate::db::maps::SubscriptionShard_Map;
+use crate::db::medias::SubscriptionShard_Media;
+use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
 use crate::gql_post::graphql_post_handler;
@@ -19,7 +22,11 @@ pub struct QueryRoot(QueryShard_User, /*QueryShard_UserHidden*/);
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(MutationShard_User, /*MutationShard_UserHidden*/);
 #[derive(MergedSubscription, Default)]
-pub struct SubscriptionRoot(SubscriptionShard_User, SubscriptionShard_UserHidden, SubscriptionShard_GlobalData, SubscriptionShard_Map);
+pub struct SubscriptionRoot(
+    SubscriptionShard_User, SubscriptionShard_UserHidden,
+    SubscriptionShard_GlobalData, SubscriptionShard_Map,
+    SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
+);
 pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 
 async fn graphql_playground() -> impl IntoResponse {

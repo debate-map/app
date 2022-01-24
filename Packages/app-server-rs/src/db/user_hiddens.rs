@@ -18,23 +18,6 @@ pub struct UserHidden {
     lastAccessPolicy: Option<String>,
     extras: serde_json::Value,
 }
-impl From<tokio_postgres::row::Row> for UserHidden {
-	fn from(row: tokio_postgres::row::Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            email: row.get("email"),
-            providerData: serde_json::from_value(row.get("providerData")).unwrap(),
-            backgroundID: row.get("backgroundID"),
-            backgroundCustom_enabled: row.get("backgroundCustom_enabled"),
-            backgroundCustom_color: row.get("backgroundCustom_color"),
-            backgroundCustom_url: row.get("backgroundCustom_url"),
-            backgroundCustom_position: row.get("backgroundCustom_position"),
-            addToStream: row.get("addToStream"),
-            lastAccessPolicy: row.get("lastAccessPolicy"),
-            extras: serde_json::from_value(row.get("extras")).unwrap(),
-		}
-	}
-}
 #[Object]
 impl UserHidden {
     async fn id(&self) -> &str { &self.id }
@@ -53,7 +36,23 @@ impl UserHidden {
     async fn lastAccessPolicy(&self) -> &Option<String> { &self.lastAccessPolicy }
     async fn extras(&self) -> &serde_json::Value { &self.extras }
 }
-
+impl From<tokio_postgres::row::Row> for UserHidden {
+	fn from(row: tokio_postgres::row::Row) -> Self {
+		Self {
+            id: ID::from(&row.get::<_, String>("id")),
+            email: row.get("email"),
+            providerData: serde_json::from_value(row.get("providerData")).unwrap(),
+            backgroundID: row.get("backgroundID"),
+            backgroundCustom_enabled: row.get("backgroundCustom_enabled"),
+            backgroundCustom_color: row.get("backgroundCustom_color"),
+            backgroundCustom_url: row.get("backgroundCustom_url"),
+            backgroundCustom_position: row.get("backgroundCustom_position"),
+            addToStream: row.get("addToStream"),
+            lastAccessPolicy: row.get("lastAccessPolicy"),
+            extras: serde_json::from_value(row.get("extras")).unwrap(),
+		}
+	}
+}
 
 /*#[derive(Default)]
 pub struct MutationShard_UserHidden;
@@ -84,9 +83,9 @@ impl SubscriptionShard_UserHidden {
             }
         })
     }
-    async fn userHidden(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = UserHidden> {
+    async fn userHidden(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<UserHidden>> {
         let mut wrapper = get_first_item_from_stream_in_result_in_future(self.userHiddens(ctx, Some(id))).await;
-        let entry = wrapper.nodes.pop().unwrap();
+        let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }
 }

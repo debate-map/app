@@ -1,3 +1,6 @@
+# note: to abort on panics, we could add [..., "-C", "panic=abort"] to the rustflags below;
+#		however, the custom handler in main.rs is preferred, because it lets you customize how much stack-trace detail to print, and "conditionally abort"
+
 # mold
 # ==========
 
