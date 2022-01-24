@@ -34,10 +34,6 @@ RUN USER=root cargo new --bin update-index-helper
 WORKDIR /dm_repo/update-index-helper
 # add one tiny dependency (with no subdeps), so cargo-build updates the index
 RUN echo "void = \"1\"" >> Cargo.toml
-#RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-#RUN cargo build --release --target=x86_64-unknown-linux-musl
-#RUN cargo build --target=x86_64-unknown-linux-musl
-#RUN cargo build -Z timings # can only use this on rust-nightly versions
 RUN cargo build
 
 WORKDIR /dm_repo
@@ -50,20 +46,19 @@ RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packa
 WORKDIR /dm_repo/Packages/app-server-rs
 
 # build the dependencies
-RUN cargo build
-#RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
+#RUN cargo build
+RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
+#RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile -Z self-profile-events=default,args
 # remove the build output of the "dummy version" of app_server_rs
-#RUN rm -f target/x86_64-unknown-linux-musl/release/deps/app_server_rs*
-#RUN rm -f target/x86_64-unknown-linux-musl/debug/deps/app_server_rs*
 RUN rm -f target/debug/deps/app_server_rs*
 
 # now copy the app-server's own code
 COPY Packages/app-server-rs/ .
 # and build the actual app-server program
-#RUN cargo build
+RUN cargo build
 #RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
-RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile
-RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && cp ./*profdata ./kgetOutput_buildTime/
+#RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes -Z self-profile -Z self-profile-events=default,args
+RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
 # ------------------------------------------------------------------------------
 # Final Stage

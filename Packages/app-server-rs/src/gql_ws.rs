@@ -36,10 +36,10 @@ pub fn extend_router(app: Router, client: Client) -> Router {
         .finish();
 
     let result = app
-        .route("/gql-playground", get(graphql_playground).post(graphql_handler))
+        .route("/gql-playground", post(graphql_handler).get(graphql_playground))
         //.route("/graphql", post(gql_post::gqp_post_handler))
         //.route("/graphql", GraphQLSubscription::new(schema.clone()))
-        .route("/graphql", on_service(MethodFilter::GET, GraphQLSubscription::new(schema.clone())).post(graphql_handler))
+        .route("/graphql", post(graphql_handler).on_service(MethodFilter::GET, GraphQLSubscription::new(schema.clone())))
         .layer(
             // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
             CorsLayer::new()

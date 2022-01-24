@@ -124,8 +124,9 @@ Object.assign(scripts, {
 			/*const bundleFilesCmd = `sh -c "mkdir -p ./temp_for_kget && cp cargo-timing.html ./temp_for_kget/ && cp ./*profdata ./temp_for_kget/"`;
 			execSync(`${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerRS(commandArgs[0])} -c dm-app-server-rs -- ${bundleFilesCmd}`);*/
 
-			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${GetPodName_AppServerRS(commandArgs[0])}:/dm_repo/Packages/app-server-rs/kgetOutput_buildTime/. ${localPath}`);
-			console.log(`Files copied to: ${paths.resolve(localPath)}`);
+			const podName = GetPodName_AppServerRS(commandArgs[0]);
+			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${podName}:/dm_repo/Packages/app-server-rs/kgetOutput_buildTime/. ${localPath}`);
+			console.log(`Files copied from "${podName}" to: ${paths.resolve(localPath)}`);
 
 			execSync(`start "" "${paths.resolve(localPath)}"`);
 
@@ -158,6 +159,9 @@ Object.assign(scripts, {
 				execSync(`start "" "${folder}"`);
 			});
 		}),
+
+		// other rust profiling-related commands
+		// 1) $env:RUSTFLAGS = '-Awarnings'; cargo llvm-lines | Select -First 30
 	},
 	ssh: {
 		db: Dynamic(()=>{
