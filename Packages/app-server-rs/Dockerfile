@@ -27,6 +27,7 @@ WORKDIR /dm_repo
 COPY .cargo/config.toml .cargo/config.toml
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
 #ENV RUSTFLAGS=-Awarnings # moved to config.toml (we cannot set RUSTFLAGS from multiple places, so chose config.toml as the location for now)
+ENV CARGO_PROFILE_DEV_DEBUG=0
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
@@ -37,6 +38,7 @@ RUN echo "void = \"1\"" >> Cargo.toml
 RUN cargo build
 
 WORKDIR /dm_repo
+#COPY Cargo.toml Packages/app-server-rs/Cargo.toml
 COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
 
 # copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in app-server's frequently changing own-code)
