@@ -4,14 +4,15 @@ use tokio_postgres::{Client};
 use std::time::Duration;
 
 use crate::utils::general::get_first_item_from_stream_in_result_in_future;
-/*#[derive(serde::Serialize, serde::Deserialize, Clone)]
+
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
     basic: bool,
 	verified: bool,
 	r#mod: bool,
 	admin: bool,
 }
-scalar!(PermissionGroups);*/
+scalar!(PermissionGroups);
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
@@ -23,9 +24,9 @@ pub struct User {
     joinDate: i64,
     //permissionGroups: PermissionGroups,
     //permissionGroups: Json<PermissionGroups>,
-    //permissionGroups: PermissionGroups,
+    permissionGroups: PermissionGroups,
     //permissionGroups: async_graphql::Value,
-    permissionGroups: String,
+    //permissionGroups: String,
     edits: i32,
     lastEditAt: Option<i64>,
 }
@@ -49,9 +50,9 @@ impl From<tokio_postgres::row::Row> for User {
                 admin: true,
             },*/
             //permissionGroups: row.get("permissionGroups"),
-            //permissionGroups: serde_json::from_value(row.get("permissionGroups")).unwrap(),
+            permissionGroups: serde_json::from_value(row.get("permissionGroups")).unwrap(),
             //permissionGroups: async_graphql::value!("{}"),
-            permissionGroups: "{}".to_owned(),
+            //permissionGroups: "{}".to_owned(),
             edits: row.get("edits"),
             lastEditAt: row.get("lastEditAt"),
 		}
@@ -66,8 +67,8 @@ impl User {
     //async fn permissionGroups(&self) -> &PermissionGroups { &self.permissionGroups }
     //async fn permissionGroups(&self) -> Json<PermissionGroups> { self.permissionGroups.clone() }
     //async fn permissionGroups(&self) -> PermissionGroups { PermissionGroups::from(self.permissionGroups) }
-    //async fn permissionGroups(&self) -> &PermissionGroups { &self.permissionGroups }
-    async fn permissionGroups(&self) -> &str { &self.permissionGroups }
+    async fn permissionGroups(&self) -> &PermissionGroups { &self.permissionGroups }
+    //async fn permissionGroups(&self) -> &str { &self.permissionGroups }
     async fn edits(&self) -> &i32 { &self.edits }
     async fn lastEditAt(&self) -> &Option<i64> { &self.lastEditAt }
 }

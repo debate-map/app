@@ -81,7 +81,7 @@ async fn main() {
         };
     });
 
-    println!("App-server-rs launched.48");
+    println!("App-server-rs launched.");
     axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
 
     /*let main_server_future = axum::Server::bind(&addr).serve(app.into_make_service()).await;

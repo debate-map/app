@@ -8,8 +8,8 @@ use crate::utils::general::get_first_item_from_stream_in_result_in_future;
 pub struct UserHidden {
     id: ID,
     email: String,
-    //providerData: serde_json::Value,
-    providerData: String,
+    providerData: serde_json::Value,
+    //providerData: String,
     backgroundID: Option<String>,
     backgroundCustom_enabled: Option<bool>,
     backgroundCustom_color: Option<String>,
@@ -17,8 +17,8 @@ pub struct UserHidden {
     backgroundCustom_position: Option<String>,
     addToStream: bool,
     lastAccessPolicy: Option<String>,
-    //extras: serde_json::Value,
-    extras: String,
+    extras: serde_json::Value,
+    //extras: String,
 }
 impl From<tokio_postgres::row::Row> for UserHidden {
 	fn from(row: tokio_postgres::row::Row) -> Self {
@@ -26,8 +26,8 @@ impl From<tokio_postgres::row::Row> for UserHidden {
 		Self {
             id: ID::from(&row.get::<_, String>("id")),
             email: row.get("email"),
-            //providerData: serde_json::from_value(row.get("providerData")).unwrap(),
-            providerData: "{}".to_owned(),
+            providerData: serde_json::from_value(row.get("providerData")).unwrap(),
+            //providerData: "{}".to_owned(),
             backgroundID: row.get("backgroundID"),
             backgroundCustom_enabled: row.get("backgroundCustom_enabled"),
             backgroundCustom_color: row.get("backgroundCustom_color"),
@@ -35,8 +35,8 @@ impl From<tokio_postgres::row::Row> for UserHidden {
             backgroundCustom_position: row.get("backgroundCustom_position"),
             addToStream: row.get("addToStream"),
             lastAccessPolicy: row.get("lastAccessPolicy"),
-            //extras: serde_json::from_value(row.get("extras")).unwrap(),
-            extras: "{}".to_owned(),
+            extras: serde_json::from_value(row.get("extras")).unwrap(),
+            //extras: "{}".to_owned(),
 		}
 	}
 }
@@ -44,8 +44,8 @@ impl From<tokio_postgres::row::Row> for UserHidden {
 impl UserHidden {
     async fn id(&self) -> &str { &self.id }
     async fn email(&self) -> &str { &self.email }
-    //async fn providerData(&self) -> &serde_json::Value { &self.providerData }
-    async fn providerData(&self) -> &str { &self.providerData }
+    async fn providerData(&self) -> &serde_json::Value { &self.providerData }
+    //async fn providerData(&self) -> &str { &self.providerData }
     async fn backgroundID(&self) -> &Option<String> { &self.backgroundID }
     #[graphql(name = "backgroundCustom_enabled")]
     async fn backgroundCustom_enabled(&self) -> &Option<bool> { &self.backgroundCustom_enabled }
@@ -57,8 +57,8 @@ impl UserHidden {
     async fn backgroundCustom_position(&self) -> &Option<String> { &self.backgroundCustom_position }
     async fn addToStream(&self) -> &bool { &self.addToStream }
     async fn lastAccessPolicy(&self) -> &Option<String> { &self.lastAccessPolicy }
-    //async fn extras(&self) -> &serde_json::Value { &self.extras }
-    async fn extras(&self) -> &str { &self.extras }
+    async fn extras(&self) -> &serde_json::Value { &self.extras }
+    //async fn extras(&self) -> &str { &self.extras }
 }
 //type UserHidden = String;
 
