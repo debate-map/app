@@ -20,7 +20,6 @@ pub struct UserHidden {
 }
 impl From<tokio_postgres::row::Row> for UserHidden {
 	fn from(row: tokio_postgres::row::Row) -> Self {
-        println!("ID as string:{}", row.get::<_, String>("id"));
 		Self {
             id: ID::from(&row.get::<_, String>("id")),
             email: row.get("email"),
@@ -57,32 +56,31 @@ impl UserHidden {
 
 
 /*#[derive(Default)]
-pub struct MutationShard_UserHiddens;
+pub struct MutationShard_UserHidden;
 #[Object]
-impl MutationShard_UserHiddens {
+impl MutationShard_UserHidden {
     async fn empty(&self) -> &str { &"" }
 }*/
 
-pub struct CollectionWrapper2<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> CollectionWrapper2<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_UserHidden<T> { nodes: Vec<T> }
+#[Object] impl<T: OutputType> GQLSet_UserHidden<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
 
 #[derive(Default)]
-pub struct SubscriptionShard_UserHiddens;
+pub struct SubscriptionShard_UserHidden;
 #[Subscription]
-impl SubscriptionShard_UserHiddens {
-    async fn userHiddens(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = CollectionWrapper2<UserHidden>> {
+impl SubscriptionShard_UserHidden {
+    async fn userHiddens(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = GQLSet_UserHidden<UserHidden>> {
         let client = ctx.data::<Client>().unwrap();
 
         let rows = match id {
             Some(id) => client.query("SELECT * FROM \"userHiddens\" WHERE id = $1;", &[&id]).await.unwrap(),
             None => client.query("SELECT * FROM \"userHiddens\";", &[]).await.unwrap(),
         };
-        let userHiddens: Vec<UserHidden> = rows.into_iter().map(|r| r.into()).collect();
-        println!("UserHiddens:{:?}", userHiddens.len());
+        let entries: Vec<UserHidden> = rows.into_iter().map(|r| r.into()).collect();
 
         stream::once(async {
-            CollectionWrapper2 {
-                nodes: userHiddens, 
+            GQLSet_UserHidden {
+                nodes: entries, 
             }
         })
     }

@@ -162,7 +162,7 @@ Object.assign(scripts, {
 			});
 		}),
 
-		// other rust profiling-related commands
+		// other rust profiling-related commands (install with: cargo install cargo-llvm-lines, run: in place you'd run "cargo build")
 		// 1) $env:RUSTFLAGS = '-Awarnings'; cargo llvm-lines | Select -First 30
 	},
 	ssh: {

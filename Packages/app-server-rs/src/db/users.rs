@@ -32,7 +32,7 @@ pub struct User {
 }
 impl From<tokio_postgres::row::Row> for User {
 	fn from(row: tokio_postgres::row::Row) -> Self {
-        println!("ID as string:{}", row.get::<_, String>("id"));
+        //println!("ID as string:{}", row.get::<_, String>("id"));
 		Self {
             //id: ID::from(row.get("id")),
             //id: serde_json::from_value(row.get("id")).unwrap(),
@@ -75,17 +75,17 @@ impl User {
 //type User = String;
 
 #[derive(Default)]
-pub struct QueryShard_Users;
+pub struct QueryShard_User;
 #[Object]
-impl QueryShard_Users {
+impl QueryShard_User {
     /// async-graphql requires that to be at least one entry under the Query section
     async fn empty(&self) -> &str { &"" }
 }
 
 #[derive(Default)]
-pub struct MutationShard_Users;
+pub struct MutationShard_User;
 #[Object]
-impl MutationShard_Users {
+impl MutationShard_User {
     #[graphql(name = "_GetConnectionID")]
     async fn _GetConnectionID(&self, ctx: &Context<'_>) -> Result<GetConnectionID_Result> {
         Ok(GetConnectionID_Result {
@@ -102,8 +102,8 @@ impl GetConnectionID_Result {
     async fn id(&self) -> &str { &self.id }
 }
 
-pub struct CollectionWrapper<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> CollectionWrapper<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_User<T> { nodes: Vec<T> }
+#[Object] impl<T: OutputType> GQLSet_User<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
 
 struct PassConnectionID_Result {
     userID: String,
@@ -114,9 +114,9 @@ impl PassConnectionID_Result {
 }
 
 #[derive(Default)]
-pub struct SubscriptionShard_Users;
+pub struct SubscriptionShard_User;
 #[Subscription]
-impl SubscriptionShard_Users {
+impl SubscriptionShard_User {
     #[graphql(name = "_PassConnectionID")]
     async fn _PassConnectionID(&self, ctx: &Context<'_>, connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
         println!("Connection-id was passed from client:{}", connectionID);
@@ -142,20 +142,20 @@ impl SubscriptionShard_Users {
         stream::iter(0..100)
     }*/
 
-    async fn users(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = CollectionWrapper<User>> {
+    async fn users(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = GQLSet_User<User>> {
         let client = ctx.data::<Client>().unwrap();
 
         let rows = match id {
             Some(id) => client.query("SELECT * FROM \"users\" WHERE id = $1;", &[&id]).await.unwrap(),
             None => client.query("SELECT * FROM \"users\";", &[]).await.unwrap(),
         };
-        let users: Vec<User> = rows.into_iter().map(|r| r.into()).collect();
-        println!("Users:{:?}", users.len());
-        //let users: Vec<User> = vec!["hi".to_string()];
+        let entries: Vec<User> = rows.into_iter().map(|r| r.into()).collect();
+        //println!("Users:{:?}", entries.len());
+        //let entries: Vec<User> = vec!["hi".to_string()];
 
         stream::once(async {
-            CollectionWrapper {
-                nodes: users, 
+            GQLSet_User {
+                nodes: entries, 
             }
         })
     }

@@ -21,6 +21,8 @@ mod pgclient;
 mod db {
     pub mod users;
     pub mod user_hiddens;
+    pub mod global_data;
+    pub mod maps;
 }
 mod utils {
     pub mod general;

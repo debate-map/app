@@ -8,8 +8,8 @@ use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use tokio_postgres::{Client};
 use tower_http::cors::{CorsLayer, Origin};
-use crate::db::user_hiddens::{SubscriptionShard_UserHiddens};
-use crate::db::users::{QueryShard_Users, MutationShard_Users, SubscriptionShard_Users};
+use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
+use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
 use crate::gql_ws::RootSchema;
 
 pub struct PostShape;
