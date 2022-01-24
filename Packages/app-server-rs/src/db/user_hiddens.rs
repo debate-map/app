@@ -9,7 +9,6 @@ pub struct UserHidden {
     id: ID,
     email: String,
     providerData: serde_json::Value,
-    //providerData: String,
     backgroundID: Option<String>,
     backgroundCustom_enabled: Option<bool>,
     backgroundCustom_color: Option<String>,
@@ -18,7 +17,6 @@ pub struct UserHidden {
     addToStream: bool,
     lastAccessPolicy: Option<String>,
     extras: serde_json::Value,
-    //extras: String,
 }
 impl From<tokio_postgres::row::Row> for UserHidden {
 	fn from(row: tokio_postgres::row::Row) -> Self {
@@ -27,7 +25,6 @@ impl From<tokio_postgres::row::Row> for UserHidden {
             id: ID::from(&row.get::<_, String>("id")),
             email: row.get("email"),
             providerData: serde_json::from_value(row.get("providerData")).unwrap(),
-            //providerData: "{}".to_owned(),
             backgroundID: row.get("backgroundID"),
             backgroundCustom_enabled: row.get("backgroundCustom_enabled"),
             backgroundCustom_color: row.get("backgroundCustom_color"),
@@ -36,7 +33,6 @@ impl From<tokio_postgres::row::Row> for UserHidden {
             addToStream: row.get("addToStream"),
             lastAccessPolicy: row.get("lastAccessPolicy"),
             extras: serde_json::from_value(row.get("extras")).unwrap(),
-            //extras: "{}".to_owned(),
 		}
 	}
 }
@@ -45,7 +41,6 @@ impl UserHidden {
     async fn id(&self) -> &str { &self.id }
     async fn email(&self) -> &str { &self.email }
     async fn providerData(&self) -> &serde_json::Value { &self.providerData }
-    //async fn providerData(&self) -> &str { &self.providerData }
     async fn backgroundID(&self) -> &Option<String> { &self.backgroundID }
     #[graphql(name = "backgroundCustom_enabled")]
     async fn backgroundCustom_enabled(&self) -> &Option<bool> { &self.backgroundCustom_enabled }
@@ -58,16 +53,8 @@ impl UserHidden {
     async fn addToStream(&self) -> &bool { &self.addToStream }
     async fn lastAccessPolicy(&self) -> &Option<String> { &self.lastAccessPolicy }
     async fn extras(&self) -> &serde_json::Value { &self.extras }
-    //async fn extras(&self) -> &str { &self.extras }
 }
-//type UserHidden = String;
 
-/*#[derive(Default)]
-pub struct QueryShard_UserHiddens;
-#[Object]
-impl QueryShard_UserHiddens {
-    async fn empty(&self) -> &str { &"" }
-}*/
 
 /*#[derive(Default)]
 pub struct MutationShard_UserHiddens;
@@ -92,7 +79,6 @@ impl SubscriptionShard_UserHiddens {
         };
         let userHiddens: Vec<UserHidden> = rows.into_iter().map(|r| r.into()).collect();
         println!("UserHiddens:{:?}", userHiddens.len());
-        //let userHiddens: Vec<UserHidden> = vec!["hi".to_string()];
 
         stream::once(async {
             CollectionWrapper2 {

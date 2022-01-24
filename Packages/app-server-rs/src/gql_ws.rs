@@ -10,18 +10,15 @@ use tokio_postgres::{Client};
 use tower_http::cors::{CorsLayer, Origin};
 use crate::db::user_hiddens::{SubscriptionShard_UserHiddens};
 use crate::db::users::{QueryShard_Users, MutationShard_Users, SubscriptionShard_Users};
+use crate::gql_post::graphql_post_handler;
 
 #[derive(MergedObject, Default)]
-struct QueryRoot(QueryShard_Users, /*QueryShard_UserHiddens*/);
+pub struct QueryRoot(QueryShard_Users, /*QueryShard_UserHiddens*/);
 #[derive(MergedObject, Default)]
-struct MutationRoot(MutationShard_Users, /*MutationShard_UserHiddens*/);
+pub struct MutationRoot(MutationShard_Users, /*MutationShard_UserHiddens*/);
 #[derive(MergedSubscription, Default)]
-struct SubscriptionRoot(SubscriptionShard_Users, SubscriptionShard_UserHiddens);
-type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
-
-async fn graphql_handler(schema: extract::Extension<RootSchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
-}
+pub struct SubscriptionRoot(SubscriptionShard_Users, SubscriptionShard_UserHiddens);
+pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
@@ -36,10 +33,10 @@ pub fn extend_router(app: Router, client: Client) -> Router {
         .finish();
 
     let result = app
-        .route("/gql-playground", post(graphql_handler).get(graphql_playground))
+        .route("/gql-playground", post(graphql_post_handler).get(graphql_playground))
         //.route("/graphql", post(gql_post::gqp_post_handler))
         //.route("/graphql", GraphQLSubscription::new(schema.clone()))
-        .route("/graphql", post(graphql_handler).on_service(MethodFilter::GET, GraphQLSubscription::new(schema.clone())))
+        .route("/graphql", post(graphql_post_handler).on_service(MethodFilter::GET, GraphQLSubscription::new(schema.clone())))
         .layer(
             // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
             CorsLayer::new()
