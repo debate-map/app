@@ -10,3 +10,19 @@ pub async fn get_first_item_from_stream<T>(stream: impl Stream<Item = T>) -> T {
     let first_item = stream.collect::<Vec<T>>().await.pop().unwrap();
     first_item
 }
+
+pub fn apply_gql_filter<T>(filter: &Option<serde_json::Value>, entries: Vec<T>) -> Vec<T> {
+    let before_length = entries.len();
+    let result: Vec<T> = entries.into_iter().filter(|entry| {
+        match &filter {
+            Some(filter) => {
+                // todo: equalTo, in, contains
+                false
+            },
+            None => true
+        }
+    }).collect();
+    println!("Filtering... @before:{} @filter:{:?} @after:{}", before_length, filter, result.len());
+    // todo
+    result
+}

@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::get_first_item_from_stream_in_result_in_future;
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
 
 #[derive(SimpleObject)]
 pub struct MapNodePhrasing {
@@ -46,14 +46,14 @@ pub struct GQLSet_MapNodePhrasing<T> { nodes: Vec<T> }
 pub struct SubscriptionShard_MapNodePhrasing;
 #[Subscription]
 impl SubscriptionShard_MapNodePhrasing {
-    async fn mapNodePhrasings(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = GQLSet_MapNodePhrasing<MapNodePhrasing>> {
+    async fn nodePhrasings(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodePhrasing<MapNodePhrasing>> {
         let client = ctx.data::<Client>().unwrap();
 
         let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"mapNodePhrasings\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"mapNodePhrasings\";", &[]).await.unwrap(),
+            Some(id) => client.query("SELECT * FROM \"nodePhrasings\" WHERE id = $1;", &[&id]).await.unwrap(),
+            None => client.query("SELECT * FROM \"nodePhrasings\";", &[]).await.unwrap(),
         };
-        let entries: Vec<MapNodePhrasing> = rows.into_iter().map(|r| r.into()).collect();
+        let entries: Vec<MapNodePhrasing> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
 
         stream::once(async {
             GQLSet_MapNodePhrasing {
@@ -61,8 +61,8 @@ impl SubscriptionShard_MapNodePhrasing {
             }
         })
     }
-    async fn mapNodePhrasing(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<MapNodePhrasing>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.mapNodePhrasings(ctx, Some(id))).await;
+    async fn nodePhrasing(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodePhrasing>> {
+        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.nodePhrasings(ctx, Some(id), filter)).await;
         let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }

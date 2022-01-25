@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use tokio_postgres::{Client};
 use std::time::Duration;
 
-use crate::utils::general::get_first_item_from_stream_in_result_in_future;
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
@@ -128,14 +128,14 @@ impl SubscriptionShard_User {
         stream::iter(0..100)
     }*/
 
-    async fn users(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = GQLSet_User<User>> {
+    async fn users(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User<User>> {
         let client = ctx.data::<Client>().unwrap();
 
         let rows = match id {
             Some(id) => client.query("SELECT * FROM \"users\" WHERE id = $1;", &[&id]).await.unwrap(),
             None => client.query("SELECT * FROM \"users\";", &[]).await.unwrap(),
         };
-        let entries: Vec<User> = rows.into_iter().map(|r| r.into()).collect();
+        let entries: Vec<User> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
         //println!("Users:{:?}", entries.len());
         //let entries: Vec<User> = vec!["hi".to_string()];
 
@@ -145,10 +145,10 @@ impl SubscriptionShard_User {
             }
         })
     }
-    async fn user(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<User>> {
+    async fn user(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<User>> {
         /*let stream = self.users(ctx, Some(id)).await.unwrap();
         let mut wrapper: CollectionWrapper<User> = stream.collect::<Vec<CollectionWrapper<User>>>().await.pop().unwrap();*/
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.users(ctx, Some(id))).await;
+        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.users(ctx, Some(id), filter)).await;
         let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }

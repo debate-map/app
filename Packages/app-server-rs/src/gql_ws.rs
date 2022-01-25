@@ -18,6 +18,11 @@ use crate::db::maps::SubscriptionShard_Map;
 use crate::db::medias::SubscriptionShard_Media;
 use crate::db::node_child_links::SubscriptionShard_NodeChildLink;
 use crate::db::node_phrasings::SubscriptionShard_MapNodePhrasing;
+use crate::db::node_ratings::SubscriptionShard_NodeRating;
+use crate::db::node_revisions::SubscriptionShard_MapNodeRevision;
+use crate::db::node_tags::SubscriptionShard_MapNodeTag;
+use crate::db::nodes::SubscriptionShard_MapNode;
+use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
@@ -33,7 +38,9 @@ pub struct SubscriptionRoot(
     SubscriptionShard_GlobalData, SubscriptionShard_Map,
     SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
     SubscriptionShard_CommandRun, SubscriptionShard_Proposal, SubscriptionShard_UserInfo,
-    SubscriptionShard_MapNodeEdit, SubscriptionShard_NodeChildLink, SubscriptionShard_MapNodePhrasing,
+    SubscriptionShard_MapNode, SubscriptionShard_NodeChildLink, SubscriptionShard_MapNodeEdit,
+    SubscriptionShard_MapNodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_MapNodeRevision, SubscriptionShard_MapNodeTag,
+    SubscriptionShard_Share,
 );
 pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 

@@ -33,6 +33,11 @@ mod db {
     pub mod map_node_edits;
     pub mod node_child_links;
     pub mod node_phrasings;
+    pub mod node_ratings;
+    pub mod node_revisions;
+    pub mod node_tags;
+    pub mod nodes;
+    pub mod shares;
 }
 mod utils {
     pub mod general;

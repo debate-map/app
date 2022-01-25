@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::get_first_item_from_stream_in_result_in_future;
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
 
 #[derive(SimpleObject)]
 pub struct Map {
@@ -51,14 +51,14 @@ pub struct GQLSet_Map<T> { nodes: Vec<T> }
 pub struct SubscriptionShard_Map;
 #[Subscription]
 impl SubscriptionShard_Map {
-    async fn maps(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = GQLSet_Map<Map>> {
+    async fn maps(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Map<Map>> {
         let client = ctx.data::<Client>().unwrap();
 
         let rows = match id {
             Some(id) => client.query("SELECT * FROM \"maps\" WHERE id = $1;", &[&id]).await.unwrap(),
             None => client.query("SELECT * FROM \"maps\";", &[]).await.unwrap(),
         };
-        let entries: Vec<Map> = rows.into_iter().map(|r| r.into()).collect();
+        let entries: Vec<Map> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
 
         stream::once(async {
             GQLSet_Map {
@@ -66,8 +66,8 @@ impl SubscriptionShard_Map {
             }
         })
     }
-    async fn map(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<Map>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.maps(ctx, Some(id))).await;
+    async fn map(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Map>> {
+        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.maps(ctx, Some(id), filter)).await;
         let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }

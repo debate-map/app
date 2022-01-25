@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::get_first_item_from_stream_in_result_in_future;
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
 
 #[derive(SimpleObject)]
 pub struct Media {
@@ -37,14 +37,14 @@ pub struct GQLSet_Media<T> { nodes: Vec<T> }
 pub struct SubscriptionShard_Media;
 #[Subscription]
 impl SubscriptionShard_Media {
-    async fn medias(&self, ctx: &Context<'_>, id: Option<String>) -> impl Stream<Item = GQLSet_Media<Media>> {
+    async fn medias(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Media<Media>> {
         let client = ctx.data::<Client>().unwrap();
 
         let rows = match id {
             Some(id) => client.query("SELECT * FROM \"medias\" WHERE id = $1;", &[&id]).await.unwrap(),
             None => client.query("SELECT * FROM \"medias\";", &[]).await.unwrap(),
         };
-        let entries: Vec<Media> = rows.into_iter().map(|r| r.into()).collect();
+        let entries: Vec<Media> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
 
         stream::once(async {
             GQLSet_Media {
@@ -52,8 +52,8 @@ impl SubscriptionShard_Media {
             }
         })
     }
-    async fn media(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<Media>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.medias(ctx, Some(id))).await;
+    async fn media(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Media>> {
+        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.medias(ctx, Some(id), filter)).await;
         let entry = wrapper.nodes.pop();
         stream::once(async { entry })
     }
