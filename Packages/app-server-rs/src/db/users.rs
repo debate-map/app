@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription};
+use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use tokio_postgres::{Client};
 use std::time::Duration;
@@ -17,7 +17,7 @@ scalar!(PermissionGroups);
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
 //type User = String;
-#[derive(Clone)]
+#[derive(SimpleObject)]
 pub struct User {
     id: ID,
     displayName: String,
@@ -30,20 +30,6 @@ pub struct User {
     //permissionGroups: String,
     edits: i32,
     lastEditAt: Option<i64>,
-}
-#[Object]
-impl User {
-    async fn id(&self) -> &str { &self.id }
-    async fn displayName(&self) -> &str { &self.displayName }
-    async fn photoURL(&self) -> &Option<String> { &self.photoURL }
-    async fn joinDate(&self) -> &i64 { &self.joinDate }
-    //async fn permissionGroups(&self) -> &PermissionGroups { &self.permissionGroups }
-    //async fn permissionGroups(&self) -> Json<PermissionGroups> { self.permissionGroups.clone() }
-    //async fn permissionGroups(&self) -> PermissionGroups { PermissionGroups::from(self.permissionGroups) }
-    async fn permissionGroups(&self) -> &PermissionGroups { &self.permissionGroups }
-    //async fn permissionGroups(&self) -> &str { &self.permissionGroups }
-    async fn edits(&self) -> &i32 { &self.edits }
-    async fn lastEditAt(&self) -> &Option<i64> { &self.lastEditAt }
 }
 impl From<tokio_postgres::row::Row> for User {
 	fn from(row: tokio_postgres::row::Row) -> Self {

@@ -9,9 +9,15 @@ use axum::{extract, AddExtensionLayer, Router};
 use tokio_postgres::{Client};
 use tower_http::cors::{CorsLayer, Origin};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
+use crate::db::command_runs::SubscriptionShard_CommandRun;
+use crate::db::feedback_proposals::SubscriptionShard_Proposal;
+use crate::db::feedback_user_infos::SubscriptionShard_UserInfo;
 use crate::db::global_data::SubscriptionShard_GlobalData;
+use crate::db::map_node_edits::SubscriptionShard_MapNodeEdit;
 use crate::db::maps::SubscriptionShard_Map;
 use crate::db::medias::SubscriptionShard_Media;
+use crate::db::node_child_links::SubscriptionShard_NodeChildLink;
+use crate::db::node_phrasings::SubscriptionShard_MapNodePhrasing;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
@@ -26,6 +32,8 @@ pub struct SubscriptionRoot(
     SubscriptionShard_User, SubscriptionShard_UserHidden,
     SubscriptionShard_GlobalData, SubscriptionShard_Map,
     SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
+    SubscriptionShard_CommandRun, SubscriptionShard_Proposal, SubscriptionShard_UserInfo,
+    SubscriptionShard_MapNodeEdit, SubscriptionShard_NodeChildLink, SubscriptionShard_MapNodePhrasing,
 );
 pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 

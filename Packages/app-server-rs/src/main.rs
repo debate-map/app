@@ -27,6 +27,12 @@ mod db {
     pub mod terms;
     pub mod access_policies;
     pub mod medias;
+    pub mod command_runs;
+    pub mod feedback_proposals;
+    pub mod feedback_user_infos;
+    pub mod map_node_edits;
+    pub mod node_child_links;
+    pub mod node_phrasings;
 }
 mod utils {
     pub mod general;

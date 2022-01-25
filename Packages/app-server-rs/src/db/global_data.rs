@@ -1,18 +1,13 @@
-use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType};
+use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
 use crate::utils::general::get_first_item_from_stream_in_result_in_future;
 
-#[derive(Clone)]
+#[derive(SimpleObject)]
 pub struct GlobalData {
     id: ID,
     extras: serde_json::Value,
-}
-#[Object]
-impl GlobalData {
-    async fn id(&self) -> &str { &self.id }
-    async fn extras(&self) -> &serde_json::Value { &self.extras }
 }
 impl From<tokio_postgres::row::Row> for GlobalData {
 	fn from(row: tokio_postgres::row::Row) -> Self {

@@ -1,29 +1,20 @@
 use std::panic;
 
-use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType};
+use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
 use crate::utils::general::get_first_item_from_stream_in_result_in_future;
 
-#[derive(Clone)]
+#[derive(SimpleObject)]
 pub struct AccessPolicy {
     id: ID,
 	creator: String,
 	createdAt: i64,
     name: String,
     permissions: serde_json::Value,
-    permissions_userExtends: serde_json::Value,
-}
-#[Object]
-impl AccessPolicy {
-    async fn id(&self) -> &str { &self.id }
-    async fn creator(&self) -> &str { &self.creator }
-    async fn createdAt(&self) -> &i64 { &self.createdAt }
-    async fn name(&self) -> &str { &self.name }
-    async fn permissions(&self) -> &serde_json::Value { &self.permissions }
     #[graphql(name = "permissions_userExtends")]
-    async fn permissions_userExtends(&self) -> &serde_json::Value { &self.permissions_userExtends }
+    permissions_userExtends: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for AccessPolicy {
 	fn from(row: tokio_postgres::row::Row) -> Self {

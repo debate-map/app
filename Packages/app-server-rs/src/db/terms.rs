@@ -1,10 +1,10 @@
-use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType};
+use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
 use crate::utils::general::get_first_item_from_stream_in_result_in_future;
 
-#[derive(Clone)]
+#[derive(SimpleObject)]
 pub struct Term {
     id: ID,
     accessPolicy: String,
@@ -17,20 +17,6 @@ pub struct Term {
     definition: String,
     note: Option<String>,
     attachments: Vec<serde_json::Value>,
-}
-#[Object]
-impl Term {
-    async fn id(&self) -> &str { &self.id }
-    async fn accessPolicy(&self) -> &str { &self.accessPolicy }
-    async fn creator(&self) -> &str { &self.creator }
-    async fn createdAt(&self) -> &i64 { &self.createdAt }
-    async fn name(&self) -> &str { &self.name }
-    async fn forms(&self) -> &Vec<String> { &self.forms }
-    async fn disambiguation(&self) -> &Option<String> { &self.disambiguation }
-    async fn r#type(&self) -> &str { &self.r#type }
-    async fn definition(&self) -> &str { &self.definition }
-    async fn note(&self) -> &Option<String> { &self.note }
-    async fn attachments(&self) -> &Vec<serde_json::Value> { &self.attachments }
 }
 impl From<tokio_postgres::row::Row> for Term {
 	fn from(row: tokio_postgres::row::Row) -> Self {

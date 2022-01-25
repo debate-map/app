@@ -1,10 +1,10 @@
-use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType};
+use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
 use crate::utils::general::get_first_item_from_stream_in_result_in_future;
 
-#[derive(Clone)]
+#[derive(SimpleObject)]
 pub struct Media {
     id: ID,
     accessPolicy: String,
@@ -14,17 +14,6 @@ pub struct Media {
     r#type: String,
     url: String,
     description: String,
-}
-#[Object]
-impl Media {
-    async fn id(&self) -> &str { &self.id }
-    async fn accessPolicy(&self) -> &str { &self.accessPolicy }
-    async fn creator(&self) -> &str { &self.creator }
-    async fn createdAt(&self) -> &i64 { &self.createdAt }
-    async fn name(&self) -> &str { &self.name }
-    async fn r#type(&self) -> &str { &self.r#type }
-    async fn url(&self) -> &str { &self.url }
-    async fn description(&self) -> &str { &self.description }
 }
 impl From<tokio_postgres::row::Row> for Media {
 	fn from(row: tokio_postgres::row::Row) -> Self {

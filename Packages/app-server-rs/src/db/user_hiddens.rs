@@ -1,40 +1,26 @@
-use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType};
+use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
 use crate::utils::general::get_first_item_from_stream_in_result_in_future;
 
-#[derive(Clone)]
+#[derive(SimpleObject)]
 pub struct UserHidden {
     id: ID,
     email: String,
     providerData: serde_json::Value,
     backgroundID: Option<String>,
+    #[graphql(name = "backgroundCustom_enabled")]
     backgroundCustom_enabled: Option<bool>,
+    #[graphql(name = "backgroundCustom_color")]
     backgroundCustom_color: Option<String>,
+    #[graphql(name = "backgroundCustom_url")]
     backgroundCustom_url: Option<String>,
+    #[graphql(name = "backgroundCustom_position")]
     backgroundCustom_position: Option<String>,
     addToStream: bool,
     lastAccessPolicy: Option<String>,
     extras: serde_json::Value,
-}
-#[Object]
-impl UserHidden {
-    async fn id(&self) -> &str { &self.id }
-    async fn email(&self) -> &str { &self.email }
-    async fn providerData(&self) -> &serde_json::Value { &self.providerData }
-    async fn backgroundID(&self) -> &Option<String> { &self.backgroundID }
-    #[graphql(name = "backgroundCustom_enabled")]
-    async fn backgroundCustom_enabled(&self) -> &Option<bool> { &self.backgroundCustom_enabled }
-    #[graphql(name = "backgroundCustom_color")]
-    async fn backgroundCustom_color(&self) -> &Option<String> { &self.backgroundCustom_color }
-    #[graphql(name = "backgroundCustom_url")]
-    async fn backgroundCustom_url(&self) -> &Option<String> { &self.backgroundCustom_url }
-    #[graphql(name = "backgroundCustom_position")]
-    async fn backgroundCustom_position(&self) -> &Option<String> { &self.backgroundCustom_position }
-    async fn addToStream(&self) -> &bool { &self.addToStream }
-    async fn lastAccessPolicy(&self) -> &Option<String> { &self.lastAccessPolicy }
-    async fn extras(&self) -> &serde_json::Value { &self.extras }
 }
 impl From<tokio_postgres::row::Row> for UserHidden {
 	fn from(row: tokio_postgres::row::Row) -> Self {
