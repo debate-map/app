@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct Proposal {
@@ -30,33 +30,23 @@ impl From<tokio_postgres::row::Row> for Proposal {
 	}
 }
 
-pub struct GQLSet_Proposal<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_Proposal<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_Proposal { nodes: Vec<Proposal> }
+#[Object] impl GQLSet_Proposal { async fn nodes(&self) -> &Vec<Proposal> { &self.nodes } }
+impl GQLSet<Proposal> for GQLSet_Proposal {
+    fn from(entries: Vec<Proposal>) -> GQLSet_Proposal { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<Proposal> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_Proposal;
 #[Subscription]
 impl SubscriptionShard_Proposal {
     #[graphql(name = "feedback_proposals")]
-    async fn feedback_proposals(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Proposal<Proposal>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"feedback_proposals\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"feedback_proposals\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<Proposal> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_Proposal {
-                nodes: entries, 
-            }
-        })
+    async fn feedback_proposals(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Proposal> {
+        handle_generic_gql_collection_request::<Proposal, GQLSet_Proposal>(ctx, "feedback_proposals", filter).await
     }
     #[graphql(name = "feedback_proposal")]
     async fn feedback_proposal(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Proposal>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.feedback_proposals(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<Proposal, GQLSet_Proposal>(ctx, "feedback_proposals", &id).await
     }
 }

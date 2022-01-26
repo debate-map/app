@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct Media {
@@ -30,31 +30,21 @@ impl From<tokio_postgres::row::Row> for Media {
 	}
 }
 
-pub struct GQLSet_Media<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_Media<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_Media { nodes: Vec<Media> }
+#[Object] impl GQLSet_Media { async fn nodes(&self) -> &Vec<Media> { &self.nodes } }
+impl GQLSet<Media> for GQLSet_Media {
+    fn from(entries: Vec<Media>) -> GQLSet_Media { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<Media> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_Media;
 #[Subscription]
 impl SubscriptionShard_Media {
-    async fn medias(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Media<Media>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"medias\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"medias\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<Media> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_Media {
-                nodes: entries, 
-            }
-        })
+    async fn medias(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Media> {
+        handle_generic_gql_collection_request::<Media, GQLSet_Media>(ctx, "medias", filter).await
     }
     async fn media(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Media>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.medias(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<Media, GQLSet_Media>(ctx, "medias", &id).await
     }
 }

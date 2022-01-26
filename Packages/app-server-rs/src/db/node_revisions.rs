@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct MapNodeRevision {
@@ -41,31 +41,21 @@ impl From<tokio_postgres::row::Row> for MapNodeRevision {
 	}
 }
 
-pub struct GQLSet_MapNodeRevision<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_MapNodeRevision<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_MapNodeRevision { nodes: Vec<MapNodeRevision> }
+#[Object] impl GQLSet_MapNodeRevision { async fn nodes(&self) -> &Vec<MapNodeRevision> { &self.nodes } }
+impl GQLSet<MapNodeRevision> for GQLSet_MapNodeRevision {
+    fn from(entries: Vec<MapNodeRevision>) -> GQLSet_MapNodeRevision { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<MapNodeRevision> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_MapNodeRevision;
 #[Subscription]
 impl SubscriptionShard_MapNodeRevision {
-    async fn nodeRevisions(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeRevision<MapNodeRevision>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"nodeRevisions\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"nodeRevisions\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<MapNodeRevision> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_MapNodeRevision {
-                nodes: entries, 
-            }
-        })
+    async fn nodeRevisions(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeRevision> {
+        handle_generic_gql_collection_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", filter).await
     }
     async fn nodeRevision(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeRevision>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.nodeRevisions(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", &id).await
     }
 }

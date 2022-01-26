@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct MapNodeEdit {
@@ -24,31 +24,21 @@ impl From<tokio_postgres::row::Row> for MapNodeEdit {
 	}
 }
 
-pub struct GQLSet_MapNodeEdit<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_MapNodeEdit<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_MapNodeEdit { nodes: Vec<MapNodeEdit> }
+#[Object] impl GQLSet_MapNodeEdit { async fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes } }
+impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
+    fn from(entries: Vec<MapNodeEdit>) -> GQLSet_MapNodeEdit { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_MapNodeEdit;
 #[Subscription]
 impl SubscriptionShard_MapNodeEdit {
-    async fn mapNodeEdits(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeEdit<MapNodeEdit>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"mapNodeEdits\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"mapNodeEdits\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<MapNodeEdit> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_MapNodeEdit {
-                nodes: entries, 
-            }
-        })
+    async fn mapNodeEdits(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeEdit> {
+        handle_generic_gql_collection_request::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
     }
     async fn mapNodeEdit(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeEdit>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.mapNodeEdits(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", &id).await
     }
 }

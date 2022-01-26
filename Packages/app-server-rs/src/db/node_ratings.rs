@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct NodeRating {
@@ -28,31 +28,21 @@ impl From<tokio_postgres::row::Row> for NodeRating {
 	}
 }
 
-pub struct GQLSet_NodeRating<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_NodeRating<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_NodeRating { nodes: Vec<NodeRating> }
+#[Object] impl GQLSet_NodeRating { async fn nodes(&self) -> &Vec<NodeRating> { &self.nodes } }
+impl GQLSet<NodeRating> for GQLSet_NodeRating {
+    fn from(entries: Vec<NodeRating>) -> GQLSet_NodeRating { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<NodeRating> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_NodeRating;
 #[Subscription]
 impl SubscriptionShard_NodeRating {
-    async fn nodeRatings(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_NodeRating<NodeRating>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"nodeRatings\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"nodeRatings\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<NodeRating> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_NodeRating {
-                nodes: entries, 
-            }
-        })
+    async fn nodeRatings(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_NodeRating> {
+        handle_generic_gql_collection_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
     }
     async fn nodeRating(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeRating>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.nodeRatings(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", &id).await
     }
 }

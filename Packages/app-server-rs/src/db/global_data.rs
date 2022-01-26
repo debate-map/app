@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct GlobalData {
@@ -18,31 +18,21 @@ impl From<tokio_postgres::row::Row> for GlobalData {
 	}
 }
 
-pub struct GQLSet_GlobalData<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_GlobalData<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_GlobalData { nodes: Vec<GlobalData> }
+#[Object] impl GQLSet_GlobalData { async fn nodes(&self) -> &Vec<GlobalData> { &self.nodes } }
+impl GQLSet<GlobalData> for GQLSet_GlobalData {
+    fn from(entries: Vec<GlobalData>) -> GQLSet_GlobalData { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<GlobalData> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_GlobalData;
 #[Subscription]
 impl SubscriptionShard_GlobalData {
-    async fn globalData(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_GlobalData<GlobalData>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"globalData\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"globalData\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<GlobalData> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_GlobalData {
-                nodes: entries, 
-            }
-        })
+    async fn globalData(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_GlobalData> {
+        handle_generic_gql_collection_request::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter).await
     }
     async fn globalDatum(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<GlobalData>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.globalData(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", &id).await
     }
 }

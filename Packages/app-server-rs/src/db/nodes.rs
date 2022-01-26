@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct MapNode {
@@ -35,31 +35,21 @@ impl From<tokio_postgres::row::Row> for MapNode {
 	}
 }
 
-pub struct GQLSet_MapNode<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_MapNode<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_MapNode { nodes: Vec<MapNode> }
+#[Object] impl GQLSet_MapNode { async fn nodes(&self) -> &Vec<MapNode> { &self.nodes } }
+impl GQLSet<MapNode> for GQLSet_MapNode {
+    fn from(entries: Vec<MapNode>) -> GQLSet_MapNode { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<MapNode> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_MapNode;
 #[Subscription]
 impl SubscriptionShard_MapNode {
-    async fn nodes(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNode<MapNode>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"nodes\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"nodes\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<MapNode> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_MapNode {
-                nodes: entries, 
-            }
-        })
+    async fn nodes(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNode> {
+        handle_generic_gql_collection_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", filter).await
     }
     async fn node(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNode>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.nodes(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", &id).await
     }
 }

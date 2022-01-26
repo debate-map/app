@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct UserHidden {
@@ -47,31 +47,22 @@ impl MutationShard_UserHidden {
     async fn empty(&self) -> &str { &"" }
 }*/
 
-pub struct GQLSet_UserHidden<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_UserHidden<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_UserHidden { nodes: Vec<UserHidden> }
+#[Object] impl GQLSet_UserHidden { async fn nodes(&self) -> &Vec<UserHidden> { &self.nodes } }
+impl GQLSet<UserHidden> for GQLSet_UserHidden {
+    fn from(entries: Vec<UserHidden>) -> GQLSet_UserHidden { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<UserHidden> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_UserHidden;
 #[Subscription]
 impl SubscriptionShard_UserHidden {
-    async fn userHiddens(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_UserHidden<UserHidden>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"userHiddens\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"userHiddens\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<UserHidden> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_UserHidden {
-                nodes: entries, 
-            }
-        })
+    async fn userHiddens(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_UserHidden> {
+        handle_generic_gql_collection_request::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
     }
-    async fn userHidden(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<UserHidden>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.userHiddens(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+    async fn userHidden(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<UserHidden>> {
+        handle_generic_gql_doc_request::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", &id).await
+
     }
 }

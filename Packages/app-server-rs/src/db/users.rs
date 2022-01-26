@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use tokio_postgres::{Client};
 use std::time::Duration;
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
@@ -88,8 +88,15 @@ impl GetConnectionID_Result {
     async fn id(&self) -> &str { &self.id }
 }
 
-pub struct GQLSet_User<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_User<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+//#[derive(SimpleObject)] pub struct GQLSet_User<T> { nodes: Vec<T> }
+/*pub struct GQLSet_User<T> { nodes: Vec<T> }
+#[Object] impl<T: OutputType> GQLSet_User<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
+pub struct GQLSet_User { nodes: Vec<User> }
+#[Object] impl GQLSet_User { async fn nodes(&self) -> &Vec<User> { &self.nodes } }
+impl GQLSet<User> for GQLSet_User {
+    fn from(entries: Vec<User>) -> GQLSet_User { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<User> { &self.nodes }
+}
 
 struct PassConnectionID_Result {
     userID: String,
@@ -128,28 +135,15 @@ impl SubscriptionShard_User {
         stream::iter(0..100)
     }*/
 
-    async fn users(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User<User>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"users\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"users\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<User> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-        //println!("Users:{:?}", entries.len());
-        //let entries: Vec<User> = vec!["hi".to_string()];
-
-        stream::once(async {
-            GQLSet_User {
-                nodes: entries, 
-            }
-        })
+    async fn users(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User> {
+        handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
     }
-    async fn user(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<User>> {
+    async fn user(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<User>> {
         /*let stream = self.users(ctx, Some(id)).await.unwrap();
         let mut wrapper: CollectionWrapper<User> = stream.collect::<Vec<CollectionWrapper<User>>>().await.pop().unwrap();*/
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.users(ctx, Some(id), filter)).await;
+        /*let mut wrapper = get_first_item_from_stream_in_result_in_future(self.users(ctx, Some(json!({"id": {"equalTo": id}})))).await;
         let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        stream::once(async { entry })*/
+        handle_generic_gql_doc_request::<User, GQLSet_User>(ctx, "users", &id).await
     }
 }

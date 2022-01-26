@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, Simpl
 use futures_util::{Stream, stream, TryFutureExt};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, apply_gql_filter};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(SimpleObject)]
 pub struct UserInfo {
@@ -18,33 +18,23 @@ impl From<tokio_postgres::row::Row> for UserInfo {
 	}
 }
 
-pub struct GQLSet_UserInfo<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_UserInfo<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }
+pub struct GQLSet_UserInfo { nodes: Vec<UserInfo> }
+#[Object] impl GQLSet_UserInfo { async fn nodes(&self) -> &Vec<UserInfo> { &self.nodes } }
+impl GQLSet<UserInfo> for GQLSet_UserInfo {
+    fn from(entries: Vec<UserInfo>) -> GQLSet_UserInfo { Self { nodes: entries } }
+    fn nodes(&self) -> &Vec<UserInfo> { &self.nodes }
+}
 
 #[derive(Default)]
 pub struct SubscriptionShard_UserInfo;
 #[Subscription]
 impl SubscriptionShard_UserInfo {
     #[graphql(name = "feedback_userInfos")]
-    async fn feedback_userInfos(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_UserInfo<UserInfo>> {
-        let client = ctx.data::<Client>().unwrap();
-
-        let rows = match id {
-            Some(id) => client.query("SELECT * FROM \"feedback_userInfos\" WHERE id = $1;", &[&id]).await.unwrap(),
-            None => client.query("SELECT * FROM \"feedback_userInfos\";", &[]).await.unwrap(),
-        };
-        let entries: Vec<UserInfo> = apply_gql_filter(&filter, rows.into_iter().map(|r| r.into()).collect());
-
-        stream::once(async {
-            GQLSet_UserInfo {
-                nodes: entries, 
-            }
-        })
+    async fn feedback_userInfos(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_UserInfo> {
+        handle_generic_gql_collection_request::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", filter).await
     }
     #[graphql(name = "feedback_userInfo")]
     async fn feedback_userInfo(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<UserInfo>> {
-        let mut wrapper = get_first_item_from_stream_in_result_in_future(self.feedback_userInfos(ctx, Some(id), filter)).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })
+        handle_generic_gql_doc_request::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", &id).await
     }
 }
