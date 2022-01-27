@@ -43,6 +43,7 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-graphql-axum",
+ "async-trait",
  "axum",
  "bytes",
  "futures",
@@ -55,6 +56,7 @@ dependencies = [
  "tokio-postgres",
  "tower",
  "tower-http",
+ "tower-service",
  "tracing",
  "tracing-subscriber",
 ]

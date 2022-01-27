@@ -1,6 +1,6 @@
-use std::error::Error;
+use std::{error::Error, any::TypeId, pin::Pin, task::Poll};
 use anyhow::bail;
-use async_graphql::{Result, async_stream::stream, Context, OutputType, Object};
+use async_graphql::{Result, async_stream::stream, Context, OutputType, Object, Positioned, parser::types::Field};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use serde_json::json;
 use tokio_postgres::{Client, Row};
@@ -49,7 +49,7 @@ pub trait GQLSet<T> {
     fn nodes(&self) -> &Vec<T>;
 }
 
-pub async fn get_entries_in_collection<T: From<Row>>(ctx: &Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> Vec<T> {
+pub async fn get_entries_in_collection<T: From<Row>>(ctx: &Context<'_>, collection_name: &str, filter: &Option<serde_json::Value>) -> Vec<T> {
     let client = ctx.data::<Client>().unwrap();
 
     let filters_sql = match get_sql_for_filters(&filter) {
@@ -66,14 +66,43 @@ pub async fn get_entries_in_collection<T: From<Row>>(ctx: &Context<'_>, collecti
     let entries: Vec<T> = rows.into_iter().map(|r| r.into()).collect();
     entries
 }
-pub async fn handle_generic_gql_collection_request<T: From<Row>, GQLSetVariant: GQLSet<T>>(ctx: &Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> {
-    let entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, filter).await;
-    stream::once(async {
+pub async fn handle_generic_gql_collection_request<T: From<Row> + Send + 'static, GQLSetVariant: GQLSet<T>>(ctx: &Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> {
+    let entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
+    let base_stream = stream::once(async {
         GQLSetVariant::from(entries)
-    })
+    });
+    Stream_WithDropListener::new(base_stream, collection_name, filter)
 }
-pub async fn handle_generic_gql_doc_request<T: From<Row>, GQLSetVariant: GQLSet<T>>(ctx: &Context<'_>, collection_name: &str, id: &str) -> impl Stream<Item = Option<T>> {
-    let mut entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, Some(json!({"id": {"equalTo": id}}))).await;
+pub async fn handle_generic_gql_doc_request<T: From<Row> + Send + 'static, GQLSetVariant: GQLSet<T>>(ctx: &Context<'_>, collection_name: &str, id: &str) -> impl Stream<Item = Option<T>> {
+    let filter = Some(json!({"id": {"equalTo": id}}));
+    let mut entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
     let entry = entries.pop();
-    stream::once(async { entry })
+    let base_stream = stream::once(async { entry });
+    Stream_WithDropListener::new(base_stream, collection_name, filter)
+}
+
+pub struct Stream_WithDropListener<T> {
+    inner_stream: Pin<Box<dyn Stream<Item = T> + Send>>,
+    collection_name: String,
+    filter: Option<serde_json::Value>,
+}
+impl<T> Stream_WithDropListener<T> {
+    pub fn new(inner_stream_new: impl Stream<Item = T> + Send + 'static, collection_name: &str, filter: Option<serde_json::Value>) -> Self {
+        Self {
+            inner_stream: Box::pin(inner_stream_new),
+            collection_name: collection_name.to_owned(),
+            filter
+        }
+    }
+}
+impl<T> Drop for Stream_WithDropListener<T> {
+    fn drop(&mut self) {
+        println!("Stream_WithDropListener got dropped. @address:{:p} @collection:{} @filter:{:?}", self, self.collection_name, self.filter);
+    }
+}
+impl<T> Stream for Stream_WithDropListener<T> {
+    type Item = T;
+    fn poll_next(mut self: Pin<&mut Self>, c: &mut std::task::Context<'_>) -> Poll<Option<<Self as Stream>::Item>> {
+        self.inner_stream.as_mut().poll_next(c)
+    }
 }

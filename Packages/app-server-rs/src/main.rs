@@ -1,4 +1,7 @@
 #![feature(backtrace)]
+#![feature(unsized_locals)]
+#![feature(unsized_fn_params)]
+
 use axum::{
     response::{Html},
     routing::{get},
@@ -41,6 +44,8 @@ mod db {
 }
 mod utils {
     pub mod general;
+    pub mod gql_general_extension;
+    pub mod async_graphql_axum_custom;
 }
 
 // Our shared state

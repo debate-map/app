@@ -1,13 +1,27 @@
+use std::borrow::Cow;
+use std::convert::Infallible;
+use std::future::Future;
+use std::str::FromStr;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{Schema, MergedObject, MergedSubscription};
-use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
 use axum::http::Method;
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use tokio_postgres::{Client};
+use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
+use async_graphql::futures_util::task::{Context, Poll};
+use async_graphql::http::{WebSocketProtocols, WsMessage, ALL_WEBSOCKET_PROTOCOLS};
+use axum::body::{boxed, BoxBody, HttpBody};
+use axum::extract::ws::{CloseFrame, Message};
+use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
+use axum::http::{self, Request, Response, StatusCode};
+use axum::Error;
+use futures_util::future::{BoxFuture, Ready};
+use futures_util::stream::{SplitSink, SplitStream};
+use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
 use crate::db::command_runs::SubscriptionShard_CommandRun;
 use crate::db::feedback_proposals::SubscriptionShard_Proposal;
@@ -27,6 +41,10 @@ use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
 use crate::gql_post::graphql_post_handler;
+//use async_graphql_axum::{GraphQLSubscription, GraphQLRequest, GraphQLResponse, GraphQLProtocol, GraphQLWebSocket};
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
+//use crate::utils::gql_general_extension::{CustomExtension, CustomExtensionCreator};
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(QueryShard_User, /*QueryShard_UserHidden*/);
@@ -54,6 +72,7 @@ pub fn extend_router(app: Router, client: Client) -> Router {
     let schema = Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         .data(client)
         //.data(connection)
+        //.extension(CustomExtensionCreator::new())
         .finish();
 
     let result = app
