@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct MapNodeRevision {
     id: ID,
     node: String,
@@ -41,7 +41,7 @@ impl From<tokio_postgres::row::Row> for MapNodeRevision {
 	}
 }
 
-pub struct GQLSet_MapNodeRevision { nodes: Vec<MapNodeRevision> }
+#[derive(Clone)] pub struct GQLSet_MapNodeRevision { nodes: Vec<MapNodeRevision> }
 #[Object] impl GQLSet_MapNodeRevision { async fn nodes(&self) -> &Vec<MapNodeRevision> { &self.nodes } }
 impl GQLSet<MapNodeRevision> for GQLSet_MapNodeRevision {
     fn from(entries: Vec<MapNodeRevision>) -> GQLSet_MapNodeRevision { Self { nodes: entries } }
@@ -52,10 +52,10 @@ impl GQLSet<MapNodeRevision> for GQLSet_MapNodeRevision {
 pub struct SubscriptionShard_MapNodeRevision;
 #[Subscription]
 impl SubscriptionShard_MapNodeRevision {
-    async fn nodeRevisions(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeRevision> {
+    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeRevision> + 'a {
         handle_generic_gql_collection_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", filter).await
     }
-    async fn nodeRevision(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeRevision>> {
+    async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeRevision>> + 'a {
         handle_generic_gql_doc_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", &id).await
     }
 }

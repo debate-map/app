@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct CommandRun {
     id: ID,
     actor: String,
@@ -31,7 +31,7 @@ impl From<tokio_postgres::row::Row> for CommandRun {
 	}
 }
 
-pub struct GQLSet_CommandRun { nodes: Vec<CommandRun> }
+#[derive(Clone)] pub struct GQLSet_CommandRun { nodes: Vec<CommandRun> }
 #[Object] impl GQLSet_CommandRun { async fn nodes(&self) -> &Vec<CommandRun> { &self.nodes } }
 impl GQLSet<CommandRun> for GQLSet_CommandRun {
     fn from(entries: Vec<CommandRun>) -> GQLSet_CommandRun { Self { nodes: entries } }
@@ -42,10 +42,10 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
 pub struct SubscriptionShard_CommandRun;
 #[Subscription]
 impl SubscriptionShard_CommandRun {
-    async fn commandRuns(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_CommandRun> {
+    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_CommandRun> + 'a {
         handle_generic_gql_collection_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
     }
-    async fn commandRun(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<CommandRun>> {
+    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<CommandRun>> + 'a {
         handle_generic_gql_doc_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", &id).await
     }
 }

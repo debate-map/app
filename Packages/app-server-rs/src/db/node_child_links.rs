@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct NodeChildLink {
     id: ID,
 	creator: String,
@@ -42,7 +42,7 @@ impl From<tokio_postgres::row::Row> for NodeChildLink {
 	}
 }
 
-pub struct GQLSet_NodeChildLink { nodes: Vec<NodeChildLink> }
+#[derive(Clone)] pub struct GQLSet_NodeChildLink { nodes: Vec<NodeChildLink> }
 #[Object] impl GQLSet_NodeChildLink { async fn nodes(&self) -> &Vec<NodeChildLink> { &self.nodes } }
 impl GQLSet<NodeChildLink> for GQLSet_NodeChildLink {
     fn from(entries: Vec<NodeChildLink>) -> GQLSet_NodeChildLink { Self { nodes: entries } }
@@ -53,10 +53,10 @@ impl GQLSet<NodeChildLink> for GQLSet_NodeChildLink {
 pub struct SubscriptionShard_NodeChildLink;
 #[Subscription]
 impl SubscriptionShard_NodeChildLink {
-    async fn nodeChildLinks(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_NodeChildLink> {
+    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_NodeChildLink> + 'a {
         handle_generic_gql_collection_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", filter).await
     }
-    async fn nodeChildLink(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeChildLink>> {
+    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
         handle_generic_gql_doc_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", &id).await
     }
 }

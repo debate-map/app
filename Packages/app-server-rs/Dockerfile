@@ -2,7 +2,9 @@
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.58 as cargo-build
+#FROM rust:1.58 as cargo-build
+# rather than use a mutable "version", lock the source image to a specific digest (so ~nightly "rust:XXX" image changes doesn't cause complete rebuilds of our build-chain)
+FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
 
 # install mold linker
 RUN apt-get update \

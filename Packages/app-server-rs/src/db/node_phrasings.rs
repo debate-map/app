@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct MapNodePhrasing {
     id: ID,
 	creator: String,
@@ -39,7 +39,7 @@ impl From<tokio_postgres::row::Row> for MapNodePhrasing {
 	}
 }
 
-pub struct GQLSet_MapNodePhrasing { nodes: Vec<MapNodePhrasing> }
+#[derive(Clone)] pub struct GQLSet_MapNodePhrasing { nodes: Vec<MapNodePhrasing> }
 #[Object] impl GQLSet_MapNodePhrasing { async fn nodes(&self) -> &Vec<MapNodePhrasing> { &self.nodes } }
 impl GQLSet<MapNodePhrasing> for GQLSet_MapNodePhrasing {
     fn from(entries: Vec<MapNodePhrasing>) -> GQLSet_MapNodePhrasing { Self { nodes: entries } }
@@ -50,10 +50,10 @@ impl GQLSet<MapNodePhrasing> for GQLSet_MapNodePhrasing {
 pub struct SubscriptionShard_MapNodePhrasing;
 #[Subscription]
 impl SubscriptionShard_MapNodePhrasing {
-    async fn nodePhrasings(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodePhrasing> {
+    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodePhrasing> + 'a {
         handle_generic_gql_collection_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", filter).await
     }
-    async fn nodePhrasing(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodePhrasing>> {
+    async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodePhrasing>> + 'a {
         handle_generic_gql_doc_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", &id).await
     }
 }

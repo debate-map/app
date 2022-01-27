@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct NodeRating {
     id: ID,
     accessPolicy: String,
@@ -28,7 +28,7 @@ impl From<tokio_postgres::row::Row> for NodeRating {
 	}
 }
 
-pub struct GQLSet_NodeRating { nodes: Vec<NodeRating> }
+#[derive(Clone)] pub struct GQLSet_NodeRating { nodes: Vec<NodeRating> }
 #[Object] impl GQLSet_NodeRating { async fn nodes(&self) -> &Vec<NodeRating> { &self.nodes } }
 impl GQLSet<NodeRating> for GQLSet_NodeRating {
     fn from(entries: Vec<NodeRating>) -> GQLSet_NodeRating { Self { nodes: entries } }
@@ -39,10 +39,10 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
 pub struct SubscriptionShard_NodeRating;
 #[Subscription]
 impl SubscriptionShard_NodeRating {
-    async fn nodeRatings(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_NodeRating> {
+    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_NodeRating> + 'a {
         handle_generic_gql_collection_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
     }
-    async fn nodeRating(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeRating>> {
+    async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeRating>> + 'a {
         handle_generic_gql_doc_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", &id).await
     }
 }

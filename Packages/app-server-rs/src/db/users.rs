@@ -17,7 +17,7 @@ scalar!(PermissionGroups);
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
 //type User = String;
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct User {
     id: ID,
     displayName: String,
@@ -88,10 +88,10 @@ impl GetConnectionID_Result {
     async fn id(&self) -> &str { &self.id }
 }
 
-//#[derive(SimpleObject)] pub struct GQLSet_User<T> { nodes: Vec<T> }
-/*pub struct GQLSet_User<T> { nodes: Vec<T> }
+//#[derive(SimpleObject, Clone)] #[derive(Clone)] pub struct GQLSet_User<T> { nodes: Vec<T> }
+/*#[derive(Clone)] pub struct GQLSet_User<T> { nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet_User<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
-pub struct GQLSet_User { nodes: Vec<User> }
+#[derive(Clone)] pub struct GQLSet_User { nodes: Vec<User> }
 #[Object] impl GQLSet_User { async fn nodes(&self) -> &Vec<User> { &self.nodes } }
 impl GQLSet<User> for GQLSet_User {
     fn from(entries: Vec<User>) -> GQLSet_User { Self { nodes: entries } }
@@ -150,13 +150,13 @@ impl SubscriptionShard_User {
         stream::iter(0..100)
     }*/
 
-    async fn users(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User> {
+    async fn users<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User> + 'a {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
         /*let mut base_stream = handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await;
         let wrapped_stream = Stream_WithDropListener::new(base_stream);
         wrapped_stream*/
     }
-    async fn user(&self, ctx: &Context<'_>, id: String) -> impl Stream<Item = Option<User>> {
+    async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {
         /*let stream = self.users(ctx, Some(id)).await.unwrap();
         let mut wrapper: CollectionWrapper<User> = stream.collect::<Vec<CollectionWrapper<User>>>().await.pop().unwrap();*/
         /*let mut wrapper = get_first_item_from_stream_in_result_in_future(self.users(ctx, Some(json!({"id": {"equalTo": id}})))).await;

@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct Share {
     id: ID,
 	creator: String,
@@ -28,7 +28,7 @@ impl From<tokio_postgres::row::Row> for Share {
 	}
 }
 
-pub struct GQLSet_Share { nodes: Vec<Share> }
+#[derive(Clone)] pub struct GQLSet_Share { nodes: Vec<Share> }
 #[Object] impl GQLSet_Share { async fn nodes(&self) -> &Vec<Share> { &self.nodes } }
 impl GQLSet<Share> for GQLSet_Share {
     fn from(entries: Vec<Share>) -> GQLSet_Share { Self { nodes: entries } }
@@ -39,10 +39,10 @@ impl GQLSet<Share> for GQLSet_Share {
 pub struct SubscriptionShard_Share;
 #[Subscription]
 impl SubscriptionShard_Share {
-    async fn shares(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Share> {
+    async fn shares<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Share> + 'a {
         handle_generic_gql_collection_request::<Share, GQLSet_Share>(ctx, "shares", filter).await
     }
-    async fn share(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Share>> {
+    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Share>> + 'a {
         handle_generic_gql_doc_request::<Share, GQLSet_Share>(ctx, "shares", &id).await
     }
 }

@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct Map {
     id: ID,
     accessPolicy: String,
@@ -44,7 +44,7 @@ impl From<tokio_postgres::row::Row> for Map {
 	}
 }
 
-pub struct GQLSet_Map { nodes: Vec<Map> }
+#[derive(Clone)] pub struct GQLSet_Map { nodes: Vec<Map> }
 #[Object] impl GQLSet_Map { async fn nodes(&self) -> &Vec<Map> { &self.nodes } }
 impl GQLSet<Map> for GQLSet_Map {
     fn from(entries: Vec<Map>) -> GQLSet_Map { Self { nodes: entries } }
@@ -55,10 +55,10 @@ impl GQLSet<Map> for GQLSet_Map {
 pub struct SubscriptionShard_Map;
 #[Subscription]
 impl SubscriptionShard_Map {
-    async fn maps(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Map> {
+    async fn maps<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Map> + 'a {
         handle_generic_gql_collection_request::<Map, GQLSet_Map>(ctx, "maps", filter).await
     }
-    async fn map(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Map>> {
+    async fn map<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Map>> + 'a {
         handle_generic_gql_doc_request::<Map, GQLSet_Map>(ctx, "maps", &id).await
     }
 }

@@ -1,9 +1,13 @@
-use std::{error::Error, any::TypeId, pin::Pin, task::Poll};
+use std::{error::Error, any::TypeId, pin::Pin, task::Poll, sync::{Arc, Mutex}, time::Duration};
 use anyhow::bail;
-use async_graphql::{Result, async_stream::stream, Context, OutputType, Object, Positioned, parser::types::Field};
+use async_graphql::{Result, async_stream::{stream, self}, Context, OutputType, Object, Positioned, parser::types::Field};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
+use serde::Serialize;
 use serde_json::json;
 use tokio_postgres::{Client, Row};
+//use tokio::sync::Mutex;
+
+use crate::gql_ws::{Storage, LQStorage};
 
 // temp (these will not be useful once the streams are live/auto-update)
 pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debug>(result: impl Future<Output = Result<impl Stream<Item = T>, U>>) -> T {
@@ -66,41 +70,79 @@ pub async fn get_entries_in_collection<T: From<Row>>(ctx: &Context<'_>, collecti
     let entries: Vec<T> = rows.into_iter().map(|r| r.into()).collect();
     entries
 }
-pub async fn handle_generic_gql_collection_request<T: From<Row> + Send + 'static, GQLSetVariant: GQLSet<T>>(ctx: &Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> {
+pub async fn handle_generic_gql_collection_request<'a,
+    T: 'static + From<Row> + Send + Clone,
+    GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
+>(ctx: &'a Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> + 'a {
     let entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
-    let base_stream = stream::once(async {
+    /*let base_stream = stream::once(async {
         GQLSetVariant::from(entries)
-    });
-    Stream_WithDropListener::new(base_stream, collection_name, filter)
+    });*/
+    //let stream_value = GQLSetVariant::from(entries);
+    /*let entries_clone = entries.clone();
+    let mut base_stream = async_stream::stream! {
+        loop {
+            futures_timer::Delay::new(Duration::from_secs(1)).await;
+            //yield &stream_value;
+            yield GQLSetVariant::from(entries_clone.clone());
+            /*let entries_as_json = serde_json::to_value(entries).unwrap();
+            let entries_clone = serde_json::from_value(entries_as_json).unwrap();
+            yield GQLSetVariant::from(entries_clone);*/
+        }
+    };*/
+    let base_stream = stream::repeat(GQLSetVariant::from(entries));
+
+    let storage_wrapper = ctx.data::<Storage>().unwrap();
+    let mut guard = storage_wrapper.lock();
+    let storage = guard.as_mut().unwrap();
+    storage.notify_lq_start(&collection_name, &filter);
+
+    Stream_WithDropListener::new(base_stream, storage_wrapper, collection_name, filter)
 }
-pub async fn handle_generic_gql_doc_request<T: From<Row> + Send + 'static, GQLSetVariant: GQLSet<T>>(ctx: &Context<'_>, collection_name: &str, id: &str) -> impl Stream<Item = Option<T>> {
+pub async fn handle_generic_gql_doc_request<'a,
+    T: 'static + From<Row> + Send + Clone,
+    GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
+>(ctx: &'a Context<'_>, collection_name: &str, id: &str) -> impl Stream<Item = Option<T>> + 'a {
     let filter = Some(json!({"id": {"equalTo": id}}));
     let mut entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
     let entry = entries.pop();
     let base_stream = stream::once(async { entry });
-    Stream_WithDropListener::new(base_stream, collection_name, filter)
+
+    let storage_wrapper = ctx.data::<Storage>().unwrap();
+    let mut guard = storage_wrapper.lock();
+    let storage = guard.as_mut().unwrap();
+    storage.notify_lq_start(&collection_name, &filter);
+
+    Stream_WithDropListener::new(base_stream, storage_wrapper, collection_name, filter)
 }
 
-pub struct Stream_WithDropListener<T> {
+pub struct Stream_WithDropListener<'a, T> {
     inner_stream: Pin<Box<dyn Stream<Item = T> + Send>>,
+    storage_wrapper: &'a Arc<Mutex<LQStorage>>,
     collection_name: String,
     filter: Option<serde_json::Value>,
 }
-impl<T> Stream_WithDropListener<T> {
-    pub fn new(inner_stream_new: impl Stream<Item = T> + Send + 'static, collection_name: &str, filter: Option<serde_json::Value>) -> Self {
+impl<'a, T> Stream_WithDropListener<'a, T> {
+    pub fn new(inner_stream_new: impl Stream<Item = T> + Send + 'static, storage_wrapper: &'a Arc<Mutex<LQStorage>>, collection_name: &str, filter: Option<serde_json::Value>) -> Self {
         Self {
             inner_stream: Box::pin(inner_stream_new),
+            storage_wrapper: storage_wrapper,
             collection_name: collection_name.to_owned(),
             filter
         }
     }
 }
-impl<T> Drop for Stream_WithDropListener<T> {
+impl<'a, T> Drop for Stream_WithDropListener<'a, T> {
     fn drop(&mut self) {
-        println!("Stream_WithDropListener got dropped. @address:{:p} @collection:{} @filter:{:?}", self, self.collection_name, self.filter);
+        //println!("Stream_WithDropListener got dropped. @address:{:p} @collection:{} @filter:{:?}", self, self.collection_name, self.filter);
+        //let mut storage: LQStorage = storage_wrapper.to_owned();
+        //let storage = self.storage_wrapper.lock.await;
+        let mut guard = self.storage_wrapper.lock();
+        let storage = guard.as_mut().unwrap();
+        storage.notify_lq_end(self.collection_name.as_str(), &self.filter);
     }
 }
-impl<T> Stream for Stream_WithDropListener<T> {
+impl<'a, T> Stream for Stream_WithDropListener<'a, T> {
     type Item = T;
     fn poll_next(mut self: Pin<&mut Self>, c: &mut std::task::Context<'_>) -> Poll<Option<<Self as Stream>::Item>> {
         self.inner_stream.as_mut().poll_next(c)

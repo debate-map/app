@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct Proposal {
     id: ID,
     r#type: String,
@@ -30,7 +30,7 @@ impl From<tokio_postgres::row::Row> for Proposal {
 	}
 }
 
-pub struct GQLSet_Proposal { nodes: Vec<Proposal> }
+#[derive(Clone)] pub struct GQLSet_Proposal { nodes: Vec<Proposal> }
 #[Object] impl GQLSet_Proposal { async fn nodes(&self) -> &Vec<Proposal> { &self.nodes } }
 impl GQLSet<Proposal> for GQLSet_Proposal {
     fn from(entries: Vec<Proposal>) -> GQLSet_Proposal { Self { nodes: entries } }
@@ -42,11 +42,11 @@ pub struct SubscriptionShard_Proposal;
 #[Subscription]
 impl SubscriptionShard_Proposal {
     #[graphql(name = "feedback_proposals")]
-    async fn feedback_proposals(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Proposal> {
+    async fn feedback_proposals<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_Proposal> + 'a {
         handle_generic_gql_collection_request::<Proposal, GQLSet_Proposal>(ctx, "feedback_proposals", filter).await
     }
     #[graphql(name = "feedback_proposal")]
-    async fn feedback_proposal(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Proposal>> {
+    async fn feedback_proposal<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Proposal>> + 'a {
         handle_generic_gql_doc_request::<Proposal, GQLSet_Proposal>(ctx, "feedback_proposals", &id).await
     }
 }

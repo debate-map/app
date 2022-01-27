@@ -4,7 +4,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Clone)]
 pub struct MapNode {
     id: ID,
 	creator: String,
@@ -35,7 +35,7 @@ impl From<tokio_postgres::row::Row> for MapNode {
 	}
 }
 
-pub struct GQLSet_MapNode { nodes: Vec<MapNode> }
+#[derive(Clone)] pub struct GQLSet_MapNode { nodes: Vec<MapNode> }
 #[Object] impl GQLSet_MapNode { async fn nodes(&self) -> &Vec<MapNode> { &self.nodes } }
 impl GQLSet<MapNode> for GQLSet_MapNode {
     fn from(entries: Vec<MapNode>) -> GQLSet_MapNode { Self { nodes: entries } }
@@ -46,10 +46,10 @@ impl GQLSet<MapNode> for GQLSet_MapNode {
 pub struct SubscriptionShard_MapNode;
 #[Subscription]
 impl SubscriptionShard_MapNode {
-    async fn nodes(&self, ctx: &Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNode> {
+    async fn nodes<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNode> + 'a {
         handle_generic_gql_collection_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", filter).await
     }
-    async fn node(&self, ctx: &Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNode>> {
+    async fn node<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNode>> + 'a {
         handle_generic_gql_doc_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", &id).await
     }
 }
