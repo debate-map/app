@@ -3,6 +3,8 @@ use bytes::Bytes;
 use futures::{future, StreamExt, Sink, ready};
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
+use crate::store::storage::Storage;
+
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
     msgs.into_iter()
@@ -35,7 +37,7 @@ pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket,
  * 3) Connecting to postgres pod through shell, then running "pg_recvlogical".
  * In this function, we use approach 2.
  */
-pub async fn start_streaming_changes(client: Client, connection: Connection<Socket, NoTlsStream>) -> Result<Client, tokio_postgres::Error> {
+pub async fn start_streaming_changes(client: Client, connection: Connection<Socket, NoTlsStream>, storage: Storage) -> Result<Client, tokio_postgres::Error> {
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -68,6 +70,20 @@ pub async fn start_streaming_changes(client: Client, connection: Connection<Sock
         // type: XLogData (WAL data, ie. change of data in db)
         if event[0] == b'w' {
             println!("Got XLogData/data-change event:{:?}", event);
+            let change = event;
+            let change_collection = change["collection"];
+
+            let guard = storage.lock();
+            //let storage = guard.as_ref().unwrap();
+            let storage = guard.unwrap();
+
+            for (lq_key, lq_info) in storage.live_queries {
+                if lq_key["collection"] != change_collection { continue; }
+                // todo
+                for change_listener in lq_info.change_listeners {
+                    change_listener(change);
+                }
+            }
         }
         // type: keepalive message
         else if event[0] == b'k' {

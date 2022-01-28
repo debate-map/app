@@ -1,6 +1,6 @@
 #![feature(backtrace)]
-#![feature(unsized_locals)]
-#![feature(unsized_fn_params)]
+//#![feature(unsized_locals)]
+//#![feature(unsized_fn_params)]
 
 use axum::{
     response::{Html},
@@ -17,6 +17,8 @@ use std::{
     sync::{Arc, Mutex}, panic, backtrace::Backtrace,
 };
 use tokio::{sync::broadcast, runtime::Runtime};
+
+use crate::store::storage::{Storage, AppState};
 
 mod gql_ws;
 mod gql_post;
@@ -42,16 +44,15 @@ mod db {
     pub mod nodes;
     pub mod shares;
 }
+mod store {
+    pub mod storage;
+}
 mod utils {
     pub mod general;
+    pub mod gql_result_stream;
     pub mod gql_general_extension;
     pub mod async_graphql_axum_custom;
-}
-
-// Our shared state
-pub struct AppState {
-    pub user_set: Mutex<HashSet<String>>,
-    pub tx: broadcast::Sender<String>,
+    pub mod type_aliases;
 }
 
 /*#[panic_handler]
@@ -76,6 +77,7 @@ async fn main() {
     let (tx, _rx) = broadcast::channel(100);
 
     let app_state = Arc::new(AppState { user_set, tx });
+    let storage = Storage::default();
 
     let app = Router::new()
         .route("/", get(index))
@@ -101,7 +103,7 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
     let (client, connection) = pgclient::create_client(false).await;
-    let app = gql_ws::extend_router(app, client);
+    let app = gql_ws::extend_router(app, client, storage).unwrap(); // test
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -113,10 +115,18 @@ async fn main() {
 
     let (client2, connection2) = pgclient::create_client(true).await;
     let _handler = tokio::spawn(async {
-        match pgclient::start_streaming_changes(client2, connection2).await {
-            Ok(result) => { println!("Done! {:?}", result); },
-            Err(err) => { println!("Error:{:?}", err); }
-        };
+        let mut errors_hit = 0;
+        while errors_hit < 5 {
+            match pgclient::start_streaming_changes(client2, connection2, storage).await {
+                Ok(result) => {
+                    println!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
+                },
+                Err(err) => {
+                    println!("PGClient loop had error:{:?}", err);
+                    errors_hit += 1;
+                }
+            };
+        }
     });
 
     println!("App-server-rs launched.");

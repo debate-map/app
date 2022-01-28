@@ -1,4 +1,4 @@
-use std::{error::Error, any::TypeId, pin::Pin, task::Poll, sync::{Arc, Mutex}, time::Duration};
+use std::{error::Error, any::TypeId, pin::Pin, task::{Poll, Waker}, sync::{Arc, Mutex}, time::Duration};
 use anyhow::bail;
 use async_graphql::{Result, async_stream::{stream, self}, Context, OutputType, Object, Positioned, parser::types::Field};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
@@ -7,7 +7,9 @@ use serde_json::json;
 use tokio_postgres::{Client, Row};
 //use tokio::sync::Mutex;
 
-use crate::gql_ws::{Storage, LQStorage};
+use crate::store::storage::{Storage, LQStorage};
+
+use super::gql_result_stream::GQLResultStream;
 
 // temp (these will not be useful once the streams are live/auto-update)
 pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debug>(result: impl Future<Output = Result<impl Stream<Item = T>, U>>) -> T {
@@ -75,29 +77,16 @@ pub async fn handle_generic_gql_collection_request<'a,
     GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> + 'a {
     let entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
-    /*let base_stream = stream::once(async {
-        GQLSetVariant::from(entries)
-    });*/
-    //let stream_value = GQLSetVariant::from(entries);
-    /*let entries_clone = entries.clone();
-    let mut base_stream = async_stream::stream! {
-        loop {
-            futures_timer::Delay::new(Duration::from_secs(1)).await;
-            //yield &stream_value;
-            yield GQLSetVariant::from(entries_clone.clone());
-            /*let entries_as_json = serde_json::to_value(entries).unwrap();
-            let entries_clone = serde_json::from_value(entries_as_json).unwrap();
-            yield GQLSetVariant::from(entries_clone);*/
-        }
-    };*/
-    let base_stream = stream::repeat(GQLSetVariant::from(entries));
 
     let storage_wrapper = ctx.data::<Storage>().unwrap();
     let mut guard = storage_wrapper.lock();
     let storage = guard.as_mut().unwrap();
-    storage.notify_lq_start(&collection_name, &filter);
-
-    Stream_WithDropListener::new(base_stream, storage_wrapper, collection_name, filter)
+    
+    let stream = GQLResultStream::new(storage_wrapper, collection_name, filter, GQLSetVariant::from(entries));
+    storage.notify_lq_start(&collection_name, &filter, |new_entries| {
+        stream.push_entry(new_entries);
+    });
+    stream
 }
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'static + From<Row> + Send + Clone,
@@ -106,17 +95,19 @@ pub async fn handle_generic_gql_doc_request<'a,
     let filter = Some(json!({"id": {"equalTo": id}}));
     let mut entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
     let entry = entries.pop();
-    let base_stream = stream::once(async { entry });
 
     let storage_wrapper = ctx.data::<Storage>().unwrap();
     let mut guard = storage_wrapper.lock();
     let storage = guard.as_mut().unwrap();
-    storage.notify_lq_start(&collection_name, &filter);
 
-    Stream_WithDropListener::new(base_stream, storage_wrapper, collection_name, filter)
+    let stream = GQLResultStream::new(storage_wrapper, collection_name, filter, entry);
+    storage.notify_lq_start(&collection_name, &filter, |new_entries| {
+        stream.push_entry(new_entries);
+    });
+    stream
 }
 
-pub struct Stream_WithDropListener<'a, T> {
+/*pub struct Stream_WithDropListener<'a, T> {
     inner_stream: Pin<Box<dyn Stream<Item = T> + Send>>,
     storage_wrapper: &'a Arc<Mutex<LQStorage>>,
     collection_name: String,
@@ -128,7 +119,7 @@ impl<'a, T> Stream_WithDropListener<'a, T> {
             inner_stream: Box::pin(inner_stream_new),
             storage_wrapper: storage_wrapper,
             collection_name: collection_name.to_owned(),
-            filter
+            filter,
         }
     }
 }
@@ -147,4 +138,4 @@ impl<'a, T> Stream for Stream_WithDropListener<'a, T> {
     fn poll_next(mut self: Pin<&mut Self>, c: &mut std::task::Context<'_>) -> Poll<Option<<Self as Stream>::Item>> {
         self.inner_stream.as_mut().poll_next(c)
     }
-}
+}*/

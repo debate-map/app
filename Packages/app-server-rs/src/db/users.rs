@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use tokio_postgres::{Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request, Stream_WithDropListener};
+use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
@@ -121,47 +121,14 @@ impl SubscriptionShard_User {
     }
 
     // tests
-    /*async fn interval(&self, #[graphql(default = 1)] n: i32) -> impl Stream<Item = i32> {
-        /*let mut value = 0;
-        let mut base_stream = async_stream::stream! {
-            loop {
-                futures_timer::Delay::new(Duration::from_secs(1)).await;
-                value += n;
-                yield value;
-            }
-        };*/
-        let mut base_stream = stream::iter(0..100);
-
-        /*let box_of_stream = Box::new(base_stream);
-        let wrapped_stream = Stream_WithDropListener::new(box_of_stream);*/
-        /*let mut pin_of_box_of_stream = Box::pin(base_stream);
-        let stream = pin_of_box_of_stream.as_ref();
-        let stream2 = pin_of_box_of_stream.as_mut();
-        let wrapped_stream = Stream_WithDropListener::new(stream);*/
-        let wrapped_stream = {
-            let mut pin_of_box_of_stream = Pin::new(&mut base_stream);
-            let stream = pin_of_box_of_stream.as_ref();
-            let stream2 = pin_of_box_of_stream.as_mut();
-            Stream_WithDropListener::new(pin_of_box_of_stream)
-        };
-        wrapped_stream
-    }*/
     /*async fn test(&self, /*mutation_type: Option<MutationType>*/) -> impl Stream<Item = i32> {
         stream::iter(0..100)
     }*/
 
     async fn users<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User> + 'a {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
-        /*let mut base_stream = handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await;
-        let wrapped_stream = Stream_WithDropListener::new(base_stream);
-        wrapped_stream*/
     }
     async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {
-        /*let stream = self.users(ctx, Some(id)).await.unwrap();
-        let mut wrapper: CollectionWrapper<User> = stream.collect::<Vec<CollectionWrapper<User>>>().await.pop().unwrap();*/
-        /*let mut wrapper = get_first_item_from_stream_in_result_in_future(self.users(ctx, Some(json!({"id": {"equalTo": id}})))).await;
-        let entry = wrapper.nodes.pop();
-        stream::once(async { entry })*/
         handle_generic_gql_doc_request::<User, GQLSet_User>(ctx, "users", &id).await
     }
 }
