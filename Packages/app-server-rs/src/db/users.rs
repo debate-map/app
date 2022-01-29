@@ -1,6 +1,6 @@
 use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
@@ -18,7 +18,7 @@ scalar!(PermissionGroups);
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
 //type User = String;
-#[derive(SimpleObject, Clone, Deserialize)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct User {
     id: ID,
     displayName: String,

@@ -77,14 +77,49 @@ pub async fn start_streaming_changes(
         // type: XLogData (WAL data, ie. change of data in db)
         if event[0] == b'w' {
             println!("Got XLogData/data-change event:{:?}", event);
-            let change: JSONValue = serde_json::from_str(std::str::from_utf8(&*event).unwrap()).unwrap();
-            let change_collection = change["collection"].as_str().unwrap();
+            //let event_as_str = std::str::from_utf8(&*event).unwrap();
+            /*let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
+            let change_json_str = event_as_str[event_as_str.find("{")..].to_string();*/
+            let u8_code_for_left_curly_bracket = "{".as_ptr() as u8; // "{" = 93
+            println!("Bytes:{}", event.iter().map(|a| a.to_string()).collect::<Vec<String>>().join(","));
+            //let first_byte_of_json_section = event.iter().position(|a| *a == u8_code_for_left_curly_bracket).unwrap();
+            //let first_byte_of_json_section = event.iter().position(|a| a.to_string() == "93").unwrap();
+            let first_byte_of_json_section = event.iter().position(|a| *a == b'{').unwrap();
+            let json_section_bytes = &event[first_byte_of_json_section..];
+            let json_section_str = std::str::from_utf8(json_section_bytes).unwrap();
+            println!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
+            
+            /*
+            example json:
+            {
+                "change": [
+                    {
+                        "kind":"update",
+                        "schema":"app_public",
+                        "table":"globalData",
+                        "columnnames":["extras","id"],
+                        "columntypes":["jsonb","text"],
+                        "columnvalues":[
+                            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test123\"}","main"
+                        ],
+                        "oldkeys":{
+                            "keynames":["id"],
+                            "keytypes":["text"],
+                            "keyvalues":["main"]
+                        }
+                    }
+                ]
+            }
+            */
+            let data: JSONValue = serde_json::from_str(json_section_str).unwrap();
+            let change = &data["change"][0];
+            let change_table = change["table"].as_str().unwrap();
 
             let mut storage = storage_wrapper.lock().await;
             let mut1 = storage.live_queries.iter_mut();
             for (lq_key, lq_info) in mut1 {
                 let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
-                if lq_key_json["collection"].as_str().unwrap() != change_collection { continue; }
+                if lq_key_json["table"].as_str().unwrap() != change_table { continue; }
                 /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                     change_listener(&lq_info.last_entries);
                 }*/

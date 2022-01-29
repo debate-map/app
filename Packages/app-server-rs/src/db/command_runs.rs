@@ -1,11 +1,11 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject, Clone, Deserialize)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct CommandRun {
     id: ID,
     actor: String,
