@@ -63,6 +63,6 @@ impl SubscriptionShard_UserHidden {
         handle_generic_gql_collection_request::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
     }
     async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<UserHidden>> + 'a {
-        handle_generic_gql_doc_request::<UserHidden>(ctx, "userHiddens", &id).await
+        handle_generic_gql_doc_request::<UserHidden>(ctx, "userHiddens", id).await
     }
 }

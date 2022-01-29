@@ -40,6 +40,6 @@ impl SubscriptionShard_MapNodeEdit {
         handle_generic_gql_collection_request::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
     }
     async fn mapNodeEdit<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeEdit>> + 'a {
-        handle_generic_gql_doc_request::<MapNodeEdit>(ctx, "mapNodeEdits", &id).await
+        handle_generic_gql_doc_request::<MapNodeEdit>(ctx, "mapNodeEdits", id).await
     }
 }

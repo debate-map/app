@@ -51,6 +51,6 @@ impl SubscriptionShard_MapNode {
         handle_generic_gql_collection_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", filter).await
     }
     async fn node<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNode>> + 'a {
-        handle_generic_gql_doc_request::<MapNode>(ctx, "nodes", &id).await
+        handle_generic_gql_doc_request::<MapNode>(ctx, "nodes", id).await
     }
 }

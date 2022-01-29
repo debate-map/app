@@ -44,6 +44,6 @@ impl SubscriptionShard_Share {
         handle_generic_gql_collection_request::<Share, GQLSet_Share>(ctx, "shares", filter).await
     }
     async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Share>> + 'a {
-        handle_generic_gql_doc_request::<Share>(ctx, "shares", &id).await
+        handle_generic_gql_doc_request::<Share>(ctx, "shares", id).await
     }
 }

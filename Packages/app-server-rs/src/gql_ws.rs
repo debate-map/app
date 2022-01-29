@@ -72,7 +72,7 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub fn extend_router(app: Router, client: Client, storage: Storage<'static>) -> Router {
+pub fn extend_router(app: Router, client: Client, storage: Storage) -> Router {
     let schema = Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         .data(client)
         .data(storage)

@@ -48,6 +48,6 @@ impl SubscriptionShard_MapNodeTag {
         handle_generic_gql_collection_request::<MapNodeTag, GQLSet_MapNodeTag>(ctx, "nodeTags", filter).await
     }
     async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeTag>> + 'a {
-        handle_generic_gql_doc_request::<MapNodeTag>(ctx, "nodeTags", &id).await
+        handle_generic_gql_doc_request::<MapNodeTag>(ctx, "nodeTags", id).await
     }
 }

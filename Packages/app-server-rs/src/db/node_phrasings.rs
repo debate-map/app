@@ -55,6 +55,6 @@ impl SubscriptionShard_MapNodePhrasing {
         handle_generic_gql_collection_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", filter).await
     }
     async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodePhrasing>> + 'a {
-        handle_generic_gql_doc_request::<MapNodePhrasing>(ctx, "nodePhrasings", &id).await
+        handle_generic_gql_doc_request::<MapNodePhrasing>(ctx, "nodePhrasings", id).await
     }
 }

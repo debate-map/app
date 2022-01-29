@@ -47,6 +47,6 @@ impl SubscriptionShard_CommandRun {
         handle_generic_gql_collection_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
     }
     async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<CommandRun>> + 'a {
-        handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", &id).await
+        handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", id).await
     }
 }

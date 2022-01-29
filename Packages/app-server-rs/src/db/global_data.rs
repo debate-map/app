@@ -34,6 +34,6 @@ impl SubscriptionShard_GlobalData {
         handle_generic_gql_collection_request::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter).await
     }
     async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<GlobalData>> + 'a {
-        handle_generic_gql_doc_request::<GlobalData>(ctx, "globalData", &id).await
+        handle_generic_gql_doc_request::<GlobalData>(ctx, "globalData", id).await
     }
 }

@@ -55,6 +55,6 @@ impl SubscriptionShard_Term {
         handle_generic_gql_collection_request::<Term, GQLSet_Term>(ctx, "terms", filter).await
     }
     async fn term<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<Term>> + 'a {
-        handle_generic_gql_doc_request::<Term>(ctx, "terms", &id).await
+        handle_generic_gql_doc_request::<Term>(ctx, "terms", id).await
     }
 }

@@ -58,6 +58,6 @@ impl SubscriptionShard_NodeChildLink {
         handle_generic_gql_collection_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", filter).await
     }
     async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
-        handle_generic_gql_doc_request::<NodeChildLink>(ctx, "nodeChildLinks", &id).await
+        handle_generic_gql_doc_request::<NodeChildLink>(ctx, "nodeChildLinks", id).await
     }
 }

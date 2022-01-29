@@ -130,6 +130,6 @@ impl SubscriptionShard_User {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
     }
     async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {
-        handle_generic_gql_doc_request::<User>(ctx, "users", &id).await
+        handle_generic_gql_doc_request::<User>(ctx, "users", id).await
     }
 }

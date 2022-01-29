@@ -48,6 +48,6 @@ impl SubscriptionShard_Proposal {
     }
     #[graphql(name = "feedback_proposal")]
     async fn feedback_proposal<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Proposal>> + 'a {
-        handle_generic_gql_doc_request::<Proposal>(ctx, "feedback_proposals", &id).await
+        handle_generic_gql_doc_request::<Proposal>(ctx, "feedback_proposals", id).await
     }
 }

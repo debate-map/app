@@ -46,6 +46,6 @@ impl SubscriptionShard_Media {
         handle_generic_gql_collection_request::<Media, GQLSet_Media>(ctx, "medias", filter).await
     }
     async fn media<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Media>> + 'a {
-        handle_generic_gql_doc_request::<Media>(ctx, "medias", &id).await
+        handle_generic_gql_doc_request::<Media>(ctx, "medias", id).await
     }
 }

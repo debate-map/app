@@ -4,7 +4,7 @@ use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
-use crate::store::storage::Storage;
+use crate::{store::storage::Storage, utils::type_aliases::JSONValue};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
@@ -41,7 +41,7 @@ pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket,
 pub async fn start_streaming_changes(
     client: Client,
     connection: Connection<Socket, NoTlsStream>,
-    storage: Storage<'static>
+    storage_wrapper: Storage
 ) -> Result<Client, tokio_postgres::Error> {
 //) -> Result<(Client, Connection<Socket, NoTlsStream>), tokio_postgres::Error> {
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
@@ -77,20 +77,18 @@ pub async fn start_streaming_changes(
         // type: XLogData (WAL data, ie. change of data in db)
         if event[0] == b'w' {
             println!("Got XLogData/data-change event:{:?}", event);
-            let change = event;
-            //let change_collection = change["collection"];
+            let change: JSONValue = serde_json::from_str(std::str::from_utf8(&*event).unwrap()).unwrap();
+            let change_collection = change["collection"].as_str().unwrap();
 
-            let guard = storage.lock();
-            //let storage = guard.as_ref().unwrap();
-            let mut storage = guard.unwrap();
-
+            let mut storage = storage_wrapper.lock().await;
             let mut1 = storage.live_queries.iter_mut();
             for (lq_key, lq_info) in mut1 {
-                //if lq_key["collection"] != change_collection { continue; }
-                // todo
-                for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
+                let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
+                if lq_key_json["collection"].as_str().unwrap() != change_collection { continue; }
+                /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                     change_listener(&lq_info.last_entries);
-                }
+                }*/
+                lq_info.on_table_changed(&change);
             }
         }
         // type: keepalive message

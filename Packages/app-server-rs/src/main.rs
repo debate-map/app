@@ -15,9 +15,9 @@ use tower_http::cors::{CorsLayer, Origin};
 use std::{
     collections::HashSet,
     net::SocketAddr,
-    sync::{Arc, Mutex}, panic, backtrace::Backtrace,
+    sync::{Arc}, panic, backtrace::Backtrace,
 };
-use tokio::{sync::broadcast, runtime::Runtime};
+use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
 use crate::store::storage::{Storage, AppState, LQStorage};
 
@@ -74,12 +74,12 @@ async fn main() {
         std::process::abort();
     }));
 
-    let user_set = Mutex::new(HashSet::new());
+    let user_set = std::sync::Mutex::new(HashSet::new());
     let (tx, _rx) = broadcast::channel(100);
 
     let app_state = Arc::new(AppState { user_set, tx });
     //let storage = Storage::<'static>::default();
-    let storage = Storage::<'static>::new(Mutex::new(LQStorage::new()));
+    let storage = Storage::new(Mutex::new(LQStorage::new()));
 
     let app = Router::new()
         .route("/", get(index))

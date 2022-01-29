@@ -57,6 +57,6 @@ impl SubscriptionShard_MapNodeRevision {
         handle_generic_gql_collection_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", filter).await
     }
     async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeRevision>> + 'a {
-        handle_generic_gql_doc_request::<MapNodeRevision>(ctx, "nodeRevisions", &id).await
+        handle_generic_gql_doc_request::<MapNodeRevision>(ctx, "nodeRevisions", id).await
     }
 }

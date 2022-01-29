@@ -36,6 +36,6 @@ impl SubscriptionShard_UserInfo {
     }
     #[graphql(name = "feedback_userInfo")]
     async fn feedback_userInfo<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<UserInfo>> + 'a {
-        handle_generic_gql_doc_request::<UserInfo>(ctx, "feedback_userInfos", &id).await
+        handle_generic_gql_doc_request::<UserInfo>(ctx, "feedback_userInfos", id).await
     }
 }

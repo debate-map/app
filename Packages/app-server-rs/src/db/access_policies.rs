@@ -45,6 +45,6 @@ impl SubscriptionShard_AccessPolicy {
         handle_generic_gql_collection_request::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
     }
     async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<AccessPolicy>> + 'a {
-        handle_generic_gql_doc_request::<AccessPolicy>(ctx, "accessPolicies", &id).await
+        handle_generic_gql_doc_request::<AccessPolicy>(ctx, "accessPolicies", id).await
     }
 }

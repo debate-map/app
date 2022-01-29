@@ -44,6 +44,6 @@ impl SubscriptionShard_NodeRating {
         handle_generic_gql_collection_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
     }
     async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<NodeRating>> + 'a {
-        handle_generic_gql_doc_request::<NodeRating>(ctx, "nodeRatings", &id).await
+        handle_generic_gql_doc_request::<NodeRating>(ctx, "nodeRatings", id).await
     }
 }

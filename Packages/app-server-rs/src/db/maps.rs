@@ -60,6 +60,6 @@ impl SubscriptionShard_Map {
         handle_generic_gql_collection_request::<Map, GQLSet_Map>(ctx, "maps", filter).await
     }
     async fn map<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<Map>> + 'a {
-        handle_generic_gql_doc_request::<Map>(ctx, "maps", &id).await
+        handle_generic_gql_doc_request::<Map>(ctx, "maps", id).await
     }
 }
