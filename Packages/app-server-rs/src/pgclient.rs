@@ -1,6 +1,7 @@
 use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
 use bytes::Bytes;
 use futures::{future, StreamExt, Sink, ready};
+use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
 use crate::store::storage::Storage;
@@ -37,12 +38,18 @@ pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket,
  * 3) Connecting to postgres pod through shell, then running "pg_recvlogical".
  * In this function, we use approach 2.
  */
-pub async fn start_streaming_changes(client: Client, connection: Connection<Socket, NoTlsStream>, storage: Storage) -> Result<Client, tokio_postgres::Error> {
+pub async fn start_streaming_changes(
+    client: Client,
+    connection: Connection<Socket, NoTlsStream>,
+    storage: Storage<'static>
+) -> Result<Client, tokio_postgres::Error> {
+//) -> Result<(Client, Connection<Socket, NoTlsStream>), tokio_postgres::Error> {
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
-    tokio::spawn(async move {
+    let handle = tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
         }
+        //return connection;
     });
 
     // now we can execute a simple statement just to confirm the connection was made
@@ -71,17 +78,18 @@ pub async fn start_streaming_changes(client: Client, connection: Connection<Sock
         if event[0] == b'w' {
             println!("Got XLogData/data-change event:{:?}", event);
             let change = event;
-            let change_collection = change["collection"];
+            //let change_collection = change["collection"];
 
             let guard = storage.lock();
             //let storage = guard.as_ref().unwrap();
-            let storage = guard.unwrap();
+            let mut storage = guard.unwrap();
 
-            for (lq_key, lq_info) in storage.live_queries {
-                if lq_key["collection"] != change_collection { continue; }
+            let mut1 = storage.live_queries.iter_mut();
+            for (lq_key, lq_info) in mut1 {
+                //if lq_key["collection"] != change_collection { continue; }
                 // todo
-                for change_listener in lq_info.change_listeners {
-                    change_listener(change);
+                for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
+                    change_listener(&lq_info.last_entries);
                 }
             }
         }
@@ -132,4 +140,6 @@ pub async fn start_streaming_changes(client: Client, connection: Connection<Sock
     }
 
     Ok(client)
+    /*let connection = join!(handle).0.unwrap();
+    Ok((client, connection))*/
 }

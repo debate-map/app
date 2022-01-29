@@ -1,10 +1,11 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use serde::Deserialize;
 use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject, Clone)]
+#[derive(SimpleObject, Clone, Deserialize)]
 pub struct MapNodePhrasing {
     id: ID,
 	creator: String,
@@ -54,6 +55,6 @@ impl SubscriptionShard_MapNodePhrasing {
         handle_generic_gql_collection_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", filter).await
     }
     async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodePhrasing>> + 'a {
-        handle_generic_gql_doc_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", &id).await
+        handle_generic_gql_doc_request::<MapNodePhrasing>(ctx, "nodePhrasings", &id).await
     }
 }

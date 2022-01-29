@@ -2,7 +2,7 @@ use std::{error::Error, any::TypeId, pin::Pin, task::{Poll, Waker}, sync::{Arc, 
 use anyhow::bail;
 use async_graphql::{Result, async_stream::{stream, self}, Context, OutputType, Object, Positioned, parser::types::Field};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
-use serde::Serialize;
+use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::json;
 use tokio_postgres::{Client, Row};
 //use tokio::sync::Mutex;
@@ -72,38 +72,60 @@ pub async fn get_entries_in_collection<T: From<Row>>(ctx: &Context<'_>, collecti
     let entries: Vec<T> = rows.into_iter().map(|r| r.into()).collect();
     entries
 }
-pub async fn handle_generic_gql_collection_request<'a,
-    T: 'static + From<Row> + Send + Clone,
-    GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
->(ctx: &'a Context<'_>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> + 'a {
+pub async fn handle_generic_gql_collection_request<'a, 'b,
+    T: 'a + 'static + From<Row> + Send + Clone + DeserializeOwned,
+    GQLSetVariant: 'a + 'static + GQLSet<T> + Send + Clone + Sync,
+>(ctx: &'a Context<'b>, collection_name: &str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> + 'a + 'b {
     let entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
 
     let storage_wrapper = ctx.data::<Storage>().unwrap();
+    let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
+    let stream_id = stream.id.clone();
+    //let sender = stream.create_channel();
+    let stream_arc = Arc::new(Mutex::new(stream));
+
     let mut guard = storage_wrapper.lock();
     let storage = guard.as_mut().unwrap();
-    
-    let stream = GQLResultStream::new(storage_wrapper, collection_name, filter, GQLSetVariant::from(entries));
-    storage.notify_lq_start(&collection_name, &filter, |new_entries| {
-        stream.push_entry(new_entries);
-    });
-    stream
+    let stream_arc_clone = stream_arc.clone();
+    storage.notify_lq_start(&collection_name, &filter, stream_id, Box::new(move |new_entries| {
+        //let new_entries_as_type: Vec<T> = new_entries.into_iter().map(|r| r.into()).collect();
+        let new_entries_as_type: Vec<T> = new_entries.into_iter().map(|a| serde_json::from_value(a.clone()).unwrap()).collect();
+        let new_result = GQLSetVariant::from(new_entries_as_type);
+        //sender.send(new_result);
+        let mut guard = stream_arc_clone.lock().unwrap();
+        guard.push_result(new_result);
+    }));
+
+    let stream_arc_clone2 = stream_arc.clone();
+    let guard = stream_arc_clone2.lock().unwrap();
+    let mut stream2: &mut GQLResultStream<GQLSetVariant> = guard.by_ref();
+    stream2
 }
-pub async fn handle_generic_gql_doc_request<'a,
-    T: 'static + From<Row> + Send + Clone,
-    GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
->(ctx: &'a Context<'_>, collection_name: &str, id: &str) -> impl Stream<Item = Option<T>> + 'a {
+pub async fn handle_generic_gql_doc_request<'a, 'b,
+    T: 'a + 'static + From<Row> + Send + Sync + Clone + DeserializeOwned
+>(ctx: &'a Context<'b>, collection_name: &str, id: &str) -> impl Stream<Item = Option<T>> + 'a + 'b {
     let filter = Some(json!({"id": {"equalTo": id}}));
-    let mut entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
-    let entry = entries.pop();
+    /*let mut entries: Vec<T> = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
+    let entry = entries.pop();*/
+    let entry: Option<T> = Some(serde_json::from_value(serde_json::from_str("{}").unwrap()).unwrap());
 
     let storage_wrapper = ctx.data::<Storage>().unwrap();
+    let mut stream = GQLResultStream::<'static>::new(storage_wrapper.clone(), collection_name, filter.clone(), entry);
+
     let mut guard = storage_wrapper.lock();
     let storage = guard.as_mut().unwrap();
+    storage.notify_lq_start(&collection_name, &filter, stream.id, Box::new(|new_entries| {
+        //let new_entry = new_entries.pop();
+        let new_entry = new_entries.get(0);
+        let new_result = match new_entry {
+            Some(new_entry) => {
+                serde_json::from_value(new_entry.clone()).unwrap()
+            },
+            None => None
+        };
+        &stream.push_result(new_result);
+    }));
 
-    let stream = GQLResultStream::new(storage_wrapper, collection_name, filter, entry);
-    storage.notify_lq_start(&collection_name, &filter, |new_entries| {
-        stream.push_entry(new_entries);
-    });
     stream
 }
 

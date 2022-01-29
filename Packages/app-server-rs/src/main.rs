@@ -1,6 +1,7 @@
 #![feature(backtrace)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
+#![feature(destructuring_assignment)]
 
 use axum::{
     response::{Html},
@@ -18,7 +19,7 @@ use std::{
 };
 use tokio::{sync::broadcast, runtime::Runtime};
 
-use crate::store::storage::{Storage, AppState};
+use crate::store::storage::{Storage, AppState, LQStorage};
 
 mod gql_ws;
 mod gql_post;
@@ -77,7 +78,8 @@ async fn main() {
     let (tx, _rx) = broadcast::channel(100);
 
     let app_state = Arc::new(AppState { user_set, tx });
-    let storage = Storage::default();
+    //let storage = Storage::<'static>::default();
+    let storage = Storage::<'static>::new(Mutex::new(LQStorage::new()));
 
     let app = Router::new()
         .route("/", get(index))
@@ -103,7 +105,7 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
     let (client, connection) = pgclient::create_client(false).await;
-    let app = gql_ws::extend_router(app, client, storage).unwrap(); // test
+    let app = gql_ws::extend_router(app, client, storage.clone());
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -113,20 +115,23 @@ async fn main() {
         }
     });
 
-    let (client2, connection2) = pgclient::create_client(true).await;
-    let _handler = tokio::spawn(async {
-        let mut errors_hit = 0;
-        while errors_hit < 5 {
-            match pgclient::start_streaming_changes(client2, connection2, storage).await {
-                Ok(result) => {
-                    println!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
-                },
-                Err(err) => {
-                    println!("PGClient loop had error:{:?}", err);
-                    errors_hit += 1;
-                }
-            };
-        }
+    let (mut client2, mut connection2) = pgclient::create_client(true).await;
+    let _handler = tokio::spawn(async move {
+        /*let mut errors_hit = 0;
+        while errors_hit < 5 {*/
+        let result = pgclient::start_streaming_changes(client2, connection2, storage.clone()).await;
+        match result {
+            Ok(result) => {
+                println!("PGClient loop ended for some reason. Result:{:?}", result);
+                /*println!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
+                (client2, connection2) = result;*/
+            },
+            Err(err) => {
+                println!("PGClient loop had error:{:?}", err);
+                /*errors_hit += 1;
+                break;*/
+            }
+        };
     });
 
     println!("App-server-rs launched.");

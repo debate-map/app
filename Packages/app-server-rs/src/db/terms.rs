@@ -1,11 +1,12 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use serde::Deserialize;
 use serde_json::json;
 use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject, Clone)]
+#[derive(SimpleObject, Clone, Deserialize)]
 pub struct Term {
     id: ID,
     accessPolicy: String,
@@ -54,6 +55,6 @@ impl SubscriptionShard_Term {
         handle_generic_gql_collection_request::<Term, GQLSet_Term>(ctx, "terms", filter).await
     }
     async fn term<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<Term>> + 'a {
-        handle_generic_gql_doc_request::<Term, GQLSet_Term>(ctx, "terms", &id).await
+        handle_generic_gql_doc_request::<Term>(ctx, "terms", &id).await
     }
 }

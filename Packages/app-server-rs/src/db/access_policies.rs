@@ -2,11 +2,12 @@ use std::panic;
 
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use serde::Deserialize;
 use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 
-#[derive(SimpleObject, Clone)]
+#[derive(SimpleObject, Clone, Deserialize)]
 pub struct AccessPolicy {
     id: ID,
 	creator: String,
@@ -44,6 +45,6 @@ impl SubscriptionShard_AccessPolicy {
         handle_generic_gql_collection_request::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
     }
     async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<AccessPolicy>> + 'a {
-        handle_generic_gql_doc_request::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", &id).await
+        handle_generic_gql_doc_request::<AccessPolicy>(ctx, "accessPolicies", &id).await
     }
 }

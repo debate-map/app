@@ -1,5 +1,6 @@
 use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
+use serde::Deserialize;
 use tokio_postgres::{Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
@@ -17,7 +18,7 @@ scalar!(PermissionGroups);
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
 //type User = String;
-#[derive(SimpleObject, Clone)]
+#[derive(SimpleObject, Clone, Deserialize)]
 pub struct User {
     id: ID,
     displayName: String,
@@ -129,6 +130,6 @@ impl SubscriptionShard_User {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
     }
     async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {
-        handle_generic_gql_doc_request::<User, GQLSet_User>(ctx, "users", &id).await
+        handle_generic_gql_doc_request::<User>(ctx, "users", &id).await
     }
 }
