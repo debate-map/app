@@ -19,7 +19,7 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
-use crate::store::storage::{Storage, AppState, LQStorage};
+use crate::store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg};
 
 mod gql_ws;
 mod gql_post;
@@ -79,7 +79,22 @@ async fn main() {
 
     let app_state = Arc::new(AppState { user_set, tx });
     //let storage = Storage::<'static>::default();
-    let storage = Storage::new(Mutex::new(LQStorage::new()));
+    let (lq_storage, receiver_for_lq_watcher_drops) = LQStorage::new();
+    let storage_wrapper = StorageWrapper::new(Mutex::new(lq_storage));
+
+    // start this listener for drop requests
+    let storage_wrapper_clone = storage_wrapper.clone();
+    tokio::spawn(async move {
+        loop {
+            let drop_msg = receiver_for_lq_watcher_drops.recv_async().await.unwrap();
+            match drop_msg {
+                DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
+                    let mut storage = storage_wrapper_clone.lock().await;
+                    storage.drop_lq_watcher(table_name, &filter, stream_id);
+                },
+            };
+        }
+    });
 
     let app = Router::new()
         .route("/", get(index))
@@ -105,7 +120,7 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
 
     let (client, connection) = pgclient::create_client(false).await;
-    let app = gql_ws::extend_router(app, client, storage.clone());
+    let app = gql_ws::extend_router(app, client, storage_wrapper.clone());
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -119,7 +134,7 @@ async fn main() {
     let _handler = tokio::spawn(async move {
         /*let mut errors_hit = 0;
         while errors_hit < 5 {*/
-        let result = pgclient::start_streaming_changes(client2, connection2, storage.clone()).await;
+        let result = pgclient::start_streaming_changes(client2, connection2, storage_wrapper.clone()).await;
         match result {
             Ok(result) => {
                 println!("PGClient loop ended for some reason. Result:{:?}", result);

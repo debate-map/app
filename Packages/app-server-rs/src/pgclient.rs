@@ -4,7 +4,7 @@ use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
-use crate::{store::storage::Storage, utils::type_aliases::JSONValue};
+use crate::{store::storage::StorageWrapper, utils::type_aliases::JSONValue};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
@@ -41,7 +41,7 @@ pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket,
 pub async fn start_streaming_changes(
     client: Client,
     connection: Connection<Socket, NoTlsStream>,
-    storage_wrapper: Storage
+    storage_wrapper: StorageWrapper
 ) -> Result<Client, tokio_postgres::Error> {
 //) -> Result<(Client, Connection<Socket, NoTlsStream>), tokio_postgres::Error> {
     // the connection object performs the actual communication with the database, so spawn it off to run on its own

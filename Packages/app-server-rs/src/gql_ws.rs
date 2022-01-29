@@ -43,7 +43,7 @@ use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
 use crate::gql_post::graphql_post_handler;
-use crate::store::storage::Storage;
+use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
 //use async_graphql_axum::{GraphQLSubscription, GraphQLRequest, GraphQLResponse, GraphQLProtocol, GraphQLWebSocket};
@@ -72,10 +72,10 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub fn extend_router(app: Router, client: Client, storage: Storage) -> Router {
+pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrapper) -> Router {
     let schema = Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         .data(client)
-        .data(storage)
+        .data(storage_wrapper)
         //.data(connection)
         //.extension(CustomExtensionCreator::new())
         .finish();

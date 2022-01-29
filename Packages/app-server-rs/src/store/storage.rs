@@ -41,35 +41,61 @@ pub struct AppState {
     pub tx: broadcast::Sender<String>,
 }
 
-pub type Storage = Arc<Mutex<LQStorage>>;
+pub type StorageWrapper = Arc<Mutex<LQStorage>>;
 pub type Filter = Option<JSONValue>;
+
+pub enum DropLQWatcherMsg {
+    Drop_ByCollectionAndFilterAndStreamID(String, Filter, Uuid),
+}
 
 //#[derive(Default)]
 pub struct LQStorage {
     pub live_queries: Pin<Box<HashMap<String, LQEntry>>>,
+    source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl LQStorage {
-    pub fn new() -> Self {
-        Self {
+    pub fn new() -> (Self, Receiver<DropLQWatcherMsg>) {
+        let (s1, r1): (Sender<DropLQWatcherMsg>, Receiver<DropLQWatcherMsg>) = flume::unbounded();
+        let new_self = Self {
             live_queries: Box::pin(HashMap::new()),
-        }
+            source_sender_for_lq_watcher_drops: s1,
+        };
+        return (new_self, r1);
     }
-    pub fn notify_lq_start(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, initial_entries: Vec<JSONValue>) {
+
+    pub fn start_lq_watcher(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, initial_entries: Vec<JSONValue>) -> &LQEntryWatcher {
         let lq_key = get_lq_key(table_name, &filter);
         let default = LQEntry::new(table_name.to_owned(), filter.clone(), initial_entries);
+        let mut lq_entries_count = self.live_queries.len();
+        let create_new_entry = !self.live_queries.contains_key(&lq_key);
         let entry = self.live_queries.entry(lq_key).or_insert(default);
-        entry.watcher_count += 1;
-        println!("LQ started. @count:{} @collection:{} @filter:{:?}", entry.watcher_count, table_name, filter);
+        if create_new_entry { lq_entries_count += 1; }
+
+        //let watcher = entry.get_or_create_watcher(stream_id);
+        let old_watcher_count = entry.entry_watchers.len();
+        let (watcher, watcher_is_new) = entry.get_or_create_watcher(stream_id);
+        let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
+        println!("LQ-watcher started. @watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
+
+        watcher
     }
-    pub fn notify_lq_end(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid) {
-        let lq_key = get_lq_key(table_name, filter);
-        let entry = self.live_queries.get_mut(&lq_key).unwrap();
-        entry.watcher_count -= 1;
-        let new_watcher_count = entry.watcher_count;
-        if new_watcher_count <= 0 {
+
+    pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {
+        return self.source_sender_for_lq_watcher_drops.clone();
+    }
+    pub fn drop_lq_watcher(&mut self, table_name: String, filter: &Filter, stream_id: Uuid) {
+        println!("Got lq-watcher drop request. @table:{} @filter:{} @stream_id:{}", table_name, match filter { Some(filter) => filter.to_string(), None => "n/a".to_owned() }, stream_id);
+
+        let lq_key = get_lq_key(&table_name, &filter);
+        let live_query = self.live_queries.get_mut(&lq_key).unwrap();
+        live_query.entry_watchers.remove(&stream_id);
+        let new_watcher_count = live_query.entry_watchers.len();
+        if new_watcher_count == 0 {
             self.live_queries.remove(&lq_key);
+            println!("Watcher count for live-query entry dropped to 0, so removing.")
         }
-        println!("LQ ended. @count:{} @table:{} @filter:{:?}", new_watcher_count, table_name, filter);
+
+        println!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, self.live_queries.len());
     }
 }
 pub fn get_lq_key(table_name: &str, filter: &Filter) -> String {
@@ -105,10 +131,10 @@ impl LQEntryWatcher {
 pub struct LQEntry {
     pub collection_name: String,
     pub filter: Filter,
-    watcher_count: i32,
+    //watcher_count: i32,
     pub last_entries: Vec<JSONValue>,
     //pub change_listeners: HashMap<Uuid, LQChangeListener<'a>>,
-    pub entry_watchers: HashMap<Uuid, LQEntryWatcher>,
+    entry_watchers: HashMap<Uuid, LQEntryWatcher>,
     /*pub new_entries_channel_sender: Sender<Vec<JSONValue>>,
     pub new_entries_channel_receiver: Receiver<Vec<JSONValue>>,*/
 }
@@ -118,7 +144,7 @@ impl LQEntry {
         Self {
             collection_name,
             filter,
-            watcher_count: 0,
+            //watcher_count: 0,
             last_entries: initial_entries,
             entry_watchers: HashMap::new(),
             /*new_entries_channel_sender: s1,
@@ -126,10 +152,21 @@ impl LQEntry {
         }
     }
 
-    pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> &LQEntryWatcher {
+    pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, bool) {
+        let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());
-        watcher
+        (watcher, create_new)
     }
+    /*pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, usize) {
+        let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());
+        (&watcher, self.entry_watchers.len())
+        /*if self.entry_watchers.contains_key(&stream_id) {
+            return (self.entry_watchers.get(&stream_id).unwrap(), self.entry_watchers.len());
+        }
+        let watcher = LQEntryWatcher::new();
+        self.entry_watchers.insert(stream_id, watcher);
+        (&watcher, self.entry_watchers.len())*/
+    }*/
 
     pub fn on_table_changed(&mut self, change: &JSONValue) {
         let old_entries = &self.last_entries;
