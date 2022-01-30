@@ -81,7 +81,6 @@ pub async fn start_streaming_changes(
             /*let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
             let change_json_str = event_as_str[event_as_str.find("{")..].to_string();*/
             let u8_code_for_left_curly_bracket = "{".as_ptr() as u8; // "{" = 93
-            println!("Bytes:{}", event.iter().map(|a| a.to_string()).collect::<Vec<String>>().join(","));
             //let first_byte_of_json_section = event.iter().position(|a| *a == u8_code_for_left_curly_bracket).unwrap();
             //let first_byte_of_json_section = event.iter().position(|a| a.to_string() == "93").unwrap();
             let first_byte_of_json_section = event.iter().position(|a| *a == b'{').unwrap();
@@ -89,28 +88,7 @@ pub async fn start_streaming_changes(
             let json_section_str = std::str::from_utf8(json_section_bytes).unwrap();
             println!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
             
-            /*
-            example json:
-            {
-                "change": [
-                    {
-                        "kind":"update",
-                        "schema":"app_public",
-                        "table":"globalData",
-                        "columnnames":["extras","id"],
-                        "columntypes":["jsonb","text"],
-                        "columnvalues":[
-                            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test123\"}","main"
-                        ],
-                        "oldkeys":{
-                            "keynames":["id"],
-                            "keytypes":["text"],
-                            "keyvalues":["main"]
-                        }
-                    }
-                ]
-            }
-            */
+            // see bottom of storage.rs for example json-data
             let data: JSONValue = serde_json::from_str(json_section_str).unwrap();
             let change = &data["change"][0];
             let change_table = change["table"].as_str().unwrap();

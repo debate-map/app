@@ -187,3 +187,59 @@ impl LQEntry {
         new_result
     }*/
 }
+
+/*
+[postgres logical-decoding message examples]
+
+row addition
+==========
+{"change":[
+    {
+        "kind":"insert",
+        "schema":"app_public",
+        "table":"globalData",
+        "columnnames":["extras","id"],
+        "columntypes":["jsonb","text"],
+        "columnvalues":[
+            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test1\"}",
+            "main2"
+        ]
+    }
+]}
+
+row change
+==========
+{"change": [
+    {
+        "kind":"update",
+        "schema":"app_public",
+        "table":"globalData",
+        "columnnames":["extras","id"],
+        "columntypes":["jsonb","text"],
+        "columnvalues":[
+            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test123\"}",
+            "main"
+        ],
+        "oldkeys":{
+            "keynames":["id"],
+            "keytypes":["text"],
+            "keyvalues":["main"]
+        }
+    }
+]}
+
+row deletion (regular mode)
+==========
+{"change":[
+    {
+        "kind":"delete",
+        "schema":"app_public",
+        "table":"globalData",
+        "oldkeys":{
+            "keynames":["id"],
+            "keytypes":["text"],
+            "keyvalues":["main2"]
+        }
+    }
+]}
+*/

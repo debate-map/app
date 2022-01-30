@@ -71,7 +71,8 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 # ------------------------------------------------------------------------------
 
 #FROM rust:1.58-slim-buster
-FROM debian:buster-slim
+#FROM debian:buster-slim
+FROM debian@sha256:f6e5cbc7eaaa232ae1db675d83eabfffdabeb9054515c15c2fb510da6bc618a7
 
 WORKDIR /dm_repo/Packages/app-server-rs
 
