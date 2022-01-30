@@ -18,7 +18,7 @@ pub struct GQLResultStream<'a, ResultT> {
     pub id: Uuid,
     storage_wrapper: Arc<Mutex<LQStorage<'a>>>,
     collection_name: String,
-    filter: Option<serde_json::Value>,
+    filter: Filter,
     // for changes
     waker: Option<Waker>,
     new_results_to_return: VecDeque<ResultT>,
@@ -27,7 +27,7 @@ impl<'a, ResultT: Send + Sync + 'static> GQLResultStream<'a, ResultT> {
     pub fn new(
         storage_wrapper: Arc<Mutex<LQStorage<'a>>>,
         collection_name: &str,
-        filter: Option<serde_json::Value>,
+        filter: Filter,
         first_result: ResultT,
     ) -> Self {
         Self {

@@ -15,7 +15,8 @@ use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use flume::{Sender, Receiver, unbounded};
-use serde_json::json;
+use serde::Deserialize;
+use serde_json::{json, Map};
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_postgres::{Client};
 use tower::Service;
@@ -32,6 +33,8 @@ use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use uuid::Uuid;
 
+use crate::utils::filter::{entry_matches_filter, Filter};
+use crate::utils::postgres_parsing::parse_postgres_array;
 use crate::utils::type_aliases::JSONValue;
 
 // todo: merge AppState and Storage
@@ -42,7 +45,6 @@ pub struct AppState {
 }
 
 pub type StorageWrapper = Arc<Mutex<LQStorage>>;
-pub type Filter = Option<JSONValue>;
 
 pub enum DropLQWatcherMsg {
     Drop_ByCollectionAndFilterAndStreamID(String, Filter, Uuid),
@@ -63,7 +65,7 @@ impl LQStorage {
         return (new_self, r1);
     }
 
-    pub fn start_lq_watcher(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, initial_entries: Vec<JSONValue>) -> &LQEntryWatcher {
+    pub fn start_lq_watcher(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, initial_entries: Vec<RowData>) -> &LQEntryWatcher {
         let lq_key = get_lq_key(table_name, &filter);
         let default = LQEntry::new(table_name.to_owned(), filter.clone(), initial_entries);
         let mut lq_entries_count = self.live_queries.len();
@@ -113,12 +115,12 @@ fn arcs_eq<T: ?Sized>(left: &Arc<T>, right: &Arc<T>) -> bool {
 }
 
 pub struct LQEntryWatcher {
-    pub new_entries_channel_sender: Sender<Vec<JSONValue>>,
-    pub new_entries_channel_receiver: Receiver<Vec<JSONValue>>,
+    pub new_entries_channel_sender: Sender<Vec<RowData>>,
+    pub new_entries_channel_receiver: Receiver<Vec<RowData>>,
 }
 impl LQEntryWatcher {
     pub fn new() -> Self {
-        let (tx, rx): (Sender<Vec<JSONValue>>, Receiver<Vec<JSONValue>>) = flume::unbounded();
+        let (tx, rx): (Sender<Vec<RowData>>, Receiver<Vec<RowData>>) = flume::unbounded();
         Self {
             new_entries_channel_sender: tx,
             new_entries_channel_receiver: rx,
@@ -126,23 +128,25 @@ impl LQEntryWatcher {
     }
 }
 
+pub type RowData = Map<String, JSONValue>;
+
 //#[derive(Default)]
 /// Holds the data related to a specific query (ie. collection-name + filter).
 pub struct LQEntry {
-    pub collection_name: String,
+    pub table_name: String,
     pub filter: Filter,
     //watcher_count: i32,
-    pub last_entries: Vec<JSONValue>,
+    pub last_entries: Vec<RowData>,
     //pub change_listeners: HashMap<Uuid, LQChangeListener<'a>>,
     entry_watchers: HashMap<Uuid, LQEntryWatcher>,
     /*pub new_entries_channel_sender: Sender<Vec<JSONValue>>,
     pub new_entries_channel_receiver: Receiver<Vec<JSONValue>>,*/
 }
 impl LQEntry {
-    pub fn new(collection_name: String, filter: Filter, initial_entries: Vec<JSONValue>) -> Self {
+    pub fn new(table_name: String, filter: Filter, initial_entries: Vec<RowData>) -> Self {
         //let (s1, r1) = unbounded();
         Self {
-            collection_name,
+            table_name,
             filter,
             //watcher_count: 0,
             last_entries: initial_entries,
@@ -168,11 +172,52 @@ impl LQEntry {
         (&watcher, self.entry_watchers.len())*/
     }*/
 
-    pub fn on_table_changed(&mut self, change: &JSONValue) {
+    pub fn on_table_changed(&mut self, change: &LDChange) {
         let old_entries = &self.last_entries;
-
-        // todo
-        let new_entries = old_entries.clone();
+        let mut new_entries = old_entries.clone();
+        match change.kind.as_str() {
+            "insert" => {
+                let new_entry = change.new_data_as_map().unwrap();
+                let filter_check_result = entry_matches_filter(&new_entry, &self.filter)
+                    .expect(&format!("Failed to execute filter match-check on new database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
+                if filter_check_result {
+                    new_entries.push(new_entry);
+                }
+            },
+            "update" => {
+                let new_data = change.new_data_as_map().unwrap();
+                let entry_index = new_entries.iter_mut().position(|a| a["id"].as_str() == new_data["id"].as_str());
+                match entry_index {
+                    Some(entry_index) => {
+                        let mut entry = new_entries.get_mut(entry_index).unwrap();
+                        for key in new_data.keys() {
+                            entry.insert(key.to_owned(), new_data[key].clone());
+                        }
+                        let filter_check_result = entry_matches_filter(entry, &self.filter)
+                            .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
+                        if !filter_check_result {
+                            new_entries.remove(entry_index);
+                        }
+                    },
+                    None => {},
+                };
+            },
+            "delete" => {
+                let id = change.get_row_id();
+                let entry_index = new_entries.iter().position(|a| a["id"].as_str().unwrap() == id);
+                match entry_index {
+                    Some(entry_index) => {
+                        new_entries.remove(entry_index);
+                    },
+                    None => {},
+                };
+            },
+            _ => {
+                // ignore any other types of change (no need to even tell the watchers about it)
+                return;
+            },
+        };
+        new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
         for (watcher_stream_id, watcher) in &self.entry_watchers {
             watcher.new_entries_channel_sender.send(new_entries.clone());
@@ -186,6 +231,78 @@ impl LQEntry {
         let new_result = watcher.new_entries_channel_receiver.recv_async().await.unwrap();
         new_result
     }*/
+}
+
+#[derive(Deserialize)]
+pub struct LDChange {
+    pub kind: String,
+    pub schema: String,
+    pub table: String,
+    pub columnnames: Option<Vec<String>>,
+    pub columntypes: Option<Vec<String>>,
+    pub columnvalues: Option<Vec<JSONValue>>,
+    pub oldkeys: Option<OldKeys>,
+}
+impl LDChange {
+    pub fn new_data_as_map(&self) -> Option<RowData> {
+        //let new_entry = JSONValue::Object();
+        //let new_entry = json!({});
+        let mut new_entry: RowData = Map::new();
+        for (i, key) in self.columnnames.as_ref()?.iter().enumerate() {
+            let typ = self.columntypes.as_ref()?.get(i).unwrap();
+            let value = self.columnvalues.as_ref()?.get(i).unwrap();
+            new_entry.insert(key.to_owned(), clone_ldchange_val_0with_type_fixes(value, typ));
+        }
+        //*new_entry.as_object().unwrap()
+        Some(new_entry)
+    }
+    pub fn get_row_id(&self) -> String {
+        let id_from_oldkeys = self.oldkeys.clone()
+            .and_then(|a| a.data_as_map().get("id").cloned())
+            .and_then(|a| a.as_str().map(|b| b.to_owned()));
+        match id_from_oldkeys {
+            Some(id) => id,
+            None => {
+                let new_data_as_map = self.new_data_as_map();
+                new_data_as_map.unwrap().get("id").unwrap().as_str().map(|a| a.to_owned()).unwrap()
+            },
+        }
+    }
+}
+fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &String) -> JSONValue {
+    if typ.as_str().ends_with("[]") {
+        return parse_postgres_array(value.as_str().unwrap());
+    }
+    match typ.as_str() {
+        "jsonb" => {
+            // the LDChange vals of type jsonb are initially stored as strings
+            // convert that to a serde_json::Value::Object, so serde_json::from_value(...) can auto-deserialize it to a nested struct
+            match value.as_str() {
+                Some(val_as_str) => {
+                    serde_json::from_str(val_as_str).unwrap()
+                },
+                None => serde_json::Value::Null,
+            }
+        },
+        _ => value.clone(),
+    }
+}
+#[derive(Clone, Deserialize)]
+pub struct OldKeys {
+    pub keynames: Vec<String>,
+    pub keytypes: Vec<String>,
+    pub keyvalues: Vec<JSONValue>,
+}
+impl OldKeys {
+    pub fn data_as_map(&self) -> RowData {
+        let mut new_entry: RowData = Map::new();
+        for (i, key) in self.keynames.iter().enumerate() {
+            let typ = self.keytypes.get(i).unwrap();
+            let value = self.keyvalues.get(i).unwrap();
+            new_entry.insert(key.to_owned(), clone_ldchange_val_0with_type_fixes(value, typ));
+        }
+        new_entry
+    }
 }
 
 /*

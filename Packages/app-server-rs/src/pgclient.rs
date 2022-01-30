@@ -4,7 +4,7 @@ use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
-use crate::{store::storage::StorageWrapper, utils::type_aliases::JSONValue};
+use crate::{store::storage::{StorageWrapper, LDChange}, utils::type_aliases::JSONValue};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
@@ -78,26 +78,28 @@ pub async fn start_streaming_changes(
         if event[0] == b'w' {
             println!("Got XLogData/data-change event:{:?}", event);
             //let event_as_str = std::str::from_utf8(&*event).unwrap();
-            /*let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
-            let change_json_str = event_as_str[event_as_str.find("{")..].to_string();*/
-            let u8_code_for_left_curly_bracket = "{".as_ptr() as u8; // "{" = 93
-            //let first_byte_of_json_section = event.iter().position(|a| *a == u8_code_for_left_curly_bracket).unwrap();
-            //let first_byte_of_json_section = event.iter().position(|a| a.to_string() == "93").unwrap();
-            let first_byte_of_json_section = event.iter().position(|a| *a == b'{').unwrap();
-            let json_section_bytes = &event[first_byte_of_json_section..];
-            let json_section_str = std::str::from_utf8(json_section_bytes).unwrap();
+            //let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
+            let event_as_str_cow = String::from_utf8_lossy(&*event);
+            let event_as_str = event_as_str_cow.as_ref();
+            const START_OF_CHANGE_JSON: &str = "{\"change\":[";
+            
+            /*let event_as_str_bytes = event_as_str.as_bytes();
+            let idx = event_as_str.find("substring to match").unwrap();
+            let substring_bytes = &event_as_str_bytes[idx..];
+            let json_section_str = String::from_utf8(substring_bytes.to_vec()).unwrap();*/
+            let json_section_str = START_OF_CHANGE_JSON.to_owned() + event_as_str.split_once(START_OF_CHANGE_JSON).unwrap().1;
             println!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
             
             // see bottom of storage.rs for example json-data
-            let data: JSONValue = serde_json::from_str(json_section_str).unwrap();
-            let change = &data["change"][0];
-            let change_table = change["table"].as_str().unwrap();
+            let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
+            let change_raw = data["change"][0].clone();
+            let change: LDChange = serde_json::from_value(change_raw).unwrap();
 
             let mut storage = storage_wrapper.lock().await;
             let mut1 = storage.live_queries.iter_mut();
             for (lq_key, lq_info) in mut1 {
                 let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
-                if lq_key_json["table"].as_str().unwrap() != change_table { continue; }
+                if lq_key_json["table"].as_str().unwrap() != change.table { continue; }
                 /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                     change_listener(&lq_info.last_entries);
                 }*/

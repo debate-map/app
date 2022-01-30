@@ -3,7 +3,6 @@ import {AddSchema, CreateAccessor, GetDoc, SlicePath, SplitStringBySlash_Cached,
 import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
-import {GetNodeRevisionsByTitle} from "./nodeRevisions.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
 import {MapNode, MapNodeL2, Polarity} from "./nodes/@MapNode.js";
 import {ChildGroup, MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType.js";
@@ -56,10 +55,10 @@ export const GetNodesByIDs = CreateAccessor((ids: string[]): MapNode[]=>{
 	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "Normal"](id));
 	return ids.map(id=>GetNode.BIN(id));
 });
-export const GetNodesByTitle = CreateAccessor((title: string, titleKey: TitleKey): MapNode[]=>{
+/*export const GetNodesByTitle = CreateAccessor((title: string, titleKey: TitleKey): MapNode[]=>{
 	const nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
 	return nodeRevisions.map(a=>GetNode.BIN(a.node));
-});
+});*/
 
 export const GetNode = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.nodes.get(id!));

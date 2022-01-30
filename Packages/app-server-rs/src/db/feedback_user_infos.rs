@@ -4,6 +4,7 @@ use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct UserInfo {
@@ -31,11 +32,11 @@ pub struct SubscriptionShard_UserInfo;
 #[Subscription]
 impl SubscriptionShard_UserInfo {
     #[graphql(name = "feedback_userInfos")]
-    async fn feedback_userInfos<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_UserInfo> + 'a {
+    async fn feedback_userInfos<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_UserInfo> + 'a {
         handle_generic_gql_collection_request::<UserInfo, GQLSet_UserInfo>(ctx, "feedback_userInfos", filter).await
     }
     #[graphql(name = "feedback_userInfo")]
-    async fn feedback_userInfo<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<UserInfo>> + 'a {
+    async fn feedback_userInfo<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<UserInfo>> + 'a {
         handle_generic_gql_doc_request::<UserInfo>(ctx, "feedback_userInfos", id).await
     }
 }

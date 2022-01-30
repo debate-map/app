@@ -9,7 +9,9 @@ use tokio_postgres::{Client, Row};
 use uuid::Uuid;
 //use tokio::sync::Mutex;
 
-use crate::{store::storage::{StorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg}, utils::type_aliases::JSONValue};
+use crate::{store::storage::{StorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, filter::get_sql_for_filters}};
+
+use super::filter::Filter;
 
 // temp (these will not be useful once the streams are live/auto-update)
 pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debug>(result: impl Future<Output = Result<impl Stream<Item = T>, U>>) -> T {
@@ -19,30 +21,6 @@ pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debu
 pub async fn get_first_item_from_stream<T>(stream: impl Stream<Item = T>) -> T {
     let first_item = stream.collect::<Vec<T>>().await.pop().unwrap();
     first_item
-}
-
-pub fn get_sql_for_filters(filter: &Option<serde_json::Value>) -> Result<String, anyhow::Error> {
-    if filter.is_none() { return Ok("".to_owned()); }
-    let filter = filter.as_ref().unwrap();
-
-    let mut parts: Vec<String> = vec![];
-    // todo: replace this code-block with one that is safe (ie. uses escaping and such)
-    for (prop_name, prop_filters) in filter.as_object().unwrap() {
-        //if let Some((filter_type, filter_value)) = prop_filters.as_object().unwrap().iter().next() {
-        for (filter_type, filter_value) in prop_filters.as_object().unwrap() {
-            parts.push(match filter_type.as_str() {
-                "equalTo" => format!("\"{prop_name}\" = {}", filter_value.to_string().replace("\"", "'")),
-                "in" => format!("\"{prop_name}\" IN {}", filter_value.to_string().replace("\"", "'").replace("[", "(").replace("]", ")")),
-                // see: https://stackoverflow.com/a/54069718
-                //"contains" => format!("ANY(\"{prop_name}\") = {}", filter_value.to_string().replace("\"", "'")),
-                "contains" => format!("\"{prop_name}\" @> {}", "'{".to_owned() + &filter_value.to_string() + "}'"),
-                //"contains_jsonb" => format!("\"{prop_name}\" @> {filter_value_as_jsonb_str}"),
-                _ => bail!(r#"Invalid filter-type "{filter_type}" specified. Supported: equalTo, in, contains."#),
-            });
-        }
-    }
-    let result = "(".to_owned() + &parts.join(") AND (") + ")";
-    Ok(result)
 }
 
 /*pub struct GQLSet<T> { pub nodes: Vec<T> }
@@ -55,10 +33,10 @@ pub trait GQLSet<T> {
     fn nodes(&self) -> &Vec<T>;
 }
 
-pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &Context<'_>, collection_name: &str, filter: &Option<serde_json::Value>) -> (Vec<JSONValue>, Vec<T>) {
+pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &Context<'_>, collection_name: &str, filter: &Filter) -> (Vec<RowData>, Vec<T>) {
     let client = ctx.data::<Client>().unwrap();
 
-    let filters_sql = match get_sql_for_filters(&filter) {
+    let filters_sql = match get_sql_for_filters(filter) {
         Ok(a) => a,
         //Err(err) => return stream::once(async { err }),
         Err(err) => panic!("Got error while applying filters:{err}"),
@@ -68,16 +46,24 @@ pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &Context<'
         _ => " WHERE ".to_owned() + &filters_sql,
     };
     println!("Running where clause:{where_clause} @filter:{filter:?}");
-    let rows = client.query(&format!("SELECT * FROM \"{collection_name}\"{where_clause};"), &[]).await.unwrap();
+    let mut rows = client.query(&format!("SELECT * FROM \"{collection_name}\"{where_clause};"), &[]).await.unwrap();
+
+    // sort by id, so that order of our results here is consistent with order after live-query-updating modifications (see storage.rs)
+    rows.sort_by_key(|a| a.get::<&str, String>("id"));
+
     //let entries: Vec<JSONValue> = rows.into_iter().map(|r| r.into()).collect();
     let entries_as_type: Vec<T> = rows.into_iter().map(|r| r.into()).collect();
-    let entries: Vec<JSONValue> = entries_as_type.iter().map(|r| serde_json::to_value(r).unwrap()).collect();
+    //let entries: Vec<JSONValue> = entries_as_type.iter().map(|r| serde_json::to_value(r).unwrap()).collect();
+    let entries: Vec<RowData> = entries_as_type.iter().map(|r| {
+        let json_val = serde_json::to_value(r).unwrap();
+        json_val.as_object().unwrap().clone()
+    }).collect();
     (entries, entries_as_type)
 }
 pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + Send + Clone + DeserializeOwned,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
->(ctx: &'a Context<'a>, collection_name: &'a str, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSetVariant> + 'a {
+>(ctx: &'a Context<'a>, collection_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
     let (entries, entries_as_type) = get_entries_in_collection::<T>(ctx, collection_name, &filter).await;
 
     let (stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
@@ -98,7 +84,7 @@ pub async fn handle_generic_gql_collection_request<'a,
         yield GQLSetVariant::from(entries_as_type);
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
-            let new_entries_as_type: Vec<T> = next_entries.into_iter().map(|a| serde_json::from_value(a.clone()).unwrap()).collect();
+            let new_entries_as_type: Vec<T> = next_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect();
 
             let next_result_set = GQLSetVariant::from(new_entries_as_type);
             yield next_result_set;
@@ -133,7 +119,7 @@ pub async fn handle_generic_gql_doc_request<'a,
         yield entry;
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
-            let mut new_entries_as_type: Vec<T> = next_entries.into_iter().map(|a| serde_json::from_value(a.clone()).unwrap()).collect();
+            let mut new_entries_as_type: Vec<T> = next_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect();
             
             //let next_result: Option<T> = new_entries_as_type.get(0);
             let next_result: Option<T> = new_entries_as_type.pop();
@@ -146,12 +132,12 @@ pub async fn handle_generic_gql_doc_request<'a,
 pub struct Stream_WithDropListener<'a, T> {
     inner_stream: Pin<Box<dyn Stream<Item = T> + 'a + Send>>,
     table_name: String,
-    filter: Option<serde_json::Value>,
+    filter: Filter,
     stream_id: Uuid,
     sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl<'a, T> Stream_WithDropListener<'a, T> {
-    pub fn new(inner_stream_new: impl Stream<Item = T> + 'a + Send, table_name: &str, filter: Option<serde_json::Value>, stream_id: Uuid, sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>) -> Self {
+    pub fn new(inner_stream_new: impl Stream<Item = T> + 'a + Send, table_name: &str, filter: Filter, stream_id: Uuid, sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>) -> Self {
         Self {
             inner_stream: Box::pin(inner_stream_new),
             table_name: table_name.to_owned(),

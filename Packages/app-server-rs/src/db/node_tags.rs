@@ -4,6 +4,7 @@ use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeTag {
@@ -44,10 +45,10 @@ impl GQLSet<MapNodeTag> for GQLSet_MapNodeTag {
 pub struct SubscriptionShard_MapNodeTag;
 #[Subscription]
 impl SubscriptionShard_MapNodeTag {
-    async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_MapNodeTag> + 'a {
+    async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_MapNodeTag> + 'a {
         handle_generic_gql_collection_request::<MapNodeTag, GQLSet_MapNodeTag>(ctx, "nodeTags", filter).await
     }
-    async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Option<serde_json::Value>) -> impl Stream<Item = Option<MapNodeTag>> + 'a {
+    async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<MapNodeTag>> + 'a {
         handle_generic_gql_doc_request::<MapNodeTag>(ctx, "nodeTags", id).await
     }
 }

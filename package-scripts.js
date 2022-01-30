@@ -117,6 +117,7 @@ function GetServeCommand(nodeEnv = null) {
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
+	"cargo-test": "set RUSTC_BOOTSTRAP=1& cargo test",
 	// gets stuff we might want, from the k8s pods
 	kget: {
 		"app-server-rs": Dynamic(()=>{

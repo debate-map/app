@@ -5,6 +5,7 @@ use tokio_postgres::{Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::filter::{Filter};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
@@ -32,6 +33,7 @@ pub struct User {
     edits: i32,
     lastEditAt: Option<i64>,
 }
+// todo: MS these converters can be removed (eg. using approach similar to clone_ldchange_val_0with_type_fixes(), or by using crate: https://github.com/dac-gmbh/serde_postgres)
 impl From<tokio_postgres::row::Row> for User {
 	fn from(row: tokio_postgres::row::Row) -> Self {
         //println!("ID as string:{}", row.get::<_, String>("id"));
@@ -126,7 +128,7 @@ impl SubscriptionShard_User {
         stream::iter(0..100)
     }*/
 
-    async fn users<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Option<serde_json::Value>) -> impl Stream<Item = GQLSet_User> + 'a {
+    async fn users<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_User> + 'a {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
     }
     async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {

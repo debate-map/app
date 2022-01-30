@@ -42,11 +42,12 @@ export const GetNodeRevisions = CreateAccessor((nodeID: string): MapNodeRevision
 		}},
 	}, a=>a.nodeRevisions);
 });
-export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): MapNodeRevision[]=>{
+// commented for now, as support is not yet added for this type of "contains" filter, in app-server-rs
+/*export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): MapNodeRevision[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
 		params: {filter: {
 			phrasing: {contains: {[titleKey]: title}},
 		}},
 	}, a=>a.nodeRevisions);
-});
+});*/
