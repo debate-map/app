@@ -1,4 +1,4 @@
-import {GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
+import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
 import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
@@ -120,6 +120,8 @@ export class MapUI extends BaseComponentPlus({
 
 		const map = GetMap(mapID);
 		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
+		// defensive; in case something goes wrong with the server-side permission-enforcing, do a basic check here as well
+		if (!DoesMapPolicyGiveMeAccess_ExtraCheck(mapID)) return <MapUIWaitMessage message="Map is private/deleted."/>;
 
 		//GetPreloadData_ForMapLoad(mapID);
 		const mapState = GetMapState(mapID);
