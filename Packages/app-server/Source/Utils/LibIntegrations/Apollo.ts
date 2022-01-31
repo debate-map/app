@@ -29,7 +29,7 @@ export function GetWebServerURL(subpath: string, referrerURLStr: string|n, force
 	// else, just guess at the correct origin
 	else {
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-		const guessedToBeLocal = forceLocalhost;
+		const guessedToBeLocal = forceLocalhost || DEV;
 		if (guessedToBeLocal) {
 			//webServerURL = new URL("http://localhost:3005");
 			webServerURL = new URL("http://localhost:3055");
@@ -55,7 +55,7 @@ export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
 
 		// this branch is only hit if the app-server is PROD, thus if we hit a "localhost:3005" host, it must have the "?db=prod" flag
-		if (referrerURL.host == "localhost:3005") {
+		if (referrerURL.host == "localhost:3005" || referrerURL.host == "localhost:3055") {
 			if (subpath == "/auth/google/callback") {
 				subpath = "/auth/google/callback_returnToLocalhost";
 			}

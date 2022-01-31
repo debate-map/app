@@ -1,11 +1,15 @@
 use async_graphql::{Context, Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
+use hyper::{Body, Method};
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 use tokio_postgres::{Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
+use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
+use crate::utils::type_aliases::JSONValue;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
@@ -102,11 +106,11 @@ impl GQLSet<User> for GQLSet_User {
 }
 
 struct PassConnectionID_Result {
-    userID: String,
+    userID: Option<String>,
 }
 #[Object]
 impl PassConnectionID_Result {
-    async fn userID(&self) -> &str { &self.userID }
+    async fn userID(&self) -> &Option<String> { &self.userID }
 }
 
 #[derive(Default)]
@@ -116,10 +120,51 @@ impl SubscriptionShard_User {
     #[graphql(name = "_PassConnectionID")]
     async fn _PassConnectionID(&self, ctx: &Context<'_>, connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
         println!("Connection-id was passed from client:{}", connectionID);
+        //let userID = "DM_SYSTEM_000000000001".to_owned();
+        let mut userID: Option<String> = None;
+
+        let client_to_asjs = HyperClient::new();
+        
+        let query_as_str = format!("query {{ _PassConnectionID(connectionID: \"{}\") {{ userID }} }}", connectionID);
+        let request_body_as_str = json!({
+            //"operationName":"CustomOpName",
+            "query": query_as_str,
+            "variables":{},
+        }).to_string();
+
+        let request = hyper::Request::builder()
+            .method(Method::POST)
+            .uri(format!("{}/graphql", APP_SERVER_JS_URL))
+            .header("Content-Type", "application/json")
+            .body(Body::from(request_body_as_str))
+            .unwrap();
+
+        match client_to_asjs.request(request).await {
+            Ok(response) => {
+                if let Ok(response_as_bytes) = hyper::body::to_bytes(response.into_body()).await {
+                    let response_as_str_cow = String::from_utf8_lossy(&*response_as_bytes);
+                    let response_as_str = response_as_str_cow.as_ref();
+                    // example str: {"data":{"_PassConnectionID":{"userID":"ABC123ABC123ABC123ABC1"}}}
+                    if let Ok(response_as_json) = serde_json::from_str::<JSONValue>(response_as_str) {
+                        if let Some(user_id_str) = response_as_json["data"]["_PassConnectionID"]["userID"].as_str() {
+                            if user_id_str.len() == 22 {
+                                userID = Some(user_id_str.to_owned());
+                            } else {
+                                println!("Failed to retrieve user-id from app-server-js, for _PassConnectionID message. Response:{}", response_as_str);
+                            }
+                        }
+                    }
+                }
+            },
+            // one example of why this can fail: if the app-server-js pod crashed
+            Err(err) => {
+                // I don't know if/how async-graphql supports error-passing for streams, so just print to server atm
+                println!("Error occurred while trying to send _PassConnectionID message to app-server-js:{}", err);
+            },
+        };
 
         stream::once(async { PassConnectionID_Result {
-            //userID: "todo2".to_owned()
-            userID: "DM_SYSTEM_000000000001".to_owned()
+            userID,
         } })
     }
 

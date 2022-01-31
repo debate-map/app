@@ -20,10 +20,10 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
-use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, gql_post::graphql_post_handler};
+use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler};
 
 mod gql;
-mod gql_post;
+mod proxy_to_asjs;
 mod chat;
 mod pgclient;
 mod db {
