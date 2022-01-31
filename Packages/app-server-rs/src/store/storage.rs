@@ -175,6 +175,7 @@ impl LQEntry {
     pub fn on_table_changed(&mut self, change: &LDChange) {
         let old_entries = &self.last_entries;
         let mut new_entries = old_entries.clone();
+        let mut our_data_changed = false;
         match change.kind.as_str() {
             "insert" => {
                 let new_entry = change.new_data_as_map().unwrap();
@@ -182,6 +183,7 @@ impl LQEntry {
                     .expect(&format!("Failed to execute filter match-check on new database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
                 if filter_check_result {
                     new_entries.push(new_entry);
+                    our_data_changed = true;
                 }
             },
             "update" => {
@@ -192,11 +194,13 @@ impl LQEntry {
                         let mut entry = new_entries.get_mut(entry_index).unwrap();
                         for key in new_data.keys() {
                             entry.insert(key.to_owned(), new_data[key].clone());
+                            our_data_changed = true;
                         }
                         let filter_check_result = entry_matches_filter(entry, &self.filter)
                             .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
                         if !filter_check_result {
                             new_entries.remove(entry_index);
+                            our_data_changed = true;
                         }
                     },
                     None => {},
@@ -208,6 +212,7 @@ impl LQEntry {
                 match entry_index {
                     Some(entry_index) => {
                         new_entries.remove(entry_index);
+                        our_data_changed = true;
                     },
                     None => {},
                 };
@@ -217,6 +222,8 @@ impl LQEntry {
                 return;
             },
         };
+        if !our_data_changed { return; }
+
         new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
         for (watcher_stream_id, watcher) in &self.entry_watchers {

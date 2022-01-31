@@ -35,7 +35,18 @@ futures-timer = "3.0.2"
 # needed for async-graphql-axum customization
 tower-service = "0.3"
 
+# for hyper-reverse-proxy
+#hyper-reverse-proxy = "0.5"
+#hyper = "0.13"
+#hyper = "0.14.16"
+hyper = {version = "0.14.16", features = ["client"] }
+#hyper = "*"
+
 [dependencies.tokio-postgres]
 git = "https://github.com/petrosagg/rust-postgres.git"
 branch = "copy-both"
 features = [ "with-serde_json-1" ] # needed for serde_json::Value to auto-convert to a declared struct
+
+[dependencies.hyper-reverse-proxy]
+#git = "https://github.com/felipenoris/hyper-reverse-proxy.git"
+git = "https://github.com/Venryx/hyper-reverse-proxy.git" # has version-bump to 0.14, which is needed to be compatible with axum's subdep

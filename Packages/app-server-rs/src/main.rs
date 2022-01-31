@@ -5,23 +5,24 @@
 
 use axum::{
     response::{Html},
-    routing::{get},
+    routing::{get, any_service, post},
     AddExtensionLayer, Router, http::{
         Method,
         header::{CONTENT_TYPE}
     },
 };
+use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode};
 use tower_http::cors::{CorsLayer, Origin};
 use std::{
     collections::HashSet,
-    net::SocketAddr,
-    sync::{Arc}, panic, backtrace::Backtrace,
+    net::{SocketAddr, IpAddr},
+    sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible,
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
-use crate::store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg};
+use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, gql_post::graphql_post_handler};
 
-mod gql_ws;
+mod gql;
 mod gql_post;
 mod chat;
 mod pgclient;
@@ -100,10 +101,6 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(index))
-        
-        //.route("/graphql", get(gql_ws::gql_websocket_handler))
-        //.route("/graphql", post(gqp_post_handler))
-        
         //.route("/websocket", get(chat::chat_websocket_handler))
         .layer(
             // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
@@ -119,10 +116,9 @@ async fn main() {
         )
         .layer(AddExtensionLayer::new(app_state));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
-
     let (client, connection) = pgclient::create_client(false).await;
-    let app = gql_ws::extend_router(app, client, storage_wrapper.clone());
+    let app = gql::extend_router(app, client, storage_wrapper.clone());
+    //let app = gql_post::extend_router(app, client);
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -151,8 +147,10 @@ async fn main() {
         }
     });
 
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
+    let server = axum::Server::bind(&addr).serve(app.into_make_service());
     println!("App-server-rs launched.");
-    axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+    server.await.unwrap();
 
     /*let main_server_future = axum::Server::bind(&addr).serve(app.into_make_service()).await;
     join_all(vec![handler, main_server_future]).await;*/

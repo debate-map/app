@@ -26,7 +26,6 @@ export * from "./DB/nodeRatings/@NodeRating.js";
 export * from "./DB/nodeRatings/@NodeRatingType.js";
 export * from "./DB/nodeRatings/ReasonScore.js";
 export * from "./DB/nodeRevisions.js";
-export * from "./DB/nodeStats/@MapNodeStats.js";
 export * from "./DB/nodeTags.js";
 export * from "./DB/nodeTags/$nodeTag.js";
 export * from "./DB/nodeTags/@MapNodeTag.js";

@@ -6,21 +6,27 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
-use axum::http::Method;
-use axum::http::header::CONTENT_TYPE;
-use axum::response::{self, IntoResponse};
-use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router};
+use hyper::Body;
+use hyper::client::HttpConnector;
 use tokio_postgres::{Client};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
 use async_graphql::futures_util::task::{Context, Poll};
 use async_graphql::http::{WebSocketProtocols, WsMessage, ALL_WEBSOCKET_PROTOCOLS};
+use axum::http::Method;
+use axum::http::header::CONTENT_TYPE;
+use axum::response::{self, IntoResponse};
+use axum::routing::{get, post, MethodFilter, on_service};
+use axum::{extract, AddExtensionLayer, Router};
 use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
 use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
-use axum::http::{self, Request, Response, StatusCode};
+use axum::http::{self, uri::Uri, Request, Response, StatusCode};
 use axum::Error;
+use axum::{
+    extract::Extension,
+};
+use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
@@ -42,7 +48,7 @@ use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
-use crate::gql_post::graphql_post_handler;
+use crate::gql_post::{graphql_post_handler, HyperClient};
 use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
@@ -80,6 +86,8 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
         //.extension(CustomExtensionCreator::new())
         .finish();
 
+    let client_to_app_server_js = HyperClient::new();
+
     let result = app
         .route("/gql-playground", post(graphql_post_handler).get(graphql_playground))
         //.route("/graphql", post(gql_post::gqp_post_handler))
@@ -97,7 +105,8 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
                 .allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
                 .allow_credentials(true),
         )
-        .layer(AddExtensionLayer::new(schema));
+        .layer(AddExtensionLayer::new(schema))
+        .layer(AddExtensionLayer::new(client_to_app_server_js));
 
     println!("Playground: http://localhost:8000");
     return result;

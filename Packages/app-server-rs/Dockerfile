@@ -41,7 +41,8 @@ RUN echo "void = \"1\"" >> Cargo.toml
 RUN cargo build
 
 WORKDIR /dm_repo
-#COPY Cargo.toml Packages/app-server-rs/Cargo.toml
+COPY Cargo.toml Cargo.toml
+COPY Cargo.lock Cargo.lock
 COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
 
 # copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in app-server's frequently changing own-code)
@@ -78,7 +79,8 @@ WORKDIR /dm_repo/Packages/app-server-rs
 
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/release/app-server-rs .
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
+#COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
+COPY --from=cargo-build /dm_repo/target/debug/app-server-rs .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
 CMD echo Starting Rust program...; \

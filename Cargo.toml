@@ -1,13 +1,24 @@
-# NOTE: This file is not *currently* being used during/for the Docker builds (just not needed yet, so left out). See ".cargo/config.toml" for rust build-flags.
-
 [workspace]
 members = [
 	"Packages/app-server-rs",
-	"Packages/graphlink-server",
+	#"Packages/graphlink-server",
 ]
+
+# NOTE: This file is not currently being used for build-flags. See ".cargo/config.toml" for rust build-flags.
 
 #[profile.dev]
 #panic = "abort"
 #lto = "off"
 #debug = 1
 #debug = 0 # this changes "debug" val from 2 to 0; this reduced the incremental build time (str change in main.rs) from ~32s to ~27s (still way too slow!)
+
+# [patch.crates-io]
+# # force hyper-reverse-proxy to use the same version of hyper as axum
+# # this errors: " → error: failed to resolve patches for `https://github.com/rust-lang/crates.io-index`
+# # 		Caused by: patch for `hyper` in `https://github.com/rust-lang/crates.io-index` points to the same source, but patches must point to different sources"
+# #hyper = "0.14.16"
+# # this doesn't error
+# hyper = {git = "https://github.com/hyperium/hyper.git", tag = "v0.14.16"}
+
+#[replace]
+#"hyper:0.13.10" = {git = "https://github.com/hyperium/hyper.git", tag = "v0.14.16"}
