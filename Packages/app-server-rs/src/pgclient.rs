@@ -92,18 +92,19 @@ pub async fn start_streaming_changes(
             
             // see bottom of storage.rs for example json-data
             let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
-            let change_raw = data["change"][0].clone();
-            let change: LDChange = serde_json::from_value(change_raw).unwrap();
+            for change_raw in data["change"].as_array().unwrap() {
+                let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
 
-            let mut storage = storage_wrapper.lock().await;
-            let mut1 = storage.live_queries.iter_mut();
-            for (lq_key, lq_info) in mut1 {
-                let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
-                if lq_key_json["table"].as_str().unwrap() != change.table { continue; }
-                /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
-                    change_listener(&lq_info.last_entries);
-                }*/
-                lq_info.on_table_changed(&change);
+                let mut storage = storage_wrapper.lock().await;
+                let mut1 = storage.live_queries.iter_mut();
+                for (lq_key, lq_info) in mut1 {
+                    let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
+                    if lq_key_json["table"].as_str().unwrap() != change.table { continue; }
+                    /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
+                        change_listener(&lq_info.last_entries);
+                    }*/
+                    lq_info.on_table_changed(&change);
+                }
             }
         }
         // type: keepalive message

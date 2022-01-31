@@ -132,23 +132,23 @@ async fn main() {
         }
     });
 
-    let (mut client2, mut connection2) = pgclient::create_client(true).await;
     let _handler = tokio::spawn(async move {
-        /*let mut errors_hit = 0;
-        while errors_hit < 5 {*/
-        let result = pgclient::start_streaming_changes(client2, connection2, storage_wrapper.clone()).await;
-        match result {
-            Ok(result) => {
-                println!("PGClient loop ended for some reason. Result:{:?}", result);
-                /*println!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
-                (client2, connection2) = result;*/
-            },
-            Err(err) => {
-                println!("PGClient loop had error:{:?}", err);
-                /*errors_hit += 1;
-                break;*/
-            }
-        };
+        let mut errors_hit = 0;
+        while errors_hit < 1000 {
+            let (mut client2, mut connection2) = pgclient::create_client(true).await;
+            let result = pgclient::start_streaming_changes(client2, connection2, storage_wrapper.clone()).await;
+            match result {
+                Ok(result) => {
+                    //println!("PGClient loop ended for some reason. Result:{:?}", result);
+                    println!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
+                },
+                Err(err) => {
+                    println!("PGClient loop had error; restarting shortly. @error:{:?}", err);
+                    errors_hit += 1;
+                }
+            };
+            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+        }
     });
 
     println!("App-server-rs launched.");
