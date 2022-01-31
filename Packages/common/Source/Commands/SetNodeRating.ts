@@ -31,7 +31,7 @@ export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
 
 		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, new UpdateNodeRatingSummaries({
 			nodeID: rating.node, ratingType: rating.type,
-			ratingsBeingRemoved: [this.sub_deleteOldRating?.payload.id], ratingsBeingAdded: [rating],
+			ratingsBeingRemoved: [this.sub_deleteOldRating?.payload.id].filter(a=>a), ratingsBeingAdded: [rating],
 		}));
 	}
 

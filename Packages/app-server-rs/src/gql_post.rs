@@ -14,6 +14,7 @@ use axum::http::{uri::Uri, Request, Response};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+use serde_json::json;
 use std::{convert::TryFrom, net::SocketAddr};
 use hyper_reverse_proxy::ProxyError;
 use tower_http::cors::{CorsLayer, Origin};
@@ -117,5 +118,16 @@ pub async fn graphql_post_handler(Extension(client): Extension<HyperClient>, mut
 
     *req.uri_mut() = Uri::try_from(uri).unwrap();
 
-    client.request(req).await.unwrap()
+    match client.request(req).await {
+        Ok(response) => response,
+        // one example of why this can fail: if the app-server-js pod crashed
+        Err(err) => {
+            // send response as json, since the caller will be expecting json
+            let json = json!({
+                "error": format!("Error occurred while trying to send post command to app-server-js:{}", err),
+            });
+            Response::builder().status(StatusCode::BAD_GATEWAY)
+                .body(Body::from(json.to_string())).unwrap()
+        },
+    }
 }

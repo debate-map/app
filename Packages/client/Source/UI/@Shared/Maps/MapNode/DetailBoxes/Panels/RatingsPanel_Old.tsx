@@ -51,7 +51,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const userFollows = GetUserFollows_List(meID);
 		const markRatingUsers = userFollows.filter(a=>a.markRatings).map(a=>a.targetUser);
 		//const ratingsOfSelfAndFollowed = GetRatings.CatchBail(emptyArray, node.id, ratingType, [...meID ? [meID] : [], ...markRatingUsers]); // catch bail (ie. allow lazy-load)
-		// temp; to mitigate overwhelming of subscription plugin, do not show the rating preview (since this requires a subscription per node)
+		// temp; to mitigate overwhelming of subscription plugin, do not load/show the symbols for self+followed ratings (since this requires a subscription per node)
 		const ratingsOfSelfAndFollowed = [] as NodeRating[];
 
 		const myDefaultAccessPolicy = GetUserHidden(meID)?.lastAccessPolicy;

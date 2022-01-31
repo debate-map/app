@@ -1,5 +1,5 @@
-import {MapNode, RatingSummary} from "../DB/nodes/@MapNode.js";
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNode, RatingSummary} from "../DB/nodes/@MapNode.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatingTypeInfo, NodeRatingType, RatingValueIsInRange} from "../DB/nodeRatings/@NodeRatingType.js";
@@ -10,7 +10,12 @@ import {GetArgumentNode} from "../DB/nodes/$node.js";
 
 @CommandMeta({
 	exposeToGraphQL: false, // server-internal
-	payloadSchema: ()=>SimpleSchema({}), // not needed
+	payloadSchema: ()=>SimpleSchema({
+		nodeID: {$ref: "UUID"},
+		ratingType: {$ref: "NodeRatingType"},
+		ratingsBeingRemoved: {items: {type: "string"}},
+		ratingsBeingAdded: {items: {$ref: NodeRating.name}},
+	}),
 })
 export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingType: NodeRatingType, ratingsBeingRemoved: string[], ratingsBeingAdded: NodeRating[]}, {}> {
 	newSummary: RatingSummary;
@@ -23,7 +28,7 @@ export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingTy
 		const ratingsInEachRange = ratingTypeInfo.valueRanges.map(range=>{
 			return ratings_final.filter(a=>RatingValueIsInRange(a.value, range));
 		});
-		
+
 		this.newSummary = new RatingSummary({
 			average: ratings_final.length ? ratings_final.map(a=>a.value).Average() : null,
 			countsByRange: ratingTypeInfo.valueRanges.map((range, i)=>ratingsInEachRange[i].length),
@@ -47,8 +52,8 @@ export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingTy
 			// For the "impact" rating-type, we calculate the "average" a bit differently than normal.
 			// Rather than a pure average of the "impact" pseudo-ratings, we use: [average of argument's relevance] * [average of premise-1's truth] * [...]
 			// Why? Because the "impact" pseudo-ratings exclude users that only rated one of the above rating-groups; this alternate approach utilizes all the ratings.
-			let argumentRelevanceRatings = RatingListAfterRemovesAndAdds(GetRatings(argument.id, NodeRatingType.relevance), ratingsBeingRemoved, ratingsBeingAdded, {nodeID: argument.id, ratingType: NodeRatingType.relevance});
-			let premiseTruthRatingSets = premises.map(premise=>RatingListAfterRemovesAndAdds(GetRatings(premise.id, NodeRatingType.truth), ratingsBeingRemoved, ratingsBeingAdded, {nodeID: premise.id, ratingType: NodeRatingType.truth}));
+			const argumentRelevanceRatings = RatingListAfterRemovesAndAdds(GetRatings(argument.id, NodeRatingType.relevance), ratingsBeingRemoved, ratingsBeingAdded, {nodeID: argument.id, ratingType: NodeRatingType.relevance});
+			const premiseTruthRatingSets = premises.map(premise=>RatingListAfterRemovesAndAdds(GetRatings(premise.id, NodeRatingType.truth), ratingsBeingRemoved, ratingsBeingAdded, {nodeID: premise.id, ratingType: NodeRatingType.truth}));
 			const ratingValueSets = [argumentRelevanceRatings.map(rating=>rating.value), ...premiseTruthRatingSets.map(set=>set.map(rating=>rating.value))];
 			const ratingValueSets_multiplied = ratingValueSets.reduce((result, set)=>{
 				if (set.length == 0) return 0; // if there are no ratings in this set, then we can't calculate an overall score, so have it become 0

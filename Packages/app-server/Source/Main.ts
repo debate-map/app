@@ -156,7 +156,7 @@ const pluginHook = makePluginHook([
 
 export const pgPool = new Pool({
 	connectionString: dbURL,
-	max: 50,
+	max: 30,
 });
 /*const query_orig = pgPool.query;
 pgPool.query = function(str) {
