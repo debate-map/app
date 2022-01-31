@@ -17,6 +17,12 @@ The maps are constructed from "claims" (blue), and "arguments" (green and red) w
 
 For more information, visit the website at: <https://debatemap.app>
 
+# Associated projects
+
+### Society Library
+
+Development of Debate Map is partially supported by [The Society Library](https://www.societylibrary.org), which is co-developing a separate infrastructural standard within Debate Map for its use.
+
 # Freeform documentation
 
 * [Coding style](https://github.com/debate-map/app/tree/master/Docs/CodingStyle.md)

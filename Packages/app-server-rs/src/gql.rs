@@ -30,6 +30,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
+use crate::{get_cors_layer};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
 use crate::db::command_runs::SubscriptionShard_CommandRun;
 use crate::db::feedback_proposals::SubscriptionShard_Proposal;
@@ -95,18 +96,6 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
         .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, GraphQLSubscription::new(schema.clone())))
         // for endpoints not defined by app-server-rs, assume it is meant for app-server-js, and thus call the proxying function
         .fallback(get(proxy_to_asjs_handler).merge(post(proxy_to_asjs_handler)))
-        .layer(
-            // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
-            CorsLayer::new()
-                //.allow_origin(any())
-                .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
-                //.allow_methods(any()),
-                //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
-                //.allow_methods(vec![Method::GET, Method::POST])
-                .allow_methods(vec![Method::GET, Method::POST])
-                .allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
-                .allow_credentials(true),
-        )
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(client_to_asjs));
 

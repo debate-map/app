@@ -9,10 +9,11 @@ use axum::{
     AddExtensionLayer, Router, http::{
         Method,
         header::{CONTENT_TYPE}
-    },
+    }, headers::HeaderName,
 };
-use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode};
-use tower_http::cors::{CorsLayer, Origin};
+use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}};
+use tower_http::cors::{CorsLayer, Origin, AnyOr};
+use utils::header_names::get_all_header_names;
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
@@ -55,6 +56,7 @@ mod utils {
     pub mod general;
     pub mod gql_general_extension;
     pub mod gql_result_stream;
+    pub mod header_names;
     pub mod postgres_parsing;
     pub mod type_aliases;
 }
@@ -66,6 +68,52 @@ fn panic(info: &PanicInfo) {
     writeln!(host_stderr, "{}", info).ok();*/
     println!("Got panic. @info:{} @stackTrace:{:?}", info, Backtrace::capture());
 }*/
+
+pub fn get_cors_layer() -> CorsLayer {
+    // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
+    CorsLayer::new()
+        //.allow_origin(any())
+        .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
+        /*//.allow_methods(any()),
+        //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
+        //.allow_methods(vec![Method::GET, Method::POST])
+        .allow_methods(vec![Method::GET, Method::POST])
+        //.allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
+        .allow_headers(vec!["*", "Authorization", HeaderName::any(), FORWARDED, "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Requested-With"])*/
+        .allow_methods(vec![
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::HEAD,
+            Method::OPTIONS,
+            Method::CONNECT,
+            Method::PATCH,
+            Method::TRACE,
+        ])
+        .allow_headers(
+            get_all_header_names()
+                .iter().map(|a| str::parse::<HeaderName>(a).unwrap())
+                .chain(vec![
+                    str::parse::<HeaderName>("*").unwrap(),
+                    header::ACCEPT,
+                    header::ACCEPT_LANGUAGE,
+                    header::ACCEPT_ENCODING,
+                    header::AUTHORIZATION,
+                    header::ORIGIN,
+                    header::CONTENT_LANGUAGE,
+                    header::CONTENT_TYPE,
+                    header::CONTENT_LENGTH,
+                    header::TRANSFER_ENCODING,
+                    header::HOST,
+                    header::FORWARDED,
+                    header::CACHE_CONTROL,
+                ])
+        )
+        //.allow_headers(HeaderName::from_static("*")) // accept all
+        //.allow_headers(HeaderName::predicate(|_, _| { true })) // accept all
+        .allow_credentials(true)
+}
 
 #[tokio::main]
 async fn main() {
@@ -102,18 +150,6 @@ async fn main() {
     let app = Router::new()
         .route("/", get(index))
         //.route("/websocket", get(chat::chat_websocket_handler))
-        .layer(
-            // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
-            CorsLayer::new()
-                //.allow_origin(any())
-                .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
-                //.allow_methods(any()),
-                //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
-                //.allow_methods(vec![Method::GET, Method::POST])
-                .allow_methods(vec![Method::GET, Method::POST])
-                .allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
-                .allow_credentials(true),
-        )
         .layer(AddExtensionLayer::new(app_state));
 
     let (client, connection) = pgclient::create_client(false).await;
@@ -127,6 +163,9 @@ async fn main() {
             println!("Postgres connection formed, for fulfilling subscriptions.")
         }
     });
+
+    let app = app
+        .layer(get_cors_layer());
 
     let _handler = tokio::spawn(async move {
         let mut errors_hit = 0;

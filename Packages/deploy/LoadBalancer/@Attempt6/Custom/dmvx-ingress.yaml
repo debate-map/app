@@ -30,6 +30,12 @@ spec:
           - backend:
               serviceName: dm-app-server-rs
               servicePort: 3105
+    - host: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us
+      http:
+        paths:
+          - backend:
+              serviceName: dm-app-server-js
+              servicePort: 3155
     # these are the domains end-users should be accessing the site from
     - host: debates.app
       http:
@@ -73,3 +79,9 @@ spec:
           - backend:
               serviceName: dm-app-server-rs
               servicePort: 3105
+    - host: app-server-js.debates.app
+      http:
+        paths:
+          - backend:
+              serviceName: dm-app-server-js
+              servicePort: 3155
