@@ -27,6 +27,7 @@ mod gql;
 mod proxy_to_asjs;
 mod pgclient;
 mod db {
+    pub mod _general;
     pub mod users;
     pub mod user_hiddens;
     pub mod global_data;

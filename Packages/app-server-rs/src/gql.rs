@@ -30,6 +30,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
+use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::{get_cors_layer};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
 use crate::db::command_runs::SubscriptionShard_CommandRun;
@@ -48,18 +49,19 @@ use crate::db::nodes::SubscriptionShard_MapNode;
 use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
-use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
+use crate::db::users::{SubscriptionShard_User};
 use crate::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient};
 use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
 
 #[derive(MergedObject, Default)]
-pub struct QueryRoot(QueryShard_User);
+pub struct QueryRoot(QueryShard_General);
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(MutationShard_User);
+pub struct MutationRoot(MutationShard_General);
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(
+    SubscriptionShard_General,
     SubscriptionShard_User, SubscriptionShard_UserHidden,
     SubscriptionShard_GlobalData, SubscriptionShard_Map,
     SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
@@ -84,12 +86,13 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
         .finish();
 
     let client_to_asjs = HyperClient::new();
+    let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        .route("/gql-playground", post(proxy_to_asjs_handler).get(graphql_playground))
+        .route("/gql-playground", on_service(MethodFilter::POST, gql_subscription_service.clone()).get(graphql_playground))
         //.route("/graphql", post(gql_post::gqp_post_handler))
         //.route("/graphql", GraphQLSubscription::new(schema.clone()))
-        .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, GraphQLSubscription::new(schema.clone())))
+        .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service))
         // for endpoints not defined by app-server-rs, assume it is meant for app-server-js, and thus call the proxying function
         .fallback(get(proxy_to_asjs_handler).merge(post(proxy_to_asjs_handler)))
         .layer(AddExtensionLayer::new(schema))

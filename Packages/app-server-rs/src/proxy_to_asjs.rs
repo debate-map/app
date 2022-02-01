@@ -18,8 +18,6 @@ use serde_json::json;
 use std::{convert::TryFrom, net::SocketAddr};
 use hyper_reverse_proxy::ProxyError;
 use tower_http::cors::{CorsLayer, Origin};
-use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
-use crate::db::users::{QueryShard_User, MutationShard_User, SubscriptionShard_User};
 use crate::gql::RootSchema;
 use futures::future::{self, Future};
 

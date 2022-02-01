@@ -3,7 +3,7 @@ import {SubscriptionClient} from "subscriptions-transport-ws";
 import {RunInAction} from "web-vcore";
 import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
 import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
-import {Assert} from "web-vcore/nm/js-vextensions";
+import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {graph} from "./MobXGraphlink";
 
@@ -103,6 +103,11 @@ export function InitApollo() {
 	wsClient.onError(error=>console.error("WebSocket error:", error.message));
 	wsLink = new WebSocketLink(wsClient);
 
+	// every 90s, send a "keepalive message" through the WS; this avoids Cloudflare's "100 seconds of dormancy" timeout (https://community.cloudflare.com/t/cloudflare-websocket-timeout/5865)
+	const keepAliveTimer = new Timer(90000, ()=>{
+		SendPingOverWebSocket();
+	}).Start();
+
 	// using the ability to split links, you can send data to each link depending on what kind of operation is being sent
 	link = split(
 		// split based on operation type
@@ -154,6 +159,27 @@ export function InitApollo() {
 	});
 }
 
+export async function SendPingOverWebSocket() {
+	const fetchResult_subscription = apolloClient.subscribe({
+		query: gql`
+			subscription {
+				_Ping {
+					pong
+				}
+			}
+		`,
+		variables: {},
+	});
+	const fetchResult = await new Promise<FetchResult<any>>(resolve=>{
+		const subscription = fetchResult_subscription.subscribe(data=>{
+			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+			resolve(data);
+		});
+	});
+	//console.log("Got response to ping:", fetchResult);
+	return fetchResult;
+}
+
 async function AuthenticateWebSocketConnection() {
 	const wsConnectCountAtStart = wsClient_connectCount;
 	// if ws-client reconnects during auth process, we must cancel this run of it (so server doesn't receive then reject a 2nd attempt per ws)
@@ -175,7 +201,7 @@ async function AuthenticateWebSocketConnection() {
 	console.log("Got connection id:", connectionID);
 
 	// associate connection-id with websocket-connection
-	const fetchResult2_subscription = await apolloClient.subscribe({
+	const fetchResult2_subscription = apolloClient.subscribe({
 		query: gql`
 			subscription _PassConnectionID($connectionID: String) {
 				_PassConnectionID(connectionID: $connectionID) {
@@ -185,7 +211,6 @@ async function AuthenticateWebSocketConnection() {
 		`,
 		variables: {connectionID},
 	});
-	if (WSReconnected()) return;
 	const fetchResult2 = await new Promise<FetchResult<any>>(resolve=>{
 		const subscription = fetchResult2_subscription.subscribe(data=>{
 			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
