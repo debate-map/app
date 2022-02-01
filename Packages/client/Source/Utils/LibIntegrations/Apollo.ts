@@ -5,7 +5,7 @@ import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCach
 import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
-import {graph} from "./MobXGraphlink";
+import {graph} from "./MobXGraphlink.js";
 
 // todo: clean these functions up, and make them consistent with the app-server versions
 export function GetWebServerURL(subpath: string) {

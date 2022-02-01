@@ -4,7 +4,7 @@ use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Po
 use flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
-use serde_json::json;
+use serde_json::{json, Map};
 use tokio_postgres::{Client, Row};
 use uuid::Uuid;
 //use tokio::sync::Mutex;
@@ -57,13 +57,19 @@ pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &async_gra
     }).collect();
     Ok((entries, entries_as_type))
 }
+
+pub fn json_values_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<JSONValue>) -> Vec<T> {
+    json_entries.into_iter().map(|a| serde_json::from_value(a).unwrap()).collect()
+}
+pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<Map<String, JSONValue>>) -> Vec<T> {
+    json_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect()
+}
+
 pub async fn handle_generic_gql_collection_request<'a,
-    T: 'a + From<Row> + Serialize + Send + Clone + DeserializeOwned,
+    T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
-    let (entries, entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, &filter).await.expect("Errored while getting entries in collection.");
-
-    let (stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
+    let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
         let sender = storage.get_sender_for_lq_watcher_drops();
@@ -71,9 +77,9 @@ pub async fn handle_generic_gql_collection_request<'a,
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let watcher = storage.start_lq_watcher(&table_name, &filter, stream_id, entries);
+        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(&table_name, &filter, stream_id, &ctx).await;
 
-        (stream_id, sender, watcher.new_entries_channel_receiver.clone())
+        (entries_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
     let filter_clone = filter.clone();
@@ -81,49 +87,44 @@ pub async fn handle_generic_gql_collection_request<'a,
         yield GQLSetVariant::from(entries_as_type);
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
-            let new_entries_as_type: Vec<T> = next_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect();
-
-            let next_result_set = GQLSetVariant::from(new_entries_as_type);
+            let next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
+            let next_result_set = GQLSetVariant::from(next_entries_as_type);
             yield next_result_set;
         }
     };
     Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
 }
 pub async fn handle_generic_gql_doc_request<'a,
-    T: 'a + From<Row> + Serialize + Send + Sync + Clone + DeserializeOwned
->(ctx: &'a async_graphql::Context<'a>, collection_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
+    T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
+>(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
-    
     let filter = Some(json!({"id": {"equalTo": id}}));
-    let (mut entries, mut entries_as_type) = get_entries_in_collection::<T>(ctx, collection_name, &filter).await.expect("Errored while getting entries in collection.");
-    let entry = entries_as_type.pop();
 
-    let (stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
+    let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
         let sender = storage.get_sender_for_lq_watcher_drops();
 
-        /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
+        /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let watcher = storage.start_lq_watcher(&collection_name, &filter, stream_id, entries);
+        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(&table_name, &filter, stream_id, &ctx).await;
+        let entry_as_type = entries_as_type.pop();
 
-        (stream_id, sender, watcher.new_entries_channel_receiver.clone())
+        (entry_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
     let filter_clone = filter.clone();
     let mut base_stream = async_stream::stream! {
-        yield entry;
+        yield entry_as_type;
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
-            let mut new_entries_as_type: Vec<T> = next_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect();
-            
-            //let next_result: Option<T> = new_entries_as_type.get(0);
-            let next_result: Option<T> = new_entries_as_type.pop();
+            let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
+            let next_result: Option<T> = next_entries_as_type.pop();
             yield next_result;
         }
     };
-    Stream_WithDropListener::new(base_stream, collection_name, filter, stream_id, sender_for_dropping_lq_watcher)
+    Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
 }
 
 pub struct Stream_WithDropListener<'a, T> {

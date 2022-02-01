@@ -15,10 +15,11 @@ use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use flume::{Sender, Receiver, unbounded};
-use serde::Deserialize;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
 use tokio::sync::{broadcast, mpsc, Mutex};
-use tokio_postgres::{Client};
+use tokio_postgres::{Client, Row};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
 use async_graphql::futures_util::task::{Context, Poll};
@@ -34,6 +35,7 @@ use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use uuid::Uuid;
 
 use crate::utils::filter::{entry_matches_filter, Filter};
+use crate::utils::general::{get_entries_in_collection, json_maps_to_typed_entries};
 use crate::utils::postgres_parsing::parse_postgres_array;
 use crate::utils::type_aliases::JSONValue;
 
@@ -65,21 +67,33 @@ impl LQStorage {
         return (new_self, r1);
     }
 
-    pub fn start_lq_watcher(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, initial_entries: Vec<RowData>) -> &LQEntryWatcher {
-        let lq_key = get_lq_key(table_name, &filter);
-        let default = LQEntry::new(table_name.to_owned(), filter.clone(), initial_entries);
-        let mut lq_entries_count = self.live_queries.len();
-        let create_new_entry = !self.live_queries.contains_key(&lq_key);
-        let entry = self.live_queries.entry(lq_key).or_insert(default);
-        if create_new_entry { lq_entries_count += 1; }
+    pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>) -> (Vec<T>, &LQEntryWatcher) {
+        let (mut entry, lq_entries_count, lq_entry_is_new) = {
+            let lq_key = get_lq_key(table_name, &filter);
+            let mut lq_entries_count = self.live_queries.len();
+
+            let create_new_entry = !self.live_queries.contains_key(&lq_key);
+            if create_new_entry {
+                let (result_entries, result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, &filter).await.expect("Errored while getting entries in collection.");
+                let new_entry = LQEntry::new(table_name.to_owned(), filter.clone(), result_entries);
+                self.live_queries.insert(lq_key.clone(), new_entry);
+            }
+
+            let entry = self.live_queries.get_mut(&lq_key).unwrap();
+            if create_new_entry { lq_entries_count += 1; }
+            (entry, lq_entries_count, create_new_entry)
+        };
+
+        let mut result_entries = entry.last_entries.clone();
+        let mut result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 
         //let watcher = entry.get_or_create_watcher(stream_id);
         let old_watcher_count = entry.entry_watchers.len();
         let (watcher, watcher_is_new) = entry.get_or_create_watcher(stream_id);
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
         println!("LQ-watcher started. @watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
-
-        watcher
+        
+        (result_entries_as_type, watcher)
     }
 
     pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {
