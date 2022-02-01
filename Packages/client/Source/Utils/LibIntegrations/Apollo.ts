@@ -103,8 +103,9 @@ export function InitApollo() {
 	wsClient.onError(error=>console.error("WebSocket error:", error.message));
 	wsLink = new WebSocketLink(wsClient);
 
-	// every 90s, send a "keepalive message" through the WS; this avoids Cloudflare's "100 seconds of dormancy" timeout (https://community.cloudflare.com/t/cloudflare-websocket-timeout/5865)
-	const keepAliveTimer = new Timer(90000, ()=>{
+	// every 45s, send a "keepalive message" through the WS; this avoids Cloudflare's "100 seconds of dormancy" timeout (https://community.cloudflare.com/t/cloudflare-websocket-timeout/5865)
+	// (we use a <60s interval, so that it will reliably hit each 60s timer-interval that Chrome 88+ allows for hidden pages: https://developer.chrome.com/blog/timer-throttling-in-chrome-88/#intensive-throttling)
+	const keepAliveTimer = new Timer(45000, ()=>{
 		SendPingOverWebSocket();
 	}).Start();
 
