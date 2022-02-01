@@ -14,7 +14,6 @@ use axum::{
 };
 use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}};
 use tower_http::cors::{CorsLayer, Origin, AnyOr};
-use utils::header_names::get_all_header_names;
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
@@ -26,7 +25,6 @@ use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherM
 
 mod gql;
 mod proxy_to_asjs;
-mod chat;
 mod pgclient;
 mod db {
     pub mod users;
@@ -58,29 +56,17 @@ mod utils {
     pub mod general;
     pub mod gql_general_extension;
     pub mod gql_result_stream;
-    pub mod header_names;
     pub mod postgres_parsing;
     pub mod type_aliases;
 }
-
-/*#[panic_handler]
-fn panic(info: &PanicInfo) {
-    /*let mut host_stderr = HStderr::new();
-    // logs "panicked at '$reason', src/main.rs:27:4" to the host stderr
-    writeln!(host_stderr, "{}", info).ok();*/
-    println!("Got panic. @info:{} @stackTrace:{:?}", info, Backtrace::capture());
-}*/
 
 pub fn get_cors_layer() -> CorsLayer {
     // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
     CorsLayer::new()
         //.allow_origin(any())
         .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
-        /*//.allow_methods(any()),
-        //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
+        //.allow_methods(any()),
         //.allow_methods(vec![Method::GET, Method::POST])
-        .allow_methods(vec![Method::GET, Method::POST])
-        .allow_headers(vec!["*", "Authorization", HeaderName::any(), FORWARDED, "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Requested-With"])*/
         .allow_methods(vec![
             Method::GET,
             Method::POST,
@@ -92,28 +78,8 @@ pub fn get_cors_layer() -> CorsLayer {
             Method::PATCH,
             Method::TRACE,
         ])
+        //.allow_headers(vec!["*", "Authorization", HeaderName::any(), FORWARDED, "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Requested-With"])
         .allow_headers(vec![CONTENT_TYPE]) // needed, because the POST requests include a content-type header (which is not on the approved-by-default list)
-        /*.allow_headers(
-            get_all_header_names()
-                .iter().map(|a| str::parse::<HeaderName>(a).unwrap())
-                .chain(vec![
-                    //str::parse::<HeaderName>("*").unwrap(),
-                    header::ACCEPT,
-                    header::ACCEPT_LANGUAGE,
-                    header::ACCEPT_ENCODING,
-                    header::AUTHORIZATION,
-                    header::ORIGIN,
-                    header::CONTENT_LANGUAGE,
-                    header::CONTENT_TYPE,
-                    header::CONTENT_LENGTH,
-                    header::TRANSFER_ENCODING,
-                    header::HOST,
-                    header::FORWARDED,
-                    header::CACHE_CONTROL,
-                ])
-        )*/
-        //.allow_headers(HeaderName::from_static("*")) // accept all
-        //.allow_headers(HeaderName::predicate(|_, _| { true })) // accept all
         .allow_credentials(true)
 }
 
@@ -150,8 +116,10 @@ async fn main() {
     });
 
     let app = Router::new()
-        .route("/", get(index));
-        //.route("/websocket", get(chat::chat_websocket_handler));
+        .route("/", get(|| async { Html(r#"
+            <p>This is the URL for the app-server, which is not meant to be opened directly by your browser.</p>
+            <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:3005/localhost:3055, if running Debate Map locally)</p>
+        "#) }));
 
     let (client, connection) = pgclient::create_client(false).await;
     let app = gql::extend_router(app, client, storage_wrapper.clone());
@@ -167,7 +135,6 @@ async fn main() {
 
     let app = app
         .layer(AddExtensionLayer::new(app_state))
-        //.layer(AddExtensionLayer::new(get_axum_logging_layer()))
         .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
         .layer(get_cors_layer());
 
@@ -190,17 +157,8 @@ async fn main() {
         }
     });
 
-    //let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
     let addr = SocketAddr::from(([0, 0, 0, 0], 3105)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
-    let server = axum::Server::bind(&addr).serve(app.into_make_service());
+    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     println!("App-server-rs launched.");
-    server.await.unwrap();
-
-    /*let main_server_future = axum::Server::bind(&addr).serve(app.into_make_service()).await;
-    join_all(vec![handler, main_server_future]).await;*/
-}
-
-// include utf-8 HTML file at *compile* time
-async fn index() -> Html<&'static str> {
-    Html(std::include_str!("../chat.html"))
+    server_fut.await.unwrap();
 }

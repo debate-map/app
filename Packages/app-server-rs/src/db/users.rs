@@ -15,9 +15,9 @@ use crate::utils::type_aliases::{JSONValue};
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct PermissionGroups {
     basic: bool,
-	verified: bool,
-	r#mod: bool,
-	admin: bool,
+    verified: bool,
+    r#mod: bool,
+    admin: bool,
 }
 scalar!(PermissionGroups);
 
@@ -31,7 +31,6 @@ pub struct User {
     photoURL: Option<String>,
     joinDate: i64,
     //permissionGroups: PermissionGroups,
-    //permissionGroups: Json<PermissionGroups>,
     permissionGroups: PermissionGroups,
     //permissionGroups: async_graphql::Value,
     //permissionGroups: String,
@@ -40,9 +39,9 @@ pub struct User {
 }
 // todo: MS these converters can be removed (eg. using approach similar to clone_ldchange_val_0with_type_fixes(), or by using crate: https://github.com/dac-gmbh/serde_postgres)
 impl From<tokio_postgres::row::Row> for User {
-	fn from(row: tokio_postgres::row::Row) -> Self {
+    fn from(row: tokio_postgres::row::Row) -> Self {
         //println!("ID as string:{}", row.get::<_, String>("id"));
-		Self {
+        Self {
             //id: ID::from(row.get("id")),
             //id: serde_json::from_value(row.get("id")).unwrap(),
             //id: serde_json::from_str(row.get("id")).unwrap(),
@@ -64,8 +63,8 @@ impl From<tokio_postgres::row::Row> for User {
             //permissionGroups: "{}".to_owned(),
             edits: row.get("edits"),
             lastEditAt: row.get("lastEditAt"),
-		}
-	}
+        }
+    }
 }
 
 #[derive(Default)]

@@ -53,14 +53,11 @@ use crate::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient};
 use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
-//use async_graphql_axum::{GraphQLSubscription, GraphQLRequest, GraphQLResponse, GraphQLProtocol, GraphQLWebSocket};
-//use crate::utils::gql_general_extension::{CustomExtension, CustomExtensionCreator};
-//use tokio::sync::Mutex;
 
 #[derive(MergedObject, Default)]
-pub struct QueryRoot(QueryShard_User, /*QueryShard_UserHidden*/);
+pub struct QueryRoot(QueryShard_User);
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(MutationShard_User, /*MutationShard_UserHidden*/);
+pub struct MutationRoot(MutationShard_User);
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(
     SubscriptionShard_User, SubscriptionShard_UserHidden,
@@ -84,7 +81,6 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
         .data(client)
         .data(storage_wrapper)
         //.data(connection)
-        //.extension(CustomExtensionCreator::new())
         .finish();
 
     let client_to_asjs = HyperClient::new();
