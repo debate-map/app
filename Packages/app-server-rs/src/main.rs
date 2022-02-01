@@ -9,7 +9,8 @@ use axum::{
     AddExtensionLayer, Router, http::{
         Method,
         header::{CONTENT_TYPE}
-    }, headers::HeaderName,
+    },
+    headers::HeaderName, middleware,
 };
 use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}};
 use tower_http::cors::{CorsLayer, Origin, AnyOr};
@@ -21,7 +22,7 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
-use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler};
+use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler, utils::axum_logging_layer::print_request_response};
 
 mod gql;
 mod proxy_to_asjs;
@@ -52,6 +53,7 @@ mod store {
 }
 mod utils {
     pub mod async_graphql_axum_custom;
+    pub mod axum_logging_layer;
     pub mod filter;
     pub mod general;
     pub mod gql_general_extension;
@@ -78,7 +80,6 @@ pub fn get_cors_layer() -> CorsLayer {
         //.allow_methods(vec![Method::GET, Method::HEAD, Method::PUT, Method::PATCH, Method::POST, Method::DELETE])
         //.allow_methods(vec![Method::GET, Method::POST])
         .allow_methods(vec![Method::GET, Method::POST])
-        //.allow_headers(vec![CONTENT_TYPE]) // to match with express server (probably unnecessary)
         .allow_headers(vec!["*", "Authorization", HeaderName::any(), FORWARDED, "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Requested-With"])*/
         .allow_methods(vec![
             Method::GET,
@@ -91,11 +92,12 @@ pub fn get_cors_layer() -> CorsLayer {
             Method::PATCH,
             Method::TRACE,
         ])
-        .allow_headers(
+        .allow_headers(vec![CONTENT_TYPE]) // needed, because the POST requests include a content-type header (which is not on the approved-by-default list)
+        /*.allow_headers(
             get_all_header_names()
                 .iter().map(|a| str::parse::<HeaderName>(a).unwrap())
                 .chain(vec![
-                    str::parse::<HeaderName>("*").unwrap(),
+                    //str::parse::<HeaderName>("*").unwrap(),
                     header::ACCEPT,
                     header::ACCEPT_LANGUAGE,
                     header::ACCEPT_ENCODING,
@@ -109,7 +111,7 @@ pub fn get_cors_layer() -> CorsLayer {
                     header::FORWARDED,
                     header::CACHE_CONTROL,
                 ])
-        )
+        )*/
         //.allow_headers(HeaderName::from_static("*")) // accept all
         //.allow_headers(HeaderName::predicate(|_, _| { true })) // accept all
         .allow_credentials(true)
@@ -148,9 +150,8 @@ async fn main() {
     });
 
     let app = Router::new()
-        .route("/", get(index))
-        //.route("/websocket", get(chat::chat_websocket_handler))
-        .layer(AddExtensionLayer::new(app_state));
+        .route("/", get(index));
+        //.route("/websocket", get(chat::chat_websocket_handler));
 
     let (client, connection) = pgclient::create_client(false).await;
     let app = gql::extend_router(app, client, storage_wrapper.clone());
@@ -165,6 +166,9 @@ async fn main() {
     });
 
     let app = app
+        .layer(AddExtensionLayer::new(app_state))
+        //.layer(AddExtensionLayer::new(get_axum_logging_layer()))
+        .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
         .layer(get_cors_layer());
 
     let _handler = tokio::spawn(async move {
@@ -186,7 +190,8 @@ async fn main() {
         }
     });
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
+    //let addr = SocketAddr::from(([127, 0, 0, 1], 3105));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3105)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     let server = axum::Server::bind(&addr).serve(app.into_make_service());
     println!("App-server-rs launched.");
     server.await.unwrap();

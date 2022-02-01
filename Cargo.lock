@@ -44,7 +44,7 @@ dependencies = [
  "async-graphql",
  "async-graphql-axum",
  "async-trait",
- "axum",
+ "axum 0.4.4",
  "bytes",
  "flume",
  "futures",
@@ -73,9 +73,9 @@ checksum = "71938f30533e4d95a6d17aa530939da3842c2ab6f4f84b9dae68447e4129f74a"
 
 [[package]]
 name = "async-graphql"
-version = "3.0.22"
+version = "3.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf8133c82d84be4006797ae96b1e938564fa5f27a07f8ef852733d535d75e40f"
+checksum = "df52aa188679abf175ab59d3c54e0a7373589b011fafaf00588289ddd134206b"
 dependencies = [
  "async-graphql-derive",
  "async-graphql-parser",
@@ -103,13 +103,13 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-axum"
-version = "3.0.22"
+version = "3.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7817584a862bbc2366921f8bb277c801717d5ba1c00bdf23c814ccf1568a839"
+checksum = "046797234d37ce633c0c388b6c7f7385c49acc04d903deff326831a44335798a"
 dependencies = [
  "async-graphql",
  "async-trait",
- "axum",
+ "axum 0.4.5",
  "bytes",
  "futures-util",
  "http-body",
@@ -121,9 +121,9 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-derive"
-version = "3.0.22"
+version = "3.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7548a7cd7a946d85b6b2b9814b11f71bdda424143c755209a4f378849d75f45"
+checksum = "cd9091f1c8b60d90b50b40e3ed80b8669919a8191985d56e5dd284c699db309d"
 dependencies = [
  "Inflector",
  "async-graphql-parser",
@@ -137,9 +137,9 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-parser"
-version = "3.0.22"
+version = "3.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa38c108e7b562fa9ccaa3d016827f61976375d79fa1e39ade9be005c0a8e2d4"
+checksum = "dc69c47d51d96486efe8526d9dcf54156bd606f730b71c5ab5a7827a60f7b209"
 dependencies = [
  "async-graphql-value",
  "pest",
@@ -150,9 +150,9 @@ dependencies = [
 
 [[package]]
 name = "async-graphql-value"
-version = "3.0.22"
+version = "3.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34394798dfadb4cf2840ce2477a93c9e241b06c5703a0b31388b3a8837f0071e"
+checksum = "317ac4364bf6f22b52f2c7c71d9c2d89bf7465898d213a317736ce83c0d74070"
 dependencies = [
  "bytes",
  "indexmap",
@@ -201,11 +201,46 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 [[package]]
 name = "axum"
 version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "310a147401c66e79fc78636e4db63ac68cd6acb9ece056de806ea173a15bce32"
+source = "git+https://github.com/tokio-rs/axum.git?rev=15914c4f15b375d5785b7f95be7685abba326c5e#15914c4f15b375d5785b7f95be7685abba326c5e"
 dependencies = [
  "async-trait",
- "axum-core",
+ "axum-core 0.1.1 (git+https://github.com/tokio-rs/axum.git?rev=15914c4f15b375d5785b7f95be7685abba326c5e)",
+ "base64",
+ "bitflags",
+ "bytes",
+ "futures-util",
+ "headers",
+ "http",
+ "http-body",
+ "hyper",
+ "itoa 1.0.1",
+ "matchit",
+ "memchr",
+ "mime",
+ "percent-encoding",
+ "pin-project-lite",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "sha-1 0.9.8",
+ "sync_wrapper",
+ "tokio",
+ "tokio-tungstenite",
+ "tokio-util",
+ "tower",
+ "tower-http",
+ "tower-layer",
+ "tower-service",
+]
+
+[[package]]
+name = "axum"
+version = "0.4.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1dbbc81d15ddf33148615b778836b525dbae4e0731710294b2c484e80c4858f7"
+dependencies = [
+ "async-trait",
+ "axum-core 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "base64",
  "bitflags",
  "bytes",
@@ -238,6 +273,19 @@ name = "axum-core"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ca6c0b218388a7ed6a8d25e94f7dea5498daaa4fd8c711fb3ff166041b06fda"
+dependencies = [
+ "async-trait",
+ "bytes",
+ "futures-util",
+ "http",
+ "http-body",
+ "mime",
+]
+
+[[package]]
+name = "axum-core"
+version = "0.1.1"
+source = "git+https://github.com/tokio-rs/axum.git?rev=15914c4f15b375d5785b7f95be7685abba326c5e#15914c4f15b375d5785b7f95be7685abba326c5e"
 dependencies = [
  "async-trait",
  "bytes",
@@ -823,9 +871,9 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 
 [[package]]
 name = "matchit"
-version = "0.4.4"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58b6f41fdfbec185dd3dff58b51e323f5bc61692c0de38419a957b0dcfccca3c"
+checksum = "9376a4f0340565ad675d11fc1419227faf5f60cd7ac9cb2e7185a471f30af833"
 
 [[package]]
 name = "md-5"
@@ -1586,6 +1634,7 @@ dependencies = [
  "http-body",
  "http-range-header",
  "pin-project-lite",
+ "tower",
  "tower-layer",
  "tower-service",
 ]

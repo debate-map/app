@@ -31,7 +31,11 @@ impl<B: Send> FromRequest<B> for GraphQLProtocol {
         println!("GraphQLProtocol.from_request @headers:{:?}", req.headers()); // v
 
         req.headers()
-            .and_then(|headers| headers.get(http::header::SEC_WEBSOCKET_PROTOCOL))
+
+            // v-replaced
+            //.and_then(|headers| headers.get(http::header::SEC_WEBSOCKET_PROTOCOL))
+            .get(http::header::SEC_WEBSOCKET_PROTOCOL)
+            
             .and_then(|value| value.to_str().ok())
             .and_then(|protocols| {
                 protocols

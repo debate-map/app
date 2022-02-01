@@ -4,7 +4,7 @@ import graphileUtils from "graphile-utils";
 import {PoolClient} from "pg";
 import {Context as Context_base} from "postgraphile";
 import {Assert} from "web-vcore/nm/js-vextensions";
-import express, {Request, Response} from "express";
+import express, {request, Request, Response} from "express";
 import {GenerateUUID, UserInfo} from "web-vcore/nm/mobx-graphlink";
 import {createRequire} from "module";
 const {makeExtendSchemaPlugin, gql} = graphileUtils;
@@ -128,7 +128,15 @@ export const AuthExtrasPlugin = makeExtendSchemaPlugin(build=>{
 						e: ctx.req.socket.remoteAddress,
 						f: ctx.req.headers["cf-connecting-ip"], // on cloudflare, this gives the source/original user ip-address
 					});*/
-					Assert(AreIPsEquivalent(GetIPAddress(ctx.req), attachInfo.ipAddress), `Cannot call PassConnectionID; the ip-address does not match the caller of _GetConnectionID!`);
+					const reqIP = GetIPAddress(ctx.req);
+					// todo: rather than let other-pod requests bypass the checks, instead just have those pods relay the ip-address of their client, and compare with that
+					const requestIsFromAnotherPod = reqIP.startsWith("10.") || reqIP.startsWith("::ffff:10.");
+
+					console.log(`Running _PassConnectionID. @requestIP:${reqIP} @attachInfo.ipAddress:${attachInfo.ipAddress}`);
+					Assert(AreIPsEquivalent(reqIP, attachInfo.ipAddress) || requestIsFromAnotherPod, ()=>{
+						//console.log(`Request ip-address:${reqIP} @attachInfo.ipAddress:${attachInfo.ipAddress}`);
+						return `Cannot call PassConnectionID; the ip-address does not match the caller of _GetConnectionID!`;
+					});
 
 					connectionIDs_usedUp.add(connectionID); // mark as used first; guarantees can't be used twice
 					ctx.req["user"] = attachInfo.userInfo; // attaches the discovered user-id to the persistent websocket connection/request
@@ -161,8 +169,8 @@ function AreIPsEquivalent(ip1_str: string, ip2_str: string) {
 	//const ip1_canonical = (ip1.includes(":") ? new Address6(ip1) : new Address4(ip1)).canonicalForm();
 	if (ip1_str == ip2_str) return true;
 
-	const ip1 = new Address6(ip1_str);
-	const ip2 = new Address6(ip2_str);
+	const ip1 = ip1_str.includes(":") ? new Address6(ip1_str) : Address6.fromAddress4(ip1_str);
+	const ip2 = ip2_str.includes(":") ? new Address6(ip2_str) : Address6.fromAddress4(ip2_str);
 	//console.log("ips.canonicalForm:", ip1_canonical.canonicalForm(), ip2.canonicalForm());
 	if (ip1.canonicalForm() == ip2.canonicalForm()) return true;
 

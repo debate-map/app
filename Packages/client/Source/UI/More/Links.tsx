@@ -2,6 +2,8 @@ import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.
 import {VReactMarkdown_Remarkable, PageContainer} from "web-vcore";
 import {styles} from "../../Utils/UI/GlobalStyles.js";
 
+export const slackInviteLink = "https://join.slack.com/t/canonicaldebatelab/shared_invite/zt-408acfmb-qhowbidwY0aKaET7wP_IEQ";
+
 const pageText = `
 ### Social media
 
@@ -20,11 +22,11 @@ const pageText = `
 
 The Debate Map project is being developed with the feedback of the Canonical Debate Lab group.
 
-You're welcome to join our [Slack channel](https://join.slack.com/t/canonicaldebatelab/shared_invite/enQtMzEzOTU3NzYyMDY3LTI4YzUxM2I0MjFjZDNlMzQxZDM4YTgwNDNlMTY3YWQwNjJhYjk0ODE1MGU5NzQ2MTAyNTFhZWRhMGNjMjAxNmE) as we develop the model further.
+You're welcome to join our [Slack channel](${slackInviteLink}) as we develop the model further.
 We share news and project updates, conduct weekly Hangouts calls, and have frequent discussions on how to improve the debate-software model.
 
 Links:
-* Slack (project chat): [Invite link](https://join.slack.com/t/canonicaldebatelab/shared_invite/enQtMzEzOTU3NzYyMDY3LTI4YzUxM2I0MjFjZDNlMzQxZDM4YTgwNDNlMTY3YWQwNjJhYjk0ODE1MGU5NzQ2MTAyNTFhZWRhMGNjMjAxNmE)
+* Slack (project chat): [Invite link](${slackInviteLink})
 * Blog: [https://medium.com/canonical-debate-lab](https://medium.com/canonical-debate-lab)
 * Facebook: [https://www.facebook.com/CanonicalDebateLab](https://www.facebook.com/CanonicalDebateLab)
 * Twitter: [https://twitter.com/CanonicalDebate](https://twitter.com/CanonicalDebate)
