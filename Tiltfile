@@ -392,49 +392,49 @@ NEXT_k8s_resource('dm-web-server',
 # new relic
 # ==========
 
-'''k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml', allow_duplicates=True)
-k8s_yaml('./Packages/deploy/NewRelic/olm_crd.yaml', allow_duplicates=True)
-k8s_yaml('./Packages/deploy/NewRelic/newrelic-manifest.yaml', allow_duplicates=True)'''
+# '''k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml', allow_duplicates=True)
+# k8s_yaml('./Packages/deploy/NewRelic/olm_crd.yaml', allow_duplicates=True)
+# k8s_yaml('./Packages/deploy/NewRelic/newrelic-manifest.yaml', allow_duplicates=True)'''
 
-k8s_yaml_grouped('./Packages/deploy/NewRelic/px.dev_viziers.yaml', "new-relic")
-k8s_yaml_grouped('./Packages/deploy/NewRelic/olm_crd.yaml', "new-relic")
-# kubectl create namespace newrelic (for now, the "newrelic" namespace is created manually in ./namespace.yaml)
-k8s_yaml_grouped('./Packages/deploy/NewRelic/newrelic-manifest.yaml', "new-relic", [
-	# stage +1
-	"nri-bundle-nri-metadata-injection-admission-create", # dep: nri-bundle-nri-metadata-injection-admission:serviceaccount
-	# stage +2
-	"nri-bundle-nri-metadata-injection", # dep: X
-	# stage +3
-	"nri-bundle-nri-metadata-injection-admission-patch", # dep: X
-	"pixie-operator-subscription:subscription", # dep: X:namespace
-	"olm-operators:operatorgroup", # dep: X:namespace
-	"olm-operator", # dep: X:namespace
-	"catalog-operator", # dep: X:namespace
-	# to not wait for
-	"nri-bundle-newrelic-pixie", # dep: pl-cluster-secrets->cluster-id, which takes time for other pods to push
-	"vizier-deleter", # dep: some service-account, which takes time for other pods to push
-])
+# k8s_yaml_grouped('./Packages/deploy/NewRelic/px.dev_viziers.yaml', "new-relic")
+# k8s_yaml_grouped('./Packages/deploy/NewRelic/olm_crd.yaml', "new-relic")
+# # kubectl create namespace newrelic (for now, the "newrelic" namespace is created manually in ./namespace.yaml)
+# k8s_yaml_grouped('./Packages/deploy/NewRelic/newrelic-manifest.yaml', "new-relic", [
+# 	# stage +1
+# 	"nri-bundle-nri-metadata-injection-admission-create", # dep: nri-bundle-nri-metadata-injection-admission:serviceaccount
+# 	# stage +2
+# 	"nri-bundle-nri-metadata-injection", # dep: X
+# 	# stage +3
+# 	"nri-bundle-nri-metadata-injection-admission-patch", # dep: X
+# 	"pixie-operator-subscription:subscription", # dep: X:namespace
+# 	"olm-operators:operatorgroup", # dep: X:namespace
+# 	"olm-operator", # dep: X:namespace
+# 	"catalog-operator", # dep: X:namespace
+# 	# to not wait for
+# 	"nri-bundle-newrelic-pixie", # dep: pl-cluster-secrets->cluster-id, which takes time for other pods to push
+# 	"vizier-deleter", # dep: some service-account, which takes time for other pods to push
+# ])
 
-NEXT_k8s_resource_batch([
-	"nri-bundle-nri-metadata-injection-admission-create",
-], labels=["new-relic"])
+# NEXT_k8s_resource_batch([
+# 	"nri-bundle-nri-metadata-injection-admission-create",
+# ], labels=["new-relic"])
 
-NEXT_k8s_resource_batch([
-	"nri-bundle-nri-metadata-injection",
-], labels=["new-relic"])
+# NEXT_k8s_resource_batch([
+# 	"nri-bundle-nri-metadata-injection",
+# ], labels=["new-relic"])
 
-NEXT_k8s_resource_batch([
-	"nri-bundle-nri-metadata-injection-admission-patch",
-	"pixie-operator-subscription:subscription",
-	"olm-operators:operatorgroup",
-	"olm-operator",
-	"catalog-operator",
-], labels=["new-relic"])
+# NEXT_k8s_resource_batch([
+# 	"nri-bundle-nri-metadata-injection-admission-patch",
+# 	"pixie-operator-subscription:subscription",
+# 	"olm-operators:operatorgroup",
+# 	"olm-operator",
+# 	"catalog-operator",
+# ], labels=["new-relic"])
 
-NEXT_k8s_resource_batch([
-	"nri-bundle-newrelic-pixie",
-	"vizier-deleter",
-], pod_readiness='ignore', labels=["new-relic"])
+# NEXT_k8s_resource_batch([
+# 	"nri-bundle-newrelic-pixie",
+# 	"vizier-deleter",
+# ], pod_readiness='ignore', labels=["new-relic"])
 
 # extras
 # ==========
