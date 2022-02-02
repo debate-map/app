@@ -91,7 +91,12 @@ impl LQStorage {
         let old_watcher_count = entry.entry_watchers.len();
         let (watcher, watcher_is_new) = entry.get_or_create_watcher(stream_id);
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
-        println!("LQ-watcher started. @watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
+        let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
+        println!("LQ-watcher started. {}", watcher_info_str);
+        // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
+        if new_watcher_count > 2 {
+            println!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
+        }
         
         (result_entries_as_type, watcher)
     }
