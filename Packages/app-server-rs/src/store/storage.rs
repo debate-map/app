@@ -109,7 +109,8 @@ impl LQStorage {
 
         let lq_key = get_lq_key(&table_name, &filter);
         let live_query = self.live_queries.get_mut(&lq_key).unwrap();
-        live_query.entry_watchers.remove(&stream_id);
+        let removed_value = live_query.entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
+        
         let new_watcher_count = live_query.entry_watchers.len();
         if new_watcher_count == 0 {
             self.live_queries.remove(&lq_key);

@@ -25,6 +25,7 @@ export function InitGraphlink() {
 		rootStore: store,
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 		onServer: false,
+		//unsubscribeTreeNodesAfter: 30000, // on live-query's data becoming unobserved, wait 30s before unsubscribing (user may re-expand something just closed, in the short-term)
 	});
 	// user-info is now supplied at the end of InitApollo() instead
 	/*graph.userInfo = {
