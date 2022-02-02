@@ -38,6 +38,10 @@ spec:
       containers:
       - name: dm-app-server-rs
         image: "TILT_PLACEHOLDER:imageURL_appServerRS"
+        resources:
+          limits:
+            #cpu: "900m" # commented atm, due to limits apparently causing slowdown, even if limit not reached (see: https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits)
+            memory: 1000Mi # if it ends up using more than this, it is likely a memory leak; kill and restart should restore regular performance
         livenessProbe:
           httpGet:
             path: /health-check

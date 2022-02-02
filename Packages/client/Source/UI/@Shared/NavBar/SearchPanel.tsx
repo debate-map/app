@@ -14,6 +14,7 @@ import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
 
@@ -101,7 +102,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 
 		this.Stash({queryStr});
 		return (
-			<Column style={{width: 750, padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
+			<Column style={{width: 750, padding: 5, background: liveSkin.MainBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
 				<Row center>
 					<TextInput style={{flex: 1}} value={queryStr}
 						instant // since enter-key needs value pre-blur
@@ -121,7 +122,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 					<Button ml={5} text="Search" onClick={()=>this.PerformSearch()}/>
 				</Row>
 				{/* <Row style={{ fontSize: 18 }}>Search results ({results_nodeIDs.length})</Row> */}
-				<Column mt={5} className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
+				<Column mt={5} className="clickThrough" style={{height: 40, background: liveSkin.MainBackgroundColor().css(), borderRadius: 10}}>
 					{/* <Row style={{ height: 40, padding: 10 }}>
 						<Pre>Sort by: </Pre>
 						<Select options={GetEntries(SortType, name => EnumNameToDisplayName(name))}

@@ -1,8 +1,10 @@
+import chroma from "web-vcore/nm/chroma-js.js";
 import {Skin} from "../Skin.js";
 
 export class SLSkin extends Skin {
 	static main = new SLSkin();
 
+	MainBackgroundColor = ()=>chroma("rgba(255,255,255,.7)");
 	HeaderFont = ()=>"Cinzel";
 	//MainFont = ()=>"TypoPRO Bebas Neue";
 	MainFont = ()=>"'Quicksand', sans-serif";
@@ -24,6 +26,10 @@ export class SLSkin extends Skin {
 			background-color: rgba(255,255,255,1) !important;
 			border: 1px solid rgba(0,0,0,.5);
 			border-radius: 0 0 5px 5px; /* shouldn't it always be this? */
+		}
+
+		.MessageUI, .MessageUI > div {
+			background-color: rgba(255,255,255,.9) !important;
 		}
 	`;
 }

@@ -3,6 +3,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import React from "react";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 type Props = {
 	parent?,
@@ -47,7 +48,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 						}}/>
 						<div style={{
 							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: `${100 - backgroundFillPercent}%`, background: "rgba(0,0,0,.7)", borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
+							width: `${100 - backgroundFillPercent}%`, background: liveSkin.MainBackgroundColor().css(), borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
 						}}/>
 						{markerPercent != null &&
 							<div style={{

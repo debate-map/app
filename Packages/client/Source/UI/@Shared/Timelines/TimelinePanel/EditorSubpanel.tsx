@@ -75,7 +75,7 @@
 // 					{showTimelineDetails &&
 // 					<TimelineDetailsEditor timeline={timeline} editing={creatorOrMod}/>}
 // 					{timeline.videoID != null &&
-// 					<Row center mb={7} p="7px 10px" style={{background: "rgba(0,0,0,.7)", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"}}>
+// 					<Row center mb={7} p="7px 10px" style={{background: liveSkin.MainBackgroundColor().css(), borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"}}>
 // 						<Pre>Video ID: </Pre>
 // 						<TextInput value={timeline.videoID} enabled={creatorOrMod} onChange={val=>{
 // 							new UpdateTimeline({id: timeline.id, updates: {videoID: val}}).RunOnServer();

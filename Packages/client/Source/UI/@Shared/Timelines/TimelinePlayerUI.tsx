@@ -107,7 +107,7 @@
 // 		const mapState = GetMapState(map.id);
 // 		return (
 // 			<Column ref={c=>this.root = c}
-// 				style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}
+// 				style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: liveSkin.MainBackgroundColor().css(), borderRadius: 5}}
 // 				onClick={e=>{
 // 					if ((e.target as HTMLElement).GetSelfAndParents().Any(a=>a.classList && a.classList.contains("NodeUI_Inner"))) return;
 // 					for (const nodeUI of this.root.DOM.$(".NodeUI_Inner").map(a=>FindReact(a) as NodeUI_Inner)) {

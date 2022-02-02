@@ -8,7 +8,7 @@ import {ES, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "dm_common";
 
-
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
@@ -29,7 +29,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		return (
 			<Column style={{position: "relative", maxHeight: 300, display: show ? "flex" : "none"}}>
-				<Column className="clickThrough" style={{background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+				<Column className="clickThrough" style={{background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 					<Row style={{padding: "4px 7px"}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>ID</span>
 						<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Date</span>
@@ -58,7 +58,7 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 
 		return (
 			<Row p="4px 7px" style={E(
-				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
+				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css()},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<span style={{flex: columnWidths[0]}}>

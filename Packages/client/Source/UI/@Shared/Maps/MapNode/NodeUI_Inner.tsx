@@ -216,12 +216,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
+		const toolbarShow = map?.extras.defaultNodeToolbarEnabled ?? true;
 		const panelToShow = hoverPanel || nodeView?.openPanel;
-		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered; // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
+		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
+			|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
 		//const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const subPanelShow = node.current.references || node.current.quote || node.current.media;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
-		const toolbarShow = map?.extras.defaultNodeToolbarEnabled ?? true;
 		const expanded = nodeView?.expanded ?? false;
 
 		const onMouseEnter = UseCallback(e=>{

@@ -7,20 +7,24 @@ import {store} from "..";
 export class NotificationMessage {
 	static lastID = -1;
 
-	constructor(text: string) {
+	constructor(text: string, pinnedFor?: number) {
 		this.id = ++NotificationMessage.lastID;
 		this.text = text;
+		if (pinnedFor) {
+			this.pinnedTill = Date.now() + pinnedFor;
+		}
 	}
 
 	id: number;
 	text: string;
+	pinnedTill?: number; // used, eg. for testing pinned-message UI
 }
 
 // helper (main use: for use from Start_0.ts)
-export function AddNotificationMessage(message: string) {
+export function AddNotificationMessage(message: string, pinnedFor?: number) {
 	RunInAction("VWAF.PostHandleError", ()=>{
 		try {
-			store.main.notificationMessages.push(new NotificationMessage(message));
+			store.main.notificationMessages.push(new NotificationMessage(message, pinnedFor));
 		} catch (ex) {
 			g.alertCount_notifications = (g.alertCount_notifications ?? 0) + 1;
 			if (g.alertCount_notifications <= 2) {

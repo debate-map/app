@@ -11,6 +11,7 @@ import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, 
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
@@ -310,7 +311,7 @@ export class NodeUI extends BaseComponentPlus(
 					{nodeChildrenToShow == emptyArray_forLoading &&
 						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
 					{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
-						<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
+						<div style={{margin: "auto 0 auto 10px", background: liveSkin.MainBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 					{!boxExpanded &&
 						<NodeChildCountMarker childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
 					{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&

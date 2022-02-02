@@ -8,6 +8,7 @@ import {Observer, GetUpdates, ES, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {MediaDetailsUI, ShowAddMediaDialog} from "./Medias/MediaDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 
@@ -36,7 +37,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
 					background: "rgba(0,0,0,.5)", borderRadius: 10,
 				}}>
-					<Row center style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
@@ -60,7 +61,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
-						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+						<Row style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedMedia
 								&& <Text style={{fontSize: 17, fontWeight: 500}}>
 									{selectedMedia.name}

@@ -31,3 +31,6 @@ export function IsMouseLeaveReal(event: React.MouseEvent<MouseEvent>, dom: HTMLE
 	if (fromElement == null || toElement == null) return true; // just assume true
 	return dom.contains(fromElement) && !dom.contains(toElement);
 }
+
+// value found since this is lowest value that yields: chroma("rgb(255,255,255)").darken(5.55).css() == "rgb(0,0,0)"
+export const chroma_maxDarken = 5.55;

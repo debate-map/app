@@ -27,7 +27,7 @@
 // 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null}}>
 // 					<Row style={{alignItems: "flex-start"}}>
 // 						<Column style={{width: 600}}>
-// 							<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)" /* borderRadius: "10px 10px 0 0" */, maxHeight: 320}}>
+// 							<Column className="clickThrough" style={{height: 80, background: liveSkin.MainBackgroundColor().css() /* borderRadius: "10px 10px 0 0" */, maxHeight: 320}}>
 // 								<Row style={{height: 40, padding: 10}}>
 // 									{/* <Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
 // 										<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
@@ -89,7 +89,7 @@
 // 		const deleteLayerError = ForDeleteLayer_GetError(userID, layer);
 // 		return (
 // 			<Column p="7px 10px" style={E(
-// 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
+// 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css()},
 // 				last && {borderRadius: "0 0 10px 10px"},
 // 			)}>
 // 				<Row>

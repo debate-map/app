@@ -31,7 +31,7 @@
 // 											style={E(
 // 												{
 // 													cursor: "pointer",
-// 													background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+// 													background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
 // 												},
 // 												index == timelines.length - 1 && {borderRadius: "0 0 10px 10px"},
 // 											)}

@@ -9,6 +9,7 @@ import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcom
 import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 
@@ -36,7 +37,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
 					background: "rgba(0,0,0,.5)", borderRadius: 10,
 				}}>
-					<Row center style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add term" enabled={CanGetBasicPermissions(MeID())} onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
@@ -60,7 +61,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
-						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+						<Row style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&
 								<Text style={{fontSize: 17, fontWeight: 500}}>
 									{GetFullNameP(selectedTerm)}

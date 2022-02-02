@@ -89,7 +89,7 @@
 // 			<div style={{paddingTop: index == 0 ? 0 : 7}}>
 // 				<Column /* mt={index == 0 ? 0 : 7} */ {...(dragInfo && dragInfo.provided.draggableProps)}
 // 					style={E(
-// 						{background: "rgba(0,0,0,.7)", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"},
+// 						{background: liveSkin.MainBackgroundColor().css(), borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"},
 // 						dragInfo && dragInfo.provided.draggableProps.style,
 // 						asDragPreview && {zIndex: zIndexes.draggable},
 // 					)}>

@@ -370,7 +370,7 @@
 // 						}}
 // 						itemSizeEstimator={this.EstimateStepHeight} itemRenderer={this.RenderStep}/>
 // 				</ScrollView> */}
-// 				<Row style={{height: 30, background: "rgba(0,0,0,.7)"}}>
+// 				<Row style={{height: 30, background: liveSkin.MainBackgroundColor().css()}}>
 // 					<Row ml="auto" style={{position: "relative"}}>
 // 						<DropDown>
 // 							<DropDownTrigger><Button text="Options" style={{height: "100%"}}/></DropDownTrigger>

@@ -7,6 +7,7 @@ import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {Link, Observer, InfoButton} from "web-vcore";
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SourceChainsEditorUI} from "../../Maps/MapNode/SourceChainsEditorUI.js";
 import {TermDefinitionPanel} from "../../Maps/MapNode/DetailBoxes/Panels/DefinitionsPanel.js";
 
@@ -88,7 +89,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 				})}
 				<Row mt={5} style={{
 					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
-					background: mediasWithMatchingURL.length % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+					background: mediasWithMatchingURL.length % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
 					padding: 5,
 					borderRadius: "0 0 5px 5px",
 				}}>
@@ -112,7 +113,7 @@ export class FoundMediaUI extends BaseComponentPlus({} as {media: Media, index: 
 				style={E(
 					{
 						whiteSpace: "normal", //cursor: "pointer",
-						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
 						padding: 5,
 					},
 					index == 0 && {borderRadius: "5px 5px 0 0"},

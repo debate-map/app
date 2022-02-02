@@ -1,6 +1,7 @@
 import {AddGlobalStyle} from "web-vcore/nm/react-vextensions.js";
 import {ES} from "web-vcore";
 
+// todo: merge this with Skin system
 export const styles = {
 	page: ES({
 		width: 960, flex: 1, margin: "100px auto", padding: 50, background: "rgba(0,0,0,.75)", borderRadius: 10, cursor: "auto",

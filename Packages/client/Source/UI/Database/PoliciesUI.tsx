@@ -9,6 +9,7 @@ import {Button, Column, Div, Pre, Row, Text} from "web-vcore/nm/react-vcomponent
 import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {PolicyDetailsUI, ShowAddAccessPolicyDialog} from "./Policies/PolicyDetailsUI.js";
 
@@ -35,7 +36,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
 					background: "rgba(0,0,0,.5)", borderRadius: 10,
 				}}>
-					<Row center style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add policy" enabled={CanGetBasicPermissions(MeID())} onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
@@ -59,7 +60,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
-						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+						<Row style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedPolicy &&
 								<Text style={{fontSize: 17, fontWeight: 500}}>
 									{selectedPolicy.name}

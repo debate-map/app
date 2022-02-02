@@ -11,6 +11,7 @@ import {MeID, GetUser, GetUserHidden, GetUserPermissionGroups, SetUserData, SetU
 import chroma from "web-vcore/nm/chroma-js.js";
 import {ProfilePanel} from "Store/main/profile";
 import {store} from "Store";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 // todo: move these to a better, more widely usable place
 /*type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -64,7 +65,7 @@ export class UserProfileUI extends BaseComponentPlus({} as UserProfileUI_Props, 
 @Observer
 class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
-		let {user, meID, me, ownProfile, profileUser_h} = this.props;
+		const {user, meID, me, ownProfile, profileUser_h} = this.props;
 		const userPermissionGroups = GetUserPermissionGroups(user ? user.id : null);
 		const meFollows = GetUserFollows_List(user.id);
 		const profileUserFollow = meFollows.find(a=>a.targetUser == user.id);
@@ -158,14 +159,14 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 @Observer
 class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
-		let {user, ownProfile, profileUser_h} = this.props;
+		const {user, ownProfile, profileUser_h} = this.props;
 
 		return <>
 			{ownProfile && profileUser_h &&
 			<Fragment>
 				<Row mt={10} mb={5} style={{fontSize: 15, fontWeight: "bold"}}>Customization</Row>
 				<Row mt={5}>Background:</Row>
-				<ScrollView mt={5} style={{height: 450, background: "rgba(0,0,0,.7)"}}>
+				<ScrollView mt={5} style={{height: 450, background: liveSkin.MainBackgroundColor().css()}}>
 					<Row style={{flexWrap: "wrap"}}>
 						{presetBackgrounds.Pairs().map(prop=>{
 							const id = prop.key;
@@ -178,7 +179,7 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 										background.url_max?.startsWith("background: ") && {background: background.url_max.replace("background: ", "")},
 										!background.url_max?.startsWith("background: ") && {
 											backgroundColor: background.color, backgroundImage: `url(${background.url_256 || background.url_1920 || background.url_3840 || background.url_max})`,
-											backgroundPosition: "center", backgroundSize: "cover"
+											backgroundPosition: "center", backgroundSize: "cover",
 										},
 										selected && {border: "1px solid rgba(255,255,255,.7)"},
 									)}
@@ -290,7 +291,7 @@ const events = [
 @Observer
 class UserProfileUI_Notifications extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
-		let {user} = this.props;
+		const {user} = this.props;
 
 		return <>
 		</>;

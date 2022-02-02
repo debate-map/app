@@ -5,9 +5,9 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {Link, PageContainer, Observer, ES} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions.js";
+import {GetUsers, GetUser, User} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {UserProfileUI} from "./Users/UserProfile.js";
-import {GetUsers, GetUser} from "dm_common";
-import {User} from "dm_common";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];
 
@@ -30,7 +30,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		users = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
-				<Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+				<Column className="clickThrough" style={{height: 40, background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 					{/* <Row style={{height: 40, padding: 10}}>
 						<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
 							<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
@@ -82,7 +82,7 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User}, 
 		if (displayName.includes("@")) displayName = displayName.split("@")[0];
 		return (
 			<Column p="7px 10px" style={E(
-				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
+				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css()},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>

@@ -8,6 +8,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import React from "react";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {MapUI} from "./@Shared/Maps/MapUI";
 import {GADDemo} from "./@GAD/GAD";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
@@ -56,7 +57,7 @@ class MapListUI extends BaseComponentPlus({}, {}) {
 		return (
 			<PageContainer style={{margin: "20px auto 20px auto", padding: 0, background: null}}>
 				<Column className="clickThrough" style={E(
-					{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"},
+					{height: 80, background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"},
 					GADDemo && {
 						background: "rgba(222,222,222,1)", color: HSLA(221, 0.13, 0.42, 1),
 						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17, fontWeight: "bold",

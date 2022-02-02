@@ -5,6 +5,7 @@ import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
 import {InfoButton, Link, Observer} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerm, GetTermsByForm, TermAttachment, Term, GetUser} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {TermDefinitionPanel} from "../../@Shared/Maps/MapNode/DetailBoxes/Panels/DefinitionsPanel.js";
 import {NodeDetailsUI_SharedProps} from "../../@Shared/Maps/MapNode/NodeDetailsUI.js";
 import {PhrasingDetailsUI_SharedProps} from "./PhrasingDetailsUI.js";
@@ -83,7 +84,7 @@ class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enable
 				})}
 				<Row mt={5} style={{
 					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
-					background: termsWithMatchingForm.length % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+					background: termsWithMatchingForm.length % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
 					padding: 5,
 					borderRadius: "0 0 5px 5px",
 				}}>
@@ -104,7 +105,7 @@ export class FoundTermUI extends BaseComponentPlus({} as {term: Term, index: num
 				style={E(
 					{
 						whiteSpace: "normal", //cursor: "pointer",
-						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
 						padding: 5,
 					},
 					index == 0 && {borderRadius: "5px 5px 0 0"},

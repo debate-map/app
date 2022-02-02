@@ -4,6 +4,7 @@ import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer} from "web-vcore";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 @Observer
 export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}) {
@@ -23,7 +24,7 @@ export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChan
 										style={E(
 											{
 												cursor: "pointer",
-												background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+												background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
 											},
 											index == users.length - 1 && {borderRadius: "0 0 10px 10px"},
 										)}

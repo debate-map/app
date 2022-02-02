@@ -8,6 +8,7 @@ import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetUser, Map} from "dm_common";
 import {columnWidths} from "UI/Debates";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 @Observer
 export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {
@@ -18,7 +19,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		const toURL = new VURL(undefined, ["debates", `${map.id}`]);
 		return (
 			<Column p="7px 10px" style={E(
-				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
+				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css()},
 				GADDemo && {
 					background: index % 2 == 0 ? "rgba(255,255,255,1)" : "rgba(222,222,222,1)", color: HSLA(222, 0.33, 0.5, 0.8),
 					fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17, fontWeight: "bold",

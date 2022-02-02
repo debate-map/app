@@ -8,9 +8,9 @@ import {Observer, HSLA, RunInAction} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, WeightingType} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {colors} from "../../../../Utils/UI/GlobalStyles.js";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
-
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
 
 const changesSince_options = [] as {name: string, value: string}[];
@@ -38,7 +38,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 			}}>
 				<Row style={E(
 					{
-						justifyContent: "flex-end", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
+						justifyContent: "flex-end", background: liveSkin.MainBackgroundColor().css(), boxShadow: colors.navBarBoxShadow,
 						width: "100%", height: GADDemo ? 40 : 30, borderRadius: "0 0 0 10px",
 					},
 					GADDemo && {
