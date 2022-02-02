@@ -74,7 +74,7 @@ pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
-        GraphQLPlaygroundConfig::new("/gql-playground").subscription_endpoint("/graphql"),
+        GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
     ))
 }
 
@@ -89,7 +89,7 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        .route("/gql-playground", on_service(MethodFilter::POST, gql_subscription_service.clone()).get(graphql_playground))
+        .route("/gql-playground", get(graphql_playground))
         //.route("/graphql", post(gql_post::gqp_post_handler))
         //.route("/graphql", GraphQLSubscription::new(schema.clone()))
         .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service))

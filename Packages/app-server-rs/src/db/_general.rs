@@ -5,6 +5,7 @@ use hyper::{Body, Method};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
+use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
@@ -53,10 +54,14 @@ impl PassConnectionID_Result {
     async fn userID(&self) -> &Option<String> { &self.userID }
 }
 
-struct Ping_Result { pong: String }
+struct Ping_Result {
+    pong: String,
+    refreshPage: bool,
+}
 #[Object]
 impl Ping_Result {
     async fn pong(&self) -> &str { &self.pong }
+    async fn refreshPage(&self) -> &bool { &self.refreshPage }
 }
 
 #[derive(Default)]
@@ -71,8 +76,12 @@ impl SubscriptionShard_General {
     #[graphql(name = "_Ping")]
     async fn _Ping(&self, ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();
-        stream::once(async { Ping_Result {
+        // create the listed file in the app-server-rs pod (eg. using Lens), if you've made an update that you need all clients to refresh for
+        let refreshPage = Path::new("./refreshPageForAllUsers_enabled").exists();
+        
+        stream::once(async move { Ping_Result {
             pong,
+            refreshPage,
         } })
     }
 

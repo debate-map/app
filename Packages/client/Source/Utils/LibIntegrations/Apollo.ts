@@ -166,6 +166,7 @@ export async function SendPingOverWebSocket() {
 			subscription {
 				_Ping {
 					pong
+					refreshPage
 				}
 			}
 		`,
@@ -178,6 +179,13 @@ export async function SendPingOverWebSocket() {
 		});
 	});
 	//console.log("Got response to ping:", fetchResult);
+
+	const {pong, refreshPage} = fetchResult.data._Ping;
+	if (refreshPage) {
+		console.log("Refreshing page due to server request.");
+		window.location.reload();
+	}
+
 	return fetchResult;
 }
 
