@@ -3,7 +3,8 @@ import React, {useMemo, useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ES, HSLA, InfoButton, Observer, UseDocumentEventListener} from "web-vcore";
 import {Color} from "web-vcore/nm/chroma-js.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
@@ -130,7 +131,7 @@ class ToolBarButton extends BaseComponent<{
 					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
 						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .1})`,
 					},
-					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/},
+					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},
 				)}
 				onClick={e=>{

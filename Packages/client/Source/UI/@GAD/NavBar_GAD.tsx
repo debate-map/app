@@ -12,9 +12,10 @@ import {Observer, Link, HSL, NavBarPanelButton} from "web-vcore";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {colors} from "../../Utils/UI/GlobalStyles.js";
-import {GADHeaderFont, GADDemo_2020} from "./GAD.js";
 import React from "react";
+import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
+import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {GADDemo_2020} from "./GAD.js";
 
 // main
 // ==========
@@ -94,7 +95,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 		let finalStyle = E(
 			{
 				position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-				fontFamily: GADHeaderFont,
+				fontFamily: SLSkin.main.HeaderFont(),
 				fontSize: sideButton ? 16 : 18, textTransform: sideButton ? "uppercase" : null, fontWeight: "normal",
 				lineHeight: "150px", color: "#000", padding: "0 15px", textDecoration: "none", opacity: 0.9,
 			},

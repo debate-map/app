@@ -1,13 +1,14 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Button} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
 import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map, ChildGroup} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General.js";
+import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
@@ -90,7 +91,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					{height: 17, fontSize: 11, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
-					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: GADMainFont /*fontSize: 12, letterSpacing: 1*/},
+					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 12, letterSpacing: 1*/},
 					style,
 				)}
 				onClick={UseCallback(e=>{

@@ -2,7 +2,8 @@ import {ArgumentType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPre
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
@@ -135,7 +136,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 								<span style={ES(
 									{position: "relative", fontSize: 13},
 									GADDemo && {
-										color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, //fontSize: 11, letterSpacing: 1
+										color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont(), //fontSize: 11, letterSpacing: 1
 									},
 								)}>{text}</span>
 							</>

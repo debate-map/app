@@ -1,24 +1,21 @@
-import chroma from "web-vcore/nm/chroma-js.js";
-import {CreateLinkCommand, GetNodeDisplayText, GetNodeL3, GetPathNodeIDs, Me, MeID, Polarity} from "dm_common";
+import {Me} from "dm_common";
 import keycode from "keycode";
 import {hasHotReloaded} from "Main";
 import React from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
-import {GetUserBackground} from "Store/db_ext/users/$user";
-import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, PageContainer, RunInAction} from "web-vcore";
-import {Assert, Clone, FromJSON, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
+import chroma from "web-vcore/nm/chroma-js.js";
+import {Clone, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
+import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
-import {Button, ColorPickerBox, Column, Text} from "web-vcore/nm/react-vcomponents.js";
+import {ColorPickerBox, Column, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuLayer} from "web-vcore/nm/react-vmenu.js";
-import {MessageBoxLayer, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {MessageBoxLayer} from "web-vcore/nm/react-vmessagebox.js";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
-import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {NavBar} from "../UI/@Shared/NavBar.js";
 import {GlobalUI} from "../UI/Global.js";
 import {HomeUI} from "../UI/Home.js";
@@ -26,13 +23,14 @@ import {MoreUI} from "../UI/More.js";
 import {GADDemo} from "./@GAD/GAD.js";
 import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
+import {RootStyles} from "./@Root/RootStyles.js";
+import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer.js";
 import {DatabaseUI} from "./Database.js";
 import {UserProfileUI} from "./Database/Users/UserProfile.js";
 import {DebatesUI} from "./Debates.js";
 import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
-import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer.js";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -44,33 +42,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		makeObservable(this);
 	}
 
-	/* ComponentWillMount() {
-		let startVal = g.storeRehydrated;
-		// wrap storeRehydrated property, so we know when it's set (from CreateStore.ts callback)
-		(g as Object)._AddGetterSetter('storeRehydrated',
-			()=>g.storeRehydrated_,
-			val=> {
-				g.storeRehydrated_ = val;
-				setTimeout(()=>this.mounted && this.Update());//
-			});
-		// trigger setter right now (in case value is already true)
-		g.storeRehydrated = startVal;
-	} */
 	async ComponentWillMount() {
-		// InitStore();
-
-		// temp fix for "Illegal invocation" error in mst-persist
-		/* window.localStorage.getItem = window.localStorage.getItem.bind(window.localStorage);
-		window.localStorage.setItem = window.localStorage.setItem.bind(window.localStorage);
-		persist('some', store, {
-			// jsonify: false,
-			// whitelist: ['name']
-			blacklist: [],
-		}).then(() => {
-			Log('Loaded state:', getSnapshot(store));
-			this.SetState({ storeReady: true });
-		}); */
-
 		const trunk = new AsyncTrunk(store, {storage: localStorage});
 		if (startURL.GetQueryVar("clearState") == "true") {
 			await trunk.clear();
@@ -123,86 +95,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 	}
 
 	OnDragEnd = async result=>{
-		const sourceDroppableInfo = FromJSON(result.source.droppableId) as DroppableInfo;
-		const sourceIndex = result.source.index as number;
-		const targetDroppableInfo: DroppableInfo = result.destination && FromJSON(result.destination.droppableId);
-		const targetIndex = result.destination && result.destination.index as number;
-		const draggableInfo = FromJSON(result.draggableId) as DraggableInfo;
 
-		if (targetDroppableInfo == null) {
-		} else if (targetDroppableInfo.type == "NodeChildHolder") {
-			// we don't support setting the actual order for nodes through dnd right now, so ignore if dragging onto same list
-			if (result.destination && result.source.droppableId == result.destination.droppableId) return;
-
-			const {parentPath: newParentPath} = targetDroppableInfo;
-			const newParentID = NN(GetPathNodeIDs(newParentPath!).Last());
-			const newParent = GetNodeL3.NN(newParentID);
-			const polarity = targetDroppableInfo.subtype == "up" ? Polarity.supporting : Polarity.opposing;
-
-			const {mapID, nodePath: draggedNodePath} = draggableInfo;
-			Assert(draggedNodePath);
-			const draggedNodeID = NN(GetPathNodeIDs(draggedNodePath!).Last());
-			const draggedNode = GetNodeL3.NN(draggedNodeID);
-
-			const copyCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath!, targetDroppableInfo.childGroup!, polarity, true);
-			const moveCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath!, targetDroppableInfo.childGroup!, polarity, false);
-			Assert(copyCommand && moveCommand);
-
-			//if (copyCommand.Validate_Safe()) {
-			if (await copyCommand.Validate_Async_Safe()) {
-				ShowMessageBox({title: "Cannot copy/move node", message: `Reason: ${copyCommand.ValidateErrorStr}`});
-				return;
-			}
-
-			const controller = ShowMessageBox({
-				title: "Copy/move the dragged node?", okButton: false, cancelButton: false,
-				message: `
-					Are you sure you want to copy/move the dragged node?
-
-					Destination (new parent): ${GetNodeDisplayText(newParent)}
-					Dragged claim/argument: ${GetNodeDisplayText(draggedNode)}
-				`.AsMultiline(0),
-				extraButtons: ()=><>
-					<Button text="Copy" onClick={async()=>{
-						controller.Close();
-						const {argumentWrapperID} = await copyCommand.RunOnServer();
-						if (argumentWrapperID) {
-							RunInAction("OnDragEnd.Copy.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
-						}
-					}} />
-					<Button ml={5} text="Move" enabled={moveCommand.Validate_Safe() == null} title={moveCommand.ValidateErrorStr} onClick={async()=>{
-						controller.Close();
-						const {argumentWrapperID} = await moveCommand.RunOnServer();
-						if (argumentWrapperID) {
-							RunInAction("OnDragEnd.Move.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
-						}
-					}} />
-					<Button ml={5} text="Cancel" onClick={()=>controller.Close()} />
-				</>,
-			});
-		} /*else if (targetDroppableInfo.type == "TimelineStepList") {
-			// if we're moving an item to later in the same list, increment the target-index again (since react-beautiful-dnd pre-applies target-index adjustment, unlike the rest of our code that uses UpdateTimelineStepsOrder/Array.Move())
-			if (sourceDroppableInfo.type == targetDroppableInfo.type && sourceIndex < targetIndex) {
-				targetIndex++;
-			}
-
-			new UpdateTimelineStepOrder({timelineID: sourceDroppableInfo.timelineID, stepID: draggableInfo.stepID, newIndex: targetIndex}).RunOnServer();
-		} else if (targetDroppableInfo.type == "TimelineStepNodeRevealList") {
-			let path = draggableInfo.nodePath;
-			const draggedNode = GetNode(GetNodeID(path));
-			const parentNode = GetParentNode(path);
-			// if dragged-node is the premise of a single-premise argument, use the argument-node instead (the UI for the argument and claim are combined, but user probably wanted the whole argument dragged)
-			if (IsPremiseOfSinglePremiseArgument(draggedNode, parentNode)) {
-				path = GetParentPath(path);
-			}
-
-			const step = GetTimelineStep(targetDroppableInfo.stepID);
-			const newNodeReveal = new NodeReveal();
-			newNodeReveal.path = path;
-			newNodeReveal.show = true;
-			const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
-			new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
-		}*/
 	};
 
 	ComponentDidMount() {
@@ -248,6 +141,13 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue-Thin.css" type="text/css"/>;
 			const linkEl2 = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />;
 			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head
+
+			const styleEl = <style>{`
+				html, body:not(.neverMatch) {
+					font-family: 
+				}
+			`}</style>;
+			ReactDOM.render(ReactDOM.createPortal(styleEl, document.head), document.createElement("div")); // render directly into head
 		}
 	}
 }
@@ -266,45 +166,13 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
 		// const currentPage = State(a => a.main.page);
 		const {page} = store.main;
-		const background = GetUserBackground(MeID());
-		const firstExtantBackgroundURL_1920Plus = background.url_1920 || background.url_3840 || background.url_max;
-		const firstExtantBackgroundURL_3840Plus = background.url_3840 || background.url_max;
-		const firstExtantBackgroundURL_max = background.url_max;
 
 		return (
 			<Column className='background'/* 'unselectable' */ style={{height: "100%"}}>
 				{/* <div className='background' style={{
 					position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
 				}}/> */}
-				<style>{
-					`
-					.background {
-						${firstExtantBackgroundURL_1920Plus?.startsWith("background: ")
-						? `background: ${firstExtantBackgroundURL_1920Plus.replace("background: ", "")}`
-						: `background-color: ${background.color};
-								background-image: url(${firstExtantBackgroundURL_1920Plus});
-								background-position: ${background.position || "center center"};
-								background-size: ${background.size || "cover"};`
-					}
-					}
-					@media (min-width: 1921px) {
-						.background {
-							${firstExtantBackgroundURL_3840Plus?.startsWith("background: ")
-						? `background: ${firstExtantBackgroundURL_3840Plus.replace("background: ", "")}`
-						: `background-image: url(${firstExtantBackgroundURL_3840Plus});`
-					}
-						}
-					}
-					@media (min-width: 3841px) {
-						.background {
-							${firstExtantBackgroundURL_max?.startsWith("background: ")
-						? `background: ${firstExtantBackgroundURL_max.replace("background: ", "")}`
-						: `background-image: url(${firstExtantBackgroundURL_max});`
-					}
-						}
-					}
-					`
-				}</style>
+				<RootStyles/>
 				<ErrorBoundary>
 					<AddressBarWrapper />
 					<OverlayUI />

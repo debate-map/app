@@ -5,7 +5,7 @@ import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";

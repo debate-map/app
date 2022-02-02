@@ -10,7 +10,8 @@ import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, 
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
@@ -159,7 +160,7 @@ export class TitlePanel extends BaseComponentPlus(
 						marginTop: !latex && GetSegmentsForTerms(displayText, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
 					},
 					style,
-					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/},
+					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 				)}
 				onClick={e=>{
 					if (IsDoubleClick(e)) this.OnDoubleClick();

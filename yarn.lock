@@ -13938,9 +13938,9 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vcomponents@npm:1.0.36":
-  version: 1.0.36
-  resolution: "react-vcomponents@npm:1.0.36"
+"react-vcomponents@1.0.36, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
+  version: 0.0.0-use.local
+  resolution: "react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents"
   dependencies:
     classnames: ^2.2.5
     keycode: ^2.2.0
@@ -13949,9 +13949,8 @@ fsevents@~2.3.2:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-vextensions: ^1.0.5
-  checksum: f3cda2d9041b0181de3cd6fd47c50644515b8cccd0a907d8d37ecb737183ac72ce5f5b0b75f23f6425f15bc762f8a166a99511960abaa2c7bf25c45772000628
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "react-vextensions@npm:1.0.12":
   version: 1.0.12
@@ -17194,9 +17193,9 @@ typescript@~3.7.3:
     express: ^4.17.1
     file-loader: ^6.2.0
     fs-extra: ^8.1.0
-    graphql: ^15.8.0
+    graphql: ^15.5.0
     graphql-feedback: ^0.0.3
-    graphql-tag: 2.12.6
+    graphql-tag: 2.12.5
     history: ^4.10.1
     html-webpack-plugin: ^5.3.1
     immer: ^7.0.7
@@ -17232,7 +17231,7 @@ typescript@~3.7.3:
     remarkable-react: ^1.4.3
     sass-loader: ^12.1.0
     source-map-loader: ^3.0.0
-    subscriptions-transport-ws: ^0.11.0
+    subscriptions-transport-ws: ^0.9.19
     svg-sprite-loader: ^6.0.7
     ts-loader: ^9.2.3
     typescript: ^4.3.2
