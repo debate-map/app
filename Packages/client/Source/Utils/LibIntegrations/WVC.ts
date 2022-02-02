@@ -3,7 +3,6 @@ import {dbVersion, hasHotReloaded} from "Main.js";
 import {RootState, store} from "Store/index.js";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
-import {colors} from "Utils/UI/GlobalStyles.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
 import {ActionFunc, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
@@ -11,6 +10,7 @@ import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
 import "./WVC/Overrides.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
@@ -33,7 +33,7 @@ AddWVCSchemas(AddSchema);
 export function InitWVC() {
 	manager_framework.Populate({
 		// styling
-		colors,
+		colors: {navBarBoxShadow: liveSkin.NavBarBoxShadow()},
 		zIndexes,
 		iconInfo,
 		useExpandedNavBar: ()=>true,

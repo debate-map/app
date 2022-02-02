@@ -5,7 +5,7 @@ import {store, RootState} from "Store";
 import {ActionFunc, Link, Observer} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
-import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 // @Observer
 export class SubNavBar_GAD extends BaseComponent<{fullWidth?: boolean}, {}> {
@@ -18,7 +18,7 @@ export class SubNavBar_GAD extends BaseComponent<{fullWidth?: boolean}, {}> {
 				// background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
 				<div style={E(
-					{display: "inline-block", background: "#fff", boxShadow: colors.navBarBoxShadow, padding: "0 30px"},
+					{display: "inline-block", background: "#fff", boxShadow: liveSkin.NavBarBoxShadow(), padding: "0 30px"},
 				)}>
 					{children}
 				</div>

@@ -1,13 +1,9 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
-import {ChildGroup, IsUserCreatorOrMod} from "dm_common";
-import {MeID} from "dm_common";
-import {GetParentNodeL3} from "dm_common";
-import {GetNodeDisplayText} from "dm_common";
-import {UnlinkNode} from "dm_common";
+import {ChildGroup, IsUserCreatorOrMod, MeID, GetParentNodeL3, GetNodeDisplayText, UnlinkNode} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -26,7 +22,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		return (
 			<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
 				enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
-				style={styles.vMenuItem} onClick={async e=>{
+				style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 					if (e.button != 0) return;
 					const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")));
 					ShowMessageBox({

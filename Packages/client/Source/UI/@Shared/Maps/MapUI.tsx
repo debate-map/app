@@ -4,6 +4,7 @@ import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps} from "Utils/UI/General.js";
 import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
 import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
@@ -11,7 +12,6 @@ import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {styles} from "../../../Utils/UI/GlobalStyles.js";
 import {ExpandableBox} from "./MapNode/ExpandableBox.js";
 import {NodeUI} from "./MapNode/NodeUI.js";
 import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots.js";
@@ -234,7 +234,7 @@ export class MapUI extends BaseComponentPlus({
 								this.LoadScroll();
 							}}/> */}
 							<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
-								<VMenuItem text="(To add a node, right click on an existing node.)" style={styles.vMenuItem}/>
+								<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
 							</VMenuStub>
 						</div>
 					</ScrollView>

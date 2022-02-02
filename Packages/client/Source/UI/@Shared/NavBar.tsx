@@ -10,7 +10,7 @@ import {Div} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {Me} from "dm_common";
-import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {ChatPanel} from "./NavBar/ChatPanel.js";
 import {GuidePanel} from "./NavBar/GuidePanel.js";
 import {NotificationsUI} from "./NavBar/NotificationsUI.js";
@@ -43,7 +43,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 		return (
 			<nav style={{
 				position: "relative", zIndex: zIndexes.navBar,
-				padding: "0 10px", boxShadow: colors.navBarBoxShadow,
+				padding: "0 10px", boxShadow: liveSkin.NavBarBoxShadow(),
 				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				background: "rgba(0,0,0,1)",
 			}}>
@@ -62,7 +62,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
-						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", // display: 'table'
+						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{topLeftOpenPanel == "chat" && <ChatPanel/>}
@@ -90,7 +90,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
-						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", // display: 'table',
+						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
 						{topRightOpenPanel == "guide" && <GuidePanel/>}

@@ -9,7 +9,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
-import {styles} from "../../../../Utils/UI/GlobalStyles.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument.js";
@@ -70,7 +70,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		//const childLayout_forStructuredHeaders = addChildGroups_structured.length <= 1 ? "below" : "right";
 		const childLayout_forStructuredHeaders = "right";
-		const headerStyle = ES(styles.vMenuItem, {opacity: 1});
+		const headerStyle = ES(liveSkin.Style_VMenuItem(), {opacity: 1});
 
 		const GetAddChildItems = (node2: MapNodeL3, path2: string, childGroup2: ChildGroup)=>{
 			const validChildTypes = GetValidNewChildTypes(node2, childGroup2, permissions);
@@ -87,7 +87,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 					return polarities.map(polarity=>{
 						const displayName = GetMapNodeTypeDisplayName(childType, node2, ClaimForm.base, polarity);
 						return (
-							<VMenuItem key={`${childType}_${polarity}`} text={`New ${displayName}`} style={styles.vMenuItem}
+							<VMenuItem key={`${childType}_${polarity}`} text={`New ${displayName}`} style={liveSkin.Style_VMenuItem()}
 								onClick={e=>{
 									if (e.button != 0) return;
 									if (userID == null) return ShowSignInPopup();
@@ -133,7 +133,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 				{!inList && !forChildHolderBox &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Cut"}
 						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
-						style={styles.vMenuItem}
+						style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
 							e.persist();
 							if (e.button == 2) {
@@ -148,7 +148,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							ACTCopyNode(path, true);
 						}}/>}
 				{!forChildHolderBox &&
-					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
+					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Copy"} style={liveSkin.Style_VMenuItem()}
 						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=>{
 							e.persist();
@@ -180,7 +180,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						}
 					}}/> */}
 				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
-					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
+					<VMenuItem text="Convert to multi-premise" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{
 							if (e.button != 0) return;
 
@@ -188,14 +188,14 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
 					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !forChildHolderBox &&
-					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
+					<VMenuItem text="Convert to single-premise" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{
 							if (e.button !== 0) return;
 
 							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
 						}}/>}
 				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
-					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
+					<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
 							if (e.button != 0) return;
 							for (const path of pathsToChangedInSubtree) {
@@ -203,7 +203,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							}
 						}}/>}
 				{inList &&
-					<VMenuItem text="Find in maps" style={styles.vMenuItem}
+					<VMenuItem text="Find in maps" style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
 							RunInAction("NodeUIMenu.FindInCurrentMap", ()=>{
 								store.main.search.findNode_state = "activating";

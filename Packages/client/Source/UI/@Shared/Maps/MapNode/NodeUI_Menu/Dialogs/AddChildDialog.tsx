@@ -7,6 +7,7 @@ import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
 import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {observer} from "web-vcore/nm/mobx-react.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
@@ -161,7 +162,8 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 	let tab = AddChildDialogTab.Claim;
 	const boxController = ShowMessageBox({
 		title: `Add ${prep.displayName}`, cancelButton: true,
-		message: observer_simple(()=>{
+		//message: observer_simple(()=>{
+		message: observer(()=>{
 			try {
 				const tempCommand = helper.GetCommand();
 				boxController.options.okButtonProps = {

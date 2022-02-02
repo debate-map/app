@@ -7,7 +7,7 @@ import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
 import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, Map} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
-import {styles} from "Utils/UI/GlobalStyles";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 export const userIDPlaceholder = "[user-id placeholder]";
 
@@ -47,7 +47,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
 								{creatorOrMod &&
-								<Button ml={5} text="X" style={{...styles.xButton}} onClick={()=>{
+								<Button ml={5} text="X" style={{...liveSkin.Style_XButton()}} onClick={()=>{
 									ShowMessageBox({
 										title: `Remove editor "${displayName}"`, cancelButton: true,
 										message: `Remove editor "${displayName}" (id: ${editorID})?`,

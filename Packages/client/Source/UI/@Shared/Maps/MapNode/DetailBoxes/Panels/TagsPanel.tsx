@@ -6,7 +6,7 @@ import {store} from "Store";
 import {TagsPanel_Subpanel} from "Store/main/maps";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
-import {styles} from "Utils/UI/GlobalStyles";
+import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetUpdates, HSLA, Observer, RunInAction_Set} from "web-vcore";
 import {Button, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -104,7 +104,7 @@ export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map
 									{label}<sup>{labelCounts.get(label)}</sup>
 									{HasAdminPermissions(MeID()) && // mods are technically able to remove whatever tags they want, but we only want to show this "shortcut" tool to admins
 									<VMenuStub>
-										<VMenuItem text="Remove all" style={styles.vMenuItem}
+										<VMenuItem text="Remove all" style={liveSkin.Style_VMenuItem()}
 											onClick={async e=>{
 												if (e.button != 0) return;
 												for (const tag of tags) {

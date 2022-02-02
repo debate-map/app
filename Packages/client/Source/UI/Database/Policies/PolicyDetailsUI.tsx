@@ -4,7 +4,7 @@ import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {userIDPlaceholder} from "UI/@Shared/Maps/MapUI/ActionBar_Left/PeopleDropDown";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
-import {styles} from "Utils/UI/GlobalStyles";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, observer_simple, TextPlus} from "web-vcore";
 import {Clone, E} from "web-vcore/nm/js-vextensions.js";
 import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -77,7 +77,7 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 								</UserPicker>
 								<PermissionSetEditor enabled={enabled} value={permissions} onChange={val=>Change(newData.permissions_userExtends[userID] = val)}/>
 							</Column>
-							<Button ml={5} enabled={enabled} text="X" style={{...styles.xButton}} onClick={()=>{
+							<Button ml={5} enabled={enabled} text="X" style={{...liveSkin.Style_XButton()}} onClick={()=>{
 								delete newData.permissions_userExtends[userID];
 								Change();
 							}}/>

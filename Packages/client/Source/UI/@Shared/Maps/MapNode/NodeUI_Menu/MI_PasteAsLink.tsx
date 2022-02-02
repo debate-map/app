@@ -1,12 +1,12 @@
 import {BaseComponent, UseMemo} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer, RunInAction} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
 import {GetParentNodeL3, GetParentNodeID, Polarity, MapNodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -46,7 +46,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 		return (
 			<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`}
 				enabled={error == null} title={error}
-				style={styles.vMenuItem} onClick={e=>{
+				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 

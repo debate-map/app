@@ -52,10 +52,10 @@ export class RootStyles extends BaseComponent<{}, {}> {
 			}
 
 			.Button {
-				${skin.ButtonStyleOverrides()}
+				${skin.StyleOverride_Button()}
 			}
 
-			${skin.FreeformStyleSection()}
+			${skin.StyleBlock_Freeform()}
 
 			`}</style>
 		);

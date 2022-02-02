@@ -1,6 +1,5 @@
 import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, PageContainer} from "web-vcore";
-import {styles} from "../../Utils/UI/GlobalStyles.js";
 
 export const slackInviteLink = "https://join.slack.com/t/canonicaldebatelab/shared_invite/zt-408acfmb-qhowbidwY0aKaET7wP_IEQ";
 

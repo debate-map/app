@@ -1,10 +1,10 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -19,7 +19,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		return (
 			<VMenuItem text={`Delete${combinedWithParentArg ? " claim" : ""}`}
 				enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
-				style={styles.vMenuItem} onClick={e=>{
+				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 
 					//const contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";

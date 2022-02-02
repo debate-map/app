@@ -9,7 +9,6 @@ import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, WeightingType} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {colors} from "../../../../Utils/UI/GlobalStyles.js";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
 
@@ -38,7 +37,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 			}}>
 				<Row style={E(
 					{
-						justifyContent: "flex-end", background: liveSkin.MainBackgroundColor().css(), boxShadow: colors.navBarBoxShadow,
+						justifyContent: "flex-end", background: liveSkin.MainBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
 						width: "100%", height: GADDemo ? 40 : 30, borderRadius: "0 0 0 10px",
 					},
 					GADDemo && {

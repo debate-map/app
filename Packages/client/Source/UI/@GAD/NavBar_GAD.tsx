@@ -14,7 +14,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import React from "react";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
-import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GADDemo_2020} from "./GAD.js";
 
 // main
@@ -28,7 +28,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
-				position: "relative", zIndex: zIndexes.navBar, height: 150, boxShadow: colors.navBarBoxShadow,
+				position: "relative", zIndex: zIndexes.navBar, height: 150, boxShadow: liveSkin.NavBarBoxShadow(),
 				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				// background: 'rgba(0,0,0,1)',
 			}}>
@@ -70,7 +70,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",
-						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", // display: 'table',
+						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
 						{topRightOpenPanel == "profile" && <UserPanel/>}

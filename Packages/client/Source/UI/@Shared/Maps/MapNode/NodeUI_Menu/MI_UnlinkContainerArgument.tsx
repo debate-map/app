@@ -2,10 +2,10 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
 import {GetNodeL3, GetNodeDisplayText, IsUserCreatorOrMod, MeID, UnlinkNode, ChildGroup} from "dm_common";
 import {Assert, NN} from "web-vcore/nm/js-vextensions";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -29,7 +29,7 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 		return (
 			<VMenuItem text="Unlink argument"
 				enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr ?? undefined}
-				style={styles.vMenuItem} onClick={e=>{
+				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 					ShowMessageBox({
 						title: `Unlink "${argumentText}"`, cancelButton: true,

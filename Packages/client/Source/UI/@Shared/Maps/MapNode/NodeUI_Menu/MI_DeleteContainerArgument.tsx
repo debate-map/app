@@ -1,5 +1,5 @@
 import {ChildGroup, DeleteArgument, GetNodeChildLinks, GetNodeDisplayText, GetNodeL3, IsUserCreatorOrMod, MeID} from "dm_common";
-import {styles} from "Utils/UI/GlobalStyles.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
@@ -31,7 +31,7 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 
 		return (
 			<VMenuItem text="Delete argument" enabled={error == null} title={error}
-				style={styles.vMenuItem} onClick={e=>{
+				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 
 					ShowMessageBox({

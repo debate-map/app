@@ -13938,7 +13938,22 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vcomponents@1.0.36, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
+"react-vcomponents@npm:1.0.37":
+  version: 1.0.37
+  resolution: "react-vcomponents@npm:1.0.37"
+  dependencies:
+    classnames: ^2.2.5
+    keycode: ^2.2.0
+    react-textarea-autosize: ^7.1.2
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    react-vextensions: ^1.0.5
+  checksum: a994760667549e1b349ad1a111377301ff930647e5ab265d9361cf749ada3fcd1413999d24d6e50ae00d2ae288beca074a3a51fc136f7e6627de15a2f13b19b5
+  languageName: node
+  linkType: hard
+
+"react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
   version: 0.0.0-use.local
   resolution: "react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents"
   dependencies:
@@ -14003,9 +14018,9 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vmessagebox@npm:1.0.10":
-  version: 1.0.10
-  resolution: "react-vmessagebox@npm:1.0.10"
+"react-vmessagebox@1.0.10, react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox":
+  version: 0.0.0-use.local
+  resolution: "react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox"
   dependencies:
     classnames: ^2.2.5
     mobx-react: ^7.2.0
@@ -14016,9 +14031,8 @@ fsevents@~2.3.2:
     react-dom: ^17.0.2
     react-vcomponents: ^1.0.33
     react-vextensions: ^1.0.10
-  checksum: 66d26506e23f1090dd53e1c42abe98d8c66fa802773e756ad607c3f9f248dbbb8c89050af0b938d853fd17033108d8f24947999957acbfef567f426398495aa1
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "react-vscrollview@npm:1.0.3":
   version: 1.0.3
@@ -17221,7 +17235,7 @@ typescript@~3.7.3:
     react-markdown: ^6.0.3
     react-universal-hooks: 0.5.1
     react-uplot: 0.0.7
-    react-vcomponents: 1.0.36
+    react-vcomponents: 1.0.37
     react-vextensions: 1.0.12
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14

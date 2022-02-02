@@ -10,7 +10,6 @@ import {Map, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {colors} from "../../../../Utils/UI/GlobalStyles.js";
 import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown.js";
 import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown.js";
 
@@ -30,7 +29,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 			}}>
 				<Row center style={E(
 					{
-						justifyContent: "flex-start", background: liveSkin.MainBackgroundColor().css(), boxShadow: colors.navBarBoxShadow,
+						justifyContent: "flex-start", background: liveSkin.MainBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
 						width: "100%", height: GADDemo ? 40 : 30, borderRadius: "0 0 10px 0",
 					},
 					GADDemo && {

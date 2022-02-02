@@ -1,9 +1,10 @@
 import {GADDemo} from "UI/@GAD/GAD";
-import {DMSkin} from "./Skins/DMSkin";
-import {SLSkin} from "./Skins/SLSkin";
+import {Skin} from "./Skin.js";
+import {DMSkin} from "./Skins/DMSkin.js";
+import {SLSkin} from "./Skins/SLSkin.js";
 
 export const liveSkin = (()=>{
-	let skin = DMSkin.main;
+	let skin: Skin = DMSkin.main;
 	if (GADDemo) skin = SLSkin.main;
 	return skin;
 })();

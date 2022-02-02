@@ -5,7 +5,6 @@ import {ActionFunc, Link, Observer} from "web-vcore";
 import {store, RootState} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {colors} from "../../Utils/UI/GlobalStyles.js";
 
 // @Observer
 export class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
@@ -18,7 +17,7 @@ export class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
 				// background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
 				<div style={E(
-					{display: "inline-block", background: liveSkin.MainBackgroundColor().css(), boxShadow: colors.navBarBoxShadow},
+					{display: "inline-block", background: liveSkin.MainBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow()},
 					fullWidth ? {width: "100%"} : {borderRadius: "0 0 10px 10px"},
 				)}>
 					{children}

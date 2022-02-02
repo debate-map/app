@@ -2,7 +2,7 @@ import {GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNod
 import React from "react";
 import {store} from "Store";
 import {DataExchangeFormat} from "Store/main/maps";
-import {styles} from "Utils/UI/GlobalStyles.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {Clone, GetEntries, ModifyString, NN, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {ClassKeys, CreateAccessor, GetSchemaJSON, TableNameToDocSchemaName} from "web-vcore/nm/mobx-graphlink.js";
@@ -20,7 +20,7 @@ export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasModPermissions(MeID())) return null; // for now, require mod permissions (since no quotas and such are in place)
 		return (
-			<VMenuItem text="Export subtree" style={styles.vMenuItem} onClick={async e=>{
+			<VMenuItem text="Export subtree" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 				if (e.button != 0) return;
 				let ui: ExportSubtreeUI|n;
 				const controller = ShowMessageBox({
