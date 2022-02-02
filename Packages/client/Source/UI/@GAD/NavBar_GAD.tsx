@@ -15,7 +15,7 @@ import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import React from "react";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {GADDemo_2020} from "./GAD.js";
+import {GADDemo_2020, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear, GetGADExternalSiteURL} from "./GAD.js";
 
 // main
 // ==========
@@ -105,7 +105,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 
 		if (page == "website") {
 			//return <Link to="https://greatamericandebate.org" style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
-			return <Link to="https://www.covidconvo.org" style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
+			return <Link to={GetGADExternalSiteURL()} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
 				Website
 				{hovered && bottomBar}
 			</Link>;
@@ -134,11 +134,13 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 				backgroundImage: "url(/Images/@GAD/COVID/Title.png)", backgroundSize: "100%", backgroundRepeat: "no-repeat",
 			}}/> as any;*/
 
-			finalStyle = E(finalStyle, {
-				margin: "0 30px", width: 500, height: 150,
-				backgroundImage: GADDemo_2020 ? "url(/Images/@GAD/2020ElectionDemo.png)" : "url(/Images/@GAD/COVID/Title.png)",
-				backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
-			});
+			finalStyle = E(
+				finalStyle,
+				{margin: "0 30px", backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat"},
+				GADDemo_Nuclear && {width: 400, height: 150, backgroundImage: "url(/Images/@GAD/Nuclear/Title_Cropped.png)"},
+				GADDemo_COVID && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/COVID/Title.png)"},
+				GADDemo_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/2020ElectionDemo.png)"},
+			);
 			text = null as any;
 		}
 

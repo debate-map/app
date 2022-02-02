@@ -3,6 +3,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {Link, Observer, RunInAction} from "web-vcore";
 import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
+import React, {Fragment} from "react";
 import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel.js";
 
 const termsPlaceholder = [];
@@ -65,10 +66,10 @@ export class DefinitionsPanel extends BaseComponentPlus(
 					})}
 				</Row>*/}
 				{termsToShow.length > 0 && termsToShow.map((term, index)=>{
-					return <>
+					return <Fragment key={index}>
 						{index > 0 && <div style={{marginTop: 7, marginBottom: 5, border: "1px solid rgba(255,255,255,.3)"}}/>}
-						<TermDefinitionPanel key={term.id} term={term}/>
-					</>;
+						<TermDefinitionPanel term={term}/>
+					</Fragment>;
 				})}
 				{termsToShow.length < termsToSearchFor.length &&
 				<>
