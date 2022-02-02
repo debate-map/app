@@ -19,5 +19,11 @@ export class SLSkin extends Skin {
 		.ButtonBar_OptionUI:last-child {
 			border-width: 1px 1px 1px 1px !important;
 		}
+
+		.dropdown__content:not(.neverMatch) {
+			background-color: rgba(255,255,255,1) !important;
+			border: 1px solid rgba(0,0,0,.5);
+			border-radius: 0 0 5px 5px; /* shouldn't it always be this? */
+		}
 	`;
 }

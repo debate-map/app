@@ -221,6 +221,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		//const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const subPanelShow = node.current.references || node.current.quote || node.current.media;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
+		const toolbarShow = map?.extras.defaultNodeToolbarEnabled ?? true;
 		const expanded = nodeView?.expanded ?? false;
 
 		const onMouseEnter = UseCallback(e=>{
@@ -369,7 +370,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							//onClick={onTextHolderClick} // not needed; TitlePanel already handles double-clicks
 							style={{padding: GetPaddingForNode(node/*, isSubnode*/)}}/>
 						{subPanelShow &&
-						<SubPanel node={node} /*onClick={onTextCompClick}*//>}
+						<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
+						{toolbarShow &&
 						<NodeToolbar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
 							leftPanelShow={leftPanelShow}
 							onMoreClick={()=>{
@@ -381,7 +383,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							onMoreHoverChange={hovered=>{
 								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
 								this.SetState({moreButtonHovered: hovered});
-							}}/>
+							}}/>}
 						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</>}
 					{...E(

@@ -368,6 +368,8 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 # ==========
 
 NEXT_k8s_resource('dm-app-server-rs',
+	#trigger_mode=TRIGGER_MODE_MANUAL,
+	trigger_mode=TRIGGER_MODE_MANUAL if PROD else TRIGGER_MODE_AUTO,
 	port_forwards=[
 		'4105:3105' if REMOTE else '3105',
 	],
@@ -375,6 +377,7 @@ NEXT_k8s_resource('dm-app-server-rs',
 )
 
 NEXT_k8s_resource('dm-app-server-js',
+	trigger_mode=TRIGGER_MODE_MANUAL if PROD else TRIGGER_MODE_AUTO,
 	port_forwards=[
 		'4155:3155' if REMOTE else '3155',
 		'4165:3165' if REMOTE else '3165' # for nodejs-inspector
@@ -383,6 +386,7 @@ NEXT_k8s_resource('dm-app-server-js',
 )
 
 NEXT_k8s_resource('dm-web-server',
+	trigger_mode=TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
 	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
 	#port_forwards='3005:31005')
 	port_forwards='4005:3005' if REMOTE else '3005',

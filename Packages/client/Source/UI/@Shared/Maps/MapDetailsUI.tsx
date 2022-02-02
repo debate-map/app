@@ -103,6 +103,12 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 					</>}
 				</RowLR>}
 
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<Pre>Node toolbar (default):</Pre>
+					<CheckBox enabled={enabled} style={{width: "100%"}}
+						value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
+				</RowLR>
+
 				{/*!forNew &&
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Default timeline:</Pre>

@@ -3,11 +3,11 @@ import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoI
 import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "dm_common";
 import {SourcesUI} from "./SourcesUI.js";
 
-export class SubPanel extends BaseComponent<{node: MapNodeL2} & HTMLProps_Fixed<"div">, {}> {
+export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
 	render() {
-		const {node, ...rest} = this.props;
+		const {node, toolbarShowing, ...rest} = this.props;
 		return (
-			<div {...rest} style={{position: "relative", margin: "5px 0 -5px 0", padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
+			<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>
@@ -76,7 +76,7 @@ export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: Me
 				{media.type == MediaType.video && <>
 					{videoID == null && <div>Invalid YouTube video url: {media.url}</div>}
 					{videoID != null && <YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
-						onPlayerInitialized={player=> {
+						onPlayerInitialized={player=>{
 							player.GetPlayerUI().style.position = "absolute";
 						}}/>}
 				</>}

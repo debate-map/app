@@ -126,4 +126,7 @@ export class Map_Extras {
 
 	@Field({$ref: "ChildLayout"}, {opt: true})
 	defaultChildLayout?: ChildLayout;
+
+	@Field({type: "boolean"}, {opt: true})
+	defaultNodeToolbarEnabled? = true;
 }
