@@ -44,6 +44,8 @@ WORKDIR "/dm_repo/Packages/app-server"
 
 ARG env_ENV
 ENV ENV=$env_ENV
+RUN echo "Env:$ENV"
+
 ENV PM2_DISCRETE_MODE=true
 ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 #ENV TS_NODE_PROJECT=../../tsconfig.base.json

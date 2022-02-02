@@ -25,6 +25,14 @@ RUN apt-get update \
 #WORKDIR /dm_repo/Packages/app-server-rs
 WORKDIR /dm_repo
 
+# args
+ARG env_ENV
+ARG debug_vs_release
+ARG debug_vs_release_flag
+# arg initial handling
+ENV ENV=$env_ENV
+RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
+
 # this makes-so cargo-build and such uses mold as its linker
 COPY .cargo/config.toml .cargo/config.toml
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
@@ -38,7 +46,8 @@ RUN USER=root cargo new --bin update-index-helper
 WORKDIR /dm_repo/update-index-helper
 # add one tiny dependency (with no subdeps), so cargo-build updates the index
 RUN echo "void = \"1\"" >> Cargo.toml
-RUN cargo build
+#RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
+RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag}
 
 WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
@@ -53,17 +62,21 @@ WORKDIR /dm_repo/Packages/app-server-rs
 
 # build the dependencies
 #RUN cargo build
-RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
+#RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings ${debug_vs_release_flag}
+RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
 #RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile -Z self-profile-events=default,args
 # remove the build output of the "dummy version" of app_server_rs
-RUN rm -f target/debug/deps/app_server_rs*
+#RUN rm -f target/debug/deps/app_server_rs*
+RUN rm -f target/${debug_vs_release}/deps/app_server_rs*
 
 # now copy the app-server's own code
 COPY Packages/app-server-rs/ .
 # and build the actual app-server program
 #RUN cargo build
 #RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
-RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes
+#RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
+RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+#RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes
 #RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes -Z self-profile -Z self-profile-events=default,args
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
@@ -75,12 +88,16 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 #FROM debian:buster-slim
 FROM debian@sha256:f6e5cbc7eaaa232ae1db675d83eabfffdabeb9054515c15c2fb510da6bc618a7
 
+# args
+ARG copy_from_path
+
 WORKDIR /dm_repo/Packages/app-server-rs
 
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/release/app-server-rs .
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
-COPY --from=cargo-build /dm_repo/target/debug/app-server-rs .
+#COPY --from=cargo-build /dm_repo/target/debug/app-server-rs .
+COPY --from=cargo-build ${copy_from_path} .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
 CMD echo Starting Rust program...; \

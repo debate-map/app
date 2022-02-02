@@ -300,6 +300,9 @@ AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
 # this keeps the NMOverwrites folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
 #local(['npx', 'file-syncer', '--from'] + nmWatchPaths + ['--to', 'NMOverwrites', '--replacements', 'node_modules/web-vcore/node_modules/', 'node_modules/', '--clearAtLaunch', '--async', '--autoKill'])
 
+USE_RELEASE_FLAG = False
+USE_RELEASE_FLAG = PROD # comment this for faster release builds (though with less optimization)
+
 # this is the base dockerfile used for all the subsequent ones
 imageURL_sharedBase = registryURL + '/dm-shared-base'
 docker_build(imageURL_sharedBase, '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
@@ -324,7 +327,11 @@ imageURL_appServerRS = registryURL + '/dm-app-server-rs'
 docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
 	build_args={
 		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
-		"env_ENV": os.getenv("ENV") or "dev"
+		"env_ENV": os.getenv("ENV") or "dev",
+		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
+		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+		# docker doesn't seem to support string interpolation in COPY command, so do it here
+		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/app-server-rs",
 	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
 	# live_update=[
