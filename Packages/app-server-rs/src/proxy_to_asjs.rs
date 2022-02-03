@@ -16,7 +16,6 @@ use async_graphql::{Schema, MergedObject, MergedSubscription};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use serde_json::json;
 use std::{convert::TryFrom, net::SocketAddr};
-use hyper_reverse_proxy::ProxyError;
 use tower_http::cors::{CorsLayer, Origin};
 use crate::gql::RootSchema;
 use futures::future::{self, Future};

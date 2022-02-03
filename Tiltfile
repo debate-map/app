@@ -307,7 +307,7 @@ USE_RELEASE_FLAG = PROD # comment this for faster release builds (though with le
 imageURL_sharedBase = registryURL + '/dm-shared-base'
 docker_build(imageURL_sharedBase, '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
 
-imageURL_webServer = registryURL + '/dm-web-server'
+imageURL_webServer = registryURL + '/dm-web-server-' + os.getenv("ENV")
 docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile',
 	build_args={
 		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
@@ -323,7 +323,7 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
 		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
 	])
-imageURL_appServerRS = registryURL + '/dm-app-server-rs'
+imageURL_appServerRS = registryURL + '/dm-app-server-rs-' + os.getenv("ENV")
 docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
 	build_args={
 		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
@@ -338,7 +338,7 @@ docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Docke
 	# 	sync('./Packages/app-server-rs/', '/dm_repo/Packages/app-server-rs/'),
 	# ]
 )
-imageURL_appServerJS = registryURL + '/dm-app-server-js'
+imageURL_appServerJS = registryURL + '/dm-app-server-js-' + os.getenv("ENV")
 docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
 		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
