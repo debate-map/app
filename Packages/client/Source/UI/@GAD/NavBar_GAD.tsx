@@ -15,6 +15,7 @@ import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import React from "react";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {Me} from "dm_common";
 import {GADDemo_2020, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear, GetGADExternalSiteURL} from "./GAD.js";
 
 // main
@@ -66,7 +67,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 
 					<span style={{position: "absolute", right: 30, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
-						<NavBarPanelButton text={/*graph.userInfo?.displayName ? graph.userInfo.displayName.match(/(.+?)( |$)/)[1] :*/ "Sign in"} panel="profile" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
+						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",

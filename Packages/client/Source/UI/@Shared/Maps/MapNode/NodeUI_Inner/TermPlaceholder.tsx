@@ -1,9 +1,10 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {HSLA} from "web-vcore";
+import {HSLA, Observer} from "web-vcore";
 import {GetTerm} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 
+@Observer
 export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termIDs: string[], showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
 	render() {
 		const {refText, termIDs, showKeyStart, onHover, onClick} = this.props;
