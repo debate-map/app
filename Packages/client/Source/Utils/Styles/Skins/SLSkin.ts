@@ -13,6 +13,7 @@ export class SLSkin extends Skin {
 	//MainFont = ()=>"TypoPRO Bebas Neue";
 	MainFont = ()=>"'Quicksand', sans-serif";
 	TextColor = ()=>"rgb(43,55,85)";
+	NavBarTextColor = ()=>"rgb(0,0,0)";
 	NavBarBoxShadow = ()=>DMSkin.main.NavBarBoxShadow();
 
 	// styles

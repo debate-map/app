@@ -9,6 +9,7 @@ export abstract class Skin {
 	abstract HeaderFont(): string;
 	abstract MainFont(): string;
 	abstract TextColor(): string;
+	abstract NavBarTextColor(): string;
 	abstract NavBarBoxShadow(): string;
 
 	// styles

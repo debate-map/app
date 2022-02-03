@@ -16,6 +16,7 @@ export class DMSkin extends Skin {
 		return fonts;
 	};
 	TextColor = ()=>"rgba(255,255,255,.7)";
+	NavBarTextColor = ()=>"rgb(255,255,255)";
 	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",
 	//navBarBoxShadow: "rgba(100,100,100,1) 0px 0px 3px",
 	NavBarBoxShadow = ()=>"rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";

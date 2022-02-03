@@ -65,8 +65,8 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					</span>}
 
 					<span style={{position: "absolute", right: 30, display: "flex"}}>
-						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NavBarPanelButton text={/*graph.userInfo?.displayName ? graph.userInfo.displayName.match(/(.+?)( |$)/)[1] :*/ "Sign in"} panel="profile" corner="top-right"/>
+						<NavBarPanelButton text="Search" panel="search" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
+						<NavBarPanelButton text={/*graph.userInfo?.displayName ? graph.userInfo.displayName.match(/(.+?)( |$)/)[1] :*/ "Sign in"} panel="profile" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",

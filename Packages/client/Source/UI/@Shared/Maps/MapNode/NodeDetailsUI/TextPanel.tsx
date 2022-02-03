@@ -12,9 +12,11 @@ export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 		return (
 			<>
 				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references) &&
-				<PhrasingDetailsUI baseData={newRevisionData.phrasing} node={AsNodeL3(newDataAsL2, newLinkData, null)} forNew={forNew} enabled={enabled} onChange={val=>{
-					Change(newRevisionData.phrasing = val);
-				}}/>}
+				<PhrasingDetailsUI baseData={newRevisionData.phrasing} node={AsNodeL3(newDataAsL2, newLinkData, null)} forNew={forNew} enabled={enabled}
+					embeddedInNodeRevision={true}
+					onChange={val=>{
+						Change(newRevisionData.phrasing = val);
+					}}/>}
 			</>
 		);
 	}

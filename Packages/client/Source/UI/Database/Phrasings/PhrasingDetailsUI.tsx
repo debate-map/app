@@ -8,6 +8,7 @@ import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapN
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES} from "web-vcore";
+import {GADDemo_Main} from "UI/@GAD/GAD";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
 import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
@@ -15,6 +16,7 @@ type Props = {
 	baseData: MapNodePhrasing_Embedded & {id?: string},
 	node: MapNodeL3, // node properties are used to constrain what phrasing options are available
 	forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodePhrasing, error: string)=>void,
+	embeddedInNodeRevision?: boolean,
 };
 type State = {newData: MapNodePhrasing, dataError: string|n};
 export type PhrasingDetailsUI_SharedProps = Props & State & {splitAt: number, Change};
@@ -38,11 +40,18 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 	}
 
 	render() {
-		const {baseData, node, forNew, enabled, style} = this.props;
+		const {baseData, node, forNew, enabled, style, embeddedInNodeRevision} = this.props;
 		const {newData} = this.state;
 		const attachmentType = GetAttachmentType_Node(node);
 
 		const Change = (..._)=>this.OnChange();
+
+		let noteField_label = "Note";
+		if (GADDemo_Main) {
+			noteField_label = embeddedInNodeRevision
+				? "Description" // main-phrasing uses the note-field for a "description" (since it can use references-attachment for references)
+				: "Reference"; // alt-phrasings uses the note-field to include a "reference"
+		}
 
 		const splitAt = 110;
 		const sharedProps = E(OmitRef(this.props), this.state, {splitAt, Change});
@@ -60,7 +69,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 				{node.type == MapNodeType.claim &&
 					<OtherTitles {...sharedProps}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Note: </Pre>
+					<Pre>{noteField_label}: </Pre>
 					<TextArea enabled={enabled} autoSize={true} style={ES({flex: 1})}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
