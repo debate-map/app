@@ -375,8 +375,8 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 # ==========
 
 NEXT_k8s_resource('dm-app-server-rs',
-	#trigger_mode=TRIGGER_MODE_MANUAL,
-	trigger_mode=TRIGGER_MODE_MANUAL if PROD else TRIGGER_MODE_AUTO,
+	# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
+	trigger_mode=TRIGGER_MODE_MANUAL,
 	port_forwards=[
 		'4105:3105' if REMOTE else '3105',
 	],
@@ -384,7 +384,7 @@ NEXT_k8s_resource('dm-app-server-rs',
 )
 
 NEXT_k8s_resource('dm-app-server-js',
-	trigger_mode=TRIGGER_MODE_MANUAL if PROD else TRIGGER_MODE_AUTO,
+	trigger_mode=TRIGGER_MODE_MANUAL,
 	port_forwards=[
 		'4155:3155' if REMOTE else '3155',
 		'4165:3165' if REMOTE else '3165' # for nodejs-inspector
