@@ -20,7 +20,10 @@ import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
 import {NodeUI_Inner} from "./NodeUI_Inner.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
-// @ExpensiveComponent
+// Warn if functions passed to NodeUI are transient (ie. change each render).
+// We don't need to do this for every component, but we need at least one component-type in the tree to do so, in order to "stop propagation" of transient props.
+// Thus, if the root node rerenders, we prevent the situation of the whole subtree rerendering.
+// We choose the NodeUI component as this "barrier" to tree-wide rerendering. (so pay attention if console contains warnings about it!)
 @WarnOfTransientObjectProps
 @Observer
 export class NodeUI extends BaseComponentPlus(
@@ -112,6 +115,7 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.renderCount++;
 		//NodeUI.lastRenderTime = Date.now();
 
+		const proxyNodeUI_ref = UseCallback(c=>this.proxyDisplayedNodeUI = c, []);
 		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
 		if (isSinglePremiseArgument) {
 			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.claim);
@@ -126,7 +130,7 @@ export class NodeUI extends BaseComponentPlus(
 				}
 
 				return (
-					<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} {...this.props} key={premise.id} map={map} node={premise} path={`${path}/${premise.id}`}>
+					<NodeUI ref={proxyNodeUI_ref} {...this.props} key={premise.id} map={map} node={premise} path={`${path}/${premise.id}`}>
 						{children}
 					</NodeUI>
 				);
@@ -255,10 +259,18 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 		let nodeChildHolder_direct: JSX.Element|n;
+		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
+		const nodeChildHolder_direct_onHeightOrDividePointChange = UseCallback(dividePoint=>{
+			/*// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
+			if (!isMultiPremiseArgument) {
+				this.SetState({dividePoint});
+			}*/
+			this.CheckForChanges();
+		}, []);
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
-				ref={c=>this.nodeChildHolder_direct = c}
+				ref={nodeChildHolder_direct_ref}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
@@ -268,13 +280,7 @@ export class NodeUI extends BaseComponentPlus(
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
 				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={ncToShow_direct}
-				onHeightOrDividePointChange={UseCallback(dividePoint=>{
-					/*// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
-					if (!isMultiPremiseArgument) {
-						this.SetState({dividePoint});
-					}*/
-					this.CheckForChanges();
-				}, [isMultiPremiseArgument])}/>;
+				onHeightOrDividePointChange={nodeChildHolder_direct_onHeightOrDividePointChange}/>;
 		}
 
 		performance.mark("NodeUI_3");
@@ -284,11 +290,11 @@ export class NodeUI extends BaseComponentPlus(
 
 		return (
 			<>
-			<div ref={c=>{
+			<div ref={UseCallback(c=>{
 				this.nodeUI = c;
 				//WaitXThenRun_Deduped([this, "checkForChanges"], 0, ()=>this.CheckForChanges());
 				if (c) requestAnimationFrame(()=>this.CheckForChanges());
-			}} className="NodeUI clickThrough" style={E(
+			}, [])} className="NodeUI clickThrough" style={E(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
 				style,
 			)}>
@@ -303,10 +309,10 @@ export class NodeUI extends BaseComponentPlus(
 					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 					</div>*/}
-					<NodeUI_Inner ref={c=>{
+					<NodeUI_Inner ref={UseCallback(c=>{
 						this.innerUI = GetInnerComp(c);
 						if (ref_innerUI) ref_innerUI(c);
-					}} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
+					}, [ref_innerUI])} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
 					{/* these are for components shown just to the right of the NodeUI_Inner box */}
 					{nodeChildrenToShow == emptyArray_forLoading &&
 						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
@@ -318,7 +324,7 @@ export class NodeUI extends BaseComponentPlus(
 						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 				</Column>
 				{boxExpanded &&
-				<Column ref={c=>this.rightColumn = c} className="rightColumn clickThrough" style={{position: "relative"}}>
+				<Column ref={UseCallback(c=>this.rightColumn = c, [])} className="rightColumn clickThrough" style={{position: "relative"}}>
 					{childConnectorBackground}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
 					{truthBoxVisible && nodeChildHolderBox_truth}

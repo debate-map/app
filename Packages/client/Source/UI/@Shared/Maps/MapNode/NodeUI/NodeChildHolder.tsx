@@ -2,7 +2,7 @@ import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecial
 import * as React from "react";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {ChildBoxInfo, ChildConnectorBackground} from "UI/@Shared/Maps/MapNode/ChildConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction, WaitXThenRun_Deduped} from "web-vcore";
@@ -16,6 +16,7 @@ import chroma from "web-vcore/nm/chroma-js.js";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
+import {NodeChildHolder_Child} from "./NodeChildHolder/NodeChildHolder_Child.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
@@ -86,50 +87,24 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const showAll = node.id == map.rootNode || node.type == MapNodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
-		const RenderChild = (child: MapNodeL3, index: number, collection_untrimmed: MapNodeL3[], direction = "down" as "up" | "down")=>{
-			/*if (pack.node.premiseAddHelper) {
-				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
-			}*/
-
-			const childLimit = direction == "down" ? childLimit_down : childLimit_up;
-			const isFarthestChildFromDivider = index == (direction == "down" ? childLimit - 1 : 0);
-			//const isFarthestChildFromDivider = index == childLimit - 1;
-			const showLimitBar = isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit);
-
-			const nodeUI = <NodeUI key={child.id}
-				ref={c=>this.childBoxes[child.id] = c}
-				ref_innerUI={c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets())}
-				indexInNodeList={index} map={map} node={child}
-				path={`${path}/${child.id}`}
-				leftMarginForLines={belowNodeUI ? 20 : 0}
-				widthOverride={childrenWidthOverride}
-				onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-			const limitBar = <ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection_untrimmed.length}/>;
-
-			if (showLimitBar) {
-				return (
-					<React.Fragment key={child.id}>
-						{direction == "up" && limitBar}
-						{nodeUI}
-						{direction == "down" && limitBar}
-					</React.Fragment>
-				);
-			}
-			return nodeUI;
-		};
-
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
+			const childLimit = direction == "up" ? childLimit_up : childLimit_down; // polarity-groups "all" and "down" both use a "down" child-limit
 			const refName = `${polarityGroup}ChildHolder`;
-			const childLimit = polarityGroup == "up" ? childLimit_up : childLimit_down; // "all" and "down" share a child-limit
 
 			const childrenHere_untrimmed = polarityGroup == "all" ? nodeChildrenToShowHere : polarityGroup == "up" ? upChildren : downChildren;
 			const childrenHere = childrenHere_untrimmed.slice(0, childLimit); // trim to the X most significant children (ie. strongest arguments)
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-here array
 			if (direction == "up") childrenHere.reverse();
 
-			const childrenHereUIs = childrenHere.map((pack, index)=>{
-				return RenderChild(pack, index, childrenHere_untrimmed, direction);
+			const childrenHereUIs = childrenHere.map((child, index)=>{
+				return <NodeChildHolder_Child key={child.id} {...{
+					map, node, path,
+					child, index, collection_untrimmed: childrenHere_untrimmed,
+					direction, belowNodeUI, childLimit,
+					widthOverride: childrenWidthOverride,
+					parent: this,
+				}}/>;
 			});
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-uis array
 			// if (direction == 'up') childrenHereUIs.reverse();
