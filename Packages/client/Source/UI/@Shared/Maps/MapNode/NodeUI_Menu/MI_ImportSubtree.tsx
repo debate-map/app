@@ -1,24 +1,25 @@
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {InfoButton, Observer, RunInAction, RunInAction_Set, TreeView} from "web-vcore";
-import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox, BoxController} from "web-vcore/nm/react-vmessagebox.js";
-import {Column, Row, TextArea, Button, CheckBox, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {FromJSON, ToJSON, CE, Clone, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {AddChildNode, HasAdminPermissions, MapNodeType, MeID, Polarity} from "dm_common";
+import React, {ComponentProps} from "react";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {HasModPermissions, HasAdminPermissions, MeID, GetNodeID, AddChildNode} from "dm_common";
+import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import React, {useReducer, useState} from "react";
-import {Command} from "mobx-graphlink";
+import {ES, InfoButton, Observer, RunInAction_Set} from "web-vcore";
+import {gql} from "web-vcore/nm/@apollo/client";
+import {FromJSON, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
+import {Button, CheckBox, Column, Row, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
-import {FS_MapNode, FS_MapNodeL3} from "./SubtreeImportExport/FSDataModel/FS_MapNode.js";
+import {FS_MapNodeL3} from "./SubtreeImportExport/FSDataModel/FS_MapNode.js";
 import {GetResourcesInImportSubtree, ImportResource, IR_NodeAndRevision} from "./SubtreeImportExport/FSImportHelpers.js";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	//lastController: BoxController;
 	render() {
+		const {map, node, path, childGroup} = this.props;
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasAdminPermissions(MeID())) return null;
 
@@ -34,16 +35,38 @@ export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 
 						// make-so dialog does not block input to rest of UI
 						overlayStyle: {background: "none", pointerEvents: "none"},
-						containerStyle: {pointerEvents: "auto"},
+						//containerStyle: {pointerEvents: "auto", backgroundColor: "rgba(255,255,255,1) !important"}, // commented; this way doesn't work
+						containerStyle: {pointerEvents: "auto"}, // also make fully opaque; this dialog has complex content, so we need max readability
 
-						message: ()=><ImportSubtreeUI ref={c=>ui = c} {...sharedProps} {...{controller}}/>,
+						message: ()=>{
+							// style block is a hack-fix for to make this dialog fully opaque (its content is complex, so we need max readability)
+							return <>
+								<style>{`
+									.ReactModal__Content:not(.neverMatch) { background-color: rgba(255,255,255,1) !important; }
+								`}</style>
+								<ImportSubtreeUI ref={c=>ui = c} {...sharedProps} {...{controller}}/>
+							</>;
+						},
 					});
 					//this.lastController = controller;
 				}}/>
 				{uiState.selectedImportResource instanceof IR_NodeAndRevision &&
 				<VMenuItem text="Recreate import-node here" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 					if (e.button != 0) return;
-					// todo
+					const res = uiState.selectedImportResource as IR_NodeAndRevision;
+					/*if (res.node.type == MapNodeType.argument) {
+						const command = new AddArgumentAndClaim({
+							mapID: map?.id,
+							argumentParentID: node.id, argumentNode: res.node, argumentRevision: res.revision, argumentLink: res.link,
+							claimNode: this.subNode!, claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
+						});
+						command.RunOnServer();
+					} else {*/
+					res.link.group = childGroup;
+					const command = new AddChildNode({
+						mapID: map?.id, parentID: node.id, node: res.node, revision: res.revision, link: res.link,
+					});
+					command.RunOnServer();
 				}}/>}
 			</>
 		);
@@ -74,7 +97,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 	render() {
 		const {mapID, node, path, controller} = this.props;
 		const {subtreeJSON, subtreeData, process, leftTab, rightTab, showLeftPanel, subtreeJSON_parseError} = this.state;
-		const dialogState = store.main.maps.importSubtreeDialog;
+		const uiState = store.main.maps.importSubtreeDialog;
 
 		let resources: ImportResource[] = [];
 		if (process && subtreeData != null) {
@@ -102,7 +125,8 @@ class ImportSubtreeUI extends BaseComponentPlus(
 										4) Place a breakpoint on line 70 (right after the "var subtree = ..." line), by clicking on the line-number label.
 										5) Change the "Base export depth" up or down 1, to trigger the code to run again; your breakpoint should get hit.
 										6) Export the subtree variable's data to a file, by running this in the dev-tools Console tab: \`RR().StartDownload(JSON.stringify(subtree, null, 2), "Export_" + Date.now() + ".json");\`
-										7) Open the downloaded file, select all of its text, copy it, and paste it into the "Subtree JSON" text-box below.
+										7) Open the downloaded file, select all of its text, copy it, and paste it into the "Subtree JSON" text-box below. (atm, you then need to [add a space, then click outside the box] a couple times, to workaround a bug)
+										8) Proceed with the import process. (check "Start extracting resources", select nodes, then right-click locations in map and press "Recreate import-node here")
 									`.AsMultiline(0)}/>
 								</Row>
 								<Row center style={{flex: 1}}>
@@ -153,10 +177,11 @@ class ImportSubtreeUI extends BaseComponentPlus(
 						<>
 							<Row>
 								<CheckBox text="Start extracting resources" value={process} onChange={val=>this.SetState({process: val})}/>
+								<CheckBox ml={5} text="Auto-search by title" value={uiState.autoSearchByTitle} onChange={val=>RunInAction_Set(this, ()=>uiState.autoSearchByTitle = val)}/>
 							</Row>
 							<ScrollView>
 								{resources.map((resource, index)=>{
-									return <ImportResourceUI key={index} {...{resource, index}}/>;
+									return <ImportResourceUI key={index} {...{resource, index, autoSearchByTitle: uiState.autoSearchByTitle}}/>;
 								})}
 							</ScrollView>
 						</>}
@@ -173,23 +198,69 @@ class ImportSubtreeUI extends BaseComponentPlus(
 }
 
 @Observer
-class ImportResourceUI extends BaseComponent<{resource: ImportResource, index: number}, {}> {
+class ImportResourceUI extends BaseComponent<{resource: ImportResource, index: number, autoSearchByTitle: boolean}, {search: boolean, existingNodesWithTitle: number|n}> {
+	ComponentWillMountOrReceiveProps(props, forMount) {
+		if (forMount || props.autoSearchByTitle != this.props.autoSearchByTitle) {
+			this.SetState({search: props.autoSearchByTitle}, ()=>{
+				this.ApplySearchSetting();
+			});
+		}
+	}
+	async ApplySearchSetting() {
+		const res = this.props.resource;
+		if (this.state.search && res instanceof IR_NodeAndRevision && res.CanSearchByTitle()) {
+			const result = await apolloClient.query({
+				query: gql`
+					query SearchQueryForImport($title: String!) {
+						nodeRevisions(filter: {phrasing: {contains: {text_base: $title}}}) {
+							nodes { id }
+						}
+					}
+				`,
+				variables: {title: res.revision.phrasing.text_base},
+			});
+			const foundNodeIDs = result.data.nodeRevisions.nodes.map(a=>a.id);
+			this.SetState({existingNodesWithTitle: foundNodeIDs.length});
+		} else {
+			this.SetState({existingNodesWithTitle: null});
+		}
+	}
+
 	render() {
-		const {resource, index} = this.props;
+		const {resource: res, index} = this.props;
+		const {search, existingNodesWithTitle} = this.state;
 		const uiState = store.main.maps.importSubtreeDialog;
-		const pathStr = resource.path.join("."); //+ (resource.path.length > 0 ? "." : "");
+		const pathStr = res.path.join("."); //+ (resource.path.length > 0 ? "." : "");
+
 		return (
 			<Row mt={index == 0 ? 0 : 5} sel style={{border: "solid gray", borderWidth: index == 0 ? 0 : "1px 0 0 0"}}>
-				{resource instanceof IR_NodeAndRevision &&
+				{res instanceof IR_NodeAndRevision &&
 				<>
 					<Text style={{flexShrink: 0, fontWeight: "bold", padding: "0 3px", background: "rgba(128,128,128,.5)", marginBottom: -5}}>{pathStr}</Text>
 					<Text ml={5} mr={5} style={{flex: 1, display: "block"}}>
-						<Text mr={3} style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}>{ModifyString(resource.node.type, m=>[m.startLower_to_upper])}:</Text>
-						{resource.revision.phrasing.text_base}
+						<Text mr={3} style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}>
+							{ModifyString(res.node.type, m=>[m.startLower_to_upper])}
+							{res.node.type == MapNodeType.argument && res.link.polarity != null &&
+								<Text style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}> [{res.link.polarity == Polarity.supporting ? "pro" : "con"}]</Text>}
+							{":"}
+						</Text>
+						{res.revision.phrasing.text_base}
 					</Text>
+					{res.CanSearchByTitle() &&
+					<CheckBox ml={5} text={`Search: ${existingNodesWithTitle ?? "?"}`}
+						style={ES(
+							{marginBottom: -5},
+							existingNodesWithTitle == 0 && {background: "rgba(0,255,0,.5)"},
+							existingNodesWithTitle != null && existingNodesWithTitle > 0 && {background: "rgba(255,0,0,.5)"},
+						)}
+						value={search} onChange={async val=>{
+							this.SetState({search: val}, ()=>{
+								this.ApplySearchSetting();
+							});
+						}}/>}
 				</>}
-				<CheckBox ml="auto" text="Selected" style={{flexShrink: 0}} value={uiState.selectedImportResource == resource} onChange={val=>{
-					const newResource = val ? resource : null;
+				<CheckBox ml={5} text="Selected" style={{flexShrink: 0}} value={uiState.selectedImportResource == res} onChange={val=>{
+					const newResource = val ? res : null;
 					RunInAction_Set(this, ()=>uiState.selectedImportResource = newResource);
 				}}/>
 			</Row>

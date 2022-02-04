@@ -1,8 +1,8 @@
-import {ArgumentType, CullMapNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, MapNode, MapNodePhrasing, MapNodePhrasingType, MapNodeRevision, MapNodeType, MapNodeType_Info, MediaAttachment, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
+import {ArgumentType, ChildGroup, ClaimForm, CullMapNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, MapNode, MapNodePhrasing, MapNodePhrasingType, MapNodeRevision, MapNodeType, MapNodeType_Info, MediaAttachment, NodeChildLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
 import {ModifyString} from "js-vextensions";
 import {Command, CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {FS_SourceChain, FS_SourceType} from "./FSDataModel/FS_Attachments.js";
-import {FS_MapNode, FS_MapNodeL3, FS_MapNodeType} from "./FSDataModel/FS_MapNode.js";
+import {FS_ClaimForm, FS_MapNode, FS_MapNodeL3, FS_MapNodeType, FS_Polarity} from "./FSDataModel/FS_MapNode.js";
 import {FS_ArgumentType} from "./FSDataModel/FS_MapNodeRevision.js";
 
 export class ImportResource {
@@ -13,8 +13,12 @@ export class IR_NodeAndRevision extends ImportResource {
 		super();
 		this.VSet(data);
 	}
+	link: NodeChildLink;
 	node: MapNode;
 	revision: MapNodeRevision;
+	CanSearchByTitle() {
+		return this.revision.phrasing.text_base.trim().length > 0;
+	}
 }
 
 type MapNode_WithPath = MapNode & {path: number[]};
@@ -31,6 +35,14 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_MapNodeL3, i
 		creator: systemUserID,
 		multiPremiseArgument: data.multiPremiseArgument,
 		rootNodeForMap: undefined,
+	});
+	const link = new NodeChildLink({
+		createdAt: node.createdAt,
+		creator: systemUserID,
+		form: data.link.form ? ModifyString(FS_ClaimForm[data.link.form], m=>[m.startUpper_to_lower]) as ClaimForm : null,
+		polarity: data.link.polarity ? ModifyString(FS_Polarity[data.link.polarity], m=>[m.startUpper_to_lower]) as Polarity : null,
+		seriesAnchor: data.link.seriesAnchor,
+		//group: undefined, // this is filled in at paste-time
 	});
 	const revData = data.current;
 	const revision = new MapNodeRevision({
@@ -66,7 +78,7 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_MapNodeL3, i
 			text_question: revData.titles.yesNoQuestion,
 		})),
 	});
-	result.push(new IR_NodeAndRevision({path, node, revision}));
+	result.push(new IR_NodeAndRevision({path, link, node, revision}));
 
 	let i = 0;
 	for (const [childID, childData] of Object.entries(data.childrenData ?? {})) {

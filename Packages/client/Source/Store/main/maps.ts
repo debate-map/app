@@ -89,7 +89,8 @@ export class ExportSubtreeDialogState {
 }
 export class ImportSubtreeDialogState {
 	constructor() { makeObservable(this); }
-	@O.ref selectedImportResource: ImportResource|n;
+	@O autoSearchByTitle = true;
+	@O.ref @ignore selectedImportResource: ImportResource|n;
 	/*@O importRatings = false;
 	@O importRatings_userIDsStr = "";*/
 }
