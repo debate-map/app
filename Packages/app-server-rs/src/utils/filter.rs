@@ -55,10 +55,10 @@ pub fn entry_matches_filter(entry: &RowData, filter: &Filter) -> Result<bool, an
                 // atm, we are assuming the caller is using "contains" in the array sense (ie. array contains the item specified): https://www.postgresql.org/docs/current/functions-array.html
                 // but support for other versions (eg. "contains json-subtree") may be added in the future
                 "contains" => {
-                    for val_to_find_in_field in filter_value.as_array().with_context(|| "Filter value was not an array!")? {
-                        if !field_value.as_array().with_context(|| "Field value was not an array!")?.contains(val_to_find_in_field) {
-                            return Ok(false);
-                        }
+                    //for val_to_find_in_field in filter_value.as_array().with_context(|| "Filter value was not an array!")? {
+                    let val_to_find_in_field = filter_value;
+                    if !field_value.as_array().with_context(|| "Field value was not an array!")?.contains(val_to_find_in_field) {
+                        return Ok(false);
                     }
                 },
                 _ => panic!(r#"Invalid filter-type "{filter_type}" specified. Supported: equalTo, in, contains."#),
