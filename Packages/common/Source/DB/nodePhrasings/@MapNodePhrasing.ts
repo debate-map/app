@@ -48,7 +48,7 @@ export class MapNodePhrasing {
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
-	note: string;
+	note?: string;
 
 	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
 	@DB((t, n)=>t.specificType(n, "jsonb[]"))

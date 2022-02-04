@@ -62,6 +62,12 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
+# we don't care about any of the npm/yarn stuff
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/.yalc
+
 Packages/client
 Packages/web-server
 Packages/app-server

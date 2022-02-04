@@ -19,7 +19,7 @@ pub struct MapNodePhrasing {
 	text_negation: Option<String>,
     #[graphql(name = "text_question")]
 	text_question: Option<String>,
-	note: String,
+	note: Option<String>,
 	terms: Vec<serde_json::Value>,
 	references: Vec<String>,
 }
