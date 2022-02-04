@@ -91,7 +91,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 					medias: [...searchInfo.medias.values()].map(media=>media.IncludeKeys(...includeKeys.medias)),
 				}, (key, value)=>{
 					// also apply include-keys filtering to embedded links/revisions/phrasings
-					if (key == "link") return value.IncludeKeys(...includeKeys.nodeChildLinks);
+					if (key == "link" && typeof value == "object") return value.IncludeKeys(...includeKeys.nodeChildLinks);
 					if (key == "current") return value.IncludeKeys(...includeKeys.nodeRevisions);
 					if (key == "phrasing") return value.IncludeKeys(...includeKeys.nodePhrasings);
 					return value;

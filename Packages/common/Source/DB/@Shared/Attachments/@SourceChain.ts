@@ -33,6 +33,10 @@ AddSchema("SourceType", {enum: GetValues(SourceType)});
 
 export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";
 export class Source {
+	constructor(data?: Partial<Source>) {
+		this.VSet(data);
+	}
+
 	type = SourceType.webpage;
 
 	// uses with * means shown in the main row (rather than in dropdown)

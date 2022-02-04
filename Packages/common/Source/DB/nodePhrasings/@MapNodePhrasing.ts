@@ -5,13 +5,9 @@ import {TermAttachment} from "../@Shared/Attachments/@TermAttachment.js";
 @MGLClass({table: "nodePhrasings"})
 export class MapNodePhrasing {
 	static Embedded(data: Partial<MapNodePhrasing>) {
-		const result = new MapNodePhrasing(data);
-		for (const key of Object.keys(result)) {
-			if (!MapNodePhrasing_Embedded_keys.includes(key as any)) {
-				delete result[key];
-			}
-		}
-		return result as MapNodePhrasing_Embedded;
+		const base = new MapNodePhrasing(data);
+		const result = CullMapNodePhrasingToBeEmbedded(base);
+		return result;
 	}
 
 	constructor(data: Partial<MapNodePhrasing>) {
@@ -70,6 +66,14 @@ export class MapNodePhrasing {
 const MapNodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "note", "terms"] as const;
 export type MapNodePhrasing_Embedded = Pick<MapNodePhrasing, typeof MapNodePhrasing_Embedded_keys[number]>;
 AddSchema("MapNodePhrasing_Embedded", DeriveJSONSchema(MapNodePhrasing, {includeOnly: MapNodePhrasing_Embedded_keys as any}));
+export function CullMapNodePhrasingToBeEmbedded(phrasing: MapNodePhrasing): MapNodePhrasing_Embedded {
+	for (const key of Object.keys(phrasing)) {
+		if (!MapNodePhrasing_Embedded_keys.includes(key as any)) {
+			delete phrasing[key];
+		}
+	}
+	return phrasing;
+}
 
 export const TitleKey_values = ["text_base", "text_negation", "text_question"] as const;
 export type TitleKey = typeof TitleKey_values[number];

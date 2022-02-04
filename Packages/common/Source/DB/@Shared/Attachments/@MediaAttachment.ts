@@ -3,11 +3,11 @@ import {CE} from "web-vcore/nm/js-vextensions.js";
 import {SourceChain, Source} from "./@SourceChain.js";
 
 export class MediaAttachment {
-	constructor(initialData?: Partial<MediaAttachment>) {
+	constructor(data?: Partial<MediaAttachment>) {
 		this.sourceChains = [
 			{sources: [new Source()]},
 		];
-		CE(this).VSet(initialData);
+		this.VSet(data);
 	}
 
 	id: string;

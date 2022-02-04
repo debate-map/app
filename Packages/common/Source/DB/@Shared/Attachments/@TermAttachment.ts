@@ -2,9 +2,10 @@ import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 
 export class TermAttachment {
-	constructor(initialData?: Partial<TermAttachment>) {
-		CE(this).VSet(initialData);
+	constructor(data?: Partial<TermAttachment>) {
+		this.VSet(data);
 	}
+
 	id: string;
 }
 AddSchema("TermAttachment", {

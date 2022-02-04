@@ -55,6 +55,12 @@ export class SLSkin extends Skin {
 			border: 1px solid rgba(0,0,0,.5);
 			border-radius: 0 0 5px 5px; /* shouldn't it always be this? */
 		}
+		div[data-tip] {
+			filter: invert(1);
+		}
+		.scrollBar {
+			filter: invert(1);
+		}
 
 		.MessageUI, .MessageUI > div {
 			background-color: rgba(255,255,255,.9) !important;

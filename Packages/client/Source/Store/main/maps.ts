@@ -5,6 +5,7 @@ import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
 import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {ImportResource} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/SubtreeImportExport/FSImportHelpers.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
 
@@ -47,8 +48,8 @@ export class MapsState {
 	@O detailsPanel = new DetailsPanelState();
 	@O tagsPanel = new TagsPanelState();
 	@O addChildDialog = new AddChildDialogState();
-	@O exportSubtreeDialog = new ExportSubtreeDialogState();
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
+	@O exportSubtreeDialog = new ExportSubtreeDialogState();
 }
 
 export enum DetailsPanel_Subpanel {
@@ -88,8 +89,9 @@ export class ExportSubtreeDialogState {
 }
 export class ImportSubtreeDialogState {
 	constructor() { makeObservable(this); }
-	@O importRatings = false;
-	@O importRatings_userIDsStr = "";
+	@O.ref selectedImportResource: ImportResource|n;
+	/*@O importRatings = false;
+	@O importRatings_userIDsStr = "";*/
 }
 
 export const GetLastAcknowledgementTime = CreateAccessor(function(nodeID: string) {

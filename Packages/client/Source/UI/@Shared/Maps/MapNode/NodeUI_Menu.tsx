@@ -10,6 +10,7 @@ import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import React from "react";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument.js";
@@ -18,6 +19,7 @@ import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree.js";
 import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink.js";
 import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument.js";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
+import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	render() {
@@ -219,8 +221,8 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							RunInAction("ToggleChildrenLayout", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 						}}/>*/}
+				<MI_ImportSubtree {...sharedProps}/>
 				<MI_ExportSubtree {...sharedProps}/>
-				{/*<MI_ImportSubtree {...sharedProps}/>*/}
 				<MI_UnlinkContainerArgument {...sharedProps}/>
 				<MI_UnlinkNode {...sharedProps}/>
 				<MI_DeleteContainerArgument {...sharedProps}/>
