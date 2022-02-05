@@ -51,9 +51,8 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					</Div>
 
 					{!GADDemo_2020 &&
-					<span style={{margin: "0 auto", paddingRight: 115}}>
+					<span style={{margin: "0 auto", paddingRight: 13}}>
 						<NavBarPageButton page="database" text="Database"/>
-						<NavBarPageButton page="website" text="Website"/>
 						<NavBarPageButton page="home" text="Home"/>
 						<NavBarPageButton page="debates" text="Debates"/>
 					</span>}
