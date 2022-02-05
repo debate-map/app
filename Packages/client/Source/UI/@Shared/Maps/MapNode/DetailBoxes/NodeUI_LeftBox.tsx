@@ -1,6 +1,7 @@
 import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MapNodeView, MeID, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {DefaultLoadingUI, Observer} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
@@ -8,7 +9,7 @@ import {E} from "web-vcore/nm/js-vextensions.js";
 import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus, cssHelper, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
@@ -130,7 +131,11 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 				)}
 			>
 				{children}
-				<div style={{position: "relative", background: backgroundColor.alpha(0.95).css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
+				<div style={{
+					position: "relative", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					background: backgroundColor.alpha(0.95).css(),
+					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
+				}}>
 					{ratingTypes.map((ratingInfo, index)=>{
 						const nodeForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentNode! : node;
 						const pathForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentPath! : path;
@@ -174,8 +179,16 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 							":hover": {background: backgroundColor.alpha(0.5).css()},
 						}}/>
 				</div>
-				<div style={{position: "relative", marginTop: 1, background: backgroundColor.alpha(0.95).css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
-					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.alpha(0.7).css()}}/>
+				<div style={{
+					position: "relative", marginTop: 1, borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					background: backgroundColor.alpha(0.95).css(),
+					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
+				}}>
+					<div style={{
+						position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5,
+						background: backgroundColor.alpha(0.7).css(),
+						//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
+					}}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings" style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>
 					{/* <PanelButton {...{ onPanelButtonHover, onPanelButtonClick, map, path, openPanel }} panel="discussion" text="Discussion"/>
@@ -207,15 +220,17 @@ type PanelButton_Props = {
 class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 	render() {
 		const {map, path, openPanel, panel, text, style, children} = this.props;
+		const {css} = cssHelper(this);
 		return (
 			<Button text={text}
-				style={E(
+				style={css(
 					{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"},
 					{
 						// border: "1px outset rgba(0,0,0,.35)",
 						border: "solid rgba(0,0,0,.4)", borderWidth: "0 0 1px 0",
 						boxShadow: "none", borderRadius: 0,
 						backgroundColor: "rgba(255,255,255,.1)", ":hover": {backgroundColor: "rgba(255,255,255,.2)"},
+						color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
 					},
 					openPanel == panel && {backgroundColor: "rgba(255,255,255,.2)"},
 					style,

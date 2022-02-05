@@ -1,6 +1,7 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed} from "web-vcore";
 import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "dm_common";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SourcesUI} from "./SourcesUI.js";
 
 export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
@@ -9,7 +10,7 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: bo
 		return (
 			<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
-				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
+				background: liveSkin.NodeSubPanelBackgroundColor().css(), borderRadius: "0 0 0 5px",
 			}}>
 				{node.current.references &&
 					<SubPanel_References attachment={node.current.references} fontSize={GetFontSizeForNode(node)}/>}

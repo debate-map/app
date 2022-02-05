@@ -13,7 +13,7 @@ export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sou
 					<Row style={{marginBottom: 3, opacity: 0.5, fontSize: 10}}>
 						Scripture taken from the NKJV®. Copyright © 1982 by Thomas Nelson. Used by permission. All rights reserved.
 					</Row>}
-				<Row style={{color: "rgba(255,255,255,.5)"}}>{headerText}:</Row>
+				<Row>{headerText}:</Row>
 				{sourceChains.map((chain: SourceChain, index)=>{
 					const linkTitle = chain.sources.map((source, index)=>{
 						if (source.link) {

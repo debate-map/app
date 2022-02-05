@@ -1,5 +1,6 @@
-import {addHook_css, SubNavBar} from "web-vcore";
+import {SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
+import {addHook_css} from "web-vcore/nm/react-vextensions";
 import {Skin} from "../Skin.js";
 
 export class DMSkin_Old extends Skin {
@@ -22,6 +23,8 @@ export class DMSkin_Old extends Skin {
 		return fonts;
 	};
 	TextColor = ()=>chroma("rgba(255,255,255,.7)");
+	NodeTextColor = ()=>this.TextColor();
+	NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.5)");
 	NavBarTextColor = ()=>"rgb(255,255,255)";
 	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",
 	//navBarBoxShadow: "rgba(100,100,100,1) 0px 0px 3px",

@@ -81,7 +81,9 @@ class MapListUI extends BaseComponentPlus({}, {}) {
 						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Creator</span>
 					</Row>
 				</Column>
-				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
+				<ScrollView style={ES({flex: 1})} contentStyle={ES({
+					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
+				})}>
 					{maps_toShow.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>No results.</div>}
 					{maps_toShow.map((map, index)=><MapEntryUI key={index} index={index} last={index == maps_toShow.length - 1} map={map}/>)}
 				</ScrollView>

@@ -1,6 +1,7 @@
 import {Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, ES, Observer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
@@ -107,7 +108,10 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 					position: "absolute",
 					zIndex: hovered ? 6 : 5,
 					minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth),
-					padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					padding: 5, borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					background: backgroundColor.css(),
+					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
+					color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
 				},
 				panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdowns},
 				!usePortal && {

@@ -3,6 +3,7 @@ import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
@@ -111,7 +112,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 			</div>*/}
 			<Row ml={30} className="clickThrough NodeChildHolderBox" style={E(
-				{position: "relative", alignItems: "flex-start"},
+				{position: "relative", alignItems: "flex-start", color: liveSkin.NodeTextColor().css()},
 				//! isMultiPremiseArgument && {alignSelf: "flex-end"},
 				//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
@@ -135,9 +136,6 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 								<RatingsPreviewBackground path={path} node={node} ratingType={group == ChildGroup.truth ? NodeRatingType.truth : NodeRatingType.relevance}/>*/}
 								<span style={ES(
 									{position: "relative", fontSize: 13},
-									GADDemo && {
-										color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont(), //fontSize: 11, letterSpacing: 1
-									},
 								)}>{text}</span>
 							</>
 						}

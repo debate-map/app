@@ -7,16 +7,49 @@ import {Assert} from "js-vextensions";
 
 export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background", allowDemoOverride = true): chroma.Color {
 	let result: chroma.Color;
-	if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)");
-	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)");
-	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("rgb(90,50,180)");
-	else if (node.type == MapNodeType.claim) result = chroma("rgb(0,80,150)");
+	/*if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
+	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
+	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("rgb(90,50,180)"); //chroma("hsl(258,57%,45%)");
+	else if (node.type == MapNodeType.claim) result = chroma("rgb(0,80,150)"); //chroma("hsl(208,100%,29%)");
 	else if (node.type == MapNodeType.argument) {
-		if (node.displayPolarity == Polarity.supporting) result = chroma("rgb(30,100,30)");
+		if (node.displayPolarity == Polarity.supporting) result = chroma("rgb(30,100,30)"); //chroma("hsl(120,54%,25%)");
 		else result = chroma("rgb(100,30,30)");
 	} else {
 		Assert(false);
+	}*/
+
+	/*if (node.type == MapNodeType.category) result = chroma("hsl(210,33%,24%)");
+	else if (node.type == MapNodeType.package) result = chroma("hsl(195,67%,35%)");
+	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,57%,45%)");
+	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,100%,29%)");
+	else if (node.type == MapNodeType.argument) {
+		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,54%,25%)");
+		else result = chroma("hsl(0,54%,25%)");
+	} else {
+		Assert(false);
+	}*/
+
+	if (node.type == MapNodeType.category) result = chroma("hsl(210,15%,24%)");
+	else if (node.type == MapNodeType.package) result = chroma("hsl(195,35%,35%)");
+	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,20%,45%)");
+	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,50%,29%)");
+	else if (node.type == MapNodeType.argument) {
+		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,25%,25%)");
+		else result = chroma("hsl(0,35%,25%)");
+	} else {
+		Assert(false);
 	}
+
+	/*if (node.type == MapNodeType.category) result = chroma("hsl(210,30%,70%)");
+	else if (node.type == MapNodeType.package) result = chroma("hsl(195,40%,70%)");
+	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,15%,70%)");
+	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,40%,70%)");
+	else if (node.type == MapNodeType.argument) {
+		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,20%,70%)");
+		else result = chroma("hsl(0,25%,70%)");
+	} else {
+		Assert(false);
+	}*/
 
 	if (type == "background") {
 		result = GetNodeBackgroundColorFromRawColor(result);

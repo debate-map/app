@@ -1,8 +1,8 @@
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {Row, Column} from "web-vcore/nm/react-vcomponents.js";
 import Moment from "web-vcore/nm/moment";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {Link, PageContainer, Observer, ES, cssHelper} from "web-vcore";
+import {Link, PageContainer, Observer, ES} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions.js";
 import {GetUsers, GetUser, User} from "dm_common";
@@ -64,8 +64,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 					</Row>
 				</Column>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({
-					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
-					borderRadius: "0 0 10px 10px",
+					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{users.map((user, index)=>{

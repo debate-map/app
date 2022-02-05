@@ -12,6 +12,7 @@ import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
@@ -158,9 +159,10 @@ export class TitlePanel extends BaseComponentPlus(
 					{
 						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node/*, isSubnode*/),
 						marginTop: !latex && GetSegmentsForTerms(displayText, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
+						color: liveSkin.NodeTextColor(),
 					},
 					style,
-					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
+					//GADDemo && {fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 				)}
 				onClick={e=>{
 					if (IsDoubleClick(e)) this.OnDoubleClick();

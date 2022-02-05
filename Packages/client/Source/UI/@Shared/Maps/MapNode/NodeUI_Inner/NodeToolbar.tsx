@@ -1,16 +1,18 @@
 import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
 import React, {useMemo, useState} from "react";
+import {Vector2} from "react-vmenu/Dist/Utils/FromJSVE";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ES, HSLA, InfoButton, Observer, UseDocumentEventListener} from "web-vcore";
 import {Color} from "web-vcore/nm/chroma-js.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {VMenuUI} from "web-vcore/nm/react-vmenu";
+import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
+import {VMenuUI, ShowVMenu} from "web-vcore/nm/react-vmenu";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
 import {NodeUI_Menu} from "../NodeUI_Menu.js";
@@ -25,7 +27,6 @@ export type NodeToolbar_Props = {
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
 		const {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
-		const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const nodeForm = GetNodeForm(node, path);
@@ -33,13 +34,18 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isPremiseOfArg = isPremiseOfSinglePremiseArg || isPremiseOfMultiPremiseArg;
 
+		/*const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
-		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));
+		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));*/
 
 		//const sharedProps = {node, panelToShow, onPanelButtonClick, leftPanelShow};
 		const sharedProps = this.props;
+		const {key, css} = cssHelper(this);
 		return (
-			<Row mt={1} style={{position: "relative", height: 25, background: backgroundColor, borderRadius: "0 0 5px 5px"}}>
+			<Row mt={1} className={key("NodeToolbar")} style={css({
+				position: "relative", height: 25, background: backgroundColor.css(), borderRadius: "0 0 5px 5px",
+				//color: liveSkin.NodeTextColor().css(),
+			})}>
 				<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>
 				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
 				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
@@ -53,15 +59,20 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 					}/>}
 				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings"/>
 				<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
-					processedMouseEvents.add(e.nativeEvent);
-					setContextMenuOpen(!contextMenuOpen);
+					/*processedMouseEvents.add(e.nativeEvent);
+					setContextMenuOpen(!contextMenuOpen);*/
+
+					const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
+					ShowVMenu({
+						pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height),
+					}, <NodeUI_Menu map={map} node={node} path={path} childGroup={ChildGroup.generic}/>);
 				}}/>
-				{contextMenuOpen &&
+				{/*contextMenuOpen &&
 				<div style={{position: "relative"}}>
 					<VMenuUI style={{left: -30, top: "100%"}} onOtherVMenuOpen={()=>setContextMenuOpen(false)}>
 						<NodeUI_Menu map={map} node={node} path={path} childGroup={ChildGroup.generic}/>
 					</VMenuUI>
-				</div>}
+				</div>*/}
 			</Row>
 		);
 	}
@@ -99,8 +110,10 @@ class ToolBarButton extends BaseComponent<{
 			: <InfoButton text={disabledInfo!}/>;
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
+		const {key, css} = cssHelper(this);
 		return (
 			<div
+				className={key("ToolBarButton", icon && `mdi mdi-icon mdi-${icon}`)}
 				onMouseEnter={()=>{
 					if (!enabled) return;
 					setHovered(true);
@@ -111,7 +124,6 @@ class ToolBarButton extends BaseComponent<{
 					setHovered(false);
 					onHoverChange?.(false);
 				}}
-				className={icon ? `mdi mdi-icon mdi-${icon}` : undefined}
 				style={ES(
 					{
 						position: "relative", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,

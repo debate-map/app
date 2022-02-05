@@ -8586,9 +8586,9 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"graphql-feedback@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "graphql-feedback@npm:0.0.3"
+"graphql-feedback@^0.0.3, graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback":
+  version: 0.0.0-use.local
+  resolution: "graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback"
   dependencies:
     classnames: ^2.3.1
     codemirror: ^5.62.2
@@ -8605,13 +8605,12 @@ fsevents@~2.3.2:
     react: ^17.0.2
     react-beautiful-dnd: ^10.0.4
     react-dom: ^17.0.2
-    react-vcomponents: ^0.0.1
-    react-vextensions: ^0.0.1
+    react-vcomponents: ^1.0.39
+    react-vextensions: ^1.0.14
     react-vmessagebox: 0.0.1
     react-vscrollview: 0.0.2
-  checksum: 6dbdf17d89a723d56b2dea696b3c8ac1a1942b82eec52444891853e512a345af4a451b340b8e5bd35b69b79182432ae66c1a53aaa8257c4f53767930d5cc18c7
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "graphql-parse-resolve-info@npm:4.12.0":
   version: 4.12.0
@@ -13938,7 +13937,7 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vcomponents@1.0.37, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
+"react-vcomponents@1.0.39, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
   version: 0.0.0-use.local
   resolution: "react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents"
   dependencies:
@@ -13948,23 +13947,11 @@ fsevents@~2.3.2:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-vextensions: ^1.0.5
+    react-vextensions: ^1.0.14
   languageName: unknown
   linkType: soft
 
-"react-vextensions@npm:1.0.12":
-  version: 1.0.12
-  resolution: "react-vextensions@npm:1.0.12"
-  dependencies:
-    classnames: ^2.2.5
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  checksum: 57309c1ed187f15ad6efc719847ec4a09dbb555e569ae799ec8dfc051bee40803f9ccdb3ec1771e9fd615150f478e6e5e21f71cd4f6687e30241ee6522ef24a2
-  languageName: node
-  linkType: hard
-
-"react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
+"react-vextensions@1.0.14, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
   version: 0.0.0-use.local
   resolution: "react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions"
   dependencies:
@@ -17237,8 +17224,8 @@ typescript@~3.7.3:
     react-markdown: ^6.0.3
     react-universal-hooks: 0.5.1
     react-uplot: 0.0.7
-    react-vcomponents: 1.0.37
-    react-vextensions: 1.0.12
+    react-vcomponents: 1.0.39
+    react-vextensions: 1.0.14
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14
     react-vmessagebox: 1.0.12

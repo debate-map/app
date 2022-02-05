@@ -6,6 +6,7 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
+import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
@@ -313,9 +314,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				});
 			};
 			return (
-				<>
 				<ExpandableBox ref={c=>DoNothing(dragInfo?.provided.innerRef(GetDOM(c) as any), this.root = c)}
-					{...{width, widthOverride, outlineColor, expanded}} parent={this}
+					parent={this}
+					{...{
+						width, widthOverride, outlineColor, expanded,
+						backgroundFillPercent: GADDemo ? 100 : backgroundFillPercent,
+						backgroundColor, markerPercent,
+					}}
 					className={
 						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
 						["NodeUI_Inner", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
@@ -326,6 +331,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					style={E(
 						/*timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime &&
 							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},*/
+						{color: liveSkin.NodeTextColor().css()},
 						style,
 						dragInfo?.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
@@ -385,12 +391,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
 								this.SetState({moreButtonHovered: hovered});
 							}}/>}
-						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
+						<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
 					</>}
-					{...E(
-						{backgroundFillPercent, backgroundColor, markerPercent},
-						GADDemo && {backgroundFillPercent: 100},
-					)}
 					toggleExpanded={toggleExpanded}
 					afterChildren={<>
 						{bottomPanelShow
@@ -403,7 +405,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
 					</>}
 				/>
-				</>
 			);
 		};
 

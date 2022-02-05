@@ -1,6 +1,6 @@
 import Moment from "web-vcore/nm/moment";
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -27,9 +27,10 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		revisions = revisions.OrderByDescending(a=>a.createdAt);
 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
+		const {css} = cssHelper(this);
 		return (
 			<Column style={{position: "relative", maxHeight: 300, display: show ? "flex" : "none"}}>
-				<Column className="clickThrough" style={{background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
+				<Column className="clickThrough" style={{background: liveSkin.HeaderColor().alpha(.3).css(), borderRadius: "10px 10px 0 0"}}>
 					<Row style={{padding: "4px 7px"}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>ID</span>
 						<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Date</span>
@@ -37,7 +38,11 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Actions</span>
 					</Row>
 				</Column>
-				<ScrollView className="selectable" style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative"})}>
+				<ScrollView className="selectable" style={css({flex: 1})} contentStyle={css({
+					position: "relative", flex: 1, borderRadius: "0 0 10px 10px",
+					//background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
+					background: "transparent",
+				})}>
 					{revisions.map((revision, index)=>{
 						return <RevisionEntryUI key={revision.id} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>;
 					})}
@@ -58,7 +63,10 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 
 		return (
 			<Row p="4px 7px" style={E(
-				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css()},
+				{background: index % 2 == 0
+					//? liveSkin.ListEntryBackgroundColor_Light().css()
+					? "transparent"
+					: liveSkin.ListEntryBackgroundColor_Dark().alpha(.3).css()},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<span style={{flex: columnWidths[0]}}>

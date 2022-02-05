@@ -14,6 +14,8 @@ export abstract class Skin {
 	abstract HeaderFont(): string;
 	abstract MainFont(): string;
 	abstract TextColor(): chroma.Color;
+	abstract NodeTextColor(): chroma.Color;
+	abstract NodeSubPanelBackgroundColor(): chroma.Color;
 	abstract NavBarBoxShadow(): string; // temp (until NavBar is moved to web-vcore)
 	abstract HeaderColor(): chroma.Color;
 	abstract ListEntryBackgroundColor_Light(): chroma.Color;
@@ -25,8 +27,9 @@ export abstract class Skin {
 	abstract Style_FillParent(): Object;
 	abstract Style_XButton(): Object;
 
-	// style overrides and blocks (defaulting to "", since they're fine to leave empty)
-	StyleOverride_Button = ()=>"";
-	StyleBlock_Freeform = ()=>"";
-	CSSHooks_Freeform = ()=>{};
+	// freeform blocks (these have defaults, since they're fine to leave empty)
+	StyleBlock_Freeform() {
+		return "";
+	}
+	CSSHooks_Freeform() {}
 }

@@ -1,8 +1,9 @@
 import {UserRow} from "UI/Database/Users.js";
 import {chroma_maxDarken} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {addHook_css, inFirefox, NavBarButton, Style, SubNavBar, SubNavBarButton} from "web-vcore";
+import {inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
+import {addHook_css} from "web-vcore/nm/react-vextensions";
 import {Skin} from "../Skin.js";
 import {DMSkin} from "./DMSkin.js";
 
@@ -21,6 +22,8 @@ export class SLSkin extends DMSkin {
 	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
 	HeaderFont = ()=>"Cinzel";
 	TextColor = ()=>chroma("rgb(43,55,85)");
+	NodeTextColor = ()=>this.TextColor();
+	NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.2)");
 	ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().alpha(1);
 	ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
 
@@ -30,11 +33,16 @@ export class SLSkin extends DMSkin {
 	// style overrides and blocks
 	// ==========
 
-	/*StyleBlock_Freeform = ()=>`
-		${DMSkin.prototype.StyleBlock_Freeform.call(this)}
-	`,*/
-	CSSHooks_Freeform = ()=>{
-		DMSkin.main.CSSHooks_Freeform("SLSkin");
+	StyleBlock_Freeform() {
+		return `
+			${DMSkin.prototype.StyleBlock_Freeform.call(this)}
+			.NodeUI_BottomPanel .uplot {
+				filter: invert(.6);
+			}
+		`;
+	}
+	CSSHooks_Freeform() {
+		DMSkin.prototype.CSSHooks_Freeform.call(this);
 		addHook_css(NavBarButton, ctx=>{
 			if (ctx.callIndex == 0) {
 				ctx.styleArgs.push({

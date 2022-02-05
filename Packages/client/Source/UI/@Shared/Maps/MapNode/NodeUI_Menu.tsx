@@ -21,11 +21,11 @@ import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgume
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 
-export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
+export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
-		const {...rest} = this.props;
+		const {delayEventHandler, ...rest} = this.props;
 		return (
-			<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
+			<VMenuStub delayEventHandler={delayEventHandler ?? true} preOpen={e=>!e.handled}>
 				<NodeUI_Menu {...rest}/>
 			</VMenuStub>
 		);
