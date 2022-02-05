@@ -36,7 +36,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 				<Column mtb={10} style={{
 					// position: "relative", flex: .4, height: "calc(100% - 20px)",
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
-					background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10,
+					background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10,
 				}}>
 					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
@@ -61,7 +61,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 					// flex: .6,
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
-					<Column style={{position: "relative", background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10}}>
+					<Column style={{position: "relative", background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&
 								<Text style={{fontSize: 17, fontWeight: 500}}>
@@ -107,8 +107,8 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
-					{padding: 5, background: liveSkin.BasePanelBackgroundColor().alpha(.7).css(), borderRadius: 5, cursor: "pointer"},
-					selected && {background: liveSkin.BasePanelBackgroundColor().alpha(.7).darken(.1 * chroma_maxDarken).css()},
+					{padding: 5, background: liveSkin.BasePanelBackgroundColor().darken(.05 * chroma_maxDarken).css(), borderRadius: 5, cursor: "pointer"},
+					selected && {background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).css()},
 				)}
 				onClick={e=>{
 					RunInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);

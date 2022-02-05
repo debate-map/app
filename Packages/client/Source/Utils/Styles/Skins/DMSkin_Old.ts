@@ -9,6 +9,7 @@ export class DMSkin_Old extends Skin {
 	// ==========
 
 	BasePanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
+	BasePanelDropShadowFilter = ()=>undefined;
 	OverlayPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
 	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
 	OverlayBorder = ()=>undefined;
@@ -19,7 +20,8 @@ export class DMSkin_Old extends Skin {
 		fonts += `, 'segoe ui emoji', 'noto color emoji', 'android emoji', 'emojisymbols', 'emojione mozilla', 'twemoji mozilla', 'segoe ui symbol'`;
 		return fonts;
 	};
-	TextColor = ()=>"rgba(255,255,255,.7)";	NavBarTextColor = ()=>"rgb(255,255,255)";
+	TextColor = ()=>chroma("rgba(255,255,255,.7)");
+	NavBarTextColor = ()=>"rgb(255,255,255)";
 	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",
 	//navBarBoxShadow: "rgba(100,100,100,1) 0px 0px 3px",
 	NavBarBoxShadow = ()=>"rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";

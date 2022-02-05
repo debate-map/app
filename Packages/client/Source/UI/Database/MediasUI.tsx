@@ -9,6 +9,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {chroma_maxDarken} from "Utils/UI/General.js";
 import {MediaDetailsUI, ShowAddMediaDialog} from "./Medias/MediaDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 
@@ -35,7 +36,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 				<Column mtb={10} style={{
 					// position: "relative", flex: .4, height: "calc(100% - 20px)",
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
-					background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10,
+					background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10,
 				}}>
 					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
@@ -60,7 +61,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 					// flex: .6,
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
-					<Column style={{position: "relative", background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10}}>
+					<Column style={{position: "relative", background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedMedia
 								&& <Text style={{fontSize: 17, fontWeight: 500}}>
@@ -106,8 +107,8 @@ export class MediaUI extends BaseComponent<MediaUI_Props, {}> {
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
-					{padding: 5, background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 5, cursor: "pointer"},
-					selected && {background: liveSkin.BasePanelBackgroundColor().alpha(1).css()},
+					{padding: 5, background: liveSkin.BasePanelBackgroundColor().darken(.05 * chroma_maxDarken).css(), borderRadius: 5, cursor: "pointer"},
+					selected && {background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).css()},
 				)}
 				onClick={e=>{
 					RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);

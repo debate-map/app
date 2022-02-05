@@ -2,9 +2,9 @@ import React from "react";
 import {Link, PageContainer, List, P} from "web-vcore";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 
-const red = "rgba(255,0,0,.7)";
-const orange = "rgba(255,128,0,.7)";
-const green = "rgba(0,255,0,.6)";
+const red = "rgba(150,0,0,1)";
+const orange = "rgba(200,100,0,1)";
+const green = "rgba(0,120,0,1)";
 
 /*const Problem = (props: {text?: string})=><span style={{color: red}}>{props.text ?? "Problem:"}</span>;
 const Solution = (props: {text?: string})=><span style={{color: green}}>{props.text ?? "Solution:"}</span>;*/
@@ -38,7 +38,7 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 
 					<P>Here are some demo maps:
 					<List items={[
-						<Link text="What shape is the earth?" to="/private/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/>
+						<Link text="What shape is the earth?" to="/private/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/>,
 					]}/></P>
 
 					<P>The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
@@ -83,7 +83,7 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 							This discourages many people from contributing at all, leaving debates only for the "hard-core".`}
 						solution={`Because debates and arguments persist in the global debate map, you don't need to "explain it all" for your viewpoint to be fairly represented.
 							Instead, you can supply only what you see has not been added yet, letting you contribute often and on many topics.`}/>
-					
+
 					<h2>Other features</h2>
 
 					<h3>Fine-grained statistical information</h3>

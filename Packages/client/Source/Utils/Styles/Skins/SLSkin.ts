@@ -12,13 +12,14 @@ export class SLSkin extends Skin {
 	// ==========
 
 	BasePanelBackgroundColor = ()=>chroma("rgba(180,180,180,.7)");
+	BasePanelDropShadowFilter = ()=>DMSkin.main.BasePanelDropShadowFilter();
 	OverlayPanelBackgroundColor = ()=>chroma("rgba(255,255,255,.7)");
 	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
 	OverlayBorder = ()=>"1px solid rgba(85,85,85,.5)";
 	HeaderFont = ()=>"Cinzel";
 	//MainFont = ()=>"TypoPRO Bebas Neue";
 	MainFont = ()=>"'Quicksand', sans-serif";
-	TextColor = ()=>"rgb(43,55,85)";
+	TextColor = ()=>chroma("rgb(43,55,85)");
 	NavBarBoxShadow = ()=>DMSkin.main.NavBarBoxShadow();
 	HeaderColor = ()=>DMSkin.main.HeaderColor();
 	ListEntryBackgroundColor_Light = ()=>DMSkin.main.ListEntryBackgroundColor_Light();
@@ -35,49 +36,10 @@ export class SLSkin extends Skin {
 	// style overrides and blocks
 	// ==========
 
-	StyleOverride_Button = ()=>`color: ${this.TextColor()} !important;`;
-	StyleBlock_Freeform = ()=>`
-		.VMenu > div:first-child { border-top: initial !important; }
-		.VMenuItem:not(.disabled):not(.neverMatch):hover {
-			background-color: rgb(200, 200, 200) !important;
-		}
-
-		.ReactModal__Content {
-			background-color: rgba(255,255,255,0.75) !important;
-		}
-		.ReactModal__Content > div:first-child {
-			background-color: rgba(255,255,255,1) !important;
-		}
-		
-		.ButtonBar_OptionUI {
-			border-width: 1px 0 1px 1px !important;
-			border-style: solid !important;
-			border-color: rgba(0,0,0,.3) !important;
-		}
-		.ButtonBar_OptionUI:last-child {
-			border-width: 1px 1px 1px 1px !important;
-		}
-
-		.dropdown__content:not(.neverMatch) {
-			background-color: rgba(255,255,255,1) !important;
-			border: 1px solid rgba(0,0,0,.5);
-			border-radius: 0 0 5px 5px; /* shouldn't it always be this? */
-		}
-		div[data-tip] {
-			filter: invert(1);
-		}
-		.scrollBar {
-			filter: invert(1);
-		}
-
-		.MessageUI, .MessageUI > div {
-			background-color: rgba(255,255,255,.9) !important;
-		}
-		.argumentsControlBar > div:first-child > div {
-			color: rgb(199, 202, 209) !important;
-		}
-	`;
+	StyleOverride_Button = ()=>`color: ${this.TextColor().css()} !important;`;
+	StyleBlock_Freeform = ()=>DMSkin.main.StyleBlock_Freeform("SLSkin");
 	CSSHooks_Freeform = ()=>{
+		DMSkin.main.CSSHooks_Freeform("SLSkin");
 		addHook_css(NavBarButton, ctx=>{
 			if (ctx.callIndex == 0) {
 				ctx.styleArgs.push({

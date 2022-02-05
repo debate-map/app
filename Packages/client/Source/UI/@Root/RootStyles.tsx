@@ -23,7 +23,7 @@ export class RootStyles extends BaseComponent<{}, {}> {
 
 			html, body:not(.neverMatch) {
 				font-family: ${skin.MainFont()};
-				color: ${skin.TextColor()};
+				color: ${skin.TextColor().css()};
 			}
 
 			.background {

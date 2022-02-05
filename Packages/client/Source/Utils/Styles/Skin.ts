@@ -6,12 +6,13 @@ globalThis.chroma = chroma;
 export abstract class Skin {
 	// scalars 
 	abstract BasePanelBackgroundColor(): chroma.Color; // for panels expected to not have content behind them
+	abstract BasePanelDropShadowFilter(): string|undefined;
 	abstract OverlayPanelBackgroundColor(): chroma.Color; // for panels expected to have content behind them
 	abstract NavBarPanelBackgroundColor(): chroma.Color; // for panels branching off from the nav-bar
 	abstract OverlayBorder(): string|undefined;
 	abstract HeaderFont(): string;
 	abstract MainFont(): string;
-	abstract TextColor(): string;
+	abstract TextColor(): chroma.Color;
 	abstract NavBarBoxShadow(): string; // temp (until NavBar is moved to web-vcore)
 	abstract HeaderColor(): chroma.Color;
 	abstract ListEntryBackgroundColor_Light(): chroma.Color;

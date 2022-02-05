@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {Row, Column} from "web-vcore/nm/react-vcomponents.js";
 import Moment from "web-vcore/nm/moment";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {Link, PageContainer, Observer, ES, cssFor} from "web-vcore";
+import {Link, PageContainer, Observer, ES, cssHelper} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions.js";
 import {GetUsers, GetUser, User} from "dm_common";
@@ -84,7 +84,7 @@ export class UserRow extends BaseComponent<{index: number, last: boolean, user: 
 
 		let {displayName} = user;
 		if (displayName.includes("@")) displayName = displayName.split("@")[0];
-		const {css} = cssFor(this);
+		const {css} = cssHelper(this);
 		return (
 			<Column p="7px 10px" style={css(
 				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
