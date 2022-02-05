@@ -9,6 +9,7 @@ import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import React from "react";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 import {MapUI} from "./@Shared/Maps/MapUI";
 import {GADDemo} from "./@GAD/GAD";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
@@ -60,8 +61,9 @@ class MapListUI extends BaseComponentPlus({}, {}) {
 					{height: 80, background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"},
 					GADDemo && {
 						color: HSLA(221, 0.13, 0.42, 1),
-						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17, fontWeight: "bold",
+						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17,
 					},
+					GADDemo && GetCinzelStyleForBold(),
 				)}>
 					<Row style={{height: 40, padding: 10}}>
 						<Select displayType="button bar" options={listTypeOptions} value={storeNode.listType} onChange={val=>{

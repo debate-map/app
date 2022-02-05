@@ -9,6 +9,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetUser, Map} from "dm_common";
 import {columnWidths} from "UI/Debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 
 @Observer
 export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {
@@ -22,8 +23,9 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
 				GADDemo && {
 					color: HSLA(222, 0.33, 0.5, 0.8),
-					fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17, fontWeight: "bold",
+					fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17,
 				},
+				GADDemo && GetCinzelStyleForBold(),
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>

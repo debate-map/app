@@ -12,6 +12,7 @@ export class DMSkin_Old extends Skin {
 	BasePanelDropShadowFilter = ()=>undefined;
 	OverlayPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
 	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
+	OverlayBorderColor = ()=>undefined;
 	OverlayBorder = ()=>undefined;
 	HeaderFont = ()=>this.MainFont();
 	MainFont = ()=>{

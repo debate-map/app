@@ -1,43 +1,38 @@
 import {UserRow} from "UI/Database/Users.js";
+import {chroma_maxDarken} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {addHook_css, NavBarButton, Style, SubNavBar, SubNavBarButton} from "web-vcore";
+import {addHook_css, inFirefox, NavBarButton, Style, SubNavBar, SubNavBarButton} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {Skin} from "../Skin.js";
 import {DMSkin} from "./DMSkin.js";
 
-export class SLSkin extends Skin {
+export function GetCinzelStyleForBold() {
+	// Firefox renders Cinzel-bold wrong, so use alt (not quite as smooth as real bold, but the best solution I know atm for FF)
+	if (inFirefox) return {textShadow: "0px 0px rgba(0,0,0,1)"};
+	return {fontWeight: "bold"};
+}
+
+export class SLSkin extends DMSkin {
 	static main = new SLSkin();
 
 	// scalars
 	// ==========
 
-	BasePanelBackgroundColor = ()=>chroma("rgba(180,180,180,.7)");
-	BasePanelDropShadowFilter = ()=>DMSkin.main.BasePanelDropShadowFilter();
-	OverlayPanelBackgroundColor = ()=>chroma("rgba(255,255,255,.7)");
 	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
-	OverlayBorder = ()=>"1px solid rgba(85,85,85,.5)";
 	HeaderFont = ()=>"Cinzel";
-	//MainFont = ()=>"TypoPRO Bebas Neue";
-	MainFont = ()=>"'Quicksand', sans-serif";
 	TextColor = ()=>chroma("rgb(43,55,85)");
-	NavBarBoxShadow = ()=>DMSkin.main.NavBarBoxShadow();
-	HeaderColor = ()=>DMSkin.main.HeaderColor();
-	ListEntryBackgroundColor_Light = ()=>DMSkin.main.ListEntryBackgroundColor_Light();
-	ListEntryBackgroundColor_Dark = ()=>DMSkin.main.ListEntryBackgroundColor_Dark();
+	ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().alpha(1);
+	ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
 
 	// styles
 	// ==========
 
-	Style_Page = ()=>DMSkin.main.Style_Page();
-	Style_VMenuItem = ()=>DMSkin.main.Style_VMenuItem().Extended({backgroundColor: "rgba(255,255,255,1)"});
-	Style_FillParent = ()=>DMSkin.main.Style_FillParent();
-	Style_XButton = ()=>DMSkin.main.Style_XButton();
-
 	// style overrides and blocks
 	// ==========
 
-	StyleOverride_Button = ()=>`color: ${this.TextColor().css()} !important;`;
-	StyleBlock_Freeform = ()=>DMSkin.main.StyleBlock_Freeform("SLSkin");
+	/*StyleBlock_Freeform = ()=>`
+		${DMSkin.prototype.StyleBlock_Freeform.call(this)}
+	`,*/
 	CSSHooks_Freeform = ()=>{
 		DMSkin.main.CSSHooks_Freeform("SLSkin");
 		addHook_css(NavBarButton, ctx=>{

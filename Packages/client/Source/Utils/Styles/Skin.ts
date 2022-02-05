@@ -9,6 +9,7 @@ export abstract class Skin {
 	abstract BasePanelDropShadowFilter(): string|undefined;
 	abstract OverlayPanelBackgroundColor(): chroma.Color; // for panels expected to have content behind them
 	abstract NavBarPanelBackgroundColor(): chroma.Color; // for panels branching off from the nav-bar
+	abstract OverlayBorderColor(): chroma.Color|undefined;
 	abstract OverlayBorder(): string|undefined;
 	abstract HeaderFont(): string;
 	abstract MainFont(): string;
