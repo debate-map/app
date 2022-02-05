@@ -112,11 +112,13 @@ export class MediaUI extends BaseComponent<MediaUI_Props, {}> {
 				onClick={e=>{
 					RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);
 				}}>
-				<Pre>{image.name}: </Pre>
-				{image.description.KeepAtMost(100)}
+				<div>
+					<Pre>{image.name}: </Pre>
+					{image.description.KeepAtMost(100)}
+				</div>
 				<Span ml="auto">
 					<Pre style={{opacity: 0.7}}>({GetNiceNameForMediaType(image.type)}) </Pre>
-					<Pre>#{image.id}</Pre>
+					<Pre>#{image.id.slice(0, 4)}</Pre>
 				</Span>
 			</Row>
 		);

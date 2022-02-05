@@ -113,11 +113,13 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 				onClick={e=>{
 					RunInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);
 				}}>
-				<Pre>{GetFullNameP(term)}<sup>{term.id.substr(0, 2)}</sup>: </Pre>
-				<Text>{term.definition}</Text>
+				<div>
+					<span style={{fontWeight: "bold"}}>{GetFullNameP(term)}<sup>{term.id.substr(0, 2)}</sup>: </span>
+					<span>{term.definition}</span>
+				</div>
 				<Span ml="auto">
 					<Pre style={{opacity: 0.7}}>({GetNiceNameForTermType(term.type)}) </Pre>
-					<Pre>#{term.id}</Pre>
+					<Pre>#{term.id.slice(0, 4)}</Pre>
 				</Span>
 			</Row>
 		);
