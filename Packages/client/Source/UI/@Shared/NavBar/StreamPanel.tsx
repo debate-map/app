@@ -6,7 +6,10 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 export class StreamPanel extends BaseComponent<{auth?}, {}> {
 	render() {
 		return (
-			<div style={{display: "flex", flexDirection: "column", width: 800, padding: 5, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "0 0 5px 0"}}>
+			<div style={{
+				display: "flex", flexDirection: "column", width: 800, padding: 5, borderRadius: "0 0 5px 0",
+				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
+			}}>
 				<StreamUI panel={true}/>
 			</div>
 		);

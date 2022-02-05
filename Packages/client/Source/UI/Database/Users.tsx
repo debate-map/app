@@ -31,7 +31,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		users = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
-				<Column className="clickThrough" style={{height: 40, background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).alpha(1).css(), borderRadius: "10px 10px 0 0"}}>
+				<Column className="clickThrough" style={{height: 40, background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 					{/* <Row style={{height: 40, padding: 10}}>
 						<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
 							<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
@@ -87,10 +87,7 @@ export class UserRow extends BaseComponent<{index: number, last: boolean, user: 
 		const {css} = cssFor(this);
 		return (
 			<Column p="7px 10px" style={css(
-				{background: index % 2 == 0
-					//? liveSkin.BasePanelBackgroundColor().brighten(.1 * chroma_maxDarken).css()
-					? "transparent"
-					: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).alpha(1).css()},
+				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>

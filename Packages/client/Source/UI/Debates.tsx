@@ -57,9 +57,9 @@ class MapListUI extends BaseComponentPlus({}, {}) {
 		return (
 			<PageContainer style={{margin: "20px auto 20px auto", padding: 0, background: null}}>
 				<Column className="clickThrough" style={E(
-					{height: 80, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "10px 10px 0 0"},
+					{height: 80, background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"},
 					GADDemo && {
-						background: "rgba(222,222,222,1)", color: HSLA(221, 0.13, 0.42, 1),
+						color: HSLA(221, 0.13, 0.42, 1),
 						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17, fontWeight: "bold",
 					},
 				)}>

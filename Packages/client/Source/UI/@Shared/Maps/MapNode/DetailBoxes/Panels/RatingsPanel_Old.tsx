@@ -15,6 +15,7 @@ import useResizeObserver from "use-resize-observer";
 import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
+import {observer} from "web-vcore/nm/mobx-react";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
@@ -165,7 +166,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					const Change = (..._)=>boxController.UpdateUI();
 					const boxController = ShowMessageBox({
 						title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
-						message: observer_simple(()=>{
+						message: observer(()=>{
 							const newRating_accessPolicy = GetAccessPolicy.CatchBail(null, newRating_accessPolicyID);
 							return (
 								<Column p="10px 0">

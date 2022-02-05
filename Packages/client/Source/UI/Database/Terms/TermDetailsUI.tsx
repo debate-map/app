@@ -6,6 +6,7 @@ import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
 import {DEL, E, GetEntries} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {observer} from "web-vcore/nm/mobx-react";
 import {Button, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GetNiceNameForTermType} from "../../Database/TermsUI.js";
@@ -108,7 +109,7 @@ export async function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
-		message: observer_simple(()=>{
+		message: observer(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

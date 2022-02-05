@@ -13,11 +13,16 @@ export class SLSkin extends Skin {
 
 	BasePanelBackgroundColor = ()=>chroma("rgba(180,180,180,.7)");
 	OverlayPanelBackgroundColor = ()=>chroma("rgba(255,255,255,.7)");
+	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
+	OverlayBorder = ()=>"1px solid rgba(85,85,85,.5)";
 	HeaderFont = ()=>"Cinzel";
 	//MainFont = ()=>"TypoPRO Bebas Neue";
 	MainFont = ()=>"'Quicksand', sans-serif";
 	TextColor = ()=>"rgb(43,55,85)";
 	NavBarBoxShadow = ()=>DMSkin.main.NavBarBoxShadow();
+	HeaderColor = ()=>DMSkin.main.HeaderColor();
+	ListEntryBackgroundColor_Light = ()=>DMSkin.main.ListEntryBackgroundColor_Light();
+	ListEntryBackgroundColor_Dark = ()=>DMSkin.main.ListEntryBackgroundColor_Dark();
 
 	// styles
 	// ==========

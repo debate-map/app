@@ -11,7 +11,6 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {Me} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {ChatPanel} from "./NavBar/ChatPanel.js";
 import {GuidePanel} from "./NavBar/GuidePanel.js";
 import {NotificationsUI} from "./NavBar/NotificationsUI.js";
 import {ReputationPanel} from "./NavBar/ReputationPanel.js";
@@ -65,7 +64,6 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
-						{topLeftOpenPanel == "chat" && <ChatPanel/>}
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
 					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>

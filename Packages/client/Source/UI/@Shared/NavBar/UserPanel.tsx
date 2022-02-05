@@ -15,7 +15,10 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		//if (graph.userInfo?.id == null) {
 		if (user == null) {
 			return (
-				<Column style={{padding: 10, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
+				<Column style={{
+					padding: 10, borderRadius: "0 0 0 5px",
+					background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
+				}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
 					<SignInPanel />
 				</Column>
@@ -24,7 +27,10 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		Assert(graph.userInfo?.id != null);
 
 		return (
-			<Column style={{padding: 5, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
+			<Column style={{
+				padding: 5, borderRadius: "0 0 0 5px",
+				background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
+			}}>
 				<Column sel>
 					{/*<div>Name: {graph.userInfo.displayName}</div>*/}
 					<div>Name: {Me()?.displayName ?? "n/a"}</div>
@@ -35,9 +41,9 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						s.main.page = "profile";
 						s.main.topRightOpenPanel = null;
 					}}>
-						<Button text="Edit profile" style={{width: 100}} />
+						<Button text="Edit profile" style={{width: 110}} />
 					</Link>
-					<Button ml={5} text="Sign out" style={{width: 100}} onClick={()=>{
+					<Button ml={5} text="Sign out" style={{width: 110}} onClick={()=>{
 						window.location.href = GetAppServerURL("/signOut");
 					}} />
 				</Row>

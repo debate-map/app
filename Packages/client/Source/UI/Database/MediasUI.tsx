@@ -37,7 +37,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
 					background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10,
 				}}>
-					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
+					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
@@ -61,7 +61,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
 					<Column style={{position: "relative", background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10}}>
-						<Row style={{height: 40, justifyContent: "center", background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
+						<Row style={{height: 40, justifyContent: "center", background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedMedia
 								&& <Text style={{fontSize: 17, fontWeight: 500}}>
 									{selectedMedia.name}

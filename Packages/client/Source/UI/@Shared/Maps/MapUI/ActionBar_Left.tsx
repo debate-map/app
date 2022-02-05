@@ -29,7 +29,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 			}}>
 				<Row center style={E(
 					{
-						justifyContent: "flex-start", background: liveSkin.OverlayPanelBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
+						justifyContent: "flex-start", background: liveSkin.NavBarPanelBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
 						width: "100%", height: GADDemo ? 40 : 30, borderRadius: "0 0 10px 0",
 					},
 					GADDemo && {

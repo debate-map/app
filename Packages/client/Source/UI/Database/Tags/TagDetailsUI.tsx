@@ -8,6 +8,7 @@ import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
+import {observer} from "web-vcore/nm/mobx-react";
 
 export type TagDetailsUI_SharedProps = DetailsUI_Base_Props<MapNodeTag, TagDetailsUI> & DetailsUI_Base_State<MapNodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
 export class TagDetailsUI extends DetailsUI_Base<MapNodeTag, TagDetailsUI> {
@@ -213,7 +214,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add tag", cancelButton: true,
-		message: observer_simple(()=>{
+		message: observer(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

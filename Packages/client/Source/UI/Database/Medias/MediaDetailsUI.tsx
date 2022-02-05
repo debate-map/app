@@ -8,6 +8,7 @@ import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {Button, Column, Pre, Row, RowLR, Select, Span, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {observer} from "web-vcore/nm/mobx-react";
 import {PolicyPicker} from "../Policies/PolicyPicker.js";
 import {store} from "../../../Store/index.js";
 
@@ -97,7 +98,7 @@ export async function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?:
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add media", cancelButton: true,
-		message: observer_simple(()=>{
+		message: observer(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

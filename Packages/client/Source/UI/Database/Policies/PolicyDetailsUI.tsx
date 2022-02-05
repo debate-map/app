@@ -7,6 +7,7 @@ import {UserPicker} from "UI/@Shared/Users/UserPicker";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, observer_simple, TextPlus} from "web-vcore";
 import {Clone, E} from "web-vcore/nm/js-vextensions.js";
+import {observer} from "web-vcore/nm/mobx-react.js";
 import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -172,7 +173,7 @@ export function ShowAddAccessPolicyDialog(initialData?: Partial<AccessPolicy>, p
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add access-policy", cancelButton: true,
-		message: observer_simple(()=>{
+		message: observer(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
