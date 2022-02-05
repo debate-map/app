@@ -8,8 +8,8 @@ import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ShareTab} from "Store/main/shareUI.js";
 import {Observer, RunInAction_Set, GetCurrentURL, InfoButton} from "web-vcore";
-import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
 import moment from "web-vcore/nm/moment";
+import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
 
 export function GetShareShortURL(share: Share) {
 	return new VURL(GetCurrentURL().domain, ["s", share?.id ?? "[SHARE_ID]"]);
@@ -29,7 +29,7 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button mr={5} text="Share"/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 700, borderRadius: "0 0 0 5px"}}>
+				<DropDownContent style={{position: "fixed", right: 0, width: 700, borderRadius: "0 0 0 5px"}}>
 					<Column>
 						<Row mb={5}>
 							<Select options={GetEntries(ShareTab, "ui")} displayType="button bar"

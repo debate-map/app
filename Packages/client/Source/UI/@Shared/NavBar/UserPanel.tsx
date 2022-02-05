@@ -15,7 +15,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		//if (graph.userInfo?.id == null) {
 		if (user == null) {
 			return (
-				<Column style={{padding: 10, background: liveSkin.MainBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
+				<Column style={{padding: 10, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
 					<SignInPanel />
 				</Column>
@@ -24,7 +24,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		Assert(graph.userInfo?.id != null);
 
 		return (
-			<Column style={{padding: 5, background: liveSkin.MainBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
+			<Column style={{padding: 5, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
 				<Column sel>
 					{/*<div>Name: {graph.userInfo.displayName}</div>*/}
 					<div>Name: {Me()?.displayName ?? "n/a"}</div>

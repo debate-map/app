@@ -51,7 +51,8 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					</Div>
 
 					{!GADDemo_2020 &&
-					<span style={{margin: "0 auto", paddingRight: 17}}>
+					<span style={{margin: "0 auto", paddingRight: 115}}>
+						<NavBarPageButton page="database" text="Database"/>
 						<NavBarPageButton page="website" text="Website"/>
 						<NavBarPageButton page="home" text="Home"/>
 						<NavBarPageButton page="debates" text="Debates"/>
@@ -66,8 +67,8 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					</span>}
 
 					<span style={{position: "absolute", right: 30, display: "flex"}}>
-						<NavBarPanelButton text="Search" panel="search" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
-						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right" style={{color: liveSkin.NavBarTextColor()}}/>
+						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
+						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",

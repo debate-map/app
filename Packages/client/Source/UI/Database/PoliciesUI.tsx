@@ -34,9 +34,9 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 				<Column mtb={10} style={{
 					// position: "relative", flex: .4, height: "calc(100% - 20px)",
 					position: "absolute", left: 10, right: "40%", height: "calc(100% - 20px)", // fix for safari
-					background: "rgba(0,0,0,.5)", borderRadius: 10,
+					background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10,
 				}}>
-					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
+					<Row center style={{height: 40, justifyContent: "center", background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add policy" enabled={CanGetBasicPermissions(MeID())} onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
@@ -59,8 +59,8 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 					// flex: .6,
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
 				}} contentStyle={ES({flex: 1, padding: 10})}>
-					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
-						<Row style={{height: 40, justifyContent: "center", background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
+					<Column style={{position: "relative", background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 10}}>
+						<Row style={{height: 40, justifyContent: "center", background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
 							{selectedPolicy &&
 								<Text style={{fontSize: 17, fontWeight: 500}}>
 									{selectedPolicy.name}
@@ -105,8 +105,8 @@ export class PolicyUI extends BaseComponentPlus({} as {policy: AccessPolicy, fir
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
-					{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
-					selected && {background: "rgba(150,150,150,.5)"},
+					{padding: 5, background: liveSkin.BasePanelBackgroundColor().alpha(.5).css(), borderRadius: 5, cursor: "pointer"},
+					selected && {background: liveSkin.BasePanelBackgroundColor().alpha(1).css()},
 				)}
 				onClick={e=>{
 					RunInAction_Set(this, ()=>store.main.database.selectedPolicyID = policy.id);

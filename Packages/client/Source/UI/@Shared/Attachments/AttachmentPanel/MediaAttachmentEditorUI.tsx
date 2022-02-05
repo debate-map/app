@@ -89,7 +89,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 				})}
 				<Row mt={5} style={{
 					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
-					background: mediasWithMatchingURL.length % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
+					background: mediasWithMatchingURL.length % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css(),
 					padding: 5,
 					borderRadius: "0 0 5px 5px",
 				}}>
@@ -113,7 +113,7 @@ export class FoundMediaUI extends BaseComponentPlus({} as {media: Media, index: 
 				style={E(
 					{
 						whiteSpace: "normal", //cursor: "pointer",
-						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
+						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.OverlayPanelBackgroundColor().css(),
 						padding: 5,
 					},
 					index == 0 && {borderRadius: "5px 5px 0 0"},

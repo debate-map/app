@@ -23,7 +23,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="People"/></DropDownTrigger>
-				<DropDownContent style={{left: 0, width: 500, borderRadius: "0 0 5px 0"}}><Column>
+				<DropDownContent style={{position: "fixed", left: 0, width: 500, borderRadius: "0 0 5px 0"}}><Column>
 					<Row center>
 						<Text>Editors:</Text>
 						<InfoButton ml={5} text="Editors have extended permissions, like being able to contribute anywhere in the map. (use node permissions to restrict other users)"/>

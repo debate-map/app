@@ -5,6 +5,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {chroma_maxDarken} from "Utils/UI/General";
 
 @Observer
 export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}) {
@@ -15,18 +16,20 @@ export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChan
 		return (
 			<DropDown ref={c=>this.dropDown = c} style={E({flex: 1}, containerStyle)}>
 				<DropDownTrigger>{children}</DropDownTrigger>
-				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
+				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: 5, zIndex: 1}}>
 					<Row style={{alignItems: "flex-start"}}>
 						<Column style={{width: 600}}>
-							<ScrollView style={ES({flex: 1})} contentStyle={{position: "relative", maxHeight: 500}}>
+							<ScrollView style={ES({flex: 1})} contentStyle={{
+								position: "relative", maxHeight: 500,
+								background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
+							}}>
 								{users.map((user, index)=>(
 									<Column key={index} p="5px 10px"
 										style={E(
 											{
 												cursor: "pointer",
-												background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css(),
+												background: index % 2 == 0 ? "transparent" : liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).alpha(1).css(),
 											},
-											index == users.length - 1 && {borderRadius: "0 0 10px 10px"},
 										)}
 										onClick={()=>{
 											onChange(user.id);

@@ -53,7 +53,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="Details"/></DropDownTrigger>
-				<DropDownContent style={{left: 0, borderRadius: "0 0 5px 0"}}><Column>
+				<DropDownContent style={{position: "fixed", left: 0, borderRadius: "0 0 5px 0"}}><Column>
 					<MapDetailsUI ref={c=>this.detailsUI = c} baseData={map} phase={creatorOrMod ? "edit" : "view"} onChange={newData=>{
 						this.SetState({dataError: this.detailsUI!.GetValidationError()});
 					}}/>

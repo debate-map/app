@@ -166,7 +166,7 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 			<Fragment>
 				<Row mt={10} mb={5} style={{fontSize: 15, fontWeight: "bold"}}>Customization</Row>
 				<Row mt={5}>Background:</Row>
-				<ScrollView mt={5} style={{height: 450, background: liveSkin.MainBackgroundColor().css()}}>
+				<ScrollView mt={5} style={{height: 450, background: liveSkin.OverlayPanelBackgroundColor().css()}}>
 					<Row style={{flexWrap: "wrap"}}>
 						{presetBackgrounds.Pairs().map(prop=>{
 							const id = prop.key;

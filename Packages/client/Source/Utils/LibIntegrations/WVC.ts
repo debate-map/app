@@ -33,7 +33,7 @@ AddWVCSchemas(AddSchema);
 export function InitWVC() {
 	manager_framework.Populate({
 		// styling
-		colors: {navBarBoxShadow: liveSkin.NavBarBoxShadow()},
+		colors: {},
 		zIndexes,
 		iconInfo,
 		useExpandedNavBar: ()=>true,

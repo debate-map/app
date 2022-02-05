@@ -7,6 +7,10 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 
 @Observer
 export class RootStyles extends BaseComponent<{}, {}> {
+	ComponentWillMount() {
+		const skin = liveSkin;
+		skin.CSSHooks_Freeform();
+	}
 	render() {
 		const background = GetUserBackground(MeID());
 		const firstExtantBackgroundURL_1920Plus = background.url_1920 || background.url_3840 || background.url_max;

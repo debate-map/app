@@ -70,7 +70,7 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 export class MessageUI extends BaseComponent<{message?: NotificationMessage, pinned?: boolean, children?: any}, {}> {
 	render() {
 		const {message, pinned, children} = this.props;
-		const backgroundColor_base = liveSkin.MainBackgroundColor().alpha(1);
+		const backgroundColor_base = liveSkin.OverlayPanelBackgroundColor().alpha(1);
 		const backgroundColor_blueified_normal = chroma.mix(backgroundColor_base, chroma("rgba(0,175,255,.7)"), .05);
 		const backgroundColor_blueified_dark = backgroundColor_blueified_normal.darken(.1 * chroma_maxDarken);
 		return (

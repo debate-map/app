@@ -5,9 +5,7 @@
 // import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 // import {MeID, GetUser, GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs, IsUserCreatorOrMod, Layer, GetUserLayerStateForMap, DeleteLayer, SetLayerAttachedToMap, SetMapLayerStateForUser, Map} from "dm_common";
 
-
 // import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
-
 
 // import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog.js";
 // import {ES} from "../../../../../Utils/UI/GlobalStyles.js";
@@ -24,7 +22,7 @@
 // 		return (
 // 			<DropDown>
 // 				<DropDownTrigger><Button ml={5} text="Layers"/></DropDownTrigger>
-// 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null}}>
+// 				<DropDownContent style={{position: "fixed", left: 0, padding: null, background: null, borderRadius: null}}>
 // 					<Row style={{alignItems: "flex-start"}}>
 // 						<Column style={{width: 600}}>
 // 							<Column className="clickThrough" style={{height: 80, background: liveSkin.MainBackgroundColor().css() /* borderRadius: "10px 10px 0 0" */, maxHeight: 320}}>

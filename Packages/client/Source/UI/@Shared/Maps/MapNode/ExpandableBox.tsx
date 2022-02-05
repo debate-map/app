@@ -48,7 +48,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 						}}/>
 						<div style={{
 							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: `${100 - backgroundFillPercent}%`, background: liveSkin.MainBackgroundColor().css(), borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
+							width: `${100 - backgroundFillPercent}%`, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
 						}}/>
 						{markerPercent != null &&
 							<div style={{

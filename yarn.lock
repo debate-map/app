@@ -2415,7 +2415,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
-    web-vcore: 0.0.46
+    web-vcore: 0.0.47
   languageName: unknown
   linkType: soft
 
@@ -13938,22 +13938,7 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vcomponents@npm:1.0.37":
-  version: 1.0.37
-  resolution: "react-vcomponents@npm:1.0.37"
-  dependencies:
-    classnames: ^2.2.5
-    keycode: ^2.2.0
-    react-textarea-autosize: ^7.1.2
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-vextensions: ^1.0.5
-  checksum: a994760667549e1b349ad1a111377301ff930647e5ab265d9361cf749ada3fcd1413999d24d6e50ae00d2ae288beca074a3a51fc136f7e6627de15a2f13b19b5
-  languageName: node
-  linkType: hard
-
-"react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
+"react-vcomponents@1.0.37, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
   version: 0.0.0-use.local
   resolution: "react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents"
   dependencies:
@@ -14018,7 +14003,24 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vmessagebox@1.0.10, react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox":
+"react-vmessagebox@npm:1.0.12":
+  version: 1.0.12
+  resolution: "react-vmessagebox@npm:1.0.12"
+  dependencies:
+    classnames: ^2.2.5
+    mobx-react: ^7.2.0
+    react-modal: ^3.11.1
+  peerDependencies:
+    mobx: ^5.0.0
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    react-vcomponents: ^1.0.33
+    react-vextensions: ^1.0.10
+  checksum: bce37dfafc2bad74d59c9ed0ab6f2d80c25bec657410fbedde540467b12e01ae1e4a36ae0a51c212bdd94b2822e625682076099ebbf3fb6a9ae45f5919c1aa38
+  languageName: node
+  linkType: hard
+
+"react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox":
   version: 0.0.0-use.local
   resolution: "react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox"
   dependencies:
@@ -17165,7 +17167,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.46, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.47, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -17239,7 +17241,7 @@ typescript@~3.7.3:
     react-vextensions: 1.0.12
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14
-    react-vmessagebox: 1.0.10
+    react-vmessagebox: 1.0.12
     react-vscrollview: 1.0.3
     remarkable: ^2.0.1
     remarkable-react: ^1.4.3

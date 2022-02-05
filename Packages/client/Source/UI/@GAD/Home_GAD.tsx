@@ -1,9 +1,10 @@
-import {Switch} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import React from "react";
 import {store} from "Store";
-import {SubNavBarButton_GAD, SubNavBar_GAD} from "./SubNavBar_GAD.js";
+import {SubNavBar, SubNavBarButton} from "web-vcore";
+import {Switch} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {GADDemo_2020, GetGADExternalSiteURL} from "./GAD.js";
 import {HomeUI2_GAD, HomeUI2_GAD2020} from "./Home2_GAD.js";
-import {GADDemo_2020} from "./GAD.js";
 
 export class HomeUI_GAD extends BaseComponentPlus({}, {}) {
 	render() {
@@ -12,10 +13,10 @@ export class HomeUI_GAD extends BaseComponentPlus({}, {}) {
 
 		return (
 			<>
-				<SubNavBar_GAD>
-					<SubNavBarButton_GAD page={page} subpage='home' text='Home'/>
-					{!GADDemo_2020 && <SubNavBarButton_GAD page={page} subpage='about' text='About'/>}
-				</SubNavBar_GAD>
+				<SubNavBar>
+					<SubNavBarButton page={page} subpage='home' text='Home'/>
+					{!GADDemo_2020 && <SubNavBarButton to={GetGADExternalSiteURL()} page={page} subpage='about' text='About'/>}
+				</SubNavBar>
 				<Switch>
 					{GADDemo_2020 && <HomeUI2_GAD2020/>}
 					{!GADDemo_2020 && <HomeUI2_GAD/>}

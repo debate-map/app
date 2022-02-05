@@ -5,12 +5,12 @@ globalThis.chroma = chroma;
 
 export abstract class Skin {
 	// scalars 
-	abstract MainBackgroundColor(): chroma.Color;
+	abstract BasePanelBackgroundColor(): chroma.Color; // for panels expected to not have content behind them
+	abstract OverlayPanelBackgroundColor(): chroma.Color; // for panels expected to have content behind them
 	abstract HeaderFont(): string;
 	abstract MainFont(): string;
 	abstract TextColor(): string;
-	abstract NavBarTextColor(): string;
-	abstract NavBarBoxShadow(): string;
+	abstract NavBarBoxShadow(): string; // temp (until NavBar is moved to web-vcore)
 
 	// styles
 	abstract Style_Page(): Object;
@@ -21,4 +21,5 @@ export abstract class Skin {
 	// style overrides and blocks (defaulting to "", since they're fine to leave empty)
 	StyleOverride_Button = ()=>"";
 	StyleBlock_Freeform = ()=>"";
+	CSSHooks_Freeform = ()=>{};
 }

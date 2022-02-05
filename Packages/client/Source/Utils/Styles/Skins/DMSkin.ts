@@ -1,3 +1,4 @@
+import {addHook_css, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {Skin} from "../Skin.js";
 
@@ -7,7 +8,8 @@ export class DMSkin extends Skin {
 	// scalars
 	// ==========
 
-	MainBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
+	BasePanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
+	OverlayPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
 	HeaderFont = ()=>this.MainFont();
 	MainFont = ()=>{
 		let fonts = `'Roboto', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif`;
@@ -15,8 +17,7 @@ export class DMSkin extends Skin {
 		fonts += `, 'segoe ui emoji', 'noto color emoji', 'android emoji', 'emojisymbols', 'emojione mozilla', 'twemoji mozilla', 'segoe ui symbol'`;
 		return fonts;
 	};
-	TextColor = ()=>"rgba(255,255,255,.7)";
-	NavBarTextColor = ()=>"rgb(255,255,255)";
+	TextColor = ()=>"rgba(255,255,255,.7)";	NavBarTextColor = ()=>"rgb(255,255,255)";
 	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",
 	//navBarBoxShadow: "rgba(100,100,100,1) 0px 0px 3px",
 	NavBarBoxShadow = ()=>"rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
@@ -36,4 +37,15 @@ export class DMSkin extends Skin {
 	StyleBlock_Freeform = ()=>`
 		.VMenu > div:first-child { border-top: initial !important; }
 	`;
+	CSSHooks_Freeform = ()=>{
+		addHook_css(SubNavBar, ctx=>{
+			if (ctx.key == "sub1") {
+				ctx.styleArgs.push({
+					background: this.OverlayPanelBackgroundColor().css(),
+					boxShadow: this.NavBarBoxShadow(),
+					color: "rgb(255,255,255)",
+				});
+			}
+		});
+	}
 }

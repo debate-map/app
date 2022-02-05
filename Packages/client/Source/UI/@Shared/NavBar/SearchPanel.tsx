@@ -102,7 +102,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 
 		this.Stash({queryStr});
 		return (
-			<Column style={{width: 750, padding: 5, background: liveSkin.MainBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
+			<Column style={{width: 750, padding: 5, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: "0 0 0 5px"}}>
 				<Row center>
 					<TextInput style={{flex: 1}} value={queryStr}
 						instant // since enter-key needs value pre-blur
@@ -122,7 +122,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 					<Button ml={5} text="Search" onClick={()=>this.PerformSearch()}/>
 				</Row>
 				{/* <Row style={{ fontSize: 18 }}>Search results ({results_nodeIDs.length})</Row> */}
-				<Column mt={5} className="clickThrough" style={{height: 40, background: liveSkin.MainBackgroundColor().css(), borderRadius: 10}}>
+				<Column mt={5} className="clickThrough" style={{height: 40, background: liveSkin.OverlayPanelBackgroundColor().css(), borderRadius: 10}}>
 					{/* <Row style={{ height: 40, padding: 10 }}>
 						<Pre>Sort by: </Pre>
 						<Select options={GetEntries(SortType, name => EnumNameToDisplayName(name))}

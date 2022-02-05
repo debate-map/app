@@ -22,7 +22,7 @@
 // 			<Row style={{height: 40, padding: 10}}>
 // 				<DropDown ref={c=>this.timelineSelect = c}>
 // 					<DropDownTrigger><Button text={timeline ? timeline.name : "[none]"}/></DropDownTrigger>
-// 					<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
+// 					<DropDownContent style={{position: "fixed", left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
 // 						<Row style={{alignItems: "flex-start"}}>
 // 							<Column style={{width: 600}}>
 // 								<ScrollView style={ES({flex: 1})} contentStyle={{flex: 0.8, position: "relative", maxHeight: 500}}>

@@ -2,11 +2,12 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {Row, Column} from "web-vcore/nm/react-vcomponents.js";
 import Moment from "web-vcore/nm/moment";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {Link, PageContainer, Observer, ES} from "web-vcore";
+import {Link, PageContainer, Observer, ES, cssFor} from "web-vcore";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions.js";
 import {GetUsers, GetUser, User} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {chroma_maxDarken} from "Utils/UI/General.js";
 import {UserProfileUI} from "./Users/UserProfile.js";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];
@@ -30,7 +31,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		users = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
-				<Column className="clickThrough" style={{height: 40, background: liveSkin.MainBackgroundColor().css(), borderRadius: "10px 10px 0 0"}}>
+				<Column className="clickThrough" style={{height: 40, background: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).alpha(1).css(), borderRadius: "10px 10px 0 0"}}>
 					{/* <Row style={{height: 40, padding: 10}}>
 						<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
 							<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
@@ -62,7 +63,10 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 						<span style={{flex: columnWidths[4], fontWeight: 500, fontSize: 17}}>Permissions</span>
 					</Row>
 				</Column>
-				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
+				<ScrollView style={ES({flex: 1})} contentStyle={ES({
+					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(),
+					borderRadius: "0 0 10px 10px",
+				})}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{users.map((user, index)=>{
 						return <UserRow key={user.id} index={index} last={index == users.length - 1} user={user}/>;
@@ -74,15 +78,19 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 }
 
 @Observer
-class UserRow extends BaseComponent<{index: number, last: boolean, user: User}, {}> {
+export class UserRow extends BaseComponent<{index: number, last: boolean, user: User}, {}> {
 	render() {
 		const {index, last, user} = this.props;
 
 		let {displayName} = user;
 		if (displayName.includes("@")) displayName = displayName.split("@")[0];
+		const {css} = cssFor(this);
 		return (
-			<Column p="7px 10px" style={E(
-				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : liveSkin.MainBackgroundColor().css()},
+			<Column p="7px 10px" style={css(
+				{background: index % 2 == 0
+					//? liveSkin.BasePanelBackgroundColor().brighten(.1 * chroma_maxDarken).css()
+					? "transparent"
+					: liveSkin.BasePanelBackgroundColor().darken(.1 * chroma_maxDarken).alpha(1).css()},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>
