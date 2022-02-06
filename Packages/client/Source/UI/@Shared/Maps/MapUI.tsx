@@ -1,4 +1,6 @@
 import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
+import React from "react";
+import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
@@ -6,7 +8,7 @@ import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeVi
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps} from "Utils/UI/General.js";
-import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
+import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction, SubNavBar, SubNavBarButton} from "web-vcore";
 import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
@@ -91,13 +93,13 @@ export function GetMapUICSSFilter() {
 type Props = {
 	mapID: string, rootNode?: MapNodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
-	subNavBarWidth?: number,
+	//subNavBarWidth?: number,
 } & HTMLProps<"div">;
 @Observer
 export class MapUI extends BaseComponentPlus({
 	// padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}
 	padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
-	subNavBarWidth: 0,
+	//subNavBarWidth: 0,
 } as Props, {}) {
 	private static currentMapUI: MapUI|n;
 	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted ? MapUI.currentMapUI : null; }
@@ -114,8 +116,9 @@ export class MapUI extends BaseComponentPlus({
 	mapUIEl: HTMLDivElement|n;
 	downPos: Vector2|n;
 	render() {
-		const {mapID, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
-		Assert(padding && subNavBarWidth != null); // nn: default-values set
+		const {mapID, rootNode: rootNode_passed, withinPage, padding, ...rest} = this.props;
+		//Assert(padding && subNavBarWidth != null); // nn: default-values set
+		Assert(padding != null); // nn: default-values set
 		Assert(mapID, "mapID is null!");
 
 		const map = GetMap(mapID);
@@ -162,12 +165,18 @@ export class MapUI extends BaseComponentPlus({
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
 		//const playingTimeline = GetPlayingTimeline(map ? map.id : null);
 
+		const subNavBarWidth = 104;
 		return (
 			<Column style={ES({flex: 1})}>
 				{!withinPage &&
-					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
-				{!withinPage &&
-					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
+				<>
+					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>
+					<SubNavBar>
+						<SubNavBarButton page={store.main.page} subpage="graph" text="Graph"/>
+						<SubNavBarButton page={store.main.page} subpage="focus" text="Focus"/>
+					</SubNavBar>
+					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>
+				</>}
 				{/* !withinPage &&
 					<TimelinePlayerUI map={map}/> */}
 				{/*! withinPage &&

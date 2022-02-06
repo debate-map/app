@@ -82,11 +82,18 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			}*/
 		}
 
-		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
-		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_up = (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_down = (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
 		const showAll = node.id == map.rootNode || node.type == MapNodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
+
+		// helper
+		const renderedChildrenOrder = [] as string[];
+		// once we're done rendering, store the rendered-children-order in the node-view, eg. so child NodeUI's can whether they have any expanded siblings
+		setTimeout(()=>{
+			RunInAction("NodeChildHolder.render.updateRenderedChildrenOrder", ()=>nodeView.renderedChildrenOrder = renderedChildrenOrder);
+		}, 0);
 
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
@@ -113,6 +120,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const dragBox = document.querySelector(".NodeUI_Inner.DragPreview");
 			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());
 
+			renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
 			return (
 				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;

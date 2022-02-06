@@ -96,6 +96,20 @@ export class NodeUI extends BaseComponentPlus(
 		const hereArgChildrenToShow = hereArg ? GetNodeChildrenToShow(hereArg, hereArgNodePath).filter(a=>a.id != node.id) : null;
 		const boxExpanded = nodeView?.expanded ?? false;
 
+		const siblingNodeViews = Object.entries(parentNodeView?.children ?? {}).OrderBy(a=>parentNodeView?.renderedChildrenOrder.indexOf(a[0]));
+		const ownIndexInSiblings = siblingNodeViews.findIndex(a=>a[0] == node.id);
+		let isFirstExpandedSibling = nodeView.expanded && siblingNodeViews.slice(0, ownIndexInSiblings).every(a=>!a[1].expanded);
+		let isLastExpandedSibling = nodeView.expanded && siblingNodeViews.slice(ownIndexInSiblings + 1).every(a=>!a[1].expanded);
+		const grandParentNodeView = GetNodeView(map.id, SlicePath(path, 2));
+		let ownIndexInVisualSiblings = -2;
+		if (isPremiseOfSinglePremiseArg && grandParentNodeView) {
+			const visualSiblingNodeViews = Object.entries(grandParentNodeView.children).OrderBy(a=>grandParentNodeView.renderedChildrenOrder.indexOf(a[0]));
+			ownIndexInVisualSiblings = visualSiblingNodeViews.findIndex(a=>a[0] == parent!.id);
+			if (!visualSiblingNodeViews.slice(0, ownIndexInVisualSiblings).every(a=>!a[1].expanded)) isFirstExpandedSibling = false;
+			if (!visualSiblingNodeViews.slice(ownIndexInVisualSiblings + 1).every(a=>!a[1].expanded)) isLastExpandedSibling = false;
+		}
+		FlashComp(this, {wait: 0, text: `IsFirstExp:${isFirstExpandedSibling} @isLastExp:${isLastExpandedSibling} @t1:${ownIndexInSiblings} @t2:${ownIndexInVisualSiblings}`});
+
 		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
 		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
@@ -203,14 +217,14 @@ export class NodeUI extends BaseComponentPlus(
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_truth}
-				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
-					/*if (truthBoxVisible && relevanceBoxVisible) {
+				onHeightOrDividePointChange={UseCallback((height, alignPoint)=>{
+					if (truthBoxVisible && relevanceBoxVisible) {
 						this.SetState({innerUIAlignPoint: height}); // if truth and relevance boxes are both visible, align-point is between them (so just below truth-box's height)
 					} else if (truthBoxVisible) {
-						this.SetState({innerUIAlignPoint}); // if only truth box is visible, the align-point is the truth box's own divide-point (ie. at same height as the add-pro/add-con buttons)
-					}*/
+						this.SetState({innerUIAlignPoint: alignPoint}); // if only truth box is visible, the align-point is the truth box's own divide-point (ie. at same height as the add-pro/add-con buttons)
+					}
 					this.CheckForChanges();
-				}, [])}/>;
+				}, [relevanceBoxVisible, truthBoxVisible])}/>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
 				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
@@ -218,12 +232,12 @@ export class NodeUI extends BaseComponentPlus(
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
 				nodeChildren={hereArgChildren ?? ea} nodeChildrenToShow={hereArgChildrenToShow_relevance}
-				onHeightOrDividePointChange={UseCallback((height, dividePoint)=>{
-					/*if (relevanceBoxVisible && !truthBoxVisible) {
-						this.SetState({dividePoint}); // if only relevance box is visible, the divide-point is the relevance box's own divide-point (ie. at same height as the add-pro/add-con buttons)
-					}*/
+				onHeightOrDividePointChange={UseCallback((height, alignPoint)=>{
+					if (relevanceBoxVisible && !truthBoxVisible) {
+						this.SetState({innerUIAlignPoint: alignPoint}); // if only relevance box is visible, the divide-point is the relevance box's own divide-point (ie. at same height as the add-pro/add-con buttons)
+					}
 					this.CheckForChanges();
-				}, [])}/>;
+				}, [relevanceBoxVisible, truthBoxVisible])}/>;
 		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
 				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
@@ -261,13 +275,13 @@ export class NodeUI extends BaseComponentPlus(
 		}
 		let nodeChildHolder_direct: JSX.Element|n;
 		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
-		const nodeChildHolder_direct_onHeightOrDividePointChange = UseCallback(dividePoint=>{
-			/*// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
+		const nodeChildHolder_direct_onHeightOrDividePointChange = UseCallback(alignPoint=>{
+			// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
 			if (!isMultiPremiseArgument) {
-				this.SetState({dividePoint});
-			}*/
+				this.SetState({innerUIAlignPoint: alignPoint});
+			}
 			this.CheckForChanges();
-		}, []);
+		}, [isMultiPremiseArgument]);
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
@@ -300,6 +314,8 @@ export class NodeUI extends BaseComponentPlus(
 				}*/
 			}, [])} className="NodeUI clickThrough" style={E(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
+				isFirstExpandedSibling && {marginTop: -(innerUIAlignPoint_safe - (selfHeight / 2) - 5)},
+				isLastExpandedSibling && {marginBottom: -((selfHeight_plusRightContent - innerUIAlignPoint_safe) - (selfHeight / 2) - 5)},
 				style,
 			)}>
 				<Column className="innerBoxColumn clickThrough" style={ES(

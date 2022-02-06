@@ -391,7 +391,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								//onClick();
 								//RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
 								//setLeftPanelPinned(!leftPanelPinned);
-								RunInAction_Set(this, ()=>nodeView.leftPanelPinned = !nodeView.leftPanelPinned);
+								RunInAction_Set(this, ()=>{
+									if (nodeView == null) return;
+									nodeView.leftPanelPinned = !nodeView.leftPanelPinned;
+								});
 							}}
 							onMoreHoverChange={hovered=>{
 								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;

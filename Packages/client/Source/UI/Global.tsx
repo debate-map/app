@@ -6,13 +6,13 @@ import {GlobalMapUI} from "./Global/GlobalMapUI.js";
 
 export class GlobalUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		const currentSubpage = store.main.global.subpage;
-		const page = "global";
+		/*const currentSubpage = store.main.global.subpage;
+		const page = "global";*/
 		return (
 			<>
-				<SubNavBar>
+				{/*<SubNavBar>
 					<SubNavBarButton page={page} subpage="map" text="Map"/>
-				</SubNavBar>
+				</SubNavBar>*/}
 				<Switch>
 					<GlobalMapUI/>
 				</Switch>

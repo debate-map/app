@@ -73,6 +73,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 							lineHeight: "1px", // keeps text from making meta-theses too tall
 							backgroundColor: Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
 							border: "none",
+							color: liveSkin.NodeTextColor().css(),
 							":hover": {backgroundColor: Chroma_Mix(backgroundColor, "black", 0.1).alpha(0.9).css()},
 						})}
 						onClick={toggleExpanded}/>

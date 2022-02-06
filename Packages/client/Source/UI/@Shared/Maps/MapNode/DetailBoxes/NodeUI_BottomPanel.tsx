@@ -138,7 +138,10 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermIDs}}
 						openTermIDs={nodeView?.openTermIDs}
 						onHoverTerm={termIDs=>onTermHover(termIDs)}
-						onClickTerm={termIDs=>RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermIDs = termIDs)}/>)}
+						onClickTerm={termIDs=>{
+							if (nodeView == null) return;
+							RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermIDs = termIDs);
+						}}/>)}
 				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
 				{renderPanel("social", show=><SocialPanel {...{show}}/>)}

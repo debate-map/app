@@ -1,6 +1,7 @@
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {Vector2, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {accessorMetadata, AddSchema, CreateAccessor, DB, defaultGraphOptions, Field, MGLClass, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
+import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {GetNode, GetNodeID, GetParentNodeID, ToPathNodes} from "../../DB/nodes.js";
 import {MapNodeType} from "../../DB/nodes/@MapNodeType.js";
 
@@ -130,6 +131,9 @@ export class MapNodeView {
 
 	@Field({type: "number"}, {opt: true})
 	@O childLimit_down?: number;
+
+	// transient info, for making layout easier
+	@O @ignore renderedChildrenOrder = [] as string[];
 }
 export const emptyNodeView = new MapNodeView(null, false);
 //RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("MapNodeView")));

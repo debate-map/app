@@ -43,7 +43,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 		/*const nodeView = GetNodeView(map?.id, path);
 		const openPanel = local_nodeView?.openPanel || nodeView?.openPanel;*/
 		const nodeView = local_nodeView ?? GetNodeView(map?.id, path);
-		const openPanel = nodeView.openPanel;
+		const openPanel = nodeView?.openPanel;
 
 		const form = GetNodeForm(node, path);
 		const parentNode = GetParentNodeL3(path);
