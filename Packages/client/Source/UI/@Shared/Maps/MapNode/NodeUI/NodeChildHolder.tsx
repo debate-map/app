@@ -13,6 +13,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "web-vcore/nm/chroma-js.js";
+import {FlashComp} from "Utils/UI/FlashKit.js";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
@@ -270,6 +271,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	// Checks for at-our-level state that may require us to update our width or child-box-offsets (for positioning our lines to child nodes).
 	// Note that there are other pathways by which our width/child-box-offsets may be updated. (eg. if child box repositions, an update is triggered through OnChildHeightOrPosChange)
 	CheckForLocalChanges() {
+		//FlashComp(this, {text: "NodeChildHolder.CheckForLocalChanges"});
 		// if (this.lastRender_source == RenderSource.SetState) return;
 		const {node, onHeightOrDividePointChange} = this.props;
 
@@ -299,6 +301,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	OnChildHeightOrPosChange = ()=>{
+		//FlashComp(this, {text: "NodeChildHolder.OnChildHeightOrPosChange"});
 		const {node} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
 			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}\ncenterY:${this.GetDividePoint()}`);

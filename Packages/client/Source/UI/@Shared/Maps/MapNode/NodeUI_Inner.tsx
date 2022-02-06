@@ -8,6 +8,7 @@ import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongP
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
+import {FlashComp} from "Utils/UI/FlashKit.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
@@ -314,7 +315,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				});
 			};
 			return (
-				<ExpandableBox ref={c=>DoNothing(dragInfo?.provided.innerRef(GetDOM(c) as any), this.root = c)}
+				<ExpandableBox
+					ref={c=>{
+						dragInfo?.provided.innerRef(GetDOM(c) as any);
+						this.root = c;
+						//if (c) FlashComp(this, {el: c.DOM_HTML, text: "NUI_Inner rendered"});
+					}}
 					parent={this}
 					{...{
 						width, widthOverride, outlineColor, expanded,

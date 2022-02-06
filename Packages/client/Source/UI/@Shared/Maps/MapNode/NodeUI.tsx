@@ -12,6 +12,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {FlashComp, FlashElement} from "Utils/UI/FlashKit.js";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
@@ -293,7 +294,10 @@ export class NodeUI extends BaseComponentPlus(
 			<div ref={UseCallback(c=>{
 				this.nodeUI = c;
 				//WaitXThenRun_Deduped([this, "checkForChanges"], 0, ()=>this.CheckForChanges());
-				if (c) requestAnimationFrame(()=>this.CheckForChanges());
+				/*if (c) {
+					requestAnimationFrame(()=>this.CheckForChanges());
+					//FlashComp(this, {el: c, text: "NodeUI rendered"});
+				}*/
 			}, [])} className="NodeUI clickThrough" style={E(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
 				style,
@@ -346,9 +350,11 @@ export class NodeUI extends BaseComponentPlus(
 		return this.proxyDisplayedNodeUI || this;
 	}
 
-	/*PostRender() {
+	// this is needed to handle certain cases (eg. where this node-view's expansion state is set to collapsed) not caught by downstream-events + ref-callback (well, when wrapped in UseCallback(...))
+	PostRender() {
+		//FlashComp(this, {text: "NodeUI rendered"});
 		this.CheckForChanges();
-	}*/
+	}
 
 	// don't actually check for changes until re-rendering has stopped for 500ms
 	// CheckForChanges = _.debounce(() => {
@@ -357,6 +363,8 @@ export class NodeUI extends BaseComponentPlus(
 	lastHeight = 0;
 	lastInnerUIAlignPoint = 0;
 	CheckForChanges = ()=>{
+		//FlashComp(this, {text: "NodeUI.CheckForChanges"});
+
 		const {node, onHeightOrPosChange, innerUIAlignPoint} = this.PropsState;
 		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
 		if (this.DOM_HTML == null) return;
@@ -408,6 +416,7 @@ export class NodeUI extends BaseComponentPlus(
 
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange = ()=>{
+		//FlashComp(this, {text: "NodeUI.OnChildHeightOrPosChange"});
 		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
 		if (this.OnChildHeightOrPosChange_updateStateQueued) return;
 		this.OnChildHeightOrPosChange_updateStateQueued = true;

@@ -32,10 +32,10 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 	if (node.type == MapNodeType.category) result = chroma("hsl(210,15%,24%)");
 	else if (node.type == MapNodeType.package) result = chroma("hsl(195,35%,35%)");
 	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,20%,45%)");
-	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,50%,29%)");
+	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,55%,29%)");
 	else if (node.type == MapNodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,25%,25%)");
-		else result = chroma("hsl(0,35%,25%)");
+		else result = chroma("hsl(0,40%,25%)");
 	} else {
 		Assert(false);
 	}
