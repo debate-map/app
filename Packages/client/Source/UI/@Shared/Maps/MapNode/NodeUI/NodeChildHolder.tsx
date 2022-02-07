@@ -22,7 +22,7 @@ import {NodeChildHolder_Child} from "./NodeChildHolder/NodeChildHolder_Child.js"
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, belowNodeUI?: boolean, minWidth?: number,
-	onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 };
 const initialState = {
 	childrenWidthOverride: null as number|n,
@@ -41,7 +41,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	childBoxes: {[key: number]: NodeUI} = {};
 	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
 	render() {
-		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth, onHeightOrDividePointChange} = this.props;
+		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth} = this.props;
 		let {childrenWidthOverride, lastChildBoxOffsets, placeholderRect} = this.state;
 		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
 
@@ -281,7 +281,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	CheckForLocalChanges() {
 		//FlashComp(this, {text: "NodeChildHolder.CheckForLocalChanges"});
 		// if (this.lastRender_source == RenderSource.SetState) return;
-		const {node, onHeightOrDividePointChange} = this.props;
+		const {node, onSizesChange} = this.props;
 
 		//const height = GetDOM(this)!.getBoundingClientRect().height;
 		const height = this.DOM_HTML.offsetHeight;
@@ -293,7 +293,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			// this.UpdateState(true);
 			this.UpdateChildrenWidthOverride();
 			this.UpdateChildBoxOffsets();
-			if (onHeightOrDividePointChange) onHeightOrDividePointChange(dividePoint);
+			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
 		}
 		this.lastHeight = height;
 		this.lastDividePoint = dividePoint;

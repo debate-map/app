@@ -16,10 +16,11 @@ export class DeleteNodeRating extends Command<{id: string}, {}> {
 	sub_updateRatingSummaries: UpdateNodeRatingSummaries;
 	Validate() {
 		const {id} = this.payload;
-		this.oldData = GetNodeRating.NN(id);
+		//this.oldData = GetNodeRating.NN(id);
+		this.oldData = this.oldData ?? GetNodeRating.NN(id); // temp fix for issue that will ultimately be fixed by planned Command-execution rework (wrapper command read+write logic in [regular-code-driven] PG transactions)
 		AssertUserCanDelete(this, this.oldData);
 
-		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, new UpdateNodeRatingSummaries({
+		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, null, new UpdateNodeRatingSummaries({
 			nodeID: this.oldData.node, ratingType: this.oldData.type,
 			ratingsBeingRemoved: [id], ratingsBeingAdded: [],
 		}));

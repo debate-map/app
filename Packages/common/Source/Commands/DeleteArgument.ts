@@ -23,12 +23,12 @@ export class DeleteArgument extends Command<{mapID?: string|n, argumentID: strin
 		const {mapID, argumentID, claimID, deleteClaim} = this.payload;
 
 		if (deleteClaim) {
-			this.IntegrateSubcommand(()=>this.sub_deleteClaim, ()=>new DeleteNode({mapID, nodeID: claimID}));
+			this.IntegrateSubcommand(()=>this.sub_deleteClaim, null, ()=>new DeleteNode({mapID, nodeID: claimID}));
 		} else {
-			this.IntegrateSubcommand(()=>this.sub_unlinkClaim, ()=>new UnlinkNode({mapID, parentID: argumentID, childID: claimID}));
+			this.IntegrateSubcommand(()=>this.sub_unlinkClaim, null, ()=>new UnlinkNode({mapID, parentID: argumentID, childID: claimID}));
 		}
 
-		this.IntegrateSubcommand(()=>this.sub_deleteContainerArgument, ()=>new DeleteNode({mapID, nodeID: argumentID}), a=>a.childrenToIgnore = [claimID]);
+		this.IntegrateSubcommand(()=>this.sub_deleteContainerArgument, null, ()=>new DeleteNode({mapID, nodeID: argumentID}), a=>a.childrenToIgnore = [claimID]);
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

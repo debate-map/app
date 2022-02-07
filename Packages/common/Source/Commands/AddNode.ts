@@ -30,7 +30,7 @@ export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: 
 		node.createdAt = Date.now();
 		revision.node = node.id;
 
-		this.IntegrateSubcommand(()=>this.sub_addRevision, ()=>new AddNodeRevision({mapID, revision}));
+		this.IntegrateSubcommand(()=>this.sub_addRevision, null, ()=>new AddNodeRevision({mapID, revision}));
 
 		// if sub of AddChildNode for new argument, ignore the "childrenOrder" prop requirement (gets added by later link-impact-node subcommand)
 		if (this.parentCommand) {

@@ -133,7 +133,8 @@ export class MapNodeView {
 	@O childLimit_down?: number;
 
 	// transient info, for making layout easier
-	@O @ignore renderedChildrenOrder = [] as string[];
+	//@O @ignore renderedChildrenOrder = [] as string[];
+	@O @ignore renderedChildrenOrder?: string[]; // can't rely on default-value, because mobx-sync doesn't use it (perhaps because of @ignore flag)
 }
 export const emptyNodeView = new MapNodeView(null, false);
 //RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("MapNodeView")));

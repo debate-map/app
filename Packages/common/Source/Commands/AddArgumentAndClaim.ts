@@ -42,11 +42,11 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 	Validate() {
 		const {mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink} = this.payload;
 
-		this.IntegrateSubcommand(()=>this.sub_addArgument, ()=>new AddChildNode({
+		this.IntegrateSubcommand(()=>this.sub_addArgument, null, ()=>new AddChildNode({
 			mapID, parentID: argumentParentID, node: argumentNode, revision: argumentRevision, link: argumentLink,
 		}));
 
-		this.IntegrateSubcommand(()=>this.sub_addClaim, ()=>new AddChildNode({mapID, parentID: this.sub_addArgument.returnData.nodeID, node: claimNode, revision: claimRevision, link: claimLink}));
+		this.IntegrateSubcommand(()=>this.sub_addClaim, null, ()=>new AddChildNode({mapID, parentID: this.sub_addArgument.returnData.nodeID, node: claimNode, revision: claimRevision, link: claimLink}));
 
 		this.returnData = {
 			argumentNodeID: this.sub_addArgument.sub_addNode.payload.node.id,

@@ -25,7 +25,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 		//this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 
-		this.IntegrateSubcommand(()=>this.sub_deleteNode, ()=>new DeleteNode({mapID: id, nodeID: this.oldData.rootNode}), a=>a.asPartOfMapDelete = true);
+		this.IntegrateSubcommand(()=>this.sub_deleteNode, null, ()=>new DeleteNode({mapID: id, nodeID: this.oldData.rootNode}), a=>a.asPartOfMapDelete = true);
 		// todo: use parents recursion on l2 nodes to make sure they're all connected to at least one other map root
 
 		this.nodeEdits = GetMapNodeEdits(id);

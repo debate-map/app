@@ -127,7 +127,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			});
 			const argumentWrapperRevision = new MapNodeRevision();
 
-			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, ()=>new AddChildNode({
+			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, null, ()=>new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
 				link: new NodeChildLink({group: childGroup, slot: 0, polarity: newPolarity}),
@@ -137,7 +137,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
 		}
 
-		this.IntegrateSubcommand(()=>this.sub_linkToNewParent, ()=>new LinkNode({
+		this.IntegrateSubcommand(()=>this.sub_linkToNewParent, null, ()=>new LinkNode({
 			mapID,
 			link: {
 				parent: newParentID_forClaim, child: nodeID,
@@ -148,14 +148,14 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		}));
 
 		if (unlinkFromOldParent && oldParent) {
-			this.IntegrateSubcommand(()=>this.sub_unlinkFromOldParent,
+			this.IntegrateSubcommand(()=>this.sub_unlinkFromOldParent, null,
 				()=>new UnlinkNode({mapID, parentID: oldParentID!, childID: nodeID}),
 				a=>a.allowOrphaning = true); // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 
 			// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
 			const children = GetNodeChildLinks(oldParentID);
 			if (oldParent.type == MapNodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
-				this.IntegrateSubcommand(()=>this.sub_deleteOldParent,
+				this.IntegrateSubcommand(()=>this.sub_deleteOldParent, null,
 					()=>new DeleteNode({mapID, nodeID: oldParentID!}),
 					a=>a.childrenToIgnore = [nodeID]); // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 			}

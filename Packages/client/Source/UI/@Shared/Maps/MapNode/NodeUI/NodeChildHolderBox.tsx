@@ -20,7 +20,7 @@ import {NodeChildHolder} from "./NodeChildHolder.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (height: number, dividePoint: number)=>void,
+	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onSizesChange?: (aboveHeight: number, belowHeight: number)=>void,
 	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
 
@@ -196,7 +196,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						{...{map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
 						usesGenericExpandedField={false}
 						linkSpawnPoint={innerBoxOffset_safe + (height / 2)}
-						onHeightOrDividePointChange={this.CheckForChanges}/>}
+						onSizesChange={this.CheckForChanges}/>}
 			</Row>
 			</>
 		);
@@ -223,7 +223,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	lastDividePoint = 0;
 	CheckForChanges = ()=>{
 		//FlashComp(this, {text: "NodeChildHolderBox.CheckForChanges"});
-		const {onHeightOrDividePointChange} = this.props;
+		const {onSizesChange} = this.props;
 
 		/*if (this.lineHolder == null) return;
 		//const lineHolderHeight = $(this.lineHolder).outerHeight();
@@ -249,7 +249,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				this.SetState({innerBoxOffset});
 			}
 
-			if (onHeightOrDividePointChange) onHeightOrDividePointChange(height, dividePoint);
+			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
 		}
 		this.lastHeight = height;
 		this.lastDividePoint = dividePoint;

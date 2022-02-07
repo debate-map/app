@@ -7,10 +7,10 @@ import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
 import {EB_ShowError, EB_StoreError, ES, GetSize, GetSize_Method, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
-import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ObjectCE, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ObjectCE, ShallowEquals, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, cssHelper, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {FlashComp, FlashElement} from "Utils/UI/FlashKit.js";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
@@ -20,6 +20,16 @@ import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
 import {NodeUI_Inner} from "./NodeUI_Inner.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
+
+// class holding values that are derived entirely within CheckForChanges()
+class ObservedValues {
+	constructor(data?: Partial<ObservedValues>) {
+		Object.assign(this, data);
+	}
+	innerUIHeight = 0;
+	childrensHeight = 0;
+	height = 0;
+}
 
 // Warn if functions passed to NodeUI are transient (ie. change each render).
 // We don't need to do this for every component, but we need at least one component-type in the tree to do so, in order to "stop propagation" of transient props.
@@ -37,8 +47,11 @@ export class NodeUI extends BaseComponentPlus(
 	},
 	{
 		//expectedBoxWidth: 0, expectedBoxHeight: 0,
-		innerUIAlignPoint: null as number|n, // todo: either greatly clean up the way this field is used/updated, or remove it altogether (probably the former)
-		selfHeight: 0, selfHeight_plusRightContent: 0,
+		obs: new ObservedValues(),
+		aboveSize_truth: 0, belowSize_truth: 0,
+		aboveSize_relevance: 0, belowSize_relevance: 0,
+		aboveSize_freeform: 0, belowSize_freeform: 0,
+		aboveSize_direct: 0, belowSize_direct: 0,
 		lastChildBoxOffsets: null as {[key: string]: Vector2}|n,
 	},
 ) {
@@ -50,8 +63,8 @@ export class NodeUI extends BaseComponentPlus(
 		Assert(IsNodeL3(node), "Node supplied to NodeUI is not level-3!");
 	}
 	static ValidateState(state) {
-		const {innerUIAlignPoint, selfHeight} = state;
-		Assert(!IsNaN(innerUIAlignPoint) && !IsNaN(selfHeight));
+		const {childrenLineAnchorPoint, innerUIHeight} = state;
+		Assert(!IsNaN(childrenLineAnchorPoint) && !IsNaN(innerUIHeight));
 	}
 
 	nodeUI: HTMLDivElement|n;
@@ -63,7 +76,7 @@ export class NodeUI extends BaseComponentPlus(
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, children} = this.props;
-		const {innerUIAlignPoint, selfHeight, selfHeight_plusRightContent, lastChildBoxOffsets} = this.state;
+		const {obs, aboveSize_truth, belowSize_truth, aboveSize_relevance, belowSize_relevance, aboveSize_freeform, belowSize_freeform, aboveSize_direct, belowSize_direct, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
 
@@ -96,19 +109,73 @@ export class NodeUI extends BaseComponentPlus(
 		const hereArgChildrenToShow = hereArg ? GetNodeChildrenToShow(hereArg, hereArgNodePath).filter(a=>a.id != node.id) : null;
 		const boxExpanded = nodeView?.expanded ?? false;
 
-		const siblingNodeViews = Object.entries(parentNodeView?.children ?? {}).OrderBy(a=>parentNodeView?.renderedChildrenOrder.indexOf(a[0]));
+		const siblingNodeViews = Object.entries(parentNodeView?.children ?? {}).filter(a=>parentNodeView?.renderedChildrenOrder?.includes(a[0])).OrderBy(a=>parentNodeView?.renderedChildrenOrder?.indexOf(a[0]));
 		const ownIndexInSiblings = siblingNodeViews.findIndex(a=>a[0] == node.id);
 		let isFirstExpandedSibling = nodeView.expanded && siblingNodeViews.slice(0, ownIndexInSiblings).every(a=>!a[1].expanded);
 		let isLastExpandedSibling = nodeView.expanded && siblingNodeViews.slice(ownIndexInSiblings + 1).every(a=>!a[1].expanded);
 		const grandParentNodeView = GetNodeView(map.id, SlicePath(path, 2));
 		let ownIndexInVisualSiblings = -2;
 		if (isPremiseOfSinglePremiseArg && grandParentNodeView) {
-			const visualSiblingNodeViews = Object.entries(grandParentNodeView.children).OrderBy(a=>grandParentNodeView.renderedChildrenOrder.indexOf(a[0]));
+			const visualSiblingNodeViews = Object.entries(grandParentNodeView.children).filter(a=>grandParentNodeView.renderedChildrenOrder?.includes(a[0])).OrderBy(a=>grandParentNodeView.renderedChildrenOrder?.indexOf(a[0]));
 			ownIndexInVisualSiblings = visualSiblingNodeViews.findIndex(a=>a[0] == parent!.id);
 			if (!visualSiblingNodeViews.slice(0, ownIndexInVisualSiblings).every(a=>!a[1].expanded)) isFirstExpandedSibling = false;
 			if (!visualSiblingNodeViews.slice(ownIndexInVisualSiblings + 1).every(a=>!a[1].expanded)) isLastExpandedSibling = false;
 		}
-		FlashComp(this, {wait: 0, text: `IsFirstExp:${isFirstExpandedSibling} @isLastExp:${isLastExpandedSibling} @t1:${ownIndexInSiblings} @t2:${ownIndexInVisualSiblings}`});
+
+		const childLayout = GetChildLayout_Final(node.current, map);
+		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
+		//const directChildrenArePolarized = childGroupsShowingDirect.length == 1 && && node.type == MapNodeType.claim;
+		const truthBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.truth, childLayout, nodeChildrenToShow);
+		const relevanceBoxVisible = ShouldChildGroupBoxBeVisible(hereArg, ChildGroup.relevance, childLayout, hereArgChildrenToShow);
+		const freeformBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.freeform, childLayout, nodeChildrenToShow);
+		const groupsUsingBoxes = (truthBoxVisible ? 1 : 0) + (relevanceBoxVisible ? 1 : 0) + (freeformBoxVisible ? 1 : 0);
+
+		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
+		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
+		const hereArgChildrenToShow_relevance = hereArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea as MapNodeL3[];
+		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
+		const ncToShow_direct: MapNodeL3[] = [
+			...ncToShow_generic,
+			...(truthBoxVisible ? [] : ncToShow_truth),
+			//...(relevanceBoxVisible ? [] : hereArgChildrenToShow_relevance),
+			...(freeformBoxVisible ? [] : ncToShow_freeform),
+		];
+		const usingDirect = ncToShow_direct.length;
+
+		const boxCenterPoints = [] as number[];
+		let boxSizesSum = 0;
+		const holderBoxHeight = 22;
+		if (truthBoxVisible) {
+			boxCenterPoints.push(aboveSize_truth + (holderBoxHeight / 2));
+			boxSizesSum += aboveSize_truth + holderBoxHeight + belowSize_truth;
+		}
+		if (relevanceBoxVisible) {
+			boxCenterPoints.push(boxSizesSum + aboveSize_relevance + (holderBoxHeight / 2));
+			boxSizesSum += aboveSize_relevance + holderBoxHeight + belowSize_relevance;
+		}
+		if (freeformBoxVisible) {
+			boxCenterPoints.push(boxSizesSum + aboveSize_freeform + (holderBoxHeight / 2));
+			boxSizesSum += aboveSize_freeform + holderBoxHeight + belowSize_freeform;
+		}
+		if (usingDirect) {
+			boxCenterPoints.push(aboveSize_direct);
+			boxSizesSum += aboveSize_direct + belowSize_direct;
+		}
+
+		const linkSpawnPoint = boxCenterPoints.Average();
+
+		let gapBeforeInnerUI = 5;
+		let gapAfterInnerUI = 5;
+		if (boxExpanded && !isFirstExpandedSibling) gapBeforeInnerUI += linkSpawnPoint - (obs.innerUIHeight / 2);
+		if (boxExpanded && !isLastExpandedSibling) gapAfterInnerUI += linkSpawnPoint - (obs.innerUIHeight / 2);
+		let rightColumnOffset = 0;
+		if (isFirstExpandedSibling) {
+			rightColumnOffset =
+				-linkSpawnPoint // align right-column's anchor-point (where its connector lines' start) to this-rect's top
+				+ gapBeforeInnerUI + (obs.innerUIHeight / 2); // then shift that anchor-point down to center of inner-ui
+		}
+		const newHeight = gapBeforeInnerUI + obs.innerUIHeight + gapAfterInnerUI;
+		//FlashComp(this, {wait: 0, text: `IsFirstExp:${isFirstExpandedSibling} @isLastExp:${isLastExpandedSibling} @t1:${ownIndexInSiblings} @t2:${ownIndexInVisualSiblings}`});
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
@@ -186,72 +253,44 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
-		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
-		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
-		const hereArgChildrenToShow_relevance = hereArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea as MapNodeL3[];
-		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
-
-		const childLayout = GetChildLayout_Final(node.current, map);
-		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
-		//const directChildrenArePolarized = childGroupsShowingDirect.length == 1 && && node.type == MapNodeType.claim;
-		const truthBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.truth, childLayout, nodeChildrenToShow);
-		const relevanceBoxVisible = ShouldChildGroupBoxBeVisible(hereArg, ChildGroup.relevance, childLayout, hereArgChildrenToShow);
-		const freeformBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.freeform, childLayout, nodeChildrenToShow);
-		const groupsUsingBoxes = (truthBoxVisible ? 1 : 0) + (relevanceBoxVisible ? 1 : 0) + (freeformBoxVisible ? 1 : 0);
-		//const usingDirect = isMultiPremiseArgument || groupsUsingBoxes == 0 || childLayout == "flat";
-		/*const nodeCanHaveGenericChildren = [...nodeTypeInfo.childGroup_childTypes.keys()].Any(a=>a == ChildGroup.generic);
-		const usingDirect = nodeCanHaveGenericChildren || childLayout == "flat";*/
-		//const usingDirect = ncToShow_generic.length > 0 || childLayout == "flat";
-		const ncToShow_direct: MapNodeL3[] = [
-			...ncToShow_generic,
-			...(truthBoxVisible ? [] : ncToShow_truth),
-			//...(relevanceBoxVisible ? [] : hereArgChildrenToShow_relevance),
-			...(freeformBoxVisible ? [] : ncToShow_freeform),
-		];
-		const usingDirect = ncToShow_direct.length;
-
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
 				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
-				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
+				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_truth}
-				onHeightOrDividePointChange={UseCallback((height, alignPoint)=>{
-					if (truthBoxVisible && relevanceBoxVisible) {
-						this.SetState({innerUIAlignPoint: height}); // if truth and relevance boxes are both visible, align-point is between them (so just below truth-box's height)
-					} else if (truthBoxVisible) {
-						this.SetState({innerUIAlignPoint: alignPoint}); // if only truth box is visible, the align-point is the truth box's own divide-point (ie. at same height as the add-pro/add-con buttons)
-					}
+				onSizesChange={UseCallback((aboveSize, belowSize)=>{
+					this.SetState({aboveSize_truth: aboveSize, belowSize_truth: belowSize});
 					this.CheckForChanges();
-				}, [relevanceBoxVisible, truthBoxVisible])}/>;
+				}, [])}/>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
 				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
-				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
+				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={hereArgChildren ?? ea} nodeChildrenToShow={hereArgChildrenToShow_relevance}
-				onHeightOrDividePointChange={UseCallback((height, alignPoint)=>{
-					if (relevanceBoxVisible && !truthBoxVisible) {
-						this.SetState({innerUIAlignPoint: alignPoint}); // if only relevance box is visible, the divide-point is the relevance box's own divide-point (ie. at same height as the add-pro/add-con buttons)
-					}
+				onSizesChange={UseCallback((aboveSize, belowSize)=>{
+					this.SetState({aboveSize_relevance: aboveSize, belowSize_relevance: belowSize});
 					this.CheckForChanges();
-				}, [relevanceBoxVisible, truthBoxVisible])}/>;
+				}, [])}/>;
 		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
 				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
-				widthOfNode={widthOverride || width} heightOfNode={selfHeight}
-				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}/>;
+				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
+				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}
+				onSizesChange={UseCallback((aboveSize, belowSize)=>{
+					this.SetState({aboveSize_freeform: aboveSize, belowSize_freeform: belowSize});
+					this.CheckForChanges();
+				}, [])}/>;
 		let childConnectorBackground: JSX.Element|n;
-		const innerUIAlignPoint_safe = innerUIAlignPoint || (selfHeight / 2);
 		if (groupsUsingBoxes > 0 /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
 			//const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
-			const linkSpawnHeight = innerUIAlignPoint_safe;
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
-					linkSpawnPoint={new Vector2(0, linkSpawnHeight)} straightLines={false}
+					linkSpawnPoint={new Vector2(0, linkSpawnPoint)} straightLines={false}
 					shouldUpdate={true}
 					childBoxInfos={([
 						!!nodeChildHolderBox_truth && {
@@ -275,13 +314,10 @@ export class NodeUI extends BaseComponentPlus(
 		}
 		let nodeChildHolder_direct: JSX.Element|n;
 		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
-		const nodeChildHolder_direct_onHeightOrDividePointChange = UseCallback(alignPoint=>{
-			// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
-			if (!isMultiPremiseArgument) {
-				this.SetState({innerUIAlignPoint: alignPoint});
-			}
+		const nodeChildHolder_direct_onSizesChange = UseCallback((aboveSize, belowSize)=>{
+			this.SetState({aboveSize_direct: aboveSize, belowSize_direct: belowSize});
 			this.CheckForChanges();
-		}, [isMultiPremiseArgument]);
+		}, []);
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
@@ -290,12 +326,13 @@ export class NodeUI extends BaseComponentPlus(
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
 				//linkSpawnPoint={isMultiPremiseArgument ? -selfHeight_plusRightContent + (selfHeight / 2) : dividePoint || (selfHeight / 2)}
-				linkSpawnPoint={isMultiPremiseArgument ? -(selfHeight_plusRightContent - innerUIAlignPoint_safe) : innerUIAlignPoint_safe}
+				//linkSpawnPoint={isMultiPremiseArgument ? -(obs.childrensHeight - childrenLineAnchorPoint_safe) : childrenLineAnchorPoint_safe}
+				linkSpawnPoint={linkSpawnPoint}
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
 				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={ncToShow_direct}
-				onHeightOrDividePointChange={nodeChildHolder_direct_onHeightOrDividePointChange}/>;
+				onSizesChange={nodeChildHolder_direct_onSizesChange}/>;
 		}
 
 		performance.mark("NodeUI_3");
@@ -303,6 +340,7 @@ export class NodeUI extends BaseComponentPlus(
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
+		const {css} = cssHelper(this);
 		return (
 			<>
 			<div ref={UseCallback(c=>{
@@ -313,17 +351,19 @@ export class NodeUI extends BaseComponentPlus(
 					//FlashComp(this, {el: c, text: "NodeUI rendered"});
 				}*/
 			}, [])} className="NodeUI clickThrough" style={E(
-				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
-				isFirstExpandedSibling && {marginTop: -(innerUIAlignPoint_safe - (selfHeight / 2) - 5)},
-				isLastExpandedSibling && {marginBottom: -((selfHeight_plusRightContent - innerUIAlignPoint_safe) - (selfHeight / 2) - 5)},
+				{
+					position: "relative", display: "flex", alignItems: "flex-start", opacity: widthOverride != 0 ? 1 : 0,
+					//padding: "5px 0",
+					height: newHeight,
+				},
 				style,
 			)}>
-				<Column className="innerBoxColumn clickThrough" style={ES(
-					{position: "relative"},
-					/* useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
-					!useAutoOffset && {paddingTop: innerBoxOffset}, */
-					// {paddingTop: innerBoxOffset},
-					{marginTop: boxExpanded ? (innerUIAlignPoint_safe! - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
+				<Column className="innerBoxColumn clickThrough" style={css(
+					{
+						position: "relative",
+						paddingTop: gapBeforeInnerUI,
+						paddingBottom: gapAfterInnerUI,
+					},
 				)}>
 					{/*node.current.accessLevel != AccessLevel.basic &&
 					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
@@ -344,7 +384,9 @@ export class NodeUI extends BaseComponentPlus(
 						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 				</Column>
 				{boxExpanded &&
-				<Column ref={UseCallback(c=>this.rightColumn = c, [])} className="rightColumn clickThrough" style={{position: "relative"}}>
+				<Column ref={UseCallback(c=>this.rightColumn = c, [])} className="rightColumn clickThrough" style={{
+					position: "absolute", left: "100%", top: rightColumnOffset,
+				}}>
 					{childConnectorBackground}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
 					{truthBoxVisible && nodeChildHolderBox_truth}
@@ -352,7 +394,7 @@ export class NodeUI extends BaseComponentPlus(
 					{/*<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.neutrality}
 						ref={UseCallback(c=>this.childBoxes["neutrality"] = c, [])}
 						ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
-						widthOfNode={widthOverride || width} heightOfNode={selfHeight}
+						widthOfNode={widthOverride || width} heightOfNode={innerUIHeight}
 						nodeChildren={ea} nodeChildrenToShow={ea}/>*/}
 					{freeformBoxVisible && nodeChildHolderBox_freeform}
 				</Column>}
@@ -374,60 +416,39 @@ export class NodeUI extends BaseComponentPlus(
 
 	// don't actually check for changes until re-rendering has stopped for 500ms
 	// CheckForChanges = _.debounce(() => {
-	lastSelfHeight = 0;
-	lastSelfHeight_plusRightContent = 0;
-	lastHeight = 0;
-	lastInnerUIAlignPoint = 0;
+	lastObservedValues = new ObservedValues();
 	CheckForChanges = ()=>{
 		//FlashComp(this, {text: "NodeUI.CheckForChanges"});
-
-		const {node, onHeightOrPosChange, innerUIAlignPoint} = this.PropsState;
-		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
+		const {node, onHeightOrPosChange} = this.PropsState;
 		if (this.DOM_HTML == null) return;
+		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
 
-		// if (this.lastRender_source == RenderSource.SetState) return;
+		const obs = new ObservedValues({
+			innerUIHeight: this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0),
+			childrensHeight: this.rightColumn?.DOM_HTML.offsetHeight ?? 0,
+			// see UseSize_Method for difference between offsetHeight and the alternatives
+			height: this.DOM_HTML.offsetHeight
+				// if multi-premise-arg, the nodeChildHolder_direct element is not "within" this.DOM_HTML; so add its height manually
+				+ (isMultiPremiseArgument && this.nodeChildHolder_direct != null ? this.nodeChildHolder_direct.DOM_HTML.offsetHeight : 0),
+		});
+		if (ShallowEquals(obs, this.lastObservedValues)) return;
 
-		const selfHeight = this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0);
-		if (selfHeight != this.lastSelfHeight) {
+		this.SetState({obs});
+
+		if (obs.innerUIHeight != this.lastObservedValues.innerUIHeight) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewSelfHeight:${selfHeight}`);
-
-			// this.UpdateState(true);
-			// this.UpdateState();
-			// setSelfHeight(selfHeight);
+				()=>`OnInnerUIHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewInnerUIHeight:${obs.innerUIHeight}`);
 			this.UpdateChildBoxOffsets();
-			this.SetState({selfHeight});
 			// if (onHeightOrPosChange) onHeightOrPosChange();
 		}
-		this.lastSelfHeight = selfHeight;
-
-		const selfHeight_plusRightContent = this.DOM_HTML.offsetHeight;
-		this.SetState({selfHeight_plusRightContent});
-
-		// see UseSize_Method for difference between offsetHeight and the alternatives
-		const height = this.DOM_HTML.offsetHeight
-			// if multi-premise-arg, the nodeChildHolder_direct element is not "within" this.DOM_HTML; so add its height manually
-			+ (isMultiPremiseArgument && this.nodeChildHolder_direct != null ? this.nodeChildHolder_direct.DOM_HTML.offsetHeight : 0);
-		if (height != this.lastHeight) {
+		if (obs.height != this.lastObservedValues.height) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${height}`);
-
-			// this.UpdateState(true);
-			// this.UpdateState();
+				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${obs.height}`);
 			this.UpdateChildBoxOffsets();
 			if (onHeightOrPosChange) onHeightOrPosChange();
 		}
-		this.lastHeight = height;
 
-		if (innerUIAlignPoint != this.lastInnerUIAlignPoint) {
-			if (onHeightOrPosChange) onHeightOrPosChange();
-		}
-
-		/* else {
-			if (this.lastRender_source == RenderSource.SetState) return;
-			this.UpdateState();
-			this.ReportChildrenCenterYChange();
-		} */
+		this.lastObservedValues = obs;
 	};
 
 	OnChildHeightOrPosChange_updateStateQueued = false;

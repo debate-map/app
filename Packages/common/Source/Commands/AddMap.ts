@@ -40,7 +40,7 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		});
 		//const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: "Root"})}));
 		const newRootNodeRevision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: "Root"})});
-		this.IntegrateSubcommand(()=>this.sub_addNode, ()=>new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}));
+		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}));
 
 		map.rootNode = this.sub_addNode.payload.node.id;
 		AssertValidate("Map", map, "Map invalid");

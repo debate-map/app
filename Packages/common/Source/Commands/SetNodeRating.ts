@@ -13,32 +13,37 @@ import {UpdateNodeRatingSummaries} from "./UpdateNodeRatingSummaries.js";
 	}),
 })
 export class SetNodeRating extends Command<{rating: NodeRating}, {}> {
-	sub_deleteOldRating: DeleteNodeRating;
+	subs_deleteOldRatings: DeleteNodeRating[];
 	sub_updateRatingSummaries: UpdateNodeRatingSummaries;
 	Validate() {
 		const {rating} = this.payload;
 
 		Assert(rating.type != "impact", "Cannot set impact rating directly.");
 		const oldRatings = GetRatings(rating.node, rating.type, [this.userInfo.id]);
-		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
-		if (oldRatings.length) {
-			this.IntegrateSubcommand(()=>this.sub_deleteOldRating, new DeleteNodeRating({id: oldRatings[0].id}));
+		//Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
+		const subs_deleteOldRatings_new = [] as DeleteNodeRating[];
+		for (const [i, oldRating] of oldRatings.entries()) {
+			this.IntegrateSubcommand(()=>this.subs_deleteOldRatings[i], c=>subs_deleteOldRatings_new[i] = c,
+				new DeleteNodeRating({id: oldRating.id}),
+				a=>a.oldData = oldRating);
 		}
+		this.subs_deleteOldRatings = subs_deleteOldRatings_new;
 
 		rating.id = this.GenerateUUID_Once("rating.id");
 		rating.creator = this.userInfo.id;
 		rating.createdAt = Date.now();
 
-		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, new UpdateNodeRatingSummaries({
+		this.IntegrateSubcommand(()=>this.sub_updateRatingSummaries, null, new UpdateNodeRatingSummaries({
 			nodeID: rating.node, ratingType: rating.type,
-			ratingsBeingRemoved: [this.sub_deleteOldRating?.payload.id].filter(a=>a), ratingsBeingAdded: [rating],
+			ratingsBeingRemoved: this.subs_deleteOldRatings.map(a=>a.payload.id),
+			ratingsBeingAdded: [rating],
 		}));
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
 		const {rating} = this.payload;
-		if (this.sub_deleteOldRating) {
-			db.add(this.sub_deleteOldRating.GetDBUpdates(db));
+		for (const sub of this.subs_deleteOldRatings) {
+			db.add(sub.GetDBUpdates(db));
 		}
 		db.set(dbp`nodeRatings/${rating.id}`, rating);
 		db.add(this.sub_updateRatingSummaries.GetDBUpdates(db));

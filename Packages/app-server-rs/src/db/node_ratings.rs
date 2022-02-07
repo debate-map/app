@@ -14,7 +14,7 @@ pub struct NodeRating {
     r#type: String,
 	creator: String,
 	createdAt: i64,
-	value: f64,
+	value: f32,
 }
 impl From<tokio_postgres::row::Row> for NodeRating {
 	fn from(row: tokio_postgres::row::Row) -> Self {
