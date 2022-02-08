@@ -1,5 +1,5 @@
 import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity, GetNodeForm, ClaimForm, GetChildLayout_Final, MapNodeType_Info, GetChildGroupLayout, ChildGroupLayout, ShouldChildGroupBoxBeVisible} from "dm_common";
-import React from "react";
+import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
@@ -10,9 +10,10 @@ import {EB_ShowError, EB_StoreError, ES, GetSize, GetSize_Method, MaybeLog, Obse
 import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ObjectCE, ShallowEquals, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, cssHelper, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {FlashComp, FlashElement} from "ui-debug-kit";
+import {useRef_nodeLeftColumn} from "tree-grapher";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
@@ -39,7 +40,7 @@ class ObservedValues {
 @Observer
 export class NodeUI extends BaseComponentPlus(
 	{} as {
-		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, style?,
+		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, treePath: string, style?,
 		leftMarginForLines?: number|n,
 		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
@@ -75,7 +76,7 @@ export class NodeUI extends BaseComponentPlus(
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, children} = this.props;
+		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, treePath, children} = this.props;
 		const {obs, aboveSize_truth, belowSize_truth, aboveSize_relevance, belowSize_relevance, aboveSize_freeform, belowSize_freeform, aboveSize_direct, belowSize_direct, lastChildBoxOffsets} = this.state;
 
 		performance.mark("NodeUI_1");
@@ -164,7 +165,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const linkSpawnPoint = boxCenterPoints.Average();
 
-		let gapBeforeInnerUI = 5;
+		/*let gapBeforeInnerUI = 5;
 		let gapAfterInnerUI = 5;
 		if (boxExpanded && !isFirstExpandedSibling) gapBeforeInnerUI += linkSpawnPoint - (obs.innerUIHeight / 2);
 		if (boxExpanded && !isLastExpandedSibling) gapAfterInnerUI += linkSpawnPoint - (obs.innerUIHeight / 2);
@@ -174,7 +175,7 @@ export class NodeUI extends BaseComponentPlus(
 				-linkSpawnPoint // align right-column's anchor-point (where its connector lines' start) to this-rect's top
 				+ gapBeforeInnerUI + (obs.innerUIHeight / 2); // then shift that anchor-point down to center of inner-ui
 		}
-		const newHeight = gapBeforeInnerUI + obs.innerUIHeight + gapAfterInnerUI;
+		const newHeight = gapBeforeInnerUI + obs.innerUIHeight + gapAfterInnerUI;*/
 		//FlashComp(this, {wait: 0, text: `IsFirstExp:${isFirstExpandedSibling} @isLastExp:${isLastExpandedSibling} @t1:${ownIndexInSiblings} @t2:${ownIndexInVisualSiblings}`});
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
@@ -255,7 +256,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
+			<NodeChildHolderBox {...{map, node, path, treePath}} group={ChildGroup.truth}
 				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
@@ -266,7 +267,7 @@ export class NodeUI extends BaseComponentPlus(
 				}, [])}/>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
-				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
+				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path} treePath={treePath}
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
@@ -276,7 +277,7 @@ export class NodeUI extends BaseComponentPlus(
 					this.CheckForChanges();
 				}, [])}/>;
 		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
+			<NodeChildHolderBox {...{map, node, path, treePath}} group={ChildGroup.freeform}
 				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
@@ -320,7 +321,7 @@ export class NodeUI extends BaseComponentPlus(
 		}, []);
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
-			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
+			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, treePath, separateChildren: false, showArgumentsControlBar: false}}
 				ref={nodeChildHolder_direct_ref}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={ChildGroup.generic}
@@ -340,6 +341,8 @@ export class NodeUI extends BaseComponentPlus(
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
+		const {ref: leftColumn_ref} = useRef_nodeLeftColumn(treePath);
+
 		const {css} = cssHelper(this);
 		return (
 			<>
@@ -354,17 +357,24 @@ export class NodeUI extends BaseComponentPlus(
 				{
 					position: "relative", display: "flex", alignItems: "flex-start", opacity: widthOverride != 0 ? 1 : 0,
 					//padding: "5px 0",
-					height: newHeight,
+					//height: newHeight,
 				},
 				style,
 			)}>
-				<Column className="innerBoxColumn clickThrough" style={css(
-					{
-						position: "relative",
-						paddingTop: gapBeforeInnerUI,
-						paddingBottom: gapAfterInnerUI,
-					},
-				)}>
+				<Column
+					ref={useCallback(c=>{
+						leftColumn_ref.current = GetDOM(c) as any;
+						//ref(c ? GetDOM(c) as any : null), [ref]);
+					}, [])}
+					className="innerBoxColumn clickThrough"
+					style={css(
+						{
+							position: "relative",
+							/*paddingTop: gapBeforeInnerUI,
+							paddingBottom: gapAfterInnerUI,*/
+						},
+					)}
+				>
 					{/*node.current.accessLevel != AccessLevel.basic &&
 					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
@@ -372,7 +382,7 @@ export class NodeUI extends BaseComponentPlus(
 					<NodeUI_Inner ref={UseCallback(c=>{
 						this.innerUI = GetInnerComp(c);
 						if (ref_innerUI) ref_innerUI(c);
-					}, [ref_innerUI])} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
+					}, [ref_innerUI])} {...{indexInNodeList, map, node, path, treePath, width, widthOverride}}/>
 					{/* these are for components shown just to the right of the NodeUI_Inner box */}
 					{nodeChildrenToShow == emptyArray_forLoading &&
 						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
@@ -385,7 +395,7 @@ export class NodeUI extends BaseComponentPlus(
 				</Column>
 				{boxExpanded &&
 				<Column ref={UseCallback(c=>this.rightColumn = c, [])} className="rightColumn clickThrough" style={{
-					position: "absolute", left: "100%", top: rightColumnOffset,
+					position: "absolute", left: "100%", //top: rightColumnOffset,
 				}}>
 					{childConnectorBackground}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}

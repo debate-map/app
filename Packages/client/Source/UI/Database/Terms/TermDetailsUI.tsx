@@ -1,4 +1,4 @@
-import {AddTerm, AttachmentType, GetAccessPolicy, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
+import {AddTerm, AttachmentType, GetAccessPolicy, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat} from "dm_common";
 import React from "react";
 import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
@@ -28,7 +28,8 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name:</Text>
-					<TextInput pattern={Term_nameFormat} required
+					<TextInput required
+						//pattern={Term_nameFormat}
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>{
 							const lastName = newData.name;

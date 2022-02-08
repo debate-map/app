@@ -7,7 +7,7 @@ import {NodeUI} from "../../NodeUI.js";
 import {ChildLimitBar, NodeChildHolder} from "../NodeChildHolder.js";
 
 export class NodeChildHolder_Child extends BaseComponent<{
-	map: Map, node: MapNodeL3, path: string,
+	map: Map, node: MapNodeL3, path: string, treePath_child: string,
 	child: MapNodeL3, index: number, collection_untrimmed: MapNodeL3[],
 	direction: "up" | "down", belowNodeUI?: boolean|n, childLimit: number,
 	widthOverride?: number|n,
@@ -15,7 +15,7 @@ export class NodeChildHolder_Child extends BaseComponent<{
 }, {}> {
 	//static defaultProps = {direction: "down"};
 	render() {
-		const {map, node, path, child, index, collection_untrimmed, direction, belowNodeUI, childLimit, widthOverride, parent} = this.props;
+		const {map, node, path, treePath_child, child, index, collection_untrimmed, direction, belowNodeUI, childLimit, widthOverride, parent} = this.props;
 		const showAll = node.id == map.rootNode || node.type == MapNodeType.argument;
 		const {initialChildLimit} = store.main.maps;
 		/*if (pack.node.premiseAddHelper) {
@@ -31,6 +31,7 @@ export class NodeChildHolder_Child extends BaseComponent<{
 			ref_innerUI={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 			indexInNodeList={index} map={map} node={child}
 			path={`${path}/${child.id}`}
+			treePath={treePath_child}
 			leftMarginForLines={belowNodeUI ? 20 : 0}
 			widthOverride={widthOverride}
 			onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;

@@ -14,13 +14,15 @@ import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_At
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {FlashComp} from "ui-debug-kit";
+import {useRef_nodeGroup} from "tree-grapher";
+import {useCallback} from "react";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {NodeChildHolder_Child} from "./NodeChildHolder/NodeChildHolder_Child.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
+	map: Map, node: MapNodeL3, path: string, treePath: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 };
@@ -41,7 +43,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	childBoxes: {[key: number]: NodeUI} = {};
 	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
 	render() {
-		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth} = this.props;
+		const {map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth} = this.props;
 		let {childrenWidthOverride, lastChildBoxOffsets, placeholderRect} = this.state;
 		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
 
@@ -95,6 +97,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			RunInAction("NodeChildHolder.render.updateRenderedChildrenOrder", ()=>nodeView.renderedChildrenOrder = renderedChildrenOrder);
 		}, 0);
 
+		let nextChildFullIndex = 0;
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
 			const childLimit = direction == "up" ? childLimit_up : childLimit_down; // polarity-groups "all" and "down" both use a "down" child-limit
@@ -107,7 +110,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 			const childrenHereUIs = childrenHere.map((child, index)=>{
 				return <NodeChildHolder_Child key={child.id} {...{
-					map, node, path,
+					map, node, path, treePath_child: `${treePath}/${nextChildFullIndex++}`,
 					child, index, collection_untrimmed: childrenHere_untrimmed,
 					direction, belowNodeUI, childLimit,
 					widthOverride: childrenWidthOverride,
@@ -164,6 +167,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			});
 		}
 
+		const {ref} = useRef_nodeGroup(path, belowNodeUI);
+
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		//this.childBoxes = {};
 		// only clear this.childBoxes when first mounting // actually, no need to clear; the ref-funcs already clear their own entries
@@ -172,7 +177,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			//this.childInnerUIs = {};
 		}, []);*/
 		return (
-			<Column ref={c=>this.childHolder = c} className="NodeChildHolder clickThrough" style={E(
+			<Column ref={useCallback(c=>{
+				this.childHolder = c;
+				ref.current = GetDOM(c) as any;
+			}, [ref])} className="NodeChildHolder clickThrough" style={E(
 				{
 					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
 					// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,

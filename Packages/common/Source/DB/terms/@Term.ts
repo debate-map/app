@@ -3,7 +3,7 @@ import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {Attachment} from "../../DB.js";
 
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
-export const Term_nameFormat = '^[a-zA-Z0-9 ,\'"%-]+$';
+//export const Term_nameFormat = '^[a-zA-Z0-9 ,\'"%-]+$';
 export const Term_formsEntryFormat = "^[^A-Z]+$";
 export const Term_disambiguationFormat = '^[a-zA-Z0-9 ,\'"%-\\/]+$';
 // export const Term_shortDescriptionFormat = "^[a-zA-Z ()[],;.!?-+*/]+$";
@@ -33,7 +33,8 @@ export class Term {
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Term_nameFormat})
+	//@Field({type: "string", pattern: Term_nameFormat}) // commented atm, since too strict
+	@Field({type: "string"})
 	name: string;
 
 	@DB((t, n)=>t.specificType(n, "text[]"))

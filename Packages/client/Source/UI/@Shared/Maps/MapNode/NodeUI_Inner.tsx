@@ -1,5 +1,5 @@
 import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MapNodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
@@ -19,6 +19,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {MapNodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -48,7 +49,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 export type NodeUI_Inner_Props = {
-	indexInNodeList: number, node: MapNodeL3, path: string, map?: Map,
+	indexInNodeList: number, node: MapNodeL3, path: string, treePath: string, map?: Map,
 	width?: number|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	usePortalForDetailBoxes?: boolean,
@@ -106,7 +107,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
+		const {indexInNodeList, map, node, path, treePath, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
@@ -314,13 +315,17 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					if (useLocalPanelState) this.Update();
 				});
 			};
+
+			const {ref} = useRef_nodeLeftColumn(treePath);
+
 			return (
 				<ExpandableBox
-					ref={c=>{
+					ref={useCallback(c=>{
 						dragInfo?.provided.innerRef(GetDOM(c) as any);
 						this.root = c;
 						//if (c) FlashComp(this, {el: c.DOM_HTML, text: "NUI_Inner rendered"});
-					}}
+						ref.current = GetDOM(c) as any;
+					}, [dragInfo?.provided, ref])}
 					parent={this}
 					{...{
 						width, widthOverride, outlineColor, expanded,

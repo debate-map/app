@@ -2410,6 +2410,7 @@ __metadata:
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0
     sync-directory: ^2.2.22
+    tree-grapher: 0.0.2
     ts-loader: 9.2.3
     ts-node: ^10.0.0
     ts-node-dev: 1.1.6
@@ -6583,6 +6584,7 @@ __metadata:
     ts-node: ^10.0.0
     ts-node-dev: 1.1.6
     ua-parser-js: ^0.7.12
+    ui-debug-kit: ^0.0.5
     updeep: ^1.0.0
     use-resize-observer: ^8.0.0
   languageName: unknown
@@ -8586,7 +8588,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"graphql-feedback@^0.0.3, graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback":
+"graphql-feedback@0.0.4, graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback":
   version: 0.0.0-use.local
   resolution: "graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback"
   dependencies:
@@ -8606,7 +8608,7 @@ fsevents@~2.3.2:
     react-beautiful-dnd: ^10.0.4
     react-dom: ^17.0.2
     react-vcomponents: ^1.0.39
-    react-vextensions: ^1.0.14
+    react-vextensions: ^1.0.15
     react-vmessagebox: 0.0.1
     react-vscrollview: 0.0.2
   languageName: unknown
@@ -9928,7 +9930,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"js-vextensions@1.0.69, js-vextensions@^1.0.65, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
+"js-vextensions@1.0.69, js-vextensions@^1.0.65, js-vextensions@^1.0.69, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
   version: 0.0.0-use.local
   resolution: "js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions"
   languageName: unknown
@@ -11249,7 +11251,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-react@npm:^7.2.0":
+"mobx-react@npm:^7.2.0, mobx-react@npm:^7.2.1":
   version: 7.2.1
   resolution: "mobx-react@npm:7.2.1"
   dependencies:
@@ -11274,6 +11276,13 @@ fsevents@~2.3.2:
   peerDependencies:
     mobx: "*"
   checksum: 4f62b2dc13065fb75369378443d459b32a554a7c6f21677cefb6c380bf4e0f24223e3501701c4a2a3b642b6bb0cbc8c4e170a8bbea9d78c99ac8c0752d34cecd
+  languageName: node
+  linkType: hard
+
+"mobx@npm:^6.3.13":
+  version: 6.3.13
+  resolution: "mobx@npm:6.3.13"
+  checksum: 2ab413a323d127081cfc749771aea5f6f6fc3c0f573dc147144356694c2f804df1a0b19cc0cac0e37d236d47d0c767571fa7a6b448dd1f9cb7e05dcad90506bc
   languageName: node
   linkType: hard
 
@@ -13951,7 +13960,7 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vextensions@1.0.14, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
+"react-vextensions@1.0.15, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
   version: 0.0.0-use.local
   resolution: "react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions"
   dependencies:
@@ -16232,6 +16241,22 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"tree-grapher@0.0.2, tree-grapher@workspace:.yalc/tree-grapher":
+  version: 0.0.0-use.local
+  resolution: "tree-grapher@workspace:.yalc/tree-grapher"
+  dependencies:
+    js-vextensions: ^1.0.69
+    mobx: ^6.3.13
+    mobx-react: ^7.2.1
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    use-callback-ref: ^1.2.5
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+  languageName: unknown
+  linkType: soft
+
 "tree-kill@npm:^1.2.2":
   version: 1.2.2
   resolution: "tree-kill@npm:1.2.2"
@@ -16653,6 +16678,16 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
+"ui-debug-kit@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "ui-debug-kit@npm:0.0.5"
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+  checksum: 52250a4c103bbed2fd6880ed086f87e3f3ed9a778e7579c8dc82e27318e36ee1a9af4943c2f1bc20cfdcaa72af1376f65a846e6bc5eb64b45d7940888dbc9e92
+  languageName: node
+  linkType: hard
+
 "uid-safe@npm:~2.1.5":
   version: 2.1.5
   resolution: "uid-safe@npm:2.1.5"
@@ -16939,6 +16974,19 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
+"use-callback-ref@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "use-callback-ref@npm:1.2.5"
+  peerDependencies:
+    "@types/react": ^16.8.0 || ^17.0.0
+    react: ^16.8.0 || ^17.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: b0027242311ed3fb006575c3be69efe31946f17129f2464707f4fcf2e167b91917236569a1d622c57b36843bc05efd9740a4ba51591553ad6fe2799cc12b138e
+  languageName: node
+  linkType: hard
+
 "use-memo-one@npm:^1.1.1":
   version: 1.1.2
   resolution: "use-memo-one@npm:1.1.2"
@@ -17197,7 +17245,7 @@ typescript@~3.7.3:
     file-loader: ^6.2.0
     fs-extra: ^8.1.0
     graphql: ^15.5.0
-    graphql-feedback: ^0.0.3
+    graphql-feedback: 0.0.4
     graphql-tag: 2.12.5
     history: ^4.10.1
     html-webpack-plugin: ^5.3.1
@@ -17225,7 +17273,7 @@ typescript@~3.7.3:
     react-universal-hooks: 0.5.1
     react-uplot: 0.0.7
     react-vcomponents: 1.0.39
-    react-vextensions: 1.0.14
+    react-vextensions: 1.0.15
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14
     react-vmessagebox: 1.0.12

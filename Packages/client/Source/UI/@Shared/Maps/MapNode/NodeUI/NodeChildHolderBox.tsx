@@ -19,7 +19,7 @@ import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
+	map: Map, node: MapNodeL3, path: string, treePath: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
 	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onSizesChange?: (aboveHeight: number, belowHeight: number)=>void,
 	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
@@ -36,7 +36,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	}
 	//lineHolder: HTMLDivElement|n;
 	render() {
-		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
+		const {map, node, path, treePath, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 		const innerBoxOffset_safe = innerBoxOffset ?? 0;
 
@@ -193,7 +193,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				</Row>
 				{nodeView[expandKey] &&
 					<NodeChildHolder ref={c=>this.childHolder = c}
-						{...{map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
+						{...{map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
 						usesGenericExpandedField={false}
 						linkSpawnPoint={innerBoxOffset_safe + (height / 2)}
 						onSizesChange={this.CheckForChanges}/>}

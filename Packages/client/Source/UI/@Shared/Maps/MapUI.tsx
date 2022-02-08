@@ -1,10 +1,11 @@
 import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
-import React from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
+import {Graph, GraphContext} from "tree-grapher";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps} from "Utils/UI/General.js";
@@ -121,6 +122,21 @@ export class MapUI extends BaseComponentPlus({
 		Assert(padding != null); // nn: default-values set
 		Assert(mapID, "mapID is null!");
 
+		const context = useMemo(()=>{
+			const graph = new Graph({
+				columnWidth: 100,
+				//uiDebugKit: {FlashComp},
+			});
+			globalThis.graph = graph; // temp
+			return graph;
+		}, []);
+		const [containerElResolved, setContainerElResolved] = useState(false);
+		const mapUI_ref = useCallback(c=>{
+			this.mapUIEl = c;
+			context.containerEl = c;
+			if (context.containerEl != null) setContainerElResolved(true);
+		}, [context]);
+
 		const map = GetMap(mapID);
 		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
 		// defensive; in case something goes wrong with the server-side permission-enforcing, do a basic check here as well
@@ -207,7 +223,8 @@ export class MapUI extends BaseComponentPlus({
 						}
 						.MapUI.scrolling > * { pointer-events: none; }
 						`}</style>
-						<div className="MapUI" ref={c=>this.mapUIEl = c}
+						<div className="MapUI"
+							ref={mapUI_ref}
 							style={{
 								position: "relative", /* display: "flex", */ whiteSpace: "nowrap",
 								padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
@@ -235,16 +252,19 @@ export class MapUI extends BaseComponentPlus({
 								e.preventDefault();
 							}}
 						>
-							{/*playingTimeline != null &&
-							<TimelineIntroBox timeline={playingTimeline}/>*/}
-							<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())}/>
-							{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
-							{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
-								this.LoadScroll();
-							}}/> */}
-							<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
-								<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
-							</VMenuStub>
+							{containerElResolved &&
+							<GraphContext.Provider value={context}>
+								{/*playingTimeline != null &&
+								<TimelineIntroBox timeline={playingTimeline}/>*/}
+								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0"/>
+								{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
+								{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
+									this.LoadScroll();
+								}}/> */}
+								<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
+									<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
+								</VMenuStub>
+							</GraphContext.Provider>}
 						</div>
 					</ScrollView>
 				</Row>
