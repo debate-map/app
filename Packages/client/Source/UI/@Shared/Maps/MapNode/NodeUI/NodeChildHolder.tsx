@@ -13,7 +13,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "web-vcore/nm/chroma-js.js";
-import {FlashComp} from "Utils/UI/FlashKit.js";
+import {FlashComp} from "ui-debug-kit";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";

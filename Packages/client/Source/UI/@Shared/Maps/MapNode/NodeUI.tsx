@@ -12,7 +12,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {FlashComp, FlashElement} from "Utils/UI/FlashKit.js";
+import {FlashComp, FlashElement} from "ui-debug-kit";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";

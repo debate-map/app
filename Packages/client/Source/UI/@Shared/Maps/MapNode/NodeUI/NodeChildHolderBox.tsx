@@ -5,7 +5,7 @@ import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapV
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
-import {FlashComp} from "Utils/UI/FlashKit.js";
+import {FlashComp} from "ui-debug-kit";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";

@@ -8,7 +8,7 @@ import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongP
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
-import {FlashComp} from "Utils/UI/FlashKit.js";
+import {FlashComp} from "ui-debug-kit";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
