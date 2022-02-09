@@ -5,7 +5,7 @@ import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
-import {Graph, GraphContext} from "tree-grapher";
+import {Graph, GraphContext, GraphColumnsVisualizer} from "tree-grapher";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps} from "Utils/UI/General.js";
@@ -254,6 +254,7 @@ export class MapUI extends BaseComponentPlus({
 						>
 							{containerElResolved &&
 							<GraphContext.Provider value={context}>
+								<GraphColumnsVisualizer levelsToScrollContainer={3}/>
 								{/*playingTimeline != null &&
 								<TimelineIntroBox timeline={playingTimeline}/>*/}
 								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0"/>

@@ -1,5 +1,5 @@
 import {ArgumentType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
-import React from "react";
+import React, {useCallback} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
@@ -9,8 +9,9 @@ import {FlashComp} from "ui-debug-kit";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
-import {Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {StripesCSS, useRef_nodeGroup, useRef_nodeLeftColumn} from "tree-grapher";
 import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "../ExpandableBox.js";
@@ -96,6 +97,14 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 			this.expandableBox!.expandButton!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
 		});
 
+		// for own level
+		/*const {ref} = useRef_nodeGroup(treePath);
+		// for child level
+		const treePath_child = `${treePath}/0`;
+		const {ref: ref_leftColumn} = useRef_nodeLeftColumn(treePath_child);*/
+
+		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath);
+
 		return (
 			<>
 			{/*<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{
@@ -112,23 +121,34 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				{group == ChildGroup.relevance && isMultiPremiseArgument &&
 					<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 			</div>*/}
-			<Row ml={30} className="clickThrough NodeChildHolderBox" style={E(
-				{position: "relative", alignItems: "flex-start", color: liveSkin.NodeTextColor().css()},
-				//! isMultiPremiseArgument && {alignSelf: "flex-end"},
-				//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
-				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
-				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
-				expanded && nodeChildrenToShow.length && innerBoxOffset == null && {opacity: 0, pointerEvents: "none"},
-			)}>
-				<Row className="clickThrough" style={E(
-					{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
-				)}>
+			<Row ml={30}
+				className="clickThrough NodeChildHolderBox"
+				style={E(
+					{position: "relative", alignItems: "flex-start", color: liveSkin.NodeTextColor().css()},
+					//! isMultiPremiseArgument && {alignSelf: "flex-end"},
+					//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
+					isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
+					// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
+					expanded && nodeChildrenToShow.length && innerBoxOffset == null && {opacity: 0, pointerEvents: "none"},
+				)}
+			>
+				<Row className="clickThrough"
+					ref={c=>{
+						ref_leftColumn.current = GetDOM(c) as any;
+						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`nodeGroup_${ref_leftColumn_group.current.path}`);
+					}}
+					style={E(
+						{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
+					)}
+				>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
 						ref={c=>{
 							this.expandableBox = c;
 							if (ref_expandableBox) ref_expandableBox(c);
+							/*ref_leftColumn.current = GetDOM(c) as any;
+							if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`nodeGroup_${ref_leftColumn_group.current.path}`);*/
 						}}
-						style={{marginTop: innerBoxOffset_safe}}
+						//style={{marginTop: innerBoxOffset_safe}}
 						padding="2px 5px"
 						text={
 							<>
@@ -192,11 +212,15 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/> */}
 				</Row>
 				{nodeView[expandKey] &&
+				<Column className="rightColumn_forBox clickThrough" style={{
+					position: "absolute", left: "100%", //top: rightColumnOffset,
+				}}>
 					<NodeChildHolder ref={c=>this.childHolder = c}
 						{...{map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
 						usesGenericExpandedField={false}
 						linkSpawnPoint={innerBoxOffset_safe + (height / 2)}
-						onSizesChange={this.CheckForChanges}/>}
+						onSizesChange={this.CheckForChanges}/>
+				</Column>}
 			</Row>
 			</>
 		);

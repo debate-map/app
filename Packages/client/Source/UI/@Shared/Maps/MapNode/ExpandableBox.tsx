@@ -7,7 +7,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 
 type Props = {
 	parent?,
-	className?: string, width: number|n, widthOverride: number|n, innerWidth?: number, outlineColor?: string|n, padding: number | string, style, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
+	className?: string, width: number|n, widthOverride: number|n, innerWidth?: number, outlineColor?: string|n, padding: number | string, style?, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
 	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number|n,
 	text, onTextHolderClick?, beforeChildren?, afterChildren?,
 	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any,

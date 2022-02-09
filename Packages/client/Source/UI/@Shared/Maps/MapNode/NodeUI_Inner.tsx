@@ -316,7 +316,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				});
 			};
 
-			const {ref} = useRef_nodeLeftColumn(treePath);
+			//const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath);
 
 			return (
 				<ExpandableBox
@@ -324,8 +324,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						dragInfo?.provided.innerRef(GetDOM(c) as any);
 						this.root = c;
 						//if (c) FlashComp(this, {el: c.DOM_HTML, text: "NUI_Inner rendered"});
-						ref.current = GetDOM(c) as any;
-					}, [dragInfo?.provided, ref])}
+						//ref_leftColumn.current = GetDOM(c) as any;
+					}, [dragInfo?.provided])}
 					parent={this}
 					{...{
 						width, widthOverride, outlineColor, expanded,

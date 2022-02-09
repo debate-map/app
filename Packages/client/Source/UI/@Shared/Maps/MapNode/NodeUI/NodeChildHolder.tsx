@@ -14,7 +14,7 @@ import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_At
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {FlashComp} from "ui-debug-kit";
-import {useRef_nodeGroup} from "tree-grapher";
+import {StripesCSS, useRef_nodeGroup} from "tree-grapher";
 import {useCallback} from "react";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
@@ -91,11 +91,13 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		// helper
-		const renderedChildrenOrder = [] as string[];
+		/*const renderedChildrenOrder = [] as string[];
 		// once we're done rendering, store the rendered-children-order in the node-view, eg. so child NodeUI's can whether they have any expanded siblings
 		setTimeout(()=>{
-			RunInAction("NodeChildHolder.render.updateRenderedChildrenOrder", ()=>nodeView.renderedChildrenOrder = renderedChildrenOrder);
-		}, 0);
+			if (nodeView.renderedChildrenOrder?.join(";") != renderedChildrenOrder.join(";")) {
+				RunInAction("NodeChildHolder.render.updateRenderedChildrenOrder", ()=>nodeView.renderedChildrenOrder = renderedChildrenOrder);
+			}
+		}, 0);*/
 
 		let nextChildFullIndex = 0;
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
@@ -123,7 +125,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const dragBox = document.querySelector(".NodeUI_Inner.DragPreview");
 			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());
 
-			renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
+			//renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
 			return (
 				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;
@@ -167,7 +169,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			});
 		}
 
-		const {ref} = useRef_nodeGroup(path, belowNodeUI);
+		const {ref_childHolder, ref_group} = useRef_nodeGroup(treePath, belowNodeUI);
 
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		//this.childBoxes = {};
@@ -179,13 +181,15 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		return (
 			<Column ref={useCallback(c=>{
 				this.childHolder = c;
-				ref.current = GetDOM(c) as any;
-			}, [ref])} className="NodeChildHolder clickThrough" style={E(
+				ref_childHolder.current = GetDOM(c) as any;
+				if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`nodeGroup_${ref_group.current.path}`);
+			}, [ref_childHolder, ref_group])} className="NodeChildHolder clickThrough" style={E(
 				{
 					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
 					// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
 					marginLeft: belowNodeUI ? 20 : 30,
 					// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+					background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"}), // for testing
 				},
 				belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
 				//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue

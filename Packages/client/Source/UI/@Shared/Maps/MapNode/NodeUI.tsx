@@ -13,7 +13,7 @@ import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {FlashComp, FlashElement} from "ui-debug-kit";
-import {useRef_nodeLeftColumn} from "tree-grapher";
+import {StripesCSS, useRef_nodeGroup, useRef_nodeLeftColumn} from "tree-grapher";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
@@ -110,7 +110,7 @@ export class NodeUI extends BaseComponentPlus(
 		const hereArgChildrenToShow = hereArg ? GetNodeChildrenToShow(hereArg, hereArgNodePath).filter(a=>a.id != node.id) : null;
 		const boxExpanded = nodeView?.expanded ?? false;
 
-		const siblingNodeViews = Object.entries(parentNodeView?.children ?? {}).filter(a=>parentNodeView?.renderedChildrenOrder?.includes(a[0])).OrderBy(a=>parentNodeView?.renderedChildrenOrder?.indexOf(a[0]));
+		/*const siblingNodeViews = Object.entries(parentNodeView?.children ?? {}).filter(a=>parentNodeView?.renderedChildrenOrder?.includes(a[0])).OrderBy(a=>parentNodeView?.renderedChildrenOrder?.indexOf(a[0]));
 		const ownIndexInSiblings = siblingNodeViews.findIndex(a=>a[0] == node.id);
 		let isFirstExpandedSibling = nodeView.expanded && siblingNodeViews.slice(0, ownIndexInSiblings).every(a=>!a[1].expanded);
 		let isLastExpandedSibling = nodeView.expanded && siblingNodeViews.slice(ownIndexInSiblings + 1).every(a=>!a[1].expanded);
@@ -121,7 +121,7 @@ export class NodeUI extends BaseComponentPlus(
 			ownIndexInVisualSiblings = visualSiblingNodeViews.findIndex(a=>a[0] == parent!.id);
 			if (!visualSiblingNodeViews.slice(0, ownIndexInVisualSiblings).every(a=>!a[1].expanded)) isFirstExpandedSibling = false;
 			if (!visualSiblingNodeViews.slice(ownIndexInVisualSiblings + 1).every(a=>!a[1].expanded)) isLastExpandedSibling = false;
-		}
+		}*/
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
@@ -254,9 +254,13 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
+		const {ref_childHolder, ref_group} = useRef_nodeGroup(treePath); // yes; like NodeChildHolder, NodeUI is itself a node-group (because it has sub-groups -- one per box and/or direct-child-holder)
+		let nextChildFullIndex = 0;
+		const GetTreePathForNextTreeChild = ()=>`${treePath}/${nextChildFullIndex++}`;
+
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path, treePath}} group={ChildGroup.truth}
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth} treePath={truthBoxVisible ? GetTreePathForNextTreeChild() : "n/a"}
 				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
@@ -267,7 +271,7 @@ export class NodeUI extends BaseComponentPlus(
 				}, [])}/>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
-				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path} treePath={treePath}
+				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path} treePath={relevanceBoxVisible ? GetTreePathForNextTreeChild() : "n/a"}
 				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
@@ -277,7 +281,7 @@ export class NodeUI extends BaseComponentPlus(
 					this.CheckForChanges();
 				}, [])}/>;
 		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path, treePath}} group={ChildGroup.freeform}
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform} treePath={freeformBoxVisible ? GetTreePathForNextTreeChild() : "n/a"}
 				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
 				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
@@ -321,7 +325,8 @@ export class NodeUI extends BaseComponentPlus(
 		}, []);
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
-			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, treePath, separateChildren: false, showArgumentsControlBar: false}}
+			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
+				treePath={GetTreePathForNextTreeChild()}
 				ref={nodeChildHolder_direct_ref}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={ChildGroup.generic}
@@ -341,7 +346,7 @@ export class NodeUI extends BaseComponentPlus(
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
-		const {ref: leftColumn_ref} = useRef_nodeLeftColumn(treePath);
+		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath);
 
 		const {css} = cssHelper(this);
 		return (
@@ -363,9 +368,10 @@ export class NodeUI extends BaseComponentPlus(
 			)}>
 				<Column
 					ref={useCallback(c=>{
-						leftColumn_ref.current = GetDOM(c) as any;
+						ref_leftColumn.current = GetDOM(c) as any;
+						if (ref_leftColumn.current) ref_leftColumn.current["nodeGroup"] = ref_leftColumn_group.current;
 						//ref(c ? GetDOM(c) as any : null), [ref]);
-					}, [])}
+					}, [ref_leftColumn, ref_leftColumn_group])}
 					className="innerBoxColumn clickThrough"
 					style={css(
 						{
@@ -394,8 +400,13 @@ export class NodeUI extends BaseComponentPlus(
 						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 				</Column>
 				{boxExpanded &&
-				<Column ref={UseCallback(c=>this.rightColumn = c, [])} className="rightColumn clickThrough" style={{
+				<Column ref={UseCallback(c=>{
+					this.rightColumn = c;
+					ref_childHolder.current = GetDOM(c) as any;
+					if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`nodeGroup_${ref_group.current.path}`);
+				}, [ref_childHolder, ref_group])} className="rightColumn clickThrough" style={{
 					position: "absolute", left: "100%", //top: rightColumnOffset,
+					background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"}), // for testing
 				}}>
 					{childConnectorBackground}
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
