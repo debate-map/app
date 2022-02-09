@@ -48,8 +48,8 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 	if (termsToSearchFor.length) {
 		const termForm_strings = termsToSearchFor.SelectMany(term=>{
 			const formsForTerm = term.forms.map(form=>_.escapeRegExp(form));
-			return formsForTerm.OrderByDescending(a=>a.length); // prefer matching long-forms over short-forms
-		});
+			return formsForTerm;
+		}).OrderByDescending(a=>a.length); // prefer matching long-forms over short-forms // doesn't seem to work atm; perhaps the regex always matches shorter options in (X|X|X) first
 		const regex = new RegExp(`(^|\\W)(${termForm_strings.join("|")})(\\W|$)`, "i");
 		//const patterns = [{name: "termForm", termForm_termIDs, regex}];
 		patterns = [{name: "termForm", regex}];

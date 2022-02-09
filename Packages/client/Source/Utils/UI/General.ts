@@ -35,5 +35,5 @@ export function IsMouseLeaveReal(event: React.MouseEvent<MouseEvent>, dom: HTMLE
 export const chroma_maxDarken = 5.55;
 
 export function TreeGraphDebug() {
-	return !!globalThis.treeGraphDebug;
+	return !!globalThis.treeGraphDebug || startURL.GetQueryVar("extra")?.includes("treeGraphDebug");
 }
