@@ -11,7 +11,7 @@ import chroma from "web-vcore/nm/chroma-js.js";
 import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {StripesCSS, useRef_nodeGroup, useRef_nodeLeftColumn} from "tree-grapher";
+import {StripesCSS, useRef_nodeLeftColumn} from "tree-grapher";
 import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "../ExpandableBox.js";
@@ -103,7 +103,11 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const treePath_child = `${treePath}/0`;
 		const {ref: ref_leftColumn} = useRef_nodeLeftColumn(treePath_child);*/
 
-		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath);
+		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath, {
+			color: group == ChildGroup.truth || group == ChildGroup.relevance
+				? GetNodeColor({type: "claim"} as any, "raw", false).css()
+				: GetNodeColor({type: MapNodeType.category} as any, "raw", false).css(),
+		});
 
 		return (
 			<>

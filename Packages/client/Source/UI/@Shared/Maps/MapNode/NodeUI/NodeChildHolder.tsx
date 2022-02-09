@@ -14,8 +14,9 @@ import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_At
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {FlashComp} from "ui-debug-kit";
-import {StripesCSS, useRef_nodeGroup} from "tree-grapher";
+import {ConnectorLinesUI, StripesCSS, useRef_nodeChildHolder} from "tree-grapher";
 import {useCallback} from "react";
+import {TreeGraphDebug} from "Utils/UI/General.js";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
@@ -169,7 +170,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			});
 		}
 
-		const {ref_childHolder, ref_group} = useRef_nodeGroup(treePath, belowNodeUI);
+		const {ref_childHolder, ref_group} = useRef_nodeChildHolder(treePath, belowNodeUI);
 
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		//this.childBoxes = {};
@@ -187,20 +188,22 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{
 					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
 					// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
-					marginLeft: belowNodeUI ? 20 : 30,
+					//marginLeft: belowNodeUI ? 20 : 30,
+					paddingLeft: belowNodeUI ? 20 : 30,
 					// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-					background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"}), // for testing
 				},
+				TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
 				belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
 				//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 				// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
 				lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 			)}>
-				{(linkSpawnPoint > 0 || belowNodeUI) && lastChildBoxOffsets &&
+				{/*(linkSpawnPoint > 0 || belowNodeUI) && lastChildBoxOffsets &&
 					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
 					<ChildConnectorBackground node={node} path={path} linkSpawnPoint={new Vector2(belowNodeUI ? -10 : -30, linkSpawnPoint)} straightLines={belowNodeUI}
 						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
-						childBoxInfos={childBoxInfos}/>}
+						childBoxInfos={childBoxInfos}/>*/}
+				<ConnectorLinesUI treePath={treePath} width={belowNodeUI ? 20 : 30} linesFromAbove={belowNodeUI}/>
 
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
 				{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&

@@ -342,7 +342,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					style={E(
 						/*timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime &&
 							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},*/
-						{color: liveSkin.NodeTextColor().css()},
+						{
+							color: liveSkin.NodeTextColor().css(),
+							margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
+						},
 						style,
 						dragInfo?.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},

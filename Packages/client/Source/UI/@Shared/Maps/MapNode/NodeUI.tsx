@@ -13,7 +13,8 @@ import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {FlashComp, FlashElement} from "ui-debug-kit";
-import {StripesCSS, useRef_nodeGroup, useRef_nodeLeftColumn} from "tree-grapher";
+import {ConnectorLinesUI, StripesCSS, useRef_nodeChildHolder, useRef_nodeLeftColumn} from "tree-grapher";
+import {TreeGraphDebug} from "Utils/UI/General.js";
 import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
@@ -254,7 +255,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
-		const {ref_childHolder, ref_group} = useRef_nodeGroup(treePath); // yes; like NodeChildHolder, NodeUI is itself a node-group (because it has sub-groups -- one per box and/or direct-child-holder)
+		const {ref_childHolder, ref_group} = useRef_nodeChildHolder(treePath); // yes; like NodeChildHolder, NodeUI is itself a node-group (because it has sub-groups -- one per box and/or direct-child-holder)
 		let nextChildFullIndex = 0;
 		const GetTreePathForNextTreeChild = ()=>`${treePath}/${nextChildFullIndex++}`;
 
@@ -290,9 +291,9 @@ export class NodeUI extends BaseComponentPlus(
 					this.SetState({aboveSize_freeform: aboveSize, belowSize_freeform: belowSize});
 					this.CheckForChanges();
 				}, [])}/>;
-		let childConnectorBackground: JSX.Element|n;
-		if (groupsUsingBoxes > 0 /*&& linkSpawnPoint > 0*/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
-			//const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
+		/*let childConnectorBackground: JSX.Element|n;
+		if (groupsUsingBoxes > 0 /*&& linkSpawnPoint > 0*#/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
+			//const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*#/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
 			childConnectorBackground = (
 				<ChildConnectorBackground node={node} path={path}
 					linkSpawnPoint={new Vector2(0, linkSpawnPoint)} straightLines={false}
@@ -309,14 +310,14 @@ export class NodeUI extends BaseComponentPlus(
 						/*!!nodeChildHolderBox_neutrality && {
 							offset: lastChildBoxOffsets?.["neutrality"],
 							color: GetNodeColor({type: "claim"} as any, "raw", false),
-						},*/
+						},*#/
 						!!nodeChildHolderBox_freeform && {
 							offset: lastChildBoxOffsets?.["freeform"],
 							color: GetNodeColor({type: MapNodeType.category} as any, "raw", false),
 						},
 					] as ChildBoxInfo[]).filter(a=>a)}/>
 			);
-		}
+		}*/
 		let nodeChildHolder_direct: JSX.Element|n;
 		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
 		const nodeChildHolder_direct_onSizesChange = UseCallback((aboveSize, belowSize)=>{
@@ -346,7 +347,7 @@ export class NodeUI extends BaseComponentPlus(
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
-		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath);
+		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath, {color: GetNodeColor(hereArg ?? node, "raw", false).css()});
 
 		const {css} = cssHelper(this);
 		return (
@@ -404,11 +405,14 @@ export class NodeUI extends BaseComponentPlus(
 					this.rightColumn = c;
 					ref_childHolder.current = GetDOM(c) as any;
 					if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`nodeGroup_${ref_group.current.path}`);
-				}, [ref_childHolder, ref_group])} className="rightColumn clickThrough" style={{
-					position: "absolute", left: "100%", //top: rightColumnOffset,
-					background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"}), // for testing
-				}}>
-					{childConnectorBackground}
+				}, [ref_childHolder, ref_group])} className="rightColumn clickThrough" style={css(
+					{
+						position: "absolute", left: "100%", //top: rightColumnOffset,
+					},
+					TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
+				)}>
+					{/*childConnectorBackground*/}
+					<ConnectorLinesUI treePath={treePath} width={30} linesFromAbove={false}/>
 					{!isMultiPremiseArgument && nodeChildHolder_direct}
 					{truthBoxVisible && nodeChildHolderBox_truth}
 					{relevanceBoxVisible && nodeChildHolderBox_relevance}

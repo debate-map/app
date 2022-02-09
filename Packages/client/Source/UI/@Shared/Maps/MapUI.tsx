@@ -8,7 +8,7 @@ import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeVi
 import {Graph, GraphContext, GraphColumnsVisualizer} from "tree-grapher";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {StandardCompProps} from "Utils/UI/General.js";
+import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
 import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction, SubNavBar, SubNavBarButton} from "web-vcore";
 import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
@@ -254,7 +254,7 @@ export class MapUI extends BaseComponentPlus({
 						>
 							{containerElResolved &&
 							<GraphContext.Provider value={context}>
-								<GraphColumnsVisualizer levelsToScrollContainer={3}/>
+								{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
 								{/*playingTimeline != null &&
 								<TimelineIntroBox timeline={playingTimeline}/>*/}
 								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0"/>
