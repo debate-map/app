@@ -379,6 +379,7 @@ export class NodeUI extends BaseComponentPlus(
 							position: "relative",
 							/*paddingTop: gapBeforeInnerUI,
 							paddingBottom: gapAfterInnerUI,*/
+							width: "100%",
 						},
 					)}
 				>

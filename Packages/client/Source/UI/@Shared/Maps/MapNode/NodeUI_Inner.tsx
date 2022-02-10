@@ -328,9 +328,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					}, [dragInfo?.provided])}
 					parent={this}
 					{...{
-						width, widthOverride, outlineColor, expanded,
+						outlineColor, expanded,
 						backgroundFillPercent: GADDemo ? 100 : backgroundFillPercent,
 						backgroundColor, markerPercent,
+						//width,
+						width: "100%",
+						widthOverride,
 					}}
 					className={
 						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
