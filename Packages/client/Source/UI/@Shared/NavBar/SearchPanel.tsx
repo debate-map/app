@@ -207,7 +207,9 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 				}
 
 				//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
-				const parentIDs = GetNodeChildLinks(null, node.id);
+				//const parentIDs = GetNodeChildLinks(null, node.id).map(a=>a.parent);
+				const parentLinks = await GetAsync(()=>GetNodeChildLinks(null, node.id));
+				const parentIDs = parentLinks.map(a=>a.parent);
 				for (const parentID of parentIDs) {
 					const newUpPath = `${parentID}/${upPath}`;
 					newUpPathAttempts.push(newUpPath);
@@ -315,7 +317,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 								} else {
 									if (searchResult_map == null) return; // still loading
 									RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (searchResult_map.id != globalMapID) {
+										if (searchResult_map.id == globalMapID) {
 											store.main.page = "global";
 										} else {
 											store.main.page = "debates";

@@ -137,10 +137,10 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				)}
 			>
 				<Row className="clickThrough"
-					ref={c=>{
+					ref={useCallback(c=>{
 						ref_leftColumn.current = GetDOM(c) as any;
-						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`nodeGroup_${ref_leftColumn_group.current.path}`);
-					}}
+						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);
+					}, [ref_leftColumn, ref_leftColumn_group])}
 					style={E(
 						{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 					)}
@@ -150,7 +150,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							this.expandableBox = c;
 							if (ref_expandableBox) ref_expandableBox(c);
 							/*ref_leftColumn.current = GetDOM(c) as any;
-							if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`nodeGroup_${ref_leftColumn_group.current.path}`);*/
+							if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);*/
 						}}
 						//style={{marginTop: innerBoxOffset_safe}}
 						padding="2px 5px"

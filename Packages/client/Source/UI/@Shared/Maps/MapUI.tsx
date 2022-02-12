@@ -1,4 +1,4 @@
-import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
+import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType_Info} from "dm_common";
 import React, {useCallback, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -257,7 +257,7 @@ export class MapUI extends BaseComponentPlus({
 								{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
 								{/*playingTimeline != null &&
 								<TimelineIntroBox timeline={playingTimeline}/>*/}
-								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0"/>
+								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" widthOverride={MapNodeType_Info.for[rootNode.type].minWidth}/>
 								{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
 								{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 									this.LoadScroll();

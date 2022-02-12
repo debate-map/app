@@ -35,6 +35,13 @@ export class TermAttachmentsUI extends BaseComponent<PhrasingDetailsUI_SharedPro
 				</Row>
 				{(newData.terms || []).map((termAttachment, index)=>{
 					const term = terms[index];
+
+					// defensive (for real case; not yet fixed)
+					if (termAttachment.id == null) {
+						termAttachment.id = "";
+						console.warn("TermAttachmentsUI encountered an attachment with an id of null, which shouldn't happen.");
+					}
+
 					return (
 						<Row key={index} mt={2}>
 							<Text>{index + 1}:</Text>

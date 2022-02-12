@@ -1,22 +1,18 @@
-import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity, GetNodeForm, ClaimForm, GetChildLayout_Final, MapNodeType_Info, GetChildGroupLayout, ChildGroupLayout, ShouldChildGroupBoxBeVisible} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetParentNodeL3, GetParentPath, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, ShouldChildGroupBoxBeVisible} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {ConnectorLinesUI, StripesCSS, useRef_nodeChildHolder, useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
-import {EB_ShowError, EB_StoreError, ES, GetSize, GetSize_Method, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
-import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ObjectCE, ShallowEquals, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {FlashComp, FlashElement} from "ui-debug-kit";
-import {ConnectorLinesUI, StripesCSS, useRef_nodeChildHolder, useRef_nodeLeftColumn} from "tree-grapher";
 import {TreeGraphDebug} from "Utils/UI/General.js";
-import {ChildBoxInfo, ChildConnectorBackground} from "./ChildConnectorBackground.js";
-import {ExpandableBox} from "./ExpandableBox.js";
+import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
+import {Assert, AssertWarn, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ShallowEquals, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
@@ -371,6 +367,7 @@ export class NodeUI extends BaseComponentPlus(
 					ref={useCallback(c=>{
 						ref_leftColumn.current = GetDOM(c) as any;
 						if (ref_leftColumn.current) ref_leftColumn.current["nodeGroup"] = ref_leftColumn_group.current;
+						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);
 						//ref(c ? GetDOM(c) as any : null), [ref]);
 					}, [ref_leftColumn, ref_leftColumn_group])}
 					className="innerBoxColumn clickThrough"
@@ -405,7 +402,7 @@ export class NodeUI extends BaseComponentPlus(
 				<Column ref={UseCallback(c=>{
 					this.rightColumn = c;
 					ref_childHolder.current = GetDOM(c) as any;
-					if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`nodeGroup_${ref_group.current.path}`);
+					if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`chForNodeGroup_${ref_group.current.path}`);
 				}, [ref_childHolder, ref_group])} className="rightColumn clickThrough" style={css(
 					{
 						position: "absolute", left: "100%", //top: rightColumnOffset,

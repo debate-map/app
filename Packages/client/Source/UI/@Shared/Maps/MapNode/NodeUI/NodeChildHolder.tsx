@@ -3,7 +3,6 @@ import * as React from "react";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {ChildBoxInfo, ChildConnectorBackground} from "UI/@Shared/Maps/MapNode/ChildConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction, WaitXThenRun_Deduped} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
@@ -160,16 +159,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			);
 		};
 
-		const childBoxInfos = [] as ChildBoxInfo[];
-		for (const [nodeID, offset] of Object.entries(lastChildBoxOffsets ?? {})) {
-			const node = nodeChildrenToShowHere.find(a=>a.id == nodeID);
-			childBoxInfos.push({
-				node,
-				offset,
-				color: node ? GetNodeColor(node, "raw", false) : chroma("rgba(0,0,0,0)"),
-			});
-		}
-
 		const {ref_childHolder, ref_group} = useRef_nodeChildHolder(treePath, belowNodeUI);
 
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
@@ -183,7 +172,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			<Column ref={useCallback(c=>{
 				this.childHolder = c;
 				ref_childHolder.current = GetDOM(c) as any;
-				if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`nodeGroup_${ref_group.current.path}`);
+				if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`chForNodeGroup_${ref_group.current.path}`);
 			}, [ref_childHolder, ref_group])} className="NodeChildHolder clickThrough" style={E(
 				{
 					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
@@ -216,7 +205,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{separateChildren &&
 					RenderPolarityGroup("up")}
 				{showArgumentsControlBar &&
-					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} node={node} path={path} group={group} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
+					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c}
+						map={map} node={node} path={path} treePath={`${treePath}/${nextChildFullIndex++}`}
+						group={group} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
 				{separateChildren &&
 					RenderPolarityGroup("down")}
 			</Column>

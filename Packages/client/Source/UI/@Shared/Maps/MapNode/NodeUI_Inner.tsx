@@ -107,8 +107,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, treePath, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
+		let {indexInNodeList, map, node, path, treePath, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
+
+		// probably-temp fix for nodes sometimes first rendering in very-skinny mode, causing tree-grapher to get layout very wrong (since it apparently doesn't re-layout after width is changed)
+		if (widthOverride == null || widthOverride < MapNodeType_Info.for[node.type].minWidth) {
+			widthOverride = MapNodeType_Info.for[node.type].minWidth;
+		}
 
 		// connector part
 		// ==========
