@@ -5,7 +5,7 @@ import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
 import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
-import {ImportResource} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/SubtreeImportExport/FSImportHelpers.js";
+import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
 
@@ -77,22 +77,25 @@ export class AddChildDialogState {
 	@O advanced = false;
 }
 
-export enum DataExchangeFormat {
-	dm_json = "dm_json",
-	//cd_json = "cd_json",
-	//gad_csv = "gad_csv",
-}
-export class ExportSubtreeDialogState {
-	constructor() { makeObservable(this); }
-	@O targetFormat = DataExchangeFormat.dm_json;
-	@O maxExportDepth = 5;
-}
 export class ImportSubtreeDialogState {
 	constructor() { makeObservable(this); }
+
+	@O sourceType = DataExchangeFormat.csv_sl;
 	@O autoSearchByTitle = true;
-	@O.ref @ignore selectedImportResource: ImportResource|n;
+	@O showAutoInsertTools = true;
+	//@O hideFoundEntries = false;
+
+	@O @ignore selectedImportResources = new Set<ImportResource>();
+	@O @ignore selectFromIndex = -1;
+
 	/*@O importRatings = false;
 	@O importRatings_userIDsStr = "";*/
+}
+
+export class ExportSubtreeDialogState {
+	constructor() { makeObservable(this); }
+	@O targetFormat = DataExchangeFormat.json_dm;
+	@O maxExportDepth = 5;
 }
 
 export const GetLastAcknowledgementTime = CreateAccessor(function(nodeID: string) {

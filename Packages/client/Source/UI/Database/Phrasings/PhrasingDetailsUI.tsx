@@ -48,9 +48,10 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 
 		let noteField_label = "Note";
 		if (GADDemo_Main) {
-			noteField_label = embeddedInNodeRevision
+			noteField_label = "Description";
+			/*noteField_label = embeddedInNodeRevision
 				? "Description" // main-phrasing uses the note-field for a "description" (since it can use references-attachment for references)
-				: "Reference"; // alt-phrasings uses the note-field to include a "reference"
+				: "Reference"; // alt-phrasings uses the note-field to include a "reference"*/
 		}
 
 		const splitAt = 110;

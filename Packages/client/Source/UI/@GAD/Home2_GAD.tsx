@@ -3,9 +3,10 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown, PageContainer} from "web-vcore";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {useEffect} from "react";
+import {GADDemo_2020, GADDemo_COVID, GADDemo_Main} from "./GAD.js";
 
 const pageText = `
-The Great American Debate is committed to scaling up societal communications, so we can debate nation-wide, and literally see all available positions to take on a given issue.
+The Society Library is committed to scaling up societal communications, so we can debate nation-wide, and literally see all available positions to take on a given issue.
 
 This work entails mapping out the arguments, claims, and evidence that we source from various forms of media in order to represent all sides of a given social debate.
 
@@ -16,8 +17,17 @@ This framework serves as the base from which we will create visualizations and i
 These arguments, claims, and evidence have been sourced from various forms of media.
 `;
 
-// climate-change version
-/*export class HomeUI2_GAD extends BaseComponent<{}, {}> {
+export class HomeUI2_GAD extends BaseComponent<{}, {}> {
+	render() {
+		if (GADDemo_Main) return <HomeUI2_GADMain/>;
+		if (GADDemo_COVID) return <HomeUI2_GADCovid/>;
+		if (GADDemo_2020) return <HomeUI2_GAD2020/>;
+		return null;
+	}
+}
+
+// climate-change version (main)
+export class HomeUI2_GADMain extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<PageContainer scrollable={true}
@@ -48,10 +58,10 @@ These arguments, claims, and evidence have been sourced from various forms of me
 			</PageContainer>
 		);
 	}
-}*/
+}
 
 // covid version
-export class HomeUI2_GAD extends BaseComponent<{}, {}> {
+export class HomeUI2_GADCovid extends BaseComponent<{}, {}> {
 	render() {
 		useScript("https://sdk.canva.com/v1/embed.js");
 		return (

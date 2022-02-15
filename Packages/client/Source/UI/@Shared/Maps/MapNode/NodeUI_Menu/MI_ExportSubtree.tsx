@@ -1,7 +1,7 @@
 import {GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, MapNodeL2, MapNodeL3, MapNodePhrasing, MapNodeRevision, Media, MeID, NodeChildLink, Term} from "dm_common";
 import React from "react";
 import {store} from "Store";
-import {DataExchangeFormat} from "Store/main/maps";
+import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
 import {Clone, GetEntries, ModifyString, NN, StartDownload} from "web-vcore/nm/js-vextensions.js";
@@ -80,7 +80,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		let subtreeExportData: string|n;
 		if (getData) {
 			var searchInfo = PopulateSearchInfoUsingSubtree(path, {maxDepth: dialogState.maxExportDepth});
-			if (dialogState.targetFormat == DataExchangeFormat.dm_json) {
+			if (dialogState.targetFormat == DataExchangeFormat.json_dm) {
 				subtreeExportData = JSON.stringify({
 					// todo: make-so the UI lets you choose which fields to keep, whether to include old node-revisions, etc.
 					nodes: [...searchInfo.nodes.values()].map(node=>node.IncludeKeys(...includeKeys.nodes)),

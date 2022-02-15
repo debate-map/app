@@ -54,7 +54,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		const text =
-			group == ChildGroup.truth ? "True?" :
+			group == ChildGroup.truth ? (GADDemo ? "Reasons" : "True?") :
 			group == ChildGroup.relevance ? "Relevant?" :
 			group == ChildGroup.neutrality ? "Neutral?" :
 			group == ChildGroup.freeform ? "Freeform" :

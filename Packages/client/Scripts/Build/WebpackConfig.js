@@ -1,6 +1,9 @@
 import {CreateWebpackConfig, FindNodeModule_FromUserProjectRoot} from "web-vcore/Scripts_Dist/Build/WebpackConfig.js";
+import {createRequire} from "module";
 import {config} from "../Config.js";
 import {npmPatch_replacerConfig} from "./NPMPatches.js";
+
+const require = createRequire(import.meta.url);
 
 /*function resolvePath(...segmentsFromRoot: string[]) {
 	//return fs.realpathSync(path.resolve(config.path_base, ...segmentsFromRoot));
@@ -16,8 +19,13 @@ import {npmPatch_replacerConfig} from "./NPMPatches.js";
 export const webpackConfig = CreateWebpackConfig({
 	config,
 	npmPatch_replacerConfig,
-	ext: {
+	ext_deep: {
 		name: "client",
+		resolve: {
+			fallback: {
+				stream: require.resolve("stream-browserify"),
+			},
+		},
 	},
 	//sourcesFromRoot: true,
 	/*tsLoaderPaths: [

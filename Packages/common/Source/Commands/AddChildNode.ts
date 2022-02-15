@@ -29,6 +29,7 @@ import {LinkNode} from "./LinkNode.js";
 		$node: {$ref: "MapNode_Partial"},
 		$revision: {$ref: "MapNodeRevision_Partial"},
 		//link: {$ref: NodeChildLink.name},
+		// todo: clean up handling of "link" field (it's marked optional, yet error occurs if left out, due to child-group not being set; and this line doesn't make enough of link's fields optional)
 		link: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
 		asMapRoot: {type: "boolean"},
 	}),

@@ -163,6 +163,7 @@ export class MapNodeRevision {
 	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
 	phrasing_tsvector?: any;
 
+	// todo: probably remove this, since the UI currently gives no way to edit it! (it seems superseded by MapNodePhrasing.note, which can be edited atm, but isn't shown in TitlePanel)
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: ["null", "string"]}, {opt: true}) // add null-type, for later when the payload-validation schema is derived from the main schema
 	note?: string;

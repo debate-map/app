@@ -141,6 +141,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 				GADDemo_Nuclear && {width: 400, height: 150, backgroundImage: "url(/Images/@GAD/Nuclear/Title_Cropped.png)"},
 				GADDemo_COVID && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/COVID/Title.png)"},
 				GADDemo_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/2020ElectionDemo.png)"},
+				//GADDemo_Nuclear && {pointerEvents: "none"},
 			);
 			text = null as any;
 		}
