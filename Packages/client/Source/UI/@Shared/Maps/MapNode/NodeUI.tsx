@@ -282,33 +282,6 @@ export class NodeUI extends BaseComponentPlus(
 					this.SetState({aboveSize_freeform: aboveSize, belowSize_freeform: belowSize});
 					this.CheckForChanges();
 				}, [])}/>;
-		/*let childConnectorBackground: JSX.Element|n;
-		if (groupsUsingBoxes > 0 /*&& linkSpawnPoint > 0*#/ && Object.entries(lastChildBoxOffsets ?? {}).length) {
-			//const linkSpawnHeight = /*(limitBarPos == LimitBarPos.above ? 37 : 0) +*#/ (dividePoint ?? 0).KeepAtLeast(selfHeight / 2);
-			childConnectorBackground = (
-				<ChildConnectorBackground node={node} path={path}
-					linkSpawnPoint={new Vector2(0, linkSpawnPoint)} straightLines={false}
-					shouldUpdate={true}
-					childBoxInfos={([
-						!!nodeChildHolderBox_truth && {
-							offset: lastChildBoxOffsets?.["truth"],
-							color: GetNodeColor({type: "claim"} as any, "raw", false),
-						},
-						!!nodeChildHolderBox_relevance && {
-							offset: lastChildBoxOffsets?.["relevance"],
-							color: GetNodeColor({type: "claim"} as any, "raw", false),
-						},
-						/*!!nodeChildHolderBox_neutrality && {
-							offset: lastChildBoxOffsets?.["neutrality"],
-							color: GetNodeColor({type: "claim"} as any, "raw", false),
-						},*#/
-						!!nodeChildHolderBox_freeform && {
-							offset: lastChildBoxOffsets?.["freeform"],
-							color: GetNodeColor({type: MapNodeType.category} as any, "raw", false),
-						},
-					] as ChildBoxInfo[]).filter(a=>a)}/>
-			);
-		}*/
 		let nodeChildHolder_direct: JSX.Element|n;
 		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
 		const nodeChildHolder_direct_onSizesChange = UseCallback((aboveSize, belowSize)=>{
@@ -324,9 +297,6 @@ export class NodeUI extends BaseComponentPlus(
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
-				//linkSpawnPoint={isMultiPremiseArgument ? -selfHeight_plusRightContent + (selfHeight / 2) : dividePoint || (selfHeight / 2)}
-				//linkSpawnPoint={isMultiPremiseArgument ? -(obs.childrensHeight - childrenLineAnchorPoint_safe) : childrenLineAnchorPoint_safe}
-				//linkSpawnPoint={linkSpawnPoint}
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}

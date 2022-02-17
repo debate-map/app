@@ -45,18 +45,10 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 					<Pre>Sort by: </Pre>
 					<Select options={["Ratings", "Recent"]} style={{borderRadius: 5, outline: "none"}} value={"Ratings"} onChange={val=>{}}/>
 				</Row> */}
-				{/* <Column>
-					<Row>Supporting arguments</Row>
-					<Row>Opposing arguments</Row>
-				</Column> */}
 				<Column ml={0}> {/* vertical */}
 					<AddArgumentButton map={map} node={node} path={path} group={group} polarity={Polarity.supporting}/>
 					<AddArgumentButton map={map} node={node} path={path} group={group} polarity={Polarity.opposing} style={{marginTop: 1}}/>
 				</Column>
-				{/* <Row ml={0}> // horizontal
-					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.supporting}/>
-					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.opposing} style={{marginLeft: 3}}/>
-				</Row> */}
 				{childBeingAdded &&
 					<div style={{marginLeft: 15}}>
 						Adding new entry...

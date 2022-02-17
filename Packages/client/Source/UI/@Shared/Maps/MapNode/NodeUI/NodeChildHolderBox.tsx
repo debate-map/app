@@ -96,12 +96,6 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 			this.expandableBox!.expandButton!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
 		});
 
-		// for own level
-		/*const {ref} = useRef_nodeGroup(treePath);
-		// for child level
-		const treePath_child = `${treePath}/0`;
-		const {ref: ref_leftColumn} = useRef_nodeLeftColumn(treePath_child);*/
-
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: group == ChildGroup.truth || group == ChildGroup.relevance
 				? GetNodeColor({type: "claim"} as any, "raw", false).css()
@@ -240,30 +234,11 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		//FlashComp(this, {text: "NodeChildHolderBox.CheckForChanges"});
 		const {onSizesChange} = this.props;
 
-		/*if (this.lineHolder == null) return;
-		//const lineHolderHeight = $(this.lineHolder).outerHeight();
-		//const lineHolderHeight = this.lineHolder.height.height + /*this.lineHolder.marginTop + this.lineHolder.marginBottom*#/ + document.body.borderTop + document.body.borderBottom;
-		const lineHolderHeight = this.lineHolder.getBoundingClientRect().height;
-		if (lineHolderHeight != this.lastLineHolderHeight) {
-			this.SetState({lineHolderHeight});
-		}
-		this.lastLineHolderHeight = lineHolderHeight;*/
-
 		//const height = $(GetDOM(this)).outerHeight();
 		//const height = GetDOM(this)!.getBoundingClientRect().height;
 		const height = this.DOM_HTML.offsetHeight;
 		const dividePoint = this.childHolder && this.Expanded ? this.childHolder.GetDividePoint() : 0;
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
-			/* if (height != this.lastHeight) {
-				this.OnHeightChange();
-			} */
-			/*if (dividePoint != this.lastDividePoint) {
-				const {height} = this.GetMeasurementInfo();
-				const distFromInnerBoxTopToMainBoxCenter = height / 2;
-				const innerBoxOffset = (dividePoint - distFromInnerBoxTopToMainBoxCenter).NaNTo(0).KeepAtLeast(0);
-				this.SetState({innerBoxOffset});
-			}*/
-
 			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
 		}
 		this.lastHeight = height;

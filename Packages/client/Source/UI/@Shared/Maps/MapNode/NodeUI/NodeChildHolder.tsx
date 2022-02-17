@@ -192,12 +192,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		};
 
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
-		//this.childBoxes = {};
-		// only clear this.childBoxes when first mounting // actually, no need to clear; the ref-funcs already clear their own entries
-		/*UseEffect(()=>{
-			this.childBoxes = {};
-			//this.childInnerUIs = {};
-		}, []);*/
 		return (
 			<>
 				<Column ref={useCallback(c=>{
@@ -216,13 +210,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
 					//lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 				)}>
-					{/*(linkSpawnPoint > 0 || belowNodeUI) && lastChildBoxOffsets &&
-						// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
-						<ChildConnectorBackground node={node} path={path} linkSpawnPoint={new Vector2(belowNodeUI ? -10 : -30, linkSpawnPoint)} straightLines={belowNodeUI}
-							shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
-							childBoxInfos={childBoxInfos}/>*/}
-					{/*<ConnectorLinesUI treePath={treePath} width={belowNodeUI ? 20 : 30} linesFromAbove={belowNodeUI}/>*/}
-
 					{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
 					{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
 						<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
