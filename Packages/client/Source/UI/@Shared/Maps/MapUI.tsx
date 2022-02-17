@@ -5,7 +5,7 @@ import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
-import {Graph, GraphContext, GraphColumnsVisualizer} from "tree-grapher";
+import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI} from "tree-grapher";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
@@ -97,11 +97,7 @@ type Props = {
 	//subNavBarWidth?: number,
 } & HTMLProps<"div">;
 @Observer
-export class MapUI extends BaseComponentPlus({
-	// padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}
-	padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
-	//subNavBarWidth: 0,
-} as Props, {}) {
+export class MapUI extends BaseComponent<Props, {}> {
 	private static currentMapUI: MapUI|n;
 	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted ? MapUI.currentMapUI : null; }
 
@@ -112,20 +108,38 @@ export class MapUI extends BaseComponentPlus({
 			Assert(IsNodeL3(rootNode), "Node supplied to MapUI is not level-3!");
 		}
 	}
+	get Padding() {
+		const winWidth = screen.availWidth;
+		const winHeight = screen.availHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar
+		return this.props.padding ?? {left: winWidth * .9, right: winWidth * .9, top: winHeight * .9, bottom: winHeight * .9};
+	}
 
 	scrollView: ScrollView|n;
 	mapUIEl: HTMLDivElement|n;
 	downPos: Vector2|n;
 	render() {
-		const {mapID, rootNode: rootNode_passed, withinPage, padding, ...rest} = this.props;
+		const {mapID, rootNode: rootNode_passed, withinPage, ...rest} = this.props;
 		//Assert(padding && subNavBarWidth != null); // nn: default-values set
-		Assert(padding != null); // nn: default-values set
+		const padding = this.Padding;
 		Assert(mapID, "mapID is null!");
 
-		const context = useMemo(()=>{
+		const graphInfo = useMemo(()=>{
 			const graph = new Graph({
-				columnWidth: 100,
+				//columnWidth: 100,
 				//uiDebugKit: {FlashComp},
+				layoutOpts: {
+					nodeSpacing: ()=>10,
+					styleSetter_layoutPending: style=>{
+						//style.right = "100%"; // not ideal, since can cause some issues (eg. during map load, the center-on-loading-nodes system can jump to empty left-area of map) 
+						style.opacity = "0";
+						style.pointerEvents = "none";
+					},
+					styleSetter_layoutDone: style=>{
+						//style.right = "";
+						style.opacity = "";
+						style.pointerEvents = "";
+					},
+				},
 			});
 			globalThis.graph = graph; // temp
 			return graph;
@@ -133,9 +147,9 @@ export class MapUI extends BaseComponentPlus({
 		const [containerElResolved, setContainerElResolved] = useState(false);
 		const mapUI_ref = useCallback(c=>{
 			this.mapUIEl = c;
-			context.containerEl = c;
-			if (context.containerEl != null) setContainerElResolved(true);
-		}, [context]);
+			graphInfo.containerEl = c;
+			if (graphInfo.containerEl != null) setContainerElResolved(true);
+		}, [graphInfo]);
 
 		const map = GetMap(mapID);
 		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
@@ -253,8 +267,9 @@ export class MapUI extends BaseComponentPlus({
 							}}
 						>
 							{containerElResolved &&
-							<GraphContext.Provider value={context}>
+							<GraphContext.Provider value={graphInfo}>
 								{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
+								<ConnectorLinesUI/>
 								{/*playingTimeline != null &&
 								<TimelineIntroBox timeline={playingTimeline}/>*/}
 								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" widthOverride={MapNodeType_Info.for[rootNode.type].minWidth}/>

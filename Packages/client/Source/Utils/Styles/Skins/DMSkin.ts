@@ -107,7 +107,7 @@ export class DMSkin extends Skin {
 			.MessageUI, .MessageUI > div {
 				background-color: rgba(255,255,255,.9) !important;
 			}
-			.argumentsControlBar > div:first-child > div {
+			.ArgumentsControlBar > div:first-child > div {
 				color: rgb(199, 202, 209) !important;
 			}
 

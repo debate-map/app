@@ -20,14 +20,14 @@ import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, treePath: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
+	map: Map, node: MapNodeL3, path: string, treePath: string, inBelowGroup: boolean, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
 	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onSizesChange?: (aboveHeight: number, belowHeight: number)=>void,
 	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
 
 @WarnOfTransientObjectProps
 @Observer
-export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBoxOffset: null as number|n, lineHolderHeight: 0, hovered: false, hovered_button: false}) {
+export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHolderHeight: 0, hovered: false, hovered_button: false}) {
 	static ValidateProps(props: Props) {
 		const {node, nodeChildren} = props;
 		// ms only asserts in dev for now (and only as warning); causes error sometimes when cut+pasting otherwise (firebase doesn`t send DB updates atomically?)
@@ -37,9 +37,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	}
 	//lineHolder: HTMLDivElement|n;
 	render() {
-		const {map, node, path, treePath, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
-		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
-		const innerBoxOffset_safe = innerBoxOffset ?? 0;
+		const {map, node, path, treePath, inBelowGroup, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
+		const {lineHolderHeight, hovered, hovered_button} = this.state;
 
 		// const nodeView = GetNodeView(map.id, path) ?? new MapNodeView();
 		// const nodeView = GetNodeView(map.id, path, true);
@@ -103,129 +102,117 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const treePath_child = `${treePath}/0`;
 		const {ref: ref_leftColumn} = useRef_nodeLeftColumn(treePath_child);*/
 
-		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath, {
+		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: group == ChildGroup.truth || group == ChildGroup.relevance
 				? GetNodeColor({type: "claim"} as any, "raw", false).css()
 				: GetNodeColor({type: MapNodeType.category} as any, "raw", false).css(),
+				gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
 		});
 
 		return (
 			<>
-			{/*<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{
-				position: "absolute",
-				//right: "100%",
-				top: 0, bottom: 0, width: 30, // these aren't actually necessary, but make dev-tools rectangles a bit less confusing
-			}}>
-				{group == ChildGroup.truth &&
-					<Squiggle start={new Vector2(0, heightOfNode / 2)} startControl_offset={new Vector2(10, 0)}
-						end={new Vector2(30, innerBoxOffset + (height / 2))} endControl_offset={new Vector2(-10, 0)} color={lineColor}/>}
-				{group == ChildGroup.relevance && !isMultiPremiseArgument &&
-					<Squiggle start={new Vector2(0, heightOfNode / 2)} startControl_offset={new Vector2(10, 0)}
-						end={new Vector2(30, innerBoxOffset + (height / 2))} endControl_offset={new Vector2(-10, 0)} color={lineColor}/>}
-				{group == ChildGroup.relevance && isMultiPremiseArgument &&
-					<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
-			</div>*/}
-			<Row ml={30}
-				className="clickThrough NodeChildHolderBox"
+			<Row className="NodeChildHolderBox clickThrough"
+				ref={useCallback(c=>{
+					const dom = GetDOM(c);
+					ref_leftColumn(dom);
+					if (dom) {
+						dom["nodeGroup"] = ref_group.current;
+						if (ref_group.current) dom.classList.add(`lcForNodeGroup_${ref_group.current.path}`);
+					}
+				}, [ref_leftColumn, ref_group])}
 				style={E(
-					{position: "relative", alignItems: "flex-start", color: liveSkin.NodeTextColor().css()},
-					//! isMultiPremiseArgument && {alignSelf: "flex-end"},
-					//!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
-					isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
+					{
+						//position: "relative",
+						position: "absolute",
+						/* removal fixes */
+						alignItems: "flex-start",
+						/* marginLeft: `calc(100% - ${width}px)`, */
+						//width: width + 30, // need space for gutter
+						width, // need space for gutter
+						boxSizing: "content-box",
+						paddingLeft: 30 + (inBelowGroup ? 20 : 0),
+						color: liveSkin.NodeTextColor().css(),
+					},
+					//isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 					// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
-					expanded && nodeChildrenToShow.length && innerBoxOffset == null && {opacity: 0, pointerEvents: "none"},
+					//expanded && nodeChildrenToShow.length && innerBoxOffset == null && {opacity: 0, pointerEvents: "none"},
 				)}
 			>
-				<Row className="clickThrough"
-					ref={useCallback(c=>{
-						ref_leftColumn.current = GetDOM(c) as any;
-						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);
-					}, [ref_leftColumn, ref_leftColumn_group])}
-					style={E(
-						{position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
+				<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
+					ref={c=>{
+						this.expandableBox = c;
+						if (ref_expandableBox) ref_expandableBox(c);
+						/*ref_leftColumn.current = GetDOM(c) as any;
+						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);*/
+					}}
+					//style={{marginTop: innerBoxOffset_safe}}
+					padding="2px 5px"
+					text={
+						<>
+							{/* for now, leave out the ratings-preview for these child-holder boxes; it has usefulness, but it's arguably too distracting atm */}
+							{/*(group == ChildGroup.truth || group == ChildGroup.relevance) &&
+							<RatingsPreviewBackground path={path} node={node} ratingType={group == ChildGroup.truth ? NodeRatingType.truth : NodeRatingType.relevance}/>*/}
+							<span style={ES(
+								{position: "relative", fontSize: 13},
+							)}>{text}</span>
+						</>
+					}
+					{...E(
+						{backgroundFillPercent: backgroundFillPercent ?? 0, backgroundColor, markerPercent},
+						GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as chroma.Color},
 					)}
-				>
-					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
-						ref={c=>{
-							this.expandableBox = c;
-							if (ref_expandableBox) ref_expandableBox(c);
-							/*ref_leftColumn.current = GetDOM(c) as any;
-							if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);*/
-						}}
-						//style={{marginTop: innerBoxOffset_safe}}
-						padding="2px 5px"
-						text={
-							<>
-								{/* for now, leave out the ratings-preview for these child-holder boxes; it has usefulness, but it's arguably too distracting atm */}
-								{/*(group == ChildGroup.truth || group == ChildGroup.relevance) &&
-								<RatingsPreviewBackground path={path} node={node} ratingType={group == ChildGroup.truth ? NodeRatingType.truth : NodeRatingType.relevance}/>*/}
-								<span style={ES(
-									{position: "relative", fontSize: 13},
-								)}>{text}</span>
-							</>
-						}
-						{...E(
-							{backgroundFillPercent: backgroundFillPercent ?? 0, backgroundColor, markerPercent},
-							GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as chroma.Color},
-						)}
-						toggleExpanded={UseCallback(e=>{
-							const newExpanded = !nodeView[expandKey];
-							const recursivelyCollapsing = !newExpanded && e.altKey;
-							RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
-								if (group == ChildGroup.truth) {
-									ACTMapNodeExpandedSet({
-										mapID: map.id, path, resetSubtree: recursivelyCollapsing,
-										[expandKey]: newExpanded,
-									});
-								} else {
-									ACTMapNodeExpandedSet({
-										mapID: map.id, path, resetSubtree: false,
-										[expandKey]: newExpanded,
-									});
-									if (recursivelyCollapsing) {
-										for (const child of nodeChildrenToShow) {
-											ACTMapNodeExpandedSet({
-												mapID: map.id, path: `${path}/${child.id}`, resetSubtree: true,
-												[expandKey]: newExpanded,
-											});
-										}
+					toggleExpanded={UseCallback(e=>{
+						const newExpanded = !nodeView[expandKey];
+						const recursivelyCollapsing = !newExpanded && e.altKey;
+						RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
+							if (group == ChildGroup.truth) {
+								ACTMapNodeExpandedSet({
+									mapID: map.id, path, resetSubtree: recursivelyCollapsing,
+									[expandKey]: newExpanded,
+								});
+							} else {
+								ACTMapNodeExpandedSet({
+									mapID: map.id, path, resetSubtree: false,
+									[expandKey]: newExpanded,
+								});
+								if (recursivelyCollapsing) {
+									for (const child of nodeChildrenToShow) {
+										ACTMapNodeExpandedSet({
+											mapID: map.id, path: `${path}/${child.id}`, resetSubtree: true,
+											[expandKey]: newExpanded,
+										});
 									}
 								}
-							});
-							e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
-							// return false;
-							if (nodeView[expandKey]) {
-								this.CheckForChanges();
 							}
-						}, [expandKey, map.id, nodeChildrenToShow, nodeView, path, group])}
-						afterChildren={<>
-							{ratingPanelShow &&
-								<div ref={c=>this.ratingPanelHolder = c} style={{
-									position: "absolute", left: 0, top: "calc(100% + 1px)",
-									width, minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth), zIndex: hovered_main ? 6 : 5,
-									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-								}}>
-									<RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType}/>
-								</div>}
-							<NodeUI_Menu_Stub {...{map, node, path}} childGroup={group}/>
-						</>}
-					/>
-					{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
-						<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}
-					{/*! nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
-						<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/> */}
-				</Row>
-				{nodeView[expandKey] &&
-				<Column className="rightColumn_forBox clickThrough" style={{
-					position: "absolute", left: "100%", //top: rightColumnOffset,
-				}}>
-					<NodeChildHolder ref={c=>this.childHolder = c}
-						{...{map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
-						usesGenericExpandedField={false}
-						linkSpawnPoint={innerBoxOffset_safe + (height / 2)}
-						onSizesChange={this.CheckForChanges}/>
-				</Column>}
+						});
+						e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
+						// return false;
+						if (nodeView[expandKey]) {
+							this.CheckForChanges();
+						}
+					}, [expandKey, map.id, nodeChildrenToShow, nodeView, path, group])}
+					afterChildren={<>
+						{ratingPanelShow &&
+							<div ref={c=>this.ratingPanelHolder = c} style={{
+								position: "absolute", left: 0, top: "calc(100% + 1px)",
+								width, minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth), zIndex: hovered_main ? 6 : 5,
+								padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+							}}>
+								<RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType}/>
+							</div>}
+						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={group}/>
+					</>}
+				/>
+				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
+					<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}
+				{/*! nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
+					<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/> */}
 			</Row>
+			{nodeView[expandKey] &&
+			<NodeChildHolder ref={c=>this.childHolder = c}
+				{...{map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
+				usesGenericExpandedField={false}
+				onSizesChange={this.CheckForChanges}/>}
 			</>
 		);
 	}
@@ -270,12 +257,12 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 			/* if (height != this.lastHeight) {
 				this.OnHeightChange();
 			} */
-			if (dividePoint != this.lastDividePoint) {
+			/*if (dividePoint != this.lastDividePoint) {
 				const {height} = this.GetMeasurementInfo();
 				const distFromInnerBoxTopToMainBoxCenter = height / 2;
 				const innerBoxOffset = (dividePoint - distFromInnerBoxTopToMainBoxCenter).NaNTo(0).KeepAtLeast(0);
 				this.SetState({innerBoxOffset});
-			}
+			}*/
 
 			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
 		}

@@ -6,7 +6,7 @@ import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchange
 import {FS_SourceChain, FS_SourceType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Attachments";
 import {FS_MapNodeL3, FS_MapNodeType, FS_ClaimForm, FS_Polarity} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode";
 import {FS_ArgumentType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNodeRevision";
-import {CSV_SL_Row} from "./DataModel";
+import {CSV_SL_Row} from "./DataModel.js";
 
 export const GetResourcesInImportSubtree_CSV_SL = CreateAccessor((rows: CSV_SL_Row[])=>{
 	const result = [] as ImportResource[];

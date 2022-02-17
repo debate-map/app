@@ -1,27 +1,40 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton.js";
-import {MapNodeL3, Polarity, Map, ChildGroup} from "dm_common";
-import {useRef_nodeChildHolder, useRef_nodeLeftColumn} from "tree-grapher";
+import {MapNodeL3, Polarity, Map, ChildGroup, MapNodeType} from "dm_common";
+import {useRef_nodeLeftColumn} from "tree-grapher";
 import {useCallback} from "react";
 import {Observer} from "web-vcore";
+import {liveSkin} from "Utils/Styles/SkinManager";
+import {GetNodeColor} from "Store/db_ext/nodes";
 
 @Observer
-export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, treePath: string, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
+export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
 	render() {
-		const {map, node, path, treePath, group, childBeingAdded} = this.props;
+		const {map, node, path, treePath, inBelowGroup, group, childBeingAdded} = this.props;
 		// const backgroundColor = GetNodeColor({ type: MapNodeType.category } as MapNodeL3);
 
-		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath, {color: "transparent"}, true);
-		const {ref_childHolder, ref_group: ref_group_2} = useRef_nodeChildHolder(treePath);
+		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
+			color: GetNodeColor({type: MapNodeType.claim}, "raw", false).css(),
+			gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
+		}, true);
 
 		return (
-			<Row className="argumentsControlBar clickThrough"
+			<Row className="ArgumentsControlBar clickThrough"
 				ref={useCallback(c=>{
-					ref_leftColumn.current = GetDOM(c) as any;
-					ref_childHolder.current = GetDOM(c) as any; // yes, this element is both the left-column and child-holder (child-holder needed so collision-avoidance occurs)
-					if (ref_leftColumn.current) ref_leftColumn.current["nodeGroup"] = ref_leftColumn_group.current;
-				}, [ref_childHolder, ref_leftColumn, ref_leftColumn_group])}
+					const dom = GetDOM(c);
+					ref_leftColumn(dom);
+					if (dom) {
+						dom["nodeGroup"] = ref_group.current;
+						if (ref_group.current) dom.classList.add(`lcForNodeGroup_${ref_group.current.path}`);
+					}
+				}, [ref_leftColumn, ref_group])}
+				style={{
+					position: "absolute",
+					//color: liveSkin.NodeTextColor().css(),
+					boxSizing: "content-box", // not needed since width is not hard-set, but using for consistency
+					paddingLeft: 30 + (inBelowGroup ? 20 : 0),
+				}}
 			>
 				{/* <Row style={{
 					/*alignSelf: "flex-start",*#/ position: "relative", background: backgroundColor.css(), borderRadius: 5,

@@ -5,7 +5,7 @@ import {GADDemo} from "UI/@GAD/GAD";
 import {HSLA} from "web-vcore";
 import {Assert} from "js-vextensions";
 
-export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background", allowDemoOverride = true): chroma.Color {
+export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarity}, type: "raw" | "background" = "background", allowDemoOverride = true): chroma.Color {
 	let result: chroma.Color;
 	/*if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
 	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
@@ -35,7 +35,8 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,55%,29%)");
 	else if (node.type == MapNodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,25%,25%)");
-		else result = chroma("hsl(0,40%,25%)");
+		else if (node.displayPolarity == Polarity.opposing) result = chroma("hsl(0,40%,25%)");
+		else result = chroma("hsl(210,15%,24%)");
 	} else {
 		Assert(false);
 	}

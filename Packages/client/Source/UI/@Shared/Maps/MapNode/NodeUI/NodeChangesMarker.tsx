@@ -3,7 +3,6 @@ import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {GetChangeTypeOutlineColor, ChangeType} from "dm_common";
-import {ChildLimitBar} from "./NodeChildHolder.js";
 
 export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string}, {}> {
 	static defaultProps = {textOutline: "rgba(10,10,10,1)"};

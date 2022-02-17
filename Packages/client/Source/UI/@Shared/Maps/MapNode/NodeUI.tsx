@@ -3,7 +3,7 @@ import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {ConnectorLinesUI, StripesCSS, useRef_nodeChildHolder, useRef_nodeLeftColumn} from "tree-grapher";
+import {ConnectorLinesUI, StripesCSS, useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
@@ -38,7 +38,7 @@ class ObservedValues {
 export class NodeUI extends BaseComponentPlus(
 	{} as {
 		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, treePath: string, style?,
-		leftMarginForLines?: number|n,
+		inBelowGroup?: boolean,
 		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
 		ref_innerUI?: (c: NodeUI_Inner|n)=>any,
@@ -50,7 +50,6 @@ export class NodeUI extends BaseComponentPlus(
 		aboveSize_relevance: 0, belowSize_relevance: 0,
 		aboveSize_freeform: 0, belowSize_freeform: 0,
 		aboveSize_direct: 0, belowSize_direct: 0,
-		lastChildBoxOffsets: null as {[key: string]: Vector2}|n,
 	},
 ) {
 	/* static renderCount = 0;
@@ -73,8 +72,8 @@ export class NodeUI extends BaseComponentPlus(
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, treePath, children} = this.props;
-		const {obs, aboveSize_truth, belowSize_truth, aboveSize_relevance, belowSize_relevance, aboveSize_freeform, belowSize_freeform, aboveSize_direct, belowSize_direct, lastChildBoxOffsets} = this.state;
+		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, treePath, inBelowGroup, children} = this.props;
+		const {obs, aboveSize_truth, belowSize_truth, aboveSize_relevance, belowSize_relevance, aboveSize_freeform, belowSize_freeform, aboveSize_direct, belowSize_direct} = this.state;
 
 		performance.mark("NodeUI_1");
 
@@ -251,15 +250,13 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
-		const {ref_childHolder, ref_group} = useRef_nodeChildHolder(treePath); // yes; like NodeChildHolder, NodeUI is itself a node-group (because it has sub-groups -- one per box and/or direct-child-holder)
 		let nextChildFullIndex = 0;
 		const GetTreePathForNextTreeChild = ()=>`${treePath}/${nextChildFullIndex++}`;
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolderBox_truth = //truthBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth} treePath={truthBoxVisible ? GetTreePathForNextTreeChild() : "n/a"}
-				ref={UseCallback(c=>this.childBoxes["truth"] = c, [])}
-				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
+				treePath={truthBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_truth}
 				onSizesChange={UseCallback((aboveSize, belowSize)=>{
@@ -268,9 +265,8 @@ export class NodeUI extends BaseComponentPlus(
 				}, [])}/>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
-				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path} treePath={relevanceBoxVisible ? GetTreePathForNextTreeChild() : "n/a"}
-				ref={UseCallback(c=>this.childBoxes["relevance"] = c, [])}
-				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
+				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
+				treePath={relevanceBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={hereArgChildren ?? ea} nodeChildrenToShow={hereArgChildrenToShow_relevance}
 				onSizesChange={UseCallback((aboveSize, belowSize)=>{
@@ -278,9 +274,8 @@ export class NodeUI extends BaseComponentPlus(
 					this.CheckForChanges();
 				}, [])}/>;
 		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform} treePath={freeformBoxVisible ? GetTreePathForNextTreeChild() : "n/a"}
-				ref={UseCallback(c=>this.childBoxes["freeform"] = c, [])}
-				ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
+				treePath={freeformBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}
 				onSizesChange={UseCallback((aboveSize, belowSize)=>{
@@ -323,14 +318,15 @@ export class NodeUI extends BaseComponentPlus(
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
-				treePath={GetTreePathForNextTreeChild()}
+				treePath={treePath}
+				treePath_priorChildCount={nextChildFullIndex} // because we use this, this group must go last
 				ref={nodeChildHolder_direct_ref}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
 				//linkSpawnPoint={isMultiPremiseArgument ? -selfHeight_plusRightContent + (selfHeight / 2) : dividePoint || (selfHeight / 2)}
 				//linkSpawnPoint={isMultiPremiseArgument ? -(obs.childrensHeight - childrenLineAnchorPoint_safe) : childrenLineAnchorPoint_safe}
-				linkSpawnPoint={linkSpawnPoint}
+				//linkSpawnPoint={linkSpawnPoint}
 				belowNodeUI={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
@@ -343,41 +339,39 @@ export class NodeUI extends BaseComponentPlus(
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
-		const {ref_leftColumn, ref_group: ref_leftColumn_group} = useRef_nodeLeftColumn(treePath, {color: GetNodeColor(hereArg ?? node, "raw", false).css()});
+		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
+			color: GetNodeColor(hereArg ?? node, "raw", false).css(),
+			gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
+			parentIsAbove: inBelowGroup,
+		});
 
 		const {css} = cssHelper(this);
 		return (
 			<>
-			<div ref={UseCallback(c=>{
-				this.nodeUI = c;
-				//WaitXThenRun_Deduped([this, "checkForChanges"], 0, ()=>this.CheckForChanges());
-				/*if (c) {
-					requestAnimationFrame(()=>this.CheckForChanges());
-					//FlashComp(this, {el: c, text: "NodeUI rendered"});
-				}*/
-			}, [])} className="NodeUI clickThrough" style={E(
-				{
-					position: "relative", display: "flex", alignItems: "flex-start", opacity: widthOverride != 0 ? 1 : 0,
-					//padding: "5px 0",
-					//height: newHeight,
-				},
-				style,
-			)}>
 				<Column
 					ref={useCallback(c=>{
-						ref_leftColumn.current = GetDOM(c) as any;
-						if (ref_leftColumn.current) ref_leftColumn.current["nodeGroup"] = ref_leftColumn_group.current;
-						if (ref_leftColumn.current && ref_leftColumn_group.current) ref_leftColumn.current.classList.add(`lcForNodeGroup_${ref_leftColumn_group.current.path}`);
-						//ref(c ? GetDOM(c) as any : null), [ref]);
-					}, [ref_leftColumn, ref_leftColumn_group])}
-					className="innerBoxColumn clickThrough"
+						this.nodeUI = c;
+						const dom = GetDOM(c);
+						ref_leftColumn(dom);
+						if (dom) {
+							dom["nodeGroup"] = ref_group.current;
+							if (ref_group.current) dom.classList.add(`lcForNodeGroup_${ref_group.current.path}`);
+						}
+					}, [ref_leftColumn, ref_group])}
+					className="NodeUI innerBoxColumn clickThrough"
 					style={css(
 						{
-							position: "relative",
+							//position: "relative",
+							position: "absolute",
 							/*paddingTop: gapBeforeInnerUI,
 							paddingBottom: gapAfterInnerUI,*/
-							width: "100%",
+							//width: "100%",
+							opacity: widthOverride != 0 ? 1 : 0,
+							//paddingLeft: inBelowGroup ? 20 : 30,
+							boxSizing: "content-box",
+							paddingLeft: 30 + (inBelowGroup ? 20 : 0),
 						},
+						style,
 					)}
 				>
 					{/*node.current.accessLevel != AccessLevel.basic &&
@@ -399,19 +393,9 @@ export class NodeUI extends BaseComponentPlus(
 						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
 				</Column>
 				{boxExpanded &&
-				<Column ref={UseCallback(c=>{
-					this.rightColumn = c;
-					ref_childHolder.current = GetDOM(c) as any;
-					if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`chForNodeGroup_${ref_group.current.path}`);
-				}, [ref_childHolder, ref_group])} className="rightColumn clickThrough" style={css(
-					{
-						position: "absolute", left: "100%", //top: rightColumnOffset,
-					},
-					TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
-				)}>
+				<>
 					{/*childConnectorBackground*/}
-					<ConnectorLinesUI treePath={treePath} width={30} linesFromAbove={false}/>
-					{!isMultiPremiseArgument && nodeChildHolder_direct}
+					{/*<ConnectorLinesUI treePath={treePath} width={30} linesFromAbove={false}/>*/}
 					{truthBoxVisible && nodeChildHolderBox_truth}
 					{relevanceBoxVisible && nodeChildHolderBox_relevance}
 					{/*<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.neutrality}
@@ -420,9 +404,8 @@ export class NodeUI extends BaseComponentPlus(
 						widthOfNode={widthOverride || width} heightOfNode={innerUIHeight}
 						nodeChildren={ea} nodeChildrenToShow={ea}/>*/}
 					{freeformBoxVisible && nodeChildHolderBox_freeform}
-				</Column>}
-			</div>
-			{isMultiPremiseArgument && nodeChildHolder_direct}
+					{nodeChildHolder_direct}
+				</>}
 			</>
 		);
 	}
@@ -461,53 +444,16 @@ export class NodeUI extends BaseComponentPlus(
 		if (obs.innerUIHeight != this.lastObservedValues.innerUIHeight) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
 				()=>`OnInnerUIHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewInnerUIHeight:${obs.innerUIHeight}`);
-			this.UpdateChildBoxOffsets();
 			// if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 		if (obs.height != this.lastObservedValues.height) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
 				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${obs.height}`);
-			this.UpdateChildBoxOffsets();
 			if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 
 		this.lastObservedValues = obs;
 	};
-
-	OnChildHeightOrPosChange_updateStateQueued = false;
-	OnChildHeightOrPosChange = ()=>{
-		//FlashComp(this, {text: "NodeUI.OnChildHeightOrPosChange"});
-		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
-		if (this.OnChildHeightOrPosChange_updateStateQueued) return;
-		this.OnChildHeightOrPosChange_updateStateQueued = true;
-		requestAnimationFrame(()=>{
-			this.OnChildHeightOrPosChange_updateStateQueued = false;
-			if (!this.mounted) return;
-			this.UpdateChildBoxOffsets();
-		});
-	};
-	UpdateChildBoxOffsets(forceUpdate = false) {
-		const newState = {} as any;
-
-		if (this.rightColumn) {
-			const holderRect = VRect.FromLTWH(this.rightColumn.DOM!.getBoundingClientRect());
-
-			const lastChildBoxOffsets = this.childBoxes.Pairs().ToMapObj(pair=>pair.key, pair=>{
-				const childBox = pair.value?.expandableBox?.DOM;
-				if (childBox == null) return null; // can be null in certain cases (eg. while inner-ui still data-loading)
-
-				let childBoxOffset = VRect.FromLTWH(childBox.getBoundingClientRect()).Position.Minus(holderRect.Position);
-				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");
-				childBoxOffset = childBoxOffset.Plus(new Vector2(0, childBox.getBoundingClientRect().height / 2));
-				return childBoxOffset;
-			});
-			newState.lastChildBoxOffsets = lastChildBoxOffsets;
-		}
-
-		const cancelIfStateSame = !forceUpdate;
-		const changedState = this.SetState(newState, undefined, cancelIfStateSame, true);
-		//Log(`Changed state? (${this.props.node.id}): ` + changedState);
-	}
 
 	// GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache: MeasurementInfo;
@@ -520,12 +466,13 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
 
 		const {props} = this;
-		const props_used = this.props.IncludeKeys("map", "node", "path", "leftMarginForLines") as typeof props;
+		const props_used = this.props.IncludeKeys("map", "node", "path", "inBelowGroup") as typeof props;
 		// Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 
-		const {map, node, path, leftMarginForLines} = props_used;
+		const {map, node, path, inBelowGroup} = props_used;
 		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
+		const leftMarginForLines = inBelowGroup ? 20 : 0;
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, leftMarginForLines);
 		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
 

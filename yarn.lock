@@ -3073,6 +3073,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-hierarchy@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@types/d3-hierarchy@npm:3.0.2"
+  checksum: d215dd0d2bbd6f3cf0cc15af314a27814e655771658cb3a3a7b00d5fab3de36aa08b396973c6da594f828a716d04019e17c67f8cd661167e40ef91f4abefd260
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.0":
   version: 3.7.1
   resolution: "@types/eslint-scope@npm:3.7.1"
@@ -6240,6 +6247,13 @@ __metadata:
   dependencies:
     array-find-index: ^1.0.1
   checksum: 1f59fe10b5339b54b1a1eee110022f663f3495cf7cf2f480686e89edc7fa8bfe42dbab4b54f85034bc8b092a76cc7becbc2dad4f9adad332ab5831bec39ad540
+  languageName: node
+  linkType: hard
+
+"d3-hierarchy@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "d3-hierarchy@npm:3.1.1"
+  checksum: 3e735875fee662c7ade6e789102bba53d7fc2ecb5de94c7990f80f9668e83cb1dd2242da874736166bc2f7b01af1465382b3cda33d6e13d672614633147746f0
   languageName: node
   linkType: hard
 
@@ -16307,6 +16321,8 @@ resolve@^2.0.0-next.3:
   version: 0.0.0-use.local
   resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:
+    "@types/d3-hierarchy": ^3.0.2
+    d3-hierarchy: ^3.1.1
     js-vextensions: ^1.0.69
     mobx: ^6.3.13
     mobx-react: ^7.2.1

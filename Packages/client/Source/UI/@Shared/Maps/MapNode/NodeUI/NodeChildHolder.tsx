@@ -1,29 +1,23 @@
-import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "web-vcore/nm/js-vextensions.js";
+import {ChildGroup, GetOrderingScores_AtPath, IsMultiPremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
-import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
-import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction, WaitXThenRun_Deduped} from "web-vcore";
-import {DroppableInfo} from "Utils/UI/DNDStructures.js";
+import {useCallback} from "react";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetOrderingScores_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
-import {GetNodeColor} from "Store/db_ext/nodes.js";
-import chroma from "web-vcore/nm/chroma-js.js";
-import {FlashComp} from "ui-debug-kit";
-import {ConnectorLinesUI, StripesCSS, useRef_nodeChildHolder} from "tree-grapher";
-import {useCallback} from "react";
+import {StripesCSS} from "tree-grapher";
+import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
+import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
-import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
+import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
+import {E, emptyObj, IsSpecialEmptyArray, nl, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Column} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
-import {NodeUI_Inner} from "../NodeUI_Inner.js";
-import {NodeChildHolder_Child} from "./NodeChildHolder/NodeChildHolder_Child.js";
+import {ChildLimitBar} from "./ChildLimitBar.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, treePath: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
-	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, belowNodeUI?: boolean, minWidth?: number,
+	map: Map, node: MapNodeL3, path: string, treePath: string, treePath_priorChildCount?: number, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
+	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 };
 const initialState = {
@@ -43,8 +37,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	childBoxes: {[key: number]: NodeUI} = {};
 	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
 	render() {
-		const {map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, belowNodeUI, minWidth} = this.props;
-		let {childrenWidthOverride, lastChildBoxOffsets, placeholderRect} = this.state;
+		const {map, node, path, treePath, treePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
+		let {childrenWidthOverride, placeholderRect} = this.state;
 		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
 
 		const nodeView = GetNodeView(map.id, path);
@@ -99,7 +93,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			}
 		}, 0);*/
 
-		let nextChildFullIndex = 0;
+		let nextChildFullIndex = treePath_priorChildCount ?? 0;
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
 			const childLimit = direction == "up" ? childLimit_up : childLimit_down; // polarity-groups "all" and "down" both use a "down" child-limit
@@ -111,13 +105,49 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			if (direction == "up") childrenHere.reverse();
 
 			const childrenHereUIs = childrenHere.map((child, index)=>{
-				return <NodeChildHolder_Child key={child.id} {...{
-					map, node, path, treePath_child: `${treePath}/${nextChildFullIndex++}`,
-					child, index, collection_untrimmed: childrenHere_untrimmed,
-					direction, belowNodeUI, childLimit,
-					widthOverride: childrenWidthOverride,
-					parent: this,
-				}}/>;
+				const parent = this;
+				const collection_untrimmed = childrenHere_untrimmed;
+				const widthOverride = childrenWidthOverride;
+
+				/*if (pack.node.premiseAddHelper) {
+					return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
+				}*/
+
+				const isFarthestChildFromDivider = index == (direction == "down" ? childLimit - 1 : 0);
+				//const isFarthestChildFromDivider = index == childLimit - 1;
+				const showLimitBar = isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit);
+
+				// wrap these in funcs, so the execution-orders always match the display-orders (so that tree-path is correct)
+				const getLimitBar = ()=>{
+					return <ChildLimitBar {...{
+						map, path, treePath: `${treePath}/${nextChildFullIndex++}`,
+						inBelowGroup: belowNodeUI ?? false,
+						childrenWidthOverride: widthOverride, direction, childLimit,
+						childCount: collection_untrimmed.length,
+					}}/>;
+				};
+				const getNodeUI = ()=>{
+					return <NodeUI key={child.id}
+						ref={UseCallback(c=>parent.childBoxes[child.id] = c, [child.id, parent.childBoxes])} // eslint-disable-line
+						//ref_innerUI={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
+						indexInNodeList={index} map={map} node={child}
+						path={`${path}/${child.id}`}
+						treePath={`${treePath}/${nextChildFullIndex++}`}
+						inBelowGroup={belowNodeUI}
+						widthOverride={widthOverride}
+						onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;
+				};
+
+				if (showLimitBar) {
+					return (
+						<React.Fragment key={child.id}>
+							{direction == "up" && getLimitBar()}
+							{getNodeUI()}
+							{direction == "down" && getLimitBar()}
+						</React.Fragment>
+					);
+				}
+				return getNodeUI();
 			});
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-uis array
 			// if (direction == 'up') childrenHereUIs.reverse();
@@ -139,27 +169,27 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						}
 
 						return (
-							<Column ref={c=>{ this[`${polarityGroup}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
-								style={E(
-									{position: "relative"},
-									childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.claim].minWidth, height: 100},
-								)}>
-								{/* childrenHere.length == 0 && <div style={{ position: 'absolute', top: '100%', width: '100%', height: 200 }}/> */}
+							<>
+								<Column ref={c=>{ this[`${polarityGroup}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
+									style={E(
+										{position: "relative"},
+										childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.claim].minWidth, height: 100},
+									)}>
+									{/* childrenHere.length == 0 && <div style={{ position: 'absolute', top: '100%', width: '100%', height: 200 }}/> */}
+									{provided.placeholder}
+									{dragIsOverDropArea && placeholderRect &&
+										<div style={{
+											position: "absolute", left: 0 /* placeholderRect.x */, top: placeholderRect.y, width: childrenWidthOverride || placeholderRect.width, height: placeholderRect.height,
+											border: "1px dashed rgba(255,255,255,1)", borderRadius: 5,
+										}}/>}
+								</Column>
 								{childrenHereUIs}
-								{provided.placeholder}
-								{dragIsOverDropArea && placeholderRect &&
-									<div style={{
-										position: "absolute", left: 0 /* placeholderRect.x */, top: placeholderRect.y, width: childrenWidthOverride || placeholderRect.width, height: placeholderRect.height,
-										border: "1px dashed rgba(255,255,255,1)", borderRadius: 5,
-									}}/>}
-							</Column>
+							</>
 						);
 					}}
 				</Droppable>
 			);
 		};
-
-		const {ref_childHolder, ref_group} = useRef_nodeChildHolder(treePath, belowNodeUI);
 
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		//this.childBoxes = {};
@@ -169,37 +199,37 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			//this.childInnerUIs = {};
 		}, []);*/
 		return (
-			<Column ref={useCallback(c=>{
-				this.childHolder = c;
-				ref_childHolder.current = GetDOM(c) as any;
-				if (ref_childHolder.current && ref_group.current) ref_childHolder.current.classList.add(`chForNodeGroup_${ref_group.current.path}`);
-			}, [ref_childHolder, ref_group])} className="NodeChildHolder clickThrough" style={E(
-				{
-					position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
-					// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
-					//marginLeft: belowNodeUI ? 20 : 30,
-					paddingLeft: belowNodeUI ? 20 : 30,
-					// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-				},
-				TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
-				belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
-				//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
-				// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
-				lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
-			)}>
-				{/*(linkSpawnPoint > 0 || belowNodeUI) && lastChildBoxOffsets &&
-					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
-					<ChildConnectorBackground node={node} path={path} linkSpawnPoint={new Vector2(belowNodeUI ? -10 : -30, linkSpawnPoint)} straightLines={belowNodeUI}
-						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
-						childBoxInfos={childBoxInfos}/>*/}
-				<ConnectorLinesUI treePath={treePath} width={belowNodeUI ? 20 : 30} linesFromAbove={belowNodeUI}/>
+			<>
+				<Column ref={useCallback(c=>{
+					this.childHolder = c;
+				}, [])} className="NodeChildHolder clickThrough" style={E(
+					{
+						position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
+						// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
+						//marginLeft: belowNodeUI ? 20 : 30,
+						paddingLeft: belowNodeUI ? 20 : 30,
+						// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+					},
+					TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
+					//belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
+					//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
+					// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
+					//lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
+				)}>
+					{/*(linkSpawnPoint > 0 || belowNodeUI) && lastChildBoxOffsets &&
+						// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
+						<ChildConnectorBackground node={node} path={path} linkSpawnPoint={new Vector2(belowNodeUI ? -10 : -30, linkSpawnPoint)} straightLines={belowNodeUI}
+							shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
+							childBoxInfos={childBoxInfos}/>*/}
+					{/*<ConnectorLinesUI treePath={treePath} width={belowNodeUI ? 20 : 30} linesFromAbove={belowNodeUI}/>*/}
 
-				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
-				{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
-					<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
-						widthOfNode={childrenWidthOverride}
-						nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
-						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>*/}
+					{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
+					{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
+						<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
+							widthOfNode={childrenWidthOverride}
+							nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
+							onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>*/}
+				</Column>
 				{!separateChildren &&
 					RenderPolarityGroup("all")}
 				{separateChildren &&
@@ -207,10 +237,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{showArgumentsControlBar &&
 					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c}
 						map={map} node={node} path={path} treePath={`${treePath}/${nextChildFullIndex++}`}
+						inBelowGroup={belowNodeUI ?? false}
 						group={group} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
 				{separateChildren &&
 					RenderPolarityGroup("down")}
-			</Column>
+			</>
 		);
 	}
 	childHolder: Column|n;
@@ -298,7 +329,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 			// this.UpdateState(true);
 			this.UpdateChildrenWidthOverride();
-			this.UpdateChildBoxOffsets();
 			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
 		}
 		this.lastHeight = height;
@@ -308,7 +338,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (orderStr != this.lastOrderStr) {
 			// this.OnChildHeightOrPosOrOrderChange();
 			// this.UpdateChildrenWidthOverride();
-			this.UpdateChildBoxOffsets();
 			// this.ReportDividePointChange();
 		}
 		this.lastOrderStr = orderStr;
@@ -324,7 +353,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		WaitXThenRun_Deduped(this, "OnChildHeightOrPosChange_lastPart", 0, ()=>{
 			if (!this.mounted) return;
 			this.UpdateChildrenWidthOverride();
-			this.UpdateChildBoxOffsets();
 			this.CheckForLocalChanges();
 		});
 	};
@@ -350,75 +378,5 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(undefined, true),
 		}, undefined, cancelIfStateSame, true);
 		// Log(`Changed state? (${this.props.node._id}): ` + changedState);
-	}
-	UpdateChildBoxOffsets(forceUpdate = false) {
-		//const childBoxes = this.childBoxes.VValues().filter(a=>a != null);
-		const newState = {} as any;
-
-		const showAddArgumentButtons = false; // node.type == MapNodeType.claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
-		// if (this.lastRender_source == RenderSource.SetState && this.childHolder) {
-		if (this.Expanded && this.childHolder) {
-			const holderRect = VRect.FromLTWH(this.childHolder.DOM!.getBoundingClientRect());
-
-			const lastChildBoxOffsets = this.childBoxes.Pairs().ToMapObj(pair=>pair.key, pair=>{
-			//const lastChildBoxOffsets = this.childInnerUIs.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
-				const childBox = pair.value?.NodeUIForDisplayedNode.innerUI?.DOM;
-				if (childBox == null) return null; // can be null in certain cases (eg. while inner-ui still data-loading)
-
-				// Assert(childBox.length, 'Could not find inner-ui of child-box.');
-				if (childBox == null) return null; // if can't find child-node's box, don't draw line for it (can happen if dragging child-node)
-				if (childBox.matches(".DragPreview")) return null; // don't draw line to node-box being dragged
-
-				let childBoxOffset = VRect.FromLTWH(childBox.getBoundingClientRect()).Position.Minus(holderRect.Position);
-				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");
-				childBoxOffset = childBoxOffset.Plus(new Vector2(0, childBox.getBoundingClientRect().height / 2));
-				return childBoxOffset;
-			});
-			newState.lastChildBoxOffsets = lastChildBoxOffsets;
-		}
-
-		const cancelIfStateSame = !forceUpdate;
-		const changedState = this.SetState(newState, undefined, cancelIfStateSame, true);
-		// Log(`Changed state? (${this.props.node._id}): ` + changedState);
-	}
-}
-
-export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: string, childrenWidthOverride: number|n, direction: "up" | "down", childCount: number, childLimit: number}, {}) {
-	static HEIGHT = 36;
-	render() {
-		const {map, path, childrenWidthOverride, direction, childCount, childLimit} = this.props;
-		const nodeView = GetNodeView(map.id, path);
-		const {initialChildLimit} = store.main.maps;
-		return (
-			<Row style={{
-				// position: "absolute", marginTop: -30,
-				//[direction == "up" ? "marginBottom" : "marginTop"]: 10,
-				margin: "5px 0",
-				width: childrenWidthOverride, cursor: "default",
-			}}>
-				<Button text={
-					<Row>
-						<Icon icon={`arrow-${direction}`} size={15}/>
-						<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>
-					</Row>
-				} title="Show more"
-				enabled={childLimit < childCount} style={ES({flex: 1})} onClick={()=>{
-					RunInAction("ChildLimitBar.showMore.onClick", ()=>{
-						nodeView[`childLimit_${direction}`] = (childLimit + 3).KeepAtMost(childCount);
-					});
-				}}/>
-				<Button ml={5} text={
-					<Row>
-						<Icon icon={`arrow-${direction == "up" ? "down" : "up"}`} size={15}/>
-						{/* <Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div> */}
-					</Row>
-				} title="Show less"
-				enabled={childLimit > initialChildLimit} style={ES({flex: 1})} onClick={()=>{
-					RunInAction("ChildLimitBar.showLess.onClick", ()=>{
-						nodeView[`childLimit_${direction}`] = (childLimit - 3).KeepAtLeast(initialChildLimit);
-					});
-				}}/>
-			</Row>
-		);
 	}
 }
