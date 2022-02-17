@@ -195,16 +195,17 @@ export class MapUI extends BaseComponent<Props, {}> {
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
 		//const playingTimeline = GetPlayingTimeline(map ? map.id : null);
 
-		const subNavBarWidth = 104;
+		//const subNavBarWidth = 104;
+		const subNavBarWidth = 0;
 		return (
 			<Column style={ES({flex: 1})}>
 				{!withinPage &&
 				<>
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>
-					<SubNavBar>
+					{/*<SubNavBar>
 						<SubNavBarButton page={store.main.page} subpage="graph" text="Graph"/>
 						<SubNavBarButton page={store.main.page} subpage="focus" text="Focus"/>
-					</SubNavBar>
+					</SubNavBar>*/}
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>
 				</>}
 				{/* !withinPage &&

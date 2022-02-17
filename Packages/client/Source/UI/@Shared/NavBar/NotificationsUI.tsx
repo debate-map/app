@@ -49,9 +49,9 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 			</ScrollView>
 		);
 	}
-	PostRender() {
+	/*PostRender() {
 		this.scrollView.UpdateSize();
-	}
+	}*/
 }
 
 /* export class MessageUI extends BaseComponent<{message: NotificationMessage}, {}> {

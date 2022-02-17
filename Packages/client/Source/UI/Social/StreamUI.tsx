@@ -87,7 +87,8 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id} treePath="0"
-							backgroundFillPercentOverride={100} useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
+							backgroundFillPercentOverride={100} width="100%"
+							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
 		} else if (run.commandName == AddNodeRevision.name) {
@@ -108,7 +109,8 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id} treePath="0"
-							backgroundFillPercentOverride={100} useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
+							backgroundFillPercentOverride={100} width="100%"
+							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
 		} else {

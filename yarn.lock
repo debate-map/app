@@ -2410,14 +2410,14 @@ __metadata:
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0
     sync-directory: ^2.2.22
-    tree-grapher: 0.0.2
+    tree-grapher: 0.0.3
     ts-loader: 9.2.3
     ts-node: ^10.0.0
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.5
-    web-vcore: 0.0.47
+    web-vcore: 0.0.48
   languageName: unknown
   linkType: soft
 
@@ -14098,16 +14098,15 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vscrollview@npm:1.0.3":
-  version: 1.0.3
-  resolution: "react-vscrollview@npm:1.0.3"
+"react-vscrollview@1.0.4, react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview":
+  version: 0.0.0-use.local
+  resolution: "react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview"
   peerDependencies:
     react: ^15.3.0
     react-dom: ^15.3.0
     react-vextensions: ^0.0.1
-  checksum: c3d71c341e0f1bbfb217d7d5586c2f8f012b5f0d004143703c0c5c05d4947ef7a9018119a0dacc32db7f58041ff8f6d5a30fbe435308c49334f0bbbd7db689b1
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "react@npm:17.0.2":
   version: 17.0.2
@@ -16317,7 +16316,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-grapher@0.0.2, tree-grapher@workspace:.yalc/tree-grapher":
+"tree-grapher@0.0.3, tree-grapher@workspace:.yalc/tree-grapher":
   version: 0.0.0-use.local
   resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:
@@ -16329,6 +16328,7 @@ resolve@^2.0.0-next.3:
     react: ^17.0.2
     react-dom: ^17.0.2
     use-callback-ref: ^1.2.5
+    use-state-with-deps: ^1.1.1
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
@@ -17085,6 +17085,15 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
+"use-state-with-deps@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "use-state-with-deps@npm:1.1.1"
+  peerDependencies:
+    react: "> 16.8.0"
+  checksum: 61cf89cdc08cb80d21fc82ad7b2494ef8880644c559af68437d1a78663682d2207f0580ae2188f912fb5a64fee2425eb18c10329171f2df5501705b07c9202be
+  languageName: node
+  linkType: hard
+
 "use@npm:^3.1.0":
   version: 3.1.1
   resolution: "use@npm:3.1.1"
@@ -17279,7 +17288,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.47, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.48, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -17354,7 +17363,7 @@ typescript@~3.7.3:
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14
     react-vmessagebox: 1.0.12
-    react-vscrollview: 1.0.3
+    react-vscrollview: 1.0.4
     remarkable: ^2.0.1
     remarkable-react: ^1.4.3
     sass-loader: ^12.1.0

@@ -31,7 +31,9 @@ export const nodeBottomPanel_minWidth = 600;
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
 		map: Map|n, node: MapNodeL3, path: string, parent: MapNodeL3|n,
-		width: number|n, widthOverride: number|n, panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,
+		width: number|string|n,
+		minWidth: number|n, // is this still needed?
+		panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,
 		backgroundColor: chroma.Color,
 		usePortal?: boolean, nodeUI?: NodeUI_Inner,
 	},
@@ -49,7 +51,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {
 			map, node, path, parent,
-			width, widthOverride, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
+			width, minWidth, panelsPosition, panelToShow, hovered, hoverTermIDs, onTermHover,
 			backgroundColor,
 			usePortal, nodeUI,
 		} = this.props;
@@ -107,7 +109,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 				{
 					position: "absolute",
 					zIndex: hovered ? 6 : 5,
-					minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth),
+					minWidth: (minWidth ?? 0).KeepAtLeast(nodeBottomPanel_minWidth),
 					padding: 5, borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					background: backgroundColor.css(),
 					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),

@@ -14,7 +14,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 //import classNames from "classnames";
-import {DEL, DoNothing, E, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {DEL, DoNothing, E, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
@@ -50,7 +50,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 export type NodeUI_Inner_Props = {
 	indexInNodeList: number, node: MapNodeL3, path: string, treePath: string, map?: Map,
-	width?: number|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
+	width?: number|string|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	usePortalForDetailBoxes?: boolean,
 } & {dragInfo?: DragInfo};
@@ -107,13 +107,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		let {indexInNodeList, map, node, path, treePath, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
+		const {indexInNodeList, map, node, path, treePath, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
-
-		// probably-temp fix for nodes sometimes first rendering in very-skinny mode, causing tree-grapher to get layout very wrong (since it apparently doesn't re-layout after width is changed)
-		if (widthOverride == null || widthOverride < MapNodeType_Info.for[node.type].minWidth) {
-			widthOverride = MapNodeType_Info.for[node.type].minWidth;
-		}
 
 		// connector part
 		// ==========
@@ -323,6 +318,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 			//const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath);
 
+			let width_final = widthOverride ?? width ?? MapNodeType_Info.for[node.type].minWidth;
+			if (IsNumber(width_final)) width_final = width_final.KeepAtLeast(MapNodeType_Info.for[node.type].minWidth);
+
 			return (
 				<ExpandableBox
 					ref={useCallback(c=>{
@@ -337,8 +335,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						backgroundFillPercent: GADDemo ? 100 : backgroundFillPercent,
 						backgroundColor, markerPercent,
 						//width,
-						width: "100%",
-						widthOverride,
+						width: width_final,
 					}}
 					className={
 						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
@@ -421,7 +418,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					toggleExpanded={toggleExpanded}
 					afterChildren={<>
 						{bottomPanelShow
-							&& <NodeUI_BottomPanel {...{map, node, path, parent, width, widthOverride, hovered, backgroundColor}}
+							&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: widthOverride, hovered, backgroundColor}}
 								ref={c=>this.bottomPanel = c}
 								usePortal={usePortalForDetailBoxes} nodeUI={this}
 								panelsPosition={panelsPosition!} panelToShow={panelToShow!}
