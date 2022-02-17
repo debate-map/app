@@ -4,10 +4,11 @@ import {useCallback} from "react";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
-import {ES, Icon, RunInAction} from "web-vcore";
+import {ES, Icon, Observer, RunInAction} from "web-vcore";
 import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
 
+@Observer
 export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, direction: "up" | "down", childCount: number, childLimit: number}, {}> {
 	static HEIGHT = 36;
 	render() {

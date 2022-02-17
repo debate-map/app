@@ -46,10 +46,6 @@ export class NodeUI extends BaseComponentPlus(
 	{
 		//expectedBoxWidth: 0, expectedBoxHeight: 0,
 		obs: new ObservedValues(),
-		aboveSize_truth: 0, belowSize_truth: 0,
-		aboveSize_relevance: 0, belowSize_relevance: 0,
-		aboveSize_freeform: 0, belowSize_freeform: 0,
-		aboveSize_direct: 0, belowSize_direct: 0,
 	},
 ) {
 	/* static renderCount = 0;
@@ -73,7 +69,7 @@ export class NodeUI extends BaseComponentPlus(
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, treePath, inBelowGroup, children} = this.props;
-		const {obs, aboveSize_truth, belowSize_truth, aboveSize_relevance, belowSize_relevance, aboveSize_freeform, belowSize_freeform, aboveSize_direct, belowSize_direct} = this.state;
+		const {obs} = this.state;
 
 		performance.mark("NodeUI_1");
 
@@ -94,8 +90,8 @@ export class NodeUI extends BaseComponentPlus(
 
 		const parent = GetParentNodeL3(path);
 		const parentPath = GetParentPath(path);
-		const parentNodeView = GetNodeView(map.id, parentPath);
-		const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
+		//const parentNodeView = GetNodeView(map.id, parentPath);
+		//const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
 
 		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
@@ -105,19 +101,6 @@ export class NodeUI extends BaseComponentPlus(
 		const hereArgChildren = hereArg ? GetNodeChildren(hereArg, hereArgNodePath) : null;
 		const hereArgChildrenToShow = hereArg ? GetNodeChildrenToShow(hereArg, hereArgNodePath).filter(a=>a.id != node.id) : null;
 		const boxExpanded = nodeView?.expanded ?? false;
-
-		/*const siblingNodeViews = Object.entries(parentNodeView?.children ?? {}).filter(a=>parentNodeView?.renderedChildrenOrder?.includes(a[0])).OrderBy(a=>parentNodeView?.renderedChildrenOrder?.indexOf(a[0]));
-		const ownIndexInSiblings = siblingNodeViews.findIndex(a=>a[0] == node.id);
-		let isFirstExpandedSibling = nodeView.expanded && siblingNodeViews.slice(0, ownIndexInSiblings).every(a=>!a[1].expanded);
-		let isLastExpandedSibling = nodeView.expanded && siblingNodeViews.slice(ownIndexInSiblings + 1).every(a=>!a[1].expanded);
-		const grandParentNodeView = GetNodeView(map.id, SlicePath(path, 2));
-		let ownIndexInVisualSiblings = -2;
-		if (isPremiseOfSinglePremiseArg && grandParentNodeView) {
-			const visualSiblingNodeViews = Object.entries(grandParentNodeView.children).filter(a=>grandParentNodeView.renderedChildrenOrder?.includes(a[0])).OrderBy(a=>grandParentNodeView.renderedChildrenOrder?.indexOf(a[0]));
-			ownIndexInVisualSiblings = visualSiblingNodeViews.findIndex(a=>a[0] == parent!.id);
-			if (!visualSiblingNodeViews.slice(0, ownIndexInVisualSiblings).every(a=>!a[1].expanded)) isFirstExpandedSibling = false;
-			if (!visualSiblingNodeViews.slice(ownIndexInVisualSiblings + 1).every(a=>!a[1].expanded)) isLastExpandedSibling = false;
-		}*/
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
@@ -138,41 +121,6 @@ export class NodeUI extends BaseComponentPlus(
 			...(freeformBoxVisible ? [] : ncToShow_freeform),
 		];
 		const usingDirect = ncToShow_direct.length;
-
-		const boxCenterPoints = [] as number[];
-		let boxSizesSum = 0;
-		const holderBoxHeight = 22;
-		if (truthBoxVisible) {
-			boxCenterPoints.push(aboveSize_truth + (holderBoxHeight / 2));
-			boxSizesSum += aboveSize_truth + holderBoxHeight + belowSize_truth;
-		}
-		if (relevanceBoxVisible) {
-			boxCenterPoints.push(boxSizesSum + aboveSize_relevance + (holderBoxHeight / 2));
-			boxSizesSum += aboveSize_relevance + holderBoxHeight + belowSize_relevance;
-		}
-		if (freeformBoxVisible) {
-			boxCenterPoints.push(boxSizesSum + aboveSize_freeform + (holderBoxHeight / 2));
-			boxSizesSum += aboveSize_freeform + holderBoxHeight + belowSize_freeform;
-		}
-		if (usingDirect) {
-			boxCenterPoints.push(aboveSize_direct);
-			boxSizesSum += aboveSize_direct + belowSize_direct;
-		}
-
-		const linkSpawnPoint = boxCenterPoints.Average();
-
-		/*let gapBeforeInnerUI = 5;
-		let gapAfterInnerUI = 5;
-		if (boxExpanded && !isFirstExpandedSibling) gapBeforeInnerUI += linkSpawnPoint - (obs.innerUIHeight / 2);
-		if (boxExpanded && !isLastExpandedSibling) gapAfterInnerUI += linkSpawnPoint - (obs.innerUIHeight / 2);
-		let rightColumnOffset = 0;
-		if (isFirstExpandedSibling) {
-			rightColumnOffset =
-				-linkSpawnPoint // align right-column's anchor-point (where its connector lines' start) to this-rect's top
-				+ gapBeforeInnerUI + (obs.innerUIHeight / 2); // then shift that anchor-point down to center of inner-ui
-		}
-		const newHeight = gapBeforeInnerUI + obs.innerUIHeight + gapAfterInnerUI;*/
-		//FlashComp(this, {wait: 0, text: `IsFirstExp:${isFirstExpandedSibling} @isLastExp:${isLastExpandedSibling} @t1:${ownIndexInSiblings} @t2:${ownIndexInVisualSiblings}`});
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
@@ -259,35 +207,35 @@ export class NodeUI extends BaseComponentPlus(
 				treePath={truthBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_truth}
-				onSizesChange={UseCallback((aboveSize, belowSize)=>{
+				/*onSizesChange={UseCallback((aboveSize, belowSize)=>{
 					this.SetState({aboveSize_truth: aboveSize, belowSize_truth: belowSize});
 					this.CheckForChanges();
-				}, [])}/>;
+				}, [])}*//>;
 		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
 			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
 				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
 				treePath={relevanceBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={hereArgChildren ?? ea} nodeChildrenToShow={hereArgChildrenToShow_relevance}
-				onSizesChange={UseCallback((aboveSize, belowSize)=>{
+				/*onSizesChange={UseCallback((aboveSize, belowSize)=>{
 					this.SetState({aboveSize_relevance: aboveSize, belowSize_relevance: belowSize});
 					this.CheckForChanges();
-				}, [])}/>;
+				}, [])}*//>;
 		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
 			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
 				treePath={freeformBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
 				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
 				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}
-				onSizesChange={UseCallback((aboveSize, belowSize)=>{
+				/*onSizesChange={UseCallback((aboveSize, belowSize)=>{
 					this.SetState({aboveSize_freeform: aboveSize, belowSize_freeform: belowSize});
 					this.CheckForChanges();
-				}, [])}/>;
+				}, [])}*//>;
 		let nodeChildHolder_direct: JSX.Element|n;
 		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
-		const nodeChildHolder_direct_onSizesChange = UseCallback((aboveSize, belowSize)=>{
+		/*const nodeChildHolder_direct_onSizesChange = UseCallback((aboveSize, belowSize)=>{
 			this.SetState({aboveSize_direct: aboveSize, belowSize_direct: belowSize});
 			this.CheckForChanges();
-		}, []);
+		}, []);*/
 		if (usingDirect && boxExpanded) {
 			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
@@ -301,7 +249,8 @@ export class NodeUI extends BaseComponentPlus(
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
 				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={ncToShow_direct}
-				onSizesChange={nodeChildHolder_direct_onSizesChange}/>;
+				//onSizesChange={nodeChildHolder_direct_onSizesChange}
+			/>;
 		}
 
 		performance.mark("NodeUI_3");
@@ -364,8 +313,6 @@ export class NodeUI extends BaseComponentPlus(
 				</Column>
 				{boxExpanded &&
 				<>
-					{/*childConnectorBackground*/}
-					{/*<ConnectorLinesUI treePath={treePath} width={30} linesFromAbove={false}/>*/}
 					{truthBoxVisible && nodeChildHolderBox_truth}
 					{relevanceBoxVisible && nodeChildHolderBox_relevance}
 					{/*<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.neutrality}
@@ -391,7 +338,6 @@ export class NodeUI extends BaseComponentPlus(
 	}
 
 	// don't actually check for changes until re-rendering has stopped for 500ms
-	// CheckForChanges = _.debounce(() => {
 	lastObservedValues = new ObservedValues();
 	CheckForChanges = ()=>{
 		//FlashComp(this, {text: "NodeUI.CheckForChanges"});
@@ -425,13 +371,8 @@ export class NodeUI extends BaseComponentPlus(
 		this.lastObservedValues = obs;
 	};
 
-	// GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache: MeasurementInfo;
 	measurementInfo_cache_lastUsedProps;
-	/* ComponentWillReceiveProps(newProps) {
-		this.GetMeasurementInfo(newProps, false); // refresh measurement-info when props change
-	} */
-	// GetMeasurementInfo(useCached: boolean) {
 	GetMeasurementInfo(): MeasurementInfo {
 		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
 
