@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, uplotDefaults} from "web-vcore";
+import {Chroma, Chroma_Safe, ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, uplotDefaults} from "web-vcore";
 import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
@@ -80,8 +80,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			{
 				label: "Rating count",
 				//stroke: chroma(0, 1, .5, "hsl").css(),
-				stroke: chroma("#ff7300").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
-				fill: chroma("#ff7300").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				stroke: Chroma("#ff7300").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: Chroma("#ff7300").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
 				//fill: "#ff7300FF",
 				points: {show: false},
 				//paths: uPlot.paths.spline2,
@@ -125,7 +125,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					},
 					//color: "rgba(0,255,0,1)",
 					//lineWidth: 1,
-					color: chroma("rgb(0,255,0)").alpha(ownRatingOpacity ?? (.5 * asNodeUIOverlay_alphaMultiplier)).css(),
+					color: Chroma("rgb(0,255,0)").alpha(ownRatingOpacity ?? (.5 * asNodeUIOverlay_alphaMultiplier)).css(),
 					lineWidth: 2,
 					drawType: "source-over",
 				},

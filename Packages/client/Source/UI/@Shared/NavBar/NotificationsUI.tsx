@@ -2,7 +2,7 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {ES, GetTimeSinceLoad, loadTime, Observer, RunInAction} from "web-vcore";
+import {Chroma, ES, GetTimeSinceLoad, loadTime, Observer, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {NotificationMessage} from "Store/main/@NotificationMessage.js";
 import moment from "web-vcore/nm/moment";
@@ -71,7 +71,7 @@ export class MessageUI extends BaseComponent<{message?: NotificationMessage, pin
 	render() {
 		const {message, pinned, children} = this.props;
 		const backgroundColor_base = liveSkin.NavBarPanelBackgroundColor().alpha(1);
-		const backgroundColor_blueified_normal = chroma.mix(backgroundColor_base, chroma("rgba(0,175,255,.7)"), .05);
+		const backgroundColor_blueified_normal = chroma.mix(backgroundColor_base, Chroma("rgba(0,175,255,.7)"), .05);
 		const backgroundColor_blueified_dark = backgroundColor_blueified_normal.darken(.1 * chroma_maxDarken);
 		return (
 			<Div ml={10} mt={10} className="MessageUI" style={{position: "relative", borderRadius: 5, cursor: "default", boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>

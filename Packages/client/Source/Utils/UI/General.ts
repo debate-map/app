@@ -1,3 +1,4 @@
+import chroma from "chroma-js";
 import katex from "katex";
 import {MouseEvent} from "react";
 

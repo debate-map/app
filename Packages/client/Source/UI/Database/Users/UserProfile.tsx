@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text, Spinner} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
-import {PageContainer, Observer, ES, Chroma_Safe, RunInAction_Set} from "web-vcore";
+import {PageContainer, Observer, ES, Chroma_Safe, RunInAction_Set, Chroma} from "web-vcore";
 import React, {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
@@ -112,7 +112,7 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 					<ColorPickerBox color={Chroma_Safe(profileUserFollow.markRatings_color).rgba()} onChange={val=>{
 						new SetUserFollowData({
 							targetUser: user.id,
-							userFollow: {...profileUserFollow, markRatings_color: chroma(val).css()},
+							userFollow: {...profileUserFollow, markRatings_color: Chroma(val).css()},
 						}).RunOnServer();
 					}}/>
 					<Text ml={5}>Size:</Text>
@@ -199,7 +199,7 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 				<Row mt={5}>
 					<Pre>Color: </Pre>
 					<ColorPickerBox color={Chroma_Safe(profileUser_h.backgroundCustom_color ?? "#FFFFFF").rgba()} onChange={val=>{
-						new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_color: chroma(val).css()}}).RunOnServer();
+						new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_color: Chroma(val).css()}}).RunOnServer();
 					}}/>
 					<Button ml={5} text="Clear" onClick={()=>{
 						new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_color: null}}).RunOnServer();

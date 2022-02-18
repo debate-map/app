@@ -1,4 +1,4 @@
-import {SubNavBar} from "web-vcore";
+import {Chroma, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
 import {Skin} from "../Skin.js";
@@ -9,9 +9,9 @@ export class DMSkin_Old extends Skin {
 	// scalars
 	// ==========
 
-	BasePanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
+	BasePanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.7)");
 	BasePanelDropShadowFilter = ()=>undefined;
-	OverlayPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
+	OverlayPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.7)");
 	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
 	OverlayBorderColor = ()=>undefined;
 	OverlayBorder = ()=>undefined;
@@ -22,16 +22,16 @@ export class DMSkin_Old extends Skin {
 		fonts += `, 'segoe ui emoji', 'noto color emoji', 'android emoji', 'emojisymbols', 'emojione mozilla', 'twemoji mozilla', 'segoe ui symbol'`;
 		return fonts;
 	};
-	TextColor = ()=>chroma("rgba(255,255,255,.7)");
+	TextColor = ()=>Chroma("rgba(255,255,255,.7)");
 	NodeTextColor = ()=>this.TextColor();
-	NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.5)");
+	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
 	NavBarTextColor = ()=>"rgb(255,255,255)";
 	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",
 	//navBarBoxShadow: "rgba(100,100,100,1) 0px 0px 3px",
 	NavBarBoxShadow = ()=>"rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
 	HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();
-	ListEntryBackgroundColor_Light = ()=>chroma("rgba(30,30,30,.7)");
-	ListEntryBackgroundColor_Dark = ()=>chroma("rgba(0,0,0,.7)");
+	ListEntryBackgroundColor_Light = ()=>Chroma("rgba(30,30,30,.7)");
+	ListEntryBackgroundColor_Dark = ()=>Chroma("rgba(0,0,0,.7)");
 
 	// styles
 	// ==========

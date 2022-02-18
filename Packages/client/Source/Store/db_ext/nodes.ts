@@ -2,7 +2,7 @@ import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 import {GetNodeChildrenL3, GetNodeRevisions, MapNodeL3, MapNodeRevision, MapNodeType, Polarity} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GADDemo} from "UI/@GAD/GAD";
-import {HSLA} from "web-vcore";
+import {Chroma_Safe, HSLA} from "web-vcore";
 import {Assert} from "js-vextensions";
 
 export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarity}, type: "raw" | "background" = "background", allowDemoOverride = true): chroma.Color {
@@ -29,14 +29,14 @@ export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarit
 		Assert(false);
 	}*/
 
-	if (node.type == MapNodeType.category) result = chroma("hsl(210,15%,24%)");
-	else if (node.type == MapNodeType.package) result = chroma("hsl(195,35%,35%)");
-	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,20%,45%)");
-	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,55%,29%)");
+	if (node.type == MapNodeType.category) result = Chroma_Safe("hsl(210,15%,24%)");
+	else if (node.type == MapNodeType.package) result = Chroma_Safe("hsl(195,35%,35%)");
+	else if (node.type == MapNodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
+	else if (node.type == MapNodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
 	else if (node.type == MapNodeType.argument) {
-		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,25%,25%)");
-		else if (node.displayPolarity == Polarity.opposing) result = chroma("hsl(0,40%,25%)");
-		else result = chroma("hsl(210,15%,24%)");
+		if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,25%,25%)");
+		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,40%,25%)");
+		else result = Chroma_Safe("hsl(210,15%,24%)");
 	} else {
 		Assert(false);
 	}
@@ -58,7 +58,7 @@ export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarit
 
 	if (allowDemoOverride && GADDemo) {
 		//result = chroma.mix(result, HSLA(0, 0, 1), .7); // mix result with white (70% white, 30% normal color)
-		result = chroma(HSLA(0, 0, 1));
+		result = Chroma_Safe(HSLA(0, 0, 1));
 	}
 
 	return result;

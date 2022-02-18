@@ -6,7 +6,7 @@ import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {FlashComp} from "ui-debug-kit";
-import {ES, HSLA, Observer, RunInAction} from "web-vcore";
+import {Chroma, ES, HSLA, Observer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
@@ -153,7 +153,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 					}
 					{...E(
 						{backgroundFillPercent: backgroundFillPercent ?? 0, backgroundColor, markerPercent},
-						GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as chroma.Color},
+						GADDemo && {backgroundFillPercent: 100, backgroundColor: Chroma(HSLA(0, 0, 1)) as chroma.Color},
 					)}
 					toggleExpanded={UseCallback(e=>{
 						const newExpanded = !nodeView[expandKey];

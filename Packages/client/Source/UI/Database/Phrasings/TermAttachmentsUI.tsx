@@ -103,6 +103,7 @@ class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enable
 		);
 	}
 }
+@Observer
 export class FoundTermUI extends BaseComponentPlus({} as {term: Term, index: number, enabled: boolean, onSelect: ()=>void}, {}) {
 	render() {
 		const {term, index, enabled, onSelect} = this.props;

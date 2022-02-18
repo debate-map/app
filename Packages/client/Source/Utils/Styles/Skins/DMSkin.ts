@@ -1,5 +1,5 @@
 import {chroma_maxDarken} from "Utils/UI/General.js";
-import {PageContainer, SubNavBar} from "web-vcore";
+import {Chroma, PageContainer, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {ProposalsColumn, ProposalEntryUI, ProposalsUserRankingColumn, ProposalUI_Inner, ProposalUI, ProposalsUI} from "web-vcore/nm/graphql-feedback.js";
 import {Button} from "web-vcore/nm/react-vcomponents";
@@ -13,19 +13,19 @@ export class DMSkin extends Skin {
 	// scalars
 	// ==========
 
-	BasePanelBackgroundColor = ()=>chroma("rgba(200,200,200,.7)");
+	BasePanelBackgroundColor = ()=>Chroma("rgba(200,200,200,.7)");
 	BasePanelDropShadowFilter = ()=>"drop-shadow(rgba(200,200,200,.7) 0px 0px 10px)";
-	OverlayPanelBackgroundColor = ()=>chroma("rgba(255,255,255,.7)");
-	//NavBarPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.7)");
+	OverlayPanelBackgroundColor = ()=>Chroma("rgba(255,255,255,.7)");
+	//NavBarPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.7)");
 	NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(.9);
-	OverlayBorderColor = ()=>chroma("rgba(0,0,0,.3)");
+	OverlayBorderColor = ()=>Chroma("rgba(0,0,0,.3)");
 	OverlayBorder = ()=>`1px solid ${this.OverlayBorderColor().css()}`;
 	HeaderFont = ()=>this.MainFont();
 	MainFont = ()=>"'Quicksand', sans-serif";
-	TextColor = ()=>chroma("rgb(50,50,50)");
-	//NodeTextColor = ()=>chroma("rgb(0,0,0)");
-	NodeTextColor = ()=>chroma("rgba(255,255,255,.7)");
-	NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.5)");
+	TextColor = ()=>Chroma("rgb(50,50,50)");
+	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
+	NodeTextColor = ()=>Chroma("rgba(255,255,255,.7)");
+	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
 	NavBarBoxShadow = ()=>"rgba(100,100,100,.3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
 	HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();
 	ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
@@ -177,7 +177,7 @@ export class DMSkin extends Skin {
 				if (ctx.key == "sub1") {
 					ctx.styleArgs.push({
 						//background: this.NavBarPanelBackgroundColor().css(),
-						background: chroma("rgba(0,0,0,.7)").css(),
+						background: Chroma("rgba(0,0,0,.7)").css(),
 						boxShadow: this.NavBarBoxShadow(),
 						color: "rgb(255,255,255)",
 					});
