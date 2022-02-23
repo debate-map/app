@@ -305,10 +305,23 @@ export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[
 	return TitleKey_values.map(key=>nodeRevision.phrasing[key]).filter(a=>a != null) as string[];
 }
 
+export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
 export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
 	form = form || GetNodeForm(node, path);
 	const phrasing = node.current.phrasing || {} as MapNodePhrasing_Embedded;
+
+	const [simpleTitle, simpleTitleFallback] = ((): [string | undefined, string]=>{
+		if (form) {
+			if (form == ClaimForm.negation) return [phrasing.text_negation, missingTitleStrings[1]];
+			if (form == ClaimForm.question) {
+				//return phrasing.text_question || missingTitleStrings[2];
+				// for now at least, allow fallback to the base title
+				return [phrasing.text_question || phrasing.text_base, missingTitleStrings[2]];
+			}
+		}
+		return [phrasing.text_base, missingTitleStrings[0]];
+	})();
 
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
@@ -338,7 +351,9 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 			return result;
 		}
 
-		if (node.current.quote || node.current.media) {
+		// for now, only use the "statements below were made" title if there is no simple-title set (needed for SL use-case)
+		// (in the future, I will probably make-so this can only be done in private maps or something, as it's contrary to the "keep components separate/debatable" concept)
+		if ((node.current.quote || node.current.media) && (simpleTitle?.trim() ?? "").length == 0) {
 			let text: string;
 			let firstSource: Source;
 			if (node.current.quote) {
@@ -376,19 +391,10 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 			if (firstSource.link) text += ` at ${VURL.Parse(firstSource.link, false).toString({domain_protocol: false})}`; // maybe temp
 			return text;
 		}
-
-		if (form) {
-			if (form == ClaimForm.negation) return phrasing.text_negation || missingTitleStrings[1];
-			if (form == ClaimForm.question) {
-				//return phrasing.text_question || missingTitleStrings[2];
-				// for now at least, allow fallback to the base title
-				return phrasing.text_question || phrasing.text_base || missingTitleStrings[2];
-			}
-		}
 	}
-	return phrasing.text_base || missingTitleStrings[0];
+
+	return simpleTitle || simpleTitleFallback;
 });
-export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string, group: ChildGroup) {
 	const nodeTypes = GetValues(MapNodeType);

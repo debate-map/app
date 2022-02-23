@@ -7,7 +7,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapNode, MapNodeType, GetAttachmentType_Node, MapNodeL2, AttachmentType, MapNodePhrasing_Embedded, TermAttachment, MapNodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, MapNodeL3} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
-import {ES} from "web-vcore";
+import {ES, Observer} from "web-vcore";
 import {GADDemo_Main} from "UI/@GAD/GAD";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
 import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
@@ -94,9 +94,14 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	render() {
 		const {forNew, splitAt, node} = this.props;
+		const attachmentType = GetAttachmentType_Node(node);
 
 		return (
 			<>
+				{node.type == MapNodeType.claim && (attachmentType == AttachmentType.quote || attachmentType == AttachmentType.media) &&
+					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
+						<Pre allowWrap={true}>If no title override is specified, a generic source-assertion claim title will be shown.</Pre>
+					</Row>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Text>Title (base): </Text>
 					<TitleInput {...OmitRef(this.props)} titleKey="text_base" innerRef={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}/>
@@ -104,15 +109,15 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 				{forNew && node.type == MapNodeType.argument &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>{`
-An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
+							An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
 
-Examples:
-* Shadow during lunar eclipses
-* May have used biased sources
-* Quote: Socrates
+							Examples:
+							* Shadow during lunar eclipses
+							* May have used biased sources
+							* Quote: Socrates
 
-The detailed version of the argument will be embodied in its premises/child-claims.
-						`.trim()}
+							The detailed version of the argument will be embodied in its premises/child-claims.
+						`.AsMultiline()}
 						</Pre>
 					</Row>}
 			</>
@@ -167,10 +172,8 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 			<TextArea
 				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
 				value={newData[titleKey]} onChange={val=>{
-					//let matches = val.Matches(/\{(.+?)\}(\[[0-9]+?\])?/);
-					//let termNames = [];
+					// find any term-markers, adding entries for them then removing the markers (eg. "some {term} name" -> "some term name")
 					const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
-						//termNames.push(g1);
 						const termName = g1;
 						if (newData.terms == null) {
 							newData.terms = [];
@@ -180,7 +183,11 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 						}
 						return g1;
 					}) : null;
-					newData.VSet(titleKey, DelIfFalsy(cleanedVal));
+
+					//newData.VSet(titleKey, DelIfFalsy(cleanedVal));
+					// if a field is editable by the UI, the result should always be non-null (empty string is preferred over null)
+					newData[titleKey] = cleanedVal || "";
+
 					Change();
 				}}
 				// for "base" title-key
