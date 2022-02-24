@@ -85,7 +85,8 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 
 	render() {
 		const {searchResults_partialTerms} = store.main.search;
-		const searchResultIDs = store.main.search.searchResults_nodeRevisionIDs;
+		// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
+		const searchResultIDs = store.main.search.searchResults_nodeRevisionIDs.Take(100);
 
 		let results_nodeRevisions = searchResultIDs.map(id=>GetNodeRevision(id)).filter(a=>a != null) as MapNodeRevision[]; // filter, cause search-results may be old (before an entry's deletion)
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
@@ -150,9 +151,9 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 							</Row>
 					</Row> */}
 					<Row style={{height: 40, padding: 10}}>
-						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>
-						<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Creator</span>
-						<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Creation date</span>
+						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 16}}>Title</span>
+						<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 16}}>Creator</span>
+						<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 16}}>Created at</span>
 					</Row>
 				</Column>
 				<ScrollView style={ES({flex: 1})} contentStyle={{paddingTop: 10}} onContextMenu={e=>{
@@ -276,7 +277,10 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			<Column>
 				<Row mt={index === 0 ? 0 : 5} className="cursorSet"
 					style={E(
-						{padding: 5, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)"},
+						{
+							padding: 5, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
+							color: liveSkin.NodeTextColor(),
+						},
 						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
 					)}
 					onMouseDown={e=>{
@@ -304,24 +308,29 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 						}}/>
 					</Row>}
 				{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
-					const searchResult_path_rootNodeID = resultPath.split("/")[0];
-					const searchResult_path_rootNode = GetNode(searchResult_path_rootNodeID);
-					const searchResult_map = GetMap(searchResult_path_rootNode?.rootNodeForMap);
+					const resultPath_nodeIDs = resultPath.split("/");
+					const resultPath_nodes = resultPath_nodeIDs.map(id=>GetNodeL2(id));
+					const result_map = GetMap(resultPath_nodes[0]?.rootNodeForMap);
+					const inCurrentMap = openMap && resultPath_nodeIDs[0] == openMap_rootNodeID;
 
-					const inCurrentMap = openMap && searchResult_path_rootNodeID == openMap_rootNodeID;
+					const resultPath_nodeTitles = resultPath_nodes.map(a=>(a ? GetNodeDisplayText(a) : "..."));
+					const resultPath_str = resultPath_nodeTitles.map(a=>{
+						return `"${a.slice(0, 20)}${a.length > 20 ? "..." : ""}"`;
+					}).join(" -> ");
+
 					return (
 						<Row key={resultPath}>
-							<Button mr="auto" text={inCurrentMap ? `Jump to ${resultPath}` : `Open containing map (${searchResult_map?.name ?? "n/a"})`} onClick={()=>{
+							<Button mr="auto" text={inCurrentMap ? `Jump to ${resultPath_str}` : `Open containing map (${result_map?.name ?? "n/a"})`} onClick={()=>{
 								if (inCurrentMap) {
 									JumpToNode(openMapID!, resultPath);
 								} else {
-									if (searchResult_map == null) return; // still loading
+									if (result_map == null) return; // still loading
 									RunInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (searchResult_map.id == globalMapID) {
+										if (result_map.id == globalMapID) {
 											store.main.page = "global";
 										} else {
 											store.main.page = "debates";
-											store.main.debates.selectedMapID = searchResult_map.id;
+											store.main.debates.selectedMapID = result_map.id;
 										}
 									});
 								}
@@ -338,8 +347,11 @@ export function JumpToNode(mapID: string, path: string) {
 	RunInAction("JumpToNode", ()=>{
 		const pathNodeIDs = path.split("/");
 
-		const mapView = new MapView();
-		const rootNodeView = new MapNodeView(path);
+		// "new Map[Node]View()" causes unwanted fields attached (now that "useDefineForClassFields:true" is enabled), so create empty object isntead
+		//const mapView = new MapView();
+		const mapView = {rootNodeViews: {}} as MapView;
+		//const rootNodeView = new MapNodeView(path);
+		const rootNodeView = {children: {}} as MapNodeView;
 		mapView.rootNodeViews[pathNodeIDs[0]] = rootNodeView;
 
 		let currentParentView = rootNodeView;
@@ -347,8 +359,16 @@ export function JumpToNode(mapID: string, path: string) {
 			if (i == 0) continue;
 			const descendantPath = pathNodeIDs.Take(i + 1).join("/");
 			currentParentView.expanded = true;
+			// for now, just make all children in the set visible (we don't yet have an easy to locate the node in the target path)
+			currentParentView.childLimit_down = 500;
+			currentParentView.childLimit_up = 500;
+			// for now, just expand all child-groups (we don't yet have an easy way to know which child-group the target-descendant's path is in)
+			currentParentView.expanded_truth = true;
+			currentParentView.expanded_relevance = true;
+			currentParentView.expanded_freeform = true;
 
-			const childView = new MapNodeView(descendantPath);
+			//const childView = new MapNodeView(descendantPath);
+			const childView = {children: {}} as MapNodeView;
 			currentParentView.children[descendantID] = childView;
 			currentParentView = childView;
 		}
@@ -356,6 +376,7 @@ export function JumpToNode(mapID: string, path: string) {
 		currentParentView.viewOffset = new Vector2(0, 0);
 
 		ACTMapViewMerge(mapID, mapView);
+		//ACTMapViewMerge(mapID, mapView, false, false);
 
 		// const mapUI = FindReact(document.querySelector('.MapUI')) as MapUI;
 		const mapUI = MapUI.CurrentMapUI;

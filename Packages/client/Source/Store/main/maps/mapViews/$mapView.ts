@@ -217,7 +217,7 @@ export function ACTMapNodeExpandedSet(opt: {
 	GetNodeView(mapID, path).openPanel = panel;
 }); */
 
-export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapView)=>{
+export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapView, mergeNulls = true, mergeUndefineds = true)=>{
 	// CreateMapViewIfMissing(opt.mapID);
 	if (GetMapView(mapID) == null) {
 		store.main.maps.mapViews.set(mapID, toMergeMapView);
@@ -243,7 +243,20 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 		oldFocusedNode_treeNode.Value.viewOffset = undefined;
 	}
 
-	const updatePrimitiveTreeNodes = GetTreeNodesInObjTree(toMergeMapView).filter(a=>IsPrimitive(a.Value) || a.Value == null);
+	const updatePrimitiveTreeNodes = GetTreeNodesInObjTree(toMergeMapView).filter(a=>{
+		if (a.Value === null) return mergeNulls;
+		if (a.Value === undefined) return mergeUndefineds;
+
+		// don't directly merge child node-views (we merge their individual fields instead)
+		/*const valIsNodeView = a.Value instanceof MapNodeView || a.Value.children != null || a.Value.expanded != null;
+		if (valIsNodeView) return false;*/
+
+		if (IsPrimitive(a.Value)) return true;
+		// the only non-primitive we'd directly merge is the viewOffset prop
+		if (a.prop == "viewOffset" && a.Value != null) return true;
+
+		return false;
+	});
 	for (const updatedNode of updatePrimitiveTreeNodes) {
 		// inStoreMapView = u.updateIn(updatedNode.PathStr_Updeep, updatedNode.Value, inStoreMapView);
 		DeepSet(inStoreMapView, updatedNode.PathStr, updatedNode.Value);

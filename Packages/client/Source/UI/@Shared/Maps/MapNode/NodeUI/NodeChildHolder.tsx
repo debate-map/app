@@ -82,7 +82,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		let childLimit_down = (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
 		const showAll = node.id == map.rootNode || node.type == MapNodeType.argument;
-		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
+		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
 
 		// helper
 		/*const renderedChildrenOrder = [] as string[];
@@ -113,9 +113,12 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
 				}*/
 
-				const isFarthestChildFromDivider = index == (direction == "down" ? childLimit - 1 : 0);
-				//const isFarthestChildFromDivider = index == childLimit - 1;
-				const showLimitBar = isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit);
+				const indexOfLastVisibleChild = childrenHere.length - 1; // the childrenHere array is already trimmed to the child-limit, so its last entry is the last visible
+				const isFarthestChildFromDivider = index == (direction == "down" ? indexOfLastVisibleChild : 0);
+				const childLimit_minShowableNow = initialChildLimit;
+				const childLimit_maxShowableNow = collection_untrimmed.length;
+				const childrenVisible = collection_untrimmed.length.KeepAtMost(childLimit);
+				const showLimitBar = isFarthestChildFromDivider && !showAll && (childrenVisible > childLimit_minShowableNow || childrenVisible < childLimit_maxShowableNow);
 
 				// wrap these in funcs, so the execution-orders always match the display-orders (so that tree-path is correct)
 				const getLimitBar = ()=>{

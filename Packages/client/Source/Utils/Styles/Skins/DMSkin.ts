@@ -83,6 +83,9 @@ export class DMSkin extends Skin {
 				background-color: rgba(255,255,255,1) !important;
 			}
 			
+			.Button {
+				word-break: initial; /* Buttons should *not* allow inherit the page-default "break-word" value, as this often leads to breaking on every letter. */
+			}
 			.ButtonBar_OptionUI {
 				border-width: 1px 0 1px 1px !important;
 				border-style: solid !important;

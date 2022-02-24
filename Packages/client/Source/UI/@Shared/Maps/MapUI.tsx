@@ -407,16 +407,23 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		const focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return false;
-		const focusNodeBoxPos = GetViewportRect(NN(GetDOM(focusNodeBox))).Center.Minus(GetViewportRect(NN(this.mapUIEl)).Position);
-		this.ScrollToPosition_Center(focusNodeBoxPos.Plus(viewOffset_target));
+		const focusNodeBoxCenter = GetViewportRect(NN(GetDOM(focusNodeBox))).Center.Minus(GetViewportRect(NN(this.mapUIEl)).Position);
+		this.ScrollToPosition_Center(focusNodeBoxCenter.Plus(viewOffset_target));
 		return true;
 	}
 	ScrollToPosition_Center(posInContainer: Vector2) {
 		const {withinPage} = this.props;
 		Assert(this.scrollView);
+		//const scrollContainerViewportSize = new Vector2(this.scrollView.vScrollableDOM.getBoundingClientRect().width, this.scrollView.vScrollableDOM.getBoundingClientRect().height);
+		const scrollContainerViewportSize = GetViewportRect(GetDOM(this.scrollView.content)!).Size;
+		const topBarsHeight = window.innerHeight - scrollContainerViewportSize.y;
 
 		const oldScroll = this.scrollView.GetScroll();
-		const newScroll = new Vector2(posInContainer.x - (window.innerWidth / 2), posInContainer.y - (window.innerHeight / 2));
+		const newScroll = new Vector2(
+			posInContainer.x - (scrollContainerViewportSize.x / 2),
+			// scroll down a bit extra, such that node is center of window, not center of scroll-view container/viewport (I've tried both, and this way is more centered "perceptually")
+			(posInContainer.y - (scrollContainerViewportSize.y / 2)) + (topBarsHeight / 2),
+		);
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;
 		}
