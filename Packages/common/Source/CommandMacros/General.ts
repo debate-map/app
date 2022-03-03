@@ -1,5 +1,6 @@
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {Command, DBHelper, dbp, GenerateUUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {GetCommandRuns} from "../DB/commandRuns.js";
 import {CommandRun, RLSTargetSet} from "../DB/commandRuns/@CommandRun.js";
 import {GetDBReadOnlyMessage, IsDBReadOnly} from "../DB/globalData.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
@@ -18,6 +19,9 @@ Command.augmentValidate = (command: Command<any>)=>{
 		const userHidden = GetUserHidden.NN(command.userInfo.id);
 		command["user_addToStream"] = userHidden.addToStream;
 	}
+
+	// todo: change this to only find command-runs that are older than X days (eg. 3)
+	command["_commandRuns"] = GetCommandRuns(undefined, undefined, true);
 };
 
 function CommandXOrAncestorCanShowInStream(command: Command<any>|n) {
@@ -68,6 +72,20 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 			// at end of path, there must exist a valid UUID
 			Assert(value != null && typeof value == "string" && Validate("UUID", value) == null, `Could not find valid UUID at rls-target field-path: ${pathInfo.fieldPath.join(".")}`);
 			rlsTargets[pathInfo.table]!.push(value);
+		}
+
+		// keep command-runs collection from growing beyond X entries (this implementation isn't great, but better than nothing for now)
+		const commandRunsToRemove = (command["_commandRuns"] as CommandRun[]).OrderByDescending(a=>a.runTime).filter((commandRun, index)=>{
+			// keep the most recent 100 entries
+			if (index < 100) return false;
+			// keep entries created in the last 3 days
+			const timeSinceRun = Date.now() - commandRun.runTime;
+			if (timeSinceRun < 3 * 24 * 60 * 60 * 1000) return false;
+			// delete the rest
+			return true;
+		});
+		for (const commandRun of commandRunsToRemove) {
+			db.set(dbp`commandRuns/${commandRun.id}`, null);
 		}
 
 		const id = GenerateUUID();
