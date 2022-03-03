@@ -1,8 +1,9 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
+import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {ChangeType, Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
@@ -43,6 +44,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 
 	node_oldData: MapNode|n;
 	nodeEdit?: Map_NodeEdit;
+	map_nodeEdits?: Map_NodeEdit[];
 	Validate() {
 		const {mapID, revision} = this.payload;
 
@@ -67,6 +69,8 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 				type: ChangeType.edit,
 			});
 			AssertValidate("Map_NodeEdit", this.nodeEdit, "Node-edit entry invalid");
+
+			this.map_nodeEdits = GetMapNodeEdits(mapID);
 		}
 
 		this.returnData = {id: revision.id};
@@ -75,7 +79,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {revision} = this.payload;
+		const {mapID, revision} = this.payload;
 		// needed, since "node.c_currentRevision" and "nodeRevision.node" are fk-refs to each other
 		//db.DeferConstraints = true; // commented; done globally in Command.augmentDBUpdates now (instant-checking doesn't really improve debugging in this context)
 
@@ -83,7 +87,22 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 		db.set(dbp`nodes/${revision.node}/.c_currentRevision`, revision.id);
 		delete revision.phrasing_tsvector; // db populates this automatically
 		db.set(dbp`nodeRevisions/${revision.id}`, revision);
-		if (this.nodeEdit) {
+
+		if (mapID != null) {
+			Assert(this.map_nodeEdits && this.nodeEdit);
+			// delete prior node-edits entries for this map+node (only need last entry for each)
+			const map_nodeEdits_forSameNode = this.map_nodeEdits.filter(a=>a.node == this.nodeEdit!.node);
+			for (const edit of map_nodeEdits_forSameNode) {
+				db.set(dbp`mapNodeEdits/${edit.id}`, null);
+			}
+
+			// delete old node-edits (ie. older than last 100) for this map, in mapNodeEdits
+			const map_nodeEdits_remaining = this.map_nodeEdits.Exclude(...map_nodeEdits_forSameNode);
+			const nodeEditsBeforeLast100 = map_nodeEdits_remaining.OrderByDescending(a=>a.time).Skip(100);
+			for (const edit of nodeEditsBeforeLast100) {
+				db.set(dbp`mapNodeEdits/${edit.id}`, null);
+			}
+
 			//db.set(dbp`maps/${mapID}/nodeEditTimes/data/.${revision.node}`, revision.createdAt);
 			//db.set(dbp`mapNodeEditTimes/${mapID}/.${revision.node}`, WrapDBValue(revision.createdAt, {merge: true}));
 			db.set(dbp`mapNodeEdits/${this.nodeEdit.id}`, this.nodeEdit);
