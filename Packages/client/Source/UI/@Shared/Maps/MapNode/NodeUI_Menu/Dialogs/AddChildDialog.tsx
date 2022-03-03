@@ -112,8 +112,8 @@ export class AddChildHelper {
 			if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
 			const runResult = runResult_copy = await command.RunOnServer();
 			RunInAction("AddChildDialog.Apply_mid", ()=>{
-				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.argumentNodeID, Date.now());
-				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.claimNodeID, Date.now());
+				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.argumentNodeID, runResult.doneAt);
+				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.claimNodeID, runResult.doneAt);
 			});
 
 			if (opt.expandSelf) {
@@ -124,7 +124,7 @@ export class AddChildHelper {
 		} else {
 			if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
 			const runResult = runResult_copy = await command.RunOnServer();
-			RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, Date.now()));
+			RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, runResult.doneAt));
 
 			if (opt.expandSelf) {
 				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,

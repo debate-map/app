@@ -34,9 +34,10 @@ type Payload = {
 		$argumentRevisionID: {$ref: "UUID"},
 		$claimNodeID: {$ref: "UUID"},
 		$claimRevisionID: {$ref: "UUID"},
+		$doneAt: {type: "number"},
 	}),
 })
-export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string}> {
+export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string, doneAt: number}> {
 	sub_addArgument: AddChildNode;
 	sub_addClaim: AddChildNode;
 	Validate() {
@@ -53,6 +54,7 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 			argumentRevisionID: this.sub_addArgument.sub_addNode.sub_addRevision.payload.revision.id,
 			claimNodeID: this.sub_addClaim.sub_addNode.payload.node.id,
 			claimRevisionID: this.sub_addClaim.sub_addNode.sub_addRevision.payload.revision.id,
+			doneAt: Date.now(),
 		};
 	}
 

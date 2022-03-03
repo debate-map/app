@@ -37,9 +37,10 @@ import {LinkNode} from "./LinkNode.js";
 		$nodeID: {$ref: "UUID"},
 		$revisionID: {$ref: "UUID"},
 		$linkID: {$ref: "UUID"},
+		$doneAt: {type: "number"},
 	}),
 })
-export class AddChildNode extends Command<{mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string}> {
+export class AddChildNode extends Command<{mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 
@@ -66,6 +67,7 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 			nodeID: this.sub_addNode.payload.node.id,
 			revisionID: this.sub_addNode.sub_addRevision.payload.revision.id,
 			linkID: this.sub_addLink.payload.link.id!,
+			doneAt: Date.now(),
 		};
 	}
 
