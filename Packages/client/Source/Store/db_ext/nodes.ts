@@ -4,8 +4,10 @@ import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Chroma_Safe, HSLA} from "web-vcore";
 import {Assert} from "js-vextensions";
+import {store} from "Store";
+import {NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
 
-export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarity}, type: "raw" | "background" = "background", allowDemoOverride = true): chroma.Color {
+export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarity, current?: MapNodeRevision}, type: "raw" | "background" = "background", allowOverrides = true): chroma.Color {
 	let result: chroma.Color;
 	/*if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
 	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
@@ -56,9 +58,23 @@ export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarit
 		result = GetNodeBackgroundColorFromRawColor(result);
 	}
 
-	if (allowDemoOverride && GADDemo) {
-		//result = chroma.mix(result, HSLA(0, 0, 1), .7); // mix result with white (70% white, 30% normal color)
-		result = Chroma_Safe(HSLA(0, 0, 1));
+	if (allowOverrides) {
+		if (GADDemo) {
+			//result = chroma.mix(result, HSLA(0, 0, 1), .7); // mix result with white (70% white, 30% normal color)
+			result = Chroma_Safe(HSLA(0, 0, 1));
+		}
+
+		if (node.current != null) {
+			const styleRules = store.main.maps.nodeStyleRules;
+			for (const rule of styleRules) {
+				if (!rule.enabled) continue;
+				if (rule.ifType == NodeStyleRule_IfType.lastEditorIs && node.current.creator == rule.if_user1) {
+					if (rule.thenType == NodeStyleRule_ThenType.setBackgroundColor) {
+						result = Chroma_Safe(rule.then_color1);
+					}
+				}
+			}
+		}
 	}
 
 	return result;

@@ -43,6 +43,8 @@ export class MapsState {
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
 	@O @version(2) weighting = WeightingType.date;
 	//@O nodeLeftBoxEnabled = false;
+	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
+	@O nodeStyleRules = [] as NodeStyleRule[];
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
@@ -50,6 +52,27 @@ export class MapsState {
 	@O addChildDialog = new AddChildDialogState();
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
 	@O exportSubtreeDialog = new ExportSubtreeDialogState();
+}
+
+export class NodeStyleRule {
+	constructor(data?: Partial<NodeStyleRule>) {
+		makeObservable(this);
+		Object.assign(this, data);
+	}
+
+	@O enabled = true;
+
+	@O ifType: NodeStyleRule_IfType;
+	@O if_user1: string;
+
+	@O thenType: NodeStyleRule_ThenType;
+	@O then_color1: string;
+}
+export enum NodeStyleRule_IfType {
+	"lastEditorIs" = "lastEditorIs",
+}
+export enum NodeStyleRule_ThenType {
+	"setBackgroundColor" = "setBackgroundColor",
 }
 
 export enum DetailsPanel_Subpanel {
