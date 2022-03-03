@@ -40,6 +40,9 @@ import {LinkNode} from "./LinkNode.js";
 	}),
 })
 export class AddChildNode extends Command<{mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string}> {
+	// controlled by parent
+	recordAsNodeEdit = true;
+
 	sub_addNode: AddNode;
 	sub_addLink: LinkNode;
 	parent_oldData: MapNode|n;
@@ -49,7 +52,7 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 		this.payload.link = E(new NodeChildLink(), this.payload.link);
 		this.payload.link.parent = parentID;
 
-		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID, node, revision}));
+		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID, node, revision}), a=>a.recordAsNodeEdit = this.recordAsNodeEdit);
 		this.payload.link.child = this.sub_addNode.payload.node.id;
 
 		this.IntegrateSubcommand(()=>this.sub_addLink, null, ()=>new LinkNode({mapID, link: this.payload.link!}));

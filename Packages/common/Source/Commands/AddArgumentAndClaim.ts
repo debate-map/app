@@ -44,7 +44,7 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 
 		this.IntegrateSubcommand(()=>this.sub_addArgument, null, ()=>new AddChildNode({
 			mapID, parentID: argumentParentID, node: argumentNode, revision: argumentRevision, link: argumentLink,
-		}));
+		}), a=>a.recordAsNodeEdit = false); // don't record the argument-node's creation as a node-edit, as it'll confuse people (ie. adding one argument, and seeing a marker for "+2" new-nodes)
 
 		this.IntegrateSubcommand(()=>this.sub_addClaim, null, ()=>new AddChildNode({mapID, parentID: this.sub_addArgument.returnData.nodeID, node: claimNode, revision: claimRevision, link: claimLink}));
 

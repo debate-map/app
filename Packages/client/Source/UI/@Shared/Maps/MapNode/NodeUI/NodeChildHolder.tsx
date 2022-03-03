@@ -4,7 +4,7 @@ import {useCallback} from "react";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
-import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL, NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
@@ -204,7 +204,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
 						// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
 						//marginLeft: belowNodeUI ? 20 : 30,
-						paddingLeft: belowNodeUI ? 20 : 30,
+						paddingLeft: belowNodeUI ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH,
 						// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					},
 					TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing

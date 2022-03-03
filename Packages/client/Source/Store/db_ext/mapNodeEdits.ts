@@ -9,17 +9,17 @@ export const GetNodeIDsChangedSinceX = CreateAccessor((mapID: string, sinceTime:
 	if (nodeEdits == null) return emptyArray;
 
 	const result = [] as string[];
-	for (const [nodeID, edit] of Object.entries(nodeEdits)) {
-		const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(nodeID) : 0;
+	for (const edit of nodeEdits) {
+		const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(edit.node) : 0;
 		const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 		if (edit.time > sinceTimeForNode) {
-			result.push(nodeID);
+			result.push(edit.node);
 		}
 	}
 	return result;
 });
-export const GetPathsToNodesChangedSinceX = CreateAccessor((mapID: string, time: number, includeAcknowledgement = true)=>{
-	// return CachedTransform_WithStore('GetPathsToNodesChangedSinceX', [mapID, time, includeAcknowledgement], {}, () => {
+const IDEqualsPassedData = (id, data)=>id == data;
+export const GetPathsToNodesChangedSinceX = CreateAccessor((mapID: string, time: number, includeAcknowledgement = true): string[]=>{
 	const nodeIDs = GetNodeIDsChangedSinceX(mapID, time, includeAcknowledgement);
 	const mapRootNodeID = GetRootNodeID(mapID);
 	if (mapRootNodeID == null) return emptyArray;
@@ -27,9 +27,10 @@ export const GetPathsToNodesChangedSinceX = CreateAccessor((mapID: string, time:
 	const result = [] as string[];
 	for (const nodeID of nodeIDs) {
 		const node = GetNode(nodeID);
-		if (node == null) return emptyArray;
-		const pathToRoot = SearchUpFromNodeForNodeMatchingX(nodeID, id=>id == mapRootNodeID);
-		if (pathToRoot == null) return emptyArray;
+		if (node == null) continue;
+		// catch-bail, so that we load the node-change-set in UI incrementally (it can take a while)
+		const pathToRoot = SearchUpFromNodeForNodeMatchingX.CatchBail(null, nodeID, IDEqualsPassedData, mapRootNodeID);
+		if (pathToRoot == null) continue;
 		result.push(pathToRoot);
 	}
 	return result;
@@ -77,7 +78,7 @@ export const GetNodeChangeType = CreateAccessor((node: MapNodeL2, sinceTime: num
 	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node.id) : 0;
 	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 	if (node.createdAt >= sinceTimeForNode) return ChangeType.add;
-	else if (node.current.createdAt > sinceTimeForNode) return ChangeType.edit;
+	if (node.current.createdAt > sinceTimeForNode) return ChangeType.edit;
 	//if (?) return ChangeType.remove;
 	return null;
 });

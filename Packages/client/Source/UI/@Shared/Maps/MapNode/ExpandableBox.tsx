@@ -9,12 +9,13 @@ type Props = {
 	parent?,
 	className?: string, width: number|string|n,
 	widthOverride?: number|n, // is this still needed?
-	innerWidth?: number, outlineColor?: string|n, padding: number | string, style?, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
+	innerWidth?: number, outlineColor?: chroma.Color|n, outlineThickness?: number|n, padding: number | string, style?, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
 	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number|n,
 	text, onTextHolderClick?, beforeChildren?, afterChildren?,
 	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any,
 };
 export class ExpandableBox extends BaseComponent<Props, {}> {
+	static defaultProps = {outlineThickness: 1};
 	static ValidateProps(props: Props) {
 		const {backgroundFillPercent} = props;
 		Assert(backgroundFillPercent >= 0 && backgroundFillPercent <= 100, "Background fill-percent must be between 0 and 100.");
@@ -25,7 +26,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 	expandButton: Button|n;
 	render() {
 		const {parent,
-			className, width, widthOverride, innerWidth, outlineColor, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
+			className, width, widthOverride, innerWidth, outlineColor, outlineThickness, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
 			backgroundFillPercent, backgroundColor, markerPercent,
 			text, onTextHolderClick, beforeChildren, afterChildren,
 			expanded, toggleExpanded, ...rest} = this.props;
@@ -38,7 +39,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 					//width, minWidth: widthOverride,
 					width: widthOverride ?? width,
-					boxShadow: `rgba(0,0,0,1) 0px 0px 2px${(outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6)}`,
+					boxShadow: `rgba(0,0,0,1) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`,
 				}, style)}
 				onClick={onClick} onMouseEnter={onMouseEnter as any} onMouseLeave={onMouseLeave as any} {...rest}>
 				{beforeChildren}

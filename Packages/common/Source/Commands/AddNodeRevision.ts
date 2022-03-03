@@ -40,7 +40,9 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNodeRevision}, {id: string}> {
-	// lastNodeRevisionID_addAmount = 0;
+	// controlled by parent
+	//lastNodeRevisionID_addAmount = 0;
+	recordAsNodeEdit = true;
 
 	node_oldData: MapNode|n;
 	nodeEdit?: Map_NodeEdit;
@@ -60,7 +62,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 			this.node_oldData = GetNode.NN(revision.node);
 		}
 
-		if (mapID != null) {
+		if (mapID != null && this.recordAsNodeEdit) {
 			this.nodeEdit = new Map_NodeEdit({
 				id: this.GenerateUUID_Once("nodeEdit.id"),
 				map: mapID,
@@ -88,9 +90,10 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 		delete revision.phrasing_tsvector; // db populates this automatically
 		db.set(dbp`nodeRevisions/${revision.id}`, revision);
 
-		if (mapID != null) {
+		if (mapID != null && this.recordAsNodeEdit) {
 			Assert(this.map_nodeEdits && this.nodeEdit);
 			// delete prior node-edits entries for this map+node (only need last entry for each)
+			// todo: maybe change this to only remove old entries of same map+node+type
 			const map_nodeEdits_forSameNode = this.map_nodeEdits.filter(a=>a.node == this.nodeEdit!.node);
 			for (const edit of map_nodeEdits_forSameNode) {
 				db.set(dbp`mapNodeEdits/${edit.id}`, null);

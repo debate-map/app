@@ -45,6 +45,8 @@ type Payload = {
 	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
 };
 
+const IDIsOfNodeThatIsRootOfMap = id=>GetNode(id)?.rootNodeForMap != null;
+
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
@@ -101,7 +103,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			return "Cannot move a node to a path underneath itself. (the move could orphan it and its descendants, if the new-parent's only anchoring was through the dragged-node)";
 		} */
 		if (unlinkFromOldParent) {
-			const closestMapRootNode = this.newParent_data.rootNodeForMap ? newParentID : SearchUpFromNodeForNodeMatchingX(newParentID, id=>GetNode(id)?.rootNodeForMap != null, [nodeID]);
+			const closestMapRootNode = this.newParent_data.rootNodeForMap ? newParentID : SearchUpFromNodeForNodeMatchingX(newParentID, IDIsOfNodeThatIsRootOfMap, null, [nodeID]);
 			AssertV(closestMapRootNode != null, "Cannot move a node to a path that would orphan it.");
 		}
 

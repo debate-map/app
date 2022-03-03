@@ -2,6 +2,7 @@ import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNode
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
+import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {ConnectorLinesUI, StripesCSS, useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
@@ -10,7 +11,7 @@ import {logTypes} from "Utils/General/Logging.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
-import {Assert, AssertWarn, E, EA, ea, emptyArray_forLoading, IsNaN, nl, ShallowEquals, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
+import {Assert, AssertWarn, E, EA, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
@@ -28,6 +29,10 @@ class ObservedValues {
 	childrensHeight = 0;
 	height = 0;
 }
+
+//export const GUTTER_WIDTH = 30;
+export const GUTTER_WIDTH = 40;
+export const GUTTER_WIDTH_SMALL = 20;
 
 // Warn if functions passed to NodeUI are transient (ie. change each render).
 // We don't need to do this for every component, but we need at least one component-type in the tree to do so, in order to "stop propagation" of transient props.
@@ -82,9 +87,8 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeView = GetNodeView(map.id, path);
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
 
-		//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
-		const sinceTime = 0;
-		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes(map.id, sinceTime, path);
+		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes.CatchBail(emptyArray, map.id, sinceTime, path); // catch bail, to lazy-load path-changes
 		const addedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.add).length;
 		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.edit).length;
 
@@ -260,7 +264,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: GetNodeColor(hereArg ?? node, "raw", false).css(),
-			gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
+			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			parentIsAbove: inBelowGroup,
 		});
 
@@ -288,7 +292,7 @@ export class NodeUI extends BaseComponentPlus(
 							opacity: widthOverride != 0 ? 1 : 0,
 							//paddingLeft: inBelowGroup ? 20 : 30,
 							boxSizing: "content-box",
-							paddingLeft: 30 + (inBelowGroup ? 20 : 0),
+							paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 						},
 						style,
 					)}
@@ -307,9 +311,7 @@ export class NodeUI extends BaseComponentPlus(
 					{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
 						<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 					{!boxExpanded &&
-						<NodeChildCountMarker childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
-					{!boxExpanded && (addedDescendants > 0 || editedDescendants > 0) &&
-						<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}
+						<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
 				</Column>
 				{boxExpanded &&
 				<>

@@ -1,10 +1,8 @@
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {MapNode} from "../../DB/nodes/@MapNode.js";
-import {GetNode} from "../../DB/nodes.js";
+import {CreateAccessor} from "mobx-graphlink";
 import {GetNodeChildLinks} from "../../DB/nodeChildLinks.js";
+import {GetNode} from "../../DB/nodes.js";
 
-export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string|n {
-	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node.id], {}, () => {
+export const SearchUpFromNodeForNodeMatchingX = CreateAccessor((startNodeID: string, xMatchFunc: (nodeID: string, data: any)=>boolean, xMatchFunc_data?: any, nodeIDsToIgnore?: string[]): string|n=>{
 	const startNode = GetNode.BIN(startNodeID); // call this so cache system knows to recalculate when node-data changes
 
 	type Head = {id: string, path: string[]};
@@ -13,7 +11,7 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 	while (currentLayerHeads.length) {
 		// first, check if any current-layer-head nodes are the root-node (if so, return right away, as we found a shortest path)
 		for (const layerHead of currentLayerHeads) {
-			if (xMatchFunc(layerHead.id)) {
+			if (xMatchFunc(layerHead.id, xMatchFunc_data)) {
 				return layerHead.path.join("/");
 			}
 		}
@@ -32,8 +30,7 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 		currentLayerHeads = newLayerHeads;
 	}
 	return null;
-	// });
-}
+});
 
 /* export function CreateMapViewForPath(path: string): MapView {
 	const pathNodes = GetPathNodes(path);

@@ -9,6 +9,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, Icon, Observer, RunInAction} from "web-vcore";
 import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeUI";
 
 @Observer
 export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, direction: "up" | "down", childCount: number, childLimit: number}, {}> {
@@ -21,7 +22,7 @@ export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePa
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: "transparent",
-			gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
+			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		});
 
 		return (
@@ -41,7 +42,7 @@ export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePa
 					//margin: "5px 0",
 					width: childrenWidthOverride, cursor: "default",
 					boxSizing: "content-box",
-					paddingLeft: 30 + (inBelowGroup ? 20 : 0),
+					paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 				}}
 			>
 				<Button text={

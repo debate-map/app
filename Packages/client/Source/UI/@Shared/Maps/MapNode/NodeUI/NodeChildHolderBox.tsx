@@ -1,4 +1,4 @@
-import {ArgumentType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
+import {ArgumentType, ChangeType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
 import React, {useCallback} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
@@ -12,12 +12,15 @@ import {E, emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {StripesCSS, useRef_nodeLeftColumn} from "tree-grapher";
+import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
+import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {nodeBottomPanel_minWidth} from "../DetailBoxes/NodeUI_BottomPanel.js";
 import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "../ExpandableBox.js";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
 import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
+import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "../NodeUI.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, treePath: string, inBelowGroup: boolean, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -100,7 +103,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 			color: group == ChildGroup.truth || group == ChildGroup.relevance
 				? GetNodeColor({type: "claim"} as any, "raw", false).css()
 				: GetNodeColor({type: MapNodeType.category} as any, "raw", false).css(),
-				gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
+				gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		});
 
 		return (
@@ -124,7 +127,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 						//width: width + 30, // need space for gutter
 						width, // need space for gutter
 						boxSizing: "content-box",
-						paddingLeft: 30 + (inBelowGroup ? 20 : 0),
+						paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 						color: liveSkin.NodeTextColor().css(),
 					},
 					//isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
@@ -198,9 +201,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 					</>}
 				/>
 				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
-					<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}
-				{/*! nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
-					<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/> */}
+					<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length}/>}
 			</Row>
 			{nodeView[expandKey] &&
 			<NodeChildHolder ref={c=>this.childHolder = c}

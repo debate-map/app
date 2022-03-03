@@ -202,6 +202,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}
 
 		const outlineColor = GetChangeTypeOutlineColor(changeType);
+		let outlineThickness = 1;
+		// in GADDemo, since node-background are white, we need to make these outlines more prominent
+		if (GADDemo && outlineColor != null) {
+			//outlineColor = chroma.mix(outlineColor, "black", .5);
+			outlineThickness = 4;
+		}
+
 		const barSize = 5;
 		const pathNodeIDs = GetPathNodeIDs(path);
 		//const isSubnode = IsNodeSubnode(node);
@@ -331,7 +338,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					}, [dragInfo?.provided])}
 					parent={this}
 					{...{
-						outlineColor, expanded,
+						outlineColor, outlineThickness, expanded,
 						backgroundFillPercent: GADDemo ? 100 : backgroundFillPercent,
 						backgroundColor, markerPercent,
 						//width,

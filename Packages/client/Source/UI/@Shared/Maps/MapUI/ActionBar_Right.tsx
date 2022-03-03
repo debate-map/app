@@ -47,8 +47,6 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 						// filter: 'drop-shadow(rgba(0,0,0,.5) 0px 0px 10px)',
 					},
 				)}>
-					{!GADDemo &&
-					<>
 						<Row center mr={5}>
 							<Pre>Show changes since: </Pre>
 							<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
@@ -58,15 +56,18 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 									mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
 								});
 							}}/>
-							<Pre ml={5}>Weighting: </Pre>
-							<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=>{
-								RunInAction("ActionBar_Right.Weighting.onChange", ()=>{
-									store.main.maps.weighting = val;
-								});
-							}}/>
+							{!GADDemo &&
+							<>
+								<Pre ml={5}>Weighting: </Pre>
+								<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=>{
+									RunInAction("ActionBar_Right.Weighting.onChange", ()=>{
+										store.main.maps.weighting = val;
+									});
+								}}/>
+							</>}
 						</Row>
-						<ShareDropDown map={map}/>
-					</>}
+						{!GADDemo &&
+							<ShareDropDown map={map}/>}
 					<LayoutDropDown map={map}/>
 				</Row>
 			</nav>

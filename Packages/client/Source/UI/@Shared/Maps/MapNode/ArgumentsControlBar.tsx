@@ -7,6 +7,7 @@ import {useCallback} from "react";
 import {Observer} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetNodeColor} from "Store/db_ext/nodes";
+import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "./NodeUI";
 
 @Observer
 export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
@@ -16,7 +17,7 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: GetNodeColor({type: MapNodeType.claim}, "raw", false).css(),
-			gutterWidth: inBelowGroup ? 20 : 30, parentGutterWidth: 30,
+			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		}, true);
 
 		return (
@@ -33,7 +34,7 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 					position: "absolute",
 					//color: liveSkin.NodeTextColor().css(),
 					boxSizing: "content-box", // not needed since width is not hard-set, but using for consistency
-					paddingLeft: 30 + (inBelowGroup ? 20 : 0),
+					paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 				}}
 			>
 				{/* <Row style={{

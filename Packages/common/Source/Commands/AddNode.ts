@@ -13,6 +13,9 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 	}),
 })
 export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
+	// controlled by parent
+	recordAsNodeEdit = true;
+
 	sub_addRevision: AddNodeRevision;
 
 	//parentID: string;
@@ -30,7 +33,7 @@ export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: 
 		node.createdAt = Date.now();
 		revision.node = node.id;
 
-		this.IntegrateSubcommand(()=>this.sub_addRevision, null, ()=>new AddNodeRevision({mapID, revision}));
+		this.IntegrateSubcommand(()=>this.sub_addRevision, null, ()=>new AddNodeRevision({mapID, revision}), a=>a.recordAsNodeEdit = this.recordAsNodeEdit);
 
 		// if sub of AddChildNode for new argument, ignore the "childrenOrder" prop requirement (gets added by later link-impact-node subcommand)
 		if (this.parentCommand) {
