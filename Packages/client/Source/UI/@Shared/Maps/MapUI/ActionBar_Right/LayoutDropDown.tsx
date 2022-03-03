@@ -31,7 +31,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final text="Layout" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", right: 0, width: 700, borderRadius: "0 0 0 5px"}}><Column>
+				<DropDownContent style={{position: "fixed", right: 0, width: uiState.nodeStyleRules.length ? 700 : 350, borderRadius: "0 0 0 5px"}}><Column>
 					<RowLR splitAt={splitAt}>
 						<Pre>Initial child limit: </Pre>
 						<Spinner min={1} style={{width: 100}} value={initialChildLimit} onChange={val=>{
