@@ -108,50 +108,6 @@ export class TitlePanel extends BaseComponentPlus(
 		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
 		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
 
-		const RenderNodeDisplayText = (text: string)=>{
-			const segments = GetSegmentsForTerms(text, termsToSearchFor);
-			this.Stash({segments}); // for debugging
-
-			const elements = [] as (string|JSX.Element)[];
-			for (const [index, segment] of segments.entries()) {
-				const mainPatternMatched = [...segment.patternMatches.keys()][0];
-				const mainPattern_match = [...segment.patternMatches.values()][0];
-				if (segment.patternMatches.size == 0) {
-					const segmentText = segment.text;
-					const edgeWhiteSpaceMatch = segmentText.match(/^( *).*?( *)$/);
-					if (edgeWhiteSpaceMatch) {
-						if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
-						elements.push(
-							<VReactMarkdown_Remarkable key={elements.length} containerType="span" source={segmentText}
-								rendererOptions={{
-									components: {
-										p: props=><span>{props.children}</span>,
-									},
-								}}/>,
-						);
-						if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
-					}
-				} else if (mainPatternMatched.name == "termForm") {
-					/*const refText = segment.textParts[1];
-					const termID = segment.textParts[2];*/
-					//const termStr = segment.textParts[2];
-					const termStr = mainPattern_match[2];
-
-					const terms = termsToSearchFor.filter(a=>a.forms.map(form=>form.toLowerCase()).includes(termStr.toLowerCase()))!; // nn: segments were initially found based on termsToSearchFor array
-					const termIDs = terms.map(a=>a.id);
-					elements.push(
-						mainPattern_match[1],
-						<TermPlaceholder key={elements.length} refText={termStr} termIDs={terms.map(a=>a.id)}
-							onHover={hovered=>this.OnTermHover(termIDs, hovered)} onClick={()=>this.OnTermClick(termIDs)}/>,
-						mainPattern_match[3],
-					);
-				} else {
-					Assert(false);
-				}
-			}
-			return elements;
-		};
-
 		return (
 			// <Row style={{position: "relative"}}>
 			<div {...FilterOutUnrecognizedProps(rest, "div")}
@@ -181,7 +137,7 @@ export class TitlePanel extends BaseComponentPlus(
 							onTermHover={(id, hovered)=>this.OnTermHover([id], hovered)}
 							onTermClick={id=>this.OnTermClick([id])}
 							termsToSearchFor={termsToSearchFor}/>}
-						{!latex && RenderNodeDisplayText(displayText)}
+						{!latex && RenderNodeDisplayText(displayText, termsToSearchFor, this)}
 					</span>}
 				{editing &&
 					<Row style={E(
@@ -213,7 +169,7 @@ export class TitlePanel extends BaseComponentPlus(
 						marginTop: GetSegmentsForTerms(noteText, termsToSearchFor).length > 1 ? -1 : 3, float: "right", // if has terms in note, bump up a bit (to offset bump-down from <sup> elements)
 					}}>
 						{/*noteText*/}
-						{RenderNodeDisplayText(noteText)}
+						{RenderNodeDisplayText(noteText, termsToSearchFor, this)}
 					</Pre>}
 				{node.type == MapNodeType.claim && node.current.quote &&
 					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
@@ -246,4 +202,50 @@ export class TitlePanel extends BaseComponentPlus(
 			this.SetState({editing: false, edit_newTitle: null, applyingEdit: false});
 		}
 	}
+}
+
+export function RenderNodeDisplayText(text: string, termsToSearchFor: Term[], titlePanel: TitlePanel|n) {
+	const segments = GetSegmentsForTerms(text, termsToSearchFor);
+	//titlePanel.Stash({segments}); // for debugging
+
+	const elements = [] as (string|JSX.Element)[];
+	for (const [index, segment] of segments.entries()) {
+		const mainPatternMatched = [...segment.patternMatches.keys()][0];
+		const mainPattern_match = [...segment.patternMatches.values()][0];
+		if (segment.patternMatches.size == 0) {
+			const segmentText = segment.text;
+			const edgeWhiteSpaceMatch = segmentText.match(/^( *).*?( *)$/);
+			if (edgeWhiteSpaceMatch) {
+				if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
+				elements.push(
+					<VReactMarkdown_Remarkable key={elements.length} containerType="span" source={segmentText}
+						rendererOptions={{
+							components: {
+								p: props=><span>{props.children}</span>,
+							},
+						}}/>,
+				);
+				if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
+			}
+		} else if (mainPatternMatched.name == "termForm") {
+			/*const refText = segment.textParts[1];
+			const termID = segment.textParts[2];*/
+			//const termStr = segment.textParts[2];
+			const termStr = mainPattern_match[2];
+
+			const terms = termsToSearchFor.filter(a=>a.forms.map(form=>form.toLowerCase()).includes(termStr.toLowerCase()))!; // nn: segments were initially found based on termsToSearchFor array
+			const termIDs = terms.map(a=>a.id);
+			elements.push(
+				mainPattern_match[1],
+				<TermPlaceholder key={elements.length} refText={termStr} termIDs={terms.map(a=>a.id)}
+					useBasicTooltip={titlePanel == null}
+					onHover={hovered=>titlePanel?.OnTermHover(termIDs, hovered)}
+					onClick={()=>titlePanel?.OnTermClick(termIDs)}/>,
+				mainPattern_match[3],
+			);
+		} else {
+			Assert(false);
+		}
+	}
+	return elements;
 }

@@ -20,10 +20,16 @@ mod tests {
 
 /// See: https://github.com/eulerto/wal2json/issues/221#issuecomment-1025143441
 /// View the tests above for examples, and intended functionality.
-pub fn parse_postgres_array(array_str: &str) -> JSONValue {
+pub fn parse_postgres_array(array_str: &str, items_are_serialized: bool) -> JSONValue {
     let result_as_strings: Vec<String> = parse_postgres_array_as_strings(array_str);
-    let result_as_json_value_strings = result_as_strings.into_iter().map(|a| serde_json::Value::String(a)).collect();
-    let result_within_json_array = serde_json::Value::Array(result_as_json_value_strings);
+    let result_as_json_values = result_as_strings.into_iter().map(|item_as_str| {
+        if (items_are_serialized) {
+            serde_json::from_str(&item_as_str.to_owned()).unwrap()
+        } else {
+            serde_json::Value::String(item_as_str)
+        }
+    }).collect();
+    let result_within_json_array = serde_json::Value::Array(result_as_json_values);
     result_within_json_array
 }
 pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {

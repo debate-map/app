@@ -5,9 +5,16 @@ import {GADDemo} from "UI/@GAD/GAD.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 
 @Observer
-export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termIDs: string[], showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
+export class TermPlaceholder extends BaseComponentPlus(
+	{showKeyStart: true} as {
+		refText: string, termIDs: string[], showKeyStart?: boolean,
+		useBasicTooltip: boolean,
+		onHover: (hovered: boolean)=>void, onClick: ()=>void,
+	},
+	{},
+) {
 	render() {
-		const {refText, termIDs, showKeyStart, onHover, onClick} = this.props;
+		const {refText, termIDs, showKeyStart, useBasicTooltip, onHover, onClick} = this.props;
 		const terms = termIDs.map(id=>GetTerm(id));
 		//const termVariantNumber = term ? GetTermVariantNumber(term) : null;
 		const termKeyStart =
@@ -19,6 +26,12 @@ export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {
 		// if (term == null) return <a>{refText}</a>;
 		return (
 			<a
+				title={!useBasicTooltip ? undefined : terms.map(term=>{
+					if (term == null) return "";
+					return `
+						${term.id}: ${term.definition}
+					`.AsMultiline(0);
+				}).filter(a=>a).join("\n")}
 				style={E(
 					{
 						//color: HSLA(120, 1, .7, 1),

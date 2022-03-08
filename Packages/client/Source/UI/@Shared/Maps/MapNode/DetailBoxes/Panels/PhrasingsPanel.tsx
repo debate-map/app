@@ -1,13 +1,15 @@
 import {Button, Column, Pre, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {InfoButton, Observer} from "web-vcore";
-import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType, Map, GetAccessPolicy, CanAddPhrasing, MapNodeL3, PermitCriteriaPermitsNoOne} from "dm_common";
+import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType, Map, GetAccessPolicy, CanAddPhrasing, MapNodeL3, PermitCriteriaPermitsNoOne, GetTermsAttached} from "dm_common";
 import {GetEntries} from "web-vcore/nm/js-vextensions";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
+import {BailIfNull, GetDoc} from "web-vcore/nm/mobx-graphlink";
 import {ShowAddPhrasingDialog} from "../../../../../Database/Phrasings/PhrasingDetailsUI.js";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel.js";
+import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeUI_Inner/TitlePanel.js";
 
 const Phrasing_FakeID = "FAKE";
 
@@ -63,9 +65,16 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 	}
 }
 
-export class PhrasingRow extends BaseComponentPlus({} as {phrasing: MapNodePhrasing, node: MapNodeL3, index: number, selected: boolean, toggleSelected: ()=>any}, {}) {
+@Observer
+export class PhrasingRow extends BaseComponent<{phrasing: MapNodePhrasing, node: MapNodeL3, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
 	render() {
 		const {phrasing, node, index, selected, toggleSelected} = this.props;
+		const termsToSearchFor = (phrasing.terms?.map(attachment=>{
+			//if (Validate("UUID", attachment.id) != null) return null; // if invalid term-id, don't try to retrieve entry
+			return BailIfNull(GetDoc({}, a=>a.terms.get(attachment.id)));
+		}) ?? []).filter(a=>a);
+
+		//const segments = GetSegmentsForTerms(phrasing.text_base, termsToSearchFor);
 		return (
 			<Row mt={index == 0 ? 0 : 3} style={{position: "relative", backgroundColor: `rgba(255,255,255,${selected ? 0.3 : 0.15})`, borderRadius: 5, padding: "2px 5px", cursor: "pointer"}} onClick={event=>{
 				if (event.defaultPrevented) return;
@@ -77,7 +86,10 @@ export class PhrasingRow extends BaseComponentPlus({} as {phrasing: MapNodePhras
 				{/* <CheckBox value={true} onChange={(val) => {
 					// todo: have this change which phrasing is selected to be used (in your client), for viewing/setting ratings in the ratings panels // nvm, having shared ratings -- for now at least
 				}}/> */}
-				<div style={{width: "100%", whiteSpace: "normal"}}>{phrasing.text_base}</div>
+
+				{/*<div style={{width: "100%", whiteSpace: "normal"}}>{phrasing.text_base}</div>*/}
+				<div>{RenderNodeDisplayText(phrasing.text_base, termsToSearchFor, null)}</div>
+
 				{/* <Pre title="Quality">Q: 50%</Pre> */}
 				{selected &&
 					<Phrasing_RightPanel phrasing={phrasing} node={node}/>}

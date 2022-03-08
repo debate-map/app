@@ -297,10 +297,13 @@ impl LDChange {
     }
 }
 fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &String) -> JSONValue {
-    if typ.as_str().ends_with("[]") {
-        return parse_postgres_array(value.as_str().unwrap());
+    let type_str = typ.as_str();
+    if type_str.ends_with("[]") {
+        let item_type_as_bytes = &type_str.as_bytes()[..type_str.find("[]").unwrap()];
+        let item_type = String::from_utf8(item_type_as_bytes.to_vec()).unwrap();
+        return parse_postgres_array(value.as_str().unwrap(), item_type == "jsonb");
     }
-    match typ.as_str() {
+    match type_str {
         "jsonb" => {
             // the LDChange vals of type jsonb are initially stored as strings
             // convert that to a serde_json::Value::Object, so serde_json::from_value(...) can auto-deserialize it to a nested struct
