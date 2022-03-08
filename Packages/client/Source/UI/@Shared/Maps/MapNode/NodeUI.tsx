@@ -146,7 +146,14 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.renderCount++;
 		//NodeUI.lastRenderTime = Date.now();
 
+		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
+			color: GetNodeColor(hereArg ?? node, "raw", false).css(),
+			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
+			parentIsAbove: inBelowGroup,
+		});
+
 		const proxyNodeUI_ref = UseCallback(c=>this.proxyDisplayedNodeUI = c, []);
+		let innerUIOverride_baseClaimMissing: JSX.Element|n;
 		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
 		if (isSinglePremiseArgument) {
 			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.claim);
@@ -175,21 +182,19 @@ export class NodeUI extends BaseComponentPlus(
 
 			// placeholder, so user can add the base-claim
 			// const backgroundColor = GetNodeColor(node).desaturate(0.5).alpha(0.8);
-			return (
-				<Column>
-					<Row /* mt={indexInNodeList === 0 ? 0 : 5} */ className="cursorSet"
-						style={{
-							padding: 5, borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
-							background: /* backgroundColor.css() */ "rgba(0, 0, 0, 0.7)",
-							margin: "5px 0", // emulate usual internal NodeUI
-							fontSize: 14, // emulate usual internal NodeUI_Inner
-						}}
-					>
-						<span style={{opacity: 0.5}}>(single-premise arg lacks base-claim; right-click to add)</span>
-						{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
-					</Row>
-				</Column>
+			innerUIOverride_baseClaimMissing = (
+				<Row /* mt={indexInNodeList === 0 ? 0 : 5} */ className="cursorSet"
+					style={{
+						padding: 5, borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
+						background: /* backgroundColor.css() */ "rgba(0, 0, 0, 0.7)",
+						margin: "5px 0", // emulate usual internal NodeUI
+						fontSize: 14, // emulate usual internal NodeUI_Inner
+					}}
+				>
+					<span style={{opacity: 0.5, color: liveSkin.NodeTextColor().css()}}>(single-premise arg lacks base-claim; right-click to add)</span>
+					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
+					<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
+				</Row>
 			);
 		}
 
@@ -262,12 +267,6 @@ export class NodeUI extends BaseComponentPlus(
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
 		this.Stash({nodeChildrenToShow}); // for debugging
 
-		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: GetNodeColor(hereArg ?? node, "raw", false).css(),
-			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
-			parentIsAbove: inBelowGroup,
-		});
-
 		const {css} = cssHelper(this);
 		return (
 			<>
@@ -297,21 +296,25 @@ export class NodeUI extends BaseComponentPlus(
 						style,
 					)}
 				>
-					{/*node.current.accessLevel != AccessLevel.basic &&
-					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
-						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
-					</div>*/}
-					<NodeUI_Inner ref={UseCallback(c=>{
-						this.innerUI = GetInnerComp(c);
-						if (ref_innerUI) ref_innerUI(c);
-					}, [ref_innerUI])} {...{indexInNodeList, map, node, path, treePath, width, widthOverride}}/>
-					{/* these are for components shown just to the right of the NodeUI_Inner box */}
-					{nodeChildrenToShow == emptyArray_forLoading &&
-						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-					{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
-						<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
-					{!boxExpanded &&
-						<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
+					{innerUIOverride_baseClaimMissing}
+					{innerUIOverride_baseClaimMissing == null &&
+					<>
+						{/*node.current.accessLevel != AccessLevel.basic &&
+						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
+							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
+						</div>*/}
+						<NodeUI_Inner ref={UseCallback(c=>{
+							this.innerUI = GetInnerComp(c);
+							if (ref_innerUI) ref_innerUI(c);
+						}, [ref_innerUI])} {...{indexInNodeList, map, node, path, treePath, width, widthOverride}}/>
+						{/* these are for components shown just to the right of the NodeUI_Inner box */}
+						{nodeChildrenToShow == emptyArray_forLoading &&
+							<div style={{margin: "auto 0 auto 10px"}}>...</div>}
+						{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
+							<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
+						{!boxExpanded &&
+							<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
+					</>}
 				</Column>
 				{boxExpanded &&
 				<>
