@@ -4,9 +4,9 @@ import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {Chroma, Chroma_Safe, Observer, RunInAction, RunInAction_Set} from "web-vcore";
+import {Chroma, Chroma_Safe, Observer, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
 import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
-import {GetUser, Map} from "dm_common";
+import {GetUser, Map, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React from "react";
 import {GetEntries} from "js-vextensions";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
@@ -22,8 +22,6 @@ const ratingPreviewOptions = [
 export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
-		const {initialChildLimit} = store.main.maps;
-		const {showReasonScoreValues} = store.main.maps;
 		const uiState = store.main.maps;
 
 		const Button_Final = GADDemo ? Button_GAD : Button;
@@ -33,24 +31,26 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 				<DropDownTrigger><Button_Final text="Layout" style={{height: "100%"}}/></DropDownTrigger>
 				<DropDownContent style={{position: "fixed", right: 0, width: uiState.nodeStyleRules.length ? 700 : 350, borderRadius: "0 0 0 5px"}}><Column>
 					<RowLR splitAt={splitAt}>
-						<Pre>Initial child limit: </Pre>
-						<Spinner min={1} style={{width: 100}} value={initialChildLimit} onChange={val=>{
-							RunInAction_Set(this, ()=>store.main.maps.initialChildLimit = val);
+						<Pre>Initial child limit:</Pre>
+						<Spinner min={1} style={{width: 100}} value={uiState.initialChildLimit} onChange={val=>{
+							RunInAction_Set(this, ()=>uiState.initialChildLimit = val);
 						}}/>
 					</RowLR>
-					<RowLR splitAt={splitAt}>
-						<Pre>Show Reason Score values: </Pre>
-						<CheckBox value={showReasonScoreValues} onChange={val=>{
-							RunInAction_Set(this, ()=>store.main.maps.showReasonScoreValues = val);
-						}}/>
+					<RowLR mt={3} splitAt={splitAt}>
+						<TextPlus info={ChildOrdering_infoText}>Child ordering:</TextPlus>
+						<Select options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildOrdering, "ui")]}
+							value={uiState.childOrdering} onChange={val=>RunInAction_Set(this, ()=>uiState.childOrdering = val)}/>
 					</RowLR>
-					<RowLR splitAt={splitAt}>
-						<Pre>Toolbar rating previews: </Pre>
-						<Select options={ratingPreviewOptions} value={store.main.maps.toolbarRatingPreviews} onChange={val=>{
-							RunInAction_Set(this, ()=>store.main.maps.toolbarRatingPreviews = val);
-						}}/>
+					<RowLR mt={3} splitAt={splitAt}>
+						<Pre>Show Reason Score values:</Pre>
+						<CheckBox value={uiState.showReasonScoreValues} onChange={val=>RunInAction_Set(this, ()=>uiState.showReasonScoreValues = val)}/>
 					</RowLR>
-					<Row mt={5}>
+					<RowLR mt={3} splitAt={splitAt}>
+						<Pre>Toolbar rating previews:</Pre>
+						<Select options={ratingPreviewOptions}
+							value={uiState.toolbarRatingPreviews} onChange={val=>RunInAction_Set(this, ()=>uiState.toolbarRatingPreviews = val)}/>
+					</RowLR>
+					<Row mt={3}>
 						<Button text="Clear map-view state" onClick={()=>{
 							RunInAction_Set(this, ()=>{
 								uiState.mapViews.delete(map.id);

@@ -6,7 +6,7 @@ import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Observer, HSLA, RunInAction} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {Map, WeightingType} from "dm_common";
+import {Map, ChildOrdering} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
@@ -27,7 +27,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 		const mapState = GetMapState.NN(map.id);
 		const {showChangesSince_type} = mapState;
 		const {showChangesSince_visitOffset} = mapState;
-		const {weighting} = store.main.maps;
+		const {childOrdering: weighting} = store.main.maps;
 
 		const tabBarWidth = 104;
 		return (
@@ -56,15 +56,6 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 									mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
 								});
 							}}/>
-							{!GADDemo &&
-							<>
-								<Pre ml={5}>Weighting: </Pre>
-								<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=>{
-									RunInAction("ActionBar_Right.Weighting.onChange", ()=>{
-										store.main.maps.weighting = val;
-									});
-								}}/>
-							</>}
 						</Row>
 						{!GADDemo &&
 							<ShareDropDown map={map}/>}

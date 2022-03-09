@@ -1,4 +1,4 @@
-import {AddMap, ChildLayout, ChildLayout_niceNames, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID} from "dm_common";
+import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {Observer, TextPlus} from "web-vcore";
@@ -20,7 +20,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 		const nodeAccessPolicy = GetAccessPolicy(newData.nodeAccessPolicy);
 
-		const splitAt = 180;
+		const splitAt = 190;
 		const width = 600;
 		return (
 			<Column style={style}>
@@ -54,91 +54,97 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 					</Row>
 					<Select options={GetEntries(MapVisibility)} enabled={enabled} value={newData.visibility} onChange={val=>Change(newData.visibility = val)}/>
 				</RowLR>*/}
-				{!creating &&
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Expand depth (default):</Pre>
-					<Spinner min={1} max={3} enabled={enabled}
-						value={ToNumber(newData.defaultExpandDepth, 0)} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
-				</RowLR>}
-				{/*!creating &&
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<TextPlus info="Whether to show the 'freeform' box under claim/argument nodes, even when they have no freeform children yet.">Show freeform (default):</TextPlus>
-					<CheckBox enabled={enabled} value={newData.extras.defaultShowFreeform ?? false} onChange={val=>Change(newData.extras.defaultShowFreeform = val)}/>
-				</RowLR>*/}
-
-				{!creating &&
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<TextPlus>Node child-layouts:</TextPlus>
-					<TextPlus info="Whether nodes are allowed to be displayed with the flat (or otherwise non-standard) layout rather than the default layout.">Allow special:</TextPlus>
-					<CheckBox ml={5} enabled={enabled} value={newData.extras.allowSpecialChildLayouts ?? false} onChange={val=>Change(newData.extras.allowSpecialChildLayouts = val)}/>
-					{/*<Text ml={5}>Set to preset:</Text>
-					<Select options={[{name: "", value: null}, "Society Library standard"]} value={null} onChange={val=>{}}/>*/}
-					{newData.extras.allowSpecialChildLayouts &&
-					<>
-						<TextPlus ml={10} info={`
-							The child-layout used for nodes that do not have an override value set.
-
-							Options:
-							* Unchanged: Don't change the child-layout from the global default and/or the node-specific override layout.
-							* Grouped: truth:group_always, relevance:group_always freeform:group_always
-							* Debate Map standard: truth:group_always, relevance:group_always, freeform:group_whenNonEmpty
-							* Society Library standard: truth:group_always, relevance:group_whenNonEmpty, freeform:flat
-							* Flat: truth:flat, relevance:group_whenNonEmpty, freeform:flat
-						`.AsMultiline(0)}>Default:</TextPlus>
-						<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
-							value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-
-						{/*<Row>
-							<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Truth:</TextPlus>
-							<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-						</Row>
-						<Row>
-							<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Relevance:</TextPlus>
-							<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-						</Row>
-						<Row>
-							<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Freeform:</TextPlus>
-							<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-						</Row>*/}
-					</>}
-				</RowLR>}
-
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Node toolbar (default):</Pre>
-					<CheckBox enabled={enabled} style={{width: "100%"}}
-						value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
-				</RowLR>
-
-				{/*!forNew &&
-				<RowLR mt={5} splitAt={splitAt}>
-					<Pre>Default timeline:</Pre>
-					<TextInput enabled={enabled} value={newData.defaultTimelineID} onChange={val=>Change(newData.defaultTimelineID = val)}/>
-				</RowLR>*/}
-				{/* <RowLR mt={5} splitAt={splitAt} style={{ width }}>
-					<Row center>
-						<Pre>Allow public nodes:</Pre>
-						<InfoButton ml={5} text=""/>
-					</Row>
-					<CheckBox enabled={enabled} value={newData.allowPublicNodes} onChange={(val) => Change(newData.allowPublicNodes = val)}/>
-				</RowLR> */}
-				{/*! forNew &&
-					<RowLR mt={5} splitAt={splitAt} style={{width}}>
-						<Pre>Root-node ID: </Pre>
-						<Spinner enabled={enabled} style={{width: "100%"}}
-							value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
-					</RowLR> */}
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Access policy: </Pre>
 					<PolicyPicker value={newData.accessPolicy} onChange={val=>Change(newData.accessPolicy = val)}>
 						<Button enabled={enabled} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
 					</PolicyPicker>
 				</RowLR>
-				<RowLR mt={5} splitAt={splitAt}>
-					<Pre>Node access policy: </Pre>
-					<PolicyPicker value={newData.nodeAccessPolicy} onChange={val=>Change(newData.nodeAccessPolicy = val)}>
-						<Button enabled={enabled} text={nodeAccessPolicy ? `${nodeAccessPolicy.name} (id: ${nodeAccessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
-					</PolicyPicker>
-				</RowLR>
+
+				<Column mt={10}>
+					<Row style={{fontWeight: "bold"}}>Node defaults</Row>
+					{!creating &&
+					<RowLR mt={5} splitAt={splitAt} style={{width}}>
+						<Pre>Expand depth:</Pre>
+						<Spinner min={1} max={3} enabled={enabled}
+							value={ToNumber(newData.defaultExpandDepth, 0)} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
+					</RowLR>}
+					{/*!creating &&
+					<RowLR mt={5} splitAt={splitAt} style={{width}}>
+						<TextPlus info="Whether to show the 'freeform' box under claim/argument nodes, even when they have no freeform children yet.">Show freeform (default):</TextPlus>
+						<CheckBox enabled={enabled} value={newData.extras.defaultShowFreeform ?? false} onChange={val=>Change(newData.extras.defaultShowFreeform = val)}/>
+					</RowLR>*/}
+
+					{!creating &&
+					<RowLR mt={5} splitAt={splitAt} style={{width}}>
+						<TextPlus>Child layout:</TextPlus>
+						<TextPlus info="Whether nodes are allowed to be displayed with the flat (or otherwise non-standard) layout rather than the default layout.">Allow special:</TextPlus>
+						<CheckBox ml={5} enabled={enabled} value={newData.extras.allowSpecialChildLayouts ?? false} onChange={val=>Change(newData.extras.allowSpecialChildLayouts = val)}/>
+						{/*<Text ml={5}>Set to preset:</Text>
+						<Select options={[{name: "", value: null}, "Society Library standard"]} value={null} onChange={val=>{}}/>*/}
+						{newData.extras.allowSpecialChildLayouts &&
+						<>
+							<TextPlus ml={10} info={`
+								The child-layout used for nodes that do not have an override value set.
+
+								${ChildLayout_optionsStr}
+							`.AsMultiline(0)}>Default:</TextPlus>
+							<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
+								value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
+
+							{/*<Row>
+								<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Truth:</TextPlus>
+								<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
+							</Row>
+							<Row>
+								<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Relevance:</TextPlus>
+								<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
+							</Row>
+							<Row>
+								<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Freeform:</TextPlus>
+								<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
+							</Row>*/}
+						</>}
+					</RowLR>}
+
+					{!creating &&
+					<RowLR mt={5} splitAt={splitAt} style={{width}}>
+						<TextPlus info={ChildOrdering_infoText}>Child ordering:</TextPlus>
+						<Select options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildOrdering, "ui")]}
+							value={newData.extras.defaultChildOrdering} onChange={val=>Change(newData.extras.defaultChildOrdering = val)}/>
+					</RowLR>}
+
+					<RowLR mt={5} splitAt={splitAt} style={{width}}>
+						<Pre>Toolbar:</Pre>
+						<CheckBox enabled={enabled} style={{width: "100%"}}
+							value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
+					</RowLR>
+
+					{/*!forNew &&
+					<RowLR mt={5} splitAt={splitAt}>
+						<Pre>Default timeline:</Pre>
+						<TextInput enabled={enabled} value={newData.defaultTimelineID} onChange={val=>Change(newData.defaultTimelineID = val)}/>
+					</RowLR>*/}
+					{/* <RowLR mt={5} splitAt={splitAt} style={{ width }}>
+						<Row center>
+							<Pre>Allow public nodes:</Pre>
+							<InfoButton ml={5} text=""/>
+						</Row>
+						<CheckBox enabled={enabled} value={newData.allowPublicNodes} onChange={(val) => Change(newData.allowPublicNodes = val)}/>
+					</RowLR> */}
+					{/*! forNew &&
+						<RowLR mt={5} splitAt={splitAt} style={{width}}>
+							<Pre>Root-node ID: </Pre>
+							<Spinner enabled={enabled} style={{width: "100%"}}
+								value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
+						</RowLR> */}
+					<RowLR mt={5} splitAt={splitAt}>
+						<TextPlus info="Note that this only applies for new nodes created in this map. (ie. if you change this setting, you must manually update the access-policies of existing nodes)">Node access policy:</TextPlus>
+						<PolicyPicker value={newData.nodeAccessPolicy} onChange={val=>Change(newData.nodeAccessPolicy = val)}>
+							<Button enabled={enabled} text={nodeAccessPolicy ? `${nodeAccessPolicy.name} (id: ${nodeAccessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
+						</PolicyPicker>
+					</RowLR>
+				</Column>
 			</Column>
 		);
 	}

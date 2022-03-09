@@ -5,6 +5,7 @@ import {AccessLevel, MapNodeL3} from "./@MapNode.js";
 import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
 import {ChildGroup, MapNodeType_Info} from "./@MapNodeType.js";
 import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment} from "../../DB.js";
+import {ChildOrdering} from "../nodeRatings.js";
 
 export enum PermissionInfoType {
 	creator = "creator",
@@ -37,6 +38,9 @@ export class NodeRevisionDisplayDetails {
 
 	@Field({$ref: "ChildLayout"}, {opt: true})
 	childLayout?: ChildLayout;
+
+	@Field({$ref: "ChildOrdering"}, {opt: true})
+	childOrdering?: ChildOrdering;
 }
 
 export enum ChildLayout {
@@ -52,6 +56,30 @@ export const ChildLayout_niceNames = {
 	flat: "Flat",
 };
 AddSchema("ChildLayout", {enum: GetValues(ChildLayout)});
+export const ChildLayout_optionsStr = `
+Options:
+* Unchanged: Don't change the child-layout from the contextual default. (see below)
+* Grouped: truth:group_always, relevance:group_always freeform:group_always
+* Debate Map standard: truth:group_always, relevance:group_always, freeform:group_whenNonEmpty
+* Society Library standard: truth:group_always, relevance:group_whenNonEmpty, freeform:flat
+* Flat: truth:flat, relevance:group_whenNonEmpty, freeform:flat
+
+The final ordering-type is determined by the first provided value (ie. not set to "Unchanged") in this list:
+1) Node setting, in node's Details->Others panel (if map has "Allow special" for child-layouts enabled)
+2) Map setting, in map's Details dropdown (if map has "Allow special" for child-layouts enabled)
+3) Fallback value of "Debate Map standard"
+`.AsMultiline(0);
+export function GetChildLayout_Final(revision: MapNodeRevision, map?: Map): ChildLayout {
+	let result = ChildLayout.dmStandard;
+	if (map?.extras.allowSpecialChildLayouts) {
+		if (map.extras.defaultChildLayout) result = map.extras.defaultChildLayout;
+		if (revision.displayDetails?.childLayout) result = revision.displayDetails.childLayout;
+	}
+	return result;
+}
+/*export function InvertChildLayout(layout: ChildLayout): ChildLayout {
+	return layout == ChildLayout.grouped ? ChildLayout.flat : ChildLayout.grouped;
+}*/
 
 export enum ChildGroupLayout {
 	group_always = "group_always",
@@ -94,22 +122,6 @@ export function ShouldChildGroupBoxBeVisible(node: MapNodeL3|n, group: ChildGrou
 	if (groupLayout == ChildGroupLayout.group_whenNonEmpty) return nodeChildren?.Any(a=>a.link?.group == group) ?? false;
 	return false;
 }
-
-export function GetChildLayout_Final(revision: MapNodeRevision, map?: Map): ChildLayout {
-	let result = ChildLayout.dmStandard;
-	if (map?.extras.allowSpecialChildLayouts) {
-		if (map.extras.defaultChildLayout) {
-			result = map.extras.defaultChildLayout;
-		}
-		if (revision.displayDetails?.childLayout) {
-			result = revision.displayDetails.childLayout;
-		}
-	}
-	return result;
-}
-/*export function InvertChildLayout(layout: ChildLayout): ChildLayout {
-	return layout == ChildLayout.grouped ? ChildLayout.flat : ChildLayout.grouped;
-}*/
 
 /*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/

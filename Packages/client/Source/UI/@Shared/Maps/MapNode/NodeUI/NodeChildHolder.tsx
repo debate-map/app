@@ -1,4 +1,4 @@
-import {ChildGroup, GetOrderingScores_AtPath, IsMultiPremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, IsMultiPremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -28,7 +28,7 @@ const initialState = {
 
 @WarnOfTransientObjectProps
 @Observer
-export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, initialState, {} as {nodeChildren_orderingScores: {[key: string]: number}}) {
+export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, initialState, {} as {nodeChildren_orderingValues: {[key: string]: number | string}}) {
 	/* static ValidateProps(props) {
 		let {node, path} = props;
 		//Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
@@ -42,10 +42,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
 
 		const nodeView = GetNodeView(map.id, path);
-		const nodeChildren_orderingScores = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
-			return GetOrderingScores_AtPath(child, `${path}/${child.id}`);
-		});
-		this.Stash({nodeChildren_orderingScores});
+		const orderingType = GetChildOrdering_Final(node.current, map, store.main.maps.childOrdering);
+		const nodeChildren_orderingValues = nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
+			return GetOrderingValue_AtPath(child, `${path}/${child.id}`, orderingType);
+		}); //.SimplifyEmpty();
+		this.Stash({nodeChildren_orderingValues});
 
 		const {initialChildLimit} = store.main.maps;
 		const {currentNodeBeingAdded_path} = store.main.maps;
@@ -56,27 +57,13 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a.type == MapNodeType.claim);
 			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
 		}
+		// always apply an initial sorting by manual-ordering data, so that if main ordering values are the same for a set (eg. no vote data), the set still has sub-sorting
+		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(node.current, map, store.main.maps.childOrdering));
+		// then apply the sorting for the main ordering-type (latest OrderBy() operation has higher priority, naturally)
+		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>nodeChildren_orderingValues[child.id]);
 
-		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
-		let downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
-
-		// apply sorting (regardless of direction, both are ordered by score/priority; "up" reordering is applied on the *child-ui list*, not the child-node list)
-		if (separateChildren) {
-			upChildren = upChildren.OrderByDescending(child=>nodeChildren_orderingScores[child.id]);
-			downChildren = downChildren.OrderByDescending(child=>nodeChildren_orderingScores[child.id]);
-			// this is really not recommended, but I guess there could be use-cases (only admins are allowed to manually order this type anyway)
-			/*if (node.childrenOrder) {
-				upChildren = upChildren.OrderByDescending(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER)); // descending, since index0 of upChildren group shows at bottom
-				downChildren = downChildren.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
-			}*/
-		} else {
-			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_orderingScores[child.id]);
-			// if (IsArgumentNode(node)) {
-			//const isArgument_any = node.type == MapNodeType.argument && node.current.argumentType == ArgumentType.any;
-			/*if (node.childrenOrder) {
-				nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
-			}*/
-		}
+		const upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
+		const downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
 
 		let childLimit_up = (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
@@ -86,7 +73,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		// helper
 		/*const renderedChildrenOrder = [] as string[];
-		// once we're done rendering, store the rendered-children-order in the node-view, eg. so child NodeUI's can whether they have any expanded siblings
+		// once we're done rendering, store the rendered-children-order in the node-view, eg. so child NodeUIs can know whether they have any expanded siblings
 		setTimeout(()=>{
 			if (nodeView.renderedChildrenOrder?.join(";") != renderedChildrenOrder.join(";")) {
 				RunInAction("NodeChildHolder.render.updateRenderedChildrenOrder", ()=>nodeView.renderedChildrenOrder = renderedChildrenOrder);
@@ -292,8 +279,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	get ChildOrderStr() {
-		const {nodeChildrenToShow, nodeChildren_orderingScores: nodeChildren_fillPercents} = this.PropsStash;
-		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents?.[a.id] ?? 0).map(a=>a.id).join(",");
+		const {nodeChildrenToShow, nodeChildren_orderingValues} = this.PropsStash;
+		return nodeChildrenToShow.OrderBy(a=>nodeChildren_orderingValues?.[a.id] ?? 0).map(a=>a.id).join(",");
 	}
 
 	PostRender() {

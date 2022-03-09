@@ -156,15 +156,6 @@ export enum Polarity {
 //export type Polarity = typeof Polarity_values[number];
 AddSchema("Polarity", {enum: GetValues(Polarity)});
 
-// regular parents
-// ==========
-
-export enum ChildOrderType {
-	manual = "manual",
-	byRating = "byRating",
-}
-AddSchema("ChildOrderType", {enum: GetValues(ChildOrderType)});
-
 // layer+anchor parents (for if subnode)
 // ==========
 

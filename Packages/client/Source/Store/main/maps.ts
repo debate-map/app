@@ -1,4 +1,4 @@
-import {GetNodeL3, WeightingType, MapView} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
@@ -39,9 +39,9 @@ export class MapsState {
 
 	@O lockMapScrolling = true;
 	@O initialChildLimit = 5;
+	@O childOrdering?: ChildOrdering;
 	@O showReasonScoreValues = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
-	@O @version(2) weighting = WeightingType.date;
 	//@O nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
 	@O nodeStyleRules = [] as NodeStyleRule[];

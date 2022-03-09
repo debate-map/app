@@ -1,5 +1,6 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {ChildOrdering} from "../nodeRatings.js";
 import {ChildLayout} from "../nodes/@MapNodeRevision.js";
 
 /*export enum MapType {
@@ -126,6 +127,9 @@ export class Map_Extras {
 
 	@Field({$ref: "ChildLayout"}, {opt: true})
 	defaultChildLayout?: ChildLayout;
+
+	@Field({$ref: "ChildOrdering"}, {opt: true})
+	defaultChildOrdering?: ChildOrdering;
 
 	@Field({type: "boolean"}, {opt: true})
 	defaultNodeToolbarEnabled? = true;

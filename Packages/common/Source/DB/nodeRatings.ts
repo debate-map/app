@@ -11,6 +11,7 @@ import {ChildGroup, MapNodeType} from "./nodes/@MapNodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
+import {Map, MapNodeRevision} from "../DB.js";
 
 export const GetRatingSummary = CreateAccessor((nodeID: string, ratingType: NodeRatingType)=>{
 	const node = GetNode(nodeID);
@@ -87,10 +88,30 @@ export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapN
 	return result;
 });
 
-export enum WeightingType {
+export enum ChildOrdering {
+	//unchanged = "unchanged",
+	manual = "manual",
 	date = "date",
 	votes = "votes",
 	reasonScore = "reasonScore",
+}
+export const ChildOrdering_infoText = `
+The ordering of a node's children can be modified in multiple ways.
+
+The final ordering-type is determined by the first provided value (ie. not set to "Unchanged") in this list:
+1) User setting, in the Layout dropdown (at top-right when map is open)
+2) Node setting, in node Details->Others panel
+3) Map setting, in map's Details dropdown
+4) Fallback value of "votes"
+
+Note: If children have identical ordering values (eg. by votes, but neither has votes), then they're sub-sorted by manual-ordering data.
+`.AsMultiline(0);
+export function GetChildOrdering_Final(parentNodeRev: MapNodeRevision, map?: Map, userOverride?: ChildOrdering) {
+	let result = ChildOrdering.votes;
+	if (map?.extras.defaultChildOrdering) result = map.extras.defaultChildOrdering;
+	if (parentNodeRev.displayDetails?.childOrdering) result = parentNodeRev.displayDetails.childOrdering;
+	if (userOverride) result = userOverride;
+	return result;
 }
 
 function ChildGroupToRatingType(childGroup: ChildGroup|n) {
@@ -105,46 +126,51 @@ export function AssertBetween0And100OrNull(val: number|n) {
 }
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
-export const GetOrderingScores_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, resultIfNoData = null)=>{
-	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
-	if (ratingType == null) return resultIfNoData;
+export const GetOrderingValue_AtPath = CreateAccessor((node: MapNodeL3, path: string, orderingType: ChildOrdering, boxType?: ChildGroup|n, ratingType?: NodeRatingType): number | string=>{
+	if (orderingType == ChildOrdering.manual) {
+		return "TODO"; // todo
+	}
 
-	if (weighting == WeightingType.date) return -node.createdAt; // reverse, so that earliest nodes show up first (node sorting-by-score is descending)
+	if (orderingType == ChildOrdering.date) {
+		return node.createdAt;
+	}
 
-	const useReasonScoreValues = weighting == WeightingType.reasonScore && rsCompatibleNodeTypes?.includes(node.type);
+	const useReasonScoreValues = orderingType == ChildOrdering.reasonScore && rsCompatibleNodeTypes?.includes(node.type);
 	if (useReasonScoreValues) {
 		const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node.id, path);
 
 		// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
-		let result: number|n;
-		if (node.type == MapNodeType.claim) {
-			result = claimTruthScore * 100;
-		} else if (node.type == MapNodeType.argument) {
-			if (boxType == ChildGroup.relevance) {
-				// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
-				result = Lerp(0, 100, argWeightMultiplier);
-			} else {
-				result = argTruthScoreComposite * 100;
+		const ratingScore = (()=>{
+			if (node.type == MapNodeType.claim) {
+				return claimTruthScore * 100;
 			}
-		}
-
-		AssertBetween0And100OrNull(result);
-		return result;
+			if (node.type == MapNodeType.argument) {
+				if (boxType == ChildGroup.relevance) {
+					// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
+					return Lerp(0, 100, argWeightMultiplier);
+				}
+				return argTruthScoreComposite * 100;
+			}
+			Assert(false);
+		})();
+		AssertBetween0And100OrNull(ratingScore);
+		return -ratingScore; // reverse, so that the highest-rated nodes show up first (the NodeChildHolder comp calls the OrderBy() method, which sorts ascendingly)
 	}
 
-	const result = GetRatingAverage_AtPath(node, ratingType, null, resultIfNoData);
+	const ratingType_final = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
+	const result = GetRatingAverage_AtPath(node, ratingType_final, null, 0);
 	AssertBetween0And100OrNull(result);
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
+export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = ChildOrdering.votes)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
 	const meID = MeID();
 	if (meID == null) return null;
 
 	if (PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return null;
-	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {
+	if (weighting == ChildOrdering.votes || !rsCompatibleNodeTypes.includes(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, [meID]);
 	}
 });
