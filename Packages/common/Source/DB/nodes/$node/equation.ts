@@ -20,5 +20,7 @@ export function GetEquationStepNumber(path: string) {
 	}
 	return equationStepNodes.map(a=>a.id).indexOf(nodeID) + 1;*/
 
-	return parentChildLinks.find(a=>a.child == nodeID)?.slot ?? null;
+	//return parentChildLinks.find(a=>a.child == nodeID)?.slot ?? null;
+
+	return parentChildLinks.OrderBy(a=>a.orderKey).findIndex(a=>a.child == nodeID) + 1;
 }

@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, LexoRank} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
@@ -23,6 +23,10 @@ export class AddChildHelper {
 		const parentNode = GetNode(this.Node_ParentID);
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
 
+		const parent_childLinks = GetNodeChildLinks(this.Node_ParentID);
+		const parent_lastOrderKey = parent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? LexoRank.middle().toString();
+		const orderKeyForOuterNode = LexoRank.parse(parent_lastOrderKey).genNext().toString();
+
 		//const defaultPolicyID = GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
 		const userHidden = GetUserHidden(MeID());
 		if (userHidden == null) {
@@ -39,7 +43,7 @@ export class AddChildHelper {
 		this.node_link = E(
 			{
 				group,
-				slot: 0, // todo
+				orderKey: orderKeyForOuterNode,
 			},
 			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base},
 			childType == MapNodeType.argument && {polarity: childPolarity},
@@ -56,7 +60,7 @@ export class AddChildHelper {
 			this.subNode_revision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: title})});
 			this.subNode_link = new NodeChildLink({
 				group: ChildGroup.generic,
-				slot: 0,
+				orderKey: LexoRank.middle().toString(),
 				form: ClaimForm.base,
 			});
 		} else {

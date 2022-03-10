@@ -7,7 +7,7 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$linkID: {$ref: "UUID"},
-		$linkUpdates: DeriveJSONSchema(NodeChildLink, {includeOnly: ["form", "polarity"], makeOptional_all: true}),
+		$linkUpdates: DeriveJSONSchema(NodeChildLink, {includeOnly: ["form", "polarity", "orderKey"], makeOptional_all: true}),
 	}),
 })
 export class UpdateLink extends Command<{linkID: string, linkUpdates: Partial<NodeChildLink>}, {}> {

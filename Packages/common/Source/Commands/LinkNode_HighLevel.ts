@@ -14,6 +14,7 @@ import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
+import {LexoRank} from "../Utils/General/LexoRank.js";
 
 export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOnNodePath: string, dropOnChildGroup: ChildGroup, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);
@@ -91,6 +92,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		const oldParent = GetNodeL2(oldParentID);
 		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");
 		this.newParent_data = GetNodeL2.NN(newParentID);
+		const newParent_childLinks = GetNodeChildLinks(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		//const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
@@ -106,6 +108,9 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			const closestMapRootNode = this.newParent_data.rootNodeForMap ? newParentID : SearchUpFromNodeForNodeMatchingX(newParentID, IDIsOfNodeThatIsRootOfMap, null, [nodeID]);
 			AssertV(closestMapRootNode != null, "Cannot move a node to a path that would orphan it.");
 		}
+
+		const newParent_lastOrderKey = newParent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? LexoRank.middle().toString();
+		const orderKeyForOuterNode = LexoRank.parse(newParent_lastOrderKey).genNext().toString();
 
 		let newParentID_forClaim = newParentID;
 
@@ -132,7 +137,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, null, ()=>new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-				link: new NodeChildLink({group: childGroup, slot: 0, polarity: newPolarity}),
+				link: new NodeChildLink({group: childGroup, orderKey: orderKeyForOuterNode, polarity: newPolarity}),
 			}));
 
 			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
@@ -146,6 +151,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
 				form: newForm,
 				polarity: this.node_data.type == MapNodeType.argument ? newPolarity : null,
+				orderKey: wrapperArgNeeded ? LexoRank.middle().toString() : orderKeyForOuterNode,
 			},
 		}));
 

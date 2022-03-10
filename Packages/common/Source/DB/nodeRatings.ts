@@ -1,5 +1,5 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, CreateAccessor, GetDocs, NoID, Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, CreateAccessor, GetDocs, NoID, Validate, AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {observable} from "web-vcore/nm/mobx.js";
 import {GetRatingTypeInfo, NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
 import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
@@ -95,6 +95,7 @@ export enum ChildOrdering {
 	votes = "votes",
 	reasonScore = "reasonScore",
 }
+AddSchema("ChildOrdering", {enum: GetValues(ChildOrdering)});
 export const ChildOrdering_infoText = `
 The ordering of a node's children can be modified in multiple ways.
 
@@ -127,8 +128,8 @@ export function AssertBetween0And100OrNull(val: number|n) {
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 export const GetOrderingValue_AtPath = CreateAccessor((node: MapNodeL3, path: string, orderingType: ChildOrdering, boxType?: ChildGroup|n, ratingType?: NodeRatingType): number | string=>{
-	if (orderingType == ChildOrdering.manual) {
-		return "TODO"; // todo
+	if (orderingType == ChildOrdering.manual && node.link) {
+		return node.link.orderKey;
 	}
 
 	if (orderingType == ChildOrdering.date) {

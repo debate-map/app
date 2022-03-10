@@ -2403,6 +2403,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@debate-map/app@workspace:."
   dependencies:
+    "@wewatch/lexorank": ^1.0.3
     chalk: ^4.1.1
     cross-env: ^7.0.3
     file-syncer: ^0.0.8
@@ -3822,6 +3823,13 @@ __metadata:
     webpack-dev-server:
       optional: true
   checksum: 050a930b63653ae0002e135cc9b0810483dd0857acd8e7ae2f41011f48f8856a150dd60c787105597ef8814541031779be1dc015ef637d70a7524d373cbbf346
+  languageName: node
+  linkType: hard
+
+"@wewatch/lexorank@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@wewatch/lexorank@npm:1.0.3"
+  checksum: e3a05cbb44edfaf8553c8f5404406684b32e45f94eba04c3c9146ddb087ec4d67bfe49af78a590544b70aa1f54f8f358e63f2835331d6d270c9fa27e2da85e0a
   languageName: node
   linkType: hard
 

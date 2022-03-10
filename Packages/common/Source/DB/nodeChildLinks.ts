@@ -7,8 +7,8 @@ export const GetNodeChildLink = CreateAccessor((id: string)=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodeChildLinks.get(id));
 });
-export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: string|n, group?: ChildGroup|n): NodeChildLink[]=>{
-	// temp; optimization that reduces the number of subscriptions made to the server (the subscriptions plugin can currently get overloaded pretty easily)
+export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: string|n, group?: ChildGroup|n, orderByOrderKeys = true): NodeChildLink[]=>{
+	// temp; optimization that improves loading speed a bit (~10s to ~7s)
 	if (parentID != null) {
 		const linksUnderParent = GetDocs({
 			params: {filter: {
@@ -18,10 +18,12 @@ export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: 
 		let result = linksUnderParent;
 		if (childID != null) result = result.filter(a=>a.child == childID);
 		if (group != null) result = result.filter(a=>a.group == group);
+
+		if (orderByOrderKeys) result = result.OrderBy(a=>a.orderKey);
 		return result;
 	}
 
-	return GetDocs({
+	let result = GetDocs({
 		params: {filter: {
 			/*and: [
 				parentID != null && {parent: {equalTo: parentID}},
@@ -32,4 +34,7 @@ export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: 
 			group: group && {equalTo: group},
 		}},
 	}, a=>a.nodeChildLinks);
+
+	if (orderByOrderKeys) result = result.OrderBy(a=>a.orderKey);
+	return result;
 });

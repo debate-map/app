@@ -37,9 +37,9 @@ export class NodeChildLink {
 	@Field({$ref: "ChildGroup"})
 	group: ChildGroup;
 
-	@DB((t, n)=>t.integer(n))
-	@Field({type: "number"}) // should "{opt: true}" be added?
-	slot = 0;
+	@DB((t, n)=>t.text(n))
+	@Field({type: "string"}) // should "{opt: true}" be added?
+	orderKey: string;
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ClaimForm"}, {opt: true})

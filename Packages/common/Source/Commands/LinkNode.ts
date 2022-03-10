@@ -27,7 +27,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		$linkID: {type: "string"},
 	}),
 })
-export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group">}, {linkID: string}> {
+export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group" | "orderKey">}, {linkID: string}> {
 	child_oldData: MapNode|n;
 	parent_oldData: MapNode;
 	Validate() {

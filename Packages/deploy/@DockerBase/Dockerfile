@@ -18,10 +18,11 @@ COPY Packages/app-server/package.json Packages/app-server/package.json
 COPY Packages/web-server/package.json Packages/web-server/package.json
 COPY Packages/deploy/package.json Packages/deploy/package.json
 
-COPY patches/ patches/
-#COPY node_modules/web-vcore/patches/ node_modules/web-vcore/patches/
 COPY .yalc/ .yalc/
 #COPY yalc.lock .
+COPY patches/ patches/
+#COPY node_modules/web-vcore/patches/ node_modules/web-vcore/patches/
+COPY Scripts/PostInstall.js Scripts/PostInstall.js
 
 # also copy cache contents from node_modules/web-vcore/.yarn/cache (if wvc is symlinked, the dm's cache will lack many of the libs)
 # this should work, except docker refuses to allow symlink-following (https://github.com/moby/moby/issues/1676)

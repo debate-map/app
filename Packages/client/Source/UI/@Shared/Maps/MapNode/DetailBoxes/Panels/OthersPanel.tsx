@@ -1,11 +1,11 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, LexoRank, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {Observer} from "web-vcore";
 import {E, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, CheckBox, Column, Pre, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, Pre, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
@@ -87,6 +87,25 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 							<UUIDStub id={link.child}/>
 						</Fragment>;
 					})}
+					{HasAdminPermissions(MeID()) &&
+					<Button ml={5} p="1px 5px" text="Simplify order-keys" onClick={()=>{
+						ShowMessageBox({
+							title: "Simplify order keys of children?",
+							message: "Doing so will update the link entries to each child, making their order-keys equidistant to each other (starting from the standard LexoRank mid-key).",
+							cancelButton: true,
+							onOK: async()=>{
+								const newOrderKeys = [] as string[];
+								for (const [i, childLink] of childLinks.entries()) {
+									newOrderKeys[i] = i == 0 ? LexoRank.middle().toString() : LexoRank.parse(newOrderKeys.Last()).genNext().toString();
+									await new UpdateLink({
+										linkID: childLink.id,
+										linkUpdates: {orderKey: newOrderKeys[i]},
+									}).RunOnServer();
+								}
+								ShowMessageBox({title: "Complete", message: "Simplification of children order-keys is complete."});
+							},
+						});
+					}}/>}
 				</Row>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Mirror children: </Text>
@@ -166,6 +185,16 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 					<Text>Path: </Text>
 					<UUIDPathStub path={path}/>
 				</Row>
+				{node.link &&
+					<Row style={{display: "flex", alignItems: "center"}}>
+						<Pre>Order key: </Pre>
+						<TextInput value={node.link.orderKey} onChange={val=>{
+							new UpdateLink({
+								linkID: node.link!.id,
+								linkUpdates: {orderKey: val},
+							}).RunOnServer();
+						}}/>
+					</Row>}
 				{node.link && canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as negation: </Pre>

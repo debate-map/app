@@ -20,6 +20,7 @@ import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink.js";
 import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument.js";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
+import {MI_MoveUpOrDown} from "./NodeUI_Menu/MI_MoveUpOrDown.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
@@ -221,8 +222,12 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							RunInAction("ToggleChildrenLayout", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 						}}/>*/}
-				<MI_ImportSubtree {...sharedProps}/>
-				<MI_ExportSubtree {...sharedProps}/>
+				<VMenuItem text="Advanced" childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
+					<MI_MoveUpOrDown direction="up" {...sharedProps}/>
+					<MI_MoveUpOrDown direction="down" {...sharedProps}/>
+					<MI_ImportSubtree {...sharedProps}/>
+					<MI_ExportSubtree {...sharedProps}/>
+				</VMenuItem>
 				<MI_UnlinkContainerArgument {...sharedProps}/>
 				<MI_UnlinkNode {...sharedProps}/>
 				<MI_DeleteContainerArgument {...sharedProps}/>
