@@ -70,7 +70,7 @@ pub struct SubscriptionRoot(
     SubscriptionShard_MapNodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_MapNodeRevision, SubscriptionShard_MapNodeTag,
     SubscriptionShard_Share,
 );
-pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
+//pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
@@ -99,5 +99,5 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
         .layer(AddExtensionLayer::new(client_to_asjs));
 
     println!("Playground: http://localhost:8000");
-    return result;
+    result
 }

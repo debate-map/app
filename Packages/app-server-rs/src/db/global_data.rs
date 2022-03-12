@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -31,10 +31,10 @@ impl GQLSet<GlobalData> for GQLSet_GlobalData {
 pub struct SubscriptionShard_GlobalData;
 #[Subscription]
 impl SubscriptionShard_GlobalData {
-    async fn globalData<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_GlobalData> + 'a {
+    async fn globalData<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_GlobalData> + 'a {
         handle_generic_gql_collection_request::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter).await
     }
-    async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<GlobalData>> + 'a {
+    async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<GlobalData>> + 'a {
         handle_generic_gql_doc_request::<GlobalData>(ctx, "globalData", id).await
     }
 }

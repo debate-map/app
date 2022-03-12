@@ -33,9 +33,9 @@ pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket,
 
 /**
  * There appear to be three ways to use replication slots:
- * 1) "CREATE_REPLICATION_SLOT" followed by "pg_logical_slot_get_changes()".
- * 2) "CREATE_REPLICATION_SLOT" followed by "START_REPLICATION" (with stream listener).
- * 3) Connecting to postgres pod through shell, then running "pg_recvlogical".
+ * 1) `CREATE_REPLICATION_SLOT` followed by `pg_logical_slot_get_changes()`.
+ * 2) `CREATE_REPLICATION_SLOT` followed by `START_REPLICATION` (with stream listener).
+ * 3) Connecting to postgres pod through shell, then running `pg_recvlogical`.
  * In this function, we use approach 2.
  */
 pub async fn start_streaming_changes(
@@ -45,7 +45,7 @@ pub async fn start_streaming_changes(
 ) -> Result<Client, tokio_postgres::Error> {
 //) -> Result<(Client, Connection<Socket, NoTlsStream>), tokio_postgres::Error> {
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
-    let handle = tokio::spawn(async move {
+    let _handle = tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
         }
@@ -114,7 +114,7 @@ pub async fn start_streaming_changes(
             println!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
             if timeout_imminent {
                 // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
-                const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946684800;
+                const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946_684_800;
                 let time_since_2000: u64 = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() - (SECONDS_FROM_UNIX_EPOCH_TO_2000 * 1000 * 1000)).try_into().unwrap();
                 
                 // see here for format details: https://www.postgresql.org/docs/10/protocol-replication.html

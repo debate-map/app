@@ -24,9 +24,9 @@ pub async fn print_request_response(
 
     let (parts, body) = res.into_parts();
     let bytes = buffer_and_print("response", body).await?;
-    let res = Response::from_parts(parts, Body::from(bytes));
+    let res2 = Response::from_parts(parts, Body::from(bytes));
 
-    Ok(res)
+    Ok(res2)
 }
 
 pub async fn buffer_and_print<B>(direction: &str, body: B) -> Result<Bytes, (StatusCode, String)>

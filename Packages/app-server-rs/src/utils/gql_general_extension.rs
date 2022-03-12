@@ -91,9 +91,7 @@ impl Extension for CustomExtension {
     }
 }
 
-
-
-struct DropListener;
+/*struct DropListener;
 impl DropListener {
     fn new() -> Self {
         Self {}
@@ -103,4 +101,4 @@ impl Drop for DropListener {
     fn drop(&mut self) {
         println!("DropListener got dropped. @address:{:p}", self);
     }
-}
+}*/

@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -60,7 +60,7 @@ impl GQLSet<UserHidden> for GQLSet_UserHidden {
 pub struct SubscriptionShard_UserHidden;
 #[Subscription]
 impl SubscriptionShard_UserHidden {
-    async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_UserHidden> + 'a {
+    async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_UserHidden> + 'a {
         handle_generic_gql_collection_request::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
     }
     async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<UserHidden>> + 'a {

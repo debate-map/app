@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -54,10 +54,10 @@ impl GQLSet<MapNodeRevision> for GQLSet_MapNodeRevision {
 pub struct SubscriptionShard_MapNodeRevision;
 #[Subscription]
 impl SubscriptionShard_MapNodeRevision {
-    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_MapNodeRevision> + 'a {
+    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_MapNodeRevision> + 'a {
         handle_generic_gql_collection_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", filter).await
     }
-    async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<MapNodeRevision>> + 'a {
+    async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<MapNodeRevision>> + 'a {
         handle_generic_gql_doc_request::<MapNodeRevision>(ctx, "nodeRevisions", id).await
     }
 }

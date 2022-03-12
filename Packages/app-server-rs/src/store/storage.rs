@@ -54,6 +54,7 @@ pub enum DropLQWatcherMsg {
 
 //#[derive(Default)]
 pub struct LQStorage {
+    #[allow(clippy::box_collection)]
     pub live_queries: Pin<Box<HashMap<String, LQEntry>>>,
     source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
@@ -64,17 +65,17 @@ impl LQStorage {
             live_queries: Box::pin(HashMap::new()),
             source_sender_for_lq_watcher_drops: s1,
         };
-        return (new_self, r1);
+        (new_self, r1)
     }
 
     pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>) -> (Vec<T>, &LQEntryWatcher) {
-        let (mut entry, lq_entries_count, lq_entry_is_new) = {
-            let lq_key = get_lq_key(table_name, &filter);
+        let (entry, lq_entries_count, _lq_entry_is_new) = {
+            let lq_key = get_lq_key(table_name, filter);
             let mut lq_entries_count = self.live_queries.len();
 
             let create_new_entry = !self.live_queries.contains_key(&lq_key);
             if create_new_entry {
-                let (result_entries, result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, &filter).await.expect("Errored while getting entries in collection.");
+                let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, filter).await.expect("Errored while getting entries in collection.");
                 let new_entry = LQEntry::new(table_name.to_owned(), filter.clone(), result_entries);
                 self.live_queries.insert(lq_key.clone(), new_entry);
             }
@@ -84,8 +85,8 @@ impl LQStorage {
             (entry, lq_entries_count, create_new_entry)
         };
 
-        let mut result_entries = entry.last_entries.clone();
-        let mut result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
+        let result_entries = entry.last_entries.clone();
+        let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 
         //let watcher = entry.get_or_create_watcher(stream_id);
         let old_watcher_count = entry.entry_watchers.len();
@@ -102,19 +103,19 @@ impl LQStorage {
     }
 
     pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {
-        return self.source_sender_for_lq_watcher_drops.clone();
+        self.source_sender_for_lq_watcher_drops.clone()
     }
-    pub fn drop_lq_watcher(&mut self, table_name: String, filter: &Filter, stream_id: Uuid) {
+    pub fn drop_lq_watcher(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid) {
         println!("Got lq-watcher drop request. @table:{} @filter:{} @stream_id:{}", table_name, match filter { Some(filter) => filter.to_string(), None => "n/a".to_owned() }, stream_id);
 
-        let lq_key = get_lq_key(&table_name, &filter);
+        let lq_key = get_lq_key(table_name, filter);
         let live_query = self.live_queries.get_mut(&lq_key).unwrap();
-        let removed_value = live_query.entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
+        let _removed_value = live_query.entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
         
         let new_watcher_count = live_query.entry_watchers.len();
         if new_watcher_count == 0 {
             self.live_queries.remove(&lq_key);
-            println!("Watcher count for live-query entry dropped to 0, so removing.")
+            println!("Watcher count for live-query entry dropped to 0, so removing.");
         }
 
         println!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, self.live_queries.len());
@@ -128,11 +129,11 @@ pub fn get_lq_key(table_name: &str, filter: &Filter) -> String {
     }).to_string()
 }
 
-fn arcs_eq<T: ?Sized>(left: &Arc<T>, right: &Arc<T>) -> bool {
+/*fn arcs_eq<T: ?Sized>(left: &Arc<T>, right: &Arc<T>) -> bool {
     let left : *const T = left.as_ref();
     let right : *const T = right.as_ref();
     left == right
-}
+}*/
 
 pub struct LQEntryWatcher {
     pub new_entries_channel_sender: Sender<Vec<RowData>>,
@@ -178,7 +179,7 @@ impl LQEntry {
 
     pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, bool) {
         let create_new = !self.entry_watchers.contains_key(&stream_id);
-        let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());
+        let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);
         (watcher, create_new)
     }
     /*pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, usize) {
@@ -211,7 +212,7 @@ impl LQEntry {
                 let entry_index = new_entries.iter_mut().position(|a| a["id"].as_str() == new_data["id"].as_str());
                 match entry_index {
                     Some(entry_index) => {
-                        let mut entry = new_entries.get_mut(entry_index).unwrap();
+                        let entry = new_entries.get_mut(entry_index).unwrap();
                         for key in new_data.keys() {
                             entry.insert(key.to_owned(), new_data[key].clone());
                             our_data_changed = true;
@@ -246,7 +247,7 @@ impl LQEntry {
 
         new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
-        for (watcher_stream_id, watcher) in &self.entry_watchers {
+        for (_watcher_stream_id, watcher) in &self.entry_watchers {
             watcher.new_entries_channel_sender.send(new_entries.clone());
         }
         //self.new_entries_channel_sender.send(new_entries.clone());
@@ -296,14 +297,13 @@ impl LDChange {
         }
     }
 }
-fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &String) -> JSONValue {
-    let type_str = typ.as_str();
-    if type_str.ends_with("[]") {
-        let item_type_as_bytes = &type_str.as_bytes()[..type_str.find("[]").unwrap()];
+fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &str) -> JSONValue {
+    if typ.ends_with("[]") {
+        let item_type_as_bytes = &typ.as_bytes()[..typ.find("[]").unwrap()];
         let item_type = String::from_utf8(item_type_as_bytes.to_vec()).unwrap();
         return parse_postgres_array(value.as_str().unwrap(), item_type == "jsonb");
     }
-    match type_str {
+    match typ {
         "jsonb" => {
             // the LDChange vals of type jsonb are initially stored as strings
             // convert that to a serde_json::Value::Object, so serde_json::from_value(...) can auto-deserialize it to a nested struct

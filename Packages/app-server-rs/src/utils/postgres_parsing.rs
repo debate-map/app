@@ -23,8 +23,8 @@ mod tests {
 pub fn parse_postgres_array(array_str: &str, items_are_serialized: bool) -> JSONValue {
     let result_as_strings: Vec<String> = parse_postgres_array_as_strings(array_str);
     let result_as_json_values = result_as_strings.into_iter().map(|item_as_str| {
-        if (items_are_serialized) {
-            serde_json::from_str(&item_as_str.to_owned()).unwrap()
+        if items_are_serialized {
+            serde_json::from_str(&item_as_str).unwrap()
         } else {
             serde_json::Value::String(item_as_str)
         }
@@ -54,73 +54,69 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
     //for (i, ch) in chars.enumerate() {
     //let chars_length = chars.into_iter().count();
     let chars_length = chars.len();
-    let mut i = 0;
-    for ch in chars {
-        match last_char_was_escape_backslash {
-            true => {
-                last_char_was_escape_backslash = false;
-                //current_entry_str.unwrap().push(ch);
+    for (i, ch) in chars.into_iter().enumerate() {
+        if last_char_was_escape_backslash {
+            last_char_was_escape_backslash = false;
+            //current_entry_str.unwrap().push(ch);
+            current_entry_str.push(ch);
+            continue;
+        }
+
+        match ch {
+            '{' if i == 0 => {},
+            '}' if i == chars_length - 1 => {
+                //if current_entry_str.is_some() {
+                if !current_entry_str.is_empty() {
+                    //end_current_entry();
+                    {
+                        /*result_as_strings.push(current_entry_str.unwrap());
+                        current_entry_str = None;*/
+                        result_as_strings.push(current_entry_str);
+                        current_entry_str = String::new();
+                        in_quote = false;
+                        in_entry = false;
+                    }
+                }
+            },
+            '\\' => {
+                last_char_was_escape_backslash = true;
+            },
+            '"' => {
+                in_quote = !in_quote;
+                // if just left a quote
+                if !in_quote {
+                    //end_current_entry();
+                    {
+                        result_as_strings.push(current_entry_str);
+                        current_entry_str = String::new();
+                        in_quote = false;
+                        in_entry = false;
+                    }
+                }
+            },
+            // ie. if just left a quote
+            ',' if !in_entry => {},
+            // if hit a separator after a non-quoted entry
+            ',' if in_entry && !in_quote => {
+                //end_current_entry();
+                {
+                    result_as_strings.push(current_entry_str);
+                    current_entry_str = String::new();
+                    in_quote = false;
+                    in_entry = false;
+                }
+            },
+            _ => {
+                // if hit start of entry
+                //if current_entry_str.is_none() {
+                if current_entry_str.is_empty() {
+                    //current_entry_str = Some(String::new());
+                    current_entry_str = String::new();
+                    in_entry = true;
+                }
                 current_entry_str.push(ch);
             }
-            false => {
-                match ch {
-                    '{' if i == 0 => {},
-                    '}' if i == chars_length - 1 => {
-                        //if current_entry_str.is_some() {
-                        if current_entry_str.len() > 0 {
-                            //end_current_entry();
-                            {
-                                /*result_as_strings.push(current_entry_str.unwrap());
-                                current_entry_str = None;*/
-                                result_as_strings.push(current_entry_str);
-                                current_entry_str = String::new();
-                                in_quote = false;
-                                in_entry = false;
-                            }
-                        }
-                    },
-                    '\\' => {
-                        last_char_was_escape_backslash = true;
-                    },
-                    '"' => {
-                        in_quote = !in_quote;
-                        // if just left a quote
-                        if !in_quote {
-                            //end_current_entry();
-                            {
-                                result_as_strings.push(current_entry_str);
-                                current_entry_str = String::new();
-                                in_quote = false;
-                                in_entry = false;
-                            }
-                        }
-                    },
-                    // ie. if just left a quote
-                    ',' if !in_entry => {},
-                    // if hit a separator after a non-quoted entry
-                    ',' if in_entry && !in_quote => {
-                        //end_current_entry();
-                        {
-                            result_as_strings.push(current_entry_str);
-                            current_entry_str = String::new();
-                            in_quote = false;
-                            in_entry = false;
-                        }
-                    },
-                    _ => {
-                        // if hit start of entry
-                        //if current_entry_str.is_none() {
-                        if current_entry_str.len() == 0 {
-                            //current_entry_str = Some(String::new());
-                            current_entry_str = String::new();
-                            in_entry = true;
-                        }
-                        current_entry_str.push(ch);
-                    }
-                };
-            },
         };
-        i += 1;
     }
     result_as_strings
 }

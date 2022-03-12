@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -55,10 +55,10 @@ impl GQLSet<NodeChildLink> for GQLSet_NodeChildLink {
 pub struct SubscriptionShard_NodeChildLink;
 #[Subscription]
 impl SubscriptionShard_NodeChildLink {
-    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_NodeChildLink> + 'a {
+    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_NodeChildLink> + 'a {
         handle_generic_gql_collection_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", filter).await
     }
-    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
+    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
         handle_generic_gql_doc_request::<NodeChildLink>(ctx, "nodeChildLinks", id).await
     }
 }

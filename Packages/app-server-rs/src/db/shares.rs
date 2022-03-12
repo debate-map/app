@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -41,10 +41,10 @@ impl GQLSet<Share> for GQLSet_Share {
 pub struct SubscriptionShard_Share;
 #[Subscription]
 impl SubscriptionShard_Share {
-    async fn shares<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_Share> + 'a {
+    async fn shares<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_Share> + 'a {
         handle_generic_gql_collection_request::<Share, GQLSet_Share>(ctx, "shares", filter).await
     }
-    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<Share>> + 'a {
+    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<Share>> + 'a {
         handle_generic_gql_doc_request::<Share>(ctx, "shares", id).await
     }
 }

@@ -14,14 +14,14 @@ use crate::{store::storage::{StorageWrapper, LQStorage, get_lq_key, DropLQWatche
 use super::filter::Filter;
 
 // temp (these will not be useful once the streams are live/auto-update)
-pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debug>(result: impl Future<Output = Result<impl Stream<Item = T>, U>>) -> T {
+/*pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debug>(result: impl Future<Output = Result<impl Stream<Item = T>, U>>) -> T {
     let stream = result.await.unwrap();
     get_first_item_from_stream(stream).await
 }
 pub async fn get_first_item_from_stream<T>(stream: impl Stream<Item = T>) -> T {
     let first_item = stream.collect::<Vec<T>>().await.pop().unwrap();
     first_item
-}
+}*/
 
 /*pub struct GQLSet<T> { pub nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
@@ -77,13 +77,13 @@ pub async fn handle_generic_gql_collection_request<'a,
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(&table_name, &filter, stream_id, &ctx).await;
+        let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx).await;
 
         (entries_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
-    let filter_clone = filter.clone();
-    let mut base_stream = async_stream::stream! {
+    //let filter_clone = filter.clone();
+    let base_stream = async_stream::stream! {
         yield GQLSetVariant::from(entries_as_type);
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
@@ -108,14 +108,14 @@ pub async fn handle_generic_gql_doc_request<'a,
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(&table_name, &filter, stream_id, &ctx).await;
+        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx).await;
         let entry_as_type = entries_as_type.pop();
 
         (entry_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
-    let filter_clone = filter.clone();
-    let mut base_stream = async_stream::stream! {
+    //let filter_clone = filter.clone();
+    let base_stream = async_stream::stream! {
         yield entry_as_type;
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();

@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -44,10 +44,10 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
 pub struct SubscriptionShard_CommandRun;
 #[Subscription]
 impl SubscriptionShard_CommandRun {
-    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_CommandRun> + 'a {
+    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_CommandRun> + 'a {
         handle_generic_gql_collection_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
     }
-    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<CommandRun>> + 'a {
+    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<CommandRun>> + 'a {
         handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", id).await
     }
 }

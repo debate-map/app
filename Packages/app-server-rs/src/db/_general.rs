@@ -9,7 +9,7 @@ use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 use crate::utils::type_aliases::{JSONValue};
 
@@ -21,7 +21,7 @@ pub struct QueryShard_General;
 #[Object]
 impl QueryShard_General {
     /// async-graphql requires that to be at least one entry under the Query section
-    async fn empty(&self) -> &str { &"" }
+    async fn empty(&self) -> &str { "" }
 }
 
 // mutations
@@ -38,7 +38,7 @@ pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
     #[graphql(name = "_GetConnectionID")]
-    async fn _GetConnectionID(&self, ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result> {
+    async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result> {
         Ok(GetConnectionID_Result {
             id: "todo".to_owned()
         })
@@ -74,7 +74,7 @@ impl SubscriptionShard_General {
     }*/
     
     #[graphql(name = "_Ping")]
-    async fn _Ping(&self, ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
+    async fn _Ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();
         // create the listed file in the app-server-rs pod (eg. using Lens), if you've made an update that you need all clients to refresh for
         let refreshPage = Path::new("./refreshPageForAllUsers_enabled").exists();
@@ -86,7 +86,7 @@ impl SubscriptionShard_General {
     }
 
     #[graphql(name = "_PassConnectionID")]
-    async fn _PassConnectionID(&self, ctx: &async_graphql::Context<'_>, #[graphql(name = "connectionID")] connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
+    async fn _PassConnectionID(&self, _ctx: &async_graphql::Context<'_>, #[graphql(name = "connectionID")] connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
         println!("Connection-id was passed from client:{}", connectionID);
         //let userID = "DM_SYSTEM_000000000001".to_owned();
         let userID = match get_user_id_from_connection_id(connectionID).await {

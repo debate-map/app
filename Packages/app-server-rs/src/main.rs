@@ -1,7 +1,22 @@
 #![feature(backtrace)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
-#![feature(destructuring_assignment)]
+#![warn(clippy::all, clippy::pedantic, clippy::cargo)]
+#![allow(
+    unused_imports, // makes refactoring a pain (eg. you comment out a line to test something, and now must scroll-to-top and comment lots of stuff)
+    non_camel_case_types,
+    non_snake_case, // makes field-names inconsistent with graphql and such, for db-struct fields
+    clippy::module_name_repetitions, // too many false positives
+    clippy::items_after_statements, // usefulness of custom line-grouping outweighs that of having all-items-before-statements
+    clippy::expect_fun_call, // requires manual integration of error-message into the format-str, which is a pain, for usually negligible perf-gains
+    clippy::redundant_closure_for_method_calls, // often means substituting a much longer method-id than the closure code itself, reducing readability
+    clippy::similar_names, // too many false positives (eg. "req" and "res")
+    clippy::must_use_candidate, // too many false positives
+    clippy::implicit_clone, // personally, I like ownedString.to_owned(); it works the same way for &str and ownedString, meaning roughly, "Give me a new owned-version, that I can send in, regardless of the source-type."
+    clippy::unused_async, // too many false positives (eg. functions that must be async to be sent as an argument to something else, like a web-server library's API)
+    clippy::for_kv_map, // there are often cases where the key/value is not *currently* used, but was/will-be-soon, due to just doing a commenting test or something
+    clippy::if_not_else, // there are often reasons a dev might want one of the blocks before the other
+)]
 
 use axum::{
     response::{Html},
@@ -22,6 +37,11 @@ use std::{
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
 use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler, utils::axum_logging_layer::print_request_response};
+
+// for testing cargo-check times
+pub fn test1() {
+    println!("Test124556573324365");
+}
 
 mod gql;
 mod proxy_to_asjs;
@@ -110,7 +130,7 @@ async fn main() {
             match drop_msg {
                 DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
                     let mut storage = storage_wrapper_clone.lock().await;
-                    storage.drop_lq_watcher(table_name, &filter, stream_id);
+                    storage.drop_lq_watcher(&table_name, &filter, stream_id);
                 },
             };
         }
@@ -130,7 +150,7 @@ async fn main() {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
         } else {
-            println!("Postgres connection formed, for fulfilling subscriptions.")
+            println!("Postgres connection formed, for fulfilling subscriptions.");
         }
     });
 
@@ -142,7 +162,7 @@ async fn main() {
     let _handler = tokio::spawn(async move {
         let mut errors_hit = 0;
         while errors_hit < 1000 {
-            let (mut client2, mut connection2) = pgclient::create_client(true).await;
+            let (client2, connection2) = pgclient::create_client(true).await;
             let result = pgclient::start_streaming_changes(client2, connection2, storage_wrapper.clone()).await;
             match result {
                 Ok(result) => {

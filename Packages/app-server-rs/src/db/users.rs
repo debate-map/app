@@ -8,11 +8,12 @@ use tokio_postgres::{Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 use crate::utils::type_aliases::{JSONValue};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct PermissionGroups {
     basic: bool,
     verified: bool,
@@ -82,7 +83,7 @@ impl GQLSet<User> for GQLSet_User {
 pub struct SubscriptionShard_User;
 #[Subscription]
 impl SubscriptionShard_User {
-    async fn users<'a>(&self, ctx: &'a async_graphql::Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_User> + 'a {
+    async fn users<'a>(&self, ctx: &'a async_graphql::Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_User> + 'a {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
     }
     async fn user<'a>(&self, ctx: &'a async_graphql::Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {

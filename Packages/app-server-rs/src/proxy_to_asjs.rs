@@ -17,7 +17,6 @@ use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use serde_json::json;
 use std::{convert::TryFrom, net::SocketAddr};
 use tower_http::cors::{CorsLayer, Origin};
-use crate::gql::RootSchema;
 use futures::future::{self, Future};
 
 pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
@@ -29,8 +28,7 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, mu
     let path_query = req
         .uri()
         .path_and_query()
-        .map(|v| v.as_str())
-        .unwrap_or(path);
+        .map_or(path, |v| v.as_str());
 
     //let uri = format!("http://127.0.0.1:3155{}", path_query);
     let uri = format!("{}{}", APP_SERVER_JS_URL, path_query);

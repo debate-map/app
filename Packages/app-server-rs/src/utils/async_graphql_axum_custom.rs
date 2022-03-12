@@ -1,3 +1,6 @@
+// since we're just making a few marked line-changes, ignore warnings from rest of code
+#![allow(warnings, unused)]
+
 use std::borrow::Cow;
 use std::convert::Infallible;
 use std::future::Future;

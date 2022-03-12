@@ -5,7 +5,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -42,10 +42,10 @@ impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
 pub struct SubscriptionShard_AccessPolicy;
 #[Subscription]
 impl SubscriptionShard_AccessPolicy {
-    async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_AccessPolicy> + 'a {
+    async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_AccessPolicy> + 'a {
         handle_generic_gql_collection_request::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
     }
-    async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<AccessPolicy>> + 'a {
+    async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<AccessPolicy>> + 'a {
         handle_generic_gql_doc_request::<AccessPolicy>(ctx, "accessPolicies", id).await
     }
 }

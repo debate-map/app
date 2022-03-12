@@ -3,7 +3,7 @@ use futures_util::{Stream, stream, TryFutureExt};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::general::{get_first_item_from_stream_in_result_in_future, handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -52,10 +52,10 @@ impl GQLSet<MapNodePhrasing> for GQLSet_MapNodePhrasing {
 pub struct SubscriptionShard_MapNodePhrasing;
 #[Subscription]
 impl SubscriptionShard_MapNodePhrasing {
-    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_MapNodePhrasing> + 'a {
+    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_MapNodePhrasing> + 'a {
         handle_generic_gql_collection_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", filter).await
     }
-    async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, filter: Filter) -> impl Stream<Item = Option<MapNodePhrasing>> + 'a {
+    async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<MapNodePhrasing>> + 'a {
         handle_generic_gql_doc_request::<MapNodePhrasing>(ctx, "nodePhrasings", id).await
     }
 }

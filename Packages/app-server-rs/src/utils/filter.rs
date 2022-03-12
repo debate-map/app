@@ -16,8 +16,8 @@ pub fn get_sql_for_filters(filter: &Filter) -> Result<String, anyhow::Error> {
         //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
         for (filter_type, filter_value) in field_filters.as_object().unwrap() {
             parts.push(match filter_type.as_str() {
-                "equalTo" => format!("\"{field_name}\" = {}", filter_value.to_string().replace("\"", "'")),
-                "in" => format!("\"{field_name}\" IN {}", filter_value.to_string().replace("\"", "'").replace("[", "(").replace("]", ")")),
+                "equalTo" => format!("\"{field_name}\" = {}", filter_value.to_string().replace('\"', "'")),
+                "in" => format!("\"{field_name}\" IN {}", filter_value.to_string().replace('\"', "'").replace('[', "(").replace(']', ")")),
                 // see: https://stackoverflow.com/a/54069718
                 //"contains" => format!("ANY(\"{field_name}\") = {}", filter_value.to_string().replace("\"", "'")),
                 "contains" => format!("\"{field_name}\" @> {}", "'{".to_owned() + &filter_value.to_string() + "}'"),
@@ -36,7 +36,7 @@ pub fn entry_matches_filter(entry: &RowData, filter: &Filter) -> Result<bool, an
 
     for (field_name, field_filters) in filter.as_object().with_context(|| "Filter package was not an object!")? {
         // consider "field doesn't exist" to be the same as "field exists, and is set to null" (since that's how the filter-system is meant to work)
-        let field_value = entry.get(field_name).or_else(|| Some(&serde_json::Value::Null)).unwrap();
+        let field_value = entry.get(field_name).or(Some(&serde_json::Value::Null)).unwrap();
         
         //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
         for (filter_type, filter_value) in field_filters.as_object().with_context(|| "Filter entry for field was not an object!")? {
