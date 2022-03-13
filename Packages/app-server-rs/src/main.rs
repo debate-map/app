@@ -40,7 +40,7 @@ use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherM
 
 // for testing cargo-check times
 pub fn test1() {
-    println!("Test124556573324361115123123333313");
+    println!("Test123");
 }
 
 mod gql;

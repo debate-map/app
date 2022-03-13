@@ -6,6 +6,9 @@
 # rather than use a mutable "version", lock the source image to a specific digest (so ~nightly "rust:XXX" image changes doesn't cause complete rebuilds of our build-chain)
 FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
 
+# generic env-var for code to know if its running as part of a Dockerfile
+ENV IN_DOCKER=1
+
 # install mold linker
 RUN apt-get update \
 	&& apt-get install -y build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config \
@@ -21,6 +24,9 @@ RUN apt-get update \
 #RUN apt-get update
 #RUN apt-get install musl-tools -y
 #RUN rustup target add x86_64-unknown-linux-musl
+
+# we don't need cargo-expand for the cached_expand! macro; its gains are only a few seconds, which is great for dev-time cargo-check, but not worth it for docker builds
+#RUN cargo install cargo-expand
 
 #WORKDIR /dm_repo/Packages/app-server-rs
 WORKDIR /dm_repo
@@ -52,8 +58,11 @@ RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag}
 WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
-COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
 
+# just copy the rust-macros crate completely here (it doesn't change very often, so it's fine if it invalidates later steps)
+COPY Packages/rust-macros Packages/rust-macros
+
+COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
 # copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in app-server's frequently changing own-code)
 RUN mkdir Packages/app-server-rs/src/
 RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
@@ -70,7 +79,9 @@ RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
 RUN rm -f target/${debug_vs_release}/deps/app_server_rs*
 
 # now copy the app-server's own code
-COPY Packages/app-server-rs/ .
+#COPY Packages/app-server-rs/ .
+COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
+#COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 # and build the actual app-server program
 #RUN cargo build
 #RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings

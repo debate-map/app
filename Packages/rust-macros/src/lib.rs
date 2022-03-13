@@ -1,59 +1,21 @@
-/*use std::env::args;
-
-use async_graphql_derive::SimpleObject;
-//use async_graphql_derive::derive_simple_object;
-
-//use darling::{FromDeriveInput, FromMeta};
-use proc_macro::TokenStream;
-use syn::parse_macro_input;
-use syn::{AttributeArgs, DeriveInput, ItemFn, ItemImpl};
-
-// function copied from async_graphql_derive's source
-fn derive_simple_object(input: TokenStream) -> TokenStream {
-    let object_args =
-        match args::SimpleObject::from_derive_input(&parse_macro_input!(input as DeriveInput)) {
-            Ok(object_args) => object_args,
-            Err(err) => return TokenStream::from(err.write_errors()),
-        };
-    match simple_object::generate(&object_args) {
-        Ok(expanded) => expanded,
-        Err(err) => err.write_errors().into(),
-    }
-}
-
-#[proc_macro_derive(SimpleObject_Cached)]
-pub fn derive_simple_object_cached(input: TokenStream) -> TokenStream {
-    //let input_tokens = &parse_macro_input!(input as DeriveInput);
-    println!("{}", input);
-
-    const input_changed_since_last_invokation: bool = ...; // TODO; check if input has changed since last cache-file save
-    
-    let output_tokens = if input_changed_since_last_invokation {
-        //let temp = derive_simple_object(input);
-        let temp = SimpleObject(input);
-        save_output_tokens_to_cache(temp); // TODO; save output_tokens to cache-file
-        temp
-    } else {
-        read_output_tokens_from_cache(input); // TODO; read previous output_tokens from cache-file, for the given macro
-    };
-
-    return output_tokens;
-}*/
-
 extern crate proc_macro;
 extern crate syn;
 use std::{env, fs};
 use std::process::{Command, Stdio};
-//use std::path::Path;
 use std::io::{BufReader, BufRead};
 use std::str::FromStr;
 
 use proc_macro::{TokenStream, Ident, Span};
-//use syn::token::Token;
-use quote::quote;
 
 #[proc_macro]
 pub fn cached_expand(input: TokenStream) -> TokenStream {
+    if let Ok(val) = env::var("IN_DOCKER") {
+        if val == "1" {
+            println!("Running in Docker, so just returning original input-tokens.");
+            return input;
+        }
+    }
+
     let _input_str = input.to_string();
     //println!("Input: {:?}", input);
 

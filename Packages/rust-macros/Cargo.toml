@@ -12,4 +12,4 @@ async-graphql = "3.0.28"
 async-graphql-derive = "3.0.28"
 
 syn = { version = "1.0.64", features = ["full", "extra-traits", "visit-mut", "visit"] }
-quote = "*"
+#quote = "*"
