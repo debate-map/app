@@ -1,5 +1,6 @@
 [workspace]
 members = [
+	"Packages/rust-macros",
 	"Packages/app-server-rs",
 	#"Packages/graphlink-server",
 ]

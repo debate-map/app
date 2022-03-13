@@ -51,6 +51,7 @@ dependencies = [
  "futures-timer",
  "futures-util",
  "hyper",
+ "rust-macros",
  "serde",
  "serde_json",
  "slab",
@@ -1251,6 +1252,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "rust-macros"
+version = "0.0.1"
+dependencies = [
+ "async-graphql",
+ "async-graphql-derive",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -37,6 +37,8 @@ futures-timer = "3.0.2"
 # needed for async-graphql-axum customization
 tower-service = "0.3"
 
+rust-macros = { path = "../rust-macros" }
+
 [dependencies.tokio-postgres]
 git = "https://github.com/petrosagg/rust-postgres.git"
 branch = "copy-both"
