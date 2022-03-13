@@ -2,6 +2,7 @@ use anyhow::Context;
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
+use rust_macros::cached_expand;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
@@ -23,6 +24,12 @@ pub struct PermissionGroups {
 scalar!(PermissionGroups);
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
+
+cached_expand!{
+const ce_args: &str = r##"
+id = "users"
+excludeLinesWith = "#[graphql(name"
+"##;
 
 //type User = String;
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -77,6 +84,8 @@ impl From<tokio_postgres::row::Row> for User {
 impl GQLSet<User> for GQLSet_User {
     fn from(entries: Vec<User>) -> GQLSet_User { Self { nodes: entries } }
     fn nodes(&self) -> &Vec<User> { &self.nodes }
+}
+
 }
 
 #[derive(Default)]

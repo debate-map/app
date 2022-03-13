@@ -1,10 +1,17 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use rust_macros::cached_expand;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
+
+cached_expand!{
+const ce_args: &str = r##"
+id = "node_ratings"
+excludeLinesWith = "#[graphql(name"
+"##;
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeRating {
@@ -35,6 +42,8 @@ impl From<tokio_postgres::row::Row> for NodeRating {
 impl GQLSet<NodeRating> for GQLSet_NodeRating {
     fn from(entries: Vec<NodeRating>) -> GQLSet_NodeRating { Self { nodes: entries } }
     fn nodes(&self) -> &Vec<NodeRating> { &self.nodes }
+}
+
 }
 
 #[derive(Default)]

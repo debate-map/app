@@ -1,10 +1,17 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use rust_macros::cached_expand;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
+
+cached_expand!{
+const ce_args: &str = r##"
+id = "map_node_edits"
+excludeLinesWith = "#[graphql(name"
+"##;
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeEdit {
@@ -31,6 +38,8 @@ impl From<tokio_postgres::row::Row> for MapNodeEdit {
 impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
     fn from(entries: Vec<MapNodeEdit>) -> GQLSet_MapNodeEdit { Self { nodes: entries } }
     fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes }
+}
+
 }
 
 #[derive(Default)]

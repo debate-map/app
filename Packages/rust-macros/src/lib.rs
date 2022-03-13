@@ -57,25 +57,48 @@ pub fn cached_expand(input: TokenStream) -> TokenStream {
     let _input_str = input.to_string();
     //println!("Input: {:?}", input);
 
-    let group_id = {
-        let mut result = "".to_owned();
-        let mut last_token_str: Option<String> = None;
+    let mut group_id = "".to_owned();
+    let mut exclude_lines_with = "NEVER_MATCHING".to_owned();
+    {
+        let mut past_token_strings: Vec<String> = Vec::new();
         for token in input.clone() {
             println!("Got token:{token}");
             let token_str = format!("{token}");
-            if token_str.starts_with("CEID_") && last_token_str.is_some() && last_token_str.unwrap() == "struct" {
+
+            /*if token_str.starts_with("CEID_") && last_token_str.is_some() && last_token_str.unwrap() == "struct" {
                 result = token_str["CEID_".len()..].to_string();
                 break;
+            }*/
+            if let Some(token_5_back) = past_token_strings.get((past_token_strings.len() as isize - 5) as usize) {
+                if token_5_back == "ce_args" {
+                    let mut lines = token_str.split("\n");
+                    // example line: id = "access_policies"
+                    if let Some(id_line) = lines.find(|a| a.contains("id = ")) {
+                        group_id = id_line.split("\"").collect::<Vec<&str>>()[1].to_owned();
+                    }
+                    // example line: excludeLinesWith = "#[graphql(name"
+                    if let Some(exclude_lines_with_0line) = lines.find(|a| a.contains("excludeLinesWith = ")) {
+                        exclude_lines_with = exclude_lines_with_0line.split("\"").collect::<Vec<&str>>()[1].to_owned();
+                    }
+                    break;
+                }
             }
 
-            last_token_str = Some(token_str);
+            past_token_strings.push(token_str);
+            /*if past_token_strings.len() > 3 {
+                past_token_strings.pop_front();
+            }*/
+
+            // if we've processed 30 tokens, and still haven't reached a ce_args string, give up (it should be at the very top)
+            if past_token_strings.len() > 30 {
+                break;
+            }
         }
-        if result == "" {
-            panic!("Could not find required struct matching pattern: CEID_<group name here>");
-        }
-        result
-    };
-    println!("Found group-id:{}", group_id);
+    }
+    if group_id == "" {
+        panic!("Could not cached_expand args. Provide it using pattern: const ce_args: &str = r#\"id = \"<group name here>\"\"#;");
+    }
+    println!("Found args. @id:{group_id} @excludeLinesWith:{exclude_lines_with}");
     let cache_folder_path = env::current_dir().unwrap().join("target").join("cached_expand").join("expansions");
     let cache_input_path = cache_folder_path.join(group_id.clone() + "_Input");
     let cache_output_path = cache_folder_path.join(group_id.clone() + "_Output");
@@ -172,8 +195,12 @@ pub fn cached_expand(input: TokenStream) -> TokenStream {
             }
 
             if start_marker_hit && !end_marker_hit && line_str != SPECIAL_MESSAGE_1 && line_str != SPECIAL_MESSAGE_2 {
-                println!("FoundExpanded({i}): {line_str}");
-                expanded_code += &line_str;
+                if line_str.contains(exclude_lines_with.as_str()) {
+                    println!("Ignoring line, based on excludeLinesWith setting:{}", line_str);
+                } else {
+                    //println!("FoundExpanded({i}): {line_str}");
+                    expanded_code += &line_str;
+                }
             }
 
             // run this after, so end-marker is still included

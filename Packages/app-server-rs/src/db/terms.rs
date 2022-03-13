@@ -1,11 +1,18 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use rust_macros::cached_expand;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
+
+cached_expand!{
+const ce_args: &str = r##"
+id = "terms"
+excludeLinesWith = "#[graphql(name"
+"##;
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Term {
@@ -46,6 +53,8 @@ impl GQLSet<Term> for GQLSet_Term {
     fn from(entries: Vec<Term>) -> GQLSet_Term { Self { nodes: entries } }
     //async fn nodes(&self) -> &Vec<Term> { &self.nodes }
     fn nodes(&self) -> &Vec<Term> { &self.nodes }
+}
+
 }
 
 #[derive(Default)]

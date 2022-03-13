@@ -2,11 +2,18 @@ use std::panic;
 
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use rust_macros::cached_expand;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
+
+cached_expand!{
+const ce_args: &str = r##"
+id = "access_policies"
+excludeLinesWith = "#[graphql(name"
+"##;
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct AccessPolicy {
@@ -36,6 +43,8 @@ impl From<tokio_postgres::row::Row> for AccessPolicy {
 impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
     fn from(entries: Vec<AccessPolicy>) -> GQLSet_AccessPolicy { Self { nodes: entries } }
     fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes }
+}
+
 }
 
 #[derive(Default)]
