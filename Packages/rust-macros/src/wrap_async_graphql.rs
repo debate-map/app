@@ -7,7 +7,6 @@ use proc_macro2::{TokenStream, TokenTree, Group, Delimiter};
 pub fn wrap_async_graphql_impl(input: TokenStream) -> TokenStream {
     let proceed = {
         let mut temp = false;
-        // if this macro is running as part of the "cargo expand" command (of a parent instance of this macro), then...
         if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {
             if val == "1" {
                 println!("Macro wrap_async_graphql: Modifying tokens, since STRIP_ASYNC_GRAPHQL is true.");
@@ -20,25 +19,16 @@ pub fn wrap_async_graphql_impl(input: TokenStream) -> TokenStream {
         return input;
     }
     
-    //let _input_str = input.to_string();
-    //println!("Input: {:?}", input);
-
     let output = input.clone();
     let output = remove_graphql_tags(output);
     output
 }
 
-//const MACROS_TO_REMOVE: &'static [&'static str] = &["graphql", "Object", "SimpleObject", "Subscription"];
 static MACROS_TO_REMOVE: &'static [&'static str] = &["graphql", "Object", "Subscription"];
 static DERIVE_MACROS_TO_REMOVE: &'static [&'static str] = &["SimpleObject", "MergedObject", "MergedSubscription"];
 fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
     let is_macro_to_block = Box::new(|token: &TokenTree| {
         match token {
-            //TokenTree::Group(Group { inner: proc_macro2::imp::Group::Fallback(proc_macro2::fallback::Group { delimiter: Brace, .. }) }) => true,
-            //TokenTree::Group(Group { inner: { 0: {delimiter: Brace, ..} } }) => true,
-            //TokenTree::Group(data) if data.inner.0.delimiter == Brace => true,
-            //TokenTree::Group(Group { .. }) => true,
-            //TokenTree::Group(data) if token.to_string().starts_with("Group { delimiter: Bracket, ") => true, // fields are private, so don't know a better way
             TokenTree::Group(data) => {
                 if data.delimiter() == Delimiter::Bracket {
                     let children: Vec<TokenTree> = data.stream().into_iter().collect();
@@ -57,8 +47,6 @@ fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
     });
     let is_hash = Box::new(|token: &TokenTree| {
         match token {
-            //TokenTree::Punct(Punct { ch: '#', .. }) => true,
-            //TokenTree::Punct(data) if token.to_string().starts_with("Punct { char: '#', ") => true, // fields are private, so don't know a better way
             TokenTree::Punct(data) if data.as_char() == '#' => true,
             _ => false,
         }
@@ -101,8 +89,6 @@ fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
 
 type SlotCheck = dyn Fn(&TokenTree) -> bool;
 fn remove_token_sequences_matching(tokens: TokenStream, slot_checks: &Vec<Box<SlotCheck>>) -> TokenStream {
-    //let token_to_remove = Vec::new();
-    //let tokens_to_remove = HashSet::new();
     let mut token_indexes_to_remove = Vec::new();
     
     let mut tokens_so_far = Vec::new();
@@ -118,9 +104,7 @@ fn remove_token_sequences_matching(tokens: TokenStream, slot_checks: &Vec<Box<Sl
             });
             if all_checks_pass {
                 //println!("Blocking this token, and the {} before it.", tokens_for_slots.len() - 1);
-                //tokens_to_remove.append(&mut tokens_for_slots);
                 for (i2, _token_in_set) in tokens_for_slots.iter().enumerate() {
-                    //tokens_to_remove.insert(token_in_set);
                     token_indexes_to_remove.push(token_index_for_first_slot + i2);
                 }
             }
@@ -129,8 +113,6 @@ fn remove_token_sequences_matching(tokens: TokenStream, slot_checks: &Vec<Box<Sl
 
     let mut result = Vec::new();
     for (i, token) in tokens_so_far.into_iter().enumerate() {
-        //if tokens_to_remove.contains(&token) {
-        //if tokens_to_remove.iter().find(|a| **a == token).is_some() {
         if token_indexes_to_remove.contains(&i) {
             continue;
         }
@@ -150,7 +132,7 @@ fn remove_token_sequences_matching(tokens: TokenStream, slot_checks: &Vec<Box<Sl
     return TokenStream::from_iter(result_processed);
 }
 
-// tests (run these with "cargo test -- --nocapture" to see log output; adding "+nightly" as an arg might good atm to avoid fresh-compile)
+// tests (run these with "cargo test -- --nocapture" to see log output)
 // ==========
 
 #[cfg(test)]
