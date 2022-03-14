@@ -237,6 +237,8 @@ mod tests {
             struct Test1 {
                 #[graphql(name = "public_base")]
                 public_base: bool;
+                #[some_other_macro]
+                public_base2: bool;
             }
 
             #[derive(MergedObject, Default)]
@@ -244,7 +246,7 @@ mod tests {
             #[derive(MergedSubscription, Default)]
             pub struct SubscriptionRoot;
     
-            #[SimpleObject]
+            #[derive(SimpleObject)]
             struct Test2 {}
     
             #[Subscription]
@@ -254,17 +256,18 @@ mod tests {
         assert_eq!(
             tokens_filtered.to_string().chars().filter(|c| !c.is_whitespace()).collect::<String>(),
             r##"
-                #[derive(Default)]
-                pub struct QueryRoot;
-                #[derive(Default)]
-                pub struct SubscriptionRoot;
-    
                 struct Test1 {
                     public_base: bool;
                     #[some_other_macro]
                     public_base2: bool;
                 }
+
+                #[derive(Default)]
+                pub struct QueryRoot;
+                #[derive(Default)]
+                pub struct SubscriptionRoot;
     
+                #[derive()]
                 struct Test2 {}
     
                 impl SubscriptionShard_CommandRun {}
