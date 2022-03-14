@@ -1,17 +1,19 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
-use rust_macros::cached_expand;
+use rust_macros::wrap_async_graphql;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
-cached_expand!{
+wrap_async_graphql!{
+
+/*cached_expand!{
 const ce_args: &str = r##"
-id = "nodes"
+id = "command_runs"
 excludeLinesWith = "#[graphql(name"
-"##;
+"##;*/
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNode {
@@ -51,8 +53,6 @@ impl GQLSet<MapNode> for GQLSet_MapNode {
     fn nodes(&self) -> &Vec<MapNode> { &self.nodes }
 }
 
-}
-
 #[derive(Default)]
 pub struct SubscriptionShard_MapNode;
 #[Subscription]
@@ -63,4 +63,6 @@ impl SubscriptionShard_MapNode {
     async fn node<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<MapNode>> + 'a {
         handle_generic_gql_doc_request::<MapNode>(ctx, "nodes", id).await
     }
+}
+
 }

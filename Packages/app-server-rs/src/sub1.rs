@@ -1,9 +1,10 @@
 
 use async_graphql::SimpleObject;
-use rust_macros::cached_expand;
+use rust_macros::wrap_async_graphql;
 use serde::{Serialize, Deserialize};
 
-cached_expand!{
+//cached_expand!{
+wrap_async_graphql!{
 
 struct CEID_MyStruct {}
 

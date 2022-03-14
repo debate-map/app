@@ -1,17 +1,19 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
-use rust_macros::cached_expand;
+use rust_macros::wrap_async_graphql;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
-cached_expand!{
+wrap_async_graphql!{
+
+/*cached_expand!{
 const ce_args: &str = r##"
-id = "node_ratings"
+id = "command_runs"
 excludeLinesWith = "#[graphql(name"
-"##;
+"##;*/
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeRating {
@@ -44,8 +46,6 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
     fn nodes(&self) -> &Vec<NodeRating> { &self.nodes }
 }
 
-}
-
 #[derive(Default)]
 pub struct SubscriptionShard_NodeRating;
 #[Subscription]
@@ -56,4 +56,6 @@ impl SubscriptionShard_NodeRating {
     async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<NodeRating>> + 'a {
         handle_generic_gql_doc_request::<NodeRating>(ctx, "nodeRatings", id).await
     }
+}
+
 }

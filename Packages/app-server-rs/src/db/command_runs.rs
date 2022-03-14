@@ -1,17 +1,19 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
-use rust_macros::cached_expand;
+use rust_macros::wrap_async_graphql;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
-cached_expand!{
-    const ce_args: &str = r##"
-    id = "command_runs"
-    excludeLinesWith = "#[graphql(name"
-    "##;
+wrap_async_graphql!{
+
+/*cached_expand!{
+const ce_args: &str = r##"
+id = "command_runs"
+excludeLinesWith = "#[graphql(name"
+"##;*/
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct CommandRun {
@@ -47,8 +49,6 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
     fn nodes(&self) -> &Vec<CommandRun> { &self.nodes }
 }
 
-}
-
 #[derive(Default)]
 pub struct SubscriptionShard_CommandRun;
 #[Subscription]
@@ -59,4 +59,6 @@ impl SubscriptionShard_CommandRun {
     async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<CommandRun>> + 'a {
         handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", id).await
     }
+}
+
 }

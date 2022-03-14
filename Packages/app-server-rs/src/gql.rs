@@ -5,9 +5,10 @@ use std::future::Future;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
+use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription};
 use hyper::Body;
 use hyper::client::HttpConnector;
+use rust_macros::{wrap_async_graphql, wrap_agql_schema_build};
 use tokio_postgres::{Client};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
@@ -55,8 +56,12 @@ use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
 
+// don't wrap this one, because we need it (there is no EmptyQuery for placeholding in )
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(QueryShard_General);
+
+wrap_async_graphql!{
+
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(MutationShard_General);
 #[derive(MergedSubscription, Default)]
@@ -72,14 +77,20 @@ pub struct SubscriptionRoot(
 );
 //pub type RootSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
 
+}
+
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
         GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
     ))
 }
 
+
 pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrapper) -> Router {
-    let schema = Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
+    let schema =
+        wrap_agql_schema_build!{
+            Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
+        }
         .data(client)
         .data(storage_wrapper)
         //.data(connection)

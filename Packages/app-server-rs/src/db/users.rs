@@ -2,7 +2,7 @@ use anyhow::Context;
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
-use rust_macros::cached_expand;
+use rust_macros::wrap_async_graphql;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
@@ -25,11 +25,13 @@ scalar!(PermissionGroups);
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
-cached_expand!{
+wrap_async_graphql!{
+
+/*cached_expand!{
 const ce_args: &str = r##"
-id = "users"
+id = "command_runs"
 excludeLinesWith = "#[graphql(name"
-"##;
+"##;*/
 
 //type User = String;
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -86,8 +88,6 @@ impl GQLSet<User> for GQLSet_User {
     fn nodes(&self) -> &Vec<User> { &self.nodes }
 }
 
-}
-
 #[derive(Default)]
 pub struct SubscriptionShard_User;
 #[Subscription]
@@ -98,4 +98,6 @@ impl SubscriptionShard_User {
     async fn user<'a>(&self, ctx: &'a async_graphql::Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {
         handle_generic_gql_doc_request::<User>(ctx, "users", id).await
     }
+}
+
 }

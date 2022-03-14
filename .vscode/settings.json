@@ -36,11 +36,13 @@
 	],*/
 
 	"rust-analyzer.server.extraEnv": {
-		"FOR_RUST_ANALYZER": "1",
 		// this allows us to use unstable features (as is true for the Docker builds), without rust-analyzer showing an error on the "#![feature(XXX)]" line
 		"RUSTC_BOOTSTRAP": "1",
+		// custom flags
+		"FOR_RUST_ANALYZER": "1",
+		"STRIP_ASYNC_GRAPHQL": "1",
 	},
-	"rust-analyzer.checkOnSave.enable": false,
+	//"rust-analyzer.checkOnSave.enable": false,
 	/*"rust-analyzer.checkOnSave.extraArgs": [
 		"--target-dir", "/tmp/rust-analyzer-check"
 	]*/
