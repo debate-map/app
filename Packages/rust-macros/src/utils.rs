@@ -3,10 +3,6 @@ use proc_macro2::{TokenStream, TokenTree, Group};
 
 pub fn remove_token_sequences_matching(tokens: TokenStream, mut slot_checks: Vec<SlotCheck>) -> TokenStream {
     let mut slots: Vec<Slot> = Vec::new();
-    /*for check in slot_checks {
-        let check_clone = Box::new(check.clone());
-        slots.push((check_clone, None));
-    }*/
     for check in slot_checks.drain(0..slot_checks.len()) {
         slots.push((check, None));
     }
@@ -17,9 +13,6 @@ pub type Slot = (SlotCheck, SlotReplacement);
 pub type SlotCheck = Box<dyn Fn(&TokenTree) -> bool>;
 pub type SlotReplacement = Option<Vec<TokenTree>>;
 pub fn replace_token_sequences_matching(tokens: TokenStream, slots: &Vec<Slot>) -> TokenStream {
-    //let slot_checks: Vec<SlotCheck> = slots.iter().map(|a| a.0).collect();
-    //let slot_replacements: Vec<SlotReplacement> = slots.iter().map(|a| a.1).collect();
-    
     let mut token_replacements_planned: HashMap<usize, SlotReplacement> = HashMap::new();
     
     let mut tokens_so_far = Vec::new();
@@ -28,9 +21,8 @@ pub fn replace_token_sequences_matching(tokens: TokenStream, slots: &Vec<Slot>) 
         tokens_so_far.push(token);
         if tokens_so_far.len() >= slots.len() {
             let token_index_for_first_slot = tokens_so_far.len() - slots.len();
-            let tokens_for_slots = tokens_so_far[token_index_for_first_slot..].to_vec();
             let all_checks_pass = slots.iter().enumerate().all(|(i, slot)| {
-                let token = tokens_for_slots.get(i).unwrap();
+                let token = &tokens_so_far[token_index_for_first_slot + i];
                 let check = &slot.0;
                 return check(token);
             });
