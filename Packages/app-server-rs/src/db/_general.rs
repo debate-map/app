@@ -2,7 +2,7 @@ use anyhow::Context;
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
-use rust_macros::wrap_async_graphql;
+use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
@@ -13,6 +13,8 @@ use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 use crate::utils::type_aliases::{JSONValue};
+
+wrap_slow_macros!{
 
 // queries
 // ==========
@@ -102,6 +104,8 @@ impl SubscriptionShard_General {
             userID,
         } })
     }
+}
+
 }
 
 async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<String>, anyhow::Error> {

@@ -2,7 +2,7 @@ use anyhow::Context;
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
-use rust_macros::wrap_async_graphql;
+use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
@@ -25,7 +25,7 @@ scalar!(PermissionGroups);
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
-wrap_async_graphql!{
+wrap_slow_macros!{
 
 /*cached_expand!{
 const ce_args: &str = r##"

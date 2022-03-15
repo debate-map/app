@@ -1,11 +1,13 @@
 use std::{env};
 use proc_macro2::{TokenStream, TokenTree, Group, Delimiter};
 
+use crate::utils::remove_token_sequences_matching;
+
 // test-approach, of just stripping all the async-graphql macros for cargo-check (since presumably not needed at that point)
 // ==========
 
-pub fn wrap_async_graphql_impl(input: TokenStream) -> TokenStream {
-    let proceed = {
+pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> TokenStream {
+    let proceed = force_proceed || {
         let mut temp = false;
         if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {
             if val == "1" {
@@ -52,7 +54,7 @@ fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
         }
     });
     
-    let result = remove_token_sequences_matching(tokens, &vec![
+    let result = remove_token_sequences_matching(tokens, vec![
         is_hash,
         is_macro_to_block,
     ]);
@@ -71,66 +73,23 @@ fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
     });
 
     // first remove any target-macros, matching pattern: `MACRO,` (ie. non-last derive-macro)
-    let result = remove_token_sequences_matching(result, &vec![
+    let result = remove_token_sequences_matching(result, vec![
         is_derive_macro_to_block.clone(),
         is_comma.clone(),
     ]);
     // then remove any target-macros, matching pattern: `,MACRO` (ie. non-first derive-macro)
-    let result = remove_token_sequences_matching(result, &vec![
+    let result = remove_token_sequences_matching(result, vec![
         is_comma.clone(),
         is_derive_macro_to_block.clone(),
     ]);
     // then remove any target-macros, matching pattern: `MACRO` (ie. standalone derive-macro)
-    let result = remove_token_sequences_matching(result, &vec![
+    let result = remove_token_sequences_matching(result, vec![
         is_derive_macro_to_block.clone(),
     ]);
     result
 }
 
-type SlotCheck = dyn Fn(&TokenTree) -> bool;
-fn remove_token_sequences_matching(tokens: TokenStream, slot_checks: &Vec<Box<SlotCheck>>) -> TokenStream {
-    let mut token_indexes_to_remove = Vec::new();
-    
-    let mut tokens_so_far = Vec::new();
-    for token in tokens {
-        //println!("Processing token:{}", token.to_string());
-        tokens_so_far.push(token);
-        if tokens_so_far.len() >= slot_checks.len() {
-            let token_index_for_first_slot = tokens_so_far.len() - slot_checks.len();
-            let tokens_for_slots = tokens_so_far[token_index_for_first_slot..].to_vec();
-            let all_checks_pass = slot_checks.iter().enumerate().all(|(i, check)| {
-                let token = tokens_for_slots.get(i).unwrap();
-                return check(token);
-            });
-            if all_checks_pass {
-                //println!("Blocking this token, and the {} before it.", tokens_for_slots.len() - 1);
-                for (i2, _token_in_set) in tokens_for_slots.iter().enumerate() {
-                    token_indexes_to_remove.push(token_index_for_first_slot + i2);
-                }
-            }
-        }
-    }
 
-    let mut result = Vec::new();
-    for (i, token) in tokens_so_far.into_iter().enumerate() {
-        if token_indexes_to_remove.contains(&i) {
-            continue;
-        }
-        result.push(token);
-    }
-
-    let result_processed: Vec<TokenTree> = result.into_iter().map(|token| {
-        match token {
-            TokenTree::Group(data) => {
-                let new_stream = remove_token_sequences_matching(data.stream(), &slot_checks);
-                TokenTree::Group(Group::new(data.delimiter(), new_stream))
-            },
-            _ => token,
-        }
-    }).collect();
-
-    return TokenStream::from_iter(result_processed);
-}
 
 // tests (run these with "cargo test -- --nocapture" to see log output)
 // ==========

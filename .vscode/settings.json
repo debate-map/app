@@ -42,7 +42,7 @@
 		"FOR_RUST_ANALYZER": "1",
 		"STRIP_ASYNC_GRAPHQL": "1",
 	},
-	//"rust-analyzer.checkOnSave.enable": false,
+	"rust-analyzer.checkOnSave.enable": false,
 	/*"rust-analyzer.checkOnSave.extraArgs": [
 		"--target-dir", "/tmp/rust-analyzer-check"
 	]*/

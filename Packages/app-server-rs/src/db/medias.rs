@@ -1,13 +1,13 @@
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
-use rust_macros::wrap_async_graphql;
+use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
-wrap_async_graphql!{
+wrap_slow_macros!{
 
 /*cached_expand!{
 const ce_args: &str = r##"

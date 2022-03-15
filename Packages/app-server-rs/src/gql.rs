@@ -8,7 +8,7 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription};
 use hyper::Body;
 use hyper::client::HttpConnector;
-use rust_macros::{wrap_async_graphql, wrap_agql_schema_build};
+use rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros};
 use tokio_postgres::{Client};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
@@ -56,11 +56,10 @@ use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use crate::utils::async_graphql_axum_custom::{GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket};
 
-// don't wrap this one, because we need it (there is no EmptyQuery for placeholding in )
+wrap_slow_macros!{
+
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(QueryShard_General);
-
-wrap_async_graphql!{
 
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(MutationShard_General);

@@ -1261,6 +1261,7 @@ dependencies = [
  "async-graphql",
  "async-graphql-derive",
  "proc-macro2",
+ "quote",
  "syn",
 ]
 

@@ -16,6 +16,9 @@
     clippy::unused_async, // too many false positives (eg. functions that must be async to be sent as an argument to something else, like a web-server library's API)
     clippy::for_kv_map, // there are often cases where the key/value is not *currently* used, but was/will-be-soon, due to just doing a commenting test or something
     clippy::if_not_else, // there are often reasons a dev might want one of the blocks before the other
+
+    // temp; for Serialize_Stub and Deserialize_Stub
+    dead_code,
 )]
 
 use axum::{
@@ -39,8 +42,9 @@ use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler, utils::axum_logging_layer::print_request_response};
 
 // for testing cargo-check times
+// (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
 pub fn test1() {
-    println!("Test1234567");
+    println!("123");
 }
 
 mod gql;
