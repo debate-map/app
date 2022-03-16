@@ -3,7 +3,7 @@ use std::time::Instant;
 
 use cached_expand::cached_expand_impl;
 use proc_macro2::TokenStream;
-use wrap_agql_schema_build::wrap_agql_schema_build_impl;
+use wrap_agql_schema_build::{wrap_agql_schema_build_impl, wrap_agql_schema_type_impl};
 use wrap_async_graphql::wrap_async_graphql_impl;
 use wrap_serde_macros::wrap_serde_macros_impl;
 use quote::quote;
@@ -52,6 +52,12 @@ pub fn wrap_slow_macros(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
 // base macros
 // ==========
+
+#[proc_macro]
+pub fn wrap_agql_schema_type(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let output = wrap_agql_schema_type_impl(TokenStream::from(input), false);
+    proc_macro::TokenStream::from(output)
+}
 
 #[proc_macro]
 pub fn wrap_agql_schema_build(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

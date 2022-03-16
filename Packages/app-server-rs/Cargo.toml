@@ -18,6 +18,7 @@ tracing = "0.1"
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
 anyhow = "1.0"
 async-trait = "0.1.52"
+url = "2"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 #crossbeam-channel = "0.5.2"
 flume = "0.10.10"

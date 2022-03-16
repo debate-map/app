@@ -1,6 +1,8 @@
 #![feature(backtrace)]
+#![feature(fn_traits)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
+
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
     unused_imports, // makes refactoring a pain (eg. you comment out a line to test something, and now must scroll-to-top and comment lots of stuff)
@@ -52,6 +54,9 @@ mod proxy_to_asjs;
 mod pgclient;
 mod db {
     pub mod _general;
+    pub mod general {
+        pub mod subtree;
+    }
     pub mod users;
     pub mod user_hiddens;
     pub mod global_data;
@@ -75,7 +80,6 @@ mod store {
     pub mod storage;
 }
 mod utils {
-    pub mod async_graphql_axum_custom;
     pub mod axum_logging_layer;
     pub mod filter;
     pub mod general;
