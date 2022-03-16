@@ -30,22 +30,10 @@ pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
 pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster.local:3155";
 
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
-    /*println!(r#"Sending "/graphql" request to force_regular branch. @referrer:{}"#, referrer_str);
-    //return graphql_router_force_regular.oneshot(req).await.map_err(|err| match err {});
-    
-    //let new_body = req.body().clone();
-    return Response::builder().status(StatusCode::NOT_FOUND)
-        .body(req.into_body()).unwrap();*/
-
-    //let schema = req.extensions().clone().get::<RootSchema>().unwrap();
-
-    //return graphql_router_force_regular.oneshot(req).await.map_err(|err| match err {});
-
     // read request's body (from frontend)
     let bytes1 = hyper::body::to_bytes(req.into_body()).await.unwrap();
     let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
     let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
-    //println!("req_as_str:{}", req_as_str);
 
     // send request to graphql engine
     //let gql_req = async_graphql::Request::new(req_as_str);
@@ -70,7 +58,7 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
         let referrer_url = Url::parse(referrer_str);
         if let Ok(referrer_url) = referrer_url {
             if referrer_url.path() == "/gql-playground" {
-                println!(r#"Sending "/graphql" request to force_regular branch. @referrer:{}"#, referrer_str);
+                println!(r#"Sending "/graphql" request to app-server-rs, since from "/gql-playground". @referrer:{}"#, referrer_str);
                 let response_str = have_own_graphql_handle_request(req, schema).await;
 
                 // send response (to frontend)

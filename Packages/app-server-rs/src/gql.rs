@@ -103,65 +103,25 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
         //.data(connection)
         .finish();
 
-
     let client_to_asjs = HyperClient::new();
-    let mut gql_subscription_service = GraphQLSubscription::new(schema.clone());
-
-    // there is surely a better way to do this conditional-proxying, but this is the only way I know atm
-    /*let graphql_router_layered = Router::new()
-        .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service.clone()))
-        .layer(AddExtensionLayer::new(schema.clone()))
-        .layer(AddExtensionLayer::new(client_to_asjs.clone()));*/
+    let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
-            //post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service)
-            on_service(MethodFilter::GET, gql_subscription_service.clone())
-                .post(proxy_to_asjs_handler)
-                /*.fallback(tower::service_fn(move |req: Request<Body>| {
-                    gql_subscription_service.call(req)
-                }))*/
-                /*.map_response(|res| async {
-                    if res.status() == StatusCode::NOT_FOUND {
-                        let res_parts = res.into_parts();
-                        let new_req = Request::builder()
-                            //.version(res_parts.0.version)
-                            .body(res_parts.1)
-                            .unwrap();
+            // approach 1 (using standard routing functions)
+            on_service(MethodFilter::GET, gql_subscription_service.clone()).post(proxy_to_asjs_handler)
 
-                        //return gql_subscription_service.call(new_req).await;
-
-                        // read response from graphql engine
-                        let gql_response = schema.execute(new_req).await;
-                        //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
-                        let response_body: String = serde_json::to_string(&gql_response).unwrap();
-                        
-                        // send response (to frontend)
-                        let mut response = Response::builder()
-                            .body(HttpBody::map_err(axum::body::Body::from(response_body), |e| axum::Error::new("Test")).boxed_unsync())
-                            .unwrap();
-                        response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
-                        return response;
-
-                        // send response (to frontend)
-                        /*let mut response = Response::builder()
-                            .body(HttpBody::map_err(axum::body::Body::from(""), |e| axum::Error::new("Test")).boxed_unsync())
-                            .unwrap();
-                        response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
-                        //return Ok(response);
-                        return response;*/
-                    }
-                    res
-                })*/
-            // based on pattern here (maybe there's a better way?): https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40
+            // approach 2 (custom first-layer service-function) [based on pattern here: https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40]
             /*tower::service_fn({
+                let graphql_router_layered = Router::new()
+                    .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service.clone()))
+                    .layer(AddExtensionLayer::new(schema.clone()))
+                    .layer(AddExtensionLayer::new(client_to_asjs.clone()));
                 let schema2 = schema.clone();
                 move |req: Request<Body>| {
                     let req_headers = req.headers().clone();
-
                     let schema3 = schema2.clone();
-                    //let graphql_router_force_regular = graphql_router_force_regular.clone();
                     let graphql_router_layered = graphql_router_layered.clone();
                     async move {
                         // if we're on the "/gql-playground" page, always send the request to the app-server-rs' regular handler (ie. not using the proxy to app-server-js)
@@ -171,8 +131,6 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
                             if let Ok(referrer_url) = referrer_url {
                                 if referrer_url.path() == "/gql-playground" {
                                     println!(r#"Sending "/graphql" request to force_regular branch. @referrer:{}"#, referrer_str);
-                                    //return graphql_router_force_regular.oneshot(req).await.map_err(|err| match err {});
-
                                     let response_str = have_own_graphql_handle_request(req, schema3).await;
 
                                     // send response (to frontend)
