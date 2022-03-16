@@ -12,7 +12,6 @@
 linker = "clang"
 rustflags = [
 	#"-Awarnings",
-	#"-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
 	"-C", "link-arg=-fuse-ld=mold"]
 
 # for musl-based linux builds (eg. when trying to deploy to an alpine image)
@@ -20,7 +19,6 @@ rustflags = [
 linker = "clang"
 rustflags = [
 	#"-Awarnings",
-	#"-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
 	"-C", "link-arg=-fuse-ld=mold"]
 #rustflags = ["-Awarnings", "-C", "link-arg=-fuse-ld=/usr/local/bin/mold", "-C", "link-args=-z text"] # suggested on discord
 # from: https://stackoverflow.com/a/70378019
