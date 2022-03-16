@@ -85,6 +85,7 @@ mod utils {
     pub mod general;
     pub mod gql_general_extension;
     pub mod gql_result_stream;
+    pub mod http;
     pub mod postgres_parsing;
     pub mod type_aliases;
 }
