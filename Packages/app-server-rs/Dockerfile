@@ -9,17 +9,49 @@ FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb9
 # generic env-var for code to know if its running as part of a Dockerfile
 ENV IN_DOCKER=1
 
-# install mold linker
-RUN apt-get update \
-	&& apt-get install -y build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config \
-	&& git clone https://github.com/rui314/mold.git \
-	&& cd mold \
-	&& git checkout v1.0.1 \
-	&& make -j$(nproc) CXX=clang++ \
-	&& make install
-#RUN apt update
-#RUN apt install mold
+RUN echo MoldInstall_Before2: $(date)
+
+# install mold linker [works:181s]
+# RUN apt-get update \
+# 	&& apt-get install -y build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config \
+# 	&& git clone https://github.com/rui314/mold.git \
+# 	&& cd mold \
+# 	&& git checkout v1.0.1 \
+# 	&& make -j$(nproc) CXX=clang++ \
+# 	&& make install
+
+# install mold linker (from active apt-get repositories) # doesn't work (mold is not in debian 11's repository atm)
+# RUN apt update
+# RUN apt install mold
 #for alpine: RUN apk add mold --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
+# install mold linker, from debian's SID (unstable) repository # first attempt; doesn't work
+# RUN apt-get update \
+# 	&& apt-get install mold --repository=http://http.us.debian.org/debian/
+
+# install mold linker, from a direct URL (retrieved from here: https://debian.pkgs.org/sid/debian-main-amd64/mold_1.1.1+dfsg-1_amd64.deb.html) [doesn't work; dep issue]
+# RUN TEMP_DEB="$(mktemp)" \
+# 	&& wget -O "$TEMP_DEB" 'http://ftp.de.debian.org/debian/pool/main/m/mold/mold_1.1.1+dfsg-1_amd64.deb' \
+# 	&& dpkg -i "$TEMP_DEB" \
+# 	&& rm -f "$TEMP_DEB"
+
+# install mold linker, from debian's SID (unstable) repository (mold is not in debian 11's repository atm) [works:72s]
+RUN apt-get update && \
+	# install some things needed by mold (at mold run-time)
+	#apt-get -y install build-essential git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config && \
+	apt-get -y install clang && \
+	# install mold
+	apt-get -y --no-install-recommends install software-properties-common && \
+	#apt-get -y install software-properties-common && \
+	add-apt-repository "deb http://httpredir.debian.org/debian sid main" && \
+	apt-get update && \
+	apt-get -t sid install -y --no-install-recommends mold
+	#apt-get -t sid install -y mold
+
+RUN echo MoldInstall_After2: $(date)
+
+# ensure mold is installed
+RUN mold --version
 
 #RUN apt-get update
 #RUN apt-get install musl-tools -y
@@ -97,7 +129,9 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 
 #FROM rust:1.58-slim-buster
 #FROM debian:buster-slim
-FROM debian@sha256:f6e5cbc7eaaa232ae1db675d83eabfffdabeb9054515c15c2fb510da6bc618a7
+#FROM debian@sha256:f6e5cbc7eaaa232ae1db675d83eabfffdabeb9054515c15c2fb510da6bc618a7
+# use debian v12 (bookworm), because that is what our linker (mold) was built on [mold only has releases for debian v12+], which makes the produced binary require it as well
+FROM debian:bookworm-slim
 
 # args
 ARG copy_from_path
