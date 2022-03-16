@@ -57,7 +57,7 @@ use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{SubscriptionShard_User};
-use crate::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient};
+use crate::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient, have_own_graphql_handle_request};
 use crate::store::storage::StorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 
@@ -83,6 +83,10 @@ pub struct SubscriptionRoot(
 
 }
 
+pub type RootSchema = wrap_agql_schema_type!{
+    Schema<QueryRoot, MutationRoot, SubscriptionRoot>
+};
+
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
         GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
@@ -101,30 +105,57 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
 
 
     let client_to_asjs = HyperClient::new();
-    let gql_subscription_service = GraphQLSubscription::new(schema.clone());
+    let mut gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     // there is surely a better way to do this conditional-proxying, but this is the only way I know atm
-    let graphql_router_layered = Router::new()
+    /*let graphql_router_layered = Router::new()
         .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service.clone()))
         .layer(AddExtensionLayer::new(schema.clone()))
-        .layer(AddExtensionLayer::new(client_to_asjs.clone()));
+        .layer(AddExtensionLayer::new(client_to_asjs.clone()));*/
 
     let result = app
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
             //post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service)
-            /*on_service(MethodFilter::GET, gql_subscription_service)
-            .post(proxy_to_asjs_handler)
-            .and_then(|res: Body| async move {
-                let res_as_str = format!("{:?}", hyper::body::to_bytes(res).await.unwrap());
-                println!("Got response from proxy:{}", res_as_str);
-                /*if res_as_str.starts_with("404") {
-                    return gql_subscription_service();
-                }*/
-                //res
-                gql_subscription_service.call(res)
-            })*/
-            tower::service_fn({
+            on_service(MethodFilter::GET, gql_subscription_service.clone())
+                .post(proxy_to_asjs_handler)
+                /*.fallback(tower::service_fn(move |req: Request<Body>| {
+                    gql_subscription_service.call(req)
+                }))*/
+                /*.map_response(|res| async {
+                    if res.status() == StatusCode::NOT_FOUND {
+                        let res_parts = res.into_parts();
+                        let new_req = Request::builder()
+                            //.version(res_parts.0.version)
+                            .body(res_parts.1)
+                            .unwrap();
+
+                        //return gql_subscription_service.call(new_req).await;
+
+                        // read response from graphql engine
+                        let gql_response = schema.execute(new_req).await;
+                        //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
+                        let response_body: String = serde_json::to_string(&gql_response).unwrap();
+                        
+                        // send response (to frontend)
+                        let mut response = Response::builder()
+                            .body(HttpBody::map_err(axum::body::Body::from(response_body), |e| axum::Error::new("Test")).boxed_unsync())
+                            .unwrap();
+                        response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
+                        return response;
+
+                        // send response (to frontend)
+                        /*let mut response = Response::builder()
+                            .body(HttpBody::map_err(axum::body::Body::from(""), |e| axum::Error::new("Test")).boxed_unsync())
+                            .unwrap();
+                        response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
+                        //return Ok(response);
+                        return response;*/
+                    }
+                    res
+                })*/
+            // based on pattern here (maybe there's a better way?): https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40
+            /*tower::service_fn({
                 let schema2 = schema.clone();
                 move |req: Request<Body>| {
                     let req_headers = req.headers().clone();
@@ -142,29 +173,11 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
                                     println!(r#"Sending "/graphql" request to force_regular branch. @referrer:{}"#, referrer_str);
                                     //return graphql_router_force_regular.oneshot(req).await.map_err(|err| match err {});
 
-                                    // read request's body (from frontend)
-                                    let bytes1 = hyper::body::to_bytes(req.into_body()).await.unwrap();
-                                    let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
-                                    let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
-                                    //println!("req_as_str:{}", req_as_str);
+                                    let response_str = have_own_graphql_handle_request(req, schema3).await;
 
-                                    // send request to graphql engine
-                                    //let gql_req = async_graphql::Request::new(req_as_str);
-                                    let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().unwrap());
-                                    let gql_req = match req_as_json["operationName"].as_str() {
-                                        Some(op_name) => gql_req.operation_name(op_name),
-                                        None => gql_req,
-                                    };
-                                    let gql_req = gql_req.variables(Variables::from_json(req_as_json["variables"].clone()));
-
-                                    // read response from graphql engine
-                                    let gql_response = schema3.execute(gql_req).await;
-                                    //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
-                                    let response_body: String = serde_json::to_string(&gql_response).unwrap();
-                                    
                                     // send response (to frontend)
                                     let mut response = Response::builder()
-                                        .body(HttpBody::map_err(axum::body::Body::from(response_body), |e| axum::Error::new("Test")).boxed_unsync())
+                                        .body(HttpBody::map_err(axum::body::Body::from(response_str), |e| axum::Error::new("Test")).boxed_unsync())
                                         .unwrap();
                                     response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
                                     return Ok(response);
@@ -176,7 +189,7 @@ pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrappe
                         graphql_router_layered.oneshot(req).await.map_err(|err| match err {})
                     }
                 }
-            })
+            })*/
         )
 
         // for endpoints not defined by app-server-rs (eg. /check-mem), assume it is meant for app-server-js, and thus call the proxying function
