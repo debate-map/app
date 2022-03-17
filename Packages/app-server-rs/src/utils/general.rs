@@ -1,6 +1,7 @@
 use std::{error::Error, any::TypeId, pin::Pin, task::{Poll, Waker}, time::Duration};
 use anyhow::{bail, Context};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
+use deadpool_postgres::Pool;
 use flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
@@ -34,7 +35,9 @@ pub trait GQLSet<T> {
 }
 
 pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), anyhow::Error> {
-    let client = ctx.data::<Client>().unwrap();
+    //let client = ctx.data::<Client>().unwrap();
+    let pool = ctx.data::<Pool>().unwrap();
+    let client = pool.get().await.unwrap();
 
     let filters_sql = get_sql_for_filters(filter).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let where_clause = match filters_sql.len() {

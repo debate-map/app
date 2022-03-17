@@ -1,5 +1,6 @@
 use anyhow::Context;
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
+use deadpool_postgres::Pool;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
 use rust_macros::wrap_slow_macros;
@@ -23,8 +24,16 @@ wrap_slow_macros!{
 pub struct QueryShard_General_Subtree;
 #[Object]
 impl QueryShard_General_Subtree {
-    async fn subtree(&self, _ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<String> {
-        Ok("todo1".to_owned())
+    async fn subtree(&self, ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<String> {
+        //let client = &mut ctx.data::<Client>().unwrap();
+        let pool = ctx.data::<Pool>().unwrap();
+        let mut client = pool.get().await.unwrap();
+
+        let tx = client.build_transaction().isolation_level(tokio_postgres::IsolationLevel::Serializable).start().await?;
+
+        // todo
+
+        Ok("todo12".to_owned())
     }
 }
 

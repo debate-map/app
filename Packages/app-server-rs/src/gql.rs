@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables};
 use bytes::Bytes;
+use deadpool_postgres::{Pool, Manager};
 use hyper::header::CONTENT_LENGTH;
 use hyper::{Body, service};
 use hyper::client::HttpConnector;
@@ -93,12 +94,22 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub fn extend_router(app: Router, client: Client, storage_wrapper: StorageWrapper) -> Router {
+pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: StorageWrapper) -> Router {
+    //let client_for_graphql = pool.get().await.unwrap();
+    // the connection object performs the actual communication with the database, so spawn it off to run on its own // commented; don't think this is needed anymore, since using pool
+    /*tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        } else {
+            println!("Postgres connection formed, for fulfilling subscriptions.");
+        }
+    });*/
     let schema =
         wrap_agql_schema_build!{
             Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         }
-        .data(client)
+        //.data(client_for_graphql)
+        .data(pool)
         .data(storage_wrapper)
         //.data(connection)
         .finish();

@@ -1,5 +1,6 @@
 use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
 use bytes::Bytes;
+use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, PoolConfig};
 use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
@@ -16,19 +17,42 @@ async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
         .collect()
 }
 
-pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
+pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
     // get connection info from env-vars
     let ev = |name| { env::var(name).unwrap() };
-    println!("Connecting app-server-rs's pg-client to: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
-    //let db_url = format!("postgres://{}:{}@{}:{}/debate-map", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"));
-    let mut db_config = format!("user={} password={} host={} port={} dbname={}", ev("DB_USER"), ev("DB_PASSWORD"), ev("DB_ADDR"), ev("DB_PORT"), "debate-map");
+    println!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
+    
+    let mut cfg = tokio_postgres::Config::new();
+    cfg.user(&ev("DB_USER"));
+    cfg.password(ev("DB_PASSWORD"));
+    cfg.host(&ev("DB_ADDR"));
+    cfg.port(ev("DB_PORT").parse::<u16>().unwrap());
+    cfg.dbname("debate-map");
+    cfg
+}
+
+/// Only use this if you need the for_replication option. (everything else should use clients taken from the shared pool)
+pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
+    let mut pg_cfg = get_tokio_postgres_config();
     if for_replication {
-        db_config += " replication=database";
+        //db_config += " replication=database";
+        //cfg.options(options);
+        pg_cfg.replication_mode(tokio_postgres::config::ReplicationMode::Logical);
     }
 
     // connect to the database
-    let (client, connection) = tokio_postgres::connect(&db_config, NoTls).await.unwrap();
+    let (client, connection) = pg_cfg.connect(NoTls).await.unwrap();
     (client, connection)
+}
+
+pub fn create_db_pool() -> Pool {
+    let pg_cfg = get_tokio_postgres_config();
+    let mgr_cfg = ManagerConfig {
+        recycling_method: RecyclingMethod::Fast
+    };
+    let mgr = Manager::from_config(pg_cfg, NoTls, mgr_cfg);
+    let pool = Pool::builder(mgr).max_size(10).runtime(Runtime::Tokio1).build().unwrap();
+    pool
 }
 
 /**

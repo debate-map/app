@@ -151,17 +151,9 @@ async fn main() {
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:3005/localhost:3055, if running Debate Map locally)</p>
         "#) }));
 
-    let (client, connection) = pgclient::create_client(false).await;
-    let app = gql::extend_router(app, client, storage_wrapper.clone());
-    //let app = gql_post::extend_router(app, client);
-    // the connection object performs the actual communication with the database, so spawn it off to run on its own
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        } else {
-            println!("Postgres connection formed, for fulfilling subscriptions.");
-        }
-    });
+    //let (client, connection) = pgclient::create_client(false).await;
+    let pool = pgclient::create_db_pool();
+    let app = gql::extend_router(app, pool, storage_wrapper.clone()).await;
 
     let app = app
         .layer(AddExtensionLayer::new(app_state))
@@ -171,8 +163,8 @@ async fn main() {
     let _handler = tokio::spawn(async move {
         let mut errors_hit = 0;
         while errors_hit < 1000 {
-            let (client2, connection2) = pgclient::create_client(true).await;
-            let result = pgclient::start_streaming_changes(client2, connection2, storage_wrapper.clone()).await;
+            let (client_replication, connection_replication) = pgclient::create_client(true).await;
+            let result = pgclient::start_streaming_changes(client_replication, connection_replication, storage_wrapper.clone()).await;
             match result {
                 Ok(result) => {
                     //println!("PGClient loop ended for some reason. Result:{:?}", result);

@@ -23,3 +23,8 @@ members = [
 
 #[replace]
 #"hyper:0.13.10" = {git = "https://github.com/hyperium/hyper.git", tag = "v0.14.16"}
+
+[patch.crates-io]
+# force deadpool-postgres to use the same version of tokio-postgres as our root project
+#tokio-postgres = "0.7.1"
+tokio-postgres = {git = "https://github.com/petrosagg/rust-postgres.git", branch = "copy-both", features = ["with-serde_json-1"]}
