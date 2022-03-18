@@ -6,8 +6,10 @@ use hyper::{Body, Method};
 use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
+use tokio::sync::RwLock;
 use tokio_postgres::{Client};
 use std::path::Path;
+use std::sync::Arc;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::db::access_policies::AccessPolicy;
@@ -55,9 +57,13 @@ impl QueryShard_General_Subtree {
             .start().await?;
 
         let ctx = AccessorContext::new(tx);
-        let mut collector = SubtreeCollector::default();
-        collector.root_path_segments = vec![root_node_id.clone()];
-        populate_subtree_collector(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &mut collector).await?;
+        let collector = SubtreeCollector::default();
+        let root_path_segments = vec![root_node_id.clone()];
+        let collector_arc = Arc::new(RwLock::new(collector));
+        populate_subtree_collector(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &root_path_segments, collector_arc.clone()).await?;
+
+        let arc_clone = collector_arc.clone();
+        let collector = arc_clone.read().await;
         let subtree = collector.to_subtree();
 
         Ok(subtree)

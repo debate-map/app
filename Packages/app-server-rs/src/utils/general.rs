@@ -1,5 +1,5 @@
-use std::{error::Error, any::TypeId, pin::Pin, task::{Poll, Waker}, time::Duration};
-use anyhow::{bail, Context};
+use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::Duration};
+use anyhow::{bail, Context, Error};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
 use flume::Sender;
@@ -51,7 +51,7 @@ where
 
 pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, QueryFunc, QueryFuncReturn>(
     query_func: QueryFunc, table_name: &str, filter: &Filter
-) -> Result<(Vec<RowData>, Vec<T>), anyhow::Error>
+) -> Result<(Vec<RowData>, Vec<T>), Error>
 where
     QueryFunc: FnOnce(String/*, &'a [&(dyn ToSql + Sync)]*/) -> QueryFuncReturn,
     QueryFuncReturn: Future<Output = Result<Vec<Row>, tokio_postgres::Error>>,
@@ -61,7 +61,7 @@ where
         0..=2 => "".to_owned(),
         _ => " WHERE ".to_owned() + &filters_sql,
     };
-    println!("Running where clause:{where_clause} @filter:{filter:?}");
+    println!("Running where clause. @table:{table_name} @{where_clause} @filter:{filter:?}");
     let mut rows = query_func(format!("SELECT * FROM \"{table_name}\"{where_clause};")/*, &[]*/).await
         .with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql}"))?;
 
@@ -77,7 +77,7 @@ where
     }).collect();
     Ok((entries, entries_as_type))
 }
-pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), anyhow::Error> {
+pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), Error> {
     //let client = ctx.data::<Client>().unwrap();
     let pool = ctx.data::<Pool>().unwrap();
     let client = pool.get().await.unwrap();

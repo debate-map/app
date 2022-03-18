@@ -1,4 +1,4 @@
-use anyhow::{bail, Context};
+use anyhow::{bail, Context, Error};
 use serde_json::Map;
 use crate::store::storage::RowData;
 use super::type_aliases::JSONValue;
@@ -6,7 +6,7 @@ use super::type_aliases::JSONValue;
 pub type Filter = Option<JSONValue>; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
 //pub type Filter = Option<Map<String, JSONValue>>;
 
-pub fn get_sql_for_filters(filter: &Filter) -> Result<String, anyhow::Error> {
+pub fn get_sql_for_filters(filter: &Filter) -> Result<String, Error> {
     if filter.is_none() { return Ok("".to_owned()); }
     let filter = filter.as_ref().unwrap();
 
@@ -30,7 +30,7 @@ pub fn get_sql_for_filters(filter: &Filter) -> Result<String, anyhow::Error> {
     Ok(result)
 }
 
-pub fn entry_matches_filter(entry: &RowData, filter: &Filter) -> Result<bool, anyhow::Error> {
+pub fn entry_matches_filter(entry: &RowData, filter: &Filter) -> Result<bool, Error> {
     if filter.is_none() { return Ok(true); }
     let filter = filter.as_ref().unwrap();
 

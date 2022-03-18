@@ -1,4 +1,4 @@
-use anyhow::Context;
+use anyhow::{Context, Error};
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
@@ -108,7 +108,7 @@ impl SubscriptionShard_General {
 
 }
 
-async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<String>, anyhow::Error> {
+async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<String>, Error> {
     let mut user_id = None;
     
     let client_to_asjs = HyperClient::new();

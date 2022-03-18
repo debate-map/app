@@ -1,3 +1,5 @@
+use std::{rc::Rc, sync::Arc};
+
 use anyhow::{anyhow, Error};
 use async_graphql::ID;
 use async_recursion::async_recursion;
@@ -6,6 +8,7 @@ use futures_util::{Future, FutureExt};
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
+use tokio::sync::RwLock;
 use tokio_postgres::Row;
 use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing}, utils::{filter::Filter, general::{get_entries_in_collection, json_maps_to_typed_entries, get_entries_in_collection_basic}, type_aliases::JSONValue}};
 use super::subtree::Subtree;
@@ -23,7 +26,7 @@ impl<'a> AccessorContext<'a> {
 
 #[derive(Default)]
 pub struct SubtreeCollector {
-    pub root_path_segments: Vec<String>,
+    //pub root_path_segments: Vec<String>,
 
     pub terms: IndexMap<String, Term>,
     pub medias: IndexMap<String, Media>,
@@ -51,12 +54,13 @@ impl SubtreeCollector {
 
 //pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a, Global>>;
 #[async_recursion]
-pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path: String, max_depth: usize, collector: &mut SubtreeCollector) -> Result<(), Error> {
+pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path: String, max_depth: usize, root_path_segments: &Vec<String>, collector_arc: Arc<RwLock<SubtreeCollector>>) -> Result<(), Error> {
     let path_segments: Vec<&str> = current_path.split("/").collect();
     let parent_node_id = path_segments.iter().nth_back(1).map(|a| a.to_string());
     let node_id = path_segments.iter().last().ok_or(anyhow!("Invalid path:{current_path}"))?.to_string();
     //search_info = search_info ?? new GetSubtree_SearchInfo({rootPathSegments: pathSegments});
 
+    // get data
     let node = get_node(ctx, &node_id).await?;
     // use match, so we can reuse outer async-context (don't know how to handle new ones in .map() easily yet)
     let node_link = match parent_node_id {
@@ -64,46 +68,65 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
         None => None,
     };
     let node_current = get_node_revision(ctx, &node.c_currentRevision).await?;
-
-    // check link first, because link can differ depending on path (ie. even if node has been seen, this link may not have been)
-    let isSubtreeRoot = path_segments.join("/") == collector.root_path_segments.join("/");
-    if let Some(node_link) = node_link {
-        if !isSubtreeRoot && !collector.node_child_links.contains_key(&node_link.id.0) {
-            collector.node_child_links.insert(node_link.id.to_string(), node_link);
-        }
-    }
-
-    // now check if node itself has been seen/processed; if so, ignore the rest of its data
-    if collector.nodes.contains_key(&node.id.0) { return Ok(()); }
-    collector.nodes.insert(node.id.to_string(), node);
-
-    assert!(!collector.node_revisions.contains_key(&node_current.id.0), "Node-revisions should be node-specific, yet entry ({}) was seen twice.", node_current.id.0);
-    collector.node_revisions.insert(node_current.id.to_string(), node_current.clone());
-
     let phrasings = get_node_phrasings(ctx, &node_id).await?;
-    for phrasing in phrasings {
-        assert!(!collector.node_phrasings.contains_key(&phrasing.id.0), "Node-phrasings should be node-specific, yet entry ({}) was seen twice.", phrasing.id.0);
-        collector.node_phrasings.insert(phrasing.id.to_string(), phrasing);
-    }
-
     let terms = get_terms_attached(ctx, &node_current.id.0).await?;
-    for term in terms {
-        if !collector.terms.contains_key(&term.id.0) { collector.terms.insert(term.id.to_string(), term); }
-    }
+    let media = match node_current.clone().media {
+        Some(media_attachment) => {
+            Some(get_media(ctx, &media_attachment["id"].as_str().unwrap().to_owned()).await?)
+        },
+        _ => None,
+    };
 
-    if let Some(media_attachment) = node_current.media {
-        if !collector.terms.contains_key(media_attachment["id"].as_str().unwrap()) {
-            let media = get_media(ctx, &media_attachment["id"].as_str().unwrap().to_owned()).await?;
-            collector.medias.insert(media.id.to_string(), media);
+    // store data
+    {
+        // check link first, because link can differ depending on path (ie. even if node has been seen, this link may not have been)
+        let arc_clone = collector_arc.clone();
+        let mut collector = arc_clone.write().await;
+        let isSubtreeRoot = path_segments.join("/") == root_path_segments.join("/");
+        if let Some(node_link) = node_link {
+            if !isSubtreeRoot && !collector.node_child_links.contains_key(&node_link.id.0) {
+                collector.node_child_links.insert(node_link.id.to_string(), node_link);
+            }
+        }
+
+        // now check if node itself has been seen/processed; if so, ignore the rest of its data
+        if collector.nodes.contains_key(&node.id.0) { return Ok(()); }
+        collector.nodes.insert(node.id.to_string(), node);
+
+        assert!(!collector.node_revisions.contains_key(&node_current.id.0), "Node-revisions should be node-specific, yet entry ({}) was seen twice.", node_current.id.0);
+        collector.node_revisions.insert(node_current.id.to_string(), node_current.clone());
+
+        for phrasing in phrasings {
+            assert!(!collector.node_phrasings.contains_key(&phrasing.id.0), "Node-phrasings should be node-specific, yet entry ({}) was seen twice.", phrasing.id.0);
+            collector.node_phrasings.insert(phrasing.id.to_string(), phrasing);
+        }
+
+        for term in terms {
+            if !collector.terms.contains_key(&term.id.0) { collector.terms.insert(term.id.to_string(), term); }
+        }
+
+        if let Some(media) = media {
+            //if !collector.terms.contains_key(media_attachment["id"].as_str().unwrap()) {
+            if !collector.terms.contains_key(&media.id.0) {
+                collector.medias.insert(media.id.to_string(), media);
+            }
         }
     }
 
-    let currentDepth = path_segments.len() - collector.root_path_segments.len();
+    // populate-data from descendants/subtree underneath the current node (must happen after store-data, else the collector.nodes.contains_key checks might get skipped past)
+    let currentDepth = path_segments.len() - root_path_segments.len();
     if currentDepth < max_depth {
-        for link in get_node_child_links(ctx, Some(&node_id), None).await? {
+        /*for link in get_node_child_links(ctx, Some(&node_id), None).await? {
             let child_id = link.child;
-            populate_subtree_collector(ctx, format!("{}/{}", current_path, child_id), max_depth, collector).boxed().await?;
+            populate_subtree_collector(ctx, format!("{}/{}", current_path, child_id), max_depth, collector).await?;
+        }*/
+        let links = get_node_child_links(ctx, Some(&node_id), None).await?;
+        let mut futures = vec![];
+        for link in links {
+            let child_id = link.child;
+            futures.push(populate_subtree_collector(ctx, format!("{}/{}", current_path, child_id), max_depth, root_path_segments, collector_arc.clone()));
         }
+        futures::future::join_all(futures).await;
     }
     Ok(())
 }
