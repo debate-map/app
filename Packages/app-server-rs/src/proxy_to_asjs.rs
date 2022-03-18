@@ -57,8 +57,9 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
         let referrer_str = &String::from_utf8_lossy(referrer.as_bytes());
         let referrer_url = Url::parse(referrer_str);
         if let Ok(referrer_url) = referrer_url {
-            if referrer_url.path() == "/gql-playground" {
-                println!(r#"Sending "/graphql" request to app-server-rs, since from "/gql-playground". @referrer:{}"#, referrer_str);
+            let path = referrer_url.path();
+            if path == "/gql-playground" || path == "/graphiql-new" {
+                println!(r#"Sending "/graphql" request to app-server-rs, since from "{path}". @referrer:{referrer_str}"#);
                 let response_str = have_own_graphql_handle_request(req, schema).await;
 
                 // send response (to frontend)

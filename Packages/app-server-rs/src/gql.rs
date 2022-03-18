@@ -4,7 +4,7 @@ use std::convert::Infallible;
 use std::future::Future;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, graphiql_source};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables};
 use bytes::Bytes;
 use deadpool_postgres::{Pool, Manager};
@@ -88,6 +88,9 @@ pub type RootSchema = wrap_agql_schema_type!{
     Schema<QueryRoot, MutationRoot, SubscriptionRoot>
 };
 
+async fn graphiql() -> impl IntoResponse {
+    response::Html(graphiql_source("/graphql", Some("wss://app-server.debates.app/graphql")))
+}
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
         GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
@@ -118,6 +121,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: StorageWrap
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
+        .route("/graphiql-new", get(graphiql)) // todo: rename this to just graphiql, once app-server-js is retired
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
             // approach 1 (using standard routing functions)

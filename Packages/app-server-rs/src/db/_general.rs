@@ -23,7 +23,7 @@ wrap_slow_macros!{
 pub struct QueryShard_General;
 #[Object]
 impl QueryShard_General {
-    /// async-graphql requires that to be at least one entry under the Query section
+    /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
 }
 
