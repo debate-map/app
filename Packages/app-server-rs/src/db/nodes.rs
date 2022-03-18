@@ -17,17 +17,18 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNode {
-    id: ID,
-	creator: String,
-	createdAt: i64,
-    r#type: String,
-	rootNodeForMap: Option<String>,
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+    pub r#type: String,
+	pub rootNodeForMap: Option<String>,
     #[graphql(name = "c_currentRevision")]
-	c_currentRevision: Option<String>,
-	accessPolicy: String,
-	multiPremiseArgument: Option<bool>,
-	argumentType: Option<String>,
-	extras: serde_json::Value,
+	//pub c_currentRevision: Option<String>,
+	pub c_currentRevision: String,
+	pub accessPolicy: String,
+	pub multiPremiseArgument: Option<bool>,
+	pub argumentType: Option<String>,
+	pub extras: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for MapNode {
 	fn from(row: tokio_postgres::row::Row) -> Self {

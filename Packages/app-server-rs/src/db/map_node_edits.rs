@@ -17,11 +17,11 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeEdit {
-    id: ID,
-	map: String,
-	node: String,
-	time: i64,
-	r#type: String,
+    pub id: ID,
+	pub map: String,
+	pub node: String,
+	pub time: i64,
+	pub r#type: String,
 }
 impl From<tokio_postgres::row::Row> for MapNodeEdit {
 	fn from(row: tokio_postgres::row::Row) -> Self {

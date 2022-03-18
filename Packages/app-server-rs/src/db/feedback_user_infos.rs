@@ -17,8 +17,8 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct UserInfo {
-    id: ID,
-    proposalsOrder: Vec<String>,
+    pub id: ID,
+    pub proposalsOrder: Vec<String>,
 }
 impl From<tokio_postgres::row::Row> for UserInfo {
 	fn from(row: tokio_postgres::row::Row) -> Self {

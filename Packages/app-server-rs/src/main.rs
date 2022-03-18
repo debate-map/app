@@ -1,5 +1,6 @@
 #![feature(backtrace)]
 #![feature(fn_traits)]
+//#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
 
@@ -19,7 +20,7 @@
     clippy::for_kv_map, // there are often cases where the key/value is not *currently* used, but was/will-be-soon, due to just doing a commenting test or something
     clippy::if_not_else, // there are often reasons a dev might want one of the blocks before the other
 
-    // temp; for Serialize_Stub and Deserialize_Stub
+    // to avoid false-positives, of certain functions, as well as for [Serialize/Deserialize]_Stub macro-usage (wrt private fields)
     dead_code,
 )]
 
@@ -56,6 +57,7 @@ mod db {
     pub mod _general;
     pub mod general {
         pub mod subtree;
+        pub mod subtree_accessors;
     }
     pub mod users;
     pub mod user_hiddens;
@@ -88,6 +90,9 @@ mod utils {
     pub mod http;
     pub mod postgres_parsing;
     pub mod type_aliases;
+    pub mod quick_tests {
+        pub mod quick1;
+    }
 }
 
 pub fn get_cors_layer() -> CorsLayer {

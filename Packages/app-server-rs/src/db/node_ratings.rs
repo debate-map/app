@@ -17,13 +17,13 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeRating {
-    id: ID,
-    accessPolicy: String,
-    node: String,
-    r#type: String,
-	creator: String,
-	createdAt: i64,
-	value: f32,
+    pub id: ID,
+    pub accessPolicy: String,
+    pub node: String,
+    pub r#type: String,
+	pub creator: String,
+	pub createdAt: i64,
+	pub value: f32,
 }
 impl From<tokio_postgres::row::Row> for NodeRating {
 	fn from(row: tokio_postgres::row::Row) -> Self {

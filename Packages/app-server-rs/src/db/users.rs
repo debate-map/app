@@ -36,16 +36,16 @@ excludeLinesWith = "#[graphql(name"
 //type User = String;
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct User {
-    id: ID,
-    displayName: String,
-    photoURL: Option<String>,
-    joinDate: i64,
-    //permissionGroups: PermissionGroups,
-    permissionGroups: PermissionGroups,
-    //permissionGroups: async_graphql::Value,
-    //permissionGroups: String,
-    edits: i32,
-    lastEditAt: Option<i64>,
+    pub id: ID,
+    pub displayName: String,
+    pub photoURL: Option<String>,
+    pub joinDate: i64,
+    //pub permissionGroups: PermissionGroups,
+    pub permissionGroups: PermissionGroups,
+    //pub permissionGroups: async_graphql::Value,
+    //pub permissionGroups: String,
+    pub edits: i32,
+    pub lastEditAt: Option<i64>,
 }
 // todo: MS these converters can be removed (eg. using approach similar to clone_ldchange_val_0with_type_fixes(), or by using crate: https://github.com/dac-gmbh/serde_postgres)
 impl From<tokio_postgres::row::Row> for User {

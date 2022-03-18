@@ -17,19 +17,19 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeRevision {
-    id: ID,
-    node: String,
-	creator: String,
-	createdAt: i64,
-    phrasing: serde_json::Value,
+    pub id: ID,
+    pub node: String,
+	pub creator: String,
+	pub createdAt: i64,
+    pub phrasing: serde_json::Value,
     #[graphql(name = "phrasing_tsvector")]
-	phrasing_tsvector: String,
-	note: Option<String>,
-	displayDetails: Option<serde_json::Value>,
-	equation: Option<serde_json::Value>,
-	references: Option<serde_json::Value>,
-	quote: Option<serde_json::Value>,
-	media: Option<serde_json::Value>,
+	pub phrasing_tsvector: String,
+	pub note: Option<String>,
+	pub displayDetails: Option<serde_json::Value>,
+	pub equation: Option<serde_json::Value>,
+	pub references: Option<serde_json::Value>,
+	pub quote: Option<serde_json::Value>,
+	pub media: Option<serde_json::Value>,
 }
 impl From<tokio_postgres::row::Row> for MapNodeRevision {
 	fn from(row: tokio_postgres::row::Row) -> Self {

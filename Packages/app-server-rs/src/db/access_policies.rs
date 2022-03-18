@@ -19,13 +19,13 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct AccessPolicy {
-    id: ID,
-	creator: String,
-	createdAt: i64,
-    name: String,
-    permissions: serde_json::Value,
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+    pub name: String,
+    pub permissions: serde_json::Value,
     #[graphql(name = "permissions_userExtends")]
-    permissions_userExtends: serde_json::Value,
+    pub permissions_userExtends: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for AccessPolicy {
 	fn from(row: tokio_postgres::row::Row) -> Self {

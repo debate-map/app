@@ -17,13 +17,13 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Share {
-    id: ID,
-	creator: String,
-	createdAt: i64,
-    name: String,
-    r#type: String,
-	mapID: Option<String>,
-	mapView: serde_json::Value,
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+    pub name: String,
+    pub r#type: String,
+	pub mapID: Option<String>,
+	pub mapView: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for Share {
 	fn from(row: tokio_postgres::row::Row) -> Self {

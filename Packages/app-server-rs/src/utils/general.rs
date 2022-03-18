@@ -6,7 +6,7 @@ use flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::{json, Map};
-use tokio_postgres::{Client, Row};
+use tokio_postgres::{Client, Row, types::ToSql};
 use uuid::Uuid;
 //use tokio::sync::Mutex;
 
@@ -34,18 +34,35 @@ pub trait GQLSet<T> {
     fn nodes(&self) -> &Vec<T>;
 }
 
-pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), anyhow::Error> {
-    //let client = ctx.data::<Client>().unwrap();
-    let pool = ctx.data::<Pool>().unwrap();
-    let client = pool.get().await.unwrap();
+/*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
+type QueryFunc = Box<
+    dyn Fn(&str, &[&(dyn ToSql + Sync)])
+    ->
+    Pin<Box<
+        dyn Future<Output = QueryFunc_ResultType>
+    >>
+>;
+fn force_boxed<T>(f: fn(&str, &[&(dyn ToSql + Sync)]) -> T) -> QueryFunc
+where
+    T: Future<Output = QueryFunc_ResultType> + 'static,
+{
+    Box::new(move |a, b| Box::pin(f(a, b)))
+}*/
 
+pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, QueryFunc, QueryFuncReturn>(
+    query_func: QueryFunc, table_name: &str, filter: &Filter
+) -> Result<(Vec<RowData>, Vec<T>), anyhow::Error>
+where
+    QueryFunc: FnOnce(String/*, &'a [&(dyn ToSql + Sync)]*/) -> QueryFuncReturn,
+    QueryFuncReturn: Future<Output = Result<Vec<Row>, tokio_postgres::Error>>,
+{
     let filters_sql = get_sql_for_filters(filter).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let where_clause = match filters_sql.len() {
         0..=2 => "".to_owned(),
         _ => " WHERE ".to_owned() + &filters_sql,
     };
     println!("Running where clause:{where_clause} @filter:{filter:?}");
-    let mut rows = client.query(&format!("SELECT * FROM \"{table_name}\"{where_clause};"), &[]).await
+    let mut rows = query_func(format!("SELECT * FROM \"{table_name}\"{where_clause};")/*, &[]*/).await
         .with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql}"))?;
 
     // sort by id, so that order of our results here is consistent with order after live-query-updating modifications (see storage.rs)
@@ -58,6 +75,17 @@ pub async fn get_entries_in_collection<T: From<Row> + Serialize>(ctx: &async_gra
         let json_val = serde_json::to_value(r).unwrap();
         json_val.as_object().unwrap().clone()
     }).collect();
+    Ok((entries, entries_as_type))
+}
+pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), anyhow::Error> {
+    //let client = ctx.data::<Client>().unwrap();
+    let pool = ctx.data::<Pool>().unwrap();
+    let client = pool.get().await.unwrap();
+
+    let query_func = |str1: String| async move {
+        client.query(&str1, &[]).await
+    };
+    let (entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter).await.unwrap();
     Ok((entries, entries_as_type))
 }
 

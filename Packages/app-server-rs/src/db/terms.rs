@@ -18,17 +18,17 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Term {
-    id: ID,
-    accessPolicy: String,
-	creator: String,
-	createdAt: i64,
-    name: String,
-	forms: Vec<String>,
-    disambiguation: Option<String>,
-    r#type: String,
-    definition: String,
-    note: Option<String>,
-    attachments: Vec<serde_json::Value>,
+    pub id: ID,
+    pub accessPolicy: String,
+	pub creator: String,
+	pub createdAt: i64,
+    pub name: String,
+	pub forms: Vec<String>,
+    pub disambiguation: Option<String>,
+    pub r#type: String,
+    pub definition: String,
+    pub note: Option<String>,
+    pub attachments: Vec<serde_json::Value>,
 }
 impl From<tokio_postgres::row::Row> for Term {
 	fn from(row: tokio_postgres::row::Row) -> Self {

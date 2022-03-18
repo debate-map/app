@@ -1,5 +1,5 @@
 use std::{env, str::FromStr};
-use proc_macro2::{TokenStream, TokenTree, Group, Delimiter, Ident, Span};
+use proc_macro2::{TokenStream, TokenTree, Ident, Span};
 
 use crate::utils::{replace_token_sequences_matching, Slot};
 

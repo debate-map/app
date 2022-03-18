@@ -17,21 +17,21 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct UserHidden {
-    id: ID,
-    email: String,
-    providerData: serde_json::Value,
-    backgroundID: Option<String>,
+    pub id: ID,
+    pub email: String,
+    pub providerData: serde_json::Value,
+    pub backgroundID: Option<String>,
     #[graphql(name = "backgroundCustom_enabled")]
-    backgroundCustom_enabled: Option<bool>,
+    pub backgroundCustom_enabled: Option<bool>,
     #[graphql(name = "backgroundCustom_color")]
-    backgroundCustom_color: Option<String>,
+    pub backgroundCustom_color: Option<String>,
     #[graphql(name = "backgroundCustom_url")]
-    backgroundCustom_url: Option<String>,
+    pub backgroundCustom_url: Option<String>,
     #[graphql(name = "backgroundCustom_position")]
-    backgroundCustom_position: Option<String>,
-    addToStream: bool,
-    lastAccessPolicy: Option<String>,
-    extras: serde_json::Value,
+    pub backgroundCustom_position: Option<String>,
+    pub addToStream: bool,
+    pub lastAccessPolicy: Option<String>,
+    pub extras: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for UserHidden {
 	fn from(row: tokio_postgres::row::Row) -> Self {

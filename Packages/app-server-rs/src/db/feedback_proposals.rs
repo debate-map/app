@@ -17,14 +17,14 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Proposal {
-    id: ID,
-    r#type: String,
-    title: String,
-    text: String,
-    creator: String,
-	createdAt: i64,
-	editedAt: Option<i64>,
-	completedAt: Option<i64>,
+    pub id: ID,
+    pub r#type: String,
+    pub title: String,
+    pub text: String,
+    pub creator: String,
+	pub createdAt: i64,
+	pub editedAt: Option<i64>,
+	pub completedAt: Option<i64>,
 }
 impl From<tokio_postgres::row::Row> for Proposal {
 	fn from(row: tokio_postgres::row::Row) -> Self {

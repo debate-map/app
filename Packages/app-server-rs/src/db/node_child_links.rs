@@ -17,21 +17,21 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeChildLink {
-    id: ID,
-	creator: String,
-	createdAt: i64,
-	parent: String,
-	child: String,
-	group: String,
-	orderKey: String,
-	form: Option<String>,
-	seriesAnchor: Option<bool>,
-	seriesEnd: Option<bool>,
-	polarity: Option<String>,
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+	pub parent: String,
+	pub child: String,
+	pub group: String,
+	pub orderKey: String,
+	pub form: Option<String>,
+	pub seriesAnchor: Option<bool>,
+	pub seriesEnd: Option<bool>,
+	pub polarity: Option<String>,
     #[graphql(name = "c_parentType")]
-	c_parentType: Option<String>,
+	pub c_parentType: Option<String>,
     #[graphql(name = "c_childType")]
-	c_childType: Option<String>,
+	pub c_childType: Option<String>,
 }
 impl From<tokio_postgres::row::Row> for NodeChildLink {
 	fn from(row: tokio_postgres::row::Row) -> Self {

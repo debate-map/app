@@ -43,6 +43,7 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-graphql-axum",
+ "async-recursion",
  "async-trait",
  "axum 0.4.4",
  "bytes",
@@ -53,6 +54,7 @@ dependencies = [
  "futures-timer",
  "futures-util",
  "hyper",
+ "indexmap",
  "rust-macros",
  "serde",
  "serde_json",
@@ -161,6 +163,17 @@ dependencies = [
  "indexmap",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "async-recursion"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2cda8f4bcc10624c4e85bc66b3f452cca98cfa5ca002dc83a16aad2367641bea"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-use std::{env, str::FromStr};
+use std::{env};
 use std::time::Instant;
 
 use cached_expand::cached_expand_impl;

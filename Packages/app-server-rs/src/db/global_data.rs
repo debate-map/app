@@ -17,8 +17,8 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct GlobalData {
-    id: ID,
-    extras: serde_json::Value,
+    pub id: ID,
+    pub extras: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for GlobalData {
 	fn from(row: tokio_postgres::row::Row) -> Self {

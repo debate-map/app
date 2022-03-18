@@ -17,14 +17,14 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Media {
-    id: ID,
-    accessPolicy: String,
-	creator: String,
-	createdAt: i64,
-    name: String,
-    r#type: String,
-    url: String,
-    description: String,
+    pub id: ID,
+    pub accessPolicy: String,
+	pub creator: String,
+	pub createdAt: i64,
+    pub name: String,
+    pub r#type: String,
+    pub url: String,
+    pub description: String,
 }
 impl From<tokio_postgres::row::Row> for Media {
 	fn from(row: tokio_postgres::row::Row) -> Self {

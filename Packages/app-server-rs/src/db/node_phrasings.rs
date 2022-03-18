@@ -17,20 +17,20 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodePhrasing {
-    id: ID,
-	creator: String,
-	createdAt: i64,
-	node: String,
-	r#type: String,
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+	pub node: String,
+	pub r#type: String,
     #[graphql(name = "text_base")]
-	text_base: String,
+	pub text_base: String,
     #[graphql(name = "text_negation")]
-	text_negation: Option<String>,
+	pub text_negation: Option<String>,
     #[graphql(name = "text_question")]
-	text_question: Option<String>,
-	note: Option<String>,
-	terms: Vec<serde_json::Value>,
-	references: Vec<String>,
+	pub text_question: Option<String>,
+	pub note: Option<String>,
+	pub terms: Vec<serde_json::Value>,
+	pub references: Vec<String>,
 }
 impl From<tokio_postgres::row::Row> for MapNodePhrasing {
 	fn from(row: tokio_postgres::row::Row) -> Self {

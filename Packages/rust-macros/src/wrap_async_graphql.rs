@@ -1,5 +1,5 @@
 use std::{env};
-use proc_macro2::{TokenStream, TokenTree, Group, Delimiter};
+use proc_macro2::{TokenStream, TokenTree, Delimiter};
 
 use crate::utils::remove_token_sequences_matching;
 

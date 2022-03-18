@@ -39,15 +39,15 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct CommandRun {
-    id: ID,
-    actor: String,
-	runTime: i64,
+    pub id: ID,
+    pub actor: String,
+	pub runTime: i64,
     #[graphql(name = "public_base")]
-    public_base: bool,
-    commandName: String,
-    commandPayload: serde_json::Value,
-    returnData: serde_json::Value,
-    rlsTargets: serde_json::Value,
+    pub public_base: bool,
+    pub commandName: String,
+    pub commandPayload: serde_json::Value,
+    pub returnData: serde_json::Value,
+    pub rlsTargets: serde_json::Value,
 }
 impl From<tokio_postgres::row::Row> for CommandRun {
 	fn from(row: tokio_postgres::row::Row) -> Self {

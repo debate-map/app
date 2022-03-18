@@ -17,15 +17,15 @@ excludeLinesWith = "#[graphql(name"
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeTag {
-    id: ID,
-	creator: String,
-	createdAt: i64,
-    nodes: Vec<String>,
-	labels: Option<serde_json::Value>,
-	mirrorChildrenFromXToY: Option<serde_json::Value>,
-	xIsExtendedByY: Option<serde_json::Value>,
-	mutuallyExclusiveGroup: Option<serde_json::Value>,
-	restrictMirroringOfX: Option<serde_json::Value>,
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+    pub nodes: Vec<String>,
+	pub labels: Option<serde_json::Value>,
+	pub mirrorChildrenFromXToY: Option<serde_json::Value>,
+	pub xIsExtendedByY: Option<serde_json::Value>,
+	pub mutuallyExclusiveGroup: Option<serde_json::Value>,
+	pub restrictMirroringOfX: Option<serde_json::Value>,
 }
 impl From<tokio_postgres::row::Row> for MapNodeTag {
 	fn from(row: tokio_postgres::row::Row) -> Self {
