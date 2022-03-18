@@ -57,7 +57,7 @@ impl QueryShard_General_Subtree {
         let ctx = AccessorContext::new(tx);
         let mut collector = SubtreeCollector::default();
         collector.root_path_segments = vec![root_node_id.clone()];
-        populate_subtree_collector(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &mut collector).await;
+        populate_subtree_collector(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &mut collector).await?;
         let subtree = collector.to_subtree();
 
         Ok(subtree)
