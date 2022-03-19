@@ -15,17 +15,19 @@ import {ShareUIState} from "./main/shareUI.js";
 import {SocialPageState} from "./main/social.js";
 import {TimelinesState} from "./main/timelines.js";
 
+export type URLParam = {name: string, value: string};
 export class MainState {
 	constructor() { makeObservable(this); }
 	// [immerable] = true;
 
 	@O page = "home";
 	@O urlExtraStr: string|n;
+	@O @ignore urlOtherFlags: URLParam[] = [];
 
 	@O lastDBVersion: number|n; // tracks the last db-version the client started with, so we can know when we need to upgrade the store-data
 	@O envOverride: string|n;
 	@O dbOverride: string|n;
-	@O dbVersionOverride: string|n;
+	//@O dbVersionOverride: string|n;
 
 	@O analyticsEnabled = true;
 	// topLeftOpenPanel: string;

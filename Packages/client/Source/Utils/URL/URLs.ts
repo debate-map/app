@@ -125,11 +125,17 @@ export function GetLoadActionFuncForURL(url: VURL) {
 		}
 
 		// load query-vars
-		if (url.GetQueryVar("extra")) store.main.urlExtraStr = url.GetQueryVar("extra") == "null" ? null : url.GetQueryVar("extra");
-		if (url.GetQueryVar("env")) store.main.envOverride = url.GetQueryVar("env") == "null" ? null : url.GetQueryVar("env");
-		if (url.GetQueryVar("db")) store.main.dbOverride = url.GetQueryVar("db") == "null" ? null : url.GetQueryVar("db");
-		if (url.GetQueryVar("dbVersion")) store.main.dbVersionOverride = url.GetQueryVar("dbVersion") == "null" ? null : url.GetQueryVar("dbVersion");
-		if (url.GetQueryVar("analyticsEnabled")) store.main.analyticsEnabled = url.GetQueryVar("analyticsEnabled") == "true";
+		store.main.urlOtherFlags = [];
+		for (const param of url.queryVars) {
+			if (param.name == "extra") store.main.urlExtraStr = param.value == "null" ? null : param.value;
+			else if (param.name == "env") store.main.envOverride = param.value == "null" ? null : param.value;
+			else if (param.name == "db") store.main.dbOverride = param.value == "null" ? null : param.value;
+			//else if (param.name == "dbVersion") store.main.dbVersionOverride = param.value == "null" ? null : param.value;
+			else if (param.name == "analytics") store.main.analyticsEnabled = param.value == "1";
+			else {
+				store.main.urlOtherFlags.push({name: param.name, value: param.value});
+			}
+		}
 
 		/* if (url.pathNodes[0] == 'forum') {
 			const subforumStr = url.pathNodes[1];
@@ -274,13 +280,16 @@ export const GetNewURL = CreateAccessor(function(includeMapViewStr = true) {
 
 	// query vars
 	if (s.main.urlExtraStr) newURL.SetQueryVar("extra", s.main.urlExtraStr);
-	if (!s.main.analyticsEnabled && newURL.GetQueryVar("analytics") == null) newURL.SetQueryVar("analytics", "false");
+	if (!s.main.analyticsEnabled && newURL.GetQueryVar("analytics") == null) newURL.SetQueryVar("analytics", "0");
 	if (s.main.envOverride) newURL.SetQueryVar("env", s.main.envOverride);
 	if (s.main.dbOverride) newURL.SetQueryVar("db", s.main.dbOverride);
-	if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
+	//if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
 	/* if (mapID && includeMapViewStr) {
 		newURL.SetQueryVar('view', GetMapViewStr(mapID));
 	} */
+	for (const param of s.main.urlOtherFlags) {
+		newURL.SetQueryVar(param.name, param.value);
+	}
 
 	if (page == "database") {
 		if (subpage == "users" && GetSelectedUserID()) {

@@ -9,7 +9,7 @@ export const presetBackgrounds = {
 		/*color: "#eee",
 		url_max: "none",
 		position: "0 0",*/
-		url_max: "background: repeat 0/5px 5px linear-gradient(90deg,rgba(0,0,0,.05) 1px,transparent 0), repeat 0/5px 5px linear-gradient(180deg,rgba(0,0,0,.05) 1px,transparent 0), #eee",
+		styleOverride: "background: repeat 0/5px 5px linear-gradient(90deg,rgba(0,0,0,.05) 1px,transparent 0), repeat 0/5px 5px linear-gradient(180deg,rgba(0,0,0,.05) 1px,transparent 0), #eee",
 	},
 	n60KYTsHSZqUuyEQxSn001: {
 		color: "#E5E8EC",

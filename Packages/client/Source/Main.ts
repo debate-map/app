@@ -79,13 +79,13 @@ if (dbStr) {
 }
 g.DB_SHORT = {development: "dev", production: "prod"}[DB] || DB;
 
-let dbVersion = 12;
+/*let dbVersion = 12;
 const dbVersionStr = AsNotNull(startURL.GetQueryVar("dbVersion")) || storeTemp.main?.dbVersionOverride;
 if (dbVersionStr) {
 	dbVersion = parseInt(dbVersionStr);
 	console.log(`Using dbVersion: ${dbVersion}`);
 }
-export {dbVersion};
+export {dbVersion};*/
 // G({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
 // hot-reloading

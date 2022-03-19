@@ -1,5 +1,5 @@
 import {GetUserPermissionGroups, Me, MeID} from "dm_common";
-import {dbVersion, hasHotReloaded} from "Main.js";
+import {hasHotReloaded} from "Main.js";
 import {RootState, store} from "Store/index.js";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
@@ -42,7 +42,7 @@ export function InitWVC() {
 		db_short: DB_SHORT,
 		devEnv: DEV,
 		prodEnv: PROD,
-		dbVersion,
+		dbVersion: 12, // last version used (n/a anymore since not using firestore)
 		HasHotReloaded: ()=>hasHotReloaded,
 		logTypes,
 		mobxCompatMode: true,

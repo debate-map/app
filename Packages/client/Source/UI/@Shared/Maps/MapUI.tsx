@@ -6,10 +6,10 @@ import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI} from "tree-grapher";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
-import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction, SubNavBar, SubNavBarButton} from "web-vcore";
+import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction, SubNavBar, SubNavBarButton, UseWindowEventListener} from "web-vcore";
 import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
@@ -108,11 +108,6 @@ export class MapUI extends BaseComponent<Props, {}> {
 			Assert(IsNodeL3(rootNode), "Node supplied to MapUI is not level-3!");
 		}
 	}
-	get Padding() {
-		const winWidth = screen.availWidth;
-		const winHeight = screen.availHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar
-		return this.props.padding ?? {left: winWidth * .9, right: winWidth * .9, top: winHeight * .9, bottom: winHeight * .9};
-	}
 
 	scrollView: ScrollView|n;
 	mapUIEl: HTMLDivElement|n;
@@ -120,7 +115,24 @@ export class MapUI extends BaseComponent<Props, {}> {
 	render() {
 		const {mapID, rootNode: rootNode_passed, withinPage, ...rest} = this.props;
 		//Assert(padding && subNavBarWidth != null); // nn: default-values set
-		const padding = this.Padding;
+
+		const GetMapUIPadding = ()=>{
+			if (this.props.padding) return padding;
+
+			/*const winWidth = screen.availWidth;
+			const winHeight = screen.availHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar*/
+			const winWidth = window.innerWidth;
+			const winHeight = window.innerHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar
+
+			// if header hidden, we're probably in iframe, so adjust padding to be a lot smaller (large paddings are confusing in small viewport)
+			const mult = ShowHeader ? .9 : .3;
+			return {left: winWidth * mult, right: winWidth * mult, top: winHeight * mult, bottom: winHeight * mult};
+		};
+		const [padding, setPadding] = useState(GetMapUIPadding());
+		UseWindowEventListener("resize", ()=>{
+			setPadding(GetMapUIPadding());
+		});
+
 		Assert(mapID, "mapID is null!");
 
 		const graphInfo = useMemo(()=>{
@@ -197,9 +209,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		//const subNavBarWidth = 104;
 		const subNavBarWidth = 0;
+		const actionBarHeight = ShowHeader ? 30 : 0;
 		return (
 			<Column style={ES({flex: 1})}>
-				{!withinPage &&
+				{!withinPage && ShowHeader &&
 				<>
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>
 					{/*<SubNavBar>
@@ -212,7 +225,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 					<TimelinePlayerUI map={map}/> */}
 				{/*! withinPage &&
 					<TimelineOverlayUI map={map}/> */}
-				<Row style={{marginTop: 30, height: "calc(100% - 30px)", alignItems: "flex-start"}}>
+				<Row style={{marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start"}}>
 					{/*!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>*/}
 					<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
@@ -278,9 +291,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 								{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 									this.LoadScroll();
 								}}/> */}
+								{ShowHeader && // on right-click, show hint about how to add nodes -- but only if header is shown (ie. not in iframe)
 								<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
 									<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
-								</VMenuStub>
+								</VMenuStub>}
 							</GraphContext.Provider>}
 						</div>
 					</ScrollView>

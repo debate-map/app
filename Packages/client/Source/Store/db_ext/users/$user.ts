@@ -1,5 +1,5 @@
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {GetUserHidden} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 
@@ -10,6 +10,7 @@ export class BackgroundConfig {
 	color?: string|n;
 
 	extension?: string|n; // used to infer the urls (default: jpg)
+	// maybe temp; if one of these fields starts with "background: ", it'll be used as a background-style-override (needed for, eg. hard-coded tiling background-images)
 	url_max?: string|n;
 	url_256?: string|n;
 	url_1920?: string|n;
@@ -17,10 +18,21 @@ export class BackgroundConfig {
 
 	position?: string|n;
 	size?: string|n;
+
+	// maybe temp; needed for some special-case backgrounds (eg. for tiling background-images)
+	//styleOverride?: string;
 }
 
 export const GetUserBackground = CreateAccessor((userID: string|n): BackgroundConfig=>{
-	if (GADDemo) return {color: "#ffffff"};
+	if (GADDemo) {
+		// if header is disabled, it means we're in the iframe for the special frontend; change background accordingly
+		if (!ShowHeader) {
+			return {
+				url_max: "background: repeat url(/Images/@GAD/BackgroundTile.png), #ffffff",
+			};
+		}
+		return {color: "#ffffff"};
+	}
 
 	const user_p = GetUserHidden(userID);
 	if (!user_p) return presetBackgrounds[defaultPresetBackground];

@@ -20,7 +20,7 @@ import {NavBar} from "../UI/@Shared/NavBar.js";
 import {GlobalUI} from "../UI/Global.js";
 import {HomeUI} from "../UI/Home.js";
 import {MoreUI} from "../UI/More.js";
-import {GADDemo} from "./@GAD/GAD.js";
+import {GADDemo, ShowHeader} from "./@GAD/GAD.js";
 import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
 import {RootStyles} from "./@Root/RootStyles.js";
@@ -172,10 +172,11 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 					<AddressBarWrapper />
 					<OverlayUI />
 				</ErrorBoundary>
+				{ShowHeader &&
 				<ErrorBoundary>
 					{!GADDemo && <NavBar />}
 					{GADDemo && <NavBar_GAD />}
-				</ErrorBoundary>
+				</ErrorBoundary>}
 				{/* <InfoButton_TooltipWrapper/> */}
 				<ErrorBoundary
 					key={page} // use key, so that error-message clears when user changes pages

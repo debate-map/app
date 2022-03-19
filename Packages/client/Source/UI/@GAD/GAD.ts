@@ -6,6 +6,7 @@ export const GADDemo = startURL.domain == "demo.greatamericandebate.org" || GAD_
 export const GADDemo_Main = startURL.GetQueryVar("extra") == "gad";
 export const GADDemo_COVID = startURL.GetQueryVar("extra") == "cov";
 export const GADDemo_2020 = startURL.GetQueryVar("extra") == "2020";
+export const ShowHeader = startURL.GetQueryVar("header") != "0";
 
 export function GetGADExternalSiteURL() {
 	if (GADDemo_COVID) return "https://www.covidconvo.org";

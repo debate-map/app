@@ -1,5 +1,4 @@
 import {DeepGet, E, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {dbVersion} from "Main";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
