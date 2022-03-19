@@ -277,7 +277,16 @@ export class MapUI extends BaseComponent<Props, {}> {
 							}}
 							onContextMenu={e=>{
 								if (e.nativeEvent["handled"]) return true;
-								e.preventDefault();
+								// block regular right-click actions on map background (so it doesn't conflict with custom right-click contents)
+								if (ShowHeader) {
+									e.preventDefault();
+								} else {
+									// if not in iframe, only block it if right-click was over a node-ui (one reason being that, in iframe, the native right-click menu is needed to press "Back")
+									const rightClickedOverNode = (e.nativeEvent.target as HTMLElement).closest(".NodeUI") != null;
+									if (rightClickedOverNode) {
+										e.preventDefault();
+									}
+								}
 							}}
 						>
 							{containerElResolved &&
