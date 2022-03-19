@@ -1,7 +1,7 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Button} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
@@ -72,11 +72,14 @@ export class AddArgumentButton extends BaseComponent<Props> {
 		const polarity_short = GetPolarityShortStr(polarity);
 		const contributeInfo = GetNodeContributionInfo(node.id);
 		const contributeInfo_polarity = contributeInfo[`${polarity_short}Args`] as NodeContributionInfo_ForPolarity;
+		// if in iframe/no-header mode, have the add-argument-buttons always disabled
+		// (the sign-in dialog is too confusing there atm: small container, signs into different website [possibly with CORS complications], and most linked maps would have 3rd-party node-adding disabled anyway)
+		const enabled = contributeInfo_polarity.canAdd && ShowHeader;
 
 		return (
 			<Button
 				text={`Add ${polarity_short}`} title={`Add ${Polarity[polarity].toLowerCase()} argument`}
-				enabled={contributeInfo_polarity.canAdd}
+				enabled={enabled}
 				// text={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				style={E(
 					{
