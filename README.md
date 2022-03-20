@@ -126,7 +126,7 @@ Remote (private port-forwards/proxies):
 * `localhost:5220`: remote (k8s), postgres instance (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5230`: remote (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_ovh` must be running)
 
-Remote (public):
+Remote (public): \[note: the new version of debate-map is not yet served at these endpoints; these are the target urls, however, for when it's ready for public access]
 * `debatemap.app`: remote (k8s), web-server
 * `app-server.debatemap.app`: remote (k8s), app-server
 * `monitor.debatemap.app`: remote (k8s), monitor-backend (with web-serving of monitor-client's files)
