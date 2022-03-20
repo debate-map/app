@@ -70,11 +70,15 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
     let node_current = get_node_revision(ctx, &node.c_currentRevision).await?;
     let phrasings = get_node_phrasings(ctx, &node_id).await?;
     let terms = get_terms_attached(ctx, &node_current.id.0).await?;
-    let media = match node_current.clone().media {
-        Some(media_attachment) => {
-            Some(get_media(ctx, &media_attachment["id"].as_str().unwrap().to_owned()).await?)
-        },
-        _ => None,
+    let medias = {
+        let mut temp = vec![];
+        for attachment in node_current.clone().attachments {
+            if let Some(media_attachment) = attachment.media {
+                let media = get_media(ctx, &media_attachment["id"].as_str().unwrap().to_owned()).await?;
+                temp.push(media);
+            };
+        }
+        temp
     };
 
     // store data
@@ -102,12 +106,14 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
         }
 
         for term in terms {
-            if !collector.terms.contains_key(&term.id.0) { collector.terms.insert(term.id.to_string(), term); }
+            if !collector.terms.contains_key(&term.id.0) {
+                collector.terms.insert(term.id.to_string(), term);
+            }
         }
 
-        if let Some(media) = media {
+        for media in medias {
             //if !collector.terms.contains_key(media_attachment["id"].as_str().unwrap()) {
-            if !collector.terms.contains_key(&media.id.0) {
+            if !collector.medias.contains_key(&media.id.0) {
                 collector.medias.insert(media.id.to_string(), media);
             }
         }

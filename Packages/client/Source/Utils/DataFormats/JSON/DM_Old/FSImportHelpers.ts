@@ -35,20 +35,22 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_MapNodeL3, i
 		createdAt: revData.createdAt,
 		creator: systemUserID,
 		displayDetails: undefined,
-		equation: revData.equation,
-		media: revData.media == null ? undefined : new MediaAttachment({
-			captured: revData.media.captured,
-			id: revData.media.id,
-			previewWidth: revData.media.previewWidth,
-			sourceChains: GetSourceChainsFromFSSourceChains(revData.media.sourceChains),
-		}),
-		quote: revData.quote == null ? undefined : new QuoteAttachment({
-			content: revData.quote.content,
-			sourceChains: GetSourceChainsFromFSSourceChains(revData.quote.sourceChains),
-		}),
-		references: revData.references == null ? undefined : new ReferencesAttachment({
-			sourceChains: GetSourceChainsFromFSSourceChains(revData.references.sourceChains),
-		}),
+		attachments: [
+			revData.equation && {equation: revData.equation},
+			revData.media && {media: new MediaAttachment({
+				captured: revData.media.captured,
+				id: revData.media.id,
+				previewWidth: revData.media.previewWidth,
+				sourceChains: GetSourceChainsFromFSSourceChains(revData.media.sourceChains),
+			})},
+			revData.quote && {quote: new QuoteAttachment({
+				content: revData.quote.content,
+				sourceChains: GetSourceChainsFromFSSourceChains(revData.quote.sourceChains),
+			})},
+			revData.references && {references: new ReferencesAttachment({
+				sourceChains: GetSourceChainsFromFSSourceChains(revData.references.sourceChains),
+			})},
+		].filter(a=>a),
 		node: node.id,
 		note: revData.note,
 		phrasing: CullMapNodePhrasingToBeEmbedded(new MapNodePhrasing({

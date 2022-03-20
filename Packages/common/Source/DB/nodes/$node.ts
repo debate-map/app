@@ -18,6 +18,7 @@ import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {MapNodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@MapNodePhrasing.js";
+import {Attachment} from "../@Shared/Attachments/@Attachment.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -31,9 +32,14 @@ export function PreProcessLatex(text: string) {
 	return text;
 }
 
+export const GetMainAttachment = CreateAccessor((rev: MapNodeRevision)=>{
+	if (rev == null) return null;
+	return rev.attachments[0] as Attachment|n;
+});
+
 export function GetFontSizeForNode(node: MapNodeL2/*, isSubnode = false*/) {
 	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
-	if (node.current.equation) return node.current.equation.latex ? 14 : 13;
+	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
 	//if (isSubnode) return 11;
 	return 14;
 }
@@ -331,11 +337,13 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.claim)[0];
 		if (baseClaim) return GetNodeDisplayText(baseClaim);
 	}
+	//const mainAttachment = node.current.attachments[0] as Attachment|n;
+	const mainAttachment = GetMainAttachment(node.current);
 	if (node.type == MapNodeType.claim) {
-		if (node.current.equation) {
-			let result = node.current.equation.text;
+		if (mainAttachment?.equation) {
+			let result = mainAttachment.equation.text;
 			//if (node.current.equation.latex && !isBot) {
-			if (node.current.equation.latex && typeof window != "undefined" && window["katex"] && window["$"]) {
+			if (mainAttachment.equation.latex && typeof window != "undefined" && window["katex"] && window["$"]) {
 				// result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
 				const latex = PreProcessLatex(result);
 				try {
@@ -353,23 +361,23 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 
 		// for now, only use the "statements below were made" title if there is no simple-title set (needed for SL use-case)
 		// (in the future, I will probably make-so this can only be done in private maps or something, as it's contrary to the "keep components separate/debatable" concept)
-		if ((node.current.quote || node.current.media) && (simpleTitle?.trim() ?? "").length == 0) {
+		if ((mainAttachment?.quote || mainAttachment?.media) && (simpleTitle?.trim() ?? "").length == 0) {
 			let text: string;
 			let firstSource: Source;
-			if (node.current.quote) {
+			if (mainAttachment.quote) {
 				text = `The statements below were made`;
-				firstSource = node.current.quote.sourceChains[0].sources[0];
+				firstSource = mainAttachment.quote.sourceChains[0].sources[0];
 
 				if (firstSource.name) text += ` as part of ${firstSource.name}`;
-			} else if (node.current.media) {
-				const media = GetMedia(node.current.media.id);
+			} else if (mainAttachment.media) {
+				const media = GetMedia(mainAttachment.media.id);
 				if (media == null) return "...";
 				// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
 				text = `The ${GetNiceNameForMediaType(media.type)} below`;
-				firstSource = node.current.media.sourceChains[0].sources[0];
+				firstSource = mainAttachment.media.sourceChains[0].sources[0];
 
 				if (firstSource.name) text += `, as part of ${firstSource.name},`;
-				text += ` was ${node.current.media.captured ? "captured" : "produced"}`;
+				text += ` was ${mainAttachment.media.captured ? "captured" : "produced"}`;
 			} else {
 				throw "[can't happen]";
 			}

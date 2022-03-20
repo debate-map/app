@@ -4,7 +4,7 @@ import {Map} from "../maps/@Map.js";
 import {AccessLevel, MapNodeL3} from "./@MapNode.js";
 import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
 import {ChildGroup, MapNodeType_Info} from "./@MapNodeType.js";
-import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment} from "../../DB.js";
+import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment, Attachment} from "../../DB.js";
 import {ChildOrdering} from "../nodeRatings.js";
 
 export enum PermissionInfoType {
@@ -184,24 +184,9 @@ export class MapNodeRevision {
 	@Field({$ref: NodeRevisionDisplayDetails.name}, {opt: true})
 	displayDetails?: NodeRevisionDisplayDetails;
 
-	// attachments
-	// ==========
-
-	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: EquationAttachment.name}, {opt: true})
-	equation?: EquationAttachment;
-
-	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: ReferencesAttachment.name}, {opt: true})
-	references?: ReferencesAttachment;
-
-	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: QuoteAttachment.name}, {opt: true})
-	quote?: QuoteAttachment;
-
-	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: MediaAttachment.name}, {opt: true})
-	media?: MediaAttachment;
+	@DB((t, n)=>t.jsonb(n))
+	@Field({items: {$ref: "Attachment"}})
+	attachments: Attachment[] = [];
 }
 AddSchema("MapNodeRevision_Partial", ["MapNodeRevision"], ()=>{
 	const schema = GetSchemaJSON("MapNodeRevision");

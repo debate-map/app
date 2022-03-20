@@ -175,7 +175,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 		if (node.type == MapNodeType.claim && node.link) {
 			const claimType = GetAttachmentType_Node(node);
 			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.question;
-			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.equation!.isStep; // && !creating;
+			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.attachments[0]?.equation!.isStep; // && !creating;
 		}
 
 		return (

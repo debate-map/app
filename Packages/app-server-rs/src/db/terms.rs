@@ -8,6 +8,8 @@ use tokio_postgres::{Client};
 use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
 use crate::utils::filter::{Filter};
 
+use super::node_revisions::Attachment;
+
 wrap_slow_macros!{
 
 /*cached_expand!{
@@ -28,7 +30,7 @@ pub struct Term {
     pub r#type: String,
     pub definition: String,
     pub note: Option<String>,
-    pub attachments: Vec<serde_json::Value>,
+    pub attachments: Vec<Attachment>,
 }
 impl From<tokio_postgres::row::Row> for Term {
 	fn from(row: tokio_postgres::row::Row) -> Self {

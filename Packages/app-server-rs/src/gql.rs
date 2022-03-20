@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::convert::Infallible;
+use std::env;
 use std::future::Future;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
@@ -89,7 +90,9 @@ pub type RootSchema = wrap_agql_schema_type!{
 };
 
 async fn graphiql() -> impl IntoResponse {
-    response::Html(graphiql_source("/graphql", Some("wss://app-server.debates.app/graphql")))
+    // use the DEV/PROD value from the "ENV" env-var, to determine what the app-server's URL is (maybe temp)
+    let app_server_host = if env::var("ENV").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:3105" } else { "app-server.debates.app" };
+    response::Html(graphiql_source("/graphql", Some(&format!("wss://{app_server_host}/graphql"))))
 }
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(

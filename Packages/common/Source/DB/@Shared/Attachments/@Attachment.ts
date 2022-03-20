@@ -13,22 +13,24 @@ export type AttachmentTarget = "node" | "term";
 export enum AttachmentType {
 	none = "none",
 	//ImpactPremise: 1,
-	equation = "equation",
 	references = "references",
 	quote = "quote",
 	media = "media",
+	equation = "equation",
 }
 
 export function GetAttachmentType_Node(node: MapNodeL2) {
-	return GetAttachmentType(node.current);
+	const mainAttachment = node.current.attachments[0];
+	if (mainAttachment == null) return AttachmentType.none;
+	return GetAttachmentType(mainAttachment);
 }
 export function GetAttachmentType(attachment: Attachment) {
 	return (
-		attachment.equation ? AttachmentType.equation
-		: attachment.references ? AttachmentType.references
-		: attachment.quote ? AttachmentType.quote
-		: attachment.media ? AttachmentType.media
-		: AttachmentType.none
+		attachment.equation ? AttachmentType.equation :
+		attachment.references ? AttachmentType.references :
+		attachment.quote ? AttachmentType.quote :
+		attachment.media ? AttachmentType.media :
+		AttachmentType.none
 	);
 }
 
@@ -45,7 +47,7 @@ export function ResetAttachment(attachment: Attachment, attachmentType: Attachme
 	}
 }
 
-// attachment-holder class (this is currently only used by the Term class; the MapNodeRevision class already has equivalent subfields itself)
+// attachment-holder class
 // ==========
 
 @MGLClass()

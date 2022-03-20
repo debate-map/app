@@ -6,7 +6,7 @@ import {Button, Pre, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey, GetMainAttachment} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -68,8 +68,13 @@ export class TitlePanel extends BaseComponentPlus(
 		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
-		const displayText = await GetAsync(()=>GetNodeDisplayText(node, path));
-		if (IsUserCreatorOrMod(MeID(), node) && node.current.equation == null) {
+		const {mainAttachment, displayText} = await GetAsync(()=>{
+			return {
+				mainAttachment: GetMainAttachment(node.current),
+				displayText: GetNodeDisplayText(node, path),
+			};
+		});
+		if (IsUserCreatorOrMod(MeID(), node) && mainAttachment?.equation == null) {
 			this.SetState({editing: true, edit_newTitle: displayText});
 		}
 	};
@@ -98,13 +103,14 @@ export class TitlePanel extends BaseComponentPlus(
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
 		const nodeView = GetNodeView(map?.id, path);
-		const latex = node.current.equation?.latex;
+		const mainAttachment = GetMainAttachment(node.current);
+		const latex = mainAttachment?.equation?.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
 		const displayText = GetNodeDisplayText(node, path);
 
-		const equationNumber = node.current.equation ? GetEquationStepNumber(path) : null;
-		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
+		const equationNumber = mainAttachment?.equation ? GetEquationStepNumber(path) : null;
+		const noteText = (mainAttachment?.equation && mainAttachment?.equation.explanation) || node.current.note;
 		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
 		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
 
@@ -133,7 +139,7 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
-						{latex && <NodeMathUI text={node.current.equation!.text}
+						{mainAttachment?.equation && latex && <NodeMathUI text={mainAttachment.equation.text}
 							onTermHover={(id, hovered)=>this.OnTermHover([id], hovered)}
 							onTermClick={id=>this.OnTermClick([id])}
 							termsToSearchFor={termsToSearchFor}/>}
@@ -171,7 +177,7 @@ export class TitlePanel extends BaseComponentPlus(
 						{/*noteText*/}
 						{RenderNodeDisplayText(noteText, termsToSearchFor, this)}
 					</Pre>}
-				{node.type == MapNodeType.claim && node.current.quote &&
+				{node.type == MapNodeType.claim && mainAttachment?.quote &&
 					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
 			</div>
 		);

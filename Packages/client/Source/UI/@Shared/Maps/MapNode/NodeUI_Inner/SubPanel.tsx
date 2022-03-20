@@ -1,23 +1,25 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed} from "web-vcore";
-import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "dm_common";
+import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SourcesUI} from "./SourcesUI.js";
 
+@Observer
 export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
 	render() {
 		const {node, toolbarShowing, ...rest} = this.props;
+		const mainAttachment = GetMainAttachment(node.current);
 		return (
-			<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
+			<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${mainAttachment?.references ? 0 : 6}px 5px 5px 5px`,
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: liveSkin.NodeSubPanelBackgroundColor().css(), borderRadius: "0 0 0 5px",
 			}}>
-				{node.current.references &&
-					<SubPanel_References attachment={node.current.references} fontSize={GetFontSizeForNode(node)}/>}
-				{node.current.quote &&
-					<SubPanel_Quote attachment={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
-				{node.current.media &&
-					<SubPanel_Media mediaAttachment={node.current.media}/>}
+				{mainAttachment?.references &&
+					<SubPanel_References attachment={mainAttachment?.references} fontSize={GetFontSizeForNode(node)}/>}
+				{mainAttachment?.quote &&
+					<SubPanel_Quote attachment={mainAttachment?.quote} fontSize={GetFontSizeForNode(node)}/>}
+				{mainAttachment?.media &&
+					<SubPanel_Media mediaAttachment={mainAttachment?.media}/>}
 			</div>
 		);
 	}

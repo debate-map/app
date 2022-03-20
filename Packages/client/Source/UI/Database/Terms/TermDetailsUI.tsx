@@ -88,7 +88,7 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 					</PolicyPicker>
 				</RowLR>
 				<AttachmentsEditorUI phase={phase} baseData={newData.attachments} onChange={val=>Change(newData.attachments = val)}
-					target="term" allowedAttachmentTypes={[AttachmentType.media, AttachmentType.references]}/>
+					target="term" allowedAttachmentTypes={[AttachmentType.references, AttachmentType.media]}/>
 			</Column>
 		);
 	}

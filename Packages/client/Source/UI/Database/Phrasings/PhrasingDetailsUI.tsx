@@ -4,11 +4,12 @@ import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "web-vc
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapNode, MapNodeType, GetAttachmentType_Node, MapNodeL2, AttachmentType, MapNodePhrasing_Embedded, TermAttachment, MapNodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, MapNodeL3} from "dm_common";
+import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapNode, MapNodeType, GetAttachmentType_Node, MapNodeL2, AttachmentType, MapNodePhrasing_Embedded, TermAttachment, MapNodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, MapNodeL3, GetMainAttachment} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
 import {GADDemo_Main} from "UI/@GAD/GAD";
+import {CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
 import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
@@ -125,9 +126,10 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	}
 }
 
-function WillNodePreferQuestionTitleHere(node: MapNodeL2, linkData: NodeChildLink|n) {
-	return node.type == MapNodeType.claim && !node.current.quote && linkData && linkData.form == ClaimForm.question;
-}
+const WillNodePreferQuestionTitleHere = CreateAccessor((node: MapNodeL2, linkData: NodeChildLink|n)=>{
+	const mainAttachment = GetMainAttachment(node.current);
+	return Boolean(node.type == MapNodeType.claim && mainAttachment?.quote == null && linkData && linkData.form == ClaimForm.question);
+});
 
 class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	render() {

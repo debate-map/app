@@ -39,16 +39,20 @@ export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
 		id: GenerateUUID(),
 		createdAt: node.createdAt,
 		creator: systemUserID,
-		references: row.link.trim().length == 0 ? undefined : new ReferencesAttachment({
-			sourceChains: [
-				new SourceChain([
-					new Source({
-						type: SourceType.webpage,
-						link: row.link.trim(),
-					}),
-				]),
-			],
-		}),
+		attachments: [
+			{
+				references: row.link.trim().length == 0 ? undefined : new ReferencesAttachment({
+					sourceChains: [
+						new SourceChain([
+							new Source({
+								type: SourceType.webpage,
+								link: row.link.trim(),
+							}),
+						]),
+					],
+				}),
+			},
+		],
 		node: node.id,
 		//note: undefined, // note cells added to phrasing.note instead (since we don't necessarily want the info showing in TitlePanel)
 		phrasing: CullMapNodePhrasingToBeEmbedded(new MapNodePhrasing({

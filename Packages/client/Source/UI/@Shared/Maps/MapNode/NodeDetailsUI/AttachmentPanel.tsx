@@ -1,10 +1,11 @@
-import {GetAttachmentType_Node} from "dm_common";
+import {AttachmentType, GetAttachmentType_Node} from "dm_common";
 import {DEL} from "js-vextensions";
 import React from "react";
 import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
 import {DetailsUI_Phase} from "UI/@Shared/DetailsUI_Base";
+import {AttachmentsEditorUI} from "UI/Database/Terms/AttachmentsEditorUI";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
 /*export function CanNodeHaveAttachments(node: MapNode) {
 	//return node.type == MapNodeType.claim;
@@ -20,19 +21,9 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 	render() {
 		const {newData, newDataAsL2, newRevisionData, forNew, enabled, Change} = this.props;
 		//const attachmentType = GetAttachmentType_Node(newDataAsL2);
-
 		//const canHaveAttachments = CanNodeHaveAttachments(newData);
-		return <AttachmentEditorUI phase={GetPhaseFromNodeDetailsUIProps({forNew, enabled: enabled!})}
-			target="node"
-			baseData={newRevisionData}
-			onChange={val=>{
-				newRevisionData.VSet({
-					equation: val.equation ?? DEL,
-					references: val.references ?? DEL,
-					quote: val.quote ?? DEL,
-					media: val.media ?? DEL,
-				});
-				Change();
-			}}/>;
+		return <AttachmentsEditorUI phase={GetPhaseFromNodeDetailsUIProps({forNew, enabled: enabled!})} target="node"
+			baseData={newRevisionData.attachments} onChange={val=>Change(newRevisionData.attachments = val)}
+			allowedAttachmentTypes={[AttachmentType.references, AttachmentType.quote, AttachmentType.media, AttachmentType.equation]}/>;
 	}
 }

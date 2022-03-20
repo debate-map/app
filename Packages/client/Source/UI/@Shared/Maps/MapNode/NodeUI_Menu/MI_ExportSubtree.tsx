@@ -1,4 +1,4 @@
-import {GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, MapNodeL2, MapNodeL3, MapNodePhrasing, MapNodeRevision, Media, MeID, NodeChildLink, Term} from "dm_common";
+import {GetMainAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, MapNodeL2, MapNodeL3, MapNodePhrasing, MapNodeRevision, Media, MeID, NodeChildLink, Term} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -65,7 +65,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		includeKeys: {
 			nodes: ClassKeys<MapNodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType"),
 			nodeChildLinks: ClassKeys<NodeChildLink>("id", "parent", "child", "form", "polarity"),
-			nodeRevisions: ClassKeys<MapNodeRevision>("id", "node", "phrasing", "note", "references", "media"),
+			nodeRevisions: ClassKeys<MapNodeRevision>("id", "node", "phrasing", "note", "attachments"),
 			nodePhrasings: ClassKeys<MapNodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "note", "terms", "references"),
 			terms: ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note"),
 			medias: ClassKeys<Media>("id", "name", "type", "url", "description"),
@@ -244,8 +244,9 @@ const PopulateSearchInfoUsingSubtree = CreateAccessor((currentPath: string, sear
 		if (!searchInfo.terms.has(term.id)) searchInfo.terms.set(term.id, term);
 	}
 
-	if (node.current.media && !searchInfo.terms.has(node.current.media.id)) {
-		const media = GetMedia(node.current.media.id)!;
+	const mainAttachment = GetMainAttachment(node.current);
+	if (mainAttachment?.media && !searchInfo.terms.has(mainAttachment?.media.id)) {
+		const media = GetMedia(mainAttachment?.media.id)!;
 		searchInfo.medias.set(media.id, media);
 	}
 

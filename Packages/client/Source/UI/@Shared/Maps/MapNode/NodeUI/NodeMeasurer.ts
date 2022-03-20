@@ -1,4 +1,4 @@
-import {GetFontSizeForNode, GetNodeDisplayText, MapNodeL3, MapNodeType_Info} from "dm_common";
+import {GetFontSizeForNode, GetMainAttachment, GetNodeDisplayText, MapNodeL3, MapNodeType_Info} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
@@ -29,20 +29,21 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: MapNodeL3, path: 
 		noteWidth_tester.innerHTML = node.current.note;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
-	if (node.current.equation && node.current.equation.explanation) {
+	const mainAttachment = GetMainAttachment(node.current);
+	if (mainAttachment?.equation && mainAttachment?.equation.explanation) {
 		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
-		noteWidth_tester.innerHTML = node.current.equation.explanation;
+		noteWidth_tester.innerHTML = mainAttachment?.equation.explanation;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	expectedTextWidth += noteWidth;
 
 	// let expectedOtherStuffWidth = 26;
 	let expectedOtherStuffWidth = 28;
-	if (node.current.quote) {
+	if (mainAttachment?.quote) {
 		expectedOtherStuffWidth += 14;
 	}
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (node.current.quote) { // quotes are often long, so just always do full-width
+	if (mainAttachment?.quote) { // quotes are often long, so just always do full-width
 		expectedBoxWidth = maxWidth_final;
 	}
 
