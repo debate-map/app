@@ -213,7 +213,7 @@ NEXT_k8s_resource(new_name='pgo_late',
 		"postgres-operator.crunchydata.com/cluster": "debate-map",
 		"postgres-operator.crunchydata.com/role": "master"
 	},
-	port_forwards='4205:5432' if REMOTE else '3205:5432',
+	port_forwards='5220:5432' if REMOTE else '5120:5432',
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 
@@ -326,7 +326,6 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 imageURL_appServerRS = registryURL + '/dm-app-server-rs-' + os.getenv("ENV")
 docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
 	build_args={
-		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
 		"env_ENV": os.getenv("ENV") or "dev",
 		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
 		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
@@ -356,6 +355,16 @@ docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfi
 		#sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
 		#sync('./Temp_Synced/postgraphile', '/dm_repo/node_modules/postgraphile'),
 	])
+imageURL_monitorBackend = registryURL + '/dm-monitor-backend-' + os.getenv("ENV")
+docker_build(imageURL_monitorBackend, '.', dockerfile='Packages/monitor-backend/Dockerfile',
+	build_args={
+		"env_ENV": os.getenv("ENV") or "dev",
+		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
+		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+		# docker doesn't seem to support string interpolation in COPY command, so do it here
+		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/monitor-backend",
+	},
+)
 
 # own app (deploy to kubernetes)
 # ==========
@@ -370,15 +379,26 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server-rs/deployment.yaml', {
 k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_appServerJS": imageURL_appServerJS,
 }))
+k8s_yaml(ReadFileWithReplacements('./Packages/monitor-backend/deployment.yaml', {
+	"TILT_PLACEHOLDER:imageURL_monitorBackend": imageURL_monitorBackend,
+}))
 
 # port forwards (see readme's [project-service-urls] guide-module for details)
 # ==========
+
+NEXT_k8s_resource('dm-web-server',
+	trigger_mode=TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
+	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
+	#port_forwards='5100:31005')
+	port_forwards='5200:5100' if REMOTE else '5100',
+	labels=["app"],
+)
 
 NEXT_k8s_resource('dm-app-server-rs',
 	# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
 	trigger_mode=TRIGGER_MODE_MANUAL,
 	port_forwards=[
-		'4105:3105' if REMOTE else '3105',
+		'5210:5110' if REMOTE else '5110',
 	],
 	labels=["app"],
 )
@@ -386,21 +406,21 @@ NEXT_k8s_resource('dm-app-server-rs',
 NEXT_k8s_resource('dm-app-server-js',
 	trigger_mode=TRIGGER_MODE_MANUAL,
 	port_forwards=[
-		'4155:3155' if REMOTE else '3155',
-		'4165:3165' if REMOTE else '3165' # for nodejs-inspector
+		'5215:5115' if REMOTE else '5115',
+		'5216:5116' if REMOTE else '5116' # for nodejs-inspector
 	],
 	labels=["app"],
 )
 
-NEXT_k8s_resource('dm-web-server',
-	trigger_mode=TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
-	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
-	#port_forwards='3005:31005')
-	port_forwards='4005:3005' if REMOTE else '3005',
+NEXT_k8s_resource('dm-monitor-backend',
+	trigger_mode=TRIGGER_MODE_MANUAL,
+	port_forwards=[
+		'5230:5130' if REMOTE else '5130',
+	],
 	labels=["app"],
 )
 
-# new relic
+# new relic (commented for now, because of apparent performance impact)
 # ==========
 
 # '''k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml', allow_duplicates=True)

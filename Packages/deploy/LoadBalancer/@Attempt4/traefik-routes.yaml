@@ -12,12 +12,12 @@
 #     kind: Rule
 #     services:
 #     - name: dm-web-server
-#       port: 3005
+#       port: 5100
 #   - match: Host(`app-server.debatemap.app`)
 #     kind: Rule
 #     services:
 #     - name: dm-app-server
-#       port: 3105
+#       port: 5110
 
 # ---
 # apiVersion: traefik.containo.us/v1alpha1
@@ -36,12 +36,12 @@
 #     kind: Rule
 #     services:
 #     - name: dm-web-server
-#       port: 3005
+#       port: 5100
 #   - match: Host(`app-server.debatemap.app`)
 #     kind: Rule
 #     services:
 #     - name: dm-app-server
-#       port: 3105
+#       port: 5110
 
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute

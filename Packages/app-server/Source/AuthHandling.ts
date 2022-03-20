@@ -161,7 +161,7 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 		if (currentUserID) {
 			res.cookie("debate-map-userid", currentUserID, {
 				//maxAge: new Date(2147483647 * 1000).toUTCString(),
-				expires: new Date(253402300000000), // from: https://stackoverflow.com/a/28289961/2441655
+				expires: new Date(253402300000000), // from: https://stackoverflow.com/a/28289961/2452165
 				httpOnly: false, // httpOnly:false, so frontend code can access it
 
 				//domain: ".app.localhost", // see above for reason
@@ -191,7 +191,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		name: "debate-map-session",
 		keys: ["key1", "key2"],
 
-		//domain: ".app.localhost", // explicitly set domain to ".app.localhost", so that it ignores the port segment, letting cookie be seen by both [app.]localhost:3005 and [db.app.]localhost:3105
+		//domain: ".app.localhost", // explicitly set domain to ".app.localhost", so that it ignores the port segment, letting cookie be seen by both [app.]localhost:5100 and [db.app.]localhost:5110
 		//domain: ".localhost",
 		//domain: "localhost",
 

@@ -212,17 +212,18 @@ Object.assign(scripts, {
 });
 
 function GetPortForwardCommandsStr(context) {
-	const fd = context == "ovh" ? "4" : "3"; // first-digit of port-numbers
-	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} ${fd}205:5432`;
+	const d2 = context == "ovh" ? "2" : "1"; // second-digit of port-numbers (signifying cluster)
+	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} 5${d2}20:5432`;
 	if (commandArgs.includes("onlyDB")) return forDB;
 
-	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} ${fd}005:3005`;
-	const forAppServerRS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerRS(context)} ${fd}105:3105`;
-	const forAppServerJS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} ${fd}155:3155`;
-	const forAppServerJS_inspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} ${fd}165:3165`;
+	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:5100`;
+	const forAppServerRS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerRS(context)} 5${d2}10:5110`;
+	const forAppServerJS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} 5${d2}15:5115`;
+	const forAppServerJS_inspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} 5${d2}16:5116`;
+	const forMonitor = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerRS(context)} 5${d2}30:5130`;
 	if (commandArgs.includes("onlyInspector")) return forAppServerJS_inspector;
 
-	return `concurrently --kill-others --names db,ws,asr,asj,asji "${forDB}" "${forWebServer}" "${forAppServerRS}" "${forAppServerJS}" "${forAppServerJS_inspector}"`;
+	return `concurrently --kill-others --names db,ws,asr,asj,asji,mo "${forDB}" "${forWebServer}" "${forAppServerRS}" "${forAppServerJS}" "${forAppServerJS_inspector}" "${forMonitor}"`;
 }
 
 // for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)
@@ -396,8 +397,8 @@ function ImportPGUserSecretAsEnvVars(context) {
 		DB_ADDR: "localhost",
 		//DB_PORT: secret.GetField("port"),
 		DB_PORT:
-			context == "ovh" ? 4205 :
-			context == "local" ? 3205 :
+			context == "ovh" ? 5220 :
+			context == "local" ? 5120 :
 			null,
 		DB_DATABASE: secret.GetField("dbname"),
 		DB_USER: secret.GetField("user"),
@@ -442,13 +443,13 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions) {
 	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
 	const password = execSync(getPasswordCmd).toString().trim();
 	
-	execSync(`$env:PGPASSWORD=${password}; psql -h localhost -p [3205/4205] -U admin -d debate-map`);
-	execSync(`Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("${password}"))@localhost:[3205/4205]/debate-map"`);*/
+	execSync(`$env:PGPASSWORD=${password}; psql -h localhost -p [5120/5220] -U admin -d debate-map`);
+	execSync(`Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("${password}"))@localhost:[5120/5220]/debate-map"`);*/
 
 	//ImportPGUserSecretAsEnvVars(context);
 	const secret = GetK8sPGUserAdminSecretData(context);
 
-	const argsStr = `-h localhost -p ${context == "ovh" ? 4205 : 3205} -U admin -d ${database}`;
+	const argsStr = `-h localhost -p ${context == "ovh" ? 5220 : 5120} -U admin -d ${database}`;
 
 	const env = {
 		//...process.env,

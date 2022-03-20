@@ -6,7 +6,7 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 
-const recognizedWebServerHosts = ["localhost:3005", "localhost:3055", "debatemap.app", "debates.app"];
+const recognizedWebServerHosts = ["localhost:5100", "localhost:5101", "debatemap.app", "debates.app"];
 //const prodDomain = "debatemap.app";
 const prodDomain = "debates.app"; // temp
 
@@ -31,8 +31,8 @@ export function GetWebServerURL(subpath: string, referrerURLStr: string|n, force
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
 		const guessedToBeLocal = forceLocalhost || DEV;
 		if (guessedToBeLocal) {
-			//webServerURL = new URL("http://localhost:3005");
-			webServerURL = new URL("http://localhost:3055");
+			//webServerURL = new URL("http://localhost:5100");
+			webServerURL = new URL("http://localhost:5101");
 		} else {
 			webServerURL = new URL(`https://${prodDomain}`);
 		}
@@ -45,7 +45,7 @@ export function GetWebServerURL(subpath: string, referrerURLStr: string|n, force
 export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 	Assert(subpath.startsWith("/"));
 
-	if (DEV) return `http://localhost:3105/${subpath.slice(1)}`;
+	if (DEV) return `http://localhost:5110/${subpath.slice(1)}`;
 
 	// if this app-server is PROD, it can connect to either the production frontend, or a localhost frontend (if url has "?db=prod")
 	console.log("GetAppServerURL_referrer:", referrerURLStr);
@@ -54,8 +54,8 @@ export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 	if (referrerURL && recognizedWebServerHosts.includes(referrerURL.host)) {
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
 
-		// this branch is only hit if the app-server is PROD, thus if we hit a "localhost:3005" host, it must have the "?db=prod" flag
-		if (referrerURL.host == "localhost:3005" || referrerURL.host == "localhost:3055") {
+		// this branch is only hit if the app-server is PROD, thus if we hit a "localhost:5100" host, it must have the "?db=prod" flag
+		if (referrerURL.host == "localhost:5100" || referrerURL.host == "localhost:5101") {
 			if (subpath == "/auth/google/callback") {
 				subpath = "/auth/google/callback_returnToLocalhost";
 			}
@@ -66,7 +66,7 @@ export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
 }
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");
-const GRAPHQL_URL = "http://localhost:3155/graphql"; // use the internal ip, not the external one
+const GRAPHQL_URL = "http://localhost:5115/graphql"; // use the internal ip, not the external one
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;

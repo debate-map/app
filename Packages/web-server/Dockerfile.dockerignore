@@ -62,9 +62,18 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
+# basic package exclusions (keep same form in all "template.dockerignore" files)
+Packages/app-server
+Packages/app-server-rs
+#Packages/client
+Packages/deploy
+#Packages/js-common
+Packages/monitor-backend
+Packages/monitor-client
+Packages/rust-macros
+#Packages/web-server
+
+# partial package excludes (the web-server needs access to the client's output files)
 Packages/client/*
 !Packages/client/Dist
 !Packages/client/Scripts
-Packages/app-server-rs
-Packages/app-server
-Packages/deploy

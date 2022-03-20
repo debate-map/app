@@ -433,7 +433,7 @@ AddWVCSchemas(AddSchema); // while we don't want to initialize the full web-vcor
 app.get("/", (req, res)=>{
 	res.send(`
 		<p>This is the URL for the database server, which is not meant to be opened directly by your browser.</p>
-		<p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or <a href="http://localhost:3005">localhost:3005</a>/<a href="http://localhost:3055">localhost:3055</a>, if running Debate Map locally)</p>
+		<p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or <a href="http://localhost:5100">localhost:5100</a>/<a href="http://localhost:5101">localhost:5101</a>, if running Debate Map locally)</p>
 	`.AsMultiline(0));
 });
 
@@ -493,7 +493,7 @@ for (let i = 0; i < 20; i++) {
 	console.log("Buffers created:", i + 1, ` @totalSize_mb:~${mbPerStep * (i + 1)}`); // mb size approximate, since a small % of random-strings may be the same, and thus be merged by v8
 }*/
 
-const serverPort = env.PORT || 3155 as number;
+const serverPort = env.PORT || 5115 as number;
 //if (inK8s) {}
 app.listen(serverPort);
 console.log("App-server started on:", serverPort, "@memInfo:", GetMemInfo());

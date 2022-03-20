@@ -153,7 +153,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(|| async { Html(r#"
             <p>This is the URL for the app-server, which is not meant to be opened directly by your browser.</p>
-            <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:3005/localhost:3055, if running Debate Map locally)</p>
+            <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }));
 
     //let (client, connection) = pgclient::create_client(false).await;
@@ -184,7 +184,7 @@ async fn main() {
         }
     });
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3105)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
+    let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     println!("App-server-rs launched.");
     server_fut.await.unwrap();

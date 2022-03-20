@@ -57,18 +57,18 @@ ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
 CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
 
 # mode: profiling
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=1024 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=8192 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=1024 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=8192 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception ./Dist/Main.js
 
 # this reliably causes the app-server to crash within a few seconds! (based on: https://github.com/nodejs/node/issues/38985#issuecomment-858795516)
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 --track-heap-objects ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 --track-heap-objects ./Dist/Main.js
 #CMD node --experimental-specifier-resolution=node --track-heap-objects ./Dist/Main.js
 # note: after deepClone fix, a crash still occurs, but the source must be slightly different (since crash occurs ~20s later, rather than right away)
 
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 --heap-prof --track-heap-objects ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 --heap-prof --track-heap-objects ./Dist/Main.js
 
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=3155 --max-semi-space-size=5000 ./Dist/Main.js; sleep infinity
-#CMD strace node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=3155 ./Dist/Main.js
+#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 --max-semi-space-size=5000 ./Dist/Main.js; sleep infinity
+#CMD strace node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js

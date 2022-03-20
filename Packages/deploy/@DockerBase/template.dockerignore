@@ -3,16 +3,27 @@
 
 NMOverwrites/
 
-# ignore everything other than the package.json files
+# basic package exclusions (keep same form in all "template.dockerignore" files)
+#Packages/app-server
+Packages/app-server-rs
+#Packages/client
+#Packages/deploy
+#Packages/js-common
+Packages/monitor-backend
+#Packages/monitor-client
+Packages/rust-macros
+#Packages/web-server
+
+# partial package excludes (for packages with package.json, keep only that package.json file)
 Packages/client/**
 !Packages/client/package.json
 Packages/js-common/**
 !Packages/js-common/package.json
-Packages/app-server-rs/**
-!Packages/app-server-rs/package.json
-Packages/app-server/**
-!Packages/app-server/package.json
 Packages/web-server/**
 !Packages/web-server/package.json
+Packages/app-server/**
+!Packages/app-server/package.json
+Packages/monitor-client/**
+!Packages/monitor-client/package.json
 Packages/deploy/**
 !Packages/deploy/package.json

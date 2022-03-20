@@ -69,7 +69,7 @@ if (ENV_COMPILE_TIME != "production") {
 declare global { var DB: string; var DB_SHORT: string; }
 
 g.DB = g.ENV;
-if (location.host == "localhost:3005" || location.host == "localhost:3055") {
+if (location.host == "localhost:5100" || location.host == "localhost:5101") {
 	g.DB = "development";
 }
 const dbStr = AsNotNull(startURL.GetQueryVar("db")) || storeTemp.main?.dbOverride;

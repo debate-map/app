@@ -10,7 +10,7 @@ import {graph} from "./MobXGraphlink.js";
 // todo: clean these functions up, and make them consistent with the app-server versions
 export function GetWebServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
-	/*if (location.host == "localhost:3005") return subpath;
+	/*if (location.host == "localhost:5100") return subpath;
 	if (location.host == "localhost:31005") return subpath; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
 	return `https://debatemap.app/${subpath.slice(1)}`;*/
 	return subpath;
@@ -21,7 +21,7 @@ export function GetAppServerURL(subpath: string): string {
 	// temp
 	/*if (location.host == "debates.app" || DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
 
-	if (location.host == "localhost:3005" || location.host == "localhost:3055") return `http://localhost:3105/${subpath.slice(1)}`;
+	if (location.host == "localhost:5100" || location.host == "localhost:5101") return `http://localhost:5110/${subpath.slice(1)}`;
 	//if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
 
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
@@ -29,7 +29,7 @@ export function GetAppServerURL(subpath: string): string {
 
 	return `https://app-server.debatemap.app/${subpath.slice(1)}`;*/
 
-	if (DB == "development") return `http://localhost:3105/${subpath.slice(1)}`;
+	if (DB == "development") return `http://localhost:5110/${subpath.slice(1)}`;
 	if (DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
 	Assert(false, `Invalid database specified:${DB}`);
 }

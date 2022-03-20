@@ -13,7 +13,7 @@ spec:
   #type: NodePort
   ports:
     - name: main
-      port: 3105
+      port: 5110
       protocol: TCP
 ---
 apiVersion: apps/v1
@@ -45,12 +45,11 @@ spec:
         livenessProbe:
           httpGet:
             path: /health-check
-            port: 3105
+            port: 5110
           initialDelaySeconds: 10999999 # mode: profiling
           #initialDelaySeconds: 20 # mode: normal
           periodSeconds: 10
-          #timeoutSeconds: 3
-          timeoutSeconds: 60 # temporarily increasing this to 60s; it seems the health-check responses have become too slow [~25s] sometimes! (not sure how; need to investigate)
+          timeoutSeconds: 3
         env:
         - name: DB_VENDOR
           value: "postgres"

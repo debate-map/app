@@ -27,7 +27,7 @@ use crate::utils::type_aliases::JSONValue;
 
 pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
 
-pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster.local:3155";
+pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster.local:5115";
 
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
     // read request's body (from frontend)
@@ -76,7 +76,7 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
         .path_and_query()
         .map_or(path, |v| v.as_str());
 
-    //let uri = format!("http://127.0.0.1:3155{}", path_query);
+    //let uri = format!("http://127.0.0.1:5115{}", path_query);
     let uri = format!("{}{}", APP_SERVER_JS_URL, path_query);
 
     *req.uri_mut() = Uri::try_from(uri).unwrap();

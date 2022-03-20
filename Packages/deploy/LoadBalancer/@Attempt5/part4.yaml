@@ -30,13 +30,13 @@ spec:
     services:
     - name: dm-web-server
       #namespace: app
-      port: 3005
+      port: 5100
   - match: Host(`dm.venryx.org`) && PathPrefix(`/more1`)
     kind: Rule
     services:
     - name: dm-web-server
       #namespace: app
-      port: 3005
+      port: 5100
   # - match: Host(`dm.venryx.org`) && PathPrefix(`/more2`)
   #   kind: Rule
   #   services:
@@ -49,4 +49,4 @@ spec:
   #   services:
   #   - name: dm-app-server
   #     #namespace: app
-  #     port: 3105
+  #     port: 5110

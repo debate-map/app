@@ -23,19 +23,25 @@ spec:
         paths:
           - backend:
               serviceName: dm-web-server
-              servicePort: 3005
+              servicePort: 5100
     - host: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
         paths:
           - backend:
               serviceName: dm-app-server-rs
-              servicePort: 3105
+              servicePort: 5110
     - host: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
         paths:
           - backend:
               serviceName: dm-app-server-js
-              servicePort: 3155
+              servicePort: 5115
+    - host: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us
+      http:
+        paths:
+          - backend:
+              serviceName: dm-monitor-backend
+              servicePort: 5130
     # these are the domains end-users should be accessing the site from
     - host: debates.app
       http:
@@ -66,22 +72,28 @@ spec:
               serviceName: dm-web-server
               #servicePort: 8765
               #servicePort: 8080
-              servicePort: 3005
+              servicePort: 5100
           # - path: "/app-server/"
           #   pathType: "Prefix"
           #   priority: 2
           #   backend:
           #     serviceName: dm-app-server
-          #     servicePort: 3105
+          #     servicePort: 5110
     - host: app-server.debates.app
       http:
         paths:
           - backend:
               serviceName: dm-app-server-rs
-              servicePort: 3105
+              servicePort: 5110
     - host: app-server-js.debates.app
       http:
         paths:
           - backend:
               serviceName: dm-app-server-js
-              servicePort: 3155
+              servicePort: 5115
+    - host: monitor.debates.app
+      http:
+        paths:
+          - backend:
+              serviceName: dm-monitor-backend
+              servicePort: 5130

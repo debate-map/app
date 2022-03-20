@@ -13,11 +13,11 @@ spec:
   #type: NodePort
   ports:
     - name: main
-      port: 3155
+      port: 5115
       protocol: TCP
     # this port is for the NodeJS inspector
     - name: nodejs-inspector
-      port: 3165
+      port: 5116
       protocol: TCP
 ---
 apiVersion: apps/v1
@@ -45,7 +45,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /health-check
-            port: 3155
+            port: 5115
           #initialDelaySeconds: 10999999 # mode: profiling
           initialDelaySeconds: 20 # mode: normal
           periodSeconds: 10

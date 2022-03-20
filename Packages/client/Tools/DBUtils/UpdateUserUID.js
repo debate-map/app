@@ -1,4 +1,4 @@
-// For usage instructions, see here: https://stackoverflow.com/a/59535579/2441655
+// For usage instructions, see here: https://stackoverflow.com/a/59535579/2452165
 
 let admin = require("firebase-admin");
 

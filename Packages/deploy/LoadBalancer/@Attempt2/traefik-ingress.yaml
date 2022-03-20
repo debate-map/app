@@ -12,7 +12,7 @@ spec:
           - 
             backend: 
               serviceName: dm-web-server
-              servicePort: 3005
+              servicePort: 5100
             path: /
     - 
       host: app-server.debatemap.app
@@ -21,7 +21,7 @@ spec:
           - 
             backend: 
               serviceName: dm-app-server
-              servicePort: 3105
+              servicePort: 5110
             path: /
   tls: 
     - 

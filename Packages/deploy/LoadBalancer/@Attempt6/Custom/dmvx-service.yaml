@@ -9,4 +9,4 @@
 #   ports:
 #   - name: http
 #     port: 8080
-#     targetPort: 3005
+#     targetPort: 5100

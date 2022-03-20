@@ -150,7 +150,7 @@ async function SeedDB(firebase) {
 
 context('MapUI', () => {
 	beforeEach(() => {
-		cy.visit('http://localhost:3005/private/---TestingMap---');
+		cy.visit('http://localhost:5100/private/---TestingMap---');
 		// const mfb = new MockFirebase('', '', '', '');
 		// const firestoreMock = new MockFirestore('', '', '', '');
 
