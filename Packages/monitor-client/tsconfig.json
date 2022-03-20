@@ -1,0 +1,24 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		// general
+		"rootDir": "Source",
+		"baseUrl": "Source", // probably todo: comment this, to require relative imports, to be consistent with the output-as-esm packages
+		"resolveJsonModule": true,
+		"outDir": "Source_JS",
+
+		// compilation
+		"esModuleInterop": true,
+	},
+	"include": [
+		"Typings/**/*.d.ts",
+		"Source/**/*.ts",
+		"Source/**/*.tsx",
+	],
+	"references": [
+		// in-repo packages
+		{"path": "../js-common"},
+		// external packages
+		{"path": "../../node_modules/web-vcore"},
+	]
+}

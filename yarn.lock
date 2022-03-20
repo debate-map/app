@@ -6636,9 +6636,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"dm_common@workspace:*, dm_common@workspace:Packages/common":
+"dm_common@workspace:*, dm_common@workspace:Packages/js-common":
   version: 0.0.0-use.local
-  resolution: "dm_common@workspace:Packages/common"
+  resolution: "dm_common@workspace:Packages/js-common"
   languageName: unknown
   linkType: soft
 

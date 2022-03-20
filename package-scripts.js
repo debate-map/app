@@ -39,7 +39,7 @@ Object.assign(scripts, {
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.build`,
 		},
 		//justDeploy: 'ts-node ./Scripts/Build/Deploy',
-		justDeploy: {
+		/*justDeploy: {
 			dev: "TODO",
 			prod: "TODO",
 		},
@@ -47,15 +47,32 @@ Object.assign(scripts, {
 			dev: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true "npm start client.build && npm start client.just-deploy.dev"`,
 			prod: `cross-env-shell NODE_ENV=production "npm start client.build && npm start client.just-deploy.prod"`,
 			prodQuick: `cross-env-shell NODE_ENV=production QUICK=true "npm start client.build && npm start client.just-deploy.prod"`,
-		},
+		},*/
 
 		//tscWatch: `./node_modules/.bin/tsc-watch.cmd --onSuccess "node ./Scripts/Build/OnSuccess.js"`,
 	},
-	common: {
+	jsCommon: {
 		// helps for spotting typescript errors in the "Packages/js-common" (client.dev script can work too, but it's nice to have one just for errors in "common")
 		// (not really useful anymore; just use app-server.dev instead)
 		//tsc: "cd Packages/js-common && tsc --noEmit",
 		tsc: "tsc --noEmit --project Packages/js-common/tsconfig.json", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
+	},
+});
+Object.assign(scripts, {
+	monitorClient: {
+		tsc: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
+		dev: {
+			default: GetServeCommand("development", "monitor-client"),
+			part2: TSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+		},
+		clean: "cd Packages/monitor-client && shx rm -rf Dist",
+		compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
+		build: {
+			default: `cross-env-shell "npm start monitorClient.clean && npm start client.compile"`,
+			dev: `cross-env NODE_ENV=development npm start monitorClient.build`,
+			prod: `cross-env NODE_ENV=production npm start monitorClient.build`,
+			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start monitorClient.build`,
+		},
 	},
 });
 
@@ -110,8 +127,8 @@ const PrepDockerCmd = ()=>{
 	return `node Scripts/PrepareDocker.js &&`;
 };
 
-function GetServeCommand(nodeEnv = null) {
-	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start client.dev.part2"`;
+function GetServeCommand(nodeEnv = null, pkg = "client") {
+	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start ${pkg}.dev.part2"`;
 }
 
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");

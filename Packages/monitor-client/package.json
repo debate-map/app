@@ -1,0 +1,32 @@
+{
+  "name": "dm_monitor-client",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "cd ../.. && npx nps"
+  },
+  "devDependencies": {
+    "@cypress/webpack-preprocessor": "4.1.0",
+    "@types/history": "4.7.3",
+    "@types/react-list": "0.8.5",
+    "commander": "2.19.0",
+    "cross-env": "6.0.3",
+    "shx": "0.3.2",
+    "ts-node": "^10.0.0",
+    "ts-node-dev": "1.1.6"
+  },
+  "dependencies": {
+    "@fast-csv/parse": "^4.3.6",
+    "dm_common": "workspace:*",
+    "katex": "^0.9.0",
+    "keycode": "^2.1.8",
+    "react": "16.9.0",
+    "react-color": "^2.14.1",
+    "react-katex": "^2.0.2",
+    "react-list": "0.8.11",
+    "stream-browserify": "^3.0.0",
+    "ua-parser-js": "^0.7.12",
+    "updeep": "^1.0.0",
+    "use-resize-observer": "^8.0.0"
+  }
+}

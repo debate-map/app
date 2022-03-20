@@ -1,12 +1,8 @@
-*.log
 **/*.log
-.DS_Store
 **/.DS_Store
 **/*-autosave.kra
 **/*.kra~
-
-node_modules
-coverage
+**/node_modules
 
 /.happypack
 /.firebase
