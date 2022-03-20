@@ -35,13 +35,19 @@ Development of Debate Map is partially supported by [The Society Library](https:
 
 # Packages
 
-* [client](https://github.com/debate-map/app/tree/master/Packages/client): The frontend code that runs in visitors' web browsers. (TypeScript)
+* [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
 * [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (TypeScript, NodeJS)
 * [app-server-rs](https://github.com/debate-map/app/tree/master/Packages/app-server-rs): Serves database queries and backend commands. (Rust)
 * [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Old version of the app-server, based on [Postgraphile](https://github.com/graphile/postgraphile). (TypeScript, NodeJS) [to be removed]
-* [common](https://github.com/debate-map/app/tree/master/Packages/common): Code shared between various JS packages. (TypeScript)
+* [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. (TypeScript)
+* [monitor-backend](https://github.com/debate-map/app/tree/master/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/master/Packages/monitor-backend#design-goals)). (Rust)
+* [js-common](https://github.com/debate-map/app/tree/master/Packages/js-common): Code shared between the various JS packages. (TypeScript)
 * [deploy](https://github.com/debate-map/app/tree/master/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
+* [rust-macros](https://github.com/debate-map/app/tree/master/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in)
+<!--
+// planned packages
 * [graphlink-server](https://github.com/debate-map/app/tree/master/Packages/graphlink-server): Library providing a GraphQL endpoint based on a PostgreSQL database, with support for live-queries. (Rust) [to be split into separate repo]
+-->
 
 # Guide modules
 
@@ -72,7 +78,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 Prerequisite steps: [setup-general](#setup-general)
 
 It's recommended to split your dev setup into two vscode windows:
-* 1\) Window #1 in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/common` is also fine)
+* 1\) Window #1 in the `Packages` folder. Use this window to open files in `Packages/client`. (opening files in `Packages/js-common` is also fine)
 * 2\) Window #2 in the repo root, for everything else. (server development, deployment, etc.)
 
 Reasons:
@@ -381,7 +387,7 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 <!----><a name="pod-quick-edits"></a>
 <details><summary><b>[pod-quick-edits] How to modify code of running pod quickly</b></summary>
 
-* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/common, Packages/web-server (in web-server pod), Packages/app-server (in app-server pod)
+* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/js-common, Packages/web-server (in web-server pod), Packages/app-server (in app-server pod)
 * 2\) If you want to quickly synchronize changes to an arbitrary node-module (or other location), do the following:
 	* 2.1\) Copy the node-module's folder, and paste it into the `Temp_Synced` folder.
 	* 2.2\) Open a shell in the target pod. (see [k8s-ssh](#k8s-ssh))

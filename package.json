@@ -7,7 +7,7 @@
   "main": "./Packages/deploy/Pulumi/index.ts",
   "workspaces": [
     "Packages/client",
-    "Packages/common",
+    "Packages/js-common",
     "Packages/web-server",
     "Packages/app-server",
     "Packages/deploy",

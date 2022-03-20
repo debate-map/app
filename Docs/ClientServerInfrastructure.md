@@ -2,9 +2,9 @@
 
 ## Overview
 
-The [client](https://github.com/debate-map/app/tree/master/Packages/client) and [server](https://github.com/debate-map/app/tree/master/Packages/app-server) are both written in Javascript. They share the same definitions for document types and such, by both importing the [common](https://github.com/debate-map/app/tree/master/Packages/common) package.
+The [client](https://github.com/debate-map/app/tree/master/Packages/client) and [server](https://github.com/debate-map/app/tree/master/Packages/app-server) are both written in Javascript. They share the same definitions for document types and such, by both importing the [common](https://github.com/debate-map/app/tree/master/Packages/js-common) package.
 
-Because of the "common" package, the validation code for [commands](https://github.com/debate-map/app/tree/master/Packages/common/Source/Commands) is usable from both the frontend and backend. This lets the frontend verify inputs from the user without those inputs even needing to be sent to the server (though the server also verifies it once it is submitted, of course).
+Because of the "common" package, the validation code for [commands](https://github.com/debate-map/app/tree/master/Packages/js-common/Source/Commands) is usable from both the frontend and backend. This lets the frontend verify inputs from the user without those inputs even needing to be sent to the server (though the server also verifies it once it is submitted, of course).
 
 ## Type definitions
 

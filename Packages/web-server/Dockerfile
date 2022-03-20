@@ -9,7 +9,7 @@ FROM $SHARED_BASE_URL
 
 # split up the copying into multiple layers, for better caching
 COPY Temp_Synced/ Temp_Synced/
-COPY Packages/common/ Packages/common/
+COPY Packages/js-common/ Packages/js-common/
 COPY Packages/client/Dist/ Packages/client/Dist/
 COPY Packages/client/Scripts/ Packages/client/Scripts/
 COPY Packages/web-server/ Packages/web-server/

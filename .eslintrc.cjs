@@ -11,9 +11,9 @@ module.exports = {
 			{
 				basePath: __dirname,
 				zones: [
-					//{target: paths.join(__dirname, "Packages/common"), from: "web-vcore"},
-					//{target: "./Packages/common", from: "web-vcore"},
-					{target: "./Packages/common", from: "./node_modules/web-vcore/", except: ["./nm"]},
+					//{target: paths.join(__dirname, "Packages/js-common"), from: "web-vcore"},
+					//{target: "./Packages/js-common", from: "web-vcore"},
+					{target: "./Packages/js-common", from: "./node_modules/web-vcore/", except: ["./nm"]},
 				],
 			},
 		],

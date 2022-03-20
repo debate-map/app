@@ -49,7 +49,7 @@ templateBase.dockerignore
 
 Packages/client/Source
 
-Packages/common/Source
+Packages/js-common/Source
 
 Packages/app-server/Source
 

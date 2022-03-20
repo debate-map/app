@@ -52,10 +52,10 @@ Object.assign(scripts, {
 		//tscWatch: `./node_modules/.bin/tsc-watch.cmd --onSuccess "node ./Scripts/Build/OnSuccess.js"`,
 	},
 	common: {
-		// helps for spotting typescript errors in the "Packages/common" (client.dev script can work too, but it's nice to have one just for errors in "common")
+		// helps for spotting typescript errors in the "Packages/js-common" (client.dev script can work too, but it's nice to have one just for errors in "common")
 		// (not really useful anymore; just use app-server.dev instead)
-		//tsc: "cd Packages/common && tsc --noEmit",
-		tsc: "tsc --noEmit --project Packages/common/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
+		//tsc: "cd Packages/js-common && tsc --noEmit",
+		tsc: "tsc --noEmit --project Packages/js-common/tsconfig.json", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 	},
 });
 
@@ -410,7 +410,7 @@ Object.assign(scripts, {
 	"app-server": {
 		// first terminal
 		//dev: "cd Packages/app-server && tsc --build --watch",
-		dev: "tsc --build --watch Packages/app-server/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
+		dev: "tsc --build --watch Packages/app-server/tsconfig.json", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 
 		// second terminal
 		run: GetStartServerCommand(),
@@ -523,7 +523,7 @@ Object.assign(scripts, {
 
 function GetBuildInitDBScriptCommand(watch) {
 	return TSScript({pkg: "app-server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
-		`--classFolders ../../Packages/common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
+		`--classFolders ../../Packages/js-common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
 		`--templateFile ./Scripts/InitDB_Template.ts`,
 		`--outFile ./Scripts/InitDB_Generated.ts`,
 		watch ? "--watch" : "");

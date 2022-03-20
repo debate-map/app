@@ -6,8 +6,8 @@ NMOverwrites/
 # ignore everything other than the package.json files
 Packages/client/**
 !Packages/client/package.json
-Packages/common/**
-!Packages/common/package.json
+Packages/js-common/**
+!Packages/js-common/package.json
 Packages/app-server-rs/**
 !Packages/app-server-rs/package.json
 Packages/app-server/**

@@ -13,7 +13,7 @@ COPY .yarn/ .yarn/
 COPY .yarnrc.yml .
 COPY yarn.lock .
 COPY Packages/client/package.json Packages/client/package.json
-COPY Packages/common/package.json Packages/common/package.json
+COPY Packages/js-common/package.json Packages/js-common/package.json
 COPY Packages/app-server/package.json Packages/app-server/package.json
 COPY Packages/web-server/package.json Packages/web-server/package.json
 COPY Packages/deploy/package.json Packages/deploy/package.json
