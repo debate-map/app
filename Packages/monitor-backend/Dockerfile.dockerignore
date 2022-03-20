@@ -1,0 +1,80 @@
+# =============================================================
+# =============================================================
+# ========== THIS IS A GENERATED FILE; DO NOT MODIFY ==========
+# =============================================================
+# =============================================================
+# (Instead, modify the template.dockerignore files, then run `npm start backend.dockerPrep`; or just run one of the docker-related commands in package-scripts.js.)
+
+# ==================================================================
+# ========== SECTION FROM templateBase.dockerignore BELOW ==========
+# ==================================================================
+
+# anywhere
+# ==========
+
+**/*.md
+**/*.d.ts
+**/Dockerfile
+**/template.dockerignore
+**/.dockerignore
+**/Dockerfile.dockerignore
+**/tsconfig.tsbuildinfo
+# deployment config files are only relevant to Kubernetes (which does not use Docker to retrieve that info)
+**/deployment.yaml
+
+# any node-module overrides (eg. symlinked packages) are now handled at start of final-layer docker-images through "COPY NMOverwrites/ /dm_repo/" command
+node_modules
+Packages/**/node_modules
+
+# root
+# ==========
+
+# most of these are excluded just so that Tilt doesn't update resources based on their being changed
+.git
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+yalc.lock
+Temp
+target
+.gitignore
+.eslintrc.cjs
+package-scripts.js
+README.md
+Tiltfile
+templateBase.dockerignore
+
+# within packages
+# ==========
+
+Packages/client/Source
+
+Packages/js-common/Source
+
+Packages/app-server/Source
+
+Packages/web-server/Source
+
+Packages/deploy/**
+!Packages/deploy/package.json
+
+# ===========================================================================
+# ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
+# ===========================================================================
+
+# we don't care about any of the npm/yarn stuff
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/.yalc
+
+# basic package exclusions (keep same form in all "template.dockerignore" files)
+Packages/app-server
+Packages/app-server-rs
+Packages/client
+Packages/deploy
+Packages/js-common
+#Packages/monitor-backend
+Packages/monitor-client
+Packages/rust-macros
+Packages/web-server

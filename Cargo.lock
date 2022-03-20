@@ -960,6 +960,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "monitor-backend"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-graphql",
+ "async-graphql-axum",
+ "async-recursion",
+ "async-trait",
+ "axum 0.4.4",
+ "bytes",
+ "deadpool",
+ "deadpool-postgres",
+ "flume",
+ "futures",
+ "futures-timer",
+ "futures-util",
+ "hyper",
+ "indexmap",
+ "rust-macros",
+ "serde",
+ "serde_json",
+ "slab",
+ "tokio",
+ "tokio-postgres",
+ "tower",
+ "tower-http",
+ "tower-service",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+]
+
+[[package]]
 name = "multer"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
