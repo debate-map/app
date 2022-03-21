@@ -1,9 +1,9 @@
-# basic package exclusions (keep same form in all "template.dockerignore" files)
-Packages/app-server
+# basic package exclusions (keep same order in all "template.dockerignore" files)
+#Packages/app-server
 Packages/app-server-rs
 Packages/client
 Packages/deploy
-Packages/js-common
+#Packages/js-common
 Packages/monitor-backend
 Packages/monitor-client
 Packages/rust-macros

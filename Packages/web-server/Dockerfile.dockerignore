@@ -62,7 +62,7 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
-# basic package exclusions (keep same form in all "template.dockerignore" files)
+# basic package exclusions (keep same order in all "template.dockerignore" files)
 Packages/app-server
 Packages/app-server-rs
 #Packages/client

@@ -450,7 +450,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;
 		}
-		Log("Loading scroll:", newScroll);
+		console.log("Loading scroll:", newScroll);
 		this.scrollView!.SetScroll(newScroll);
 		// Log("Scrolling to position: " + newScroll);
 
@@ -474,7 +474,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		const scrollNeededToEnactNewViewportRect = newViewportRect.Position.Minus(viewportRect.Position);
 		const newScroll = new Vector2(oldScroll).Plus(scrollNeededToEnactNewViewportRect);
-		Log("Loading scroll:", newScroll, "@TargetRect", targetRect);
+		console.log("Loading scroll:", newScroll, "@TargetRect", targetRect);
 		this.scrollView.SetScroll(newScroll);
 
 		// the loadFocusedNodeTimer keeps running until it scrolls to the stored "focused node"

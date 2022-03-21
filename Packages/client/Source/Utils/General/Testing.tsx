@@ -16,7 +16,7 @@ export function NotifyTestStepDone(testID: string, stepNumber: number, stepInfo:
 	}
 
 	testData[testID].stepInfos[stepNumber] = stepInfo;
-	Log(`Step ${stepNumber} of test ${testID} completed!`);
+	console.log(`Step ${stepNumber} of test ${testID} completed!`);
 }
 
 G({CheckTest}); declare global { function CheckTest(testID: string); }
