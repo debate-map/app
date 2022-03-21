@@ -41,10 +41,21 @@ use std::{
     sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible,
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
+use flume::{Sender, Receiver, unbounded};
 
-/*mod gql;
-mod proxy_to_asjs;
+mod gql;
+/*mod proxy_to_asjs;
 mod pgclient;*/
+mod utils {
+    pub mod type_aliases;
+}
+
+pub mod db {
+    pub mod _general;
+}
+pub mod migrations {
+    pub mod v2;
+}
 
 pub fn get_cors_layer() -> CorsLayer {
     // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
@@ -65,6 +76,10 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
+pub enum GeneralMessage {
+    MigrateLogMessageAdded(String),
+}
+
 #[tokio::main]
 async fn main() {
     panic::set_hook(Box::new(|info| {
@@ -74,11 +89,18 @@ async fn main() {
     }));
 
     let app = Router::new()
-        .layer(get_cors_layer())
         /*.route("/", get(|| async { Html(r#"
             <p>This is the URL for monitor-backend.</p>
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/;
+
+    let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
+
+    let app = gql::extend_router(app, msg_sender, msg_receiver).await;
+
+    // cors layer apparently must be added after the stuff it needs to apply to
+    let app = app
+        .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5130)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());

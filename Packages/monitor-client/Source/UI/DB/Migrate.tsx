@@ -13,9 +13,7 @@ export class LogMessage {
 export const MIGRATE_LOG_ENTRIES_SUBSCRIPTION = gql`
 subscription MigrateMessages {
 	migrateLogEntries {
-		nodes {
-			text
-		}
+		text
 	}
 }
 `;
@@ -33,8 +31,14 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 	render() {
 		let {} = this.props;
 
-		const {data, loading} = useSubscription(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {variables: {}});
-		const logEntries = data?.migrateLogEntries.nodes ?? [] as LogMessage[];
+		const [logEntries, setLogEntries] = useState([] as LogMessage[]);
+		const {data, loading} = useSubscription(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
+			variables: {},
+			onSubscriptionData: info=>{
+				const newEntry = info.subscriptionData.data.migrateLogEntries;
+				setLogEntries(logEntries.concat(newEntry));
+			},
+		});
 
 		const [startMigration, info] = useMutation(START_MIGRATION);
 

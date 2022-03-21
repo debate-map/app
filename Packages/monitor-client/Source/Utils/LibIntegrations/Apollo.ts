@@ -27,9 +27,9 @@ export function InitApollo() {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
 		// allows cookies to be sent with "graphql" calls (eg. for passing passportjs session-token with mutation/command calls)
-		/*fetchOptions: {
+		fetchOptions: {
 			credentials: "include",
-		},*/
+		},
 	});
 
 	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {

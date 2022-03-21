@@ -1,0 +1,133 @@
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::convert::Infallible;
+use std::env;
+use std::future::Future;
+use std::str::FromStr;
+use std::sync::{Arc, Mutex};
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig, graphiql_source};
+use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables};
+use bytes::Bytes;
+use deadpool_postgres::{Pool, Manager};
+use hyper::header::CONTENT_LENGTH;
+use hyper::{Body, service};
+use hyper::client::HttpConnector;
+use rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
+use tokio_postgres::{Client};
+use tower::make::Shared;
+use tower::{Service, ServiceExt, BoxError, service_fn};
+use tower_http::cors::{CorsLayer, Origin};
+use async_graphql::futures_util::task::{Context, Poll};
+use async_graphql::http::{WebSocketProtocols, WsMessage, ALL_WEBSOCKET_PROTOCOLS};
+use axum::http::{Method, HeaderValue};
+use axum::http::header::CONTENT_TYPE;
+use axum::response::{self, IntoResponse};
+use axum::routing::{get, post, MethodFilter, on_service};
+use axum::{extract, AddExtensionLayer, Router};
+use axum::body::{boxed, BoxBody, HttpBody};
+use axum::extract::ws::{CloseFrame, Message};
+use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
+use axum::http::{self, uri::Uri, Request, Response, StatusCode};
+use axum::Error;
+use axum::{
+    extract::Extension,
+};
+use url::Url;
+use std::{convert::TryFrom, net::SocketAddr};
+use futures_util::future::{BoxFuture, Ready};
+use futures_util::stream::{SplitSink, SplitStream};
+use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
+use crate::GeneralMessage;
+use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
+use crate::utils::type_aliases::JSONValue;
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
+use flume::{Sender, Receiver, unbounded};
+
+wrap_slow_macros!{
+
+#[derive(MergedObject, Default)]
+pub struct QueryRoot(
+    QueryShard_General,
+);
+
+#[derive(MergedObject, Default)]
+pub struct MutationRoot(
+    MutationShard_General,
+);
+
+#[derive(MergedSubscription, Default)]
+pub struct SubscriptionRoot(
+    SubscriptionShard_General,
+);
+
+}
+
+pub type RootSchema = wrap_agql_schema_type!{
+    Schema<QueryRoot, MutationRoot, SubscriptionRoot>
+};
+
+async fn graphiql() -> impl IntoResponse {
+    // use the DEV/PROD value from the "ENV" env-var, to determine what the app-server's URL is (maybe temp)
+    let app_server_host = if env::var("ENV").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "app-server.debates.app" };
+    response::Html(graphiql_source("/graphql", Some(&format!("wss://{app_server_host}/graphql"))))
+}
+async fn graphql_playground() -> impl IntoResponse {
+    response::Html(playground_source(
+        GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
+    ))
+}
+
+/*async fn graphql_handler(schema: Extension<RootSchema>, req: GraphQLRequest) -> GraphQLResponse {
+    schema.execute(req.into_inner()).await.into()
+}*/
+
+pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
+    // read request's body (from frontend)
+    let bytes1 = hyper::body::to_bytes(req.into_body()).await.unwrap();
+    let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
+    let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
+
+    // send request to graphql engine
+    //let gql_req = async_graphql::Request::new(req_as_str);
+    let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().unwrap());
+    let gql_req = match req_as_json["operationName"].as_str() {
+        Some(op_name) => gql_req.operation_name(op_name),
+        None => gql_req,
+    };
+    let gql_req = gql_req.variables(Variables::from_json(req_as_json["variables"].clone()));
+
+    // read response from graphql engine
+    let gql_response = schema.execute(gql_req).await;
+    //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
+    let response_str: String = serde_json::to_string(&gql_response).unwrap();
+    
+    response_str
+}
+pub async fn graphql_handler(Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
+    let response_str = have_own_graphql_handle_request(req, schema).await;
+
+    // send response (to frontend)
+    let mut response = Response::builder().body(axum::body::Body::from(response_str)).unwrap();
+    response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
+    return response;
+}
+
+pub async fn extend_router(app: Router, msg_sender: Sender<GeneralMessage>, msg_receiver: Receiver<GeneralMessage>) -> Router {
+    let schema =
+        wrap_agql_schema_build!{
+            Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
+        }
+        .data(msg_sender)
+        .data(msg_receiver)
+        .finish();
+
+    let gql_subscription_service = GraphQLSubscription::new(schema.clone());
+
+    let result = app
+        .route("/graphiql", get(graphiql))
+        .route("/gql-playground", get(graphql_playground))
+        .route("/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
+        .layer(AddExtensionLayer::new(schema));
+
+    result
+}

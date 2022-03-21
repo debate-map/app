@@ -160,6 +160,7 @@ async fn main() {
     let pool = pgclient::create_db_pool();
     let app = gql::extend_router(app, pool, storage_wrapper.clone()).await;
 
+    // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
         .layer(AddExtensionLayer::new(app_state))
         .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
