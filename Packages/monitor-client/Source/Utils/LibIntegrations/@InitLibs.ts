@@ -1,5 +1,6 @@
 import {AddWVCSchemas, ExposeModuleExports} from "web-vcore";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {InitApollo} from "./Apollo.js";
 import {InitReactVComponents} from "./ReactVComponents.js";
 import {InitWVC} from "./WVC.js";
 
@@ -21,6 +22,7 @@ function ExposeModuleExports_Final() {
 
 AddWVCSchemas(AddSchema);
 export function InitLibs() {
+	InitApollo();
 	InitWVC();
 	//InitReactJS();
 	InitReactVComponents();

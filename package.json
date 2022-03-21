@@ -10,6 +10,7 @@
     "Packages/js-common",
     "Packages/web-server",
     "Packages/app-server",
+    "Packages/monitor-client",
     "Packages/deploy",
     ".yalc/*"
   ],

@@ -19,7 +19,7 @@ export class SideBar extends BaseComponent<{}, {}> {
 		};
 
 		return (
-			<Column style={{width: 200}}>
+			<Column mr={10} style={{width: 200}}>
 				<PageButton page="home"/>
 				<PageButton page="db" subpage="migrate" text="DB/Migrate"/>
 			</Column>

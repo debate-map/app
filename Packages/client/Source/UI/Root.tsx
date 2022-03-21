@@ -11,7 +11,7 @@ import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
-import {ColorPickerBox, Column, Text} from "web-vcore/nm/react-vcomponents.js";
+import {ColorPickerBox, Column, Div, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuLayer} from "web-vcore/nm/react-vmenu.js";
 import {MessageBoxLayer} from "web-vcore/nm/react-vmessagebox.js";
@@ -25,6 +25,7 @@ import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
 import {RootStyles} from "./@Root/RootStyles.js";
 import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer.js";
+import {NotificationsUI} from "./@Shared/NavBar/NotificationsUI";
 import {DatabaseUI} from "./Database.js";
 import {UserProfileUI} from "./Database/Users/UserProfile.js";
 import {DebatesUI} from "./Debates.js";
@@ -49,7 +50,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		}
 
 		await trunk.init();
-		Log("Loaded state:", Clone(store));
+		console.log("Loaded state:", Clone(store));
 
 		// start auto-runs, now that store+firelink are created (and store has initialized -- not necessary, but nice)
 		//require("../Utils/AutoRuns");
@@ -59,7 +60,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		}
 		// UpdateURL(false);
 		if (PROD && store.main.analyticsEnabled) {
-			Log("Initialized Google Analytics.");
+			console.log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			//ReactGA.initialize("UA-21256330-33");
 
@@ -89,7 +90,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 
 		return (
 			<DragDropContext_Beautiful onDragEnd={this.OnDragEnd}>
-				<RootUI />
+				<RootUI/>
 			</DragDropContext_Beautiful>
 		);
 	}
@@ -131,11 +132,11 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		}
 
 		// add Quicksand font
-		const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />;
+		const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet"/>;
 		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head
 
 		if (GADDemo) {
-			const linkEl2 = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet" />;
+			const linkEl2 = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet"/>;
 			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head
 
 			//const linkEl2 = <link rel="stylesheet" media="screen" href="//fontlibrary.org/face/bebasneueregular" type="text/css"/>;
@@ -169,13 +170,13 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 				}}/> */}
 				<RootStyles/>
 				<ErrorBoundary>
-					<AddressBarWrapper />
-					<OverlayUI />
+					<AddressBarWrapper/>
+					<OverlayUI/>
 				</ErrorBoundary>
 				{ShowHeader &&
 				<ErrorBoundary>
-					{!GADDemo && <NavBar />}
-					{GADDemo && <NavBar_GAD />}
+					{!GADDemo && <NavBar/>}
+					{GADDemo && <NavBar_GAD/>}
 				</ErrorBoundary>}
 				{/* <InfoButton_TooltipWrapper/> */}
 				<ErrorBoundary
@@ -190,19 +191,19 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "login-succeeded" && <PostLoginAttemptUI success={true}/>}
 						{page == "login-failed" && <PostLoginAttemptUI success={false}/>}
 
-						{page == "database" && <DatabaseUI />}
-						{page == "forum" && <ForumUI />}
-						{page == "feedback" && <FeedbackUI />}
-						{page == "more" && <MoreUI />}
-						{page == "home" && !GADDemo && <HomeUI />}
-						{page == "home" && GADDemo && <HomeUI_GAD />}
-						{page == "social" && <SocialUI />}
-						{page == "debates" && <DebatesUI />}
-						{page == "global" && <GlobalUI />}
+						{page == "database" && <DatabaseUI/>}
+						{page == "forum" && <ForumUI/>}
+						{page == "feedback" && <FeedbackUI/>}
+						{page == "more" && <MoreUI/>}
+						{page == "home" && !GADDemo && <HomeUI/>}
+						{page == "home" && GADDemo && <HomeUI_GAD/>}
+						{page == "social" && <SocialUI/>}
+						{page == "debates" && <DebatesUI/>}
+						{page == "global" && <GlobalUI/>}
 
 						{/*<Route path='/search'><SearchUI/></Route>
 						<Route path='/guide'><GuideUI/></Route>*/}
-						{page == "profile" && <UserProfileUI user={Me()} />}
+						{page == "profile" && <UserProfileUI user={Me()}/>}
 					</main>
 				</ErrorBoundary>
 			</Column>
@@ -214,6 +215,9 @@ class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div className="clickThrough" style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
+				<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
+					<NotificationsUI/>
+				</Div>
 				<NodeDetailBoxesLayer/>
 				<MessageBoxLayer/>
 				<VMenuLayer/>

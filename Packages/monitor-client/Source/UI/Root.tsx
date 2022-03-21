@@ -2,7 +2,9 @@ import React from "react";
 import * as ReactColor from "react-color";
 import ReactDOM from "react-dom";
 import {store} from "Store";
+import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, Observer, RunInAction} from "web-vcore";
+import {ApolloProvider} from "web-vcore/nm/@apollo/client";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {Clone} from "web-vcore/nm/js-vextensions";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync";
@@ -51,7 +53,9 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		if (!storeReady) return null;
 
 		return (
-			<RootUI />
+			<ApolloProvider client={apolloClient}>
+				<RootUI/>
+			</ApolloProvider>
 		);
 	}
 
@@ -86,8 +90,8 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 			<Row className='background'/* 'unselectable' */ style={{height: "100%"}}>
 				<RootStyles/>
 				<ErrorBoundary>
-					<AddressBarWrapper />
-					<OverlayUI />
+					<AddressBarWrapper/>
+					<OverlayUI/>
 				</ErrorBoundary>
 				<ErrorBoundary>
 					<SideBar/>

@@ -15,6 +15,8 @@ export class MainState {
 	@O @ignore urlOtherFlags: URLParam[] = [];
 
 	@O @ignore notificationMessages = [] as NotificationMessage[];
+	@O @ignore webSocketConnected = false;
+	@O @ignore webSocketLastDCTime: number;
 
 	// pages (and nav-bar panels)
 	// ==========
