@@ -58,7 +58,11 @@ export class Term {
 	note?: string;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({$gqlType: "[Attachment!]!", items: {$ref: "Attachment"}})
+	@Field({
+		//$gqlType: "[Attachment!]!",
+		$gqlType: "[AttachmentT0!]", // app-server-js needs this to match the postgraphile-generated graphql type-name atm (postgraphile's functionality has not yet been merged into app-server-rs)
+		items: {$ref: "Attachment"},
+	})
 	attachments: Attachment[] = [];
 }
 
