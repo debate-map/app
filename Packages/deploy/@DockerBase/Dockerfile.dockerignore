@@ -74,7 +74,7 @@ Packages/app-server-rs
 #Packages/deploy
 #Packages/js-common
 Packages/monitor-backend
-Packages/monitor-client
+#Packages/monitor-client
 Packages/rust-macros
 #Packages/web-server
 
@@ -87,5 +87,7 @@ Packages/web-server/**
 !Packages/web-server/package.json
 Packages/app-server/**
 !Packages/app-server/package.json
+Packages/monitor-client/**
+!Packages/monitor-client/package.json
 Packages/deploy/**
 !Packages/deploy/package.json

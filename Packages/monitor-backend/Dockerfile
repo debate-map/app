@@ -48,6 +48,9 @@ WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 
+# when building app-server-rs, we don't care about the other Rust pod codebases; replace their entries in the root Cargo.toml (sed syntax: https://askubuntu.com/a/20416)
+RUN sed -i 's~"Packages/app-server-rs",~~g' Cargo.toml
+
 # just copy the rust-macros crate completely here (it doesn't change very often, so it's fine if it invalidates later steps)
 COPY Packages/rust-macros Packages/rust-macros
 

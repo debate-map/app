@@ -12,10 +12,11 @@ Packages/deploy
 Packages/js-common
 #Packages/monitor-backend
 #Packages/monitor-client
-Packages/rust-macros
+#Packages/rust-macros
 Packages/web-server
 
-# partial package excludes (monitor-backend needs access to the monitor-client's output files)
+# partial package excludes
+# we need access to monitor-client's output files
 Packages/client/*
 !Packages/client/Dist
 #!Packages/client/Scripts

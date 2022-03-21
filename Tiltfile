@@ -307,6 +307,16 @@ USE_RELEASE_FLAG = PROD # comment this for faster release builds (though with le
 imageURL_sharedBase = registryURL + '/dm-shared-base'
 docker_build(imageURL_sharedBase, '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
 
+imageURL_monitorBackend = registryURL + '/dm-monitor-backend-' + os.getenv("ENV")
+docker_build(imageURL_monitorBackend, '.', dockerfile='Packages/monitor-backend/Dockerfile',
+	build_args={
+		"env_ENV": os.getenv("ENV") or "dev",
+		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
+		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+		# docker doesn't seem to support string interpolation in COPY command, so do it here
+		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/monitor-backend",
+	},
+)
 imageURL_webServer = registryURL + '/dm-web-server-' + os.getenv("ENV")
 docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile',
 	build_args={
@@ -355,21 +365,14 @@ docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfi
 		#sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
 		#sync('./Temp_Synced/postgraphile', '/dm_repo/node_modules/postgraphile'),
 	])
-imageURL_monitorBackend = registryURL + '/dm-monitor-backend-' + os.getenv("ENV")
-docker_build(imageURL_monitorBackend, '.', dockerfile='Packages/monitor-backend/Dockerfile',
-	build_args={
-		"env_ENV": os.getenv("ENV") or "dev",
-		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
-		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
-		# docker doesn't seem to support string interpolation in COPY command, so do it here
-		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/monitor-backend",
-	},
-)
 
 # own app (deploy to kubernetes)
 # ==========
 
 k8s_yaml('./namespace.yaml')
+k8s_yaml(ReadFileWithReplacements('./Packages/monitor-backend/deployment.yaml', {
+	"TILT_PLACEHOLDER:imageURL_monitorBackend": imageURL_monitorBackend,
+}))
 k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
 }))
@@ -379,12 +382,17 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server-rs/deployment.yaml', {
 k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_appServerJS": imageURL_appServerJS,
 }))
-k8s_yaml(ReadFileWithReplacements('./Packages/monitor-backend/deployment.yaml', {
-	"TILT_PLACEHOLDER:imageURL_monitorBackend": imageURL_monitorBackend,
-}))
 
 # port forwards (see readme's [project-service-urls] guide-module for details)
 # ==========
+
+NEXT_k8s_resource('dm-monitor-backend',
+	trigger_mode=TRIGGER_MODE_MANUAL,
+	port_forwards=[
+		'5230:5130' if REMOTE else '5130',
+	],
+	labels=["app"],
+)
 
 NEXT_k8s_resource('dm-web-server',
 	trigger_mode=TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
@@ -408,14 +416,6 @@ NEXT_k8s_resource('dm-app-server-js',
 	port_forwards=[
 		'5215:5115' if REMOTE else '5115',
 		'5216:5116' if REMOTE else '5116' # for nodejs-inspector
-	],
-	labels=["app"],
-)
-
-NEXT_k8s_resource('dm-monitor-backend',
-	trigger_mode=TRIGGER_MODE_MANUAL,
-	port_forwards=[
-		'5230:5130' if REMOTE else '5130',
 	],
 	labels=["app"],
 )
