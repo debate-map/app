@@ -213,10 +213,10 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
-			<div style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
-				<NodeDetailBoxesLayer />
-				<MessageBoxLayer />
-				<VMenuLayer />
+			<div className="clickThrough" style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
+				<NodeDetailBoxesLayer/>
+				<MessageBoxLayer/>
+				<VMenuLayer/>
 			</div>
 		);
 	}

@@ -1,0 +1,30 @@
+@import "~web-vcore/Source/Utils/Styles/Entry_Base.scss";
+
+.CodeMirror {
+	color: rgba(255,255,255,.7);
+}
+.CodeMirror-wrap > .CodeMirror-scroll {
+	// fix for odd display glitch, where first post's editor would show horizontal-scrollbar (even though "marginBottom: -30" is supposed to already fix it) 
+	will-change: transform;
+
+	// fix for odd issue, of bottom of codemirror text-area blocking mouse events of part of buttons just beneath it
+	pointer-events: none;
+	.CodeMirror-sizer {
+		pointer-events: auto;
+	}
+}
+
+.ReactModal__Overlay {
+	z-index: 15 !important;
+}
+// header
+.ReactModal__Content > div:first-child {
+	border-radius: 3px 3px 0 0;
+}
+
+// fallback, for if code-based approach fails
+.background {
+	background-color: #E5E8EC;
+	background-position: center bottom;
+	background-size: cover;
+}
