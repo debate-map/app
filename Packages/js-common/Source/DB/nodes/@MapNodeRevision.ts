@@ -185,7 +185,7 @@ export class MapNodeRevision {
 	displayDetails?: NodeRevisionDisplayDetails;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({items: {$ref: "Attachment"}})
+	@Field({$gqlType: "[Attachment!]!", items: {$ref: "Attachment"}})
 	attachments: Attachment[] = [];
 }
 AddSchema("MapNodeRevision_Partial", ["MapNodeRevision"], ()=>{

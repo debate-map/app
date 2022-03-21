@@ -58,7 +58,7 @@ export class Term {
 	note?: string;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({items: {$ref: "Attachment"}})
+	@Field({$gqlType: "[Attachment!]!", items: {$ref: "Attachment"}})
 	attachments: Attachment[] = [];
 }
 
