@@ -68,7 +68,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 				</Row>
 				{subpanel == DetailsPanel_Subpanel.text &&
 					<TextPanel {...sharedProps}/>}
-				{subpanel == DetailsPanel_Subpanel.attachment &&
+				{subpanel == DetailsPanel_Subpanel.attachments &&
 					<AttachmentPanel {...sharedProps}/>}
 				{subpanel == DetailsPanel_Subpanel.permissions &&
 					<PermissionsPanel {...sharedProps}/>}

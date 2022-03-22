@@ -60,7 +60,8 @@ export class Term {
 	@DB((t, n)=>t.jsonb(n))
 	@Field({
 		//$gqlType: "[Attachment!]!",
-		$gqlType: "[AttachmentT0!]", // app-server-js needs this to match the postgraphile-generated graphql type-name atm (postgraphile's functionality has not yet been merged into app-server-rs)
+		//$gqlType: "[AttachmentT0!]", // app-server-js needs this to match the postgraphile-generated graphql type-name atm (postgraphile's functionality has not yet been merged into app-server-rs)
+		$gqlTypeIsScalar: false, // let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
 		items: {$ref: "Attachment"},
 	})
 	attachments: Attachment[] = [];

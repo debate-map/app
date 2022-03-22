@@ -77,7 +77,7 @@ export enum NodeStyleRule_ThenType {
 
 export enum DetailsPanel_Subpanel {
 	text = "text",
-	attachment = "attachment",
+	attachments = "attachments",
 	permissions = "permissions",
 	others = "others",
 }

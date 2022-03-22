@@ -32,7 +32,7 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 							<Button ml={5} text={`#${index + 1} (${attachmentType})`}
 								style={E(
 									{padding: "3px 7px"},
-									newData.length > 1 && {borderRadius: "5px 0 0 5px"},
+									{borderRadius: "5px 0 0 5px"},
 									thisAttachmentSelected && {backgroundColor: "rgba(90, 100, 110, 0.9)"},
 								)}
 								onClick={()=>setSelectedAttachmentIndex(index)}/>
