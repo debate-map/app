@@ -61,7 +61,8 @@ export class Term {
 	@Field({
 		//$gqlType: "[Attachment!]!",
 		//$gqlType: "[AttachmentT0!]", // app-server-js needs this to match the postgraphile-generated graphql type-name atm (postgraphile's functionality has not yet been merged into app-server-rs)
-		$gqlTypeIsScalar: false, // let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
+		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
+		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
 		items: {$ref: "Attachment"},
 	})
 	attachments: Attachment[] = [];

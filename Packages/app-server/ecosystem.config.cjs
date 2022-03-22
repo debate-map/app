@@ -9,6 +9,9 @@ if (inLocalK8s) {
 }
 console.log("Preparing to run app-server. @devMode:", DEV, "@serverHost:", k8sServiceHost, "@inLocalK8s:", inLocalK8s);
 
+// temp; needed because app-server-js queries an alternate graphql API (served by postgraphile), which always uses the "JSON" scalar for complex objects
+process.env.FORCE_ALL_DOC_FIELDS_SCALARS = "1";
+
 const nodeArgs = [
 	`--experimental-specifier-resolution=node`,
 	`--max-old-space-size=15000`,
