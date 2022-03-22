@@ -36,6 +36,11 @@ export class SLSkin extends DMSkin {
 	StyleBlock_Freeform() {
 		return `
 			${DMSkin.prototype.StyleBlock_Freeform.call(this)}
+			/* overrides */
+			.NodeUI_Inner > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
+				color: ${this.NodeTextColor().css()} !important;
+			}
+			/* new */
 			.NodeUI_BottomPanel .uplot {
 				filter: invert(.6);
 			}
