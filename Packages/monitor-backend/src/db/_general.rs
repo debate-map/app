@@ -1,4 +1,4 @@
-use anyhow::{Context, Error};
+use anyhow::{anyhow, Context, Error};
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use flume::{Receiver, Sender};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
@@ -41,10 +41,14 @@ pub struct MutationShard_General;
 impl MutationShard_General {
     async fn startMigration(&self, ctx: &async_graphql::Context<'_>, to_version: usize) -> Result<StartMigration_Result> {
         let msg_sender = ctx.data::<Sender<GeneralMessage>>().unwrap();
-        let migration_id = match to_version {
+        let migration_result = match to_version {
             2 => migrate_db_to_v2(msg_sender.clone()).await,
-            _ => panic!("No migration-code exists for migrating to version {to_version}!"),
+            _ => Err(anyhow!("No migration-code exists for migrating to version {to_version}!")),
         };
+        if let Err(ref err) = migration_result {
+            println!("Got error while running migration:{}", err);
+        }
+        let migration_id = migration_result?;
         
         Ok(StartMigration_Result {
             migrationID: migration_id,

@@ -5,6 +5,7 @@ import {Observer} from "web-vcore";
 import React, {useState} from "react";
 import gql from "graphql-tag";
 import {useMutation, useSubscription} from "web-vcore/nm/@apollo/client.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 
 export class LogMessage {
 	text: string;
@@ -47,9 +48,16 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 				<Row>
 					<Text>Migrate to:</Text>
 					<Button ml={5} text="V2" onClick={async()=>{
-						const {migrationID} = (await startMigration({variables: {
-							toVersion: 2,
-						}})).data;
+						ShowMessageBox({
+							title: "Start migration to V2?",
+							message: "Start migration to version 2?",
+							cancelButton: true,
+							onOK: async()=>{
+								const {migrationID} = (await startMigration({variables: {
+									toVersion: 2,
+								}})).data;
+							},
+						});
 					}}/>
 					<Button ml={5} text="Stop" enabled={false}/>
 				</Row>

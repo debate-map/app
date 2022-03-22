@@ -44,8 +44,8 @@ use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 
 mod gql;
-/*mod proxy_to_asjs;
-mod pgclient;*/
+//mod proxy_to_asjs;
+mod pgclient;
 mod utils {
     pub mod type_aliases;
 }
