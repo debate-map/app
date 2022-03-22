@@ -17,6 +17,7 @@ Packages/web-server
 
 # partial package excludes
 # we need access to monitor-client's output files
-Packages/client/*
-!Packages/client/Dist
-#!Packages/client/Scripts
+Packages/monitor-client/*
+!Packages/monitor-client/Dist
+!Packages/monitor-client/Resources
+#!Packages/monitor-client/Scripts

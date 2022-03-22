@@ -98,7 +98,9 @@ export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment, 
 export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: MediaAttachment}, {}) {
 	render() {
 		const {mediaAttachment} = this.props;
-		const media = GetMedia(mediaAttachment.id)!; // nn: db-ref, bail
+		const media = GetMedia(mediaAttachment.id); // nn: db-ref, bail
+		if (media == null) return null;
+
 		const videoID = ParseYoutubeVideoID(media.url);
 		return (
 			<div style={{position: "relative"}}>

@@ -540,8 +540,9 @@ Note: We use Cloudflare here, but others could be used.
 * 2\) Create a Cloudflare account, and start the add-website process on it. Follow the instructions for basic setup.
 	* 2.1\) On your domain registrar manager/website, make sure that you configure Cloudflare as the DNS Name Servers.
 	* 2.2\) On Cloudflare, make sure that you add an entry for both the web-server and app-server. (both pointing to the OVH kubernetes cluster host-name)
-* 3\) Set up a redirect from `www.YOUR_DOMAIN.YOUR_TLD` to `YOUR_DOMAIN.YOUR_TLD`. (using the Rules section, as [seen here](https://community.cloudflare.com/t/redirecting-www-to-non-www/2949/28))
-* 4\) Enable the "SSL/TLS" -> "Edge Certificates" -> "Always Use HTTPS" option. (seems to not really be necessary, presumably because Traefik doesn't respond for non-https requests so Chrome retries with https automatically, but good practice)
+* 3\) Enable the "SSL/TLS" -> "Edge Certificates" -> "Always Use HTTPS" option. (seems to not really be necessary, presumably because Traefik doesn't respond for non-https requests so Chrome retries with https automatically, but good practice)
+* 4\) Set up a redirect from `www.YOUR_DOMAIN.YOUR_TLD` to `YOUR_DOMAIN.YOUR_TLD`. (using the Rules section, as [seen here](https://community.cloudflare.com/t/redirecting-www-to-non-www/2949/28))
+* 5\) Expose the various debate-map subdomains as part of your Cloudflare proxy's DNS settings, using CNAME entries: app-server, monitor
 
 </details>
 

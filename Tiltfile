@@ -311,8 +311,11 @@ imageURL_monitorBackend = registryURL + '/dm-monitor-backend-' + os.getenv("ENV"
 docker_build(imageURL_monitorBackend, '.', dockerfile='Packages/monitor-backend/Dockerfile',
 	build_args={
 		"env_ENV": os.getenv("ENV") or "dev",
+
 		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
 		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+		# todo: probably just always use dev/debug mode (there are very few users of the monitor tool, so compile speed is more important than execution speed)
+
 		# docker doesn't seem to support string interpolation in COPY command, so do it here
 		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/monitor-backend",
 	},

@@ -26,22 +26,24 @@
 
 use axum::{
     response::{Html},
-    routing::{get, any_service, post},
+    routing::{get, any_service, post, get_service},
     AddExtensionLayer, Router, http::{
         Method,
         header::{CONTENT_TYPE}
     },
-    headers::HeaderName, middleware,
+    headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
-use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}};
-use tower_http::cors::{CorsLayer, Origin, AnyOr};
+use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
+use tower::ServiceExt;
+use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
-    sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible,
+    sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible, str::FromStr,
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
+use tower_http::{services::ServeDir};
 
 mod gql;
 //mod proxy_to_asjs;
@@ -90,9 +92,10 @@ async fn main() {
 
     let app = Router::new()
         /*.route("/", get(|| async { Html(r#"
-            <p>This is the URL for monitor-backend.</p>
+            <p>This is the URL for the monitor-backend.</p>
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
-        "#) }))*/;
+        "#) }))*/
+        .fallback(get(handler));
 
     let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
 
@@ -106,4 +109,57 @@ async fn main() {
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     println!("Monitor-backend launched.");
     server_fut.await.unwrap();
+}
+
+async fn handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
+    // see here for meaning of the parts: https://docs.rs/hyper/latest/hyper/struct.Uri.html
+    /*let axum::http::uri::Parts { scheme, authority, path_and_query, .. } = uri.clone().into_parts();
+    let path = path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string());
+    let query = path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned());*/
+    //println!("BaseURI:{}", uri);
+    let (scheme, authority, path, _query) = {
+        let temp = uri.clone().into_parts();
+        (
+            "https", //temp.scheme.map_or("".to_owned(), |a| a.to_string()),
+            "debatemap.app", //temp.authority.map_or("".to_owned(), |a| a.to_string()),
+            temp.path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string()),
+            temp.path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned()),
+        )
+    };
+    
+    // try resolving path from "/Dist" folder
+    if let Ok(uri_variant) = Uri::from_str(&format!("{scheme}://{authority}/Dist/{path}")) {
+        let res = get_static_file(uri_variant.clone()).await?;
+        if res.status() != StatusCode::NOT_FOUND { return Ok(res); }
+    }
+
+    // try resolving path from "/Resources" folder
+    if let Ok(uri_variant) = Uri::from_str(&format!("{scheme}://{authority}/Resources/{path}")) {
+        let res = get_static_file(uri_variant.clone()).await?;
+        if res.status() != StatusCode::NOT_FOUND { return Ok(res); }
+    }
+
+    // if all else fails, just resolve to "/Dist/index.html"
+    //println!("Test:{}", format!("{scheme}://{authority}/Dist/index.html"));
+    if let Ok(uri_variant) = Uri::from_str(&format!("{scheme}://{authority}/Dist/index.html")) {
+        let res = get_static_file(uri_variant.clone()).await?;
+        //println!("Response for index.html: {:?}", res);
+        if res.status() != StatusCode::NOT_FOUND { return Ok(res); }
+    }
+
+    return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong; failed to resolve URI to a resource.")));
+}
+
+async fn get_static_file(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
+    let req = Request::builder().uri(uri).body(Body::empty()).unwrap();
+    let root_resolve_folder = "../monitor-client";
+
+    // `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
+    match ServeDir::new(root_resolve_folder).oneshot(req).await {
+        Ok(res) => Ok(res.map(boxed)),
+        Err(err) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Something went wrong: {}", err),
+        )),
+    }
 }

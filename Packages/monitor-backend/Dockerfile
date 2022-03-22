@@ -48,7 +48,7 @@ WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 
-# when building app-server-rs, we don't care about the other Rust pod codebases; replace their entries in the root Cargo.toml (sed syntax: https://askubuntu.com/a/20416)
+# when building monitor-backend, we don't care about the other Rust pod codebases; replace their entries in the root Cargo.toml (sed syntax: https://askubuntu.com/a/20416)
 RUN sed -i 's~"Packages/app-server-rs",~~g' Cargo.toml
 
 # just copy the rust-macros crate completely here (it doesn't change very often, so it's fine if it invalidates later steps)
@@ -85,6 +85,9 @@ WORKDIR /dm_repo/Packages/monitor-backend
 
 COPY --from=cargo-build ${copy_from_path} .
 COPY --from=cargo-build /dm_repo/Packages/monitor-backend/kgetOutput_buildTime/ ./kgetOutput_buildTime/
+
+# copy frontend files from monitor-client package (monitor-backend is the web-server for those static files)
+COPY Packages/monitor-client/Dist/ /dm_repo/Packages/monitor-client/Dist/
 
 CMD echo Starting Rust program...; \
 	RUST_BACKTRACE=full ./monitor-backend; \

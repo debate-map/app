@@ -31,7 +31,8 @@ Object.assign(scripts, {
 			run: "cd Packages/client && cypress run",
 		},
 		clean: "cd Packages/client && shx rm -rf Dist",
-		compile: TSScript({pkg: "client"}, "Scripts/Bin/Compile"),
+		//compile: TSScript({pkg: "client"}, "Scripts/Bin/Compile"),
+		compile: "cd Packages/client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
 		build: {
 			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
 			dev: `cross-env NODE_ENV=development npm start client.build`,
@@ -66,9 +67,10 @@ Object.assign(scripts, {
 			part2: TSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
 		},
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
-		compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
+		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
+		compile: "cd Packages/monitor-client && node --experimental-specifier-resolution=node ./Scripts/Bin/Compile.js",
 		build: {
-			default: `cross-env-shell "npm start monitorClient.clean && npm start client.compile"`,
+			default: `cross-env-shell "npm start monitorClient.clean && npm start monitorClient.compile"`,
 			dev: `cross-env NODE_ENV=development npm start monitorClient.build`,
 			prod: `cross-env NODE_ENV=production npm start monitorClient.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start monitorClient.build`,
