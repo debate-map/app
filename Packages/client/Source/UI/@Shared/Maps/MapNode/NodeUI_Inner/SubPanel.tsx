@@ -1,26 +1,51 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed} from "web-vcore";
-import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment} from "dm_common";
+import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed, Chroma} from "web-vcore";
+import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment, GetAttachmentType} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import React, {Fragment, useState} from "react";
+import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
+import {E, ModifyString} from "web-vcore/nm/js-vextensions";
+import {chroma_maxDarken} from "Utils/UI/General.js";
+import {CSS_Button_MatchSelectOption} from "UI/@Root/RootStyles.js";
 import {SourcesUI} from "./SourcesUI.js";
 
 @Observer
 export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
 	render() {
 		const {node, toolbarShowing, ...rest} = this.props;
-		const mainAttachment = GetMainAttachment(node.current);
+		const attachments_all = node.current.attachments;
+		const attachments_showable = attachments_all.filter(a=>a.equation == null);
+		const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
+		const currentAttachment = attachments_showable[selectedAttachmentIndex];
+
 		return (
-			<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${mainAttachment?.references ? 0 : 6}px 5px 5px 5px`,
-				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
-				background: liveSkin.NodeSubPanelBackgroundColor().css(), borderRadius: "0 0 0 5px",
-			}}>
-				{mainAttachment?.references &&
-					<SubPanel_References attachment={mainAttachment?.references} fontSize={GetFontSizeForNode(node)}/>}
-				{mainAttachment?.quote &&
-					<SubPanel_Quote attachment={mainAttachment?.quote} fontSize={GetFontSizeForNode(node)}/>}
-				{mainAttachment?.media &&
-					<SubPanel_Media mediaAttachment={mainAttachment?.media}/>}
-			</div>
+			<>
+				{attachments_showable.length > 1 &&
+				<Row mb={5} p="0 5px" style={{position: "relative", flexWrap: "wrap", gap: 5}}>
+					{/*<Text>Attachments:</Text>*/}
+					{attachments_showable.map((attachment, index)=>{
+						const attachmentType = GetAttachmentType(attachment);
+						const thisAttachmentSelected = selectedAttachmentIndex == index;
+						return <Button key={index} text={`${index + 1}: ${ModifyString(attachmentType, m=>[m.startLower_to_upper])}`}
+							style={E(
+								{padding: "3px 7px"},
+								CSS_Button_MatchSelectOption(thisAttachmentSelected),
+							)}
+							onClick={()=>setSelectedAttachmentIndex(index)}/>;
+					})}
+				</Row>}
+				<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,
+					// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
+					background: liveSkin.NodeSubPanelBackgroundColor().css(), borderRadius: "0 0 0 5px",
+				}}>
+					{currentAttachment?.references &&
+						<SubPanel_References attachment={currentAttachment?.references} fontSize={GetFontSizeForNode(node)}/>}
+					{currentAttachment?.quote &&
+						<SubPanel_Quote attachment={currentAttachment?.quote} fontSize={GetFontSizeForNode(node)}/>}
+					{currentAttachment?.media &&
+						<SubPanel_Media mediaAttachment={currentAttachment?.media}/>}
+				</div>
+			</>
 		);
 	}
 }

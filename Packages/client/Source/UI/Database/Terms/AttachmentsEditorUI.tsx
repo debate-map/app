@@ -1,14 +1,16 @@
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/react-vcomponents.js";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Button, Column, Row, TextInput, Select, Text, Pre, Button_styles} from "web-vcore/nm/react-vcomponents.js";
+import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import React, {Fragment, useState} from "react";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern, Attachment, AttachmentType, MediaAttachment, GetAttachmentType, AttachmentTarget} from "dm_common";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {ES, Observer, VDateTime} from "web-vcore";
+import {Chroma, ES, Observer, VDateTime} from "web-vcore";
 import Moment from "web-vcore/nm/moment";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
+import {chroma_maxDarken} from "Utils/UI/General";
+import {CSS_Button_MatchSelectOption} from "UI/@Root/RootStyles";
 
 @Observer
 export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], AttachmentsEditorUI, {target: AttachmentTarget, allowedAttachmentTypes: AttachmentType[]}> {
@@ -22,24 +24,25 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 		const selectedAttachment = newData[selectedAttachmentIndex] as Attachment|n;
 		return (
 			<Column style={ES({flex: 1})}>
-				<Row mb={5}>
+				<Row mb={5} style={{flexWrap: "wrap", gap: 5}}>
 					<Text>Attachments:</Text>
 					{/*<Select ml={5} displayType="button bar" options={Range(0, newData.length - 1).map(index=>`#${index + 1}`)} value={selectedSourceChainIndex} onChange={val=>this.SetState({selectedSourceChainIndex: val})}/>*/}
 					{newData.map((attachment, index)=>{
 						const attachmentType = GetAttachmentType(attachment);
 						const thisAttachmentSelected = selectedAttachmentIndex == index;
-						return <Fragment key={index}>
-							<Button ml={5} text={`#${index + 1} (${attachmentType})`}
+						return <Row key={index}>
+							<Button text={`${index + 1}: ${ModifyString(attachmentType, m=>[m.startLower_to_upper])}`}
 								style={E(
 									{padding: "3px 7px"},
 									{borderRadius: "5px 0 0 5px"},
-									thisAttachmentSelected && {backgroundColor: "rgba(90, 100, 110, 0.9)"},
+									//thisAttachmentSelected && {backgroundColor: Button_background_dark},
+									CSS_Button_MatchSelectOption(thisAttachmentSelected),
 								)}
 								onClick={()=>setSelectedAttachmentIndex(index)}/>
 							<Button text="X"
 								style={E(
 									{padding: "3px 5px", borderRadius: "0 5px 5px 0"},
-									thisAttachmentSelected && {backgroundColor: "rgba(90, 100, 110, 0.9)"},
+									CSS_Button_MatchSelectOption(thisAttachmentSelected),
 								)}
 								onClick={()=>{
 									ShowMessageBox({
@@ -57,9 +60,9 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 										},
 									});
 								}}/>
-						</Fragment>;
+						</Row>;
 					})}
-					{enabled && <Button ml={5} text="+" onClick={()=>{
+					{enabled && <Button text="+" onClick={()=>{
 						const attachment = new Attachment({
 							media: new MediaAttachment(),
 						});
