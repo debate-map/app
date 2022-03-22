@@ -6,7 +6,7 @@ import React, {Fragment, useState} from "react";
 import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
 import {E, ModifyString} from "web-vcore/nm/js-vextensions";
 import {chroma_maxDarken} from "Utils/UI/General.js";
-import {CSS_Button_MatchSelectOption} from "UI/@Root/RootStyles.js";
+import {ButtonChain} from "Utils/ReactComponents/ButtonChain.js";
 import {SourcesUI} from "./SourcesUI.js";
 
 @Observer
@@ -26,12 +26,16 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: bo
 					{attachments_showable.map((attachment, index)=>{
 						const attachmentType = GetAttachmentType(attachment);
 						const thisAttachmentSelected = selectedAttachmentIndex == index;
-						return <Button key={index} text={`${index + 1}: ${ModifyString(attachmentType, m=>[m.startLower_to_upper])}`}
-							style={E(
-								{padding: "3px 7px"},
-								CSS_Button_MatchSelectOption(thisAttachmentSelected),
-							)}
-							onClick={()=>setSelectedAttachmentIndex(index)}/>;
+						return (
+							<ButtonChain key={index} selected={thisAttachmentSelected}>
+								<Button text={`${index + 1}: ${ModifyString(attachmentType, m=>[m.startLower_to_upper])}`}
+									style={E(
+										{padding: "3px 7px"},
+										//ButtonChain_Button_CSSOverrides(thisAttachmentSelected),
+									)}
+									onClick={()=>setSelectedAttachmentIndex(index)}/>
+							</ButtonChain>
+						);
 					})}
 				</Row>}
 				<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,

@@ -41,15 +41,16 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 					<Text>Source chains:</Text>
 					{/*<Select ml={5} displayType="button bar" options={Range(0, newData.length - 1).map(index=>`#${index + 1}`)} value={selectedSourceChainIndex} onChange={val=>this.SetState({selectedSourceChainIndex: val})}/>*/}
 					{Range(0, newData.length - 1).map(chainIndex=>{
+						const showDelete = newData.length > 1 && enabled;
 						return <Fragment key={chainIndex}>
 							<Button ml={5} text={`#${chainIndex + 1}`}
 								style={E(
 									{padding: "3px 7px"},
-									newData.length > 1 && {borderRadius: "5px 0 0 5px"},
+									showDelete && {borderRadius: "5px 0 0 5px"},
 									selectedChainIndex == chainIndex && {backgroundColor: "rgba(90, 100, 110, 0.9)"},
 								)}
 								onClick={()=>this.SetState({selectedChainIndex: chainIndex})}/>
-							{newData.length > 1 &&
+							{showDelete &&
 							<Button text="X"
 								style={E(
 									{padding: "3px 5px", borderRadius: "0 5px 5px 0"},
@@ -123,8 +124,10 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 		const timeMinUI = ()=>{
 			return <>
 				<Pre>Time (min): </Pre>
-				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_min ? Moment(source.time_min) : null} max={source.time_max ? Moment(source.time_max) : null}
-					inputProps={{style: {width: 120}}}
+				<VDateTime enabled={enabled}
+					dateFormat="YYYY-MM-DD" timeFormat="HH:mm" inputProps={{style: {width: 120}}}
+					max={source.time_max ? Moment(source.time_max) : null}
+					value={source.time_min ? Moment(source.time_min) : null}
 					onChange={val=>{
 						Change(source.VSet("time_min", val ? Moment(val).valueOf() : DEL));
 					}}/>
@@ -133,8 +136,10 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 		const timeMaxUI = ()=>{
 			return <>
 				<Pre>Time (max): </Pre>
-				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_max ? Moment(source.time_max) : null} min={source.time_min ? Moment(source.time_min) : null}
-					inputProps={{style: {width: 120}}}
+				<VDateTime enabled={enabled}
+					dateFormat="YYYY-MM-DD" timeFormat="HH:mm" inputProps={{style: {width: 120}}}
+					min={source.time_min ? Moment(source.time_min) : null}
+					value={source.time_max ? Moment(source.time_max) : null}
 					onChange={val=>{
 						Change(source.VSet("time_max", val ? Moment(val).valueOf() : DEL));
 					}}/>

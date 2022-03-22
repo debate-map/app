@@ -10,7 +10,7 @@ import Moment from "web-vcore/nm/moment";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
 import {chroma_maxDarken} from "Utils/UI/General";
-import {CSS_Button_MatchSelectOption} from "UI/@Root/RootStyles";
+import {ButtonChain} from "Utils/ReactComponents/ButtonChain";
 
 @Observer
 export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], AttachmentsEditorUI, {target: AttachmentTarget, allowedAttachmentTypes: AttachmentType[]}> {
@@ -30,19 +30,21 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 					{newData.map((attachment, index)=>{
 						const attachmentType = GetAttachmentType(attachment);
 						const thisAttachmentSelected = selectedAttachmentIndex == index;
-						return <Row key={index}>
+						const showDelete = enabled;
+						return <ButtonChain key={index} selected={thisAttachmentSelected}>
 							<Button text={`${index + 1}: ${ModifyString(attachmentType, m=>[m.startLower_to_upper])}`}
 								style={E(
 									{padding: "3px 7px"},
-									{borderRadius: "5px 0 0 5px"},
+									showDelete && {borderRadius: "5px 0 0 5px"},
 									//thisAttachmentSelected && {backgroundColor: Button_background_dark},
-									CSS_Button_MatchSelectOption(thisAttachmentSelected),
+									//ButtonChain_Button_CSSOverrides(thisAttachmentSelected),
 								)}
 								onClick={()=>setSelectedAttachmentIndex(index)}/>
+							{showDelete &&
 							<Button text="X"
 								style={E(
 									{padding: "3px 5px", borderRadius: "0 5px 5px 0"},
-									CSS_Button_MatchSelectOption(thisAttachmentSelected),
+									//ButtonChain_Button_CSSOverrides(thisAttachmentSelected),
 								)}
 								onClick={()=>{
 									ShowMessageBox({
@@ -59,8 +61,8 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 											}
 										},
 									});
-								}}/>
-						</Row>;
+								}}/>}
+						</ButtonChain>;
 					})}
 					{enabled && <Button text="+" onClick={()=>{
 						const attachment = new Attachment({
