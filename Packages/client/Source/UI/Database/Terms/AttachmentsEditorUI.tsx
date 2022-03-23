@@ -1,16 +1,12 @@
-import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {Button, Column, Row, TextInput, Select, Text, Pre, Button_styles} from "web-vcore/nm/react-vcomponents.js";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import React, {Fragment, useState} from "react";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern, Attachment, AttachmentType, MediaAttachment, GetAttachmentType, AttachmentTarget} from "dm_common";
-import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {Chroma, ES, Observer, VDateTime} from "web-vcore";
-import Moment from "web-vcore/nm/moment";
-import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
+import {Attachment, AttachmentTarget, AttachmentType, GetAttachmentType, MediaAttachment} from "dm_common";
+import React, {useState} from "react";
 import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
-import {chroma_maxDarken} from "Utils/UI/General";
+import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {ButtonChain} from "Utils/ReactComponents/ButtonChain";
+import {ES, Observer} from "web-vcore";
+import {E, ModifyString} from "web-vcore/nm/js-vextensions.js";
+import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 @Observer
 export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], AttachmentsEditorUI, {target: AttachmentTarget, allowedAttachmentTypes: AttachmentType[]}> {
@@ -18,10 +14,21 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 		const {phase, target, allowedAttachmentTypes} = this.props;
 		const {newData} = this.state;
 		const {enabled, Change} = this.helpers;
-
 		const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
-
 		const selectedAttachment = newData[selectedAttachmentIndex] as Attachment|n;
+
+		// don't allow more than one equation/references attachment per node (it is pointless/redundant, so just confuses people and processors if there are multiple)
+		let allowedAttachmentTypes_forSelected = allowedAttachmentTypes;
+		if (selectedAttachment) {
+			const otherAttachments = newData.Exclude(selectedAttachment);
+			if (otherAttachments.Any(a=>a.equation != null) && selectedAttachment.equation == null) {
+				allowedAttachmentTypes_forSelected = allowedAttachmentTypes_forSelected.filter(a=>a != AttachmentType.equation);
+			}
+			if (otherAttachments.Any(a=>a.references != null) && selectedAttachment.references == null) {
+				allowedAttachmentTypes_forSelected = allowedAttachmentTypes_forSelected.filter(a=>a != AttachmentType.references);
+			}
+		}
+
 		return (
 			<Column style={ES({flex: 1})}>
 				<Row mb={5} style={{flexWrap: "wrap", gap: 5}}>
@@ -74,7 +81,7 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 				</Row>
 				{selectedAttachment &&
 					<AttachmentEditorUI phase={phase} baseData={selectedAttachment} onChange={val=>Change(newData[selectedAttachmentIndex] = val)}
-					target={target} allowedAttachmentTypes={allowedAttachmentTypes}/>}
+						target={target} allowedAttachmentTypes={allowedAttachmentTypes_forSelected}/>}
 			</Column>
 		);
 	}
