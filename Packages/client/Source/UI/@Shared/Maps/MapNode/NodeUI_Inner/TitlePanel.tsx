@@ -10,7 +10,7 @@ import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, 
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {NodeMathUI} from "../NodeMathUI.js";
@@ -107,7 +107,13 @@ export class TitlePanel extends BaseComponentPlus(
 		const latex = mainAttachment?.equation?.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
-		const displayText = GetNodeDisplayText(node, path);
+		let displayText = GetNodeDisplayText(node, path);
+		// in SL+NoHeader mode, hide the bracket-text at the start of the node's text, as that's just a helper flag for the special frontend (temp)
+		if (GADDemo && !ShowHeader) {
+			// three parts: optional non-bracket chars at start, bracket-text, optional space(s) after bracket-text
+			// this regex strips out parts 2 and 3, but leaves in part 1
+			displayText = displayText.replace(/^([^[]*)\[.+?\]\s*/, "$1");
+		}
 
 		const equationNumber = mainAttachment?.equation ? GetEquationStepNumber(path) : null;
 		const noteText = (mainAttachment?.equation && mainAttachment?.equation.explanation) || node.current.note;

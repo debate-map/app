@@ -17,6 +17,7 @@ use crate::db::medias::Media;
 use crate::db::node_child_links::NodeChildLink;
 use crate::db::node_phrasings::MapNodePhrasing;
 use crate::db::node_revisions::MapNodeRevision;
+use crate::db::node_tags::MapNodeTag;
 use crate::db::nodes::MapNode;
 use crate::db::terms::Term;
 use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
@@ -39,6 +40,7 @@ pub struct Subtree {
     pub nodeChildLinks: Vec<NodeChildLink>,
     pub nodeRevisions: Vec<MapNodeRevision>,
     pub nodePhrasings: Vec<MapNodePhrasing>,
+    pub nodeTags: Vec<MapNodeTag>,
 }
 
 #[derive(Default)]

@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::Row;
-use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing}, utils::{filter::Filter, general::{get_entries_in_collection, json_maps_to_typed_entries, get_entries_in_collection_basic}, type_aliases::JSONValue}};
+use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{filter::Filter, general::{get_entries_in_collection, json_maps_to_typed_entries, get_entries_in_collection_basic}, type_aliases::JSONValue}};
 use super::subtree::Subtree;
 
 pub struct AccessorContext<'a> {
@@ -34,6 +34,7 @@ pub struct SubtreeCollector {
     pub node_child_links: IndexMap<String, NodeChildLink>,
     pub node_revisions: IndexMap<String, MapNodeRevision>,
     pub node_phrasings: IndexMap<String, MapNodePhrasing>,
+    pub node_tags: IndexMap<String, MapNodeTag>,
 }
 impl SubtreeCollector {
     pub fn to_subtree(self: &Self) -> Subtree {
@@ -44,6 +45,7 @@ impl SubtreeCollector {
             nodeChildLinks: self.node_child_links.clone().into_values().collect(),
             nodeRevisions: self.node_revisions.clone().into_values().collect(),
             nodePhrasings: self.node_phrasings.clone().into_values().collect(),
+            nodeTags: self.node_tags.clone().into_values().collect(),
         }
     }
 }
@@ -80,6 +82,7 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
         }
         temp
     };
+    let tags = get_tags_for(ctx, &node_id).await?;
 
     // store data
     {
@@ -115,6 +118,12 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
             //if !collector.terms.contains_key(media_attachment["id"].as_str().unwrap()) {
             if !collector.medias.contains_key(&media.id.0) {
                 collector.medias.insert(media.id.to_string(), media);
+            }
+        }
+
+        for tag in tags {
+            if !collector.node_tags.contains_key(&tag.id.0) {
+                collector.node_tags.insert(tag.id.to_string(), tag);
             }
         }
     }
@@ -212,5 +221,10 @@ pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error
 pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<MapNodeRevision, Error> {
     get_db_entry(ctx, "nodeRevisions", &Some(json!({
         "id": {"equalTo": id}
+    }))).await
+}
+pub async fn get_tags_for(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<MapNodeTag>, Error> {
+    get_db_entries(ctx, "nodeTags", &Some(json!({
+        "nodes": {"contains": node_id}
     }))).await
 }
