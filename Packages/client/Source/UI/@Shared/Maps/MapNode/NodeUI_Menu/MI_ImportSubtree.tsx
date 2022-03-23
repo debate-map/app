@@ -8,7 +8,7 @@ import {FS_MapNodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode
 import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {ES, InfoButton, O, Observer, RunInAction_Set} from "web-vcore";
+import {AddNotificationMessage, ES, InfoButton, O, Observer, RunInAction_Set} from "web-vcore";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {E, FromJSON, GetEntries, ModifyString, Timer} from "web-vcore/nm/js-vextensions.js";
 import {makeObservable} from "web-vcore/nm/mobx";
@@ -23,7 +23,6 @@ import ReactList from "react-list";
 import {GetOpenMapID} from "Store/main.js";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
-import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 

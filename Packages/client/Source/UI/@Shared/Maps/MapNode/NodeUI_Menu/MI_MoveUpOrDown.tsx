@@ -1,30 +1,11 @@
-import {AddChildNode, ChildGroup, ChildOrdering, CullMapNodePhrasingToBeEmbedded, GetChildOrdering_Final, GetMap, GetNode, GetNodeChildLinks, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, GetNodeL3, GetParentNode, GetParentNodeID, GetParentNodeL2, GetParentPath, HasAdminPermissions, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrAdmin, IsUserCreatorOrMod, LexoRank, MapNode, MapNodeL3, MapNodePhrasing, MapNodeRevision, MapNodeType, MeID, NodeChildLink, Polarity, SourceType, systemUserID, UpdateLink} from "dm_common";
-import React, {ComponentProps} from "react";
+import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeChildLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, LexoRank, MeID, Polarity, UpdateLink} from "dm_common";
+import React from "react";
 import {store} from "Store";
-import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
-import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
-import {DataExchangeFormat, ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
-import {FS_MapNodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode.js";
-import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
-import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
+import {ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {ES, InfoButton, O, Observer, RunInAction_Set} from "web-vcore";
-import {gql} from "web-vcore/nm/@apollo/client";
-import {E, FromJSON, GetEntries, ModifyString, Timer} from "web-vcore/nm/js-vextensions.js";
-import {makeObservable} from "web-vcore/nm/mobx";
-import {ignore} from "web-vcore/nm/mobx-sync";
-import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Observer} from "web-vcore";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {parseString, RowMap} from "@fast-csv/parse";
-import ReactList from "react-list";
-import {GetOpenMapID} from "Store/main.js";
-import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
-import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
-import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
-import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer

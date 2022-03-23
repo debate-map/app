@@ -4,7 +4,6 @@ import {O} from "web-vcore";
 import {makeObservable} from "web-vcore/nm/mobx";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
-import {NotificationMessage} from "./main/@NotificationMessage.js";
 import {DatabaseState} from "./main/database.js";
 import {DebatesPageState} from "./main/debates.js";
 import {MapsState} from "./main/maps.js";
@@ -32,10 +31,6 @@ export class MainState {
 	@O analyticsEnabled = true;
 	// topLeftOpenPanel: string;
 	// topRightOpenPanel: string;
-	@O @ignore notificationMessages = [] as NotificationMessage[];
-	@O @ignore webSocketConnected = false;
-	//@O @ignore webSocketError = false;
-	@O @ignore webSocketLastDCTime: number;
 	@O @ignore shareBeingLoaded: string|n;
 
 	/*@O @ignore userID_apollo: string|n; // maybe rework

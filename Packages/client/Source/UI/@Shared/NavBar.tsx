@@ -2,7 +2,7 @@ import React, {useCallback} from "react";
 import {RootState, store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {Link, NavBarPanelButton, Observer} from "web-vcore";
+import {Link, NavBarPanelButton, NotificationsUI, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
@@ -12,7 +12,6 @@ import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {Me} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GuidePanel} from "./NavBar/GuidePanel.js";
-import {NotificationsUI} from "./NavBar/NotificationsUI.js";
 import {ReputationPanel} from "./NavBar/ReputationPanel.js";
 import {SearchPanel} from "./NavBar/SearchPanel.js";
 import {StreamPanel} from "./NavBar/StreamPanel.js";
@@ -66,9 +65,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
-					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
-						<NotificationsUI/>
-					</Div>
+					<NotificationsUI placement="topLeft" navBarHeight={45}/>
 
 					<span style={{margin: "0 auto", paddingRight: 20}}>
 						<NavBarPageButton page="database" text="Database"/>

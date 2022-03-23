@@ -3,7 +3,7 @@ import * as ReactColor from "react-color";
 import ReactDOM from "react-dom";
 import {store} from "Store";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
-import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, Observer, RunInAction} from "web-vcore";
+import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, NotificationsUI, Observer, RunInAction} from "web-vcore";
 import {ApolloProvider} from "web-vcore/nm/@apollo/client";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {Clone} from "web-vcore/nm/js-vextensions";
@@ -99,7 +99,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 				<ErrorBoundary
 					key={page} // use key, so that error-message clears when user changes pages
 				>
-					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
+					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", /*justifyContent: "center",*/ alignItems: "flex-start"}}>
 						{page == "home" && <HomeUI/>}
 						{page == "db" && <DBUI/>}
 					</main>
@@ -129,6 +129,7 @@ class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div className="clickThrough" style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
+				<NotificationsUI placement="topRight" navBarHeight={0}/>
 				<MessageBoxLayer/>
 				<VMenuLayer/>
 			</div>

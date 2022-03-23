@@ -4,7 +4,6 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
-import {Skin} from "../Skin.js";
 import {DMSkin} from "./DMSkin.js";
 
 export function GetCinzelStyleForBold() {
@@ -36,6 +35,7 @@ export class SLSkin extends DMSkin {
 	StyleBlock_Freeform() {
 		return `
 			${DMSkin.prototype.StyleBlock_Freeform.call(this)}
+			
 			/* overrides */
 			.NodeUI_Inner > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
 				color: ${this.NodeTextColor().css()} !important;

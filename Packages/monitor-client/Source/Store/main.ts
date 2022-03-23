@@ -1,10 +1,8 @@
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {O} from "web-vcore";
 import {makeObservable} from "web-vcore/nm/mobx";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {store} from "./index.js";
-import {NotificationMessage} from "./main/@NotificationMessage.js";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
@@ -14,9 +12,7 @@ export class MainState {
 	@O urlExtraStr: string|n;
 	@O @ignore urlOtherFlags: URLParam[] = [];
 
-	@O @ignore notificationMessages = [] as NotificationMessage[];
-	@O @ignore webSocketConnected = false;
-	@O @ignore webSocketLastDCTime: number;
+	@O adminKey = "";
 
 	// pages (and nav-bar panels)
 	// ==========

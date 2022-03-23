@@ -20,8 +20,8 @@ subscription MigrateMessages {
 `;
 
 const START_MIGRATION = gql`
-mutation($toVersion: Int!) {
-	startMigration(toVersion: $toVersion) {
+mutation($adminKey: String!, $toVersion: Int!) {
+	startMigration(adminKey: $adminKey, toVersion: $toVersion) {
 		migrationID
 	}
 }
@@ -43,6 +43,7 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 
 		const [startMigration, info] = useMutation(START_MIGRATION);
 
+		const adminKey = store.main.adminKey;
 		return (
 			<Column style={{flex: 1}}>
 				<Row>
@@ -53,9 +54,9 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 							message: "Start migration to version 2?",
 							cancelButton: true,
 							onOK: async()=>{
-								const {migrationID} = (await startMigration({variables: {
-									toVersion: 2,
-								}})).data;
+								const {migrationID} = (await startMigration({
+									variables: {toVersion: 2, adminKey},
+								})).data;
 							},
 						});
 					}}/>

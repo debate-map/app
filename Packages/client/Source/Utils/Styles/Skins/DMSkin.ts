@@ -1,11 +1,12 @@
 import {chroma_maxDarken} from "Utils/UI/General.js";
-import {Chroma, PageContainer, SubNavBar} from "web-vcore";
+import {Chroma, DefaultSkin, PageContainer, Skin, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {ProposalsColumn, ProposalEntryUI, ProposalsUserRankingColumn, ProposalUI_Inner, ProposalUI, ProposalsUI} from "web-vcore/nm/graphql-feedback.js";
 import {Button} from "web-vcore/nm/react-vcomponents";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
-import {Skin} from "../Skin.js";
-import {SLSkin} from "./SLSkin.js";
+
+// add as global, so one can easily test out new colors using the browser dev-tools
+globalThis.chroma = chroma;
 
 export class DMSkin extends Skin {
 	static main = new DMSkin();
@@ -23,13 +24,15 @@ export class DMSkin extends Skin {
 	HeaderFont = ()=>this.MainFont();
 	MainFont = ()=>"'Quicksand', sans-serif";
 	TextColor = ()=>Chroma("rgb(50,50,50)");
-	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
-	NodeTextColor = ()=>Chroma("rgba(255,255,255,.7)");
-	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
 	NavBarBoxShadow = ()=>"rgba(100,100,100,.3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
 	HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();
 	ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
 	ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.15 * chroma_maxDarken).alpha(1);
+
+	// dm-specific
+	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
+	NodeTextColor = ()=>Chroma("rgba(255,255,255,.7)");
+	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
 
 	// styles
 	// ==========
@@ -45,7 +48,10 @@ export class DMSkin extends Skin {
 
 	// we implement these as regular prototype-bound methods, so that child-classes can rebind the func's "this" to itself
 	StyleBlock_Freeform() {
+		const styleFixesFromWVC = DefaultSkin.prototype.StyleBlock_Freeform.call(this);
 		return `
+			${styleFixesFromWVC}
+			
 			a:not(.noMatch) {
 				color: rgba(0,130,0,1);
 			}
@@ -71,7 +77,6 @@ export class DMSkin extends Skin {
 				color: ${this.NodeTextColor().alpha(.5).css()} !important;
 			}
 
-			.VMenu > div:first-child { border-top: initial !important; }
 			.VMenuItem:not(.disabled):not(.neverMatch):hover {
 				background-color: rgb(200, 200, 200) !important;
 			}

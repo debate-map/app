@@ -1,7 +1,6 @@
-import {Chroma, SubNavBar} from "web-vcore";
+import {Chroma, SubNavBar, Skin} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
-import {Skin} from "../Skin.js";
 
 export class DMSkin_Old extends Skin {
 	static main = new DMSkin_Old();

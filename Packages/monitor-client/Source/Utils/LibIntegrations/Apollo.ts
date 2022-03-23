@@ -39,7 +39,7 @@ export function InitApollo() {
 	wsClient.onConnected(()=>{
 		wsClient_connectCount++;
 		console.log(`WebSocket connected. (count: ${wsClient_connectCount})`);
-		RunInAction("wsClient.onConnected", ()=>store.main.webSocketConnected = true);
+		RunInAction("wsClient.onConnected", ()=>store.wvc.webSocketConnected = true);
 
 		// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data)
 		//AuthenticateWebSocketConnection();
@@ -47,7 +47,7 @@ export function InitApollo() {
 	wsClient.onReconnected(()=>{
 		wsClient_connectCount++;
 		console.log(`WebSocket reconnected. (count: ${wsClient_connectCount})`);
-		RunInAction("wsClient.onReconnected", ()=>store.main.webSocketConnected = true);
+		RunInAction("wsClient.onReconnected", ()=>store.wvc.webSocketConnected = true);
 
 		// whenever our web-socket reconnects, we have to authenticate the new websocket connection
 		//AuthenticateWebSocketConnection();
@@ -58,12 +58,12 @@ export function InitApollo() {
 	});
 	wsClient.onDisconnected(()=>{
 		// only log the "disconnection" if this is the first one, or we know it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
-		if (store.main.webSocketLastDCTime == null || store.main.webSocketConnected) {
+		if (store.wvc.webSocketLastDCTime == null || store.wvc.webSocketConnected) {
 			console.log("WebSocket disconnected.");
 		}
 		RunInAction("wsClient.onDisconnected", ()=>{
-			store.main.webSocketConnected = false;
-			store.main.webSocketLastDCTime = Date.now();
+			store.wvc.webSocketConnected = false;
+			store.wvc.webSocketLastDCTime = Date.now();
 		});
 	});
 	wsClient.onError(error=>console.error("WebSocket error:", error.message));

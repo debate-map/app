@@ -1,11 +1,10 @@
 import {GetUserPermissionGroups, Me, MeID} from "dm_common";
 import {hasHotReloaded} from "Main.js";
 import {RootState, store} from "Store/index.js";
-import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
+import {ActionFunc, AddNotificationMessage, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
@@ -48,6 +47,7 @@ export function InitWVC() {
 		mobxCompatMode: true,
 
 		// urls
+		GetSkin: ()=>liveSkin,
 		pageTree,
 		startURL,
 		GetLoadActionFuncForURL,

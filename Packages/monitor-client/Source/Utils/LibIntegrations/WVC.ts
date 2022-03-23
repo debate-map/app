@@ -1,7 +1,6 @@
 import {MeID} from "dm_common";
 import {RootState, store} from "Store/index.js";
-import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
-import {ActionFunc, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
+import {ActionFunc, AddNotificationMessage, AddWVCSchemas, DefaultSkin, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "../../Utils/URL/URLs.js";
@@ -22,6 +21,7 @@ AddWVCSchemas(AddSchema);
 export function InitWVC() {
 	manager_framework.Populate({
 		// styling
+		GetSkin: ()=>DefaultSkin.main,
 		colors: {},
 		zIndexes: {subNavBar: 0},
 		iconInfo: {},

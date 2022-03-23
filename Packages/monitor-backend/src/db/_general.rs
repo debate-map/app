@@ -7,11 +7,20 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
+use std::env;
 use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::GeneralMessage;
 use crate::migrations::v2::migrate_db_to_v2;
+
+pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
+    let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
+    if !result && print_message_if_wrong {
+        println!("Admin-key is incorrect! Submitted:{}", admin_key);
+    }
+    return result;
+}
 
 wrap_slow_macros!{
 
@@ -39,7 +48,9 @@ struct StartMigration_Result {
 pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
-    async fn startMigration(&self, ctx: &async_graphql::Context<'_>, to_version: usize) -> Result<StartMigration_Result> {
+    async fn startMigration(&self, ctx: &async_graphql::Context<'_>, admin_key: String, to_version: usize) -> Result<StartMigration_Result, Error> {
+        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        
         let msg_sender = ctx.data::<Sender<GeneralMessage>>().unwrap();
         let migration_result = match to_version {
             2 => migrate_db_to_v2(msg_sender.clone()).await,

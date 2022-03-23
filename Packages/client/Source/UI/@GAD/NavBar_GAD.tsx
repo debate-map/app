@@ -4,10 +4,9 @@ import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {RootState, store} from "Store";
-import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI.js";
 import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel.js";
 import {UserPanel} from "UI/@Shared/NavBar/UserPanel.js";
-import {Observer, Link, HSL, NavBarPanelButton} from "web-vcore";
+import {Observer, Link, HSL, NavBarPanelButton, NotificationsUI} from "web-vcore";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
@@ -45,9 +44,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 							</Div> as any
 						} panel="reputation" corner="top-left"/> */}
 					</span>
-					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 150, bottom: 0}}>
-						<NotificationsUI/>
-					</Div>
+					<NotificationsUI placement="topLeft" navBarHeight={150}/>
 
 					{!GADDemo_2020 &&
 					<span style={{margin: "0 auto", paddingRight: 13}}>

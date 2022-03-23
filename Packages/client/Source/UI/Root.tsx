@@ -25,7 +25,6 @@ import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
 import {RootStyles} from "./@Root/RootStyles.js";
 import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer.js";
-import {NotificationsUI} from "./@Shared/NavBar/NotificationsUI";
 import {DatabaseUI} from "./Database.js";
 import {UserProfileUI} from "./Database/Users/UserProfile.js";
 import {DebatesUI} from "./Debates.js";
@@ -215,9 +214,6 @@ class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div className="clickThrough" style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
-				<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
-					<NotificationsUI/>
-				</Div>
 				<NodeDetailBoxesLayer/>
 				<MessageBoxLayer/>
 				<VMenuLayer/>
