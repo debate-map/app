@@ -18,18 +18,18 @@ excludeLinesWith = "#[graphql(name"
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeTag {
     pub id: ID,
-	pub creator: String,
-	pub createdAt: i64,
+    pub creator: String,
+    pub createdAt: i64,
     pub nodes: Vec<String>,
-	pub labels: Option<serde_json::Value>,
-	pub mirrorChildrenFromXToY: Option<serde_json::Value>,
-	pub xIsExtendedByY: Option<serde_json::Value>,
-	pub mutuallyExclusiveGroup: Option<serde_json::Value>,
-	pub restrictMirroringOfX: Option<serde_json::Value>,
+    pub labels: Option<serde_json::Value>,
+    pub mirrorChildrenFromXToY: Option<serde_json::Value>,
+    pub xIsExtendedByY: Option<serde_json::Value>,
+    pub mutuallyExclusiveGroup: Option<serde_json::Value>,
+    pub restrictMirroringOfX: Option<serde_json::Value>,
 }
 impl From<tokio_postgres::row::Row> for MapNodeTag {
-	fn from(row: tokio_postgres::row::Row) -> Self {
-		Self {
+    fn from(row: tokio_postgres::row::Row) -> Self {
+        Self {
             id: ID::from(&row.get::<_, String>("id")),
             creator: row.get("creator"),
             createdAt: row.get("createdAt"),
@@ -39,8 +39,8 @@ impl From<tokio_postgres::row::Row> for MapNodeTag {
             xIsExtendedByY: row.get("xIsExtendedByY"),
             mutuallyExclusiveGroup: row.get("mutuallyExclusiveGroup"),
             restrictMirroringOfX: row.get("restrictMirroringOfX"),
-		}
-	}
+        }
+    }
 }
 
 #[derive(Clone)] pub struct GQLSet_MapNodeTag { nodes: Vec<MapNodeTag> }
