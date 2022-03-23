@@ -110,9 +110,9 @@ export class TitlePanel extends BaseComponentPlus(
 		let displayText = GetNodeDisplayText(node, path);
 		// in SL+NoHeader mode, hide the bracket-text at the start of the node's text, as that's just a helper flag for the special frontend (temp)
 		if (GADDemo && !ShowHeader) {
-			// three parts: optional non-bracket chars at start, bracket-text, optional space(s) after bracket-text
+			// three parts: word/emoji + space [at start; optional], bracketed-text, space(s) after bracket-text [optional]
 			// this regex strips out parts 2 and 3, but leaves in part 1
-			displayText = displayText.replace(/^([^[]*)\[.+?\]\s*/, "$1");
+			displayText = displayText.replace(/^([^[ ]+\s)?\[.+?\]\s*/, "$1");
 		}
 
 		const equationNumber = mainAttachment?.equation ? GetEquationStepNumber(path) : null;
