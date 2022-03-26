@@ -83,7 +83,7 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 			if (timeSinceRun < 3 * 24 * 60 * 60 * 1000) return false;
 			// delete the rest
 			return true;
-		});
+		}).Take(30); // limit command-runs-to-remove to 30 entries (else server can be overwhelmed and crash; exact diagnosis unknown, but happened for case of 227-at-once)
 		for (const commandRun of commandRunsToRemove) {
 			db.set(dbp`commandRuns/${commandRun.id}`, null);
 		}

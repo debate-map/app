@@ -101,7 +101,8 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 
 			// delete old node-edits (ie. older than last 100) for this map, in mapNodeEdits
 			const map_nodeEdits_remaining = this.map_nodeEdits.Exclude(...map_nodeEdits_forSameNode);
-			const nodeEditsBeforeLast100 = map_nodeEdits_remaining.OrderByDescending(a=>a.time).Skip(100);
+			const nodeEditsBeforeLast100 = map_nodeEdits_remaining.OrderByDescending(a=>a.time).Skip(100)
+				.Take(30); // limit node-edits-to-remove to 30 entries (else server can be overwhelmed and crash; exact diagnosis unknown, but happened for command-runs for case of 227-at-once)
 			for (const edit of nodeEditsBeforeLast100) {
 				db.set(dbp`mapNodeEdits/${edit.id}`, null);
 			}
