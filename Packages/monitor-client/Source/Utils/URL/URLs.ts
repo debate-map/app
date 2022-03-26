@@ -11,6 +11,8 @@ export const pageTree = new Page({}, {
 	db: new Page({}, {
 		migrate: new Page({}),
 	}),
+	netdata: new Page(),
+	grafana: new Page(),
 });
 export const rootPages = Object.keys(pageTree.children);
 export const rootPageDefaultChilds = pageTree.children.Pairs().filter(a=>a.value.children?.Pairs().length).ToMapObj(pair=>pair.key, pair=>{

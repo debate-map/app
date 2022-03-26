@@ -19,6 +19,8 @@ export class MainState {
 
 	@O home = {} as {subpage: string};
 	@O db = {} as {subpage: string};
+	/*@O netdata = {} as {subpage: string};
+	@O grafana = {} as {subpage: string};*/
 
 	// non-page-specific sections/components (roughly corresponds to @Shared folder)
 	// ==========

@@ -470,6 +470,21 @@ NEXT_k8s_resource('dm-app-server-js',
 # 	"vizier-deleter",
 # ], pod_readiness='ignore', labels=["new-relic"])
 
+# netdata
+# ==========
+
+load('ext://helm_remote', 'helm_remote')
+helm_remote('netdata',
+	repo_url='https://netdata.github.io/helmchart',
+	#version='1.33.1',
+	version='3.7.12', # helm-chart version is different from netdata version
+)
+
+NEXT_k8s_resource_batch([
+	"netdata-parent",
+	"netdata-child",
+], labels=["monitoring"])
+
 # extras
 # ==========
 

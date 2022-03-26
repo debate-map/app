@@ -16,7 +16,9 @@ import {MessageBoxLayer} from "web-vcore/nm/react-vmessagebox.js";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
 import {SideBar} from "./@Shared/SideBar";
 import {DBUI} from "./DB";
+import {GrafanaUI} from "./Grafana";
 import {HomeUI} from "./Home";
+import {NetDataUI} from "./NetData";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -102,6 +104,8 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", /*justifyContent: "center",*/ alignItems: "flex-start"}}>
 						{page == "home" && <HomeUI/>}
 						{page == "db" && <DBUI/>}
+						{page == "netdata" && <NetDataUI/>}
+						{page == "grafana" && <GrafanaUI/>}
 					</main>
 				</ErrorBoundary>
 			</Row>
