@@ -19,6 +19,8 @@ import {DBUI} from "./DB";
 import {GrafanaUI} from "./Grafana";
 import {HomeUI} from "./Home";
 import {NetDataUI} from "./NetData";
+import {PixieUI} from "./Pixie";
+import {PrometheusUI} from "./Prometheus";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -106,6 +108,8 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "db" && <DBUI/>}
 						{page == "netdata" && <NetDataUI/>}
 						{page == "grafana" && <GrafanaUI/>}
+						{page == "prometheus" && <PrometheusUI/>}
+						{page == "pixie" && <PixieUI/>}
 					</main>
 				</ErrorBoundary>
 			</Row>

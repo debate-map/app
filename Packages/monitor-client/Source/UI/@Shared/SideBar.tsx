@@ -24,6 +24,8 @@ export class SideBar extends BaseComponent<{}, {}> {
 				<PageButton page="db" subpage="migrate" text="DB/Migrate"/>
 				<PageButton page="netdata" text="NetData"/>
 				<PageButton page="grafana" text="Grafana"/>
+				<PageButton page="prometheus" text="Prometheus"/>
+				<PageButton page="pixie" text="Pixie"/>
 			</Column>
 		);
 	}
