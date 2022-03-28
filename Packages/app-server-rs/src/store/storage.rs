@@ -36,6 +36,7 @@ use uuid::Uuid;
 
 use crate::utils::filter::{entry_matches_filter, Filter};
 use crate::utils::general::{get_entries_in_collection, json_maps_to_typed_entries};
+use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::postgres_parsing::parse_postgres_array;
 use crate::utils::type_aliases::JSONValue;
 
@@ -68,7 +69,14 @@ impl LQStorage {
         (new_self, r1)
     }
 
-    pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, mtx: MtxLayer) -> (Vec<T>, &LQEntryWatcher) {
+    pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&mut Mtx>) -> (Vec<T>, &LQEntryWatcher) {
+        /*let mut mtx = new_mtx!("part1");
+        let mtx = match parent_mtx {
+            Some(p) => p.add_sub(mtx),
+            None => &mut mtx,
+        };*/
+        new_mtx!(mtx, "part1", parent_mtx);
+
         let (entry, lq_entries_count, _lq_entry_is_new) = {
             let lq_key = get_lq_key(table_name, filter);
             let mut lq_entries_count = self.live_queries.len();
@@ -85,6 +93,7 @@ impl LQStorage {
             (entry, lq_entries_count, create_new_entry)
         };
 
+        mtx.section("part2");
         let result_entries = entry.last_entries.clone();
         let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 
