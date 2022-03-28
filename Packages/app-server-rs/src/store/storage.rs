@@ -68,7 +68,7 @@ impl LQStorage {
         (new_self, r1)
     }
 
-    pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>) -> (Vec<T>, &LQEntryWatcher) {
+    pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, mtx: MtxLayer) -> (Vec<T>, &LQEntryWatcher) {
         let (entry, lq_entries_count, _lq_entry_is_new) = {
             let lq_key = get_lq_key(table_name, filter);
             let mut lq_entries_count = self.live_queries.len();

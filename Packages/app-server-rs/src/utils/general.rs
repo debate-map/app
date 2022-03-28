@@ -1,4 +1,4 @@
-use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::Duration};
+use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant}};
 use anyhow::{bail, Context, Error};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
@@ -9,6 +9,7 @@ use serde_json::{json, Map};
 use tokio_postgres::{Client, Row, types::ToSql};
 use uuid::Uuid;
 //use tokio::sync::Mutex;
+use metrics::{counter, histogram, increment_counter};
 
 use crate::{store::storage::{StorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, filter::get_sql_for_filters}};
 
@@ -56,6 +57,8 @@ where
     QueryFunc: FnOnce(String/*, &'a [&(dyn ToSql + Sync)]*/) -> QueryFuncReturn,
     QueryFuncReturn: Future<Output = Result<Vec<Row>, tokio_postgres::Error>>,
 {
+    let time1 = Instant::now();
+
     let filters_sql = get_sql_for_filters(filter).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let where_clause = match filters_sql.len() {
         0..=2 => "".to_owned(),
@@ -64,6 +67,8 @@ where
     println!("Running where clause. @table:{table_name} @{where_clause} @filter:{filter:?}");
     let mut rows = query_func(format!("SELECT * FROM \"{table_name}\"{where_clause};")/*, &[]*/).await
         .with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql}"))?;
+
+    let time2 = Instant::now();
 
     // sort by id, so that order of our results here is consistent with order after live-query-updating modifications (see storage.rs)
     rows.sort_by_key(|a| a.get::<&str, String>("id"));
@@ -75,6 +80,10 @@ where
         let json_val = serde_json::to_value(r).unwrap();
         json_val.as_object().unwrap().clone()
     }).collect();
+
+    histogram!("get_entries_in_collection_basic.part1", time2.duration_since(time1).as_secs_f64() * 1000f64);
+    histogram!("get_entries_in_collection_basic.part2", Instant::now().duration_since(time2).as_secs_f64() * 1000f64);
+
     Ok((entries, entries_as_type))
 }
 pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), Error> {
@@ -100,6 +109,7 @@ pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
+    let mtx = new_mtx!("part1");
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
@@ -108,11 +118,12 @@ pub async fn handle_generic_gql_collection_request<'a,
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx).await;
+        let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, mtx).await;
 
         (entries_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
+    mtx.section("part2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield GQLSetVariant::from(entries_as_type);
@@ -123,14 +134,17 @@ pub async fn handle_generic_gql_collection_request<'a,
             yield next_result_set;
         }
     };
+    process_mtx(mtx);
     Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
 }
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
+    increment_counter!("handle_generic_gql_doc_request.call_count");
+    let start = Instant::now();
+    
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter = Some(json!({"id": {"equalTo": id}}));
-
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
@@ -144,6 +158,8 @@ pub async fn handle_generic_gql_doc_request<'a,
 
         (entry_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
+
+    histogram!("handle_generic_gql_doc_request.start_watcher", start.elapsed().as_secs_f64() * 1000f64);
 
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {

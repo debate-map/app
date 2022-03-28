@@ -42,7 +42,7 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
-use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler, utils::axum_logging_layer::print_request_response};
+use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response, metrics_manager::set_up_metrics}};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -88,6 +88,8 @@ mod utils {
     pub mod gql_general_extension;
     pub mod gql_result_stream;
     pub mod http;
+    pub mod metrics_manager;
+    pub mod mtx;
     pub mod postgres_parsing;
     pub mod type_aliases;
     pub mod quick_tests {
@@ -127,6 +129,8 @@ async fn main() {
         println!("Got panic. @info:{}\n@stackTrace:{}", info, stacktrace);
         std::process::abort();
     }));
+
+    set_up_metrics();
 
     let user_set = std::sync::Mutex::new(HashSet::new());
     let (tx, _rx) = broadcast::channel(100);
