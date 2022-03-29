@@ -75,8 +75,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 					<TextArea enabled={enabled} autoSize={true} style={ES({flex: 1})}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
-				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references || attachmentType == AttachmentType.equation) &&
-					<TermAttachmentsUI {...sharedProps}/>}
+				<TermAttachmentsUI {...sharedProps}/>
 				{newData.type == MapNodePhrasingType.web &&
 					<PhrasingReferencesUI {...sharedProps}/>}
 			</Column>

@@ -69,13 +69,11 @@ impl LQStorage {
         (new_self, r1)
     }
 
-    pub async fn start_lq_watcher<T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&mut Mtx>) -> (Vec<T>, &LQEntryWatcher) {
-        /*let mut mtx = new_mtx!("part1");
-        let mtx = match parent_mtx {
-            Some(p) => p.add_sub(mtx),
-            None => &mut mtx,
-        };*/
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&'a RefCell<Mtx<'a>>>) -> (Vec<T>, &LQEntryWatcher) {
         new_mtx!(mtx, "part1", parent_mtx);
+        /*let mut mtx = crate::utils::mtx::mtx::Mtx::new(crate::utils::mtx::mtx::fn_name!());
+        mtx.section("part1");
+        mtx.parent = parent_mtx;*/
 
         let (entry, lq_entries_count, _lq_entry_is_new) = {
             let lq_key = get_lq_key(table_name, filter);

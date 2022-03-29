@@ -8,7 +8,7 @@ macro_rules! fn_name {
         &name[..name.len() - 3]
     }}
 }
-use std::sync::Arc;
+use std::{sync::Arc, cell::RefCell};
 
 pub(crate) use fn_name;
 
@@ -36,57 +36,41 @@ pub(crate) use fn_name;
     mtx
 }*/
 
-/*macro_rules! new_mtx {
-    ($first_section_name:expr) => {{
-        //$crate::utils::mtx::mtx::new_mtx_impl($crate::utils::mtx::mtx::fn_name!(), $first_section_name, None).0.unwrap()
-        //let mut mtx_none = $crate::utils::mtx::mtx::mtx_none.clone();
-        $crate::utils::mtx::mtx::new_mtx_impl($crate::utils::mtx::mtx::fn_name!(), $first_section_name)
-    }};
-    /*($first_section_name:expr, $parent_mtx:expr) => {{
-        //$crate::utils::mtx::mtx::new_mtx_impl($crate::utils::mtx::mtx::fn_name!(), $first_section_name, $parent_mtx).1.unwrap()
-        let temp = &mut $crate::utils::mtx::mtx::mtx_none;
-        $crate::utils::mtx::mtx::new_mtx_impl($crate::utils::mtx::mtx::fn_name!(), $first_section_name)
-    }};*/
-}*/
 macro_rules! new_mtx {
     ($mtx:ident, $first_section_name:expr) => {
-        let mut mtx_owned = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!());
-        mtx_owned.section($first_section_name);
-        let $mtx = &mut mtx_owned;
+        $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, None);
     };
     ($mtx:ident, $first_section_name:expr, $parent_mtx:expr) => {
-        let mut mtx_owned = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!());
-        mtx_owned.section($first_section_name);
-        let $mtx = match $parent_mtx {
-            Some(p) => p.add_sub(mtx_owned),
-            None => &mut mtx_owned,
-        };
+        let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!());
+        $mtx.section($first_section_name);
+        $mtx.parent = $parent_mtx;
     };
 }
 pub(crate) use new_mtx;
 
-pub struct Mtx {
-    func_name: String,
-    subs: Vec<Mtx>,
+pub struct Mtx<'a> {
+    pub func_name: String,
+    //pub parent: Option<&'a mut Mtx<'b, 'b>>,
+    pub parent: Option<&'a RefCell<Self>>,
 }
 //pub static mtx_none: Arc<Mtx> = Arc::new(Mtx::new("n/a"));
-impl Mtx {
+impl<'a> Mtx<'a> {
     pub fn new(func_name: &str) -> Self {
         Self {
             func_name: func_name.to_owned(),
-            subs: vec![],
+            parent: None,
         }
     }
     pub fn section(self: &mut Self, name: &str) {
         // todo
     }
-    pub fn add_sub(self: &mut Self, sub_mtx: Mtx) -> &mut Mtx {
-        self.subs.push(sub_mtx);
-        //return &mut sub_mtx;
-        self.subs.last_mut().unwrap()
+}
+/*impl Drop for Mtx<'_> {
+    fn drop(&mut self) {
+        if let Some(parent) = self.parent {
+            // todo
+        } else {
+            // todo
+        }
     }
-}
-
-pub fn process_mtx(mtx: &mut Mtx) {
-    // todo
-}
+}*/

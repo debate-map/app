@@ -1,4 +1,4 @@
-use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant}};
+use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant}, cell::RefCell};
 use anyhow::{bail, Context, Error};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
@@ -13,7 +13,7 @@ use metrics::{counter, histogram, increment_counter};
 
 use crate::{store::storage::{StorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, filter::get_sql_for_filters}};
 
-use super::{filter::Filter, mtx::mtx::{new_mtx, process_mtx}};
+use super::{filter::Filter, mtx::mtx::{new_mtx}};
 
 // temp (these will not be useful once the streams are live/auto-update)
 /*pub async fn get_first_item_from_stream_in_result_in_future<T, U: std::fmt::Debug>(result: impl Future<Output = Result<impl Stream<Item = T>, U>>) -> T {
@@ -105,11 +105,31 @@ pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(j
     json_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect()
 }
 
+pub struct MyStruct<'a, 'b> {
+    pub parent: Option<&'a mut MyStruct<'b, 'b>>,
+}
+pub fn test1() -> String {
+    let mut str1 = MyStruct { parent: None };
+    {
+        let temp = &mut str1;
+        test2(temp);
+    };
+
+    let temp2 = &mut str1;
+    test3(temp2);
+    "".to_owned()
+}
+pub fn test2<'a>(borrow_str: &'a MyStruct<'_, '_>) {
+}
+pub fn test3<'a>(borrow_str: &'a mut MyStruct<'_, '_>) {
+}
+
 pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
     new_mtx!(mtx, "part1");
+    let mtx_rc = RefCell::new(mtx);
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
@@ -118,12 +138,12 @@ pub async fn handle_generic_gql_collection_request<'a,
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(mtx)).await;
+        let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx_rc)).await;
 
         (entries_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
-    mtx.section("part2");
+    mtx_rc.borrow_mut().section("part2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield GQLSetVariant::from(entries_as_type);
@@ -134,13 +154,13 @@ pub async fn handle_generic_gql_collection_request<'a,
             yield next_result_set;
         }
     };
-    process_mtx(mtx);
     Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
 }
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
     new_mtx!(mtx, "part1");
+    let mtx_rc = RefCell::new(mtx);
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter = Some(json!({"id": {"equalTo": id}}));
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
@@ -151,13 +171,13 @@ pub async fn handle_generic_gql_doc_request<'a,
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
-        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(mtx)).await;
+        let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx_rc)).await;
         let entry_as_type = entries_as_type.pop();
 
         (entry_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
-    mtx.section("part2");
+    mtx_rc.borrow_mut().section("part2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield entry_as_type;
@@ -168,7 +188,6 @@ pub async fn handle_generic_gql_doc_request<'a,
             yield next_result;
         }
     };
-    process_mtx(mtx);
     Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
 }
 
