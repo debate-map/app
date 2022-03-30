@@ -69,16 +69,18 @@ impl LQStorage {
         (new_self, r1)
     }
 
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&'a RefCell<Mtx<'a>>>) -> (Vec<T>, &LQEntryWatcher) {
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, &LQEntryWatcher) {
         new_mtx!(mtx, "part1", parent_mtx);
         /*let mut mtx = crate::utils::mtx::mtx::Mtx::new(crate::utils::mtx::mtx::fn_name!());
         mtx.section("part1");
         mtx.parent = parent_mtx;*/
 
         let (entry, lq_entries_count, _lq_entry_is_new) = {
+            new_mtx!(mtx2, "part1", Some(&mtx));
             let lq_key = get_lq_key(table_name, filter);
             let mut lq_entries_count = self.live_queries.len();
 
+            mtx2.section("part2");
             let create_new_entry = !self.live_queries.contains_key(&lq_key);
             if create_new_entry {
                 let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, filter).await.expect("Errored while getting entries in collection.");
@@ -86,6 +88,7 @@ impl LQStorage {
                 self.live_queries.insert(lq_key.clone(), new_entry);
             }
 
+            mtx2.section("part3");
             let entry = self.live_queries.get_mut(&lq_key).unwrap();
             if create_new_entry { lq_entries_count += 1; }
             (entry, lq_entries_count, create_new_entry)
