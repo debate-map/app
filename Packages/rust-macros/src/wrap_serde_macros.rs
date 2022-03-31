@@ -1,7 +1,7 @@
 use std::{env, str::FromStr};
 use proc_macro2::{TokenStream, TokenTree, Ident, Span};
 
-use crate::utils::{replace_token_sequences_matching, Slot};
+use crate::utils::{replace_token_sequences_matching, Slot, remove_token_sequences_for_macros};
 
 // test-approach, of just stripping all the async-graphql macros for cargo-check (since presumably not needed at that point)
 // ==========
@@ -26,11 +26,14 @@ pub fn wrap_serde_macros_impl(input: TokenStream, force_proceed: bool) -> TokenS
     output
 }
 
+static MACROS_TO_REMOVE: &'static [&'static str] = &["serde"];
 static DERIVE_MACRO_REPLACEMENTS_FROM: &'static [&'static str] = &["Serialize", "Deserialize"];
 static DERIVE_MACRO_REPLACEMENTS_TO: &'static [&'static str] = &["rust_macros::Serialize_Stub", "rust_macros::Deserialize_Stub"];
 fn replace_serde_macros(tokens: TokenStream) -> TokenStream {
     let mut result = tokens;
     
+    result = remove_token_sequences_for_macros(result, MACROS_TO_REMOVE);
+
     for (i, from_macro) in DERIVE_MACRO_REPLACEMENTS_FROM.iter().enumerate() {
         let mut slots: Vec<Slot> = Vec::new();
         let check = Box::new(|token: &TokenTree| {

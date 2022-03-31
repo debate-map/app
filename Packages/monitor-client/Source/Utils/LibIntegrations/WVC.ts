@@ -1,5 +1,6 @@
 import {MeID} from "dm_common";
 import {RootState, store} from "Store/index.js";
+import {MainSkin} from "Utils/Styles/MainSkin.js";
 import {ActionFunc, AddNotificationMessage, AddWVCSchemas, DefaultSkin, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
@@ -21,7 +22,8 @@ AddWVCSchemas(AddSchema);
 export function InitWVC() {
 	manager_framework.Populate({
 		// styling
-		GetSkin: ()=>DefaultSkin.main,
+		//GetSkin: ()=>DefaultSkin.main,
+		GetSkin: ()=>MainSkin.main,
 		colors: {},
 		zIndexes: {subNavBar: 0},
 		iconInfo: {},

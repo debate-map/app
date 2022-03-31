@@ -10,7 +10,7 @@ import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {chroma_maxDarken} from "Utils/UI/General.js";
+import {chroma_maxDarken} from "web-vcore";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 

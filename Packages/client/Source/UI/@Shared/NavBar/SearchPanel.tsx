@@ -4,7 +4,7 @@ import moment from "web-vcore/nm/moment";
 import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES, RunInAction} from "web-vcore";
+import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES, RunInAction, chroma_maxDarken} from "web-vcore";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
@@ -15,7 +15,6 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {chroma_maxDarken} from "Utils/UI/General.js";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
 

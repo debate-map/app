@@ -1,5 +1,80 @@
 use std::{collections::HashMap};
-use proc_macro2::{TokenStream, TokenTree, Group};
+use proc_macro2::{TokenStream, TokenTree, Group, Delimiter};
+
+// level-2 helpers
+// ==========
+
+pub fn remove_token_sequences_for_macros(tokens: TokenStream, macros_to_remove: &'static [&'static str]) -> TokenStream {
+    remove_token_sequences_matching(tokens, get_slot_checks_for_removing_macros(macros_to_remove))
+}
+pub fn get_slot_checks_for_removing_macros(macros_to_remove: &'static [&'static str]) -> Vec<SlotCheck> {
+    let is_macro_to_block = Box::new(|token: &TokenTree| {
+        match token {
+            TokenTree::Group(data) => {
+                if data.delimiter() == Delimiter::Bracket {
+                    let children: Vec<TokenTree> = data.stream().into_iter().collect();
+                    if let Some(first_child) = children.get(0) {
+                        if let TokenTree::Ident(data) = first_child {
+                            if macros_to_remove.contains(&data.to_string().as_str()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                false
+            },
+            _ => false,
+        }
+    });
+    let is_hash = Box::new(|token: &TokenTree| {
+        match token {
+            TokenTree::Punct(data) if data.as_char() == '#' => true,
+            _ => false,
+        }
+    });
+    
+    vec![
+        is_hash,
+        is_macro_to_block,
+    ]
+}
+
+pub fn remove_token_sequences_for_derive_macros(tokens: TokenStream, derive_macros_to_remove: &'static [&'static str]) -> TokenStream {
+    let result = tokens;    
+
+    let is_derive_macro_to_block = Box::new(|token: &TokenTree| {
+        match token {
+            TokenTree::Ident(data) if derive_macros_to_remove.contains(&data.to_string().as_str()) => true,
+            _ => false,
+        }
+    });
+    let is_comma = Box::new(|token: &TokenTree| {
+        match token {
+            TokenTree::Punct(data) if data.as_char() == ',' => true,
+            _ => false
+        }
+    });
+
+    // first remove any target-macros, matching pattern: `MACRO,` (ie. non-last derive-macro)
+    let result = remove_token_sequences_matching(result, vec![
+        is_derive_macro_to_block.clone(),
+        is_comma.clone(),
+    ]);
+    // then remove any target-macros, matching pattern: `,MACRO` (ie. non-first derive-macro)
+    let result = remove_token_sequences_matching(result, vec![
+        is_comma.clone(),
+        is_derive_macro_to_block.clone(),
+    ]);
+    // then remove any target-macros, matching pattern: `MACRO` (ie. standalone derive-macro)
+    let result = remove_token_sequences_matching(result, vec![
+        is_derive_macro_to_block.clone(),
+    ]);
+
+    result
+}
+
+// level-1 helpers (token-modification functions)
+// ==========
 
 pub fn remove_token_sequences_matching(tokens: TokenStream, mut slot_checks: Vec<SlotCheck>) -> TokenStream {
     let mut slots: Vec<Slot> = Vec::new();

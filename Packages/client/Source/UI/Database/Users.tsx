@@ -7,7 +7,7 @@ import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions.js";
 import {GetUsers, GetUser, User} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {chroma_maxDarken} from "Utils/UI/General.js";
+import {chroma_maxDarken} from "web-vcore";
 import {UserProfileUI} from "./Users/UserProfile.js";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];

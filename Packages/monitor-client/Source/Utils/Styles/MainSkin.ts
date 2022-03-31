@@ -7,8 +7,9 @@ import {addHook_css} from "web-vcore/nm/react-vextensions";
 // add as global, so one can easily test out new colors using the browser dev-tools
 globalThis.chroma = chroma;
 
-export class DMSkin extends Skin {
-	static main = new DMSkin();
+// note: keep this up-to-date with DMSkin.ts in "client" (can be done "lazily" though, since imperfections are fine for this tool)
+export class MainSkin extends Skin {
+	static main = new MainSkin();
 
 	// scalars
 	// ==========
@@ -145,33 +146,6 @@ export class DMSkin extends Skin {
 			}
 		});
 
-		// graphql-feedback
-		addHook_css(ProposalsUI, ctx=>{
-			if (ctx.callIndex == 0) ctx.styleArgs.push({filter: this.BasePanelDropShadowFilter()});
-		});
-		addHook_css(ProposalsColumn, ctx=>{
-			if (ctx.callIndex == 1) ctx.styleArgs.push({background: this.HeaderColor().css()});
-		});
-		addHook_css(ProposalsUserRankingColumn, ctx=>{
-			if (ctx.callIndex == 1) ctx.styleArgs.push({background: this.HeaderColor().css()});
-		});
-		//addHook_css(ProposalEntryUI, ctx=>{
-		// ProposalEntryUI is wrapped, so attach by string/name instead
-		addHook_css("ProposalEntryUI", ctx=>{
-			if (ctx.callIndex == 0) {
-				ctx.styleArgs.push({
-					background: ctx.self["props"].index % 2 == 0 ? this.ListEntryBackgroundColor_Light().css() : this.ListEntryBackgroundColor_Dark().css(),
-				});
-			}
-		});
-		addHook_css(ProposalUI, ctx=>{
-			if (ctx.callIndex == 2) ctx.styleArgs.push({filter: this.BasePanelDropShadowFilter()});
-		});
-		addHook_css(ProposalUI_Inner, ctx=>{
-			if (ctx.callIndex == 0) ctx.styleArgs.push({background: this.BasePanelBackgroundColor().css()});
-			else if (ctx.callIndex == 2 || ctx.callIndex == 3) ctx.styleArgs.push({color: this.TextColor().css()});
-		});
-
 		/*let asBaseFor: (new(..._)=>Skin)|undefined;
 		for (const childType of [SLSkin]) {
 			if (this instanceof childType) asBaseFor = SLSkin;
@@ -179,7 +153,7 @@ export class DMSkin extends Skin {
 		const targetSkinType = this.constructor;
 
 		// these hooks we only add if we're the actual skin being used
-		if (targetSkinType == DMSkin) {
+		if (targetSkinType == MainSkin) {
 			addHook_css(SubNavBar, ctx=>{
 				if (ctx.key == "sub1") {
 					ctx.styleArgs.push({

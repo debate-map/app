@@ -13,6 +13,7 @@ use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::GeneralMessage;
 use crate::migrations::v2::migrate_db_to_v2;
+use crate::store::storage::{Mtx, AppStateWrapper};
 
 pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
     let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
@@ -33,10 +34,23 @@ pub struct QueryShard_General;
 impl QueryShard_General {
     /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
+    
+    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<Mtx>, Error> {
+        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        
+        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let mtx_results = app_state.mtx_results.read().await;
+        Ok(mtx_results.to_vec())
+    }
 }
 
 // mutations
 // ==========
+
+#[derive(SimpleObject)]
+struct GenericMutation_Result {
+    message: String,
+}
 
 #[derive(SimpleObject)]
 struct StartMigration_Result {
@@ -48,6 +62,18 @@ struct StartMigration_Result {
 pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
+    async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        
+        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let mut mtx_results = app_state.mtx_results.write().await;
+        mtx_results.clear();
+        
+        Ok(GenericMutation_Result {
+            message: "success".to_string(),
+        })
+    }
+    
     async fn startMigration(&self, ctx: &async_graphql::Context<'_>, admin_key: String, to_version: usize) -> Result<StartMigration_Result, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
         

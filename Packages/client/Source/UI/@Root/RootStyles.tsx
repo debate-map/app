@@ -2,9 +2,7 @@ import {MeID} from "dm_common";
 import React from "react";
 import {GetUserBackground} from "Store/db_ext/users/$user";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {chroma_maxDarken} from "Utils/UI/General";
-import {Chroma, ES, Observer} from "web-vcore";
-import {Button_styles} from "web-vcore/nm/react-vcomponents";
+import {Observer} from "web-vcore";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 
 //export const Button_background_dark = Chroma("rgba(90,100,110,0.9)").css(); // same as hover color, except .9 alpha instead of .8

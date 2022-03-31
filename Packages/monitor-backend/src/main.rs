@@ -24,8 +24,9 @@
     dead_code,
 )]
 
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use axum::{
-    response::{Html},
+    response::{Html, self, IntoResponse},
     routing::{get, any_service, post, get_service},
     AddExtensionLayer, Router, http::{
         Method,
@@ -47,7 +48,10 @@ use tower_http::{services::ServeDir};
 
 use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results};
 
-mod gql;
+mod gql_;
+mod gql {
+    pub mod _general;
+}
 //mod proxy_to_asjs;
 mod pgclient;
 mod utils {
@@ -60,11 +64,7 @@ mod store {
 mod connections {
     pub mod from_app_server_rs;
 }
-
-pub mod db {
-    pub mod _general;
-}
-pub mod migrations {
+mod migrations {
     pub mod v2;
 }
 
@@ -99,7 +99,7 @@ async fn main() {
         std::process::abort();
     }));
     
-    let app_state = AppStateWrapper::new(AppState { mtx_results: vec![] });
+    let app_state = AppStateWrapper::new(AppState::default());
 
     let app = Router::new()
         /*.route("/", get(|| async { Html(r#"
@@ -111,7 +111,7 @@ async fn main() {
 
     let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
 
-    let app = gql::extend_router(app, msg_sender, msg_receiver).await;
+    let app = gql_::extend_router(app, msg_sender, msg_receiver, app_state.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app

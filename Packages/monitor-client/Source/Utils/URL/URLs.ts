@@ -9,6 +9,7 @@ import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 export const pageTree = new Page({}, {
 	home: new Page({}),
 	db: new Page({}, {
+		requests: new Page({}),
 		migrate: new Page({}),
 	}),
 	netdata: new Page(),

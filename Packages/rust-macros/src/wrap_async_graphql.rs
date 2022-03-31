@@ -1,7 +1,7 @@
 use std::{env};
-use proc_macro2::{TokenStream, TokenTree, Delimiter};
+use proc_macro2::{TokenStream, TokenTree};
 
-use crate::utils::remove_token_sequences_matching;
+use crate::utils::{remove_token_sequences_for_derive_macros, remove_token_sequences_for_macros};
 
 // test-approach, of just stripping all the async-graphql macros for cargo-check (since presumably not needed at that point)
 // ==========
@@ -29,67 +29,11 @@ pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> Token
 static MACROS_TO_REMOVE: &'static [&'static str] = &["graphql", "Object", "Subscription"];
 static DERIVE_MACROS_TO_REMOVE: &'static [&'static str] = &["SimpleObject", "MergedObject", "MergedSubscription"];
 fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
-    let is_macro_to_block = Box::new(|token: &TokenTree| {
-        match token {
-            TokenTree::Group(data) => {
-                if data.delimiter() == Delimiter::Bracket {
-                    let children: Vec<TokenTree> = data.stream().into_iter().collect();
-                    if let Some(first_child) = children.get(0) {
-                        if let TokenTree::Ident(data) = first_child {
-                            if MACROS_TO_REMOVE.contains(&data.to_string().as_str()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                false
-            },
-            _ => false,
-        }
-    });
-    let is_hash = Box::new(|token: &TokenTree| {
-        match token {
-            TokenTree::Punct(data) if data.as_char() == '#' => true,
-            _ => false,
-        }
-    });
-    
-    let result = remove_token_sequences_matching(tokens, vec![
-        is_hash,
-        is_macro_to_block,
-    ]);
-
-    let is_derive_macro_to_block = Box::new(|token: &TokenTree| {
-        match token {
-            TokenTree::Ident(data) if DERIVE_MACROS_TO_REMOVE.contains(&data.to_string().as_str()) => true,
-            _ => false,
-        }
-    });
-    let is_comma = Box::new(|token: &TokenTree| {
-        match token {
-            TokenTree::Punct(data) if data.as_char() == ',' => true,
-            _ => false
-        }
-    });
-
-    // first remove any target-macros, matching pattern: `MACRO,` (ie. non-last derive-macro)
-    let result = remove_token_sequences_matching(result, vec![
-        is_derive_macro_to_block.clone(),
-        is_comma.clone(),
-    ]);
-    // then remove any target-macros, matching pattern: `,MACRO` (ie. non-first derive-macro)
-    let result = remove_token_sequences_matching(result, vec![
-        is_comma.clone(),
-        is_derive_macro_to_block.clone(),
-    ]);
-    // then remove any target-macros, matching pattern: `MACRO` (ie. standalone derive-macro)
-    let result = remove_token_sequences_matching(result, vec![
-        is_derive_macro_to_block.clone(),
-    ]);
+    let mut result = tokens;
+    result = remove_token_sequences_for_macros(result, MACROS_TO_REMOVE);
+    result = remove_token_sequences_for_derive_macros(result, DERIVE_MACROS_TO_REMOVE);
     result
 }
-
-
 
 // tests (run these with "cargo test -- --nocapture" to see log output)
 // ==========

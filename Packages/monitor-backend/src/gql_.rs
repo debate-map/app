@@ -38,7 +38,8 @@ use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::GeneralMessage;
-use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
+use crate::gql::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
+use crate::store::storage::AppStateWrapper;
 use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::JSONValue;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
@@ -67,11 +68,11 @@ pub type RootSchema = wrap_agql_schema_type!{
     Schema<QueryRoot, MutationRoot, SubscriptionRoot>
 };
 
-async fn graphiql() -> impl IntoResponse {
+/*async fn graphiql() -> impl IntoResponse {
     // use the DEV/PROD value from the "ENV" env-var, to determine what the app-server's URL is (maybe temp)
     let app_server_host = if env::var("ENV").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "app-server.debates.app" };
     response::Html(graphiql_source("/graphql", Some(&format!("wss://{app_server_host}/graphql"))))
-}
+}*/
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
         GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
@@ -112,19 +113,20 @@ pub async fn graphql_handler(Extension(schema): Extension<RootSchema>, req: Requ
     return response;
 }
 
-pub async fn extend_router(app: Router, msg_sender: Sender<GeneralMessage>, msg_receiver: Receiver<GeneralMessage>) -> Router {
+pub async fn extend_router(app: Router, msg_sender: Sender<GeneralMessage>, msg_receiver: Receiver<GeneralMessage>, app_state: AppStateWrapper) -> Router {
     let schema =
         wrap_agql_schema_build!{
             Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         }
         .data(msg_sender)
         .data(msg_receiver)
+        .data(app_state)
         .finish();
 
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        .route("/graphiql", get(graphiql))
+        //.route("/graphiql", get(graphiql))
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
         .layer(AddExtensionLayer::new(schema));

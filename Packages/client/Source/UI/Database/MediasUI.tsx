@@ -4,12 +4,11 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetSelectedMedia, GetSelectedMediaID} from "Store/main/database";
-import {Observer, GetUpdates, ES, RunInAction} from "web-vcore";
+import {Observer, GetUpdates, ES, RunInAction, chroma_maxDarken} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {chroma_maxDarken} from "Utils/UI/General.js";
 import {MediaDetailsUI, ShowAddMediaDialog} from "./Medias/MediaDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 

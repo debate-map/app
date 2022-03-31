@@ -5,7 +5,6 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React, {Fragment, useState} from "react";
 import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
 import {E, ModifyString} from "web-vcore/nm/js-vextensions";
-import {chroma_maxDarken} from "Utils/UI/General.js";
 import {ButtonChain} from "Utils/ReactComponents/ButtonChain.js";
 import {SourcesUI} from "./SourcesUI.js";
 

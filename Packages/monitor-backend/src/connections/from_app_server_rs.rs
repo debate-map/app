@@ -49,7 +49,8 @@ pub async fn send_mtx_results(
     let SendMtxResults_Request { mtx } = payload;
     println!("Got mtx-result:{}", serde_json::to_string_pretty(&mtx).unwrap());
 
-    // todo: add mtx-result to app_state
+    let mut mtx_results = app_state.mtx_results.write().await;
+    mtx_results.push(mtx);
     
     let json = json!({
         "message": format!("Mtx-result successfully received."),

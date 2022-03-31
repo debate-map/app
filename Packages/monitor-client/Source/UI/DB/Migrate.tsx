@@ -12,7 +12,7 @@ export class LogMessage {
 }
 
 export const MIGRATE_LOG_ENTRIES_SUBSCRIPTION = gql`
-subscription MigrateMessages {
+subscription {
 	migrateLogEntries {
 		text
 	}

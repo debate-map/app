@@ -3,6 +3,7 @@ import * as ReactColor from "react-color";
 import ReactDOM from "react-dom";
 import {store} from "Store";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
+import {MainSkin} from "Utils/Styles/MainSkin";
 import {AddressBarWrapper, Chroma, ErrorBoundary, LoadURL, NotificationsUI, Observer, RunInAction} from "web-vcore";
 import {ApolloProvider} from "web-vcore/nm/@apollo/client";
 import chroma from "web-vcore/nm/chroma-js.js";
@@ -118,16 +119,19 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 }
 
 export class RootStyles extends BaseComponent<{}, {}> {
+	ComponentWillMount() {
+		const skin = MainSkin.main;
+		skin.CSSHooks_Freeform();
+	}
 	render() {
+		const skin = MainSkin.main;
 		return (
 			<style>{`
 			html, body:not(.neverMatch) {
-				font-family: 'Quicksand', sans-serif;
-				color: ${
-					//Chroma("rgba(255,255,255,.7)").css()
-					Chroma("rgb(50,50,50)").css()
-				};
+				font-family: ${skin.MainFont()};
+				color: ${skin.TextColor().css()};
 			}
+			${skin.StyleBlock_Freeform()}
 			`}</style>
 		);
 	}

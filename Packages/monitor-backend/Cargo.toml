@@ -25,7 +25,7 @@ flume = "0.10.10"
 hyper = {version = "0.14.16", features = ["client"] }
 deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
 deadpool-postgres = "0.10.1"
-indexmap = "1.8.0"
+indexmap = {version = "1.8.0", features = ["serde"]}
 async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
 

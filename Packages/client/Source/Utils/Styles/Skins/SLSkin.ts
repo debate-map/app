@@ -1,5 +1,5 @@
 import {UserRow} from "UI/Database/Users.js";
-import {chroma_maxDarken} from "Utils/UI/General.js";
+import {chroma_maxDarken} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
