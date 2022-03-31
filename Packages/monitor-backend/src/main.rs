@@ -45,11 +45,20 @@ use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
+use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results};
+
 mod gql;
 //mod proxy_to_asjs;
 mod pgclient;
 mod utils {
+    pub mod general;
     pub mod type_aliases;
+}
+mod store {
+    pub mod storage;
+}
+mod connections {
+    pub mod from_app_server_rs;
 }
 
 pub mod db {
@@ -89,12 +98,15 @@ async fn main() {
         println!("Got panic. @info:{}\n@stackTrace:{}", info, stacktrace);
         std::process::abort();
     }));
+    
+    let app_state = AppStateWrapper::new(AppState { mtx_results: vec![] });
 
     let app = Router::new()
         /*.route("/", get(|| async { Html(r#"
             <p>This is the URL for the monitor-backend.</p>
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/
+        .route("/send-mtx-results", post(send_mtx_results))
         .fallback(get(handler));
 
     let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
@@ -103,10 +115,13 @@ async fn main() {
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
+        .layer(AddExtensionLayer::new(app_state))
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5130)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
-    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
+    //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
+    //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info());
+    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
     println!("Monitor-backend launched.");
     server_fut.await.unwrap();
 }

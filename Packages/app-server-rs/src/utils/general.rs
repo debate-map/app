@@ -4,6 +4,7 @@ use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Po
 use deadpool_postgres::Pool;
 use flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
+use hyper::Body;
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::{json, Map};
 use tokio_postgres::{Client, Row, types::ToSql};
@@ -11,7 +12,7 @@ use uuid::Uuid;
 //use tokio::sync::Mutex;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::storage::{StorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, filter::get_sql_for_filters}};
+use crate::{store::storage::{LQStorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, filter::get_sql_for_filters}};
 
 use super::{filter::Filter, mtx::mtx::{new_mtx}};
 
@@ -127,7 +128,7 @@ pub async fn handle_generic_gql_collection_request<'a,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
     new_mtx!(mtx, "part1");
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
-        let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
+        let storage_wrapper = ctx.data::<LQStorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
         let sender = storage.get_sender_for_lq_watcher_drops();
 
@@ -159,7 +160,7 @@ pub async fn handle_generic_gql_doc_request<'a,
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter = Some(json!({"id": {"equalTo": id}}));
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
-        let storage_wrapper = ctx.data::<StorageWrapper>().unwrap();
+        let storage_wrapper = ctx.data::<LQStorageWrapper>().unwrap();
         let mut storage = storage_wrapper.lock().await;
         let sender = storage.get_sender_for_lq_watcher_drops();
 
@@ -215,4 +216,10 @@ impl<'a, T> Stream for Stream_WithDropListener<'a, T> {
     fn poll_next(mut self: Pin<&mut Self>, c: &mut std::task::Context<'_>) -> Poll<Option<<Self as Stream>::Item>> {
         self.inner_stream.as_mut().poll_next(c)
     }
+}
+
+pub async fn body_to_str(body: Body) -> Result<String, Error> {
+    let bytes1 = hyper::body::to_bytes(body).await?;
+    let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
+    Ok(req_as_str)
 }

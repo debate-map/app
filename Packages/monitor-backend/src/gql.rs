@@ -39,6 +39,7 @@ use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::GeneralMessage;
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
+use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::JSONValue;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 use flume::{Sender, Receiver, unbounded};
@@ -83,8 +84,7 @@ async fn graphql_playground() -> impl IntoResponse {
 
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
     // read request's body (from frontend)
-    let bytes1 = hyper::body::to_bytes(req.into_body()).await.unwrap();
-    let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
+    let req_as_str: String = body_to_str(req.into_body()).await.unwrap();
     let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
 
     // send request to graphql engine

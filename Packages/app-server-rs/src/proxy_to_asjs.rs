@@ -11,7 +11,7 @@ use axum::http::{Method, HeaderValue};
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router};
+use axum::{extract, AddExtensionLayer, Router, Json};
 use axum::http::{uri::Uri, Request, Response};
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, Variables};
@@ -23,6 +23,7 @@ use tower_http::cors::{CorsLayer, Origin};
 use futures::future::{self, Future};
 
 use crate::gql::RootSchema;
+use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::JSONValue;
 
 pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
@@ -31,8 +32,7 @@ pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster
 
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
     // read request's body (from frontend)
-    let bytes1 = hyper::body::to_bytes(req.into_body()).await.unwrap();
-    let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
+    let req_as_str = body_to_str(req.into_body()).await.unwrap();
     let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
 
     // send request to graphql engine
@@ -91,6 +91,9 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
             });
             Response::builder().status(StatusCode::BAD_GATEWAY)
                 .body(Body::from(json.to_string())).unwrap()
+            /*Json(json!({
+                "error": format!("Error occurred while trying to send get/post command to app-server-js:{}", err),
+            }))*/
         },
     }
 }

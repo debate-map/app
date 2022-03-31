@@ -42,7 +42,7 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 
-use crate::{store::storage::{StorageWrapper, AppState, LQStorage, DropLQWatcherMsg}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response}};
+use crate::{store::storage::{LQStorageWrapper, AppState, LQStorage, DropLQWatcherMsg, AppStateWrapper}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response}};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -134,10 +134,10 @@ async fn main() {
     let user_set = std::sync::Mutex::new(HashSet::new());
     let (tx, _rx) = broadcast::channel(100);
 
-    let app_state = Arc::new(AppState { user_set, tx });
+    let app_state = AppStateWrapper::new(AppState { user_set, tx });
     //let storage = Storage::<'static>::default();
     let (lq_storage, receiver_for_lq_watcher_drops) = LQStorage::new();
-    let storage_wrapper = StorageWrapper::new(Mutex::new(lq_storage));
+    let storage_wrapper = LQStorageWrapper::new(Mutex::new(lq_storage));
 
     // start this listener for drop requests
     let storage_wrapper_clone = storage_wrapper.clone();

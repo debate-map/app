@@ -60,7 +60,7 @@ use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{SubscriptionShard_User};
 use crate::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient, have_own_graphql_handle_request};
-use crate::store::storage::StorageWrapper;
+use crate::store::storage::LQStorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 
 wrap_slow_macros!{
@@ -100,7 +100,7 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: StorageWrapper) -> Router {
+pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWrapper) -> Router {
     //let client_for_graphql = pool.get().await.unwrap();
     // the connection object performs the actual communication with the database, so spawn it off to run on its own // commented; don't think this is needed anymore, since using pool
     /*tokio::spawn(async move {
@@ -173,6 +173,6 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: StorageWrap
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(client_to_asjs));
 
-    println!("Playground: http://localhost:8000");
+    println!("Playground: http://localhost:[view readme]");
     result
 }

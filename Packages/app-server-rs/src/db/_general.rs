@@ -10,7 +10,7 @@ use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
-use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request};
+use crate::utils::general::{handle_generic_gql_collection_request, GQLSet, handle_generic_gql_doc_request, body_to_str};
 use crate::utils::filter::{Filter};
 use crate::utils::type_aliases::{JSONValue};
 
@@ -129,12 +129,10 @@ async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<
 
     // one example of why this can fail: if the app-server-js pod crashed
     let response = client_to_asjs.request(request).await.with_context(|| "Error occurred while trying to send _PassConnectionID message to app-server-js.")?;
-    let response_as_bytes = hyper::body::to_bytes(response.into_body()).await.with_context(|| "Could not convert response into bytes.")?;
-    let response_as_str_cow = String::from_utf8_lossy(&*response_as_bytes);
-    let response_as_str = response_as_str_cow.as_ref();
+    let response_as_str = body_to_str(response.into_body()).await.with_context(|| "Could not convert response into string.")?;
     
     // example str: {"data":{"_PassConnectionID":{"userID":"ABC123ABC123ABC123ABC1"}}}
-    let response_as_json = serde_json::from_str::<JSONValue>(response_as_str).with_context(|| format!("Could not parse response-str as json:{}", response_as_str))?;
+    let response_as_json = serde_json::from_str::<JSONValue>(&response_as_str).with_context(|| format!("Could not parse response-str as json:{}", response_as_str))?;
     let user_id_str = response_as_json["data"]["_PassConnectionID"]["userID"].as_str().with_context(|| format!("Response was malformed; should have GraphQL response shape. @response:{}", response_as_str))?;
     if user_id_str.len() == 22 {
         user_id = Some(user_id_str.to_owned());

@@ -84,6 +84,7 @@ pub fn wrap_serde_macros(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 }
 
 // derive macros
+// todo: fix that these fail for structs that already have their own "'X" lifetimes specified
 // ==========
 
 #[proc_macro_derive(Serialize_Stub)]

@@ -42,17 +42,17 @@ use crate::utils::type_aliases::JSONValue;
 
 // todo: merge AppState and Storage
 
+pub type AppStateWrapper = Arc<AppState>;
 pub struct AppState {
     pub user_set: std::sync::Mutex<HashSet<String>>,
     pub tx: broadcast::Sender<String>,
 }
 
-pub type StorageWrapper = Arc<Mutex<LQStorage>>;
-
 pub enum DropLQWatcherMsg {
     Drop_ByCollectionAndFilterAndStreamID(String, Filter, Uuid),
 }
 
+pub type LQStorageWrapper = Arc<Mutex<LQStorage>>;
 //#[derive(Default)]
 pub struct LQStorage {
     #[allow(clippy::box_collection)]
