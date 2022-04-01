@@ -71,7 +71,7 @@ export const RequestsUI = observer(()=>{
 
 	return (
 		<Column style={{flex: 1, height: "100%"}}>
-			<Row>
+			<Row center>
 				<Text>Actions:</Text>
 				<Button ml={5} text="Refresh" onClick={async()=>{
 					await refetch();
