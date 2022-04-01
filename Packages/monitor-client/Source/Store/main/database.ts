@@ -11,5 +11,6 @@ export class RequestsState {
 	constructor() { makeObservable(this); }
 	@O showRange_duration = 60000;
 	@O showRange_end = Date.now();
-	@O pathFilter = "";
+	@O pathFilter_enabled = false;
+	@O pathFilter_str = "";
 }

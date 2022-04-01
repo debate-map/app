@@ -18,7 +18,13 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
 		const uiState = store.main.database.requests;
-		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes).filter(a=>a.path.includes(uiState.pathFilter));
+		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes).filter(lifetime=>{
+			if (!uiState.pathFilter_enabled) return true;
+			if (uiState.pathFilter_str.startsWith("/") && uiState.pathFilter_str.endsWith("/")) {
+				return lifetime.path.match(uiState.pathFilter_str.slice(1, -1)) != null;
+			}
+			return lifetime.path.includes(uiState.pathFilter_str);
+		});
 
 		const lifetimeGroups = new Map<string, LifetimeGroup>();
 		for (const lifetime of lifetimes) {
@@ -81,6 +87,7 @@ export class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime, index: num
 					left: start_asPercentage.ToPercentStr(),
 					right: (1 - end_asPercentage).ToPercentStr(),
 					//width: (end_asPercentage - start_asPercentage).KeepAtLeast(.01).ToPercentStr(),
+					minWidth: 1,
 					top: 0, height: 3,
 					backgroundColor: colorForPath,
 				}}

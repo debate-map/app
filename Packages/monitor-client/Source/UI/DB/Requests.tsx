@@ -1,14 +1,12 @@
 import gql from "graphql-tag";
 import React from "react";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {hourInMS, minuteInMS, Observer, observer_simple, RunInAction_Set, secondInMS} from "web-vcore";
+import {hourInMS, InfoButton, minuteInMS, RunInAction_Set, secondInMS} from "web-vcore";
 import {useMutation, useQuery} from "web-vcore/nm/@apollo/client.js";
-import {Button, Column, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
-import {useForceUpdate} from "tree-grapher";
-import {MtxResultUI} from "./Requests/MtxResultUI";
+import {Button, CheckBox, Column, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
 export class Mtx {
 	sectionLifetimes: MtxSectionLifetimeMap;
@@ -91,8 +89,9 @@ export const RequestsUI = observer(()=>{
 				<TextInput ml={5} type="datetime-local" {...{step: 1}}
 					value={DateToDateTimeInputStr(new Date(uiState.showRange_end))} onChange={val=>RunInAction_Set(()=>uiState.showRange_end = new Date(val).valueOf())}/>
 				<Button ml={5} text="Now" onClick={()=>RunInAction_Set(()=>uiState.showRange_end = Date.now())}/>
-				<Text ml={5}>Path filter:</Text>
-				<TextInput ml={5} value={uiState.pathFilter} onChange={val=>uiState.pathFilter = val}/>
+				<CheckBox ml={5} text="Path filter:" value={uiState.pathFilter_enabled} onChange={val=>RunInAction_Set(()=>uiState.pathFilter_enabled = val)}/>
+				<TextInput ml={5} value={uiState.pathFilter_str} onChange={val=>uiState.pathFilter_str = val}/>
+				<InfoButton ml={5} text="You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/"/>
 			</Row>
 			<Row>Mtx results ({mtxResults.length})</Row>
 			<ScrollView>
