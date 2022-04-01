@@ -36,7 +36,7 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 		}
 
 		return (
-			<Column style={{position: "relative", height: lifetimes.length * 3}}>
+			<Column style={{position: "relative", height: (lifetimeGroups.size * 3) + 1, border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0"}}>
 				{[...lifetimeGroups.values()].map((group, index)=>{
 					return <LifetimeGroupUI key={index} group={group} index={index}/>;
 				})}
