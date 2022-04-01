@@ -86,11 +86,13 @@ export const RequestsUI = observer(()=>{
 					await refetch();
 				}}/>
 				<Text ml={5}>Range to show, duration:</Text>
-				<TextInput type="time" {...{step: 1}} style={{marginLeft: 5}} value={TimeInMSToTimeInputStr(uiState.showRange_duration)} onChange={val=>uiState.showRange_duration = TimeInputStrToTimeInMS(val)}/>
+				<TextInput ml={5} type="time" {...{step: 1}} value={TimeInMSToTimeInputStr(uiState.showRange_duration)} onChange={val=>uiState.showRange_duration = TimeInputStrToTimeInMS(val)}/>
 				<Text ml={5}>End:</Text>
-				<TextInput type="datetime-local" {...{step: 1}} style={{marginLeft: 5}}
+				<TextInput ml={5} type="datetime-local" {...{step: 1}}
 					value={DateToDateTimeInputStr(new Date(uiState.showRange_end))} onChange={val=>RunInAction_Set(()=>uiState.showRange_end = new Date(val).valueOf())}/>
 				<Button ml={5} text="Now" onClick={()=>RunInAction_Set(()=>uiState.showRange_end = Date.now())}/>
+				<Text ml={5}>Path filter:</Text>
+				<TextInput ml={5} value={uiState.pathFilter} onChange={val=>uiState.pathFilter = val}/>
 			</Row>
 			<Row>Mtx results ({mtxResults.length})</Row>
 			<ScrollView>

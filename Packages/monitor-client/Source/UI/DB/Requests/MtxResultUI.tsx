@@ -17,7 +17,8 @@ class LifetimeGroup {
 export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
-		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes);
+		const uiState = store.main.database.requests;
+		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes).filter(a=>a.path.includes(uiState.pathFilter));
 
 		const lifetimeGroups = new Map<string, LifetimeGroup>();
 		for (const lifetime of lifetimes) {
@@ -49,7 +50,7 @@ export class LifetimeGroupUI extends BaseComponent<{group: LifetimeGroup, index:
 				title={`GroupPath:${group.path}`}
 			>
 				{group.lifetimes.map((lifetime, lifetimeIndex)=>{
-					return <LifetimeUI key={index} lifetime={lifetime} index={lifetimeIndex}/>;
+					return <LifetimeUI key={lifetimeIndex} lifetime={lifetime} index={lifetimeIndex}/>;
 				})}
 			</div>
 		);
