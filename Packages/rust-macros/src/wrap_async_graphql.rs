@@ -1,5 +1,5 @@
 use std::{env};
-use proc_macro2::{TokenStream, TokenTree};
+use proc_macro2::{TokenStream};
 
 use crate::utils::{remove_token_sequences_for_derive_macros, remove_token_sequences_for_macros};
 

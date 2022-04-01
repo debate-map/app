@@ -3,6 +3,7 @@ import {O} from "web-vcore";
 import {makeObservable} from "web-vcore/nm/mobx";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {store} from "./index.js";
+import {DatabaseState} from "./main/database.js";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
@@ -18,7 +19,7 @@ export class MainState {
 	// ==========
 
 	@O home = {} as {subpage: string};
-	@O db = {} as {subpage: string};
+	@O database = new DatabaseState();
 	/*@O netdata = {} as {subpage: string};
 	@O grafana = {} as {subpage: string};
 	@O prometheus = {} as {subpage: string};

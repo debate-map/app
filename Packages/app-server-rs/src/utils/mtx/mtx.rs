@@ -186,7 +186,6 @@ pub async fn send_mtx_tree_to_monitor_backend(
     //println!("Sending mtx-tree to monitor-backend:{}", serde_json::to_string_pretty(mtx_root).unwrap());
     let client = Client::new();
 
-    println!("Starting...");
     let req = Request::builder()
         .method(Method::POST)
         //.uri(format!("http://{}/post", get_host_of_other_pod("dm-monitor-backend", "default", "5130")))
@@ -198,9 +197,8 @@ pub async fn send_mtx_tree_to_monitor_backend(
             mtx_root_as_str
             .into()
         )?;
-    println!("Sending...");
     let res = client.request(req).await?;
-    println!("Done! Response:{}", body_to_str(res.into_body()).await?);
+    //println!("Done! Response:{}", body_to_str(res.into_body()).await?);
 
     Ok::<(), Error>(())
 }

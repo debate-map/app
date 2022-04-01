@@ -35,12 +35,22 @@ impl QueryShard_General {
     /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
     
-    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<Mtx>, Error> {
+    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<Mtx>, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
-        let mtx_results = app_state.mtx_results.read().await;
-        Ok(mtx_results.to_vec())
+        let mtx_results = app_state.mtx_results.read().await.to_vec();
+        let mtx_results_filtered: Vec<Mtx> = mtx_results.into_iter().filter(|mtx| {
+            for lifetime in mtx.section_lifetimes.values() {
+                let section_start = lifetime.0;
+                let section_end = section_start + lifetime.1;
+                if section_start < end_time && section_end > start_time {
+                    return true;
+                }
+            }
+            false
+        }).collect();
+        Ok(mtx_results_filtered)
     }
 }
 

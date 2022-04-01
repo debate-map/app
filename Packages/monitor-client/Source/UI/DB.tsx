@@ -9,7 +9,7 @@ import {RequestsUI} from "./DB/Requests";
 @Observer
 export class DBUI extends BaseComponent<{}, {}> {
 	render() {
-		const currentSubpage = store.main.db.subpage;
+		const currentSubpage = store.main.database.subpage;
 		return (
 			<Switch>
 				<RequestsUI/>

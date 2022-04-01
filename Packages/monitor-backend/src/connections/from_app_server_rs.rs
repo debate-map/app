@@ -51,6 +51,10 @@ pub async fn send_mtx_results(
 
     let mut mtx_results = app_state.mtx_results.write().await;
     mtx_results.push(mtx);
+    if mtx_results.len() > 5000 {
+        let entries_to_remove = mtx_results.len() - 5000;
+        mtx_results.drain(0..entries_to_remove);
+    }
     
     let json = json!({
         "message": format!("Mtx-result successfully received."),
