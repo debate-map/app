@@ -6,19 +6,56 @@ import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {GetLifetimesInMap, Mtx, MtxLifetime} from "../Requests.js";
 
+class LifetimeGroup {
+	constructor(data?: Partial<LifetimeGroup>) {
+		this.VSet(data);
+	}
+	path: string;
+	lifetimes: MtxLifetime[] = [];
+}
+
 export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
 		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes);
+
+		const lifetimeGroups = new Map<string, LifetimeGroup>();
+		for (const lifetime of lifetimes) {
+			const groupPath = `${lifetime.path.slice(0, lifetime.path.lastIndexOf("/"))}/*`;
+			if (!lifetimeGroups.has(groupPath)) {
+				lifetimeGroups.set(groupPath, new LifetimeGroup({path: groupPath}));
+			}
+			lifetimeGroups.get(groupPath)!.lifetimes.push(lifetime);
+		}
+
 		return (
 			<Column style={{position: "relative", height: lifetimes.length * 3}}>
-				{lifetimes.map((lifetime, index)=>{
-					return <LifetimeUI key={index} lifetime={lifetime} index={index}/>;
+				{[...lifetimeGroups.values()].map((group, index)=>{
+					return <LifetimeGroupUI key={index} group={group} index={index}/>;
 				})}
 			</Column>
 		);
 	}
 }
+
+export class LifetimeGroupUI extends BaseComponent<{group: LifetimeGroup, index: number}, {}> {
+	render() {
+		const {group, index} = this.props;
+		return (
+			<div
+				style={{
+					position: "relative", height: 3,
+				}}
+				title={`GroupPath:${group.path}`}
+			>
+				{group.lifetimes.map((lifetime, lifetimeIndex)=>{
+					return <LifetimeUI key={index} lifetime={lifetime} index={lifetimeIndex}/>;
+				})}
+			</div>
+		);
+	}
+}
+
 export class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime, index: number}, {}> {
 	render() {
 		const {lifetime, index} = this.props;
@@ -43,7 +80,7 @@ export class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime, index: num
 					left: start_asPercentage.ToPercentStr(),
 					right: (1 - end_asPercentage).ToPercentStr(),
 					//width: (end_asPercentage - start_asPercentage).KeepAtLeast(.01).ToPercentStr(),
-					top: index * 3, height: 3,
+					top: 0, height: 3,
 					backgroundColor: colorForPath,
 				}}
 				title={`

@@ -23,14 +23,18 @@ export class MtxLifetime {
 	startTime: number;
 	duration: number;
 }
-export function GetLifetimesInMap(map: MtxSectionLifetimeMap) {
-	return Object.entries(map).map(entry=>{
+export function GetLifetimesInMap(map: MtxSectionLifetimeMap, sort = true) {
+	let result = Object.entries(map).map(entry=>{
 		return new MtxLifetime().VSet({
 			path: entry[0],
 			startTime: entry[1][0],
 			duration: entry[1][1],
 		});
 	});
+	// fsr, the entries are not sorted at this point, despite (seemingly) being sorted when serialized for sending from backend
+	//if (sort) result = result.OrderBy(a=>a.startTime);
+	if (sort) result = result.OrderBy(a=>a.path);
+	return result;
 }
 
 export const MTX_RESULTS_QUERY = gql`

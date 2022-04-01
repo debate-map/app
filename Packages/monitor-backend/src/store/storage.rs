@@ -50,37 +50,3 @@ pub struct Mtx {
 }
 
 }
-
-/*#[derive(Clone, Serialize, Deserialize)]
-pub struct IndexMap2<K: std::hash::Hash + Eq, V>(IndexMap<K, V>);
-use std::ops::{Deref, DerefMut};
-impl<K: std::hash::Hash + Eq, V> Deref for IndexMap2<K, V> {
-    type Target = IndexMap<K, V>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl<K: std::hash::Hash + Eq, V> DerefMut for IndexMap2<K, V> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl<K: std::hash::Hash + Eq + Send + Sync, V: Send + Sync> async_graphql::OutputType for IndexMap2<K, V> {
-    fn type_name() -> std::borrow::Cow< 'static,str>  {
-        todo!()
-    }
-    fn create_type_info(registry: &mut async_graphql::registry::Registry) -> String {
-        todo!()
-    }
-    fn resolve< 'life0, 'life1, 'life2, 'life3, 'async_trait>(& 'life0 self,ctx: & 'life1 async_graphql::ContextSelectionSet< 'life2> ,field: & 'life3 async_graphql::Positioned<async_graphql::parser::types::Field> ,) ->  core::pin::Pin<Box<dyn core::future::Future<Output = async_graphql::ServerResult<async_graphql::Value> > + core::marker::Send+ 'async_trait> >where 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait, 'life3: 'async_trait,Self: 'async_trait {
-        todo!()
-    }
-}*/
-/*impl<K: Send + Sync, V: Send + Sync> async_graphql::ContainerType for IndexMap2<K, V> {
-    fn resolve_field< 'life0, 'life1, 'life2, 'async_trait>(& 'life0 self,ctx: & 'life1 async_graphql::Context< 'life2>) ->  core::pin::Pin<Box<dyn core::future::Future<Output = async_graphql::ServerResult<Option<async_graphql::Value> > > + core::marker::Send+ 'async_trait> >where 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait,Self: 'async_trait {
-        todo!()
-    }
-}
-impl<K: Send + Sync, V: Send + Sync> async_graphql::ObjectType for IndexMap2<K, V> {
-}*/
