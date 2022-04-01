@@ -18,13 +18,14 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
 		const uiState = store.main.database.requests;
-		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes).filter(lifetime=>{
-			if (!uiState.pathFilter_enabled) return true;
-			if (uiState.pathFilter_str.startsWith("/") && uiState.pathFilter_str.endsWith("/")) {
-				return lifetime.path.match(uiState.pathFilter_str.slice(1, -1)) != null;
-			}
-			return lifetime.path.includes(uiState.pathFilter_str);
-		});
+		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes)
+			.filter(lifetime=>{
+				if (!uiState.pathFilter_enabled) return true;
+				if (uiState.pathFilter_str.startsWith("/") && uiState.pathFilter_str.endsWith("/")) {
+					return lifetime.path.match(uiState.pathFilter_str.slice(1, -1)) != null;
+				}
+				return lifetime.path.includes(uiState.pathFilter_str);
+			});
 
 		const lifetimeGroups = new Map<string, LifetimeGroup>();
 		for (const lifetime of lifetimes) {
@@ -93,7 +94,7 @@ export class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime, index: num
 				}}
 				title={`
 					Path:${lifetime.path}
-					StartTime:${new Date(lifetime.startTime).toLocaleString("sv")}
+					StartTime:${new Date(lifetime.startTime).toLocaleString("sv")}.${new Date(lifetime.startTime).getMilliseconds().toString().padStart(3, "0")}
 					Duration:${lifetime.duration}ms
 				`.AsMultiline(0)}/>
 		);

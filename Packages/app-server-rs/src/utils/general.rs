@@ -14,7 +14,7 @@ use metrics::{counter, histogram, increment_counter};
 
 use crate::{store::storage::{LQStorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, filter::get_sql_for_filters}};
 
-use super::{filter::Filter, mtx::mtx::{new_mtx}};
+use super::{filter::Filter, mtx::mtx::{new_mtx, Mtx}};
 
 pub fn time_since_epoch() -> Duration {
     SystemTime::now().duration_since(UNIX_EPOCH).unwrap()
@@ -49,14 +49,13 @@ where
 }*/
 
 pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, QueryFunc, QueryFuncReturn>(
-    query_func: QueryFunc, table_name: &str, filter: &Filter
+    query_func: QueryFunc, table_name: &str, filter: &Filter, parent_mtx: Option<&Mtx>,
 ) -> Result<(Vec<RowData>, Vec<T>), Error>
 where
     QueryFunc: FnOnce(String/*, &'a [&(dyn ToSql + Sync)]*/) -> QueryFuncReturn,
     QueryFuncReturn: Future<Output = Result<Vec<Row>, tokio_postgres::Error>>,
 {
-    let time1 = Instant::now();
-
+    new_mtx!(mtx, "1", parent_mtx);
     let filters_sql = get_sql_for_filters(filter).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let where_clause = match filters_sql.len() {
         0..=2 => "".to_owned(),
@@ -66,8 +65,7 @@ where
     let mut rows = query_func(format!("SELECT * FROM \"{table_name}\"{where_clause};")/*, &[]*/).await
         .with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql}"))?;
 
-    let time2 = Instant::now();
-
+    mtx.section("2");
     // sort by id, so that order of our results here is consistent with order after live-query-updating modifications (see storage.rs)
     rows.sort_by_key(|a| a.get::<&str, String>("id"));
 
@@ -79,20 +77,19 @@ where
         json_val.as_object().unwrap().clone()
     }).collect();
 
-    histogram!("get_entries_in_collection_basic.part1", time2.duration_since(time1).as_secs_f64() * 1000f64);
-    histogram!("get_entries_in_collection_basic.part2", Instant::now().duration_since(time2).as_secs_f64() * 1000f64);
-
     Ok((entries, entries_as_type))
 }
-pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter) -> Result<(Vec<RowData>, Vec<T>), Error> {
+pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
+    new_mtx!(mtx, "1", parent_mtx);
     //let client = ctx.data::<Client>().unwrap();
     let pool = ctx.data::<Pool>().unwrap();
     let client = pool.get().await.unwrap();
 
+    mtx.section("2");
     let query_func = |str1: String| async move {
         client.query(&str1, &[]).await
     };
-    let (entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter).await.unwrap();
+    let (entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter, Some(&mtx)).await.unwrap();
     Ok((entries, entries_as_type))
 }
 
@@ -128,11 +125,10 @@ pub async fn handle_generic_gql_collection_request<'a,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
     new_mtx!(mtx, "1");
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
-        let storage_wrapper = ctx.data::<LQStorageWrapper>().unwrap();
-        mtx.section("1.5");
-        let mut storage = storage_wrapper.lock().await;
+        let storage = ctx.data::<LQStorageWrapper>().unwrap();
+        //mtx.section("1.5");
         //let mut storage = storage_wrapper.write().await;
-        mtx.section("1.6");
+        //mtx.section("1.6");
         let sender = storage.get_sender_for_lq_watcher_drops();
 
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
@@ -163,11 +159,10 @@ pub async fn handle_generic_gql_doc_request<'a,
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter = Some(json!({"id": {"equalTo": id}}));
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
-        let storage_wrapper = ctx.data::<LQStorageWrapper>().unwrap();
-        mtx.section("1.5");
-        let mut storage = storage_wrapper.lock().await;
+        let storage = ctx.data::<LQStorageWrapper>().unwrap();
+        //mtx.section("1.5");
         //let mut storage = storage_wrapper.write().await;
-        mtx.section("1.6");
+        //mtx.section("1.6");
         let sender = storage.get_sender_for_lq_watcher_drops();
 
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));

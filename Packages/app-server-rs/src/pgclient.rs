@@ -49,9 +49,10 @@ pub fn create_db_pool() -> Pool {
     let pg_cfg = get_tokio_postgres_config();
     let mgr_cfg = ManagerConfig {
         recycling_method: RecyclingMethod::Fast
+        //recycling_method: RecyclingMethod::Verified
     };
     let mgr = Manager::from_config(pg_cfg, NoTls, mgr_cfg);
-    let pool = Pool::builder(mgr).max_size(30).runtime(Runtime::Tokio1).build().unwrap();
+    let pool = Pool::builder(mgr).max_size(1500).runtime(Runtime::Tokio1).build().unwrap();
     pool
 }
 
@@ -119,9 +120,9 @@ pub async fn start_streaming_changes(
             for change_raw in data["change"].as_array().unwrap() {
                 let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
 
-                let mut storage = storage_wrapper.lock().await;
                 //let mut storage = storage_wrapper.write().await;
-                let mut1 = storage.live_queries.iter_mut();
+                let mut live_queries = storage_wrapper.live_queries.write().await;
+                let mut1 = live_queries.iter_mut();
                 for (lq_key, lq_info) in mut1 {
                     let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
                     if lq_key_json["table"].as_str().unwrap() != change.table { continue; }

@@ -137,7 +137,7 @@ async fn main() {
     let app_state = AppStateWrapper::new(AppState { user_set, tx });
     //let storage = Storage::<'static>::default();
     let (lq_storage, receiver_for_lq_watcher_drops) = LQStorage::new();
-    let storage_wrapper = LQStorageWrapper::new(Mutex::new(lq_storage));
+    let storage_wrapper = LQStorageWrapper::new(lq_storage);
     //let storage_wrapper = LQStorageWrapper::new(RwLock::new(lq_storage));
 
     // start this listener for drop requests
@@ -147,9 +147,8 @@ async fn main() {
             let drop_msg = receiver_for_lq_watcher_drops.recv_async().await.unwrap();
             match drop_msg {
                 DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
-                    let mut storage = storage_wrapper_clone.lock().await;
                     //let mut storage = storage_wrapper_clone.write().await;
-                    storage.drop_lq_watcher(&table_name, &filter, stream_id);
+                    storage_wrapper_clone.drop_lq_watcher(&table_name, &filter, stream_id).await;
                 },
             };
         }

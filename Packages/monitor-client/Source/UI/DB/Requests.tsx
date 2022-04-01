@@ -64,9 +64,13 @@ export const RequestsUI = observer(()=>{
 	const {data, loading, refetch} = useQuery(MTX_RESULTS_QUERY, {
 		variables: {adminKey, startTime: uiState.showRange_end - uiState.showRange_duration, endTime: uiState.showRange_end},
 	});
-	const mtxResults: Mtx[] = data?.mtxResults ?? [];
+	let mtxResults: Mtx[] = data?.mtxResults ?? [];
+	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
+	mtxResults = mtxResults.OrderBy(mtx=>{
+		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(lifetime=>lifetime[0]).Min();
+		return earliestLifetimeStart;
+	});
 	console.log("Got data:", mtxResults);
-
 	const [clearMtxResults, info] = useMutation(CLEAR_MTX_RESULTS);
 
 	return (
@@ -90,7 +94,7 @@ export const RequestsUI = observer(()=>{
 					value={DateToDateTimeInputStr(new Date(uiState.showRange_end))} onChange={val=>RunInAction_Set(()=>uiState.showRange_end = new Date(val).valueOf())}/>
 				<Button ml={5} text="Now" onClick={()=>RunInAction_Set(()=>uiState.showRange_end = Date.now())}/>
 				<CheckBox ml={5} text="Path filter:" value={uiState.pathFilter_enabled} onChange={val=>RunInAction_Set(()=>uiState.pathFilter_enabled = val)}/>
-				<TextInput ml={5} value={uiState.pathFilter_str} onChange={val=>uiState.pathFilter_str = val}/>
+				<TextInput ml={5} style={{flex: 1}} value={uiState.pathFilter_str} onChange={val=>uiState.pathFilter_str = val}/>
 				<InfoButton ml={5} text="You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/"/>
 			</Row>
 			<Row>Mtx results ({mtxResults.length})</Row>

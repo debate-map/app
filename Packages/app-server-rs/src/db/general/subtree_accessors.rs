@@ -159,7 +159,7 @@ pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<
     let query_func = |str1: String| async move {
         ctx.tx.query(&str1, &[]).await
     };
-    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter).await?;
+    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
     Ok(entries_as_type)
 }
 
