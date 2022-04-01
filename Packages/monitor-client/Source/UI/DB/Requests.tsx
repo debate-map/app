@@ -8,6 +8,7 @@ import {Button, Column, Row, Text, TextInput} from "web-vcore/nm/react-vcomponen
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {useForceUpdate} from "tree-grapher";
+import {MtxResultUI} from "./Requests/MtxResultUI";
 
 export class Mtx {
 	sectionLifetimes: MtxSectionLifetimeMap;
@@ -22,7 +23,7 @@ export class MtxLifetime {
 	startTime: number;
 	duration: number;
 }
-function GetLifetimesInMap(map: MtxSectionLifetimeMap) {
+export function GetLifetimesInMap(map: MtxSectionLifetimeMap) {
 	return Object.entries(map).map(entry=>{
 		return new MtxLifetime().VSet({
 			path: entry[0],
@@ -110,30 +111,4 @@ function TimeInMSToTimeInputStr(timeInMS: number) {
 function TimeInputStrToTimeInMS(timeStr: string) {
 	const parts = timeStr.split(":").map(a=>Number(a));
 	return (parts[0] * hourInMS) + (parts[1] * minuteInMS) + (parts[2] * secondInMS);
-}
-
-class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
-	render() {
-		const {mtx} = this.props;
-		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes);
-		return (
-			<Column>
-				{lifetimes.map((lifetime, index)=>{
-					return <LifetimeUI key={index} lifetime={lifetime}/>;
-				})}
-			</Column>
-		);
-	}
-}
-class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime}, {}> {
-	render() {
-		const {lifetime} = this.props;
-		return (
-			<Row>
-				<Text>Path:{lifetime.path}</Text>
-				<Text ml={5}>StartTime:{new Date(lifetime.startTime).toLocaleString("sv")}</Text>
-				<Text ml={5}>Duration:{lifetime.duration}ms</Text>
-			</Row>
-		);
-	}
 }
