@@ -40,7 +40,7 @@ use std::{
     net::{SocketAddr, IpAddr},
     sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible,
 };
-use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
+use tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 
 use crate::{store::storage::{LQStorageWrapper, AppState, LQStorage, DropLQWatcherMsg, AppStateWrapper}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response}};
 
@@ -138,6 +138,7 @@ async fn main() {
     //let storage = Storage::<'static>::default();
     let (lq_storage, receiver_for_lq_watcher_drops) = LQStorage::new();
     let storage_wrapper = LQStorageWrapper::new(Mutex::new(lq_storage));
+    //let storage_wrapper = LQStorageWrapper::new(RwLock::new(lq_storage));
 
     // start this listener for drop requests
     let storage_wrapper_clone = storage_wrapper.clone();
@@ -147,6 +148,7 @@ async fn main() {
             match drop_msg {
                 DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
                     let mut storage = storage_wrapper_clone.lock().await;
+                    //let mut storage = storage_wrapper_clone.write().await;
                     storage.drop_lq_watcher(&table_name, &filter, stream_id);
                 },
             };

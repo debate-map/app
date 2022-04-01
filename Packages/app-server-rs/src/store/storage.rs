@@ -18,7 +18,7 @@ use flume::{Sender, Receiver, unbounded};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc, Mutex, RwLock};
 use tokio_postgres::{Client, Row};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
@@ -53,6 +53,7 @@ pub enum DropLQWatcherMsg {
 }
 
 pub type LQStorageWrapper = Arc<Mutex<LQStorage>>;
+//pub type LQStorageWrapper = Arc<RwLock<LQStorage>>;
 //#[derive(Default)]
 pub struct LQStorage {
     #[allow(clippy::box_collection)]
@@ -70,17 +71,17 @@ impl LQStorage {
     }
 
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&mut self, table_name: &str, filter: &Filter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, &LQEntryWatcher) {
-        new_mtx!(mtx, "part1", parent_mtx);
+        new_mtx!(mtx, "1", parent_mtx);
         /*let mut mtx = crate::utils::mtx::mtx::Mtx::new(crate::utils::mtx::mtx::fn_name!());
         mtx.section("part1");
         mtx.parent = parent_mtx;*/
 
         let (entry, lq_entries_count, _lq_entry_is_new) = {
-            new_mtx!(mtx2, "part1", Some(&mtx));
+            new_mtx!(mtx2, "1.1", Some(&mtx));
             let lq_key = get_lq_key(table_name, filter);
             let mut lq_entries_count = self.live_queries.len();
 
-            mtx2.section("part2");
+            mtx2.section("1.2");
             let create_new_entry = !self.live_queries.contains_key(&lq_key);
             if create_new_entry {
                 let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, filter).await.expect("Errored while getting entries in collection.");
@@ -88,13 +89,13 @@ impl LQStorage {
                 self.live_queries.insert(lq_key.clone(), new_entry);
             }
 
-            mtx2.section("part3");
+            mtx2.section("1.3");
             let entry = self.live_queries.get_mut(&lq_key).unwrap();
             if create_new_entry { lq_entries_count += 1; }
             (entry, lq_entries_count, create_new_entry)
         };
 
-        mtx.section("part2");
+        mtx.section("2");
         let result_entries = entry.last_entries.clone();
         let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 

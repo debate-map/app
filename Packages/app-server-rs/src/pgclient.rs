@@ -120,6 +120,7 @@ pub async fn start_streaming_changes(
                 let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
 
                 let mut storage = storage_wrapper.lock().await;
+                //let mut storage = storage_wrapper.write().await;
                 let mut1 = storage.live_queries.iter_mut();
                 for (lq_key, lq_info) in mut1 {
                     let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();

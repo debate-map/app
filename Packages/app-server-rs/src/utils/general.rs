@@ -126,10 +126,13 @@ pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
-    new_mtx!(mtx, "part1");
+    new_mtx!(mtx, "1");
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<LQStorageWrapper>().unwrap();
+        mtx.section("1.5");
         let mut storage = storage_wrapper.lock().await;
+        //let mut storage = storage_wrapper.write().await;
+        mtx.section("1.6");
         let sender = storage.get_sender_for_lq_watcher_drops();
 
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
@@ -140,7 +143,7 @@ pub async fn handle_generic_gql_collection_request<'a,
         (entries_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
-    mtx.section("part2");
+    mtx.section("2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield GQLSetVariant::from(entries_as_type);
@@ -156,12 +159,15 @@ pub async fn handle_generic_gql_collection_request<'a,
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
-    new_mtx!(mtx, "part1");
+    new_mtx!(mtx, "1");
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter = Some(json!({"id": {"equalTo": id}}));
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage_wrapper = ctx.data::<LQStorageWrapper>().unwrap();
+        mtx.section("1.5");
         let mut storage = storage_wrapper.lock().await;
+        //let mut storage = storage_wrapper.write().await;
+        mtx.section("1.6");
         let sender = storage.get_sender_for_lq_watcher_drops();
 
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));
@@ -173,7 +179,7 @@ pub async fn handle_generic_gql_doc_request<'a,
         (entry_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
     };
 
-    mtx.section("part2");
+    mtx.section("2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield entry_as_type;
