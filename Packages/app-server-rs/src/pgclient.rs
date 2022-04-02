@@ -124,19 +124,15 @@ pub async fn start_streaming_changes(
                 let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
 
                 //let mut storage = storage_wrapper.write().await;
-                let guard = storage_wrapper.live_queries.guard();
-                let live_queries = storage_wrapper.live_queries.with_guard(&guard);
-                let mut1 = live_queries.iter();
-                for entry in mut1 {
-                    let (lq_key, lq_info) = entry;
+                let mut live_queries = storage_wrapper.live_queries.write().await;
+                let mut1 = live_queries.iter_mut();
+                for (lq_key, lq_info) in mut1 {
                     let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
                     if lq_key_json["table"].as_str().unwrap() != change.table { continue; }
                     /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                         change_listener(&lq_info.last_entries);
                     }*/
-                    let mut lq_info_new = lq_info.clone();
-                    lq_info_new.on_table_changed(&change);
-                    live_queries.insert(lq_key.clone(), lq_info_new);
+                    lq_info.on_table_changed(&change);
                 }
             }
         }
