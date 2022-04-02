@@ -53,8 +53,11 @@ macro_rules! new_mtx {
         $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, None);
     };
     ($mtx:ident, $first_section_name:expr, $parent_mtx:expr) => {
+        $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, $parent_mtx, None);
+    };
+    ($mtx:ident, $first_section_name:expr, $parent_mtx:expr, $extra_info:expr) => {
         let parent_mtx: Option<&$crate::utils::mtx::mtx::Mtx> = $parent_mtx;
-        let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!(), $first_section_name, parent_mtx);
+        let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!(), $first_section_name, parent_mtx, $extra_info);
     };
 }
 use hyper::{Client, Method, Request, Body};
@@ -68,19 +71,22 @@ use crate::utils::{type_aliases::JSONValue, general::{time_since_epoch_ms, body_
 
 pub enum MtxMessage {
     /// tuple.0 is the section's path (relative); tuple.1 is the start-time in ms-since-epoch; tuple.2 is the end-time in ms-since-epoch
-    AddSectionLifetime(String, f64, f64),
+    AddSectionLifetime(String, SectionLifetime),
 }
 
 #[derive(Serialize)]
 pub struct Mtx {
     #[serde(skip)] pub func_name: String,
     #[serde(skip)] pub path_from_root_mtx: String,
+    //pub extra_info: String,
+
     #[serde(skip)] pub current_section_name: Cow<'static, str>,
     #[serde(skip)] pub current_section_start_time: f64,
+    #[serde(skip)] pub current_section_extra_info: Option<String>,
     /// This field holds the timings of all sections in the root mtx-enabled function, as well as any mtx-enabled functions called underneath it (where the root mtx is passed).
     /// Entry's key is the "path" to the section, eg: root_func/part1/other_func/part3
     /// Entry's value is a tuple, containing the start-time and duration of the section, stored as fractional milliseconds.
-    pub section_lifetimes: IndexMap<String, (f64, f64)>,
+    pub section_lifetimes: IndexMap<String, SectionLifetime>,
 
     // communication helpers
     #[serde(skip)] pub msg_sender: Sender<MtxMessage>,
@@ -93,7 +99,7 @@ pub struct Mtx {
 }
 //pub static mtx_none: Arc<Mtx> = Arc::new(Mtx::new("n/a"));
 impl Mtx {
-    pub fn new(func_name: &str, first_section_name: impl Into<Cow<'static, str>>, parent: Option<&Mtx>) -> Self {
+    pub fn new(func_name: &str, first_section_name: impl Into<Cow<'static, str>>, parent: Option<&Mtx>, extra_info: Option<String>) -> Self {
         let (msg_sender, msg_receiver): (Sender<MtxMessage>, Receiver<MtxMessage>) = flume::unbounded();
         let root_mtx_sender = match parent {
             Some(parent) => parent.root_mtx_sender.clone(),
@@ -105,8 +111,11 @@ impl Mtx {
                 Some(parent) => format!("{}/{}", parent.current_section_path(), func_name),
                 None => func_name.to_owned(),
             },
+            //extra_info,
+
             current_section_name: first_section_name.into(),
             current_section_start_time: time_since_epoch_ms(),
+            current_section_extra_info: extra_info,
             section_lifetimes: IndexMap::new(),
             msg_sender,
             msg_receiver,
@@ -125,14 +134,20 @@ impl Mtx {
         format!("{}/{}", self.path_from_root_mtx, self.current_section_name)
     }
     pub fn section(&mut self, name: impl Into<Cow<'static, str>>) {
+        self.section_2(name, None);
+    }
+    pub fn section_2(&mut self, name: impl Into<Cow<'static, str>>, extra_info: Option<String>) {
         let now = time_since_epoch_ms();
         let duration = now - self.current_section_start_time;
         let section_path = self.current_section_path();
-        self.section_lifetimes.insert(section_path.clone(), (self.current_section_start_time, duration));
-        self.root_mtx_sender.send(MtxMessage::AddSectionLifetime(section_path, self.current_section_start_time, duration)).unwrap();
+        let lifetime = SectionLifetime { extra_info: self.current_section_extra_info.clone(), start_time: self.current_section_start_time, duration };
+
+        self.section_lifetimes.insert(section_path.clone(), lifetime.clone());
+        self.root_mtx_sender.send(MtxMessage::AddSectionLifetime(section_path, lifetime)).unwrap();
 
         self.current_section_name = name.into();
         self.current_section_start_time = now;
+        self.current_section_extra_info = extra_info;
     }
 }
 impl Drop for Mtx {
@@ -141,8 +156,8 @@ impl Drop for Mtx {
         if self.is_root_mtx() {
             for msg in self.msg_receiver.drain() {
                 match msg {
-                    MtxMessage::AddSectionLifetime(path, start, duration) => {
-                        self.section_lifetimes.insert(path, (start, duration));
+                    MtxMessage::AddSectionLifetime(path, lifetime) => {
+                        self.section_lifetimes.insert(path, lifetime);
                     }
                 }
             }
@@ -157,6 +172,13 @@ impl Drop for Mtx {
             });
         }
     }
+}
+
+#[derive(Clone, Serialize)]
+pub struct SectionLifetime {
+    pub extra_info: Option<String>,
+    pub start_time: f64,
+    pub duration: f64,
 }
 
 /*//wrap_slow_macros!{

@@ -131,10 +131,7 @@ async fn main() {
         std::process::abort();
     }));
 
-    let user_set = std::sync::Mutex::new(HashSet::new());
-    let (tx, _rx) = broadcast::channel(100);
-
-    let app_state = AppStateWrapper::new(AppState { user_set, tx });
+    let app_state = AppStateWrapper::new(AppState {});
     //let storage = Storage::<'static>::default();
     let (lq_storage, receiver_for_lq_watcher_drops) = LQStorage::new();
     let storage_wrapper = LQStorageWrapper::new(lq_storage);

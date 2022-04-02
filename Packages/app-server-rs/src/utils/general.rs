@@ -55,8 +55,9 @@ where
     QueryFunc: FnOnce(String/*, &'a [&(dyn ToSql + Sync)]*/) -> QueryFuncReturn,
     QueryFuncReturn: Future<Output = Result<Vec<Row>, tokio_postgres::Error>>,
 {
-    new_mtx!(mtx, "1", parent_mtx);
+    new_mtx!(mtx, "1:run query", parent_mtx);
     let filters_sql = get_sql_for_filters(filter).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
+    mtx.current_section_extra_info = Some(format!("@table_name:{table_name} @filters_sql:{filters_sql}"));
     let where_clause = match filters_sql.len() {
         0..=2 => "".to_owned(),
         _ => " WHERE ".to_owned() + &filters_sql,
@@ -65,7 +66,7 @@ where
     let mut rows = query_func(format!("SELECT * FROM \"{table_name}\"{where_clause};")/*, &[]*/).await
         .with_context(|| format!("Error running select command for entries in table. @table:{table_name} @filters_sql:{filters_sql}"))?;
 
-    mtx.section("2");
+    mtx.section("2:sort and convert");
     // sort by id, so that order of our results here is consistent with order after live-query-updating modifications (see storage.rs)
     rows.sort_by_key(|a| a.get::<&str, String>("id"));
 
@@ -80,12 +81,12 @@ where
     Ok((entries, entries_as_type))
 }
 pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: &str, filter: &Filter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
-    new_mtx!(mtx, "1", parent_mtx);
+    new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
     //let client = ctx.data::<Client>().unwrap();
     let pool = ctx.data::<Pool>().unwrap();
     let client = pool.get().await.unwrap();
 
-    mtx.section("2");
+    mtx.section("2:get entries");
     let query_func = |str1: String| async move {
         client.query(&str1, &[]).await
     };

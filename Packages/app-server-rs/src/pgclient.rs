@@ -52,7 +52,10 @@ pub fn create_db_pool() -> Pool {
         //recycling_method: RecyclingMethod::Verified
     };
     let mgr = Manager::from_config(pg_cfg, NoTls, mgr_cfg);
-    let pool = Pool::builder(mgr).max_size(1500).runtime(Runtime::Tokio1).build().unwrap();
+    //let pool_size = 1;
+    //let pool_size = 5;
+    let pool_size = 1050;
+    let pool = Pool::builder(mgr).max_size(pool_size).runtime(Runtime::Tokio1).build().unwrap();
     pool
 }
 

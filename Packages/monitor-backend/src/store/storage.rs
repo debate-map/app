@@ -35,6 +35,8 @@ wrap_slow_macros!{
 // derived from struct in app-server-rs/.../mtx.rs
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Mtx {
+    //pub extra_info: String,
+
     /// This field holds the timings of all sections in the root mtx-enabled function, as well as any mtx-enabled functions called underneath it (where the root mtx is passed).
     /// Entry's key is the "path" to the section, eg: root_func/part1/other_func/part3
     /// Entry's value is a tuple, containing the start-time and duration of the section, stored as fractional milliseconds.
@@ -46,7 +48,14 @@ pub struct Mtx {
 
     // tell serde to serialize the HashMap using the ordered_map function, which collects the entries into a temporary BTreeMap (which is sorted)
     #[serde(serialize_with = "crate::utils::general::ordered_map")]
-    pub section_lifetimes: HashMap<String, (f64, f64)>,
+    pub section_lifetimes: HashMap<String, SectionLifetime>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SectionLifetime {
+    pub extra_info: Option<String>,
+    pub start_time: f64,
+    pub duration: f64,
 }
 
 }

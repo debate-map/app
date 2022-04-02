@@ -44,8 +44,6 @@ use crate::utils::type_aliases::JSONValue;
 
 pub type AppStateWrapper = Arc<AppState>;
 pub struct AppState {
-    pub user_set: std::sync::Mutex<HashSet<String>>,
-    pub tx: broadcast::Sender<String>,
 }
 
 pub enum DropLQWatcherMsg {

@@ -4,29 +4,37 @@ import {store} from "Store";
 import {hourInMS, InfoButton, minuteInMS, RunInAction_Set, secondInMS} from "web-vcore";
 import {useMutation, useQuery} from "web-vcore/nm/@apollo/client.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, CheckBox, Column, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
 export class Mtx {
+	//extraInfo: string;
 	sectionLifetimes: MtxSectionLifetimeMap;
 }
 export type MtxSectionLifetimeMap = {
-	[key: string]: [number, number]
+	[key: string]: MtxLifetime_Base
 };
+export class MtxLifetime_Base {
+	extra_info?: string;
+	start_time: number;
+	duration: number;
+}
 
 // synthesized from the above, for easier processing
-export class MtxLifetime {
+export class MtxLifetime_Plus {
 	path: string;
+	extraInfo?: string;
 	startTime: number;
 	duration: number;
 }
 export function GetLifetimesInMap(map: MtxSectionLifetimeMap, sort = true) {
 	let result = Object.entries(map).map(entry=>{
-		return new MtxLifetime().VSet({
+		return new MtxLifetime_Plus().VSet({
 			path: entry[0],
-			startTime: entry[1][0],
-			duration: entry[1][1],
+			extraInfo: entry[1].extra_info,
+			startTime: entry[1].start_time,
+			duration: entry[1].duration,
 		});
 	});
 	// fsr, the entries are not sorted at this point, despite (seemingly) being sorted when serialized for sending from backend
@@ -67,7 +75,7 @@ export const RequestsUI = observer(()=>{
 	let mtxResults: Mtx[] = data?.mtxResults ?? [];
 	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
 	mtxResults = mtxResults.OrderBy(mtx=>{
-		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(lifetime=>lifetime[0]).Min();
+		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(lifetime=>lifetime.start_time).Min();
 		return earliestLifetimeStart;
 	});
 	console.log("Got data:", mtxResults);
@@ -96,6 +104,16 @@ export const RequestsUI = observer(()=>{
 				<CheckBox ml={5} text="Path filter:" value={uiState.pathFilter_enabled} onChange={val=>RunInAction_Set(()=>uiState.pathFilter_enabled = val)}/>
 				<TextInput ml={5} style={{flex: 1}} value={uiState.pathFilter_str} onChange={val=>uiState.pathFilter_str = val}/>
 				<InfoButton ml={5} text="You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/"/>
+				<DropDown>
+					<DropDownTrigger><Button ml={5} style={{height: "100%"}} text="Others"/></DropDownTrigger>
+					<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
+						<Row>
+							<Text>Significant duration threshold:</Text>
+							<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>
+							<Text>ms</Text>
+						</Row>
+					</Column></DropDownContent>
+				</DropDown>
 			</Row>
 			<Row>Mtx results ({mtxResults.length})</Row>
 			<ScrollView>

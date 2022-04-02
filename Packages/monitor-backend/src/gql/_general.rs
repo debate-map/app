@@ -42,8 +42,8 @@ impl QueryShard_General {
         let mtx_results = app_state.mtx_results.read().await.to_vec();
         let mtx_results_filtered: Vec<Mtx> = mtx_results.into_iter().filter(|mtx| {
             for lifetime in mtx.section_lifetimes.values() {
-                let section_start = lifetime.0;
-                let section_end = section_start + lifetime.1;
+                let section_start = lifetime.start_time;
+                let section_end = section_start + lifetime.duration;
                 if section_start < end_time && section_end > start_time {
                     return true;
                 }

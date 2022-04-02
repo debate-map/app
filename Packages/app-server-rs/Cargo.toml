@@ -26,6 +26,8 @@ hyper = {version = "0.14.16", features = ["client"] }
 deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
 deadpool-postgres = "0.10.1"
 indexmap = "1.8.0"
+#dashmap = "4.0.2" # the API is hard to use correctly/safely (there are rules you have to follow that aren't compiled-ensured)
+flurry = "0.4.0"
 async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
 metrics = "0.18.1"
