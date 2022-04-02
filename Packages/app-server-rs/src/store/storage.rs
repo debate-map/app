@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::future::Future;
 use std::pin::Pin;
@@ -55,14 +55,14 @@ pub type LQStorageWrapper = Arc<LQStorage>;
 //#[derive(Default)]
 pub struct LQStorage {
     #[allow(clippy::box_collection)]
-    pub live_queries: RwLock<HashMap<String, LQEntry>>,
+    pub live_queries: flurry::HashMap<String, LQEntry>,
     source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl LQStorage {
     pub fn new() -> (Self, Receiver<DropLQWatcherMsg>) {
         let (s1, r1): (Sender<DropLQWatcherMsg>, Receiver<DropLQWatcherMsg>) = flume::unbounded();
         let new_self = Self {
-            live_queries: RwLock::new(HashMap::new()),
+            live_queries: flurry::HashMap::new(),
             source_sender_for_lq_watcher_drops: s1,
         };
         (new_self, r1)
@@ -76,7 +76,8 @@ impl LQStorage {
 
         let lq_key = get_lq_key(table_name, filter);
         let (mut lq_entries_count, create_new_entry) = {
-            let live_queries = self.live_queries.read().await;
+            let guard = self.live_queries.guard();
+            let live_queries = self.live_queries.with_guard(&guard);
             let lq_entries_count = live_queries.len();
             let create_new_entry = !live_queries.contains_key(&lq_key);
             (lq_entries_count, create_new_entry)
@@ -93,12 +94,14 @@ impl LQStorage {
         let lq_entry_is_new = new_entry.is_some();
 
         mtx.section("3");
-        let mut live_queries = self.live_queries.write().await;
+        let guard = self.live_queries.guard();
+        let live_queries = self.live_queries.with_guard(&guard);
         let entry = {
             if let Some(new_entry) = new_entry {
                 live_queries.insert(lq_key.clone(), new_entry);
             }
-            let entry = live_queries.get_mut(&lq_key).unwrap();
+            //let entry = live_queries.get_mut(&lq_key).unwrap();
+            let entry = live_queries.get(&lq_key).unwrap();
             if lq_entry_is_new { lq_entries_count += 1; }
             entry
         };
@@ -109,7 +112,12 @@ impl LQStorage {
 
         //let watcher = entry.get_or_create_watcher(stream_id);
         let old_watcher_count = entry.entry_watchers.len();
-        let (watcher, watcher_is_new) = entry.get_or_create_watcher(stream_id);
+
+        let mut entry_new = entry.clone();
+        let (watcher, watcher_is_new) = entry_new.get_or_create_watcher(stream_id);
+        let watcher_clone = watcher.clone();
+        live_queries.insert(lq_key, entry_new);
+        
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
         let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
         println!("LQ-watcher started. {}", watcher_info_str);
@@ -118,7 +126,7 @@ impl LQStorage {
             println!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
         }
         
-        (result_entries_as_type, watcher.clone())
+        (result_entries_as_type, watcher_clone)
     }
 
     pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {
@@ -128,14 +136,17 @@ impl LQStorage {
         println!("Got lq-watcher drop request. @table:{} @filter:{} @stream_id:{}", table_name, match filter { Some(filter) => filter.to_string(), None => "n/a".to_owned() }, stream_id);
 
         let lq_key = get_lq_key(table_name, filter);
-        let mut live_queries = self.live_queries.write().await;
-        let live_query = live_queries.get_mut(&lq_key).unwrap();
-        let _removed_value = live_query.entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
-        
-        let new_watcher_count = live_query.entry_watchers.len();
+        let guard = self.live_queries.guard();
+        let live_queries = self.live_queries.with_guard(&guard);
+        let mut live_query_new = live_queries.get(&lq_key).unwrap().clone();
+        let _removed_value = live_query_new.entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
+
+        let new_watcher_count = live_query_new.entry_watchers.len();
         if new_watcher_count == 0 {
             live_queries.remove(&lq_key);
             println!("Watcher count for live-query entry dropped to 0, so removing.");
+        } else {
+            live_queries.insert(lq_key, live_query_new);
         }
 
         println!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, live_queries.len());
@@ -174,6 +185,7 @@ pub type RowData = Map<String, JSONValue>;
 
 //#[derive(Default)]
 /// Holds the data related to a specific query (ie. collection-name + filter).
+#[derive(Clone)]
 pub struct LQEntry {
     pub table_name: String,
     pub filter: Filter,
