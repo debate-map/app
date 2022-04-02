@@ -5,7 +5,7 @@ use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 
-use crate::{store::storage::{LQStorageWrapper, LDChange}, utils::type_aliases::JSONValue};
+use crate::{store::live_queries::{LQStorageWrapper}, utils::{type_aliases::JSONValue, db::postgres_parsing::LDChange}};
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();

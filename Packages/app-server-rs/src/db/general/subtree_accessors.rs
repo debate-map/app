@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::Row;
-use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{filter::Filter, general::{get_entries_in_collection, json_maps_to_typed_entries, get_entries_in_collection_basic}, type_aliases::JSONValue}};
+use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{db::{queries::get_entries_in_collection_basic, filter::Filter}, type_aliases::JSONValue}};
 use super::subtree::Subtree;
 
 pub struct AccessorContext<'a> {

@@ -60,7 +60,7 @@ use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{SubscriptionShard_User};
 use crate::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient, have_own_graphql_handle_request};
-use crate::store::storage::LQStorageWrapper;
+use crate::store::live_queries::LQStorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 
 wrap_slow_macros!{

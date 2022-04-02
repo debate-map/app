@@ -42,7 +42,7 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 
-use crate::{store::storage::{LQStorageWrapper, AppState, LQStorage, DropLQWatcherMsg, AppStateWrapper}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response}};
+use crate::{store::{live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, storage::{AppStateWrapper, AppState}}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response}};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -80,10 +80,16 @@ mod db {
 }
 mod store {
     pub mod storage;
+    pub mod live_queries;
 }
 mod utils {
     pub mod axum_logging_layer;
-    pub mod filter;
+    pub mod db {
+        pub mod filter;
+        pub mod handlers;
+        pub mod postgres_parsing;
+        pub mod queries;
+    }
     pub mod general;
     pub mod gql_general_extension;
     pub mod gql_result_stream;
@@ -91,7 +97,6 @@ mod utils {
     pub mod mtx {
         pub mod mtx;
     }
-    pub mod postgres_parsing;
     pub mod type_aliases;
     pub mod quick_tests {
         pub mod quick1;

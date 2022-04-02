@@ -1,8 +1,12 @@
-use super::type_aliases::JSONValue;
+use rust_macros::wrap_slow_macros;
+use serde::Deserialize;
+use serde_json::Map;
+
+use crate::{utils::type_aliases::JSONValue, store::live_queries::RowData};
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::postgres_parsing::parse_postgres_array_as_strings;
+    use crate::utils::db::postgres_parsing::parse_postgres_array_as_strings;
 
     #[test]
     fn simple() {
@@ -120,3 +124,135 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
     }
     result_as_strings
 }
+
+#[derive(Deserialize)]
+pub struct LDChange {
+    pub kind: String,
+    pub schema: String,
+    pub table: String,
+    pub columnnames: Option<Vec<String>>,
+    pub columntypes: Option<Vec<String>>,
+    pub columnvalues: Option<Vec<JSONValue>>,
+    pub oldkeys: Option<OldKeys>,
+}
+impl LDChange {
+    pub fn new_data_as_map(&self) -> Option<RowData> {
+        //let new_entry = JSONValue::Object();
+        //let new_entry = json!({});
+        let mut new_entry: RowData = Map::new();
+        for (i, key) in self.columnnames.as_ref()?.iter().enumerate() {
+            let typ = self.columntypes.as_ref()?.get(i).unwrap();
+            let value = self.columnvalues.as_ref()?.get(i).unwrap();
+            new_entry.insert(key.to_owned(), clone_ldchange_val_0with_type_fixes(value, typ));
+        }
+        //*new_entry.as_object().unwrap()
+        Some(new_entry)
+    }
+    pub fn get_row_id(&self) -> String {
+        let id_from_oldkeys = self.oldkeys.clone()
+            .and_then(|a| a.data_as_map().get("id").cloned())
+            .and_then(|a| a.as_str().map(|b| b.to_owned()));
+        match id_from_oldkeys {
+            Some(id) => id,
+            None => {
+                let new_data_as_map = self.new_data_as_map();
+                new_data_as_map.unwrap().get("id").unwrap().as_str().map(|a| a.to_owned()).unwrap()
+            },
+        }
+    }
+}
+fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &str) -> JSONValue {
+    if typ.ends_with("[]") {
+        let item_type_as_bytes = &typ.as_bytes()[..typ.find("[]").unwrap()];
+        let item_type = String::from_utf8(item_type_as_bytes.to_vec()).unwrap();
+        return parse_postgres_array(value.as_str().unwrap(), item_type == "jsonb");
+    }
+    match typ {
+        "jsonb" => {
+            // the LDChange vals of type jsonb are initially stored as strings
+            // convert that to a serde_json::Value::Object, so serde_json::from_value(...) can auto-deserialize it to a nested struct
+            match value.as_str() {
+                Some(val_as_str) => {
+                    serde_json::from_str(val_as_str).unwrap()
+                },
+                None => serde_json::Value::Null,
+            }
+        },
+        _ => value.clone(),
+    }
+}
+wrap_slow_macros!{
+#[derive(Clone, Deserialize)]
+pub struct OldKeys {
+    pub keynames: Vec<String>,
+    pub keytypes: Vec<String>,
+    pub keyvalues: Vec<JSONValue>,
+}
+}
+impl OldKeys {
+    pub fn data_as_map(&self) -> RowData {
+        let mut new_entry: RowData = Map::new();
+        for (i, key) in self.keynames.iter().enumerate() {
+            let typ = self.keytypes.get(i).unwrap();
+            let value = self.keyvalues.get(i).unwrap();
+            new_entry.insert(key.to_owned(), clone_ldchange_val_0with_type_fixes(value, typ));
+        }
+        new_entry
+    }
+}
+
+/*
+[postgres logical-decoding message examples]
+
+row addition
+==========
+{"change":[
+    {
+        "kind":"insert",
+        "schema":"app_public",
+        "table":"globalData",
+        "columnnames":["extras","id"],
+        "columntypes":["jsonb","text"],
+        "columnvalues":[
+            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test1\"}",
+            "main2"
+        ]
+    }
+]}
+
+row change
+==========
+{"change": [
+    {
+        "kind":"update",
+        "schema":"app_public",
+        "table":"globalData",
+        "columnnames":["extras","id"],
+        "columntypes":["jsonb","text"],
+        "columnvalues":[
+            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test123\"}",
+            "main"
+        ],
+        "oldkeys":{
+            "keynames":["id"],
+            "keytypes":["text"],
+            "keyvalues":["main"]
+        }
+    }
+]}
+
+row deletion (regular mode)
+==========
+{"change":[
+    {
+        "kind":"delete",
+        "schema":"app_public",
+        "table":"globalData",
+        "oldkeys":{
+            "keynames":["id"],
+            "keytypes":["text"],
+            "keyvalues":["main2"]
+        }
+    }
+]}
+*/

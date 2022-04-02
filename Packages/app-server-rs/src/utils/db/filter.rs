@@ -1,7 +1,6 @@
 use anyhow::{bail, Context, Error};
 use serde_json::Map;
-use crate::store::storage::RowData;
-use super::type_aliases::JSONValue;
+use crate::{store::live_queries::RowData, utils::type_aliases::JSONValue};
 
 pub type Filter = Option<JSONValue>; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
 //pub type Filter = Option<Map<String, JSONValue>>;
