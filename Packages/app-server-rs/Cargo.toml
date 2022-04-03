@@ -32,6 +32,8 @@ async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
 metrics = "0.18.1"
 log = "0.4.16"
+regex = "1.5.5"
+itertools = "0.10.3"
 
 # needed for async-graphql "scalar!" macro
 serde = "*"

@@ -23,7 +23,7 @@ use tower_http::cors::{CorsLayer, Origin};
 use futures::future::{self, Future};
 
 use crate::gql::RootSchema;
-use crate::utils::general::body_to_str;
+use crate::utils::general::general::body_to_str;
 use crate::utils::type_aliases::JSONValue;
 
 pub type HyperClient = hyper::client::Client<HttpConnector, Body>;

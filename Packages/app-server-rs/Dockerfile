@@ -4,7 +4,9 @@
 
 #FROM rust:1.58 as cargo-build
 # rather than use a mutable "version", lock the source image to a specific digest (so ~nightly "rust:XXX" image changes doesn't cause complete rebuilds of our build-chain)
-FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
+#FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
+# temp, to be (closer to) matching with cargo 1.60.0-beta.3 on dev-machine
+FROM rustlang/rust:nightly-bullseye@sha256:80046c08dad9ac3941941be072ea5db5c105a6208cff73ca36496f761c2f5c9c as cargo-build
 
 # generic env-var for code to know if its running as part of a Dockerfile
 ENV IN_DOCKER=1

@@ -4,13 +4,13 @@ use anyhow::{anyhow, Error};
 use async_graphql::ID;
 use async_recursion::async_recursion;
 use deadpool_postgres::Transaction;
-use futures_util::{Future, FutureExt};
+use futures_util::{Future, FutureExt, TryStreamExt, StreamExt, pin_mut};
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
-use tokio_postgres::Row;
-use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{db::{queries::get_entries_in_collection_basic, filter::Filter}, type_aliases::JSONValue}};
+use tokio_postgres::{Row, types::ToSql};
+use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{db::{queries::{get_entries_in_collection_basic}, filter::Filter, fragments::SQLFragment}, type_aliases::JSONValue, general::general::to_anyhow}};
 use super::subtree::Subtree;
 
 pub struct AccessorContext<'a> {
@@ -56,6 +56,7 @@ impl SubtreeCollector {
 
 //pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a, Global>>;
 #[async_recursion]
+//#[async_recursion(?Send)]
 pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path: String, max_depth: usize, root_path_segments: &Vec<String>, collector_arc: Arc<RwLock<SubtreeCollector>>) -> Result<(), Error> {
     let path_segments: Vec<&str> = current_path.split("/").collect();
     let parent_node_id = path_segments.iter().nth_back(1).map(|a| a.to_string());
@@ -156,10 +157,30 @@ pub async fn get_db_entry<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a
     Ok(result)
 }
 pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter: &Filter) -> Result<Vec<T>, Error> {
-    let query_func = |str1: String| async move {
-        ctx.tx.query(&str1, &[]).await
+    let query_func = |mut sql: SQLFragment| async move {
+        let (sql_text, params) = sql.into_query_args()?;
+        
+        /*let temp1: Vec<Box<dyn ToSql + Sync>> = params.into_iter().map(strip_send_from_tosql_sync_send).collect();
+        let temp2: Vec<&(dyn ToSql + Sync)> = temp1.iter().map(|a| a.as_ref()).collect();
+        //ctx.tx.query(&sql_text, temp2.as_slice()).await
+        ctx.tx.query_raw(&sql_text, temp2.as_slice()).await*/
+
+        /*//let temp2 = temp1.iter().map(|a| a.as_ref());
+        let stream = ctx.tx.query_raw(&sql_text, params.iter()).await?;
+        Ok(stream.filter_map(|a| async move {
+            match a {
+                Ok(a) => Some(a),
+                Err(err) => None,
+            }
+        }).collect::<Vec<_>>().await)*/
+
+        // query_raw supposedly allows dynamically-constructed params-vecs, but the only way I've been able to get it working is by locking the vector to a single concrete type
+        // see here: https://github.com/sfackler/rust-postgres/issues/445#issuecomment-1086774095
+        //let params: Vec<String> = params.into_iter().map(|a| a.as_ref().to_string()).collect();
+        ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?
+            .try_collect().await.map_err(to_anyhow)
     };
-    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
+    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name.to_owned(), filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
     Ok(entries_as_type)
 }
 

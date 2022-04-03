@@ -1,5 +1,5 @@
 use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell};
-use anyhow::{bail, Context, Error};
+use anyhow::{anyhow, bail, Context, Error};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
 use flume::Sender;
@@ -25,4 +25,10 @@ pub async fn body_to_str(body: Body) -> Result<String, Error> {
     let bytes1 = hyper::body::to_bytes(body).await?;
     let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
     Ok(req_as_str)
+}
+
+pub fn to_anyhow<T: std::error::Error>(err: T) -> Error
+    where T: Into<Error> + Send + Sync
+{
+    anyhow!(err)
 }

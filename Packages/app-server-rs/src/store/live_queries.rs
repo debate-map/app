@@ -80,7 +80,7 @@ impl LQStorage {
         mtx.section("2:get entries");
         let new_entry = match create_new_entry {
             true => {
-                let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name, filter, Some(&mtx)).await.expect("Errored while getting entries in collection.");
+                let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name.to_owned(), filter, Some(&mtx)).await.expect("Errored while getting entries in collection.");
                 Some(LQEntry::new(table_name.to_owned(), filter.clone(), result_entries))
             },
             false => None,

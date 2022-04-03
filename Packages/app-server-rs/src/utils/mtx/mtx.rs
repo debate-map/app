@@ -67,7 +67,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 
-use crate::utils::{type_aliases::JSONValue, general::{time_since_epoch_ms, body_to_str}};
+use crate::utils::{type_aliases::JSONValue, general::general::{time_since_epoch_ms, body_to_str}};
 
 pub enum MtxMessage {
     /// tuple.0 is the section's path (relative); tuple.1 is the start-time in ms-since-epoch; tuple.2 is the end-time in ms-since-epoch

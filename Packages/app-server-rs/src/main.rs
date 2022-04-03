@@ -1,5 +1,8 @@
 #![feature(backtrace)]
 #![feature(fn_traits)]
+#![feature(iterator_try_collect)]
+#![feature(try_trait_v2)]
+#![feature(try_trait_v2_residual)]
 //#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
@@ -86,11 +89,15 @@ mod utils {
     pub mod axum_logging_layer;
     pub mod db {
         pub mod filter;
+        pub mod fragments;
         pub mod handlers;
         pub mod postgres_parsing;
         pub mod queries;
     }
-    pub mod general;
+    pub mod general {
+        pub mod extensions;
+        pub mod general;
+    }
     pub mod gql_general_extension;
     pub mod gql_result_stream;
     pub mod http;
