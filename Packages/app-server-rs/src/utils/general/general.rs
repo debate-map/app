@@ -12,7 +12,7 @@ use uuid::Uuid;
 //use tokio::sync::Mutex;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue}};
+use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue}};
 
 pub fn time_since_epoch() -> Duration {
     SystemTime::now().duration_since(UNIX_EPOCH).unwrap()

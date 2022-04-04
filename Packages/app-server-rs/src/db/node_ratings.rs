@@ -4,7 +4,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
@@ -49,10 +49,10 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
 pub struct SubscriptionShard_NodeRating;
 #[Subscription]
 impl SubscriptionShard_NodeRating {
-    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_NodeRating> + 'a {
+    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_NodeRating> + 'a {
         handle_generic_gql_collection_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
     }
-    async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<NodeRating>> + 'a {
+    async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<NodeRating>> + 'a {
         handle_generic_gql_doc_request::<NodeRating>(ctx, "nodeRatings", id).await
     }
 }

@@ -21,7 +21,7 @@ use crate::db::node_tags::MapNodeTag;
 use crate::db::nodes::MapNode;
 use crate::db::terms::Term;
 use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
 use crate::utils::type_aliases::{JSONValue};
 
 use super::subtree_accessors::{SubtreeCollector, populate_subtree_collector, AccessorContext};

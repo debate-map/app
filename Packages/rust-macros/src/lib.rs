@@ -18,6 +18,12 @@ mod wrap_async_graphql;
 mod wrap_agql_schema_build;
 mod wrap_serde_macros;
 
+#[proc_macro]
+/// Use this as a way of "commenting" a macro temporarily, without needing to find the end-bracket.
+pub fn unchanged(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    input
+}
+
 // higher level (ie. combining multiple macros into one)
 // ==========
 

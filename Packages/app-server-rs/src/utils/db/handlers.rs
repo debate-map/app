@@ -11,8 +11,8 @@ use tokio_postgres::{Client, Row, types::ToSql};
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue}};
-use super::{super::{mtx::mtx::{new_mtx, Mtx}}, filter::Filter};
+use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue}};
+use super::{super::{mtx::mtx::{new_mtx, Mtx}}, filter::{QueryFilter, FilterInput}};
 
 /*pub struct GQLSet<T> { pub nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
@@ -34,21 +34,18 @@ pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(j
 pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
->(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter: Filter) -> impl Stream<Item = GQLSetVariant> + 'a {
+>(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = GQLSetVariant> + 'a {
     new_mtx!(mtx, "1");
+    let filter = QueryFilter::from_filter_input_opt(&filter_json).unwrap();
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage = ctx.data::<LQStorageWrapper>().unwrap();
-        //mtx.section("1.5");
-        //let mut storage = storage_wrapper.write().await;
-        //mtx.section("1.6");
-        let sender = storage.get_sender_for_lq_watcher_drops();
 
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
         let stream_id = Uuid::new_v4();
         let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx)).await;
 
-        (entries_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
+        (entries_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
     };
 
     mtx.section("2");
@@ -69,13 +66,10 @@ pub async fn handle_generic_gql_doc_request<'a,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
     new_mtx!(mtx, "1");
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
-    let filter = Some(json!({"id": {"equalTo": id}}));
+    let filter_json = json!({"id": {"equalTo": id}});
+    let filter = QueryFilter::from_filter_input(&filter_json).unwrap();
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage = ctx.data::<LQStorageWrapper>().unwrap();
-        //mtx.section("1.5");
-        //let mut storage = storage_wrapper.write().await;
-        //mtx.section("1.6");
-        let sender = storage.get_sender_for_lq_watcher_drops();
 
         /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));
         let stream_id = stream.id.clone();*/
@@ -83,7 +77,7 @@ pub async fn handle_generic_gql_doc_request<'a,
         let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx)).await;
         let entry_as_type = entries_as_type.pop();
 
-        (entry_as_type, stream_id, sender, watcher.new_entries_channel_receiver.clone())
+        (entry_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
     };
 
     mtx.section("2");
@@ -103,12 +97,12 @@ pub async fn handle_generic_gql_doc_request<'a,
 pub struct Stream_WithDropListener<'a, T> {
     inner_stream: Pin<Box<dyn Stream<Item = T> + 'a + Send>>,
     table_name: String,
-    filter: Filter,
+    filter: QueryFilter,
     stream_id: Uuid,
     sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl<'a, T> Stream_WithDropListener<'a, T> {
-    pub fn new(inner_stream_new: impl Stream<Item = T> + 'a + Send, table_name: &str, filter: Filter, stream_id: Uuid, sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>) -> Self {
+    pub fn new(inner_stream_new: impl Stream<Item = T> + 'a + Send, table_name: &str, filter: QueryFilter, stream_id: Uuid, sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>) -> Self {
         Self {
             inner_stream: Box::pin(inner_stream_new),
             table_name: table_name.to_owned(),

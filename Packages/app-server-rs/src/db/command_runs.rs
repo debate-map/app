@@ -4,7 +4,7 @@ use rust_macros::{wrap_slow_macros, wrap_serde_macros, Deserialize_Stub, Seriali
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter};
+use crate::utils::db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}};
 
 // for testing wrap_serde_macros! on a single struct
 /*wrap_serde_macros!{
@@ -74,10 +74,10 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
 pub struct SubscriptionShard_CommandRun;
 #[Subscription]
 impl SubscriptionShard_CommandRun {
-    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_CommandRun> + 'a {
+    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_CommandRun> + 'a {
         handle_generic_gql_collection_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
     }
-    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<CommandRun>> + 'a {
+    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<CommandRun>> + 'a {
         handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", id).await
     }
 }

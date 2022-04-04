@@ -11,8 +11,8 @@ use tokio_postgres::{Client, Row, types::ToSql, Statement};
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, get_lq_key, DropLQWatcherMsg, RowData}, utils::{type_aliases::JSONValue, db::{filter::get_sql_for_filters, fragments::{SQLFragment, SQLParam}}, general::general::to_anyhow,}};
-use super::{super::{mtx::mtx::{new_mtx, Mtx}}, filter::Filter};
+use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{filter::get_sql_for_filters, fragments::{SQLFragment, SQLParam}}, general::general::to_anyhow,}};
+use super::{super::{mtx::mtx::{new_mtx, Mtx}}, postgres_parsing::RowData, filter::QueryFilter};
 
 /*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
 type QueryFunc = Box<
@@ -34,7 +34,7 @@ where
 pub type QueryFuncReturn = dyn Future<Output = Result<Vec<Row>, tokio_postgres::Error>>;*/
 
 pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, QueryFunc, QueryFuncReturn>(
-    query_func: QueryFunc, table_name: String, filter: &Filter, parent_mtx: Option<&Mtx>,
+    query_func: QueryFunc, table_name: String, filter: &QueryFilter, parent_mtx: Option<&Mtx>,
 ) -> Result<(Vec<RowData>, Vec<T>), Error>
     where
         QueryFunc: FnOnce(SQLFragment) -> QueryFuncReturn,
@@ -69,7 +69,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
 
     Ok((entries, entries_as_type))
 }
-pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: String, filter: &Filter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
+pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: String, filter: &QueryFilter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
     new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
     //let client = ctx.data::<Client>().unwrap();
     let pool = ctx.data::<Pool>().unwrap();

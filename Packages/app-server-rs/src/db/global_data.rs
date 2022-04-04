@@ -4,7 +4,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
@@ -39,10 +39,10 @@ impl GQLSet<GlobalData> for GQLSet_GlobalData {
 pub struct SubscriptionShard_GlobalData;
 #[Subscription]
 impl SubscriptionShard_GlobalData {
-    async fn globalData<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_GlobalData> + 'a {
+    async fn globalData<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_GlobalData> + 'a {
         handle_generic_gql_collection_request::<GlobalData, GQLSet_GlobalData>(ctx, "globalData", filter).await
     }
-    async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<GlobalData>> + 'a {
+    async fn globalDatum<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<GlobalData>> + 'a {
         handle_generic_gql_doc_request::<GlobalData>(ctx, "globalData", id).await
     }
 }

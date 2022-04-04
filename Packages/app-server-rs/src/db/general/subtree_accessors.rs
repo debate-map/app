@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::{Row, types::ToSql};
-use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{db::{queries::{get_entries_in_collection_basic}, filter::Filter, fragments::SQLFragment}, type_aliases::JSONValue, general::general::to_anyhow}};
+use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{db::{queries::{get_entries_in_collection_basic}, fragments::SQLFragment, filter::{FilterInput, QueryFilter}}, type_aliases::JSONValue, general::general::to_anyhow}};
 use super::subtree::Subtree;
 
 pub struct AccessorContext<'a> {
@@ -150,13 +150,13 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
 // accessors // todo: probably move these to the "db/XXX" files
 // ==========
 
-pub async fn get_db_entry<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter: &Filter) -> Result<T, Error> {
-    let entries = get_db_entries(ctx, table_name, filter).await?;
+pub async fn get_db_entry<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<T, Error> {
+    let entries = get_db_entries(ctx, table_name, filter_json).await?;
     let entry = entries.into_iter().nth(0);
-    let result = entry.ok_or(anyhow!(r#"No entries found in table "{table_name}" matching filter:{filter:?}"#))?;
+    let result = entry.ok_or(anyhow!(r#"No entries found in table "{table_name}" matching filter:{filter_json:?}"#))?;
     Ok(result)
 }
-pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter: &Filter) -> Result<Vec<T>, Error> {
+pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<Vec<T>, Error> {
     let query_func = |mut sql: SQLFragment| async move {
         let (sql_text, params) = sql.into_query_args()?;
         
@@ -180,7 +180,9 @@ pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<
         ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?
             .try_collect().await.map_err(to_anyhow)
     };
-    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name.to_owned(), filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
+
+    let filter = QueryFilter::from_filter_input_opt(filter_json)?;
+    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name.to_owned(), &filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
     Ok(entries_as_type)
 }
 

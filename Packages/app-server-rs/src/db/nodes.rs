@@ -4,7 +4,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
@@ -57,10 +57,10 @@ impl GQLSet<MapNode> for GQLSet_MapNode {
 pub struct SubscriptionShard_MapNode;
 #[Subscription]
 impl SubscriptionShard_MapNode {
-    async fn nodes<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_MapNode> + 'a {
+    async fn nodes<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_MapNode> + 'a {
         handle_generic_gql_collection_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", filter).await
     }
-    async fn node<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<MapNode>> + 'a {
+    async fn node<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<MapNode>> + 'a {
         handle_generic_gql_doc_request::<MapNode>(ctx, "nodes", id).await
     }
 }

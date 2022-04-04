@@ -1,47 +1,128 @@
 use std::fmt::Display;
 use anyhow::{anyhow, bail, Context, Error};
+use indexmap::IndexMap;
+use rust_macros::{wrap_slow_macros, unchanged};
+use serde::Serialize;
 use crate::utils::general::extensions::IteratorV;
 use itertools::{chain, Itertools};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
-use crate::{store::live_queries::RowData, utils::type_aliases::JSONValue};
-use super::fragments::{SQLFragment, SQLParam};
+use crate::{utils::type_aliases::JSONValue};
+use super::{fragments::{SQLFragment, SQLParam}, postgres_parsing::RowData};
 
-pub type Filter = Option<JSONValue>; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
 //pub type Filter = Option<Map<String, JSONValue>>;
+pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
 
-pub fn get_sql_for_filters(filter: &Filter) -> Result<SQLFragment, Error> {
-    let filter = match filter.as_ref() {
-        Some(a) => a,
-        None => return Ok(SQLFragment::lit("")),
-    };
+wrap_slow_macros!{
+
+#[derive(Debug, Serialize)]
+pub struct QueryFilter {
+    pub field_filters: IndexMap<String, FieldFilter>,
+}
+impl QueryFilter {
+    pub fn empty() -> Self {
+        Self {
+            field_filters: IndexMap::new(),
+        }
+    }
+    // example filter: Some(Object({"id": Object({"equalTo": String("t5gRdPS9TW6HrTKS2l2IaZ")})}))
+    pub fn from_filter_input_opt(input: &Option<FilterInput>) -> Result<QueryFilter, Error> {
+        match input {
+            Some(input) => Self::from_filter_input(input),
+            // if no input, just return an empty filter (has same effect as "no filter", so best to unify)
+            None => Ok(QueryFilter::empty()),
+        }
+    }
+    pub fn from_filter_input(input: &FilterInput) -> Result<QueryFilter, Error> {
+        let result = QueryFilter { field_filters: IndexMap::new() };
+
+        for (field_name, field_filters_json) in input.as_object().ok_or_else(|| anyhow!("Filter root-structure was not an object!"))?.iter() {
+            let field_filter = FieldFilter::default();
+            //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
+            for (op_json, op_val_json) in field_filters_json.as_object().ok_or_else(|| anyhow!("Filter-structure for field {field_name} was not an object!"))? {
+                let op: FilterOp = match op_json.as_str() {
+                    "equalTo" => FilterOp::EqualsX,
+                    "in" => FilterOp::EqualsOneOfX,
+                    "contains" => FilterOp::ContainsAllOfX,
+                    _ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, in, contains."#),
+                };
+                field_filter.filter_ops.insert(op, op_val_json.clone());
+            }
+            result.field_filters.insert(field_name.to_owned(), field_filter);
+        }
+
+        Ok(result)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.field_filters.len() == 0
+    }
+}
+impl Clone for QueryFilter {
+    fn clone(&self) -> Self {
+        let field_filters = IndexMap::new();
+        for (key, value) in self.field_filters {
+            field_filters.insert(key, value);
+        }
+        Self { field_filters }
+    }
+}
+impl Display for QueryFilter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.is_empty() {
+            f.write_str("n/a");
+        } else {
+            f.write_fmt(format_args!("{self:?}"));
+        }
+        Ok(())
+    }
+}
+
+#[derive(Default, Debug, Serialize)]
+pub struct FieldFilter {
+    pub filter_ops: IndexMap<FilterOp, JSONValue>,
+}
+#[derive(Eq, Hash, PartialEq, Debug, Serialize)]
+pub enum FilterOp {
+    EqualsX,
+    /// More precisely: "equals at least one of X"
+    EqualsOneOfX,
+    ContainsAllOfX,
+}
+
+}
+
+pub fn get_sql_for_filters(filter: &QueryFilter) -> Result<SQLFragment, Error> {
+    if filter.is_empty() {
+        return Ok(SQLFragment::lit(""));
+    }
 
     let mut parts: Vec<SQLFragment> = vec![];
     parts.push(SQLFragment::lit("("));
-    for (i, (field_name, field_filters)) in filter.as_object().ok_or_else(|| anyhow!("Filter root-structure was not an object!"))?.iter().enumerate() {
+    for (i, (field_name, field_filter)) in filter.field_filters.iter().enumerate() {
         if i > 0 {
             parts.push(SQLFragment::lit(") AND ("));
         }
         //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
-        for (filter_type, filter_value) in field_filters.as_object().ok_or_else(|| anyhow!("Filter-structure for field {field_name} was not an object!"))? {
-            parts.push(match filter_type.as_str() {
-                "equalTo" => SQLFragment::new("$I = $V", vec![
+        for (op, op_val) in field_filter.filter_ops {
+            parts.push(match op {
+                FilterOp::EqualsX => SQLFragment::new("$I = $V", vec![
                     SQLParam::Ident(field_name.clone()),
-                    filter_value_to_value_param(filter_value)?,
+                    op_value_to_value_param(&op_val)?,
                 ]),
-                "in" => {
-                    let vals = filter_value.as_array().ok_or_else(|| anyhow!("Value for \"in\" filter was not an array!"))?;
+                FilterOp::EqualsOneOfX => {
+                    let vals = op_val.as_array().ok_or_else(|| anyhow!("Value for \"in\" filter was not an array!"))?;
                     SQLFragment::INTERPOLATED_SQL(
                         format!("$I IN ({})", vals.iter().map(|_| "$V").collect_vec().join(",")),
                         chain(
                             [SQLParam::Ident(field_name.clone())],
-                            vals.iter().map(|a| filter_value_to_value_param(a)).try_collect2::<Vec<SQLParam>>()?,
+                            vals.iter().map(|a| op_value_to_value_param(a)).try_collect2::<Vec<SQLParam>>()?,
                         ).collect_vec()
                     )
                 },
                 // see: https://stackoverflow.com/a/54069718
                 //"contains" => SQLFragment::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
-                "contains" => {
+                FilterOp::ContainsAllOfX => {
                     /*let vals = filter_value.as_array().ok_or_else(|| anyhow!("Value for \"contains\" filter was not an array!"))?;
                     SQLFragment::INTERPOLATED_SQL(
                         format!("$I @> '{{{}}}'", vals.iter().map(|_| "$V").collect_vec().join(",")),
@@ -63,11 +144,10 @@ pub fn get_sql_for_filters(filter: &Filter) -> Result<SQLFragment, Error> {
                     //SQLFragment::new("$I @> '{$V}'", vec![ // this syntax works in console, but not in prepared statements apparently
                     SQLFragment::new("$I @> array[$V]", vec![
                         SQLParam::Ident(field_name.clone()),
-                        filter_value_to_value_param(filter_value)?,
+                        op_value_to_value_param(&op_val)?,
                     ])
                 },
                 //"contains_jsonb" => SQLFragment::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
-                _ => bail!(r#"Invalid filter-type "{filter_type}" specified. Supported: equalTo, in, contains."#),
             });
         }
     }
@@ -76,54 +156,47 @@ pub fn get_sql_for_filters(filter: &Filter) -> Result<SQLFragment, Error> {
     let combined_fragment = SQLFragment::merge(parts);
     Ok(combined_fragment)
 }
-pub fn filter_value_to_value_param(filter_value: &JSONValue) -> Result<SQLParam, Error> {
-    match filter_value {
+pub fn op_value_to_value_param(op_val: &JSONValue) -> Result<SQLParam, Error> {
+    match op_val {
         JSONValue::String(val) => Ok(SQLParam::Value(val.to_owned())),
         JSONValue::Number(val) => Ok(SQLParam::Value(val.to_string())),
         JSONValue::Bool(val) => Ok(SQLParam::Value(val.to_string())),
         _ => {
-            //SQLParam::Value(filter_value.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
-            bail!("Conversion from this type of json-value ({filter_value:?}) to a SQLParam is not yet implemented. Instead, provide one of: String, Number, Bool");
+            //SQLParam::Value(op_val.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
+            bail!("Conversion from this type of json-value ({op_val:?}) to a SQLParam is not yet implemented. Instead, provide one of: String, Number, Bool");
         },
     }
 }
 
-pub fn entry_matches_filter(entry: &RowData, filter: &Filter) -> Result<bool, Error> {
-    if filter.is_none() { return Ok(true); }
-    let filter = filter.as_ref().unwrap();
-
-    for (field_name, field_filters) in filter.as_object().with_context(|| "Filter package was not an object!")? {
+pub fn entry_matches_filter(entry: &RowData, filter: &QueryFilter) -> Result<bool, Error> {
+    for (field_name, field_filter) in filter.field_filters {
         // consider "field doesn't exist" to be the same as "field exists, and is set to null" (since that's how the filter-system is meant to work)
-        let field_value = entry.get(field_name).or(Some(&serde_json::Value::Null)).unwrap();
+        let field_value = entry.get(&field_name).or(Some(&serde_json::Value::Null)).unwrap();
         
-        //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
-        for (filter_type, filter_value) in field_filters.as_object().with_context(|| "Filter entry for field was not an object!")? {
-            match filter_type.as_str() {
-                "equalTo" => {
-                    if field_value != filter_value {
+        for (op, op_val) in field_filter.filter_ops {
+            match op {
+                FilterOp::EqualsX => {
+                    if field_value != &op_val {
                         return Ok(false);
                     }
                 },
                 // see: https://www.postgresql.org/docs/current/functions-comparisons.html
-                "in" => {
-                    if !filter_value.as_array().with_context(|| "Filter value was not an array!")?.contains(field_value) {
+                FilterOp::EqualsOneOfX => {
+                    if !op_val.as_array().with_context(|| "Filter value was not an array!")?.contains(field_value) {
                         return Ok(false);
                     }
                 },
                 // atm, we are assuming the caller is using "contains" in the array sense (ie. array contains the item specified): https://www.postgresql.org/docs/current/functions-array.html
                 // but support for other versions (eg. "contains json-subtree") may be added in the future
-                "contains" => {
+                FilterOp::ContainsAllOfX => {
                     //for val_to_find_in_field in filter_value.as_array().with_context(|| "Filter value was not an array!")? {
-                    let val_to_find_in_field = filter_value;
-                    if !field_value.as_array().with_context(|| "Field value was not an array!")?.contains(val_to_find_in_field) {
+                    let val_to_find_in_field = op_val;
+                    if !field_value.as_array().with_context(|| "Field value was not an array!")?.contains(&val_to_find_in_field) {
                         return Ok(false);
                     }
                 },
-                _ => panic!(r#"Invalid filter-type "{filter_type}" specified. Supported: equalTo, in, contains."#),
             }
         }
     }
     Ok(true)
 }
-
-// example filter: Some(Object({"id": Object({"equalTo": String("t5gRdPS9TW6HrTKS2l2IaZ")})}))

@@ -34,21 +34,7 @@ use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use uuid::Uuid;
 
-use crate::utils::db::filter::{Filter, entry_matches_filter};
-use crate::utils::db::handlers::json_maps_to_typed_entries;
-use crate::utils::db::postgres_parsing::parse_postgres_array;
-use crate::utils::db::queries::{get_entries_in_collection};
-use crate::utils::mtx::mtx::{Mtx, new_mtx};
-use crate::utils::type_aliases::JSONValue;
-
-// todo: merge AppState and Storage
-
+// todo: merge AppState and LQStorage
 pub type AppStateWrapper = Arc<AppState>;
 pub struct AppState {
 }
-
-/*fn arcs_eq<T: ?Sized>(left: &Arc<T>, right: &Arc<T>) -> bool {
-    let left : *const T = left.as_ref();
-    let right : *const T = right.as_ref();
-    left == right
-}*/

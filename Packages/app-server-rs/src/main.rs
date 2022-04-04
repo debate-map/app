@@ -84,6 +84,10 @@ mod db {
 mod store {
     pub mod storage;
     pub mod live_queries;
+    pub mod live_queries_ {
+        pub mod lq_group;
+        pub mod lq_instance;
+    }
 }
 mod utils {
     pub mod axum_logging_layer;
@@ -145,23 +149,7 @@ async fn main() {
 
     let app_state = AppStateWrapper::new(AppState {});
     //let storage = Storage::<'static>::default();
-    let (lq_storage, receiver_for_lq_watcher_drops) = LQStorage::new();
-    let storage_wrapper = LQStorageWrapper::new(lq_storage);
-    //let storage_wrapper = LQStorageWrapper::new(RwLock::new(lq_storage));
-
-    // start this listener for drop requests
-    let storage_wrapper_clone = storage_wrapper.clone();
-    tokio::spawn(async move {
-        loop {
-            let drop_msg = receiver_for_lq_watcher_drops.recv_async().await.unwrap();
-            match drop_msg {
-                DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
-                    //let mut storage = storage_wrapper_clone.write().await;
-                    storage_wrapper_clone.drop_lq_watcher(&table_name, &filter, stream_id).await;
-                },
-            };
-        }
-    });
+    let (lq_storage, storage_wrapper) = LQStorage::new_in_wrapper();
 
     let app = Router::new()
         .route("/", get(|| async { Html(r#"

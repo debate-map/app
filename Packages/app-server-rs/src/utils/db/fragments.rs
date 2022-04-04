@@ -4,7 +4,7 @@ use itertools::Itertools;
 use regex::{Regex, Captures};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
-use crate::{store::live_queries::RowData, utils::type_aliases::JSONValue};
+use crate::{utils::type_aliases::JSONValue};
 
 // Send is needed, else can't be used across .await points
 //pub type ParamType = Box<dyn ToSql + Send + Sync>;

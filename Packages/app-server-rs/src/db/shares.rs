@@ -4,7 +4,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
@@ -49,10 +49,10 @@ impl GQLSet<Share> for GQLSet_Share {
 pub struct SubscriptionShard_Share;
 #[Subscription]
 impl SubscriptionShard_Share {
-    async fn shares<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_Share> + 'a {
+    async fn shares<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_Share> + 'a {
         handle_generic_gql_collection_request::<Share, GQLSet_Share>(ctx, "shares", filter).await
     }
-    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<Share>> + 'a {
+    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<Share>> + 'a {
         handle_generic_gql_doc_request::<Share>(ctx, "shares", id).await
     }
 }

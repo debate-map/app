@@ -4,7 +4,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
@@ -63,10 +63,10 @@ impl GQLSet<NodeChildLink> for GQLSet_NodeChildLink {
 pub struct SubscriptionShard_NodeChildLink;
 #[Subscription]
 impl SubscriptionShard_NodeChildLink {
-    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_NodeChildLink> + 'a {
+    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_NodeChildLink> + 'a {
         handle_generic_gql_collection_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", filter).await
     }
-    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
+    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
         handle_generic_gql_doc_request::<NodeChildLink>(ctx, "nodeChildLinks", id).await
     }
 }

@@ -4,7 +4,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::Filter}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
@@ -52,11 +52,11 @@ pub struct SubscriptionShard_Proposal;
 #[Subscription]
 impl SubscriptionShard_Proposal {
     #[graphql(name = "feedback_proposals")]
-    async fn feedback_proposals<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Filter) -> impl Stream<Item = GQLSet_Proposal> + 'a {
+    async fn feedback_proposals<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_Proposal> + 'a {
         handle_generic_gql_collection_request::<Proposal, GQLSet_Proposal>(ctx, "feedback_proposals", filter).await
     }
     #[graphql(name = "feedback_proposal")]
-    async fn feedback_proposal<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Filter) -> impl Stream<Item = Option<Proposal>> + 'a {
+    async fn feedback_proposal<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<Proposal>> + 'a {
         handle_generic_gql_doc_request::<Proposal>(ctx, "feedback_proposals", id).await
     }
 }

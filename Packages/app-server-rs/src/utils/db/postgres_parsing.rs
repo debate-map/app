@@ -2,7 +2,9 @@ use rust_macros::wrap_slow_macros;
 use serde::Deserialize;
 use serde_json::Map;
 
-use crate::{utils::type_aliases::JSONValue, store::live_queries::RowData};
+use crate::{utils::type_aliases::JSONValue};
+
+pub type RowData = Map<String, JSONValue>;
 
 #[cfg(test)]
 mod tests {
