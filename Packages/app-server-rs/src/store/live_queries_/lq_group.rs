@@ -45,11 +45,10 @@ use crate::utils::type_aliases::JSONValue;
 use super::lq_instance::{LQInstance, LQEntryWatcher};
 
 pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
-    let filter_shape = filter.clone();
-    for (field_name, field_filter) in filter.field_filters {
-        for (op, val) in field_filter.filter_ops {
-            let filter_ops_new = filter_shape.field_filters.get(&field_name).unwrap().filter_ops;
-            filter_ops_new.insert(op, JSONValue::Null);
+    let mut filter_shape = filter.clone();
+    for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
+        for (op, val) in field_filter.filter_ops.clone().iter() {
+            filter_shape.field_filters.get_mut(field_name).unwrap().filter_ops.insert(op.clone(), JSONValue::Null);
         }
     }
     filter_shape
@@ -57,11 +56,10 @@ pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
 pub fn get_lq_group_key(table_name: &str, filter: &QueryFilter) -> String {
     //format!("@table:{} @filter:{:?}", table_name, filter)
 
-    let filter_shape = filter.clone();
-    for (field_name, field_filter) in filter.field_filters {
-        for (op, val) in field_filter.filter_ops {
-            let filter_ops_new = filter_shape.field_filters.get(&field_name).unwrap().filter_ops;
-            filter_ops_new.insert(op, JSONValue::Null);
+    let mut filter_shape = filter.clone();
+    for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
+        for (op, val) in field_filter.filter_ops.clone().iter() {
+            filter_shape.field_filters.get_mut(field_name).unwrap().filter_ops.insert(op.clone(), JSONValue::Null);
         }
     }
     
@@ -87,12 +85,13 @@ pub struct LQGroup {
     pub channel_for_batch_start__receiver_base: Receiver<LQBatchMessage>,
 
     // for specific live-query entries (ie. one for each set of values supplied for the shape/template)
-    pub query_instances: RwLock<HashMap<String, LQInstance>>,
+    pub query_instances: RwLock<HashMap<String, Arc<LQInstance>>>,
     //source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl LQGroup {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
         let (s1, r1): (Sender<LQBatchMessage>, Receiver<LQBatchMessage>) = flume::unbounded();
+        let r1_clone = r1.clone(); // clone needed for tokio::spawn closure below
         let new_self = Self {
             table_name,
             filter_shape,
@@ -109,7 +108,7 @@ impl LQGroup {
         // start this listener for batch requests
         tokio::spawn(async move {
             loop {
-                let msg = r1.recv_async().await.unwrap();
+                let msg = r1_clone.recv_async().await.unwrap();
                 match msg {
                     LQBatchMessage::Start => {
                         // todo
@@ -149,7 +148,7 @@ impl LQGroup {
         let mut live_queries = self.query_instances.write().await;
         let entry = {
             if let Some(new_entry) = new_entry {
-                live_queries.insert(lq_key.clone(), new_entry);
+                live_queries.insert(lq_key.clone(), Arc::new(new_entry));
             }
             let entry = live_queries.get_mut(&lq_key).unwrap();
             if lq_entry_is_new { lq_entries_count += 1; }
@@ -157,12 +156,13 @@ impl LQGroup {
         };
 
         mtx.section("4:convert + return");
-        let result_entries = entry.last_entries.clone();
+        let last_entries = entry.last_entries.read().await;
+        let result_entries = last_entries.clone();
         let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 
         //let watcher = entry.get_or_create_watcher(stream_id);
-        let old_watcher_count = entry.entry_watchers.len();
-        let (watcher, watcher_is_new) = entry.get_or_create_watcher(stream_id);
+        let old_watcher_count = entry.entry_watchers.read().await.len();
+        let (watcher, watcher_is_new) = entry.get_or_create_watcher(stream_id).await;
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
         let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
         println!("LQ-watcher started. {}", watcher_info_str);
@@ -182,10 +182,13 @@ impl LQGroup {
 
         let lq_key = get_lq_instance_key(table_name, filter);
         let mut live_queries = self.query_instances.write().await;
-        let live_query = live_queries.get_mut(&lq_key).unwrap();
-        let _removed_value = live_query.entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
-        
-        let new_watcher_count = live_query.entry_watchers.len();
+        let new_watcher_count = {
+            let live_query = live_queries.get_mut(&lq_key).unwrap();
+            let mut entry_watchers = live_query.entry_watchers.write().await;
+            let _removed_value = entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
+            
+            entry_watchers.len()
+        };
         if new_watcher_count == 0 {
             live_queries.remove(&lq_key);
             println!("Watcher count for live-query entry dropped to 0, so removing.");

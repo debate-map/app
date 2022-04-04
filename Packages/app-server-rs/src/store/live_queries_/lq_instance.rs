@@ -38,6 +38,7 @@ use crate::utils::db::filter::{entry_matches_filter, QueryFilter};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::postgres_parsing::{LDChange, RowData};
 use crate::utils::db::queries::{get_entries_in_collection};
+use crate::utils::general::general::rw_locked_hashmap__get_entry_or_insert_with;
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::type_aliases::JSONValue;
 
@@ -70,9 +71,9 @@ pub struct LQInstance {
     pub table_name: String,
     pub filter: QueryFilter,
     //watcher_count: i32,
-    pub last_entries: Vec<RowData>,
+    pub last_entries: RwLock<Vec<RowData>>,
     //pub change_listeners: HashMap<Uuid, LQChangeListener<'a>>,
-    pub entry_watchers: HashMap<Uuid, LQEntryWatcher>,
+    pub entry_watchers: RwLock<HashMap<Uuid, LQEntryWatcher>>,
     /*pub new_entries_channel_sender: Sender<Vec<JSONValue>>,
     pub new_entries_channel_receiver: Receiver<Vec<JSONValue>>,*/
 }
@@ -83,17 +84,19 @@ impl LQInstance {
             table_name,
             filter,
             //watcher_count: 0,
-            last_entries: initial_entries,
-            entry_watchers: HashMap::new(),
+            last_entries: RwLock::new(initial_entries),
+            entry_watchers: RwLock::new(HashMap::new()),
             /*new_entries_channel_sender: s1,
             new_entries_channel_receiver: r1,*/
         }
     }
 
-    pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, bool) {
+    pub async fn get_or_create_watcher(&self, stream_id: Uuid) -> (LQEntryWatcher, bool) {
+        /*let entry_watchers = self.entry_watchers.write().await;
         let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);
-        (watcher, create_new)
+        (watcher, create_new)*/
+        rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new).await
     }
     /*pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, usize) {
         let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());
@@ -106,8 +109,8 @@ impl LQInstance {
         (&watcher, self.entry_watchers.len())*/
     }*/
 
-    pub fn on_table_changed(&mut self, change: &LDChange) {
-        let old_entries = &self.last_entries;
+    pub async fn on_table_changed(&self, change: &LDChange) {
+        let old_entries = self.last_entries.read().await;
         let mut new_entries = old_entries.clone();
         let mut our_data_changed = false;
         match change.kind.as_str() {
@@ -160,11 +163,15 @@ impl LQInstance {
 
         new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
-        for (_watcher_stream_id, watcher) in &self.entry_watchers {
+        let entry_watchers = self.entry_watchers.read().await;
+        for (_watcher_stream_id, watcher) in entry_watchers.iter() {
             watcher.new_entries_channel_sender.send(new_entries.clone());
         }
         //self.new_entries_channel_sender.send(new_entries.clone());
-        self.last_entries = new_entries;
+
+        let mut last_entries = self.last_entries.write().await;
+        last_entries.drain(..);
+        last_entries.append(&mut new_entries);
     }
 
     /*pub async fn await_next_entries(&mut self, stream_id: Uuid) -> Vec<JSONValue> {

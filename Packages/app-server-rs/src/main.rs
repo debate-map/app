@@ -149,7 +149,7 @@ async fn main() {
 
     let app_state = AppStateWrapper::new(AppState {});
     //let storage = Storage::<'static>::default();
-    let (lq_storage, storage_wrapper) = LQStorage::new_in_wrapper();
+    let lq_storage = LQStorage::new_in_wrapper();
 
     let app = Router::new()
         .route("/", get(|| async { Html(r#"
@@ -159,7 +159,7 @@ async fn main() {
 
     //let (client, connection) = pgclient::create_client(false).await;
     let pool = pgclient::create_db_pool();
-    let app = gql::extend_router(app, pool, storage_wrapper.clone()).await;
+    let app = gql::extend_router(app, pool, lq_storage.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
@@ -171,7 +171,7 @@ async fn main() {
         let mut errors_hit = 0;
         while errors_hit < 1000 {
             let (client_replication, connection_replication) = pgclient::create_client(true).await;
-            let result = pgclient::start_streaming_changes(client_replication, connection_replication, storage_wrapper.clone()).await;
+            let result = pgclient::start_streaming_changes(client_replication, connection_replication, lq_storage.clone()).await;
             match result {
                 Ok(result) => {
                     //println!("PGClient loop ended for some reason. Result:{:?}", result);

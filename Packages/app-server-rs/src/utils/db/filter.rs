@@ -13,7 +13,7 @@ use super::{fragments::{SQLFragment, SQLParam}, postgres_parsing::RowData};
 //pub type Filter = Option<Map<String, JSONValue>>;
 pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Debug, Serialize)]
 pub struct QueryFilter {
@@ -34,10 +34,10 @@ impl QueryFilter {
         }
     }
     pub fn from_filter_input(input: &FilterInput) -> Result<QueryFilter, Error> {
-        let result = QueryFilter { field_filters: IndexMap::new() };
+        let mut result = QueryFilter { field_filters: IndexMap::new() };
 
         for (field_name, field_filters_json) in input.as_object().ok_or_else(|| anyhow!("Filter root-structure was not an object!"))?.iter() {
-            let field_filter = FieldFilter::default();
+            let mut field_filter = FieldFilter::default();
             //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
             for (op_json, op_val_json) in field_filters_json.as_object().ok_or_else(|| anyhow!("Filter-structure for field {field_name} was not an object!"))? {
                 let op: FilterOp = match op_json.as_str() {
@@ -60,11 +60,12 @@ impl QueryFilter {
 }
 impl Clone for QueryFilter {
     fn clone(&self) -> Self {
-        let field_filters = IndexMap::new();
-        for (key, value) in self.field_filters {
-            field_filters.insert(key, value);
+        /*let mut field_filters: IndexMap<String, FieldFilter> = IndexMap::new();
+        for (key, value) in self.field_filters.iter() {
+            field_filters.insert(key.clone(), value.clone());
         }
-        Self { field_filters }
+        Self { field_filters }*/
+        Self { field_filters: self.field_filters.clone() }
     }
 }
 impl Display for QueryFilter {
@@ -78,11 +79,11 @@ impl Display for QueryFilter {
     }
 }
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Default, Clone, Debug, Serialize)]
 pub struct FieldFilter {
     pub filter_ops: IndexMap<FilterOp, JSONValue>,
 }
-#[derive(Eq, Hash, PartialEq, Debug, Serialize)]
+#[derive(Eq, Hash, PartialEq, Debug, Clone, Serialize)]
 pub enum FilterOp {
     EqualsX,
     /// More precisely: "equals at least one of X"
@@ -90,7 +91,7 @@ pub enum FilterOp {
     ContainsAllOfX,
 }
 
-}
+//}
 
 pub fn get_sql_for_filters(filter: &QueryFilter) -> Result<SQLFragment, Error> {
     if filter.is_empty() {
@@ -104,7 +105,7 @@ pub fn get_sql_for_filters(filter: &QueryFilter) -> Result<SQLFragment, Error> {
             parts.push(SQLFragment::lit(") AND ("));
         }
         //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
-        for (op, op_val) in field_filter.filter_ops {
+        for (op, op_val) in field_filter.filter_ops.iter() {
             parts.push(match op {
                 FilterOp::EqualsX => SQLFragment::new("$I = $V", vec![
                     SQLParam::Ident(field_name.clone()),
@@ -169,14 +170,14 @@ pub fn op_value_to_value_param(op_val: &JSONValue) -> Result<SQLParam, Error> {
 }
 
 pub fn entry_matches_filter(entry: &RowData, filter: &QueryFilter) -> Result<bool, Error> {
-    for (field_name, field_filter) in filter.field_filters {
+    for (field_name, field_filter) in filter.field_filters.iter() {
         // consider "field doesn't exist" to be the same as "field exists, and is set to null" (since that's how the filter-system is meant to work)
-        let field_value = entry.get(&field_name).or(Some(&serde_json::Value::Null)).unwrap();
+        let field_value = entry.get(field_name).or(Some(&serde_json::Value::Null)).unwrap();
         
-        for (op, op_val) in field_filter.filter_ops {
+        for (op, op_val) in field_filter.filter_ops.iter() {
             match op {
                 FilterOp::EqualsX => {
-                    if field_value != &op_val {
+                    if field_value != op_val {
                         return Ok(false);
                     }
                 },
