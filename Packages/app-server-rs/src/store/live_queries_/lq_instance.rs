@@ -169,6 +169,10 @@ impl LQInstance {
         }
         //self.new_entries_channel_sender.send(new_entries.clone());
 
+        self.set_last_entries(new_entries).await;
+    }
+
+    pub async fn set_last_entries(&self, mut new_entries: Vec<RowData>) {
         let mut last_entries = self.last_entries.write().await;
         last_entries.drain(..);
         last_entries.append(&mut new_entries);

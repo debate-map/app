@@ -42,6 +42,7 @@ use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::type_aliases::JSONValue;
 
+use super::lq_batch::LQBatch;
 use super::lq_instance::{LQInstance, LQEntryWatcher};
 
 pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
@@ -77,8 +78,8 @@ pub struct LQGroup {
     pub table_name: String,
     pub filter_shape: QueryFilter,
 
-    /// A "batch" may be as small as one query, if first/isolated.
-    pub last_batch_execution_time: Option<f64>,
+    pub last_committed_batch: Option<LQBatch>,
+    pub next_batch: LQBatch,
     
     // for coordination of currently-buffering batches
     pub channel_for_batch_start__sender_base: Sender<LQBatchMessage>,
@@ -96,7 +97,8 @@ impl LQGroup {
             table_name,
             filter_shape,
 
-            last_batch_execution_time: None,
+            last_committed_batch: None,
+            next_batch: LQBatch::default(),
 
             channel_for_batch_start__sender_base: s1,
             channel_for_batch_start__receiver_base: r1,

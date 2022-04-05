@@ -8,7 +8,7 @@ use itertools::{chain, Itertools};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
 use crate::{utils::type_aliases::JSONValue};
-use super::{fragments::{SQLFragment, SQLParam}, postgres_parsing::RowData};
+use super::{fragments::{SQLFragment, SQLParam, SQLIdent, SF}, postgres_parsing::RowData};
 
 //pub type Filter = Option<Map<String, JSONValue>>;
 pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
@@ -95,37 +95,40 @@ pub enum FilterOp {
 
 pub fn get_sql_for_filters(filter: &QueryFilter) -> Result<SQLFragment, Error> {
     if filter.is_empty() {
-        return Ok(SQLFragment::lit(""));
+        return Ok(SF::lit(""));
     }
 
     let mut parts: Vec<SQLFragment> = vec![];
-    parts.push(SQLFragment::lit("("));
+    parts.push(SF::lit("("));
     for (i, (field_name, field_filter)) in filter.field_filters.iter().enumerate() {
         if i > 0 {
-            parts.push(SQLFragment::lit(") AND ("));
+            parts.push(SF::lit(") AND ("));
         }
         //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
         for (op, op_val) in field_filter.filter_ops.iter() {
             parts.push(match op {
-                FilterOp::EqualsX => SQLFragment::new("$I = $V", vec![
-                    SQLParam::Ident(field_name.clone()),
+                FilterOp::EqualsX => SF::new("$I = $V", vec![
+                    SQLIdent::param(field_name.clone())?,
                     op_value_to_value_param(&op_val)?,
                 ]),
                 FilterOp::EqualsOneOfX => {
                     let vals = op_val.as_array().ok_or_else(|| anyhow!("Value for \"in\" filter was not an array!"))?;
-                    SQLFragment::INTERPOLATED_SQL(
-                        format!("$I IN ({})", vals.iter().map(|_| "$V").collect_vec().join(",")),
-                        chain(
-                            [SQLParam::Ident(field_name.clone())],
-                            vals.iter().map(|a| op_value_to_value_param(a)).try_collect2::<Vec<SQLParam>>()?,
-                        ).collect_vec()
-                    )
+                    SF::merge(chain!(
+                        SF::new_once("$I IN (", vec![SQLIdent::param(field_name.clone())?]),
+                        vals.iter().enumerate().map(|(i, val)| -> Result<Vec<SQLFragment>, Error> {
+                            Ok(vec![
+                                if i > 0 { Some(SF::lit(",")) } else { None },
+                                Some(SF::new("$V", vec![op_value_to_value_param(val)?])),
+                            ].into_iter().filter_map(|a| a).collect_vec())
+                        }).try_collect2::<Vec<_>>()?.into_iter().flatten().collect_vec(),
+                        SF::lit_once(")"),
+                    ).collect_vec())
                 },
                 // see: https://stackoverflow.com/a/54069718
-                //"contains" => SQLFragment::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
+                //"contains" => SF::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
                 FilterOp::ContainsAllOfX => {
                     /*let vals = filter_value.as_array().ok_or_else(|| anyhow!("Value for \"contains\" filter was not an array!"))?;
-                    SQLFragment::INTERPOLATED_SQL(
+                    SF::INTERPOLATED_SQL(
                         format!("$I @> '{{{}}}'", vals.iter().map(|_| "$V").collect_vec().join(",")),
                         chain(
                             [SQLParam::Ident(field_name.clone())],
@@ -136,25 +139,25 @@ pub fn get_sql_for_filters(filter: &QueryFilter) -> Result<SQLFragment, Error> {
                     //let _val_str = filter_value.as_str().ok_or_else(|| anyhow!("Value for \"contains\" filter was not a string!"))?;
 
                     // meaning: if the row contains any values in the passed array (read as: if any of the row's values match the passed value) 
-                    //SQLFragment::new("$I @> '{$V}'", vec![
+                    //SF::new("$I @> '{$V}'", vec![
                         
                     // meaining: if the row contains all values in the passed jsonb array (this only works for json presumably)
-                    //SQLFragment::new("$I @> cast($V as jsonb)", vec![
+                    //SF::new("$I @> cast($V as jsonb)", vec![
 
                     // meaining: if the row contains all values in the passed array (see: https://stackoverflow.com/a/54069718)
-                    //SQLFragment::new("$I @> '{$V}'", vec![ // this syntax works in console, but not in prepared statements apparently
-                    SQLFragment::new("$I @> array[$V]", vec![
-                        SQLParam::Ident(field_name.clone()),
+                    //SF::new("$I @> '{$V}'", vec![ // this syntax works in console, but not in prepared statements apparently
+                    SF::new("$I @> array[$V]", vec![
+                        SQLIdent::new(field_name.clone())?.into_param(),
                         op_value_to_value_param(&op_val)?,
                     ])
                 },
-                //"contains_jsonb" => SQLFragment::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
+                //"contains_jsonb" => SF::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
             });
         }
     }
-    parts.push(SQLFragment::lit(")"));
+    parts.push(SF::lit(")"));
 
-    let combined_fragment = SQLFragment::merge(parts);
+    let combined_fragment = SF::merge(parts);
     Ok(combined_fragment)
 }
 pub fn op_value_to_value_param(op_val: &JSONValue) -> Result<SQLParam, Error> {

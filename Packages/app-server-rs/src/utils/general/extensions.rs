@@ -13,5 +13,16 @@ pub trait IteratorV : Iterator {
     {
         core::iter::Iterator::try_collect::<B>(self)
     }
+
+    // figure out the type-definition for this someday, lol
+    /*fn try_collect_vec<B>(&mut self) -> ChangeOutputType<Self::Item, B>
+    where
+        Self: Sized,
+        Self::Item: Try,
+        <Self::Item as Try>::Residual: Residual<B>,
+        B: FromIterator<<Self::Item as Try>::Output>,
+    {
+        core::iter::Iterator::try_collect::<Vec<B>>(self)
+    }*/
 }
 impl<T: ?Sized> IteratorV for T where T: Iterator { }

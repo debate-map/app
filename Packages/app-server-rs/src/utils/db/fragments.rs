@@ -1,10 +1,33 @@
-use std::{fmt::Display, sync::atomic::AtomicI32};
+use std::{fmt::Display, sync::atomic::AtomicI32, iter::{once, Once}};
 use anyhow::{anyhow, bail, Context, Error, ensure};
 use itertools::Itertools;
 use regex::{Regex, Captures};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
 use crate::{utils::type_aliases::JSONValue};
+
+#[derive(Debug)]
+pub struct SQLIdent {
+    name: String,
+}
+impl SQLIdent {
+    pub fn new(name: String) -> Result<SQLIdent, Error> {
+        // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
+        let re = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
+        ensure!(re.is_match(&name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{name}");
+        Ok(Self {
+            name
+        })
+    }
+    /// Shortcut for `SQLIdent::new(...).into_param()`.
+    pub fn param(name: String) -> Result<SQLParam, Error> {
+        Ok(SQLIdent::new(name)?.into_param())
+    }
+
+    pub fn into_param(self) -> SQLParam {
+        SQLParam::Ident(self)
+    }
+}
 
 // Send is needed, else can't be used across .await points
 //pub type ParamType = Box<dyn ToSql + Send + Sync>;
@@ -15,7 +38,7 @@ use crate::{utils::type_aliases::JSONValue};
 //#[derive(Debug, Clone)]
 pub enum SQLParam {
     /// For names of tables, columns, etc.
-    Ident(String),
+    Ident(SQLIdent),
     /// Examples: strings, numbers, etc. (for technical reasons, these currently must be converted to a String -- for most types this works fine)
     Value(String),
 }
@@ -51,6 +74,8 @@ impl ToSql for SQLParam {
     tokio_postgres::types::to_sql_checked!();
 }
 
+/// Alias for SQLFragment, to make it shorter to call things like... SF::new, SF::lit, SF::merge
+pub type SF = SQLFragment;
 //#[derive(Clone)] // can't do this atm, since can't have ToSql+Clone for params field (see: https://github.com/rust-lang/rust/issues/32220)
 pub struct SQLFragment {
     pub sql_text: String,
@@ -59,31 +84,32 @@ pub struct SQLFragment {
 impl SQLFragment {
     /// For param-placeholders in sql_text, use $I for identifiers, and $V for values.
     /// Note: In sql-text, don't add quotes around these markers/placeholders. (only exceptions are some complex structures, eg. the outer quotes and brackets for jsonb arrays)
-    //pub fn new<T>(sql_text: &'static str, params: Vec<T>) -> Self
-    pub fn new(sql_text: &'static str, params: Vec<SQLParam>) -> Self
-        // requires that for each param, calling param.to_owned() would return a type that is ToSql+Sync+'static
-        //where T: ToSql + Send + Sync + 'static
-        //where T: Display + 'static
-        //where T: String
-    {
+    pub fn new(sql_text: &'static str, params: Vec<SQLParam>) -> Self {
         Self {
             sql_text: sql_text.to_owned(),
             //params: params.into_iter().map(|a| Box::new(a) as ParamType).collect(),
             params: params,
         }
     }
+    /// Like new(), except wraps the result in a `once` iterator; this makes it easy to use in the itertool `chain!(...)` macro
+    pub fn new_once(sql_text: &'static str, params: Vec<SQLParam>) -> Once<Self> {
+        once(Self::new(sql_text, params))
+    }
+    pub fn lit(sql_text: &'static str) -> Self {
+        Self::new(sql_text, vec![])
+    }
+    /// Like lit(), except wraps the result in a `once` iterator; this makes it easy to use in the itertool `chain!(...)` macro
+    pub fn lit_once(sql_text: &'static str) -> Once<Self> {
+        once(Self::lit(sql_text))
+    }
+    
     /// Only use this when you have to: when the number/placement of Identifiers in the SQL query-text is dynamic.
-    pub fn INTERPOLATED_SQL(sql_text: String, params: Vec<SQLParam>) -> Self {
+    /*pub fn INTERPOLATED_SQL(sql_text: String, params: Vec<SQLParam>) -> Self {
         Self {
             sql_text: sql_text,
             params: params,
         }
-    }
-    pub fn lit(sql_text: &'static str) -> Self {
-        //let params: Vec<&'static str> = vec![]; // type of this doesn't really matter; just must satisfy new's constraints
-        let params: Vec<SQLParam> = vec![];
-        Self::new(sql_text, params)
-    }
+    }*/
 
     pub fn merge(fragments: Vec<SQLFragment>) -> SQLFragment {
         let mut sql_text = "".to_owned();
@@ -95,6 +121,17 @@ impl SQLFragment {
             }
         }
         Self { sql_text, params }
+    }
+    /// Like `merge()`, except having a SQLFragment of `\n` inserted between each provided fragment.
+    pub fn merge_lines(line_fragments: Vec<SQLFragment>) -> SQLFragment {
+        let mut final_fragments = vec![];
+        for (i, frag) in line_fragments.into_iter().enumerate() {
+            if i > 0 {
+                final_fragments.push(Self::lit("\n"));
+            }
+            final_fragments.push(frag);
+        }
+        Self::merge(final_fragments)
     }
 
     pub fn into_query_args(&mut self) -> Result<(String, Vec<SQLParam>), Error> {
@@ -112,17 +149,17 @@ impl SQLFragment {
                 next_match_index += 1;
                 let param = self.params.get(match_index).with_context(|| format!("SQL query-string references param with index {match_index}, but no corresponding param was found."))?;
                 match &param {
-                    &SQLParam::Ident(str) => {
+                    &SQLParam::Ident(ident) => {
                         println!("Test1");
                         ensure!(caps_g0.as_str() == "$I", "Placeholder-type ({}) doesn't match with param-type (Ident)!", caps_g0.as_str()); // defensive
 
                         // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
                         let re = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
-                        ensure!(re.is_match(str), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{str}");
+                        ensure!(re.is_match(&ident.name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{}", &ident.name);
 
                         //format!("${}", match_id)
                         // temp; interpolate the identifier directly into the query-str (don't know how to avoid it atm)
-                        Ok(format!("\"{str}\""))
+                        Ok(format!("\"{}\"", ident.name))
                     },
                     &SQLParam::Value(_str) => {
                         println!("Test2");

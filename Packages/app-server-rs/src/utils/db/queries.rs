@@ -11,7 +11,7 @@ use tokio_postgres::{Client, Row, types::ToSql, Statement};
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{filter::get_sql_for_filters, fragments::{SQLFragment, SQLParam}}, general::general::to_anyhow,}};
+use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{filter::get_sql_for_filters, fragments::{SQLFragment, SQLParam, SQLIdent}}, general::general::to_anyhow,}};
 use super::{super::{mtx::mtx::{new_mtx, Mtx}}, postgres_parsing::RowData, filter::QueryFilter};
 
 /*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
@@ -51,7 +51,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
     };
     println!("Running where clause. @table:{table_name} @{where_sql} @filter:{filter:?}");
     let final_query = SQLFragment::merge(vec![
-        SQLFragment::new("SELECT * FROM $I", vec![SQLParam::Ident(table_name.clone())]),
+        SQLFragment::new("SELECT * FROM $I", vec![SQLIdent::param(table_name.clone())?]),
         where_sql,
     ]);
     let mut rows = query_func(final_query).await
