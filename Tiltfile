@@ -22,29 +22,29 @@ def AddResourceNamesBatch_IfValid(namesBatch):
 		appliedResourceNames_batches.append(namesBatch)
 
 def NEXT_k8s_resource(workload = '', **args):
-	if "resource_deps" in args:
-		fail("Cannot specify resource_deps, for resource \"" + thisResourceName + "\". (if you want to custom resource_deps, use the regular k8s_resource function)") # throw error
-
-	args["workload"] = workload
-	thisResourceName = args["new_name"] if "new_name" in args else args["workload"]
-	args["resource_deps"] = GetLastResourceNamesBatch()
-
-	AddResourceNamesBatch_IfValid([thisResourceName])
-	return k8s_resource(**args)
-def NEXT_k8s_resource_batch(workloads = [], **args):
-	if "resource_deps" in args:
-		fail("Cannot specify resource_deps, for resource \"" + thisResourceName + "\". (if you want to custom resource_deps, use the regular k8s_resource function)") # throw error
-
+	entry = args
+	entry["workload"] = workload
+	results = NEXT_k8s_resource_batch([
+		entry
+	])
+	return results[0]
+def NEXT_k8s_resource_batch(entries = []):
 	resource_deps = GetLastResourceNamesBatch()
 	batch_resourceNames = []
-	for workload in workloads:
-		args["workload"] = workload
-		thisResourceName = args["new_name"] if "new_name" in args else args["workload"]
-		args["resource_deps"] = resource_deps
 
+	results = []
+	for entry in entries:
+		if "resource_deps" in entry:
+			fail("Cannot specify resource_deps, for resource \"" + thisResourceName + "\". (if you want to customize resource_deps, use the regular k8s_resource function)") # throw error # why?
+		entry["resource_deps"] = resource_deps
+
+		thisResourceName = entry["new_name"] if "new_name" in entry else entry["workload"]
 		batch_resourceNames.append(thisResourceName)
-		k8s_resource(**args)
+
+		results.append(k8s_resource(**entry))
 	AddResourceNamesBatch_IfValid(batch_resourceNames)
+	
+	return results
 
 def k8s_yaml_grouped(pathOrBlob, groupName, resourcesToIgnore = []):
 	'''blob = read_file(pathOrBlob) else pathOrBlob
@@ -389,39 +389,42 @@ k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 # port forwards (see readme's [project-service-urls] guide-module for details)
 # ==========
 
-NEXT_k8s_resource('dm-monitor-backend',
-	trigger_mode=TRIGGER_MODE_MANUAL,
-	port_forwards=[
-		'5230:5130' if REMOTE else '5130',
-	],
-	labels=["app"],
-)
-
-NEXT_k8s_resource('dm-web-server',
-	trigger_mode=TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
-	#extra_pod_selectors={"app": "dm-web-server"}, # this is needed fsr
-	#port_forwards='5100:31005')
-	port_forwards='5200:5100' if REMOTE else '5100',
-	labels=["app"],
-)
-
-NEXT_k8s_resource('dm-app-server-rs',
-	# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
-	trigger_mode=TRIGGER_MODE_MANUAL,
-	port_forwards=[
-		'5210:5110' if REMOTE else '5110',
-	],
-	labels=["app"],
-)
-
-NEXT_k8s_resource('dm-app-server-js',
-	trigger_mode=TRIGGER_MODE_MANUAL,
-	port_forwards=[
-		'5215:5115' if REMOTE else '5115',
-		'5216:5116' if REMOTE else '5116' # for nodejs-inspector
-	],
-	labels=["app"],
-)
+NEXT_k8s_resource_batch([
+	{
+		"workload": 'dm-monitor-backend',
+		"trigger_mode": TRIGGER_MODE_MANUAL,
+		"port_forwards": [
+			'5230:5130' if REMOTE else '5130',
+		],
+		"labels": ["app"],
+	},
+	{
+		"workload": 'dm-web-server',
+		"trigger_mode": TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
+		#"extra_pod_selectors": {"app": "dm-web-server"}, # this is needed fsr
+		#"port_forwards": '5100:31005')
+		"port_forwards": '5200:5100' if REMOTE else '5100',
+		"labels": ["app"],
+	},
+	{
+		"workload": 'dm-app-server-rs',
+		# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
+		"trigger_mode": TRIGGER_MODE_MANUAL,
+		"port_forwards": [
+			'5210:5110' if REMOTE else '5110',
+		],
+		"labels": ["app"],
+	},
+	{
+		"workload": 'dm-app-server-js',
+		"trigger_mode": TRIGGER_MODE_MANUAL,
+		"port_forwards": [
+			'5215:5115' if REMOTE else '5115',
+			'5216:5116' if REMOTE else '5116' # for nodejs-inspector
+		],
+		"labels": ["app"],
+	}
+])
 
 # new relic (commented for now, because of apparent performance impact)
 # ==========
@@ -481,9 +484,9 @@ helm_remote('netdata',
 )
 
 NEXT_k8s_resource_batch([
-	"netdata-parent",
-	"netdata-child",
-], labels=["monitoring"])
+	{"workload": "netdata-parent", "labels": ["monitoring"]},
+	{"workload": "netdata-child", "labels": ["monitoring"]},
+])
 
 # extras
 # ==========
