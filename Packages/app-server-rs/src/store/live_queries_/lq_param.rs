@@ -32,13 +32,13 @@ impl LQParam {
     pub fn instantiate_param_using_lq_instance_data(&self, lq_index: usize, lq_instance: &LQInstance) -> Result<LQParam, Error> {
         let proto = self;
         match proto {
-            &LQParam::LQIndex(_) => Ok(LQParam::LQIndex(lq_index)),
-            &LQParam::FilterOpValue(field_name, op_i, _) => {
-                let field_filter_for_lq_instance = lq_instance.filter.field_filters.get(&field_name)
+            LQParam::LQIndex(_) => Ok(LQParam::LQIndex(lq_index)),
+            LQParam::FilterOpValue(field_name, op_i, _) => {
+                let field_filter_for_lq_instance = lq_instance.filter.field_filters.get(field_name)
                     .ok_or(anyhow!("LQ-instance had no filter-value for field \"{field_name}\"."))?;
-                let filter_op = field_filter_for_lq_instance.filter_ops.get(op_i)
+                let filter_op = field_filter_for_lq_instance.filter_ops.get(*op_i)
                     .ok_or(anyhow!("Field-filter had no filter-op with index \"{op_i}\"."))?;
-                Ok(LQParam::FilterOpValue(field_name, op_i, filter_op.clone()))
+                Ok(LQParam::FilterOpValue(field_name.to_owned(), *op_i, filter_op.clone()))
             }
         }
     }
@@ -47,14 +47,10 @@ impl LQParam {
         match self {
             LQParam::LQIndex(lq_index) => {
                 // todo: have this output a number rather than string
-                Ok(SQLParam::Value_String(lq_index.to_string()).into_value_fragment()?)
+                SQLParam::Value_String(lq_index.to_string()).into_value_fragment()
             },
             LQParam::FilterOpValue(field_name, op_i, op) => {
-                Ok(match op {
-                    FilterOp::EqualsX(val) => json_value_to_sql_value_param(&val)?.into_value_fragment()?,
-                    FilterOp::IsWithinX(vals) => json_vals_to_sql_array_fragment(&vals)?,
-                    FilterOp::ContainsAllOfX(vals) => json_vals_to_sql_array_fragment(&vals)?,
-                })
+                op.get_sql_for_value()
             }
         }
     }
@@ -74,26 +70,7 @@ impl LQParam {
                     SQLIdent::param(self.name())?.into_ident_fragment()?,
                 ]);
                 
-                Ok(match op {
-                    FilterOp::EqualsX(val) => SF::merge(vec![
-                        field_name_fragment,
-                        SF::lit(" = "),
-                        lq_param_name_fragment,
-                    ]),
-                    FilterOp::IsWithinX(vals) => SF::merge(vec![
-                        field_name_fragment,
-                        SF::lit(" IN "),
-                        lq_param_name_fragment,
-                    ]),
-                    // see: https://stackoverflow.com/a/54069718
-                    //"contains" => SF::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
-                    FilterOp::ContainsAllOfX(vals) => SF::merge(vec![
-                        field_name_fragment,
-                        SF::lit(" @> "),
-                        lq_param_name_fragment,
-                    ]),
-                    //"contains_jsonb" => SF::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
-                })
+                Ok(op.get_sql_for_application(field_name_fragment, lq_param_name_fragment))
             }
         }
     }

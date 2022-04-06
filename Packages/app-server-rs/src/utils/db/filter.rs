@@ -3,7 +3,7 @@ use anyhow::{anyhow, bail, Context, Error};
 use indexmap::IndexMap;
 use rust_macros::{wrap_slow_macros, unchanged};
 use serde::Serialize;
-use crate::{utils::general::{extensions::IteratorV, general::match_cond_to_iter}, store::live_queries_::lq_param::LQParam};
+use crate::{utils::general::{extensions::IteratorV, general::match_cond_to_iter}, store::live_queries_::lq_param::{LQParam, json_vals_to_sql_array_fragment}};
 use itertools::{chain, Itertools};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
@@ -19,6 +19,9 @@ wrap_slow_macros!{
 pub struct QueryFilter {
     pub field_filters: IndexMap<String, FieldFilter>,
 }
+
+}
+
 impl QueryFilter {
     pub fn empty() -> Self {
         Self {
@@ -40,14 +43,15 @@ impl QueryFilter {
             let mut field_filter = FieldFilter::default();
             //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
             for (op_json, op_val_json) in field_filters_json.as_object().ok_or_else(|| anyhow!("Filter-structure for field {field_name} was not an object!"))? {
+                let op_val_json_clone = op_val_json.clone();
                 let op: FilterOp = match op_json.as_str() {
-                    "equalTo" => FilterOp::EqualsX(op_val_json.clone()),
+                    "equalTo" => FilterOp::EqualsX(op_val_json_clone),
                     "in" => {
-                        let vals = op_val_json.clone().as_array().ok_or(anyhow!("Filter-op of type \"in\" requires an array value!"))?;
+                        let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"in\" requires an array value!"))?;
                         FilterOp::IsWithinX(vals.to_vec())
                     },
                     "contains" => {
-                        let vals = op_val_json.clone().as_array().ok_or(anyhow!("Filter-op of type \"contains\" requires an array value!"))?;
+                        let vals = op_val_json_clone.as_array().ok_or(anyhow!("Filter-op of type \"contains\" requires an array value!"))?;
                         FilterOp::ContainsAllOfX(vals.to_vec())
                     },
                     _ => bail!(r#"Invalid filter-op "{op_json}" specified. Supported: equalTo, in, contains."#),
@@ -62,6 +66,32 @@ impl QueryFilter {
 
     pub fn is_empty(&self) -> bool {
         self.field_filters.len() == 0
+    }
+
+    /// This method does not use batching; if you want batching, use `LQBatch`.
+    pub fn get_sql_for_application(&self) -> Result<SQLFragment, Error> {
+        if self.is_empty() {
+            return Ok(SF::lit(""));
+        }
+    
+        let mut parts: Vec<SQLFragment> = vec![];
+        parts.push(SF::lit("("));
+        for (i, (field_name, field_filter)) in self.field_filters.iter().enumerate() {
+            if i > 0 {
+                parts.push(SF::lit(") AND ("));
+            }
+            //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
+            for op in field_filter.filter_ops.iter() {
+                parts.push(op.get_sql_for_application(
+                    SQLIdent::param(field_name.clone())?.into_ident_fragment()?,
+                    op.get_sql_for_value()?,
+                ));
+            }
+        }
+        parts.push(SF::lit(")"));
+    
+        let combined_fragment = SF::merge(parts);
+        Ok(combined_fragment)
     }
 }
 impl Clone for QueryFilter {
@@ -91,6 +121,8 @@ impl Display for QueryFilter {
     }
 }
 
+wrap_slow_macros!{
+
 #[derive(Default, Clone, Debug, Serialize)]
 pub struct FieldFilter {
     pub filter_ops: Vec<FilterOp>,
@@ -105,15 +137,48 @@ pub enum FilterOp {
 
 }
 
+impl FilterOp {
+    pub fn get_sql_for_value(&self) -> Result<SQLFragment, Error> {
+        Ok(match self {
+            FilterOp::EqualsX(val) => json_value_to_sql_value_param(&val)?.into_value_fragment()?,
+            FilterOp::IsWithinX(vals) => json_vals_to_sql_array_fragment(&vals)?,
+            FilterOp::ContainsAllOfX(vals) => json_vals_to_sql_array_fragment(&vals)?,
+        })
+    }
+
+    pub fn get_sql_for_application(&self, fragment_for_value_in_db: SQLFragment, fragment_for_value_in_filter_op: SQLFragment) -> SQLFragment {
+        match self {
+            FilterOp::EqualsX(val) => SF::merge(vec![
+                fragment_for_value_in_db,
+                SF::lit(" = "),
+                fragment_for_value_in_filter_op,
+            ]),
+            FilterOp::IsWithinX(vals) => SF::merge(vec![
+                fragment_for_value_in_db,
+                SF::lit(" IN "),
+                fragment_for_value_in_filter_op,
+            ]),
+            // see: https://stackoverflow.com/a/54069718
+            //"contains" => SF::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
+            FilterOp::ContainsAllOfX(vals) => SF::merge(vec![
+                fragment_for_value_in_db,
+                SF::lit(" @> "),
+                fragment_for_value_in_filter_op,
+            ]),
+            //"contains_jsonb" => SF::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
+        }
+    }
+}
+
 pub fn entry_matches_filter(entry: &RowData, filter: &QueryFilter) -> Result<bool, Error> {
     for (field_name, field_filter) in filter.field_filters.iter() {
         // consider "field doesn't exist" to be the same as "field exists, and is set to null" (since that's how the filter-system is meant to work)
         let field_value = entry.get(field_name).or(Some(&serde_json::Value::Null)).unwrap();
         
-        for op in field_filter.filter_ops {
+        for op in &field_filter.filter_ops {
             match op {
                 FilterOp::EqualsX(val) => {
-                    if field_value != &val {
+                    if field_value != val {
                         return Ok(false);
                     }
                 },

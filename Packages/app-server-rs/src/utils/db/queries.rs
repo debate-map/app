@@ -41,7 +41,8 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
         QueryFuncReturn: Future<Output = Result<Vec<Row>, Error>>,
 {
     new_mtx!(mtx, "1:run query", parent_mtx);
-    let filters_sql = get_sql_for_query_filter(filter, None, None).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
+    //let filters_sql = get_sql_for_query_filter(filter, None, None).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
+    let filters_sql = filter.get_sql_for_application().with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let filters_sql_str = filters_sql.to_string(); // workaround for difficulty implementing Clone for SQLFragment ()
     mtx.current_section_extra_info = Some(format!("@table_name:{table_name} @filters_sql:{filters_sql}"));
     

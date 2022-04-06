@@ -57,6 +57,7 @@ macro_rules! new_mtx {
     };
     ($mtx:ident, $first_section_name:expr, $parent_mtx:expr, $extra_info:expr) => {
         let parent_mtx: Option<&$crate::utils::mtx::mtx::Mtx> = $parent_mtx;
+        #[allow(unused_mut)]
         let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!(), $first_section_name, parent_mtx, $extra_info);
     };
 }

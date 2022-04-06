@@ -123,7 +123,7 @@ impl SQLFragment {
         let params_final = params_base.into_iter().filter_map(|a| {
             match a {
                 // identifiers are (safely -- by goal, anyway) inlined into the sql-text, so don't send them to tokio-postgres/the-db as "actual" params
-                SQLParam::Ident(str) => None,
+                SQLParam::Ident(_str) => None,
                 SQLParam::Value_String(str) => Some(SQLParam::Value_String(str)),
                 SQLParam::Value_Null => Some(SQLParam::Value_Null),
             }

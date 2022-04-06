@@ -28,7 +28,8 @@ use super::lq_group::LQGroup;
 use super::lq_instance::LQInstance;
 use super::lq_param::LQParam;
 
-/// A "batch" may be as small as one query, if first/isolated.
+/// Use this struct to collect multiple queries and execute them in one go as a "batched query".
+/// It can also be used as a convenience wrapper around executing a single query; but for most standalone queries, `get_entries_in_collection[_basic]` will be more appropriate.
 //#[derive(Default)]
 pub struct LQBatch {
     // from LQGroup
@@ -117,7 +118,7 @@ impl LQBatch {
                 SF::new_once("SELECT * FROM $I", vec![SQLIdent::param(self.table_name.clone())?]),
                 SF::lit_once("JOIN lq_param_sets ON ("),
                 lq_param_protos.iter()
-                    // in this section, we only care about the IDForFieldFilterOp lq-params
+                    // in this section, we only care about the FilterOpValue lq-params
                     .filter(|proto| {
                         match proto {
                             LQParam::FilterOpValue(..) => true,
@@ -127,7 +128,7 @@ impl LQBatch {
                     .map(|proto| -> Result<SQLFragment, Error> {
                         proto.get_sql_for_application(&self.table_name, "lq_param_sets")
                     }).try_collect2::<Vec<_>>()?,
-                SF::lit_once(") ORDER BY index;"),
+                SF::lit_once(") ORDER BY lq_index;"),
             ).collect_vec());
             combined_sql.into_query_args()?
         };
