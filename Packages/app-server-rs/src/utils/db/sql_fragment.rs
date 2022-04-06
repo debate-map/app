@@ -6,77 +6,11 @@ use serde_json::Map;
 use tokio_postgres::types::ToSql;
 use crate::{utils::type_aliases::JSONValue};
 
-#[derive(Debug)]
-pub struct SQLIdent {
-    name: String,
-}
-impl SQLIdent {
-    pub fn new(name: String) -> Result<SQLIdent, Error> {
-        // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
-        let re = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
-        ensure!(re.is_match(&name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{name}");
-        Ok(Self {
-            name
-        })
-    }
-    /// Shortcut for `SQLIdent::new(...).into_param()`.
-    pub fn param(name: String) -> Result<SQLParam, Error> {
-        Ok(SQLIdent::new(name)?.into_param())
-    }
-
-    pub fn into_param(self) -> SQLParam {
-        SQLParam::Ident(self)
-    }
-}
-
-// Send is needed, else can't be used across .await points
-//pub type ParamType = Box<dyn ToSql + Send + Sync>;
-// see comments in get_db_entries() for reason this is needed
-//pub type ParamType = Box<dyn Display>;
-//pub type ParamType = String;
-#[derive(Debug)]
-//#[derive(Debug, Clone)]
-pub enum SQLParam {
-    /// For names of tables, columns, etc.
-    Ident(SQLIdent),
-    /// Examples: strings, numbers, etc. (for technical reasons, these currently must be converted to a String -- for most types this works fine)
-    Value(String),
-}
-impl ToSql for SQLParam {
-    fn to_sql(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> where Self: Sized {
-        match self {
-            //SQLParam::Ident(str) => str.to_sql(ty, out),
-            SQLParam::Ident(_str) => {
-                // instead, it should be interpolated into the query-str (since I don't know of a better way atm); see SQLFragment.into_query_args()
-                panic!("to_sql should never be called on a SQLParam::Ident!");
-            },
-            SQLParam::Value(str) => {
-                if ty.name().to_lowercase() == "bool" {
-                    let str_as_bool = str.to_lowercase() == "true";
-                    return str_as_bool.to_sql(ty, out);
-                }
-
-                str.to_sql(ty, out)
-            },
-        }
-    }
-    //tokio_postgres::types::accepts!(Bool);
-    fn accepts(ty: &tokio_postgres::types::Type) -> bool where Self: Sized {
-        //println!("Type:{} Accepts:{}", ty, String::accepts(ty));
-        //if let tokio_postgres::types::Type::BOOL(ty) = ty {
-        if ty.name().to_lowercase() == "bool" { return true; }
-
-        // test
-        //if ty.name().to_lowercase() == "_text" { return true; }
-
-        String::accepts(ty)
-    }
-    tokio_postgres::types::to_sql_checked!();
-}
+use super::sql_param::SQLParam;
 
 /// Alias for SQLFragment, to make it shorter to call things like... SF::new, SF::lit, SF::merge
 pub type SF = SQLFragment;
-//#[derive(Clone)] // can't do this atm, since can't have ToSql+Clone for params field (see: https://github.com/rust-lang/rust/issues/32220)
+#[derive(Clone)] // can't do this atm, since can't have ToSql+Clone for params field (see: https://github.com/rust-lang/rust/issues/32220)
 pub struct SQLFragment {
     pub sql_text: String,
     pub params: Vec<SQLParam>,
@@ -148,9 +82,8 @@ impl SQLFragment {
                 let match_index = next_match_index;
                 next_match_index += 1;
                 let param = self.params.get(match_index).with_context(|| format!("SQL query-string references param with index {match_index}, but no corresponding param was found."))?;
-                match &param {
-                    &SQLParam::Ident(ident) => {
-                        println!("Test1");
+                match param {
+                    SQLParam::Ident(ident) => {
                         ensure!(caps_g0.as_str() == "$I", "Placeholder-type ({}) doesn't match with param-type (Ident)!", caps_g0.as_str()); // defensive
 
                         // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
@@ -161,9 +94,15 @@ impl SQLFragment {
                         // temp; interpolate the identifier directly into the query-str (don't know how to avoid it atm)
                         Ok(format!("\"{}\"", ident.name))
                     },
-                    &SQLParam::Value(_str) => {
-                        println!("Test2");
-                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type ({}) doesn't match with param-type (Value)!", caps_g0.as_str()); // defensive
+                    SQLParam::Value_String(_str) => {
+                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type ({}) doesn't match with param-type (Value_String)!", caps_g0.as_str()); // defensive
+
+                        let value_id = next_value_id;
+                        next_value_id += 1;
+                        Ok(format!("${}", value_id))
+                    },
+                    SQLParam::Value_Null => {
+                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type ({}) doesn't match with param-type (Value_Null)!", caps_g0.as_str()); // defensive
 
                         let value_id = next_value_id;
                         next_value_id += 1;
@@ -183,8 +122,10 @@ impl SQLFragment {
         let params_base = std::mem::replace(&mut self.params, vec![]);
         let params_final = params_base.into_iter().filter_map(|a| {
             match a {
+                // identifiers are (safely -- by goal, anyway) inlined into the sql-text, so don't send them to tokio-postgres/the-db as "actual" params
                 SQLParam::Ident(str) => None,
-                SQLParam::Value(str) => Some(SQLParam::Value(str)),
+                SQLParam::Value_String(str) => Some(SQLParam::Value_String(str)),
+                SQLParam::Value_Null => Some(SQLParam::Value_Null),
             }
         }).collect();
         

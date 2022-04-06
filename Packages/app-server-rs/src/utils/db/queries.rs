@@ -11,7 +11,7 @@ use tokio_postgres::{Client, Row, types::ToSql, Statement};
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{filter::get_sql_for_filters, fragments::{SQLFragment, SQLParam, SQLIdent}}, general::general::to_anyhow,}};
+use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{sql_fragment::{SQLFragment}, sql_param::SQLIdent}, general::general::to_anyhow,}};
 use super::{super::{mtx::mtx::{new_mtx, Mtx}}, postgres_parsing::RowData, filter::QueryFilter};
 
 /*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
@@ -41,7 +41,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
         QueryFuncReturn: Future<Output = Result<Vec<Row>, Error>>,
 {
     new_mtx!(mtx, "1:run query", parent_mtx);
-    let filters_sql = get_sql_for_filters(filter).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
+    let filters_sql = get_sql_for_query_filter(filter, None, None).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let filters_sql_str = filters_sql.to_string(); // workaround for difficulty implementing Clone for SQLFragment ()
     mtx.current_section_extra_info = Some(format!("@table_name:{table_name} @filters_sql:{filters_sql}"));
     

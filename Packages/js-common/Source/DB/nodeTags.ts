@@ -10,7 +10,7 @@ export const GetNodeTags = CreateAccessor((nodeID: string, userIDs?: string[]|n)
 		//queryOps: [new WhereOp(`nodes.${nodeID}`, ">", "")], // `if value > ""` means "if key exists"
 		//queryOps: [new WhereOp(`nodes`, "array-contains", nodeID)],
 		params: {filter: {
-			nodes: {contains: nodeID},
+			nodes: {contains: [nodeID]},
 			creator: userIDs != null && {in: userIDs},
 		}},
 	}, a=>a.nodeTags);

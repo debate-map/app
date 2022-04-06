@@ -28,7 +28,7 @@ export const GetTermsByForm = CreateAccessor((form: string): Term[]=>{
 			filterStr: `filter: {forms: {contains: [$form]}}`,
 			variables: {form},
 		},*/
-		params: {filter: {forms: {contains: form}}},
+		params: {filter: {forms: {contains: [form]}}},
 	}, a=>a.terms);
 });
 export const GetTermsAttached = CreateAccessor((nodeRevisionID: string): Term[]=>{

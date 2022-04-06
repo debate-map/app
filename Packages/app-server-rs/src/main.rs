@@ -88,16 +88,18 @@ mod store {
         pub mod lq_batch;
         pub mod lq_group;
         pub mod lq_instance;
+        pub mod lq_param;
     }
 }
 mod utils {
     pub mod axum_logging_layer;
     pub mod db {
         pub mod filter;
-        pub mod fragments;
+        pub mod sql_fragment;
         pub mod handlers;
         pub mod postgres_parsing;
         pub mod queries;
+        pub mod sql_param;
     }
     pub mod general {
         pub mod extensions;

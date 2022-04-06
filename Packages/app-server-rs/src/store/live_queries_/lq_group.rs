@@ -15,6 +15,8 @@ use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use flume::{Sender, Receiver, unbounded};
+use indexmap::IndexMap;
+use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
@@ -35,7 +37,7 @@ use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use uuid::Uuid;
 
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
-use crate::utils::db::filter::{entry_matches_filter, QueryFilter};
+use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::postgres_parsing::LDChange;
 use crate::utils::db::queries::{get_entries_in_collection};
@@ -48,22 +50,19 @@ use super::lq_instance::{LQInstance, LQEntryWatcher};
 pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
     let mut filter_shape = filter.clone();
     for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
-        for (op, val) in field_filter.filter_ops.clone().iter() {
-            filter_shape.field_filters.get_mut(field_name).unwrap().filter_ops.insert(op.clone(), JSONValue::Null);
+        for op in field_filter.filter_ops.clone().iter() {
+            let op_with_vals_stripped = match op {
+                FilterOp::EqualsX(val) => FilterOp::EqualsX(JSONValue::Null),
+                FilterOp::IsWithinX(vals) => FilterOp::IsWithinX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
+                FilterOp::ContainsAllOfX(vals) => FilterOp::ContainsAllOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
+            };
+            filter_shape.field_filters.get_mut(field_name).unwrap().filter_ops.push(op_with_vals_stripped);
         }
     }
     filter_shape
 }
 pub fn get_lq_group_key(table_name: &str, filter: &QueryFilter) -> String {
-    //format!("@table:{} @filter:{:?}", table_name, filter)
-
-    let mut filter_shape = filter.clone();
-    for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
-        for (op, val) in field_filter.filter_ops.clone().iter() {
-            filter_shape.field_filters.get_mut(field_name).unwrap().filter_ops.insert(op.clone(), JSONValue::Null);
-        }
-    }
-    
+    let mut filter_shape = filter_shape_from_filter(filter);
     json!({
         "table": table_name,
         "filter": filter_shape,
@@ -86,7 +85,7 @@ pub struct LQGroup {
     pub channel_for_batch_start__receiver_base: Receiver<LQBatchMessage>,
 
     // for specific live-query entries (ie. one for each set of values supplied for the shape/template)
-    pub query_instances: RwLock<HashMap<String, Arc<LQInstance>>>,
+    pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
     //source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl LQGroup {
@@ -98,12 +97,13 @@ impl LQGroup {
             filter_shape,
 
             last_committed_batch: None,
-            next_batch: LQBatch::default(),
+            //next_batch: LQBatch::default(),
+            next_batch: LQBatch::new(table_name.clone(), filter_shape.clone()),
 
             channel_for_batch_start__sender_base: s1,
             channel_for_batch_start__receiver_base: r1,
 
-            query_instances: RwLock::new(HashMap::new()),
+            query_instances: RwLock::new(IndexMap::new()),
             //source_sender_for_lq_watcher_drops: s1,
         };
 
