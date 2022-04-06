@@ -54,6 +54,11 @@ RUN sed -i 's~"Packages/app-server-rs",~~g' Cargo.toml
 # just copy the rust-macros crate completely here (it doesn't change very often, so it's fine if it invalidates later steps)
 COPY Packages/rust-macros Packages/rust-macros
 
+COPY Packages/rust-shared/Cargo.toml Packages/rust-shared/Cargo.toml
+# copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in rust-shared's frequently changing own-code)
+RUN mkdir Packages/rust-shared/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-shared/src/lib.rs
+
 COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
 # copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in app-server's frequently changing own-code)
 RUN mkdir Packages/monitor-backend/src/
@@ -63,10 +68,18 @@ WORKDIR /dm_repo/Packages/monitor-backend
 
 # build the dependencies
 RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
-# remove the build output of the "dummy version" of monitor_backend
-RUN rm -f target/${debug_vs_release}/deps/monitor_backend*
 
-# now copy the monitor-backend's own code
+# remove the build output of the "dummy versions" of packages (needed for subsequent compile)
+#RUN rm -f /dm_repo/Packages/monitor_backend/target/${debug_vs_release}/deps/monitor_backend*
+RUN rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared*
+RUN rm -f /dm_repo/target/${debug_vs_release}/deps/monitor_backend*
+
+# now copy the actual code for rust-shared, and build it
+COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
+RUN cat /dm_repo/Packages/rust-shared/src/lib.rs
+RUN cd /dm_repo/Packages/rust-shared/ && RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+
+# now copy the actual code for monitor-backend, and build it
 COPY Packages/monitor-backend/ /dm_repo/Packages/monitor-backend/
 RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)

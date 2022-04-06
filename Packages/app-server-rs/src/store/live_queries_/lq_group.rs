@@ -53,7 +53,7 @@ pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
     for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
         for op in field_filter.filter_ops.clone().iter() {
             let op_with_vals_stripped = match op {
-                FilterOp::EqualsX(val) => FilterOp::EqualsX(JSONValue::Null),
+                FilterOp::EqualsX(_val) => FilterOp::EqualsX(JSONValue::Null),
                 FilterOp::IsWithinX(vals) => FilterOp::IsWithinX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
                 FilterOp::ContainsAllOfX(vals) => FilterOp::ContainsAllOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
             };
@@ -63,7 +63,7 @@ pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
     filter_shape
 }
 pub fn get_lq_group_key(table_name: &str, filter: &QueryFilter) -> String {
-    let mut filter_shape = filter_shape_from_filter(filter);
+    let filter_shape = filter_shape_from_filter(filter);
     json!({
         "table": table_name,
         "filter": filter_shape,
@@ -240,7 +240,7 @@ impl LQGroup {
             /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                 change_listener(&lq_info.last_entries);
             }*/
-            lq_info.on_table_changed(&change);
+            lq_info.on_table_changed(&change).await;
         }
     }
 }

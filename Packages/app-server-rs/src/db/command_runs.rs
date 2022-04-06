@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::{wrap_slow_macros, wrap_serde_macros, Deserialize_Stub, Serialize_Stub};
@@ -74,10 +75,10 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
 pub struct SubscriptionShard_CommandRun;
 #[Subscription]
 impl SubscriptionShard_CommandRun {
-    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_CommandRun> + 'a {
+    async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
         handle_generic_gql_collection_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
     }
-    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<CommandRun>> + 'a {
+    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<CommandRun>, SubError>> + 'a {
         handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", id).await
     }
 }

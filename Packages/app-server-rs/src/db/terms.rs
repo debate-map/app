@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -62,10 +63,10 @@ impl GQLSet<Term> for GQLSet_Term {
 pub struct SubscriptionShard_Term;
 #[Subscription]
 impl SubscriptionShard_Term {
-    async fn terms<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_Term> + 'a {
+    async fn terms<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Term, SubError>> + 'a {
         handle_generic_gql_collection_request::<Term, GQLSet_Term>(ctx, "terms", filter).await
     }
-    async fn term<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<Term>> + 'a {
+    async fn term<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Term>, SubError>> + 'a {
         handle_generic_gql_doc_request::<Term>(ctx, "terms", id).await
     }
 }

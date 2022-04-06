@@ -23,7 +23,7 @@ impl LQParam {
     pub fn name(&self) -> String {
         match self {
             LQParam::LQIndex(_) => "lq_index".to_owned(),
-            LQParam::FilterOpValue(field_name, op_index, op) => {
+            LQParam::FilterOpValue(field_name, op_index, _) => {
                 format!("{}_{}", field_name, op_index)
             }
         }
@@ -49,7 +49,7 @@ impl LQParam {
                 // todo: have this output a number rather than string
                 SQLParam::Value_String(lq_index.to_string()).into_value_fragment()
             },
-            LQParam::FilterOpValue(field_name, op_i, op) => {
+            LQParam::FilterOpValue(_, _, op) => {
                 op.get_sql_for_value()
             }
         }
@@ -58,7 +58,7 @@ impl LQParam {
     pub fn get_sql_for_application(&self, left_container_name: &str, right_container_name: &str) -> Result<SQLFragment, Error> {
         match self {
             LQParam::LQIndex(..) => bail!("Invalid call to get_sql_for_application, for an LQParam::LQIndex."),
-            LQParam::FilterOpValue(field_name, op_i, op) => {
+            LQParam::FilterOpValue(field_name, _, op) => {
                 let field_name_fragment = SF::merge(vec![
                     SQLIdent::param(left_container_name.to_owned())?.into_ident_fragment()?,
                     SF::lit("."),

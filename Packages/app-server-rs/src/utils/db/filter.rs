@@ -148,19 +148,19 @@ impl FilterOp {
 
     pub fn get_sql_for_application(&self, fragment_for_value_in_db: SQLFragment, fragment_for_value_in_filter_op: SQLFragment) -> SQLFragment {
         match self {
-            FilterOp::EqualsX(val) => SF::merge(vec![
+            FilterOp::EqualsX(_) => SF::merge(vec![
                 fragment_for_value_in_db,
                 SF::lit(" = "),
                 fragment_for_value_in_filter_op,
             ]),
-            FilterOp::IsWithinX(vals) => SF::merge(vec![
+            FilterOp::IsWithinX(_) => SF::merge(vec![
                 fragment_for_value_in_db,
                 SF::lit(" IN "),
                 fragment_for_value_in_filter_op,
             ]),
             // see: https://stackoverflow.com/a/54069718
             //"contains" => SF::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
-            FilterOp::ContainsAllOfX(vals) => SF::merge(vec![
+            FilterOp::ContainsAllOfX(_) => SF::merge(vec![
                 fragment_for_value_in_db,
                 SF::lit(" @> "),
                 fragment_for_value_in_filter_op,

@@ -100,7 +100,7 @@ impl LQStorage {
     pub async fn notify_of_ld_change(&self, change: &LDChange) {
         let query_groups = self.query_groups.read().await;
         for group in query_groups.values() {
-            group.notify_of_ld_change(change);
+            group.notify_of_ld_change(change).await;
         }
     }
 

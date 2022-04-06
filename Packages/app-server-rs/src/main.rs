@@ -94,6 +94,10 @@ mod store {
 mod utils {
     pub mod axum_logging_layer;
     pub mod db {
+        pub mod agql_ext {
+            pub mod gql_general_extension;
+            pub mod gql_result_stream;
+        }
         pub mod filter;
         pub mod sql_fragment;
         pub mod handlers;
@@ -105,8 +109,6 @@ mod utils {
         pub mod extensions;
         pub mod general;
     }
-    pub mod gql_general_extension;
-    pub mod gql_result_stream;
     pub mod http;
     pub mod mtx {
         pub mod mtx;

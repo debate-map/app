@@ -2,9 +2,10 @@ use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, 
 use anyhow::{bail, Context, Error};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
-use flume::Sender;
+use flume::{Sender, Receiver};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use hyper::Body;
+use rust_shared::SubError;
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::{json, Map};
 use tokio_postgres::{Client, Row, types::ToSql};
@@ -34,9 +35,18 @@ pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(j
 pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
->(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = GQLSetVariant> + 'a {
+>(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
     new_mtx!(mtx, "1");
-    let filter = QueryFilter::from_filter_input_opt(&filter_json).unwrap();
+    let stream_for_error = |err: Error| {
+        //return stream::once(async { Err(err) });
+        let base_stream = async_stream::stream! {
+            yield Err(SubError::new(err.to_string()));
+        };
+        let (s1, _r1): (Sender<DropLQWatcherMsg>, Receiver<DropLQWatcherMsg>) = flume::unbounded();
+        Stream_WithDropListener::new(base_stream, table_name, QueryFilter::empty(), Uuid::new_v4(), s1)
+    };
+
+    let filter = match QueryFilter::from_filter_input_opt(&filter_json) { Ok(a) => a, Err(err) => return stream_for_error(err) };
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage = ctx.data::<LQStorageWrapper>().unwrap();
 
@@ -51,23 +61,32 @@ pub async fn handle_generic_gql_collection_request<'a,
     mtx.section("2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
-        yield GQLSetVariant::from(entries_as_type);
+        yield Ok(GQLSetVariant::from(entries_as_type));
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
             let next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
             let next_result_set = GQLSetVariant::from(next_entries_as_type);
-            yield next_result_set;
+            yield Ok(next_result_set);
         }
     };
     Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
 }
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
->(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Option<T>> + 'a {
+>(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
     new_mtx!(mtx, "1");
+    let stream_for_error = |err: Error| {
+        //return stream::once(async { Err(err) });
+        let base_stream = async_stream::stream! {
+            yield Err(SubError::new(err.to_string()));
+        };
+        let (s1, _r1): (Sender<DropLQWatcherMsg>, Receiver<DropLQWatcherMsg>) = flume::unbounded();
+        Stream_WithDropListener::new(base_stream, table_name, QueryFilter::empty(), Uuid::new_v4(), s1)
+    };
+
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter_json = json!({"id": {"equalTo": id}});
-    let filter = QueryFilter::from_filter_input(&filter_json).unwrap();
+    let filter = match QueryFilter::from_filter_input(&filter_json) { Ok(a) => a, Err(err) => return stream_for_error(err) };
     let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage = ctx.data::<LQStorageWrapper>().unwrap();
 
@@ -83,12 +102,12 @@ pub async fn handle_generic_gql_doc_request<'a,
     mtx.section("2");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
-        yield entry_as_type;
+        yield Ok(entry_as_type);
         loop {
             let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
             let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
             let next_result: Option<T> = next_entries_as_type.pop();
-            yield next_result;
+            yield Ok(next_result);
         }
     };
     Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
@@ -115,7 +134,12 @@ impl<'a, T> Stream_WithDropListener<'a, T> {
 impl<'a, T> Drop for Stream_WithDropListener<'a, T> {
     fn drop(&mut self) {
         println!("Stream_WithDropListener got dropped. @address:{:p} @table:{} @filter:{:?}", self, self.table_name, self.filter);
-        self.sender_for_lq_watcher_drops.send(DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(self.table_name.clone(), self.filter.clone(), self.stream_id));
+        
+        // the receivers of the channel below may all be dropped, causing the `send()` to return a SendError; ignore this, since it is expected (for the streams returned by `stream_for_error`)
+        #[allow(unused_must_use)]
+        {
+            self.sender_for_lq_watcher_drops.send(DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(self.table_name.clone(), self.filter.clone(), self.stream_id));
+        }
     }
 }
 impl<'a, T> Stream for Stream_WithDropListener<'a, T> {

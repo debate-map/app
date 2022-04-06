@@ -220,7 +220,7 @@ pub async fn send_mtx_tree_to_monitor_backend(
             mtx_root_as_str
             .into()
         )?;
-    let res = client.request(req).await?;
+    let _res = client.request(req).await?;
     //println!("Done! Response:{}", body_to_str(res.into_body()).await?);
 
     Ok::<(), Error>(())

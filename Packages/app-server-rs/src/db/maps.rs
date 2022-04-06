@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -65,10 +66,10 @@ impl GQLSet<Map> for GQLSet_Map {
 pub struct SubscriptionShard_Map;
 #[Subscription]
 impl SubscriptionShard_Map {
-    async fn maps<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_Map> + 'a {
+    async fn maps<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Map, SubError>> + 'a {
         handle_generic_gql_collection_request::<Map, GQLSet_Map>(ctx, "maps", filter).await
     }
-    async fn map<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<Map>> + 'a {
+    async fn map<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<Map>, SubError>> + 'a {
         handle_generic_gql_doc_request::<Map>(ctx, "maps", id).await
     }
 }

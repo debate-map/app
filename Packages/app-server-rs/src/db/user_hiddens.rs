@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -68,10 +69,10 @@ impl GQLSet<UserHidden> for GQLSet_UserHidden {
 pub struct SubscriptionShard_UserHidden;
 #[Subscription]
 impl SubscriptionShard_UserHidden {
-    async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_UserHidden> + 'a {
+    async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserHidden, SubError>> + 'a {
         handle_generic_gql_collection_request::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
     }
-    async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Option<UserHidden>> + 'a {
+    async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<UserHidden>, SubError>> + 'a {
         handle_generic_gql_doc_request::<UserHidden>(ctx, "userHiddens", id).await
     }
 }

@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use anyhow::Context;
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
@@ -91,10 +92,10 @@ impl GQLSet<User> for GQLSet_User {
 pub struct SubscriptionShard_User;
 #[Subscription]
 impl SubscriptionShard_User {
-    async fn users<'a>(&self, ctx: &'a async_graphql::Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_User> + 'a {
+    async fn users<'a>(&self, ctx: &'a async_graphql::Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
         handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
     }
-    async fn user<'a>(&self, ctx: &'a async_graphql::Context<'_>, id: String) -> impl Stream<Item = Option<User>> + 'a {
+    async fn user<'a>(&self, ctx: &'a async_graphql::Context<'_>, id: String) -> impl Stream<Item = Result<Option<User>, SubError>> + 'a {
         handle_generic_gql_doc_request::<User>(ctx, "users", id).await
     }
 }

@@ -4,6 +4,7 @@ use flume::{Receiver, Sender};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
 use rust_macros::wrap_slow_macros;
+use rust_shared::SubError;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
@@ -133,17 +134,17 @@ impl SubscriptionShard_General {
             refreshPage,
         } })
     }
-    async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>) -> impl Stream<Item = LogEntry> + 'a {
+    async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>) -> impl Stream<Item = Result<LogEntry, SubError>> + 'a {
         let msg_receiver = ctx.data::<Receiver<GeneralMessage>>().unwrap();
         
         //let nodes: Vec<LogEntry> = vec![];
         let base_stream = async_stream::stream! {
-            yield LogEntry { text: "Stream started...".to_owned() };
+            yield Ok(LogEntry { text: "Stream started...".to_owned() });
             loop {
                 let next_msg = msg_receiver.recv_async().await.unwrap();
                 match next_msg {
                     GeneralMessage::MigrateLogMessageAdded(text) => {
-                        yield LogEntry { text };
+                        yield Ok(LogEntry { text });
                     }
                 }
             }

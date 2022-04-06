@@ -7,6 +7,7 @@ Packages/deploy
 Packages/monitor-backend
 Packages/monitor-client
 Packages/rust-macros
+Packages/rust-shared
 #Packages/web-server
 
 # partial package excludes (the web-server needs access to the client's output files)

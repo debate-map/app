@@ -77,4 +77,5 @@ Packages/js-common
 Packages/monitor-backend
 Packages/monitor-client
 #Packages/rust-macros
+#Packages/rust-shared
 Packages/web-server

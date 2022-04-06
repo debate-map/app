@@ -76,6 +76,7 @@ Packages/app-server-rs
 Packages/monitor-backend
 #Packages/monitor-client
 Packages/rust-macros
+Packages/rust-shared
 #Packages/web-server
 
 # partial package excludes (for packages with package.json, keep only that package.json file)

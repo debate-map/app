@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -63,10 +64,10 @@ impl GQLSet<NodeChildLink> for GQLSet_NodeChildLink {
 pub struct SubscriptionShard_NodeChildLink;
 #[Subscription]
 impl SubscriptionShard_NodeChildLink {
-    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_NodeChildLink> + 'a {
+    async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeChildLink, SubError>> + 'a {
         handle_generic_gql_collection_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", filter).await
     }
-    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<NodeChildLink>> + 'a {
+    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<NodeChildLink>, SubError>> + 'a {
         handle_generic_gql_doc_request::<NodeChildLink>(ctx, "nodeChildLinks", id).await
     }
 }

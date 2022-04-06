@@ -49,10 +49,10 @@ pub struct LQEntryWatcher {
 }
 impl LQEntryWatcher {
     pub fn new() -> Self {
-        let (tx, rx): (Sender<Vec<RowData>>, Receiver<Vec<RowData>>) = flume::unbounded();
+        let (s1, r1): (Sender<Vec<RowData>>, Receiver<Vec<RowData>>) = flume::unbounded();
         Self {
-            new_entries_channel_sender: tx,
-            new_entries_channel_receiver: rx,
+            new_entries_channel_sender: s1,
+            new_entries_channel_receiver: r1,
         }
     }
 }
@@ -165,7 +165,7 @@ impl LQInstance {
         
         let entry_watchers = self.entry_watchers.read().await;
         for (_watcher_stream_id, watcher) in entry_watchers.iter() {
-            watcher.new_entries_channel_sender.send(new_entries.clone());
+            watcher.new_entries_channel_sender.send(new_entries.clone()).unwrap();
         }
         //self.new_entries_channel_sender.send(new_entries.clone());
 

@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -53,10 +54,10 @@ impl GQLSet<MapNodeTag> for GQLSet_MapNodeTag {
 pub struct SubscriptionShard_MapNodeTag;
 #[Subscription]
 impl SubscriptionShard_MapNodeTag {
-    async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_MapNodeTag> + 'a {
+    async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeTag, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNodeTag, GQLSet_MapNodeTag>(ctx, "nodeTags", filter).await
     }
-    async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<MapNodeTag>> + 'a {
+    async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<MapNodeTag>, SubError>> + 'a {
         handle_generic_gql_doc_request::<MapNodeTag>(ctx, "nodeTags", id).await
     }
 }

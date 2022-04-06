@@ -1,5 +1,6 @@
 use std::panic;
 
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -50,10 +51,10 @@ impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
 pub struct SubscriptionShard_AccessPolicy;
 #[Subscription]
 impl SubscriptionShard_AccessPolicy {
-    async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_AccessPolicy> + 'a {
+    async fn accessPolicies<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_AccessPolicy, SubError>> + 'a {
         handle_generic_gql_collection_request::<AccessPolicy, GQLSet_AccessPolicy>(ctx, "accessPolicies", filter).await
     }
-    async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<AccessPolicy>> + 'a {
+    async fn accessPolicy<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<AccessPolicy>, SubError>> + 'a {
         handle_generic_gql_doc_request::<AccessPolicy>(ctx, "accessPolicies", id).await
     }
 }

@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -64,10 +65,10 @@ impl GQLSet<MapNodeRevision> for GQLSet_MapNodeRevision {
 pub struct SubscriptionShard_MapNodeRevision;
 #[Subscription]
 impl SubscriptionShard_MapNodeRevision {
-    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_MapNodeRevision> + 'a {
+    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeRevision, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNodeRevision, GQLSet_MapNodeRevision>(ctx, "nodeRevisions", filter).await
     }
-    async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<MapNodeRevision>> + 'a {
+    async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<MapNodeRevision>, SubError>> + 'a {
         handle_generic_gql_doc_request::<MapNodeRevision>(ctx, "nodeRevisions", id).await
     }
 }

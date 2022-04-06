@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -60,10 +61,10 @@ impl GQLSet<MapNodePhrasing> for GQLSet_MapNodePhrasing {
 pub struct SubscriptionShard_MapNodePhrasing;
 #[Subscription]
 impl SubscriptionShard_MapNodePhrasing {
-    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_MapNodePhrasing> + 'a {
+    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodePhrasing, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNodePhrasing, GQLSet_MapNodePhrasing>(ctx, "nodePhrasings", filter).await
     }
-    async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<MapNodePhrasing>> + 'a {
+    async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<MapNodePhrasing>, SubError>> + 'a {
         handle_generic_gql_doc_request::<MapNodePhrasing>(ctx, "nodePhrasings", id).await
     }
 }

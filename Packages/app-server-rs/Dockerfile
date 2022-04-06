@@ -72,6 +72,11 @@ RUN sed -i 's~"Packages/monitor-backend",~~g' Cargo.toml
 # just copy the rust-macros crate completely here (it doesn't change very often, so it's fine if it invalidates later steps)
 COPY Packages/rust-macros Packages/rust-macros
 
+COPY Packages/rust-shared/Cargo.toml Packages/rust-shared/Cargo.toml
+# copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in rust-shared's frequently changing own-code)
+RUN mkdir Packages/rust-shared/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-shared/src/lib.rs
+
 COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
 # copy "dummy content" for the program (needed for Rust to build the dependencies, without having to rope in app-server's frequently changing own-code)
 RUN mkdir Packages/app-server-rs/src/
@@ -83,11 +88,18 @@ WORKDIR /dm_repo/Packages/app-server-rs
 #RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings ${debug_vs_release_flag}
 RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
 #RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile -Z self-profile-events=default,args
-# remove the build output of the "dummy version" of app_server_rs
-#RUN rm -f target/debug/deps/app_server_rs*
-RUN rm -f target/${debug_vs_release}/deps/app_server_rs*
 
-# now copy the app-server's own code
+# remove the build output of the "dummy versions" of packages (needed for subsequent compile)
+#RUN rm -f /dm_repo/Packages/app-server-rs/target/${debug_vs_release}/deps/app_server_rs*
+RUN rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared*
+RUN rm -f /dm_repo/target/${debug_vs_release}/deps/app_server_rs*
+
+# now copy the actual code for rust-shared, and build it
+COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
+RUN cat /dm_repo/Packages/rust-shared/src/lib.rs
+RUN cd /dm_repo/Packages/rust-shared/ && RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+
+# now copy the actual code for app-server-rs, and build it
 #COPY Packages/app-server-rs/ .
 COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
 #COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/

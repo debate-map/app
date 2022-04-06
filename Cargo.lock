@@ -72,6 +72,7 @@ dependencies = [
  "metrics",
  "regex",
  "rust-macros",
+ "rust-shared",
  "serde",
  "serde_json",
  "slab",
@@ -1054,6 +1055,7 @@ dependencies = [
  "hyper",
  "indexmap",
  "rust-macros",
+ "rust-shared",
  "serde",
  "serde_json",
  "slab",
@@ -1445,6 +1447,10 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "rust-shared"
+version = "0.0.1"
 
 [[package]]
 name = "ryu"

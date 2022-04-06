@@ -1,3 +1,4 @@
+use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
@@ -49,10 +50,10 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
 pub struct SubscriptionShard_NodeRating;
 #[Subscription]
 impl SubscriptionShard_NodeRating {
-    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = GQLSet_NodeRating> + 'a {
+    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRating, SubError>> + 'a {
         handle_generic_gql_collection_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
     }
-    async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Option<NodeRating>> + 'a {
+    async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<NodeRating>, SubError>> + 'a {
         handle_generic_gql_doc_request::<NodeRating>(ctx, "nodeRatings", id).await
     }
 }
