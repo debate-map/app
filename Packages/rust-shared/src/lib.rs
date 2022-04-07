@@ -15,6 +15,6 @@ impl Error for SubError {}
 
 impl fmt::Display for SubError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "GQLError:{}", self.message)
+        write!(f, "SubError:{}", self.message)
     }
 }

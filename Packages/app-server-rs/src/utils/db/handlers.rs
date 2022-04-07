@@ -46,6 +46,7 @@ pub async fn handle_generic_gql_collection_request<'a,
         Stream_WithDropListener::new(base_stream, table_name, QueryFilter::empty(), Uuid::new_v4(), s1)
     };
 
+    mtx.section("2");
     let filter = match QueryFilter::from_filter_input_opt(&filter_json) { Ok(a) => a, Err(err) => return stream_for_error(err) };
     let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
         let storage = ctx.data::<LQStorageWrapper>().unwrap();
@@ -58,7 +59,7 @@ pub async fn handle_generic_gql_collection_request<'a,
         (entries_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
     };
 
-    mtx.section("2");
+    mtx.section("3");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield Ok(GQLSetVariant::from(entries_as_type));
@@ -84,6 +85,7 @@ pub async fn handle_generic_gql_doc_request<'a,
         Stream_WithDropListener::new(base_stream, table_name, QueryFilter::empty(), Uuid::new_v4(), s1)
     };
 
+    mtx.section("2");
     //tokio::time::sleep(std::time::Duration::from_millis(123456789)).await; // temp
     let filter_json = json!({"id": {"equalTo": id}});
     let filter = match QueryFilter::from_filter_input(&filter_json) { Ok(a) => a, Err(err) => return stream_for_error(err) };
@@ -99,7 +101,7 @@ pub async fn handle_generic_gql_doc_request<'a,
         (entry_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
     };
 
-    mtx.section("2");
+    mtx.section("3");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
         yield Ok(entry_as_type);

@@ -106,8 +106,9 @@ impl LQStorage {
 
     /// Called from handlers.rs
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
-        new_mtx!(mtx, "1", parent_mtx);
+        new_mtx!(mtx, "1:get or create query-group", parent_mtx);
         let group = self.get_or_create_query_group(table_name, filter).await;
+        mtx.section("2:start lq-watcher");
         group.start_lq_watcher(table_name, filter, stream_id, ctx, Some(&mtx)).await
     }
 }
