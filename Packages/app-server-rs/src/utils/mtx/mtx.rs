@@ -151,48 +151,48 @@ impl Mtx {
         };
         new_self.start_new_section(&first_section_name.into(), extra_info, time_since_epoch_ms());
 
-        // start a timer that, once per second (while the mtx-instance is active/in-scope), sends its data to the backend
-        let (id_clone, section_lifetimes_clone, msg_receiver_clone) = (new_self.id.clone(), new_self.section_lifetimes.clone(), new_self.msg_receiver.clone());
-        tokio::spawn(async move {
-            let mut interval = time::interval(time::Duration::from_secs(1));
-            let mut last_data_as_str: Option<String> = None;
-            loop {
-                interval.tick().await;
-                // if we're the last place holding references to the id and section-lifetimes, the mtx object must have been destroyed;
-                //     that means it has already sent its final results to the monitor-backend, so we can end this loop
-                if Arc::strong_count(&id_clone) <= 1 && Arc::strong_count(&section_lifetimes_clone) <= 1 {
-                    println!("Stopping mtx-data-sending timer, since mtx instance has been dropped."); // temp
-                    break;
-                }
+        if new_self.is_root_mtx() {
+            // start a timer that, once per second (while the mtx-instance is active/in-scope), sends its data to the backend
+            let (id_clone, section_lifetimes_clone, msg_receiver_clone) = (new_self.id.clone(), new_self.section_lifetimes.clone(), new_self.msg_receiver.clone());
+            tokio::spawn(async move {
+                let mut interval = time::interval(time::Duration::from_secs(1));
+                let mut last_data_as_str: Option<String> = None;
+                loop {
+                    interval.tick().await;
 
-                // process any messages that have buffered up
-                MtxMessage::apply_messages_to_mtx_data(&section_lifetimes_clone, msg_receiver_clone.drain());
-
-                // if this is the first iteration, wait a bit before trying to serialize+send the section-lifetimes
-                // (the flurry::HashMap needs a bit to "apply" the initial section-insert [edit: seems this isn't the reason]; it's ok if this delay is too short sometimes)
-                /*if last_data_as_str.is_none() {
-                    time::sleep(Duration::from_millis(1000)).await;
-                }*/
-
-                // todo: fix that monitor-backend is somehow receiving mtx-entries without "section_lifetimes" empty (the attempted fix above doesn't seem to work)
-                // break point
-
-                let send_attempt_fut = send_mtx_data_to_monitor_backend(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str.clone());
-                let data_as_str = match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
-                    Ok(regular_result) => {
-                        Some(regular_result.expect("Got error while sending mtx-tree to monitor-backend..."))
-                    },
-                    Err(_err) => {
-                        // if timeout happens, just ignore (there might have been local network glitch or something)
-                        //None
-                        last_data_as_str
+                    // if this is the first iteration, wait a bit
+                    // (this wait appears to give time for the mtx-instance to be bound to a scope or something, such that the strong_count() call sees the remove strong-reference we expect)
+                    if last_data_as_str.is_none() {
+                        time::sleep(Duration::from_millis(1000)).await;
                     }
-                };
-                
-                last_data_as_str = data_as_str;
-                //println!("Sent partial results for mtx entry..."); // temp
-            }
-        });
+
+                    // if we're the last place holding references to the id and section-lifetimes, the mtx object must have been destroyed;
+                    //     that means it has already sent its final results to the monitor-backend, so we can end this loop
+                    if Arc::strong_count(&id_clone) <= 1 && Arc::strong_count(&section_lifetimes_clone) <= 1 {
+                        println!("Stopping mtx-data-sending timer, since mtx instance has been dropped."); // temp
+                        break;
+                    }
+
+                    // process any messages that have buffered up
+                    MtxMessage::apply_messages_to_mtx_data(&section_lifetimes_clone, msg_receiver_clone.drain());
+
+                    let send_attempt_fut = send_mtx_data_to_monitor_backend(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str.clone());
+                    let data_as_str = match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
+                        Ok(regular_result) => {
+                            Some(regular_result.expect("Got error while sending mtx-tree to monitor-backend..."))
+                        },
+                        Err(_err) => {
+                            // if timeout happens, just ignore (there might have been local network glitch or something)
+                            //None
+                            last_data_as_str
+                        }
+                    };
+                    
+                    last_data_as_str = data_as_str;
+                    //println!("Sent partial results for mtx entry..."); // temp
+                }
+            });
+        }
 
         new_self
     }
