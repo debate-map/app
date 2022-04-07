@@ -23,8 +23,8 @@ pub struct GQLResultStream<'a, ResultT> {
     waker: Option<Waker>,
     new_results_to_return: VecDeque<ResultT>,
 }
-impl<'a, ResultT: Send + Sync + 'static> GQLResultStream<'a, ResultT> {
-    pub fn new(
+pub fn new(
+        impl<'a, ResultT: Send + Sync + 'static> GQLResultStream<'a, ResultT> {
         storage_wrapper: Arc<Mutex<LQStorage<'a>>>,
         collection_name: &str,
         filter: Filter,

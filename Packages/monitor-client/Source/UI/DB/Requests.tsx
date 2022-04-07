@@ -9,33 +9,43 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
 export class Mtx {
-	//extraInfo: string;
-	sectionLifetimes: MtxSectionLifetimeMap;
+	//id: string;
+	sectionLifetimes: MtxSectionMap;
 }
-export type MtxSectionLifetimeMap = {
-	[key: string]: MtxLifetime_Base
+export type MtxSectionMap = {
+	[key: string]: MtxSection_Raw
 };
-export class MtxLifetime_Base {
+export class MtxSection_Raw {
+	path: string;
 	extra_info?: string;
 	start_time: number;
-	duration: number;
+	duration?: number;
 }
 
 // synthesized from the above, for easier processing
-export class MtxLifetime_Plus {
+export class MtxSection {
 	path: string;
 	extraInfo?: string;
 	startTime: number;
-	duration: number;
+	duration?: number;
+
+	get Duration_Safe() {
+		return this.duration ?? (Date.now() - this.startTime);
+	}
 }
-export function GetLifetimesInMap(map: MtxSectionLifetimeMap, sort = true) {
+
+export function GetSectionsInMap(map: MtxSectionMap, sort = true) {
 	let result = Object.entries(map).map(entry=>{
-		return new MtxLifetime_Plus().VSet({
-			path: entry[0],
+		return new MtxSection().VSet({
+			//...entry[1],
+			//path: entry[0],
+			path: entry[1].path,
 			extraInfo: entry[1].extra_info,
 			startTime: entry[1].start_time,
 			duration: entry[1].duration,
 		});
+		/*Object.setPrototypeOf(entry[1], MtxSection.prototype); // cast to MtxSection, so the class-methods work
+		return entry[1];*/
 	});
 	// fsr, the entries are not sorted at this point, despite (seemingly) being sorted when serialized for sending from backend
 	//if (sort) result = result.OrderBy(a=>a.startTime);
@@ -75,7 +85,7 @@ export const RequestsUI = observer(()=>{
 	let mtxResults: Mtx[] = data?.mtxResults ?? [];
 	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
 	mtxResults = mtxResults.OrderBy(mtx=>{
-		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(lifetime=>lifetime.start_time).Min();
+		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(a=>a.start_time).Min();
 		return earliestLifetimeStart;
 	});
 	console.log("Got data:", mtxResults);

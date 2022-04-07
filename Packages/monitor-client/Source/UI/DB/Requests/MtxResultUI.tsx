@@ -5,14 +5,14 @@ import {Chroma, ES, Observer} from "web-vcore";
 import {GetPercentFromXToY} from "web-vcore/.yalc/js-vextensions";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetLifetimesInMap, Mtx, MtxLifetime_Plus} from "../Requests.js";
+import {GetSectionsInMap, Mtx, MtxSection} from "../Requests.js";
 
 class LifetimeGroup {
 	constructor(data?: Partial<LifetimeGroup>) {
 		this.VSet(data);
 	}
 	path: string;
-	lifetimes: MtxLifetime_Plus[] = [];
+	sections: MtxSection[] = [];
 }
 
 @Observer
@@ -20,7 +20,7 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
 		const uiState = store.main.database.requests;
-		const lifetimes = GetLifetimesInMap(mtx.sectionLifetimes)
+		const sections = GetSectionsInMap(mtx.sectionLifetimes)
 			.filter(lifetime=>{
 				if (!uiState.pathFilter_enabled) return true;
 				if (uiState.pathFilter_str.startsWith("/") && uiState.pathFilter_str.endsWith("/")) {
@@ -30,12 +30,12 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 			});
 
 		const lifetimeGroups = new Map<string, LifetimeGroup>();
-		for (const lifetime of lifetimes) {
+		for (const lifetime of sections) {
 			const groupPath = `${lifetime.path.slice(0, lifetime.path.lastIndexOf("/"))}/*`;
 			if (!lifetimeGroups.has(groupPath)) {
 				lifetimeGroups.set(groupPath, new LifetimeGroup({path: groupPath}));
 			}
-			lifetimeGroups.get(groupPath)!.lifetimes.push(lifetime);
+			lifetimeGroups.get(groupPath)!.sections.push(lifetime);
 		}
 
 		const [expanded, setExpanded] = useState(false);
@@ -45,12 +45,12 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 				style={{
 					position: "relative",
 					//height: 1 + (lifetimeGroups.size * 3) + (expanded ? lifetimeGroups.size * 20 : 0),
-					height: 1 + (lifetimeGroups.size * 3) + (expanded ? lifetimes.length * 18 : 0),
+					height: 1 + (lifetimeGroups.size * 3) + (expanded ? sections.length * 18 : 0),
 				}}
 			>
 				<Column style={{border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0", cursor: "pointer"}} onClick={()=>setExpanded(!expanded)}>
 					{[...lifetimeGroups.values()].map((group, index)=>{
-						return <LifetimeGroupUI key={index} group={group} index={index}/>;
+						return <SectionGroupUI key={index} group={group} index={index}/>;
 					})}
 				</Column>
 				{/*expanded &&
@@ -59,8 +59,8 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 				})*/}
 				{expanded &&
 				<Column style={{background: "rgba(0,0,0,.1)"}}>
-					{lifetimes.map((lifetime, lifetimeIndex)=>{
-						return <LifetimeUI_Expanded key={lifetimeIndex} lifetime={lifetime} index={lifetimeIndex} lifetimes={lifetimes}/>;
+					{sections.map((section, sectionIndex)=>{
+						return <SectionUI_Expanded key={sectionIndex} section={section} index={sectionIndex} sections={sections}/>;
 					})}
 				</Column>}
 			</Column>
@@ -68,19 +68,19 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	}
 }
 
-export class LifetimeGroupUI extends BaseComponent<{group: LifetimeGroup, index: number}, {}> {
+export class SectionGroupUI extends BaseComponent<{group: LifetimeGroup, index: number}, {}> {
 	render() {
 		const {group, index} = this.props;
 		return (
 			<div style={{position: "relative", height: 3}} title={`GroupPath:${group.path}`}>
-				{group.lifetimes.map((lifetime, lifetimeIndex)=>{
-					return <LifetimeUI key={lifetimeIndex} lifetime={lifetime} index={lifetimeIndex}/>;
+				{group.sections.map((lifetime, lifetimeIndex)=>{
+					return <SectionUI key={lifetimeIndex} lifetime={lifetime} index={lifetimeIndex}/>;
 				})}
 			</div>
 		);
 	}
 }
-/*export class LifetimeGroupUI_Expanded extends BaseComponent<{group: LifetimeGroup, index: number}, {}> {
+/*export class SectionGroupUI_Expanded extends BaseComponent<{group: LifetimeGroup, index: number}, {}> {
 	render() {
 		const {group, index} = this.props;
 		return (
@@ -94,12 +94,12 @@ export class LifetimeGroupUI extends BaseComponent<{group: LifetimeGroup, index:
 }*/
 
 @Observer
-export class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime_Plus, index: number}, {}> {
+export class SectionUI extends BaseComponent<{lifetime: MtxSection, index: number}, {}> {
 	render() {
 		const {lifetime, index} = this.props;
 		const uiState = store.main.database.requests;
 		const start_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, lifetime.startTime, true);
-		const end_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, lifetime.startTime + lifetime.duration, true);
+		const end_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, lifetime.startTime + lifetime.Duration_Safe, true);
 
 		return (
 			<div
@@ -122,15 +122,15 @@ export class LifetimeUI extends BaseComponent<{lifetime: MtxLifetime_Plus, index
 	}
 }
 @Observer
-export class LifetimeUI_Expanded extends BaseComponent<{lifetime: MtxLifetime_Plus, index: number, lifetimes: MtxLifetime_Plus[]}, {}> {
+export class SectionUI_Expanded extends BaseComponent<{section: MtxSection, index: number, sections: MtxSection[]}, {}> {
 	render() {
-		const {lifetime, index, lifetimes} = this.props;
+		const {section, index, sections} = this.props;
 		const uiState = store.main.database.requests;
 
-		const subpath = lifetime.path.split("/").slice(-2).join("/");
-		const childLifetimes = lifetimes.filter(a=>a.path.startsWith(`${lifetime.path}/`) && a.path.split("/").length == lifetime.path.split("/").length + 2);
-		const selfTime = lifetime.duration - (childLifetimes.length ? childLifetimes.map(a=>a.duration).Sum() : 0);
-		const backgroundColor = GetColorForPath(lifetime.path);
+		const subpath = section.path.split("/").slice(-2).join("/");
+		const childSections = sections.filter(a=>a.path.startsWith(`${section.path}/`) && a.path.split("/").length == section.path.split("/").length + 2);
+		const selfTime = section.Duration_Safe - (childSections.length ? childSections.map(a=>a.Duration_Safe).Sum() : 0);
+		const backgroundColor = GetColorForPath(section.path);
 		//const bkgHsl = backgroundColor.hsl();
 		//const foregroundColor = Chroma([bkgHsl[0], bkgHsl[1], bkgHsl[2] >= .5 ? 0 : 1], "hsl");
 		//const foregroundColor = Chroma(backgroundColor.hsl()[2] >= .5 ? "black" : "white");
@@ -138,7 +138,7 @@ export class LifetimeUI_Expanded extends BaseComponent<{lifetime: MtxLifetime_Pl
 		const foregroundColor = Chroma("white");
 
 		return (
-			<Row sel ml={lifetime.path.split("/").length * 10} style={{fontSize: 11, height: 18}}>
+			<Row sel ml={section.path.split("/").length * 10} style={{fontSize: 11, height: 18}}>
 				<Text style={{background: backgroundColor.css(), color: foregroundColor.css()}}>Subpath:</Text>
 				<Text style={ES(
 					{background: backgroundColor.css(), color: foregroundColor.css()},
@@ -148,15 +148,15 @@ export class LifetimeUI_Expanded extends BaseComponent<{lifetime: MtxLifetime_Pl
 				)}>{subpath}</Text>
 				<Row style={ES(
 					//lifetime.duration < uiState.significantDurationThreshold && {opacity: .7},
-					lifetime.duration >= uiState.significantDurationThreshold && {background: "white"},
+					section.Duration_Safe >= uiState.significantDurationThreshold && {background: "white"},
 				)}>
-					<Text ml={5}>StartTime:{new Date(lifetime.startTime).toLocaleString("sv")}.{new Date(lifetime.startTime).getMilliseconds().toString().padStart(3, "0")}</Text>
+					<Text ml={5}>StartTime:{new Date(section.startTime).toLocaleString("sv")}.{new Date(section.startTime).getMilliseconds().toString().padStart(3, "0")}</Text>
 					<Text ml={5}>TotalTime:</Text>
-					<Text>{lifetime.duration.toFixed(3)}ms</Text>
+					<Text>{section.Duration_Safe.toFixed(3)}ms</Text>
 					<Text ml={5}>SelfTime:</Text>
 					<Text style={ES(selfTime >= uiState.significantDurationThreshold && {color: "red"})}>{selfTime.toFixed(3)}ms</Text>
-					{lifetime.extraInfo != null &&
-					<Text ml={5} style={{fontWeight: "bold"}}>ExtraInfo:{lifetime.extraInfo}</Text>}
+					{section.extraInfo != null &&
+					<Text ml={5} style={{fontWeight: "bold"}}>ExtraInfo:{section.extraInfo}</Text>}
 				</Row>
 			</Row>
 		);

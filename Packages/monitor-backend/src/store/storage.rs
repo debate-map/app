@@ -15,6 +15,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::Serializer;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
+use uuid::Uuid;
 use std::{
     collections::{HashSet, HashMap, BTreeMap},
     net::{SocketAddr, IpAddr},
@@ -35,27 +36,20 @@ wrap_slow_macros!{
 // derived from struct in app-server-rs/.../mtx.rs
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Mtx {
-    //pub extra_info: String,
-
-    /// This field holds the timings of all sections in the root mtx-enabled function, as well as any mtx-enabled functions called underneath it (where the root mtx is passed).
-    /// Entry's key is the "path" to the section, eg: root_func/part1/other_func/part3
-    /// Entry's value is a tuple, containing the start-time and duration of the section, stored as fractional milliseconds.
-    //pub section_lifetimes: IndexMap<String, (f64, f64)>,
-    //pub section_lifetimes: IndexMap2<String, (f64, f64)>,
-
-    // use BTreeMap so that the entries are sorted (alphabetically, by key)
-    //pub section_lifetimes: BTreeMap<String, (f64, f64)>,
+    //pub id: Arc<Uuid>,
+    pub id: String, // changed to String, since agql's OutputType is not implemented for Uuid
 
     // tell serde to serialize the HashMap using the ordered_map function, which collects the entries into a temporary BTreeMap (which is sorted)
     #[serde(serialize_with = "crate::utils::general::ordered_map")]
-    pub section_lifetimes: HashMap<String, SectionLifetime>,
+    pub section_lifetimes: HashMap<String, MtxSection>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct SectionLifetime {
+pub struct MtxSection {
+    pub path: String,
     pub extra_info: Option<String>,
     pub start_time: f64,
-    pub duration: f64,
+    pub duration: Option<f64>,
 }
 
 }

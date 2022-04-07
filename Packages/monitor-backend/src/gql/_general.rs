@@ -44,7 +44,10 @@ impl QueryShard_General {
         let mtx_results_filtered: Vec<Mtx> = mtx_results.into_iter().filter(|mtx| {
             for lifetime in mtx.section_lifetimes.values() {
                 let section_start = lifetime.start_time;
-                let section_end = section_start + lifetime.duration;
+                let section_end = match lifetime.duration {
+                    Some(duration) => section_start + duration,
+                    None => f64::MAX, // for this context of filtering, consider a not-yet-ended section to extend to max-time
+                };
                 if section_start < end_time && section_end > start_time {
                     return true;
                 }

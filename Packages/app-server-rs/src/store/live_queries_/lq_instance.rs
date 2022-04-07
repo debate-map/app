@@ -96,7 +96,7 @@ impl LQInstance {
         let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);
         (watcher, create_new)*/
-        rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new).await
+        rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new, None).await
     }
     /*pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, usize) {
         let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());

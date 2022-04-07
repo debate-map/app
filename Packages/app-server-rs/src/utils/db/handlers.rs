@@ -36,7 +36,7 @@ pub async fn handle_generic_gql_collection_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'a + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
-    new_mtx!(mtx, "1");
+    new_mtx!(mtx, "1", None, Some(format!("@table_name:{table_name} @filter:{filter_json:?}")));
     let stream_for_error = |err: Error| {
         //return stream::once(async { Err(err) });
         let base_stream = async_stream::stream! {
@@ -75,7 +75,7 @@ pub async fn handle_generic_gql_collection_request<'a,
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'a + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
-    new_mtx!(mtx, "1");
+    new_mtx!(mtx, "1", None, Some(format!("@table_name:{table_name} @id:{id}")));
     let stream_for_error = |err: Error| {
         //return stream::once(async { Err(err) });
         let base_stream = async_stream::stream! {

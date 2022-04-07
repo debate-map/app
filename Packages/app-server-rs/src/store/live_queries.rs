@@ -78,7 +78,7 @@ impl LQStorage {
                 let drop_msg = wrapper_clone.channel_for_lq_watcher_drops__receiver_base.recv_async().await.unwrap();
                 match drop_msg {
                     DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
-                        let query_group = wrapper_clone.get_or_create_query_group(&table_name, &filter).await;
+                        let query_group = wrapper_clone.get_or_create_query_group(&table_name, &filter, None).await;
                         query_group.drop_lq_watcher(&table_name, &filter, stream_id).await;
                     },
                 };
@@ -88,12 +88,12 @@ impl LQStorage {
         wrapper
     }
 
-    pub async fn get_or_create_query_group(&self, table_name: &str, filter: &QueryFilter) -> Arc<LQGroup> {
+    pub async fn get_or_create_query_group(&self, table_name: &str, filter: &QueryFilter, mtx_p: Option<&Mtx>) -> Arc<LQGroup> {
         let key = get_lq_group_key(table_name, filter);
         let filter_shape = filter_shape_from_filter(filter);
         rw_locked_hashmap__get_entry_or_insert_with(&self.query_groups, key, || {
             Arc::new(LQGroup::new(table_name.to_owned(), filter_shape))
-        }).await.0
+        }, mtx_p).await.0
     }
 
     /// Called from pgclient.rs
@@ -105,9 +105,9 @@ impl LQStorage {
     }
 
     /// Called from handlers.rs
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
-        new_mtx!(mtx, "1:get or create query-group", parent_mtx);
-        let group = self.get_or_create_query_group(table_name, filter).await;
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+        new_mtx!(mtx, "1:get or create query-group", mtx_p);
+        let group = self.get_or_create_query_group(table_name, filter, Some(&mtx)).await;
         mtx.section("2:start lq-watcher");
         group.start_lq_watcher(table_name, filter, stream_id, ctx, Some(&mtx)).await
     }

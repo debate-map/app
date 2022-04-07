@@ -44,7 +44,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
     //let filters_sql = get_sql_for_query_filter(filter, None, None).with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let filters_sql = filter.get_sql_for_application().with_context(|| format!("Got error while getting sql for filter:{filter:?}"))?;
     let filters_sql_str = filters_sql.to_string(); // workaround for difficulty implementing Clone for SQLFragment ()
-    mtx.current_section_extra_info = Some(format!("@table_name:{table_name} @filters_sql:{filters_sql}"));
+    mtx.current_section.extra_info = Some(format!("@table_name:{table_name} @filters_sql:{filters_sql}"));
     
     let where_sql = match filters_sql.sql_text.len() {
         0..=2 => SQLFragment::lit(""),

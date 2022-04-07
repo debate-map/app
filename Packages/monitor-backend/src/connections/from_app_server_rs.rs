@@ -50,6 +50,11 @@ pub async fn send_mtx_results(
     println!("Got mtx-result:{}", serde_json::to_string_pretty(&mtx).unwrap());
 
     let mut mtx_results = app_state.mtx_results.write().await;
+    if let Some(existing_entry) = mtx_results.iter().enumerate().find(|(_, entry)| entry.id == mtx.id) {
+        let index = existing_entry.0;
+        mtx_results.remove(index);
+    }
+
     mtx_results.push(mtx);
     if mtx_results.len() > 5000 {
         let entries_to_remove = mtx_results.len() - 5000;
