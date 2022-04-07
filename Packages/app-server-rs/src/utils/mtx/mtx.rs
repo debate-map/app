@@ -175,6 +175,7 @@ impl Mtx {
                 }*/
 
                 // todo: fix that monitor-backend is somehow receiving mtx-entries without "section_lifetimes" empty (the attempted fix above doesn't seem to work)
+                // break point
 
                 let send_attempt_fut = send_mtx_data_to_monitor_backend(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str.clone());
                 let data_as_str = match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
@@ -187,7 +188,7 @@ impl Mtx {
                         last_data_as_str
                     }
                 };
-                    
+                
                 last_data_as_str = data_as_str;
                 //println!("Sent partial results for mtx entry..."); // temp
             }
@@ -216,7 +217,7 @@ impl Mtx {
         {
             let guard = self.section_lifetimes.guard();
             let section_lifetimes = self.section_lifetimes.with_guard(&guard);
-            section_lifetimes.insert(old_section.path.clone(), old_section.clone());
+            section_lifetimes.insert(old_section.get_key(), old_section.clone());
         }
         self.root_mtx_sender.send(MtxMessage::UpdateSectionLifetime(old_section.get_key(), old_section.clone())).unwrap();
         section_end_time
@@ -281,7 +282,8 @@ pub struct MtxSection {
 }
 impl MtxSection {
     pub fn get_key(&self) -> String {
-        let new_section_path_plus_time = format!("{};{}", self.path, self.start_time);
+        // use "#" as the separator, so that it sorts earlier than "/" (such that children show up after the parent, when sorting by path-plus-time)
+        let new_section_path_plus_time = format!("{}#{}", self.path, self.start_time);
         new_section_path_plus_time
     }
 }
