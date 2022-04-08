@@ -148,7 +148,7 @@ async fn main() {
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
-        println!("Got panic. @info:{}\n@stackTrace:{}", info, stacktrace);
+        println!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace);
         std::process::abort();
     }));
 

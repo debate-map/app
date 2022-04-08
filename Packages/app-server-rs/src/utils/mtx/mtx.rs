@@ -18,7 +18,7 @@ macro_rules! fn_name {
         result
     }}
 }
-use std::{sync::Arc, cell::RefCell, time::{Instant, Duration}, borrow::Cow, rc::Rc};
+use std::{sync::{Arc, RwLock, RwLockWriteGuard}, cell::RefCell, time::{Instant, Duration}, borrow::Cow, rc::Rc};
 
 use anyhow::Error;
 use flume::{Sender, Receiver};
@@ -67,7 +67,7 @@ pub(crate) use new_mtx;
 use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Map};
-use tokio::time;
+use tokio::{time};
 use uuid::Uuid;
 
 use crate::utils::{type_aliases::JSONValue, general::general::{time_since_epoch_ms, body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}};
@@ -77,14 +77,22 @@ pub enum MtxMessage {
     UpdateSectionLifetime(String, MtxSection),
 }
 impl MtxMessage {
-    pub fn apply_messages_to_mtx_data(mtx_section_lifetimes: &Arc<flurry::HashMap<String, MtxSection>>, messages: impl Iterator<Item = MtxMessage>) {
-        let guard = mtx_section_lifetimes.guard();
-        let section_lifetimes = mtx_section_lifetimes.with_guard(&guard);
+    pub fn apply_messages_to_mtx_data(
+        mtx_section_lifetimes: &Arc<RwLock<IndexMap<String, MtxSection>>>,
+        //mtx_section_lifetimes: &Arc<flurry::HashMap<String, MtxSection>>,
+        messages: impl Iterator<Item = MtxMessage>
+    ) {
+        let mut section_lifetimes = mtx_section_lifetimes.write().unwrap();
+        /*let guard = mtx_section_lifetimes.guard();
+        let section_lifetimes = mtx_section_lifetimes.with_guard(&guard);*/
         for msg in messages {
-            msg.apply_to_mtx_data(&section_lifetimes);
+            msg.apply_to_mtx_data(&mut section_lifetimes);
         }
     }
-    pub fn apply_to_mtx_data(self, section_lifetimes_ref: &flurry::HashMapRef<String, MtxSection>) {
+    pub fn apply_to_mtx_data(self,
+        section_lifetimes_ref: &mut RwLockWriteGuard<IndexMap<String, MtxSection>>
+        //section_lifetimes_ref: &flurry::HashMapRef<String, MtxSection>
+    ) {
         match self {
             MtxMessage::UpdateSectionLifetime(path_and_time, lifetime) => {
                 section_lifetimes_ref.insert(path_and_time, lifetime);
@@ -105,8 +113,8 @@ pub struct Mtx {
     /// This field holds the timings of all sections in the root mtx-enabled function, as well as any mtx-enabled functions called underneath it (where the root mtx is passed).
     /// Entry's key is the "path" to the section + ";" + the section's start-time, eg: root_func/part1/other_func/part3;1649321920506.4802
     /// Entry's value is `SectionLifetime` struct, containing the start-time and duration of the section (stored as fractional milliseconds), etc.
-    //pub section_lifetimes: Arc<RwLock<IndexMap<String, SectionLifetime>>>,
-    pub section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
+    pub section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
+    //pub section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
 
     // communication helpers
     pub msg_sender: Sender<MtxMessage>,
@@ -139,7 +147,8 @@ impl Mtx {
             // the value of this doesn't matter; it gets overwritten by start_new_section below
             current_section: MtxSection { path: "[temp placeholder]".to_string(), start_time: 0f64, extra_info: None, duration: None },
 
-            section_lifetimes: Arc::new(flurry::HashMap::new()),
+            section_lifetimes: Arc::new(RwLock::new(IndexMap::new())),
+            //section_lifetimes: Arc::new(flurry::HashMap::new()),
             msg_sender,
             msg_receiver,
             //parent: None,
@@ -182,6 +191,7 @@ impl Mtx {
                             Some(regular_result.expect("Got error while sending mtx-tree to monitor-backend..."))
                         },
                         Err(_err) => {
+                            println!("Timed out trying to send mtx-tree to monitor-backend...");
                             // if timeout happens, just ignore (there might have been local network glitch or something)
                             //None
                             last_data_as_str
@@ -215,8 +225,9 @@ impl Mtx {
         old_section.duration = Some(section_end_time - old_section.start_time);
 
         {
-            let guard = self.section_lifetimes.guard();
-            let section_lifetimes = self.section_lifetimes.with_guard(&guard);
+            let mut section_lifetimes = self.section_lifetimes.write().unwrap();
+            /*let guard = self.section_lifetimes.guard();
+            let section_lifetimes = self.section_lifetimes.with_guard(&guard);*/
             section_lifetimes.insert(old_section.get_key(), old_section.clone());
         }
         self.root_mtx_sender.send(MtxMessage::UpdateSectionLifetime(old_section.get_key(), old_section.clone())).unwrap();
@@ -229,6 +240,7 @@ impl Mtx {
             extra_info,
             duration: None,
         };
+        println!("Starting section:{}", new_section.path);
         self.start_new_section_2(new_section, name != MTX_FINAL_SECTION_NAME);
     }
     fn start_new_section_2(&mut self, new_section: MtxSection, send_to_root_mtx: bool) {
@@ -257,6 +269,7 @@ impl Mtx {
 }
 impl Drop for Mtx {
     fn drop(&mut self) {
+        println!("Drop called. @current_section:{:?} @lifetimes:{:?}", self.current_section.get_key(), /*self.section_lifetimes*/ "[snip]");
         self.section(MTX_FINAL_SECTION_NAME); // called simply to mark end of prior section
         if self.is_root_mtx() {
             MtxMessage::apply_messages_to_mtx_data(&self.section_lifetimes, self.msg_receiver.drain());
@@ -273,7 +286,7 @@ impl Drop for Mtx {
 
 pub const MTX_FINAL_SECTION_NAME: &'static str = "$end-marker$";
 
-#[derive(Clone, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct MtxSection {
     pub path: String,
     pub extra_info: Option<String>,
@@ -308,17 +321,23 @@ pub fn json_obj_1field<T: Serialize>(field_name: &str, field_value: T) -> Result
     format!("{service_name}.{namespace}.svc.cluster.local:{port}")
 }*/
 
-pub async fn send_mtx_data_to_monitor_backend(id: Arc<Uuid>, section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>, last_data_as_str: Option<String>) -> Result<String, Error> {
+pub async fn send_mtx_data_to_monitor_backend(
+    id: Arc<Uuid>,
+    section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
+    //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
+    last_data_as_str: Option<String>
+) -> Result<String, Error> {
     let mut data_as_map = Map::new();
     data_as_map.insert("id".to_owned(), serde_json::to_value((*id).clone())?);
 
     let data_as_str = {
-        //data_as_map.insert("section_lifetimes".to_owned(), serde_json::to_value((*section_lifetimes).clone())?);
-        let guard = section_lifetimes.guard();
+        let section_lifetimes = section_lifetimes.read().unwrap();
+        data_as_map.insert("section_lifetimes".to_owned(), serde_json::to_value((*section_lifetimes).clone())?);
+        /*let guard = section_lifetimes.guard();
         /*let section_lifetimes_as_hashmap = flurry_hashmap_into_hashmap(&section_lifetimes, guard);
         data_as_map.insert("section_lifetimes".to_owned(), serde_json::to_value(section_lifetimes_as_hashmap)?);*/
         let section_lifetimes_as_json_map = flurry_hashmap_into_json_map(&section_lifetimes, guard, true)?;
-        data_as_map.insert("section_lifetimes".to_owned(), JSONValue::Object(section_lifetimes_as_json_map));
+        data_as_map.insert("section_lifetimes".to_owned(), JSONValue::Object(section_lifetimes_as_json_map));*/
 
         //let self_as_str = json_obj_1field("mtx", self).map(|a| a.to_string()).unwrap_or("failed to serialize mtx-instance".to_string());
         let mut wrapper = Map::new();

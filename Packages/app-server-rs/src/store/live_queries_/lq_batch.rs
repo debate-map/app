@@ -78,16 +78,16 @@ impl LQBatch {
 
         let query_instances = self.query_instances.read().await;
         let query_instance_vals: Vec<&Arc<LQInstance>> = query_instances.values().collect();
+        let lq_last_index = query_instance_vals.len() - 1;
 
         mtx.section("2:prepare the combined query");
         let (sql_text, params) = {
             let lq_param_protos = self.lq_param_prototypes();
-            let lq_params_last_index = lq_param_protos.len() - 1;
 
             // each entry of the root-chain is considered its own line, with `merge_lines()` adding line-breaks between them
             let mut combined_sql = SF::merge_lines(chain!(
                 chain!(
-                    SF::lit_once("WITH lq_params("),
+                    SF::lit_once("WITH lq_param_sets("),
                     lq_param_protos.iter().enumerate().map(|(i, proto)| -> Result<SQLFragment, Error> {
                         Ok(SF::merge(chain!(
                             match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
@@ -111,7 +111,7 @@ impl LQBatch {
                             ).collect_vec()))
                         }).try_collect2::<Vec<_>>()?,
                         SF::lit_once(")"),
-                        match_cond_to_iter(lq_index < lq_params_last_index, SF::lit_once(","), empty()),
+                        match_cond_to_iter(lq_index < lq_last_index, SF::lit_once(","), empty()),
                     ).collect_vec()))
                 }).try_collect2::<Vec<_>>()?,
                 SF::lit_once(")"),

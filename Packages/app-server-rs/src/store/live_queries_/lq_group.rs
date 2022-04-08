@@ -42,6 +42,7 @@ use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::postgres_parsing::LDChange;
 use crate::utils::db::queries::{get_entries_in_collection};
+use crate::utils::general::extensions::ResultV;
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::type_aliases::JSONValue;
 
@@ -51,14 +52,15 @@ use super::lq_instance::{LQInstance, LQEntryWatcher};
 pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
     let mut filter_shape = filter.clone();
     for (field_name, field_filter) in filter_shape.field_filters.clone().iter() {
-        for op in field_filter.filter_ops.clone().iter() {
+        let field_filter_mut = filter_shape.field_filters.get_mut(field_name).unwrap();
+        field_filter_mut.filter_ops = field_filter.filter_ops.clone().iter().map(|op| {
             let op_with_vals_stripped = match op {
                 FilterOp::EqualsX(_val) => FilterOp::EqualsX(JSONValue::Null),
                 FilterOp::IsWithinX(vals) => FilterOp::IsWithinX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
                 FilterOp::ContainsAllOfX(vals) => FilterOp::ContainsAllOfX(vals.iter().map(|_| JSONValue::Null).collect_vec()),
             };
-            filter_shape.field_filters.get_mut(field_name).unwrap().filter_ops.push(op_with_vals_stripped);
-        }
+            op_with_vals_stripped
+        }).collect_vec();
     }
     filter_shape
 }
@@ -176,7 +178,7 @@ impl LQGroup {
             // temp; just immediately execute the (single item) batch ourselves
             //self.channel_for_batch_messages__sender_base.send(LQBatchMessage::Execute);
             //self.execute_current_batch();
-            batch.execute(ctx, Some(&mtx)).await.expect("Got error executing live-query batch...");
+            batch.execute(ctx, Some(&mtx)).await.expect_lazy(|_| format!("Got error executing live-query batch. @filter_shape:{}", self.filter_shape));
 
             //self.last_committed_batch = Some(batch);
             //mem::replace(self.last_committed_batch.get_mut(), Some(batch));
