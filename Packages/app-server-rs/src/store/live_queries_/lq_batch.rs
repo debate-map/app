@@ -117,17 +117,22 @@ impl LQBatch {
                 SF::lit_once(")"),
                 SF::new_once("SELECT * FROM $I", vec![SQLIdent::param(self.table_name.clone())?]),
                 SF::lit_once("JOIN lq_param_sets ON ("),
-                lq_param_protos.iter()
-                    // in this section, we only care about the FilterOpValue lq-params
-                    .filter(|proto| {
-                        match proto {
-                            LQParam::FilterOpValue(..) => true,
-                            LQParam::LQIndex(..) => false,
-                        }
-                    })
-                    .map(|proto| -> Result<SQLFragment, Error> {
-                        proto.get_sql_for_application(&self.table_name, "lq_param_sets")
-                    }).try_collect2::<Vec<_>>()?,
+                match_cond_to_iter(
+                    // if the only lq-param is the "lq_index" one, then use an always-true expression for the "JOIN ON" section
+                    lq_param_protos.len() <= 1,
+                    SF::lit_once("'1' = '1'"),
+                    lq_param_protos.iter()
+                        // in this section, we only care about the FilterOpValue lq-params
+                        .filter(|proto| {
+                            match proto {
+                                LQParam::FilterOpValue(..) => true,
+                                LQParam::LQIndex(..) => false,
+                            }
+                        })
+                        .map(|proto| -> Result<SQLFragment, Error> {
+                            proto.get_sql_for_application(&self.table_name, "lq_param_sets")
+                        }).try_collect2::<Vec<_>>()?.into_iter(),
+                    ),
                 SF::lit_once(") ORDER BY lq_index;"),
             ).collect_vec());
             combined_sql.into_query_args()?

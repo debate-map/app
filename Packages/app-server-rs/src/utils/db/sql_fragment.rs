@@ -94,19 +94,28 @@ impl SQLFragment {
                         // temp; interpolate the identifier directly into the query-str (don't know how to avoid it atm)
                         Ok(format!("\"{}\"", ident.name))
                     },
-                    SQLParam::Value_String(_str) => {
-                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type ({}) doesn't match with param-type (Value_String)!", caps_g0.as_str()); // defensive
+                    _ => {
+                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type provided ({}) must be $V, for param of type Value_XXX!", caps_g0.as_str()); // defensive
 
                         let value_id = next_value_id;
                         next_value_id += 1;
-                        Ok(format!("${}", value_id))
-                    },
-                    SQLParam::Value_Null => {
-                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type ({}) doesn't match with param-type (Value_Null)!", caps_g0.as_str()); // defensive
 
-                        let value_id = next_value_id;
-                        next_value_id += 1;
-                        Ok(format!("${}", value_id))
+                        /*let type_annotation = match value_id {
+                            1 => "::int",
+                            _ => "",
+                        };*/
+                        // for tokio-postgres <> postgres type-mapping: https://docs.rs/postgres/latest/postgres/types/trait.ToSql.html#types
+                        // for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
+                        let type_annotation = match param {
+                            SQLParam::Ident(_) => panic!("Invalid for this match group!"),
+                            SQLParam::Value_Null => "",
+                            SQLParam::Value_Bool(_) => "::bool",
+                            SQLParam::Value_Int(_) => "::int8",
+                            SQLParam::Value_Float(_) => "::float8",
+                            SQLParam::Value_String(_) => "::text",
+                        };
+                        
+                        Ok(format!("${}{}", value_id, type_annotation))
                     },
                 }
             })();
@@ -124,8 +133,10 @@ impl SQLFragment {
             match a {
                 // identifiers are (safely -- by goal, anyway) inlined into the sql-text, so don't send them to tokio-postgres/the-db as "actual" params
                 SQLParam::Ident(_str) => None,
-                SQLParam::Value_String(str) => Some(SQLParam::Value_String(str)),
-                SQLParam::Value_Null => Some(SQLParam::Value_Null),
+                /*SQLParam::Value_String(str) => Some(SQLParam::Value_String(str)),
+                SQLParam::Value_Float(str) => Some(SQLParam::Value_Float(str)),
+                SQLParam::Value_Null => Some(SQLParam::Value_Null),*/
+                _a => Some(_a)
             }
         }).collect();
         

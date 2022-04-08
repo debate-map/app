@@ -46,8 +46,9 @@ impl LQParam {
     pub fn get_sql_for_value(&self) -> Result<SQLFragment, Error> {
         match self {
             LQParam::LQIndex(lq_index) => {
-                // todo: have this output a number rather than string
-                SQLParam::Value_String(lq_index.to_string()).into_value_fragment()
+                //SQLParam::Value_Float(f64::try_from(*lq_index)?).into_value_fragment() // this doesn't work fsr
+                //SQLParam::Value_Float(*lq_index as f64).into_value_fragment()
+                SQLParam::Value_Int(*lq_index as i64).into_value_fragment()
             },
             LQParam::FilterOpValue(_, _, op) => {
                 op.get_sql_for_value()
