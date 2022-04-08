@@ -88,6 +88,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "array-init"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6945cc5422176fc5e602e590c2878d2c2acd9a4fe20a4baa7c28022521698ec6"
+
+[[package]]
 name = "ascii_utils"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1312,6 +1318,7 @@ name = "postgres-types"
 version = "0.2.2"
 source = "git+https://github.com/petrosagg/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
 dependencies = [
+ "array-init",
  "bytes",
  "fallible-iterator",
  "postgres-protocol",

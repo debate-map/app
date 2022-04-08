@@ -40,7 +40,7 @@ impl SQLIdent {
 
 #[derive(Debug, Clone)]
 pub enum SQLParam {
-    // for type-mappings between rust-postgres <> postgres, see here: https://docs.rs/postgres/latest/postgres/types/trait.FromSql.html
+    // for rust-postgres <> postgres type-mappings: https://docs.rs/postgres/latest/postgres/types/trait.FromSql.html#types
 
     /// For names of tables, columns, etc.
     Ident(SQLIdent),

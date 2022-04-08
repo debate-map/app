@@ -49,4 +49,7 @@ rust-shared = { path = "../rust-shared" }
 [dependencies.tokio-postgres]
 git = "https://github.com/petrosagg/rust-postgres.git"
 branch = "copy-both"
-features = [ "with-serde_json-1" ] # needed for serde_json::Value to auto-convert to a declared struct
+features = [
+	"with-serde_json-1", # needed for serde_json::Value to auto-convert to a declared struct
+	"array-impls"
+]
