@@ -240,7 +240,6 @@ impl Mtx {
             extra_info,
             duration: None,
         };
-        println!("Starting section:{}", new_section.path);
         self.start_new_section_2(new_section, name != MTX_FINAL_SECTION_NAME);
     }
     fn start_new_section_2(&mut self, new_section: MtxSection, send_to_root_mtx: bool) {
@@ -269,7 +268,7 @@ impl Mtx {
 }
 impl Drop for Mtx {
     fn drop(&mut self) {
-        println!("Drop called. @current_section:{:?} @lifetimes:{:?}", self.current_section.get_key(), /*self.section_lifetimes*/ "[snip]");
+        //println!("Drop called. @current_section:{:?} @lifetimes:{:?}", self.current_section.get_key(), /*self.section_lifetimes*/ "[snip]");
         self.section(MTX_FINAL_SECTION_NAME); // called simply to mark end of prior section
         if self.is_root_mtx() {
             MtxMessage::apply_messages_to_mtx_data(&self.section_lifetimes, self.msg_receiver.drain());

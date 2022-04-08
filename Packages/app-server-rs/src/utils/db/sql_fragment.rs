@@ -77,7 +77,7 @@ impl SQLFragment {
         let mut error = None;
         let sql_final = re.replace_all(&sql_base, |caps: &Captures| {
             let result = (|| {
-                println!("Groups:{:?};{:?};{:?}", caps.get(0), caps.get(1), caps.get(2));
+                //println!("Replacing sql-param placeholder at:{:?}", caps.get(0).to_owned());
                 let caps_g0 = caps.get(0).ok_or(anyhow!("Capture was missing/invalid."))?;
                 let match_index = next_match_index;
                 next_match_index += 1;

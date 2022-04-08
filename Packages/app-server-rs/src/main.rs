@@ -45,7 +45,7 @@ use std::{
 };
 use tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 
-use crate::{store::{live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, storage::{AppStateWrapper, AppState}}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response}};
+use crate::{store::{live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, storage::{AppStateWrapper, AppState}}, proxy_to_asjs::proxy_to_asjs_handler, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -106,6 +106,7 @@ mod utils {
         pub mod sql_param;
     }
     pub mod general {
+        pub mod errors;
         pub mod extensions;
         pub mod general;
     }
@@ -148,7 +149,10 @@ async fn main() {
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
-        println!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace);
+        let stacktrace_str_simplified = simplify_stack_trace_str(stacktrace.to_string())
+            // if error occurs in this, just fallback to showing the regular stack-trace (we can't have the crash-handler itself crash xd)
+            .unwrap_or(stacktrace.to_string());
+        println!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace_str_simplified);
         std::process::abort();
     }));
 

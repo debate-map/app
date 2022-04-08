@@ -47,17 +47,17 @@ pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: 
     {
         let map_read = map.read().await;
         mtx.section("1.1");
-        println!("1.1, key:{:?}", key);
+        //println!("1.1, key:{:?}", key);
         if let Some(val) = map_read.get(&key) {
             let val_clone = val.clone();
             return (val_clone, false);
         }
     }
     
-    mtx.section("2");
+    //mtx.section("2");
     let mut map_write = map.write().await;
-    println!("2.1, key:{:?}", key);
     mtx.section("2.1");
+    //println!("2.1, key:{:?}", key);
     // use entry().or_insert_with() in case another thread inserted the same key while we were unlocked above
     let val_clone = map_write.entry(key).or_insert_with(insert_func).clone();
     (val_clone, true)

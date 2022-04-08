@@ -135,7 +135,7 @@ impl<'a, T> Stream_WithDropListener<'a, T> {
 }
 impl<'a, T> Drop for Stream_WithDropListener<'a, T> {
     fn drop(&mut self) {
-        println!("Stream_WithDropListener got dropped. @address:{:p} @table:{} @filter:{:?}", self, self.table_name, self.filter);
+        //println!("Stream_WithDropListener got dropped. @address:{:p} @table:{} @filter:{:?}", self, self.table_name, self.filter);
         
         // the receivers of the channel below may all be dropped, causing the `send()` to return a SendError; ignore this, since it is expected (for the streams returned by `stream_for_error`)
         #[allow(unused_must_use)]

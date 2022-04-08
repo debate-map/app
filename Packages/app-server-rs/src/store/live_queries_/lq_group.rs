@@ -134,15 +134,14 @@ impl LQGroup {
         mtx.parent = parent_mtx;*/
 
         let lq_key = get_lq_instance_key(table_name, filter);
-        let (mut lq_entries_count, create_new_entry) = {
-            let live_queries = self.query_instances.read().await;
-            let lq_entries_count = live_queries.len();
-            let create_new_entry = !live_queries.contains_key(&lq_key);
-            (lq_entries_count, create_new_entry)
+        let (mut lqi_active, create_new_instance) = {
+            let lq_instances = self.query_instances.read().await;
+            let create_new_instance = !lq_instances.contains_key(&lq_key);
+            (lq_instances.len(), create_new_instance)
         };
 
         mtx.section("2:get entries");
-        let new_entry = match create_new_entry {
+        let new_lq_instance = match create_new_instance {
             true => {
                 /*let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name.to_owned(), filter, Some(&mtx)).await.expect("Errored while getting entries in collection.");
                 Some(LQInstance::new(table_name.to_owned(), filter.clone(), result_entries))*/
@@ -150,10 +149,10 @@ impl LQGroup {
             },
             false => None,
         };
-        let lq_entry_is_new = new_entry.is_some();
+        let lq_entry_is_new = new_lq_instance.is_some();
 
         mtx.section("3:get lq write-lock, then possibly insert lq-instance, then read lq-instance");
-        let instance = {
+        let (instance, lqi_bufferred) = {
             let next_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
             
             //let batch = mem::replace(&mut self.next_batch, RwLock::new(next_batch));
@@ -162,15 +161,15 @@ impl LQGroup {
             let batch = mem::replace(&mut *next_batch_ref, next_batch);
 
             //let mut live_queries = self.query_instances.write().await;
-            let instance = {
+            let (instance, lqi_bufferred) = {
                 let mut instances_in_batch = batch.query_instances.write().await;
-                if let Some(new_entry) = new_entry {
+                if let Some(new_entry) = new_lq_instance {
                     //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
                     instances_in_batch.insert(lq_key.clone(), Arc::new(new_entry));
                 }
                 let instance = instances_in_batch.get(&lq_key).unwrap();
-                if lq_entry_is_new { lq_entries_count += 1; }
-                instance.clone()
+                if lq_entry_is_new { lqi_active += 1; }
+                (instance.clone(), instances_in_batch.len())
             };
 
             mtx.section("4:wait for batch to execute, then grab the result");
@@ -182,11 +181,12 @@ impl LQGroup {
 
             //self.last_committed_batch = Some(batch);
             //mem::replace(self.last_committed_batch.get_mut(), Some(batch));
-            let mut last_committed_batch_ref = self.next_batch.write().await;
+            // break point
+            let mut last_committed_batch_ref = self.last_committed_batch.write().await;
             //let _old_last_committed = mem::replace(&mut *last_committed_batch_ref, batch);
-            *last_committed_batch_ref = batch;
+            *last_committed_batch_ref = Some(batch);
 
-            instance
+            (instance, lqi_bufferred)
         };
 
         let last_entries = instance.last_entries.read().await;
@@ -199,7 +199,7 @@ impl LQGroup {
         let old_watcher_count = instance.entry_watchers.read().await.len();
         let (watcher, watcher_is_new) = instance.get_or_create_watcher(stream_id).await;
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
-        let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lq_entry_count:{}", new_watcher_count, table_name, filter, lq_entries_count);
+        let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{} @lqi_buffered:{}", new_watcher_count, table_name, filter, lqi_active, lqi_bufferred);
         println!("LQ-watcher started. {}", watcher_info_str);
         // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
         if new_watcher_count > 4 {

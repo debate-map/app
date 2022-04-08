@@ -219,7 +219,7 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::INT2_ARRAY => get_array(row, column, column_i, |a: i16| Ok(JSONValue::Number(serde_json::Number::from(a))))?,
         Type::INT4_ARRAY => get_array(row, column, column_i, |a: i32| Ok(JSONValue::Number(serde_json::Number::from(a))))?,
         Type::INT8_ARRAY => get_array(row, column, column_i, |a: i64| Ok(JSONValue::Number(serde_json::Number::from(a))))?,
-        Type::TEXT_ARRAY => get_array(row, column, column_i, |a: String| Ok(JSONValue::String(a)))?,
+        Type::TEXT_ARRAY | Type::VARCHAR_ARRAY => get_array(row, column, column_i, |a: String| Ok(JSONValue::String(a)))?,
         Type::JSON_ARRAY | Type::JSONB_ARRAY => get_array(row, column, column_i, |a: JSONValue| Ok(a))?,
         Type::FLOAT4_ARRAY => get_array(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8_ARRAY => get_array(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
@@ -245,42 +245,3 @@ fn get_array<'a, T: FromSql<'a>>(row: &'a Row, column: &Column, column_i: usize,
         None => JSONValue::Null,
     })
 }
-
-/*/// You can try these if you have a complex non-array type that can only be converted through stringification.
-/// Example:
-/// ```
-/// Type::FLOAT8 => get_through_string(row, column, column_i, |_raw: f64, str| Ok(JSONValue::Number(serde_json::Number::from_str(&str)?)))?,
-/// ```
-fn get_through_string<'a, T: FromSql<'a> + ToString>(row: &'a Row, column: &Column, column_i: usize, val_to_json_val: impl Fn(T, String) -> Result<JSONValue, Error>) -> Result<JSONValue, Error> {
-    let raw_val = row.try_get::<_, Option<T>>(column_i).with_context(|| format!("column_name:{}", column.name()))?;
-    Ok(match raw_val {
-        Some(val) => {
-            let val_as_str = val.to_string();
-            val_to_json_val(val, val_as_str)?
-        },
-        None => JSONValue::Null,
-    })
-}
-/// You can try this if you have a complex array type that can only be converted through stringification.
-/// Example:
-/// ```
-/// Type::FLOAT8_ARRAY => get_array_through_string(row, column, column_i, |_raw: f64, str| Ok(JSONValue::Number(serde_json::Number::from_str(&str)?)))?,
-/// ```
-fn get_array_through_string<'a, T: FromSql<'a> + ToString>(row: &'a Row, column: &Column, column_i: usize, val_to_json_val: impl Fn(T, String) -> Result<JSONValue, Error>) -> Result<JSONValue, Error> {
-    let raw_val_array = row.try_get::<_, Option<Vec<T>>>(column_i).with_context(|| format!("column_name:{}", column.name()))?;
-    Ok(match raw_val_array {
-        Some(val_array) => {
-            /*JSONValue::Array(val_array.into_iter().map(|val| {
-                let val_as_str = val.to_string();
-                Ok::<_, Error>(val_to_json_val(val, val_as_str)?)
-            }).collect::<Result<Vec<_>, _>>()?)*/
-            let mut result = vec![];
-            for val in val_array {
-                let val_as_str = val.to_string();
-                result.push(val_to_json_val(val, val_as_str)?);
-            }
-            JSONValue::Array(result)
-        },
-        None => JSONValue::Null,
-    })
-}*/
