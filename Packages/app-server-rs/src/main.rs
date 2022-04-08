@@ -149,9 +149,7 @@ async fn main() {
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
-        let stacktrace_str_simplified = simplify_stack_trace_str(stacktrace.to_string())
-            // if error occurs in this, just fallback to showing the regular stack-trace (we can't have the crash-handler itself crash xd)
-            .unwrap_or(stacktrace.to_string());
+        let stacktrace_str_simplified = simplify_stack_trace_str(stacktrace.to_string());
         println!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace_str_simplified);
         std::process::abort();
     }));

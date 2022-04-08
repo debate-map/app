@@ -22,9 +22,9 @@ impl StackTraceLine {
     }
 }
 
-pub fn simplify_stack_trace_str(source: String) -> Result<String, Error> {
+pub fn simplify_stack_trace_str(source: String) -> String {
     let lines_raw = source.split("\n");
-    let regex__func_name = Regex::new(r"^\s+(\d+):").unwrap();
+    let regex__func_name = Regex::new(r"^ +(\d+):").unwrap();
     let regex__code_path = Regex::new(r"^ +at ").unwrap();
     let regex__code_path_for_own_code = Regex::new(r"^ +at \./").unwrap();
     let regex__github_path = Regex::new("/usr/local/cargo/registry/src/github.com-([0-9a-f]+)/").unwrap();
@@ -58,19 +58,19 @@ pub fn simplify_stack_trace_str(source: String) -> Result<String, Error> {
     let new_lines = lines.into_iter().enumerate().filter_map(|(i, line)| {
         match line {
             StackTraceLine::FuncName(_) => {
-                let next_line_is_path_line = match &old_lines[i + 1] { StackTraceLine::CodePath(_) => true, _ => false };
+                let next_line_is_path_line = match &old_lines.get(i + 1) { Some(StackTraceLine::CodePath(_)) => true, _ => false };
                 if next_line_is_path_line {
                     None
                 } else {
                     // if we can't find a code-path line after this func-name line, indent this line anyway, right here
-                    let func_line_str = old_lines[i].get_str();
+                    let func_line_str = old_lines.get(i).unwrap().get_str();
                     let new_line = StackTraceLine::CodePathPlusFuncName(" ".repeat(indent_for_column_2) + func_line_str);
                     Some((i, new_line))
                 }
             },
             StackTraceLine::CodePath(_) => {
-                let path_line_str = old_lines[i].get_str();
-                let func_line_str = match &old_lines[i - 1] { StackTraceLine::FuncName(str) => Some(str), _ => None };
+                let path_line_str = old_lines.get(i).unwrap().get_str();
+                let func_line_str = match &old_lines.get(i - 1) { Some(StackTraceLine::FuncName(str)) => Some(str), _ => None };
                 if let Some(func_line_str) = func_line_str {
                     let spaces_to_reach_c2_indent = indent_for_column_2 - path_line_str.len();
                     let new_line = StackTraceLine::CodePathPlusFuncName(path_line_str.to_owned() + &" ".repeat(spaces_to_reach_c2_indent) + &func_line_str);
@@ -83,5 +83,5 @@ pub fn simplify_stack_trace_str(source: String) -> Result<String, Error> {
     }).map(|a| a.1).collect_vec();
 
     let result = new_lines.iter().map(|a| a.get_str()).collect_vec().join("\n");
-    Ok(result)
+    result
 }

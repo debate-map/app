@@ -1,5 +1,7 @@
 use std::{ops::{Residual, Try}, fmt};
 
+use crate::utils::general::errors::simplify_stack_trace_str;
+
 pub type ChangeOutputType<T, V> = <<T as Try>::Residual as Residual<V>>::TryType;
 
 pub trait IteratorV : Iterator {
@@ -58,9 +60,10 @@ impl<T, E> ResultV<T, E> for Result<T, E> {
         match self {
             Ok(t) => t,
             Err(err) => {
-                let e_str = format!("{err:?}");
+                let err_str = format!("{err:?}");
+                let err_str_simplified = simplify_stack_trace_str(err_str);
                 let msg = msg_getter(err);
-                panic!("{}\n\t@base_error:{}", msg, indent_all_lines(&e_str, 1));
+                panic!("{}\n\t@base_error:{}", msg, indent_all_lines(&err_str_simplified, 1));
             },
         }
     }
