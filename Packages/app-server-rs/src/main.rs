@@ -3,6 +3,7 @@
 #![feature(iterator_try_collect)]
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
+#![feature(duration_checked_float)]
 //#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]

@@ -7,6 +7,8 @@ use crate::utils::{remove_token_sequences_for_derive_macros, remove_token_sequen
 // ==========
 
 pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> TokenStream {
+    //return input; // uncommenting this can be helpful for debugging in some cases
+
     let proceed = force_proceed || {
         let mut temp = false;
         if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {

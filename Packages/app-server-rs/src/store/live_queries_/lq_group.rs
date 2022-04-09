@@ -48,7 +48,7 @@ use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
 use crate::utils::general::general::{AtomicF64, time_since_epoch_ms};
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
-use crate::utils::type_aliases::JSONValue;
+use crate::utils::type_aliases::{JSONValue, PGClientObject};
 
 use super::lq_batch::LQBatch;
 use super::lq_instance::{LQInstance, LQEntryWatcher};
@@ -134,7 +134,7 @@ impl LQGroup {
         new_self
     }
 
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
         new_mtx!(mtx, "1:get or create lqi", parent_mtx);
         let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, ctx, Some(&mtx)).await;
 
@@ -161,7 +161,7 @@ impl LQGroup {
         
         (result_entries_as_type, watcher.clone())
     }
-    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
+    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
         new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
         let lq_key = get_lq_instance_key(table_name, filter);
         let creating_new_lqi = {
@@ -180,7 +180,7 @@ impl LQGroup {
         let instance = query_instances.get(&lq_key).unwrap();
         (instance.clone(), query_instances.len())
     }
-    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) {
+    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: PGClientObject, parent_mtx: Option<&Mtx>) {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
         let old_lqi_count_in_batch = {
             //let batch = self.current_batch.read().await;
@@ -201,7 +201,7 @@ impl LQGroup {
         mtx.section_2("2:wait for batch to execute", Some(format!("@old_lqi_count:{old_lqi_count_in_batch} @will_trigger_execute:{this_call_should_commit_batch}")));
         self.execute_current_batch_once_ready(ctx, this_call_should_commit_batch, Some(&mtx)).await;
     }
-    async fn execute_current_batch_once_ready(&self, ctx: &async_graphql::Context<'_>, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
+    async fn execute_current_batch_once_ready(&self, ctx: PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
         // if this call is not the one to trigger execution, just wait for the execution to happen, then resume the caller-function
         if !this_call_triggers_execution {
             new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx);
@@ -223,7 +223,7 @@ impl LQGroup {
         let current_batch_set_time = self.current_batch_set_time.load(Ordering::Relaxed);
         let batch_end_time = current_batch_set_time + LQ_BATCH_DURATION_MIN;
         let time_till_batch_end = batch_end_time - time_since_epoch_ms();
-        tokio::time::sleep(Duration::from_secs_f64(time_till_batch_end / 1000f64)).await;
+        tokio::time::sleep(Duration::try_from_secs_f64(time_till_batch_end / 1000f64).unwrap_or(Duration::from_secs(0))).await;
 
         // now that we're done waiting, get write-locks right away (else other calls of this function may add lqi's to the current-batch, which may get "missed" if this function progresses too far)
         mtx.section("2:acquire locks");

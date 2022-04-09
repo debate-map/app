@@ -17,6 +17,7 @@ use crate::utils::db::sql_param::{SQLIdent};
 use crate::utils::general::extensions::IteratorV;
 use crate::utils::general::general::{match_cond_to_iter, time_since_epoch_ms, AtomicF64};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
+use crate::utils::type_aliases::PGClientObject;
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}, general::general::to_anyhow}};
 
 use super::lq_instance::LQInstance;
@@ -62,14 +63,15 @@ impl LQBatch {
         ).collect_vec()
     }
 
-    pub async fn execute(&mut self, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>)
+    pub async fn execute(&mut self, ctx: PGClientObject, parent_mtx: Option<&Mtx>)
         //-> Result<Vec<RowData>, Error>
         -> Result<(), Error>
     {
         new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
         //let client = ctx.data::<Client>().unwrap();
-        let pool = ctx.data::<Pool>().unwrap();
-        let client = pool.get().await.unwrap();
+        /*let pool = ctx.data::<Pool>().unwrap();
+        let client = pool.get().await.unwrap();*/
+        let client = ctx;
         //mtx.current_section_extra_info = Some(format!("@table_name:{} @filters_sql:{}", instance.table_name, filters_sql));
 
         //let query_instances = self.query_instances.read().await;
