@@ -14,6 +14,6 @@ export class RequestsState {
 	@O significantDurationThreshold = 1;
 
 	// filters
-	@O pathFilter_enabled = false;
-	@O pathFilter_str = "";
+	@O filter_enabled = false;
+	@O filter_str = "";
 }

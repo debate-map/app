@@ -5,7 +5,7 @@ import {Chroma, ES, Observer} from "web-vcore";
 import {GetPercentFromXToY} from "web-vcore/.yalc/js-vextensions";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetSectionsInMap, Mtx, MtxSection} from "../Requests.js";
+import {Mtx, MtxSection} from "../Requests.js";
 
 class LifetimeGroup {
 	constructor(data?: Partial<LifetimeGroup>) {
@@ -20,14 +20,7 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
 		const uiState = store.main.database.requests;
-		const sections = GetSectionsInMap(mtx.sectionLifetimes)
-			.filter(lifetime=>{
-				if (!uiState.pathFilter_enabled) return true;
-				if (uiState.pathFilter_str.startsWith("/") && uiState.pathFilter_str.endsWith("/")) {
-					return lifetime.path.match(uiState.pathFilter_str.slice(1, -1)) != null;
-				}
-				return lifetime.path.includes(uiState.pathFilter_str);
-			});
+		const sections = mtx.sectionLifetimes;
 
 		const lifetimeGroups = new Map<string, LifetimeGroup>();
 		for (const lifetime of sections) {
@@ -163,7 +156,10 @@ export class SectionUI_Expanded extends BaseComponent<{section: MtxSection, inde
 	}
 }
 function GetColorForPath(path: string) {
-	const prng = new RNG_Mulberry32(GetHashForString_cyrb53(path));
+	// for color-generation, only consider the last func-name and section-name of the path
+	// (this way, a [func/section]'s color is stable regardless of upper call-stack, which enables global scanning)
+	const subpath = path.split("/").slice(-2).join("/");
+	const prng = new RNG_Mulberry32(GetHashForString_cyrb53(subpath));
 	let colorForPath = Chroma(`rgba(${prng.GetNextFloat() * 255},${prng.GetNextFloat() * 255},${prng.GetNextFloat() * 255},1)`);
 	//const colorForPath = `hsla(${prng.GetNextFloat() * 360},100%,50%,1)`;
 	//const colorForPath = `hsla(${prng.GetNextFloat() * 360},${50 + (prng.GetNextFloat() * 50)}%,50%,1)`;

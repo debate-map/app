@@ -91,12 +91,12 @@ impl LQInstance {
         }
     }
 
-    pub async fn get_or_create_watcher(&self, stream_id: Uuid) -> (LQEntryWatcher, bool) {
+    pub async fn get_or_create_watcher(&self, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (LQEntryWatcher, bool) {
         /*let entry_watchers = self.entry_watchers.write().await;
         let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);
         (watcher, create_new)*/
-        rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new, None).await
+        rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new, mtx_p).await
     }
     /*pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, usize) {
         let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());

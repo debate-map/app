@@ -8,11 +8,11 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
-export class Mtx {
+export class Mtx_Raw {
 	//id: string;
-	sectionLifetimes: MtxSectionMap;
+	sectionLifetimes: MtxSectionMap_Raw;
 }
-export type MtxSectionMap = {
+export type MtxSectionMap_Raw = {
 	[key: string]: MtxSection_Raw
 };
 export class MtxSection_Raw {
@@ -23,7 +23,28 @@ export class MtxSection_Raw {
 }
 
 // synthesized from the above, for easier processing
+export class Mtx {
+	static FromMtxRaw(raw: Mtx_Raw, sort = true) {
+		const result = new Mtx();
+		for (const [key, value] of Object.entries(raw.sectionLifetimes)) {
+			result.sectionLifetimes.push(MtxSection.FromRaw(value));
+		}
+		// fsr, the entries are not sorted at this point, despite (seemingly) being sorted when serialized for sending from backend
+		if (sort) result.sectionLifetimes = result.sectionLifetimes.OrderBy(a=>a.path);
+		return result;
+	}
+	sectionLifetimes: MtxSection[] = [];
+}
 export class MtxSection {
+	static FromRaw(raw: MtxSection_Raw) {
+		return new MtxSection().VSet({
+			path: raw.path,
+			extraInfo: raw.extra_info,
+			startTime: raw.start_time,
+			duration: raw.duration,
+		});
+	}
+
 	path: string;
 	extraInfo?: string;
 	startTime: number;
@@ -32,25 +53,6 @@ export class MtxSection {
 	get Duration_Safe() {
 		return this.duration ?? (Date.now() - this.startTime);
 	}
-}
-
-export function GetSectionsInMap(map: MtxSectionMap, sort = true) {
-	let result = Object.entries(map).map(entry=>{
-		return new MtxSection().VSet({
-			//...entry[1],
-			//path: entry[0],
-			path: entry[1].path,
-			extraInfo: entry[1].extra_info,
-			startTime: entry[1].start_time,
-			duration: entry[1].duration,
-		});
-		/*Object.setPrototypeOf(entry[1], MtxSection.prototype); // cast to MtxSection, so the class-methods work
-		return entry[1];*/
-	});
-	// fsr, the entries are not sorted at this point, despite (seemingly) being sorted when serialized for sending from backend
-	//if (sort) result = result.OrderBy(a=>a.startTime);
-	if (sort) result = result.OrderBy(a=>a.path);
-	return result;
 }
 
 export const MTX_RESULTS_QUERY = gql`
@@ -82,10 +84,24 @@ export const RequestsUI = observer(()=>{
 	const {data, loading, refetch} = useQuery(MTX_RESULTS_QUERY, {
 		variables: {adminKey, startTime: uiState.showRange_end - uiState.showRange_duration, endTime: uiState.showRange_end},
 	});
-	let mtxResults: Mtx[] = data?.mtxResults ?? [];
+	const mtxResults_raw: Mtx_Raw[] = data?.mtxResults ?? [];
+	let mtxResults = mtxResults_raw.map(a=>Mtx.FromMtxRaw(a))
+		.filter(mtx=>{
+			if (!uiState.filter_enabled) return true;
+			return mtx.sectionLifetimes.Any(lifetime=>{
+				if (uiState.filter_str.startsWith("/") && uiState.filter_str.endsWith("/")) {
+					if (lifetime.path.match(new RegExp(uiState.filter_str.slice(1, -1))) != null) return true;
+					if (lifetime.extraInfo?.match(new RegExp(uiState.filter_str.slice(1, -1))) != null) return true;
+				} else {
+					if (lifetime.path.includes(uiState.filter_str)) return true;
+					if (lifetime.extraInfo?.includes(uiState.filter_str)) return true;
+				}
+				return false;
+			});
+		});
 	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
 	mtxResults = mtxResults.OrderBy(mtx=>{
-		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(a=>a.start_time).Min();
+		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(a=>a.startTime).Min();
 		return earliestLifetimeStart;
 	});
 	console.log("Got data:", mtxResults);
@@ -111,9 +127,12 @@ export const RequestsUI = observer(()=>{
 				<TextInput ml={5} type="datetime-local" {...{step: 1}}
 					value={DateToDateTimeInputStr(new Date(uiState.showRange_end))} onChange={val=>RunInAction_Set(()=>uiState.showRange_end = new Date(val).valueOf())}/>
 				<Button ml={5} text="Now" onClick={()=>RunInAction_Set(()=>uiState.showRange_end = Date.now())}/>
-				<CheckBox ml={5} text="Path filter:" value={uiState.pathFilter_enabled} onChange={val=>RunInAction_Set(()=>uiState.pathFilter_enabled = val)}/>
-				<TextInput ml={5} style={{flex: 1}} value={uiState.pathFilter_str} onChange={val=>uiState.pathFilter_str = val}/>
-				<InfoButton ml={5} text="You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/"/>
+				<CheckBox ml={5} text="Filter:" value={uiState.filter_enabled} onChange={val=>RunInAction_Set(()=>uiState.filter_enabled = val)}/>
+				<TextInput ml={5} style={{flex: 1}} value={uiState.filter_str} onChange={val=>uiState.filter_str = val}/>
+				<InfoButton ml={5} text={`
+					Filters out mtx-results lacking a lifetime whose path, or extra-info string, matches the given pattern.
+					You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
+				`.AsMultiline(0)}/>
 				<DropDown>
 					<DropDownTrigger><Button ml={5} style={{height: "100%"}} text="Others"/></DropDownTrigger>
 					<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>

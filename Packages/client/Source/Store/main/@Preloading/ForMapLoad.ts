@@ -1,4 +1,4 @@
-import {GetNode, GetNodeChildLinks, GetNodeChildrenL3, GetNodeL2, GetNodeRevisions, GetNodeTags, MapNodeView} from "dm_common";
+import {GetMap, GetNode, GetNodeChildLinks, GetNodeChildrenL3, GetNodeL2, GetNodeRevisions, GetNodeTags, MapNodeView} from "dm_common";
 import {CatchBail, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMapView} from "../maps/mapViews/$mapView";
 
@@ -20,6 +20,7 @@ export const GetNodeIDsVisibleInNodeViewExpansionState = CreateAccessor((nodeVie
 
 export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 	//console.log("Starting");
+	GetMap.CatchBail(null, "FAKE_MAP_AS_PRELOAD_START_MARKER"); // for viewing in monitor-backend's request-stack profiler
 
 	const mapView = GetMapView(mapID);
 	if (mapView == null) return;
@@ -48,5 +49,6 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 		CatchBail(null, ()=>GetNodeChildrenL3.CatchItemBails(null, nodeID));
 	}
 
+	GetMap.CatchBail(null, "FAKE_MAP_AS_PRELOAD_END_MARKER"); // for viewing in monitor-backend's request-stack profiler
 	//console.log("Done @nodeCount:", nodeIDs.length, "@nodeIDs:", nodeIDs);
 });

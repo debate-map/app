@@ -134,8 +134,8 @@ impl LQGroup {
         new_self
     }
 
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
-        new_mtx!(mtx, "1:get or create lqi", parent_mtx);
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+        new_mtx!(mtx, "1:get or create lqi", mtx_p);
         let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, ctx, Some(&mtx)).await;
 
         mtx.section("2:get current result-set");
@@ -150,7 +150,7 @@ impl LQGroup {
         mtx.section("4:get or create watcher, for the given stream");
         //let watcher = entry.get_or_create_watcher(stream_id);
         let old_watcher_count = instance.entry_watchers.read().await.len();
-        let (watcher, watcher_is_new) = instance.get_or_create_watcher(stream_id).await;
+        let (watcher, watcher_is_new) = instance.get_or_create_watcher(stream_id, mtx_p).await;
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
         let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
         println!("LQ-watcher started. {}", watcher_info_str);
