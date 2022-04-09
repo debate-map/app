@@ -172,7 +172,7 @@ class TimeMarker extends BaseComponent<{time: number, rangeStart: number, rangeE
 				left: GetPercentFromXToY(rangeStart, rangeEnd, time).ToPercentStr(),
 				top: 0, bottom: 0,
 				width: time % 1000 == 0 ? 2 : 1,
-				background: "rgba(0,0,0,.7)",
+				background: time % 1000 == 0 ? "rgba(0,0,0,1)" : "rgba(0,0,0,.3)",
 			}}/>
 		);
 	}

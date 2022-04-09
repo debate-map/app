@@ -146,24 +146,34 @@ impl FilterOp {
         })
     }
 
-    pub fn get_sql_for_application(&self, fragment_for_value_in_db: SQLFragment, fragment_for_value_in_filter_op: SQLFragment) -> SQLFragment {
+    pub fn get_sql_for_application(&self, ref_to_val_in_db: SQLFragment, ref_to_val_in_filter_op: SQLFragment) -> SQLFragment {
+        let bracket_plus_val_in_db = SF::merge(vec![
+            SF::lit("("),
+            ref_to_val_in_db,
+        ]);
+        let bracket_plus_val_in_filter_op = SF::merge(vec![
+            ref_to_val_in_filter_op,
+            SF::lit(")"),
+        ]);
         match self {
             FilterOp::EqualsX(_) => SF::merge(vec![
-                fragment_for_value_in_db,
+                bracket_plus_val_in_db,
                 SF::lit(" = "),
-                fragment_for_value_in_filter_op,
+                bracket_plus_val_in_filter_op,
             ]),
             FilterOp::IsWithinX(_) => SF::merge(vec![
-                fragment_for_value_in_db,
-                SF::lit(" IN "),
-                fragment_for_value_in_filter_op,
+                bracket_plus_val_in_db,
+                //SF::lit(" IN "), // commented; this only works for subqueries, not arrays
+                SF::lit(" = ANY("),
+                bracket_plus_val_in_filter_op,
+                SF::lit(")"),
             ]),
             // see: https://stackoverflow.com/a/54069718
             //"contains" => SF::new("ANY(\"$X\") = $X", vec![field_name, &filter_value.to_string().replace("\"", "'")]),
             FilterOp::ContainsAllOfX(_) => SF::merge(vec![
-                fragment_for_value_in_db,
+                bracket_plus_val_in_db,
                 SF::lit(" @> "),
-                fragment_for_value_in_filter_op,
+                bracket_plus_val_in_filter_op,
             ]),
             //"contains_jsonb" => SF::new("\"$I\" @> $V", vec![field_name, filter_value_as_jsonb_str]),
         }
