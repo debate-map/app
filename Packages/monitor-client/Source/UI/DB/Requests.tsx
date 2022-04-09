@@ -3,8 +3,10 @@ import React from "react";
 import {store} from "Store";
 import {hourInMS, InfoButton, minuteInMS, RunInAction_Set, secondInMS} from "web-vcore";
 import {useMutation, useQuery} from "web-vcore/nm/@apollo/client.js";
+import {GetPercentFromXToY, Range} from "web-vcore/nm/js-vextensions";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
@@ -81,8 +83,10 @@ export const RequestsUI = observer(()=>{
 	const uiState = store.main.database.requests;
 
 	//const forceUpdate = useForceUpdate();
+	const rangeStart = uiState.showRange_end - uiState.showRange_duration;
+	const rangeEnd = uiState.showRange_end;
 	const {data, loading, refetch} = useQuery(MTX_RESULTS_QUERY, {
-		variables: {adminKey, startTime: uiState.showRange_end - uiState.showRange_duration, endTime: uiState.showRange_end},
+		variables: {adminKey, startTime: rangeStart, endTime: rangeEnd},
 	});
 	const mtxResults_raw: Mtx_Raw[] = data?.mtxResults ?? [];
 	let mtxResults = mtxResults_raw.map(a=>Mtx.FromMtxRaw(a))
@@ -146,6 +150,11 @@ export const RequestsUI = observer(()=>{
 			</Row>
 			<Row>Mtx results ({mtxResults.length})</Row>
 			<ScrollView>
+				<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, pointerEvents: "none"}}>
+					{Range(rangeStart.CeilingTo(100), rangeEnd.FloorTo(100), 100, true).map(time=>{
+						return <TimeMarker key={time} time={time} rangeStart={rangeStart} rangeEnd={rangeEnd}/>;
+					})}
+				</div>
 				{mtxResults.map((mtx, index)=>{
 					return <MtxResultUI key={index} mtx={mtx}/>;
 				})}
@@ -153,6 +162,22 @@ export const RequestsUI = observer(()=>{
 		</Column>
 	);
 });
+
+class TimeMarker extends BaseComponent<{time: number, rangeStart: number, rangeEnd: number}, {}> {
+	render() {
+		const {time, rangeStart, rangeEnd} = this.props;
+		return (
+			<div style={{
+				position: "absolute",
+				left: GetPercentFromXToY(rangeStart, rangeEnd, time).ToPercentStr(),
+				top: 0, bottom: 0,
+				width: time % 1000 == 0 ? 2 : 1,
+				background: "rgba(0,0,0,.7)",
+			}}/>
+		);
+	}
+}
+
 function DateToDateTimeInputStr(date: Date) {
 	date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
 	//return date.toISOString().slice(0, 16);

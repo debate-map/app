@@ -1,7 +1,8 @@
 import React, {useState} from "react";
 import {store} from "Store/index.js";
 import {GetHashForString_cyrb53, RNG_Mulberry32} from "ui-debug-kit";
-import {Chroma, ES, Observer} from "web-vcore";
+import {MainSkin} from "Utils/Styles/MainSkin.js";
+import {Chroma, chroma_maxDarken, ES, Observer} from "web-vcore";
 import {GetPercentFromXToY} from "web-vcore/.yalc/js-vextensions";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
@@ -51,7 +52,10 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 					return <LifetimeGroupUI_Expanded key={index} group={group} index={index}/>;
 				})*/}
 				{expanded &&
-				<Column style={{background: "rgba(0,0,0,.1)"}}>
+				<Column style={{
+					// since we're changing alpha to 1, this shows up darker than the page background (which is good)
+					background: MainSkin.main.BasePanelBackgroundColor().alpha(1).css(),
+				}}>
 					{sections.map((section, sectionIndex)=>{
 						return <SectionUI_Expanded key={sectionIndex} section={section} index={sectionIndex} sections={sections}/>;
 					})}
@@ -140,6 +144,7 @@ export class SectionUI_Expanded extends BaseComponent<{section: MtxSection, inde
 					//lifetime.duration < uiState.significantDurationThreshold && {fontStyle: "italic"},
 				)}>{subpath}</Text>
 				<Row style={ES(
+					//{background: MainSkin.main.BasePanelBackgroundColor().alpha(1).css()},
 					//lifetime.duration < uiState.significantDurationThreshold && {opacity: .7},
 					section.Duration_Safe >= uiState.significantDurationThreshold && {background: "white"},
 				)}>
