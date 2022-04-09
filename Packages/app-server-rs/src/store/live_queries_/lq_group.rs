@@ -174,14 +174,15 @@ impl LQGroup {
                 (instance.clone(), instances_in_batch.len())
             };
 
-            mtx.section("4:wait for batch to execute, then grab the result");
+            mtx.section("4:wait for batch to execute");
             
             // temp; just immediately execute the (single item) batch ourselves
+            // break point
             //self.channel_for_batch_messages__sender_base.send(LQBatchMessage::Execute);
             //self.execute_current_batch();
             batch.execute(ctx, Some(&mtx)).await.expect_lazy(|_| format!("Got error executing live-query batch. @filter_shape:{}", self.filter_shape));
 
-            mtx.section("5:commit the current batch");
+            mtx.section("5:commit the lq-instances in current batch");
             {
                 let instances_in_batch = batch.query_instances.read().await;
                 let mut query_instances = self.query_instances.write().await;

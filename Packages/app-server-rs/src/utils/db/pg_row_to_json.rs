@@ -44,7 +44,7 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::FLOAT4 => get_basic(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8 => get_basic(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
         // these types require a custom StringCollector struct as an intermediary
-        Type::TS_VECTOR => get_basic(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
+        Type::TS_VECTOR => get_basic(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.0)))?,
 
         // array types
         Type::BOOL_ARRAY => get_array(row, column, column_i, |a: bool| Ok(JSONValue::Bool(a)))?,
@@ -56,7 +56,7 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::FLOAT4_ARRAY => get_array(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8_ARRAY => get_array(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
         // these types require a custom StringCollector struct as an intermediary
-        Type::TS_VECTOR_ARRAY => get_array(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
+        Type::TS_VECTOR_ARRAY => get_array(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.0)))?,
 
         _ => bail!("Cannot convert pg-cell \"{}\" of type \"{}\" to a JSONValue.", column.name(), column.type_().name()),
     })
@@ -80,26 +80,11 @@ fn get_array<'a, T: FromSql<'a>>(row: &'a Row, column: &Column, column_i: usize,
     })
 }
 
-enum StringCollector {
-    Value(String)
-}
-impl StringCollector {
-    pub fn into_str(self) -> String {
-        match self {
-            Self::Value(str) => str,
-        }
-    }
-}
+struct StringCollector(String);
 impl FromSql<'_> for StringCollector {
     fn from_sql(_: &Type, raw: &[u8]) -> Result<StringCollector, Box<dyn std::error::Error + Sync + Send>> {
         let result = std::str::from_utf8(raw)?;
-        Ok(StringCollector::Value(result.to_owned()))
+        Ok(StringCollector(result.to_owned()))
     }
-
-    fn accepts(ty: &Type) -> bool {
-        match *ty {
-            Type::TS_VECTOR => true,
-            _ => false,
-        }
-    }
+    fn accepts(_ty: &Type) -> bool { true }
 }
