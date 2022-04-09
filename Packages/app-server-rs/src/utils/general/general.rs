@@ -1,4 +1,4 @@
-use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell, collections::HashMap, iter::{once, empty}, fmt::Display};
+use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell, collections::HashMap, iter::{once, empty}, fmt::Display, sync::atomic::{Ordering, AtomicU64}};
 use anyhow::{anyhow, bail, Context, Error};
 use async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
@@ -84,41 +84,27 @@ pub fn flurry_hashmap_into_json_map<K: Hash + Ord + Eq + Clone + Display, V: Ser
     Ok(result)
 }
 
-/*pub fn generic_iter<I>(iter: I) -> I
-    where I: IntoIterator
-{
-    return iter;
-}*/
-
-pub fn match_cond_to_iter<T>(cond_x: bool, iter_y: impl Iterator<Item = T> + 'static, iter_z: impl Iterator<Item = T> + 'static)
-    //-> ()
-    //-> &'a mut dyn Iterator
-    -> Box<dyn Iterator<Item = T>>
-{
-    /*if y {
-        return Box::new(x);
-    }
-    Box::new(z);*/
-
-    //return if y { &x } else { &z };
-
-    /*let x;
-    let y;
-    let z: &mut dyn Iterator = if y {
-        x = iter_x;
-        &mut x
-    } else {
-        y = iter_z;
-        &mut y
-    };
-
-    z*/
-    
-    //let iter: Iterator = if true { Some(SF::let(",")) } else { None };
-
-    //let iter: Box<dyn Iterator<Item = T>> = if true { Box::new(iter_x) } else { Box::new(iter_z) };
+pub fn match_cond_to_iter<T>(cond_x: bool, iter_y: impl Iterator<Item = T> + 'static, iter_z: impl Iterator<Item = T> + 'static) -> Box<dyn Iterator<Item = T>> {
     match cond_x {
         true => Box::new(iter_y),
         false => Box::new(iter_z)
+    }
+}
+
+pub struct AtomicF64 {
+    storage: AtomicU64,
+}
+impl AtomicF64 {
+    pub fn new(value: f64) -> Self {
+        let as_u64 = value.to_bits();
+        Self { storage: AtomicU64::new(as_u64) }
+    }
+    pub fn store(&self, value: f64, ordering: Ordering) {
+        let as_u64 = value.to_bits();
+        self.storage.store(as_u64, ordering)
+    }
+    pub fn load(&self, ordering: Ordering) -> f64 {
+        let as_u64 = self.storage.load(ordering);
+        f64::from_bits(as_u64)
     }
 }

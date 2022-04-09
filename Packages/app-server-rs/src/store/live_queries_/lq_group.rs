@@ -8,6 +8,8 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
+use std::time::Duration;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
 use axum::http::Method;
@@ -22,6 +24,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
 use tokio::sync::{broadcast, mpsc, Mutex, RwLock};
+use tokio::time::Instant;
 use tokio_postgres::{Client, Row};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
@@ -43,6 +46,7 @@ use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::pg_stream_parsing::LDChange;
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
+use crate::utils::general::general::{AtomicF64, time_since_epoch_ms};
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::type_aliases::JSONValue;
 
@@ -72,8 +76,9 @@ pub fn get_lq_group_key(table_name: &str, filter: &QueryFilter) -> String {
     }).to_string()
 }
 
+#[derive(Debug, Clone)]
 pub enum LQBatchMessage {
-    Execute,
+    NotifyExecutionDone,
 }
 pub struct LQGroup {
     // shape
@@ -81,13 +86,14 @@ pub struct LQGroup {
     pub filter_shape: QueryFilter,
 
     // for coordination of currently-buffering batches
-    pub channel_for_batch_messages__sender_base: Sender<LQBatchMessage>,
-    pub channel_for_batch_messages__receiver_base: Receiver<LQBatchMessage>,
+    pub channel_for_batch_messages__sender_base: broadcast::Sender<LQBatchMessage>,
+    pub channel_for_batch_messages__receiver_base: broadcast::Receiver<LQBatchMessage>,
     
     /// The last batch whose contents were committed. (to LQGroup.query_instances)
     pub last_committed_batch: RwLock<Option<LQBatch>>,
     /// The current-batch, ie. the next batch to be committed. (until it's committed, the lq-instances are not active)
     pub current_batch: RwLock<LQBatch>,
+    pub current_batch_set_time: AtomicF64,
 
     /// Map of committed live-query instances.
     pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
@@ -95,8 +101,9 @@ pub struct LQGroup {
 }
 impl LQGroup {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
-        let (s1, r1): (Sender<LQBatchMessage>, Receiver<LQBatchMessage>) = flume::unbounded();
+        //let (s1, r1): (Sender<LQBatchMessage>, Receiver<LQBatchMessage>) = flume::unbounded();
         //let r1_clone = r1.clone(); // clone needed for tokio::spawn closure below
+        let (s1, r1): (broadcast::Sender<LQBatchMessage>, broadcast::Receiver<LQBatchMessage>) = broadcast::channel(10);
         let new_self = Self {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),
@@ -104,6 +111,7 @@ impl LQGroup {
             last_committed_batch: RwLock::new(None),
             //next_batch: LQBatch::default(),
             current_batch: RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone())),
+            current_batch_set_time: AtomicF64::new(time_since_epoch_ms()),
 
             channel_for_batch_messages__sender_base: s1,
             channel_for_batch_messages__receiver_base: r1,
@@ -128,7 +136,7 @@ impl LQGroup {
 
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
         new_mtx!(mtx, "1:get or create lqi", parent_mtx);
-        let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, Some(&mtx)).await;
+        let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, ctx, Some(&mtx)).await;
 
         mtx.section("2:get current result-set");
         let result_entries = {
@@ -153,7 +161,7 @@ impl LQGroup {
         
         (result_entries_as_type, watcher.clone())
     }
-    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
+    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
         new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
         let lq_key = get_lq_instance_key(table_name, filter);
         let creating_new_lqi = {
@@ -164,7 +172,7 @@ impl LQGroup {
 
         mtx.section("2:create a new lqi (if needed)");
         if creating_new_lqi {
-            self.create_new_lq_instance(table_name, filter, &lq_key, Some(&mtx)).await;
+            self.create_new_lq_instance(table_name, filter, &lq_key, ctx, Some(&mtx)).await;
         }
 
         mtx.section("3:return the current lqi for this key");
@@ -172,53 +180,79 @@ impl LQGroup {
         let instance = query_instances.get(&lq_key).unwrap();
         (instance.clone(), query_instances.len())
     }
-    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, parent_mtx: Option<&Mtx>) {
+    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
-        let this_call_should_commit_batch = {
-            let batch = self.current_batch.read().await;
-            let old_lqi_count_in_batch = {
-                let mut instances_in_batch = batch.query_instances.write().await;
-                let old_lqi_count_in_batch = instances_in_batch.len();
+        let batch = self.current_batch.read().await;
+        let old_lqi_count_in_batch = {
+            let mut instances_in_batch = batch.query_instances.write().await;
+            let old_lqi_count_in_batch = instances_in_batch.len();
 
-                let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
-                //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
-                instances_in_batch.insert(lq_key.to_owned(), Arc::new(new_lqi));
+            let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
+            //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
+            instances_in_batch.insert(lq_key.to_owned(), Arc::new(new_lqi));
 
-                old_lqi_count_in_batch
-            };
-
-            mtx.section("2:wait for batch to execute");
-            batch.wait_for_execution().await;
-
-            let this_call_should_commit_batch = old_lqi_count_in_batch == 0;
-            if this_call_should_commit_batch {
-                mtx.section("3:commit the lqi's in batch to overall group");
-                {
-                    let instances_in_batch = batch.query_instances.read().await;
-                    let mut query_instances = self.query_instances.write().await;
-                    for (key, value) in instances_in_batch.iter() {
-                        query_instances.insert(key.to_owned(), value.clone());
-                    }
-                }
-            }
-            this_call_should_commit_batch
+            old_lqi_count_in_batch
         };
 
-        if this_call_should_commit_batch {
-            mtx.section("4:update the last/current batch references");
-            // create a new batch as the next "current batch"
-            let batch_committing_now = {
-                let new_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
-                let mut current_batch_ref = self.current_batch.write().await;
-                let batch_committing_now = std::mem::replace(&mut *current_batch_ref, new_batch);
-                batch_committing_now
-            };
-            // store batch as the "last committed batch"
-            {
-                let mut last_committed_batch_ref = self.last_committed_batch.write().await;
-                *last_committed_batch_ref = Some(batch_committing_now);
+        let this_call_should_commit_batch = old_lqi_count_in_batch == 0;
+        mtx.section_2("2:wait for batch to execute", Some(format!("@old_lqi_count:{old_lqi_count_in_batch} @will_trigger_execute:{this_call_should_commit_batch}")));
+        self.execute_current_batch_once_ready(ctx, this_call_should_commit_batch, Some(&mtx)).await;
+    }
+    async fn execute_current_batch_once_ready(&self, ctx: &async_graphql::Context<'_>, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
+        // if this call is not the one to trigger execution, just wait for the execution to happen, then resume the caller-function
+        if !this_call_triggers_execution {
+            new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx);
+            //let sender_clone = self.channel_for_batch_messages__sender_base.clone();
+            let mut receiver = self.channel_for_batch_messages__sender_base.subscribe();
+            loop {
+                let msg = receiver.recv().await.unwrap();
+                match msg {
+                    LQBatchMessage::NotifyExecutionDone => break,
+                }
+            }
+            return;
+        }
+
+        new_mtx!(mtx, "1:wait for the correct time to execute", parent_mtx);
+        // todo: fine-tune these settings, as well as scale-up algorithm
+        const LQ_BATCH_DURATION_MIN: f64 = 100f64;
+        //const LQ_BATCH_DURATION_MAX: f64 = 100f64;
+        let current_batch_set_time = self.current_batch_set_time.load(Ordering::Relaxed);
+        let batch_end_time = current_batch_set_time + LQ_BATCH_DURATION_MIN;
+        let time_till_batch_end = batch_end_time - time_since_epoch_ms();
+        tokio::time::sleep(Duration::from_secs_f64(time_till_batch_end / 1000f64)).await;
+
+        mtx.section("2:reacquire the current-batch");
+        let batch = self.current_batch.read().await;
+
+        mtx.section("3:execute the batch");
+        batch.execute(ctx, Some(&mtx)).await.expect("Executing the lq-batch failed!");
+
+        mtx.section("4:commit the lqi's in batch to overall group");
+        {
+            let instances_in_batch = batch.query_instances.read().await;
+            let mut query_instances = self.query_instances.write().await;
+            mtx.current_section.extra_info = Some(format!("@lqi_count:{}", query_instances.len()));
+            for (key, value) in instances_in_batch.iter() {
+                query_instances.insert(key.to_owned(), value.clone());
             }
         }
+
+        mtx.section("5:update the last/current batch references");
+        // create a new batch as the next "current batch"
+        let batch_committing_now = {
+            let new_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
+            let mut current_batch_ref = self.current_batch.write().await;
+            let batch_committing_now = std::mem::replace(&mut *current_batch_ref, new_batch);
+            self.current_batch_set_time.store(time_since_epoch_ms(), Ordering::Relaxed);
+            batch_committing_now
+        };
+        // store batch as the "last committed batch"
+        {
+            let mut last_committed_batch_ref = self.last_committed_batch.write().await;
+            *last_committed_batch_ref = Some(batch_committing_now);
+        }
+        self.channel_for_batch_messages__sender_base.send(LQBatchMessage::NotifyExecutionDone).unwrap();
     }
 
     /*pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {
@@ -260,7 +294,3 @@ impl LQGroup {
         }
     }
 }
-
-// todo: fine-tune these settings, as well as scale-up algorithm
-const LQ_BATCH_DURATION_MIN: usize = 100;
-const LQ_BATCH_DURATION_MAX: usize = 100;

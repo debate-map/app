@@ -1,4 +1,5 @@
 use std::iter::{once, empty};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::{sync::Arc};
 use anyhow::{Error};
 use async_graphql::{Result};
@@ -14,7 +15,7 @@ use crate::utils::db::sql_fragment::{SF};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::utils::db::sql_param::{SQLIdent};
 use crate::utils::general::extensions::IteratorV;
-use crate::utils::general::general::{match_cond_to_iter};
+use crate::utils::general::general::{match_cond_to_iter, time_since_epoch_ms, AtomicF64};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}, general::general::to_anyhow}};
 
@@ -30,7 +31,8 @@ pub struct LQBatch {
     pub filter_shape: QueryFilter,
     
     pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
-    pub execution_time: Option<f64>,
+    //pub execution_time: Option<f64>,
+    //execution_time: AtomicF64, // a value of -1 means "not yet set", ie. execution hasn't happened yet
 }
 impl LQBatch {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
@@ -38,7 +40,7 @@ impl LQBatch {
             table_name,
             filter_shape,
             query_instances: RwLock::default(),
-            execution_time: None,
+            //execution_time: AtomicF64::new(-1f64),
         }
     }
 
@@ -57,13 +59,6 @@ impl LQBatch {
                 }).collect_vec()
             }).collect_vec()
         ).collect_vec()
-    }
-
-    /// This function handles the scheduling of the batch's execution.
-    pub async fn wait_for_execution(&self) -> bool {
-        let caller_is_one_to_commit_batch = self.query_instances.len() <= 1;
-
-        caller_is_one_to_commit_batch
     }
 
     pub async fn execute(&self, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>)
@@ -173,6 +168,8 @@ impl LQBatch {
             let lq_instance = query_instance_vals.get(i).unwrap();
             lq_instance.set_last_entries(lq_results).await;
         }
+
+        //self.execution_time.store(time_since_epoch_ms(), Ordering::Relaxed);
 
         //Ok(lq_results_converted)
         Ok(())
