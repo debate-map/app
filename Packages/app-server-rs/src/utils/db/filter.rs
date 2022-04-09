@@ -8,7 +8,7 @@ use itertools::{chain, Itertools};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
 use crate::{utils::type_aliases::JSONValue};
-use super::{sql_fragment::{SQLFragment, SF}, postgres_parsing::RowData, sql_param::{SQLIdent, json_value_to_sql_value_param}};
+use super::{sql_fragment::{SQLFragment, SF}, pg_stream_parsing::RowData, sql_param::{SQLIdent, json_value_to_sql_value_param}};
 
 //pub type Filter = Option<Map<String, JSONValue>>;
 pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)

@@ -8,7 +8,7 @@ pub type RowData = Map<String, JSONValue>;
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::db::postgres_parsing::parse_postgres_array_as_strings;
+    use crate::utils::db::pg_stream_parsing::parse_postgres_array_as_strings;
 
     #[test]
     fn simple() {

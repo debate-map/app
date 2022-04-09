@@ -40,7 +40,7 @@ use uuid::Uuid;
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
-use crate::utils::db::postgres_parsing::LDChange;
+use crate::utils::db::pg_stream_parsing::LDChange;
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
