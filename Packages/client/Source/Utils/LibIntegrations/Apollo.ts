@@ -67,7 +67,9 @@ export function InitApollo() {
 	//Test1();
 
 	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
-		reconnect: true,
+		reconnect:
+			(startURL.GetQueryVar("ws_rc") == "0" ? false : null) ?? // for testing
+			true,
 	});
 	// could also detect general web dc/rc (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/Online_and_offline_events), but doesn't seem necessary
 	wsClient.onConnected(()=>{

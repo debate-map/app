@@ -80,14 +80,16 @@ pub struct LQGroup {
     pub table_name: String,
     pub filter_shape: QueryFilter,
 
-    pub last_committed_batch: RwLock<Option<LQBatch>>,
-    pub next_batch: RwLock<LQBatch>,
-    
     // for coordination of currently-buffering batches
     pub channel_for_batch_messages__sender_base: Sender<LQBatchMessage>,
     pub channel_for_batch_messages__receiver_base: Receiver<LQBatchMessage>,
+    
+    /// The last batch whose contents were committed. (to LQGroup.query_instances)
+    pub last_committed_batch: RwLock<Option<LQBatch>>,
+    /// The next batch to be committed. (until it's committed, the lq-instances are not active)
+    pub next_batch: RwLock<LQBatch>,
 
-    // for specific live-query entries (ie. one for each set of values supplied for the shape/template)
+    /// Map of committed live-query instances.
     pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
     //source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
@@ -179,11 +181,17 @@ impl LQGroup {
             //self.execute_current_batch();
             batch.execute(ctx, Some(&mtx)).await.expect_lazy(|_| format!("Got error executing live-query batch. @filter_shape:{}", self.filter_shape));
 
-            //self.last_committed_batch = Some(batch);
-            //mem::replace(self.last_committed_batch.get_mut(), Some(batch));
-            // break point
+            mtx.section("5:commit the current batch");
+            {
+                let instances_in_batch = batch.query_instances.read().await;
+                let mut query_instances = self.query_instances.write().await;
+                for (key, value) in instances_in_batch.iter() {
+                    query_instances.insert(key.to_owned(), value.clone());
+                }
+            }
+
+            // store batch as the "last committed batch"
             let mut last_committed_batch_ref = self.last_committed_batch.write().await;
-            //let _old_last_committed = mem::replace(&mut *last_committed_batch_ref, batch);
             *last_committed_batch_ref = Some(batch);
 
             (instance, lqi_bufferred)
@@ -234,9 +242,11 @@ impl LQGroup {
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {
         //let mut storage = storage_wrapper.write().await;
-        let mut live_queries = self.query_instances.write().await;
+        /*let mut live_queries = self.query_instances.write().await;
         let mut1 = live_queries.iter_mut();
-        for (lq_key, lq_info) in mut1 {
+        for (lq_key, lq_info) in mut1 {*/
+        let live_queries = self.query_instances.read().await;
+        for (lq_key, lq_info) in live_queries.iter() {
             let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
             if lq_key_json["table"].as_str().unwrap() != change.table { continue; }
             /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {

@@ -12,7 +12,7 @@ use indexmap::IndexMap;
 use itertools::{chain, Itertools};
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::{json, Map};
-use tokio_postgres::Column;
+use tokio_postgres::{Column, types};
 use tokio_postgres::types::{Type, FromSql};
 use tokio_postgres::{Client, Row, types::ToSql, Statement};
 use uuid::Uuid;
@@ -131,8 +131,12 @@ impl LQBatch {
                                 LQParam::LQIndex(..) => false,
                             }
                         })
-                        .map(|proto| -> Result<SQLFragment, Error> {
-                            proto.get_sql_for_application(&self.table_name, "lq_param_sets")
+                        .enumerate()
+                        .map(|(i, proto)| -> Result<SQLFragment, Error> {
+                            Ok(SF::merge(chain!(
+                                match_cond_to_iter(i > 0, once(SF::lit("AND ")), empty()),
+                                once(proto.get_sql_for_application(&self.table_name, "lq_param_sets")?),
+                            ).collect_vec()))
                         }).try_collect2::<Vec<_>>()?.into_iter(),
                     ),
                 SF::lit_once(") ORDER BY lq_index;"),
@@ -213,6 +217,8 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::JSON | Type::JSONB => get_basic(row, column, column_i, |a: JSONValue| Ok(a))?,
         Type::FLOAT4 => get_basic(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8 => get_basic(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
+        // just use stringification for types that don't have a specific pg->rust-postgres FromSQL implementation
+        Type::TS_VECTOR => get_basic(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
 
         // array types
         Type::BOOL_ARRAY => get_array(row, column, column_i, |a: bool| Ok(JSONValue::Bool(a)))?,
@@ -223,6 +229,8 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::JSON_ARRAY | Type::JSONB_ARRAY => get_array(row, column, column_i, |a: JSONValue| Ok(a))?,
         Type::FLOAT4_ARRAY => get_array(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8_ARRAY => get_array(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
+        // just use stringification for types that don't have a specific pg->rust-postgres FromSQL implementation
+        Type::TS_VECTOR_ARRAY => get_basic(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
 
         _ => bail!("Cannot convert pg-cell \"{}\" of type \"{}\" to a JSONValue.", column.name(), column.type_().name()),
     })
@@ -244,4 +252,28 @@ fn get_array<'a, T: FromSql<'a>>(row: &'a Row, column: &Column, column_i: usize,
         },
         None => JSONValue::Null,
     })
+}
+
+enum StringCollector {
+    Value(String)
+}
+impl StringCollector {
+    pub fn into_str(self) -> String {
+        match self {
+            Self::Value(str) => str,
+        }
+    }
+}
+impl FromSql<'_> for StringCollector {
+    fn from_sql(_: &Type, raw: &[u8]) -> Result<StringCollector, Box<dyn std::error::Error + Sync + Send>> {
+        let result = std::str::from_utf8(raw)?;
+        Ok(StringCollector::Value(result.to_owned()))
+    }
+
+    fn accepts(ty: &Type) -> bool {
+        match *ty {
+            Type::TS_VECTOR => true,
+            _ => false,
+        }
+    }
 }
