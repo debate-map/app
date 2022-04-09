@@ -34,7 +34,7 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         // for rust-postgres <> postgres type-mappings: https://docs.rs/postgres/latest/postgres/types/trait.FromSql.html#types
         // for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
 
-        // basics
+        // single types
         Type::BOOL => get_basic(row, column, column_i, |a: bool| Ok(JSONValue::Bool(a)))?,
         Type::INT2 => get_basic(row, column, column_i, |a: i16| Ok(JSONValue::Number(serde_json::Number::from(a))))?,
         Type::INT4 => get_basic(row, column, column_i, |a: i32| Ok(JSONValue::Number(serde_json::Number::from(a))))?,
@@ -43,7 +43,7 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::JSON | Type::JSONB => get_basic(row, column, column_i, |a: JSONValue| Ok(a))?,
         Type::FLOAT4 => get_basic(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8 => get_basic(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
-        // just use stringification for types that don't have a specific pg->rust-postgres FromSQL implementation
+        // these types require a custom StringCollector struct as an intermediary
         Type::TS_VECTOR => get_basic(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
 
         // array types
@@ -55,8 +55,8 @@ pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Res
         Type::JSON_ARRAY | Type::JSONB_ARRAY => get_array(row, column, column_i, |a: JSONValue| Ok(a))?,
         Type::FLOAT4_ARRAY => get_array(row, column, column_i, |a: f32| Ok(f64_to_json_number(a.into())?))?,
         Type::FLOAT8_ARRAY => get_array(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
-        // just use stringification for types that don't have a specific pg->rust-postgres FromSQL implementation
-        Type::TS_VECTOR_ARRAY => get_basic(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
+        // these types require a custom StringCollector struct as an intermediary
+        Type::TS_VECTOR_ARRAY => get_array(row, column, column_i, |a: StringCollector| Ok(JSONValue::String(a.into_str())))?,
 
         _ => bail!("Cannot convert pg-cell \"{}\" of type \"{}\" to a JSONValue.", column.name(), column.type_().name()),
     })
