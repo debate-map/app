@@ -59,6 +59,13 @@ impl LQBatch {
         ).collect_vec()
     }
 
+    /// This function handles the scheduling of the batch's execution.
+    pub async fn wait_for_execution(&self) -> bool {
+        let caller_is_one_to_commit_batch = self.query_instances.len() <= 1;
+
+        caller_is_one_to_commit_batch
+    }
+
     pub async fn execute(&self, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>)
         //-> Result<Vec<RowData>, Error>
         -> Result<(), Error>

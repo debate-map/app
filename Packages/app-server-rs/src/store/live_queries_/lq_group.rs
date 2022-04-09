@@ -86,8 +86,8 @@ pub struct LQGroup {
     
     /// The last batch whose contents were committed. (to LQGroup.query_instances)
     pub last_committed_batch: RwLock<Option<LQBatch>>,
-    /// The next batch to be committed. (until it's committed, the lq-instances are not active)
-    pub next_batch: RwLock<LQBatch>,
+    /// The current-batch, ie. the next batch to be committed. (until it's committed, the lq-instances are not active)
+    pub current_batch: RwLock<LQBatch>,
 
     /// Map of committed live-query instances.
     pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
@@ -103,7 +103,7 @@ impl LQGroup {
 
             last_committed_batch: RwLock::new(None),
             //next_batch: LQBatch::default(),
-            next_batch: RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone())),
+            current_batch: RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone())),
 
             channel_for_batch_messages__sender_base: s1,
             channel_for_batch_messages__receiver_base: r1,
@@ -126,89 +126,25 @@ impl LQGroup {
         new_self
     }
 
-    /*pub async fn execute_current_batch(&mut self) {
-    }*/
-
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
-        new_mtx!(mtx, "1:get lq read-lock", parent_mtx);
-        /*let mut mtx = crate::utils::mtx::mtx::Mtx::new(crate::utils::mtx::mtx::fn_name!());
-        mtx.section("part1");
-        mtx.parent = parent_mtx;*/
+        new_mtx!(mtx, "1:get or create lqi", parent_mtx);
+        let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, Some(&mtx)).await;
 
-        let lq_key = get_lq_instance_key(table_name, filter);
-        let (mut lqi_active, create_new_instance) = {
-            let lq_instances = self.query_instances.read().await;
-            let create_new_instance = !lq_instances.contains_key(&lq_key);
-            (lq_instances.len(), create_new_instance)
+        mtx.section("2:get current result-set");
+        let result_entries = {
+            let result_entries = instance.last_entries.read().await;
+            result_entries.clone()
         };
 
-        mtx.section("2:get entries");
-        let new_lq_instance = match create_new_instance {
-            true => {
-                /*let (result_entries, _result_entries_as_type) = get_entries_in_collection::<T>(ctx, table_name.to_owned(), filter, Some(&mtx)).await.expect("Errored while getting entries in collection.");
-                Some(LQInstance::new(table_name.to_owned(), filter.clone(), result_entries))*/
-                Some(LQInstance::new(table_name.to_owned(), filter.clone(), vec![]))
-            },
-            false => None,
-        };
-        let lq_entry_is_new = new_lq_instance.is_some();
-
-        mtx.section("3:get lq write-lock, then possibly insert lq-instance, then read lq-instance");
-        let (instance, lqi_bufferred) = {
-            let next_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
-            
-            //let batch = mem::replace(&mut self.next_batch, RwLock::new(next_batch));
-            //let batch = mem::replace(self.next_batch.get_mut(), next_batch);
-            let mut next_batch_ref = self.next_batch.write().await;
-            let batch = mem::replace(&mut *next_batch_ref, next_batch);
-
-            //let mut live_queries = self.query_instances.write().await;
-            let (instance, lqi_bufferred) = {
-                let mut instances_in_batch = batch.query_instances.write().await;
-                if let Some(new_entry) = new_lq_instance {
-                    //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
-                    instances_in_batch.insert(lq_key.clone(), Arc::new(new_entry));
-                }
-                let instance = instances_in_batch.get(&lq_key).unwrap();
-                if lq_entry_is_new { lqi_active += 1; }
-                (instance.clone(), instances_in_batch.len())
-            };
-
-            mtx.section("4:wait for batch to execute");
-            
-            // temp; just immediately execute the (single item) batch ourselves
-            // break point
-            //self.channel_for_batch_messages__sender_base.send(LQBatchMessage::Execute);
-            //self.execute_current_batch();
-            batch.execute(ctx, Some(&mtx)).await.expect_lazy(|_| format!("Got error executing live-query batch. @filter_shape:{}", self.filter_shape));
-
-            mtx.section("5:commit the lq-instances in current batch");
-            {
-                let instances_in_batch = batch.query_instances.read().await;
-                let mut query_instances = self.query_instances.write().await;
-                for (key, value) in instances_in_batch.iter() {
-                    query_instances.insert(key.to_owned(), value.clone());
-                }
-            }
-
-            // store batch as the "last committed batch"
-            let mut last_committed_batch_ref = self.last_committed_batch.write().await;
-            *last_committed_batch_ref = Some(batch);
-
-            (instance, lqi_bufferred)
-        };
-
-        let last_entries = instance.last_entries.read().await;
-
-        mtx.section("5:convert + return");
-        let result_entries = last_entries.clone();
+        mtx.section("3:convert result-set to rust types");
         let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 
+        mtx.section("4:get or create watcher, for the given stream");
         //let watcher = entry.get_or_create_watcher(stream_id);
         let old_watcher_count = instance.entry_watchers.read().await.len();
         let (watcher, watcher_is_new) = instance.get_or_create_watcher(stream_id).await;
         let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
-        let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{} @lqi_buffered:{}", new_watcher_count, table_name, filter, lqi_active, lqi_bufferred);
+        let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
         println!("LQ-watcher started. {}", watcher_info_str);
         // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
         if new_watcher_count > 4 {
@@ -216,6 +152,73 @@ impl LQGroup {
         }
         
         (result_entries_as_type, watcher.clone())
+    }
+    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
+        new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
+        let lq_key = get_lq_instance_key(table_name, filter);
+        let creating_new_lqi = {
+            let lq_instances = self.query_instances.read().await;
+            let create_new_instance = !lq_instances.contains_key(&lq_key);
+            create_new_instance
+        };
+
+        mtx.section("2:create a new lqi (if needed)");
+        if creating_new_lqi {
+            self.create_new_lq_instance(table_name, filter, &lq_key, Some(&mtx)).await;
+        }
+
+        mtx.section("3:return the current lqi for this key");
+        let query_instances = self.query_instances.read().await;
+        let instance = query_instances.get(&lq_key).unwrap();
+        (instance.clone(), query_instances.len())
+    }
+    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, parent_mtx: Option<&Mtx>) {
+        new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
+        let this_call_should_commit_batch = {
+            let batch = self.current_batch.read().await;
+            let old_lqi_count_in_batch = {
+                let mut instances_in_batch = batch.query_instances.write().await;
+                let old_lqi_count_in_batch = instances_in_batch.len();
+
+                let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
+                //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
+                instances_in_batch.insert(lq_key.to_owned(), Arc::new(new_lqi));
+
+                old_lqi_count_in_batch
+            };
+
+            mtx.section("2:wait for batch to execute");
+            batch.wait_for_execution().await;
+
+            let this_call_should_commit_batch = old_lqi_count_in_batch == 0;
+            if this_call_should_commit_batch {
+                mtx.section("3:commit the lqi's in batch to overall group");
+                {
+                    let instances_in_batch = batch.query_instances.read().await;
+                    let mut query_instances = self.query_instances.write().await;
+                    for (key, value) in instances_in_batch.iter() {
+                        query_instances.insert(key.to_owned(), value.clone());
+                    }
+                }
+            }
+            this_call_should_commit_batch
+        };
+
+        if this_call_should_commit_batch {
+            mtx.section("4:update the last/current batch references");
+            // create a new batch as the next "current batch"
+            let batch_committing_now = {
+                let new_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
+                let mut current_batch_ref = self.current_batch.write().await;
+                let batch_committing_now = std::mem::replace(&mut *current_batch_ref, new_batch);
+                batch_committing_now
+            };
+            // store batch as the "last committed batch"
+            {
+                let mut last_committed_batch_ref = self.last_committed_batch.write().await;
+                *last_committed_batch_ref = Some(batch_committing_now);
+            }
+        }
     }
 
     /*pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {
