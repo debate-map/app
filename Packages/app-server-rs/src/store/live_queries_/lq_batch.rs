@@ -30,7 +30,7 @@ pub struct LQBatch {
     pub table_name: String,
     pub filter_shape: QueryFilter,
     
-    pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
+    pub query_instances: IndexMap<String, Arc<LQInstance>>,
     //pub execution_time: Option<f64>,
     //execution_time: AtomicF64, // a value of -1 means "not yet set", ie. execution hasn't happened yet
 }
@@ -39,7 +39,8 @@ impl LQBatch {
         Self {
             table_name,
             filter_shape,
-            query_instances: RwLock::default(),
+            query_instances: IndexMap::default(),
+            //query_instances: RwLock::default(),
             //execution_time: AtomicF64::new(-1f64),
         }
     }
@@ -61,7 +62,7 @@ impl LQBatch {
         ).collect_vec()
     }
 
-    pub async fn execute(&self, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>)
+    pub async fn execute(&mut self, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>)
         //-> Result<Vec<RowData>, Error>
         -> Result<(), Error>
     {
@@ -71,8 +72,9 @@ impl LQBatch {
         let client = pool.get().await.unwrap();
         //mtx.current_section_extra_info = Some(format!("@table_name:{} @filters_sql:{}", instance.table_name, filters_sql));
 
-        let query_instances = self.query_instances.read().await;
-        let query_instance_vals: Vec<&Arc<LQInstance>> = query_instances.values().collect();
+        //let query_instances = self.query_instances.read().await;
+        //let query_instances = &mut self.query_instances;
+        let query_instance_vals: Vec<&Arc<LQInstance>> = self.query_instances.values().collect();
         let lq_last_index = query_instance_vals.len() - 1;
 
         mtx.section("2:prepare the combined query");

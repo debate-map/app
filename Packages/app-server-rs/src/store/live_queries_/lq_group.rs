@@ -182,9 +182,12 @@ impl LQGroup {
     }
     async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: &async_graphql::Context<'_>, parent_mtx: Option<&Mtx>) {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
-        let batch = self.current_batch.read().await;
         let old_lqi_count_in_batch = {
-            let mut instances_in_batch = batch.query_instances.write().await;
+            //let batch = self.current_batch.read().await;
+            let mut batch = self.current_batch.write().await;
+            //let batch = self.current_batch.get_mut();
+            //let mut instances_in_batch = batch.query_instances.write().await;
+            let instances_in_batch = &mut batch.query_instances;
             let old_lqi_count_in_batch = instances_in_batch.len();
 
             let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
@@ -222,15 +225,24 @@ impl LQGroup {
         let time_till_batch_end = batch_end_time - time_since_epoch_ms();
         tokio::time::sleep(Duration::from_secs_f64(time_till_batch_end / 1000f64)).await;
 
-        mtx.section("2:reacquire the current-batch");
-        let batch = self.current_batch.read().await;
+        // now that we're done waiting, get write-locks right away (else other calls of this function may add lqi's to the current-batch, which may get "missed" if this function progresses too far)
+        mtx.section("2:acquire locks");
+        new_mtx!(locks_mtx, "1:get current-batch write-lock", Some(&mtx));
+        //let batch = self.current_batch.read().await;
+        let mut batch = self.current_batch.write().await;
+        //locks_mtx.section("2:get current-batch query_instances write-lock");
+        //let instances_in_batch = batch.query_instances.write().await;
+        locks_mtx.section("2:get last-committed-batch write-lock");
+        let mut last_committed_batch_ref = self.last_committed_batch.write().await;
+        drop(locks_mtx);
 
         mtx.section("3:execute the batch");
         batch.execute(ctx, Some(&mtx)).await.expect("Executing the lq-batch failed!");
 
         mtx.section("4:commit the lqi's in batch to overall group");
         {
-            let instances_in_batch = batch.query_instances.read().await;
+            //let instances_in_batch = batch.query_instances.read().await;
+            let instances_in_batch = &mut batch.query_instances;
             let mut query_instances = self.query_instances.write().await;
             mtx.current_section.extra_info = Some(format!("@lqi_count:{}", query_instances.len()));
             for (key, value) in instances_in_batch.iter() {
@@ -238,18 +250,18 @@ impl LQGroup {
             }
         }
 
-        mtx.section("5:update the last/current batch references");
-        // create a new batch as the next "current batch"
+        mtx.section("5:update the current-batch reference");
         let batch_committing_now = {
+            // create a new batch as the next "current batch"
             let new_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
-            let mut current_batch_ref = self.current_batch.write().await;
-            let batch_committing_now = std::mem::replace(&mut *current_batch_ref, new_batch);
+            //let mut current_batch_ref = self.current_batch.write().await;
+            let batch_committing_now = std::mem::replace(&mut *batch, new_batch);
             self.current_batch_set_time.store(time_since_epoch_ms(), Ordering::Relaxed);
             batch_committing_now
         };
-        // store batch as the "last committed batch"
+        mtx.section("6:update the last-committed-batch reference");
         {
-            let mut last_committed_batch_ref = self.last_committed_batch.write().await;
+            //let mut last_committed_batch_ref = self.last_committed_batch.write().await;
             *last_committed_batch_ref = Some(batch_committing_now);
         }
         self.channel_for_batch_messages__sender_base.send(LQBatchMessage::NotifyExecutionDone).unwrap();

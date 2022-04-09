@@ -101,6 +101,8 @@ pub async fn handle_generic_gql_doc_request<'a,
         (entry_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
     };
 
+    // break point; fix that async-graphql just drops/cancels futures mid-execution (likely due to client unsubscribing), causing major issues!
+
     mtx.section("3");
     //let filter_clone = filter.clone();
     let base_stream = async_stream::stream! {
