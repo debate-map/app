@@ -4,6 +4,7 @@ use itertools::Itertools;
 use regex::{Regex, Captures};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
+use lazy_static::lazy_static;
 use crate::{utils::type_aliases::JSONValue};
 
 use super::sql_param::SQLParam;
@@ -70,12 +71,14 @@ impl SQLFragment {
 
     pub fn into_query_args(&mut self) -> Result<(String, Vec<SQLParam>), Error> {
         let sql_base = std::mem::replace(&mut self.sql_text, "".to_owned());
-        let re = Regex::new(r"\$[IV]").unwrap();
+        lazy_static! {
+            static ref REGEX_PLACEHOLDER: Regex = Regex::new(r"\$[IV]").unwrap();
+        }
 
         let mut next_match_index = 0;
         let mut next_value_id = 1;
         let mut error = None;
-        let sql_final = re.replace_all(&sql_base, |caps: &Captures| {
+        let sql_final = REGEX_PLACEHOLDER.replace_all(&sql_base, |caps: &Captures| {
             let result = (|| {
                 //println!("Replacing sql-param placeholder at:{:?}", caps.get(0).to_owned());
                 let caps_g0 = caps.get(0).ok_or(anyhow!("Capture was missing/invalid."))?;
@@ -87,8 +90,10 @@ impl SQLFragment {
                         ensure!(caps_g0.as_str() == "$I", "Placeholder-type ({}) doesn't match with param-type (Ident)!", caps_g0.as_str()); // defensive
 
                         // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
-                        let re = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
-                        ensure!(re.is_match(&ident.name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{}", &ident.name);
+                        lazy_static! {
+                            static ref REGEX_SAFE_IDENT: Regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
+                        }
+                        ensure!(REGEX_SAFE_IDENT.is_match(&ident.name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{}", &ident.name);
 
                         //format!("${}", match_id)
                         // temp; interpolate the identifier directly into the query-str (don't know how to avoid it atm)

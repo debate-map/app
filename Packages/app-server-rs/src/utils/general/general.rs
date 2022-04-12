@@ -37,10 +37,12 @@ pub fn to_anyhow<T: std::error::Error>(err: T) -> Error
     anyhow!(err)
 }
 
-/// Alternative to `my_hash_map.entry(key).or_insert_with(...)`, for when the hashmap is wrapped in a RwLock, and you want a "write" lock to only be obtained if a "read" lock is insufficient.
-/// Returns `true` if the entry didn't exist and had to be created -- `false` otherwise.
-/// See: https://stackoverflow.com/a/57057033
-pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: Clone>(map: &RwLock<HashMap<K, V>>, key: K, insert_func: impl FnOnce() -> V, mtx_p: Option<&Mtx>) -> (V, bool)
+/// Alternative to `my_hash_map.entry(key).or_insert_with(...)`, for when the hashmap is wrapped in a RwLock, and you want a "write" lock to only be obtained if a "read" lock is insufficient. (see: https://stackoverflow.com/a/57057033)
+/// Returns tuple of:
+/// 0) The value that was found/created.
+/// 1) The new number of entries in the map.
+/// 2) `true` if the entry didn't exist and had to be created -- `false` otherwise.
+pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: Clone>(map: &RwLock<HashMap<K, V>>, key: K, insert_func: impl FnOnce() -> V, mtx_p: Option<&Mtx>) -> (V, bool, usize)
     where K: Sized, K: Hash + Eq
 {
     new_mtx!(mtx, "1", mtx_p);
@@ -50,7 +52,8 @@ pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: 
         //println!("1.1, key:{:?}", key);
         if let Some(val) = map_read.get(&key) {
             let val_clone = val.clone();
-            return (val_clone, false);
+            let count = map_read.len();
+            return (val_clone, false, count);
         }
     }
     
@@ -60,7 +63,8 @@ pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: 
     //println!("2.1, key:{:?}", key);
     // use entry().or_insert_with() in case another thread inserted the same key while we were unlocked above
     let val_clone = map_write.entry(key).or_insert_with(insert_func).clone();
-    (val_clone, true)
+    let count = map_write.len();
+    (val_clone, true, count)
 }
 
 pub fn flurry_hashmap_into_hashmap<K: Hash + Eq + Clone, V: Clone>(map: &flurry::HashMap<K, V>, guard: Guard<'_>) -> HashMap<K, V> {

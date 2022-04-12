@@ -91,7 +91,7 @@ impl LQInstance {
         }
     }
 
-    pub async fn get_or_create_watcher(&self, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (LQEntryWatcher, bool) {
+    pub async fn get_or_create_watcher(&self, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (LQEntryWatcher, bool, usize) {
         /*let entry_watchers = self.entry_watchers.write().await;
         let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);

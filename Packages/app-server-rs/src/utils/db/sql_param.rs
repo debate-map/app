@@ -5,6 +5,7 @@ use regex::{Regex, Captures};
 use rust_shared::BasicError;
 use serde_json::Map;
 use tokio_postgres::types::{ToSql, WrongType};
+use lazy_static::lazy_static;
 use crate::{utils::type_aliases::JSONValue};
 
 use super::sql_fragment::SQLFragment;
@@ -16,8 +17,10 @@ pub struct SQLIdent {
 impl SQLIdent {
     pub fn new(name: String) -> Result<SQLIdent, Error> {
         // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
-        let re = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
-        ensure!(re.is_match(&name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{name}");
+        lazy_static! {
+            static ref REGEX_SAFE_IDENT: Regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
+        }
+        ensure!(REGEX_SAFE_IDENT.is_match(&name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{name}");
         Ok(Self {
             name
         })

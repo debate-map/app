@@ -188,9 +188,7 @@ impl LQGroup {
 
         mtx.section("4:get or create watcher, for the given stream");
         //let watcher = entry.get_or_create_watcher(stream_id);
-        let old_watcher_count = instance.entry_watchers.read().await.len();
-        let (watcher, watcher_is_new) = instance.get_or_create_watcher(stream_id, mtx_p).await;
-        let new_watcher_count = old_watcher_count + if watcher_is_new { 1 } else { 0 };
+        let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
         let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
         println!("LQ-watcher started. {}", watcher_info_str);
         // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning

@@ -1,6 +1,7 @@
 use anyhow::{Error, ensure};
 use itertools::Itertools;
 use regex::Regex;
+use lazy_static::lazy_static;
 
 #[derive(Clone)]
 enum StackTraceLine {
@@ -24,11 +25,13 @@ impl StackTraceLine {
 
 pub fn simplify_stack_trace_str(source: String) -> String {
     let lines_raw = source.split("\n");
-    let regex__func_name = Regex::new(r"^ +(\d+):").unwrap();
-    let regex__code_path = Regex::new(r"^ +at ").unwrap();
-    let regex__code_path_for_own_code = Regex::new(r"^ +at \./").unwrap();
-    let regex__github_path = Regex::new("/usr/local/cargo/registry/src/github.com-([0-9a-f]+)/").unwrap();
-    let regex__rustc_path = Regex::new("/rustc/([0-9a-f]+)/").unwrap();
+    lazy_static! {
+        static ref regex__func_name: Regex = Regex::new(r"^ +(\d+):").unwrap();
+        static ref regex__code_path: Regex = Regex::new(r"^ +at ").unwrap();
+        static ref regex__code_path_for_own_code: Regex = Regex::new(r"^ +at \./").unwrap();
+        static ref regex__github_path: Regex = Regex::new("/usr/local/cargo/registry/src/github.com-([0-9a-f]+)/").unwrap();
+        static ref regex__rustc_path: Regex = Regex::new("/rustc/([0-9a-f]+)/").unwrap();
+    }
 
     let lines = lines_raw.map(|line| {
         if regex__func_name.is_match(line) {

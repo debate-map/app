@@ -68,6 +68,7 @@ dependencies = [
  "hyper",
  "indexmap",
  "itertools",
+ "lazy_static",
  "log",
  "metrics",
  "regex",
