@@ -7,7 +7,7 @@ AddSchema("UserID", {pattern: "^[a-zA-Z0-9]+$"});
 @MGLClass({table: "users"})
 export class User {
 	constructor(data?: Partial<User>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@DB((t, n)=>t.text(n).primary())

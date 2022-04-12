@@ -19,7 +19,7 @@ export class CommandRunMetadata {
 	static entries = new Map<typeof Command, CommandRunMetadata>();
 
 	constructor(data: CommandRunMetadata_ConstructorData) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	record: boolean;

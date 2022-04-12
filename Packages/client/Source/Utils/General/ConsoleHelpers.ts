@@ -18,7 +18,6 @@ export function StoreTempData(data: Object) {
 	g.tempData.push(E({_time: Date.now()}, data));
 }
 
-
 // temp (for in-console db-upgrades and such)
 // ==========
 
@@ -53,9 +52,9 @@ export function StoreTempData(data: Object) {
 	const dbUpdates_revs = MergeDBUpdates_Multi(...revsWithImg.map(rev=> {
 		const img = images.find(a=>a.id == rev["image"].id);
 		return {
-			[`nodeRevisions/${rev.id}`]: E(rev, {
+			[`nodeRevisions/${rev.id}`]: EV(rev, {
 				image: DEL,
-				media: E(rev["image"], {previewWidth: img ? OmitIfNull(img.previewWidth) : OMIT, sourceChains: img ? img.sourceChains : OMIT, captured: img && img.type == 20 ? true : OMIT}),
+				media: EV(rev["image"], {previewWidth: img ? OmitIfNull(img.previewWidth) : OMIT, sourceChains: img ? img.sourceChains : OMIT, captured: img && img.type == 20 ? true : OMIT}),
 			}),
 		};
 	}));
@@ -63,7 +62,7 @@ export function StoreTempData(data: Object) {
 	const dbUpdates_images = MergeDBUpdates_Multi(...images.map(img=> {
 		return {
 			[`images/${img.id}`]: null,
-			[`medias/${img.id}`]: E(img, {
+			[`medias/${img.id}`]: EV(img, {
 				previewWidth: DEL,
 				sourceChains: DEL,
 				type: 10,

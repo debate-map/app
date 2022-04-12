@@ -4,7 +4,7 @@ import {DraggableProvided, DraggableStateSnapshot} from "web-vcore/nm/react-beau
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 	type: "NodeChildHolder" | "TimelineStepList" | "TimelineStepNodeRevealList";
 

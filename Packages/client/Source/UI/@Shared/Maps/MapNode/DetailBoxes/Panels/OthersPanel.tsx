@@ -50,7 +50,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 
 		/*const changeControlType_currentType = node.ownerMapID != null ? "Private" : "Public";
 		// const changeControlType_newType = changeControlType_currentType == 'Private' ? 'Public' : 'Private';
-		const changeControlTypeCommand = new ChangeNodeOwnerMap(E({nodeID: node.id, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?.id)}));
+		const changeControlTypeCommand = new ChangeNodeOwnerMap(EV({nodeID: node.id, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?.id)}));
 		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node.id, newOrderType: node.childrenOrderType == ChildOrderType.manual ? ChildOrderType.byRating : ChildOrderType.manual}));*/
 
 		const parentLinks = GetNodeChildLinks(null, node.id);

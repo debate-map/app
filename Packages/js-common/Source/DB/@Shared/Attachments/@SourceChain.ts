@@ -34,7 +34,7 @@ AddSchema("SourceType", {enum: GetValues(SourceType)});
 export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";
 export class Source {
 	constructor(data?: Partial<Source>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	type = SourceType.webpage;

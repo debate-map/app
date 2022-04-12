@@ -2,7 +2,7 @@ import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 
 export class EquationAttachment {
 	constructor(data?: Partial<EquationAttachment>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	latex?: boolean;

@@ -10,7 +10,7 @@ import {Mtx, MtxSection} from "../Requests.js";
 
 class LifetimeGroup {
 	constructor(data?: Partial<LifetimeGroup>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 	path: string;
 	sections: MtxSection[] = [];

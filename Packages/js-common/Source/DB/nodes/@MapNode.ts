@@ -98,7 +98,7 @@ AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 @MGLClass()
 export class MapNode_Extras {
 	constructor(data?: Partial<MapNode_Extras>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({
@@ -110,7 +110,7 @@ export class MapNode_Extras {
 @MGLClass()
 export class RatingSummary {
 	constructor(data?: Partial<RatingSummary>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	//declare _key: string; // rating-type

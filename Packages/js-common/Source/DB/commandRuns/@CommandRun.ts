@@ -50,7 +50,7 @@ export class CommandRun {
 @MGLClass()
 export class RLSTargetSet {
 	constructor(data?: Partial<RLSTargetSet>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({

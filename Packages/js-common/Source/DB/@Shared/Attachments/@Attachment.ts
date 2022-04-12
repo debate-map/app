@@ -53,7 +53,7 @@ export function ResetAttachment(attachment: Attachment, attachmentType: Attachme
 @MGLClass()
 export class Attachment {
 	constructor(data?: Partial<Attachment>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({$ref: EquationAttachment.name}, {opt: true})

@@ -4,7 +4,7 @@ import {AddSchema, MGLClass, DB, Field, UUID_regex, DeriveJSONSchema, GetSchemaJ
 @MGLClass()
 export class PermitCriteria {
 	constructor(data?: Partial<PermitCriteria>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({type: "number"})
@@ -17,7 +17,7 @@ export class PermitCriteria {
 @MGLClass()
 export class PermissionSetForType {
 	constructor(data?: Partial<PermissionSetForType>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({type: "boolean"})
@@ -46,7 +46,7 @@ export class PermissionSetForType {
 @MGLClass()
 export class PermissionSet {
 	constructor(data?: Partial<PermissionSet>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({$ref: "PermissionSetForType"})
@@ -70,7 +70,7 @@ export class PermissionSet {
 @MGLClass({table: "accessPolicies"})
 export class AccessPolicy {
 	constructor(data: {name: string} & Partial<AccessPolicy>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@DB((t, n)=>t.text(n).primary())

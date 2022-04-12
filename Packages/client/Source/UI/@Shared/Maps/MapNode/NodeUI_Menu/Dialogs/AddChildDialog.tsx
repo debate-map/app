@@ -37,7 +37,7 @@ export class AddChildHelper {
 			accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 			//parents: {[this.Node_ParentID]: {_: true}},
 			type: childType,
-			//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
+			//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 		});
 		this.node_revision = new MapNodeRevision();
 		this.node_link = E(
@@ -52,7 +52,7 @@ export class AddChildHelper {
 		if (childType == MapNodeType.argument) {
 			this.node.argumentType = ArgumentType.all;
 			this.subNode = new MapNode({
-				//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
+				//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 				type: MapNodeType.claim, creator: userID,

@@ -7,7 +7,7 @@ export class MediaAttachment {
 		this.sourceChains = [
 			{sources: [new Source()]},
 		];
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	id: string;

@@ -12,7 +12,7 @@ AddSchema("ChangeType", {enum: GetValues(ChangeType)});
 @MGLClass({table: "mapNodeEdits"})
 export class Map_NodeEdit {
 	constructor(data?: Partial<Map_NodeEdit>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@DB((t, n)=>t.text(n).primary())

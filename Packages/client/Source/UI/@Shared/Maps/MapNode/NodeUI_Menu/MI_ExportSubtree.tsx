@@ -200,7 +200,7 @@ export class GetSubtree_SearchConfig {
 }
 export class GetSubtree_SearchInfo {
 	constructor(data: Partial<GetSubtree_SearchInfo>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	// temp

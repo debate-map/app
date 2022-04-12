@@ -26,7 +26,7 @@ export class GlobalData {
 @MGLClass()
 export class GlobalData_Extras {
 	constructor(data?: Partial<GlobalData_Extras>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({type: "boolean"}, {opt: true})

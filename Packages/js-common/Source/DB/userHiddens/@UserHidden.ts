@@ -8,7 +8,7 @@ type ProviderData = any;
 @MGLClass({table: "userHiddens"})
 export class UserHidden {
 	constructor(data?: Partial<UserHidden>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@DB((t, n)=>t.text(n).primary())
@@ -68,7 +68,7 @@ export class UserHidden {
 @MGLClass()
 export class UserHidden_Extras {
 	constructor(data?: Partial<UserHidden_Extras>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({

@@ -3,7 +3,7 @@ import {CE} from "web-vcore/nm/js-vextensions.js";
 
 export class TermAttachment {
 	constructor(data?: Partial<TermAttachment>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	id: string;

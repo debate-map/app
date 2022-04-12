@@ -6,7 +6,7 @@ export class ReferencesAttachment {
 		this.sourceChains = [
 			{sources: [new Source()]},
 		];
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	sourceChains: SourceChain[];

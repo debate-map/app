@@ -119,7 +119,7 @@ export class Map {
 @MGLClass()
 export class Map_Extras {
 	constructor(data?: Partial<Map_Extras>) {
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 
 	@Field({type: "boolean"}, {opt: true})

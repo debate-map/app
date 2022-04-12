@@ -17,7 +17,7 @@ export class ImportResource {
 export class IR_NodeAndRevision extends ImportResource {
 	constructor(data?: Partial<IR_NodeAndRevision>) {
 		super();
-		this.VSet(data);
+		Object.assign(this, data);
 	}
 	link: NodeChildLink;
 	node: MapNode;
