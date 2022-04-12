@@ -1,15 +1,16 @@
 import React, {useState} from "react";
 import {store} from "Store/index.js";
+import {MtxGroup} from "Store/main/database.js";
 import {GetHashForString_cyrb53, RNG_Mulberry32} from "ui-debug-kit";
 import {MainSkin} from "Utils/Styles/MainSkin.js";
 import {Chroma, chroma_maxDarken, ES, Observer} from "web-vcore";
 import {GetPercentFromXToY} from "web-vcore/.yalc/js-vextensions";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {Mtx, MtxMatchesGroup1, MtxSection} from "../Requests.js";
+import {Mtx, MtxSection} from "../Requests.js";
 
-class LifetimeGroup {
-	constructor(data?: Partial<LifetimeGroup>) {
+class SectionLayer {
+	constructor(data?: Partial<SectionLayer>) {
 		Object.assign(this, data);
 	}
 	path: string;
@@ -22,32 +23,32 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 		const {mtx} = this.props;
 		const uiState = store.main.database.requests;
 		const sections = mtx.sectionLifetimes;
+		const highlightGroup = uiState.groups.filter(group=>group.enabled && group.highlight && MtxGroup.Matches(group, mtx)).LastOrX(); // have later matching groups take priority
 
-		const lifetimeGroups = new Map<string, LifetimeGroup>();
+		const sectionLayers = new Map<string, SectionLayer>();
 		for (const lifetime of sections) {
 			const groupPath = `${lifetime.path.slice(0, lifetime.path.lastIndexOf("/"))}/*`;
-			if (!lifetimeGroups.has(groupPath)) {
-				lifetimeGroups.set(groupPath, new LifetimeGroup({path: groupPath}));
+			if (!sectionLayers.has(groupPath)) {
+				sectionLayers.set(groupPath, new SectionLayer({path: groupPath}));
 			}
-			lifetimeGroups.get(groupPath)!.sections.push(lifetime);
+			sectionLayers.get(groupPath)!.sections.push(lifetime);
 		}
 
 		const [expanded, setExpanded] = useState(false);
-
 		return (
 			<Column
 				style={{
 					position: "relative",
 					//height: 1 + (lifetimeGroups.size * 3) + (expanded ? lifetimeGroups.size * 20 : 0),
-					height: 1 + (lifetimeGroups.size * 3) + (expanded ? sections.length * 18 : 0),
+					height: 1 + (sectionLayers.size * 3) + (expanded ? sections.length * 18 : 0),
 				}}
 			>
 				<Column style={ES(
 					{border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0", cursor: "pointer"},
-					uiState.group1_highlight && MtxMatchesGroup1(mtx) && {background: "rgba(0,255,0,.2)"},
+					highlightGroup != null && {background: highlightGroup.highlightColor},
 				)} onClick={()=>setExpanded(!expanded)}>
-					{[...lifetimeGroups.values()].map((group, index)=>{
-						return <SectionGroupUI key={index} group={group} index={index}/>;
+					{[...sectionLayers.values()].map((group, index)=>{
+						return <SectionLayerUI key={index} group={group} index={index}/>;
 					})}
 				</Column>
 				{/*expanded &&
@@ -68,13 +69,13 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	}
 }
 
-export class SectionGroupUI extends BaseComponent<{group: LifetimeGroup, index: number}, {}> {
+export class SectionLayerUI extends BaseComponent<{group: SectionLayer, index: number}, {}> {
 	render() {
 		const {group, index} = this.props;
 		return (
 			<div style={{position: "relative", height: 3}} title={`GroupPath:${group.path}`}>
-				{group.sections.map((lifetime, lifetimeIndex)=>{
-					return <SectionUI key={lifetimeIndex} lifetime={lifetime} index={lifetimeIndex}/>;
+				{group.sections.map((section, sectionIndex)=>{
+					return <SectionUI key={sectionIndex} section={section} index={sectionIndex}/>;
 				})}
 			</div>
 		);
@@ -94,12 +95,12 @@ export class SectionGroupUI extends BaseComponent<{group: LifetimeGroup, index: 
 }*/
 
 @Observer
-export class SectionUI extends BaseComponent<{lifetime: MtxSection, index: number}, {}> {
+export class SectionUI extends BaseComponent<{section: MtxSection, index: number}, {}> {
 	render() {
-		const {lifetime, index} = this.props;
+		const {section, index} = this.props;
 		const uiState = store.main.database.requests;
-		const start_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, lifetime.startTime, true);
-		const end_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, lifetime.startTime + lifetime.Duration_Safe, true);
+		const start_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, section.startTime, true);
+		const end_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, section.startTime + section.Duration_Safe, true);
 
 		return (
 			<div
@@ -110,13 +111,13 @@ export class SectionUI extends BaseComponent<{lifetime: MtxSection, index: numbe
 					//width: (end_asPercentage - start_asPercentage).KeepAtLeast(.01).ToPercentStr(),
 					minWidth: 1,
 					top: 0, height: 3,
-					backgroundColor: GetColorForPath(lifetime.path).css(),
+					backgroundColor: GetColorForPath(section.path).css(),
 				}}
 				title={`
-					Path:${lifetime.path}
-					StartTime:${new Date(lifetime.startTime).toLocaleString("sv")}.${new Date(lifetime.startTime).getMilliseconds().toString().padStart(3, "0")}
-					Duration:${lifetime.duration}ms
-					${lifetime.extraInfo != null ? `MtxExtraInfo:${lifetime.extraInfo}` : ""}
+					Path:${section.path}
+					StartTime:${new Date(section.startTime).toLocaleString("sv")}.${new Date(section.startTime).getMilliseconds().toString().padStart(3, "0")}
+					Duration:${section.duration}ms
+					${section.extraInfo != null ? `MtxExtraInfo:${section.extraInfo}` : ""}
 				`.AsMultiline(0).trim()}/>
 		);
 	}

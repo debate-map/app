@@ -18,7 +18,8 @@ export class MainSkin extends Skin {
 	BasePanelDropShadowFilter = ()=>"drop-shadow(rgba(200,200,200,.7) 0px 0px 10px)";
 	OverlayPanelBackgroundColor = ()=>Chroma("rgba(255,255,255,.7)");
 	//NavBarPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.7)");
-	NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(.9);
+	//NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(.9);
+	NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(1);
 	OverlayBorderColor = ()=>Chroma("rgba(0,0,0,.3)");
 	OverlayBorder = ()=>`1px solid ${this.OverlayBorderColor().css()}`;
 	HeaderFont = ()=>this.MainFont();
