@@ -160,7 +160,7 @@ impl Mtx {
         };
         new_self.start_new_section(&first_section_name.into(), extra_info, time_since_epoch_ms());
 
-        if new_self.is_root_mtx() {
+        if new_self.is_root_mtx() && !cfg!(test) {
             // start a timer that, once per second (while the mtx-instance is active/in-scope), sends its data to the backend
             let (id_clone, section_lifetimes_clone, msg_receiver_clone) = (new_self.id.clone(), new_self.section_lifetimes.clone(), new_self.msg_receiver.clone());
             tokio::spawn(async move {
@@ -270,11 +270,12 @@ impl Drop for Mtx {
     fn drop(&mut self) {
         //println!("Drop called. @current_section:{:?} @lifetimes:{:?}", self.current_section.get_key(), /*self.section_lifetimes*/ "[snip]");
         self.section(MTX_FINAL_SECTION_NAME); // called simply to mark end of prior section
-        if self.is_root_mtx() {
+        if self.is_root_mtx() && !cfg!(test) {
             MtxMessage::apply_messages_to_mtx_data(&self.section_lifetimes, self.msg_receiver.drain());
 
             //self.send_to_monitor_backend();
             let (id_clone, section_lifetimes_clone) = (self.id.clone(), self.section_lifetimes.clone());
+
             tokio::spawn(async move {
                 send_mtx_data_to_monitor_backend(id_clone, section_lifetimes_clone, None).await
                     .expect("Got error while sending mtx-tree to monitor-backend...");
