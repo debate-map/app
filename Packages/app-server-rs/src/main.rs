@@ -140,6 +140,7 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
+//#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
     //panic::always_abort();

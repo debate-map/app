@@ -34,7 +34,10 @@ export class Mtx {
 			result.sectionLifetimes.push(MtxSection.FromRaw(value));
 		}
 		// fsr, the entries are not sorted at this point, despite (seemingly) being sorted when serialized for sending from backend
-		if (sort) result.sectionLifetimes = result.sectionLifetimes.OrderBy(a=>a.path);
+		if (sort) {
+			// use time as top-priority sorting, since path-str sorting is unreliable for section-names
+			result.sectionLifetimes = result.sectionLifetimes.OrderBy(a=>a.path).OrderBy(a=>a.startTime);
+		}
 		return result;
 	}
 	sectionLifetimes: MtxSection[] = [];

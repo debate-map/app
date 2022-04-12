@@ -298,10 +298,10 @@ impl LQGroup {
             //let instances_in_batch = batch.query_instances.read().await;
             let instances_in_batch = &mut batch.query_instances;
             let mut query_instances = self.query_instances.write().await;
-            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch.len()));
             for (key, value) in instances_in_batch.iter() {
                 query_instances.insert(key.to_owned(), value.clone());
             }
+            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch.len()));
             meta.last_batch_committed_index = batch_i as i64;
             //meta.last_batch_buffering_started_index = batch_i as i64;
         }

@@ -13,7 +13,7 @@ use crate::utils::db::filter::{QueryFilter};
 use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
 use crate::utils::db::sql_fragment::{SF};
 use crate::utils::db::pg_stream_parsing::RowData;
-use crate::utils::db::sql_param::{SQLIdent};
+use crate::utils::db::sql_param::{SQLIdent, SQLParam};
 use crate::utils::general::extensions::IteratorV;
 use crate::utils::general::general::{match_cond_to_iter, time_since_epoch_ms, AtomicF64};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
@@ -77,68 +77,10 @@ impl LQBatch {
         //let query_instances = self.query_instances.read().await;
         //let query_instances = &mut self.query_instances;
         let query_instance_vals: Vec<&Arc<LQInstance>> = self.query_instances.values().collect();
-        let lq_last_index = query_instance_vals.len() - 1;
 
         mtx.section("2:prepare the combined query");
         let lq_param_protos = self.lq_param_prototypes();
-        let (sql_text, params) = {
-            // each entry of the root-chain is considered its own line, with `merge_lines()` adding line-breaks between them
-            let mut combined_sql = SF::merge_lines(chain!(
-                chain!(
-                    SF::lit_once("WITH lq_param_sets("),
-                    lq_param_protos.iter().enumerate().map(|(i, proto)| -> Result<SQLFragment, Error> {
-                        Ok(SF::merge(chain!(
-                            match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
-                            Some(SQLIdent::param(proto.name())?.into_ident_fragment()?),
-                        ).collect_vec()))
-                    }).try_collect2::<Vec<_>>()?,
-                    SF::lit_once(") AS (")
-                ),
-                SF::lit_once("VALUES"),
-                query_instance_vals.iter().enumerate().map(|(lq_index, lq_instance)| -> Result<SQLFragment, Error> {
-                    let lq_param_instances = lq_param_protos.iter().map(|proto| -> Result<LQParam, Error> {
-                        proto.instantiate_param_using_lq_instance_data(lq_index, lq_instance)
-                    }).try_collect2::<Vec<_>>()?;
-
-                    Ok(SF::merge(chain!(
-                        SF::lit_once("("),
-                        lq_param_instances.iter().enumerate().map(|(lq_param_i, lq_param)| -> Result<SQLFragment, Error> {
-                            Ok(SF::merge(chain!(
-                                match_cond_to_iter(lq_param_i > 0, once(SF::lit(", ")), empty()),
-                                once(lq_param.get_sql_for_value()?),
-                            ).collect_vec()))
-                        }).try_collect2::<Vec<_>>()?,
-                        SF::lit_once(")"),
-                        match_cond_to_iter(lq_index < lq_last_index, SF::lit_once(","), empty()),
-                    ).collect_vec()))
-                }).try_collect2::<Vec<_>>()?,
-                SF::lit_once(")"),
-                SF::new_once("SELECT * FROM $I", vec![SQLIdent::param(self.table_name.clone())?]),
-                SF::lit_once("JOIN lq_param_sets ON ("),
-                match_cond_to_iter(
-                    // if the only lq-param is the "lq_index" one, then use an always-true expression for the "JOIN ON" section
-                    lq_param_protos.len() <= 1,
-                    SF::lit_once("'1' = '1'"),
-                    lq_param_protos.iter()
-                        // in this section, we only care about the FilterOpValue lq-params
-                        .filter(|proto| {
-                            match proto {
-                                LQParam::FilterOpValue(..) => true,
-                                LQParam::LQIndex(..) => false,
-                            }
-                        })
-                        .enumerate()
-                        .map(|(i, proto)| -> Result<SQLFragment, Error> {
-                            Ok(SF::merge(chain!(
-                                match_cond_to_iter(i > 0, once(SF::lit("AND ")), empty()),
-                                once(proto.get_sql_for_application(&self.table_name, "lq_param_sets")?),
-                            ).collect_vec()))
-                        }).try_collect2::<Vec<_>>()?.into_iter(),
-                    ),
-                SF::lit_once(") ORDER BY lq_index;"),
-            ).collect_vec());
-            combined_sql.into_query_args()?
-        };
+        let (sql_text, params) = self.prepare_sql_query(&lq_param_protos, &query_instance_vals, Some(&mtx))?;
 
         mtx.section("3:execute the combined query");
         println!("Executing query-batch. @sql_text:{} @params:{:?}", sql_text, params);
@@ -177,5 +119,72 @@ impl LQBatch {
 
         //Ok(lq_results_converted)
         Ok(())
+    }
+
+    fn prepare_sql_query(&self, lq_param_protos: &Vec<LQParam>, query_instance_vals: &Vec<&Arc<LQInstance>>, mtx_p: Option<&Mtx>) -> Result<(String, Vec<SQLParam>), Error> {
+        new_mtx!(mtx, "1:prep", mtx_p);
+        let lq_last_index = query_instance_vals.len() - 1;
+
+        // each entry of the root-chain is considered its own line, with `merge_lines()` adding line-breaks between them
+        let mut combined_sql = SF::merge_lines(chain!(
+            {mtx.section("2"); empty()},
+            chain!(
+                SF::lit_once("WITH lq_param_sets("),
+                lq_param_protos.iter().enumerate().map(|(i, proto)| -> Result<SQLFragment, Error> {
+                    Ok(SF::merge(chain!(
+                        match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
+                        Some(SQLIdent::param(proto.name())?.into_ident_fragment()?),
+                    ).collect_vec()))
+                }).try_collect2::<Vec<_>>()?,
+                SF::lit_once(") AS (")
+            ),
+
+            {mtx.section("3"); empty()},
+            SF::lit_once("VALUES"),
+            query_instance_vals.iter().enumerate().map(|(lq_index, lq_instance)| -> Result<SQLFragment, Error> {
+                let lq_param_instances = lq_param_protos.iter().map(|proto| -> Result<LQParam, Error> {
+                    proto.instantiate_param_using_lq_instance_data(lq_index, lq_instance)
+                }).try_collect2::<Vec<_>>()?;
+
+                Ok(SF::merge(chain!(
+                    SF::lit_once("("),
+                    lq_param_instances.iter().enumerate().map(|(lq_param_i, lq_param)| -> Result<SQLFragment, Error> {
+                        Ok(SF::merge(chain!(
+                            match_cond_to_iter(lq_param_i > 0, once(SF::lit(", ")), empty()),
+                            once(lq_param.get_sql_for_value()?),
+                        ).collect_vec()))
+                    }).try_collect2::<Vec<_>>()?,
+                    SF::lit_once(")"),
+                    match_cond_to_iter(lq_index < lq_last_index, SF::lit_once(","), empty()),
+                ).collect_vec()))
+            }).try_collect2::<Vec<_>>()?,
+            SF::lit_once(")"),
+            SF::new_once("SELECT * FROM $I", vec![SQLIdent::param(self.table_name.clone())?]),
+            SF::lit_once("JOIN lq_param_sets ON ("),
+
+            {mtx.section("4"); empty()},
+            match_cond_to_iter(
+                // if the only lq-param is the "lq_index" one, then use an always-true expression for the "JOIN ON" section
+                lq_param_protos.len() <= 1,
+                SF::lit_once("'1' = '1'"),
+                lq_param_protos.iter()
+                    // in this section, we only care about the FilterOpValue lq-params
+                    .filter(|proto| {
+                        match proto {
+                            LQParam::FilterOpValue(..) => true,
+                            LQParam::LQIndex(..) => false,
+                        }
+                    })
+                    .enumerate()
+                    .map(|(i, proto)| -> Result<SQLFragment, Error> {
+                        Ok(SF::merge(chain!(
+                            match_cond_to_iter(i > 0, SF::lit_once("AND "), empty()),
+                            once(proto.get_sql_for_application(&self.table_name, "lq_param_sets")?),
+                        ).collect_vec()))
+                    }).try_collect2::<Vec<_>>()?.into_iter(),
+                ),
+            SF::lit_once(") ORDER BY lq_index;"),
+        ).collect_vec());
+        Ok(combined_sql.into_query_args()?)
     }
 }
