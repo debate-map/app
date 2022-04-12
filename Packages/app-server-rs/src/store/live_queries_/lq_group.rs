@@ -8,7 +8,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
-use std::sync::atomic::Ordering;
+use std::sync::atomic::{Ordering, AtomicU64, AtomicI64};
 use std::time::Duration;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
@@ -76,10 +76,43 @@ pub fn get_lq_group_key(table_name: &str, filter: &QueryFilter) -> String {
     }).to_string()
 }
 
+type RwLock_Std<T> = std::sync::RwLock<T>;
+
 #[derive(Debug, Clone)]
 pub enum LQBatchMessage {
-    NotifyExecutionDone,
+    NotifyExecutionDone(usize),
 }
+
+#[derive(Clone)]
+pub struct LQGroup_BatchesMeta {
+    /*pub last_batch_buffering_started_index: AtomicI64,
+    pub last_batch_execution_started_index: AtomicI64,
+    pub last_batch_execution_started_time: AtomicF64,
+    pub last_batch_executed_index: AtomicI64,
+    pub last_batch_committed_index: AtomicI64,*/
+    //pub last_batch_buffering_started_index: i64,
+    pub last_batch_execution_started_index: i64,
+    pub last_batch_execution_started_time: f64,
+    //pub last_batch_executed_index: i64,
+    pub last_batch_committed_index: i64,
+}
+impl LQGroup_BatchesMeta {
+    pub fn new() -> Self {
+        Self {
+            /*last_batch_buffering_started_index: AtomicI64::new(0),
+            last_batch_execution_started_index: AtomicI64::new(-1),
+            last_batch_execution_started_time: AtomicF64::new(time_since_epoch_ms()),
+            last_batch_executed_index: AtomicI64::new(-1),
+            last_batch_committed_index: AtomicI64::new(-1),*/
+            //last_batch_buffering_started_index: 0,
+            last_batch_execution_started_index: -1,
+            last_batch_execution_started_time: time_since_epoch_ms(),
+            //last_batch_executed_index: -1,
+            last_batch_committed_index: -1,
+        }
+    }
+}
+
 pub struct LQGroup {
     // shape
     pub table_name: String,
@@ -89,13 +122,8 @@ pub struct LQGroup {
     pub channel_for_batch_messages__sender_base: broadcast::Sender<LQBatchMessage>,
     pub channel_for_batch_messages__receiver_base: broadcast::Receiver<LQBatchMessage>,
     
-    /// The last batch whose contents were committed. (to LQGroup.query_instances)
-    pub last_committed_batch: RwLock<Option<LQBatch>>,
-    /// The batch that's buffering / getting lq-entries added to it. (until it's executed+committed, the lq-instances are not active, ie. they don't listen for db-changes)
-    pub executing_batch: RwLock<Option<LQBatch>>,
-    pub last_batch_execution_time: AtomicF64,
-    /// The batch that's buffering / getting lq-entries added to it. (until it's executed+committed, the lq-instances are not active, ie. they don't listen for db-changes)
-    pub buffering_batch: RwLock<LQBatch>,
+    pub batches: Vec<RwLock<LQBatch>>,
+    pub batches_meta: RwLock<LQGroup_BatchesMeta>,
 
     /// Map of committed live-query instances.
     pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
@@ -110,10 +138,9 @@ impl LQGroup {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),
 
-            last_committed_batch: RwLock::new(None),
-            executing_batch: RwLock::new(None),
-            last_batch_execution_time: AtomicF64::new(time_since_epoch_ms()),
-            buffering_batch: RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone())),
+            // temp; just start the vec with 100 entries, to avoid need for getting a write lock to add new entries (while testing)
+            batches: (0..100).map(|_| RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone()))).collect_vec(),
+            batches_meta: RwLock::new(LQGroup_BatchesMeta::new()),
 
             channel_for_batch_messages__sender_base: s1,
             channel_for_batch_messages__receiver_base: r1,
@@ -122,18 +149,28 @@ impl LQGroup {
             //source_sender_for_lq_watcher_drops: s1,
         };
 
-        // start this listener for batch requests
-        /*tokio::spawn(async move {
-            loop {
-                let msg = r1_clone.recv_async().await.unwrap();
-                match msg {
-                    LQBatchMessage::Execute => {
-                    },
-                };
-            }
-        });*/
-
         new_self
+    }
+
+    pub fn get_executing_batch(&self, meta: LQGroup_BatchesMeta) -> Option<(usize, &RwLock<LQBatch>)> {
+        //let last_batch_execution_started_index = meta.last_batch_execution_started_index.load(Ordering::Relaxed);
+        let last_batch_execution_started_index = meta.last_batch_execution_started_index;
+        if last_batch_execution_started_index == -1 { return None; }
+
+        //let last_batch_executed_index = self.last_batch_execution_started_index.load(Ordering::Relaxed);
+        let last_batch_executed_index = meta.last_batch_execution_started_index;
+        if last_batch_execution_started_index > last_batch_executed_index {
+            let index = last_batch_execution_started_index as usize;
+            return Some((index, self.batches.get(index)?));
+        }
+        None
+    }
+    pub fn get_buffering_batch(&self, meta: LQGroup_BatchesMeta) -> (usize, &RwLock<LQBatch>) {
+        //let index = self.batches.len() - 1;
+        //let index = meta.last_batch_buffering_started_index as usize;
+        let first_open_index = (meta.last_batch_execution_started_index + 1) as usize;
+        let result = self.batches.get(first_open_index).unwrap();
+        (first_open_index, result)
     }
 
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
@@ -184,9 +221,10 @@ impl LQGroup {
     }
     async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: PGClientObject, parent_mtx: Option<&Mtx>) {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
-        let lqis_buffered_already = {
-            //let batch = self.current_batch.read().await;
-            let mut batch = self.buffering_batch.write().await;
+        let (batch_i, lqis_buffered_already) = {
+            let meta = self.batches_meta.read().await;
+            let (batch_i, batch_lock) = self.get_buffering_batch(meta.clone());
+            let mut batch = batch_lock.write().await;
             //let batch = self.current_batch.get_mut();
             //let mut instances_in_batch = batch.query_instances.write().await;
             let instances_in_batch = &mut batch.query_instances;
@@ -196,77 +234,79 @@ impl LQGroup {
             //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
             instances_in_batch.insert(lq_key.to_owned(), Arc::new(new_lqi));
 
-            lqis_buffered_already
+            (batch_i, lqis_buffered_already)
         };
 
         let this_call_should_commit_batch = lqis_buffered_already == 0;
         mtx.section_2("2:wait for batch to execute", Some(format!("@lqis_buffered_already:{lqis_buffered_already} @will_trigger_execute:{this_call_should_commit_batch}")));
-        self.execute_current_batch_once_ready(ctx, this_call_should_commit_batch, Some(&mtx)).await;
+        self.execute_batch_x_once_ready(batch_i, ctx, this_call_should_commit_batch, Some(&mtx)).await;
     }
-    async fn execute_current_batch_once_ready(&self, ctx: PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
+    async fn execute_batch_x_once_ready(&self, batch_i: usize, ctx: PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
         // if this call is not the one to trigger execution, just wait for the execution to happen, then resume the caller-function
         if !this_call_triggers_execution {
-            new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx);
+            new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx, Some(format!("@batch_i:{batch_i}")));
             //let sender_clone = self.channel_for_batch_messages__sender_base.clone();
             let mut receiver = self.channel_for_batch_messages__sender_base.subscribe();
             loop {
                 let msg = receiver.recv().await.unwrap();
                 match msg {
-                    LQBatchMessage::NotifyExecutionDone => break,
+                    LQBatchMessage::NotifyExecutionDone(executed_batch_i) => {
+                        if executed_batch_i == batch_i {
+                            break;
+                        }
+                    },
                 }
             }
             return;
         }
 
-        new_mtx!(mtx, "1:wait for the correct time to execute", parent_mtx);
+        new_mtx!(mtx, "1:wait for the correct time to execute", parent_mtx, Some(format!("@batch_i:{batch_i}")));
         // todo: fine-tune these settings, as well as scale-up algorithm
         const LQ_BATCH_DURATION_MIN: f64 = 100f64;
         //const LQ_BATCH_DURATION_MAX: f64 = 100f64;
-        let last_batch_execution_time = self.last_batch_execution_time.load(Ordering::Relaxed);
+        let last_batch_execution_time = {
+            let meta = self.batches_meta.read().await;
+            //self.last_batch_execution_started_time.load(Ordering::Relaxed)
+            meta.last_batch_execution_started_time
+        };
         let batch_end_time = last_batch_execution_time + LQ_BATCH_DURATION_MIN;
         let time_till_batch_end = batch_end_time - time_since_epoch_ms();
         tokio::time::sleep(Duration::try_from_secs_f64(time_till_batch_end / 1000f64).unwrap_or(Duration::from_secs(0))).await;
 
-        // now that we're done waiting, get write-locks right away (else other calls of this function may add lqi's to the current-batch, which may get "missed" if this function progresses too far)
+        // now that we're done waiting, get write-locks right away
         mtx.section("2:acquire locks");
-        new_mtx!(locks_mtx, "1:get executing-batch write-lock", Some(&mtx));
-        //let batch = self.current_batch.read().await;
-        let mut batch = self.executing_batch.write().await;
-        //locks_mtx.section("2:get current-batch query_instances write-lock");
-        //let instances_in_batch = batch.query_instances.write().await;
-        locks_mtx.section("2:get last-committed-batch write-lock");
-        let mut last_committed_batch_ref = self.last_committed_batch.write().await;
+        new_mtx!(locks_mtx, "1:get batches-meta write-lock", Some(&mtx));
+        let mut meta = self.batches_meta.write().await;
+        locks_mtx.section("2:get batch write-lock");
+        let (batch_i, batch_lock) = self.get_buffering_batch(meta.clone());
+        let mut batch = batch_lock.write().await;
         drop(locks_mtx);
 
-        mtx.section("3:execute the batch");
+        mtx.section_2("3:execute the batch", Some(format!("@batch_lqi_count:{}", batch.query_instances.len())));
+        meta.last_batch_execution_started_index = batch_i as i64;
+        meta.last_batch_execution_started_time = time_since_epoch_ms();
+        drop(meta); // drop lock on meta prior to executing batch
         batch.execute(ctx, Some(&mtx)).await.expect("Executing the lq-batch failed!");
 
-        mtx.section("4:commit the lqi's in batch to overall group");
+        mtx.section("3.1:reacquire meta-lock"); //, and update last_batch_executed_index
+        // reacquire meta-lock
+        let mut meta = self.batches_meta.write().await;
+        //meta.last_batch_executed_index = batch_i as i64;
+
+        mtx.section("4:commit the lqi's in batch to overall group, and update batches-meta");
         {
             //let instances_in_batch = batch.query_instances.read().await;
             let instances_in_batch = &mut batch.query_instances;
             let mut query_instances = self.query_instances.write().await;
-            mtx.current_section.extra_info = Some(format!("@lqi_count:{}", query_instances.len()));
+            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch.len()));
             for (key, value) in instances_in_batch.iter() {
                 query_instances.insert(key.to_owned(), value.clone());
             }
+            meta.last_batch_committed_index = batch_i as i64;
+            //meta.last_batch_buffering_started_index = batch_i as i64;
         }
 
-        mtx.section("5:update the current-batch reference");
-        let batch_committing_now = {
-            // create a new batch as the next "current batch"
-            let new_batch = LQBatch::new(self.table_name.clone(), self.filter_shape.clone());
-            //let mut current_batch_ref = self.current_batch.write().await;
-            let batch_committing_now = std::mem::replace(&mut *batch, new_batch);
-            self.current_batch_set_time.store(time_since_epoch_ms(), Ordering::Relaxed);
-            batch_committing_now
-        };
-        mtx.section("6:update the last-committed-batch reference");
-        {
-            //let mut last_committed_batch_ref = self.last_committed_batch.write().await;
-            *last_committed_batch_ref = Some(batch_committing_now);
-        }
-        self.channel_for_batch_messages__sender_base.send(LQBatchMessage::NotifyExecutionDone).unwrap();
+        self.channel_for_batch_messages__sender_base.send(LQBatchMessage::NotifyExecutionDone(batch_i)).unwrap();
     }
 
     /*pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {

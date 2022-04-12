@@ -6,7 +6,7 @@ import {Chroma, chroma_maxDarken, ES, Observer} from "web-vcore";
 import {GetPercentFromXToY} from "web-vcore/.yalc/js-vextensions";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {Mtx, MtxSection} from "../Requests.js";
+import {Mtx, MtxMatchesGroup1, MtxSection} from "../Requests.js";
 
 class LifetimeGroup {
 	constructor(data?: Partial<LifetimeGroup>) {
@@ -42,7 +42,10 @@ export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 					height: 1 + (lifetimeGroups.size * 3) + (expanded ? sections.length * 18 : 0),
 				}}
 			>
-				<Column style={{border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0", cursor: "pointer"}} onClick={()=>setExpanded(!expanded)}>
+				<Column style={ES(
+					{border: "solid rgba(0,0,0,.1)", borderWidth: "1px 0 0 0", cursor: "pointer"},
+					uiState.group1_highlight && MtxMatchesGroup1(mtx) && {background: "rgba(0,255,0,.2)"},
+				)} onClick={()=>setExpanded(!expanded)}>
 					{[...lifetimeGroups.values()].map((group, index)=>{
 						return <SectionGroupUI key={index} group={group} index={index}/>;
 					})}

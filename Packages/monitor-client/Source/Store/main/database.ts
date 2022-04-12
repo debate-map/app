@@ -13,7 +13,11 @@ export class RequestsState {
 	@O showRange_end = Date.now();
 	@O significantDurationThreshold = 1;
 
-	// filters
-	@O filter_enabled = false;
-	@O filter_str = "";
+	// groups
+	@O group1_path_matchEnabled = false;
+	@O group1_path_matchStr = "";
+	@O group1_extraInfo_matchEnabled = false;
+	@O group1_extraInfo_matchStr = "";
+	@O group1_filter = false;
+	@O group1_highlight = false;
 }

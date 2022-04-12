@@ -78,6 +78,33 @@ mutation($adminKey: String!) {
 export const RequestsUI extends BaseComponent<{}, {}> {
 	render() {*/
 
+export function FieldMatchesStr(fieldValue: string, matchStr: string) {
+	if (matchStr.startsWith("/") && matchStr.endsWith("/")) {
+		return fieldValue.match(new RegExp(matchStr.slice(1, -1))) != null;
+	}
+	return fieldValue.includes(matchStr);
+}
+
+export class MtxSectionConstraint {
+	constructor(data?: Partial<MtxSectionConstraint>) { Object.assign(this, data); }
+	pathMatchStr?: string;
+	extraInfoMatchStr?: string;
+}
+export function MtxSectionMatchesConstraint(section: MtxSection, constraint: MtxSectionConstraint) {
+	if (constraint.pathMatchStr != null && !FieldMatchesStr(section.path, constraint.pathMatchStr)) return false;
+	if (constraint.extraInfoMatchStr != null && !FieldMatchesStr(section.extraInfo ?? "", constraint.extraInfoMatchStr)) return false;
+	return true;
+}
+
+export function MtxMatchesGroup1(mtx: Mtx) {
+	const uiState = store.main.database.requests;
+	const pathConstraint = new MtxSectionConstraint({pathMatchStr: uiState.group1_path_matchStr});
+	if (uiState.group1_path_matchEnabled && !mtx.sectionLifetimes.Any(section=>MtxSectionMatchesConstraint(section, pathConstraint))) return false;
+	const extraInfoConstraint = new MtxSectionConstraint({extraInfoMatchStr: uiState.group1_extraInfo_matchStr});
+	if (uiState.group1_extraInfo_matchEnabled && !mtx.sectionLifetimes.Any(section=>MtxSectionMatchesConstraint(section, extraInfoConstraint))) return false;
+	return true;
+}
+
 export const RequestsUI = observer(()=>{
 	const adminKey = store.main.adminKey;
 	const uiState = store.main.database.requests;
@@ -91,17 +118,8 @@ export const RequestsUI = observer(()=>{
 	const mtxResults_raw: Mtx_Raw[] = data?.mtxResults ?? [];
 	let mtxResults = mtxResults_raw.map(a=>Mtx.FromMtxRaw(a))
 		.filter(mtx=>{
-			if (!uiState.filter_enabled) return true;
-			return mtx.sectionLifetimes.Any(lifetime=>{
-				if (uiState.filter_str.startsWith("/") && uiState.filter_str.endsWith("/")) {
-					if (lifetime.path.match(new RegExp(uiState.filter_str.slice(1, -1))) != null) return true;
-					if (lifetime.extraInfo?.match(new RegExp(uiState.filter_str.slice(1, -1))) != null) return true;
-				} else {
-					if (lifetime.path.includes(uiState.filter_str)) return true;
-					if (lifetime.extraInfo?.includes(uiState.filter_str)) return true;
-				}
-				return false;
-			});
+			if (!uiState.group1_filter) return true;
+			return MtxMatchesGroup1(mtx);
 		});
 	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
 	mtxResults = mtxResults.OrderBy(mtx=>{
@@ -131,22 +149,44 @@ export const RequestsUI = observer(()=>{
 				<TextInput ml={5} type="datetime-local" {...{step: 1}}
 					value={DateToDateTimeInputStr(new Date(uiState.showRange_end))} onChange={val=>RunInAction_Set(()=>uiState.showRange_end = new Date(val).valueOf())}/>
 				<Button ml={5} text="Now" onClick={()=>RunInAction_Set(()=>uiState.showRange_end = Date.now())}/>
-				<CheckBox ml={5} text="Filter:" value={uiState.filter_enabled} onChange={val=>RunInAction_Set(()=>uiState.filter_enabled = val)}/>
-				<TextInput ml={5} style={{flex: 1}} value={uiState.filter_str} onChange={val=>uiState.filter_str = val}/>
-				<InfoButton ml={5} text={`
-					Filters out mtx-results lacking a lifetime whose path, or extra-info string, matches the given pattern.
-					You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
-				`.AsMultiline(0)}/>
-				<DropDown>
-					<DropDownTrigger><Button ml={5} style={{height: "100%"}} text="Others"/></DropDownTrigger>
-					<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
-						<Row>
-							<Text>Significant duration threshold:</Text>
-							<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>
-							<Text>ms</Text>
-						</Row>
-					</Column></DropDownContent>
-				</DropDown>
+				<Row ml="auto">
+					<DropDown autoHide={false}>
+						<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
+						<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}><Column>
+							<Row>Has section with...</Row>
+							<Row center>
+								<CheckBox ml={5} text="Path:" value={uiState.group1_path_matchEnabled} onChange={val=>RunInAction_Set(()=>uiState.group1_path_matchEnabled = val)}/>
+								<TextInput ml={5} style={{flex: 1}} value={uiState.group1_path_matchStr} onChange={val=>uiState.group1_path_matchStr = val}/>
+								<InfoButton ml={5} text={`
+									You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
+								`.AsMultiline(0)}/>
+							</Row>
+							<Row>Has section with...</Row>
+							<Row center>
+								<CheckBox ml={5} text="Extra-info:" value={uiState.group1_extraInfo_matchEnabled} onChange={val=>RunInAction_Set(()=>uiState.group1_extraInfo_matchEnabled = val)}/>
+								<TextInput ml={5} style={{flex: 1}} value={uiState.group1_extraInfo_matchStr} onChange={val=>uiState.group1_extraInfo_matchStr = val}/>
+								<InfoButton ml={5} text={`
+									You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
+								`.AsMultiline(0)}/>
+							</Row>
+							<Row center>
+								<Text>Effects:</Text>
+								<CheckBox ml={5} text="Filter" value={uiState.group1_filter} onChange={val=>RunInAction_Set(()=>uiState.group1_filter = val)}/>
+								<CheckBox ml={5} text="Highlight" value={uiState.group1_highlight} onChange={val=>RunInAction_Set(()=>uiState.group1_highlight = val)}/>
+							</Row>
+						</Column></DropDownContent>
+					</DropDown>
+					<DropDown style={{marginLeft: 5}}>
+						<DropDownTrigger><Button style={{height: "100%"}} text="Others"/></DropDownTrigger>
+						<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
+							<Row center>
+								<Text>Significant duration threshold:</Text>
+								<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>
+								<Text>ms</Text>
+							</Row>
+						</Column></DropDownContent>
+					</DropDown>
+				</Row>
 			</Row>
 			<Row>Mtx results ({mtxResults.length})</Row>
 			<ScrollView>
