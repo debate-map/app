@@ -310,7 +310,7 @@ export class NodeUI extends BaseComponentPlus(
 						{/* these are for components shown just to the right of the NodeUI_Inner box */}
 						{nodeChildrenToShow == emptyArray_forLoading &&
 							<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-						{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
+						{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) &&
 							<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 						{!boxExpanded &&
 							<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
