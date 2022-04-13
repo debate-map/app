@@ -123,6 +123,7 @@ export class RootStyles extends BaseComponent<{}, {}> {
 		const skin = MainSkin.main;
 		skin.CSSHooks_Freeform();
 	}
+	loadingUI = ()=>null;
 	render() {
 		const skin = MainSkin.main;
 		return (

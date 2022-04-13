@@ -14,6 +14,7 @@ export class RootStyles extends BaseComponent<{}, {}> {
 		const skin = liveSkin;
 		skin.CSSHooks_Freeform();
 	}
+	loadingUI = ()=>null;
 	render() {
 		const background = GetUserBackground(MeID());
 		const firstExtantBackgroundURL_1920Plus = background.url_1920 || background.url_3840 || background.url_max;
