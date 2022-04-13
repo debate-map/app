@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
+import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {ArgumentType, MapNodeRevision} from "./@MapNodeRevision.js";
@@ -81,7 +81,7 @@ export class MapNode {
 	extras = new MapNode_Extras();
 }
 AddSchema("MapNode_Partial", ["MapNode"], ()=>{
-	const schema = GetSchemaJSON("MapNode");
+	const schema = GetSchemaJSON_Cloned("MapNode");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = ["type"];
 	return schema;

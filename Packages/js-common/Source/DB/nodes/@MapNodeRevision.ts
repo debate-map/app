@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "web-vcore/nm/mobx-graphlink.js";
 import {Map} from "../maps/@Map.js";
 import {AccessLevel, MapNodeL3} from "./@MapNode.js";
 import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
@@ -195,7 +195,7 @@ export class MapNodeRevision {
 	attachments: Attachment[] = [];
 }
 AddSchema("MapNodeRevision_Partial", ["MapNodeRevision"], ()=>{
-	const schema = GetSchemaJSON("MapNodeRevision");
+	const schema = GetSchemaJSON_Cloned("MapNodeRevision");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = [];
 	return schema;
