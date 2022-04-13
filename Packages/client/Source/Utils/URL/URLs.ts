@@ -47,9 +47,11 @@ export const pageTree = new Page({}, {
 	s: new Page({simpleSubpages: false}),
 });
 export const rootPages = Object.keys(pageTree.children);
-export const rootPageDefaultChilds = pageTree.children.Pairs().filter(a=>a.value.children?.Pairs().length).ToMapObj(pair=>pair.key, pair=>{
-	return pair.value.children.Pairs()[0].key;
-});
+export const rootPageDefaultChilds = Object.entries(pageTree.children)
+	.filter(pair=>Object.entries(pair[1].children ?? {}).length > 0)
+	.ToMapObj(pair=>pair[0], pair=>{
+		return Object.keys(pair[1].children)[0];
+	});
 
 export function PushHistoryEntry() {
 	// history.pushState({}, document.title, GetNewURL());

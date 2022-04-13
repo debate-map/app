@@ -87,7 +87,7 @@ export const presetBackgrounds = {
 } as any as {[key: string]: BackgroundConfig};
 
 // infer the urls
-for (const {key, value: background} of presetBackgrounds.Pairs()) {
+for (const [key, background] of Object.entries(presetBackgrounds)) {
 	const isImage = background.color == null;
 	if (!isImage) continue;
 

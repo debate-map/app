@@ -168,12 +168,10 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 				<Row mt={5}>Background:</Row>
 				<ScrollView mt={5} style={{height: 450, background: liveSkin.OverlayPanelBackgroundColor().css()}}>
 					<Row style={{flexWrap: "wrap"}}>
-						{presetBackgrounds.Pairs().map(prop=>{
-							const id = prop.key;
-							const background = prop.value;
+						{Object.entries(presetBackgrounds).map(([id, background], propIndex)=>{
 							const selected = (profileUser_h!.backgroundID || defaultPresetBackground) == id;
 							return (
-								<Div key={prop.index}
+								<Div key={propIndex}
 									style={ES(
 										{width: 100, height: 100, border: "1px solid black", cursor: "pointer"},
 										background.url_max?.startsWith("background: ") && {background: background.url_max.replace("background: ", "")},

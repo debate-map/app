@@ -189,7 +189,7 @@ export const GetNodeViewsBelowPath = CreateAccessor((mapID: string|n, pathOrPath
 	const nodeView = GetNodeView(mapID, pathOrPathNodes);
 	if (includeSelf) result.set(pathNodes.join("/"), nodeView);
 
-	for (const {key: childID, value: child} of nodeView?.children?.Pairs() ?? []) {
+	for (const [childID, child] of Object.entries(nodeView?.children ?? {})) {
 		result.set(pathNodes.concat(childID).join("/"), child);
 
 		const nodeViewsBelowChild = GetNodeViewsBelowPath(mapID, pathNodes.concat(childID));
