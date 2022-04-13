@@ -35,6 +35,7 @@ log = "0.4.16"
 regex = "1.5.5"
 itertools = "0.10.3"
 lazy_static = "1.4.0"
+num_cpus = "1.0"
 
 # needed for async-graphql "scalar!" macro
 serde = "*"

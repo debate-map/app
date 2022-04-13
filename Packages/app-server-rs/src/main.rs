@@ -196,6 +196,6 @@ async fn main() {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
-    println!("App-server-rs launched.");
+    println!("App-server-rs launched. @logical_cpus:{} @physical_cpus:{}", num_cpus::get(), num_cpus::get_physical());
     server_fut.await.unwrap();
 }

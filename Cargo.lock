@@ -71,6 +71,7 @@ dependencies = [
  "lazy_static",
  "log",
  "metrics",
+ "num_cpus",
  "regex",
  "rust-macros",
  "rust-shared",

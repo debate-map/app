@@ -7,8 +7,9 @@ use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
 use indexmap::IndexMap;
 use itertools::{chain, Itertools};
-use tokio::sync::RwLock;
+use tokio::sync::{RwLock, Semaphore};
 use tokio_postgres::Row;
+use lazy_static::lazy_static;
 use crate::store::live_queries_::lq_batch_::sql_generator::prepare_sql_query;
 use crate::utils::db::filter::{QueryFilter};
 use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
@@ -79,6 +80,9 @@ impl LQBatch {
         //let query_instances = &mut self.query_instances;
         let query_instance_vals: Vec<&Arc<LQInstance>> = self.query_instances.values().collect();
 
+        mtx.section("1.1:wait for semaphore permit");
+        let permit = SEMAPHORE__BATCH_EXECUTION.acquire().await.unwrap();
+
         mtx.section("2:prepare the combined query");
         let lq_param_protos = self.lq_param_prototypes();
         let (sql_text, params) = prepare_sql_query(&self.table_name, &lq_param_protos, &query_instance_vals, Some(&mtx))?;
@@ -110,6 +114,9 @@ impl LQBatch {
             lq_results
         }).collect();
 
+        // drop semaphore permit (ie. if there's another thread waiting to enter the section of code above, allow them now)
+        drop(permit);
+
         mtx.section("6:commit the new result-sets");
         for (i, lq_results) in lq_results_converted.into_iter().enumerate() {
             let lq_instance = query_instance_vals.get(i).unwrap();
@@ -120,5 +127,19 @@ impl LQBatch {
 
         //Ok(lq_results_converted)
         Ok(())
+    }
+}
+
+lazy_static! {
+    // limit the number of threads that are simultaneously executing lq-batches
+    // (this yields a better result, since it means requests will resolve "at full speed, but in order", rather than "at full speed, all at once, such that they all take a long time to complete")
+    static ref SEMAPHORE__BATCH_EXECUTION: Semaphore = Semaphore::new(get_batch_execution_concurrency_limit());
+}
+fn get_batch_execution_concurrency_limit() -> usize {
+    let logical_cpus = num_cpus::get();
+    match logical_cpus {
+        // prefer to leave one core free, for the various other processing that needs to occur
+        3.. => logical_cpus - 1,
+        _ => logical_cpus,
     }
 }
