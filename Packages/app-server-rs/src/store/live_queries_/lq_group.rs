@@ -138,7 +138,7 @@ impl LQGroup {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),
 
-            // temp; just start the vec with 500 entries, to avoid need for getting a write lock to add new entries (while testing)
+            // for now, have the cycling-set contain 500 entries; this is enough to avoid lock-conflicts, while not hammering memory-usage
             batches: (0..500).map(|_| RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone()))).collect_vec(),
             batches_meta: RwLock::new(LQGroup_BatchesMeta::new()),
 
@@ -159,7 +159,8 @@ impl LQGroup {
 
         //let last_batch_executed_index = self.last_batch_execution_started_index.load(Ordering::Relaxed);
         let last_batch_executed_index = meta.last_batch_execution_started_index;
-        if last_batch_execution_started_index > last_batch_executed_index {
+        // if the "last started" and "last completed" differ, then there's still one (or more) in-progress
+        if last_batch_execution_started_index != last_batch_executed_index {
             let index = last_batch_execution_started_index as usize;
             return Some((index, self.batches.get(index)?));
         }
@@ -168,7 +169,14 @@ impl LQGroup {
     pub fn get_buffering_batch(&self, meta: LQGroup_BatchesMeta) -> (usize, &RwLock<LQBatch>) {
         //let index = self.batches.len() - 1;
         //let index = meta.last_batch_buffering_started_index as usize;
-        let first_open_index = (meta.last_batch_execution_started_index + 1) as usize;
+        let mut first_open_index = (meta.last_batch_execution_started_index + 1) as usize;
+        if first_open_index > self.batches.len() - 1 {
+            //println!("Looping around...");
+            first_open_index = 0;
+            /*let temp = self.batches.get(first_open_index).unwrap();
+            let temp2 = temp.write().await;
+            temp2.query_instances.drain(..);*/
+        }
         let result = self.batches.get(first_open_index).unwrap();
         (first_open_index, result)
     }
@@ -296,10 +304,12 @@ impl LQGroup {
             //let instances_in_batch = batch.query_instances.read().await;
             let instances_in_batch = &mut batch.query_instances;
             let mut query_instances = self.query_instances.write().await;
-            for (key, value) in instances_in_batch.iter() {
+            for (key, value) in instances_in_batch.into_iter() {
                 query_instances.insert(key.to_owned(), value.clone());
             }
             mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch.len()));
+            batch.reset_for_next_cycle();
+
             meta.last_batch_committed_index = batch_i as i64;
             //meta.last_batch_buffering_started_index = batch_i as i64;
         }

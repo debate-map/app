@@ -33,6 +33,7 @@ pub struct LQBatch {
     pub table_name: String,
     pub filter_shape: QueryFilter,
     
+    /// Note that this map gets cleared as soon as its entries are committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
     pub query_instances: IndexMap<String, Arc<LQInstance>>,
     //pub execution_time: Option<f64>,
     //execution_time: AtomicF64, // a value of -1 means "not yet set", ie. execution hasn't happened yet
@@ -46,6 +47,11 @@ impl LQBatch {
             //query_instances: RwLock::default(),
             //execution_time: AtomicF64::new(-1f64),
         }
+    }
+
+    /// Call this each cycle, after the batch's contents have been committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
+    pub fn reset_for_next_cycle(&mut self) {
+        self.query_instances.drain(..);
     }
 
     /// Returns a set of LQParam instances with filler values; used for generating the column-names for the temp-table holding the param-sets.

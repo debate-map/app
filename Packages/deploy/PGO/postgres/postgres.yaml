@@ -94,6 +94,10 @@ spec:
         # 3) This "shouldn't" be necessary, but atm I've found that I need to kill the "debate-map-instance1-XXX" pod for changes to be applied (at least quickly); after doing so, the pod will restart in a half minute or so.
         # 4) Confirm that changes were applied, by using Lens to open terminal in the "debate-map-instance1-XXX" pod, running `psql`, then running: `SHOW max_connections;`
         parameters:
+          # for 15gb node
+          #max_connections: 300 # default: 100
+
+          # for 30gb node
           max_connections: 1000 # default: 100
           shared_buffers: 5GB # default: 8MB/128MB
           maintenance_work_mem: 1GB # default: 64MB
