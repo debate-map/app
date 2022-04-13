@@ -13,9 +13,6 @@ const O = observable;
 export class MapView {
 	constructor() { makeObservable(this); }
 
-	// rootNodeView = new MapNodeView();
-	// include root-node-view as a keyed-child, so that it's consistent with descendants (of key signifying id)
-	// rootNodeView;
 	// @O rootNodeViews = observable.map<string, MapNodeView>();
 	// use simple object rather than observable-map, since observable-map would lose its prototype on page refresh (when mobx-sync starts loading stored data, this path is not initialized-with-types, since it's nested/non-static)
 	// maybe todo: update mobx-sync to at least be able to handle the mobx classes (observable.map, observable.array, etc.)
@@ -47,12 +44,6 @@ export const GetDefaultExpansionFieldsForNodeView = CreateAccessor((path: string
 	}
 	return result;
 });
-
-/*export enum PanelOpenSource {
-	"toolbar" = "toolbar",
-	"left-panel" = "left-panel",
-}
-AddSchema("PanelOpenSource", {enum: GetValues(PanelOpenSource)});*/
 
 @MGLClass()
 export class MapNodeView {

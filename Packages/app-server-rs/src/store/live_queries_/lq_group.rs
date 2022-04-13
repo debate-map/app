@@ -138,8 +138,8 @@ impl LQGroup {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),
 
-            // temp; just start the vec with 100 entries, to avoid need for getting a write lock to add new entries (while testing)
-            batches: (0..100).map(|_| RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone()))).collect_vec(),
+            // temp; just start the vec with 500 entries, to avoid need for getting a write lock to add new entries (while testing)
+            batches: (0..500).map(|_| RwLock::new(LQBatch::new(table_name.clone(), filter_shape.clone()))).collect_vec(),
             batches_meta: RwLock::new(LQGroup_BatchesMeta::new()),
 
             channel_for_batch_messages__sender_base: s1,

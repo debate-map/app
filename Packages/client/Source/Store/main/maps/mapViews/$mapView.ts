@@ -35,22 +35,48 @@ export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): strin
 	return result;
 }
 
-export const GetFocusedNodePathNodes = CreateAccessor((mapViewOrMapID: string | MapView | n): string[]=>{
-	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
-	if (mapView == null) return [];
+export class FoundNodeViewInfo {
+	nodeView: MapNodeView;
+	pathInMap: string;
+}
+export function InMapView_FindNodeViewWhere(mapView: MapView, condition: (node: MapNodeView)=>boolean): FoundNodeViewInfo|undefined {
+	for (const [rootID, rootView] of Object.entries(mapView.rootNodeViews)) {
+		const focusedNodeInfo = FindNodeViewWhere(rootView, condition, rootID);
+		if (focusedNodeInfo != null) {
+			return focusedNodeInfo;
+		}
+	}
+}
+export function FindNodeViewWhere(nodeView: MapNodeView, condition: (node: MapNodeView)=>boolean, pathInMap: string): FoundNodeViewInfo|undefined {
+	if (condition(nodeView)) {
+		return {nodeView, pathInMap};
+	}
+	for (const [childID, child] of Object.entries(nodeView.children)) {
+		const result = FindNodeViewWhere(child, condition, `${pathInMap}/${childID}`);
+		if (result != null) {
+			return result;
+		}
+	}
+}
 
-	const focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
+export const GetFocusedNodeInfo = CreateAccessor((mapViewOrMapID: string | MapView | n): FoundNodeViewInfo|undefined=>{
+	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
+	if (mapView == null) return undefined;
+
+	/*const focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
 	if (focusedTreeNode == null) return [];
 
 	const focusedNodeView = focusedTreeNode.ancestorNodes.Last();
 	// return focusedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
-	return GetPathFromDataPath(focusedNodeView.PathNodes);
+	return GetPathFromDataPath(focusedNodeView.PathNodes);*/
+
+	return InMapView_FindNodeViewWhere(mapView, view=>view.focused == true);
 });
 export const GetFocusedNodePath = CreateAccessor((mapViewOrMapID: string | MapView | n)=>{
-	return GetFocusedNodePathNodes(mapViewOrMapID).join("/").toString(); // toString() needed if only 1 item
+	return GetFocusedNodeInfo(mapViewOrMapID)?.pathInMap ?? "";
 });
 export const GetFocusedNodeID = CreateAccessor((mapID: string)=>{
-	const focusedNodeStr = GetFocusedNodePathNodes(mapID).LastOrX();
+	const focusedNodeStr = GetFocusedNodePath(mapID).split("/").LastOrX();
 	return focusedNodeStr ? PathSegmentToNodeID(focusedNodeStr) : null;
 });
 

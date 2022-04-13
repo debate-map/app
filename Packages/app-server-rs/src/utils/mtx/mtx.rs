@@ -178,7 +178,7 @@ impl Mtx {
                     // if we're the last place holding references to the id and section-lifetimes, the mtx object must have been destroyed;
                     //     that means it has already sent its final results to the monitor-backend, so we can end this loop
                     if Arc::strong_count(&id_clone) <= 1 && Arc::strong_count(&section_lifetimes_clone) <= 1 {
-                        println!("Stopping mtx-data-sending timer, since mtx instance has been dropped."); // temp
+                        //println!("Stopping mtx-data-sending timer, since mtx instance has been dropped."); // temp
                         break;
                     }
 
