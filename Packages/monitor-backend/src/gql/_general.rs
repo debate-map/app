@@ -10,11 +10,14 @@ use serde_json::json;
 use tokio_postgres::{Client};
 use std::env;
 use std::path::Path;
+use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::GeneralMessage;
 use crate::migrations::v2::migrate_db_to_v2;
 use crate::store::storage::{Mtx, AppStateWrapper};
+use crate::utils::general::body_to_str;
+use crate::utils::type_aliases::JSONValue;
 
 pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
     let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
@@ -56,6 +59,28 @@ impl QueryShard_General {
         }).collect();
         Ok(mtx_results_filtered)
     }
+    
+    async fn basicInfo(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, Error> {
+        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        
+        let basic_info = get_basic_info_from_app_server_rs().await?;
+        Ok(basic_info)
+    }
+}
+
+pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
+    let client = hyper::Client::new();
+    let req = hyper::Request::builder()
+        .method(Method::GET)
+        .uri("http://dm-app-server-rs.default.svc.cluster.local:5110/basic-info")
+        .header("Content-Type", "application/json")
+        .body(json!({}).to_string().into())?;
+    let res = client.request(req).await?;
+    let res_as_json_str = body_to_str(res.into_body()).await?;
+    let res_as_json = JSONValue::from_str(&res_as_json_str)?;
+    //println!("Done! Response:{}", res_as_json);
+
+    Ok(res_as_json)
 }
 
 // mutations

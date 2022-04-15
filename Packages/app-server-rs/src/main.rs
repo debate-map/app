@@ -7,6 +7,7 @@
 //#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
+#![feature(integer_atomics, const_fn_trait_bound)] // needed for mem_alloc.rs
 
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
@@ -36,10 +37,13 @@ use axum::{
         header::{CONTENT_TYPE}
     }, middleware,
 };
+use serde_json::json;
 use tower_http::cors::{CorsLayer, Origin};
+use utils::general::mem_alloc::Trallocator;
 use std::{
     net::{SocketAddr}, panic, backtrace::Backtrace,
 };
+use std::alloc::System;
 
 use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}};
 
@@ -109,6 +113,7 @@ mod utils {
         pub mod errors;
         pub mod extensions;
         pub mod general;
+        pub mod mem_alloc;
     }
     pub mod http;
     pub mod mtx {
@@ -119,6 +124,10 @@ mod utils {
         pub mod quick1;
     }
 }
+
+
+#[global_allocator]
+static GLOBAL: Trallocator<System> = Trallocator::new(System);
 
 pub fn get_cors_layer() -> CorsLayer {
     // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
@@ -155,15 +164,27 @@ async fn main() {
         std::process::abort();
     }));
 
+    GLOBAL.reset();
+    println!("memory used: {} bytes", GLOBAL.get());
+
     let app_state = AppStateWrapper::new(AppState {});
     //let storage = Storage::<'static>::default();
     let lq_storage = LQStorage::new_in_wrapper();
 
     let app = Router::new()
-        .route("/", get(|| async { Html(r#"
-            <p>This is the URL for the app-server, which is not meant to be opened directly by your browser.</p>
-            <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
-        "#) }));
+        .route("/", get(|| async {
+            Html(r#"
+                <p>This is the URL for the app-server, which is not meant to be opened directly by your browser.</p>
+                <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
+            "#)
+        }))
+        .route("/basic-info", get(|| async {
+            let memUsed = GLOBAL.get();
+            println!("memory used: {memUsed} bytes");
+            axum::response::Json(json!({
+                "memUsed": memUsed,
+            }))
+        }));
 
     //let (client, connection) = pgclient::create_client(false).await;
     let pool = pgclient::create_db_pool();

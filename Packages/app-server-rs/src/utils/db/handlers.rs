@@ -77,7 +77,10 @@ pub async fn handle_generic_gql_collection_request<'a,
         let base_stream = async_stream::stream! {
             yield Ok(GQLSetVariant::from(entries_as_type));
             loop {
-                let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
+                let next_entries = match lq_entry_receiver_clone.recv_async().await {
+                    Ok(a) => a,
+                    Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
+                };
                 let next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
                 let next_result_set = GQLSetVariant::from(next_entries_as_type);
                 yield Ok(next_result_set);
@@ -139,7 +142,10 @@ pub async fn handle_generic_gql_doc_request<'a,
         let base_stream = async_stream::stream! {
             yield Ok(entry_as_type);
             loop {
-                let next_entries = lq_entry_receiver_clone.recv_async().await.unwrap();
+                let next_entries = match lq_entry_receiver_clone.recv_async().await {
+                    Ok(a) => a,
+                    Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
+                };
                 let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
                 let next_result: Option<T> = next_entries_as_type.pop();
                 yield Ok(next_result);

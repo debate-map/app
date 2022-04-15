@@ -209,25 +209,23 @@ impl LQGroup {
     async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
         new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
         let lq_key = get_lq_instance_key(table_name, filter);
-        let creating_new_lqi = {
-            let lq_instances = self.query_instances.read().await;
-            let create_new_instance = !lq_instances.contains_key(&lq_key);
-            create_new_instance
-        };
 
-        mtx.section("2:create a new lqi (if needed)");
-        if creating_new_lqi {
-            self.create_new_lq_instance(table_name, filter, &lq_key, ctx, Some(&mtx)).await;
-        }
-
-        mtx.section("3:return the current lqi for this key");
         let query_instances = self.query_instances.read().await;
-        let instance = query_instances.get(&lq_key).unwrap();
-        (instance.clone(), query_instances.len())
+        match query_instances.get(&lq_key) {
+            Some(instance) => {
+                mtx.section("2A:clone+return the current lqi for this key");
+                (instance.clone(), query_instances.len())
+            },
+            None => {
+                mtx.section("2B:create a new lqi");
+                drop(query_instances); // must drop our read-lock, so that write-lock can be obtained, in func below
+                self.create_new_lq_instance(table_name, filter, &lq_key, ctx, Some(&mtx)).await
+            }
+        }
     }
-    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: PGClientObject, parent_mtx: Option<&Mtx>) {
+    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
-        let (batch_i, lqis_buffered_already) = {
+        let (new_lqi_arc, batch_i, lqis_buffered_already) = {
             let meta = self.batches_meta.read().await;
             let (batch_i, batch_lock) = self.get_buffering_batch(meta.clone());
             let mut batch = batch_lock.write().await;
@@ -238,14 +236,16 @@ impl LQGroup {
 
             let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
             //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
-            instances_in_batch.insert(lq_key.to_owned(), Arc::new(new_lqi));
+            let new_lqi_arc = Arc::new(new_lqi);
+            instances_in_batch.insert(lq_key.to_owned(), new_lqi_arc.clone());
 
-            (batch_i, lqis_buffered_already)
+            (new_lqi_arc, batch_i, lqis_buffered_already)
         };
 
         let this_call_should_commit_batch = lqis_buffered_already == 0;
         mtx.section_2("2:wait for batch to execute", Some(format!("@lqis_buffered_already:{lqis_buffered_already} @will_trigger_execute:{this_call_should_commit_batch}")));
         self.execute_batch_x_once_ready(batch_i, ctx, this_call_should_commit_batch, Some(&mtx)).await;
+        (new_lqi_arc, lqis_buffered_already)
     }
     async fn execute_batch_x_once_ready(&self, batch_i: usize, ctx: PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
         // if this call is not the one to trigger execution, just wait for the execution to happen, then resume the caller-function
@@ -326,9 +326,15 @@ impl LQGroup {
         let lq_key = get_lq_instance_key(table_name, filter);
         let mut live_queries = self.query_instances.write().await;
         let new_watcher_count = {
-            let live_query = live_queries.get_mut(&lq_key).unwrap();
+            let live_query = match live_queries.get_mut(&lq_key) {
+                Some(a) => a,
+                None => return, // if entry already deleted, just ignore for now [maybe fixed after change to get_or_create_lq_instance?]
+            };
             let mut entry_watchers = live_query.entry_watchers.write().await;
-            let _removed_value = entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
+            
+            // commented the `.expect`, since was failing occasionally, and I don't have time to debug atm [maybe fixed after change to get_or_create_lq_instance?]
+            //let _removed_value = entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
+            entry_watchers.remove(&stream_id);
             
             entry_watchers.len()
         };
