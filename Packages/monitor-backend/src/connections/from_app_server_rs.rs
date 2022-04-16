@@ -34,13 +34,17 @@ pub struct SendMtxResults_Request {
 
 }
 
+pub fn is_addr_from_pod(addr: &SocketAddr) -> bool {
+    addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.")
+}
+
 pub async fn send_mtx_results(
-    Extension(app_state): Extension<AppStateWrapper>, ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    Extension(app_state): Extension<AppStateWrapper>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     //req: Request<Body>
     Json(payload): Json<SendMtxResults_Request>
 ) -> Response<Body> {
-    let caller_is_pod = addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.");
-    if !caller_is_pod {
+    if !is_addr_from_pod(&addr) {
         error!("/send-mtx-results endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
         let json = json!({"error": format!("This endpoint is only meant to be used for in-cluster callers (ie. pods) atm.")});
         return Response::builder().status(StatusCode::BAD_GATEWAY)

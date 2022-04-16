@@ -12,17 +12,32 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {LogEntryUI} from "./Logs/LogEntryUI";
 import {LogGroupsUI} from "./Logs/LogGroupsUI";
 
-export type LogEntry_Raw = string;
+export class LogEntry_Raw {
+	time: number;
+	level: string;
+
+	span_name: string;
+	target: string;
+
+	message: string;
+}
 
 // synthesized from the above, for easier processing
 export class LogEntry {
 	static FromRaw(raw: LogEntry_Raw) {
 		const result = new LogEntry();
-		result.startTime = Date.now(); // todo
-		result.message = raw;
+		Object.assign(result, raw);
+		/*result.time = raw.time;
+		result.level = raw.level;
+		result.span_name = raw.span_name;
+		result.target = raw.target;
+		result.message = raw.message;*/
 		return result;
 	}
-	startTime: number;
+	time: number;
+	level: string;
+	span_name: string;
+	target: string;
 	message: string;
 }
 
@@ -59,7 +74,7 @@ export const LogsUI = observer(()=>{
 		});
 	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
 	logEntries = logEntries.OrderBy(entry=>{
-		return entry.startTime;
+		return entry.time;
 	});
 	console.log("Got data:", logEntries);
 	const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);

@@ -1069,6 +1069,7 @@ dependencies = [
  "slab",
  "tokio",
  "tokio-postgres",
+ "tokio-tungstenite",
  "tower",
  "tower-http",
  "tower-service",

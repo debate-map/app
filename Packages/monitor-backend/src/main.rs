@@ -47,7 +47,7 @@ use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results};
+use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results, links::app_server_rs_link::connect_to_app_server_rs};
 
 mod gql_;
 mod gql {
@@ -55,6 +55,9 @@ mod gql {
 }
 //mod proxy_to_asjs;
 mod pgclient;
+mod links {
+    pub mod app_server_rs_link;
+}
 mod utils {
     pub mod general;
     pub mod type_aliases;
@@ -116,6 +119,8 @@ async fn main() {
         "#) }))*/
         .route("/send-mtx-results", post(send_mtx_results))
         .fallback(get(handler));
+
+    tokio::spawn(connect_to_app_server_rs());
 
     let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
 

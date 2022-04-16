@@ -37,9 +37,10 @@ use axum::{
         header::{CONTENT_TYPE}
     }, middleware,
 };
+use flume::Receiver;
 use serde_json::json;
 use tower_http::cors::{CorsLayer, Origin};
-use utils::general::{mem_alloc::Trallocator, logging::set_up_logging};
+use utils::general::{mem_alloc::Trallocator, logging::{set_up_logging, LogEntry}};
 use std::{
     net::{SocketAddr}, panic, backtrace::Backtrace,
 };
@@ -47,7 +48,7 @@ use std::alloc::System;
 use tracing::{info, error, metadata::LevelFilter};
 use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, Layer, util::SubscriberInitExt, filter};
 
-use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}};
+use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -56,32 +57,10 @@ pub fn test1() {
 }
 
 mod gql;
-mod proxy_to_asjs;
-mod pgclient;
-mod db {
-    pub mod _general;
-    pub mod general {
-        pub mod subtree;
-        pub mod subtree_accessors;
-    }
-    pub mod users;
-    pub mod user_hiddens;
-    pub mod global_data;
-    pub mod maps;
-    pub mod terms;
-    pub mod access_policies;
-    pub mod medias;
-    pub mod command_runs;
-    pub mod feedback_proposals;
-    pub mod feedback_user_infos;
-    pub mod map_node_edits;
-    pub mod node_child_links;
-    pub mod node_phrasings;
-    pub mod node_ratings;
-    pub mod node_revisions;
-    pub mod node_tags;
-    pub mod nodes;
-    pub mod shares;
+mod links {
+    pub mod monitor_backend_link;
+    pub mod pgclient;
+    pub mod proxy_to_asjs;
 }
 mod store {
     pub mod storage;
@@ -127,6 +106,31 @@ mod utils {
         pub mod quick1;
     }
 }
+mod db {
+    pub mod _general;
+    pub mod general {
+        pub mod subtree;
+        pub mod subtree_accessors;
+    }
+    pub mod users;
+    pub mod user_hiddens;
+    pub mod global_data;
+    pub mod maps;
+    pub mod terms;
+    pub mod access_policies;
+    pub mod medias;
+    pub mod command_runs;
+    pub mod feedback_proposals;
+    pub mod feedback_user_infos;
+    pub mod map_node_edits;
+    pub mod node_child_links;
+    pub mod node_phrasings;
+    pub mod node_ratings;
+    pub mod node_revisions;
+    pub mod node_tags;
+    pub mod nodes;
+    pub mod shares;
+}
 
 
 #[global_allocator]
@@ -155,7 +159,7 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
-fn set_up_globals() {
+fn set_up_globals() -> Receiver<LogEntry> {
     //panic::always_abort();
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
@@ -165,13 +169,13 @@ fn set_up_globals() {
         std::process::abort();
     }));
 
-    set_up_logging();
+    set_up_logging()
 }
 
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    set_up_globals();
+    let log_entry_receiver = set_up_globals();
 
     GLOBAL.reset();
     info!("memory used: {} bytes", GLOBAL.get());
@@ -193,7 +197,8 @@ async fn main() {
             axum::response::Json(json!({
                 "memUsed": memUsed,
             }))
-        }));
+        }))
+        .route("/monitor-backend-link", get(monitor_backend_link_handle_ws_upgrade));
 
     //let (client, connection) = pgclient::create_client(false).await;
     let pool = pgclient::create_db_pool();
@@ -203,6 +208,7 @@ async fn main() {
     let app = app
         .layer(AddExtensionLayer::new(app_state))
         .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
+        .layer(AddExtensionLayer::new(log_entry_receiver))
         .layer(get_cors_layer());
 
     let _handler = tokio::spawn(async move {
@@ -225,7 +231,8 @@ async fn main() {
     });
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
-    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
+    //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
+    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
     info!("App-server-rs launched. @logical_cpus:{} @physical_cpus:{}", num_cpus::get(), num_cpus::get_physical());
     server_fut.await.unwrap();
 }

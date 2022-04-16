@@ -13,7 +13,7 @@ export class LogEntryUI extends BaseComponent<{entry: LogEntry}, {}> {
 
 		return (
 			<Column>
-				<Row>{new Date(entry.startTime).toLocaleString("sv")}: {entry.message}</Row>
+				<Row>{new Date(entry.time).toLocaleString("sv")}: {entry.message}</Row>
 			</Column>
 		);
 	}

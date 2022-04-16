@@ -433,7 +433,7 @@ NEXT_k8s_resource_batch([
 	}
 ])
 
-# new relic (commented for now, because of apparent performance impact)
+# new relic (commented for now, because of apparent performance impact) [and left commented, because I want to find all open-source tools long-term -- or at least, totally customizable, which new-relic is not]
 # ==========
 
 # '''k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml', allow_duplicates=True)
@@ -483,17 +483,19 @@ NEXT_k8s_resource_batch([
 # netdata
 # ==========
 
+# only install the netdata pods if we're in remote cluster (it can't collect anything useful in docker-desktop anyway; and removing it saves memory)
 load('ext://helm_remote', 'helm_remote')
-helm_remote('netdata',
-	repo_url='https://netdata.github.io/helmchart',
-	#version='1.33.1',
-	version='3.7.12', # helm-chart version is different from netdata version
-)
+if REMOTE:
+	helm_remote('netdata',
+		repo_url='https://netdata.github.io/helmchart',
+		#version='1.33.1',
+		version='3.7.12', # helm-chart version is different from netdata version
+	)
 
-NEXT_k8s_resource_batch([
-	{"workload": "netdata-parent", "labels": ["monitoring"]},
-	{"workload": "netdata-child", "labels": ["monitoring"]},
-])
+	NEXT_k8s_resource_batch([
+		{"workload": "netdata-parent", "labels": ["monitoring"]},
+		{"workload": "netdata-child", "labels": ["monitoring"]},
+	])
 
 # extras
 # ==========

@@ -10,7 +10,7 @@ use tracing::{info, error};
 use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
+use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::general::body_to_str;
 use crate::utils::type_aliases::{JSONValue};
 

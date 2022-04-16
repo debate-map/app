@@ -322,7 +322,7 @@ impl LQGroup {
         self.source_sender_for_lq_watcher_drops.clone()
     }*/
     pub async fn drop_lq_watcher(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid) {
-        println!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
+        info!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
 
         let lq_key = get_lq_instance_key(table_name, filter);
         let mut live_queries = self.query_instances.write().await;
