@@ -1,9 +1,10 @@
-import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {Assert, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Command, DBHelper, dbp, GenerateUUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetCommandRuns} from "../DB/commandRuns.js";
 import {CommandRun, RLSTargetSet} from "../DB/commandRuns/@CommandRun.js";
 import {GetDBReadOnlyMessage, IsDBReadOnly} from "../DB/globalData.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
+import {DMCommon_InServer} from "../Utils/General/General.js";
 import {GetCommandRunMetaForClass} from "./CommandRunMeta.js";
 
 // general augmentations
@@ -20,8 +21,12 @@ Command.augmentValidate = (command: Command<any>)=>{
 		command["user_addToStream"] = userHidden.addToStream;
 	}
 
-	// todo: change this to only find command-runs that are older than X days (eg. 3)
-	command["_commandRuns"] = GetCommandRuns(undefined, undefined, true);
+	if (DMCommon_InServer()) {
+		// todo: change this to only find command-runs that are older than X days (eg. 3)
+		command["_commandRuns"] = GetCommandRuns(undefined, undefined, true);
+	} else {
+		command["_commandRuns"] = emptyArray;
+	}
 };
 
 function CommandXOrAncestorCanShowInStream(command: Command<any>|n) {

@@ -347,18 +347,22 @@ impl LQGroup {
     }
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {
+        if self.table_name != change.table {
+            return;
+        }
+        
         //let mut storage = storage_wrapper.write().await;
         /*let mut live_queries = self.query_instances.write().await;
         let mut1 = live_queries.iter_mut();
         for (lq_key, lq_info) in mut1 {*/
         let live_queries = self.query_instances.read().await;
-        for (lq_key, lq_info) in live_queries.iter() {
-            let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
-            if lq_key_json["table"].as_str().unwrap() != change.table { continue; }
+        for (_lq_key, lq_instance) in live_queries.iter() {
+            /*let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
+            if lq_key_json["table"].as_str().unwrap() != change.table { continue; }*/
             /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                 change_listener(&lq_info.last_entries);
             }*/
-            lq_info.on_table_changed(&change).await;
+            lq_instance.on_table_changed(&change).await;
         }
     }
 }

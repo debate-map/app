@@ -9,10 +9,11 @@ import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Div} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
-import {Me} from "dm_common";
+import {HasAdminPermissions, Me, MeID} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GuidePanel} from "./NavBar/GuidePanel.js";
 import {ReputationPanel} from "./NavBar/ReputationPanel.js";
+import {DebugPanel} from "./NavBar/DebugPanel.js";
 import {SearchPanel} from "./NavBar/SearchPanel.js";
 import {StreamPanel} from "./NavBar/StreamPanel.js";
 import {UserPanel} from "./NavBar/UserPanel.js";
@@ -48,6 +49,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
 						<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
+						{HasAdminPermissions(MeID()) && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
 						{/* <NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton text={
 							<Div className="cursorSet" style={{position: "relative", height: 45}}>
@@ -63,6 +65,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
+						{topLeftOpenPanel == "debug" && <DebugPanel/>}
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
 					<NotificationsUI placement="topLeft" navBarHeight={45}/>
