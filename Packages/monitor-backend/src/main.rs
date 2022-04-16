@@ -94,8 +94,17 @@ pub fn get_cors_layer() -> CorsLayer {
 
 #[derive(Clone, Debug)]
 pub enum GeneralMessage {
-    LogEntryAdded(LogEntry),
+    //LogEntryAdded(LogEntry),
     MigrateLogMessageAdded(String),
+}
+
+// for some very-strange reason, using the tokio::broadcast::[Sender/Receiver] to transmit LogEntry's (from app_server_rs_link.rs to _general.rs) silently fails
+// it fails for async-flume as well, but switching to sync-flume fixes it -- so we need this second-version of GeneralMessage that uses flume (maybe switch to flume completely later, eg. making a broadcast-like wrapper)
+// I suspect the issue has something to do with the "silent dropping of futures" that I had to work-around in handlers.rs...
+// ...but wasn't able to discover the "difference" between MigrateLogMessageAdded and LogEntryAdded pathway that would explain it (and thus suggest a proper solution)
+#[derive(Clone, Debug)]
+pub enum GeneralMessage_Flume {
+    LogEntryAdded(LogEntry),
 }
 
 fn set_up_globals() {
@@ -123,11 +132,11 @@ async fn main() {
         .route("/send-mtx-results", post(send_mtx_results))
         .fallback(get(handler));
 
-    //let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
+    let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
     let (msg_sender, msg_receiver): (broadcast::Sender<GeneralMessage>, broadcast::Receiver<GeneralMessage>) = broadcast::channel(100);
-    tokio::spawn(connect_to_app_server_rs(msg_sender.clone()));
+    tokio::spawn(connect_to_app_server_rs(msg_sender_test.clone()));
 
-    let app = gql_::extend_router(app, msg_sender, msg_receiver, app_state.clone()).await;
+    let app = gql_::extend_router(app, msg_sender, msg_receiver, msg_sender_test, msg_receiver_test, app_state.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app

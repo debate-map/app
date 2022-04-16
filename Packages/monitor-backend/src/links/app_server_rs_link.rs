@@ -11,12 +11,12 @@ use tracing::{debug, error, info};
 use url::Url;
 use tokio_tungstenite::tungstenite::{connect, Message};
 
-use crate::GeneralMessage;
+use crate::{GeneralMessage, GeneralMessage_Flume};
 
 wrap_slow_macros!{
 
 // keep synced with struct in logging.rs (this one's the "mirror")
-#[derive(Clone, Debug, Serialize, Deserialize, SimpleObject)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize, Debug, Default)]
 pub struct LogEntry {
     time: f64,
     level: String,
@@ -27,10 +27,8 @@ pub struct LogEntry {
 
 }
 
-pub async fn connect_to_app_server_rs(sender: broadcast::Sender<GeneralMessage>) {
-    //let interval = tokio::time::interval(Duration::from_secs(5));
+pub async fn connect_to_app_server_rs(sender: Sender<GeneralMessage_Flume>) {
     loop {
-        //interval.tick().await; // first tick is immediate
         tokio::time::sleep(Duration::from_secs(5)).await;
 
         let (mut socket, response) = match connect(
@@ -74,10 +72,11 @@ pub async fn connect_to_app_server_rs(sender: broadcast::Sender<GeneralMessage>)
                 }
             };
 
-            println!("Received log-entry:{}", msg_as_str);
-            match sender.send(GeneralMessage::LogEntryAdded(log_entry)) {
-                Ok(count) => {
-                    println!("Test1:{count}");
+            //println!("Received log-entry:{}", msg_as_str);
+            match sender.send(GeneralMessage_Flume::LogEntryAdded(log_entry)) {
+                Ok(_) => {
+                    //println!("Test1:{count}");
+                    //println!("Test1");
                 },
                 Err(err) => println!("Cannot send log-entry; all receivers were dropped. @err:{err}"),
             }

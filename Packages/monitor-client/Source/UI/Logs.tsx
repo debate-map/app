@@ -2,11 +2,10 @@ import gql from "graphql-tag";
 import React, {useState} from "react";
 import {store} from "Store";
 import {LogGroup} from "Store/main/logs/LogGroup";
-import {hourInMS, InfoButton, minuteInMS, Observer, RunInAction, RunInAction_Set, secondInMS} from "web-vcore";
-import {useMutation, useQuery, useSubscription} from "web-vcore/nm/@apollo/client.js";
-import {Clone, GetPercentFromXToY, Range} from "web-vcore/nm/js-vextensions";
+import {Observer} from "web-vcore";
+import {useSubscription} from "web-vcore/nm/@apollo/client.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {LogEntryUI} from "./Logs/LogEntryUI";
@@ -16,7 +15,7 @@ export class LogEntry_Raw {
 	time: number;
 	level: string;
 
-	span_name: string;
+	spanName: string;
 	target: string;
 
 	message: string;
@@ -27,11 +26,6 @@ export class LogEntry {
 	static FromRaw(raw: LogEntry_Raw) {
 		const result = new LogEntry();
 		Object.assign(result, raw);
-		/*result.time = raw.time;
-		result.level = raw.level;
-		result.span_name = raw.span_name;
-		result.target = raw.target;
-		result.message = raw.message;*/
 		return result;
 	}
 	time: number;
@@ -44,6 +38,10 @@ export class LogEntry {
 export const LOG_ENTRIES_SUBSCRIPTION = gql`
 subscription($adminKey: String!) {
 	logEntries(adminKey: $adminKey) {
+		time
+		level
+		spanName
+		target
 		message
 	}
 }
@@ -57,14 +55,14 @@ mutation($adminKey: String!) {
 }
 `;*/
 
-//export const LogsUI = observer(()=>{
-@Observer
+export const LogsUI = observer(()=>{
+/*@Observer
 export class LogsUI extends BaseComponent<{}, {}> {
-	render() {
-		const adminKey = store.main.adminKey;
-		const uiState = store.main.logs;
+	render() {*/
+	const adminKey = store.main.adminKey;
+	const uiState = store.main.logs;
 
-		/*const {data, loading, refetch} = useQuery(LOG_ENTRIES_QUERY, {
+	/*const {data, loading, refetch} = useQuery(LOG_ENTRIES_QUERY, {
 			variables: {adminKey},
 		});
 		const logEntries_raw: LogEntry_Raw[] = data?.logEntries ?? [];
@@ -81,18 +79,28 @@ export class LogsUI extends BaseComponent<{}, {}> {
 		});
 		console.log("Got data:", logEntries);*/
 
-		const [logEntries, setLogEntries] = useState([] as LogEntry[]);
-		const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
-			variables: {adminKey},
-			onSubscriptionData: info=>{
-				const newEntry = info.subscriptionData.data.logEntries;
-				setLogEntries(logEntries.concat(newEntry));
-			},
+	const [logEntries, setLogEntries] = useState([] as LogEntry[]);
+	const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
+		variables: {adminKey},
+		onSubscriptionData: info=>{
+			const newEntry_raw = info.subscriptionData.data.logEntries as LogEntry_Raw;
+			const newEntry_final = LogEntry.FromRaw(newEntry_raw);
+			setLogEntries(logEntries.concat(newEntry_final));
+		},
+	});
+
+	const logEntriesToShow = logEntries
+		.filter(entry=>{
+			for (const group of uiState.groups) {
+				if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
+			}
+			return true;
 		});
+	//logEntriesToShow = logEntriesToShow.OrderBy(a=>a.time);
 
-		//const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);
+	//const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);
 
-		return (
+	return (
 			<Column style={{flex: 1, height: "100%"}}>
 				<Row center>
 					<Text>Actions:</Text>
@@ -126,14 +134,14 @@ export class LogsUI extends BaseComponent<{}, {}> {
 						</DropDown>*/}
 					</Row>
 				</Row>
-				<Row>Log entries ({logEntries.length})</Row>
-				<ScrollView>
-					{logEntries.map((entry, index)=>{
+				<Row>Log entries ({logEntriesToShow.length})</Row>
+				<ScrollView className="selectable">
+					{logEntriesToShow.map((entry, index)=>{
 						return <LogEntryUI key={index} entry={entry}/>;
 					})}
 				</ScrollView>
 			</Column>
-		);
-	}
-}
-//});
+	);
+	/*}
+}*/
+});

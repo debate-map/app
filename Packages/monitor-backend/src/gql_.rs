@@ -38,7 +38,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
-use crate::GeneralMessage;
+use crate::{GeneralMessage, GeneralMessage_Flume};
 use crate::gql::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::store::storage::AppStateWrapper;
 use crate::utils::general::body_to_str;
@@ -114,13 +114,20 @@ pub async fn graphql_handler(Extension(schema): Extension<RootSchema>, req: Requ
     return response;
 }
 
-pub async fn extend_router(app: Router, msg_sender: broadcast::Sender<GeneralMessage>, msg_receiver: broadcast::Receiver<GeneralMessage>, app_state: AppStateWrapper) -> Router {
+pub async fn extend_router(
+    app: Router,
+    msg_sender: broadcast::Sender<GeneralMessage>, msg_receiver: broadcast::Receiver<GeneralMessage>,
+    msg_sender_test: Sender<GeneralMessage_Flume>, msg_receiver_test: Receiver<GeneralMessage_Flume>,
+    app_state: AppStateWrapper
+) -> Router {
     let schema =
         wrap_agql_schema_build!{
             Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         }
         .data(msg_sender)
         .data(msg_receiver)
+        .data(msg_sender_test)
+        .data(msg_receiver_test)
         .data(app_state)
         .finish();
 

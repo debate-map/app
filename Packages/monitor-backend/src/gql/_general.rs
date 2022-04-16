@@ -15,7 +15,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::GeneralMessage;
+use crate::{GeneralMessage, GeneralMessage_Flume};
 use crate::links::app_server_rs_link::LogEntry;
 use crate::migrations::v2::migrate_db_to_v2;
 use crate::store::storage::{Mtx, AppStateWrapper};
@@ -179,25 +179,31 @@ impl SubscriptionShard_General {
     }
 
     async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<LogEntry, SubError>> + 'a {
-        let msg_receiver_base = ctx.data::<broadcast::Sender<GeneralMessage>>().unwrap();
-        let mut msg_receiver = msg_receiver_base.subscribe();
+        let msg_receiver = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
+        /*let msg_receiver_base = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
+        //let mut msg_receiver = msg_receiver_base.subscribe();
+        let mut msg_receiver = msg_receiver_base.clone();*/
+        //let result = tokio::spawn(async move {
         let base_stream = async_stream::stream! {
             if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
 
             //yield Ok(LogEntry::default());
             loop {
-                println!("Waiting...");
-                let next_msg = msg_receiver.recv().await.unwrap();
-                println!("Msg:{:?}", next_msg);
+                //println!("Waiting...");
+                //let next_msg = msg_receiver.recv_async().await.unwrap();
+                let next_msg = msg_receiver.recv().unwrap();
+                //println!("Msg:{:?}", next_msg);
                 match next_msg {
-                    GeneralMessage::MigrateLogMessageAdded(_text) => {},
-                    GeneralMessage::LogEntryAdded(entry) => {
+                    //GeneralMessage_Flume::MigrateLogMessageAdded(_text) => {},
+                    GeneralMessage_Flume::LogEntryAdded(entry) => {
                         yield Ok(entry);
                     },
                 }
             }
         };
         base_stream
+        /*}).await.unwrap();
+        result*/
     }
 
     async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<MigrationLogEntry, SubError>> + 'a {
@@ -213,7 +219,7 @@ impl SubscriptionShard_General {
                     GeneralMessage::MigrateLogMessageAdded(text) => {
                         yield Ok(MigrationLogEntry { text });
                     },
-                    GeneralMessage::LogEntryAdded(_entry) => {},
+                    //GeneralMessage::LogEntryAdded(_entry) => {},
                 }
             }
         };

@@ -4,7 +4,7 @@ import express, {Request, RequestHandler} from "express";
 import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert, ToInt} from "web-vcore/nm/js-vextensions.js";
+import {Assert, SleepAsync, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
@@ -145,7 +145,13 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 
 	//if (true) return void done(null, {id}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
-	const user = await GetAsync(()=>GetUser(userBasicInfo.id));
+	let user: User|n;
+	// try this a few times; fsr, it sometimes return null when in fact the entry exists (would investigate more, but the app-server's being moved to rust anyway...)
+	for (let i = 0; i < 4; i++) {
+		user = await GetAsync(()=>GetUser(userBasicInfo.id));
+		if (user != null) break;
+		else await SleepAsync(500);
+	}
 	if (user == null) done(`Cannot find user with id "${userBasicInfo.id}".`);
 	done(null, user);
 });
