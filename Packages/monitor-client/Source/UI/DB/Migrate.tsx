@@ -12,8 +12,8 @@ export class LogMessage {
 }
 
 export const MIGRATE_LOG_ENTRIES_SUBSCRIPTION = gql`
-subscription {
-	migrateLogEntries {
+subscription($adminKey: String!) {
+	migrateLogEntries(adminKey: $adminKey) {
 		text
 	}
 }
@@ -31,10 +31,11 @@ mutation($adminKey: String!, $toVersion: Int!) {
 export class MigrateUI extends BaseComponent<{}, {}> {
 	render() {
 		let {} = this.props;
+		const adminKey = store.main.adminKey;
 
 		const [logEntries, setLogEntries] = useState([] as LogMessage[]);
 		const {data, loading} = useSubscription(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
-			variables: {},
+			variables: {adminKey},
 			onSubscriptionData: info=>{
 				const newEntry = info.subscriptionData.data.migrateLogEntries;
 				setLogEntries(logEntries.concat(newEntry));
@@ -43,7 +44,6 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 
 		const [startMigration, info] = useMutation(START_MIGRATION);
 
-		const adminKey = store.main.adminKey;
 		return (
 			<Column style={{flex: 1}}>
 				<Row>

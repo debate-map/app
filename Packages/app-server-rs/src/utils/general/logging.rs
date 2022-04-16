@@ -10,6 +10,7 @@ use tracing_subscriber::{filter, Layer, prelude::__tracing_subscriber_Subscriber
 
 use super::general::time_since_epoch_ms;
 
+// keep synced with struct in app_server_rs_link.rs (this one's the "source")
 #[derive(Serialize)]
 pub struct LogEntry {
     time: f64,
@@ -113,7 +114,8 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
             match self.event_sender.send(entry) {
                 Ok(_) => {},
                 Err(err) => {
-                    eprintln!("Hit error while trying to send log-entry through flume channel:{}", err);
+                    //eprintln!("Hit error while trying to send log-entry through flume channel:{}", err);
+                    println!("Hit error while trying to send log-entry through flume channel:{}", err);
                 }
             };
         }

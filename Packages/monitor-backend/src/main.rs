@@ -35,6 +35,7 @@ use axum::{
     headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
 use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
+use links::app_server_rs_link::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use tracing::{error, info};
@@ -91,7 +92,9 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
+#[derive(Clone, Debug)]
 pub enum GeneralMessage {
+    LogEntryAdded(LogEntry),
     MigrateLogMessageAdded(String),
 }
 
@@ -120,9 +123,9 @@ async fn main() {
         .route("/send-mtx-results", post(send_mtx_results))
         .fallback(get(handler));
 
-    tokio::spawn(connect_to_app_server_rs());
-
-    let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
+    //let (msg_sender, msg_receiver): (Sender<GeneralMessage>, Receiver<GeneralMessage>) = flume::unbounded();
+    let (msg_sender, msg_receiver): (broadcast::Sender<GeneralMessage>, broadcast::Receiver<GeneralMessage>) = broadcast::channel(100);
+    tokio::spawn(connect_to_app_server_rs(msg_sender.clone()));
 
     let app = gql_::extend_router(app, msg_sender, msg_receiver, app_state.clone()).await;
 

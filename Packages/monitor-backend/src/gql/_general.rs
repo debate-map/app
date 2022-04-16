@@ -7,6 +7,7 @@ use rust_macros::wrap_slow_macros;
 use rust_shared::SubError;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
+use tokio::sync::broadcast;
 use tokio_postgres::{Client};
 use tracing::error;
 use std::env;
@@ -15,6 +16,7 @@ use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::GeneralMessage;
+use crate::links::app_server_rs_link::LogEntry;
 use crate::migrations::v2::migrate_db_to_v2;
 use crate::store::storage::{Mtx, AppStateWrapper};
 use crate::utils::general::body_to_str;
@@ -102,6 +104,18 @@ struct StartMigration_Result {
 pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
+    /*async fn clearLogEntries(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        
+        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let mut mtx_results = app_state.mtx_results.write().await;
+        mtx_results.clear();
+        
+        Ok(GenericMutation_Result {
+            message: "success".to_string(),
+        })
+    }*/
+
     async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
         
@@ -145,7 +159,7 @@ struct Ping_Result {
     refreshPage: bool,
 }
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
-pub struct LogEntry {
+pub struct MigrationLogEntry {
     pub text: String,
 }
 //#[derive(Clone, SimpleObject)] pub struct GQLSet_LogEntry { nodes: Vec<LogEntry> }
@@ -163,18 +177,43 @@ impl SubscriptionShard_General {
             refreshPage,
         } })
     }
-    async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>) -> impl Stream<Item = Result<LogEntry, SubError>> + 'a {
-        let msg_receiver = ctx.data::<Receiver<GeneralMessage>>().unwrap();
-        
-        //let nodes: Vec<LogEntry> = vec![];
+
+    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<LogEntry, SubError>> + 'a {
+        let msg_receiver_base = ctx.data::<broadcast::Sender<GeneralMessage>>().unwrap();
+        let mut msg_receiver = msg_receiver_base.subscribe();
         let base_stream = async_stream::stream! {
-            yield Ok(LogEntry { text: "Stream started...".to_owned() });
+            if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
+
+            //yield Ok(LogEntry::default());
             loop {
-                let next_msg = msg_receiver.recv_async().await.unwrap();
+                println!("Waiting...");
+                let next_msg = msg_receiver.recv().await.unwrap();
+                println!("Msg:{:?}", next_msg);
+                match next_msg {
+                    GeneralMessage::MigrateLogMessageAdded(_text) => {},
+                    GeneralMessage::LogEntryAdded(entry) => {
+                        yield Ok(entry);
+                    },
+                }
+            }
+        };
+        base_stream
+    }
+
+    async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<MigrationLogEntry, SubError>> + 'a {
+        let msg_receiver_base = ctx.data::<broadcast::Sender<GeneralMessage>>().unwrap();
+        let mut msg_receiver = msg_receiver_base.subscribe();
+        let base_stream = async_stream::stream! {
+            if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
+
+            yield Ok(MigrationLogEntry { text: "Stream started...".to_owned() });
+            loop {
+                let next_msg = msg_receiver.recv().await.unwrap();
                 match next_msg {
                     GeneralMessage::MigrateLogMessageAdded(text) => {
-                        yield Ok(LogEntry { text });
-                    }
+                        yield Ok(MigrationLogEntry { text });
+                    },
+                    GeneralMessage::LogEntryAdded(_entry) => {},
                 }
             }
         };
