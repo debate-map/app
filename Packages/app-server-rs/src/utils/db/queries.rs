@@ -8,6 +8,7 @@ use hyper::Body;
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::{json, Map};
 use tokio_postgres::{Client, Row, types::ToSql, Statement};
+use tracing::info;
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
@@ -50,7 +51,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
         0..=2 => SQLFragment::lit(""),
         _ => SQLFragment::merge(vec![SQLFragment::lit(" WHERE "), filters_sql]),
     };
-    println!("Running where clause. @table:{table_name} @{where_sql} @filter:{filter:?}");
+    info!("Running where clause. @table:{table_name} @{where_sql} @filter:{filter:?}");
     let final_query = SQLFragment::merge(vec![
         SQLFragment::new("SELECT * FROM $I", vec![SQLIdent::param(table_name.clone())?]),
         where_sql,

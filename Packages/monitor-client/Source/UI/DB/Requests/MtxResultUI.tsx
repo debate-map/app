@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {store} from "Store/index.js";
-import {MtxGroup} from "Store/main/database.js";
+import {MtxGroup} from "Store/main/database/MtxGroup.js";
 import {GetHashForString_cyrb53, RNG_Mulberry32} from "ui-debug-kit";
 import {MainSkin} from "Utils/Styles/MainSkin.js";
 import {Chroma, chroma_maxDarken, ES, Observer} from "web-vcore";

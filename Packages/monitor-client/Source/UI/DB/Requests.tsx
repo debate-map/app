@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 import React from "react";
 import {store} from "Store";
-import {MtxConstraint, MtxGroup, MtxSectionConstraint} from "Store/main/database.js";
+import {MtxGroup} from "Store/main/database/MtxGroup.js";
 import {hourInMS, InfoButton, minuteInMS, RunInAction, RunInAction_Set, secondInMS} from "web-vcore";
 import {useMutation, useQuery} from "web-vcore/nm/@apollo/client.js";
 import {Clone, GetPercentFromXToY, Range} from "web-vcore/nm/js-vextensions";
@@ -9,7 +9,7 @@ import {observer} from "web-vcore/nm/mobx-react.js";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {GroupsUI} from "./Requests/GroupsUI.js";
+import {MtxGroupsUI} from "./Requests/MtxGroupsUI.js";
 import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
 export class Mtx_Raw {
@@ -133,7 +133,7 @@ export const RequestsUI = observer(()=>{
 					<DropDown autoHide={false}>
 						<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
 						<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
-							<GroupsUI/>
+							<MtxGroupsUI/>
 						</DropDownContent>
 					</DropDown>
 					<DropDown style={{marginLeft: 5}}>

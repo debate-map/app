@@ -13,6 +13,7 @@ use serde::Deserialize;
 use serde_json::json;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
+use tracing::{error, info};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
@@ -40,14 +41,14 @@ pub async fn send_mtx_results(
 ) -> Response<Body> {
     let caller_is_pod = addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.");
     if !caller_is_pod {
-        println!("/send-mtx-results endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
+        error!("/send-mtx-results endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
         let json = json!({"error": format!("This endpoint is only meant to be used for in-cluster callers (ie. pods) atm.")});
         return Response::builder().status(StatusCode::BAD_GATEWAY)
             .body(Body::from(json.to_string())).unwrap()
     }
 
     let SendMtxResults_Request { mtx } = payload;
-    println!("Got mtx-result:{}", serde_json::to_string_pretty(&mtx).unwrap());
+    info!("Got mtx-result:{}", serde_json::to_string_pretty(&mtx).unwrap());
 
     let mut mtx_results = app_state.mtx_results.write().await;
     if let Some(existing_entry) = mtx_results.iter().enumerate().find(|(_, entry)| entry.id == mtx.id) {

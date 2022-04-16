@@ -39,11 +39,13 @@ use axum::{
 };
 use serde_json::json;
 use tower_http::cors::{CorsLayer, Origin};
-use utils::general::mem_alloc::Trallocator;
+use utils::general::{mem_alloc::Trallocator, logging::set_up_logging};
 use std::{
     net::{SocketAddr}, panic, backtrace::Backtrace,
 };
 use std::alloc::System;
+use tracing::{info, error, metadata::LevelFilter};
+use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, Layer, util::SubscriberInitExt, filter};
 
 use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}};
 
@@ -113,6 +115,7 @@ mod utils {
         pub mod errors;
         pub mod extensions;
         pub mod general;
+        pub mod logging;
         pub mod mem_alloc;
     }
     pub mod http;
@@ -152,20 +155,26 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
-//#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
-#[tokio::main]
-async fn main() {
+fn set_up_globals() {
     //panic::always_abort();
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
         let stacktrace_str_simplified = simplify_stack_trace_str(stacktrace.to_string());
-        println!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace_str_simplified);
+        error!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace_str_simplified);
         std::process::abort();
     }));
 
+    set_up_logging();
+}
+
+//#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
+#[tokio::main]
+async fn main() {
+    set_up_globals();
+
     GLOBAL.reset();
-    println!("memory used: {} bytes", GLOBAL.get());
+    info!("memory used: {} bytes", GLOBAL.get());
 
     let app_state = AppStateWrapper::new(AppState {});
     //let storage = Storage::<'static>::default();
@@ -204,10 +213,10 @@ async fn main() {
             match result {
                 Ok(result) => {
                     //println!("PGClient loop ended for some reason. Result:{:?}", result);
-                    println!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
+                    error!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
                 },
                 Err(err) => {
-                    println!("PGClient loop had error; restarting shortly. @error:{:?}", err);
+                    error!("PGClient loop had error; restarting shortly. @error:{:?}", err);
                     errors_hit += 1;
                 }
             };
@@ -217,6 +226,6 @@ async fn main() {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
-    println!("App-server-rs launched. @logical_cpus:{} @physical_cpus:{}", num_cpus::get(), num_cpus::get_physical());
+    info!("App-server-rs launched. @logical_cpus:{} @physical_cpus:{}", num_cpus::get(), num_cpus::get_physical());
     server_fut.await.unwrap();
 }

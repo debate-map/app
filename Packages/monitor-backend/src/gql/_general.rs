@@ -8,6 +8,7 @@ use rust_shared::SubError;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
+use tracing::error;
 use std::env;
 use std::path::Path;
 use std::str::FromStr;
@@ -22,7 +23,7 @@ use crate::utils::type_aliases::JSONValue;
 pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
     let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
     if !result && print_message_if_wrong {
-        println!("Admin-key is incorrect! Submitted:{}", admin_key);
+        error!("Admin-key is incorrect! Submitted:{}", admin_key);
     }
     return result;
 }
@@ -122,7 +123,7 @@ impl MutationShard_General {
             _ => Err(anyhow!("No migration-code exists for migrating to version {to_version}!")),
         };
         if let Err(ref err) = migration_result {
-            println!("Got error while running migration:{}", err);
+            error!("Got error while running migration:{}", err);
         }
         let migration_id = migration_result?;
         

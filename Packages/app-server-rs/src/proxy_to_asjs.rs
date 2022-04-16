@@ -17,6 +17,7 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, Variables};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use serde_json::json;
+use tracing::info;
 use url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
 use tower_http::cors::{CorsLayer, Origin};
@@ -59,7 +60,7 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
         if let Ok(referrer_url) = referrer_url {
             let path = referrer_url.path();
             if path == "/gql-playground" || path == "/graphiql-new" {
-                println!(r#"Sending "/graphql" request to app-server-rs, since from "{path}". @referrer:{referrer_str}"#);
+                info!(r#"Sending "/graphql" request to app-server-rs, since from "{path}". @referrer:{referrer_str}"#);
                 let response_str = have_own_graphql_handle_request(req, schema).await;
 
                 // send response (to frontend)

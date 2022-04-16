@@ -68,6 +68,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Map};
 use tokio::{time};
+use tracing::{trace, error};
 use uuid::Uuid;
 
 use crate::utils::{type_aliases::JSONValue, general::general::{time_since_epoch_ms, body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}};
@@ -229,6 +230,7 @@ impl Mtx {
             extra_info,
             duration: None,
         };
+        trace!("Section started:{new_section:?}");
         self.start_new_section_2(new_section, name != MTX_FINAL_SECTION_NAME);
     }
     fn start_new_section_2(&mut self, new_section: MtxSection, send_to_root_mtx: bool) {
@@ -318,7 +320,7 @@ async fn try_send_mtx_data_to_monitor_backend(
     let data_as_str = match mtx_data_to_str(id, section_lifetimes).await {
         Ok(a) => a,
         Err(err) => {
-            println!("Got error while converting mtx-tree to string... @err:{}", err);
+            error!("Got error while converting mtx-tree to string... @err:{}", err);
             return None;
         }
     };
@@ -334,13 +336,13 @@ async fn try_send_mtx_data_to_monitor_backend(
                     Ok(_) => {},
                     // if sending mtx-result to monitor fails, print the error, but don't crash the server
                     Err(err) => {
-                        println!("Got error while sending mtx-tree to monitor-backend... @err:{}", err);
+                        error!("Got error while sending mtx-tree to monitor-backend... @err:{}", err);
                     }
                 }
             },
             // if timeout happens, just ignore (there might have been local network glitch or something)
             Err(_err) => {
-                println!("Timed out trying to send mtx-tree to monitor-backend...");
+                error!("Timed out trying to send mtx-tree to monitor-backend...");
             }
         };
     }
@@ -372,6 +374,7 @@ pub async fn mtx_data_to_str(
     Ok(data_as_str)
 }
 
+// todo: have the data transfered over a websocket, rather than individual requests (eg. to avoid the DNS-overloading issue that has caused requests to drop/timeout)
 pub async fn send_mtx_tree_to_monitor_backend(
     //mtx_root: &Mtx
     mtx_root_as_str: String

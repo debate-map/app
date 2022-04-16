@@ -32,6 +32,7 @@ use axum::Error;
 use axum::{
     extract::Extension,
 };
+use tracing::info;
 use url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
@@ -173,6 +174,6 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWr
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(client_to_asjs));
 
-    println!("Playground: http://localhost:[view readme]");
+    info!("Playground: http://localhost:[view readme]");
     result
 }

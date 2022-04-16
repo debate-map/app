@@ -19,6 +19,7 @@ import {SideBar} from "./@Shared/SideBar";
 import {DBUI} from "./DB";
 import {GrafanaUI} from "./Grafana";
 import {HomeUI} from "./Home";
+import {LogsUI} from "./Logs";
 import {NetDataUI} from "./NetData";
 import {PixieUI} from "./Pixie";
 import {PrometheusUI} from "./Prometheus";
@@ -106,6 +107,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 				>
 					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", /*justifyContent: "center",*/ alignItems: "flex-start"}}>
 						{page == "home" && <HomeUI/>}
+						{page == "logs" && <LogsUI/>}
 						{page == "db" && <DBUI/>}
 						{page == "netdata" && <NetDataUI/>}
 						{page == "grafana" && <GrafanaUI/>}

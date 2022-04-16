@@ -104,6 +104,13 @@ k8s_yaml('./Packages/deploy/NodeSetup/node-setup-daemon-set.yaml')
 # since node-setup pod sleeps forever after running (causing readiness checks to fail/never-return... I think), don't wait for those readiness-checks to succeed
 NEXT_k8s_resource("node-setup", pod_readiness='ignore')
 
+# metrics-server (already present on OVH; but needs to be added for docker-desktop)
+# ==========
+
+if not REMOTE:
+	k8s_yaml('./Packages/deploy/Monitors/metrics-server/components.yaml')
+	NEXT_k8s_resource("metrics-server", labels=["monitoring"])
+
 # prometheus
 # ==========
 

@@ -4,13 +4,14 @@ use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, 
 use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
+use tracing::info;
 
 use crate::{utils::type_aliases::JSONValue};
 
 pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
     // get connection info from env-vars
     let ev = |name| { env::var(name).unwrap() };
-    println!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
+    info!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
     
     let mut cfg = tokio_postgres::Config::new();
     cfg.user(&ev("DB_USER"));

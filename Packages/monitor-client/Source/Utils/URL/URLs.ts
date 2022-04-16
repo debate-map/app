@@ -8,6 +8,7 @@ import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
 	home: new Page({}),
+	logs: new Page({}),
 	db: new Page({}, {
 		requests: new Page({}),
 		migrate: new Page({}),

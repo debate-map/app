@@ -6,6 +6,7 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
+use tracing::{info, error};
 use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
@@ -89,12 +90,12 @@ impl SubscriptionShard_General {
 
     #[graphql(name = "_PassConnectionID")]
     async fn _PassConnectionID(&self, _ctx: &async_graphql::Context<'_>, #[graphql(name = "connectionID")] connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
-        println!("Connection-id was passed from client:{}", connectionID);
+        info!("Connection-id was passed from client:{}", connectionID);
         //let userID = "DM_SYSTEM_000000000001".to_owned();
         let userID = match get_user_id_from_connection_id(connectionID).await {
             Ok(userID) => userID,
             Err(err) => {
-                println!("Failed to retrieve user-id from connection id. @error:{}", err);
+                error!("Failed to retrieve user-id from connection id. @error:{}", err);
                 None
             }
         };
@@ -136,7 +137,7 @@ async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<
     if user_id_str.len() == 22 {
         user_id = Some(user_id_str.to_owned());
     } else {
-        println!("User-id in GraphQL response was invalid; should have a length of 22. Response:{}", response_as_str);
+        error!("User-id in GraphQL response was invalid; should have a length of 22. Response:{}", response_as_str);
     }
 
     Ok(user_id)

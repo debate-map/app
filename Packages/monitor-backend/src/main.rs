@@ -37,6 +37,7 @@ use axum::{
 use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
+use tracing::{error, info};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
@@ -91,13 +92,20 @@ pub enum GeneralMessage {
     MigrateLogMessageAdded(String),
 }
 
-#[tokio::main]
-async fn main() {
+fn set_up_globals() {
     panic::set_hook(Box::new(|info| {
         let stacktrace = Backtrace::force_capture();
-        println!("Got panic. @info:{}\n@stackTrace:{}", info, stacktrace);
+        error!("Got panic. @info:{}\n@stackTrace:{}", info, stacktrace);
         std::process::abort();
     }));
+
+    // install global collector configured based on RUST_LOG env var.
+    tracing_subscriber::fmt::init();
+}
+
+#[tokio::main]
+async fn main() {
+    set_up_globals();
     
     let app_state = AppStateWrapper::new(AppState::default());
 
@@ -122,7 +130,7 @@ async fn main() {
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info());
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
-    println!("Monitor-backend launched.");
+    info!("Monitor-backend launched.");
     server_fut.await.unwrap();
 }
 

@@ -4,6 +4,7 @@ use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, 
 use futures::{future, StreamExt, Sink, ready};
 use tokio::join;
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
+use tracing::{info, debug, error, trace};
 
 use crate::{store::live_queries::{LQStorageWrapper}, utils::{type_aliases::JSONValue, db::pg_stream_parsing::LDChange}};
 
@@ -20,7 +21,7 @@ async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
 pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
     // get connection info from env-vars
     let ev = |name| { env::var(name).unwrap() };
-    println!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
+    info!("Postgres connection-info: postgres://{}:<redacted>@{}:{}/debate-map", ev("DB_USER"), ev("DB_ADDR"), ev("DB_PORT"));
     
     let mut cfg = tokio_postgres::Config::new();
     cfg.user(&ev("DB_USER"));
@@ -75,7 +76,7 @@ pub async fn start_streaming_changes(
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     let _handle = tokio::spawn(async move {
         if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
+            error!("connection error: {}", e);
         }
         //return connection;
     });
@@ -104,7 +105,7 @@ pub async fn start_streaming_changes(
         // see here for list of message-types: https://www.postgresql.org/docs/10/protocol-replication.html
         // type: XLogData (WAL data, ie. change of data in db)
         if event[0] == b'w' {
-            println!("Got XLogData/data-change event:{:?}", event);
+            debug!("Got XLogData/data-change event:{:?}", event);
             //let event_as_str = std::str::from_utf8(&*event).unwrap();
             //let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
             let event_as_str_cow = String::from_utf8_lossy(&*event);
@@ -116,7 +117,7 @@ pub async fn start_streaming_changes(
             let substring_bytes = &event_as_str_bytes[idx..];
             let json_section_str = String::from_utf8(substring_bytes.to_vec()).unwrap();*/
             let json_section_str = START_OF_CHANGE_JSON.to_owned() + event_as_str.split_once(START_OF_CHANGE_JSON).unwrap().1;
-            println!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
+            debug!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
             
             // see bottom of storage.rs for example json-data
             let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
@@ -129,7 +130,7 @@ pub async fn start_streaming_changes(
         else if event[0] == b'k' {
             let last_byte = event.last().unwrap();
             let timeout_imminent = last_byte == &1;
-            println!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
+            trace!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
             if timeout_imminent {
                 // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
                 const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946_684_800;
@@ -153,7 +154,7 @@ pub async fn start_streaming_changes(
 
                 let buf = Bytes::from(data_to_send);
 
-                println!("Responding to keepalive message/warning... @response:{:x?}", buf);
+                trace!("Responding to keepalive message/warning... @response:{:x?}", buf);
                 let mut next_step = 1;
                 future::poll_fn(|cx| {
                     loop {

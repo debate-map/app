@@ -1,5 +1,6 @@
 use anyhow::Error;
 use flume::Sender;
+use tracing::{error, info};
 
 use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::JSONValue};
 
@@ -9,14 +10,14 @@ pub async fn migrate_db_to_v2(msg_sender: Sender<GeneralMessage>) -> Result<Stri
     // (maybe switch to using a shared program-wide pool, to avoid the need for this)
     let _handle = tokio::spawn(async move {
         if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
+            error!("connection error: {}", e);
         }
         //return connection;
     });
     
     let migration_id = "1".to_owned();
     let log = |text: &str| {
-        println!("MigrateLog: {text}");
+        info!("MigrateLog: {text}");
         msg_sender.send(GeneralMessage::MigrateLogMessageAdded(text.to_owned())).unwrap();
     };
 

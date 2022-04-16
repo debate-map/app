@@ -38,6 +38,7 @@ use axum::Error;
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
+use tracing::{info, warn};
 use uuid::Uuid;
 
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
@@ -198,10 +199,10 @@ impl LQGroup {
         //let watcher = entry.get_or_create_watcher(stream_id);
         let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
         let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
-        println!("LQ-watcher started. {}", watcher_info_str);
+        info!("LQ-watcher started. {}", watcher_info_str);
         // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
         if new_watcher_count > 4 {
-            println!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
+            warn!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
         }
         
         (result_entries_as_type, watcher.clone())
@@ -340,10 +341,10 @@ impl LQGroup {
         };
         if new_watcher_count == 0 {
             live_queries.remove(&lq_key);
-            println!("Watcher count for live-query entry dropped to 0, so removing.");
+            info!("Watcher count for live-query entry dropped to 0, so removing.");
         }
 
-        println!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, live_queries.len());
+        info!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, live_queries.len());
     }
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {
