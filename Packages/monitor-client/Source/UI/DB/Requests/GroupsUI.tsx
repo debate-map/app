@@ -9,7 +9,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions";
 export class GroupsUI extends BaseComponent<{}, {}> {
 	render() {
 		let {} = this.props;
-		const uiState = store.main.database.requests;
+		const uiState = store.main.db.requests;
 		const groups = uiState.groups;
 
 		// the code in the descendent comps just modify the data directly;

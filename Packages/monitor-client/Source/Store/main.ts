@@ -19,7 +19,7 @@ export class MainState {
 	// ==========
 
 	@O home = {} as {subpage: string};
-	@O database = new DatabaseState();
+	@O db = new DatabaseState();
 	/*@O netdata = {} as {subpage: string};
 	@O grafana = {} as {subpage: string};
 	@O prometheus = {} as {subpage: string};

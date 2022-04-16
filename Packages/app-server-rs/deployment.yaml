@@ -42,7 +42,7 @@ spec:
           limits:
             #cpu: "900m" # commented atm, due to limits apparently causing slowdown, even if limit not reached (see: https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits)
             # if it ends up using more than this, it is likely a memory leak; kill and restart should restore regular performance
-            memory: 2000Mi # temp-increased to 2gb, to fix OOM issue hit
+            memory: 3000Mi # temp-increased to 3gb, to fix OOM issue hit (will try to debug/fix soon)
         livenessProbe:
           httpGet:
             path: /health-check

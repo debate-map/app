@@ -85,7 +85,7 @@ export const RequestsUI extends BaseComponent<{}, {}> {
 
 export const RequestsUI = observer(()=>{
 	const adminKey = store.main.adminKey;
-	const uiState = store.main.database.requests;
+	const uiState = store.main.db.requests;
 
 	//const forceUpdate = useForceUpdate();
 	const rangeStart = uiState.showRange_end - uiState.showRange_duration;

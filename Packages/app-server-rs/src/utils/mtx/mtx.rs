@@ -185,18 +185,7 @@ impl Mtx {
                     // process any messages that have buffered up
                     MtxMessage::apply_messages_to_mtx_data(&section_lifetimes_clone, msg_receiver_clone.drain());
 
-                    let send_attempt_fut = send_mtx_data_to_monitor_backend(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str.clone());
-                    let data_as_str = match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
-                        Ok(regular_result) => {
-                            Some(regular_result.expect("Got error while sending mtx-tree to monitor-backend..."))
-                        },
-                        Err(_err) => {
-                            println!("Timed out trying to send mtx-tree to monitor-backend...");
-                            // if timeout happens, just ignore (there might have been local network glitch or something)
-                            //None
-                            last_data_as_str
-                        }
-                    };
+                    let data_as_str = try_send_mtx_data_to_monitor_backend(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str.clone()).await;
                     
                     last_data_as_str = data_as_str;
                     //println!("Sent partial results for mtx entry..."); // temp
@@ -277,8 +266,7 @@ impl Drop for Mtx {
             let (id_clone, section_lifetimes_clone) = (self.id.clone(), self.section_lifetimes.clone());
 
             tokio::spawn(async move {
-                send_mtx_data_to_monitor_backend(id_clone, section_lifetimes_clone, None).await
-                    .expect("Got error while sending mtx-tree to monitor-backend...");
+                try_send_mtx_data_to_monitor_backend(id_clone, section_lifetimes_clone, None).await;
             });
         }
     }
@@ -321,11 +309,48 @@ pub fn json_obj_1field<T: Serialize>(field_name: &str, field_value: T) -> Result
     format!("{service_name}.{namespace}.svc.cluster.local:{port}")
 }*/
 
-pub async fn send_mtx_data_to_monitor_backend(
+async fn try_send_mtx_data_to_monitor_backend(
     id: Arc<Uuid>,
     section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
     //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
-    last_data_as_str: Option<String>
+    last_data_as_str: Option<String>,
+) -> Option<String> {
+    let data_as_str = match mtx_data_to_str(id, section_lifetimes).await {
+        Ok(a) => a,
+        Err(err) => {
+            println!("Got error while converting mtx-tree to string... @err:{}", err);
+            return None;
+        }
+    };
+    let proceed = match last_data_as_str {
+        Some(last) => data_as_str != last,
+        None => true,
+    };
+    if proceed {
+        let send_attempt_fut = send_mtx_tree_to_monitor_backend(data_as_str.clone());
+        match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
+            Ok(regular_result) => {
+                match regular_result {
+                    Ok(_) => {},
+                    // if sending mtx-result to monitor fails, print the error, but don't crash the server
+                    Err(err) => {
+                        println!("Got error while sending mtx-tree to monitor-backend... @err:{}", err);
+                    }
+                }
+            },
+            // if timeout happens, just ignore (there might have been local network glitch or something)
+            Err(_err) => {
+                println!("Timed out trying to send mtx-tree to monitor-backend...");
+            }
+        };
+    }
+    Some(data_as_str)
+}
+
+pub async fn mtx_data_to_str(
+    id: Arc<Uuid>,
+    section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
+    //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
 ) -> Result<String, Error> {
     let mut data_as_map = Map::new();
     data_as_map.insert("id".to_owned(), serde_json::to_value((*id).clone())?);
@@ -344,13 +369,6 @@ pub async fn send_mtx_data_to_monitor_backend(
         wrapper.insert("mtx".to_owned(), JSONValue::Object(data_as_map));
         JSONValue::Object(wrapper).to_string()
     };
-    let proceed = match last_data_as_str {
-        Some(last) => data_as_str != last,
-        None => true,
-    };
-    if proceed {
-        send_mtx_tree_to_monitor_backend(data_as_str.clone()).await?;
-    }
     Ok(data_as_str)
 }
 

@@ -26,7 +26,8 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 	if (mapView == null) return;
 
 	const nodeIDs = Object.entries(mapView.rootNodeViews).SelectMany(([id, nodeView])=>{
-		return GetNodeIDsVisibleInNodeViewExpansionState(nodeView, id, true);
+		//return GetNodeIDsVisibleInNodeViewExpansionState(nodeView, id, true);
+		return GetNodeIDsVisibleInNodeViewExpansionState(nodeView, id, false);
 	}).Distinct();
 
 	for (const nodeID of nodeIDs) {

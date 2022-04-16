@@ -83,8 +83,10 @@ fn get_array<'a, T: FromSql<'a>>(row: &'a Row, column: &Column, column_i: usize,
 struct StringCollector(String);
 impl FromSql<'_> for StringCollector {
     fn from_sql(_: &Type, raw: &[u8]) -> Result<StringCollector, Box<dyn std::error::Error + Sync + Send>> {
-        let result = std::str::from_utf8(raw)?;
-        Ok(StringCollector(result.to_owned()))
+        /*let result = std::str::from_utf8_lossy(raw);
+        Ok(StringCollector(result.to_owned()))*/
+        let result = String::from_utf8_lossy(raw);
+        Ok(StringCollector(result.to_string()))
     }
     fn accepts(_ty: &Type) -> bool { true }
 }

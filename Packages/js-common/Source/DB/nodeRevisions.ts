@@ -4,6 +4,9 @@ import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
 import {MapNodeRevision} from "./nodes/@MapNodeRevision.js";
 
 export const GetNodeRevision = CreateAccessor((id: string|n)=>{
+	/*if (id == "HMemAFcKRtWjYcdktiGXGA") {
+		debugger;
+	}*/
 	return GetDoc({}, a=>a.nodeRevisions.get(id!));
 });
 

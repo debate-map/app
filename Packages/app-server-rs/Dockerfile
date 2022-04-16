@@ -136,21 +136,22 @@ COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./
 # regular running
 # ==========
 
-# CMD echo Starting Rust program...; \
-# #	./app-server-rs; \
-# 	RUST_BACKTRACE=full ./app-server-rs; \
-# 	sleep 1; echo Rust program crashed...
-# #	sleep 1; echo Rust program crashed...; sleep 123456789
+CMD echo Starting Rust program...; \
+#	./app-server-rs; \
+	RUST_BACKTRACE=full ./app-server-rs; \
+	sleep 1; echo Rust program crashed...
+#	sleep 1; echo Rust program crashed...; sleep 123456789
 
 # when you want to do memory-profiling
 # ==========
 
 # install heaptrack tool, for memory-usage profiling; and "ps" and such (see instructions below)
-RUN apt-get update && \
-	apt-get -y install heaptrack && \
-	apt-get -y install procps
+# RUN apt-get update && \
+# 	apt-get -y install heaptrack && \
+# 	apt-get -y install procps
 
-CMD RUST_BACKTRACE=full heaptrack ./app-server-rs; sleep 123456789
+# run the program, with heaptrack enabled
+# CMD RUST_BACKTRACE=full heaptrack ./app-server-rs; sleep 123456789
 
 # once running, and you've collected enough profiling data, do the following to view:
 # 1) Find program's process-id: `ps aux --sort -rss`

@@ -21,7 +21,7 @@ class SectionLayer {
 export class MtxResultUI extends BaseComponent<{mtx: Mtx}, {}> {
 	render() {
 		const {mtx} = this.props;
-		const uiState = store.main.database.requests;
+		const uiState = store.main.db.requests;
 		const sections = mtx.sectionLifetimes;
 		const highlightGroup = uiState.groups.filter(group=>group.enabled && group.highlight && MtxGroup.Matches(group, mtx)).LastOrX(); // have later matching groups take priority
 
@@ -98,7 +98,7 @@ export class SectionLayerUI extends BaseComponent<{group: SectionLayer, index: n
 export class SectionUI extends BaseComponent<{section: MtxSection, index: number}, {}> {
 	render() {
 		const {section, index} = this.props;
-		const uiState = store.main.database.requests;
+		const uiState = store.main.db.requests;
 		const start_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, section.startTime, true);
 		const end_asPercentage = GetPercentFromXToY(uiState.showRange_end - uiState.showRange_duration, uiState.showRange_end, section.startTime + section.Duration_Safe, true);
 
@@ -126,7 +126,7 @@ export class SectionUI extends BaseComponent<{section: MtxSection, index: number
 export class SectionUI_Expanded extends BaseComponent<{section: MtxSection, index: number, sections: MtxSection[]}, {}> {
 	render() {
 		const {section, index, sections} = this.props;
-		const uiState = store.main.database.requests;
+		const uiState = store.main.db.requests;
 
 		const subpath = section.path.split("/").slice(-2).join("/");
 		const childSections = sections.filter(a=>a.path.startsWith(`${section.path}/`) && a.path.split("/").length == section.path.split("/").length + 2);

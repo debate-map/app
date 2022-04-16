@@ -94,7 +94,7 @@ impl LQBatch {
         let (sql_text, params) = prepare_sql_query(&self.table_name, &lq_param_protos, &query_instance_vals, Some(&mtx))?;
 
         mtx.section("3:execute the combined query");
-        println!("Executing query-batch. @sql_text:{} @params:{:?}", sql_text, params);
+        //println!("Executing query-batch. @sql_text:{} @params:{:?}", sql_text, params);
         let rows: Vec<Row> = client.query_raw(&sql_text, params).await.map_err(to_anyhow)?
             .try_collect().await.map_err(to_anyhow)?;
 
@@ -104,9 +104,9 @@ impl LQBatch {
             let lq_index: i64 = row.get("lq_index");
             // convert to RowData structs (the behavior of RowData/JSONValue is simpler/more-standardized than tokio_postgres::Row)
             let columns_to_process = row.columns().len() - lq_param_protos.len();
-            println!("Columns to process:{columns_to_process} @protos_len:{}", lq_param_protos.len());
+            //println!("Columns to process:{columns_to_process} @protos_len:{}", lq_param_protos.len());
             let row_data = postgres_row_to_row_data(row, columns_to_process)?;
-            println!("Got row-data!:{:?}", row_data);
+            //println!("Got row-data!:{:?}", row_data);
             lq_results[lq_index as usize].push(row_data);
         }
 
