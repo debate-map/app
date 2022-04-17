@@ -1,4 +1,4 @@
-use std::{fmt, collections::HashMap};
+use std::{fmt, collections::HashMap, ops::Sub};
 
 use flume::{Sender, Receiver, TrySendError};
 use indexmap::IndexMap;
@@ -116,10 +116,12 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
             // todo: make-so this handles all fields
             entry.message = visitor.field_values.get("message").map(|a| a.to_owned()).unwrap_or_else(|| "[n/a]".to_string());
 
+            //self.event_sender.try_send(entry).unwrap();
+
             let mut target_open_slots = 10;
             loop {
                 // remove messages from start of queue, until there are at least X slots open
-                let entries_to_consume_to_reach_target_open_slots = usize::max(0, self.event_sender.len() - (self.event_sender.capacity().unwrap() - target_open_slots));
+                let entries_to_consume_to_reach_target_open_slots = self.event_sender.len().checked_sub(self.event_sender.capacity().unwrap() - target_open_slots).unwrap_or(0);
                 for _i in 0..entries_to_consume_to_reach_target_open_slots {
                     #[allow(unused_must_use)] {
                         self.event_receiver.recv();

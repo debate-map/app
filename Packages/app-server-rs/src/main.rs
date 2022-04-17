@@ -165,6 +165,10 @@ fn set_up_globals() -> Receiver<LogEntry> {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
         let stacktrace_str_simplified = simplify_stack_trace_str(stacktrace.to_string());
+
+        // if panic occurs, first do a simple logging with println!, in case the panic occurred within the logging-system
+        println!("Got panic. @info:{} [see next log-message for stack-trace]", info);
+
         error!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace_str_simplified);
         std::process::abort();
     }));

@@ -115,6 +115,7 @@ export class LogsUI extends BaseComponent<{}, {}> {
 						await refetch();*/
 						setLogEntries([]);
 					}}/>
+					<Text ml={5}>{`Note: "println" calls are not yet captured here.`}</Text>
 					<Row ml="auto">
 						<DropDown autoHide={false}>
 							<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
