@@ -30,7 +30,7 @@ export class LogEntry {
 	}
 	time: number;
 	level: string;
-	span_name: string;
+	spanName: string;
 	target: string;
 	message: string;
 }
@@ -55,94 +55,93 @@ mutation($adminKey: String!) {
 }
 `;*/
 
-export const LogsUI = observer(()=>{
-/*@Observer
+//export const LogsUI = observer(()=>{
+@Observer
 export class LogsUI extends BaseComponent<{}, {}> {
-	render() {*/
-	const adminKey = store.main.adminKey;
-	const uiState = store.main.logs;
+	render() {
+		const adminKey = store.main.adminKey;
+		const uiState = store.main.logs;
 
-	/*const {data, loading, refetch} = useQuery(LOG_ENTRIES_QUERY, {
+		/*const {data, loading, refetch} = useQuery(LOG_ENTRIES_QUERY, {
+				variables: {adminKey},
+			});
+			const logEntries_raw: LogEntry_Raw[] = data?.logEntries ?? [];
+			let logEntries = logEntries_raw.map(a=>LogEntry.FromRaw(a))
+				.filter(entry=>{
+					for (const group of uiState.groups) {
+						if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
+					}
+					return true;
+				});
+			// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
+			logEntries = logEntries.OrderBy(entry=>{
+				return entry.time;
+			});
+			console.log("Got data:", logEntries);*/
+
+		const [logEntries, setLogEntries] = useState([] as LogEntry[]);
+		const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
 			variables: {adminKey},
+			onSubscriptionData: info=>{
+				const newEntries_raw = info.subscriptionData.data.logEntries as LogEntry_Raw[];
+				const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
+				setLogEntries(logEntries.concat(newEntries_final));
+			},
 		});
-		const logEntries_raw: LogEntry_Raw[] = data?.logEntries ?? [];
-		let logEntries = logEntries_raw.map(a=>LogEntry.FromRaw(a))
+
+		const logEntriesToShow = logEntries
 			.filter(entry=>{
 				for (const group of uiState.groups) {
 					if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
 				}
 				return true;
 			});
-		// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
-		logEntries = logEntries.OrderBy(entry=>{
-			return entry.time;
-		});
-		console.log("Got data:", logEntries);*/
+		//logEntriesToShow = logEntriesToShow.OrderBy(a=>a.time);
 
-	const [logEntries, setLogEntries] = useState([] as LogEntry[]);
-	const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
-		variables: {adminKey},
-		onSubscriptionData: info=>{
-			const newEntries_raw = info.subscriptionData.data.logEntries as LogEntry_Raw[];
-			const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
-			setLogEntries(logEntries.concat(newEntries_final));
-		},
-	});
+		//const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);
 
-	const logEntriesToShow = logEntries
-		.filter(entry=>{
-			for (const group of uiState.groups) {
-				if (group.enabled && group.filter && !LogGroup.Matches(group, entry)) return false;
-			}
-			return true;
-		});
-	//logEntriesToShow = logEntriesToShow.OrderBy(a=>a.time);
-
-	//const [clearLogEntries, info] = useMutation(CLEAR_LOG_ENTRIES);
-
-	return (
-			<Column style={{flex: 1, height: "100%"}}>
-				<Row center>
-					<Text>Actions:</Text>
-					{/*<Button ml={5} text="Refresh" onClick={async()=>{
-						await refetch();
-						//forceUpdate(); // fsr, this is currently necessary
-					}}/>*/}
-					<Button ml={5} text="Clear (local list)" onClick={async()=>{
-						/*const {message} = (await clearLogEntries({
-							variables: {adminKey},
-						})).data;
-						await refetch();*/
-						setLogEntries([]);
-					}}/>
-					<Text ml={5}>{`Note: "println" calls are not yet captured here.`}</Text>
-					<Row ml="auto">
-						<DropDown autoHide={false}>
-							<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
-							<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
-								<LogGroupsUI/>
-							</DropDownContent>
-						</DropDown>
-						{/*<DropDown style={{marginLeft: 5}}>
-							<DropDownTrigger><Button style={{height: "100%"}} text="Others"/></DropDownTrigger>
-							<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
-								<Row center>
-									<Text>Significant duration threshold:</Text>
-									<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>
-									<Text>ms</Text>
-								</Row>
-							</Column></DropDownContent>
-						</DropDown>*/}
+		return (
+				<Column style={{flex: 1, height: "100%"}}>
+					<Row center>
+						<Text>Actions:</Text>
+						{/*<Button ml={5} text="Refresh" onClick={async()=>{
+							await refetch();
+							//forceUpdate(); // fsr, this is currently necessary
+						}}/>*/}
+						<Button ml={5} text="Clear (local list)" onClick={async()=>{
+							/*const {message} = (await clearLogEntries({
+								variables: {adminKey},
+							})).data;
+							await refetch();*/
+							setLogEntries([]);
+						}}/>
+						<Text ml={5}>{`Note: "println" calls are not yet captured here.`}</Text>
+						<Row ml="auto">
+							<DropDown autoHide={false}>
+								<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
+								<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
+									<LogGroupsUI/>
+								</DropDownContent>
+							</DropDown>
+							{/*<DropDown style={{marginLeft: 5}}>
+								<DropDownTrigger><Button style={{height: "100%"}} text="Others"/></DropDownTrigger>
+								<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
+									<Row center>
+										<Text>Significant duration threshold:</Text>
+										<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>
+										<Text>ms</Text>
+									</Row>
+								</Column></DropDownContent>
+							</DropDown>*/}
+						</Row>
 					</Row>
-				</Row>
-				<Row>Log entries ({logEntriesToShow.length})</Row>
-				<ScrollView className="selectable">
-					{logEntriesToShow.map((entry, index)=>{
-						return <LogEntryUI key={index} entry={entry}/>;
-					})}
-				</ScrollView>
-			</Column>
-	);
-	/*}
-}*/
-});
+					<Row>Log entries ({logEntriesToShow.length})</Row>
+					<ScrollView className="selectable">
+						{logEntriesToShow.map((entry, index)=>{
+							return <LogEntryUI key={index} entry={entry}/>;
+						})}
+					</ScrollView>
+				</Column>
+		);
+	}
+}
