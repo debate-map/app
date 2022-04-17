@@ -38,7 +38,7 @@ use axum::Error;
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
-use tracing::{info, warn};
+use tracing::{info, warn, debug};
 use uuid::Uuid;
 
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
@@ -199,7 +199,7 @@ impl LQGroup {
         //let watcher = entry.get_or_create_watcher(stream_id);
         let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
         let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
-        info!("LQ-watcher started. {}", watcher_info_str);
+        debug!("LQ-watcher started. {}", watcher_info_str);
         // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
         if new_watcher_count > 4 {
             warn!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
@@ -322,7 +322,7 @@ impl LQGroup {
         self.source_sender_for_lq_watcher_drops.clone()
     }*/
     pub async fn drop_lq_watcher(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid) {
-        info!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
+        debug!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
 
         let lq_key = get_lq_instance_key(table_name, filter);
         let mut live_queries = self.query_instances.write().await;
@@ -341,10 +341,10 @@ impl LQGroup {
         };
         if new_watcher_count == 0 {
             live_queries.remove(&lq_key);
-            info!("Watcher count for live-query entry dropped to 0, so removing.");
+            debug!("Watcher count for live-query entry dropped to 0, so removing.");
         }
 
-        info!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, live_queries.len());
+        debug!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, live_queries.len());
     }
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {

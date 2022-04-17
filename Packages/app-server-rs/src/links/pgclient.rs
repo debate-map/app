@@ -2,9 +2,10 @@ use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
 use bytes::Bytes;
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, PoolConfig};
 use futures::{future, StreamExt, Sink, ready};
-use tokio::join;
+use tokio::{join, select};
 use tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
 use tracing::{info, debug, error, trace};
+use anyhow::{anyhow, Error};
 
 use crate::{store::live_queries::{LQStorageWrapper}, utils::{type_aliases::JSONValue, db::pg_stream_parsing::LDChange}};
 
@@ -71,108 +72,133 @@ pub async fn start_streaming_changes(
     client: Client,
     connection: Connection<Socket, NoTlsStream>,
     storage_wrapper: LQStorageWrapper
-) -> Result<Client, tokio_postgres::Error> {
+) -> Result<Client, Error> {
 //) -> Result<(Client, Connection<Socket, NoTlsStream>), tokio_postgres::Error> {
+    info!("Starting pgclient::start_streaming_changes...");
+
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
-    let _handle = tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            error!("connection error: {}", e);
-        }
-        //return connection;
+    let fut1 = tokio::spawn(async move {
+        connection.await
     });
 
-    // now we can execute a simple statement just to confirm the connection was made
-    let rows = q(&client, "SELECT '123'").await;
-    assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");
+    let fut2 = tokio::spawn(async move {
+        // now we can execute a simple statement just to confirm the connection was made
+        let rows = q(&client, "SELECT '123'").await;
+        assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");
 
-    //let slot_name = "slot";
-    let slot_name = "slot_".to_owned() + &SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis().to_string();
-    let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"wal2json\"", slot_name);
-    let lsn = q(&client, &slot_query).await[0].get("consistent_point").unwrap().to_owned();
+        //let slot_name = "slot";
+        let slot_name = "slot_".to_owned() + &SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis().to_string();
+        let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"wal2json\"", slot_name);
+        let lsn = q(&client, &slot_query).await[0].get("consistent_point").unwrap().to_owned();
 
-    let query = format!("START_REPLICATION SLOT {} LOGICAL {}", slot_name, lsn);
-    let duplex_stream = client.copy_both_simple::<bytes::Bytes>(&query).await.unwrap();
-    let mut duplex_stream_pin = Box::pin(duplex_stream);
+        let query = format!("START_REPLICATION SLOT {} LOGICAL {}", slot_name, lsn);
+        let duplex_stream = client.copy_both_simple::<bytes::Bytes>(&query).await.unwrap();
+        let mut duplex_stream_pin = Box::pin(duplex_stream);
 
-    loop {
-        let event_res_opt = duplex_stream_pin.as_mut().next().await;
-        if event_res_opt.is_none() { break; }
-        //if event_res_opt.is_none() { continue; }
-        let event_res = event_res_opt.unwrap();
-        if event_res.is_err() { continue }
-        let event = event_res.unwrap();
-
-        // see here for list of message-types: https://www.postgresql.org/docs/10/protocol-replication.html
-        // type: XLogData (WAL data, ie. change of data in db)
-        if event[0] == b'w' {
-            debug!("Got XLogData/data-change event:{:?}", event);
-            //let event_as_str = std::str::from_utf8(&*event).unwrap();
-            //let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
-            let event_as_str_cow = String::from_utf8_lossy(&*event);
-            let event_as_str = event_as_str_cow.as_ref();
-            const START_OF_CHANGE_JSON: &str = "{\"change\":[";
-            
-            /*let event_as_str_bytes = event_as_str.as_bytes();
-            let idx = event_as_str.find("substring to match").unwrap();
-            let substring_bytes = &event_as_str_bytes[idx..];
-            let json_section_str = String::from_utf8(substring_bytes.to_vec()).unwrap();*/
-            let json_section_str = START_OF_CHANGE_JSON.to_owned() + event_as_str.split_once(START_OF_CHANGE_JSON).unwrap().1;
-            debug!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
-            
-            // see bottom of storage.rs for example json-data
-            let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
-            for change_raw in data["change"].as_array().unwrap() {
-                let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
-                storage_wrapper.notify_of_ld_change(&change).await;
+        loop {
+            let event_res_opt = duplex_stream_pin.as_mut().next().await;
+            if event_res_opt.is_none() {
+                info!("Duplex-stream from pgclient returned a None; breaking listen loop. (parent should spawn new connection soon)");
+                break;
             }
-        }
-        // type: keepalive message
-        else if event[0] == b'k' {
-            let last_byte = event.last().unwrap();
-            let timeout_imminent = last_byte == &1;
-            trace!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
-            if timeout_imminent {
-                // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
-                const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946_684_800;
-                let time_since_2000: u64 = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() - (SECONDS_FROM_UNIX_EPOCH_TO_2000 * 1000 * 1000)).try_into().unwrap();
+            //if event_res_opt.is_none() { continue; }
+            let event_res = event_res_opt.unwrap();
+            if event_res.is_err() { continue }
+            let event = event_res.unwrap();
+
+            // see here for list of message-types: https://www.postgresql.org/docs/10/protocol-replication.html
+            // type: XLogData (WAL data, ie. change of data in db)
+            if event[0] == b'w' {
+                debug!("Got XLogData/data-change event:{:?}", event);
+                //let event_as_str = std::str::from_utf8(&*event).unwrap();
+                //let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
+                let event_as_str_cow = String::from_utf8_lossy(&*event);
+                let event_as_str = event_as_str_cow.as_ref();
+                const START_OF_CHANGE_JSON: &str = "{\"change\":[";
                 
-                // see here for format details: https://www.postgresql.org/docs/10/protocol-replication.html
-                let mut data_to_send: Vec<u8> = vec![];
-                // Byte1('r'); Identifies the message as a receiver status update.
-                data_to_send.extend_from_slice(&[114]); // "r" in ascii
-                // The location of the last WAL byte + 1 received and written to disk in the standby.
-                data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
-                // The location of the last WAL byte + 1 flushed to disk in the standby.
-                data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
-                // The location of the last WAL byte + 1 applied in the standby.
-                data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
-                // The client's system clock at the time of transmission, as microseconds since midnight on 2000-01-01.
-                //0, 0, 0, 0, 0, 0, 0, 0,
-                data_to_send.extend_from_slice(&time_since_2000.to_be_bytes());
-                // Byte1; If 1, the client requests the server to reply to this message immediately. This can be used to ping the server, to test if the connection is still healthy.
-                data_to_send.extend_from_slice(&[1]);
+                /*let event_as_str_bytes = event_as_str.as_bytes();
+                let idx = event_as_str.find("substring to match").unwrap();
+                let substring_bytes = &event_as_str_bytes[idx..];
+                let json_section_str = String::from_utf8(substring_bytes.to_vec()).unwrap();*/
+                let json_section_str = START_OF_CHANGE_JSON.to_owned() + event_as_str.split_once(START_OF_CHANGE_JSON).unwrap().1;
+                debug!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
+                
+                // see bottom of storage.rs for example json-data
+                let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
+                for change_raw in data["change"].as_array().unwrap() {
+                    let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
+                    storage_wrapper.notify_of_ld_change(&change).await;
+                }
+            }
+            // type: keepalive message
+            else if event[0] == b'k' {
+                let last_byte = event.last().unwrap();
+                let timeout_imminent = last_byte == &1;
+                trace!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
+                if timeout_imminent {
+                    // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
+                    const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946_684_800;
+                    let time_since_2000: u64 = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() - (SECONDS_FROM_UNIX_EPOCH_TO_2000 * 1000 * 1000)).try_into().unwrap();
+                    
+                    // see here for format details: https://www.postgresql.org/docs/10/protocol-replication.html
+                    let mut data_to_send: Vec<u8> = vec![];
+                    // Byte1('r'); Identifies the message as a receiver status update.
+                    data_to_send.extend_from_slice(&[114]); // "r" in ascii
+                    // The location of the last WAL byte + 1 received and written to disk in the standby.
+                    data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
+                    // The location of the last WAL byte + 1 flushed to disk in the standby.
+                    data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
+                    // The location of the last WAL byte + 1 applied in the standby.
+                    data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
+                    // The client's system clock at the time of transmission, as microseconds since midnight on 2000-01-01.
+                    //0, 0, 0, 0, 0, 0, 0, 0,
+                    data_to_send.extend_from_slice(&time_since_2000.to_be_bytes());
+                    // Byte1; If 1, the client requests the server to reply to this message immediately. This can be used to ping the server, to test if the connection is still healthy.
+                    data_to_send.extend_from_slice(&[1]);
 
-                let buf = Bytes::from(data_to_send);
+                    let buf = Bytes::from(data_to_send);
 
-                trace!("Responding to keepalive message/warning... @response:{:x?}", buf);
-                let mut next_step = 1;
-                future::poll_fn(|cx| {
-                    loop {
-                        match next_step {
-                            1 => { ready!(duplex_stream_pin.as_mut().poll_ready(cx)).unwrap(); }
-                            2 => { duplex_stream_pin.as_mut().start_send(buf.clone()).unwrap(); },
-                            3 => { ready!(duplex_stream_pin.as_mut().poll_flush(cx)).unwrap(); },
-                            4 => { return Poll::Ready(()) },
-                            _ => panic!(),
+                    trace!("Responding to keepalive message/warning... @response:{:x?}", buf);
+                    let mut next_step = 1;
+                    future::poll_fn(|cx| {
+                        loop {
+                            match next_step {
+                                1 => { ready!(duplex_stream_pin.as_mut().poll_ready(cx)).unwrap(); }
+                                2 => { duplex_stream_pin.as_mut().start_send(buf.clone()).unwrap(); },
+                                3 => { ready!(duplex_stream_pin.as_mut().poll_flush(cx)).unwrap(); },
+                                4 => { return Poll::Ready(()) },
+                                _ => panic!(),
+                            }
+                            next_step += 1;
                         }
-                        next_step += 1;
-                    }
-                }).await;
+                    }).await;
+                }
             }
         }
-    }
 
-    Ok(client)
-    /*let connection = join!(handle).0.unwrap();
-    Ok((client, connection))*/
+        Ok(client)
+        /*let connection = join!(handle).0.unwrap();
+        Ok((client, connection))*/
+    });
+
+    select! {
+        fut1_result_in_join_result = fut1 => {
+            match fut1_result_in_join_result {
+                Err(join_err) => Err(Error::new(join_err)), // recast the join error as our main error
+                Ok(fut1_result) => match fut1_result {
+                    Err(err) => {
+                        error!("Connection error in base connection-thread of pgclient::start_streaming_changes: {}", err);
+                        Err(Error::new(err))
+                    },
+                    Ok(_) => Err(anyhow!("Base connection-thread of start_streaming_changes ended for some reason; returning, so can be restarted.")),
+                },
+            }
+        },
+        fut2_result_in_join_result = fut2 => {
+            match fut2_result_in_join_result {
+                Err(join_err) => Err(Error::new(join_err)), // recast the join error as our main error
+                Ok(fut2_result) => fut2_result,
+            }
+        },
+    }
 }

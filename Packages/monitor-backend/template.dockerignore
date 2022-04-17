@@ -2,6 +2,7 @@
 **/package.json
 **/package-lock.json
 **/yarn.lock
+**/yarn-lock-for-docker.lock
 **/.yalc
 
 # basic package exclusions (keep same order in all "template.dockerignore" files)

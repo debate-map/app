@@ -145,13 +145,16 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 
 	//if (true) return void done(null, {id}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
-	let user: User|n;
+	const user = await GetAsync(()=>GetUser(userBasicInfo.id));
+
+	/*let user: User|n;
 	// try this a few times; fsr, it sometimes return null when in fact the entry exists (would investigate more, but the app-server's being moved to rust anyway...)
 	for (let i = 0; i < 4; i++) {
 		user = await GetAsync(()=>GetUser(userBasicInfo.id));
 		if (user != null) break;
 		else await SleepAsync(500);
-	}
+	}*/
+
 	if (user == null) done(`Cannot find user with id "${userBasicInfo.id}".`);
 	done(null, user);
 });

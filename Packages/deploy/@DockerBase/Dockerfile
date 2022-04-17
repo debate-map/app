@@ -11,14 +11,15 @@ WORKDIR "/dm_repo"
 COPY package.json .
 COPY .yarn/ .yarn/
 COPY .yarnrc.yml .
-COPY yarn.lock .
+#COPY yarn.lock .
+COPY Others/yarn-lock-for-docker.lock yarn.lock
 COPY Packages/client/package.json Packages/client/package.json
 COPY Packages/js-common/package.json Packages/js-common/package.json
 COPY Packages/app-server/package.json Packages/app-server/package.json
 COPY Packages/web-server/package.json Packages/web-server/package.json
 COPY Packages/deploy/package.json Packages/deploy/package.json
 
-COPY .yalc/ .yalc/
+#COPY .yalc/ .yalc/ # don't do it here; apply these as an update after the main install
 #COPY yalc.lock .
 COPY patches/ patches/
 #COPY node_modules/web-vcore/patches/ node_modules/web-vcore/patches/
@@ -50,7 +51,7 @@ RUN apk --no-cache --virtual build-dependencies add python3 make g++ libexecinfo
 # remove python (and such) again, since not needed anymore
 	&& apk del build-dependencies \
 # exclude just-created caches (the caches can't be used anyway)
-	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
+#	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
 # delete folders that had to be marked as deps (eg. under web-vcore), but which are actually only needed at development time
 	&& rm -r /dm_repo/node_modules/typescript \
 # we can't exclude @babel quite yet, unfortunately, because some packages runtime-require it (eg. "react-textarea-autosize" requires "@babel/runtime/helpers/extends")
@@ -59,6 +60,13 @@ RUN apk --no-cache --virtual build-dependencies add python3 make g++ libexecinfo
 #	&& cd /dm_repo/node_modules/@babel && rm -r !(runtime)
 	&& cd /dm_repo/node_modules/@babel && find . -mindepth 1 -maxdepth 1 -type d ! -name "runtime" -exec rm -r {} \;
 # for additional options (such as enableInlineBuilds), modify the .yarnrc.yml file
+
+# *now* copy the .yalc folder, and rerun the yarn install (to apply the yalc-overrides)
+COPY .yalc/ .yalc/
+RUN yarn workspaces focus --all --production \
+	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
+	#&& rm -r /dm_repo/node_modules/typescript \
+	&& cd /dm_repo/node_modules/@babel && find . -mindepth 1 -maxdepth 1 -type d ! -name "runtime" -exec rm -r {} \;
 
 # strace: for debugging, eg. the "std::bad_alloc" error, as mentioned here: https://stackoverflow.com/a/59923848
 #RUN apk --no-cache add procps strace

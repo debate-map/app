@@ -429,8 +429,9 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 	* 3.1\) Option 1, using node directly: (not recommended atm)
 		* 3.1.1\) Run: `npm start app-server.dev` (has vsc-2 task)
 	* 3.2\) Option 2, using the app-server package within k8s:
-		* 3.2.1\) Run (in repo root): `npm start backend.tiltUp_local`
-		* 3.2.2\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+		* 3.2.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
+		* 3.2.2\) Run (in repo root): `npm start backend.tiltUp_local`
+		* 3.2.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
 	* Note: If changes were made that affect the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or run a database migration (see: [#db-migrate](#db-migrate)).
 * 4\) Backend should now be up and running. You can test the deployment by opening the frontend (eg. `localhost:[5100/5101]`), the `graphiql` page (`localhost:5110/graphiql`), etc.
 

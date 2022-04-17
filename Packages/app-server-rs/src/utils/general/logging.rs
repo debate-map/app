@@ -25,15 +25,17 @@ pub struct LogEntry {
     message: String,
 }
 
-pub fn should_event_be_kept(metadata: &Metadata) -> bool {
+pub fn should_event_be_kept(metadata: &Metadata, levels_to_exclude: Option<Level>) -> bool {
     // temp
     if !metadata.target().starts_with("app_server_rs") {
         return false;
     }
-    if matches!(*metadata.level(), Level::TRACE | Level::DEBUG) {
-        return false;
+    if let Some(levels_to_exclude) = levels_to_exclude {
+        if matches!(*metadata.level(), levels_to_exclude) {
+            return false;
+        }
     }
-        
+       
     // If this *is* "interesting_span", make sure to enable it.
     /*if metadata.is_span() && metadata.name() == "interesting_span" {
         return true;
@@ -57,7 +59,7 @@ pub fn set_up_logging() -> Receiver<LogEntry> {
         should_event_be_kept(metadata)
     });*/
     let printing_layer_func = filter::filter_fn(move |metadata| {
-        should_event_be_kept(metadata)
+        should_event_be_kept(metadata, Some(Level::TRACE))
     });
 
     let printing_layer = tracing_subscriber::fmt::layer().with_filter(printing_layer_func);
@@ -94,7 +96,7 @@ impl/*<F>*/ Layer_WithIntercept/*<F>*/ {
 impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
     fn on_event(&self, event: &Event<'_>, ctx: Context<'_, S>) {
         let metadata = event.metadata();
-        if should_event_be_kept(metadata) {
+        if should_event_be_kept(metadata, None) {
             let mut entry = LogEntry {
                 time: time_since_epoch_ms(),
                 level: metadata.level().to_string(),

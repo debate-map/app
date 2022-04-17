@@ -23,6 +23,8 @@ Packages/**/node_modules
 .yarn/*
 !.yarn/releases
 !.yarn/plugins
+# yarn.lock is excluded, because we always use `Others/yarn-lock-for-docker.lock` instead
+yarn.lock
 yalc.lock
 Temp
 target
