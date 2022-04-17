@@ -20,14 +20,14 @@ wrap_slow_macros!{
 pub struct LogEntry {
     pub time: f64,
     pub level: String,
-    pub span_name: String,
     pub target: String,
+    pub span_name: String,
     pub message: String,
 }
 
 }
 
-pub async fn connect_to_app_server_rs(mut sender: ABSender<GeneralMessage>) {
+pub async fn connect_to_app_server_rs(sender: ABSender<GeneralMessage>) {
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
 

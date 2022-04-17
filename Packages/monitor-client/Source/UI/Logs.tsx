@@ -15,13 +15,15 @@ export class LogEntry_Raw {
 	time: number;
 	level: string;
 
-	spanName: string;
 	target: string;
+	spanName: string;
 
 	message: string;
 }
 
 // synthesized from the above, for easier processing
+export const Level_values = ["ERROR", "WARN", "INFO", "DEBUG", "TRACE"] as const;
+export type Level = typeof Level_values[number];
 export class LogEntry {
 	static FromRaw(raw: LogEntry_Raw) {
 		const result = new LogEntry();
@@ -29,9 +31,9 @@ export class LogEntry {
 		return result;
 	}
 	time: number;
-	level: string;
-	spanName: string;
+	level: Level;
 	target: string;
+	spanName: string;
 	message: string;
 }
 
@@ -40,8 +42,8 @@ subscription($adminKey: String!) {
 	logEntries(adminKey: $adminKey) {
 		time
 		level
-		spanName
 		target
+		spanName
 		message
 	}
 }
@@ -135,7 +137,7 @@ export class LogsUI extends BaseComponent<{}, {}> {
 							</DropDown>*/}
 						</Row>
 					</Row>
-					<Row>Log entries ({logEntriesToShow.length})</Row>
+					<Row>Log entries (showing {logEntriesToShow.length} of {logEntries.length})</Row>
 					<ScrollView className="selectable">
 						{logEntriesToShow.map((entry, index)=>{
 							return <LogEntryUI key={index} entry={entry}/>;

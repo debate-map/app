@@ -1,6 +1,7 @@
 import React from "react";
 import {store} from "Store";
 import {LogConstraint, LogGroup} from "Store/main/logs/LogGroup";
+import {Level_values} from "UI/Logs";
 import {Chroma, Chroma_Safe, InfoButton, Observer, RunInAction} from "web-vcore";
 import {Clone} from "web-vcore/nm/js-vextensions";
 import {Button, CheckBox, ColorPickerBox, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -76,6 +77,32 @@ class LogConstraintUI extends BaseComponent<{constraint: LogConstraint, index: n
 				<Row>
 					<CheckBox text="Enabled" value={constraint.enabled} onChange={val=>Change(constraint.enabled = val)}/>
 					<Button ml={5} text="Delete" onClick={()=>Change(constraints.Remove(constraint))}/>
+				</Row>
+				<Row center>
+					<CheckBox ml={5} text="Level:" value={constraint.level_matchEnabled} onChange={val=>Change(constraint.level_matchEnabled = val)}/>
+					{/*<TextInput ml={5} style={{flex: 1}} value={constraint.level_matchStr} onChange={val=>Change(constraint.level_matchStr = val)}/>
+					<InfoButton ml={5} text={`
+						You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
+					`.AsMultiline(0)}/>*/}
+					{Level_values.map(levelVal=>{
+						return <CheckBox key={levelVal} ml={5} text={levelVal} value={constraint.level_matchVals.includes(levelVal)} onChange={val=>{
+							Change(constraint.level_matchVals = Level_values.filter(a=>(a == levelVal ? val : constraint.level_matchVals.includes(a))));
+						}}/>;
+					})}
+				</Row>
+				<Row center>
+					<CheckBox ml={5} text="Target:" value={constraint.target_matchEnabled} onChange={val=>Change(constraint.target_matchEnabled = val)}/>
+					<TextInput ml={5} style={{flex: 1}} value={constraint.target_matchStr} onChange={val=>Change(constraint.target_matchStr = val)}/>
+					<InfoButton ml={5} text={`
+						You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
+					`.AsMultiline(0)}/>
+				</Row>
+				<Row center>
+					<CheckBox ml={5} text="SpanName:" value={constraint.spanName_matchEnabled} onChange={val=>Change(constraint.spanName_matchEnabled = val)}/>
+					<TextInput ml={5} style={{flex: 1}} value={constraint.spanName_matchStr} onChange={val=>Change(constraint.spanName_matchStr = val)}/>
+					<InfoButton ml={5} text={`
+						You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
+					`.AsMultiline(0)}/>
 				</Row>
 				<Row center>
 					<CheckBox ml={5} text="Message:" value={constraint.message_matchEnabled} onChange={val=>Change(constraint.message_matchEnabled = val)}/>

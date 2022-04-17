@@ -17,11 +17,11 @@ pub struct LogEntry {
     pub time: f64,
     pub level: String,
 
-    pub span_name: String,
+    //pub module_path: String,
+    pub target: String, // generally, this equals module_path (but not necessarily, as per docs)
     /*pub kind: String,
-    pub module_path: String,
     pub line_number: usize,*/
-    pub target: String, // also include this, since according to docs, it *may* be different than what's present in span_name and module_path
+    pub span_name: String, // generally, this equals [kind + file-path + line-number] (but not necessarily, afaik)
 
     pub message: String,
 }
@@ -102,8 +102,8 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
             let mut entry = LogEntry {
                 time: time_since_epoch_ms(),
                 level: metadata.level().to_string(),
-                span_name: metadata.name().to_owned(),
                 target: metadata.target().to_owned(),
+                span_name: metadata.name().to_owned(),
                 //message: format!("{:?}", metadata),
                 //message: metadata.fields().field("message").map(|a| a.to_string()).unwrap_or("[n/a]".to_string()),
                 message: "[to be loaded...]".to_owned(),

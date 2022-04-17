@@ -44,3 +44,6 @@ export function FieldMatchesStr(fieldValue: string, matchStr: string) {
 	}
 	return fieldValue.includes(matchStr);
 }
+export function FieldMatchesValInList(fieldValue: string, matchVals: string[]) {
+	return matchVals.includes(fieldValue);
+}
