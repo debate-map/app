@@ -25,6 +25,12 @@ pub struct QueryShard_General;
 impl QueryShard_General {
     /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
+    
+    // useful for testing monitor-tool's logs page
+    async fn print_empty_log(&self) -> &str {
+        info!("print_empty_log called");
+        ""
+    }
 }
 
 // mutations

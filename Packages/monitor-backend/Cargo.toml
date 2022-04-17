@@ -22,13 +22,16 @@ url = "2"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 #crossbeam-channel = "0.5.2"
 flume = "0.10.10"
-hyper = {version = "0.14.16", features = ["client"] }
+#postage = { version = "0.4.1", features = ["futures-traits"] }
+async-broadcast = "0.4.0"
+hyper = {version = "0.14.18", features = ["client"] }
 deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
 deadpool-postgres = "0.10.1"
 indexmap = {version = "1.8.0", features = ["serde"]}
 async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
 tokio-tungstenite = "*"
+lazy_static = "1.4.0"
 
 # needed for async-graphql "scalar!" macro
 serde = "*"

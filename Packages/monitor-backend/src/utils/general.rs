@@ -1,8 +1,15 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{collections::{BTreeMap, HashMap}, time::{SystemTime, Duration, UNIX_EPOCH}};
 
 use anyhow::Error;
 use hyper::Body;
 use serde::Serialize;
+
+pub fn time_since_epoch() -> Duration {
+    SystemTime::now().duration_since(UNIX_EPOCH).unwrap()
+}
+pub fn time_since_epoch_ms() -> f64 {
+    time_since_epoch().as_secs_f64() * 1000f64
+}
 
 pub async fn body_to_str(body: Body) -> Result<String, Error> {
     let bytes1 = hyper::body::to_bytes(body).await?;

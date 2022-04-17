@@ -1,5 +1,6 @@
 #![feature(backtrace)]
 #![feature(fn_traits)]
+#![feature(type_alias_impl_trait)]
 //#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
@@ -39,16 +40,17 @@ use links::app_server_rs_link::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use tracing::{error, info};
+use utils::{general::time_since_epoch_ms, type_aliases::{FSender, FReceiver}};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
-    sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible, str::FromStr,
+    sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible, str::FromStr, time::Duration,
 };
 use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results, links::app_server_rs_link::connect_to_app_server_rs};
+use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results, links::app_server_rs_link::connect_to_app_server_rs, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
 mod gql {
@@ -60,6 +62,7 @@ mod links {
     pub mod app_server_rs_link;
 }
 mod utils {
+    pub mod futures;
     pub mod general;
     pub mod type_aliases;
 }
@@ -94,7 +97,7 @@ pub fn get_cors_layer() -> CorsLayer {
 
 #[derive(Clone, Debug)]
 pub enum GeneralMessage {
-    //LogEntryAdded(LogEntry),
+    LogEntryAdded(LogEntry),
     MigrateLogMessageAdded(String),
 }
 
@@ -102,10 +105,10 @@ pub enum GeneralMessage {
 // it fails for async-flume as well, but switching to sync-flume fixes it -- so we need this second-version of GeneralMessage that uses flume (maybe switch to flume completely later, eg. making a broadcast-like wrapper)
 // I suspect the issue has something to do with the "silent dropping of futures" that I had to work-around in handlers.rs...
 // ...but wasn't able to discover the "difference" between MigrateLogMessageAdded and LogEntryAdded pathway that would explain it (and thus suggest a proper solution)
-#[derive(Clone, Debug)]
+/*#[derive(Clone, Debug)]
 pub enum GeneralMessage_Flume {
     LogEntryAdded(LogEntry),
-}
+}*/
 
 fn set_up_globals() {
     panic::set_hook(Box::new(|info| {
@@ -133,11 +136,15 @@ async fn main() {
         .route("/send-mtx-results", post(send_mtx_results))
         .fallback(get(handler));
 
-    let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
-    let (msg_sender, msg_receiver): (broadcast::Sender<GeneralMessage>, broadcast::Receiver<GeneralMessage>) = broadcast::channel(100);
-    tokio::spawn(connect_to_app_server_rs(msg_sender_test.clone()));
+    //let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
+    //let (msg_sender, msg_receiver): (broadcast::Sender<GeneralMessage>, broadcast::Receiver<GeneralMessage>) = broadcast::channel(10000);
+    //let (msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = postage::broadcast::channel(10000);
+    let (mut msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = async_broadcast::broadcast(10000);
+    msg_sender.set_overflow(true);
+    //tokio::spawn(connect_to_app_server_rs(msg_sender_test.clone()));
+    tokio::spawn(connect_to_app_server_rs(msg_sender.clone()));
 
-    let app = gql_::extend_router(app, msg_sender, msg_receiver, msg_sender_test, msg_receiver_test, app_state.clone()).await;
+    let app = gql_::extend_router(app, msg_sender, msg_receiver, /*msg_sender_test, msg_receiver_test,*/ app_state.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app

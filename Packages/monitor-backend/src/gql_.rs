@@ -38,11 +38,11 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
-use crate::{GeneralMessage, GeneralMessage_Flume};
+use crate::{GeneralMessage};
 use crate::gql::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::store::storage::AppStateWrapper;
 use crate::utils::general::body_to_str;
-use crate::utils::type_aliases::JSONValue;
+use crate::utils::type_aliases::{JSONValue, ABSender, ABReceiver};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 use flume::{Sender, Receiver, unbounded};
 
@@ -116,8 +116,8 @@ pub async fn graphql_handler(Extension(schema): Extension<RootSchema>, req: Requ
 
 pub async fn extend_router(
     app: Router,
-    msg_sender: broadcast::Sender<GeneralMessage>, msg_receiver: broadcast::Receiver<GeneralMessage>,
-    msg_sender_test: Sender<GeneralMessage_Flume>, msg_receiver_test: Receiver<GeneralMessage_Flume>,
+    msg_sender: ABSender<GeneralMessage>, msg_receiver: ABReceiver<GeneralMessage>,
+    //msg_sender_test: Sender<GeneralMessage_Flume>, msg_receiver_test: Receiver<GeneralMessage_Flume>,
     app_state: AppStateWrapper
 ) -> Router {
     let schema =
@@ -126,8 +126,8 @@ pub async fn extend_router(
         }
         .data(msg_sender)
         .data(msg_receiver)
-        .data(msg_sender_test)
-        .data(msg_receiver_test)
+        /*.data(msg_sender_test)
+        .data(msg_receiver_test)*/
         .data(app_state)
         .finish();
 

@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Context, Error};
 use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use flume::{Receiver, Sender};
+use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
 use rust_macros::wrap_slow_macros;
@@ -15,12 +16,13 @@ use std::path::Path;
 use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::{GeneralMessage, GeneralMessage_Flume};
+use crate::utils::futures::make_reliable;
+use crate::{GeneralMessage};
 use crate::links::app_server_rs_link::LogEntry;
 use crate::migrations::v2::migrate_db_to_v2;
 use crate::store::storage::{Mtx, AppStateWrapper};
 use crate::utils::general::body_to_str;
-use crate::utils::type_aliases::JSONValue;
+use crate::utils::type_aliases::{JSONValue, ABSender, ABReceiver};
 
 pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
     let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
@@ -178,31 +180,60 @@ impl SubscriptionShard_General {
         } })
     }
 
-    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<Vec<LogEntry>, SubError>> + 'a {
-        let msg_receiver = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
-        /*let msg_receiver_base = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
-        //let mut msg_receiver = msg_receiver_base.subscribe();
-        let mut msg_receiver = msg_receiver_base.clone();*/
+    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<Vec<LogEntry>, SubError>> + 'a {        
+        //let msg_receiver = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
+
+        let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
+        //let mut msg_receiver = msg_sender.subscribe();
+        //let mut temp = msg_sender.subscribe().peekable();
+        let mut msg_receiver = msg_sender.new_receiver();
+        // msg_receiver.len() includes entries from before its creation, so set the messages_processed variable appropriately
+        let mut messages_processed = msg_receiver.len();
+
         //let result = tokio::spawn(async move {
         let base_stream = async_stream::stream! {
             if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
 
             //yield Ok(LogEntry::default());
             let mut new_entries = vec![]; // use buffer, for more efficient transfer+rerendering
+            //let mut entries_sent = 0;
             loop {
-                //println!("Waiting...");
-                //let next_msg = msg_receiver.recv_async().await.unwrap();
-                let next_msg = msg_receiver.recv().unwrap();
-                //println!("Msg:{:?}", next_msg);
+                //global_tick_helper().await;
+
+                //let mut msg_receiver = Pin::new(&mut temp);
+                //use postage::prelude::Stream;
+
+                /*let next_msg = msg_receiver.recv().unwrap();
                 match next_msg {
-                    //GeneralMessage_Flume::MigrateLogMessageAdded(_text) => {},
                     GeneralMessage_Flume::LogEntryAdded(entry) => {
                         new_entries.push(entry);
                     },
+                }*/
+
+                //println!("Waiting...");
+                //match msg_receiver.recv().await {
+                //match msg_receiver.next().await {
+                match make_reliable(msg_receiver.recv(), Duration::from_millis(10)).await {
+                    Err(_err) => break, // channel closed (program must have crashed), end loop
+                    Ok(msg) => {
+                        //println!("Msg#:{messages_processed} @msg:{:?}", msg);
+                        match msg {
+                            GeneralMessage::MigrateLogMessageAdded(_text) => {},
+                            GeneralMessage::LogEntryAdded(entry) => {
+                                //entries_sent += 1;
+                                //entry.message = entries_sent.to_string() + "     " + &entry.message;
+                                new_entries.push(entry);
+                            },
+                        }
+                        messages_processed += 1;
+                    }
                 }
 
                 // if no more messages bufferred up, and we've collected some new log-entries, then send that set of new-entries to the client
-                if msg_receiver.is_empty() && !new_entries.is_empty() {
+                //if msg_receiver.is_empty() && !new_entries.is_empty() {
+                let messages_still_buffered = msg_receiver.len().checked_sub(messages_processed).unwrap_or(0);
+                //println!("@messages_still_buffered:{messages_still_buffered} @part1:{} @part2:{}", msg_receiver.len(), messages_processed);
+                if messages_still_buffered == 0 && !new_entries.is_empty() {
                     yield Ok(new_entries);
                     new_entries = vec![];
                 }
@@ -214,19 +245,29 @@ impl SubscriptionShard_General {
     }
 
     async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<MigrationLogEntry, SubError>> + 'a {
-        let msg_receiver_base = ctx.data::<broadcast::Sender<GeneralMessage>>().unwrap();
-        let mut msg_receiver = msg_receiver_base.subscribe();
+        let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
+        //let mut msg_receiver = msg_sender.subscribe();
+        let mut msg_receiver = msg_sender.new_receiver();
+        
+        //let mut msg_receiver = ctx.data::<PBReceiver<GeneralMessage>>().unwrap().clone();
+
         let base_stream = async_stream::stream! {
             if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
 
             yield Ok(MigrationLogEntry { text: "Stream started...".to_owned() });
             loop {
-                let next_msg = msg_receiver.recv().await.unwrap();
-                match next_msg {
-                    GeneralMessage::MigrateLogMessageAdded(text) => {
-                        yield Ok(MigrationLogEntry { text });
-                    },
-                    //GeneralMessage::LogEntryAdded(_entry) => {},
+                //use postage::prelude::Stream;
+
+                //let next_msg = msg_receiver.recv().await.unwrap();
+                match msg_receiver.recv().await {
+                //match msg_receiver.next().await {
+                    Err(_err) => break, // channel closed (program must have crashed), end loop
+                    Ok(msg) => match msg {
+                        GeneralMessage::MigrateLogMessageAdded(text) => {
+                            yield Ok(MigrationLogEntry { text });
+                        },
+                        GeneralMessage::LogEntryAdded(_entry) => {},
+                    }
                 }
             }
         };

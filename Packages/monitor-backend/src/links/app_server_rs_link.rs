@@ -11,23 +11,23 @@ use tracing::{debug, error, info};
 use url::Url;
 use tokio_tungstenite::tungstenite::{connect, Message};
 
-use crate::{GeneralMessage, GeneralMessage_Flume};
+use crate::{GeneralMessage, utils::type_aliases::ABSender};
 
 wrap_slow_macros!{
 
 // keep fields synced with struct in logging.rs (this one's the "mirror")
 #[derive(SimpleObject, Clone, Serialize, Deserialize, Debug, Default)]
 pub struct LogEntry {
-    time: f64,
-    level: String,
-    span_name: String,
-    target: String,
-    message: String,
+    pub time: f64,
+    pub level: String,
+    pub span_name: String,
+    pub target: String,
+    pub message: String,
 }
 
 }
 
-pub async fn connect_to_app_server_rs(sender: Sender<GeneralMessage_Flume>) {
+pub async fn connect_to_app_server_rs(mut sender: ABSender<GeneralMessage>) {
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
 
@@ -73,7 +73,7 @@ pub async fn connect_to_app_server_rs(sender: Sender<GeneralMessage_Flume>) {
             };
 
             //println!("Received log-entry:{}", msg_as_str);
-            match sender.send(GeneralMessage_Flume::LogEntryAdded(log_entry)) {
+            match sender.broadcast(GeneralMessage::LogEntryAdded(log_entry)).await {
                 Ok(_) => {
                     //println!("Test1:{count}");
                     //println!("Test1");
