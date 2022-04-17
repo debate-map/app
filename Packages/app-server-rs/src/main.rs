@@ -39,9 +39,8 @@ use axum::{
 };
 use flume::Receiver;
 use serde_json::json;
-use tokio::sync::broadcast;
 use tower_http::cors::{CorsLayer, Origin};
-use utils::general::{mem_alloc::Trallocator, logging::{set_up_logging, LogEntry}};
+use utils::{general::{mem_alloc::Trallocator, logging::{set_up_logging, LogEntry}}, type_aliases::{ABSender, ABReceiver}};
 use std::{
     net::{SocketAddr}, panic, backtrace::Backtrace,
 };
@@ -160,7 +159,7 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
-fn set_up_globals() -> broadcast::Sender<LogEntry> {
+fn set_up_globals() -> (ABSender<LogEntry>, ABReceiver<LogEntry>) {
     //panic::always_abort();
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
@@ -174,15 +173,16 @@ fn set_up_globals() -> broadcast::Sender<LogEntry> {
         std::process::abort();
     }));
 
-    let (s1, r1): (broadcast::Sender<LogEntry>, broadcast::Receiver<LogEntry>) = broadcast::channel(10000);
+    let (mut s1, r1): (ABSender<LogEntry>, ABReceiver<LogEntry>) = async_broadcast::broadcast(10000);
+    s1.set_overflow(true);
     set_up_logging(s1.clone());
-    s1
+    (s1, r1)
 }
 
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    let log_entry_sender = set_up_globals();
+    let (log_entry_sender, log_entry_receiver) = set_up_globals();
     println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
     GLOBAL.reset();
@@ -217,6 +217,7 @@ async fn main() {
         .layer(AddExtensionLayer::new(app_state))
         .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
         .layer(AddExtensionLayer::new(log_entry_sender))
+        .layer(AddExtensionLayer::new(log_entry_receiver))
         .layer(get_cors_layer());
 
     let _handler = tokio::spawn(async move {

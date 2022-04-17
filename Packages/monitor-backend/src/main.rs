@@ -39,7 +39,8 @@ use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Re
 use links::app_server_rs_link::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
-use tracing::{error, info};
+use tracing::{error, info, Level, Metadata};
+use tracing_subscriber::{Layer, filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
 use utils::{general::time_since_epoch_ms, type_aliases::{FSender, FReceiver}};
 use std::{
     collections::HashSet,
@@ -117,8 +118,18 @@ fn set_up_globals() {
         std::process::abort();
     }));
 
-    // install global collector configured based on RUST_LOG env var.
-    tracing_subscriber::fmt::init();
+    //tracing_subscriber::fmt::init(); // install global collector configured based on RUST_LOG env var
+    let printing_layer = tracing_subscriber::fmt::layer().with_filter(filter::filter_fn(move |metadata| {
+        //should_event_be_kept(metadata, &[Level::TRACE, Level::DEBUG])
+        should_event_be_kept(metadata, &[Level::TRACE])
+        //should_event_be_kept(metadata, &[])
+    }));
+    tracing_subscriber::registry().with(printing_layer).init();
+}
+pub fn should_event_be_kept(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
+    if !metadata.target().starts_with("monitor_backend") { return false; }
+    if levels_to_exclude.contains(metadata.level()) { return false; }
+    true
 }
 
 #[tokio::main]

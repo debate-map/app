@@ -331,6 +331,10 @@ async fn try_send_mtx_data_to_monitor_backend(
     if proceed {
         let send_attempt_fut = send_mtx_tree_to_monitor_backend(data_as_str.clone());
         match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
+            // if timeout happens, just ignore (there might have been local network glitch or something)
+            Err(_err) => {
+                error!("Timed out trying to send mtx-tree to monitor-backend...");
+            }
             Ok(regular_result) => {
                 match regular_result {
                     Ok(_) => {},
@@ -340,10 +344,6 @@ async fn try_send_mtx_data_to_monitor_backend(
                     }
                 }
             },
-            // if timeout happens, just ignore (there might have been local network glitch or something)
-            Err(_err) => {
-                error!("Timed out trying to send mtx-tree to monitor-backend...");
-            }
         };
     }
     Some(data_as_str)

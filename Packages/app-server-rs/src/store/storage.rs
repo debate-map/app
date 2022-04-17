@@ -18,7 +18,7 @@ use flume::{Sender, Receiver, unbounded};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
-use tokio::sync::{broadcast, mpsc, Mutex, RwLock};
+use tokio::sync::{mpsc, Mutex, RwLock};
 use tokio_postgres::{Client, Row};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};

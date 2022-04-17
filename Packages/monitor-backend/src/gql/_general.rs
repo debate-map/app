@@ -8,7 +8,6 @@ use rust_macros::wrap_slow_macros;
 use rust_shared::SubError;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use tokio::sync::broadcast;
 use tokio_postgres::{Client};
 use tracing::error;
 use std::env;
@@ -65,7 +64,7 @@ impl QueryShard_General {
         Ok(mtx_results_filtered)
     }
     
-    async fn basicInfo(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, Error> {
+    async fn basicInfo(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
         
         let basic_info = get_basic_info_from_app_server_rs().await?;

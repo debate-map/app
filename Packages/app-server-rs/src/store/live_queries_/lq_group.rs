@@ -23,7 +23,7 @@ use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
-use tokio::sync::{broadcast, mpsc, Mutex, RwLock};
+use tokio::sync::{mpsc, Mutex, RwLock};
 use tokio::time::Instant;
 use tokio_postgres::{Client, Row};
 use tower::Service;
@@ -49,7 +49,7 @@ use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
 use crate::utils::general::general::{AtomicF64, time_since_epoch_ms};
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
-use crate::utils::type_aliases::{JSONValue, PGClientObject};
+use crate::utils::type_aliases::{JSONValue, PGClientObject, ABReceiver, ABSender};
 
 use super::lq_batch::LQBatch;
 use super::lq_instance::{LQInstance, LQEntryWatcher};
@@ -120,8 +120,8 @@ pub struct LQGroup {
     pub filter_shape: QueryFilter,
 
     // for coordination of currently-buffering batches
-    pub channel_for_batch_messages__sender_base: broadcast::Sender<LQBatchMessage>,
-    pub channel_for_batch_messages__receiver_base: broadcast::Receiver<LQBatchMessage>,
+    pub channel_for_batch_messages__sender_base: ABSender<LQBatchMessage>,
+    pub channel_for_batch_messages__receiver_base: ABReceiver<LQBatchMessage>,
     
     pub batches: Vec<RwLock<LQBatch>>,
     pub batches_meta: RwLock<LQGroup_BatchesMeta>,
@@ -134,7 +134,7 @@ impl LQGroup {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
         //let (s1, r1): (Sender<LQBatchMessage>, Receiver<LQBatchMessage>) = flume::unbounded();
         //let r1_clone = r1.clone(); // clone needed for tokio::spawn closure below
-        let (s1, r1): (broadcast::Sender<LQBatchMessage>, broadcast::Receiver<LQBatchMessage>) = broadcast::channel(10);
+        let (s1, r1): (ABSender<LQBatchMessage>, ABReceiver<LQBatchMessage>) = async_broadcast::broadcast(10);
         let new_self = Self {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),
@@ -253,7 +253,7 @@ impl LQGroup {
         if !this_call_triggers_execution {
             new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx, Some(format!("@batch_i:{batch_i}")));
             //let sender_clone = self.channel_for_batch_messages__sender_base.clone();
-            let mut receiver = self.channel_for_batch_messages__sender_base.subscribe();
+            let mut receiver = self.channel_for_batch_messages__sender_base.new_receiver();
             loop {
                 let msg = receiver.recv().await.unwrap();
                 match msg {
@@ -315,7 +315,7 @@ impl LQGroup {
             //meta.last_batch_buffering_started_index = batch_i as i64;
         }
 
-        self.channel_for_batch_messages__sender_base.send(LQBatchMessage::NotifyExecutionDone(batch_i)).unwrap();
+        self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
     }
 
     /*pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {

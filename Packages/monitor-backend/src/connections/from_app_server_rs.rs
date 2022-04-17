@@ -13,7 +13,7 @@ use serde::Deserialize;
 use serde_json::json;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
-use tracing::{error, info};
+use tracing::{error, info, trace};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
@@ -52,7 +52,7 @@ pub async fn send_mtx_results(
     }
 
     let SendMtxResults_Request { mtx } = payload;
-    info!("Got mtx-result:{}", serde_json::to_string_pretty(&mtx).unwrap());
+    trace!("Got mtx-result:{}", serde_json::to_string_pretty(&mtx).unwrap());
 
     let mut mtx_results = app_state.mtx_results.write().await;
     if let Some(existing_entry) = mtx_results.iter().enumerate().find(|(_, entry)| entry.id == mtx.id) {

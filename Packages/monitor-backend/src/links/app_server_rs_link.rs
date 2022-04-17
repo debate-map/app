@@ -3,13 +3,14 @@ use std::time::Duration;
 
 use async_graphql::SimpleObject;
 use flume::Sender;
+use futures_util::StreamExt;
 use rust_macros::wrap_slow_macros;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use tokio::sync::broadcast;
+use tokio::time;
 use tracing::{debug, error, info};
 use url::Url;
-use tokio_tungstenite::tungstenite::{connect, Message};
+use tokio_tungstenite::{tungstenite::{connect, Message}, connect_async};
 
 use crate::{GeneralMessage, utils::type_aliases::ABSender};
 
@@ -31,14 +32,23 @@ pub async fn connect_to_app_server_rs(sender: ABSender<GeneralMessage>) {
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
 
-        let (mut socket, response) = match connect(
-            Url::parse("ws://dm-app-server-rs.default.svc.cluster.local:5110/monitor-backend-link").unwrap()
-        ) {
-            Ok(a) => a,
-            Err(err) => {
-                error!("Couldn't connect to app-server-rs websocket endpoint:{}", err);
+        let url = Url::parse("ws://dm-app-server-rs.default.svc.cluster.local:5110/monitor-backend-link").unwrap();
+        let connect_attempt_fut = connect_async(url);
+        let (mut socket, response) = match time::timeout(Duration::from_secs(3), connect_attempt_fut).await {
+            // if timeout happens, just ignore (there might have been local network glitch or something)
+            Err(_err) => {
+                error!("Timed out trying to connect to app-server-rs...");
                 continue;
-            }
+            },
+            Ok(connect_result) => {
+                match connect_result {
+                    Ok(a) => a,
+                    Err(err) => {
+                        error!("Couldn't connect to app-server-rs websocket endpoint:{}", err);
+                        continue;
+                    }
+                }
+            },
         };
         info!("Connection made with app-server-rs websocket endpoint. @response:{response:?}");
 
@@ -56,18 +66,21 @@ pub async fn connect_to_app_server_rs(sender: ABSender<GeneralMessage>) {
         }*/
 
         loop {
-            let msg = match socket.read_message() {
-                Ok(msg) => msg,
-                Err(err) => {
-                    error!("Error reading message from link with app-server-rs:{}", err);
-                    break;
-                }
+            let msg = match socket.next().await {
+                None => continue,
+                Some(entry) => match entry {
+                    Ok(msg) => msg,
+                    Err(err) => {
+                        error!("Error reading message from link with app-server-rs:{}", err);
+                        break;
+                    }
+                },
             };
             let msg_as_str = msg.into_text().unwrap();
             let log_entry = match serde_json::from_str(&msg_as_str) {
                 Ok(a) => a,
                 Err(err) => {
-                    eprintln!("Got error converting message-string into LogEntry. @msg_str:{msg_as_str} @err:{err}");
+                    error!("Got error converting message-string into LogEntry. @msg_str:{msg_as_str} @err:{err}");
                     continue;
                 }
             };
@@ -78,7 +91,7 @@ pub async fn connect_to_app_server_rs(sender: ABSender<GeneralMessage>) {
                     //println!("Test1:{count}");
                     //println!("Test1");
                 },
-                Err(err) => println!("Cannot send log-entry; all receivers were dropped. @err:{err}"),
+                Err(err) => error!("Cannot send log-entry; all receivers were dropped. @err:{err}"),
             }
         }
     }

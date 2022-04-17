@@ -23,6 +23,7 @@ impl StackTraceLine {
     }
 }
 
+#[allow(non_upper_case_globals)]
 pub fn simplify_stack_trace_str(source: String) -> String {
     let lines_raw = source.split("\n");
     lazy_static! {

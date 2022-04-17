@@ -13,7 +13,6 @@ use hyper::header::CONTENT_LENGTH;
 use hyper::{Body, service};
 use hyper::client::HttpConnector;
 use rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
-use tokio::sync::broadcast;
 use tokio_postgres::{Client};
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};

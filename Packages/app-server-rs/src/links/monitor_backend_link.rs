@@ -5,17 +5,16 @@ use flume::Receiver;
 use futures::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
 use hyper::{StatusCode, Response};
 use serde_json::json;
-use tokio::sync::broadcast;
 use tracing::error;
 
-use crate::utils::general::logging::LogEntry;
+use crate::utils::{general::logging::LogEntry, type_aliases::{ABReceiver, ABSender}};
 
 pub fn is_addr_from_pod(addr: &SocketAddr) -> bool {
     addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.")
 }
 
 pub async fn monitor_backend_link_handle_ws_upgrade(
-    Extension(s1): Extension<broadcast::Sender<LogEntry>>,
+    Extension(s1): Extension<ABSender<LogEntry>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     ws: WebSocketUpgrade
 ) -> impl IntoResponse {
@@ -27,12 +26,12 @@ pub async fn monitor_backend_link_handle_ws_upgrade(
             .body(temp).unwrap().into_response();
     }
 
-    let r1 = s1.subscribe();
+    let r1 = s1.new_receiver();
     ws.on_upgrade(move |socket| handle_socket(socket, r1, addr)).into_response()
     //ws.on_upgrade(move |socket| handle_socket(socket, r1, addr))
 }
 
-async fn handle_socket(socket: WebSocket, log_entry_receiver: broadcast::Receiver<LogEntry>, _addr: SocketAddr) {
+async fn handle_socket(socket: WebSocket, log_entry_receiver: ABReceiver<LogEntry>, _addr: SocketAddr) {
     /*if !is_addr_from_pod(&addr) {
         error!("/monitor-backend-link endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
         return;
@@ -48,7 +47,7 @@ async fn read(mut receiver: SplitStream<WebSocket>) {
         // do nothing
     }
 }
-async fn write(mut sender: SplitSink<WebSocket, Message>, mut log_entry_receiver: broadcast::Receiver<LogEntry>) {
+async fn write(mut sender: SplitSink<WebSocket, Message>, mut log_entry_receiver: ABReceiver<LogEntry>) {
     loop {
         //let next_entry = match log_entry_receiver.recv_async().await {
         let next_entry = match log_entry_receiver.recv().await {

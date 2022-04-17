@@ -1,13 +1,15 @@
 use std::{fmt, collections::HashMap, ops::Sub};
 
 use flume::{Sender, Receiver, TrySendError};
+use futures::executor::block_on;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use serde::Serialize;
 use serde_json::json;
-use tokio::sync::broadcast;
 use tracing::{Level, error, Subscriber, Metadata, subscriber::Interest, span, Event, metadata::LevelFilter, field::{Visit, Field}};
 use tracing_subscriber::{filter, Layer, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, layer::{Filter, Context}};
+
+use crate::utils::type_aliases::ABSender;
 
 use super::general::time_since_epoch_ms;
 
@@ -48,7 +50,7 @@ pub fn should_event_be_kept(metadata: &Metadata, levels_to_exclude: &[Level]) ->
     true
 }
 
-pub fn set_up_logging(s1: broadcast::Sender<LogEntry>) /*-> Receiver<LogEntry>*/ {
+pub fn set_up_logging(s1: ABSender<LogEntry>) /*-> Receiver<LogEntry>*/ {
     //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::unbounded();
     //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::bounded(10000);
 
@@ -77,14 +79,14 @@ pub fn set_up_logging(s1: broadcast::Sender<LogEntry>) /*-> Receiver<LogEntry>*/
 pub struct Layer_WithIntercept/*<F>*/ {
     /*event_sender: Sender<LogEntry>,
     event_receiver: Receiver<LogEntry>,*/
-    event_sender: broadcast::Sender<LogEntry>,
+    event_sender: ABSender<LogEntry>,
     //event_receiver: broadcast::Receiver<LogEntry>,
 }
 impl/*<F>*/ Layer_WithIntercept/*<F>*/ {
     pub fn new(
         /*event_sender: Sender<LogEntry>,
         event_receiver: Receiver<LogEntry>,*/
-        event_sender: broadcast::Sender<LogEntry>,
+        event_sender: ABSender<LogEntry>,
         //event_receiver: broadcast::Receiver<LogEntry>,
     ) -> Self {
         //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::unbounded();
@@ -96,7 +98,7 @@ impl/*<F>*/ Layer_WithIntercept/*<F>*/ {
 }
 //impl<S: Subscriber, F: 'static + Layer<S>> Layer<S> for Layer_WithIntercept<F> {
 impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
-    fn on_event(&self, event: &Event<'_>, ctx: Context<'_, S>) {
+    fn on_event(&self, event: &Event<'_>, _ctx: Context<'_, S>) {
         let metadata = event.metadata();
         if should_event_be_kept(metadata, &[]) {
             let mut entry = LogEntry {
@@ -115,11 +117,16 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
             // todo: make-so this handles all fields
             entry.message = visitor.field_values.get("message").map(|a| a.to_owned()).unwrap_or_else(|| "[n/a]".to_string());
 
-            match self.event_sender.send(entry) {
-                Ok(_) => {},
-                // if a send fails (ie. no receivers attached yet), that's fine; just print a message
-                Err(entry) => println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")
-            };
+            //let start = std::time::Instant::now();
+            block_on(async {
+                match self.event_sender.broadcast(entry).await {
+                    Ok(_) => {},
+                    // if a send fails (ie. no receivers attached yet), that's fine; just print a message
+                    Err(entry) => println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")
+                };
+            });
+            // typical results: 0.01ms (which seems fine; if we're logging so much that 0.01ms is a problem, we're very likely logging too much...)
+            //println!("Time taken:{}", start.elapsed().as_secs_f64() * 1000f64);
 
             //self.event_sender.try_send(entry).unwrap();
 

@@ -8,3 +8,5 @@ pub type PGClientObject = Object<Manager>;
 // channels
 pub type FSender<T> = flume::Sender<T>;
 pub type FReceiver<T> = flume::Receiver<T>;
+pub type ABSender<T> = async_broadcast::Sender<T>;
+pub type ABReceiver<T> = async_broadcast::Receiver<T>;
