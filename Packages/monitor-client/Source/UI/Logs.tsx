@@ -5,7 +5,7 @@ import {LogGroup} from "Store/main/logs/LogGroup";
 import {Observer} from "web-vcore";
 import {useSubscription} from "web-vcore/nm/@apollo/client.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {LogEntryUI} from "./Logs/LogEntryUI";
@@ -82,9 +82,12 @@ export class LogsUI extends BaseComponent<{}, {}> {
 			console.log("Got data:", logEntries);*/
 
 		const [logEntries, setLogEntries] = useState([] as LogEntry[]);
+		const [enabled, setEnabled] = useState(true);
+
 		const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
 			variables: {adminKey},
 			onSubscriptionData: info=>{
+				if (!enabled) return;
 				const newEntries_raw = info.subscriptionData.data.logEntries as LogEntry_Raw[];
 				const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
 				setLogEntries(logEntries.concat(newEntries_final));
@@ -105,7 +108,8 @@ export class LogsUI extends BaseComponent<{}, {}> {
 		return (
 				<Column style={{flex: 1, height: "100%"}}>
 					<Row center>
-						<Text>Actions:</Text>
+						{/*<Text>Actions:</Text>*/}
+						<CheckBox text="Enabled" value={enabled} onChange={val=>setEnabled(val)}/>
 						{/*<Button ml={5} text="Refresh" onClick={async()=>{
 							await refetch();
 							//forceUpdate(); // fsr, this is currently necessary
