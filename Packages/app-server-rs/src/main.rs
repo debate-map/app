@@ -176,6 +176,7 @@ fn set_up_globals() -> Receiver<LogEntry> {
 #[tokio::main]
 async fn main() {
     let log_entry_receiver = set_up_globals();
+    println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
     GLOBAL.reset();
     info!("memory used: {} bytes", GLOBAL.get());

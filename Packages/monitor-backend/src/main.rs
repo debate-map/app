@@ -121,6 +121,7 @@ fn set_up_globals() {
 #[tokio::main]
 async fn main() {
     set_up_globals();
+    println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
     
     let app_state = AppStateWrapper::new(AppState::default());
 

@@ -15,7 +15,7 @@ use crate::{GeneralMessage, GeneralMessage_Flume};
 
 wrap_slow_macros!{
 
-// keep synced with struct in logging.rs (this one's the "mirror")
+// keep fields synced with struct in logging.rs (this one's the "mirror")
 #[derive(SimpleObject, Clone, Serialize, Deserialize, Debug, Default)]
 pub struct LogEntry {
     time: f64,
