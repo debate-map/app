@@ -83,9 +83,9 @@ export class LogsUI extends BaseComponent<{}, {}> {
 	const {data, loading} = useSubscription(LOG_ENTRIES_SUBSCRIPTION, {
 		variables: {adminKey},
 		onSubscriptionData: info=>{
-			const newEntry_raw = info.subscriptionData.data.logEntries as LogEntry_Raw;
-			const newEntry_final = LogEntry.FromRaw(newEntry_raw);
-			setLogEntries(logEntries.concat(newEntry_final));
+			const newEntries_raw = info.subscriptionData.data.logEntries as LogEntry_Raw[];
+			const newEntries_final = newEntries_raw.map(a=>LogEntry.FromRaw(a));
+			setLogEntries(logEntries.concat(newEntries_final));
 		},
 	});
 

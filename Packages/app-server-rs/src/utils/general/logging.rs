@@ -58,8 +58,8 @@ pub fn set_up_logging() -> Receiver<LogEntry> {
         should_event_be_kept(metadata)
     });*/
     let printing_layer_func = filter::filter_fn(move |metadata| {
-        //should_event_be_kept(metadata, Some(Level::TRACE | Level::DEBUG))
-        should_event_be_kept(metadata, &[Level::TRACE])
+        should_event_be_kept(metadata, &[Level::TRACE, Level::DEBUG])
+        //should_event_be_kept(metadata, &[Level::TRACE])
     });
 
     let printing_layer = tracing_subscriber::fmt::layer().with_filter(printing_layer_func);

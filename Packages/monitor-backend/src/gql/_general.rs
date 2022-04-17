@@ -178,7 +178,7 @@ impl SubscriptionShard_General {
         } })
     }
 
-    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<LogEntry, SubError>> + 'a {
+    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<Vec<LogEntry>, SubError>> + 'a {
         let msg_receiver = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
         /*let msg_receiver_base = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
         //let mut msg_receiver = msg_receiver_base.subscribe();
@@ -188,6 +188,7 @@ impl SubscriptionShard_General {
             if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
 
             //yield Ok(LogEntry::default());
+            let mut new_entries = vec![]; // use buffer, for more efficient transfer+rerendering
             loop {
                 //println!("Waiting...");
                 //let next_msg = msg_receiver.recv_async().await.unwrap();
@@ -196,8 +197,14 @@ impl SubscriptionShard_General {
                 match next_msg {
                     //GeneralMessage_Flume::MigrateLogMessageAdded(_text) => {},
                     GeneralMessage_Flume::LogEntryAdded(entry) => {
-                        yield Ok(entry);
+                        new_entries.push(entry);
                     },
+                }
+
+                // if no more messages bufferred up, and we've collected some new log-entries, then send that set of new-entries to the client
+                if msg_receiver.is_empty() && !new_entries.is_empty() {
+                    yield Ok(new_entries);
+                    new_entries = vec![];
                 }
             }
         };

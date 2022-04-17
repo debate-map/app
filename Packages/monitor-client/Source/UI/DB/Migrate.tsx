@@ -7,7 +7,7 @@ import gql from "graphql-tag";
 import {useMutation, useSubscription} from "web-vcore/nm/@apollo/client.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 
-export class LogMessage {
+export class MigrationLogEntry {
 	text: string;
 }
 
@@ -33,11 +33,11 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 		let {} = this.props;
 		const adminKey = store.main.adminKey;
 
-		const [logEntries, setLogEntries] = useState([] as LogMessage[]);
+		const [logEntries, setLogEntries] = useState([] as MigrationLogEntry[]);
 		const {data, loading} = useSubscription(MIGRATE_LOG_ENTRIES_SUBSCRIPTION, {
 			variables: {adminKey},
 			onSubscriptionData: info=>{
-				const newEntry = info.subscriptionData.data.migrateLogEntries;
+				const newEntry = info.subscriptionData.data.migrateLogEntries as MigrationLogEntry;
 				setLogEntries(logEntries.concat(newEntry));
 			},
 		});
@@ -71,7 +71,7 @@ export class MigrateUI extends BaseComponent<{}, {}> {
 	}
 }
 
-class LogMessageUI extends BaseComponent<{message: LogMessage}, {}> {
+class LogMessageUI extends BaseComponent<{message: MigrationLogEntry}, {}> {
 	render() {
 		const {message} = this.props;
 		return (
