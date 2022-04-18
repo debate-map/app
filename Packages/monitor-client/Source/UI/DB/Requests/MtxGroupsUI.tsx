@@ -29,6 +29,7 @@ export class MtxGroupsUI extends BaseComponent<{}, {}> {
 					<Button ml={5} p="3px 7px" text="+" onClick={()=>{
 						Change(groups.push(new MtxGroup()));
 					}}/>
+					<Text ml={5}>Note: Non-regex match-strings are matched with case-insensitivity.</Text>
 				</Row>
 				<Column>
 					{groups.map((group, index)=>{

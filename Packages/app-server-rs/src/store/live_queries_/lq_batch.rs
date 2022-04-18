@@ -10,6 +10,7 @@ use itertools::{chain, Itertools};
 use tokio::sync::{RwLock, Semaphore};
 use tokio_postgres::Row;
 use lazy_static::lazy_static;
+use tracing::trace;
 use crate::store::live_queries_::lq_batch_::sql_generator::prepare_sql_query;
 use crate::utils::db::filter::{QueryFilter};
 use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
@@ -92,7 +93,7 @@ impl LQBatch {
         let (sql_text, params) = prepare_sql_query(&self.table_name, &lq_param_protos, &query_instance_vals, Some(&mtx))?;
 
         mtx.section("3:execute the combined query");
-        //println!("Executing query-batch. @sql_text:{} @params:{:?}", sql_text, params);
+        trace!("Executing query-batch. @sql_text:{} @params:{:?}", sql_text, params);
         let rows: Vec<Row> = client.query_raw(&sql_text, params).await.map_err(to_anyhow)?
             .try_collect().await.map_err(to_anyhow)?;
 

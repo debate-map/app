@@ -38,9 +38,12 @@ export class MtxSectionConstraint {
 	}
 }
 
-export function FieldMatchesStr(fieldValue: string, matchStr: string) {
+export function FieldMatchesStr(fieldValue: string, matchStr: string, caseSensitiveForPlainStr = false) {
 	if (matchStr.startsWith("/") && matchStr.endsWith("/")) {
 		return fieldValue.match(new RegExp(matchStr.slice(1, -1))) != null;
+	}
+	if (!caseSensitiveForPlainStr) {
+		return fieldValue.toLowerCase().includes(matchStr.toLowerCase());
 	}
 	return fieldValue.includes(matchStr);
 }
