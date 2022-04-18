@@ -368,6 +368,7 @@ export function JumpToNode(mapID: string, path: string) {
 
 			//const childView = new MapNodeView(descendantPath);
 			const childView = {children: {}} as MapNodeView;
+			currentParentView.children ??= {};
 			currentParentView.children[descendantID] = childView;
 			currentParentView = childView;
 		}

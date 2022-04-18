@@ -115,7 +115,9 @@ export class MapNodeView {
 
 	@Field({patternProperties: {".{22}": {$ref: "MapNodeView"}}})
 	// @O children? = observable.map<string, MapNodeView>();
-	@O children = {} as {[key: string]: MapNodeView};
+	// this field shouldn't ever be null; but given that somehow it is, mark that fact with the TypeScript "?" operator
+	//@O children = {} as {[key: string]: MapNodeView};
+	@O children? = {} as {[key: string]: MapNodeView};
 
 	@Field({type: "number"}, {opt: true})
 	@O childLimit_up?: number;

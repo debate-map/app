@@ -51,7 +51,7 @@ export function FindNodeViewWhere(nodeView: MapNodeView, condition: (node: MapNo
 	if (condition(nodeView)) {
 		return {nodeView, pathInMap};
 	}
-	for (const [childID, child] of Object.entries(nodeView.children)) {
+	for (const [childID, child] of Object.entries(nodeView.children ?? {})) {
 		const result = FindNodeViewWhere(child, condition, `${pathInMap}/${childID}`);
 		if (result != null) {
 			return result;
@@ -161,7 +161,7 @@ export function GetNodeViewsAlongPath(mapID: string|n, path: string | string[] |
 			nodeViews.push(null);
 			continue;
 		}
-		let childGroup = nodeViews.length ? nodeViews.Last()!.children : rootNodeViews;
+		let childGroup = nodeViews.length ? (nodeViews.Last()!.children ?? {}) : rootNodeViews;
 		if (createNodeViewsIfMissing) {
 			// temp safeguard against sometimes-occuring bug (which shouldn't ever occur but somehow has/had been)
 			if (childGroup == null) {

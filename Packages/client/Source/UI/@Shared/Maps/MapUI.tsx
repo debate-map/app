@@ -168,7 +168,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 		// defensive; in case something goes wrong with the server-side permission-enforcing, do a basic check here as well
 		if (!DoesMapPolicyGiveMeAccess_ExtraCheck(mapID)) return <MapUIWaitMessage message="Map is private/deleted."/>;
 
-		GetPreloadData_ForMapLoad(mapID);
+		// atm, only enable this in dev-mode (it makes the initial-loading too slow to be enabled in prod, atm :/ -- keeping it enabled in dev, so I can keep optimizing it, however)
+		if (DEV) {
+			GetPreloadData_ForMapLoad(mapID);
+		}
 		const mapState = GetMapState(mapID);
 		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
 
