@@ -25,7 +25,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
 use tokio::sync::{mpsc, Mutex, RwLock};
-use tokio::time::Instant;
+use tokio::time::{Instant, self};
 use tokio_postgres::{Client, Row};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
@@ -35,11 +35,11 @@ use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
 use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
 use axum::http::{self, Request, Response, StatusCode};
-use axum::Error;
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
-use tracing::{info, warn, debug};
+use tracing::{info, warn, debug, error};
+use anyhow::{anyhow, Error};
 use uuid::Uuid;
 
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
@@ -191,28 +191,44 @@ impl LQGroup {
     }
 
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
-        new_mtx!(mtx, "1:get or create lqi", mtx_p);
-        let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, ctx, Some(&mtx)).await;
+        new_mtx!(mtx, "0:start loop", mtx_p);
+        let result: (Vec<T>, LQEntryWatcher);
+        // maybe temp; try to add lq-watcher on a loop, that we keep retrying until we succeed (workaround for some timing issues hit; there's almost certainly a better solution long-term)
+        loop {
+            mtx.section("1:get or create lqi");
+            let (instance, lqi_active) = match self.get_or_create_lq_instance(table_name, filter, &ctx, Some(&mtx)).await {
+                Ok(a) => a,
+                // if we hit an error, retry in a bit
+                Err(_err) => {
+                    mtx.section("1.1:waiting a bit, before retrying");
+                    time::sleep(Duration::from_millis(500)).await;
+                    continue;
+                }
+            };
 
-        mtx.section("2:get current result-set");
-        let result_entries = instance.last_entries.read().await.clone();
+            mtx.section("2:get current result-set");
+            let result_entries = instance.last_entries.read().await.clone();
 
-        mtx.section("3:convert result-set to rust types");
-        let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
+            mtx.section("3:convert result-set to rust types");
+            let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
 
-        mtx.section("4:get or create watcher, for the given stream");
-        //let watcher = entry.get_or_create_watcher(stream_id);
-        let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
-        let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
-        debug!("LQ-watcher started. {}", watcher_info_str);
-        // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
-        if new_watcher_count > 4 {
-            warn!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
+            mtx.section("4:get or create watcher, for the given stream");
+            //let watcher = entry.get_or_create_watcher(stream_id);
+            let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
+            let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
+            debug!("LQ-watcher started. {}", watcher_info_str);
+            // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
+            if new_watcher_count > 4 {
+                warn!("WARNING: LQ-watcher count unusually high ({})! {}", new_watcher_count, watcher_info_str);
+            }
+            
+            result = (result_entries_as_type, watcher.clone());
+            break;
         }
-        
-        (result_entries_as_type, watcher.clone())
+
+        result
     }
-    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
+    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
         new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
         let lq_key = get_lq_instance_key(table_name, filter);
 
@@ -220,16 +236,16 @@ impl LQGroup {
         match query_instances.get(&lq_key) {
             Some(instance) => {
                 mtx.section("2A:clone+return the current lqi for this key");
-                (instance.clone(), query_instances.len())
+                Ok((instance.clone(), query_instances.len()))
             },
             None => {
                 mtx.section("2B:create a new lqi");
                 drop(query_instances); // must drop our read-lock, so that write-lock can be obtained, in func below
-                self.create_new_lq_instance(table_name, filter, &lq_key, ctx, Some(&mtx)).await
+                Ok(self.create_new_lq_instance(table_name, filter, &lq_key, ctx, Some(&mtx)).await?)
             }
         }
     }
-    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
+    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
         let (new_lqi_arc, batch_i, lqis_buffered_already) = {
             new_mtx!(mtx2, "1:get batches_meta read-lock", Some(&mtx));
@@ -250,26 +266,40 @@ impl LQGroup {
 
         let this_call_should_commit_batch = lqis_buffered_already == 0;
         mtx.section_2("2:wait for batch to execute", Some(format!("@lqis_buffered_already:{lqis_buffered_already} @will_trigger_execute:{this_call_should_commit_batch}")));
-        self.execute_batch_x_once_ready(batch_i, ctx, this_call_should_commit_batch, Some(&mtx)).await;
-        (new_lqi_arc, lqis_buffered_already)
+        self.execute_batch_x_once_ready(batch_i, ctx, this_call_should_commit_batch, Some(&mtx)).await?;
+        Ok((new_lqi_arc, lqis_buffered_already))
     }
-    async fn execute_batch_x_once_ready(&self, batch_i: usize, ctx: PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) {
+    async fn execute_batch_x_once_ready(&self, batch_i: usize, ctx: &PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) -> Result<(), Error> {
         // if this call is not the one to trigger execution, just wait for the execution to happen, then resume the caller-function
         if !this_call_triggers_execution {
             new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx, Some(format!("@batch_i:{batch_i}")));
             //let sender_clone = self.channel_for_batch_messages__sender_base.clone();
             let mut receiver = self.channel_for_batch_messages__sender_base.new_receiver();
             loop {
-                let msg = receiver.recv().await.unwrap();
-                match msg {
-                    LQBatchMessage::NotifyExecutionDone(executed_batch_i) => {
-                        if executed_batch_i == batch_i {
-                            break;
+                let wait_for_execution_done = async {
+                    loop {
+                        let msg = receiver.recv().await.unwrap();
+                        match msg {
+                            LQBatchMessage::NotifyExecutionDone(executed_batch_i) => {
+                                if executed_batch_i == batch_i {
+                                    return;
+                                }
+                            },
                         }
+                    }
+                };
+                match time::timeout(Duration::from_secs(3), wait_for_execution_done).await {
+                    // temp: if we timeout after X seconds, having failed to receive the "batch execution done" message, assume we "missed" the batch-execution...
+                    Err(_err) => {
+                        error!("Timed out waiting for batch-execution to complete. Retrying this request shortly... @table:{} @filter:{}", self.table_name, self.filter_shape);
+                        // and so pass an error to parent (triggering a retry in a moment)
+                        return Err(anyhow!("timed_out"));
                     },
-                }
+                    // the "batch execution is done" message was received; break out of the message-reading loop
+                    Ok(_) => break,
+                };
             }
-            return;
+            return Ok(());
         }
 
         new_mtx!(mtx, "1:wait for the correct time to execute", parent_mtx, Some(format!("@batch_i:{batch_i}")));
@@ -326,6 +356,7 @@ impl LQGroup {
 
         mtx.section("7:send message notifying of execution being done");
         self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
+        Ok(())
     }
 
     /*pub fn get_sender_for_lq_watcher_drops(&self) -> Sender<DropLQWatcherMsg> {

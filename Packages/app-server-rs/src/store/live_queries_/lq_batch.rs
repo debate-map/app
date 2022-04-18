@@ -72,7 +72,7 @@ impl LQBatch {
         ).collect_vec()
     }
 
-    pub async fn execute(&mut self, ctx: PGClientObject, parent_mtx: Option<&Mtx>)
+    pub async fn execute(&mut self, ctx: &PGClientObject, parent_mtx: Option<&Mtx>)
         //-> Result<Vec<RowData>, Error>
         -> Result<(), Error>
     {
