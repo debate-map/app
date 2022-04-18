@@ -76,10 +76,17 @@ Packages/rust-macros/*
 Packages/rust-shared/*
 Packages/web-server/*
 
-# but re-include these
-!Packages/js-common/*
-!Packages/web-server/*
+# but re-include the Cargo.toml files (in the rust packages)
+#!Packages/rust-macros/Cargo.toml
+# temp: must copy whole rust-macros folder atm (see Dockerfile)
+!Packages/rust-macros/*
+!Packages/rust-shared/Cargo.toml
+!Packages/monitor-backend/Cargo.toml
+!Packages/app-server-rs/Cargo.toml
 
-# web-server needs access to the client's output files
-!Packages/client/Dist
-!Packages/client/Scripts
+# we don't care about any of the npm/yarn stuff
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/yarn-lock-for-docker.lock
+**/.yalc

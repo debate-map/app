@@ -1,7 +1,21 @@
-# see: ./Tiltfile (or source: Packages/deploy/@DockerBase/Dockerfile)
-#ARG SHARED_BASE_URL
-ARG SHARED_BASE_URL=gcr.io/debate-map-prod/dm-shared-base
-FROM $SHARED_BASE_URL
+# STAGE 1 (base-image: none)
+# ==================================================
+# ----------
+	ARG JS_BASE_URL
+	#ARG JS_BASE_URL=gcr.io/debate-map-prod/dm-js-base
+# ----------
+
+# STAGE 2 (base-image: dm-js-base)
+# ==================================================
+# ----------
+	# see: ./Tiltfile (or source: Packages/deploy/@JSBase/Dockerfile)
+	FROM $JS_BASE_URL
+	ARG env_ENV
+# ----------
+
+# initial arg processing
+ENV ENV=$env_ENV
+RUN echo "Env:$ENV"
 
 #COPY NMOverwrites/ /dm_repo/
 
@@ -41,10 +55,6 @@ WORKDIR "/dm_repo/Packages/app-server"
 #COPY Temp_Synced/graphile-build node_modules/graphile-build
 #COPY Temp_Synced/graphile-build-pg node_modules/graphile-build-pg
 #COPY Test1.json Test1.json
-
-ARG env_ENV
-ENV ENV=$env_ENV
-RUN echo "Env:$ENV"
 
 ENV PM2_DISCRETE_MODE=true
 ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true

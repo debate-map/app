@@ -393,7 +393,7 @@ Object.assign(scripts, {
 		}),
 	},
 });
-scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@DockerBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
+scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@JSBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
 function SetTileEnvCmd(prod, context) {
 	return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"} ${context ? `set CONTEXT=${context}&&` : ""}`;
 }

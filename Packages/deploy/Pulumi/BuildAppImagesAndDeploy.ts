@@ -1,5 +1,5 @@
 import * as docker from "@pulumi/docker";
-import {registryUrl} from "./SetUpGCR_ForDockerImages";
+import {registryUrl} from "./SetUpGoogleContainerRegistry";
 
 const deploysEnabled = {
 	sharedBase: true,
@@ -8,10 +8,10 @@ const deploysEnabled = {
 };
 
 if (deploysEnabled.sharedBase) {
-	var sharedBase_info = DeployPackage("Packages/deploy/@DockerBase/Dockerfile", {imageName_base: "dm-shared-base"});
+	var jsBase_info = DeployPackage("Packages/deploy/@JSBase/Dockerfile", {imageName_base: "dm-js-base"});
 }
-export const sharedBase_baseImageName = sharedBase_info!.baseImageName;
-export const sharedBase_fullImageName = sharedBase_info!.fullImageName;
+export const jsBase_baseImageName = jsBase_info!.baseImageName;
+export const jsBase_fullImageName = jsBase_info!.fullImageName;
 
 if (deploysEnabled.webServer) {
 	var webServer_info = DeployPackage("Packages/web-server/Dockerfile", {imageName_base: "dm-web-server"});
@@ -24,6 +24,9 @@ if (deploysEnabled.appServer) {
 }
 export const appServer_baseImageName = appServer_info!.baseImageName;
 export const appServer_fullImageName = appServer_info!.fullImageName;
+
+// todo: add code for the other packages
+// [edit: actually, I don't think these steps are needed; tilt has auth to push with whatever image-name it needs; pulumi apparently doesn't need to pre-create them]
 
 function DeployPackage(pathToDockerfile: string, opts: {imageName_base: string, imageName_final?: string}) {
 	// Get registry info (creds and endpoint).

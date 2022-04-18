@@ -1,16 +1,19 @@
-# basic package exclusions (keep same order in all "template.dockerignore" files)
-Packages/app-server
-Packages/app-server-rs
-#Packages/client
-Packages/deploy
-#Packages/js-common
-Packages/monitor-backend
-Packages/monitor-client
-Packages/rust-macros
-Packages/rust-shared
-#Packages/web-server
-
-# partial package excludes (the web-server needs access to the client's output files)
+# default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
+Packages/app-server/*
+Packages/app-server-rs/*
 Packages/client/*
+Packages/deploy/*
+Packages/js-common/*
+Packages/monitor-backend/*
+Packages/monitor-client/*
+Packages/rust-macros/*
+Packages/rust-shared/*
+Packages/web-server/*
+
+# but re-include these
+!Packages/js-common/*
+!Packages/web-server/*
+
+# web-server needs access to the client's output files
 !Packages/client/Dist
 !Packages/client/Scripts

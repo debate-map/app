@@ -1,0 +1,24 @@
+# default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
+Packages/app-server/*
+Packages/app-server-rs/*
+Packages/client/*
+Packages/deploy/*
+Packages/js-common/*
+Packages/monitor-backend/*
+Packages/monitor-client/*
+Packages/rust-macros/*
+Packages/rust-shared/*
+Packages/web-server/*
+
+# but re-include the package.json files (in the rust packages)
+!Packages/client/package.json
+!Packages/js-common/package.json
+!Packages/web-server/package.json
+!Packages/app-server/package.json
+!Packages/monitor-client/package.json
+!Packages/deploy/package.json
+
+# for this base image, we can completely ignore the node_modules/ folder (we aren't the one -- actually, we don't need it for any of the docker-images, because we have NMOverwrites)
+#node_modules/
+
+NMOverwrites/

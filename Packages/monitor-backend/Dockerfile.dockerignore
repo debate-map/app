@@ -64,28 +64,30 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
+# default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
+Packages/app-server/*
+Packages/app-server-rs/*
+Packages/client/*
+Packages/deploy/*
+Packages/js-common/*
+Packages/monitor-backend/*
+Packages/monitor-client/*
+Packages/rust-macros/*
+Packages/rust-shared/*
+Packages/web-server/*
+
+# but re-include these
+!Packages/rust-shared/*
+!Packages/monitor-backend/*
+
+# we need access to monitor-client's output files
+!Packages/monitor-client/Dist
+!Packages/monitor-client/Resources
+#!Packages/monitor-client/Scripts
+
 # we don't care about any of the npm/yarn stuff
 **/package.json
 **/package-lock.json
 **/yarn.lock
 **/yarn-lock-for-docker.lock
 **/.yalc
-
-# basic package exclusions (keep same order in all "template.dockerignore" files)
-Packages/app-server
-Packages/app-server-rs
-Packages/client
-Packages/deploy
-Packages/js-common
-#Packages/monitor-backend
-#Packages/monitor-client
-#Packages/rust-macros
-#Packages/rust-shared
-Packages/web-server
-
-# partial package excludes
-# we need access to monitor-client's output files
-Packages/monitor-client/*
-!Packages/monitor-client/Dist
-!Packages/monitor-client/Resources
-#!Packages/monitor-client/Scripts

@@ -293,7 +293,12 @@ impl LQGroup {
         meta.last_batch_execution_started_index = batch_i as i64;
         meta.last_batch_execution_started_time = time_since_epoch_ms();
         drop(meta); // drop lock on meta prior to executing batch
+
         batch.execute(ctx, Some(&mtx)).await.expect("Executing the lq-batch failed!");
+        /*if let Err(err) = batch.execute(ctx, Some(&mtx)).await {
+            // if a query fails, log the error, but continue execution (better than panicking the whole server)
+            error!("{}", err);
+        }*/
 
         mtx.section("4:reacquire meta write-lock"); //, and update last_batch_executed_index
         // reacquire meta-lock

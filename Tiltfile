@@ -310,27 +310,54 @@ AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
 USE_RELEASE_FLAG = False
 USE_RELEASE_FLAG = PROD # comment this for faster release builds (though with less optimization)
 
-# this is the base dockerfile used for all the subsequent ones
-imageURL_sharedBase = registryURL + '/dm-shared-base'
-docker_build(imageURL_sharedBase, '.', dockerfile='Packages/deploy/@DockerBase/Dockerfile')
+# rust
+# -----
+
+# this is the nodejs-base dockerfile used for all subsequent rust images
+imageURL_rustBase = registryURL + '/dm-rust-base-' + os.getenv("ENV")
+docker_build(imageURL_rustBase, '.', dockerfile='Packages/deploy/@RustBase/Dockerfile',
+	build_args={
+		"env_ENV": os.getenv("ENV") or "dev",
+		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
+		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+	},
+)
 
 imageURL_monitorBackend = registryURL + '/dm-monitor-backend-' + os.getenv("ENV")
 docker_build(imageURL_monitorBackend, '.', dockerfile='Packages/monitor-backend/Dockerfile',
 	build_args={
+		"RUST_BASE_URL": imageURL_rustBase,
 		"env_ENV": os.getenv("ENV") or "dev",
-
 		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
 		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
 		# todo: probably just always use dev/debug mode (there are very few users of the monitor tool, so compile speed is more important than execution speed)
-
 		# docker doesn't seem to support string interpolation in COPY command, so do it here
 		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/monitor-backend",
 	},
 )
+imageURL_appServerRS = registryURL + '/dm-app-server-rs-' + os.getenv("ENV")
+docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
+	build_args={
+		"RUST_BASE_URL": imageURL_rustBase,
+		"env_ENV": os.getenv("ENV") or "dev",
+		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
+		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+		# docker doesn't seem to support string interpolation in COPY command, so do it here
+		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/app-server-rs",
+	},
+)
+
+# nodejs
+# -----
+
+# this is the nodejs-base dockerfile used for all subsequent js images
+imageURL_jsBase = registryURL + '/dm-js-base-' + os.getenv("ENV")
+docker_build(imageURL_jsBase, '.', dockerfile='Packages/deploy/@JSBase/Dockerfile')
+
 imageURL_webServer = registryURL + '/dm-web-server-' + os.getenv("ENV")
 docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile',
 	build_args={
-		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
+		"JS_BASE_URL": imageURL_jsBase,
 		"env_ENV": os.getenv("ENV") or "dev",
 	},
 	# this lets Tilt update the listed files directly, without involving Docker at all
@@ -343,24 +370,10 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
 		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
 	])
-imageURL_appServerRS = registryURL + '/dm-app-server-rs-' + os.getenv("ENV")
-docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
-	build_args={
-		"env_ENV": os.getenv("ENV") or "dev",
-		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
-		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
-		# docker doesn't seem to support string interpolation in COPY command, so do it here
-		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/app-server-rs",
-	},
-	# this lets Tilt update the listed files directly, without involving Docker at all
-	# live_update=[
-	# 	sync('./Packages/app-server-rs/', '/dm_repo/Packages/app-server-rs/'),
-	# ]
-)
 imageURL_appServerJS = registryURL + '/dm-app-server-js-' + os.getenv("ENV")
 docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
-		#"SHARED_BASE_URL": imageURL_sharedBase, # commented for now, since Tilt thinks shared-base image is unused unless hard-coded
+		"JS_BASE_URL": imageURL_jsBase,
 		"env_ENV": os.getenv("ENV") or "dev"
 	},
 	# this lets Tilt update the listed files directly, without involving Docker at all

@@ -20,7 +20,16 @@ function PrepareDockerIgnoreFiles() {
 	const ignoreText_sharedBase_final = ignoreText_sharedBase_raw.replace("# [[[PLACEHOLDER FOR NODE_MODULES WATCH PATHS]]]", nmWatchPaths_notUnderWVC_asDockerIgnoreText);*/
 	const ignoreText_sharedBase_final = ignoreText_sharedBase_raw;
 
-	const dockerPackages = ["Packages/deploy/@DockerBase", "Packages/web-server", "Packages/app-server-rs", "Packages/app-server", "Packages/monitor-backend"];
+	const dockerPackages = [
+		// js
+		"Packages/deploy/@JSBase",
+		"Packages/web-server",
+		"Packages/app-server",
+		// rust
+		"Packages/deploy/@RustBase",
+		"Packages/monitor-backend",
+		"Packages/app-server-rs",
+	];
 	for (const path of dockerPackages) {
 		const ignoreText_packageSpecific = fs.readFileSync(`${path}/template.dockerignore`).toString();
 		const ignoreText_final = [
