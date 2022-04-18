@@ -1,5 +1,6 @@
 import {Assert, CE, emptyArray_forLoading, GetValues, IsString} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, CreateAccessor, GetDoc, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, BailError, CreateAccessor, GetDoc, MapWithBailHandling, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeL3} from "../DB.js";
 import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
@@ -107,19 +108,18 @@ export const GetNodeID = CreateAccessor(<{
 	return PathSegmentToNodeID(ownNodeStr);
 }));
 
-/** Test1 */
-export const GetNodeParents = CreateAccessor(function(/** Test12 */ nodeID: string) {
+export const GetNodeParents = CreateAccessor((nodeID: string)=>{
 	const parentLinks = GetNodeChildLinks(undefined, nodeID);
-	return parentLinks.map(a=>this!.MaybeCatchItemBail(()=>GetNode(a.parent)));
+	return parentLinks.map(a=>GetNode.BIN(a.parent)); // BIN: we know link exists, so parent-node should as well (so null must mean change loading)
 });
-export const GetNodeParentsL2 = CreateAccessor(function(nodeID: string) {
-	return GetNodeParents(nodeID).map(parent=>this!.MaybeCatchItemBail(()=>(parent ? GetNodeL2(parent) : undefined)));
+export const GetNodeParentsL2 = CreateAccessor((nodeID: string)=>{
+	return MapWithBailHandling(GetNodeParents(nodeID), parent=>GetNodeL2.BIN(parent)); // BIN: we know parent exists, so l2-data should as well (so null must mean change loading)
 });
-export const GetNodeParentsL3 = CreateAccessor(function(nodeID: string, path: string) {
-	return GetNodeParents(nodeID).map(parent=>this!.MaybeCatchItemBail(()=>(parent ? GetNodeL3(SlicePath(path, 1)) : undefined)));
-});
+/*export const GetNodeParentsL3 = CreateAccessor((nodeID: string, path: string)=>{
+	return MapWithBailHandling(GetNodeParents(nodeID), parent=>GetNodeL3.BIN(SlicePath(path, 1))); // BIN: we know parent exists, so l3-data should as well (so null must mean change loading)
+});*/
 
-export const GetNodeChildren = CreateAccessor(function(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[]) {
+export const GetNodeChildren = CreateAccessor((nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	/*let node = GetNode(nodeID);
 	if (node == null) return emptyArray;
 	// special case, for demo map
@@ -132,7 +132,8 @@ export const GetNodeChildren = CreateAccessor(function(nodeID: string, includeMi
 		if (c.catchItemBails) return GetNode.CatchBail(c.catchItemBails_asX, link.child);
 		return GetNode(link.child);
 	});*/
-	let result = childLinks.map(link=>this!.MaybeCatchItemBail(()=>GetNode(link.child) as MapNode)); // cast as MapNode, because db guarantees that node exists
+	//let result = MapWithBailHandling(childLinks, link=>GetNode.BIN(link.child)); // BIN: we know link exists, so child-node should as well (so null must mean change loading)
+	let result = MapWithBailHandling(childLinks, link=>GetNode(link.child) as MapNode);
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
 		const tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
@@ -232,16 +233,15 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 	return result;
 });
 
-export const GetNodeChildrenL2 = CreateAccessor(function(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[]) {
+export const GetNodeChildrenL2 = CreateAccessor((nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren, tagsToIgnore);
-	const nodeChildrenL2 = nodeChildren.map(child=>this!.MaybeCatchItemBail(()=>GetNodeL2.BIN(child))); // BIN: we know node exists, so rest should as well (so null must mean change loading)
+	const nodeChildrenL2 = MapWithBailHandling(nodeChildren, child=>GetNodeL2.BIN(child)); // BIN: we know node exists, so l2-data should as well (so null must mean change loading)
 	return nodeChildrenL2;
 });
-export const GetNodeChildrenL3 = CreateAccessor(function(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[]) {
+export const GetNodeChildrenL3 = CreateAccessor((nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	path = path || nodeID;
-
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	const nodeChildrenL3 = nodeChildrenL2.map(child=>this!.MaybeCatchItemBail(()=>GetNodeL3.BIN(`${path}/${child.id}`, tagsToIgnore))); // BIN: we know node exists, so rest should as well (so null must mean change loading)
+	const nodeChildrenL3 = MapWithBailHandling(nodeChildrenL2, child=>GetNodeL3.BIN(`${path}/${child.id}`, tagsToIgnore)); // BIN: we know node exists, so l3-data should as well (so null must mean change loading)
 	return nodeChildrenL3;
 });
 

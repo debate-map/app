@@ -47,7 +47,8 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 		//GetRatings.CatchBail(null, nodeID, NodeRatingType.relevance);
 
 		GetNodeChildLinks.CatchBail(null, nodeID);
-		CatchBail(null, ()=>GetNodeChildrenL3.CatchItemBails(null, nodeID));
+		//CatchBail(null, ()=>GetNodeChildrenL3.CatchItemBails(null, nodeID));
+		GetNodeChildrenL3.CatchBail(null, nodeID);
 	}
 
 	GetMap.CatchBail(null, "FAKE_MAP_AS_PRELOAD_END_MARKER"); // for viewing in monitor-backend's request-stack profiler
