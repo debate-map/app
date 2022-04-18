@@ -6,7 +6,7 @@ import {MtxGroup} from "./database/MtxGroup";
 
 export class DatabaseState {
 	constructor() { makeObservable(this); }
-	@O subpage: "requests" | "migrate";
+	@O subpage: "requests" | "watchers" | "migrate";
 	@O requests = new RequestsState();
 }
 

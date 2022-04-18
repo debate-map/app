@@ -136,7 +136,12 @@ impl LQGroup {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
         //let (s1, r1): (Sender<LQBatchMessage>, Receiver<LQBatchMessage>) = flume::unbounded();
         //let r1_clone = r1.clone(); // clone needed for tokio::spawn closure below
-        let (s1, r1): (ABSender<LQBatchMessage>, ABReceiver<LQBatchMessage>) = async_broadcast::broadcast(10000); // temp-set to 10000, to fix deadlock (of some entries not being consumed I think)
+        let (mut s1, r1): (ABSender<LQBatchMessage>, ABReceiver<LQBatchMessage>) = async_broadcast::broadcast(100);
+
+        // afaik, the only case where overflow can (and has been) occuring is when there are no callers waiting for the batch to execute (in execute_batch_x_once_ready)
+        // thus, it is fine to overflow/delete-old-entries, as no one cares about the entries in that case anyway
+        s1.set_overflow(true);
+
         let new_self = Self {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),

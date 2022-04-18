@@ -11,6 +11,7 @@ export const pageTree = new Page({}, {
 	logs: new Page({}),
 	db: new Page({}, {
 		requests: new Page({}),
+		watchers: new Page({}),
 		migrate: new Page({}),
 	}),
 	netdata: new Page(),

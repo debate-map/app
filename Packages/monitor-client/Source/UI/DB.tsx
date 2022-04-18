@@ -5,6 +5,7 @@ import {Observer} from "web-vcore";
 import React, {useState} from "react";
 import {MigrateUI} from "./DB/Migrate";
 import {RequestsUI} from "./DB/Requests";
+import {WatchersUI} from "./DB/Watchers";
 
 @Observer
 export class DBUI extends BaseComponent<{}, {}> {
@@ -13,6 +14,7 @@ export class DBUI extends BaseComponent<{}, {}> {
 		return (
 			<Switch>
 				<RequestsUI/>
+				{currentSubpage == "watchers" && <WatchersUI/>}
 				{currentSubpage == "migrate" && <MigrateUI/>}
 			</Switch>
 		);
