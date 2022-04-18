@@ -247,12 +247,13 @@ impl LQGroup {
     }
     async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
-        let (new_lqi_arc, batch_i, lqis_buffered_already) = {
+        let (new_lqi_arc, batch_i, batch_generation, lqis_buffered_already) = {
             new_mtx!(mtx2, "1:get batches_meta read-lock", Some(&mtx));
             let meta_clone = self.batches_meta.read().await.clone();
             mtx2.section("2:get batch write-lock, and insert");
             let (batch_i, batch_lock) = self.get_buffering_batch(meta_clone);
             let mut batch = batch_lock.write().await;
+            let batch_generation = batch.get_generation();
             let instances_in_batch = &mut batch.query_instances;
             let lqis_buffered_already = instances_in_batch.len();
 
@@ -261,48 +262,20 @@ impl LQGroup {
             let new_lqi_arc = Arc::new(new_lqi);
             instances_in_batch.insert(lq_key.to_owned(), new_lqi_arc.clone());
 
-            (new_lqi_arc, batch_i, lqis_buffered_already)
+            (new_lqi_arc, batch_i, batch_generation, lqis_buffered_already)
         };
 
         let this_call_should_commit_batch = lqis_buffered_already == 0;
         mtx.section_2("2:wait for batch to execute", Some(format!("@lqis_buffered_already:{lqis_buffered_already} @will_trigger_execute:{this_call_should_commit_batch}")));
-        self.execute_batch_x_once_ready(batch_i, ctx, this_call_should_commit_batch, Some(&mtx)).await?;
+        self.execute_batch_x_once_ready(batch_i, batch_generation, ctx, Some(&mtx)).await?;
         Ok((new_lqi_arc, lqis_buffered_already))
     }
-    async fn execute_batch_x_once_ready(&self, batch_i: usize, ctx: &PGClientObject, this_call_triggers_execution: bool, parent_mtx: Option<&Mtx>) -> Result<(), Error> {
-        // if this call is not the one to trigger execution, just wait for the execution to happen, then resume the caller-function
-        if !this_call_triggers_execution {
-            new_mtx!(_mtx, "1:wait for the batch to execute (it will be triggered by earlier call)", parent_mtx, Some(format!("@batch_i:{batch_i}")));
-            //let sender_clone = self.channel_for_batch_messages__sender_base.clone();
-            let mut receiver = self.channel_for_batch_messages__sender_base.new_receiver();
-            loop {
-                let wait_for_execution_done = async {
-                    loop {
-                        let msg = receiver.recv().await.unwrap();
-                        match msg {
-                            LQBatchMessage::NotifyExecutionDone(executed_batch_i) => {
-                                if executed_batch_i == batch_i {
-                                    return;
-                                }
-                            },
-                        }
-                    }
-                };
-                match time::timeout(Duration::from_secs(3), wait_for_execution_done).await {
-                    // temp: if we timeout after X seconds, having failed to receive the "batch execution done" message, assume we "missed" the batch-execution...
-                    Err(_err) => {
-                        error!("Timed out waiting for batch-execution to complete. Retrying this request shortly... @table:{} @filter:{}", self.table_name, self.filter_shape);
-                        // and so pass an error to parent (triggering a retry in a moment)
-                        return Err(anyhow!("timed_out"));
-                    },
-                    // the "batch execution is done" message was received; break out of the message-reading loop
-                    Ok(_) => break,
-                };
-            }
-            return Ok(());
-        }
+    async fn execute_batch_x_once_ready(&self, batch_i: usize, batch_generation: usize, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(), Error> {
+        new_mtx!(mtx, "1:create receiver", parent_mtx, Some(format!("@batch_i:{batch_i} @batch_generation:{batch_generation}")));
+        // create receiver now, so we start receiving all messages from this point
+        let mut receiver = self.channel_for_batch_messages__sender_base.new_receiver();
 
-        new_mtx!(mtx, "1:wait for the correct time to execute", parent_mtx, Some(format!("@batch_i:{batch_i}")));
+        mtx.section("2:wait for the correct time to execute");
         // todo: fine-tune these settings, as well as scale-up algorithm
         const LQ_BATCH_DURATION_MIN: f64 = 100f64;
         //const LQ_BATCH_DURATION_MAX: f64 = 100f64;
@@ -311,51 +284,84 @@ impl LQGroup {
         let time_till_batch_end = batch_end_time - time_since_epoch_ms();
         tokio::time::sleep(Duration::try_from_secs_f64(time_till_batch_end / 1000f64).unwrap_or(Duration::from_secs(0))).await;
 
-        // now that we're done waiting, get write-locks right away
-        mtx.section("2:acquire locks");
-        new_mtx!(locks_mtx, "1:get batches-meta write-lock", Some(&mtx));
-        let mut meta = self.batches_meta.write().await;
-        locks_mtx.section("2:get batch write-lock");
-        let (batch_i, batch_lock) = self.get_buffering_batch(meta.clone());
-        let mut batch = batch_lock.write().await;
-        drop(locks_mtx);
-
-        mtx.section_2("3:execute the batch", Some(format!("@batch_lqi_count:{}", batch.query_instances.len())));
-        meta.last_batch_execution_started_index = batch_i as i64;
-        meta.last_batch_execution_started_time = time_since_epoch_ms();
-        drop(meta); // drop lock on meta prior to executing batch
-
-        batch.execute(ctx, Some(&mtx)).await.expect("Executing the lq-batch failed!");
-        /*if let Err(err) = batch.execute(ctx, Some(&mtx)).await {
-            // if a query fails, log the error, but continue execution (better than panicking the whole server)
-            error!("{}", err);
-        }*/
-
-        mtx.section("4:reacquire meta write-lock"); //, and update last_batch_executed_index
-        // reacquire meta-lock
-        let mut meta = self.batches_meta.write().await;
-        //meta.last_batch_executed_index = batch_i as i64;
-
-        mtx.section("5:reset batch, and drop batch write-lock");
-        let instances_in_batch = batch.reset_for_next_cycle();
-        let instances_in_batch_len = instances_in_batch.len();
-        drop(batch); // drop write-lock on batch
-
-        mtx.section_2("6:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", self.query_instances.get_live_guards_str())));
+        mtx.section("3:race to be the one to perform the execution (it doesn't matter which succeeds)");
         {
-            //let instances_in_batch = batch.query_instances.read().await;
-            let mut query_instances = self.query_instances.write("execute_batch_x_once_ready").await;
-            for (key, value) in instances_in_batch.into_iter() {
-                query_instances.insert(key.to_owned(), value.clone());
-            }
-            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch_len));
+            let batch_lock = self.batches.get(batch_i).unwrap();
+            let mut batch = batch_lock.write().await;
+            if batch.get_generation() == batch_generation {
+                // upgrade to write lock; the first task that makes it here is the one that executes the batch
+                //let batch = batch_lock.write().await;
+                
+                // now that we're done waiting, get write-locks right away
+                new_mtx!(mtx2, "1:get batches-meta write-lock", Some(&mtx));
+                let mut meta = self.batches_meta.write().await;
 
-            meta.last_batch_committed_index = batch_i as i64;
-            //meta.last_batch_buffering_started_index = batch_i as i64;
+                mtx2.section_2("2:execute the batch", Some(format!("@batch_lqi_count:{}", batch.query_instances.len())));
+                meta.last_batch_execution_started_index = batch_i as i64;
+                meta.last_batch_execution_started_time = time_since_epoch_ms();
+                drop(meta); // drop lock on meta prior to executing batch
+
+                batch.execute(ctx, Some(&mtx2)).await.expect("Executing the lq-batch failed!");
+                /*if let Err(err) = batch.execute(ctx, Some(&mtx)).await {
+                    // if a query fails, log the error, but continue execution (better than panicking the whole server)
+                    error!("{}", err);
+                }*/
+
+                mtx2.section("3:reacquire meta write-lock"); //, and update last_batch_executed_index
+                // reacquire meta-lock
+                let mut meta = self.batches_meta.write().await;
+                //meta.last_batch_executed_index = batch_i as i64;
+
+                mtx2.section("4:reset batch, and drop batch write-lock");
+                let instances_in_batch = batch.mark_generation_end_and_reset();
+                let instances_in_batch_len = instances_in_batch.len();
+                drop(batch); // drop write-lock on batch
+
+                mtx2.section_2("5:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", self.query_instances.get_live_guards_str())));
+                {
+                    //let instances_in_batch = batch.query_instances.read().await;
+                    let mut query_instances = self.query_instances.write("execute_batch_x_once_ready").await;
+                    for (key, value) in instances_in_batch.into_iter() {
+                        query_instances.insert(key.to_owned(), value.clone());
+                    }
+                    mtx2.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch_len));
+
+                    meta.last_batch_committed_index = batch_i as i64;
+                    //meta.last_batch_buffering_started_index = batch_i as i64;
+                }
+
+                mtx2.section("6:send message notifying of execution being done");
+                self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
+            }
         }
 
-        mtx.section("7:send message notifying of execution being done");
-        self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
+        // todo: probably rework/remove this "confirmation" section (I think it's unnecessary now)
+        mtx.section_2("4:loop through messages for confirmation that batch executed (performed by whoever won the race above)", Some(format!("@batch_i:{batch_i}")));
+        //let sender_clone = self.channel_for_batch_messages__sender_base.clone();
+        loop {
+            let wait_for_execution_done = async {
+                loop {
+                    let msg = receiver.recv().await.unwrap();
+                    match msg {
+                        LQBatchMessage::NotifyExecutionDone(executed_batch_i) => {
+                            if executed_batch_i == batch_i {
+                                return;
+                            }
+                        },
+                    }
+                }
+            };
+            match time::timeout(Duration::from_secs(3), wait_for_execution_done).await {
+                // temp: if we timeout after X seconds, having failed to receive the "batch execution done" message, assume we "missed" the batch-execution...
+                Err(_err) => {
+                    error!("Timed out waiting for confirmation of batch-execution completion. Retrying this request shortly... @table:{} @filter:{}", self.table_name, self.filter_shape);
+                    // and so pass an error to parent (triggering a retry in a moment)
+                    return Err(anyhow!("timed_out"));
+                },
+                // the "batch execution is done" message was received; break out of the message-reading loop
+                Ok(_) => break,
+            };
+        }
         Ok(())
     }
 

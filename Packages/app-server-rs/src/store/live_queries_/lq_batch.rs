@@ -1,4 +1,5 @@
 use std::iter::{once, empty};
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::{sync::Arc};
 use anyhow::{Error};
@@ -33,25 +34,37 @@ pub struct LQBatch {
     // from LQGroup
     pub table_name: String,
     pub filter_shape: QueryFilter,
+    //pub index_in_group: usize,
     
     /// Note that this map gets cleared as soon as its entries are committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
     pub query_instances: IndexMap<String, Arc<LQInstance>>,
     //pub execution_time: Option<f64>,
     //execution_time: AtomicF64, // a value of -1 means "not yet set", ie. execution hasn't happened yet
+
+    //pub execution_in_progress: Mutex<bool>,
+    pub executions_completed: usize,
 }
 impl LQBatch {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
         Self {
             table_name,
             filter_shape,
+            //index_in_group,
+
             query_instances: IndexMap::default(),
             //query_instances: RwLock::default(),
             //execution_time: AtomicF64::new(-1f64),
+            //execution_in_progress: Mutex::new(false),
+            executions_completed: 0,
         }
+    }
+    pub fn get_generation(&self) -> usize {
+        self.executions_completed
     }
 
     /// Call this each cycle, after the batch's contents have been committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
-    pub fn reset_for_next_cycle(&mut self) -> Vec<(String, Arc<LQInstance>)> {
+    pub fn mark_generation_end_and_reset(&mut self) -> Vec<(String, Arc<LQInstance>)> {
+        self.executions_completed += 1;
         self.query_instances.drain(..).collect_vec()
     }
 
