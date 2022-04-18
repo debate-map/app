@@ -1,6 +1,6 @@
 import {Clone, E, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {store} from "Store";
@@ -46,13 +46,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const outerNode = isPremiseOfSinglePremiseArg ? parent : node;
 		const outerPath = isPremiseOfSinglePremiseArg ? SlicePath(path, 1) : path;
-		let pathsToChangedInSubtree = [] as string[];
-		if (map) {
-			//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
-			const sinceTime = 0;
-			const pathsToChangedNodes = GetPathsToNodesChangedSinceX(map.id, sinceTime);
-			pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
-		}
 
 		const copiedNode = GetCopiedNode();
 		const copiedNodePath = GetCopiedNodePath();
@@ -197,14 +190,27 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
 						}}/>}
-				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
+				{// this is too slow, checking the paths merely when right-clicking; instead, just always have the option visible, and delay the path-finding till when clicking it
+				/*pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
 					<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
 							if (e.button != 0) return;
 							for (const path of pathsToChangedInSubtree) {
 								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
 							}
-						}}/>}
+						}}/>*/}
+				{map && !forChildHolderBox &&
+				<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
+					onClick={async e=>{
+						if (e.button != 0) return;
+						//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+						const sinceTime = 0;
+						const pathsToChangedNodes = await GetAsync(()=>GetPathsToNodesChangedSinceX(map.id, sinceTime), {maxIterations: 1000}); // this can take a lot of iterations...
+						const pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
+						for (const path of pathsToChangedInSubtree) {
+							RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
+						}
+					}}/>}
 				{inList &&
 					<VMenuItem text="Find in maps" style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
