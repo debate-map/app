@@ -360,34 +360,36 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 		"JS_BASE_URL": imageURL_jsBase,
 		"env_ENV": os.getenv("ENV") or "dev",
 	},
-	# this lets Tilt update the listed files directly, without involving Docker at all
-	live_update=[
-		#sync('./NMOverwrites/', '/dm_repo/'),
-		sync('./.yalc/', '/dm_repo/.yalc/'),
-		sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
-		#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
-		sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
-		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
-		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
-	])
+	# this lets Tilt update the listed files directly, without involving Docker at all (though must enable this, per session, through tilt-ui)
+	# live_update=[
+	# 	#sync('./NMOverwrites/', '/dm_repo/'),
+	# 	sync('./.yalc/', '/dm_repo/.yalc/'),
+	# 	sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
+	# 	#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
+	# 	sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
+	# 	# temp-synced folder (eg. for adding temp log-lines to node-modules) 
+	# 	#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
+	# ]
+)
 imageURL_appServerJS = registryURL + '/dm-app-server-js-' + os.getenv("ENV")
 docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
 		"JS_BASE_URL": imageURL_jsBase,
 		"env_ENV": os.getenv("ENV") or "dev"
 	},
-	# this lets Tilt update the listed files directly, without involving Docker at all
-	live_update=[
-		#sync('./NMOverwrites/', '/dm_repo/'),
-		sync('./.yalc/', '/dm_repo/.yalc/'),
-		sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
-		#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
-		sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
-		# temp-synced folder (eg. for adding temp log-lines to node-modules) 
-		#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
-		#sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
-		#sync('./Temp_Synced/postgraphile', '/dm_repo/node_modules/postgraphile'),
-	])
+	# this lets Tilt update the listed files directly, without involving Docker at all (though must enable this, per session, through tilt-ui)
+	# live_update=[
+	# 	#sync('./NMOverwrites/', '/dm_repo/'),
+	# 	sync('./.yalc/', '/dm_repo/.yalc/'),
+	# 	sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
+	# 	#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
+	# 	sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
+	# 	# temp-synced folder (eg. for adding temp log-lines to node-modules) 
+	# 	#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
+	# 	#sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
+	# 	#sync('./Temp_Synced/postgraphile', '/dm_repo/node_modules/postgraphile'),
+	# ]
+)
 
 # own app (deploy to kubernetes)
 # ==========

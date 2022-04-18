@@ -3,11 +3,20 @@ import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
 import {MapNodeRevision} from "./nodes/@MapNodeRevision.js";
 
+export function CleanNodeRevision<T extends(MapNodeRevision|n)>(source: T): T {
+	if (source != null) {
+		// the phrasing_tsvector field, when stringified, contains unusual unicode characters, which app-server-js is unable to write to the db;
+		// thus, we strip that field at read-time, so we don't accidentally send it later on [it'd be useless to send anyway, since the server overwrites that field itself]
+		delete source.phrasing_tsvector;
+	}
+	return source;
+}
+
 export const GetNodeRevision = CreateAccessor((id: string|n)=>{
 	/*if (id == "HMemAFcKRtWjYcdktiGXGA") {
 		debugger;
 	}*/
-	return GetDoc({}, a=>a.nodeRevisions.get(id!));
+	return CleanNodeRevision(GetDoc({}, a=>a.nodeRevisions.get(id!)));
 });
 
 // todo: make this use an actual query, to improve performance
@@ -43,7 +52,7 @@ export const GetNodeRevisions = CreateAccessor((nodeID: string): MapNodeRevision
 		params: {filter: {
 			node: {equalTo: nodeID},
 		}},
-	}, a=>a.nodeRevisions);
+	}, a=>a.nodeRevisions).map(a=>CleanNodeRevision(a));
 });
 // commented for now, as support is not yet added for this type of "contains" filter (ie. targeting something within jsonb), in app-server-rs
 /*export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): MapNodeRevision[]=>{

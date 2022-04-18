@@ -1,5 +1,6 @@
 import {emptyArray, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
 import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink";
+import {CommandRun} from "./commandRuns/@CommandRun.js";
 import {MeID} from "./users.js";
 
 export const GetCommandRuns = CreateAccessor((commandTypes?: string[], actorID?: string, showAll?: boolean)=>{
