@@ -20,6 +20,7 @@ use axum::{extract, AddExtensionLayer, Router};
 use flume::{Sender, Receiver, unbounded};
 use indexmap::IndexMap;
 use itertools::Itertools;
+use rust_shared::time_since_epoch_ms;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
@@ -47,7 +48,7 @@ use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::pg_stream_parsing::LDChange;
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
-use crate::utils::general::general::{AtomicF64, time_since_epoch_ms};
+use crate::utils::general::general::{AtomicF64};
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::type_aliases::{JSONValue, PGClientObject, ABReceiver, ABSender};
 
@@ -187,10 +188,7 @@ impl LQGroup {
         let (instance, lqi_active) = self.get_or_create_lq_instance(table_name, filter, ctx, Some(&mtx)).await;
 
         mtx.section("2:get current result-set");
-        let result_entries = {
-            let result_entries = instance.last_entries.read().await;
-            result_entries.clone()
-        };
+        let result_entries = instance.last_entries.read().await.clone();
 
         mtx.section("3:convert result-set to rust types");
         let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
@@ -227,11 +225,11 @@ impl LQGroup {
     async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: PGClientObject, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, usize) {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
         let (new_lqi_arc, batch_i, lqis_buffered_already) = {
-            let meta = self.batches_meta.read().await;
-            let (batch_i, batch_lock) = self.get_buffering_batch(meta.clone());
+            new_mtx!(mtx2, "1:get batches_meta read-lock", Some(&mtx));
+            let meta_clone = self.batches_meta.read().await.clone();
+            mtx2.section("2:get batch write-lock, and insert");
+            let (batch_i, batch_lock) = self.get_buffering_batch(meta_clone);
             let mut batch = batch_lock.write().await;
-            //let batch = self.current_batch.get_mut();
-            //let mut instances_in_batch = batch.query_instances.write().await;
             let instances_in_batch = &mut batch.query_instances;
             let lqis_buffered_already = instances_in_batch.len();
 
@@ -271,11 +269,7 @@ impl LQGroup {
         // todo: fine-tune these settings, as well as scale-up algorithm
         const LQ_BATCH_DURATION_MIN: f64 = 100f64;
         //const LQ_BATCH_DURATION_MAX: f64 = 100f64;
-        let last_batch_execution_time = {
-            let meta = self.batches_meta.read().await;
-            //self.last_batch_execution_started_time.load(Ordering::Relaxed)
-            meta.last_batch_execution_started_time
-        };
+        let last_batch_execution_time = self.batches_meta.read().await.last_batch_execution_started_time;
         let batch_end_time = last_batch_execution_time + LQ_BATCH_DURATION_MIN;
         let time_till_batch_end = batch_end_time - time_since_epoch_ms();
         tokio::time::sleep(Duration::try_from_secs_f64(time_till_batch_end / 1000f64).unwrap_or(Duration::from_secs(0))).await;
@@ -295,21 +289,24 @@ impl LQGroup {
         drop(meta); // drop lock on meta prior to executing batch
         batch.execute(ctx, Some(&mtx)).await.expect("Executing the lq-batch failed!");
 
-        mtx.section("3.1:reacquire meta-lock"); //, and update last_batch_executed_index
+        mtx.section("4:reacquire meta write-lock"); //, and update last_batch_executed_index
         // reacquire meta-lock
         let mut meta = self.batches_meta.write().await;
         //meta.last_batch_executed_index = batch_i as i64;
 
-        mtx.section("4:commit the lqi's in batch to overall group, and update batches-meta");
+        mtx.section("5:reset batch, and drop batch write-lock");
+        let instances_in_batch = batch.reset_for_next_cycle();
+        let instances_in_batch_len = instances_in_batch.len();
+        drop(batch); // drop write-lock on batch
+
+        mtx.section("6:commit the lqi's in batch to overall group, and update batches-meta");
         {
             //let instances_in_batch = batch.query_instances.read().await;
-            let instances_in_batch = &mut batch.query_instances;
             let mut query_instances = self.query_instances.write().await;
             for (key, value) in instances_in_batch.into_iter() {
                 query_instances.insert(key.to_owned(), value.clone());
             }
-            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch.len()));
-            batch.reset_for_next_cycle();
+            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch_len));
 
             meta.last_batch_committed_index = batch_i as i64;
             //meta.last_batch_buffering_started_index = batch_i as i64;
@@ -322,17 +319,21 @@ impl LQGroup {
         self.source_sender_for_lq_watcher_drops.clone()
     }*/
     pub async fn drop_lq_watcher(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid) {
+        new_mtx!(mtx, "1:get query_instances write-lock");
         debug!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
 
         let lq_key = get_lq_instance_key(table_name, filter);
-        let mut live_queries = self.query_instances.write().await;
+        // break point
+        let mut lq_instances = self.query_instances.write().await;
+        mtx.section("2:get lq_instance for key, then get lq_instance.entry_watcher write-lock");
         let new_watcher_count = {
-            let live_query = match live_queries.get_mut(&lq_key) {
+            let lq_instance = match lq_instances.get_mut(&lq_key) {
                 Some(a) => a,
                 None => return, // if entry already deleted, just ignore for now [maybe fixed after change to get_or_create_lq_instance?]
             };
-            let mut entry_watchers = live_query.entry_watchers.write().await;
+            let mut entry_watchers = lq_instance.entry_watchers.write().await;
             
+            mtx.section("3:update entry_watchers, then remove lq_instance (if no watchers), then complete");
             // commented the `.expect`, since was failing occasionally, and I don't have time to debug atm [maybe fixed after change to get_or_create_lq_instance?]
             //let _removed_value = entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
             entry_watchers.remove(&stream_id);
@@ -340,14 +341,15 @@ impl LQGroup {
             entry_watchers.len()
         };
         if new_watcher_count == 0 {
-            live_queries.remove(&lq_key);
+            lq_instances.remove(&lq_key);
             debug!("Watcher count for live-query entry dropped to 0, so removing.");
         }
 
-        debug!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, live_queries.len());
+        debug!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, lq_instances.len());
     }
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {
+        new_mtx!(mtx, "1:get query_instances read-lock");
         if self.table_name != change.table {
             return;
         }
@@ -357,13 +359,14 @@ impl LQGroup {
         let mut1 = live_queries.iter_mut();
         for (lq_key, lq_info) in mut1 {*/
         let live_queries = self.query_instances.read().await;
+        mtx.section("2:loop through lq-instances, and call on_table_changed");
         for (_lq_key, lq_instance) in live_queries.iter() {
             /*let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
             if lq_key_json["table"].as_str().unwrap() != change.table { continue; }*/
             /*for (stream_id, change_listener) in lq_info.change_listeners.iter_mut() {
                 change_listener(&lq_info.last_entries);
             }*/
-            lq_instance.on_table_changed(&change).await;
+            lq_instance.on_table_changed(&change, Some(&mtx)).await;
         }
     }
 }

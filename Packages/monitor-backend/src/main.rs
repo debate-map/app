@@ -41,7 +41,7 @@ use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use tracing::{error, info, Level, Metadata};
 use tracing_subscriber::{Layer, filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
-use utils::{general::time_since_epoch_ms, type_aliases::{FSender, FReceiver}};
+use utils::{type_aliases::{FSender, FReceiver}};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},

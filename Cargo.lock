@@ -1482,6 +1482,9 @@ dependencies = [
 [[package]]
 name = "rust-shared"
 version = "0.0.1"
+dependencies = [
+ "tokio",
+]
 
 [[package]]
 name = "ryu"

@@ -4,7 +4,6 @@ use std::task::{Context, Poll, Wake};
 use std::thread::{self, Thread};
 use std::time::Duration;
 
-use crate::utils::general::time_since_epoch_ms;
 use crate::utils::type_aliases::FReceiver;
 
 use super::type_aliases::FSender;

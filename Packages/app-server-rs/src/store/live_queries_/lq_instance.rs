@@ -109,9 +109,11 @@ impl LQInstance {
         (&watcher, self.entry_watchers.len())*/
     }*/
 
-    pub async fn on_table_changed(&self, change: &LDChange) {
-        let old_entries = self.last_entries.read().await;
-        let mut new_entries = old_entries.clone();
+    pub async fn on_table_changed(&self, change: &LDChange, mtx_p: Option<&Mtx>) {
+        new_mtx!(mtx, "1:get last_entries read-lock, clone, then drop lock", mtx_p);
+        let mut new_entries = self.last_entries.read().await.clone();
+
+        mtx.section("2:calculate new_entries");
         let mut our_data_changed = false;
         match change.kind.as_str() {
             "insert" => {
@@ -163,12 +165,14 @@ impl LQInstance {
 
         new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
+        mtx.section("3:get entry_watchers read-lock, then notify each watcher of new_entries");
         let entry_watchers = self.entry_watchers.read().await;
         for (_watcher_stream_id, watcher) in entry_watchers.iter() {
             watcher.new_entries_channel_sender.send(new_entries.clone()).unwrap();
         }
         //self.new_entries_channel_sender.send(new_entries.clone());
 
+        mtx.section("4:update the last_entries list");
         self.set_last_entries(new_entries).await;
     }
 

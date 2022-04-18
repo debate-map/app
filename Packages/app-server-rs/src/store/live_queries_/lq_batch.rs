@@ -17,7 +17,7 @@ use crate::utils::db::sql_fragment::{SF};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::utils::db::sql_param::{SQLIdent, SQLParam};
 use crate::utils::general::extensions::IteratorV;
-use crate::utils::general::general::{match_cond_to_iter, time_since_epoch_ms, AtomicF64};
+use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
 use crate::utils::type_aliases::PGClientObject;
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}, general::general::to_anyhow}};
@@ -50,8 +50,8 @@ impl LQBatch {
     }
 
     /// Call this each cycle, after the batch's contents have been committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
-    pub fn reset_for_next_cycle(&mut self) {
-        self.query_instances.drain(..);
+    pub fn reset_for_next_cycle(&mut self) -> Vec<(String, Arc<LQInstance>)> {
+        self.query_instances.drain(..).collect_vec()
     }
 
     /// Returns a set of LQParam instances with filler values; used for generating the column-names for the temp-table holding the param-sets.
@@ -82,8 +82,6 @@ impl LQBatch {
         let client = ctx;
         //mtx.current_section_extra_info = Some(format!("@table_name:{} @filters_sql:{}", instance.table_name, filters_sql));
 
-        //let query_instances = self.query_instances.read().await;
-        //let query_instances = &mut self.query_instances;
         let query_instance_vals: Vec<&Arc<LQInstance>> = self.query_instances.values().collect();
 
         mtx.section("1.1:wait for semaphore permit");

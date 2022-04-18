@@ -18,13 +18,6 @@ use std::hash::Hash;
 
 use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, mtx::mtx::{new_mtx, Mtx}}};
 
-pub fn time_since_epoch() -> Duration {
-    SystemTime::now().duration_since(UNIX_EPOCH).unwrap()
-}
-pub fn time_since_epoch_ms() -> f64 {
-    time_since_epoch().as_secs_f64() * 1000f64
-}
-
 pub async fn body_to_str(body: Body) -> Result<String, Error> {
     let bytes1 = hyper::body::to_bytes(body).await?;
     let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
@@ -57,7 +50,7 @@ pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: 
         }
     }
     
-    //mtx.section("2");
+    mtx.section("2");
     let mut map_write = map.write().await;
     mtx.section("2.1");
     //println!("2.1, key:{:?}", key);

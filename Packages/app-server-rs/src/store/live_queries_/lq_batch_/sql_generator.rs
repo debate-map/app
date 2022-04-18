@@ -15,7 +15,7 @@ use crate::utils::db::sql_fragment::{SF};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::utils::db::sql_param::{SQLIdent, SQLParam};
 use crate::utils::general::extensions::IteratorV;
-use crate::utils::general::general::{match_cond_to_iter, time_since_epoch_ms, AtomicF64};
+use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
 use crate::utils::type_aliases::PGClientObject;
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}, general::general::to_anyhow}};
@@ -95,8 +95,9 @@ mod tests {
     use std::{sync::Arc, iter::once};
 
     use itertools::chain;
+    use rust_shared::time_since_epoch_ms;
     use serde_json::json;
-    use crate::{store::live_queries_::{lq_batch_::sql_generator, lq_instance::LQInstance, lq_param::LQParam}, utils::{db::filter::{FilterOp, QueryFilter}, type_aliases::JSONValue, general::general::time_since_epoch_ms}};
+    use crate::{store::live_queries_::{lq_batch_::sql_generator, lq_instance::LQInstance, lq_param::LQParam}, utils::{db::filter::{FilterOp, QueryFilter}, type_aliases::JSONValue}};
 
     use super::prepare_sql_query;
 
