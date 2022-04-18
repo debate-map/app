@@ -32,6 +32,8 @@ RUN apt-get update && \
 	apt-get update && \
 	apt-get -t sid install -y --no-install-recommends mold
 	#apt-get -t sid install -y mold
+# also install various other commands (eg. for inspecting folder-structure during build)
+RUN apt-get install -y tree
 
 # ensure mold is installed
 RUN mold --version
@@ -82,34 +84,51 @@ COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
 RUN mkdir Packages/app-server-rs/src/
 RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
 
-WORKDIR /dm_repo/Packages/app-server-rs
-
 # build the dependencies
-#RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings ${debug_vs_release_flag}
-RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
+RUN RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag}
+#RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
 #RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile -Z self-profile-events=default,args
+
+# list all paths under "target" that contain "shared"
+RUN cd /dm_repo/target && tree -fa | grep shared
+#RUN echo rerun_flag_0 && ls /dm_repo/Packages/app-server-rs
+#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}
+#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/build
+#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/deps
+#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/incremental
 
 # remove the build output of the "dummy versions" of packages (needed for subsequent compile)
 #RUN rm -f /dm_repo/Packages/app-server-rs/target/${debug_vs_release}/deps/app_server_rs*
-RUN rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared*
-RUN rm -f /dm_repo/target/${debug_vs_release}/deps/app_server_rs*
+RUN rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared* && \
+	rm -f /dm_repo/target/${debug_vs_release}/deps/librust_shared* && \
+	rm -f /dm_repo/target/${debug_vs_release}/deps/app_server_rs*
 
-# now copy the actual code for rust-shared, and build it
+# now that rust-shared has dependencies of its own, some of its compile data gets stored in places as well, so delete those contents (since the compile above was for placeholder-code)
+# RUN rm -f /dm_repo/target/${debug_vs_release}/rust-shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/rust_shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/librust-shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/librust_shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/app-server-rs* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/app_server_rs*
+# 	#rm -rf /dm_repo/target/${debug_vs_release}/incremental && \
+# 	#rm -rf /dm_repo/target/${debug_vs_release}/deps && \
+# 	#rm -rf /dm_repo/target/${debug_vs_release}/build && \
+
+# relist all paths under "target" that contain "shared", to confirm none are left
+RUN cd /dm_repo/target && tree -fa | grep shared
+
+# now copy the actual code for each relevant package
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
-RUN cat /dm_repo/Packages/rust-shared/src/lib.rs
-RUN cd /dm_repo/Packages/rust-shared/ && RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
-
-# now copy the actual code for app-server-rs, and build it
-#COPY Packages/app-server-rs/ .
 COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
-#COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
-# and build the actual app-server program
-#RUN RUSTC_BOOTSTRAP=1 cargo build -Z timings
-#RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
+# ensure rust_shared was copied correctly
+RUN echo rerun_flag_1 && cat /dm_repo/Packages/rust-shared/src/lib.rs
+
+# now build everything
+WORKDIR /dm_repo/Packages/app-server-rs
 RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
-#RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes
-#RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z time-passes -Z self-profile -Z self-profile-events=default,args
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
+# WORKDIR /dm_repo/
+# RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
 
 # ------------------------------------------------------------------------------
 # Final Stage

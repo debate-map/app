@@ -4,7 +4,9 @@
 
 #FROM rust:1.58 as cargo-build
 # rather than use a mutable "version", lock the source image to a specific digest (so ~nightly "rust:XXX" image changes doesn't cause complete rebuilds of our build-chain)
-FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
+#FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
+# temp, to be (closer to) matching with cargo 1.60.0-beta.3 on dev-machine
+FROM rustlang/rust:nightly-bullseye@sha256:80046c08dad9ac3941941be072ea5db5c105a6208cff73ca36496f761c2f5c9c as cargo-build
 
 # generic env-var for code to know if its running as part of a Dockerfile
 ENV IN_DOCKER=1
@@ -18,6 +20,8 @@ RUN apt-get update && \
 	add-apt-repository "deb http://httpredir.debian.org/debian sid main" && \
 	apt-get update && \
 	apt-get -t sid install -y --no-install-recommends mold
+# also install various other commands (eg. for inspecting folder-structure during build)
+RUN apt-get install -y tree
 
 # ensure mold is installed
 RUN mold --version
@@ -64,23 +68,26 @@ COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
 RUN mkdir Packages/monitor-backend/src/
 RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
 
-WORKDIR /dm_repo/Packages/monitor-backend
-
 # build the dependencies
-RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
+RUN RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag}
 
+# list all paths under "target" that contain "shared"
+RUN cd /dm_repo/target && tree -fa | grep shared
 # remove the build output of the "dummy versions" of packages (needed for subsequent compile)
-#RUN rm -f /dm_repo/Packages/monitor_backend/target/${debug_vs_release}/deps/monitor_backend*
-RUN rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared*
-RUN rm -f /dm_repo/target/${debug_vs_release}/deps/monitor_backend*
+RUN rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared* && \
+	rm -f /dm_repo/target/${debug_vs_release}/deps/librust_shared* && \
+	rm -f /dm_repo/target/${debug_vs_release}/deps/monitor_backend*
+# relist all paths under "target" that contain "shared", to confirm none are left
+RUN cd /dm_repo/target && tree -fa | grep shared
 
-# now copy the actual code for rust-shared, and build it
+# now copy the actual code for each relevant package
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
-RUN cat /dm_repo/Packages/rust-shared/src/lib.rs
-RUN cd /dm_repo/Packages/rust-shared/ && RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
-
-# now copy the actual code for monitor-backend, and build it
 COPY Packages/monitor-backend/ /dm_repo/Packages/monitor-backend/
+# ensure rust_shared was copied correctly
+RUN echo rerun_flag_1 && cat /dm_repo/Packages/rust-shared/src/lib.rs
+
+# now build everything
+WORKDIR /dm_repo/Packages/monitor-backend
 RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
