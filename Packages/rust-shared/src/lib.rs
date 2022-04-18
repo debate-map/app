@@ -1,8 +1,13 @@
+#![allow(
+    non_camel_case_types,
+)]
+
 use std::time::{UNIX_EPOCH, SystemTime, Duration};
 
 pub mod errors;
-pub use errors::*;
 pub mod locks;
+
+pub use errors::*;
 pub use locks::*;
 
 pub fn time_since_epoch() -> Duration {

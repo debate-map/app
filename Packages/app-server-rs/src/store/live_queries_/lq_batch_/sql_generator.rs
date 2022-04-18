@@ -25,7 +25,7 @@ use super::super::lq_param::LQParam;
 
 pub fn prepare_sql_query(table_name: &str, lq_param_protos: &Vec<LQParam>, query_instance_vals: &Vec<&Arc<LQInstance>>, mtx_p: Option<&Mtx>) -> Result<(String, Vec<SQLParam>), Error> {
     new_mtx!(mtx, "1:prep", mtx_p);
-    let lq_last_index = query_instance_vals.len() - 1;
+    let lq_last_index = query_instance_vals.len() as i64 - 1;
 
     // each entry of the root-chain is considered its own line, with `merge_lines()` adding line-breaks between them
     let mut combined_sql = SF::merge_lines(chain!(
@@ -57,7 +57,7 @@ pub fn prepare_sql_query(table_name: &str, lq_param_protos: &Vec<LQParam>, query
                     ).collect_vec()))
                 }).try_collect2::<Vec<_>>()?,
                 SF::lit_once(")"),
-                match_cond_to_iter(lq_index < lq_last_index, SF::lit_once(","), empty()),
+                match_cond_to_iter((lq_index as i64) < lq_last_index, SF::lit_once(","), empty()),
             ).collect_vec()))
         }).try_collect2::<Vec<_>>()?,
         SF::lit_once(")"),

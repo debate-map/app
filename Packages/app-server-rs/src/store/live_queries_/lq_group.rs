@@ -20,7 +20,7 @@ use axum::{extract, AddExtensionLayer, Router};
 use flume::{Sender, Receiver, unbounded};
 use indexmap::IndexMap;
 use itertools::Itertools;
-use rust_shared::time_since_epoch_ms;
+use rust_shared::{time_since_epoch_ms, RwLock_Tracked};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
@@ -128,14 +128,15 @@ pub struct LQGroup {
     pub batches_meta: RwLock<LQGroup_BatchesMeta>,
 
     /// Map of committed live-query instances.
-    pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
+    //pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
+    pub query_instances: RwLock_Tracked<IndexMap<String, Arc<LQInstance>>>,
     //source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl LQGroup {
     pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
         //let (s1, r1): (Sender<LQBatchMessage>, Receiver<LQBatchMessage>) = flume::unbounded();
         //let r1_clone = r1.clone(); // clone needed for tokio::spawn closure below
-        let (s1, r1): (ABSender<LQBatchMessage>, ABReceiver<LQBatchMessage>) = async_broadcast::broadcast(10);
+        let (s1, r1): (ABSender<LQBatchMessage>, ABReceiver<LQBatchMessage>) = async_broadcast::broadcast(10000); // temp-set to 10000, to fix deadlock (of some entries not being consumed I think)
         let new_self = Self {
             table_name: table_name.clone(),
             filter_shape: filter_shape.clone(),
@@ -147,7 +148,7 @@ impl LQGroup {
             channel_for_batch_messages__sender_base: s1,
             channel_for_batch_messages__receiver_base: r1,
 
-            query_instances: RwLock::new(IndexMap::new()),
+            query_instances: RwLock_Tracked::new(IndexMap::new()),
             //source_sender_for_lq_watcher_drops: s1,
         };
 
@@ -209,7 +210,7 @@ impl LQGroup {
         new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
         let lq_key = get_lq_instance_key(table_name, filter);
 
-        let query_instances = self.query_instances.read().await;
+        let query_instances = self.query_instances.read("get_or_create_lq_instance").await;
         match query_instances.get(&lq_key) {
             Some(instance) => {
                 mtx.section("2A:clone+return the current lqi for this key");
@@ -299,10 +300,10 @@ impl LQGroup {
         let instances_in_batch_len = instances_in_batch.len();
         drop(batch); // drop write-lock on batch
 
-        mtx.section("6:commit the lqi's in batch to overall group, and update batches-meta");
+        mtx.section_2("6:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", self.query_instances.get_live_guards_str())));
         {
             //let instances_in_batch = batch.query_instances.read().await;
-            let mut query_instances = self.query_instances.write().await;
+            let mut query_instances = self.query_instances.write("execute_batch_x_once_ready").await;
             for (key, value) in instances_in_batch.into_iter() {
                 query_instances.insert(key.to_owned(), value.clone());
             }
@@ -312,6 +313,7 @@ impl LQGroup {
             //meta.last_batch_buffering_started_index = batch_i as i64;
         }
 
+        mtx.section("7:send message notifying of execution being done");
         self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
     }
 
@@ -324,7 +326,7 @@ impl LQGroup {
 
         let lq_key = get_lq_instance_key(table_name, filter);
         // break point
-        let mut lq_instances = self.query_instances.write().await;
+        let mut lq_instances = self.query_instances.write("drop_lq_watcher").await;
         mtx.section("2:get lq_instance for key, then get lq_instance.entry_watcher write-lock");
         let new_watcher_count = {
             let lq_instance = match lq_instances.get_mut(&lq_key) {
@@ -358,7 +360,7 @@ impl LQGroup {
         /*let mut live_queries = self.query_instances.write().await;
         let mut1 = live_queries.iter_mut();
         for (lq_key, lq_info) in mut1 {*/
-        let live_queries = self.query_instances.read().await;
+        let live_queries = self.query_instances.read("notify_of_ld_change").await;
         mtx.section("2:loop through lq-instances, and call on_table_changed");
         for (_lq_key, lq_instance) in live_queries.iter() {
             /*let lq_key_json: JSONValue = serde_json::from_str(lq_key).unwrap();
