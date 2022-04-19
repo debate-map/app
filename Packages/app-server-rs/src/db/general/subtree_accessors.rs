@@ -248,6 +248,6 @@ pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<Ma
 }
 pub async fn get_tags_for(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<MapNodeTag>, Error> {
     get_db_entries(ctx, "nodeTags", &Some(json!({
-        "nodes": {"contains": node_id}
+        "nodes": {"contains": [node_id]}
     }))).await
 }

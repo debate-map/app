@@ -1,6 +1,7 @@
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr};
 use std::str::FromStr;
+use anyhow::{anyhow, Error};
 use axum::body::HttpBody;
 use hyper::server::conn::AddrStream;
 use hyper::{client::HttpConnector, Body, Server, StatusCode};
@@ -31,14 +32,14 @@ pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
 
 pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster.local:5115";
 
-pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
+pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
     // read request's body (from frontend)
-    let req_as_str = body_to_str(req.into_body()).await.unwrap();
-    let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
+    let req_as_str = body_to_str(req.into_body()).await?;
+    let req_as_json = JSONValue::from_str(&req_as_str)?;
 
     // send request to graphql engine
     //let gql_req = async_graphql::Request::new(req_as_str);
-    let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().unwrap());
+    let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().ok_or(anyhow!("The \"query\" field must be a string."))?);
     let gql_req = match req_as_json["operationName"].as_str() {
         Some(op_name) => gql_req.operation_name(op_name),
         None => gql_req,
@@ -48,9 +49,9 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     // read response from graphql engine
     let gql_response = schema.execute(gql_req).await;
     //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
-    let response_str: String = serde_json::to_string(&gql_response).unwrap();
+    let response_str: String = serde_json::to_string(&gql_response)?;
     
-    response_str
+    Ok(response_str)
 }
 
 pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, mut req: Request<Body>) -> Response<Body> {
@@ -61,7 +62,10 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
             let path = referrer_url.path();
             if path == "/gql-playground" || path == "/graphiql-new" {
                 info!(r#"Sending "/graphql" request to app-server-rs, since from "{path}". @referrer:{referrer_str}"#);
-                let response_str = have_own_graphql_handle_request(req, schema).await;
+                let response_str = match have_own_graphql_handle_request(req, schema).await {
+                    Ok(a) => a,
+                    Err(err) => format!("Got error in passing/execution of graphql request to app-server-rs' gql engine:{err:?}"),
+                };
 
                 // send response (to frontend)
                 let mut response = Response::builder().body(axum::body::Body::from(response_str)).unwrap();
