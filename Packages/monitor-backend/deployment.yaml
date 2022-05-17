@@ -69,3 +69,35 @@ spec:
         # just reuse the db-password as the admin-key for now
         - name: MONITOR_BACKEND_ADMIN_KEY
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
+
+# give monitor-backend various kubernetes-api permissions
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: role-for-dm-privileged-pods
+  namespace: default
+rules:
+# Just an example, feel free to change it
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: [
+    "list",
+    "get",
+    #"watch",
+    "delete"
+  ]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: dm-monitor-backend
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default
+roleRef:
+  kind: Role
+  name: role-for-dm-privileged-pods
+  apiGroup: rbac.authorization.k8s.io

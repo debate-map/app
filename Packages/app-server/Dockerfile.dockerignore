@@ -77,5 +77,5 @@ Packages/rust-shared/*
 Packages/web-server/*
 
 # but re-include these
-!Packages/app-server/*
-!Packages/js-common/*
+!Packages/app-server/**
+!Packages/js-common/**

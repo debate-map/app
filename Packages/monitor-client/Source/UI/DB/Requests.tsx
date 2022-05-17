@@ -120,7 +120,7 @@ export const RequestsUI = observer(()=>{
 				<Button ml={5} text="Clear (on app-server-rs)" onClick={async()=>{
 					const {message} = (await clearMtxResults({
 						variables: {adminKey},
-					})).data;
+					})).data.clearMtxResults;
 					await refetch();
 				}}/>
 				<Text ml={5}>Range to show, duration:</Text>

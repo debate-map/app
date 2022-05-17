@@ -9,11 +9,12 @@ use rust_shared::SubError;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
-use tracing::error;
-use std::env;
+use tracing::{error, info};
+use std::{env, fs};
 use std::path::Path;
 use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
+use hyper_tls::HttpsConnector;
 
 use crate::utils::futures::make_reliable;
 use crate::{GeneralMessage};
@@ -87,6 +88,66 @@ pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
     Ok(res_as_json)
 }
 
+pub async fn get_k8s_pod_names(namespace: &str) -> Result<Vec<String>, Error> {
+    let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+    let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
+    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
+
+    let req = hyper::Request::builder()
+        .method(Method::GET)
+        .uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods/"))
+        .header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {token}"))
+        .body(json!({}).to_string().into())?;
+    /*let client = hyper::Client::new();
+    let res = client.request(req).await?;*/
+    let https = HttpsConnector::new();
+    let res = hyper::Client::builder().build::<_, hyper::Body>(https).request(req).await?;
+
+    let res_as_json_str = body_to_str(res.into_body()).await?;
+    info!("Got list of k8s pods (in namespace \"{namespace}\"): {}", res_as_json_str);
+    let res_as_json = JSONValue::from_str(&res_as_json_str)?;
+
+    let pod_names = (|| {
+        let mut pod_names: Vec<String> = vec![];
+        for pod_info in res_as_json.as_object()?.get("items")?.as_array()? {
+            let pod_name = pod_info.as_object()?.get("metadata")?.as_object()?.get("name")?.as_str()?;
+            pod_names.push(pod_name.to_owned());
+        }
+        Some(pod_names)
+    })().ok_or_else(|| anyhow!("Response from kubernetes API is malformed:{res_as_json_str}"))?;
+
+    Ok(pod_names)
+}
+
+pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
+    info!("Beginning request to restart the app-server.");
+    let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+    let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
+    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
+
+    // todo: improve this to ignore pods that are already terminating (eg. for if trying to restart app-server right shortly after a previous restart)
+    let app_server_pod_name: String = get_k8s_pod_names("default").await?
+        .iter().find(|a| a.starts_with("dm-app-server-rs-")).ok_or(anyhow!("App-server pod not found in list of active pods."))?.to_owned();
+
+    let req = hyper::Request::builder()
+        .method(Method::DELETE)
+        .uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/pods/{app_server_pod_name}"))
+        .header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {token}"))
+        .body(json!({}).to_string().into())?;
+    /*let client = hyper::Client::new();
+    let res = client.request(req).await?;*/
+    let https = HttpsConnector::new();
+    let res = hyper::Client::builder().build::<_, hyper::Body>(https).request(req).await?;
+    
+    let res_as_json_str = body_to_str(res.into_body()).await?;
+    info!("Got response from k8s server, on trying to restart pod \"{app_server_pod_name}\": {}", res_as_json_str);
+    let res_as_json = JSONValue::from_str(&res_as_json_str)?;
+
+    Ok(res_as_json)
+}
+
 // mutations
 // ==========
 
@@ -116,6 +177,16 @@ impl MutationShard_General {
             message: "success".to_string(),
         })
     }*/
+    
+    async fn restartAppServer(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        
+        tell_k8s_to_restart_app_server().await?;
+        
+        Ok(GenericMutation_Result {
+            message: "success".to_string(),
+        })
+    }
 
     async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }

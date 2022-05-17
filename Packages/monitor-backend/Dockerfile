@@ -41,6 +41,13 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 
 WORKDIR /dm_repo/Packages/monitor-backend
 
+# temp (for ssl connections; will look for cleaner way soon)
+#RUN cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt >> /etc/ssl/certs/ca-certificates.crt
+#RUN cp /var/run/secrets/kubernetes.io/serviceaccount/ca.crt /etc/ssl/certs/ca-certificates.crt
+RUN apt-get update && apt-get install -y ca-certificates
+#RUN mkdir /usr/local/share/ca-certificates
+#RUN update-ca-certificates
+
 COPY --from=cargo-build ${copy_from_path} .
 COPY --from=cargo-build /dm_repo/Packages/monitor-backend/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
@@ -48,5 +55,10 @@ COPY --from=cargo-build /dm_repo/Packages/monitor-backend/kgetOutput_buildTime/ 
 COPY Packages/monitor-client/Dist/ /dm_repo/Packages/monitor-client/Dist/
 
 CMD echo Starting Rust program...; \
+\
+	# try to find better way to enable ssl connections...
+	cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt >> /usr/local/share/ca-certificates/k8s_ca.crt; \
+	update-ca-certificates; \
+\
 	RUST_BACKTRACE=full ./monitor-backend; \
 	sleep 1; echo Rust program crashed...
