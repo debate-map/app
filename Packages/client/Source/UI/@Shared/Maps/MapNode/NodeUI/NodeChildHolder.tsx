@@ -53,10 +53,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		//let nodeChildrenToShowInRelevanceBox;
-		if (IsMultiPremiseArgument(node) && group == ChildGroup.generic) {
+		/*if (IsMultiPremiseArgument(node) && group == ChildGroup.generic) {
 			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a.type == MapNodeType.claim);
 			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
-		}
+		}*/
 		// always apply an initial sorting by manual-ordering data, so that if main ordering values are the same for a set (eg. no vote data), the set still has sub-sorting
 		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(node.current, map, store.main.maps.childOrdering));
 		// then apply the sorting for the main ordering-type (latest OrderBy() operation has higher priority, naturally)
