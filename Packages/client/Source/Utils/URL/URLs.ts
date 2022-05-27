@@ -6,6 +6,7 @@ import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/ma
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {MaybeLog, Page} from "web-vcore";
 import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
+import {ACTMapNodeSelect, GetFocusedNodeID, GetSelectedNodePathNodes} from "Store/main/maps/mapViews/$mapView";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
@@ -69,7 +70,7 @@ export function NormalizeURL(url: VURL) {
 	return result;
 }
 
-export function GetCrawlerURLStrForMap(mapID: string) {
+export function GetURLStrForMap(mapID: string) {
 	const map = GetMap(mapID);
 	if (map == null) return mapID.toString();
 
@@ -82,7 +83,7 @@ export function GetCrawlerURLStrForMap(mapID: string) {
 	return result;
 }
 
-export function GetCrawlerURLStrForNode(node: MapNodeL2) {
+export function GetURLStrForNode(node: MapNodeL2) {
 	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z0-9]/g, "-");
 	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
 	while (result.Contains("--")) {
@@ -124,19 +125,6 @@ export function GetLoadActionFuncForURL(url: VURL) {
 		const subpage = url.pathNodes[1];
 		if (url.pathNodes[1] && pageTree.children[page]?.simpleSubpages) {
 			store.main[page].subpage = subpage;
-		}
-
-		// load query-vars
-		store.main.urlOtherFlags = [];
-		for (const param of url.queryVars) {
-			if (param.name == "extra") store.main.urlExtraStr = param.value == "null" ? null : param.value;
-			else if (param.name == "env") store.main.envOverride = param.value == "null" ? null : param.value;
-			else if (param.name == "db") store.main.dbOverride = param.value == "null" ? null : param.value;
-			//else if (param.name == "dbVersion") store.main.dbVersionOverride = param.value == "null" ? null : param.value;
-			else if (param.name == "analytics") store.main.analyticsEnabled = param.value == "1";
-			else {
-				store.main.urlOtherFlags.push({name: param.name, value: param.value});
-			}
 		}
 
 		/* if (url.pathNodes[0] == 'forum') {
@@ -258,6 +246,26 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			store.main.shareBeingLoaded = shareID;
 			// actual loading handled by LoadShare.ts
 		}
+
+		// load query-vars
+		store.main.urlOtherFlags = [];
+		for (const param of url.queryVars) {
+			// special flags (regular ones have handling in the path-specific branches)
+			if (param.name == "extra") store.main.urlExtraStr = param.value == "null" ? null : param.value;
+			else if (param.name == "env") store.main.envOverride = param.value == "null" ? null : param.value;
+			else if (param.name == "db") store.main.dbOverride = param.value == "null" ? null : param.value;
+			//else if (param.name == "dbVersion") store.main.dbVersionOverride = param.value == "null" ? null : param.value;
+			else if (param.name == "analytics") store.main.analyticsEnabled = param.value == "1";
+			else if (param.name == "s") {
+				const openMapID = GetOpenMapID();
+				if (openMapID != null) {
+					const nodePathToSelect = param.value;
+					store.main.selectNode_fragmentPath = `${openMapID}/${nodePathToSelect}`;
+				}
+			} else {
+				store.main.urlOtherFlags.push({name: param.name, value: param.value});
+			}
+		}
 	};
 }
 
@@ -278,19 +286,6 @@ export const GetNewURL = CreateAccessor(function(includeMapViewStr = true) {
 	var subpage = GetSubpage();
 	if (pageTree.children[page]?.simpleSubpages && subpage) {
 		newURL.pathNodes.push(subpage);
-	}
-
-	// query vars
-	if (s.main.urlExtraStr) newURL.SetQueryVar("extra", s.main.urlExtraStr);
-	if (!s.main.analyticsEnabled && newURL.GetQueryVar("analytics") == null) newURL.SetQueryVar("analytics", "0");
-	if (s.main.envOverride) newURL.SetQueryVar("env", s.main.envOverride);
-	if (s.main.dbOverride) newURL.SetQueryVar("db", s.main.dbOverride);
-	//if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
-	/* if (mapID && includeMapViewStr) {
-		newURL.SetQueryVar('view', GetMapViewStr(mapID));
-	} */
-	for (const param of s.main.urlOtherFlags) {
-		newURL.SetQueryVar(param.name, param.value);
 	}
 
 	if (page == "database") {
@@ -317,28 +312,34 @@ export const GetNewURL = CreateAccessor(function(includeMapViewStr = true) {
 		if (threadID) newURL.pathNodes.push(`${threadID}`);
 	} */
 
-	let mapID: string|n;
+	const mapID = GetOpenMapID();
 	if (page == "debates") {
-		mapID = s.main.debates.selectedMapID;
 		if (mapID) {
 			// newURL.pathNodes.push(mapID+"");
-			const urlStr = GetCrawlerURLStrForMap(mapID);
+			const urlStr = GetURLStrForMap(mapID);
 			newURL.pathNodes.push(urlStr);
 		}
 	}
-	if (page == "global" && subpage == "map") {
-		mapID = GetOpenMapID();
+	/*if (page == "global" && subpage == "map") {
 		if (isBot) {
 			const map = GetMap(mapID);
 			// const rootNodeID = store.main.mapViews.get(mapID).rootNodeID;
 			const rootNodeID = map?.rootNode;
 			const rootNode = GetNodeL2(rootNodeID);
 			if (rootNode) {
-				const nodeStr = GetCrawlerURLStrForNode(rootNode);
+				const nodeStr = GetURLStrForNode(rootNode);
 				if (rootNodeID && rootNodeID != map!.rootNode) {
 					newURL.pathNodes.push(nodeStr);
 				}
 			}
+		}
+	}*/
+	if (mapID != null) {
+		const selectedNodePathNodes = GetSelectedNodePathNodes(mapID);
+		if (selectedNodePathNodes.length) {
+			const pathNodes_short = selectedNodePathNodes.map(a=>a.slice(0, 3));
+			const pathToSelected_final = pathNodes_short.slice(0, -1).concat(selectedNodePathNodes.Last()).join("/"); // leave final node-id unshortened
+			newURL.SetQueryVar("s", pathToSelected_final);
 		}
 	}
 
@@ -367,6 +368,19 @@ export const GetNewURL = CreateAccessor(function(includeMapViewStr = true) {
 	if (page == "home" && subpage == "home") newURL.pathNodes.length = 0;
 
 	Assert(!newURL.pathNodes.Any(a=>a == "/"), `A path-node cannot be just "/". @url(${newURL})`);
+
+	// query vars (these come at end, since most are special cases, which we don't want interrupting the regular-usage path and flags)
+	if (s.main.urlExtraStr) newURL.SetQueryVar("extra", s.main.urlExtraStr);
+	if (!s.main.analyticsEnabled && newURL.GetQueryVar("analytics") == null) newURL.SetQueryVar("analytics", "0");
+	if (s.main.envOverride) newURL.SetQueryVar("env", s.main.envOverride);
+	if (s.main.dbOverride) newURL.SetQueryVar("db", s.main.dbOverride);
+	//if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
+	/* if (mapID && includeMapViewStr) {
+		newURL.SetQueryVar('view', GetMapViewStr(mapID));
+	} */
+	for (const param of s.main.urlOtherFlags) {
+		newURL.SetQueryVar(param.name, param.value);
+	}
 
 	return newURL;
 });

@@ -32,6 +32,7 @@ export class MainState {
 	// topLeftOpenPanel: string;
 	// topRightOpenPanel: string;
 	@O @ignore shareBeingLoaded: string|n;
+	@O @ignore selectNode_fragmentPath: string|n;
 
 	/*@O @ignore userID_apollo: string|n; // maybe rework
 	@O @ignore userID_apollo_ready = false; // maybe rework*/
