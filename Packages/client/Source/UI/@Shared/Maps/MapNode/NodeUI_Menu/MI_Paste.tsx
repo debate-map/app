@@ -1,4 +1,4 @@
-import {AsNodeL2, AsNodeL3, ChildGroup, ClaimForm, GetAccessPolicy, GetMapNodeTypeDisplayName, GetNode, GetNodeContributionInfo, GetNodeDisplayText, GetNodeForm, GetNodeL3, GetParentNodeID, GetParentNodeL3, GetPolarityShortStr, LinkNode_HighLevel, MapNodeL3, MapNodeRevision_titlePattern, MapNodeType, MeID, NodeContributionInfo_ForPolarity, Polarity, ReversePolarity} from "dm_common";
+import {AsNodeL2, AsNodeL3, ChildGroup, ClaimForm, GetAccessPolicy, GetMapNodeTypeDisplayName, GetNode, GetNodeChildrenL3, GetNodeContributionInfo, GetNodeDisplayText, GetNodeForm, GetNodeL3, GetParentNodeID, GetParentNodeL3, GetPolarityShortStr, LinkNode_HighLevel, MapNodeL3, MapNodeRevision_titlePattern, MapNodeType, MeID, NodeContributionInfo_ForPolarity, Polarity, ReversePolarity} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -9,7 +9,7 @@ import {ES, InfoButton, Link, Observer, RunInAction} from "web-vcore";
 import {GetEntries, GetValues, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {BailError, Command, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
-import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
+import {CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, UseMemo} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -56,11 +56,11 @@ export class TransferType {
 	steps: {text: string, extra: string}[];
 }
 export const transferTypes: TransferType[] = [
-	{name: "Cut", steps: [
+	{name: "Move", steps: [
 		{text: `Source-node is linked under new location.`, extra: ""},
 		{text: `Source-node is unlinked from old location.`, extra: ""},
 	]},
-	{name: "Copy", steps: [
+	{name: "Link", steps: [
 		{text: `Source-node is linked under new location.`, extra: ""},
 	]},
 	{name: "Clone", steps: [
@@ -79,65 +79,56 @@ export async function ShowPasteDialog(commandData_initial: PayloadOf<LinkNode_Hi
 	const boxController = ShowMessageBox({
 		title: `Pasting node to new location`, cancelButton: true,
 		message: observer(()=>{
+			const sourcePath = `${commandData_initial.oldParentID}/${commandData_initial.nodeID}`;
+			const sourceNode = GetNodeL3(sourcePath);
+			const sourceNodeChildren = sourceNode && GetNodeChildrenL3(sourceNode.id, sourcePath);
+
 			const sourceNodeOptions = [
-				GetNodeL3(`${commandData_initial.oldParentID}/${commandData_initial.nodeID}`),
-			].filter(a=>a);
+				sourceNode,
+				sourceNodeChildren && sourceNodeChildren.length > 0 ? sourceNodeChildren.find(a=>a.type == MapNodeType.claim) : null,
+			].filter(a=>a) as MapNodeL3[];
 			const destinationNodeOptions = [
 				GetNodeL3(`${commandData_initial.newParentID}`),
-			].filter(a=>a);
+			].filter(a=>a) as MapNodeL3[];
 			const validDestinationGroups = GetEntries(ChildGroup);
 			const transferType = transferTypes[2];
 
 			return (
-				<Row ref={c=>root = c} style={{width: 1000}}>
-					<Column style={{flex: 1}}>
-						<Row>Source node:</Row>
-						<Column style={{background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5}}>
-							{sourceNodeOptions.map((source, index)=>{
-								return (
-									<NodePreviewUI key={index} panel="source" node={source!} index={index}/>
-								);
-							})}
-						</Column>
-						<Text>Transfer type:</Text>
-						<Column>
-							{transferTypes.map((type, index)=>{
-								return <TransferTypeButton key={index} type={type} index={index} selected={transferType == type}/>;
-							})}
-						</Column>
-						{transferType == transferTypes[2] &&
-						<>
-							<Row>Clone options:</Row>
-							<Column style={{background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5}}>
-								<Row>
-									<Text>Node-type of clone:</Text>
-									<Select ml={5} options={GetEntries(MapNodeType)} value={MapNodeType.category}/>
-								</Row>
-							</Column>
-						</>}
-						{/*<Row>
-							<CheckBox text="Use wrapper/argument as source" value={!!commandData.unlinkFromOldParent} onChange={val=>Change(commandData.unlinkFromOldParent = val)}/>
-						</Row>*/}
+				<Column ref={c=>root = c} style={{width: 1000}}>
+					<Row style={{fontSize: 16, fontWeight: "bold"}}>Source node{sourceNodeOptions.length > 0 ? "s" : ""}</Row>
+					{sourceNodeOptions.map((source, index)=>{
+						return (
+							<NodePreviewUI key={index} panel="source" node={source!} index={index}/>
+						);
+					})}
+					{/*<Text>Transfer type:</Text>
+					<Column>
+						{transferTypes.map((type, index)=>{
+							return <TransferTypeButton key={index} type={type} index={index} selected={transferType == type}/>;
+						})}
 					</Column>
-					<Column ml={10} style={{flex: 1}}>
-						<Row>Destination node (new parent):</Row>
-						<Column style={{background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5}}>
-							{destinationNodeOptions.map((node, index)=>{
-								return (
-									<NodePreviewUI key={index} panel="destination" node={node!} index={index}/>
-								);
-							})}
-						</Column>
-						<Row>
-							<Text>Destination group:</Text>
-							<Select ml={5} options={validDestinationGroups} value={ChildGroup.generic}
-								onChange={val=>{
-									Change(commandData.childGroup = val);
-									// todo
-								}}/>
-						</Row>
-					</Column>
-				</Row>
+					{transferType == transferTypes[2] &&
+					<>
+					</>}*/}
+					<Row mt={10} style={{fontSize: 16, fontWeight: "bold"}}>Destination node (new parent)</Row>
+					{destinationNodeOptions.map((node, index)=>{
+						return (
+							<NodePreviewUI key={index} panel="destination" node={node!} index={index}/>
+						);
+					})}
+					<Row>
+						<Text>Child-group:</Text>
+						<Select ml={5} options={validDestinationGroups} value={ChildGroup.generic}
+							onChange={val=>{
+								Change(commandData.childGroup = val);
+								// todo
+							}}/>
+					</Row>
+					{/*<CheckBox text="Preview steps that will be taken" value={true}/>
+					<Row>Step 1: todo</Row>
+					<Row>Step 2: todo</Row>
+					<Row>Step 3: todo</Row>*/}
+				</Column>
 			);
 		}),
 		onOK: ()=>{
@@ -170,27 +161,51 @@ class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node
 	render() {
 		const {panel, node, index} = this.props;
 		const path = node.link ? `${node.link?.parent}/${node.link?.child}` : node.id;
+		const transferType = "Clone";
+		const cloneAsType = node.type;
 
 		const backgroundColor = GetNodeColor(node).desaturate(0.5).alpha(0.8);
+		const splitAt = 90;
 		return (
-			<Row mt={index === 0 ? 0 : 5} style={{flex: 1}}>
-				<CheckBox value={true} text={`${ModifyString(MapNodeType[node.type], m=>[m.startLower_to_upper])}:`}/>
-				<Row ml={10} className="cursorSet"
-					style={ES(
-						{
-							flex: 1, padding: 5,
-							background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
-							color: liveSkin.NodeTextColor(),
-						},
-						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
-					)}
-					onMouseDown={e=>{
-						if (e.button !== 2) return false;
-						this.SetState({menuOpened: true});
-					}}>
-					<span style={{flex: 1}}>{GetNodeDisplayText(node, path)}</span>
-				</Row>
-			</Row>
+			<Column mt={index === 0 ? 0 : 5} style={{
+				background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5,
+			}}>
+				<RowLR splitAt={splitAt}>
+					<Text>{ModifyString(MapNodeType[node.type], m=>[m.startLower_to_upper])}:</Text>
+					<Row className="cursorSet"
+						style={ES(
+							{
+								flex: 1, padding: 5,
+								background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
+								color: liveSkin.NodeTextColor(),
+							},
+							// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
+						)}
+						onMouseDown={e=>{
+							if (e.button !== 2) return false;
+							this.SetState({menuOpened: true});
+						}}>
+						<span style={{flex: 1}}>{GetNodeDisplayText(node, path)}</span>
+					</Row>
+				</RowLR>
+				{panel == "source" && <RowLR splitAt={splitAt} mt={5}>
+					<Row>
+						<Text>Transfer:</Text>
+						<InfoButton ml={5} mt={3} text={`
+							Ignore: todo
+							Move: todo
+							Link: todo
+							Clone: todo
+						`.AsMultiline(0)}/>
+					</Row>
+					<Select displayType="button bar" options={["Ignore", `Move`, `Link`, "Clone"]} value={transferType}/>
+					{transferType == "Clone" &&
+					<Row>
+						<Text ml={5}>Clone as:</Text>
+						<Select ml={5} options={GetEntries(MapNodeType)} value={cloneAsType}/>
+					</Row>}
+				</RowLR>}
+			</Column>
 		);
 	}
 }

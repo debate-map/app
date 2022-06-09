@@ -126,7 +126,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 				{!multipleAddChildGroups &&
 					addChildGroups[0]}
 				{!inList && !forChildHolderBox &&
-					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Cut"}
+					<VMenuItem text={<span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(for moving node elsewhere)</span></span> as any}
 						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
 						style={liveSkin.Style_VMenuItem()}
 						onClick={e=>{
@@ -136,14 +136,14 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								return;
 							}
 
-							/* let pathToCut = path;
+							let pathToCut = path;
 							if (node.type == MapNodeType.claim && combinedWithParentArg) {
-								pathToCut = SlicePath(path, 1);
-							} */
-							ACTCopyNode(path, true);
+								pathToCut = SlicePath(path, 1)!;
+							}
+							ACTCopyNode(pathToCut, true);
 						}}/>}
 				{!forChildHolderBox &&
-					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Copy"} style={liveSkin.Style_VMenuItem()}
+					<VMenuItem text={<span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(for linking to 2nd location)</span></span> as any} style={liveSkin.Style_VMenuItem()}
 						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=>{
 							e.persist();
@@ -152,11 +152,11 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								return;
 							}
 
-							/* let pathToCopy = path;
+							let pathToCopy = path;
 							if (node.type == MapNodeType.claim && combinedWithParentArg) {
-								pathToCopy = SlicePath(path, 1);
-							} */
-							ACTCopyNode(path, false);
+								pathToCopy = SlicePath(path, 1)!;
+							}
+							ACTCopyNode(pathToCopy, false);
 						}}/>}
 				<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>
 				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
