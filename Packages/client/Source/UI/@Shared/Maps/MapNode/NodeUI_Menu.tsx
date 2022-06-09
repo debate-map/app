@@ -16,7 +16,7 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument.js";
 import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode.js";
 import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree.js";
-import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink.js";
+import {MI_Paste} from "./NodeUI_Menu/MI_Paste.js";
 import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument.js";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
@@ -92,7 +92,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						);
 					});
 				})}
-				<MI_PasteAsLink {...sharedProps} node={node2} path={path2} childGroup={childGroup2}/>
 				{/*<VMenuItem text={`Paste (advanced)`} enabled={false} style={headerStyle}>
 					<VMenuItem text={`As link, directly`} style={styles.vMenuItem}/>
 					<VMenuItem text={`As link, in new argument`} style={styles.vMenuItem}/>
@@ -159,22 +158,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							} */
 							ACTCopyNode(path, false);
 						}}/>}
-				{/* // disabled for now, since I need to create a new command to wrap the logic. One route: create a CloneNode_HighLevel command, modeled after LinkNode_HighLevel (or containing it as a sub)
-					IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(GetParentNodeID(path), copiedNode.Extended({ _key: -1 }), permissions, childGroup) && !copiedNode_asCut &&
-					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async (e) => {
-						if (e.button != 0) return;
-						if (userID == null) return ShowSignInPopup();
-
-						const baseNodePath = State(a => a.main.copiedNodePath);
-						const baseNodePath_ids = GetPathNodeIDs(baseNodePath);
-						const info = await new CloneNode({ mapID: mapID, baseNodePath, newParentID: node._id }).RunOnServer();
-
-						store.dispatch(new ACTSetLastAcknowledgementTime({ nodeID: info.nodeID, time: Date.now() }));
-
-						if (copiedNode_asCut) {
-							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).RunOnServer();
-						}
-					}}/> */}
+				<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>
 				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
 					<VMenuItem text="Convert to multi-premise" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{
