@@ -17,6 +17,7 @@ import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgume
 import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode.js";
 import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree.js";
 import {MI_Paste} from "./NodeUI_Menu/MI_Paste.js";
+import {MI_CloneNode} from "./NodeUI_Menu/MI_CloneNode.js";
 import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument.js";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
@@ -159,6 +160,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							ACTCopyNode(pathToCopy, false);
 						}}/>}
 				<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>
+				<MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>
 				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
 					<VMenuItem text="Convert to multi-premise" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{

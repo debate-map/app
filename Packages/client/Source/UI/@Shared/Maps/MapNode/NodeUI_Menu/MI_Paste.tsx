@@ -1,21 +1,12 @@
-import {AsNodeL2, AsNodeL3, ChildGroup, ClaimForm, GetAccessPolicy, GetMapNodeTypeDisplayName, GetNode, GetNodeChildrenL3, GetNodeContributionInfo, GetNodeDisplayText, GetNodeForm, GetNodeL3, GetParentNodeID, GetParentNodeL3, GetPolarityShortStr, LinkNode_HighLevel, MapNodeL3, MapNodeRevision_titlePattern, MapNodeType, MeID, NodeContributionInfo_ForPolarity, Polarity, ReversePolarity} from "dm_common";
+import {ClaimForm, GetNodeChildrenL3, GetNodeDisplayText, GetParentNodeID, IsSinglePremiseArgument, LinkNode_HighLevel, MapNodeType, MeID} from "dm_common";
 import React from "react";
-import {store} from "Store";
-import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
-import map from "updeep/types/map";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {ES, InfoButton, Link, Observer, RunInAction} from "web-vcore";
-import {GetEntries, GetValues, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {BailError, Command, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
-import {observer} from "web-vcore/nm/mobx-react.js";
-import {CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, UseMemo} from "web-vcore/nm/react-vextensions.js";
+import {Observer} from "web-vcore";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {NodeDetailsUI} from "../NodeDetailsUI.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
-import {AddChildHelper} from "./Dialogs/AddChildDialog.js";
+import {PayloadOf, ShowTransferNodeDialog, TransferNodesPayload} from "./Dialogs/TransferNodeDialog.js";
 
 @Observer
 export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
@@ -27,15 +18,33 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		const oldParentID = GetParentNodeID(copiedNodePath);
-		const commandData_initial: PayloadOf<LinkNode_HighLevel> = {
-			mapID: map?.id, oldParentID, newParentID: node.id, nodeID: copiedNode.id,
-			newForm: null, newPolarity: null,
-			//createWrapperArg?: boolean,
-			childGroup,
-			//linkAsArgument?: boolean,
-			unlinkFromOldParent: copiedNode_asCut,
-			deleteEmptyArgumentWrapper: false,
+		if (oldParentID == null) return; // parentless not supported yet
+
+		const commandData_initial: TransferNodesPayload = {
+			nodes: [
+				{
+					oldParentID, newParentID: node.id, nodeID: copiedNode.id,
+					newForm: null, newPolarity: null,
+					//createWrapperArg?: boolean,
+					childGroup,
+					//linkAsArgument?: boolean,
+					unlinkFromOldParent: copiedNode_asCut,
+					deleteEmptyArgumentWrapper: false,
+				},
+			],
 		};
+
+		const sourcePath = `${oldParentID}/${node.id}`;
+		const sourceNode = node;
+		const sourceNodeChildren = sourceNode && GetNodeChildrenL3(sourceNode.id, sourcePath);
+		if (IsSinglePremiseArgument(node) && sourceNodeChildren && sourceNodeChildren.length > 0) {
+			const premise = sourceNodeChildren.find(a=>a.type == MapNodeType.claim);
+			if (premise) {
+				commandData_initial.nodes.push({
+					nodeID: premise.id,
+				});
+			}
+		}
 
 		return (
 			<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`}
@@ -43,169 +52,8 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					ShowPasteDialog(commandData_initial);
+					ShowTransferNodeDialog(commandData_initial);
 				}}/>
-		);
-	}
-}
-
-export type PayloadOf<T> = T extends Command<infer Payload> ? Payload : never;
-
-export class TransferType {
-	name: string;
-	steps: {text: string, extra: string}[];
-}
-export const transferTypes: TransferType[] = [
-	{name: "Move", steps: [
-		{text: `Source-node is linked under new location.`, extra: ""},
-		{text: `Source-node is unlinked from old location.`, extra: ""},
-	]},
-	{name: "Link", steps: [
-		{text: `Source-node is linked under new location.`, extra: ""},
-	]},
-	{name: "Clone", steps: [
-		{text: `A "clone" of the source-node is created.`, extra: ""},
-		{text: `That "clone" is linked under new location.`, extra: ""},
-	]},
-];
-export async function ShowPasteDialog(commandData_initial: PayloadOf<LinkNode_HighLevel>) {
-	const commandData = commandData_initial;
-	const uiState = {};
-
-	let root;
-	//let nodeEditorUI: NodeDetailsUI|n;
-	const Change = (..._)=>boxController.UpdateUI();
-
-	const boxController = ShowMessageBox({
-		title: `Pasting node to new location`, cancelButton: true,
-		message: observer(()=>{
-			const sourcePath = `${commandData_initial.oldParentID}/${commandData_initial.nodeID}`;
-			const sourceNode = GetNodeL3(sourcePath);
-			const sourceNodeChildren = sourceNode && GetNodeChildrenL3(sourceNode.id, sourcePath);
-
-			const sourceNodeOptions = [
-				sourceNode,
-				sourceNodeChildren && sourceNodeChildren.length > 0 ? sourceNodeChildren.find(a=>a.type == MapNodeType.claim) : null,
-			].filter(a=>a) as MapNodeL3[];
-			const destinationNodeOptions = [
-				GetNodeL3(`${commandData_initial.newParentID}`),
-			].filter(a=>a) as MapNodeL3[];
-			const validDestinationGroups = GetEntries(ChildGroup);
-			const transferType = transferTypes[2];
-
-			return (
-				<Column ref={c=>root = c} style={{width: 1000}}>
-					<Row style={{fontSize: 16, fontWeight: "bold"}}>Source node{sourceNodeOptions.length > 0 ? "s" : ""}</Row>
-					{sourceNodeOptions.map((source, index)=>{
-						return (
-							<NodePreviewUI key={index} panel="source" node={source!} index={index}/>
-						);
-					})}
-					{/*<Text>Transfer type:</Text>
-					<Column>
-						{transferTypes.map((type, index)=>{
-							return <TransferTypeButton key={index} type={type} index={index} selected={transferType == type}/>;
-						})}
-					</Column>
-					{transferType == transferTypes[2] &&
-					<>
-					</>}*/}
-					<Row mt={10} style={{fontSize: 16, fontWeight: "bold"}}>Destination node (new parent)</Row>
-					{destinationNodeOptions.map((node, index)=>{
-						return (
-							<NodePreviewUI key={index} panel="destination" node={node!} index={index}/>
-						);
-					})}
-					<Row>
-						<Text>Child-group:</Text>
-						<Select ml={5} options={validDestinationGroups} value={ChildGroup.generic}
-							onChange={val=>{
-								Change(commandData.childGroup = val);
-								// todo
-							}}/>
-					</Row>
-					{/*<CheckBox text="Preview steps that will be taken" value={true}/>
-					<Row>Step 1: todo</Row>
-					<Row>Step 2: todo</Row>
-					<Row>Step 3: todo</Row>*/}
-				</Column>
-			);
-		}),
-		onOK: ()=>{
-			// todo
-		},
-	});
-}
-
-class TransferTypeButton extends BaseComponent<{type: TransferType, index: number, selected: boolean}, {}> {
-	render() {
-		const {type, index, selected} = this.props;
-		return (
-			<Column mt={index === 0 ? 0 : 5} style={ES(
-				{background: `rgba(0,0,0,${selected ? .2 : .1})`, padding: 5, borderRadius: 5, cursor: "pointer"},
-				selected && {border: "2px solid rgba(0,0,0,.3)"},
-			)}>
-				<Text ml={5} style={{fontSize: 18}}>{type.name}</Text>
-				{type.steps.map((step, stepI)=>{
-					return <Row key={stepI}>
-						<Text>Step {stepI + 1}: {step.text}</Text>
-						{step.extra.length > 0 && <InfoButton text={step.extra}/>}
-					</Row>;
-				})}
-			</Column>
-		);
-	}
-}
-
-class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node: MapNodeL3, index: number}, {}> {
-	render() {
-		const {panel, node, index} = this.props;
-		const path = node.link ? `${node.link?.parent}/${node.link?.child}` : node.id;
-		const transferType = "Clone";
-		const cloneAsType = node.type;
-
-		const backgroundColor = GetNodeColor(node).desaturate(0.5).alpha(0.8);
-		const splitAt = 90;
-		return (
-			<Column mt={index === 0 ? 0 : 5} style={{
-				background: "rgba(0,0,0,.1)", padding: 5, borderRadius: 5,
-			}}>
-				<RowLR splitAt={splitAt}>
-					<Text>{ModifyString(MapNodeType[node.type], m=>[m.startLower_to_upper])}:</Text>
-					<Row className="cursorSet"
-						style={ES(
-							{
-								flex: 1, padding: 5,
-								background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
-								color: liveSkin.NodeTextColor(),
-							},
-							// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
-						)}
-						onMouseDown={e=>{
-							if (e.button !== 2) return false;
-							this.SetState({menuOpened: true});
-						}}>
-						<span style={{flex: 1}}>{GetNodeDisplayText(node, path)}</span>
-					</Row>
-				</RowLR>
-				{panel == "source" && <RowLR splitAt={splitAt} mt={5}>
-					<Row>
-						<Text>Transfer:</Text>
-						<InfoButton ml={5} mt={3} text={`
-							Ignore: todo
-							Move: todo
-							Link: todo
-							Clone: todo
-						`.AsMultiline(0)}/>
-					</Row>
-					<Select displayType="button bar" options={["Ignore", `Move`, `Link`, "Clone"]} value={transferType}/>
-					{transferType == "Clone" &&
-					<Row>
-						<Text ml={5}>Clone as:</Text>
-						<Select ml={5} options={GetEntries(MapNodeType)} value={cloneAsType}/>
-					</Row>}
-				</RowLR>}
-			</Column>
 		);
 	}
 }

@@ -14,6 +14,8 @@ use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::general::body_to_str;
 use crate::utils::type_aliases::{JSONValue};
 
+use super::commands::transfer_nodes::transfer_nodes;
+
 wrap_slow_macros!{
 
 // queries
@@ -52,6 +54,16 @@ impl MutationShard_General {
             id: "todo".to_owned()
         })
     }
+
+    // todo: move this to an appropriate location (make some structuring similar to the Command system in app-server-js)
+    async fn transferNodes(&self, _ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result> {
+        let result = transfer_nodes(payload)?;
+        Ok(result)
+    }
+}
+#[derive(SimpleObject)]
+pub struct GenericMutation_Result {
+    pub message: String,
 }
 
 // subscriptions

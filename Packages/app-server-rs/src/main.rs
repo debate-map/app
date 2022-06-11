@@ -107,6 +107,9 @@ mod utils {
     }
 }
 mod db {
+    pub mod commands {
+        pub mod transfer_nodes;
+    }
     pub mod _general;
     pub mod general {
         pub mod subtree;
