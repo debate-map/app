@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeChildrenL3, GetNodeDisplayText, GetParentNodeID, IsSinglePremiseArgument, LinkNode_HighLevel, MapNodeType, MeID} from "dm_common";
+import {ChildGroup, ClaimForm, GetNodeChildrenL3, GetNodeDisplayText, GetParentNodeID, IsSinglePremiseArgument, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -6,7 +6,7 @@ import {Observer} from "web-vcore";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
-import {PayloadOf, ShowTransferNodeDialog, TransferNodesPayload} from "./Dialogs/TransferNodeDialog.js";
+import {PayloadOf, ShowTransferNodeDialog, TransferNodesPayload, TransferType} from "./Dialogs/TransferNodeDialog.js";
 
 @Observer
 export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
@@ -17,34 +17,8 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
-		const oldParentID = GetParentNodeID(copiedNodePath);
-		if (oldParentID == null) return; // parentless not supported yet
-
-		const commandData_initial: TransferNodesPayload = {
-			nodes: [
-				{
-					oldParentID, newParentID: node.id, nodeID: copiedNode.id,
-					newForm: null, newPolarity: null,
-					//createWrapperArg?: boolean,
-					childGroup,
-					//linkAsArgument?: boolean,
-					unlinkFromOldParent: copiedNode_asCut,
-					deleteEmptyArgumentWrapper: false,
-				},
-			],
-		};
-
-		const sourcePath = `${oldParentID}/${node.id}`;
-		const sourceNode = node;
-		const sourceNodeChildren = sourceNode && GetNodeChildrenL3(sourceNode.id, sourcePath);
-		if (IsSinglePremiseArgument(node) && sourceNodeChildren && sourceNodeChildren.length > 0) {
-			const premise = sourceNodeChildren.find(a=>a.type == MapNodeType.claim);
-			if (premise) {
-				commandData_initial.nodes.push({
-					nodeID: premise.id,
-				});
-			}
-		}
+		const commandData_initial = GetTransferNodesInitialPayload(copiedNode, copiedNodePath, node.id, childGroup, "link");
+		if (commandData_initial == false) return;
 
 		return (
 			<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`}
@@ -56,6 +30,51 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 				}}/>
 		);
 	}
+}
+
+export function GetTransferNodesInitialPayload(copiedNode: MapNodeL3, copiedNodePath: string, newParentID: string, childGroup: ChildGroup, transferType: TransferType) {
+	const oldParentID = GetParentNodeID(copiedNodePath);
+	if (oldParentID == null || copiedNode.link == null) return false; // parentless not supported yet
+
+	const commandData_initial: TransferNodesPayload = {
+		nodes: [
+			{
+				nodeID: copiedNode.id,
+				oldParentID,
+				transferType,
+				clone_newType: copiedNode.type,
+				clone_keepChildren: true,
+
+				newParentID,
+				childGroup,
+				claimForm: copiedNode.link.form,
+				argumentPolarity: copiedNode.link.polarity,
+			},
+		],
+	};
+
+	const sourcePath = `${oldParentID}/${copiedNode.id}`;
+	const sourceNode = copiedNode;
+	const sourceNodeChildren = sourceNode && GetNodeChildrenL3(sourceNode.id, sourcePath);
+	if (IsSinglePremiseArgument(copiedNode) && sourceNodeChildren && sourceNodeChildren.length > 0) {
+		const premise = sourceNodeChildren.find(a=>a.type == MapNodeType.claim);
+		if (premise) {
+			commandData_initial.nodes.push({
+				nodeID: premise.id,
+				oldParentID: copiedNode.id,
+				transferType,
+				clone_newType: premise.type,
+				clone_keepChildren: true,
+
+				newParentID: null,
+				childGroup: ChildGroup.generic,
+				claimForm: premise.link!.form,
+				argumentPolarity: premise.link!.polarity,
+			});
+		}
+	}
+
+	return commandData_initial;
 }
 
 // old code
