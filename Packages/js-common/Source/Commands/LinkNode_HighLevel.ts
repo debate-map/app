@@ -48,6 +48,22 @@ type Payload = {
 
 const IDIsOfNodeThatIsRootOfMap = id=>GetNode(id)?.rootNodeForMap != null;
 
+export function IsChildTypeValidInChildGroup(parentType: MapNodeType, childGroup: ChildGroup, childType: MapNodeType) {
+	const expectingClaim_inArg = parentType == MapNodeType.argument && childGroup == ChildGroup.generic;
+	if (expectingClaim_inArg && childType != MapNodeType.claim) return false;
+
+	const expectingArgument_inStructuredGroup = childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality);
+	if (expectingArgument_inStructuredGroup && childType != MapNodeType.argument) return false;
+
+	return true;
+}
+export function IsWrapperArgNeededForTransfer(parent_type: MapNodeType, parent_childGroup: ChildGroup, transferNode_type: MapNodeType, transferNode_childGroup?: ChildGroup) {
+	const transferNodeIsValidAlready = IsChildTypeValidInChildGroup(parent_type, parent_childGroup, transferNode_type);
+	const wrapperArgWouldBeValidInParent = IsChildTypeValidInChildGroup(parent_type, parent_childGroup, MapNodeType.argument);
+	const transferNodeCanBePlacedInWrapperArg = transferNode_type == MapNodeType.claim && (transferNode_childGroup == null || transferNode_childGroup == ChildGroup.generic);
+	return !transferNodeIsValidAlready && wrapperArgWouldBeValidInParent && transferNodeCanBePlacedInWrapperArg;
+}
+
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
@@ -114,11 +130,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		let newParentID_forClaim = newParentID;
 
-		//const wrapperArgNeeded = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument) && childGroup != ChildGroup.freeform;
-		const parentIsExpectingArgument = childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance);
-		const nodeIsClaimThatCanBeWrappedAsArgument = this.node_data.type == MapNodeType.claim;
-		//const wrapperArgNeeded = parentIsExpectingArgument && nodeCanBeWrappedAsArgument && ForLink_GetError(this.newParent_data.type, this.node_data.type, childGroup) != null;
-		const wrapperArgNeeded = parentIsExpectingArgument && nodeIsClaimThatCanBeWrappedAsArgument;
+		const wrapperArgNeeded = IsWrapperArgNeededForTransfer(this.newParent_data.type, childGroup, this.node_data.type);
 		if (wrapperArgNeeded) {
 			AssertV(childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth,
 				`Claim is being linked under parent that requires a wrapper-argument, but the specified child-group (${childGroup}) is incompatible with that.`);
