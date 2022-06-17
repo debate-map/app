@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
@@ -22,6 +22,7 @@ import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgume
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 import {MI_MoveUpOrDown} from "./NodeUI_Menu/MI_MoveUpOrDown.js";
+import {MI_Paste_Old} from "./NodeUI_Menu/MI_Paste_Old.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
@@ -137,10 +138,10 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								return;
 							}
 
-							let pathToCut = path;
-							if (node.type == MapNodeType.claim && combinedWithParentArg) {
+							const pathToCut = path;
+							/*if (node.type == MapNodeType.claim && combinedWithParentArg) {
 								pathToCut = SlicePath(path, 1)!;
-							}
+							}*/
 							ACTCopyNode(pathToCut, true);
 						}}/>}
 				{!forChildHolderBox &&
@@ -153,13 +154,20 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								return;
 							}
 
-							let pathToCopy = path;
-							if (node.type == MapNodeType.claim && combinedWithParentArg) {
+							const pathToCopy = path;
+							/*if (node.type == MapNodeType.claim && combinedWithParentArg) {
 								pathToCopy = SlicePath(path, 1)!;
-							}
+							}*/
 							ACTCopyNode(pathToCopy, false);
 						}}/>}
-				<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>
+				{copiedNode &&
+					<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
+						{multipleAddChildGroups && addChildItems_structured_generic && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.generic}/>}
+						{multipleAddChildGroups && addChildItems_structured_truth && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.truth}/>}
+						{multipleAddChildGroups && addChildItems_structured_relevance && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.relevance}/>}
+						{multipleAddChildGroups && addChildItems_freeform && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.freeform}/>}
+					</VMenuItem>}
+				{/*<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>*/}
 				<MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>
 				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
 					<VMenuItem text="Convert to multi-premise" style={liveSkin.Style_VMenuItem()}

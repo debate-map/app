@@ -9,6 +9,8 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {ShowTransferNodeDialog} from "./Dialogs/TransferNodeDialog.js";
 import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/TransferNodeData.js";
 
+// todo: have this menu-item fully replace MI_Paste_Old
+
 @Observer
 export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 	render() {

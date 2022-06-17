@@ -23,11 +23,6 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 	let payload = payload_initial;
 	let uiState = uiState_initial;
 
-	// temp; only allow one transfer at a time
-	if (payload.nodes.length > 1) {
-		payload.nodes.slice(0, -1).forEach(a=>a.transferType = "ignore");
-	}
-
 	let root;
 	//let nodeEditorUI: NodeDetailsUI|n;
 	const Change = (..._)=>{
@@ -45,11 +40,16 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 		message: observer(()=>{
 			return (
 				<Column ref={c=>root = c} style={{width: 1000}}>
-					{// temp
-					payload.nodes.length > 1 &&
-					<Row mb={5}>{`
-						Note: For now, this dialog only allows transfer of one node at a time. For cases where an argument and claim are combined into one node-box on the map (such as this case), ${""
-						}you'll generally want to choose "move", "link", or "clone" for the claim node (in box #2 below), and "shim" for the argument node (in box #1 below).
+					{payload.nodes.length > 1 &&
+					<Row mb={5} style={{whiteSpace: "pre-wrap"}}>{`
+						Note: The source for this transfer (ie. the node-box you pressed "${payload_initial.nodes[0].transferType == "move" ? "Cut" : "Copy"}" on), is actually a "combined node-box", representing two nodes:
+						1) A claim node; this is the statement/premise that, if true, is supposed to ${
+							uiState_initial.destinationChildGroup.IsOneOf("truth", "relevance", "neutrality")
+								? `impact the ${uiState_initial.destinationChildGroup} of the ancestor node`
+								: `have significance relative to the ancestor node`
+						}.
+						2) An argument node; this node "wraps" its child claim node mentioned above, marking it for usage in that specific context.
+						Generally, you'll want to choose "shim" for the argument node (in box #1 below), and "move", "link", or "clone" for the claim node (in box #2 below).
 					`.AsMultiline(0)}</Row>}
 
 					{payload.nodes.map((nodeInfo, index)=>{
@@ -173,20 +173,15 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 							Move (aka "Cut then paste"): Unlink the source-node from its existing location, and link it instead under the listed "New parent" node.
 							Link (aka "Copy then paste"): Link the source-node under the listed "New parent" node, but keep it also linked at its existing location. (changes to the node in either place thus affect the other location)
 							Clone: Make an independent* duplicate of the source-node, and link it under the listed "New parent" node.
-								IMPORTANT: While the source-node *itself* is cloned/duplicated, and thus editable independently, any children it carries with it (ie. if "Keep children" is set to "Yes") will only be linked, *not* cloned.
-								Thus, the clone's children must themselves also be cloned, if you want to produce a fully independent node-tree.
+								IMPORTANT: While the source-node *itself* is cloned/duplicated (and thus editable independently), any children the clone carries with it (ie. if "Keep children" is set to "Yes") will only be linked, *not* cloned.
+								Thus, the clone's children/descendants must themselves also be cloned afterward, if you want to produce a fully independent node-tree.
 							Shim: Make a brand new argument-node under the listed "New parent" node, then use this as the parent for the claim-node being transferred in box #2. (this option only shows up when applicable)
 						`.AsMultiline(0)}/>
 					</Row>
 					<Select displayType="button bar" options={transferTypeOptions}
+						enabled={false} // temp
 						value={nodeInfo.transferType} onChange={val=>{
 							nodeInfo.transferType = val;
-
-							// temp
-							if (val != "shim") {
-								payload.nodes.filter((a, i)=>i != index).forEach(a=>a.transferType = "ignore");
-							}
-
 							Change();
 						}}/>
 				</RowLR>

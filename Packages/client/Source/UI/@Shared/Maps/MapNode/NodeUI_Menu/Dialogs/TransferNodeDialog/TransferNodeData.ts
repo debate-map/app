@@ -16,7 +16,12 @@ export class NodeInfoForTransfer {
 	claimForm?: ClaimForm|n;
 	argumentPolarity?: Polarity|n;
 }
-export const TransferType_values = ["ignore", "move", "link", "clone", "shim"] as const;
+export const TransferType_values = [
+	"ignore",
+	"move", "link", "clone",
+	"shim",
+	//"delete", // for the case of moving a claim to a place not needing an argument wrapper, where the old argument-wrapper would otherwise be left empty
+] as const;
 export type TransferType = typeof TransferType_values[number];
 
 export type PayloadOf<T> = T extends Command<infer Payload> ? Payload : never;
