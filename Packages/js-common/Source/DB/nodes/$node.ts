@@ -5,7 +5,7 @@ import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
-import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
+import {CheckValidityOfLink, CheckValidityOfNewLink, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
 import {ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode.js";
 import {MapNodeRevision} from "./@MapNodeRevision.js";
 import {ChildGroup, MapNodeType} from "./@MapNodeType.js";
@@ -406,12 +406,12 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string, group: ChildGroup) {
 	const nodeTypes = GetValues(MapNodeType);
-	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type, group) == null);
+	const validChildTypes = nodeTypes.filter(type=>CheckValidityOfLink(nodeType, group, type) == null);
 	return validChildTypes;
 }
 export function GetValidNewChildTypes(parent: MapNodeL2, childGroup: ChildGroup, permissions: PermissionGroupSet) {
 	const nodeTypes = GetValues(MapNodeType);
-	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, childGroup) == null);
+	const validChildTypes = nodeTypes.filter(type=>CheckValidityOfNewLink(parent.id, childGroup, {type} as any, permissions) == null);
 
 	// if in relevance or truth group, claims cannot be direct children (must be within argument)
 	/*if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {

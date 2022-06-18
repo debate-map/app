@@ -5,7 +5,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim, AddChildNode} from "../Commands.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
-import {ForLink_GetError, GetNode} from "../DB/nodes.js";
+import {CheckValidityOfLink, GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
@@ -53,7 +53,7 @@ export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial
 
 		// confirm that the parent-child combination is valid
 		//const forNewLink_error = ForNewLink_GetError(link.parent); // can't use this atm, since not "pure" enough
-		const forLink_error = ForLink_GetError(this.parent_oldData.type, this.child_oldData.type, link.group);
+		const forLink_error = CheckValidityOfLink(this.parent_oldData.type, link.group, this.child_oldData.type);
 		AssertV(forLink_error == null, forLink_error);
 
 		link.id = this.GenerateUUID_Once("link.id");

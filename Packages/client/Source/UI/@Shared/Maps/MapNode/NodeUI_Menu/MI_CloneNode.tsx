@@ -7,7 +7,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {MI_SharedProps} from "../NodeUI_Menu.jsx";
-import {ShowTransferNodeDialog} from "./Dialogs/TransferNodeDialog.js";
+import {ShowTransferNodeDialog, TransferNodeNeedsWrapper} from "./Dialogs/TransferNodeDialog.js";
 import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/TransferNodeData.js";
 
 @Observer
@@ -28,8 +28,19 @@ export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
 		const parentOfNodeToClone = GetParentNodeL3(pathToClone);
 		if (parentOfNodeToClone == null || nodeToClone.link == null) return null; // cannot clone a map's root-node (for now anyway)
 
-		const [commandData_initial, uiState_initial] = GetTransferNodesInitialData(nodeToClone, pathToClone, parentOfNodeToClone, nodeToClone.link.group, "clone");
-		if (commandData_initial == null || uiState_initial == null) return;
+		const [payload_initial, uiState_initial] = GetTransferNodesInitialData(nodeToClone, pathToClone, parentOfNodeToClone, nodeToClone.link.group, "clone");
+		if (payload_initial == null || uiState_initial == null) return;
+
+		// if cloning, and its an arg+claim combo
+		if (payload_initial.nodes[0].transferType == "clone" && payload_initial.nodes.length > 1) {
+			// maybe temp: if arg can be "shimmed", default to that; else, default to "ignore"
+			const argCanBeShim = TransferNodeNeedsWrapper(payload_initial.nodes[1], uiState_initial);
+			if (argCanBeShim) {
+				payload_initial.nodes[0].transferType = "shim";
+			} else {
+				payload_initial.nodes[0].transferType = "ignore";
+			}
+		}
 
 		return (
 			<VMenuItem text={<span>Clone <span style={{fontSize: 10, opacity: 0.7}}>(for independent* duplicate)</span></span> as any}
@@ -37,7 +48,7 @@ export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					ShowTransferNodeDialog(commandData_initial, uiState_initial, "Clone node in-place");
+					ShowTransferNodeDialog(payload_initial, uiState_initial, "Clone node in-place");
 				}}/>
 		);
 	}

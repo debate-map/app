@@ -4,7 +4,7 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, ForLink_GetError} from "../DB/nodes.js";
+import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckValidityOfLink} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -48,18 +48,20 @@ type Payload = {
 
 const IDIsOfNodeThatIsRootOfMap = id=>GetNode(id)?.rootNodeForMap != null;
 
-export function IsChildTypeValidInChildGroup(parentType: MapNodeType, childGroup: ChildGroup, childType: MapNodeType) {
-	const expectingClaim_inArg = parentType == MapNodeType.argument && childGroup == ChildGroup.generic;
-	if (expectingClaim_inArg && childType != MapNodeType.claim) return false;
-
-	const expectingArgument_inStructuredGroup = childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality);
-	if (expectingArgument_inStructuredGroup && childType != MapNodeType.argument) return false;
-
-	return true;
-}
+/*export function CheckValidityOfChildTypeInChildGroup(parentType: MapNodeType, childGroup: ChildGroup, childType: MapNodeType) {
+	if (parentType == MapNodeType.argument && childGroup == ChildGroup.generic && childType != MapNodeType.claim) {
+		return "Where parent is an argument, and child-group is generic, a claim child is expected.";
+	}
+	if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != MapNodeType.argument) {
+		return `Where child-group is ${childGroup}, an argument child is expected.`;
+	}
+	return null;
+}*/
 export function IsWrapperArgNeededForTransfer(parent_type: MapNodeType, parent_childGroup: ChildGroup, transferNode_type: MapNodeType, transferNode_childGroup?: ChildGroup) {
-	const transferNodeIsValidAlready = IsChildTypeValidInChildGroup(parent_type, parent_childGroup, transferNode_type);
-	const wrapperArgWouldBeValidInParent = IsChildTypeValidInChildGroup(parent_type, parent_childGroup, MapNodeType.argument);
+	/*const transferNodeIsValidAlready = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, transferNode_type) == null;
+	const wrapperArgWouldBeValidInParent = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, MapNodeType.argument) == null;*/
+	const transferNodeIsValidAlready = CheckValidityOfLink(parent_type, parent_childGroup, transferNode_type) == null;
+	const wrapperArgWouldBeValidInParent = CheckValidityOfLink(parent_type, parent_childGroup, MapNodeType.argument) == null;
 	const transferNodeCanBePlacedInWrapperArg = transferNode_type == MapNodeType.claim && (transferNode_childGroup == null || transferNode_childGroup == ChildGroup.generic);
 	return !transferNodeIsValidAlready && wrapperArgWouldBeValidInParent && transferNodeCanBePlacedInWrapperArg;
 }

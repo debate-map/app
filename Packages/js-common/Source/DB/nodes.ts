@@ -261,11 +261,34 @@ export function GetChildGroup(childType: MapNodeType, parentType: MapNodeType|n)
 	return ChildGroup.generic;
 }
 
-export const ForLink_GetError = CreateAccessor((parentType: MapNodeType, childType: MapNodeType, childGroup: ChildGroup)=>{
+/** Does basic checking of validity of parent<>child linkage. See `CheckValidityOfNewLink` for a more thorough validation. */
+export const CheckValidityOfLink = CreateAccessor((parentType: MapNodeType, childGroup: ChildGroup, childType: MapNodeType)=>{
+	// redundant check, improving error-message clarity for certain issues
+	if (!MapNodeType_Info.for[parentType].childGroup_childTypes.has(childGroup)) {
+		return `Where parent's type is ${MapNodeType[parentType]}, no "${ChildGroup[childGroup]}" child-group exists.`;
+	}
+
 	const validChildTypes = MapNodeType_Info.for[parentType].childGroup_childTypes.get(childGroup) ?? [];
-	if (!validChildTypes.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid here. (parent type: ${MapNodeType[parentType]}, child group: ${ChildGroup[childGroup]}).`;
+	if (!validChildTypes.includes(childType)) {
+		// redundant checks, improving error-message clarity for certain issues
+		if (parentType == MapNodeType.argument && childGroup == ChildGroup.generic && childType != MapNodeType.claim) {
+			return `Where parent is an argument, and child-group is generic, a claim child is expected (instead it's a ${MapNodeType[childType]}).`;
+		}
+		if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != MapNodeType.argument) {
+			return `Where child-group is ${childGroup}, an argument child is expected (instead it's a ${MapNodeType[childType]}).`;
+		}
+
+		// give generic message
+		return `The child's type (${MapNodeType[childType]}) is not valid here. (parent type: ${MapNodeType[parentType]}, child group: ${ChildGroup[childGroup]})`;
+	}
 });
-export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newChildGroup: ChildGroup)=>{
+/**
+ * Extension of `CheckValidityOfLink`, with additional checking based on knowledge of specific nodes being linked, user's permissions, etc.
+ * For example:
+ * * Blocks if node is being linked as child of itself.
+ * * Blocks if adding child to global-root, without user being an admin.
+ * */
+export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -282,11 +305,11 @@ export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: P
 	// if new-holder-type is not specified, consider "any" and so don't check
 	/*if (newChildGroup !== undefined) {
 		const currentChildGroup = GetChildGroup(newChild.type, parent.type);
-		if (isAlreadyChild && currentChildGroup == newChildGroup) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
+		if (isAlreadyChild && currentChildGroup == newChildGroup) return "Node is already a child of the parent."; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
 	}*/
-	if (isAlreadyChild) return false;
+	if (isAlreadyChild) return "Node is already a child of the parent.";
 
-	return ForLink_GetError(parent.type, newChild.type, newChildGroup);
+	return CheckValidityOfLink(parent.type, newChildGroup, newChild.type);
 });
 
 export const ForDelete_GetError = CreateAccessor((userID: string|n, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{

@@ -1,11 +1,11 @@
-import {ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, Polarity} from "dm_common";
+import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {ES, InfoButton, Observer} from "web-vcore";
 import {gql} from "web-vcore/nm/@apollo/client";
-import {Clone, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
+import {Clone, GetEntries, GetValues, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {CheckBox, Column, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -20,20 +20,22 @@ export type TransferNodeDialog_SharedProps = {
 };
 
 export async function ShowTransferNodeDialog(payload_initial: TransferNodesPayload, uiState_initial: TransferNodesUIState, titleOverride?: string) {
-	let payload = payload_initial;
-	let uiState = uiState_initial;
+	const payload = payload_initial;
+	const uiState = uiState_initial;
 
 	let root;
 	//let nodeEditorUI: NodeDetailsUI|n;
 	const Change = (..._)=>{
 		// maybe temp; clone payload and such each time, so components know to rerender
-		payload = Clone(payload);
+		/*payload = Clone(payload);
 		uiState = Clone(uiState);
-		sharedProps = {payload, uiState, Change};
+		sharedProps = {payload, uiState, Change};*/
+
+		boxController.options.okButtonProps = {enabled: payload.nodes.Any(a=>a.transferType != "ignore")};
 		boxController.UpdateUI();
 	};
 
-	let sharedProps: TransferNodeDialog_SharedProps = {payload, uiState, Change};
+	const sharedProps: TransferNodeDialog_SharedProps = {payload, uiState, Change};
 
 	const boxController = ShowMessageBox({
 		title: titleOverride ?? `Pasting node to new location`, cancelButton: true,
@@ -42,7 +44,7 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 				<Column ref={c=>root = c} style={{width: 1000}}>
 					{payload.nodes.length > 1 &&
 					<Row mb={5} style={{whiteSpace: "pre-wrap"}}>{`
-						Note: The source for this transfer (ie. the node-box you pressed "${payload_initial.nodes[0].transferType == "move" ? "Cut" : "Copy"}" on), is actually a "combined node-box", representing two nodes:
+						Note: The source for this transfer (ie. the node-box you pressed "${{move: "Cut", link: "Copy", clone: "Clone", shim: "Clone"}[payload_initial.nodes[0].transferType]}" on), is actually a "combined node-box", representing two nodes:
 						1) A claim node; this is the statement/premise that, if true, is supposed to ${
 							uiState_initial.destinationChildGroup.IsOneOf("truth", "relevance", "neutrality")
 								? `impact the ${uiState_initial.destinationChildGroup} of the ancestor node`
@@ -53,7 +55,8 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 					`.AsMultiline(0)}</Row>}
 
 					{payload.nodes.map((nodeInfo, index)=>{
-						return <TransferNodeUI key={index} {...sharedProps} nodeInfo={nodeInfo} index={index}/>;
+						const indexAndTime = `${index}_${Date.now()}`; // add time, so that the TransferNodeUI comp refreshes every time (since the passed structures are just mutating)
+						return <TransferNodeUI key={indexAndTime} {...sharedProps} nodeInfo={nodeInfo} index={index}/>;
 					})}
 					{/*<CheckBox text="Preview steps that will be taken" value={true}/>
 					<Row>Step 1: todo</Row>
@@ -100,7 +103,7 @@ function GetTransferNodeFinalType(nodeInfo: NodeInfoForTransfer) {
 	if (node == null) return null;
 	return nodeInfo.transferType == "clone" && nodeInfo.clone_newType != null ? nodeInfo.clone_newType : node.type;
 }
-function TransferNodeNeedsWrapper(nodeInfo: NodeInfoForTransfer, uiState: TransferNodesUIState) {
+export function TransferNodeNeedsWrapper(nodeInfo: NodeInfoForTransfer, uiState: TransferNodesUIState) {
 	const finalType = GetTransferNodeFinalType(nodeInfo);
 	if (finalType == null) return false;
 
@@ -114,10 +117,13 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 
 		const earlierNodeInfos = payload.nodes.slice(0, index);
 		const earlierNodeInfo_transferring = earlierNodeInfos.find(a=>a.transferType != "ignore");
-		let newParent: MapNodeL3|n;
+		/*let newParent: MapNodeL3|n;
 		if (earlierNodeInfo_transferring?.transferType == "shim") newParent = null;
 		else if (earlierNodeInfo_transferring != null) newParent = GetNodeL3(`${earlierNodeInfo_transferring.nodeID}`);
-		else newParent = uiState.destinationParent;
+		else newParent = uiState.destinationParent;*/
+		const newParentType = earlierNodeInfo_transferring != null ? GetTransferNodeFinalType(earlierNodeInfo_transferring) : uiState.destinationParent.type;
+		if (newParentType == null) return "Transfer #1 is invalid; cannot retrieve data for its source-node.";
+		const newParent = earlierNodeInfo_transferring != null ? null : uiState.destinationParent;
 
 		const path = nodeInfo.oldParentID ? `${nodeInfo.oldParentID}/${nodeInfo.nodeID}` : nodeInfo.nodeID;
 		const node = GetNodeL3(path);
@@ -129,13 +135,16 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 		nodeTypeEntry_orig.name = `Keep original type (${nodeTypeEntry_orig.name})`;
 
 		const finalType = GetTransferNodeFinalType(nodeInfo);
+		if (finalType == null) return;
 
 		//const wrapperSection = nodeInfo.transferType != "ignore" && IsWrapperArgNeededForTransfer(finalType, nodeInfo.childGroup);
 
 		const transferTypeOptions = TransferType_values.map(a=>({name: ModifyString(a, m=>[m.startLower_to_upper]), value: a}));
 		const isArgumentForCombined = index == 0 && payload.nodes.length > 1;
-		const canBeShim = isArgumentForCombined && TransferNodeNeedsWrapper(payload.nodes[1], uiState);
+		const canBeShim = isArgumentForCombined; //&& TransferNodeNeedsWrapper(payload.nodes[1], uiState);
 		if (!canBeShim) transferTypeOptions.Remove(transferTypeOptions.find(a=>a.value == "shim"));
+		// temp: disable the Move and Link options for now, since not yet implemented in new transfer system
+		transferTypeOptions.filter(a=>a.value == "move" || a.value == "link").forEach(a=>a["style"] = {pointerEvents: "none", opacity: .5, cursor: "default"});
 
 		const splitAt = 110;
 		return <>
@@ -176,14 +185,14 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 								IMPORTANT: While the source-node *itself* is cloned/duplicated (and thus editable independently), any children the clone carries with it (ie. if "Keep children" is set to "Yes") will only be linked, *not* cloned.
 								Thus, the clone's children/descendants must themselves also be cloned afterward, if you want to produce a fully independent node-tree.
 							Shim: Make a brand new argument-node under the listed "New parent" node, then use this as the parent for the claim-node being transferred in box #2. (this option only shows up when applicable)
+
+							Note: The Move and Link options are disabled at the moment, since their implementation in the new transfer system is not yet complete.
 						`.AsMultiline(0)}/>
 					</Row>
-					<Select displayType="button bar" options={transferTypeOptions}
-						enabled={false} // temp
-						value={nodeInfo.transferType} onChange={val=>{
-							nodeInfo.transferType = val;
-							Change();
-						}}/>
+					<Select displayType="button bar" options={transferTypeOptions} value={nodeInfo.transferType} onChange={val=>{
+						nodeInfo.transferType = val;
+						Change();
+					}}/>
 				</RowLR>
 				{nodeInfo.transferType != "ignore" &&
 				<RowLR mt={5} splitAt={splitAt}>
@@ -255,6 +264,15 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 								}}/>
 						</Row>}
 					</RowLR>
+					{(()=>{
+						const childGroupsThisNodeIsValidIn = GetValues(ChildGroup).filter(group=>CheckValidityOfLink(newParentType, group, finalType) == null);
+						if (!childGroupsThisNodeIsValidIn.includes(nodeInfo.childGroup)) {
+							return <Row mt={5} style={{color: "red"}}>
+								{/*`Issue: This transfer's selected child-group (${ChildGroup[nodeInfo.childGroup]}) is not valid given its transfer context. (${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)})`*/}
+								{`Issue: ${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)}`}
+							</Row>;
+						}
+					})()}
 				</>}
 			</Column>
 		</>;
@@ -268,7 +286,7 @@ class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node
 		const {menuOpened} = this.state;
 		const path = node?.link ? `${node.link?.parent}/${node.link?.child}` : node?.id;
 
-		const backgroundColor = node ? GetNodeColor(node, "background", false).desaturate(0.5).alpha(0.8) : null;
+		const backgroundColor = node ? GetNodeColor(node, "background", false)/*.desaturate(0.5)*/.alpha(0.8) : null;
 		return (
 			<Column style={{flex: 1}}>
 				{node &&

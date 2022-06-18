@@ -269,7 +269,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const nodeL3 = AsNodeL3(node, null);
 		const path = `${node.id}`;
 
-		const backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
+		const backgroundColor = GetNodeColor(nodeL3)/*.desaturate(0.5)*/.alpha(0.8);
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (

@@ -208,7 +208,6 @@ export function ShowAddPhrasingDialog(node: MapNodeL3, type: MapNodePhrasingType
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add phrasing", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonProps = {enabled: valid};
 			return (
 				<Column style={{padding: "10px 0", width: 800}}>
 					<PhrasingDetailsUI
@@ -218,6 +217,8 @@ export function ShowAddPhrasingDialog(node: MapNodeL3, type: MapNodePhrasingType
 						onChange={(val, error)=>{
 							newEntry = val;
 							valid = !error;
+
+							boxController.options.okButtonProps = {enabled: valid};
 							boxController.UpdateUI();
 						}}/>
 				</Column>
