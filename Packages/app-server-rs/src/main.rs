@@ -112,8 +112,9 @@ mod db {
     }
     pub mod _general;
     pub mod general {
+        pub mod accessor_helpers;
         pub mod subtree;
-        pub mod subtree_accessors;
+        pub mod subtree_collector;
     }
     pub mod users;
     pub mod user_hiddens;

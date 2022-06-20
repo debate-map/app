@@ -178,7 +178,7 @@ impl MutationShard_General {
         })
     }*/
     
-    async fn restartAppServer(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+    async fn restartAppServer(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
         
         tell_k8s_to_restart_app_server().await?;

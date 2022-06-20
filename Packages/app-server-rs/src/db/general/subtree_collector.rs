@@ -10,11 +10,11 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::{Row, types::ToSql};
-use crate::{db::{medias::Media, terms::Term, nodes::MapNode, node_child_links::NodeChildLink, node_revisions::MapNodeRevision, node_phrasings::MapNodePhrasing, node_tags::MapNodeTag}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}}, type_aliases::JSONValue, general::general::to_anyhow}};
+use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{MapNode, get_node}, node_child_links::{NodeChildLink, get_node_child_links}, node_revisions::{MapNodeRevision, get_node_revision}, node_phrasings::{MapNodePhrasing, get_node_phrasings}, node_tags::{MapNodeTag, get_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}}, type_aliases::JSONValue, general::general::to_anyhow}};
 use super::subtree::Subtree;
 
 pub struct AccessorContext<'a> {
-    tx: Transaction<'a>,
+    pub tx: Transaction<'a>,
 }
 impl<'a> AccessorContext<'a> {
     pub fn new(tx: Transaction<'a>) -> Self {
@@ -145,109 +145,4 @@ pub async fn populate_subtree_collector(ctx: &AccessorContext<'_>, current_path:
         futures::future::join_all(futures).await;
     }
     Ok(())
-}
-
-// accessors // todo: probably move these to the "db/XXX" files
-// ==========
-
-pub async fn get_db_entry<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<T, Error> {
-    let entries = get_db_entries(ctx, table_name, filter_json).await?;
-    let entry = entries.into_iter().nth(0);
-    let result = entry.ok_or(anyhow!(r#"No entries found in table "{table_name}" matching filter:{filter_json:?}"#))?;
-    Ok(result)
-}
-pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<Vec<T>, Error> {
-    let query_func = |mut sql: SQLFragment| async move {
-        let (sql_text, params) = sql.into_query_args()?;
-        
-        /*let temp1: Vec<Box<dyn ToSql + Sync>> = params.into_iter().map(strip_send_from_tosql_sync_send).collect();
-        let temp2: Vec<&(dyn ToSql + Sync)> = temp1.iter().map(|a| a.as_ref()).collect();
-        //ctx.tx.query(&sql_text, temp2.as_slice()).await
-        ctx.tx.query_raw(&sql_text, temp2.as_slice()).await*/
-
-        /*//let temp2 = temp1.iter().map(|a| a.as_ref());
-        let stream = ctx.tx.query_raw(&sql_text, params.iter()).await?;
-        Ok(stream.filter_map(|a| async move {
-            match a {
-                Ok(a) => Some(a),
-                Err(err) => None,
-            }
-        }).collect::<Vec<_>>().await)*/
-
-        // query_raw supposedly allows dynamically-constructed params-vecs, but the only way I've been able to get it working is by locking the vector to a single concrete type
-        // see here: https://github.com/sfackler/rust-postgres/issues/445#issuecomment-1086774095
-        //let params: Vec<String> = params.into_iter().map(|a| a.as_ref().to_string()).collect();
-        ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?
-            .try_collect().await.map_err(to_anyhow)
-    };
-
-    let filter = QueryFilter::from_filter_input_opt(filter_json)?;
-    let (_entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name.to_owned(), &filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
-    Ok(entries_as_type)
-}
-
-/*#[derive(Serialize, Deserialize)]
-struct MapNodeL3 {
-    // todo
-}
-pub async fn get_node_l3(ctx: &AccessorContext<'_>, path: String) -> Option<MapNodeL3> {
-    let id = path.split("/").last();
-    let node: Option<MapNode> = get_db_entry(ctx, "nodes", &Some(json!({
-        "id": {"equalTo": id}
-    }))).await;
-
-    let node_l3: MapNodeL3 = node;
-    Some(node_l3)
-}*/
-
-pub async fn get_node(ctx: &AccessorContext<'_>, id: &str) -> Result<MapNode, Error> {
-    get_db_entry(ctx, "nodes", &Some(json!({
-        "id": {"equalTo": id}
-    }))).await
-}
-pub async fn get_node_phrasings(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<MapNodePhrasing>, Error> {
-    get_db_entries(ctx, "nodePhrasings", &Some(json!({
-        "node": {"equalTo": node_id}
-    }))).await
-}
-pub async fn get_terms_attached(ctx: &AccessorContext<'_>, node_rev_id: &str) -> Result<Vec<Term>, Error> {
-    let rev = get_node_revision(ctx, node_rev_id).await?;
-    let empty = &vec![];
-    let term_values = rev.phrasing["terms"].as_array().unwrap_or(empty);
-    let terms_futures = term_values.into_iter().map(|attachment| async {
-        get_term(ctx, attachment["id"].as_str().unwrap()).await.unwrap()
-    });
-    let terms: Vec<Term> = futures::future::join_all(terms_futures).await;
-    Ok(terms)
-}
-pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Error> {
-    get_db_entry(ctx, "medias", &Some(json!({
-        "id": {"equalTo": id}
-    }))).await
-}
-pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&str>, child_id: Option<&str>) -> Result<Vec<NodeChildLink>, Error> {
-    let mut filter_map = serde_json::Map::new();
-    if let Some(parent_id) = parent_id {
-        filter_map.insert("parent".to_owned(), json!({"equalTo": parent_id}));
-    }
-    if let Some(child_id) = child_id {
-        filter_map.insert("child".to_owned(), json!({"equalTo": child_id}));
-    }
-    get_db_entries(ctx, "nodeChildLinks", &Some(JSONValue::Object(filter_map))).await
-}
-
-pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
-    get_db_entry(ctx, "terms", &Some(json!({
-        "id": {"equalTo": id}
-    }))).await
-}
-pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<MapNodeRevision, Error> {
-    get_db_entry(ctx, "nodeRevisions", &Some(json!({
-        "id": {"equalTo": id}
-    }))).await
-}
-pub async fn get_tags_for(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<MapNodeTag>, Error> {
-    get_db_entries(ctx, "nodeTags", &Some(json!({
-        "nodes": {"contains": [node_id]}
-    }))).await
 }

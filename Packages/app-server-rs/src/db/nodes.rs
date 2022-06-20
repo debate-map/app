@@ -1,11 +1,21 @@
+use anyhow::Error;
 use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+
+use super::general::{subtree_collector::AccessorContext, accessor_helpers::get_db_entry};
+
+pub async fn get_node(ctx: &AccessorContext<'_>, id: &str) -> Result<MapNode, Error> {
+    get_db_entry(ctx, "nodes", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
 
 wrap_slow_macros!{
 

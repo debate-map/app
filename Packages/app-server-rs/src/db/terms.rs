@@ -1,3 +1,4 @@
+use anyhow::Error;
 use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -8,7 +9,23 @@ use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::node_revisions::Attachment;
+use super::{node_revisions::{Attachment, get_node_revision}, general::{subtree_collector::AccessorContext, accessor_helpers::get_db_entry}};
+
+pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
+    get_db_entry(ctx, "terms", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
+pub async fn get_terms_attached(ctx: &AccessorContext<'_>, node_rev_id: &str) -> Result<Vec<Term>, Error> {
+    let rev = get_node_revision(ctx, node_rev_id).await?;
+    let empty = &vec![];
+    let term_values = rev.phrasing["terms"].as_array().unwrap_or(empty);
+    let terms_futures = term_values.into_iter().map(|attachment| async {
+        get_term(ctx, attachment["id"].as_str().unwrap()).await.unwrap()
+    });
+    let terms: Vec<Term> = futures::future::join_all(terms_futures).await;
+    Ok(terms)
+}
 
 wrap_slow_macros!{
 

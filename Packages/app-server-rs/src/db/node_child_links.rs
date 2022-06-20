@@ -1,11 +1,26 @@
+use anyhow::Error;
 use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}, type_aliases::JSONValue};
+
+use super::general::{subtree_collector::AccessorContext, accessor_helpers::get_db_entries};
+
+pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&str>, child_id: Option<&str>) -> Result<Vec<NodeChildLink>, Error> {
+    let mut filter_map = serde_json::Map::new();
+    if let Some(parent_id) = parent_id {
+        filter_map.insert("parent".to_owned(), json!({"equalTo": parent_id}));
+    }
+    if let Some(child_id) = child_id {
+        filter_map.insert("child".to_owned(), json!({"equalTo": child_id}));
+    }
+    get_db_entries(ctx, "nodeChildLinks", &Some(JSONValue::Object(filter_map))).await
+}
 
 wrap_slow_macros!{
 

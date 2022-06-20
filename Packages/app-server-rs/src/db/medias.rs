@@ -1,11 +1,21 @@
+use anyhow::Error;
 use rust_shared::SubError;
 use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+
+use super::general::{accessor_helpers::get_db_entry, subtree_collector::AccessorContext};
+
+pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Error> {
+    get_db_entry(ctx, "medias", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
 
 wrap_slow_macros!{
 
