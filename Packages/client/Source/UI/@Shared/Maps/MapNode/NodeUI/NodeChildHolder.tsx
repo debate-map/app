@@ -342,7 +342,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				: 0;
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM!).height / 2 : 0;
+		return this.childHolder?.DOM && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM!).height / 2 : 0;
 	}
 
 	UpdateChildrenWidthOverride(forceUpdate = false) {

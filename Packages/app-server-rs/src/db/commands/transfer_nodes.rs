@@ -14,14 +14,22 @@ pub fn transfer_nodes(payload: JSONValue) -> Result<GenericMutation_Result, Erro
                         "nodeID": {"type": "string"},
                         "transferType": {"type": "string"},
                         "clone_newType": {"type": "string"},
+                        "clone_keepChildren": {"type": "boolean"},
 
                         "newParentID": {"type": "string"},
                         "childGroup": {"type": "string"},
+                        "claimForm": {"type": "string"},
+                        "argumentPolarity": {"type": "string"},
                     },
+                    "required": [
+                        "transferType",
+                        //"clone_newType", "clone_keepChildren",
+                        "childGroup",
+                    ],
                 },
             },
         },
-        //"required": ["newParentID", "nodeID", "childGroup"],
+        "required": ["nodes"],
     });
     let compiled = JSONSchema::compile(&schema).expect("A valid schema");
 

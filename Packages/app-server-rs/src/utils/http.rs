@@ -1,9 +1,13 @@
-/*async fn clone_request(req: Request<Body>) -> (Request<Body>, Request<Body>) {
+use axum::http;
+use futures_util::TryStreamExt;
+use hyper::{Request, Body};
+
+pub async fn clone_request(req: Request<Body>) -> (Request<Body>, Request<Body>) {
     let (parts, body) = req.into_parts();
     //clone_request_from_parts(parts, body, "sdf".to_owned()).await
     clone_request_from_parts(parts, body).await
 }
-async fn clone_request_from_parts(
+pub async fn clone_request_from_parts(
     parts: http::request::Parts, body: hyper::Body,
     // modifications
     //new_url: String
@@ -33,4 +37,4 @@ async fn clone_request_from_parts(
         .unwrap();
 
     (req1, req2)
-}*/
+}

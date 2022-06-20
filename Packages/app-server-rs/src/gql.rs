@@ -60,7 +60,7 @@ use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{SubscriptionShard_User};
-use crate::links::proxy_to_asjs::{proxy_to_asjs_handler, HyperClient, have_own_graphql_handle_request};
+use crate::links::proxy_to_asjs::{maybe_proxy_to_asjs_handler, HyperClient, have_own_graphql_handle_request};
 use crate::store::live_queries::LQStorageWrapper;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 
@@ -129,7 +129,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWr
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
             // approach 1 (using standard routing functions)
-            on_service(MethodFilter::GET, gql_subscription_service.clone()).post(proxy_to_asjs_handler)
+            on_service(MethodFilter::GET, gql_subscription_service.clone()).post(maybe_proxy_to_asjs_handler)
 
             // approach 2 (custom first-layer service-function) [based on pattern here: https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40]
             /*tower::service_fn({
@@ -170,7 +170,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWr
         )
 
         // for endpoints not defined by app-server-rs (eg. /check-mem), assume it is meant for app-server-js, and thus call the proxying function
-        .fallback(get(proxy_to_asjs_handler).merge(post(proxy_to_asjs_handler)))
+        .fallback(get(maybe_proxy_to_asjs_handler).merge(post(maybe_proxy_to_asjs_handler)))
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(client_to_asjs));
 

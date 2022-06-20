@@ -26,6 +26,7 @@ use futures::future::{self, Future};
 
 use crate::gql::RootSchema;
 use crate::utils::general::general::body_to_str;
+use crate::utils::http::clone_request;
 use crate::utils::type_aliases::JSONValue;
 
 pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
@@ -54,7 +55,10 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     Ok(response_str)
 }
 
-pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, mut req: Request<Body>) -> Response<Body> {
+pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
+    let mut proxy_request_to_asjs = true;
+    
+    // if client is on the "/gql-playground" or "/graphiql-new" pages, don't proxy the request to app-server-js
     if let Some(referrer) = req.headers().get("Referer") {
         let referrer_str = &String::from_utf8_lossy(referrer.as_bytes());
         let referrer_url = Url::parse(referrer_str);
@@ -62,19 +66,32 @@ pub async fn proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Ex
             let path = referrer_url.path();
             if path == "/gql-playground" || path == "/graphiql-new" {
                 info!(r#"Sending "/graphql" request to app-server-rs, since from "{path}". @referrer:{referrer_str}"#);
-                let response_str = match have_own_graphql_handle_request(req, schema).await {
-                    Ok(a) => a,
-                    Err(err) => format!("Got error in passing/execution of graphql request to app-server-rs' gql engine:{err:?}"),
-                };
-
-                // send response (to frontend)
-                let mut response = Response::builder().body(axum::body::Body::from(response_str)).unwrap();
-                response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
-                return response;
+                proxy_request_to_asjs = false;
             }
         }
     }
     
+    let (mut req, req2) = clone_request(req).await;
+    let body_as_str = body_to_str(req2.into_body()).await.unwrap();
+    // if request is running one of the commands that's already been rewritten in app-server-rs, don't proxy the request to app-server-js
+    if body_as_str.contains("transferNodes(payload: $payload)") {
+        proxy_request_to_asjs = false;
+    }
+
+    // if not proxying to app-server-js, then send the request to the GraphQL component of this app-server-rs
+    if !proxy_request_to_asjs {
+        let response_str = match have_own_graphql_handle_request(req, schema).await {
+            Ok(a) => a,
+            Err(err) => format!("Got error in passing/execution of graphql request to app-server-rs' gql engine:{err:?}"),
+        };
+
+        // send response (to frontend)
+        let mut response = Response::builder().body(axum::body::Body::from(response_str)).unwrap();
+        response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
+        return response;
+    }
+
+
     let path = req.uri().path();
     let path_query = req
         .uri()

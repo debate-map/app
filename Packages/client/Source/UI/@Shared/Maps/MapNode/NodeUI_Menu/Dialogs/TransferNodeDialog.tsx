@@ -68,16 +68,14 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 		onOK: async()=>{
 			const result = await apolloClient.mutate({
 				mutation: gql`
-					mutation(payload: JSON!) {
+					mutation($payload: JSON!) {
 						transferNodes(payload: $payload) {
 							message
 						}
 					}
 				`,
 				variables: {
-					payload: {
-						// todo
-					},
+					payload,
 				},
 				//fetchPolicy: "network-only",
 			});
