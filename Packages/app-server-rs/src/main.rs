@@ -110,8 +110,9 @@ mod utils {
 mod db {
     pub mod commands {
         pub mod _command;
-        pub mod add_node_revision;
-        pub mod transfer_nodes;
+        // temp-removed
+        //pub mod add_node_revision;
+        //pub mod transfer_nodes;
     }
     pub mod _general;
     pub mod general {

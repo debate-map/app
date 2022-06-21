@@ -201,8 +201,8 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						const sinceTime = 0;
 						const pathsToChangedNodes = await GetAsync(()=>GetPathsToNodesChangedSinceX(map.id, sinceTime), {maxIterations: 1000}); // this can take a lot of iterations...
 						const pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
-						for (const path of pathsToChangedInSubtree) {
-							RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
+						for (const path2 of pathsToChangedInSubtree) {
+							RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path2), Date.now()));
 						}
 					}}/>}
 				{inList &&

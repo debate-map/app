@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
+import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, NodeInfoForTransfer, Polarity, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
@@ -11,7 +11,7 @@ import {observer} from "web-vcore/nm/mobx-react.js";
 import {CheckBox, Column, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {TransferNodesPayload, TransferNodesUIState, NodeInfoForTransfer, TransferType_values} from "./TransferNodeDialog/TransferNodeData";
+import {TransferNodesUIState} from "./TransferNodeDialog/TransferNodeData.js";
 
 export type TransferNodeDialog_SharedProps = {
 	payload: TransferNodesPayload,
@@ -144,7 +144,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 
 		//const wrapperSection = nodeInfo.transferType != "ignore" && IsWrapperArgNeededForTransfer(finalType, nodeInfo.childGroup);
 
-		const transferTypeOptions = TransferType_values.map(a=>({name: ModifyString(a, m=>[m.startLower_to_upper]), value: a}));
+		const transferTypeOptions = GetValues(TransferType).map(a=>({name: ModifyString(a, m=>[m.startLower_to_upper]), value: a}));
 		const isArgumentForCombined = index == 0 && payload.nodes.length > 1;
 		const canBeShim = isArgumentForCombined; //&& TransferNodeNeedsWrapper(payload.nodes[1], uiState);
 		if (!canBeShim) transferTypeOptions.Remove(transferTypeOptions.find(a=>a.value == "shim"));

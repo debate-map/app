@@ -1,4 +1,4 @@
-import {GetNodeL3, GetParentNodeL3, MapNodeType, MeID} from "dm_common";
+import {GetNodeL3, GetParentNodeL3, MapNodeType, MeID, TransferType} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -28,17 +28,17 @@ export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
 		const parentOfNodeToClone = GetParentNodeL3(pathToClone);
 		if (parentOfNodeToClone == null || nodeToClone.link == null) return null; // cannot clone a map's root-node (for now anyway)
 
-		const [payload_initial, uiState_initial] = GetTransferNodesInitialData(nodeToClone, pathToClone, parentOfNodeToClone, nodeToClone.link.group, "clone");
+		const [payload_initial, uiState_initial] = GetTransferNodesInitialData(nodeToClone, pathToClone, parentOfNodeToClone, nodeToClone.link.group, TransferType.clone);
 		if (payload_initial == null || uiState_initial == null) return;
 
 		// if cloning, and its an arg+claim combo
-		if (payload_initial.nodes[0].transferType == "clone" && payload_initial.nodes.length > 1) {
+		if (payload_initial.nodes[0].transferType == TransferType.clone && payload_initial.nodes.length > 1) {
 			// maybe temp: if arg can be "shimmed", default to that; else, default to "ignore"
 			const argCanBeShim = TransferNodeNeedsWrapper(payload_initial.nodes[1], uiState_initial);
 			if (argCanBeShim) {
-				payload_initial.nodes[0].transferType = "shim";
+				payload_initial.nodes[0].transferType = TransferType.shim;
 			} else {
-				payload_initial.nodes[0].transferType = "ignore";
+				payload_initial.nodes[0].transferType = TransferType.ignore;
 			}
 		}
 

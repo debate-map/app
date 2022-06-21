@@ -1,29 +1,6 @@
-import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout} from "dm_common";
+import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType} from "dm_common";
 import {Command} from "web-vcore/.yalc/mobx-graphlink";
-import {TransferNodeNeedsWrapper} from "../TransferNodeDialog";
-
-export class TransferNodesPayload {
-	nodes: NodeInfoForTransfer[];
-}
-export class NodeInfoForTransfer {
-	nodeID?: string; // can be null, if transfer is of type "shim"
-	oldParentID?: string;
-	transferType: TransferType;
-	clone_newType: MapNodeType;
-	clone_keepChildren: boolean;
-
-	newParentID?: string|n;
-	childGroup: ChildGroup;
-	claimForm?: ClaimForm|n;
-	argumentPolarity?: Polarity|n;
-}
-export const TransferType_values = [
-	"ignore",
-	"move", "link", "clone",
-	"shim",
-	//"delete", // for the case of moving a claim to a place not needing an argument wrapper, where the old argument-wrapper would otherwise be left empty
-] as const;
-export type TransferType = typeof TransferType_values[number];
+import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 
 export type PayloadOf<T> = T extends Command<infer Payload> ? Payload : never;
 
@@ -81,7 +58,7 @@ export function GetTransferNodesInitialData(transferNode: MapNodeL3, transferNod
 		const claimNeedsWrapper = TransferNodeNeedsWrapper(payload_initial.nodes[0], uiState_initial);
 		if (claimNeedsWrapper) {
 			payload_initial.nodes.Insert(0, {
-				transferType: "shim",
+				transferType: TransferType.shim,
 				childGroup: uiState_initial.destinationChildGroup,
 				// not relevant, but required fields
 				clone_newType: MapNodeType.argument,
