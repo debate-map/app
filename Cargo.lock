@@ -59,6 +59,7 @@ dependencies = [
  "async-recursion",
  "async-trait",
  "axum 0.4.4",
+ "base64",
  "bytes",
  "deadpool",
  "deadpool-postgres",

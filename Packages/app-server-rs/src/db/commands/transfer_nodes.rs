@@ -85,9 +85,11 @@ pub async fn transfer_nodes(gql_ctx: &async_graphql::Context<'_>, payload_raw: J
         match node_info.transferType.as_str() {
             "ignore" => {},
             "move" => {
+                return Err(anyhow!("Not yet implemented."));
                 // todo
             },
             "link" => {
+                return Err(anyhow!("Not yet implemented."));
                 // todo
             },
             "clone" => {
@@ -96,6 +98,7 @@ pub async fn transfer_nodes(gql_ctx: &async_graphql::Context<'_>, payload_raw: J
                 let node = get_node(&ctx, node_id).await?;
             },
             "shim" => {
+                return Err(anyhow!("Not yet implemented."));
                 // todo
             },
             transfer_type => {

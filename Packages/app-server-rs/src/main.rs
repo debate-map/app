@@ -89,6 +89,7 @@ mod utils {
         pub mod pg_row_to_json;
         pub mod queries;
         pub mod sql_param;
+        pub mod uuid;
     }
     pub mod general {
         pub mod errors;
@@ -108,6 +109,8 @@ mod utils {
 }
 mod db {
     pub mod commands {
+        pub mod _command;
+        pub mod add_node_revision;
         pub mod transfer_nodes;
     }
     pub mod _general;
