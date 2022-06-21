@@ -9,7 +9,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::{node_revisions::{Attachment, get_node_revision}, general::{subtree_collector::AccessorContext, accessor_helpers::get_db_entry}};
+use super::{general::{accessor_helpers::{get_db_entry, AccessorContext}}, node_revisions::{get_node_revision, Attachment}};
 
 pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
     get_db_entry(ctx, "terms", &Some(json!({

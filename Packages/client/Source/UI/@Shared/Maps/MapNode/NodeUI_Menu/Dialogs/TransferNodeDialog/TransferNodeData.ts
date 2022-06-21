@@ -6,7 +6,7 @@ export class TransferNodesPayload {
 	nodes: NodeInfoForTransfer[];
 }
 export class NodeInfoForTransfer {
-	nodeID?: string;
+	nodeID?: string; // can be null, if transfer is of type "shim"
 	oldParentID?: string;
 	transferType: TransferType;
 	clone_newType: MapNodeType;

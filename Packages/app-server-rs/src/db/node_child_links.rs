@@ -9,7 +9,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}, type_aliases::JSONValue};
 
-use super::general::{subtree_collector::AccessorContext, accessor_helpers::get_db_entries};
+use super::general::{accessor_helpers::{get_db_entry, AccessorContext, get_db_entries}};
 
 pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&str>, child_id: Option<&str>) -> Result<Vec<NodeChildLink>, Error> {
     let mut filter_map = serde_json::Map::new();

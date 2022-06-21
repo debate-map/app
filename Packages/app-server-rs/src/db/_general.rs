@@ -56,8 +56,8 @@ impl MutationShard_General {
     }
 
     // todo: move this to an appropriate location (make some structuring similar to the Command system in app-server-js)
-    async fn transferNodes(&self, _ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result> {
-        let result = transfer_nodes(payload)?;
+    async fn transferNodes(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result> {
+        let result = transfer_nodes(ctx, payload).await?;
         Ok(result)
     }
 }

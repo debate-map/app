@@ -3,8 +3,9 @@ use jsonschema::{JSONSchema, output::BasicOutput};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use lazy_static::lazy_static;
+use deadpool_postgres::Pool;
 
-use crate::{utils::type_aliases::JSONValue, db::_general::GenericMutation_Result};
+use crate::{utils::type_aliases::JSONValue, db::{_general::GenericMutation_Result, nodes::get_node, general::accessor_helpers::AccessorContext}};
 
 // temp
 type TransferType = String;
@@ -48,7 +49,7 @@ lazy_static! {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NodeInfoForTransfer {
-	nodeID: Option<String>,
+	nodeID: Option<String>, // can be null, if transfer is of type "shim"
 	oldParentID: Option<String>,
 	transferType: TransferType,
 	clone_newType: MapNodeType,
@@ -61,17 +62,45 @@ pub struct NodeInfoForTransfer {
 }
 
 // todo: expand this from just node-cloning, to also work for node moving/linking (as intended)
-pub fn transfer_nodes(payload_raw: JSONValue) -> Result<GenericMutation_Result, Error> {
+pub async fn transfer_nodes(gql_ctx: &async_graphql::Context<'_>, payload_raw: JSONValue) -> Result<GenericMutation_Result, Error> {
     let output: BasicOutput = TRANSFER_NODES_PAYLOAD_SCHEMA_JSON_COMPILED.apply(&payload_raw).basic();
     if !output.is_valid() {
         let output_json = serde_json::to_value(output).expect("Failed to serialize output");
         return Err(anyhow!(output_json));
     }
-    let payload: TransferNodesPayload = serde_json::from_value(payload_raw)?; 
+    let payload: TransferNodesPayload = serde_json::from_value(payload_raw)?;
 
-    for node in payload.nodes {
-        if node.transferType == "clone" {
-            println!("Found clone transfer:{node:?}");
+    //let client = &mut ctx.data::<Client>().unwrap();
+    let pool = gql_ctx.data::<Pool>().unwrap();
+    let mut client = pool.get().await.unwrap();
+    let tx = client.build_transaction()
+        //.isolation_level(tokio_postgres::IsolationLevel::Serializable).start().await?;
+        // use with serializable+deferrable+readonly, so that the transaction is guaranteed to not fail (see doc for `deferrable`) [there may be a better way] 
+        .isolation_level(tokio_postgres::IsolationLevel::Serializable).deferrable(true).read_only(true)
+        .start().await?;
+    let ctx = AccessorContext::new(tx);
+
+    for (i, node_info) in payload.nodes.iter().enumerate() {
+        let _prev_node_info = payload.nodes.get(i - 1);
+        match node_info.transferType.as_str() {
+            "ignore" => {},
+            "move" => {
+                // todo
+            },
+            "link" => {
+                // todo
+            },
+            "clone" => {
+                //println!("Found clone transfer:{node:?}");
+                let node_id = node_info.nodeID.as_ref().ok_or(anyhow!("For transfer of type \"clone\", nodeID must be specified."))?;
+                let node = get_node(&ctx, node_id).await?;
+            },
+            "shim" => {
+                // todo
+            },
+            transfer_type => {
+                return Err(anyhow!("Invalid transfer type \"{transfer_type}\"."));
+            },
         }
     }
 

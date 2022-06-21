@@ -65,21 +65,28 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 				</Column>
 			);
 		}),
-		onOK: async()=>{
-			const result = await apolloClient.mutate({
-				mutation: gql`
-					mutation($payload: JSON!) {
-						transferNodes(payload: $payload) {
-							message
+		onOK: ()=>{
+			// temp; if an "Issue: XXX" element is present in the dialog's UI, block pressing OK (ie. execution of the dialog/command)
+			if (document.querySelector(".transferNodeBlocker") != null) {
+				return false;
+			}
+
+			(async()=>{
+				const result = await apolloClient.mutate({
+					mutation: gql`
+						mutation($payload: JSON!) {
+							transferNodes(payload: $payload) {
+								message
+							}
 						}
-					}
-				`,
-				variables: {
-					payload,
-				},
-				//fetchPolicy: "network-only",
-			});
-			console.log("Got result:", result);
+					`,
+					variables: {
+						payload,
+					},
+					//fetchPolicy: "network-only",
+				});
+				console.log("Got result:", result);
+			})();
 		},
 	});
 }
@@ -265,7 +272,10 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 					{(()=>{
 						const childGroupsThisNodeIsValidIn = GetValues(ChildGroup).filter(group=>CheckValidityOfLink(newParentType, group, finalType) == null);
 						if (!childGroupsThisNodeIsValidIn.includes(nodeInfo.childGroup)) {
-							return <Row mt={5} style={{color: "red"}}>
+							return <Row mt={5} style={{color: "red"}}
+								// temp; add special class-name, which blocks dialog from proceeding / having OK pressed
+								className="transferNodeBlocker"
+							>
 								{/*`Issue: This transfer's selected child-group (${ChildGroup[nodeInfo.childGroup]}) is not valid given its transfer context. (${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)})`*/}
 								{`Issue: ${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)}`}
 							</Row>;

@@ -2,10 +2,20 @@ use futures_util::TryStreamExt;
 use serde::Serialize;
 use tokio_postgres::Row;
 use anyhow::{anyhow, Error};
+use deadpool_postgres::Transaction;
 
 use crate::utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::general::to_anyhow};
 
-use super::subtree_collector::AccessorContext;
+pub struct AccessorContext<'a> {
+    pub tx: Transaction<'a>,
+}
+impl<'a> AccessorContext<'a> {
+    pub fn new(tx: Transaction<'a>) -> Self {
+        Self {
+            tx
+        }
+    }
+}
 
 pub async fn get_db_entry<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<T, Error> {
     let entries = get_db_entries(ctx, table_name, filter_json).await?;

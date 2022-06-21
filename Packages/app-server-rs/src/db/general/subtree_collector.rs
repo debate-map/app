@@ -3,7 +3,6 @@ use std::{rc::Rc, sync::Arc};
 use anyhow::{anyhow, Error};
 use async_graphql::ID;
 use async_recursion::async_recursion;
-use deadpool_postgres::Transaction;
 use futures_util::{Future, FutureExt, TryStreamExt, StreamExt, pin_mut};
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
@@ -11,18 +10,7 @@ use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::{Row, types::ToSql};
 use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{MapNode, get_node}, node_child_links::{NodeChildLink, get_node_child_links}, node_revisions::{MapNodeRevision, get_node_revision}, node_phrasings::{MapNodePhrasing, get_node_phrasings}, node_tags::{MapNodeTag, get_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}}, type_aliases::JSONValue, general::general::to_anyhow}};
-use super::subtree::Subtree;
-
-pub struct AccessorContext<'a> {
-    pub tx: Transaction<'a>,
-}
-impl<'a> AccessorContext<'a> {
-    pub fn new(tx: Transaction<'a>) -> Self {
-        Self {
-            tx
-        }
-    }
-}
+use super::{subtree::Subtree, accessor_helpers::AccessorContext};
 
 #[derive(Default)]
 pub struct SubtreeCollector {

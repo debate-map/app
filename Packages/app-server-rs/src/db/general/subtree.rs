@@ -24,7 +24,8 @@ use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
 use crate::utils::type_aliases::{JSONValue};
 
-use super::subtree_collector::{SubtreeCollector, populate_subtree_collector, AccessorContext};
+use super::accessor_helpers::AccessorContext;
+use super::subtree_collector::{SubtreeCollector, populate_subtree_collector};
 
 // queries
 // ==========
@@ -50,14 +51,13 @@ impl QueryShard_General_Subtree {
         //let client = &mut ctx.data::<Client>().unwrap();
         let pool = ctx.data::<Pool>().unwrap();
         let mut client = pool.get().await.unwrap();
-
         let tx = client.build_transaction()
             //.isolation_level(tokio_postgres::IsolationLevel::Serializable).start().await?;
             // use with serializable+deferrable+readonly, so that the transaction is guaranteed to not fail (see doc for "deferrable") [there may be a better way] 
             .isolation_level(tokio_postgres::IsolationLevel::Serializable).deferrable(true).read_only(true)
             .start().await?;
-
         let ctx = AccessorContext::new(tx);
+
         let collector = SubtreeCollector::default();
         let root_path_segments = vec![root_node_id.clone()];
         let collector_arc = Arc::new(RwLock::new(collector));
