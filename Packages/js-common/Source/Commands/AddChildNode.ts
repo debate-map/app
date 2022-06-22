@@ -3,7 +3,7 @@ import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSON
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {AddArgumentAndClaim} from "../Commands.js";
+import {AddArgumentAndClaim, TransferNodes} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode, Polarity} from "../DB/nodes/@MapNode.js";
@@ -24,7 +24,7 @@ import {LinkNode} from "./LinkNode.js";
 })
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
-		$mapID: {$ref: "UUID"},
+		mapID: {$ref: "UUID"},
 		$parentID: {type: ["null", "string"]},
 		$node: {$ref: "MapNode_Partial"},
 		$revision: {$ref: "MapNodeRevision_Partial"},
@@ -40,7 +40,7 @@ import {LinkNode} from "./LinkNode.js";
 		$doneAt: {type: "number"},
 	}),
 })
-export class AddChildNode extends Command<{mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
+export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 
@@ -61,6 +61,7 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 		// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
 		this.parent_oldData =
 			this.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this)?.payload.argumentNode
+			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this)?.transferData[0].addNodeCommand?.payload.node
 			?? GetNode.NN(parentID)!;
 
 		this.returnData = {

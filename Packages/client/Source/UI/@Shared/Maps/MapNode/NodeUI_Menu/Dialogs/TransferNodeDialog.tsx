@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, NodeInfoForTransfer, Polarity, TransferNodesPayload, TransferType} from "dm_common";
+import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, NodeInfoForTransfer, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
@@ -72,24 +72,42 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 			}
 
 			(async()=>{
-				const result = await apolloClient.mutate({
+				/*const result = await apolloClient.mutate({
 					mutation: gql`
 						mutation($payload: JSON!) {
-							transferNodes(payload: $payload) {
+							TransferNodes(payload: $payload) {
 								message
 							}
 						}
 					`,
 					variables: {
-						payload,
+						//payload,
+						//payload: RemoveNullProps(Clone(payload)),
+						...payload,
 					},
 					//fetchPolicy: "network-only",
-				});
+				});*/
+				const command = new TransferNodes(payload);
+				const result = await command.RunOnServer();
 				console.log("Got result:", result);
 			})();
 		},
 	});
 }
+
+// temp fix for app-server-rs validation issue, of newParentID field needing to be non-null
+/*function RemoveNullProps(tree: Object) {
+	for (const [key, val] of Object.entries(tree)) {
+		if (val == null) {
+			delete tree[key];
+			continue;
+		}
+		if (typeof val == "object") {
+			RemoveNullProps(val);
+		}
+	}
+	return tree;
+}*/
 
 class InfoRect extends BaseComponent<{text: string, first?: boolean}, {}> {
 	render() {

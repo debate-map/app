@@ -3,7 +3,7 @@ import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-v
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
-import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
+import {GetHighestLexoRankUnderParent, GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckValidityOfLink} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
@@ -14,7 +14,9 @@ import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
-import {LexoRank} from "../Utils/General/LexoRank.js";
+import {VLexoRank} from "../Utils/General/LexoRank.js";
+
+// todo: eventually retire this Command, once TransferNodes has been developed enough to cover all this one's use-cases
 
 export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOnNodePath: string, dropOnChildGroup: ChildGroup, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);
@@ -110,7 +112,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		const oldParent = GetNodeL2(oldParentID);
 		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");
 		this.newParent_data = GetNodeL2.NN(newParentID);
-		const newParent_childLinks = GetNodeChildLinks(newParentID);
+		const orderKeyForOuterNode = GetHighestLexoRankUnderParent(newParentID).genNext().toString();
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		//const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
@@ -126,9 +128,6 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			const closestMapRootNode = this.newParent_data.rootNodeForMap ? newParentID : SearchUpFromNodeForNodeMatchingX(newParentID, IDIsOfNodeThatIsRootOfMap, null, [nodeID]);
 			AssertV(closestMapRootNode != null, "Cannot move a node to a path that would orphan it.");
 		}
-
-		const newParent_lastOrderKey = newParent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? LexoRank.middle().toString();
-		const orderKeyForOuterNode = LexoRank.parse(newParent_lastOrderKey).genNext().toString();
 
 		let newParentID_forClaim = newParentID;
 
@@ -165,7 +164,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
 				form: newForm,
 				polarity: this.node_data.type == MapNodeType.argument ? newPolarity : null,
-				orderKey: wrapperArgNeeded ? LexoRank.middle().toString() : orderKeyForOuterNode,
+				orderKey: wrapperArgNeeded ? VLexoRank.middle().toString() : orderKeyForOuterNode,
 			},
 		}));
 

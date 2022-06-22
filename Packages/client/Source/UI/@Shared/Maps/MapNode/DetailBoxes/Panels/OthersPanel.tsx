@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, LexoRank, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -91,12 +91,12 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 					<Button ml={5} p="1px 5px" text="Simplify order-keys" onClick={()=>{
 						ShowMessageBox({
 							title: "Simplify order keys of children?",
-							message: "Doing so will update the link entries to each child, making their order-keys equidistant to each other (starting from the standard LexoRank mid-key).",
+							message: "Doing so will update the link entries to each child, making their order-keys equidistant to each other (starting from the standard lexo-rank mid-key).",
 							cancelButton: true,
 							onOK: async()=>{
 								const newOrderKeys = [] as string[];
 								for (const [i, childLink] of childLinks.entries()) {
-									newOrderKeys[i] = i == 0 ? LexoRank.middle().toString() : LexoRank.parse(newOrderKeys.Last()).genNext().toString();
+									newOrderKeys[i] = i == 0 ? VLexoRank.middle().toString() : VLexoRank.parse(newOrderKeys.Last()).genNext().toString();
 									await new UpdateLink({
 										linkID: childLink.id,
 										linkUpdates: {orderKey: newOrderKeys[i]},

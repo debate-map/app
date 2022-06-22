@@ -28,7 +28,7 @@ export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
 		const parentOfNodeToClone = GetParentNodeL3(pathToClone);
 		if (parentOfNodeToClone == null || nodeToClone.link == null) return null; // cannot clone a map's root-node (for now anyway)
 
-		const [payload_initial, uiState_initial] = GetTransferNodesInitialData(nodeToClone, pathToClone, parentOfNodeToClone, nodeToClone.link.group, TransferType.clone);
+		const [payload_initial, uiState_initial] = GetTransferNodesInitialData(map, nodeToClone, pathToClone, parentOfNodeToClone, nodeToClone.link.group, TransferType.clone);
 		if (payload_initial == null || uiState_initial == null) return;
 
 		// if cloning, and its an arg+claim combo

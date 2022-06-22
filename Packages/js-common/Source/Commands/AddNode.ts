@@ -7,12 +7,12 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 @CommandMeta({
 	exposeToGraphQL: false, // server-internal
 	payloadSchema: ()=>SimpleSchema({
-		$mapID: {$ref: "UUID"},
+		mapID: {$ref: "UUID"},
 		$node: {$ref: "MapNode_Partial"},
 		$revision: {$ref: "MapNodeRevision_Partial"},
 	}),
 })
-export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
+export class AddNode extends Command<{mapID?: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 

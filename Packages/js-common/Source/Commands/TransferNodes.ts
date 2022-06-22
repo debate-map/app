@@ -1,11 +1,21 @@
-import {GetValues} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {ChildGroup, MapNodeType} from "../DB.js";
-import {ClaimForm, Polarity} from "../DB/nodes/@MapNode.js";
+import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, MapNodeRevision, MapNodeType, NodeChildLink} from "../DB.js";
+import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
+import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../DB/nodes/@MapNode.js";
+import {AddChildNode} from "./AddChildNode.js";
 
-@MGLClass()
+@MGLClass({schemaDeps: [
+	/*"UUID",*/ // commented for now, since the schema-dependency system seems to get stuck with it, fsr (perhaps failure for multiple deps)
+	"NodeInfoForTransfer",
+]})
 export class TransferNodesPayload {
+	//@Field({$ref: "UUID"}, {opt: true})
+	@Field({type: "string"}, {opt: true})
+	mapID?: string|n;
+
 	@Field({items: {$ref: "NodeInfoForTransfer"}})
 	nodes: NodeInfoForTransfer[];
 }
@@ -28,6 +38,9 @@ export class NodeInfoForTransfer {
 
 	@Field({type: ["string", "null"]}, {opt: true})
 	newParentID?: string|n;
+
+	@Field({type: ["string", "null"]}, {opt: true})
+	newAccessPolicyID?: string|n;
 
 	@Field({$ref: "ChildGroup"}, {opt: true})
 	childGroup: ChildGroup;
@@ -56,7 +69,11 @@ export enum TransferType {
 }
 AddSchema("TransferType", {enum: GetValues(TransferType)});
 
-//@MapEdit
+class TransferData {
+	addNodeCommand?: AddChildNode;
+}
+
+@MapEdit
 @UserEdit
 /*@CommandRunMeta({
 	record: true,
@@ -73,15 +90,106 @@ AddSchema("TransferType", {enum: GetValues(TransferType)});
 	}),
 })
 export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/}> {
+	transferData = [] as TransferData[];
 	Validate() {
+		const {nodes} = this.payload;
 		console.log("Validate called. @payload:", this.payload);
 
-		// todo
+		for (const [i, transfer] of nodes.entries()) {
+			const prevTransfer = nodes[i - 1];
+			const prevTransferData = this.transferData[i - 1];
+
+			const accessPolicyID = transfer.newAccessPolicyID != null ? GetAccessPolicy.NN(transfer.newAccessPolicyID)!.id : GetSystemAccessPolicyID("Public, ungoverned (standard)");
+
+			if (transfer.transferType == TransferType.ignore) {
+				// no processing needed
+			} else if (transfer.transferType == TransferType.move) {
+				// todo
+			} else if (transfer.transferType == TransferType.link) {
+				// todo
+			} else if (transfer.transferType == TransferType.clone) {
+				AssertV(transfer.oldParentID != null, "Only nodes with a parent can be cloned at the moment.");
+				const node = GetNodeL3.NN(`${transfer.oldParentID}/${transfer.nodeID}`);
+
+				if (transfer.newParentID != null) {
+					AssertV(GetNodeL2(transfer.newParentID) != null, "New-parent-id specifies a node that doesn't exist!");
+				}
+				const newParentID = transfer.newParentID ?? prevTransferData.addNodeCommand?.returnData.nodeID;
+				AssertV(newParentID != null, "Parent-node-id is still null!");
+				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParentID).genNext().toString();
+
+				const newNode = Clone(AsNodeL1(node)) as MapNode;
+				if (transfer.clone_newType != null && transfer.clone_newType != node.type) {
+					newNode.type = transfer.clone_newType;
+				}
+				newNode.accessPolicy = accessPolicyID;
+				const newRev = Clone(node.current) as MapNodeRevision;
+
+				const newLink = Clone(node.link) as NodeChildLink;
+				newLink.group = transfer.childGroup;
+				newLink.orderKey = orderKeyForNewNode;
+				if (newNode.type == MapNodeType.argument && transfer.argumentPolarity != null) {
+					newLink.polarity = transfer.argumentPolarity;
+				}
+
+				this.IntegrateSubcommand<AddChildNode>(
+					()=>(this.transferData[i]?.addNodeCommand as any),
+					cmd=>{
+						const transferData = this.transferData[i] ?? (this.transferData[i] = new TransferData());
+						transferData.addNodeCommand = cmd;
+					},
+					()=>{
+						const addNodeCommand = new AddChildNode({
+							parentID: newParentID,
+							node: newNode,
+							revision: newRev,
+							link: newLink,
+						});
+						return addNodeCommand;
+					},
+					cmd=>cmd.sub_addLink,
+				);
+			} else if (transfer.transferType == TransferType.shim) {
+				const argumentWrapper = new MapNode({
+					accessPolicy: accessPolicyID,
+					type: MapNodeType.argument,
+				});
+				const argumentWrapperRevision = new MapNodeRevision();
+
+				AssertV(transfer.newParentID != null, `For transfer of type "shim", the new-parent-id must be specified.`);
+				const newParent = GetNodeL2.NN(transfer.newParentID);
+				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParent.id).genNext().toString();
+
+				this.IntegrateSubcommand(
+					()=>(this.transferData[i]?.addNodeCommand as any),
+					cmd=>{
+						const transferData = this.transferData[i] ?? (this.transferData[i] = new TransferData());
+						transferData.addNodeCommand = cmd;
+					},
+					()=>{
+						const cmd = new AddChildNode({
+							parentID: transfer.newParentID!,
+							node: argumentWrapper,
+							revision: argumentWrapperRevision,
+							// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
+							link: new NodeChildLink({
+								group: transfer.childGroup,
+								orderKey: orderKeyForNewNode,
+								polarity: transfer.argumentPolarity ?? Polarity.supporting,
+							}),
+						});
+						return cmd;
+					},
+				);
+			}
+		}
 
 		this.returnData = {};
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		// todo
+		for (const transferData of this.transferData) {
+			transferData.addNodeCommand?.DeclareDBUpdates(db);
+		}
 	}
 }

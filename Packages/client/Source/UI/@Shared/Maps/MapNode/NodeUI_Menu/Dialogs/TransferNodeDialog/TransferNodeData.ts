@@ -1,4 +1,4 @@
-import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType} from "dm_common";
+import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID} from "dm_common";
 import {Command} from "web-vcore/.yalc/mobx-graphlink";
 import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 
@@ -9,7 +9,7 @@ export class TransferNodesUIState {
 	destinationChildGroup: ChildGroup;
 }
 
-export function GetTransferNodesInitialData(transferNode: MapNodeL3, transferNodePath: string, newParent: MapNodeL3, outerChildGroup: ChildGroup, transferType: TransferType) {
+export function GetTransferNodesInitialData(map: Map|n, transferNode: MapNodeL3, transferNodePath: string, newParent: MapNodeL3, outerChildGroup: ChildGroup, transferType: TransferType) {
 	const oldParentID = GetParentNodeID(transferNodePath);
 	if (oldParentID == null || transferNode.link == null) return [null, null] as const; // parentless not supported yet
 
@@ -23,6 +23,7 @@ export function GetTransferNodesInitialData(transferNode: MapNodeL3, transferNod
 				clone_keepChildren: true,
 
 				newParentID: newParent.id,
+				newAccessPolicyID: map?.nodeAccessPolicy,
 				childGroup: outerChildGroup,
 				claimForm: transferNode.link.form,
 				argumentPolarity: transferNode.link.polarity,
@@ -44,6 +45,7 @@ export function GetTransferNodesInitialData(transferNode: MapNodeL3, transferNod
 				clone_keepChildren: true,
 
 				newParentID: null,
+				newAccessPolicyID: map?.nodeAccessPolicy,
 				childGroup: ChildGroup.generic,
 				claimForm: premise.link!.form,
 				argumentPolarity: premise.link!.polarity,

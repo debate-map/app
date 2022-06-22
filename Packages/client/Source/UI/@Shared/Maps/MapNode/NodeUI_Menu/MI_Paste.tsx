@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeDisplayText, MapNodeType, MeID} from "dm_common";
+import {ClaimForm, GetNodeDisplayText, MapNodeType, MeID, TransferType} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -20,7 +20,7 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
-		const [commandData_initial, uiState_initial] = GetTransferNodesInitialData(copiedNode, copiedNodePath, node, childGroup, copiedNode_asCut ? "move" : "link");
+		const [commandData_initial, uiState_initial] = GetTransferNodesInitialData(map, copiedNode, copiedNodePath, node, childGroup, copiedNode_asCut ? TransferType.move : TransferType.link);
 		if (commandData_initial == null || uiState_initial == null) return;
 
 		return (

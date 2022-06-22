@@ -34,7 +34,7 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 })
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
-		mapID: {type: "string"},
+		mapID: {$ref: "UUID"},
 		revision: {$ref: MapNodeRevision.name},
 	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
