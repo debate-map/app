@@ -1,12 +1,15 @@
 import {Assert, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {TagComp_CloneHistory} from "../DB/nodeTags/@MapNodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, MapNodeRevision, MapNodeType, NodeChildLink} from "../DB.js";
 import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../DB/nodes/@MapNode.js";
+import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
 import {AddChildNode} from "./AddChildNode.js";
+import {AddNodeTag} from "./AddNodeTag.js";
 import {LinkNode} from "./LinkNode.js";
 
 @MGLClass({schemaDeps: [
@@ -74,6 +77,7 @@ AddSchema("TransferType", {enum: GetValues(TransferType)});
 class TransferData {
 	addNodeCommand?: AddChildNode;
 	linkChildCommands = [] as LinkNode[];
+	addTagCommands = [] as AddNodeTag[];
 }
 
 @MapEdit
@@ -128,8 +132,6 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				newNode.accessPolicy = accessPolicyID;
 				const newRev = Clone(node.current) as MapNodeRevision;
 
-				// todo: have cloned-node "marked as a clone" somehow, with the UI able to make good use of this information
-
 				const newLink = Clone(node.link) as NodeChildLink;
 				newLink.group = transfer.childGroup;
 				newLink.orderKey = orderKeyForNewNode;
@@ -167,6 +169,29 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 									link: {...link, parent: transferData.addNodeCommand!.returnData.nodeID},
 								});
 								return linkCommand;
+							},
+						);
+					}
+				}
+
+				const tags = GetNodeTags(node.id);
+				for (const [i2, tag] of tags.entries()) {
+					if (tag.cloneHistory != null) {
+						this.IntegrateSubcommand(
+							()=>transferData.addTagCommands[i2],
+							cmd=>transferData.addTagCommands[i2] = cmd,
+							()=>{
+								const newNodes = tag.nodes.concat(transferData.addNodeCommand!.returnData.nodeID);
+								const newCloneHistory = Clone(tag.cloneHistory) as TagComp_CloneHistory;
+								newCloneHistory.cloneChain = tag.cloneHistory!.cloneChain.concat(transferData.addNodeCommand!.returnData.nodeID);
+								const addTagCommand = new AddNodeTag({
+									tag: {
+										...tag,
+										nodes: newNodes,
+										cloneHistory: newCloneHistory,
+									},
+								});
+								return addTagCommand;
 							},
 						);
 					}
@@ -214,6 +239,9 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 			transferData.addNodeCommand?.DeclareDBUpdates(db);
 			for (const linkCommand of transferData.linkChildCommands) {
 				linkCommand.DeclareDBUpdates(db);
+			}
+			for (const addTagCommand of transferData.addTagCommands) {
+				addTagCommand.DeclareDBUpdates(db);
 			}
 		}
 	}

@@ -3,6 +3,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
 import {HasModPermissions} from "../DB/users/$user.js";
+import {TransferNodes} from "./TransferNodes.js";
 
 @UserEdit
 @CommandMeta({
@@ -22,8 +23,12 @@ export class AddNodeTag extends Command<{tag: MapNodeTag}, {id: string}> {
 		tag.createdAt = Date.now();
 		AssertValidate("MapNodeTag", tag, "MapNodeTag invalid");
 
-		for (const nodeID of tag.nodes) {
-			const node = GetNode(nodeID);
+		for (const [i, nodeID] of tag.nodes.entries()) {
+			const isLastNode = i == tag.nodes.length - 1;
+			const node =
+				(isLastNode ? this.Up(TransferNodes)?.Check(a=>a.transferData[0]?.addTagCommands.includes(this))?.transferData[0].addNodeCommand?.payload.node : null)
+				?? (isLastNode ? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addTagCommands.includes(this))?.transferData[1].addNodeCommand?.payload.node : null)
+				?? GetNode(nodeID);
 			AssertV(node, `Node with id ${nodeID} does not exist.`);
 		}
 
