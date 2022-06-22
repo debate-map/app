@@ -5,7 +5,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {ES, InfoButton, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
+import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
 import {observer} from "web-vcore/nm/mobx-react";
@@ -47,6 +47,8 @@ export class TagDetailsUI extends DetailsUI_Base<MapNodeTag, TagDetailsUI> {
 					<TagCompUI_MutuallyExclusiveGroup {...sharedProps}/>}
 				{compClass == TagComp_RestrictMirroringOfX &&
 					<TagCompUI_RestrictMirroringOfX {...sharedProps}/>}
+				{compClass == TagComp_CloneHistory &&
+					<TagCompUI_CloneHistory {...sharedProps}/>}
 			</Column>
 		);
 	}
@@ -127,6 +129,27 @@ class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsU
 				</Row>
 				{comp.blacklistedMirrorParents.map((nodeID, index)=>{
 					return <NodeInArrayRow key={index} {...this.props} enabled={enabled && !comp.blacklistAllMirrorParents} comp={comp} nodeArrayKey="blacklistedMirrorParents" nodeEntry={nodeID} nodeEntryIndex={index}/>;
+				})}
+			</>
+		);
+	}
+}
+
+class TagCompUI_CloneHistory extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
+	render() {
+		const {newData, enabled, splitAt, Change} = this.props;
+		const comp = newData.cloneHistory!;
+		return (
+			<>
+				<Row mt={5}>
+					<Text>Clone chain:</Text>
+					<Button ml={5} p="3px 7px" text="+" enabled={enabled} onClick={()=>{
+						comp.cloneChain.push("");
+						Change();
+					}}/>
+				</Row>
+				{comp.cloneChain.map((nodeID, index)=>{
+					return <NodeInArrayRow key={index} {...this.props} enabled={enabled} comp={comp} nodeArrayKey="cloneChain" nodeEntry={nodeID} nodeEntryIndex={index}/>;
 				})}
 			</>
 		);
@@ -216,10 +239,15 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 		title: "Add tag", cancelButton: true,
 		message: observer(()=>{
 			const tempCommand = getCommand();
+			const oldProps = boxController.options.okButtonProps;
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
 				title: tempCommand.ValidateErrorStr,
 			};
+			// temp (till react-vmessagebox is updated to allow more ergonomic ok-button-enabledness updating)
+			if (boxController.options.okButtonProps.enabled != !!oldProps?.enabled) {
+				boxController.UpdateUI();
+			}
 
 			return (
 				<Column style={{padding: "10px 0", width: 500}}>

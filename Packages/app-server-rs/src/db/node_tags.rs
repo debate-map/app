@@ -36,6 +36,7 @@ pub struct MapNodeTag {
     pub xIsExtendedByY: Option<serde_json::Value>,
     pub mutuallyExclusiveGroup: Option<serde_json::Value>,
     pub restrictMirroringOfX: Option<serde_json::Value>,
+    pub cloneHistory: Option<serde_json::Value>,
 }
 impl From<tokio_postgres::row::Row> for MapNodeTag {
     fn from(row: tokio_postgres::row::Row) -> Self {
@@ -49,6 +50,7 @@ impl From<tokio_postgres::row::Row> for MapNodeTag {
             xIsExtendedByY: row.get("xIsExtendedByY"),
             mutuallyExclusiveGroup: row.get("mutuallyExclusiveGroup"),
             restrictMirroringOfX: row.get("restrictMirroringOfX"),
+            cloneHistory: row.get("cloneHistory"),
         }
     }
 }

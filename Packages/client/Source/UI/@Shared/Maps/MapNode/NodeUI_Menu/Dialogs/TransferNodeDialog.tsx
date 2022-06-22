@@ -170,6 +170,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 		transferTypeOptions.filter(a=>a.value == "move" || a.value == "link").forEach(a=>a["style"] = {pointerEvents: "none", opacity: .5, cursor: "default"});
 
 		const splitAt = 110;
+		const yesAndNoOpts = [{name: "Yes", value: true}, {name: "No", value: false}];
 		return <>
 			{/*wrapperSection &&
 			<>
@@ -237,7 +238,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 						<Text>Clone details:</Text>
 						<Row>
 							<Text>Keep children:</Text>
-							<Select ml={5} options={[{name: "Yes", value: true}, {name: "No", value: false}]}
+							<Select ml={5} options={yesAndNoOpts}
 								value={nodeInfo.clone_keepChildren} onChange={val=>Change(nodeInfo.clone_keepChildren = val)}/>
 							<InfoButton ml={5} text={
 							index == 0
@@ -252,6 +253,12 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 									Yes: All children of the source-node are linked as children of the clone. These children are *not* themselved cloned, they are merely linked.
 									No: The clone is created without any children.
 								`.AsMultiline(0)}/>
+						</Row>
+						<Row ml={5}>
+							<Text>Keep tags:</Text>
+							<Select ml={5} options={yesAndNoOpts.filter(a=>a.value == false)}
+								value={nodeInfo.clone_keepChildren} onChange={val=>Change(nodeInfo.clone_keepChildren = val)}/>
+							<InfoButton ml={5} text={`General cloning of tags is not implemented yet. However, if a "clone history" tag is present, it'll be cloned and extended.`}/>
 						</Row>
 						<Row ml={5}>
 							<Text>Convert clone to:</Text>

@@ -51,6 +51,10 @@ export class MapNodeTag {
 	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: "TagComp_RestrictMirroringOfX"}, {opt: true})
 	restrictMirroringOfX?: TagComp_RestrictMirroringOfX;
+
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "TagComp_CloneHistory"}, {opt: true})
+	cloneHistory?: TagComp_CloneHistory;
 }
 
 // tag comps
@@ -234,6 +238,21 @@ AddSchema("TagComp_RestrictMirroringOfX", {
 	},
 });
 
+export class TagComp_CloneHistory extends TagComp {
+	static displayName = "clone history";
+	static description = "Keeps a history of the nodes that were cloned to result in the final node in the chain.";
+	static nodeKeys = ["cloneChain"];
+
+	constructor(initialData?: Partial<TagComp_CloneHistory>) { super(); CE(this).VSet(initialData); }
+
+	cloneChain = [] as string[];
+}
+AddSchema("TagComp_CloneHistory", {
+	properties: {
+		cloneChain: {items: {$ref: "UUID"}},
+	},
+});
+
 // tag comp meta
 // ==========
 
@@ -243,6 +262,7 @@ export const TagComp_classes = [
 	TagComp_XIsExtendedByY,
 	TagComp_MutuallyExclusiveGroup,
 	TagComp_RestrictMirroringOfX,
+	TagComp_CloneHistory,
 ] as const;
 export type TagComp_Class = typeof TagComp_classes[number];
 CalculateTagCompClassStatics();
