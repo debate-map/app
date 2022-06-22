@@ -4,8 +4,10 @@ import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, MapNodeRevision, MapNodeType, NodeChildLink} from "../DB.js";
 import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
+import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../DB/nodes/@MapNode.js";
 import {AddChildNode} from "./AddChildNode.js";
+import {LinkNode} from "./LinkNode.js";
 
 @MGLClass({schemaDeps: [
 	/*"UUID",*/ // commented for now, since the schema-dependency system seems to get stuck with it, fsr (perhaps failure for multiple deps)
@@ -71,6 +73,7 @@ AddSchema("TransferType", {enum: GetValues(TransferType)});
 
 class TransferData {
 	addNodeCommand?: AddChildNode;
+	linkChildCommands = [] as LinkNode[];
 }
 
 @MapEdit
@@ -125,6 +128,8 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				newNode.accessPolicy = accessPolicyID;
 				const newRev = Clone(node.current) as MapNodeRevision;
 
+				// todo: have cloned-node "marked as a clone" somehow, with the UI able to make good use of this information
+
 				const newLink = Clone(node.link) as NodeChildLink;
 				newLink.group = transfer.childGroup;
 				newLink.orderKey = orderKeyForNewNode;
@@ -149,6 +154,23 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 					},
 					cmd=>cmd.sub_addLink,
 				);
+				const transferData = this.transferData[i]; // by this point, it'll be set
+
+				if (transfer.clone_keepChildren) {
+					const oldChildLinks = GetNodeChildLinks(node.id);
+					for (const [i2, link] of oldChildLinks.entries()) {
+						this.IntegrateSubcommand(
+							()=>transferData.linkChildCommands[i2],
+							cmd=>transferData.linkChildCommands[i2] = cmd,
+							()=>{
+								const linkCommand = new LinkNode({
+									link: {...link, parent: transferData.addNodeCommand!.returnData.nodeID},
+								});
+								return linkCommand;
+							},
+						);
+					}
+				}
 			} else if (transfer.transferType == TransferType.shim) {
 				const argumentWrapper = new MapNode({
 					accessPolicy: accessPolicyID,
@@ -190,6 +212,9 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 	DeclareDBUpdates(db: DBHelper) {
 		for (const transferData of this.transferData) {
 			transferData.addNodeCommand?.DeclareDBUpdates(db);
+			for (const linkCommand of transferData.linkChildCommands) {
+				linkCommand.DeclareDBUpdates(db);
+			}
 		}
 	}
 }

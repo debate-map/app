@@ -28,7 +28,7 @@ import {TransferNodes} from "./TransferNodes.js";
 		$linkID: {type: "string"},
 	}),
 })
-export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group" | "orderKey">}, {linkID: string}> {
+export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group" | "orderKey">}, {linkID: string}> {
 	child_oldData: MapNode|n;
 	parent_oldData: MapNode;
 	Validate() {
@@ -45,6 +45,8 @@ export class LinkNode extends Command<{mapID: string|n, link: RequiredBy<Partial
 			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_linkToNewParent == this)?.sub_addArgumentWrapper?.payload.node
 			//?? (this.parentCommand instanceof ImportSubtree_Old ? "" as any : null) // hack; use empty-string to count as non-null for this chain, but count as false for if-statements (ye...)
 			?? this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this.up)?.transferData[0].addNodeCommand?.payload.node
+			?? this.Up(TransferNodes)?.Check(a=>a.transferData[0]?.linkChildCommands.includes(this))?.transferData[0].addNodeCommand?.payload.node
+			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.linkChildCommands.includes(this))?.transferData[1].addNodeCommand?.payload.node
 			?? GetNode.NN(link.parent);
 		AssertV(this.parent_oldData, "Cannot link child-node to parent that does not exist!");
 
