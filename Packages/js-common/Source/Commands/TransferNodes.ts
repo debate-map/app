@@ -1,6 +1,6 @@
 import {Assert, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {TagComp_CloneHistory} from "../DB/nodeTags/@MapNodeTag.js";
+import {MapNodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@MapNodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, MapNodeRevision, MapNodeType, NodeChildLink} from "../DB.js";
@@ -175,9 +175,11 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				}
 
 				const tags = GetNodeTags(node.id);
+				const tagsShowingCloneHistoryForThisNode = [] as MapNodeTag[];
 				for (const [i2, tag] of tags.entries()) {
 					const tagShowsCloneHistoryForThisNode = tag.cloneHistory != null && tag.cloneHistory.cloneChain.LastOrX() == node.id;
 					if (tagShowsCloneHistoryForThisNode) {
+						tagsShowingCloneHistoryForThisNode.push(tag);
 						this.IntegrateSubcommand(
 							()=>transferData.addTagCommands[i2],
 							cmd=>transferData.addTagCommands[i2] = cmd,
@@ -196,6 +198,26 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 							},
 						);
 					}
+				}
+
+				if (tagsShowingCloneHistoryForThisNode.length == 0) {
+					const i2 = tags.length;
+					this.IntegrateSubcommand(
+						()=>transferData.addTagCommands[i2],
+						cmd=>transferData.addTagCommands[i2] = cmd,
+						()=>{
+							const newNodes = [node.id, transferData.addNodeCommand!.returnData.nodeID];
+							const newCloneHistory = new TagComp_CloneHistory();
+							newCloneHistory.cloneChain = [node.id, transferData.addNodeCommand!.returnData.nodeID];
+							const addTagCommand = new AddNodeTag({
+								tag: {
+									nodes: newNodes,
+									cloneHistory: newCloneHistory,
+								} as MapNodeTag,
+							});
+							return addTagCommand;
+						},
+					);
 				}
 			} else if (transfer.transferType == TransferType.shim) {
 				const argumentWrapper = new MapNode({
