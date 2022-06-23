@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetParentNodeL3, GetParentPath, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, ShouldChildGroupBoxBeVisible} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, ShouldChildGroupBoxBeVisible, TagComp_CloneHistory} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -12,8 +12,9 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
 import {Assert, AssertWarn, E, EA, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
-import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
@@ -303,6 +304,7 @@ export class NodeUI extends BaseComponentPlus(
 						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 						</div>*/}
+						<CloneHistoryButton node={node}/>
 						<NodeUI_Inner ref={UseCallback(c=>{
 							this.innerUI = GetInnerComp(c);
 							if (ref_innerUI) ref_innerUI(c);

@@ -46,10 +46,12 @@ export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportRe
 						title: `Import subtree`,
 						okButton: false, buttonBarStyle: {display: "none"},
 
-						// make-so dialog does not block input to rest of UI
+						// don't use overlay/background-blocker
 						overlayStyle: {background: "none", pointerEvents: "none"},
+						containerStyle: {pointerEvents: "auto"},
+
+						// also make fully opaque; this dialog has complex content, so we need max readability
 						//containerStyle: {pointerEvents: "auto", backgroundColor: "rgba(255,255,255,1) !important"}, // commented; this way doesn't work
-						containerStyle: {pointerEvents: "auto"}, // also make fully opaque; this dialog has complex content, so we need max readability
 
 						message: ()=>{
 							// style block is a hack-fix for to make this dialog fully opaque (its content is complex, so we need max readability)

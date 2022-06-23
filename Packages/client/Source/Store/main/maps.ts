@@ -41,6 +41,7 @@ export class MapsState {
 	@O initialChildLimit = 5;
 	@O childOrdering?: ChildOrdering;
 	@O showReasonScoreValues = false;
+	@O showCloneHistoryButtons = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
 	//@O nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases

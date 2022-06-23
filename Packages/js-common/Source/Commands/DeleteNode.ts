@@ -106,6 +106,8 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 			db.set(dbp`nodeRevisions/${revision.id}`, null);
 		}
 
+		// todo: delete any tags for which this node is the only associated node
+
 		// delete node's own data last (path of least resistance regarding fk-refs)
 		db.set(dbp`nodes/${nodeID}`, null);
 	}

@@ -46,6 +46,13 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						<CheckBox value={uiState.showReasonScoreValues} onChange={val=>RunInAction_Set(this, ()=>uiState.showReasonScoreValues = val)}/>
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
+						<TextPlus info={`
+							When enabled, a small button is shown to the left of nodes that were the source or result of node-cloning operations.
+							Clicking that button shows the full cloning history, and lets you jump to each of the nodes in those chains.
+						`.AsMultiline(0)}>Show clone-history buttons:</TextPlus>
+						<CheckBox value={uiState.showCloneHistoryButtons} onChange={val=>RunInAction_Set(this, ()=>uiState.showCloneHistoryButtons = val)}/>
+					</RowLR>
+					<RowLR mt={3} splitAt={splitAt}>
 						<Pre>Toolbar rating previews:</Pre>
 						<Select options={ratingPreviewOptions}
 							value={uiState.toolbarRatingPreviews} onChange={val=>RunInAction_Set(this, ()=>uiState.toolbarRatingPreviews = val)}/>

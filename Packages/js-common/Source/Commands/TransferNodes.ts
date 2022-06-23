@@ -176,7 +176,8 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 
 				const tags = GetNodeTags(node.id);
 				for (const [i2, tag] of tags.entries()) {
-					if (tag.cloneHistory != null) {
+					const tagShowsCloneHistoryForThisNode = tag.cloneHistory != null && tag.cloneHistory.cloneChain.LastOrX() == node.id;
+					if (tagShowsCloneHistoryForThisNode) {
 						this.IntegrateSubcommand(
 							()=>transferData.addTagCommands[i2],
 							cmd=>transferData.addTagCommands[i2] = cmd,
