@@ -158,15 +158,17 @@ export const ACTEnsureMapStateInit = StoreAction((mapID: string)=>{
 });
 
 // the broadcast-channel allows us to easily replicate the node-copy operation in other tabs, enabling easy copy-paste between tabs
-var ACTCopyNode_broadcastChannel = new BroadcastChannel("ACTCopyNode_broadcastChannel");
-ACTCopyNode_broadcastChannel.onmessage = (ev: MessageEvent)=>{
-	const {path, asCut} = ev.data as {path: string, asCut: boolean};
-	ACTCopyNode(path, asCut, false);
-};
+var ACTCopyNode_broadcastChannel = g.BroadcastChannel != null ? new BroadcastChannel("ACTCopyNode_broadcastChannel") : null;
+if (ACTCopyNode_broadcastChannel) {
+	ACTCopyNode_broadcastChannel.onmessage = (ev: MessageEvent)=>{
+		const {path, asCut} = ev.data as {path: string, asCut: boolean};
+		ACTCopyNode(path, asCut, false);
+	};
+}
 export const ACTCopyNode = StoreAction((path: string|n, asCut: boolean, broadcastToOtherTabs = true)=>{
 	store.main.maps.copiedNodePath = path;
 	store.main.maps.copiedNodePath_asCut = asCut;
-	if (broadcastToOtherTabs) {
+	if (broadcastToOtherTabs && ACTCopyNode_broadcastChannel) {
 		ACTCopyNode_broadcastChannel.postMessage({path, asCut});
 	}
 });
