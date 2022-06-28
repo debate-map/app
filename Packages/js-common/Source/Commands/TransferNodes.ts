@@ -264,7 +264,10 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				linkCommand.DeclareDBUpdates(db);
 			}
 			for (const addTagCommand of transferData.addTagCommands) {
-				addTagCommand.DeclareDBUpdates(db);
+				// check if slot has an add-tag command (there can be gaps, if the node being cloned has tags, but some of them do not need transfering [the slots/indices of the orig-tags are used for `addTagsCommands` array])
+				if (addTagCommand != null) {
+					addTagCommand.DeclareDBUpdates(db);
+				}
 			}
 		}
 	}
