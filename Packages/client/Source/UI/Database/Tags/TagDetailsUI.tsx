@@ -3,7 +3,7 @@ import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
-import {ES, InfoButton, observer_simple} from "web-vcore";
+import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
@@ -156,6 +156,7 @@ class TagCompUI_CloneHistory extends BaseComponentPlus({} as TagDetailsUI_Shared
 	}
 }
 
+@Observer
 class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps & {comp: TagComp, nodeKey: string, label: string, mt?: number | string}, {}) {
 	render() {
 		const {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label, mt} = this.props;
@@ -194,6 +195,7 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 	}
 }
 
+@Observer
 class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & {comp: TagComp, nodeArrayKey: string, nodeEntry: string, nodeEntryIndex: number}, {}) {
 	render() {
 		const {newData, enabled, compClass, splitAt, Change, comp, nodeArrayKey, nodeEntry, nodeEntryIndex} = this.props;
