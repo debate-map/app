@@ -37,7 +37,7 @@ pub async fn handle_generic_gql_collection_request<'a,
     GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
     let (client, storage, table_name) = {
-        let ctx2 = ctx;
+        let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
         let pool = ctx2.data::<Pool>().unwrap();
         let client = pool.get().await.unwrap();
         let storage = ctx2.data::<LQStorageWrapper>().unwrap().clone();
@@ -46,7 +46,7 @@ pub async fn handle_generic_gql_collection_request<'a,
     };
     
     let result = tokio::spawn(async move {
-        let table_name = &table_name;
+        let table_name = &table_name; // is this actually needed?
 
         new_mtx!(mtx, "1", None, Some(format!("@table_name:{table_name} @filter:{filter_json:?}")));
         let stream_for_error = |err: Error| {
@@ -67,7 +67,7 @@ pub async fn handle_generic_gql_collection_request<'a,
             /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
             let stream_id = stream.id.clone();*/
             let stream_id = Uuid::new_v4();
-            let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, client, Some(&mtx)).await;
+            let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, &client, Some(&mtx)).await;
 
             (entries_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
         };
@@ -129,7 +129,7 @@ pub async fn handle_generic_gql_doc_request<'a,
             let stream_id = stream.id.clone();*/
             let stream_id = Uuid::new_v4();
             //let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx)).await;
-            let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, client, Some(&mtx)).await;
+            let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, &client, Some(&mtx)).await;
             let entry_as_type = entries_as_type.pop();
 
             (entry_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())

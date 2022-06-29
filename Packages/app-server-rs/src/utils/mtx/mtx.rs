@@ -69,7 +69,7 @@ use rust_shared::time_since_epoch_ms;
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Map};
 use tokio::{time};
-use tracing::{trace, error};
+use tracing::{trace, error, info};
 use uuid::Uuid;
 
 use crate::utils::{type_aliases::JSONValue, general::general::{body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}};
@@ -257,6 +257,13 @@ impl Mtx {
             result.expect("Got error while sending mtx-tree to monitor-backend...");
         });
     }*/
+
+    /// Helper function to make an `info!(...)` log-call, with the basic info like function-name. (avoids need to add custom message for logging of key function-calls)
+    pub fn log_call(&self, temp_extra_info: Option<String>) {
+        let current_section_extra_info_str = self.current_section.extra_info.as_ref().map_or("".to_owned(), |a| format!(" {}", a));
+        let temp_extra_info_str = temp_extra_info.map_or("".to_owned(), |a| format!(" {}", a));
+        info!("Called:{}{}{}", self.func_name, current_section_extra_info_str, temp_extra_info_str);
+    }
 }
 impl Drop for Mtx {
     fn drop(&mut self) {

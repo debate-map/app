@@ -112,6 +112,7 @@ mod db {
         pub mod _command;
         // temp-removed
         //pub mod add_node_revision;
+        pub mod refresh_lq_data;
         //pub mod transfer_nodes;
     }
     pub mod _general;

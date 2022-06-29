@@ -45,7 +45,7 @@ use uuid::Uuid;
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
-use crate::utils::db::pg_stream_parsing::LDChange;
+use crate::utils::db::pg_stream_parsing::{LDChange, RowData};
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
 use crate::utils::general::general::{AtomicF64};
@@ -190,13 +190,13 @@ impl LQGroup {
         (first_open_index, result)
     }
 
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, client: &PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
         new_mtx!(mtx, "0:start loop", mtx_p);
         let result: (Vec<T>, LQEntryWatcher);
         // maybe temp; try to add lq-watcher on a loop, that we keep retrying until we succeed (workaround for some timing issues hit; there's almost certainly a better solution long-term)
         loop {
             mtx.section("1:get or create lqi");
-            let (instance, lqi_active) = match self.get_or_create_lq_instance(table_name, filter, &ctx, Some(&mtx)).await {
+            let (instance, lqi_active) = match self.get_or_create_lq_instance(table_name, filter, &client, Some(&mtx)).await {
                 Ok(a) => a,
                 // if we hit an error, retry in a bit
                 Err(_err) => {
@@ -228,7 +228,8 @@ impl LQGroup {
 
         result
     }
-    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
+
+    async fn get_or_create_lq_instance(&self, table_name: &str, filter: &QueryFilter, client: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
         new_mtx!(mtx, "1:check if a new lqi is needed", parent_mtx);
         let lq_key = get_lq_instance_key(table_name, filter);
 
@@ -241,13 +242,20 @@ impl LQGroup {
             None => {
                 mtx.section("2B:create a new lqi");
                 drop(query_instances); // must drop our read-lock, so that write-lock can be obtained, in func below
-                Ok(self.create_new_lq_instance(table_name, filter, &lq_key, ctx, Some(&mtx)).await?)
+                Ok(self.create_new_lq_instance(table_name, filter, &lq_key, client, Some(&mtx)).await?)
             }
         }
     }
-    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
+    async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, client: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
+        let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
+        //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
+        let new_lqi_arc = Arc::new(new_lqi);
+        let lqis_buffered_already = self.schedule_lqi_init_within_batch(lq_key, new_lqi_arc.clone(), client, parent_mtx).await?;
+        Ok((new_lqi_arc, lqis_buffered_already))
+    }
+    async fn schedule_lqi_init_within_batch(&self, lq_key: &str, new_lqi_arc: Arc<LQInstance>, client: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<usize, Error> {
         new_mtx!(mtx, "1:add lqi to batch", parent_mtx);
-        let (new_lqi_arc, batch_i, batch_generation, lqis_buffered_already) = {
+        let (batch_i, batch_generation, lqis_buffered_already) = {
             new_mtx!(mtx2, "1:get batches_meta read-lock", Some(&mtx));
             let meta_clone = self.batches_meta.read().await.clone();
             mtx2.section("2:get batch write-lock, and insert");
@@ -257,20 +265,18 @@ impl LQGroup {
             let instances_in_batch = &mut batch.query_instances;
             let lqis_buffered_already = instances_in_batch.len();
 
-            let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
-            //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
-            let new_lqi_arc = Arc::new(new_lqi);
             instances_in_batch.insert(lq_key.to_owned(), new_lqi_arc.clone());
 
-            (new_lqi_arc, batch_i, batch_generation, lqis_buffered_already)
+            (batch_i, batch_generation, lqis_buffered_already)
         };
 
         let this_call_should_commit_batch = lqis_buffered_already == 0;
         mtx.section_2("2:wait for batch to execute", Some(format!("@lqis_buffered_already:{lqis_buffered_already} @will_trigger_execute:{this_call_should_commit_batch}")));
-        self.execute_batch_x_once_ready(batch_i, batch_generation, ctx, Some(&mtx)).await?;
-        Ok((new_lqi_arc, lqis_buffered_already))
+        self.execute_batch_x_once_ready(batch_i, batch_generation, client, Some(&mtx)).await?;
+        Ok(lqis_buffered_already)
     }
-    async fn execute_batch_x_once_ready(&self, batch_i: usize, batch_generation: usize, ctx: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(), Error> {
+
+    async fn execute_batch_x_once_ready(&self, batch_i: usize, batch_generation: usize, client: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(), Error> {
         new_mtx!(mtx, "1:create receiver", parent_mtx, Some(format!("@batch_i:{batch_i} @batch_generation:{batch_generation}")));
         // create receiver now, so we start receiving all messages from this point
         let mut receiver = self.channel_for_batch_messages__sender_base.new_receiver();
@@ -301,7 +307,7 @@ impl LQGroup {
                 meta.last_batch_execution_started_time = time_since_epoch_ms();
                 drop(meta); // drop lock on meta prior to executing batch
 
-                batch.execute(ctx, Some(&mtx2)).await.expect("Executing the lq-batch failed!");
+                batch.execute(client, Some(&mtx2)).await.expect("Executing the lq-batch failed!");
                 /*if let Err(err) = batch.execute(ctx, Some(&mtx)).await {
                     // if a query fails, log the error, but continue execution (better than panicking the whole server)
                     error!("{}", err);
@@ -322,7 +328,22 @@ impl LQGroup {
                     //let instances_in_batch = batch.query_instances.read().await;
                     let mut query_instances = self.query_instances.write("execute_batch_x_once_ready").await;
                     for (key, value) in instances_in_batch.into_iter() {
-                        query_instances.insert(key.to_owned(), value.clone());
+                        let old_lqi = query_instances.insert(key.to_owned(), value.clone());
+                        if let Some(old_lqi) = old_lqi {
+                            // if an old-lqi was replaced, but in fact that "old lqi" was the same lqi...
+                            if Arc::ptr_eq(&value.clone(), &old_lqi) {
+                                // ...then this "recommit" is just due to a `refresh_lq_data_for_x` call (see function below) and is fine; do nothing
+                            }
+                            // else, the new-lqi is in fact a new instance/allocation (which means something went wrong; log an error)
+                            else {
+                                error!("After batch completed, lq-instance was being committed, but an earlier entry was found; this shouldn't happen. This is an error, since it means the prior lqi's watchers stop noticing changes!");
+                                /*warn!("After batch completed, lq-instance was being committed, but an earlier entry was found; this shouldn't happen. Nonetheless, attempting to merge watchers...");
+                                let new_lqi = query_instances.get(&key).ok_or(anyhow!("New-lqi not found!"))?;
+                                let watchers = new_lqi.entry_watchers.write().await;
+                                // an issue here is what stream-id to use (current code would leave dangling/unremovable watcher)
+                                watchers.insert("TODO", LQEntryWatcher::new_proxy_to(old_lqi.entry_watchers));*/
+                            }
+                        }
                     }
                     mtx2.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch_len));
 
@@ -373,7 +394,6 @@ impl LQGroup {
         debug!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
 
         let lq_key = get_lq_instance_key(table_name, filter);
-        // break point
         let mut lq_instances = self.query_instances.write("drop_lq_watcher").await;
         mtx.section("2:get lq_instance for key, then get lq_instance.entry_watcher write-lock");
         let new_watcher_count = {
@@ -418,5 +438,48 @@ impl LQGroup {
             }*/
             lq_instance.on_table_changed(&change, Some(&mtx)).await;
         }
+    }
+
+    /// Reacquires the data for a given doc/row from the database, and force-updates the live-query entry for it.
+    /// (temporary fix for bug where a `nodes/XXX` db-entry occasionally gets "stuck" -- ie. its live-query entry doesn't update, despite its db-data changing)
+    pub async fn refresh_lq_data_for_x(&self, entry_id: &str, client: &PGClientObject) -> Result<(), Error> {
+        /*new_mtx!(mtx, "1:get live_queries", None, Some(format!("@table_name:{} @entry_id:{}", self.table_name, entry_id)));
+        mtx.log_call(None);*/
+
+        // get read-lock for self.query_instances, clone the collection, then drop the lock immediately (to avoid deadlock with function-trees we're about to call)
+        let live_queries: IndexMap<String, Arc<LQInstance>> = {
+            let live_queries = self.query_instances.read("refresh_lq_data_for_x").await;
+            live_queries.clone() // in cloning the IndexMap, all the keys and value are cloned as well
+        };
+
+        for (lq_key, lqi) in live_queries.iter() {
+            let entry_for_id = lqi.get_last_entry_with_id(entry_id).await;
+            // if this lq-instance has no entries with the entry-id we want to refresh, then ignore it
+            if entry_for_id.is_none() { continue; }
+            
+            self.schedule_lqi_init_within_batch(lq_key, lqi.clone(), client, None).await?;
+            let new_data = match lqi.get_last_entry_with_id(entry_id).await {
+                None => {
+                    warn!("While force-refreshing lq-data, the new batch completed, but no entry was found with the given id. This could mean the entry was just deleted, but more likely it's a bug.");
+                    continue;
+                },
+                Some(a) => a,
+            };
+            info!("While force-refreshing lq-data, got new-data. @table:{} @new_data:{:?}", self.table_name, new_data);
+
+            let new_data_as_change = LDChange {
+                table: self.table_name.clone(),
+                kind: "update".to_owned(),
+                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
+                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
+                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
+                oldkeys: None,
+                schema: "".to_owned(),
+            };
+
+            lqi.on_table_changed(&new_data_as_change, None).await;
+        }
+        Ok(())
     }
 }

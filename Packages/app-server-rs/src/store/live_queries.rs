@@ -7,6 +7,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
+use anyhow::Error;
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
 use axum::http::Method;
@@ -28,7 +29,6 @@ use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
 use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
 use axum::http::{self, Request, Response, StatusCode};
-use axum::Error;
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
@@ -105,10 +105,24 @@ impl LQStorage {
     }
 
     /// Called from handlers.rs
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, ctx: PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, table_name: &str, filter: &QueryFilter, stream_id: Uuid, client: &PGClientObject, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
         new_mtx!(mtx, "1:get or create query-group", mtx_p);
         let group = self.get_or_create_query_group(table_name, filter, Some(&mtx)).await;
         mtx.section("2:start lq-watcher");
-        group.start_lq_watcher(table_name, filter, stream_id, ctx, Some(&mtx)).await
+        group.start_lq_watcher(table_name, filter, stream_id, client, Some(&mtx)).await
+    }
+
+    /// Reacquires the data for a given doc/row from the database, and force-updates the live-query entries for it.
+    /// (temporary fix for bug where a `nodes/XXX` db-entry occasionally gets "stuck" -- ie. its live-query entry doesn't update, despite its db-data changing)
+    pub async fn refresh_lq_data(&self, table_name: String, entry_id: String, client: &PGClientObject) -> Result<(), Error> {
+        new_mtx!(mtx, "1:refresh_lq_data", None, Some(format!("@table_name:{table_name} @entry_id:{entry_id}")));
+        mtx.log_call(None);
+        let query_groups = self.query_groups.read().await;
+        for group in query_groups.values() {
+            if group.table_name == table_name {
+                group.refresh_lq_data_for_x(entry_id.as_str(), client).await?;
+            }
+        }
+        Ok(())
     }
 }

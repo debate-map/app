@@ -6,7 +6,9 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import _ from "lodash";
-import {MapNodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map} from "dm_common";
+import {MapNodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions} from "dm_common";
+import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
+import {gql} from "web-vcore/nm/@apollo/client";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 @Observer
@@ -71,6 +73,25 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							}*/
 						}}/>
 						{/* error && <Pre>{error.message}</Pre> */}
+						{HasModPermissions(MeID()) &&
+						<Button ml="auto" text="Force refresh" onClick={async()=>{
+							const result = await apolloClient.mutate({
+								mutation: gql`
+									mutation($payload: JSON!) {
+										refreshLQData(payload: $payload) {
+											message
+										}
+									}
+								`,
+								variables: {
+									payload: {
+										collection: "nodes",
+										entryID: node.id,
+									},
+								},
+							});
+							console.log("Force-refresh-node result:", result);
+						}}/>}
 					</Row>}
 			</Column>
 		);

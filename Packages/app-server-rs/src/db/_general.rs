@@ -14,6 +14,8 @@ use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::general::body_to_str;
 use crate::utils::type_aliases::{JSONValue};
 
+use super::commands::refresh_lq_data::refresh_lq_data;
+
 //use super::commands::transfer_nodes::transfer_nodes;
 
 wrap_slow_macros!{
@@ -60,6 +62,10 @@ impl MutationShard_General {
         let result = transfer_nodes(ctx, payload).await?;
         Ok(result)
     }*/
+    async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result> {
+        let result = refresh_lq_data(ctx, payload).await?;
+        Ok(result)
+    }
 }
 #[derive(SimpleObject)]
 pub struct GenericMutation_Result {

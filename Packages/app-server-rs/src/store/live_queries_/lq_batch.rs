@@ -85,7 +85,7 @@ impl LQBatch {
         ).collect_vec()
     }
 
-    pub async fn execute(&mut self, ctx: &PGClientObject, parent_mtx: Option<&Mtx>)
+    pub async fn execute(&mut self, client: &PGClientObject, parent_mtx: Option<&Mtx>)
         //-> Result<Vec<RowData>, Error>
         -> Result<(), Error>
     {
@@ -93,7 +93,7 @@ impl LQBatch {
         //let client = ctx.data::<Client>().unwrap();
         /*let pool = ctx.data::<Pool>().unwrap();
         let client = pool.get().await.unwrap();*/
-        let client = ctx;
+        //let client = ctx;
         //mtx.current_section_extra_info = Some(format!("@table_name:{} @filters_sql:{}", instance.table_name, filters_sql));
 
         let query_instance_vals: Vec<&Arc<LQInstance>> = self.query_instances.values().collect();

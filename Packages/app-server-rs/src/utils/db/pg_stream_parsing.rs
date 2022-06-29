@@ -130,6 +130,7 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
 #[derive(Deserialize)]
 pub struct LDChange {
     pub kind: String,
+    /// Present in data from lds, but not used for anything atm (within app-server-rs).
     pub schema: String,
     pub table: String,
     pub columnnames: Option<Vec<String>>,
@@ -150,6 +151,7 @@ impl LDChange {
         //*new_entry.as_object().unwrap()
         Some(new_entry)
     }
+    /// Tries to get row-id from `oldkeys` data; else, falls back to using the new-data (ie. from `columnvalues`).
     pub fn get_row_id(&self) -> String {
         let id_from_oldkeys = self.oldkeys.clone()
             .and_then(|a| a.data_as_map().get("id").cloned())

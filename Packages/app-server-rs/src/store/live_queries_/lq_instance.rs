@@ -127,14 +127,17 @@ impl LQInstance {
             },
             "update" => {
                 let new_data = change.new_data_as_map().unwrap();
+                // find entry (ie. row/doc) with the given id, in new_entries (ie. the new set of values that will be pushed to clients for this query)
                 let entry_index = new_entries.iter_mut().position(|a| a["id"].as_str() == new_data["id"].as_str());
                 match entry_index {
                     Some(entry_index) => {
+                        // update the target entry's data to reflect the current change
                         let entry = new_entries.get_mut(entry_index).unwrap();
                         for key in new_data.keys() {
                             entry.insert(key.to_owned(), new_data[key].clone());
                             our_data_changed = true;
                         }
+                        // check if the entry still matches the query's filter (if not, remove the entry from the query's results)
                         let filter_check_result = entry_matches_filter(entry, &self.filter)
                             .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
                         if !filter_check_result {
@@ -182,6 +185,14 @@ impl LQInstance {
         last_entries.append(&mut new_entries);
     }
 
+    pub async fn get_last_entry_with_id(&self, entry_id: &str) -> Option<RowData> {
+        let last_entries = self.last_entries.read().await;
+        last_entries.iter().find(|entry2| {
+            let entry2_id = entry2.get("id").and_then(|a| a.as_str()).map_or("", |a| a);
+            entry2_id == entry_id
+        }).cloned()
+    }
+    
     /*pub async fn await_next_entries(&mut self, stream_id: Uuid) -> Vec<JSONValue> {
         let watcher = self.get_or_create_watcher(stream_id);
         let new_result = watcher.new_entries_channel_receiver.recv_async().await.unwrap();
