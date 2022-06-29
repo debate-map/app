@@ -1,5 +1,6 @@
 export * from "./Utils/DB/PathFinder.js";
 export * from "./Utils/DB/RatingProcessor.js";
+export * from "./Utils/General/Domains.js";
 export * from "./Utils/General/General.js";
 export * from "./Utils/General/LexoRank.js";
 

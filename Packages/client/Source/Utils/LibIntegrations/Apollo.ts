@@ -1,3 +1,4 @@
+import {GetServerURL} from "dm_common";
 import {store} from "Store";
 import {SubscriptionClient} from "subscriptions-transport-ws";
 import {RunInAction} from "web-vcore";
@@ -7,12 +8,11 @@ import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {graph} from "./MobXGraphlink.js";
 
-// todo: clean these functions up, and make them consistent with the app-server versions
-export function GetWebServerURL(subpath: string) {
+/*export function GetWebServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
 	/*if (location.host == "localhost:5100") return subpath;
 	if (location.host == "localhost:31005") return subpath; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
-	return `https://debatemap.app/${subpath.slice(1)}`;*/
+	return `https://debatemap.app/${subpath.slice(1)}`;*#/
 	return subpath;
 }
 export function GetAppServerURL(subpath: string): string {
@@ -27,11 +27,32 @@ export function GetAppServerURL(subpath: string): string {
 	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
 	//if (location.host.endsWith(":31005")) return `${location.protocol}//${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
 
-	return `https://app-server.debatemap.app/${subpath.slice(1)}`;*/
+	return `https://app-server.debatemap.app/${subpath.slice(1)}`;*#/
 
 	if (DB == "development") return `http://localhost:5110/${subpath.slice(1)}`;
-	if (DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
+	if (DB == "production") {
+		// maybe temp: for graphql/websocket to OVH host directly, use unencrypted http/ws rather than https/wss (since the server hasn't yet been set up with TLS itself)
+		/*if (window.location.host.endsWith(".ovh.us") && subpath == "/graphql") {
+			return `http://app-server.${window.location.host}/${subpath.slice(1)}`;
+		}*#/
+
+		//return `https://app-server.debates.app/${subpath.slice(1)}`;
+		//return `https://app-server.${window.location.host}/${subpath.slice(1)}`;
+		return `${window.location.protocol}//app-server.${window.location.host}/${subpath.slice(1)}`;
+	}
 	Assert(false, `Invalid database specified:${DB}`);
+}*/
+
+export function GetWebServerURL(subpath: string) {
+	return GetServerURL("web-server", subpath, window.location.origin);
+}
+export function GetAppServerURL(subpath: string): string {
+	// if on localhost, but user has set the db/server override to "prod", do so
+	if (window.location.hostname == "localhost" && DB == "production") {
+		return `https://app-server.debates.app/${subpath.slice(1)}`;
+	}
+
+	return GetServerURL("app-server", subpath, window.location.origin);
 }
 
 const GRAPHQL_URL = GetAppServerURL("/graphql");

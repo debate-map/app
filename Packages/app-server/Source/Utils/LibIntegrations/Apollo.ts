@@ -4,66 +4,11 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 // @ts-ignore // temp fix for import error
 //import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep_cjs.js";
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
-import {Assert} from "web-vcore/nm/js-vextensions";
+import {Assert, E} from "web-vcore/nm/js-vextensions";
 
-const recognizedWebServerHosts = ["localhost:5100", "localhost:5101", "debatemap.app", "debates.app"];
-//const prodDomain = "debatemap.app";
-const prodDomain = "debates.app"; // temp
-
-const DEV = process.env.ENV == "dev";
+/*const DEV = process.env.ENV == "dev";
 const inK8s = process.env.KUBERNETES_SERVICE_HOST != null;
-//const inK8s = process.env.DB_ADDR;
-
-export function GetWebServerURL(subpath: string, referrerURLStr: string|n, forceLocalhost = false) {
-	Assert(subpath.startsWith("/"));
-
-	console.log("GetWebServerURL_referrer:", referrerURLStr);
-	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
-	//const origin = referrerURL?.origin;
-
-	let webServerURL: URL;
-	// if there is a referrer-url, and its host is recognized (OR app-server is DEV), trust that host as being the web-server host
-	if (referrerURL && (recognizedWebServerHosts.includes(referrerURL.host) || DEV)) {
-		webServerURL = referrerURL;
-	}
-	// else, just guess at the correct origin
-	else {
-		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-		const guessedToBeLocal = forceLocalhost || DEV;
-		if (guessedToBeLocal) {
-			//webServerURL = new URL("http://localhost:5100");
-			webServerURL = new URL("http://localhost:5101");
-		} else {
-			webServerURL = new URL(`https://${prodDomain}`);
-		}
-	}
-
-	webServerURL.pathname = subpath;
-
-	return webServerURL.toString();
-}
-export function GetAppServerURL(subpath: string, referrerURLStr: string|n) {
-	Assert(subpath.startsWith("/"));
-
-	if (DEV) return `http://localhost:5110/${subpath.slice(1)}`;
-
-	// if this app-server is PROD, it can connect to either the production frontend, or a localhost frontend (if url has "?db=prod")
-	console.log("GetAppServerURL_referrer:", referrerURLStr);
-	const referrerURL = referrerURLStr ? new URL(referrerURLStr) : null;
-	// this handling is needed for the "?db=prod" helper
-	if (referrerURL && recognizedWebServerHosts.includes(referrerURL.host)) {
-		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-
-		// this branch is only hit if the app-server is PROD, thus if we hit a "localhost:5100" host, it must have the "?db=prod" flag
-		if (referrerURL.host == "localhost:5100" || referrerURL.host == "localhost:5101") {
-			if (subpath == "/auth/google/callback") {
-				subpath = "/auth/google/callback_returnToLocalhost";
-			}
-		}
-	}
-
-	return `https://app-server.${prodDomain}/${subpath.slice(1)}`;
-}
+//const inK8s = process.env.DB_ADDR;*/
 
 //const GRAPHQL_URL = GetDBServerURL("/graphql");
 const GRAPHQL_URL = "http://localhost:5115/graphql"; // use the internal ip, not the external one

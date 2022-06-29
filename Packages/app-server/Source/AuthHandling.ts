@@ -2,12 +2,11 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import express, {Request, RequestHandler} from "express";
 import cookieSession from "cookie-session";
-import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
+import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, GetServerURL} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert, SleepAsync, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
-import {GetAppServerURL, GetWebServerURL} from "./Utils/LibIntegrations/Apollo.js";
 
 const DEV = process.env.ENV == "dev";
 
@@ -42,15 +41,20 @@ callbackURL_proxy.toString = ()=>{
 	return GetAppServerURL("/auth/google/callback", referrerURL);
 };*/
 
+/* eslint-disable */
 Object.defineProperty(Object.prototype, "callbackURL", {
 	get() {
 		const referrerURL = currentAuthRequest?.get("Referrer");
 		console.log("Referrer url for auth request:", referrerURL);
-		return GetAppServerURL("/auth/google/callback", referrerURL);
+
+		return GetServerURL("app-server", "/auth/google/callback", referrerURL);
+		//return GetServerURL("app-server", "/auth/google/callback", referrerURL, {forceHTTPS: true}); // google's sign-in requires "https" callback, so provide such
+
 		/*if (process.env.ENV == "prod") return "https://app-server.debates.app/auth/google/callback"; // temp fix (shouldn't be needed, but apparently the rel-to-abs code passport uses is wrong)
 		return "/auth/google/callback";*/
 	},
 });
+/* eslint-enable */
 
 let currentAuthRequest: Request<{}, any, any, any, Record<string, any>>;
 passport.use(new GoogleStrategy(
@@ -250,9 +254,9 @@ export function SetUpAuthHandling(app: ExpressApp) {
 			console.log("User_RM:", req.user);
 			// if success
 			if (req.user) {
-				res.redirect(GetWebServerURL("/login-succeeded", req?.get("Referrer")));
+				res.redirect(GetServerURL("web-server", "/login-succeeded", req?.get("Referrer")));
 			} else {
-				res.redirect(GetWebServerURL("/login-failed", req?.get("Referrer")));
+				res.redirect(GetServerURL("web-server", "/login-failed", req?.get("Referrer")));
 			}
 			next();
 		});
@@ -264,9 +268,9 @@ export function SetUpAuthHandling(app: ExpressApp) {
 			console.log("User_LH:", req.user);
 			// if success
 			if (req.user) {
-				res.redirect(GetWebServerURL("/login-succeeded", req?.get("Referrer"), true));
+				res.redirect(GetServerURL("web-server", "/login-succeeded", req?.get("Referrer"), {forceLocalhost: true}));
 			} else {
-				res.redirect(GetWebServerURL("/login-failed", req?.get("Referrer"), true));
+				res.redirect(GetServerURL("web-server", "/login-failed", req?.get("Referrer"), {forceLocalhost: true}));
 			}
 			next();
 		});
@@ -275,10 +279,10 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		req.logOut();
 		if (req.session?.destroy) {
 			req.session.destroy(()=>{
-				res.redirect(GetWebServerURL("/", req?.get("Referrer")));
+				res.redirect(GetServerURL("web-server", "/", req?.get("Referrer")));
 			});
 		} else {
-			res.redirect(GetWebServerURL("/", req?.get("Referrer")));
+			res.redirect(GetServerURL("web-server", "/", req?.get("Referrer")));
 		}
 	});
 
