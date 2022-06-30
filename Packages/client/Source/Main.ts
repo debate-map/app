@@ -29,12 +29,28 @@ g.webpackData = __webpack_require__;*/
 const startURL = VURL.Parse(window.location.href);
 declare global { export const startURL: VURL; } G({startURL});
 
-const storeTemp_json = localStorage.__mobx_sync__;
 let storeTemp = {} as RootState;
-if (storeTemp_json) {
-	try { // defensive
-		storeTemp = JSON.parse(storeTemp_json);
-	} catch (ex) {}
+try {
+	const storeTemp_json = localStorage.__mobx_sync__;
+	if (storeTemp_json) {
+		try { // defensive
+			storeTemp = JSON.parse(storeTemp_json);
+		} catch (ex) {}
+	}
+} catch (ex) {
+	if (prompt(
+		"Debate Map failed to load map-data from local-storage; site cannot function until local-storage is re-enabled.\n\n"
+		+ "If Debate Map is loaded in an iframe, you can most likely solve this by disabling the \"Block third-party cookies\" option in Chrome's incognito-mode new-tab, then refreshing.\n\n"
+		+ "For more info, you can copy and visit the link below.",
+		"https://stackoverflow.com/a/69004255",
+	)) {
+		// commented; modern browsers block this auto-navigation, so best to just leave it up to the user
+		/*try {
+			if (window.top) window.top.location.href = "https://stackoverflow.com/a/69004255";
+		} catch (ex) {
+			alert("Navigation to information page failed. To view it, you can refresh the page, then manually copy and visit the link.");
+		}*/
+	}
 }
 function AsNotNull(val: any) {
 	if (val == null || val == "null") return null;
