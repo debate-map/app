@@ -59,7 +59,7 @@ const GRAPHQL_URL = GetAppServerURL("/graphql");
 
 let httpLink: HttpLink;
 let wsClient: SubscriptionClient;
-let wsClient_connectCount = 0;
+export let wsClient_connectCount = 0; // export, so can check with console command
 let wsLink: WebSocketLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;

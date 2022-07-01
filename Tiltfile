@@ -2,6 +2,9 @@
 allow_k8s_contexts('ovh')
 
 #print("Env vars:", os.environ)
+load('ext://dotenv', 'dotenv')
+dotenv()
+#print("Env vars after loading from .env file:", os.environ)
 
 ENV = os.getenv("ENV")
 DEV = ENV == "dev"
@@ -299,6 +302,93 @@ AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
 
+# cert-manager (for creating/renewing SSL certificates)
+# ==========
+
+load('ext://helm_remote', 'helm_remote')
+# only install the netdata pods if we're in remote cluster (it has nothing to do in local cluster)
+if REMOTE:
+	helm_remote('cert-manager',
+		repo_url='https://charts.jetstack.io',
+		version='1.8.2',
+		namespace="cert-manager",
+		create_namespace=True,
+		set=[
+			"installCRDs=true",
+		],
+	)
+
+	NEXT_k8s_resource_batch([
+		{"workload": "cert-manager", "labels": ["cert-manager"]},
+		{"workload": "cert-manager-cainjector", "labels": ["cert-manager"]},
+		{"workload": "cert-manager-webhook", "labels": ["cert-manager"]},
+		{"workload": "cert-manager-startupapicheck", "labels": ["cert-manager"]},
+		{
+			"new_name": "cert-manager-other-objects", "labels": ["cert-manager"],
+			"objects": [
+				"cert-manager:namespace",
+				"certificaterequests.cert-manager.io:customresourcedefinition",
+				"certificates.cert-manager.io:customresourcedefinition",
+				"challenges.acme.cert-manager.io:customresourcedefinition",
+				"clusterissuers.cert-manager.io:customresourcedefinition",
+				"issuers.cert-manager.io:customresourcedefinition",
+				"orders.acme.cert-manager.io:customresourcedefinition",
+				"cert-manager-webhook:mutatingwebhookconfiguration",
+				"cert-manager-cainjector:serviceaccount",
+				"cert-manager:serviceaccount",
+				"cert-manager-webhook:serviceaccount",
+				"cert-manager-startupapicheck:serviceaccount",
+				"cert-manager-cainjector\\:leaderelection:role",
+				"cert-manager\\:leaderelection:role",
+				"cert-manager-webhook\\:dynamic-serving:role",
+				"cert-manager-startupapicheck\\:create-cert:role",
+				"cert-manager-cainjector:clusterrole",
+				"cert-manager-controller-issuers:clusterrole",
+				"cert-manager-controller-clusterissuers:clusterrole",
+				"cert-manager-controller-certificates:clusterrole",
+				"cert-manager-controller-orders:clusterrole",
+				"cert-manager-controller-challenges:clusterrole",
+				"cert-manager-controller-ingress-shim:clusterrole",
+				"cert-manager-view:clusterrole",
+				"cert-manager-edit:clusterrole",
+				"cert-manager-controller-approve\\:cert-manager-io:clusterrole",
+				"cert-manager-controller-certificatesigningrequests:clusterrole",
+				"cert-manager-webhook\\:subjectaccessreviews:clusterrole",
+				"cert-manager-cainjector\\:leaderelection:rolebinding",
+				"cert-manager\\:leaderelection:rolebinding",
+				"cert-manager-webhook\\:dynamic-serving:rolebinding",
+				"cert-manager-startupapicheck\\:create-cert:rolebinding",
+				"cert-manager-cainjector:clusterrolebinding",
+				"cert-manager-controller-issuers:clusterrolebinding",
+				"cert-manager-controller-clusterissuers:clusterrolebinding",
+				"cert-manager-controller-certificates:clusterrolebinding",
+				"cert-manager-controller-orders:clusterrolebinding",
+				"cert-manager-controller-challenges:clusterrolebinding",
+				"cert-manager-controller-ingress-shim:clusterrolebinding",
+				"cert-manager-controller-approve\\:cert-manager-io:clusterrolebinding",
+				"cert-manager-controller-certificatesigningrequests:clusterrolebinding",
+				"cert-manager-webhook\\:subjectaccessreviews:clusterrolebinding",
+				"cert-manager-webhook:configmap",
+				"cert-manager-webhook:validatingwebhookconfiguration",
+			],
+		},
+	])
+
+	k8s_yaml(ReadFileWithReplacements('./Packages/deploy/CertManager/cert-manager.yaml', {
+		"TILT_PLACEHOLDER:eab_hmacKey": os.getenv("EAB_HMAC_KEY"),
+		"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
+	}))
+	# NEXT_k8s_resource_batch([
+	# 	{"workload": "ssl-prod", "labels": ["cert-manager"]},
+	# ])
+
+	NEXT_k8s_resource(new_name="ssl-prod", labels=["cert-manager"],
+		objects=[
+			"zero-sll-eabsecret:secret",
+			"ssl-prod:clusterissuer",
+		],
+	)
+
 # own app (docker build and such)
 # ==========
 
@@ -499,7 +589,6 @@ NEXT_k8s_resource_batch([
 # ==========
 
 # only install the netdata pods if we're in remote cluster (it can't collect anything useful in docker-desktop anyway; and removing it saves memory)
-load('ext://helm_remote', 'helm_remote')
 if REMOTE:
 	helm_remote('netdata',
 		repo_url='https://netdata.github.io/helmchart',
@@ -510,6 +599,23 @@ if REMOTE:
 	NEXT_k8s_resource_batch([
 		{"workload": "netdata-parent", "labels": ["monitoring"]},
 		{"workload": "netdata-child", "labels": ["monitoring"]},
+		{
+			"new_name": "netdata-other-objects", "labels": ["monitoring"],
+			"objects": [
+				"netdata:serviceaccount",
+				"netdata-psp:podsecuritypolicy",
+				"netdata:clusterrole",
+				"netdata-psp:clusterrole",
+				"netdata:clusterrolebinding",
+				"netdata-psp:clusterrolebinding",
+				"netdata-parent-database:persistentvolumeclaim",
+				"netdata-parent-alarms:persistentvolumeclaim",
+				"netdata-conf-parent:configmap",
+				"netdata-conf-child:configmap",
+				"netdata-child-sd-config-map:configmap",
+				"netdata:ingress",
+			],
+		},
 	])
 
 # extras
