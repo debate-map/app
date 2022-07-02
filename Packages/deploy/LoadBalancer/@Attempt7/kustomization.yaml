@@ -1,8 +1,13 @@
 resources:
+# gateway templates
 - gateway-crds
 - gateway-webhooks/admission_webhook.yaml
 - gateway-webhooks/certificate_config.yaml
-- gateway.yaml
-# traefik prep
+# gateway customizations
+- gateways.yaml
+- routes.yaml
+
+# traefik templates
 - rbac.yaml
-#- traefik-service.yaml
+# traefik customizations: 
+# [customizations are set in the traefik-values.yaml file]

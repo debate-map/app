@@ -19,23 +19,17 @@ spec:
       keySecretRef:
         name: zerossl-eab
         key: secret
-      #keyAlgorithm: HS256
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: zerossl-key-prod4
+      name: zerossl-key-prod5
     # Enable the HTTP-01 challenge provider
     solvers:
-    # for ingress api
-    # - http01:
-    #     ingress:
-    #       class: traefik
-    # for gateway api
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-            - name: my-gateway
+            - name: gateway-http
               #namespace: traefik
               kind: Gateway
-            - name: my-gateway-https
+            - name: gateway-https
               #namespace: traefik
               kind: Gateway

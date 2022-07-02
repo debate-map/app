@@ -1,0 +1,57 @@
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: GatewayClass
+metadata:
+  name: gateway-class-main
+spec:
+  controllerName: traefik.io/gateway-controller
+
+# The HTTP (ie. non-HTTPS) gateway. It's used for:
+# 1) Serving the proxy requests coming from Cloudflare/debates.app. (will probably switch it to use the HTTPS gateway in the future)
+# 2) Serving the ECMA tls-certificate provisioning process.
+# 3) For various debugging/development purposes.
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: Gateway
+metadata:
+  name: gateway-http
+  #annotations:
+  #  cert-manager.io/cluster-issuer: ssl-prod
+spec:
+  gatewayClassName: gateway-class-main
+  # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
+  listeners:
+    - name: http
+      #hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us
+      protocol: HTTP
+      port: 80
+
+# The HTTPS gateway. It's used for:
+# 1) Serving requests coming from debating.app. (which is the variant of debates.app that avoids the cloudflare-cdn, eg. to fully avoid the websocket-timeout concern)
+# 2) As backup for the ".app" domains, since they are required to be served as HTTPS. (if Cloudflare has issues, I want the origin server to be able to provide HTTPS connections)
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: Gateway
+metadata:
+  name: gateway-https
+  annotations:
+    cert-manager.io/cluster-issuer: ssl-prod
+spec:
+  gatewayClassName: gateway-class-main
+  # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
+  listeners:
+    # origin/ovh
+    - {name: https-ovh, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-ovh-as, hostname: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-ovh-asjs, hostname: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-ovh-monitor, hostname: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    # debating.app
+    - {name: https-d1, hostname: debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-d1-as, hostname: app-server.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-d1-asjs, hostname: app-server-js.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-d1-monitor, hostname: monitor.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    # debates.app
+    - {name: https-d2, hostname: debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-d2-as, hostname: app-server.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-d2-asjs, hostname: app-server-js.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
+    - {name: https-d2-monitor, hostname: monitor.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod5, kind: Secret, group: core}]}}
