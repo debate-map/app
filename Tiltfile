@@ -331,8 +331,11 @@ NEXT_k8s_resource_batch([
    		"gateway-api-admission:rolebinding",
    		"gateway-api-admission:clusterrolebinding",
    		"my-gateway:gateway",
-   		"my-route:httproute",
    		"gateway-api-admission:validatingwebhookconfiguration",
+   		"route-web-server:httproute",
+   		"route-app-server:httproute",
+   		"route-app-server-js:httproute",
+   		"route-monitor:httproute",
 		],
 	},
 ])

@@ -1,3 +1,4 @@
+# todo: get certificate provisioning working again
 ---
 apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: GatewayClass
@@ -27,7 +28,7 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: HTTPRoute
 metadata:
-  name: my-route
+  name: route-web-server
   namespace: default
 spec:
   parentRefs:
@@ -41,16 +42,57 @@ spec:
     #     - path:
     #         type: Exact
     #         value: /foo
-    #   backendRefs:
-    #     - name: whoami
-    #       port: 80
-    #       weight: 1
     - backendRefs:
       - name: dm-web-server
         port: 5100
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: HTTPRoute
+metadata:
+  name: route-app-server
+  namespace: default
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+  - "app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "app-server.debating.app"
+  - "app-server.debates.app"
+  rules:
+    - backendRefs:
       - name: dm-app-server-rs
         port: 5110
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: HTTPRoute
+metadata:
+  name: route-app-server-js
+  namespace: default
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+  - "app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "app-server-js.debating.app"
+  - "app-server-js.debates.app"
+  rules:
+    - backendRefs:
       - name: dm-app-server-js
         port: 5115
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: HTTPRoute
+metadata:
+  name: route-monitor
+  namespace: default
+spec:
+  parentRefs:
+    - name: my-gateway
+  hostnames:
+  - "monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "monitor.debating.app"
+  - "monitor.debates.app"
+  rules:
+    - backendRefs:
       - name: dm-monitor-backend
         port: 5130

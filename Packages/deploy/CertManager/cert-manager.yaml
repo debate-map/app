@@ -33,6 +33,6 @@ spec:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-            - name: example-gateway
+            - name: my-gateway
               #namespace: traefik
               kind: Gateway
