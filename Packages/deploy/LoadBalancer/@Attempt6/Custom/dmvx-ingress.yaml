@@ -13,7 +13,7 @@ metadata:
   name: dmvx-ingress
   annotations:
     kubernetes.io/ingress.class: traefik
-    cert-manager.io/cluster-issuer: ssl-prod
+    cert-manager.io/cluster-issuer: zerossl-issuer
 
     # commented; this was forcing all routes (including "web") to use tls, even though only the "websecure" route supports it (which was making non-https requests unresolvable, ie. always returning 404)
     # (note that with this commented, the websecure route now requires the tls:true flag, else it has the same issue in the opposite direction)
@@ -37,7 +37,7 @@ spec:
         - debating.app
       #secretName: zerossl-eab
       secretName: zerossl-key-prod # this presumably correct, since matches field-mapping seen here: https://github.com/cert-manager/cert-manager/issues/3325
-      #secretName: ssl-prod
+      #secretName: zerossl-issuer
       #secretName: empty-placeholder # this field isn't needed; we use it just to avoid kubernetes error/warning
   rules:
     # these allow you to open the site directly, using the ovh cluster domain-name

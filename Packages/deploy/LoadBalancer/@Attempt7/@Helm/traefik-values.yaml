@@ -1,9 +1,16 @@
 additionalArguments:
   - "--experimental.kubernetesgateway=true"
   - "--providers.kubernetesgateway=true"
+
+  # test
+  - "--providers.kubernetesingress=false"
+
   # test
   # - '--entrypoints.web.address=:80/tcp'
   # - '--entrypoints.websecure.address=:443/tcp'
+  # Enable the dashboard without requiring a password. Not recommended for production.
+  - "--api.insecure"
+  - "--api.dashboard"
 
 hostNetwork: true
 # see here for what are supposed to be the defaults (but seem messed up in my case): https://github.com/traefik/traefik-helm-chart/blob/ff25058604da2eeee7eac3fec3b1e0e89949c407/traefik/values.yaml

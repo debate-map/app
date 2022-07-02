@@ -331,11 +331,12 @@ NEXT_k8s_resource_batch([
    		"gateway-api-admission:rolebinding",
    		"gateway-api-admission:clusterrolebinding",
    		"gateway-http:gateway",
+   		#"gateway-https:gateway",
    		"gateway-api-admission:validatingwebhookconfiguration",
-   		"route-web-server:httproute",
-   		"route-app-server:httproute",
-   		"route-app-server-js:httproute",
-   		"route-monitor:httproute",
+   		# "route-web-server:httproute",
+   		# "route-app-server:httproute",
+   		# "route-app-server-js:httproute",
+   		# "route-monitor:httproute",
 		],
 	},
 ])
@@ -458,13 +459,13 @@ if REMOTE:
 		"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
 	}))
 	# NEXT_k8s_resource_batch([
-	# 	{"workload": "ssl-prod", "labels": ["cert-manager"]},
+	# 	{"workload": "zerossl-issuer", "labels": ["cert-manager"]},
 	# ])
 
-	NEXT_k8s_resource(new_name="ssl-prod", labels=["cert-manager"],
+	NEXT_k8s_resource(new_name="zerossl-issuer", labels=["cert-manager"],
 		objects=[
 			"zerossl-eab:secret",
-			"ssl-prod:clusterissuer",
+			"zerossl-issuer:clusterissuer",
 		],
 	)
 
