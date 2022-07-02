@@ -274,7 +274,6 @@ helm_remote('reflector',
 # from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
 k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
 k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
-#k8s_yaml('./Packages/deploy/Reflector/Reflections/zerossl-key-prod.yaml')
 NEXT_k8s_resource("reflector",
 	objects=[
 		"reflector:clusterrole",

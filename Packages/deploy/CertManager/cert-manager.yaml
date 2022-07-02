@@ -21,7 +21,7 @@ spec:
         key: secret
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: zerossl-key-prod5
+      name: zerossl-key-prod6
     # Enable the HTTP-01 challenge provider
     solvers:
     - http01:
