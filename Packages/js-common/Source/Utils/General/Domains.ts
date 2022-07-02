@@ -4,6 +4,7 @@ const recognizedWebServerHosts = [
 	"localhost:5100", "localhost:5101",
 	"debatemap.app",
 	"debates.app",
+	"debating.app",
 	"9m2x1z.nodes.c1.or1.k8s.ovh.us",
 ];
 //const prodDomain = "debatemap.app";

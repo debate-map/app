@@ -4,8 +4,11 @@ metadata:
   name: dmvx-ingress
   annotations:
     kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: ssl-prod
+
     # commented; this was forcing all routes (including "web") to use tls, even though only the "websecure" route supports it (which was making non-https requests unresolvable, ie. always returning 404)
     # (note that with this commented, the websecure route now requires the tls:true flag, else it has the same issue in the opposite direction)
+    # NOTE: When I realized an (actual/live) certificate had been successfully issued, was shortly after trying uncommenting the one/two lines below; success may have been due to this, or just delayed success from before that action.
     #traefik.ingress.kubernetes.io/router.tls: "true"
     #traefik.ingress.kubernetes.io/router.tls.certresolver: default
 
@@ -16,6 +19,15 @@ metadata:
     # ingress.kubernetes.io/browser-xss-filter: "true"
     #traefik.ingress.kubernetes.io/custom-response-headers: "Server:||X-Application-Context:||X-Powered-By:||exception:||Access-Control-Allow-Headers:CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
 spec:
+  tls:
+    - hosts:
+        - 9m2x1z.nodes.c1.or1.k8s.ovh.us
+        - debates.app
+        - debating.app
+      #secretName: zerossl-eab
+      secretName: zerossl-key-prod # this presumably correct, since matches field-mapping seen here: https://github.com/cert-manager/cert-manager/issues/3325
+      #secretName: ssl-prod
+      #secretName: empty-placeholder # this field isn't needed; we use it just to avoid kubernetes error/warning
   rules:
     # these allow you to open the site directly, using the ovh cluster domain-name
     - host: 9m2x1z.nodes.c1.or1.k8s.ovh.us
@@ -42,43 +54,22 @@ spec:
           - backend:
               serviceName: dm-monitor-backend
               servicePort: 5130
+
     # these are the domains end-users should be accessing the site from
+
+    # debates.app
     - host: debates.app
       http:
-        # middlewares:
-        #   test-stripprefix:
-        #     stripPrefix:
-        #       prefixes:
-        #         - "/app-server"
-        #         - "/app-server/"
-        #   testHeader:
-        #     headers:
-        #       accessControlAllowMethods:
-        #         - CONNECT
-        #         - DELETE
-        #         - GET
-        #         - HEAD
-        #         - OPTIONS
-        #         - PATCH
-        #         - POST
-        #         - PUT
         paths:
           -
             # path: "/"
             # pathType: "Prefix"
             # priority: 1
             backend:
-              #serviceName: dmvx-service
               serviceName: dm-web-server
               #servicePort: 8765
               #servicePort: 8080
               servicePort: 5100
-          # - path: "/app-server/"
-          #   pathType: "Prefix"
-          #   priority: 2
-          #   backend:
-          #     serviceName: dm-app-server
-          #     servicePort: 5110
     - host: app-server.debates.app
       http:
         paths:
@@ -92,6 +83,32 @@ spec:
               serviceName: dm-app-server-js
               servicePort: 5115
     - host: monitor.debates.app
+      http:
+        paths:
+          - backend:
+              serviceName: dm-monitor-backend
+              servicePort: 5130
+
+    # debating.app
+    - host: debating.app
+      http:
+        paths:
+          - backend:
+              serviceName: dm-web-server
+              servicePort: 5100
+    - host: app-server.debating.app
+      http:
+        paths:
+          - backend:
+              serviceName: dm-app-server-rs
+              servicePort: 5110
+    - host: app-server-js.debating.app
+      http:
+        paths:
+          - backend:
+              serviceName: dm-app-server-js
+              servicePort: 5115
+    - host: monitor.debating.app
       http:
         paths:
           - backend:

@@ -384,7 +384,7 @@ if REMOTE:
 
 	NEXT_k8s_resource(new_name="ssl-prod", labels=["cert-manager"],
 		objects=[
-			"zero-sll-eabsecret:secret",
+			"zerossl-eab:secret",
 			"ssl-prod:clusterissuer",
 		],
 	)

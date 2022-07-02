@@ -43,19 +43,22 @@ export function GetAppServerURL(subpath: string): string {
 	Assert(false, `Invalid database specified:${DB}`);
 }*/
 
-export function GetWebServerURL(subpath: string) {
-	return GetServerURL("web-server", subpath, window.location.origin);
+export function GetWebServerURL(subpath: string, preferredServerOrigin?: string) {
+	return GetServerURL("web-server", subpath, preferredServerOrigin ?? window.location.origin);
 }
-export function GetAppServerURL(subpath: string): string {
+export function GetAppServerURL(subpath: string, preferredServerOrigin?: string): string {
 	// if on localhost, but user has set the db/server override to "prod", do so
 	if (window.location.hostname == "localhost" && DB == "production") {
 		return `https://app-server.debates.app/${subpath.slice(1)}`;
 	}
 
-	return GetServerURL("app-server", subpath, window.location.origin);
+	return GetServerURL("app-server", subpath, preferredServerOrigin ?? window.location.origin);
 }
 
 const GRAPHQL_URL = GetAppServerURL("/graphql");
+// for graphql/websocket connections, bypass cloudflare-cdn (ie. debates.app) and connect directly to the server cluster (ie. debating.app)
+// (the cdn is nice for caching the static files, but for live data transfer, it has no value -- so direct is better, eg. to avoid cloudflare's websocket timeouts)
+//const GRAPHQL_URL = GetAppServerURL("/graphql", "debating.app");
 
 let httpLink: HttpLink;
 let wsClient: SubscriptionClient;

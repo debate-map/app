@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   namespace: cert-manager # the NS you're running cert-manager in
-  name: zero-sll-eabsecret
+  name: zerossl-eab
 stringData:
   secret: TILT_PLACEHOLDER:eab_hmacKey
 ---
@@ -17,17 +17,22 @@ spec:
     externalAccountBinding:
       keyID: TILT_PLACEHOLDER:eab_kid
       keySecretRef:
-        name: zero-sll-eabsecret
+        name: zerossl-eab
         key: secret
       keyAlgorithm: HS256
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: zerossl-prod
+      name: zerossl-key-prod
     # Enable the HTTP-01 challenge provider
     solvers:
+    # for ingress api
     - http01:
-        gatewayHTTPRoute:
-          parentRefs:
-            - name: traefik
-              namespace: traefik
-              kind: Gateway
+        ingress:
+          class: traefik
+    # for gateway api
+    # - http01:
+    #     gatewayHTTPRoute:
+    #       parentRefs:
+    #         - name: traefik
+    #           namespace: traefik
+    #           kind: Gateway
