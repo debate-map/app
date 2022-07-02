@@ -26,13 +26,13 @@ spec:
     # Enable the HTTP-01 challenge provider
     solvers:
     # for ingress api
-    - http01:
-        ingress:
-          class: traefik
-    # for gateway api
     # - http01:
-    #     gatewayHTTPRoute:
-    #       parentRefs:
-    #         - name: traefik
-    #           namespace: traefik
-    #           kind: Gateway
+    #     ingress:
+    #       class: traefik
+    # for gateway api
+    - http01:
+        gatewayHTTPRoute:
+          parentRefs:
+            - name: example-gateway
+              #namespace: traefik
+              kind: Gateway

@@ -1,0 +1,8 @@
+resources:
+- gateway-crds
+- gateway-webhooks/admission_webhook.yaml
+- gateway-webhooks/certificate_config.yaml
+- gateway.yaml
+# traefik prep
+- rbac.yaml
+#- traefik-service.yaml
