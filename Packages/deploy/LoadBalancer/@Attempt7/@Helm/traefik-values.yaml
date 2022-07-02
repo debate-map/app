@@ -1,14 +1,26 @@
 additionalArguments:
   - "--experimental.kubernetesgateway=true"
   - "--providers.kubernetesgateway=true"
+  # test
+  # - '--entrypoints.web.address=:80/tcp'
+  # - '--entrypoints.websecure.address=:443/tcp'
 
 hostNetwork: true
+# see here for what are supposed to be the defaults (but seem messed up in my case): https://github.com/traefik/traefik-helm-chart/blob/ff25058604da2eeee7eac3fec3b1e0e89949c407/traefik/values.yaml
 ports:
   web:
     port: 80
-    redirectTo: websecure
+    #port: 8000
+    #hostPort: 80
+    #expose: true
+    #exposedPort: 80
+    #redirectTo: websecure
   websecure:
     port: 443
+    #port: 8443
+    #hostPort: 443
+    #expose: true
+    #exposedPort: 443
 
 securityContext:
   capabilities:

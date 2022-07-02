@@ -273,7 +273,8 @@ helm_remote('reflector',
 
 # from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
 k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
-k8s_yaml('./Packages/deploy/PGO/Custom/user-secret-mirror.yaml')
+k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
+#k8s_yaml('./Packages/deploy/Reflector/Reflections/zerossl-key-prod.yaml')
 NEXT_k8s_resource("reflector",
 	objects=[
 		"reflector:clusterrole",
@@ -332,10 +333,10 @@ NEXT_k8s_resource_batch([
    		"gateway-api-admission:clusterrolebinding",
    		"my-gateway:gateway",
    		"gateway-api-admission:validatingwebhookconfiguration",
-   		"route-web-server:httproute",
-   		"route-app-server:httproute",
-   		"route-app-server-js:httproute",
-   		"route-monitor:httproute",
+   		# "route-web-server:httproute",
+   		# "route-app-server:httproute",
+   		# "route-app-server-js:httproute",
+   		# "route-monitor:httproute",
 		],
 	},
 ])
@@ -668,34 +669,35 @@ NEXT_k8s_resource_batch([
 # ==========
 
 # only install the netdata pods if we're in remote cluster (it can't collect anything useful in docker-desktop anyway; and removing it saves memory)
-if REMOTE:
-	helm_remote('netdata',
-		repo_url='https://netdata.github.io/helmchart',
-		#version='1.33.1',
-		version='3.7.12', # helm-chart version is different from netdata version
-	)
+# temp-disabled (to make sure it's not messing up the cert-manager stuff, since some netdata pods were showing in its logs)
+# if REMOTE:
+# 	helm_remote('netdata',
+# 		repo_url='https://netdata.github.io/helmchart',
+# 		#version='1.33.1',
+# 		version='3.7.12', # helm-chart version is different from netdata version
+# 	)
 
-	NEXT_k8s_resource_batch([
-		{"workload": "netdata-parent", "labels": ["monitoring"]},
-		{"workload": "netdata-child", "labels": ["monitoring"]},
-		{
-			"new_name": "netdata-other-objects", "labels": ["monitoring"],
-			"objects": [
-				"netdata:serviceaccount",
-				"netdata-psp:podsecuritypolicy",
-				"netdata:clusterrole",
-				"netdata-psp:clusterrole",
-				"netdata:clusterrolebinding",
-				"netdata-psp:clusterrolebinding",
-				"netdata-parent-database:persistentvolumeclaim",
-				"netdata-parent-alarms:persistentvolumeclaim",
-				"netdata-conf-parent:configmap",
-				"netdata-conf-child:configmap",
-				"netdata-child-sd-config-map:configmap",
-				"netdata:ingress",
-			],
-		},
-	])
+# 	NEXT_k8s_resource_batch([
+# 		{"workload": "netdata-parent", "labels": ["monitoring"]},
+# 		{"workload": "netdata-child", "labels": ["monitoring"]},
+# 		{
+# 			"new_name": "netdata-other-objects", "labels": ["monitoring"],
+# 			"objects": [
+# 				"netdata:serviceaccount",
+# 				"netdata-psp:podsecuritypolicy",
+# 				"netdata:clusterrole",
+# 				"netdata-psp:clusterrole",
+# 				"netdata:clusterrolebinding",
+# 				"netdata-psp:clusterrolebinding",
+# 				"netdata-parent-database:persistentvolumeclaim",
+# 				"netdata-parent-alarms:persistentvolumeclaim",
+# 				"netdata-conf-parent:configmap",
+# 				"netdata-conf-child:configmap",
+# 				"netdata-child-sd-config-map:configmap",
+# 				"netdata:ingress",
+# 			],
+# 		},
+# 	])
 
 # extras
 # ==========
