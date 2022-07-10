@@ -9,7 +9,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::general::{accessor_helpers::{get_db_entry, AccessorContext, get_db_entries}};
+use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
 pub async fn get_tags_for(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<MapNodeTag>, Error> {
     get_db_entries(ctx, "nodeTags", &Some(json!({

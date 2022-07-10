@@ -7,10 +7,8 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 use crate::utils::type_aliases::JSONValue;
-
-use super::general::{accessor_helpers::{get_db_entry, AccessorContext}};
 
 pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<MapNodeRevision, Error> {
     get_db_entry(ctx, "nodeRevisions", &Some(json!({

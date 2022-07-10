@@ -9,7 +9,7 @@ use tokio_postgres::{Client};
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::general::{accessor_helpers::{get_db_entry, AccessorContext}};
+use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 
 pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Error> {
     get_db_entry(ctx, "medias", &Some(json!({
