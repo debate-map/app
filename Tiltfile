@@ -282,192 +282,195 @@ NEXT_k8s_resource("reflector",
 	],
 )
 
-# load-balancer/reverse-proxy (traefik)
+# load-balancer/reverse-proxy (traefik, ingress-based [old])
 # ==========
 
-# k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
-# traefik_resourceDeps = GetLastResourceNamesBatch()
-# k8s_resource("traefik-daemon-set",
-# 	resource_deps=traefik_resourceDeps,
-# 	labels=["traefik"],
-# )
-# k8s_resource(new_name="traefik",
-# 	objects=[
-# 		"traefik-ingress-controller:serviceaccount",
-#    	"traefik-ingress-controller:clusterrole",
-#    	"traefik-ingress-controller:clusterrolebinding",
-#    	"dmvx-ingress:ingress",
-# 	],
-# 	resource_deps=traefik_resourceDeps,
-# 	labels=["traefik"],
-# )
-# AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
+k8s_yaml(kustomize('./Packages/deploy/LoadBalancer/@Attempt6'))
+traefik_resourceDeps = GetLastResourceNamesBatch()
+k8s_resource("traefik-daemon-set",
+	resource_deps=traefik_resourceDeps,
+	labels=["traefik"],
+)
+k8s_resource(new_name="traefik",
+	objects=[
+		"traefik-ingress-controller:serviceaccount",
+   	"traefik-ingress-controller:clusterrole",
+   	"traefik-ingress-controller:clusterrolebinding",
+   	"dmvx-ingress:ingress",
+	],
+	resource_deps=traefik_resourceDeps,
+	labels=["traefik"],
+)
+AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
 
 # commented till I get traefik working in general
 #k8s_yaml("Packages/deploy/LoadBalancer/traefik-dashboard.yaml")
 
-k8s_yaml(kustomize("./Packages/deploy/LoadBalancer/@Attempt7")) # from: https://github.com/kubernetes-sigs/gateway-api/tree/v0.4.3/config/crd
-#k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt7/gateway-webhooks/admission_webhook.yaml") # from: https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.4.3/deploy/admission_webhook.yaml
-#k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt7/gateway-webhooks/certificate_config.yaml") # from: https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.4.3/deploy/certificate_config.yaml
-
-NEXT_k8s_resource_batch([
-	{"workload": "gateway-api-admission-server", "labels": ["gateway-api"]},
-	{"workload": "gateway-api-admission", "labels": ["gateway-api"]},
-	{"workload": "gateway-api-admission-patch", "labels": ["gateway-api"]},
-	{
-		"new_name": "gateway-api-other-objects", "labels": ["gateway-api"],
-		"objects": [
-			"gateway-api:namespace",
-   		"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
-   		"gateways.gateway.networking.k8s.io:customresourcedefinition",
-   		"httproutes.gateway.networking.k8s.io:customresourcedefinition",
-   		"referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
-   		"tcproutes.gateway.networking.k8s.io:customresourcedefinition",
-   		"tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
-   		"udproutes.gateway.networking.k8s.io:customresourcedefinition",
-   		"gateway-api-admission:serviceaccount",
-   		"gateway-api-admission:role",
-   		"gateway-api-admission:clusterrole",
-   		"gateway-api-admission:rolebinding",
-   		"gateway-api-admission:clusterrolebinding",
-   		"gateway-http:gateway",
-   		#"gateway-https:gateway",
-   		"gateway-api-admission:validatingwebhookconfiguration",
-   		# "route-web-server:httproute",
-   		# "route-app-server:httproute",
-   		# "route-app-server-js:httproute",
-   		# "route-monitor:httproute",
-		],
-	},
-])
-
-helm_remote('traefik',
-	repo_url='https://helm.traefik.io/traefik',
-	version='10.24.0', # helm-chart version is different from traefik version
-	# set=[
-	# 	"additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true}",
-	# 	# maybe temp (from: https://www.jetstack.io/blog/cert-manager-gateway-api-traefik-guide)
-	# 	# "additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true,--providers.kubernetesingress,--providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik}",
-	# 	#"additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true,--entrypoints.web.address=:80/tcp}",
-	# 	# "ssl.enforced=true",
-	# 	# "dashboard.ingressRoute=true",
-	# 	"ports.web.port=80",
-	# ],
-	values=["./Packages/deploy/LoadBalancer/@Attempt7/@Helm/traefik-values.yaml"],
-)
-
-NEXT_k8s_resource_batch([
-	{
-		"new_name": "traefik-other-objects", "labels": ["traefik"],
-		"objects": [
-			# "traefik:Deployment:default",
-			# "traefik:Service:default",
-			# "traefik:ServiceAccount:default",
-			# "traefik:ClusterRole:default",
-			# "traefik:ClusterRoleBinding:default",
-			"ingressroutes.traefik.containo.us:CustomResourceDefinition:default",
-			"ingressroutetcps.traefik.containo.us:CustomResourceDefinition:default",
-			"ingressrouteudps.traefik.containo.us:CustomResourceDefinition:default",
-			"middlewares.traefik.containo.us:CustomResourceDefinition:default",
-			"middlewaretcps.traefik.containo.us:CustomResourceDefinition:default",
-			"serverstransports.traefik.containo.us:CustomResourceDefinition:default",
-			"tlsoptions.traefik.containo.us:CustomResourceDefinition:default",
-			"tlsstores.traefik.containo.us:CustomResourceDefinition:default",
-			"traefikservices.traefik.containo.us:CustomResourceDefinition:default",
-			"traefik:ServiceAccount:default",
-			"traefik:ClusterRole:default",
-			"traefik:ClusterRoleBinding:default",
-			"traefik-dashboard:IngressRoute:default",
-		],
-	},
-])
-
-# initialize traefik after the cluster-roles and such are initialized
-NEXT_k8s_resource_batch([
-	{"workload": "traefik", "labels": ["traefik"]},
-])
-
-# cert-manager (for creating/renewing SSL certificates)
+# load-balancer/reverse-proxy (traefik, gateway-based [new])
 # ==========
 
-# only install the netdata pods if we're in remote cluster (it has nothing to do in local cluster)
-if REMOTE:
-	helm_remote('cert-manager',
-		repo_url='https://charts.jetstack.io',
-		version='1.8.2',
-		namespace="cert-manager",
-		create_namespace=True,
-		set=[
-			"installCRDs=true",
-			"extraArgs={--feature-gates=ExperimentalGatewayAPISupport=true}",
-		],
-	)
+# k8s_yaml(kustomize("./Packages/deploy/LoadBalancer/@Attempt7")) # from: https://github.com/kubernetes-sigs/gateway-api/tree/v0.4.3/config/crd
+# #k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt7/gateway-webhooks/admission_webhook.yaml") # from: https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.4.3/deploy/admission_webhook.yaml
+# #k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt7/gateway-webhooks/certificate_config.yaml") # from: https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.4.3/deploy/certificate_config.yaml
 
-	NEXT_k8s_resource_batch([
-		{"workload": "cert-manager", "labels": ["cert-manager"]},
-		{"workload": "cert-manager-cainjector", "labels": ["cert-manager"]},
-		{"workload": "cert-manager-webhook", "labels": ["cert-manager"]},
-		{"workload": "cert-manager-startupapicheck", "labels": ["cert-manager"]},
-		{
-			"new_name": "cert-manager-other-objects", "labels": ["cert-manager"],
-			"objects": [
-				"cert-manager:Namespace:default",
-				"cert-manager-cainjector:ServiceAccount:cert-manager",
-				"cert-manager:ServiceAccount:cert-manager",
-				"cert-manager-webhook:ServiceAccount:cert-manager",
-				"cert-manager-webhook:ConfigMap:cert-manager",
-				"cert-manager-cainjector:ClusterRole:cert-manager",
-				"cert-manager-controller-issuers:ClusterRole:cert-manager",
-				"cert-manager-controller-clusterissuers:ClusterRole:cert-manager",
-				"cert-manager-controller-certificates:ClusterRole:cert-manager",
-				"cert-manager-controller-orders:ClusterRole:cert-manager",
-				"cert-manager-controller-challenges:ClusterRole:cert-manager",
-				"cert-manager-controller-ingress-shim:ClusterRole:cert-manager",
-				"cert-manager-view:ClusterRole:cert-manager",
-				"cert-manager-edit:ClusterRole:cert-manager",
-				"cert-manager-controller-approve\\:cert-manager-io:ClusterRole:cert-manager",
-				"cert-manager-controller-certificatesigningrequests:ClusterRole:cert-manager",
-				"cert-manager-webhook\\:subjectaccessreviews:ClusterRole:cert-manager",
-				"cert-manager-cainjector:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-issuers:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-clusterissuers:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-certificates:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-orders:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-challenges:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-ingress-shim:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-approve\\:cert-manager-io:ClusterRoleBinding:cert-manager",
-				"cert-manager-controller-certificatesigningrequests:ClusterRoleBinding:cert-manager",
-				"cert-manager-webhook\\:subjectaccessreviews:ClusterRoleBinding:cert-manager",
-				"cert-manager-cainjector\\:leaderelection:Role:kube-system",
-				"cert-manager\\:leaderelection:Role:kube-system",
-				"cert-manager-webhook\\:dynamic-serving:Role:cert-manager",
-				"cert-manager-cainjector\\:leaderelection:RoleBinding:kube-system",
-				"cert-manager\\:leaderelection:RoleBinding:kube-system",
-				"cert-manager-webhook\\:dynamic-serving:RoleBinding:cert-manager",
-				"cert-manager-webhook:MutatingWebhookConfiguration:cert-manager",
-				"cert-manager-webhook:ValidatingWebhookConfiguration:cert-manager",
-				"cert-manager-startupapicheck:ServiceAccount:cert-manager",
-				"cert-manager-startupapicheck\\:create-cert:Role:cert-manager",
-				"cert-manager-startupapicheck\\:create-cert:RoleBinding:cert-manager",
-				#"zerossl-eab:Secret:cert-manager",
-			],
-		},
-	])
+# NEXT_k8s_resource_batch([
+# 	{"workload": "gateway-api-admission-server", "labels": ["gateway-api"]},
+# 	{"workload": "gateway-api-admission", "labels": ["gateway-api"]},
+# 	{"workload": "gateway-api-admission-patch", "labels": ["gateway-api"]},
+# 	{
+# 		"new_name": "gateway-api-other-objects", "labels": ["gateway-api"],
+# 		"objects": [
+# 			"gateway-api:namespace",
+#    		"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
+#    		"gateways.gateway.networking.k8s.io:customresourcedefinition",
+#    		"httproutes.gateway.networking.k8s.io:customresourcedefinition",
+#    		"referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
+#    		"tcproutes.gateway.networking.k8s.io:customresourcedefinition",
+#    		"tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
+#    		"udproutes.gateway.networking.k8s.io:customresourcedefinition",
+#    		"gateway-api-admission:serviceaccount",
+#    		"gateway-api-admission:role",
+#    		"gateway-api-admission:clusterrole",
+#    		"gateway-api-admission:rolebinding",
+#    		"gateway-api-admission:clusterrolebinding",
+#    		"gateway-http:gateway",
+#    		#"gateway-https:gateway",
+#    		"gateway-api-admission:validatingwebhookconfiguration",
+#    		# "route-web-server:httproute",
+#    		# "route-app-server:httproute",
+#    		# "route-app-server-js:httproute",
+#    		# "route-monitor:httproute",
+# 		],
+# 	},
+# ])
 
-	k8s_yaml(ReadFileWithReplacements('./Packages/deploy/CertManager/cert-manager.yaml', {
-		"TILT_PLACEHOLDER:eab_hmacKey": os.getenv("EAB_HMAC_KEY"),
-		"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
-	}))
-	# NEXT_k8s_resource_batch([
-	# 	{"workload": "zerossl-issuer", "labels": ["cert-manager"]},
-	# ])
+# helm_remote('traefik',
+# 	repo_url='https://helm.traefik.io/traefik',
+# 	version='10.24.0', # helm-chart version is different from traefik version
+# 	# set=[
+# 	# 	"additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true}",
+# 	# 	# maybe temp (from: https://www.jetstack.io/blog/cert-manager-gateway-api-traefik-guide)
+# 	# 	# "additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true,--providers.kubernetesingress,--providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik}",
+# 	# 	#"additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true,--entrypoints.web.address=:80/tcp}",
+# 	# 	# "ssl.enforced=true",
+# 	# 	# "dashboard.ingressRoute=true",
+# 	# 	"ports.web.port=80",
+# 	# ],
+# 	values=["./Packages/deploy/LoadBalancer/@Attempt7/@Helm/traefik-values.yaml"],
+# )
 
-	NEXT_k8s_resource(new_name="zerossl-issuer", labels=["cert-manager"],
-		objects=[
-			"zerossl-eab:secret",
-			"zerossl-issuer:clusterissuer",
-		],
-	)
+# NEXT_k8s_resource_batch([
+# 	{
+# 		"new_name": "traefik-other-objects", "labels": ["traefik"],
+# 		"objects": [
+# 			# "traefik:Deployment:default",
+# 			# "traefik:Service:default",
+# 			# "traefik:ServiceAccount:default",
+# 			# "traefik:ClusterRole:default",
+# 			# "traefik:ClusterRoleBinding:default",
+# 			"ingressroutes.traefik.containo.us:CustomResourceDefinition:default",
+# 			"ingressroutetcps.traefik.containo.us:CustomResourceDefinition:default",
+# 			"ingressrouteudps.traefik.containo.us:CustomResourceDefinition:default",
+# 			"middlewares.traefik.containo.us:CustomResourceDefinition:default",
+# 			"middlewaretcps.traefik.containo.us:CustomResourceDefinition:default",
+# 			"serverstransports.traefik.containo.us:CustomResourceDefinition:default",
+# 			"tlsoptions.traefik.containo.us:CustomResourceDefinition:default",
+# 			"tlsstores.traefik.containo.us:CustomResourceDefinition:default",
+# 			"traefikservices.traefik.containo.us:CustomResourceDefinition:default",
+# 			"traefik:ServiceAccount:default",
+# 			"traefik:ClusterRole:default",
+# 			"traefik:ClusterRoleBinding:default",
+# 			"traefik-dashboard:IngressRoute:default",
+# 		],
+# 	},
+# ])
+
+# # initialize traefik after the cluster-roles and such are initialized
+# NEXT_k8s_resource_batch([
+# 	{"workload": "traefik", "labels": ["traefik"]},
+# ])
+
+# # cert-manager (for creating/renewing SSL certificates)
+# # ==========
+
+# # only install the netdata pods if we're in remote cluster (it has nothing to do in local cluster)
+# if REMOTE:
+# 	helm_remote('cert-manager',
+# 		repo_url='https://charts.jetstack.io',
+# 		version='1.8.2',
+# 		namespace="cert-manager",
+# 		create_namespace=True,
+# 		set=[
+# 			"installCRDs=true",
+# 			"extraArgs={--feature-gates=ExperimentalGatewayAPISupport=true}",
+# 		],
+# 	)
+
+# 	NEXT_k8s_resource_batch([
+# 		{"workload": "cert-manager", "labels": ["cert-manager"]},
+# 		{"workload": "cert-manager-cainjector", "labels": ["cert-manager"]},
+# 		{"workload": "cert-manager-webhook", "labels": ["cert-manager"]},
+# 		{"workload": "cert-manager-startupapicheck", "labels": ["cert-manager"]},
+# 		{
+# 			"new_name": "cert-manager-other-objects", "labels": ["cert-manager"],
+# 			"objects": [
+# 				"cert-manager:Namespace:default",
+# 				"cert-manager-cainjector:ServiceAccount:cert-manager",
+# 				"cert-manager:ServiceAccount:cert-manager",
+# 				"cert-manager-webhook:ServiceAccount:cert-manager",
+# 				"cert-manager-webhook:ConfigMap:cert-manager",
+# 				"cert-manager-cainjector:ClusterRole:cert-manager",
+# 				"cert-manager-controller-issuers:ClusterRole:cert-manager",
+# 				"cert-manager-controller-clusterissuers:ClusterRole:cert-manager",
+# 				"cert-manager-controller-certificates:ClusterRole:cert-manager",
+# 				"cert-manager-controller-orders:ClusterRole:cert-manager",
+# 				"cert-manager-controller-challenges:ClusterRole:cert-manager",
+# 				"cert-manager-controller-ingress-shim:ClusterRole:cert-manager",
+# 				"cert-manager-view:ClusterRole:cert-manager",
+# 				"cert-manager-edit:ClusterRole:cert-manager",
+# 				"cert-manager-controller-approve\\:cert-manager-io:ClusterRole:cert-manager",
+# 				"cert-manager-controller-certificatesigningrequests:ClusterRole:cert-manager",
+# 				"cert-manager-webhook\\:subjectaccessreviews:ClusterRole:cert-manager",
+# 				"cert-manager-cainjector:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-issuers:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-clusterissuers:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-certificates:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-orders:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-challenges:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-ingress-shim:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-approve\\:cert-manager-io:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-controller-certificatesigningrequests:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-webhook\\:subjectaccessreviews:ClusterRoleBinding:cert-manager",
+# 				"cert-manager-cainjector\\:leaderelection:Role:kube-system",
+# 				"cert-manager\\:leaderelection:Role:kube-system",
+# 				"cert-manager-webhook\\:dynamic-serving:Role:cert-manager",
+# 				"cert-manager-cainjector\\:leaderelection:RoleBinding:kube-system",
+# 				"cert-manager\\:leaderelection:RoleBinding:kube-system",
+# 				"cert-manager-webhook\\:dynamic-serving:RoleBinding:cert-manager",
+# 				"cert-manager-webhook:MutatingWebhookConfiguration:cert-manager",
+# 				"cert-manager-webhook:ValidatingWebhookConfiguration:cert-manager",
+# 				"cert-manager-startupapicheck:ServiceAccount:cert-manager",
+# 				"cert-manager-startupapicheck\\:create-cert:Role:cert-manager",
+# 				"cert-manager-startupapicheck\\:create-cert:RoleBinding:cert-manager",
+# 				#"zerossl-eab:Secret:cert-manager",
+# 			],
+# 		},
+# 	])
+
+# 	k8s_yaml(ReadFileWithReplacements('./Packages/deploy/CertManager/cert-manager.yaml', {
+# 		"TILT_PLACEHOLDER:eab_hmacKey": os.getenv("EAB_HMAC_KEY"),
+# 		"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
+# 	}))
+# 	# NEXT_k8s_resource_batch([
+# 	# 	{"workload": "zerossl-issuer", "labels": ["cert-manager"]},
+# 	# ])
+
+# 	NEXT_k8s_resource(new_name="zerossl-issuer", labels=["cert-manager"],
+# 		objects=[
+# 			"zerossl-eab:secret",
+# 			"zerossl-issuer:clusterissuer",
+# 		],
+# 	)
 
 # own app (docker build and such)
 # ==========
