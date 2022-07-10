@@ -55,7 +55,7 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     Ok(response_str)
 }
 
-pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, mut req: Request<Body>) -> Response<Body> {
+pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
     let mut proxy_request_to_asjs = true;
     
     // if client is on the "/gql-playground" or "/graphiql-new" pages, don't proxy the request to app-server-js

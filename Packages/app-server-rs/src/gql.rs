@@ -38,7 +38,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
-use crate::db::general::subtree::{QueryShard_General_Subtree};
+use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::utils::type_aliases::JSONValue;
 use crate::{get_cors_layer};
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
@@ -70,7 +70,7 @@ wrap_slow_macros!{
 pub struct QueryRoot(QueryShard_General, QueryShard_General_Subtree);
 
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(MutationShard_General);
+pub struct MutationRoot(MutationShard_General, MutationShard_General_Subtree);
 
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(

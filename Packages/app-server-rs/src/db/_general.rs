@@ -1,5 +1,5 @@
 use anyhow::{Context, Error};
-use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
+use async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
 use rust_macros::wrap_slow_macros;
@@ -51,7 +51,7 @@ pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
     #[graphql(name = "_GetConnectionID")]
-    async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result> {
+    async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result, Error> {
         Ok(GetConnectionID_Result {
             id: "todo".to_owned()
         })
@@ -62,7 +62,7 @@ impl MutationShard_General {
         let result = transfer_nodes(ctx, payload).await?;
         Ok(result)
     }*/
-    async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result> {
+    async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, Error> {
         let result = refresh_lq_data(ctx, payload).await?;
         Ok(result)
     }
