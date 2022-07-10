@@ -70,14 +70,8 @@ pub async fn transfer_nodes(gql_ctx: &async_graphql::Context<'_>, payload_raw: J
     }
     let payload: TransferNodesPayload = serde_json::from_value(payload_raw)?;
 
-    //let client = &mut ctx.data::<Client>().unwrap();
-    let pool = gql_ctx.data::<Pool>().unwrap();
-    let mut client = pool.get().await.unwrap();
-    let tx = client.build_transaction()
-        //.isolation_level(tokio_postgres::IsolationLevel::Serializable).start().await?;
-        // use with serializable+deferrable+readonly, so that the transaction is guaranteed to not fail (see doc for `deferrable`) [there may be a better way] 
-        .isolation_level(tokio_postgres::IsolationLevel::Serializable).deferrable(true).read_only(true)
-        .start().await?;
+    let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+    let tx = start_transaction(&mut anchor, gql_ctx).await?;
     let ctx = AccessorContext::new(tx);
 
     for (i, node_info) in payload.nodes.iter().enumerate() {

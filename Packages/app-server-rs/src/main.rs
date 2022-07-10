@@ -92,6 +92,7 @@ mod utils {
         pub mod uuid;
     }
     pub mod general {
+        pub mod data_anchor;
         pub mod errors;
         pub mod extensions;
         pub mod general;
