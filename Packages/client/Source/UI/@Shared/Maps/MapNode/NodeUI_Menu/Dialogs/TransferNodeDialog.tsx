@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, NodeInfoForTransfer, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
+import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
@@ -256,9 +256,12 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 						</Row>
 						<Row ml={5}>
 							<Text>Keep tags:</Text>
-							<Select ml={5} options={yesAndNoOpts.filter(a=>a.value == false)}
-								value={nodeInfo.clone_keepChildren} onChange={val=>Change(nodeInfo.clone_keepChildren = val)}/>
-							<InfoButton ml={5} text={`General cloning of tags is not implemented yet. However, if a "clone history" tag is present, it'll be cloned and extended.`}/>
+							<Select ml={5} options={GetEntries(NodeTagCloneType)}
+								value={nodeInfo.clone_keepTags} onChange={val=>Change(nodeInfo.clone_keepTags = val)}/>
+							<InfoButton ml={5} text={`
+								Minimal: No tags are cloned, other than one exception: Any "clone history" tags that had the old node as the result/last-entry, will be cloned and extended.
+								Basics: The "minimal" tags (described above) will be cloned, plus any "basic" tag-types: labels
+							`.AsMultiline(0)}/>
 						</Row>
 						<Row ml={5}>
 							<Text>Convert clone to:</Text>

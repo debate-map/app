@@ -13,6 +13,7 @@ type MapNodeType = String;
 type ClaimForm = String;
 type Polarity = String;
 type ChildGroup = String;
+type NodeTagCloneType = String;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TransferNodesPayload {
@@ -28,6 +29,7 @@ lazy_static! {
                         "transferType": {"type": "string"},
                         "clone_newType": {"type": "string"},
                         "clone_keepChildren": {"type": "boolean"},
+                        "clone_keepTags": {"type": "boolean"},
 
                         "newParentID": {"type": "string"},
                         "childGroup": {"type": "string"},
@@ -54,6 +56,7 @@ pub struct NodeInfoForTransfer {
 	transferType: TransferType,
 	clone_newType: MapNodeType,
 	clone_keepChildren: bool,
+	clone_keepTags: NodeTagCloneType,
 
 	newParentID: Option<String>,
 	childGroup: ChildGroup,

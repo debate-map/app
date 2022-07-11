@@ -1,6 +1,7 @@
 import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "web-vcore/nm/mobx-graphlink.js";
-import {GetValues_ForSchema, ModifyString, CE, Assert} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, ModifyString, CE, Assert, Clone} from "web-vcore/nm/js-vextensions.js";
 import {Polarity} from "../nodes/@MapNode.js";
+import {NodeTagCloneType} from "../../Commands.js";
 
 @MGLClass({table: "nodeTags"})
 export class MapNodeTag {
@@ -56,6 +57,24 @@ export class MapNodeTag {
 	@Field({$ref: "TagComp_CloneHistory"}, {opt: true})
 	cloneHistory?: TagComp_CloneHistory;
 }
+export function MaybeCloneAndRetargetNodeTag(tag: MapNodeTag, cloneType: NodeTagCloneType, oldNodeID: string, newNodeID: string): MapNodeTag|n {
+	const tagCloneLevel = [NodeTagCloneType.minimal, NodeTagCloneType.basics].indexOf(cloneType);
+
+	const newTag = Clone(tag) as MapNodeTag;
+	if (newTag.labels != null && tagCloneLevel >= 1) {
+		newTag.labels.nodeX = newNodeID;
+	}
+	// clone-history tags are a special case: clone+extend them if-and-only-if the result/final-entry is the old-node (preserving history without creating confusion)
+	else if (newTag.cloneHistory != null && newTag.cloneHistory.cloneChain.LastOrX() == oldNodeID) {
+		newTag.cloneHistory.cloneChain.push(newNodeID);
+		//newTag.nodes.push(newNodeID);
+	} else {
+		return null;
+	}
+
+	newTag.nodes = CalculateNodeIDsForTag(newTag);
+	return newTag;
+}
 
 // tag comps
 // ==========
@@ -65,6 +84,8 @@ export abstract class TagComp {
 	static displayName: string;
 	static description: string;
 	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array (field-value can be a node-id string, or an array of such strings)
+	/*#* Method that retargets the tag-comp from one node to another. (called when a node and its tags are being cloned) */
+	//ChangeTarget(oldNodeID: string, newNodeID: string) {}
 
 	/** Has side-effect: Casts tag-comps to their original classes/types. */
 	//abstract GetFinalTagComps(): TagComp[];
@@ -82,6 +103,7 @@ export class TagComp_Labels extends TagComp {
 	static displayName = "labels";
 	static description = "Generic container for attaching arbitrary text labels to a node. (eg. as annotations for third-party tools)";
 	static nodeKeys = ["nodeX"];
+	//ChangeTarget(oldNodeID: string, newNodeID: string) { this.nodeX = newNodeID; }
 
 	constructor(initialData?: Partial<TagComp_Labels>) { super(); CE(this).VSet(initialData); }
 
@@ -141,7 +163,7 @@ AddSchema("TagComp_MirrorChildrenFromXToY", {
 export class TagComp_XIsExtendedByY extends TagComp {
 	static displayName = "X is extended by Y (composite)";
 	static description = CE(`
-		Meaning: claim Y is the same as claim X, except it is wider-scoped (and thus weaker) than X -- along some consistent axis/criteria of a series.
+		Meaning: claim Y is consistent with claim X, but taken to a further extent/degree (along some consistent axis/criteria of a series).
 		Example: X (we should charge at least $50) is extended by Y (we should charge at least $100).
 		Effect: Makes-so any con-args of X (base) are mirrored as con-args of Y (extension), and any pro-args of Y (extension) are mirrored as pro-args of X (base).
 	`).AsMultiline(0);
@@ -323,6 +345,11 @@ export function GetNodeTagType(tag: MapNodeTag) {
 	return MapNodeTagType_values[compKeyIndex];
 }*/
 
+export function CalculateNodeIDsForTag(tag: MapNodeTag) {
+	const compClass = GetTagCompClassByTag(tag);
+	const tagComp = GetTagCompOfTag(tag);
+	return CalculateNodeIDsForTagComp(tagComp, compClass);
+}
 export function CalculateNodeIDsForTagComp(tagComp: TagComp, compClass: TagComp_Class) {
 	/*let compClass = GetTagCompClassByTag(tag);
 	let comp = GetTagCompOfTag(tag);*/

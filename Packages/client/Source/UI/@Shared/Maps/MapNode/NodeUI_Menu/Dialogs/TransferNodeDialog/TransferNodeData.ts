@@ -1,4 +1,4 @@
-import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID} from "dm_common";
+import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
 import {Command} from "web-vcore/.yalc/mobx-graphlink";
 import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 
@@ -21,6 +21,7 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: MapNodeL3,
 				transferType,
 				clone_newType: transferNode.type,
 				clone_keepChildren: false,
+				clone_keepTags: NodeTagCloneType.basics,
 
 				newParentID: newParent.id,
 				newAccessPolicyID: map?.nodeAccessPolicy,
@@ -43,6 +44,7 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: MapNodeL3,
 				transferType,
 				clone_newType: premise.type,
 				clone_keepChildren: false,
+				clone_keepTags: NodeTagCloneType.basics,
 
 				newParentID: null,
 				newAccessPolicyID: map?.nodeAccessPolicy,
@@ -65,6 +67,7 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: MapNodeL3,
 				// not relevant, but required fields
 				clone_newType: MapNodeType.argument,
 				clone_keepChildren: false,
+				clone_keepTags: NodeTagCloneType.basics,
 			});
 		}
 	}

@@ -1,6 +1,6 @@
 import {Assert, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON, MGLClass, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@MapNodeTag.js";
+import {MaybeCloneAndRetargetNodeTag, MapNodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@MapNodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, MapNodeRevision, MapNodeType, NodeChildLink} from "../DB.js";
@@ -41,6 +41,9 @@ export class NodeInfoForTransfer {
 	@Field({type: "boolean"})
 	clone_keepChildren: boolean;
 
+	@Field({$ref: "NodeTagCloneType"})
+	clone_keepTags: NodeTagCloneType;
+
 	@Field({type: ["string", "null"]}, {opt: true})
 	newParentID?: string|n;
 
@@ -73,6 +76,13 @@ export enum TransferType {
 	shim = "shim",
 }
 AddSchema("TransferType", {enum: GetValues(TransferType)});
+
+export enum NodeTagCloneType {
+	minimal = "minimal",
+	basics = "basics",
+	//full = "full",
+}
+AddSchema("NodeTagCloneType", {enum: GetValues(NodeTagCloneType)});
 
 class TransferData {
 	addNodeCommand?: AddChildNode;
@@ -157,6 +167,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 					cmd=>cmd.sub_addLink,
 				);
 				const transferData = this.transferData[i]; // by this point, it'll be set
+				const newNodeID = transferData.addNodeCommand!.returnData.nodeID;
 
 				if (transfer.clone_keepChildren) {
 					const oldChildLinks = GetNodeChildLinks(node.id);
@@ -175,32 +186,22 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				}
 
 				const tags = GetNodeTags(node.id);
-				const tagsShowingCloneHistoryForThisNode = [] as MapNodeTag[];
 				for (const [i2, tag] of tags.entries()) {
-					const tagShowsCloneHistoryForThisNode = tag.cloneHistory != null && tag.cloneHistory.cloneChain.LastOrX() == node.id;
-					if (tagShowsCloneHistoryForThisNode) {
-						tagsShowingCloneHistoryForThisNode.push(tag);
+					const newTag = MaybeCloneAndRetargetNodeTag(tag, transfer.clone_keepTags, node.id, newNodeID);
+					if (newTag != null) {
 						this.IntegrateSubcommand(
 							()=>transferData.addTagCommands[i2],
 							cmd=>transferData.addTagCommands[i2] = cmd,
 							()=>{
-								const newNodes = tag.nodes.concat(transferData.addNodeCommand!.returnData.nodeID);
-								const newCloneHistory = Clone(tag.cloneHistory) as TagComp_CloneHistory;
-								newCloneHistory.cloneChain = tag.cloneHistory!.cloneChain.concat(transferData.addNodeCommand!.returnData.nodeID);
-								const addTagCommand = new AddNodeTag({
-									tag: {
-										...tag,
-										nodes: newNodes,
-										cloneHistory: newCloneHistory,
-									},
-								});
-								return addTagCommand;
+								return new AddNodeTag({tag: newTag});
 							},
 						);
 					}
 				}
 
-				if (tagsShowingCloneHistoryForThisNode.length == 0) {
+				const tagsShowingCloneHistoryForOldNode = tags.filter(tag=>tag.cloneHistory != null && tag.cloneHistory.cloneChain.LastOrX() == node.id);
+				// if there was no clone-history tag we could extend to record this clone action, create a brand new clone-history tag for it
+				if (tagsShowingCloneHistoryForOldNode.length == 0) {
 					const i2 = tags.length;
 					this.IntegrateSubcommand(
 						()=>transferData.addTagCommands[i2],
