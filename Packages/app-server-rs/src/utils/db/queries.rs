@@ -8,7 +8,7 @@ use hyper::Body;
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use serde_json::{json, Map};
 use tokio_postgres::{Client, Row, types::ToSql, Statement};
-use tracing::info;
+use tracing::{info, trace, debug};
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
@@ -51,7 +51,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
         0..=2 => SQLFragment::lit(""),
         _ => SQLFragment::merge(vec![SQLFragment::lit(" WHERE "), filters_sql]),
     };
-    info!("Running where clause. @table:{table_name} @{where_sql} @filter:{filter:?}");
+    info!("Running where clause. @table:{table_name} @where:{where_sql} @filter:{filter:?}");
     let final_query = SQLFragment::merge(vec![
         SQLFragment::new("SELECT * FROM $I", vec![SQLIdent::param(table_name.clone())?]),
         where_sql,
@@ -80,7 +80,7 @@ pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &a
     mtx.section("2:get entries");
     let query_func = |mut sql: SQLFragment| async move {
         let (sql_text, params) = sql.into_query_args()?;
-        println!("Running sql fragment. @sql_text:{sql_text} @params:{params:?}");
+        info!("Running sql fragment. @sql_text:{sql_text} @params:{params:?}");
 
         /*let temp1: Vec<Box<dyn ToSql + Sync>> = params.into_iter().map(strip_send_from_tosql_sync_send).collect();
         let temp2: Vec<&(dyn ToSql + Sync)> = temp1.iter().map(|a| a.as_ref()).collect();

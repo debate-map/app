@@ -24,7 +24,18 @@ pub struct Attachment {
     pub references: Option<JSONValue>,
     pub quote: Option<JSONValue>,
     pub media: Option<JSONValue>,
+    //pub media: Option<MediaAttachment>,
 }
+
+/*#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+pub struct MediaAttachment {
+    pub id: string,
+    /// whether the image/video is claimed to be a capturing of real-world footage
+	pub captured: boolean,
+    /// used to limit the display-width, eg. to keep a tall-but-skinny image from extending multiple screens down
+	pub previewWidth: Option<f64>,
+	pub sourceChains: SourceChain[],
+}*/
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeRevision {

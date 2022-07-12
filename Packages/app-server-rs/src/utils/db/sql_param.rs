@@ -85,6 +85,10 @@ pub fn json_value_to_sql_value_param(json_val: &JSONValue) -> Result<SQLParam, E
             Err(anyhow!("Invalid \"number\":{}", val))
         },
         JSONValue::String(val) => Ok(SQLParam::Value_String(val.to_owned())),
+        /*JSONValue::Object(data) => {
+            // break point
+            Ok(SQLParam::Value_JSONB(data))
+        },*/
         _ => {
             //SQLParam::Value(op_val.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
             bail!("Conversion from this type of json-value ({json_val:?}) to a SQLParam is not yet implemented. Instead, provide one of: String, Number, Bool, Null");
@@ -124,9 +128,9 @@ impl ToSql for SQLParam {
     }
     //tokio_postgres::types::to_sql_checked!();
 
-    fn to_sql_checked(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+    fn to_sql_checked(&self, typ: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
         match self {
-            //SQLParam::Ident(str) => str.to_sql(ty, out),
+            //SQLParam::Ident(str) => str.to_sql(typ, out),
             SQLParam::Ident(_str) => {
                 // instead, it should be interpolated into the query-str (since I don't know of a better way atm); see SQLFragment.into_query_args()
                 panic!("to_sql should never be called on a SQLParam::Ident!");
@@ -134,25 +138,28 @@ impl ToSql for SQLParam {
             SQLParam::Value_Null => {
                 let val: Option<&str> = None;
 
-                //if !Option::<&str>::accepts(ty) { return Err(Box::new(WrongType::new::<Self>(ty.clone()))); }
-                if !Option::<&str>::accepts(ty) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Null to pg type \"{ty}\"."))); }
-                val.to_sql(ty, out)
+                // commented; don't do any type-checks, since we'd need to manually match each Option<T> to the sql-type
+                // (also, the null gets output the same way in each case -- and the database should reject the operation if null is invalid for the column)
+                //if !Option::<&str>::accepts(typ) { return Err(Box::new(WrongType::new::<Self>(typ.clone()))); }
+                //if !Option::<&str>::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Null to pg type \"{typ}\"."))); }
+
+                val.to_sql(typ, out)
             },
             SQLParam::Value_Bool(val) => {
-                if !bool::accepts(ty) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Bool to pg type \"{ty}\"."))); }
-                val.to_sql(ty, out)
+                if !bool::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Bool to pg type \"{typ}\"."))); }
+                val.to_sql(typ, out)
             },
             SQLParam::Value_Int(val) => {
-                if !i64::accepts(ty) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Int to pg type \"{ty}\"."))); }
-                val.to_sql(ty, out)
+                if !i64::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Int to pg type \"{typ}\"."))); }
+                val.to_sql(typ, out)
             },
             SQLParam::Value_Float(val) => {
-                if !f64::accepts(ty) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Float to pg type \"{ty}\"."))); }
-                val.to_sql(ty, out)
+                if !f64::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Float to pg type \"{typ}\"."))); }
+                val.to_sql(typ, out)
             },
             SQLParam::Value_String(val) => {
-                if !String::accepts(ty) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_String to pg type \"{ty}\"."))); }
-                val.to_sql(ty, out)
+                if !String::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_String to pg type \"{typ}\"."))); }
+                val.to_sql(typ, out)
             },
         }
     }

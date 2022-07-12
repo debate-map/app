@@ -23,6 +23,7 @@ import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 import {MI_MoveUpOrDown} from "./NodeUI_Menu/MI_MoveUpOrDown.js";
 import {MI_Paste_Old} from "./NodeUI_Menu/MI_Paste_Old.js";
+import {MI_CloneSubtree} from "./NodeUI_Menu/MI_CloneSubtree.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
@@ -225,6 +226,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 				<VMenuItem text="Advanced" childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
 					<MI_MoveUpOrDown direction="up" {...sharedProps}/>
 					<MI_MoveUpOrDown direction="down" {...sharedProps}/>
+					<MI_CloneSubtree {...sharedProps}/>
 					<MI_ImportSubtree {...sharedProps}/>
 					<MI_ExportSubtree {...sharedProps}/>
 				</VMenuItem>

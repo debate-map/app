@@ -39,6 +39,8 @@ lazy_static = "1.4.0"
 num_cpus = "1.0"
 jsonschema = "0.16"
 base64 = "*"
+#tokio-pg-mapper = "0.2.0"
+#tokio-pg-mapper-derive = "0.2.0"
 
 # needed for async-graphql "scalar!" macro
 serde = "*"

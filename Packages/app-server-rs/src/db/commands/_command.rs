@@ -45,6 +45,15 @@ pub async fn set_db_entry_by_filter(ctx: &AccessorContext<'_>, table_name: Strin
     [...]
 }*/
 
+pub fn to_row_data(data: impl Serialize) -> Result<RowData, Error> {
+    let as_json = serde_json::to_value(data)?;
+    let as_map = as_json.as_object().ok_or(anyhow!("The passed data did not serialize to a json object/map!"))?;
+    Ok(as_map.to_owned())
+}
+pub async fn set_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row_struct: T) -> Result<Vec<Row>, Error> {
+    let struct_as_row_data = to_row_data(new_row_struct)?;
+    set_db_entry_by_id(ctx, table_name, id, struct_as_row_data).await
+}
 pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row: RowData) -> Result<Vec<Row>, Error> {
     let mut final_query = SF::merge_lines(chain!(
         chain!(
@@ -67,11 +76,27 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
             }).try_collect2::<Vec<_>>()?,
             SF::lit_once(")"),
         ),
-        SF::lit_once("ON CONFLICT (id) DO UPDATE"),
+        SF::lit_once("ON CONFLICT (id) DO UPDATE SET"),
+        new_row.iter().filter(|key_and_val| key_and_val.0 != "id").enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
+            Ok(SF::merge(chain!(
+                match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
+                Some(SQLIdent::param(key_and_val.0.to_owned())?.into_ident_fragment()?),
+                SF::lit_once(" = EXCLUDED."),
+                Some(SQLIdent::param(key_and_val.0.to_owned())?.into_ident_fragment()?),
+            ).collect_vec()))
+        }).try_collect2::<Vec<_>>()?,
     ).collect_vec());
     let (sql_text, params) = final_query.into_query_args()?;
 
-    let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?
-        .try_collect().await.map_err(to_anyhow)?;
+    let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
+
+    //let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?.try_collect().await.map_err(to_anyhow)?;
+    let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params).await
+        .map_err(|err| {
+            anyhow!("Got error while running query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
+        })?
+        .try_collect().await.map_err(|err| {
+            anyhow!("Got error while collecting results of db-query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
+        })?;
     Ok(rows)
 }

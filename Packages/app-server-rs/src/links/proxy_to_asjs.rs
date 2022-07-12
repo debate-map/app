@@ -78,7 +78,12 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
         proxy_request_to_asjs = false;
     }*/
     // todo: make-so this command-type checking actually parses the message properly, rather than just substring-searching!
-    if body_as_str.contains("refreshLQData(payload: $payload)") || body_as_str.contains("cloneSubtree(payload: $payload)") {
+    if 
+        //body_as_str.contains("subtree(rootNodeId: $rootNodeID, maxDepth: $maxDepth)") ||
+        body_as_str.contains("subtree(") ||
+        body_as_str.contains("refreshLQData(payload: $payload)") ||
+        body_as_str.contains("cloneSubtree(payload: $payload)")
+    {
         proxy_request_to_asjs = false;
     }
 

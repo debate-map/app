@@ -11,6 +11,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::Row;
+use std::collections::HashSet;
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -31,7 +32,7 @@ use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::sql_param::SQLIdent;
-use crate::utils::db::transactions::start_transaction;
+use crate::utils::db::transactions::start_read_transaction;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
 use crate::utils::general::general::to_anyhow;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
@@ -67,6 +68,19 @@ pub struct Subtree {
     pub nodePhrasings: Vec<MapNodePhrasing>,
     pub nodeTags: Vec<MapNodeTag>,
 }
+impl Subtree {
+    pub fn get_all_ids(&self) -> HashSet<String> {
+        let mut result = HashSet::<String>::new();
+        for entry in &self.terms { result.insert(entry.id.to_string()); }
+        for entry in &self.medias { result.insert(entry.id.to_string()); }
+        for entry in &self.nodes { result.insert(entry.id.to_string()); }
+        for entry in &self.nodeChildLinks { result.insert(entry.id.to_string()); }
+        for entry in &self.nodeRevisions { result.insert(entry.id.to_string()); }
+        for entry in &self.nodePhrasings { result.insert(entry.id.to_string()); }
+        for entry in &self.nodeTags { result.insert(entry.id.to_string()); }
+        result
+    }
+}
 
 #[derive(Default)]
 pub struct QueryShard_General_Subtree;
@@ -74,7 +88,7 @@ pub struct QueryShard_General_Subtree;
 impl QueryShard_General_Subtree {
     async fn subtree(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let tx = start_transaction(&mut anchor, gql_ctx).await?;
+        let tx = start_read_transaction(&mut anchor, gql_ctx).await?;
         let ctx = AccessorContext::new(tx);
 
         let collector = SubtreeCollector::default();

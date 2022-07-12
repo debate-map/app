@@ -24,12 +24,18 @@ pub async fn body_to_str(body: Body) -> Result<String, Error> {
     Ok(req_as_str)
 }
 
-pub fn to_anyhow<T: std::error::Error>(err: T) -> Error
+pub fn to_anyhow<
+    //T: std::error::Error
+    T: ToString
+>(err: T) -> Error
     where T: Into<Error> + Send + Sync
 {
     anyhow!(err)
 }
-pub fn to_anyhow_with_extra<T: std::error::Error>(err: T, extra: String) -> Error
+pub fn to_anyhow_with_extra<
+    //T: std::error::Error
+    T: ToString
+>(err: T, extra: String) -> Error
     where T: Into<Error> + Send + Sync
 {
     anyhow!(err.to_string() + "\n@extra:" + &extra)

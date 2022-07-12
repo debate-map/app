@@ -41,11 +41,18 @@ pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<
             }
         }).collect::<Vec<_>>().await)*/
 
+        let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
+
         // query_raw supposedly allows dynamically-constructed params-vecs, but the only way I've been able to get it working is by locking the vector to a single concrete type
         // see here: https://github.com/sfackler/rust-postgres/issues/445#issuecomment-1086774095
         //let params: Vec<String> = params.into_iter().map(|a| a.as_ref().to_string()).collect();
-        ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?
-            .try_collect().await.map_err(to_anyhow)
+        ctx.tx.query_raw(&sql_text, params).await
+            .map_err(|err| {
+                anyhow!("Got error while running query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str)
+            })?
+            .try_collect().await.map_err(|err| {
+                anyhow!("Got error while collecting results of db-query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str)
+            })
     };
 
     let filter = QueryFilter::from_filter_input_opt(filter_json)?;

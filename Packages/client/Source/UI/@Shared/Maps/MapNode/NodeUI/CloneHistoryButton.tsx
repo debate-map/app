@@ -14,22 +14,28 @@ export class CloneHistoryButton extends BaseComponent<{node: MapNodeL3}, {}> {
 		const {node} = this.props;
 		if (!store.main.maps.showCloneHistoryButtons) return null;
 
-		const cloneHistoryComps = GetNodeTagComps(node.id).filter(a=>a instanceof TagComp_CloneHistory) as TagComp_CloneHistory[];
-		const mainCloneHistoryComp: TagComp_CloneHistory|null = cloneHistoryComps.Max(a=>a.cloneChain.length);
-		if (mainCloneHistoryComp == null) return null;
+		const cloneHistoryComps_withEmpties = GetNodeTagComps(node.id).filter(a=>a instanceof TagComp_CloneHistory) as TagComp_CloneHistory[];
+		// todo: probably filter out nodes here in chain that were deleted (since it's not cleaned up by deletion command atm)
+		const cloneHistoryComps = cloneHistoryComps_withEmpties.filter(a=>a.cloneChain.length > 1);
+		if (cloneHistoryComps.length == 0) return null;
+		//const mainCloneHistoryComp: TagComp_CloneHistory|null = cloneHistoryComps.Max(a=>a.cloneChain.length);
+		const historiesWithEntriesBeforeUs = cloneHistoryComps.filter(a=>a.cloneChain.indexOf(node.id) > 0);
+		const historiesWithEntriesAfterUs = cloneHistoryComps.filter(a=>a.cloneChain.indexOf(node.id) < a.cloneChain.length - 1);
 
 		return (
 			<div style={{position: "absolute", right: "calc(100% - 35px)", top: 0, bottom: 0, display: "flex"}}>
-				<Button text={mainCloneHistoryComp.cloneChain[0] == node.id ? "S" : "C"} style={{margin: "auto 0", padding: "1px 5px"}} onClick={()=>{
-					let ui: CloneHistoryUI|n;
-					const controller = ShowMessageBox({
-						title: `Viewing clone-history for node "${node.id}" (as source and/or clone)`,
-						// don't use overlay/background-blocker
-						overlayStyle: {background: "none", pointerEvents: "none"},
-						containerStyle: {pointerEvents: "auto"},
-						message: ()=><CloneHistoryUI ref={c=>ui = c} node={node} controller={controller}/>,
-					});
-				}}/>
+				<Button text={`${historiesWithEntriesBeforeUs.length}:${historiesWithEntriesAfterUs.length}`} style={{margin: "auto 0", padding: "1px 5px"}}
+					title={`This node was the clone in ${historiesWithEntriesBeforeUs.length} case, and the source for a clone in ${historiesWithEntriesAfterUs.length} cases. (click for details)`}
+					onClick={()=>{
+						let ui: CloneHistoryUI|n;
+						const controller = ShowMessageBox({
+							title: `Viewing clone-history for node "${node.id}" (as source and/or clone)`,
+							// don't use overlay/background-blocker
+							overlayStyle: {background: "none", pointerEvents: "none"},
+							containerStyle: {pointerEvents: "auto"},
+							message: ()=><CloneHistoryUI ref={c=>ui = c} node={node} controller={controller}/>,
+						});
+					}}/>
 			</div>
 		);
 	}

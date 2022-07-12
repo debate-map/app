@@ -6,10 +6,14 @@ use rust_macros::wrap_slow_macros;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio_postgres::{Client};
-
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, pg_row_to_json::{postgres_row_to_json_value, postgres_row_to_struct}}};
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
+
+/*extern crate tokio_pg_mapper_derive;
+extern crate tokio_pg_mapper;
+use tokio_pg_mapper::FromTokioPostgresRow;
+use tokio_pg_mapper_derive::PostgresMapper;*/
 
 pub async fn get_tags_for(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<MapNodeTag>, Error> {
     get_db_entries(ctx, "nodeTags", &Some(json!({
@@ -25,20 +29,21 @@ id = "command_runs"
 excludeLinesWith = "#[graphql(name"
 "##;*/
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize, /*PostgresMapper*/)]
+//#[pg_mapper(table = "nodeTags")] // idk why this is needed, but whatever
 pub struct MapNodeTag {
     pub id: ID,
     pub creator: String,
     pub createdAt: i64,
     pub nodes: Vec<String>,
-    pub labels: Option<serde_json::Value>,
+    pub labels: Option<TagComp_Labels>,
     pub mirrorChildrenFromXToY: Option<serde_json::Value>,
     pub xIsExtendedByY: Option<serde_json::Value>,
     pub mutuallyExclusiveGroup: Option<serde_json::Value>,
     pub restrictMirroringOfX: Option<serde_json::Value>,
-    pub cloneHistory: Option<serde_json::Value>,
+    pub cloneHistory: Option<TagComp_CloneHistory>,
 }
-impl From<tokio_postgres::row::Row> for MapNodeTag {
+/*impl From<tokio_postgres::row::Row> for MapNodeTag {
     fn from(row: tokio_postgres::row::Row) -> Self {
         Self {
             id: ID::from(&row.get::<_, String>("id")),
@@ -53,7 +58,28 @@ impl From<tokio_postgres::row::Row> for MapNodeTag {
             cloneHistory: row.get("cloneHistory"),
         }
     }
+}*/
+impl From<tokio_postgres::row::Row> for MapNodeTag {
+    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row) }
 }
+
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[graphql(name = "TagComp_Labels")]
+pub struct TagComp_Labels {
+	pub nodeX: String,
+	pub labels: Vec<String>,
+}
+/*impl From<tokio_postgres::row::Row> for TagComp_Labels {
+    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row) }
+}*/
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[graphql(name = "TagComp_CloneHistory")]
+pub struct TagComp_CloneHistory {
+    pub cloneChain: Vec<String>,
+}
+/*impl From<tokio_postgres::row::Row> for TagComp_CloneHistory {
+    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row) }
+}*/
 
 #[derive(Clone)] pub struct GQLSet_MapNodeTag { nodes: Vec<MapNodeTag> }
 #[Object] impl GQLSet_MapNodeTag { async fn nodes(&self) -> &Vec<MapNodeTag> { &self.nodes } }

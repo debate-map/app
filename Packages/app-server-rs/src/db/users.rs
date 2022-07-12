@@ -48,6 +48,7 @@ pub struct User {
     pub lastEditAt: Option<i64>,
 }
 // todo: MS these converters can be removed (eg. using approach similar to clone_ldchange_val_0with_type_fixes(), or by using crate: https://github.com/dac-gmbh/serde_postgres)
+// [actually, just make a nice proc-macro wrapper around the postgres_row_to_json_value function, as seen in node_tags.rs]
 impl From<tokio_postgres::row::Row> for User {
     fn from(row: tokio_postgres::row::Row) -> Self {
         //println!("ID as string:{}", row.get::<_, String>("id"));

@@ -1,12 +1,18 @@
 use anyhow::{anyhow, bail, Context, Error, ensure};
 use async_graphql::{Result};
 use futures_util::{StreamExt};
+use serde::Deserialize;
 use serde_json::{json, Map};
 use tokio_postgres::{Column, types};
 use tokio_postgres::types::{Type, FromSql};
 use tokio_postgres::{Row};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::{utils::{type_aliases::JSONValue}};
+
+pub fn postgres_row_to_struct<'a, T: for<'de> Deserialize<'de>>(row: Row) -> T {
+    let as_json = postgres_row_to_json_value(row, 100).unwrap();
+    serde_json::from_value(as_json).unwrap()
+}
 
 pub fn postgres_row_to_json_value(row: Row, columns_to_process: usize) -> Result<JSONValue, Error> {
     let row_data = postgres_row_to_row_data(row, columns_to_process)?;

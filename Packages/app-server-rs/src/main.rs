@@ -4,7 +4,7 @@
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
 #![feature(duration_checked_float)]
-//#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
+#![feature(let_chains)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
 #![feature(integer_atomics, const_fn_trait_bound)] // needed for mem_alloc.rs
