@@ -118,6 +118,8 @@ impl SQLFragment {
                             SQLParam::Value_Int(_) => "::int8",
                             SQLParam::Value_Float(_) => "::float8",
                             SQLParam::Value_String(_) => "::text",
+                            //SQLParam::Value_String(_) => "", // for where string should be auto-converted to a more specialized pg-type
+                            SQLParam::Value_JSONB(_) => "::jsonb",
                         };
                         
                         Ok(format!("${}{}", value_id, type_annotation))

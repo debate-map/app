@@ -168,7 +168,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             }
         }
 
-        set_db_entry_by_id_for_struct(&ctx, "tags".to_owned(), tag.id.to_string(), tag).await?;
+        set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
     }
 
     log("Committing transaction...");

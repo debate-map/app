@@ -53,6 +53,7 @@ pub enum SQLParam {
     Value_Int(i64),
     Value_Float(f64),
     Value_String(String),
+    Value_JSONB(JSONValue),
 }
 impl SQLParam {
     pub fn into_ident_fragment(self) -> Result<SQLFragment, Error> {
@@ -85,10 +86,9 @@ pub fn json_value_to_sql_value_param(json_val: &JSONValue) -> Result<SQLParam, E
             Err(anyhow!("Invalid \"number\":{}", val))
         },
         JSONValue::String(val) => Ok(SQLParam::Value_String(val.to_owned())),
-        /*JSONValue::Object(data) => {
-            // break point
-            Ok(SQLParam::Value_JSONB(data))
-        },*/
+        // this is a bit inelegant here, in that we assume we want json-value scalars to map to the pg-type scalars, and the non-scalars to pg-type "jsonb", but that's not necessarily always the case
+        JSONValue::Array(_data) => Ok(SQLParam::Value_JSONB(json_val.clone())),
+        JSONValue::Object(_data) => Ok(SQLParam::Value_JSONB(json_val.clone())),
         _ => {
             //SQLParam::Value(op_val.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
             bail!("Conversion from this type of json-value ({json_val:?}) to a SQLParam is not yet implemented. Instead, provide one of: String, Number, Bool, Null");
@@ -159,6 +159,10 @@ impl ToSql for SQLParam {
             },
             SQLParam::Value_String(val) => {
                 if !String::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_String to pg type \"{typ}\"."))); }
+                val.to_sql(typ, out)
+            },
+            SQLParam::Value_JSONB(val) => {
+                if !JSONValue::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_JSONB to pg type \"{typ}\"."))); }
                 val.to_sql(typ, out)
             },
         }

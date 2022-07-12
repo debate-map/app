@@ -45,6 +45,7 @@ pub struct MapNodeRevision {
     pub createdAt: i64,
     pub phrasing: JSONValue,
     #[graphql(name = "phrasing_tsvector")]
+    #[serde(skip_serializing)] // makes-so when serializing the struct for saving to the db, this field is excluded (as it must be, since it's auto-generated)
     pub phrasing_tsvector: String,
     pub note: Option<String>,
     pub displayDetails: Option<JSONValue>,
