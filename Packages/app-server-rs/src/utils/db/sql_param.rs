@@ -175,3 +175,31 @@ impl<T: ToSql + SQLParam_> SQLParam_ for Vec<T> {
     }
 }
 impl<T: ToSql + SQLParam_ + Send + Sync + std::clone::Clone + 'static> SQLParam for Vec<T> {}
+
+/// Note: Always serializes as a value sql-param.
+#[derive(Debug, Clone)]
+pub struct CustomPGSerializer<T: ToSql> {
+    pg_type: String,
+    data: T,
+}
+impl<T: ToSql> CustomPGSerializer<T> {
+    pub fn new(pg_type: String, data: T) -> Self {
+        if pg_type.len() > 0 && !pg_type.starts_with("::") {
+            panic!("Invalid pg-type string; it must start with \"::\". @provided:{}", pg_type);
+        }
+        Self {
+            pg_type,
+            data,
+        }
+    }
+}
+impl<T: ToSql> SQLParam_ for CustomPGSerializer<T> {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> {
+        //Ok((true, "$V", self.pg_type.clone()))
+        prep_integrate_val(offered_slot, self.pg_type.as_str())
+    }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        self.data.to_sql_checked(ty, out)
+    }
+}
+impl<T: ToSql + Send + Sync + std::clone::Clone + 'static> SQLParam for CustomPGSerializer<T> {}

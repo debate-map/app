@@ -11,7 +11,7 @@ use tokio_postgres::{Row, types::ToSql};
 use anyhow::{anyhow, Error, Context};
 use deadpool_postgres::{Transaction, Pool};
 
-use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, pg_stream_parsing::RowData, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::SQLParam}, general::{general::{to_anyhow, match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::PGClientObject};
+use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, pg_stream_parsing::RowData, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::{SQLParam, CustomPGSerializer}}, general::{general::{to_anyhow, match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::PGClientObject};
 use crate::{utils::type_aliases::JSONValue};
 
 pub struct UserInfo {
@@ -79,7 +79,23 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
                 Ok(SF::merge(chain!(
                     match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
                     //Some(SF::value(key_and_val.1.to_owned())),
-                    Some(json_value_to_guessed_sql_value_param_fragment(key_and_val.1)?)
+                    Some({
+                        // temp; hard-code the correct type for fields that the guesser guesses wrong (this system really needs cleanup to avoid this ugly hack...)
+                        if table_name == "nodePhrasings" && key_and_val.0 == "references" {
+                            let as_array = key_and_val.1.as_array().unwrap().clone();
+                            let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
+                            /*let mut as_array_of_strings: Vec<String> = vec![];
+                            for val in as_array {
+                                as_array_of_strings.push(val.as_str().unwrap().to_owned());
+                            }*/
+                            SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
+                        } else if table_name == "nodePhrasings" && key_and_val.0 == "terms" {
+                            let as_array = key_and_val.1.as_array().unwrap().clone();
+                            SF::value(CustomPGSerializer::new("::jsonb[]".to_owned(), as_array))
+                        } else {
+                            json_value_to_guessed_sql_value_param_fragment(key_and_val.1)?
+                        }
+                    })
                 ).collect_vec()))
             }).try_collect2::<Vec<_>>()?,
             SF::lit(")").once(),

@@ -1,6 +1,7 @@
 import {Assert, IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {VLexoRank} from "../Utils.js";
+import {DMCommon_InServer} from "../Utils/General/General.js";
 import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
 import {ChildGroup} from "./nodes/@MapNodeType.js";
 
@@ -10,7 +11,7 @@ export const GetNodeChildLink = CreateAccessor((id: string)=>{
 });
 export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: string|n, group?: ChildGroup|n, orderByOrderKeys = true): NodeChildLink[]=>{
 	// temp; optimization that improves loading speed a bit (~10s to ~7s)
-	if (parentID != null) {
+	if (parentID != null && !DMCommon_InServer()) { // had to disable this in app-server-js, since causing UnlinkNode to fail in some cases (not sure why)
 		const linksUnderParent = GetDocs({
 			params: {filter: {
 				parent: parentID && {equalTo: parentID},

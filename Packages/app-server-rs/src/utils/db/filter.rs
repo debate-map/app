@@ -244,6 +244,9 @@ pub fn json_value_to_guessed_sql_value_param_fragment(json_val: &JSONValue) -> R
             let i64_vals = data.iter().filter(|a| a.is_number() && a.as_i64().is_some()).map(|a| a.as_i64().unwrap()).collect_vec();
             let f64_vals = data.iter().filter(|a| a.is_number() && a.as_f64().is_some()).map(|a| a.as_f64().unwrap()).collect_vec();
             let string_vals = data.iter().filter(|a| a.is_string()).map(|a| a.as_str().unwrap().to_owned()).collect_vec();
+            /*let array_vals = data.iter().filter(|a| a.is_array()).map(|a| a.as_array().unwrap().to_owned()).collect_vec();
+            let object_vals = data.iter().filter(|a| a.is_object()).map(|a| a.as_object().unwrap().to_owned()).collect_vec();*/
+
             let val_list_lengths = vec![bool_vals.len(), i64_vals.len(), f64_vals.len(), string_vals.len()];
             let most_matches_for_list = val_list_lengths.into_iter().max().unwrap();
             if most_matches_for_list > 0 {
@@ -251,6 +254,8 @@ pub fn json_value_to_guessed_sql_value_param_fragment(json_val: &JSONValue) -> R
                 if i64_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(i64_vals))) }
                 if f64_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(f64_vals))) }
                 if string_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(string_vals))) }
+                /*if array_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(array_vals))) }
+                if object_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(object_vals))) }*/
             }
 
             // fallback to jsonb
