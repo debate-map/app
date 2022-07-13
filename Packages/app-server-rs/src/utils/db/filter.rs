@@ -3,12 +3,12 @@ use anyhow::{anyhow, bail, Context, Error};
 use indexmap::IndexMap;
 use rust_macros::{wrap_slow_macros, unchanged};
 use serde::Serialize;
-use crate::{utils::general::{extensions::IteratorV, general::match_cond_to_iter}, store::live_queries_::lq_param::{LQParam, json_vals_to_sql_array_fragment}};
+use crate::{utils::general::{extensions::IteratorV, general::match_cond_to_iter}, store::live_queries_::lq_param::{LQParam}};
 use itertools::{chain, Itertools};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
 use crate::{utils::type_aliases::JSONValue};
-use super::{sql_fragment::{SQLFragment, SF}, pg_stream_parsing::RowData, sql_param::{SQLIdent, json_value_to_sql_value_param}};
+use super::{sql_fragment::{SQLFragment, SF}, pg_stream_parsing::RowData, sql_ident::{SQLIdent}, sql_param::SQLParamBoxed};
 
 //pub type Filter = Option<Map<String, JSONValue>>;
 pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
@@ -83,7 +83,7 @@ impl QueryFilter {
             //if let Some((filter_type, filter_value)) = field_filters.as_object().unwrap().iter().next() {
             for op in field_filter.filter_ops.iter() {
                 parts.push(op.get_sql_for_application(
-                    SQLIdent::param(field_name.clone())?.into_ident_fragment()?,
+                    SF::ident(SQLIdent::new(field_name.clone())?),
                     op.get_sql_for_value()?,
                 ));
             }
@@ -140,7 +140,11 @@ pub enum FilterOp {
 impl FilterOp {
     pub fn get_sql_for_value(&self) -> Result<SQLFragment, Error> {
         Ok(match self {
-            FilterOp::EqualsX(val) => json_value_to_sql_value_param(&val)?.into_value_fragment()?,
+            FilterOp::EqualsX(val) => {
+                /*let temp = json_value_to_guessed_sql_value_param(&val)?;
+                SF::value(*temp)*/
+                json_value_to_guessed_sql_value_param_fragment(&val)?
+            },
             FilterOp::IsWithinX(vals) => json_vals_to_sql_array_fragment(&vals)?,
             FilterOp::ContainsAllOfX(vals) => json_vals_to_sql_array_fragment(&vals)?,
         })
@@ -211,4 +215,74 @@ pub fn entry_matches_filter(entry: &RowData, filter: &QueryFilter) -> Result<boo
         }
     }
     Ok(true)
+}
+
+
+/// This function tries to convert an anonymous json-value into a type with ToSql implemented, for use as a sql-param.
+/// It's a bit inelegant here, in that we assume we want json-value scalars to map to pg-type scalars, and non-scalars to pg-type "jsonb", when that's not necessarily the case.
+/// That said, it's sufficient for our purposes, since we only use this for live-query "filters", where these simple rules work fine.
+//pub fn json_value_to_guessed_sql_value_param(json_val: &JSONValue) -> Result<SQLParamBoxed, Error> {
+pub fn json_value_to_guessed_sql_value_param_fragment(json_val: &JSONValue) -> Result<SQLFragment, Error> {
+    match json_val {
+        JSONValue::Null => Ok(SF::value(Box::new(Option::<String>::None))),
+        JSONValue::Bool(val) => Ok(SF::value(Box::new(*val))),
+        JSONValue::Number(val) => {
+            if let Some(val_i64) = val.as_i64() {
+                return Ok(SF::value(Box::new(val_i64)))
+                /*let val_i32 = i32::try_from(val_i64)?;
+                return Ok(SQLParam::Value_Int(val_i32));*/
+            }
+            if let Some(val_f64) = val.as_f64() {
+                return Ok(SF::value(Box::new(val_f64)));
+            }
+            Err(anyhow!("Invalid \"number\":{}", val))
+        },
+        JSONValue::String(val) => Ok(SF::value(Box::new(val.to_owned()))),
+        JSONValue::Array(data) => {
+            //if data.iter().all(|a| a.is_string()) { return Ok(SF::value(Box::new(json_val.clone()))) }
+            let bool_vals = data.iter().filter(|a| a.is_boolean()).map(|a| a.as_bool().unwrap()).collect_vec();
+            let i64_vals = data.iter().filter(|a| a.is_number() && a.as_i64().is_some()).map(|a| a.as_i64().unwrap()).collect_vec();
+            let f64_vals = data.iter().filter(|a| a.is_number() && a.as_f64().is_some()).map(|a| a.as_f64().unwrap()).collect_vec();
+            let string_vals = data.iter().filter(|a| a.is_string()).map(|a| a.as_str().unwrap().to_owned()).collect_vec();
+            let val_list_lengths = vec![bool_vals.len(), i64_vals.len(), f64_vals.len(), string_vals.len()];
+            let most_matches_for_list = val_list_lengths.into_iter().max().unwrap();
+            if most_matches_for_list > 0 {
+                if bool_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(bool_vals))) }
+                if i64_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(i64_vals))) }
+                if f64_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(f64_vals))) }
+                if string_vals.len() == most_matches_for_list { return Ok(SF::value(Box::new(string_vals))) }
+            }
+
+            // fallback to jsonb
+            Ok(SF::value(Box::new(json_val.clone())))
+            // todo: make sure this is correct
+        },
+        JSONValue::Object(_data) => {
+            Ok(SF::value(Box::new(json_val.clone())))
+            // todo: make sure this is correct
+        },
+        _ => {
+            //SQLParam::Value(op_val.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
+            bail!("Conversion from this type of json-value ({json_val:?}) to a SQLParam is not yet implemented. Instead, provide one of: Null, Bool, Number, String, Array, Object");
+        },
+    }
+}
+pub fn json_vals_to_sql_array_fragment(json_vals: &Vec<JSONValue>) -> Result<SQLFragment, Error> {
+    Ok(SF::merge(chain!(
+        SF::lit("array[").once(),
+        json_vals_to_fragments(json_vals)?,
+        SF::lit("]").once(),
+    ).collect_vec()))
+}
+pub fn json_vals_to_fragments(json_vals: &Vec<JSONValue>) -> Result<Vec<SQLFragment>, Error> {
+    json_vals.iter().enumerate().map(|(i, val)| -> Result<SQLFragment, Error> {
+        Ok(SQLFragment::merge(chain!(
+            match_cond_to_iter(i > 0, SF::lit(",").once(), empty()),
+            {
+                /*let temp = json_value_to_guessed_sql_value_param(val)?;
+                SF::value(*temp).once()*/
+                json_value_to_guessed_sql_value_param_fragment(&val)?.once()
+            },
+        ).collect_vec()))
+    }).try_collect2::<Vec<_>>()
 }

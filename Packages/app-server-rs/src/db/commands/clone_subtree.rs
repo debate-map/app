@@ -9,6 +9,7 @@ use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
 use hyper::{Body, Method};
 use rust_macros::wrap_slow_macros;
+use rust_shared::{time_since_epoch_ms, time_since_epoch_ms_i64};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tokio::sync::RwLock;
@@ -35,7 +36,6 @@ use crate::utils::db::accessors::AccessorContext;
 use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
-use crate::utils::db::sql_param::SQLIdent;
 use crate::utils::db::transactions::{start_read_transaction, start_write_transaction};
 use crate::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
@@ -100,19 +100,24 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
 	// defer database's checking of foreign-key constraints until the end of the transaction (else would error)
     ctx.tx.execute("SET CONSTRAINTS ALL DEFERRED;", &[]).await?;
 
+    // todo: make-so these new entries all have their "creator" field updated, to the user that did the cloning
+
     log("part 1");
     // first, add a new link from the old-node's parent to the new-node (which we've generated an id for, and are about to construct)
     let old_root_links = get_node_child_links(&ctx, Some(payload.parentNodeID.as_str()), Some(payload.rootNodeID.as_str())).await?;
     let old_root_link = old_root_links.get(0).ok_or(anyhow!("No child-link found between provided root-node \"{}\" and parent \"{}\".", payload.rootNodeID, payload.parentNodeID))?;
     let mut new_root_link = old_root_link.clone();
+    new_root_link.id = ID(new_uuid_v4_as_b64());
+    new_root_link.createdAt = time_since_epoch_ms_i64();
     new_root_link.child = id_replacements.get(&payload.rootNodeID).ok_or(anyhow!("Generation of new id for clone of root-node failed somehow."))?.to_owned();
     log("part 1.5");
-    set_db_entry_by_id_for_struct(&ctx, "nodeChildLinks".to_owned(), new_uuid_v4_as_b64(), new_root_link).await?;
+    set_db_entry_by_id_for_struct(&ctx, "nodeChildLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 
     log("part 2");
     for node_old in subtree.nodes {
         let mut node = node_old.clone();
         node.id = get_new_id(&node.id);
+        node.createdAt = time_since_epoch_ms_i64();
         node.c_currentRevision = get_new_id_str(&node.c_currentRevision);
         set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node).await?;
     }
@@ -120,6 +125,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     for rev_old in subtree.nodeRevisions {
         let mut rev = rev_old.clone();
         rev.id = get_new_id(&rev.id);
+        rev.createdAt = time_since_epoch_ms_i64();
         /*for attachment in &rev.attachments {
             if let Some(media) = attachment.media {
             }
@@ -131,6 +137,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     for phrasing_old in subtree.nodePhrasings {
         let mut phrasing = phrasing_old.clone();
         phrasing.id = get_new_id(&phrasing.id);
+        phrasing.createdAt = time_since_epoch_ms_i64();
         phrasing.node = get_new_id_str(&phrasing.node);
         set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
     }
@@ -138,6 +145,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     for link_old in subtree.nodeChildLinks {
         let mut link = link_old.clone();
         link.id = get_new_id(&link.id);
+        link.createdAt = time_since_epoch_ms_i64();
         link.parent = get_new_id_str(&link.parent);
         link.child = get_new_id_str(&link.child);
         set_db_entry_by_id_for_struct(&ctx, "nodeChildLinks".to_owned(), link.id.to_string(), link).await?;
@@ -146,6 +154,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     for tag_old in subtree.nodeTags {
         let mut tag = tag_old.clone();
         tag.id = get_new_id(&tag.id);
+        tag.createdAt = time_since_epoch_ms_i64();
 
         // todo: recreate the CalculateNodeIDsForTag function, so we don't need manual updating of the "nodes" field
 

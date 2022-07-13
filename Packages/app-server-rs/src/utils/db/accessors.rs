@@ -1,10 +1,10 @@
 use futures_util::TryStreamExt;
 use serde::Serialize;
-use tokio_postgres::Row;
+use tokio_postgres::{Row, types::ToSql};
 use anyhow::{anyhow, Error};
 use deadpool_postgres::{Transaction, Pool};
 
-use crate::utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{general::to_anyhow, data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject};
+use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{general::to_anyhow, data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
 
 pub struct AccessorContext<'a> {
     pub tx: Transaction<'a>,
@@ -43,10 +43,13 @@ pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<
 
         let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
 
+        let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+        let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
         // query_raw supposedly allows dynamically-constructed params-vecs, but the only way I've been able to get it working is by locking the vector to a single concrete type
         // see here: https://github.com/sfackler/rust-postgres/issues/445#issuecomment-1086774095
         //let params: Vec<String> = params.into_iter().map(|a| a.as_ref().to_string()).collect();
-        ctx.tx.query_raw(&sql_text, params).await
+        ctx.tx.query_raw(&sql_text, params_as_refs).await
             .map_err(|err| {
                 anyhow!("Got error while running query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str)
             })?

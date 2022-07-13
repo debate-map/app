@@ -8,6 +8,7 @@
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
 #![feature(integer_atomics, const_fn_trait_bound)] // needed for mem_alloc.rs
+#![feature(box_patterns)]
 
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
@@ -89,6 +90,7 @@ mod utils {
         pub mod pg_stream_parsing;
         pub mod pg_row_to_json;
         pub mod queries;
+        pub mod sql_ident;
         pub mod sql_param;
         pub mod transactions;
         pub mod uuid;

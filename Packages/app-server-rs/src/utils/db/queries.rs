@@ -12,7 +12,7 @@ use tracing::{info, trace, debug};
 use uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{sql_fragment::{SQLFragment}, sql_param::SQLIdent}, general::general::to_anyhow,}};
+use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::JSONValue, db::{sql_fragment::{SQLFragment}, sql_ident::SQLIdent}, general::general::to_anyhow,}, db::commands::_command::ToSqlWrapper};
 use super::{super::{mtx::mtx::{new_mtx, Mtx}}, pg_stream_parsing::RowData, filter::QueryFilter};
 
 /*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
@@ -53,7 +53,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
     };
     info!("Running where clause. @table:{table_name} @where:{where_sql} @filter:{filter:?}");
     let final_query = SQLFragment::merge(vec![
-        SQLFragment::new("SELECT * FROM $I", vec![SQLIdent::param(table_name.clone())?]),
+        SQLFragment::new("SELECT * FROM $I", vec![Box::new(SQLIdent::new(table_name.clone())?)]),
         where_sql,
     ]);
     let mut rows = query_func(final_query).await
@@ -86,7 +86,10 @@ pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &a
         let temp2: Vec<&(dyn ToSql + Sync)> = temp1.iter().map(|a| a.as_ref()).collect();
         client.query(&sql_text, temp2.as_slice()).await*/
         
-        client.query_raw(&sql_text, params).await.map_err(to_anyhow)?
+        let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+        let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
+        client.query_raw(&sql_text, params_as_refs).await.map_err(to_anyhow)?
             .try_collect().await.map_err(to_anyhow)
     };
     let (entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter, Some(&mtx)).await?;

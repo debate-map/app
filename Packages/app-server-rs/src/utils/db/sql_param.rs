@@ -1,170 +1,177 @@
 use std::{fmt::Display, sync::atomic::AtomicI32, iter::{once, Once}};
 use anyhow::{anyhow, bail, Context, Error, ensure};
+use bytes::BytesMut;
+use dyn_clone::DynClone;
 use itertools::Itertools;
 use regex::{Regex, Captures};
 use rust_shared::BasicError;
 use serde_json::Map;
-use tokio_postgres::types::{ToSql, WrongType};
+use tokio_postgres::types::{ToSql, WrongType, Type, IsNull, Kind};
 use lazy_static::lazy_static;
 use crate::{utils::type_aliases::JSONValue};
 
 use super::sql_fragment::SQLFragment;
 
-#[derive(Debug, Clone)]
-pub struct SQLIdent {
-    pub name: String,
+// (the ToSql constraint is for easier coding; sql-params that only interpolate themself into the query-str can have an empty/panicking ToSql implementation)
+// (the 'static constraint makes things easier by declaring that SQLParam will only be implemented-for/used-on owned types rather than references)
+/*pub trait SQLParam: ToSql + /*Clone +*/ Sync + std::fmt::Debug + 'static {
+pub type SQLParam_ = SQLParam;*/
+pub trait SQLParam_ /*: /*ToSql +*/ /*Clone +*/ Sync + std::fmt::Debug + 'static*/ {
+    /// * Returned tuple's first-val is whether to "consume" the parameter-slot that was offered. (ie. whether it gets sent to db as an "actual" query-parameter)
+    /// * Returned tuple's second-val is the "type" of parameter-slot that the offered slot must match.
+    /// * Returned tuple's third-val is the text to interpolate into the query-string for this param.
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error>;
+   
+    // test
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>>;
 }
-impl SQLIdent {
-    pub fn new(name: String) -> Result<SQLIdent, Error> {
-        // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
-        lazy_static! {
-            static ref REGEX_SAFE_IDENT: Regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
-        }
-        ensure!(REGEX_SAFE_IDENT.is_match(&name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{name}");
-        Ok(Self {
-            name
-        })
-    }
-    /// Shortcut for `SQLIdent::new(...).into_param()`.
-    pub fn param(name: String) -> Result<SQLParam, Error> {
-        Ok(SQLIdent::new(name)?.into_param())
-    }
+pub trait SQLParam: SQLParam_ + DynClone + /*ToSql +*/ /*+ Clone*/ /*+ ?Sized*/ Send + Sync + std::fmt::Debug + 'static {}
 
-    pub fn into_param(self) -> SQLParam {
-        SQLParam::Ident(self)
+dyn_clone::clone_trait_object!(SQLParam);
+
+pub type SQLParamBoxed = Box<dyn SQLParam>;
+/*impl<T: SQLParam + ?Sized> ToSql for Box<T> {
+}*/
+//impl<T: ToSql> ToSql for Box<T> {
+/*impl ToSql for Box<dyn ToSql> {
+    fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn std::error::Error + Sync + Send>> where Self: Sized {
+        let derefed: &dyn ToSql = &**self;
+        derefed.to_sql(ty, out)
+    }
+    fn accepts(ty: &Type) -> bool where Self: Sized {
+        T::accepts(ty)
+    }
+    fn to_sql_checked(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        let derefed: &dyn ToSql = &**self;
+        derefed.to_sql_checked(ty, out)
+    }
+}*/
+impl<T: SQLParam + ?Sized> SQLParam_ for Box<T> {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> {
+        //(**self).prep_integrate(offered_slot)
+        T::prep_integrate(self, offered_slot)
+    }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        (**self).to_sql_checked_(ty, out)
     }
 }
+impl<T: SQLParam + ?Sized + std::clone::Clone> SQLParam for Box<T> {}
+/*pub fn sql_param_boxed<T: SQLParam>(val: T) -> SQLParamBoxed {
+    Box::new(val)
+}*/
 
-// Send is needed, else can't be used across .await points
-//pub type ParamType = Box<dyn ToSql + Send + Sync>;
-// see comments in get_db_entries() for reason this is needed
-//pub type ParamType = Box<dyn Display>;
-//pub type ParamType = String;
-
-#[derive(Debug, Clone)]
-pub enum SQLParam {
-    // for rust-postgres <> postgres type-mappings: https://docs.rs/postgres/latest/postgres/types/trait.FromSql.html#types
-
-    /// For names of tables, columns, etc.
-    Ident(SQLIdent),
-    /// Examples: strings, numbers, etc. (for technical reasons, these currently must be converted to a String -- for most types this works fine [edit: is this still true?])
-    Value_Null,
-    Value_Bool(bool),
-    Value_Int(i64),
-    Value_Float(f64),
-    Value_String(String),
-    Value_JSONB(JSONValue),
-}
-impl SQLParam {
-    pub fn into_ident_fragment(self) -> Result<SQLFragment, Error> {
+// implement SQLParam for basic rust types
+// for tokio-postgres <> postgres type-mapping: https://docs.rs/postgres/latest/postgres/types/trait.ToSql.html#types
+// for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
+impl<T> SQLParam_ for Option<T> where T: SQLParam {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> {
         match self {
-            SQLParam::Ident(_) => Ok(SQLFragment::new("$I", vec![self])),
-            _ => bail!("Cannot convert a SQLParam:Value_XXX into an identifier SQLFragment."),
+            Some(val) => val.prep_integrate(offered_slot),
+            None => Ok((true, "$V", format!("${}", offered_slot))),
         }
     }
-    pub fn into_value_fragment(self) -> Result<SQLFragment, Error> {
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
         match self {
-            SQLParam::Ident(_) => bail!("Cannot convert a SQLParam:Ident into a value SQLFragment."),
-            _ => Ok(SQLFragment::new("$V", vec![self])),
+            Some(val) => val.to_sql_checked_(ty, out),
+            None => {
+                //Option::<String>::None.to_sql_checked(ty, out)
+                // for now, we're just gonna say that a None value is valid for all column-types in database (I don't know how to check nullability of db column atm, to compare)
+                // todo: make sure this won't cause problems
+                Ok(IsNull::Yes)
+            },
         }
     }
 }
+impl<T: std::clone::Clone> SQLParam for Option<T> where T: SQLParam {}
+fn prep_integrate_val(offered_slot: i32, type_annotation: &str) -> Result<(bool, &str, String), Error> {
+    let interpolation_str = format!("${}{}", offered_slot, type_annotation);
+    Ok((true, "$V", interpolation_str))
+}
+impl SQLParam_ for bool {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::bool") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for bool {}
+impl SQLParam_ for i32 {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::int4") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for i32 {}
+impl SQLParam_ for i64 {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::int8") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for i64 {}
+impl SQLParam_ for f32 {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::float4") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for f32 {}
+impl SQLParam_ for f64 {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::float8") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for f64 {}
+impl SQLParam_ for String {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::text") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for String {}
+impl SQLParam_ for JSONValue {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> { prep_integrate_val(offered_slot, "::jsonb") }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> { self.to_sql_checked(ty, out) }
+}
+impl SQLParam for JSONValue {}
 
-pub fn json_value_to_sql_value_param(json_val: &JSONValue) -> Result<SQLParam, Error> {
-    match json_val {
-        JSONValue::Null => Ok(SQLParam::Value_Null),
-        JSONValue::Bool(val) => Ok(SQLParam::Value_Bool(*val)),
-        JSONValue::Number(val) => {
-            if let Some(val_i64) = val.as_i64() {
-                return Ok(SQLParam::Value_Int(val_i64))
-                /*let val_i32 = i32::try_from(val_i64)?;
-                return Ok(SQLParam::Value_Int(val_i32));*/
-            }
-            if let Some(val_f64) = val.as_f64() {
-                return Ok(SQLParam::Value_Float(val_f64));
-            }
-            Err(anyhow!("Invalid \"number\":{}", val))
-        },
-        JSONValue::String(val) => Ok(SQLParam::Value_String(val.to_owned())),
-        // this is a bit inelegant here, in that we assume we want json-value scalars to map to the pg-type scalars, and the non-scalars to pg-type "jsonb", but that's not necessarily always the case
-        JSONValue::Array(_data) => Ok(SQLParam::Value_JSONB(json_val.clone())),
-        JSONValue::Object(_data) => Ok(SQLParam::Value_JSONB(json_val.clone())),
-        _ => {
-            //SQLParam::Value(op_val.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
-            bail!("Conversion from this type of json-value ({json_val:?}) to a SQLParam is not yet implemented. Instead, provide one of: String, Number, Bool, Null");
-        },
-    }
+pub trait ToSQLFragment {
+    fn into_ident_fragment(self) -> Result<SQLFragment, Error>;
+    fn into_value_fragment(self) -> Result<SQLFragment, Error>;
 }
 
-impl ToSql for SQLParam {
-    fn to_sql(&self, _ty: &tokio_postgres::types::Type, _out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> where Self: Sized {
-        /*match self {
-            //SQLParam::Ident(str) => str.to_sql(ty, out),
-            SQLParam::Ident(_str) => {
-                // instead, it should be interpolated into the query-str (since I don't know of a better way atm); see SQLFragment.into_query_args()
-                panic!("to_sql should never be called on a SQLParam::Ident!");
+/*impl<T: SQLParam> SQLParam_ for Vec<T> {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> {
+        //prep_integrate_val(offered_slot, "::bool")
+        match self.get(0) {
+            Some(first_val) => {
+                let mut result = first_val.prep_integrate(offered_slot)?;
+                result.2 = result.2 + "[]";
+                Ok(result)
             },
-            SQLParam::Value_Null => {
-                let temp: Option<&str> = None;
-                temp.to_sql(ty, out)
+            // for empty-vector case, postgres is fine with the type-annotation being left empty
+            None => prep_integrate_val(offered_slot, ""),
+        }
+    }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        //self.to_sql_checked(ty, out)
+        //<&[T] as SQLParam_>::to_sql_checked_(self.get(0).unwrap(), ty, out)
+        /*match self.get(0) {
+            Some(first_val) => first_val.to_sql_checked_(ty, out),
+            None => {
+                // I don't know how to handle the empty-vector case, so just assume it's valid // todo: make sure this doesn't cause problems
+                //Ok(IsNull::No)
+                // empty vectors serialize the same way regardless of type (thankfully), so 
+                let empty_vec: Vec<bool> = vec![];
+                empty_vec.to_sql_checked(ty, out)
             },
-            SQLParam::Value_Bool(val) => val.to_sql(ty, out),
-            SQLParam::Value_Float(val) => val.to_sql(ty, out),
-            SQLParam::Value_String(val) => val.to_sql(ty, out),
         }*/
-        panic!("Call to_sql_checked instead.");
-    }
-    //tokio_postgres::types::accepts!(Bool);
-    fn accepts(_ty: &tokio_postgres::types::Type) -> bool where Self: Sized {
-        /*//println!("Type:{} Accepts:{}", ty, String::accepts(ty));
-        //if let tokio_postgres::types::Type::BOOL(ty) = ty {
-        if ty.name().to_lowercase() == "bool" { return true; }
-
-        // test
-        //if ty.name().to_lowercase() == "_text" { return true; }
-
-        String::accepts(ty)*/
-        panic!("Call to_sql_checked instead.");
-    }
-    //tokio_postgres::types::to_sql_checked!();
-
-    fn to_sql_checked(&self, typ: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
-        match self {
-            //SQLParam::Ident(str) => str.to_sql(typ, out),
-            SQLParam::Ident(_str) => {
-                // instead, it should be interpolated into the query-str (since I don't know of a better way atm); see SQLFragment.into_query_args()
-                panic!("to_sql should never be called on a SQLParam::Ident!");
-            },
-            SQLParam::Value_Null => {
-                let val: Option<&str> = None;
-
-                // commented; don't do any type-checks, since we'd need to manually match each Option<T> to the sql-type
-                // (also, the null gets output the same way in each case -- and the database should reject the operation if null is invalid for the column)
-                //if !Option::<&str>::accepts(typ) { return Err(Box::new(WrongType::new::<Self>(typ.clone()))); }
-                //if !Option::<&str>::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Null to pg type \"{typ}\"."))); }
-
-                val.to_sql(typ, out)
-            },
-            SQLParam::Value_Bool(val) => {
-                if !bool::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Bool to pg type \"{typ}\"."))); }
-                val.to_sql(typ, out)
-            },
-            SQLParam::Value_Int(val) => {
-                if !i64::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Int to pg type \"{typ}\"."))); }
-                val.to_sql(typ, out)
-            },
-            SQLParam::Value_Float(val) => {
-                if !f64::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_Float to pg type \"{typ}\"."))); }
-                val.to_sql(typ, out)
-            },
-            SQLParam::Value_String(val) => {
-                if !String::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_String to pg type \"{typ}\"."))); }
-                val.to_sql(typ, out)
-            },
-            SQLParam::Value_JSONB(val) => {
-                if !JSONValue::accepts(typ) { return Err(BasicError::boxed(format!("Cannot convert SQLParam::Value_JSONB to pg type \"{typ}\"."))); }
-                val.to_sql(typ, out)
-            },
-        }
     }
 }
+impl<T: SQLParam + std::clone::Clone> SQLParam for Vec<T> {}*/
+impl<T: ToSql + SQLParam_> SQLParam_ for Vec<T> {
+    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> {
+        //prep_integrate_val(offered_slot, "::bool")
+        match self.get(0) {
+            Some(first_val) => {
+                let mut result = first_val.prep_integrate(offered_slot)?;
+                result.2 = result.2 + "[]";
+                Ok(result)
+            },
+            // for empty-vector case, postgres is fine with the type-annotation being left empty
+            None => prep_integrate_val(offered_slot, ""),
+        }
+    }
+    fn to_sql_checked_(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        self.to_sql_checked(ty, out)
+    }
+}
+impl<T: ToSql + SQLParam_ + Send + Sync + std::clone::Clone + 'static> SQLParam for Vec<T> {}

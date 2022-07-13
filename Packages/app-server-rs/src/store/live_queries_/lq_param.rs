@@ -4,7 +4,7 @@ use itertools::{Itertools, chain};
 use regex::{Regex, Captures};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
-use crate::{utils::{type_aliases::JSONValue, db::{filter::FilterOp, sql_param::{SQLParam, json_value_to_sql_value_param, SQLIdent}, sql_fragment::{SQLFragment, SF}}, general::{general::match_cond_to_iter, extensions::IteratorV}}};
+use crate::{utils::{type_aliases::JSONValue, db::{filter::FilterOp, sql_param::{SQLParam}, sql_fragment::{SQLFragment, SF}, sql_ident::SQLIdent}, general::{general::match_cond_to_iter, extensions::IteratorV}}};
 
 use super::lq_instance::LQInstance;
 
@@ -48,7 +48,8 @@ impl LQParam {
             LQParam::LQIndex(lq_index) => {
                 //SQLParam::Value_Float(f64::try_from(*lq_index)?).into_value_fragment() // this doesn't work fsr
                 //SQLParam::Value_Float(*lq_index as f64).into_value_fragment()
-                SQLParam::Value_Int(*lq_index as i64).into_value_fragment()
+                //SQLParam::Value_Int(*lq_index as i64).into_value_fragment()
+                Ok(SQLFragment::value(*lq_index as i64))
             },
             LQParam::FilterOpValue(_, _, op) => {
                 op.get_sql_for_value()
@@ -61,34 +62,18 @@ impl LQParam {
             LQParam::LQIndex(..) => bail!("Invalid call to get_sql_for_application, for an LQParam::LQIndex."),
             LQParam::FilterOpValue(field_name, _, op) => {
                 let field_name_fragment = SF::merge(vec![
-                    SQLIdent::param(left_container_name.to_owned())?.into_ident_fragment()?,
+                    SF::ident(SQLIdent::new(left_container_name.to_owned())?),
                     SF::lit("."),
-                    SQLIdent::param(field_name.to_owned())?.into_ident_fragment()?,
+                    SF::ident(SQLIdent::new(field_name.to_owned())?),
                 ]);
                 let lq_param_name_fragment = SF::merge(vec![
-                    SQLIdent::param(right_container_name.to_owned())?.into_ident_fragment()?,
+                    SF::ident(SQLIdent::new(right_container_name.to_owned())?),
                     SF::lit("."),
-                    SQLIdent::param(self.name())?.into_ident_fragment()?,
+                    SF::ident(SQLIdent::new(self.name())?),
                 ]);
                 
                 Ok(op.get_sql_for_application(field_name_fragment, lq_param_name_fragment))
             }
         }
     }
-}
-
-pub fn json_vals_to_sql_array_fragment(json_vals: &Vec<JSONValue>) -> Result<SQLFragment, Error> {
-    Ok(SF::merge(chain!(
-        SF::lit_once("array["),
-        json_vals_to_fragments(json_vals)?,
-        SF::lit_once("]"),
-    ).collect_vec()))
-}
-pub fn json_vals_to_fragments(json_vals: &Vec<JSONValue>) -> Result<Vec<SQLFragment>, Error> {
-    json_vals.iter().enumerate().map(|(i, val)| -> Result<SQLFragment, Error> {
-        Ok(SQLFragment::merge(chain!(
-            match_cond_to_iter(i > 0, SF::lit_once(","), empty()),
-            once(json_value_to_sql_value_param(val)?.into_value_fragment()?),
-        ).collect_vec()))
-    }).try_collect2::<Vec<_>>()
 }

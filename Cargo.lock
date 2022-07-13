@@ -63,6 +63,7 @@ dependencies = [
  "bytes",
  "deadpool",
  "deadpool-postgres",
+ "dyn-clone",
  "flume",
  "flurry",
  "futures",
@@ -600,6 +601,12 @@ checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
  "generic-array 0.14.5",
 ]
+
+[[package]]
+name = "dyn-clone"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "140206b78fb2bc3edbcfc9b5ccbd0b30699cfe8d348b8b31b330e47df5291a5a"
 
 [[package]]
 name = "easy-parallel"

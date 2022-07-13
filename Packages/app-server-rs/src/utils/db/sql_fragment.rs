@@ -7,37 +7,52 @@ use tokio_postgres::types::ToSql;
 use lazy_static::lazy_static;
 use crate::{utils::type_aliases::JSONValue};
 
-use super::sql_param::SQLParam;
+use super::sql_param::{SQLParam, SQLParamBoxed};
 
 /// Alias for SQLFragment, to make it shorter to call things like... SF::new, SF::lit, SF::merge
 pub type SF = SQLFragment;
 #[derive(Clone)] // can't do this atm, since can't have ToSql+Clone for params field (see: https://github.com/rust-lang/rust/issues/32220)
 pub struct SQLFragment {
     pub sql_text: String,
-    pub params: Vec<SQLParam>,
+    pub params: Vec<SQLParamBoxed>,
 }
+/*impl Clone for SQLFragment {
+    fn clone(&self) -> Self {
+        SQLFragment {
+            sql_text: self.sql_text.clone(),
+            params: self.params.
+        }
+    }
+    fn clone_from(&mut self, source: &Self) {
+        
+    }
+}*/
 impl SQLFragment {
     /// For param-placeholders in sql_text, use $I for identifiers, and $V for values.
     /// Note: In sql-text, don't add quotes around these markers/placeholders. (only exceptions are some complex structures, eg. the outer quotes and brackets for jsonb arrays)
-    pub fn new(sql_text: &'static str, params: Vec<SQLParam>) -> Self {
+    pub fn new(sql_text: &'static str, params: Vec<SQLParamBoxed>) -> Self {
         Self {
             sql_text: sql_text.to_owned(),
             //params: params.into_iter().map(|a| Box::new(a) as ParamType).collect(),
             params: params,
         }
     }
-    /// Like new(), except wraps the result in a `once` iterator; this makes it easy to use in the itertool `chain!(...)` macro
-    pub fn new_once(sql_text: &'static str, params: Vec<SQLParam>) -> Once<Self> {
-        once(Self::new(sql_text, params))
-    }
     pub fn lit(sql_text: &'static str) -> Self {
         Self::new(sql_text, vec![])
     }
-    /// Like lit(), except wraps the result in a `once` iterator; this makes it easy to use in the itertool `chain!(...)` macro
-    pub fn lit_once(sql_text: &'static str) -> Once<Self> {
-        once(Self::lit(sql_text))
+    // helpers for "raw" param-fragments
+    pub fn ident<T: SQLParam>(param: T) -> Self {
+        SQLFragment::new("$I", vec![Box::new(param)])
     }
-    
+    pub fn value<T: SQLParam>(param: T) -> Self {
+        SQLFragment::new("$V", vec![Box::new(param)])
+    }
+
+    /// Wraps this fragment in a `once` iterator; this makes it easy to use in the itertool `chain!(...)` macro
+    pub fn once(self) -> Once<Self> {
+        once(self)
+    }
+
     /// Only use this when you have to: when the number/placement of Identifiers in the SQL query-text is dynamic.
     /*pub fn INTERPOLATED_SQL(sql_text: String, params: Vec<SQLParam>) -> Self {
         Self {
@@ -48,7 +63,7 @@ impl SQLFragment {
 
     pub fn merge(fragments: Vec<SQLFragment>) -> SQLFragment {
         let mut sql_text = "".to_owned();
-        let mut params: Vec<SQLParam> = vec![];
+        let mut params: Vec<SQLParamBoxed> = vec![];
         for fragment in fragments {
             sql_text += &fragment.sql_text;
             for param in fragment.params {
@@ -69,7 +84,7 @@ impl SQLFragment {
         Self::merge(final_fragments)
     }
 
-    pub fn into_query_args(&mut self) -> Result<(String, Vec<SQLParam>), Error> {
+    pub fn into_query_args(&mut self) -> Result<(String, Vec<SQLParamBoxed>), Error> {
         let sql_base = std::mem::replace(&mut self.sql_text, "".to_owned());
         lazy_static! {
             static ref REGEX_PLACEHOLDER: Regex = Regex::new(r"\$[IV]").unwrap();
@@ -85,46 +100,17 @@ impl SQLFragment {
                 let match_index = next_match_index;
                 next_match_index += 1;
                 let param = self.params.get(match_index).with_context(|| format!("SQL query-string references param with index {match_index}, but no corresponding param was found."))?;
-                match param {
-                    SQLParam::Ident(ident) => {
-                        ensure!(caps_g0.as_str() == "$I", "Placeholder-type ({}) doesn't match with param-type (Ident)!", caps_g0.as_str()); // defensive
+                let slot_index_offered = next_value_id;
 
-                        // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
-                        lazy_static! {
-                            static ref REGEX_SAFE_IDENT: Regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
-                        }
-                        ensure!(REGEX_SAFE_IDENT.is_match(&ident.name), "An identifier was attempted to be used that contained invalid characters! Attempted identifier:{}", &ident.name);
-
-                        //format!("${}", match_id)
-                        // temp; interpolate the identifier directly into the query-str (don't know how to avoid it atm)
-                        Ok(format!("\"{}\"", ident.name))
-                    },
-                    _ => {
-                        ensure!(caps_g0.as_str() == "$V", "Placeholder-type provided ({}) must be $V, for param of type Value_XXX!", caps_g0.as_str()); // defensive
-
-                        let value_id = next_value_id;
-                        next_value_id += 1;
-
-                        /*let type_annotation = match value_id {
-                            1 => "::int",
-                            _ => "",
-                        };*/
-                        // for tokio-postgres <> postgres type-mapping: https://docs.rs/postgres/latest/postgres/types/trait.ToSql.html#types
-                        // for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
-                        let type_annotation = match param {
-                            SQLParam::Ident(_) => panic!("Invalid for this match group!"),
-                            SQLParam::Value_Null => "",
-                            SQLParam::Value_Bool(_) => "::bool",
-                            SQLParam::Value_Int(_) => "::int8",
-                            SQLParam::Value_Float(_) => "::float8",
-                            SQLParam::Value_String(_) => "::text",
-                            //SQLParam::Value_String(_) => "", // for where string should be auto-converted to a more specialized pg-type
-                            SQLParam::Value_JSONB(_) => "::jsonb",
-                        };
-                        
-                        Ok(format!("${}{}", value_id, type_annotation))
-                    },
+                let (consume_slot, slot_type_required, interpolation_text) = param.prep_integrate(slot_index_offered)?;
+                // defensive
+                if caps_g0.as_str() != slot_type_required {
+                    return Err(anyhow!("Placeholder-type provided ({}) does not match the type required ({}) for the value provided.", caps_g0.as_str(), slot_type_required))
                 }
+                if consume_slot {
+                    next_value_id += 1;
+                }
+                Ok(interpolation_text)
             })();
             result.map_err(|err| error = Some(err)).unwrap_or_default()
         }).into_owned();
@@ -136,14 +122,13 @@ impl SQLFragment {
         ensure!(placeholders_found == self.params.len(), "Placeholder and param lengths differ!");
         
         let params_base = std::mem::replace(&mut self.params, vec![]);
-        let params_final = params_base.into_iter().filter_map(|a| {
-            match a {
-                // identifiers are (safely -- by goal, anyway) inlined into the sql-text, so don't send them to tokio-postgres/the-db as "actual" params
-                SQLParam::Ident(_str) => None,
-                /*SQLParam::Value_String(str) => Some(SQLParam::Value_String(str)),
-                SQLParam::Value_Float(str) => Some(SQLParam::Value_Float(str)),
-                SQLParam::Value_Null => Some(SQLParam::Value_Null),*/
-                _a => Some(_a)
+        let params_final = params_base.into_iter().filter(|a| {
+            match a.prep_integrate(0) {
+                Ok(result) => {
+                    // identifiers are (safely -- that's the goal, anyway) inlined into the sql-text, so don't send them to tokio-postgres/the-db as "actual" params
+                    result.0
+                }
+                Err(err) => false,
             }
         }).collect();
         

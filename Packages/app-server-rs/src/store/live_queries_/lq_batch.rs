@@ -9,15 +9,17 @@ use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
 use indexmap::IndexMap;
 use itertools::{chain, Itertools};
 use tokio::sync::{RwLock, Semaphore};
+use tokio_postgres::types::ToSql;
 use tokio_postgres::{Row, RowStream};
 use lazy_static::lazy_static;
 use tracing::{trace, error};
+use crate::db::commands::_command::ToSqlWrapper;
 use crate::store::live_queries_::lq_batch_::sql_generator::prepare_sql_query;
 use crate::utils::db::filter::{QueryFilter};
 use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
 use crate::utils::db::sql_fragment::{SF};
 use crate::utils::db::pg_stream_parsing::RowData;
-use crate::utils::db::sql_param::{SQLIdent, SQLParam};
+use crate::utils::db::sql_param::{SQLParam};
 use crate::utils::general::extensions::IteratorV;
 use crate::utils::general::general::{match_cond_to_iter, AtomicF64, to_anyhow_with_extra};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
@@ -114,7 +116,10 @@ impl LQBatch {
                 error!("Batch had execute() called, despite its `query_instances` field being empty! (this should never happen)");
                 vec![]
             } else {
-                let row_stream = client.query_raw(&sql_text, params)
+                let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+                let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
+                let row_stream = client.query_raw(&sql_text, params_as_refs)
                     .await.map_err(|a| to_anyhow_with_extra(a, sql_info_str.clone()))?;
                 let rows: Vec<Row> = row_stream.try_collect()
                     .await.map_err(|a| to_anyhow_with_extra(a, sql_info_str.clone()))?;

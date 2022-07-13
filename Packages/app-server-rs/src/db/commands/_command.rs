@@ -7,11 +7,11 @@ use serde::Serialize;
 use async_trait::async_trait;
 use futures_util::{TryStreamExt};
 use serde_json::json;
-use tokio_postgres::Row;
+use tokio_postgres::{Row, types::ToSql};
 use anyhow::{anyhow, Error, Context};
 use deadpool_postgres::{Transaction, Pool};
 
-use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic, pg_stream_parsing::RowData, sql_param::{SQLIdent, json_value_to_sql_value_param}, accessors::AccessorContext}, general::{general::{to_anyhow, match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::PGClientObject};
+use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, pg_stream_parsing::RowData, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::SQLParam}, general::{general::{to_anyhow, match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::PGClientObject};
 use crate::{utils::type_aliases::JSONValue};
 
 pub struct UserInfo {
@@ -55,34 +55,42 @@ pub async fn set_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'
     set_db_entry_by_id(ctx, table_name, id, struct_as_row_data).await
 }
 pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row: RowData) -> Result<Vec<Row>, Error> {
+    // todo: maybe remove this (it's not really necessary to pass the id in separately from the row-data)
+    let id_from_row_data = new_row.get("id").ok_or(anyhow!("No \"id\" field in entry!"))?
+        .as_str().ok_or(anyhow!("The \"id\" field in entry was not a string!"))?;
+    if id_from_row_data != id.as_str() {
+        return Err(anyhow!("ID passed to set_db_entry_by_id does not match the id present in the data structure."));
+    }
+    
     let mut final_query = SF::merge_lines(chain!(
         chain!(
-            SF::new_once("INSERT INTO $I (", vec![SQLIdent::param(table_name.clone())?]),
+            SF::new("INSERT INTO $I (", vec![SQLIdent::new_boxed(table_name.clone())?]).once(),
             new_row.iter().enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
                 Ok(SF::merge(chain!(
-                    match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
-                    Some(SQLIdent::param(key_and_val.0.to_owned())?.into_ident_fragment()?),
+                    match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
+                    Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
                 ).collect_vec()))
             }).try_collect2::<Vec<_>>()?,
-            SF::lit_once(")")
+            SF::lit(")").once()
         ),
         chain!(
-            SF::lit_once("VALUES("),
+            SF::lit("VALUES(").once(),
             new_row.iter().enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
                 Ok(SF::merge(chain!(
-                    match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
-                    Some(json_value_to_sql_value_param(&key_and_val.1.to_owned())?.into_value_fragment()?),
+                    match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
+                    //Some(SF::value(key_and_val.1.to_owned())),
+                    Some(json_value_to_guessed_sql_value_param_fragment(key_and_val.1)?)
                 ).collect_vec()))
             }).try_collect2::<Vec<_>>()?,
-            SF::lit_once(")"),
+            SF::lit(")").once(),
         ),
-        SF::lit_once("ON CONFLICT (id) DO UPDATE SET"),
+        SF::lit("ON CONFLICT (id) DO UPDATE SET").once(),
         new_row.iter().filter(|key_and_val| key_and_val.0 != "id").enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
             Ok(SF::merge(chain!(
-                match_cond_to_iter(i > 0, once(SF::lit(", ")), empty()),
-                Some(SQLIdent::param(key_and_val.0.to_owned())?.into_ident_fragment()?),
-                SF::lit_once(" = EXCLUDED."),
-                Some(SQLIdent::param(key_and_val.0.to_owned())?.into_ident_fragment()?),
+                match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
+                Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
+                SF::lit(" = EXCLUDED.").once(),
+                Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
             ).collect_vec()))
         }).try_collect2::<Vec<_>>()?,
     ).collect_vec());
@@ -90,8 +98,17 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
 
     let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
 
+    // this basically "unboxes" the params into refs; this is needed for each entry to satisfy the ToSql constraint
+    // (see here for more info: https://github.com/sfackler/rust-postgres/issues/712)
+    /*let params_as_refs: Vec<&(dyn ToSql + Sync)> = params.iter()
+        .map(|x| x/*.as_ref()*/ as &(dyn ToSql + Sync))
+        .collect();*/
+
+    let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+    let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
     //let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?.try_collect().await.map_err(to_anyhow)?;
-    let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params).await
+    let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params_as_refs).await
         .map_err(|err| {
             anyhow!("Got error while running query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
         })?
@@ -99,4 +116,22 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
             anyhow!("Got error while collecting results of db-query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
         })?;
     Ok(rows)
+}
+
+#[derive(Debug)]
+pub struct ToSqlWrapper {
+    pub data: Box<dyn SQLParam>,
+}
+impl ToSql for ToSqlWrapper {
+    fn accepts(ty: &tokio_postgres::types::Type) -> bool where Self: Sized {
+        panic!("Call to_sql_checked instead.");
+    }
+    fn to_sql(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> where Self: Sized {
+        panic!("Call to_sql_checked instead.");
+    }
+    fn to_sql_checked(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        /*let test: dyn SQLParam = *self.data;
+        test.to_sql_checked_(ty, out)*/
+        self.data.to_sql_checked_(ty, out)
+    }
 }
