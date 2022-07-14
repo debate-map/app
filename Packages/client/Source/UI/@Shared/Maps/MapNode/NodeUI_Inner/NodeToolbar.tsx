@@ -9,6 +9,7 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ES, HSLA, InfoButton, Observer, UseDocumentEventListener} from "web-vcore";
 import {Color} from "web-vcore/nm/chroma-js.js";
+import {E} from "web-vcore/nm/js-vextensions";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
@@ -21,12 +22,14 @@ import {NodeUI_Menu} from "../NodeUI_Menu.js";
 export type NodeToolbar_Props = {
 	backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onMoreClick?: (e: any)=>any, onMoreHoverChange?: (hovered: boolean)=>any,
+	nodeUI_width_final: number,
 	leftPanelShow: boolean,
 } & NodeUI_Inner_Props;
+export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
-		const {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, leftPanelShow} = this.props;
+		const {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, nodeUI_width_final, leftPanelShow} = this.props;
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const nodeForm = GetNodeForm(node, path);
@@ -34,30 +37,49 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isPremiseOfArg = isPremiseOfSinglePremiseArg || isPremiseOfMultiPremiseArg;
 
+		//const sharedProps = {node, panelToShow, onPanelButtonClick, leftPanelShow};
+		const sharedProps = E(this.props, {buttonCount: 1}); // button-count is updated shortly
+		const {key, css} = cssHelper(this);
+
+		const toolbarItems = (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
+		const getToolbarItemUIs = ()=>{
+			return toolbarItems.map((item, index)=>{
+				if (item.panel == "truth" && (node.type == MapNodeType.claim || node.type == MapNodeType.argument)) {
+					return <ToolBarButton key={index} {...sharedProps} text="Agreement" panel="truth"
+						enabled={node.type == MapNodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
+				}
+				if (item.panel == "relevance" && (node.type == MapNodeType.argument || isPremiseOfArg)) {
+					return <ToolBarButton key={index} {...sharedProps} text="Relevance" panel="relevance"
+						enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg}
+						disabledInfo={
+							isPremiseOfMultiPremiseArg
+								? "This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises."
+								: undefined
+						}/>;
+				}
+				if (item.panel == "tags") {
+					return <ToolBarButton key={index} {...sharedProps} text="Tags" panel="tags"/>;
+				}
+				if (item.panel == "phrasings") {
+					return <ToolBarButton key={index} {...sharedProps} text="Phrasings" panel="phrasings"/>;
+				}
+				return null;
+			});
+		};
+		// for this call, we are just getting the number of toolbar-buttons (fine to discard result)
+		sharedProps.buttonCount = getToolbarItemUIs().filter(a=>a != null).length;
+
 		/*const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
 		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));*/
 
-		//const sharedProps = {node, panelToShow, onPanelButtonClick, leftPanelShow};
-		const sharedProps = this.props;
-		const {key, css} = cssHelper(this);
 		return (
 			<Row mt={1} className={key("NodeToolbar")} style={css({
 				position: "relative", height: 25, background: backgroundColor.css(), borderRadius: "0 0 5px 5px",
 				//color: liveSkin.NodeTextColor().css(),
 			})}>
 				<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>
-				{(node.type == MapNodeType.claim || node.type == MapNodeType.argument) &&
-				<ToolBarButton {...sharedProps} text="Agreement" panel="truth"
-					enabled={node.type == MapNodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>}
-				{(node.type == MapNodeType.argument || isPremiseOfArg) &&
-				<ToolBarButton {...sharedProps} text="Relevance" panel="relevance"
-					enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg}
-					disabledInfo={
-						isPremiseOfMultiPremiseArg ? "This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises." :
-						undefined
-					}/>}
-				<ToolBarButton {...sharedProps} text="Phrasings" panel="phrasings"/>
+				{getToolbarItemUIs()}
 				<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
 					/*processedMouseEvents.add(e.nativeEvent);
 					setContextMenuOpen(!contextMenuOpen);*/
@@ -84,12 +106,18 @@ class ToolBarButton extends BaseComponent<{
 	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onClick?: (e: React.MouseEvent)=>any, onHoverChange?: (hovered: boolean)=>any,
 	leftPanelShow: boolean,
-} & NodeToolbar_Props, {}> {
+} & NodeToolbar_SharedProps, {}> {
 	render() {
-		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, leftPanelShow} = this.props;
+		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, nodeUI_width_final, leftPanelShow, buttonCount} = this.props;
 		const [hovered, setHovered] = useState(false);
 		let highlight = panel && panelToShow == panel;
 		const {toolbarRatingPreviews} = store.main.maps;
+		const spacePerButton = (nodeUI_width_final - 40) / (buttonCount ?? 1);
+		const sizeIndex =
+			spacePerButton >= 80 ? 0 :
+			spacePerButton >= 60 ? 1 :
+			spacePerButton >= 50 ? 2 :
+			3;
 
 		let icon: string|n;
 		if (text == "<<") {
@@ -106,7 +134,10 @@ class ToolBarButton extends BaseComponent<{
 		const highlightOrHovered = highlight || hovered;
 
 		const textComp = enabled
-			? <Text style={{position: "relative"}}>{text}</Text>
+			? <Text style={E(
+				{position: "relative", overflow: "hidden", textOverflow: "ellipsis"},
+				{fontSize: [null, 10, 10, 8][sizeIndex]},
+			)}>{text}</Text>
 			: <InfoButton text={disabledInfo!}/>;
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
@@ -133,10 +164,14 @@ class ToolBarButton extends BaseComponent<{
 					highlightOrHovered && {background: "rgba(255,255,255,.2)"},
 					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
 					!first && {borderWidth: "1px 0 0 1px"},
-					icon == null && {flex: 50, borderWidth: "1px 0 0 1px"},
+					icon == null && {
+						// normally we try to keep all toolbar-buttons the same width, but with limited space, use flexible width based on text-length
+						flex: [50, 50, text.length, text.length][sizeIndex],
+						borderWidth: "1px 0 0 1px",
+					},
 					icon && {
 						//width: icon == "transfer-left" ? 40 : 25,
-						width: icon == "transfer-left" ? 35 : 30,
+						width: icon == "transfer-left" ? [35, 25, 20, 15][sizeIndex] : [30, 25, 20, 15][sizeIndex],
 						fontSize: 16,
 					},
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
@@ -164,7 +199,7 @@ class ToolBarButton extends BaseComponent<{
 }
 
 @Observer
-export class RatingsPreviewBackground extends BaseComponent<{path: string, node: MapNodeL3, ratingType: NodeRatingType} & NodeToolbar_Props, {}> {
+export class RatingsPreviewBackground extends BaseComponent<{path: string, node: MapNodeL3, ratingType: NodeRatingType} & NodeToolbar_SharedProps, {}> {
 	render() {
 		const {path, node, ratingType, backgroundColor} = this.props;
 		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.none) return null;

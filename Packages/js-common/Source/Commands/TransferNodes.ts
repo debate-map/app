@@ -145,8 +145,8 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				const newLink = Clone(node.link) as NodeChildLink;
 				newLink.group = transfer.childGroup;
 				newLink.orderKey = orderKeyForNewNode;
-				if (newNode.type == MapNodeType.argument && transfer.argumentPolarity != null) {
-					newLink.polarity = transfer.argumentPolarity;
+				if (newNode.type == MapNodeType.argument) {
+					newLink.polarity = transfer.argumentPolarity ?? Polarity.supporting;
 				}
 
 				this.IntegrateSubcommand<AddChildNode>(

@@ -50,7 +50,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 export type NodeUI_Inner_Props = {
 	indexInNodeList: number, node: MapNodeL3, path: string, treePath: string, map?: Map,
-	width?: number|string|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
+	width?: number/*|string*/|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	usePortalForDetailBoxes?: boolean,
 } & {dragInfo?: DragInfo};
@@ -327,7 +327,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			//const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath);
 
 			let width_final = widthOverride ?? width ?? MapNodeType_Info.for[node.type].minWidth;
-			if (IsNumber(width_final)) width_final = width_final.KeepAtLeast(MapNodeType_Info.for[node.type].minWidth);
+			//if (IsNumber(width_final))
+			width_final = width_final.KeepAtLeast(MapNodeType_Info.for[node.type].minWidth);
 
 			return (
 				<ExpandableBox
@@ -407,6 +408,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
 						{toolbarShow &&
 						<NodeToolbar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
+							nodeUI_width_final={width_final}
 							leftPanelShow={leftPanelShow}
 							onMoreClick={()=>{
 								//onClick();

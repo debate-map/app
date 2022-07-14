@@ -116,7 +116,9 @@ export class Map {
 	extras = new Map_Extras();
 }
 
-@MGLClass()
+@MGLClass({
+	schemaDeps: ["ToolbarItem"],
+})
 export class Map_Extras {
 	constructor(data?: Partial<Map_Extras>) {
 		Object.assign(this, data);
@@ -133,4 +135,25 @@ export class Map_Extras {
 
 	@Field({type: "boolean"}, {opt: true})
 	defaultNodeToolbarEnabled? = true;
+
+	@Field({items: {$ref: "ToolbarItem"}}, {opt: true})
+	toolbarItems? = [] as ToolbarItem[];
+}
+
+export const NodePanel_values = [
+	"significance", "neutrality", "truth", "relevance", "impact",
+	"definitions",
+	"phrasings",
+	"discussion",
+	"social",
+	"tags",
+	"details",
+	"history",
+	"others",
+];
+export type NodePanel = typeof NodePanel_values[number];
+@MGLClass()
+export class ToolbarItem {
+	@Field({type: "string"})
+	panel: NodePanel;
 }

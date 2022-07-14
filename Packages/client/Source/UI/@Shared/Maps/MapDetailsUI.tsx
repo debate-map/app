@@ -1,4 +1,4 @@
-import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID, ChildOrdering, ChildOrdering_infoText} from "dm_common";
+import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {Observer, TextPlus} from "web-vcore";
@@ -116,8 +116,36 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>Toolbar:</Pre>
-						<CheckBox enabled={enabled} style={{width: "100%"}}
-							value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
+						<Text>Show:</Text>
+						<CheckBox ml={5} enabled={enabled} value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
+						<TextPlus ml={5} info={`
+							* If no items are enabled, the default toolbar-items will be shown.
+							* For an item to be shown, it still must be valid for the given node.
+						`.AsMultiline(0)}>Items:</TextPlus>
+						{(()=>{
+							const setToolbarItemEnabled = (item_panel: string, new_enabled: boolean)=>{
+								const items_order: ToolbarItem[] = [{panel: "truth"}, {panel: "relevance"}, {panel: "tags"}, {panel: "phrasings"}];
+
+								let new_items: ToolbarItem[] = newData.extras.toolbarItems ?? [];
+								// first, remove any entries for the given panel (ensuring no duplicates)
+								new_items = new_items.filter(a=>a.panel != item_panel);
+								// then, if enabling that panel, add an entry for it
+								if (new_enabled) {
+									new_items.push({panel: item_panel});
+								}
+								// then ensure the ordering is correct
+								new_items = new_items.OrderBy(a=>items_order.findIndex(b=>b.panel == a.panel));
+								Change(newData.extras.toolbarItems = new_items);
+							};
+							return (
+								<Row style={{fontSize: 12}}>
+									<CheckBox ml={5} text="Agreement" value={newData.extras.toolbarItems?.Any(a=>a.panel == "truth") ?? false} onChange={val=>setToolbarItemEnabled("truth", val)}/>
+									<CheckBox ml={5} text="Relevance" value={newData.extras.toolbarItems?.Any(a=>a.panel == "relevance") ?? false} onChange={val=>setToolbarItemEnabled("relevance", val)}/>
+									<CheckBox ml={5} text="Tags" value={newData.extras.toolbarItems?.Any(a=>a.panel == "tags") ?? false} onChange={val=>setToolbarItemEnabled("tags", val)}/>
+									<CheckBox ml={5} text="Phrasings" value={newData.extras.toolbarItems?.Any(a=>a.panel == "phrasings") ?? false} onChange={val=>setToolbarItemEnabled("phrasings", val)}/>
+								</Row>
+							);
+						})()}
 					</RowLR>
 
 					{/*!forNew &&

@@ -2,6 +2,7 @@ import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun,
 import React from "react";
 import {store} from "Store";
 import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
+import useResizeObserver from "use-resize-observer";
 import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus} from "web-vcore";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {Command} from "web-vcore/nm/mobx-graphlink";
@@ -62,6 +63,8 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 			}}/>
 		);
 
+		const {ref: rootRef, width = -1, height = -1} = useResizeObserver();
+
 		let messageUI: JSX.Element;
 		let messageUI_row2: JSX.Element|n;
 		if (run.commandName == AddChildNode.name) {
@@ -87,7 +90,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id} treePath="0"
-							backgroundFillPercentOverride={100} width="100%"
+							backgroundFillPercentOverride={100} width={width}
 							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
@@ -109,7 +112,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id} treePath="0"
-							backgroundFillPercentOverride={100} width="100%"
+							backgroundFillPercentOverride={100} width={width}
 							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
@@ -118,7 +121,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 		}
 
 		return (
-			<Column>
+			<Column ref={a=>rootRef(a?.DOM_HTML ?? null)}>
 				<Row mt={index > 0 ? 10 : 0} style={{background: HSLA(0, 0, 1, .2), borderRadius: 5, fontSize: 13}}>
 					<Column sel ml={5} mr={5} p={5} center style={{justifyContent: "center"}}>
 						<Pre>{moment(run.runTime).format("YYYY-MM-DD")}</Pre>
