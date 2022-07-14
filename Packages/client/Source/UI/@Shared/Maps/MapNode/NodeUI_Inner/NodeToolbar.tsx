@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
+import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {Vector2} from "react-vmenu/Dist/Utils/FromJSVE";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -42,6 +42,10 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const {key, css} = cssHelper(this);
 
 		const toolbarItems = (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
+		const tags = GetNodeTags(node.id);
+		const labels = tags.filter(a=>a.labels != null).SelectMany(a=>a.labels!.labels).Distinct();
+		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
+		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;
 		const getToolbarItemUIs = ()=>{
 			return toolbarItems.map((item, index)=>{
 				if (item.panel == "truth" && (node.type == MapNodeType.claim || node.type == MapNodeType.argument)) {
@@ -58,7 +62,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 						}/>;
 				}
 				if (item.panel == "tags") {
-					return <ToolBarButton key={index} {...sharedProps} text="Tags" panel="tags"/>;
+					return <ToolBarButton key={index} {...sharedProps} text={labelsAndOtherTags > 0 ? `Tags: ${labelsAndOtherTags}` : "Tags"} panel="tags"/>;
 				}
 				if (item.panel == "phrasings") {
 					return <ToolBarButton key={index} {...sharedProps} text="Phrasings" panel="phrasings"/>;
