@@ -61,7 +61,7 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
         ) AS media_ids_from_revisions ON (medias.id = media_ids_from_revisions.id#>>'{}')
     "#, params(&[&root_id, &(max_depth as i32)])).await?.try_collect().await?;
 
-    let subtree = Subtree {
+    let mut subtree = Subtree {
         terms: term_rows.into_iter().map(|a| a.into()).collect(),
         medias: media_rows.into_iter().map(|a| a.into()).collect(),
         nodes: node_rows.into_iter().map(|a| a.into()).collect(),
@@ -70,5 +70,6 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
         nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
         nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
     };
+    subtree.sort_all_entries();
     Ok(subtree)
 }

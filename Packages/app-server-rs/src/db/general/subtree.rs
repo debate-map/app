@@ -67,6 +67,17 @@ impl Subtree {
         for entry in &self.nodeTags { result.insert(entry.id.to_string()); }
         result
     }
+    pub fn sort_all_entries(&mut self) {
+        // see here for reason sort_by_key isn't used: https://stackoverflow.com/a/47126516
+        //self.terms.sort_by_key(|a| &a.id);
+        self.terms.sort_by(|x, y| x.id.cmp(&y.id));
+        self.medias.sort_by(|x, y| x.id.cmp(&y.id));
+        self.nodes.sort_by(|x, y| x.id.cmp(&y.id));
+        self.nodeChildLinks.sort_by(|x, y| x.id.cmp(&y.id));
+        self.nodeRevisions.sort_by(|x, y| x.id.cmp(&y.id));
+        self.nodePhrasings.sort_by(|x, y| x.id.cmp(&y.id));
+        self.nodeTags.sort_by(|x, y| x.id.cmp(&y.id));
+    }
 }
 
 #[derive(Default)]

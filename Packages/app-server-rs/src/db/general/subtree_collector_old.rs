@@ -26,7 +26,7 @@ pub struct SubtreeCollector_Old {
 }
 impl SubtreeCollector_Old {
     pub fn to_subtree(self: &Self) -> Subtree {
-        Subtree {
+        let mut result = Subtree {
             terms: self.terms.clone().into_values().collect(),
             medias: self.medias.clone().into_values().collect(),
             nodes: self.nodes.clone().into_values().collect(),
@@ -34,7 +34,9 @@ impl SubtreeCollector_Old {
             nodeRevisions: self.node_revisions.clone().into_values().collect(),
             nodePhrasings: self.node_phrasings.clone().into_values().collect(),
             nodeTags: self.node_tags.clone().into_values().collect(),
-        }
+        };
+        result.sort_all_entries();
+        result
     }
 }
 
