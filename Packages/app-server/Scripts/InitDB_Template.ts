@@ -134,29 +134,65 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		create index nodeChildLinks_parent_child on app_public."nodeChildLinks" (parent, child);
 
 		-- helper functions (eg. optimized tree-traversal)
+		CREATE OR REPLACE FUNCTION encode_uuid(id UUID) RETURNS varchar(22) LANGUAGE SQL IMMUTABLE AS $$1
+			SELECT replace(replace(
+			trim(trailing "=" FROM encode(decode(replace(gen_random_uuid()::text, "-", ""), "hex"), "base64"))
+			, "+", "-"), "/", "_");
+		$$;
+		CREATE OR REPLACE FUNCTION decode_uuid(id text) RETURNS UUID LANGUAGE SQL IMMUTABLE AS $$
+			SELECT encode(decode(
+				replace(replace(id, "_", "/"), "-", "+") || substr("==", 1, (33-length(id)) % 3), "base64"), "hex")::uuid;
+		$$;
+
 		CREATE OR REPLACE FUNCTION descendants(root text, max_depth INTEGER DEFAULT 5)
 		RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
-			WITH RECURSIVE children(parent, child, depth) AS (
-				SELECT
-					p.parent, p.child, 1
-				FROM
-					app_public."nodeChildLinks" AS p
-				WHERE
-					p.parent=root
-				UNION
+			SELECT root as id, 0 as depth
+			UNION ALL (
+				WITH RECURSIVE children(id, depth, is_cycle, nodes_path) AS (
 					SELECT
-						c.parent, c.child, children.depth+1
+						p.child, 1, false, ARRAY[p.parent]
 					FROM
-						app_public."nodeChildLinks" AS c, children
-					WHERE c.parent = children.child AND children.depth < max_depth
-			) SELECT
-				child as id, min(depth) as depth
-			FROM
-				children group by child
-			UNION ALL
-			SELECT * FROM (
-				SELECT root as id, 0 as depth
-			) row_for_root;
+						app_public."nodeChildLinks" AS p
+					WHERE
+						p.parent=root
+					UNION
+						SELECT
+							c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent
+						FROM
+							app_public."nodeChildLinks" AS c, children
+						WHERE c.parent = children.id AND NOT is_cycle AND children.depth < max_depth
+				) SELECT
+					id, min(depth) as depth
+				FROM
+					children
+				GROUP BY id
+				ORDER BY depth, id
+			)
+		$$;
+		CREATE OR REPLACE FUNCTION ancestors(root text, max_depth INTEGER DEFAULT 5)
+		RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
+			SELECT root as id, 0 as depth
+			UNION ALL (
+				WITH RECURSIVE parents(id, depth, is_cycle, nodes_path) AS (
+					SELECT
+						p.parent, 1, false, ARRAY[p.child]
+					FROM
+						app_public."nodeChildLinks" AS p
+					WHERE
+						p.child=root
+					UNION
+						SELECT
+							c.parent, parents.depth+1, c.parent = ANY(parents.nodes_path), nodes_path || c.child
+						FROM
+							app_public."nodeChildLinks" AS c, parents
+						WHERE c.child = parents.id AND NOT is_cycle AND parents.depth < max_depth
+				) SELECT
+					id, min(depth) as depth
+				FROM
+					parents
+				GROUP BY id
+				ORDER BY depth, id
+			)
 		$$;
 
 		-- RLS helper functions

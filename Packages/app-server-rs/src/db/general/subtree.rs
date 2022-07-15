@@ -29,6 +29,7 @@ use crate::db::nodes::MapNode;
 use crate::db::terms::Term;
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::db::filter::{QueryFilter, FilterInput};
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::start_read_transaction;
@@ -38,7 +39,7 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 use crate::utils::type_aliases::{JSONValue, PGClientObject};
 use crate::utils::db::accessors::{AccessorContext};
 
-use super::subtree_collector::{get_node_subtree};
+use super::subtree_collector::{get_node_subtree, params};
 
 wrap_slow_macros!{
 
@@ -80,6 +81,23 @@ impl Subtree {
     }
 }
 
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+pub struct Descendant {
+    id: String,
+    distance: i32,
+}
+impl From<tokio_postgres::row::Row> for Descendant {
+    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row) }
+}
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+pub struct Ancestor {
+    id: String,
+    distance: i32,
+}
+impl From<tokio_postgres::row::Row> for Ancestor {
+    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row) }
+}
+
 #[derive(Default)]
 pub struct QueryShard_General_Subtree;
 #[Object]
@@ -89,9 +107,31 @@ impl QueryShard_General_Subtree {
         let tx = start_read_transaction(&mut anchor, gql_ctx).await?;
         let ctx = AccessorContext::new(tx);
 
-        let subtree = get_node_subtree(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX)).await?;
+        let subtree = get_node_subtree(&ctx, root_node_id, max_depth.unwrap_or(10000)).await?;
 
         Ok(subtree)
+    }
+
+    // lower-level functions
+    async fn descendants(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, Error> {
+        let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+        let tx = start_read_transaction(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new(tx);
+        let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
+
+        let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from descendants($1, $2)"#, params(&[&root_node_id, &max_depth_i32])).await?.try_collect().await?;
+        let descendants: Vec<Descendant> = rows.into_iter().map(|a| a.into()).collect();
+        Ok(descendants)
+    }
+    async fn ancestors(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Ancestor>, Error> {
+        let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+        let tx = start_read_transaction(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new(tx);
+        let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
+
+        let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from ancestors($1, $2)"#, params(&[&root_node_id, &max_depth_i32])).await?.try_collect().await?;
+        let ancestors: Vec<Ancestor> = rows.into_iter().map(|a| a.into()).collect();
+        Ok(ancestors)
     }
 }
 
