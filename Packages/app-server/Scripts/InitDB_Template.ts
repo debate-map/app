@@ -138,7 +138,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 			WITH RECURSIVE children(parent, child, depth) AS (
 				SELECT
-					p.parent, p.child, 0
+					p.parent, p.child, 1
 				FROM
 					app_public."nodeChildLinks" AS p
 				WHERE
@@ -148,7 +148,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 						c.parent, c.child, children.depth+1
 					FROM
 						app_public."nodeChildLinks" AS c, children
-					WHERE c.parent = children.child AND children.depth < max_depth - 1
+					WHERE c.parent = children.child AND children.depth < max_depth
 			) SELECT
 				child as id, min(depth) as depth
 			FROM
