@@ -24,7 +24,7 @@ use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::AccessPolicy;
-use crate::db::general::subtree::get_subtree;
+use crate::db::general::subtree_collector::get_node_subtree;
 use crate::db::medias::Media;
 use crate::db::node_child_links::{NodeChildLink, get_node_child_links};
 use crate::db::node_phrasings::MapNodePhrasing;
@@ -52,7 +52,7 @@ use super::_command::{set_db_entry_by_id, set_db_entry_by_id_for_struct};
 pub struct CloneSubtreePayload {
     parentNodeID: String,
     rootNodeID: String,
-    maxDepth: Option<usize>,
+    maxDepth: usize,
 }
 lazy_static! {
     static ref CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON: JSONValue = json!({
@@ -87,7 +87,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     };
 
     log("part 0");
-    let subtree = get_subtree(&ctx, payload.rootNodeID.clone(), payload.maxDepth).await?;
+    let subtree = get_node_subtree(&ctx, payload.rootNodeID.clone(), payload.maxDepth).await?;
     // these don't need cloning (since they don't "reference back"): terms, medias
 
     log("part 0.5");

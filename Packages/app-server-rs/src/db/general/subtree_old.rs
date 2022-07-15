@@ -39,13 +39,13 @@ use crate::utils::type_aliases::{JSONValue, PGClientObject};
 use crate::utils::db::accessors::{AccessorContext};
 
 use super::subtree::Subtree;
-use super::subtree_collector::{SubtreeCollector, populate_subtree_collector};
+use super::subtree_collector_old::{SubtreeCollector_Old, populate_subtree_collector_old};
 
-pub async fn get_subtree(ctx: &AccessorContext<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
-    let collector = SubtreeCollector::default();
+pub async fn get_subtree_old(ctx: &AccessorContext<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
+    let collector = SubtreeCollector_Old::default();
     let root_path_segments = vec![root_node_id.clone()];
     let collector_arc = Arc::new(RwLock::new(collector));
-    populate_subtree_collector(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &root_path_segments, collector_arc.clone()).await?;
+    populate_subtree_collector_old(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &root_path_segments, collector_arc.clone()).await?;
 
     let arc_clone = collector_arc.clone();
     let collector = arc_clone.read().await;
@@ -64,10 +64,10 @@ impl QueryShard_General_Subtree_Old {
         let tx = start_read_transaction(&mut anchor, gql_ctx).await?;
         let ctx = AccessorContext::new(tx);
 
-        let collector = SubtreeCollector::default();
+        let collector = SubtreeCollector_Old::default();
         let root_path_segments = vec![root_node_id.clone()];
         let collector_arc = Arc::new(RwLock::new(collector));
-        populate_subtree_collector(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &root_path_segments, collector_arc.clone()).await?;
+        populate_subtree_collector_old(&ctx, root_node_id, max_depth.unwrap_or(usize::MAX), &root_path_segments, collector_arc.clone()).await?;
 
         let arc_clone = collector_arc.clone();
         let collector = arc_clone.read().await;
