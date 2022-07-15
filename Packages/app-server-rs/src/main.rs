@@ -123,6 +123,8 @@ mod db {
     }
     pub mod _general;
     pub mod general {
+        pub mod subtree_old;
+        pub mod subtree_collector_old;
         pub mod subtree;
         pub mod subtree_collector;
     }
