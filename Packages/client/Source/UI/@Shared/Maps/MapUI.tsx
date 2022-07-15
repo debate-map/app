@@ -342,6 +342,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		const map = this.Map;
 		if (map == null) return this.loadFocusedNodeTimer.Stop();
 		const focusNodePath = GetFocusedNodePath(map.id);
+		if (focusNodePath == null) return this.loadFocusedNodeTimer.Stop();
 
 		// if more nodes have been rendered, along the path to the focus-node
 		const foundBox = this.FindNodeBox(focusNodePath, true);
@@ -394,6 +395,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		// if (this.scrollView.state.scrollOp_bar) return false;
 
 		const focusNode_target = GetFocusedNodePath(GetMapView(map.id)); // || map.rootNode.toString();
+		if (focusNode_target == null) return false;
 		// Log(`FocusNode_target:${focusNode_target}`);
 		return this.ScrollToNode(focusNode_target);
 	}

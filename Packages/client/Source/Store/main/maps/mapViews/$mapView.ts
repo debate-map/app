@@ -73,10 +73,10 @@ export const GetFocusedNodeInfo = CreateAccessor((mapViewOrMapID: string | MapVi
 	return InMapView_FindNodeViewWhere(mapView, view=>view.focused == true);
 });
 export const GetFocusedNodePath = CreateAccessor((mapViewOrMapID: string | MapView | n)=>{
-	return GetFocusedNodeInfo(mapViewOrMapID)?.pathInMap ?? "";
+	return GetFocusedNodeInfo(mapViewOrMapID)?.pathInMap;
 });
 export const GetFocusedNodeID = CreateAccessor((mapID: string)=>{
-	const focusedNodeStr = GetFocusedNodePath(mapID).split("/").LastOrX();
+	const focusedNodeStr = GetFocusedNodePath(mapID)?.split("/").LastOrX();
 	return focusedNodeStr ? PathSegmentToNodeID(focusedNodeStr) : null;
 });
 

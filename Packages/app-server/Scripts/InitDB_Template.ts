@@ -130,6 +130,31 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
+		-- indexes
+		create index nodeChildLinks_parent_child on app_public."nodeChildLinks" (parent, child);
+
+		-- helper functions (eg. optimized tree-traversal)
+		CREATE OR REPLACE FUNCTION descendants(root text, max_depth INTEGER DEFAULT 5)
+			RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
+			WITH RECURSIVE children(id, child, depth) AS (
+				SELECT
+					p.parent, p.child, 0
+				FROM
+					app_public."nodeChildLinks" AS p
+				WHERE
+					p.parent=root
+				UNION
+					SELECT
+						c.parent, c.child, children.depth+1
+					FROM
+						app_public."nodeChildLinks" AS c, children
+					WHERE c.parent = children.child AND children.depth < max_depth
+			) SELECT
+				id, min(depth)
+			FROM
+				children group by id;
+		$$;
+
 		-- RLS helper functions
 
 		create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar, policyField varchar) returns boolean as $$ begin 
