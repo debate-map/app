@@ -135,24 +135,31 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 		-- helper functions (eg. optimized tree-traversal)
 		CREATE OR REPLACE FUNCTION descendants(root text, max_depth INTEGER DEFAULT 5)
-			RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
-			WITH RECURSIVE children(id, child, depth) AS (
-				SELECT
-					p.parent, p.child, 0
-				FROM
-					app_public."nodeChildLinks" AS p
-				WHERE
-					p.parent=root
-				UNION
+		RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
+			SELECT DISTINCT x.*
+			FROM (
+				WITH RECURSIVE children(id, child, depth) AS (
 					SELECT
-						c.parent, c.child, children.depth+1
+						p.parent, p.child, 0
 					FROM
+						app_public."nodeChildLinks" AS p
+					WHERE
+						p.parent=root
+					UNION
+						SELECT
+						c.parent, c.child, children.depth+1
+						FROM
 						app_public."nodeChildLinks" AS c, children
-					WHERE c.parent = children.child AND children.depth < max_depth
-			) SELECT
-				id, min(depth)
-			FROM
-				children group by id;
+						WHERE c.parent = children.child AND children.depth < max_depth - 1
+				) SELECT
+					id, child, min(depth) as depth
+				FROM
+					children group by id, child
+			) as t
+			cross join lateral (values 
+				(t.id, t.depth),
+				(t.child, t.depth + 1)
+			) as x(age, val);
 		$$;
 
 		-- RLS helper functions
