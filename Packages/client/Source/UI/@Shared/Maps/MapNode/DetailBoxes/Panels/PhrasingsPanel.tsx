@@ -76,13 +76,19 @@ export class PhrasingRow extends BaseComponent<{phrasing: MapNodePhrasing, node:
 
 		//const segments = GetSegmentsForTerms(phrasing.text_base, termsToSearchFor);
 		return (
-			<Row mt={index == 0 ? 0 : 3} style={{position: "relative", backgroundColor: `rgba(255,255,255,${selected ? 0.3 : 0.15})`, borderRadius: 5, padding: "2px 5px", cursor: "pointer"}} onClick={event=>{
-				if (event.defaultPrevented) return;
-				if (phrasing.id == Phrasing_FakeID) return;
-				toggleSelected();
-				// event.preventDefault();
-				// return false;
-			}}>
+			<Row mt={index == 0 ? 0 : 3}
+				style={{
+					position: "relative", backgroundColor: `rgba(255,255,255,${selected ? 0.3 : 0.15})`, borderRadius: 5, padding: "2px 5px", cursor: "pointer",
+					whiteSpace: "initial", // fixes text extending out of box
+				}}
+				onClick={event=>{
+					if (event.defaultPrevented) return;
+					if (phrasing.id == Phrasing_FakeID) return;
+					toggleSelected();
+					// event.preventDefault();
+					// return false;
+				}}
+			>
 				{/* <CheckBox value={true} onChange={(val) => {
 					// todo: have this change which phrasing is selected to be used (in your client), for viewing/setting ratings in the ratings panels // nvm, having shared ratings -- for now at least
 				}}/> */}

@@ -26,7 +26,7 @@ pub struct SubtreeCollector_Old {
 }
 impl SubtreeCollector_Old {
     pub fn to_subtree(self: &Self) -> Subtree {
-        let mut result = Subtree {
+        let result = Subtree {
             terms: self.terms.clone().into_values().collect(),
             medias: self.medias.clone().into_values().collect(),
             nodes: self.nodes.clone().into_values().collect(),
@@ -35,7 +35,9 @@ impl SubtreeCollector_Old {
             nodePhrasings: self.node_phrasings.clone().into_values().collect(),
             nodeTags: self.node_tags.clone().into_values().collect(),
         };
-        result.sort_all_entries();
+        // commented; we want this endpoint's algorithm "frozen", since the alt-frontend relies on it for consistent ordering with debate-map's frontend
+        // (in the long-term, this should be resolved by getting accurate "orderKey" fields set for everything, and definitely-correct inserting/updating of them -- but for now, just freeze the "subtreeOld" algorithm)
+        //result.sort_all_entries();
         result
     }
 }

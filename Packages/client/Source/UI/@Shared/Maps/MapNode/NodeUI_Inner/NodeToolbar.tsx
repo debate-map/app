@@ -27,6 +27,7 @@ export type NodeToolbar_Props = {
 } & NodeUI_Inner_Props;
 export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
+@Observer
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
 		const {map, node, path, backgroundColor, panelToShow, onPanelButtonClick, onMoreClick, onMoreHoverChange, nodeUI_width_final, leftPanelShow} = this.props;
