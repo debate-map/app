@@ -194,6 +194,36 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 				ORDER BY depth, id
 			)
 		$$;
+		CREATE OR REPLACE FUNCTION shortest_path(source text, dest text)
+		RETURNS TABLE(node_id text, link_id text) LANGUAGE plpgsql STABLE AS $$
+		DECLARE
+			node_ids text[];
+			link_ids text[];
+				seq integer[];
+		BEGIN
+			WITH RECURSIVE parents(link, parent, child, depth, is_cycle, nodes_path, links_path) AS (
+				SELECT
+					p.id, p.parent, p.child, 0, false, ARRAY[p.child], ARRAY[p.id]
+				FROM
+					app_public."nodeChildLinks" AS p
+				WHERE
+					p.child=dest
+				UNION
+					SELECT
+						c.id, c.parent, c.child, parents.depth+1, c.parent = ANY(nodes_path), nodes_path || c.child, links_path || c.id
+					FROM
+						app_public."nodeChildLinks" AS c, parents
+					WHERE c.child = parents.parent AND NOT is_cycle
+			) SELECT
+				parents.nodes_path, parents.links_path INTO STRICT node_ids, link_ids
+			FROM
+				parents
+			WHERE parents.parent = source
+			ORDER BY depth DESC LIMIT 1;
+				SELECT array_agg(gs.val order by gs.val) INTO STRICT seq from generate_series(0, array_length(node_ids, 1)) gs(val);
+			RETURN QUERY SELECT t.node_id, t.link_id FROM unnest(node_ids || source, ARRAY[null]::text[] || link_ids, seq) AS t(node_id, link_id, depth) ORDER by t.depth DESC;
+		END
+		$$;
 
 		-- RLS helper functions
 

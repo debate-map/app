@@ -9,9 +9,9 @@ use tokio_postgres::{Row};
 use crate::utils::db::pg_stream_parsing::RowData;
 use crate::{utils::{type_aliases::JSONValue}};
 
-pub fn postgres_row_to_struct<'a, T: for<'de> Deserialize<'de>>(row: Row) -> T {
-    let as_json = postgres_row_to_json_value(row, 100).unwrap();
-    serde_json::from_value(as_json).unwrap()
+pub fn postgres_row_to_struct<'a, T: for<'de> Deserialize<'de>>(row: Row) -> Result<T, Error> {
+    let as_json = postgres_row_to_json_value(row, 100)?;
+    Ok(serde_json::from_value(as_json)?)
 }
 
 pub fn postgres_row_to_json_value(row: Row, columns_to_process: usize) -> Result<JSONValue, Error> {

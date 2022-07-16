@@ -60,7 +60,7 @@ pub struct MapNodeTag {
     }
 }*/
 impl From<tokio_postgres::row::Row> for MapNodeTag {
-    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row) }
+    fn from(row: tokio_postgres::row::Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]

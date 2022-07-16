@@ -61,8 +61,7 @@ pub struct QueryShard_General_Subtree_Old;
 impl QueryShard_General_Subtree_Old {
     async fn subtree_old(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let tx = start_read_transaction(&mut anchor, gql_ctx).await?;
-        let ctx = AccessorContext::new(tx);
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 
         let collector = SubtreeCollector_Old::default();
         let root_path_segments = vec![root_node_id.clone()];

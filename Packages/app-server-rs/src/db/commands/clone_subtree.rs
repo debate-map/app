@@ -77,8 +77,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     let payload: CloneSubtreePayload = serde_json::from_value(payload_raw)?;
     
     let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-    let tx = start_write_transaction(&mut anchor, gql_ctx).await?;
-    let ctx = AccessorContext::new(tx);
+    let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 
     // probably temp: helper for logging
     let log = |text: &str| {

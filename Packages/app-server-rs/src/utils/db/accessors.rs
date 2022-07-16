@@ -6,14 +6,24 @@ use deadpool_postgres::{Transaction, Pool};
 
 use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{general::to_anyhow, data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
 
+use super::transactions::{start_read_transaction, start_write_transaction};
+
 pub struct AccessorContext<'a> {
     pub tx: Transaction<'a>,
 }
 impl<'a> AccessorContext<'a> {
-    pub fn new(tx: Transaction<'a>) -> Self {
+    pub fn new_raw(tx: Transaction<'a>) -> Self {
         Self {
             tx
         }
+    }
+    pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
+        let tx = start_read_transaction(anchor, gql_ctx).await?;
+        Ok(Self { tx })
+    }
+    pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
+        let tx = start_write_transaction(anchor, gql_ctx).await?;
+        Ok(Self { tx })
     }
 }
 
