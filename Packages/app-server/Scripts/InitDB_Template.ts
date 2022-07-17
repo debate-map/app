@@ -130,6 +130,10 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
+		-- field collation fixes (ideal would be to, database-wide, have collation default to case-sensitive, but for now we just do it for a few key fields for which "ORDER BY" clauses exist)
+		ALTER TABLE "nodeChildLinks" ALTER COLUMN "orderKey" SET DATA TYPE TEXT COLLATE "C"
+		ALTER TABLE "nodeChildLinks" ALTER COLUMN "id" SET DATA TYPE TEXT COLLATE "C"
+
 		-- indexes
 		create index nodeChildLinks_parent_child on app_public."nodeChildLinks" (parent, child);
 
