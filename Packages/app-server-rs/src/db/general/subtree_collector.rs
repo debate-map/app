@@ -76,7 +76,7 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
         nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
         nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
     };
-    //subtree.sort_all_entries();
+    subtree.sort_all_entries();
     Ok(subtree)
 }
 
