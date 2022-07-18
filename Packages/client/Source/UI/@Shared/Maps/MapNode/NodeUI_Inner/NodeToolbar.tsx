@@ -63,6 +63,44 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 						}/>;
 				}
 				if (item.panel == "tags") {
+					// if there are labels, display them directly within the toolbar-button
+					// todo: make-so you map-creator/user can choose whether to have the "tags" button show the label-previews below, or instead just a tag-count as normal
+					if (labels.length) {
+						/*const labelUIWidths = labels.map((label, labelI)=>{
+							const paddingAndMargin = (labelI > 0 ? 5 : 0) + 10;
+							return paddingAndMargin + (label.length * 5.25); // based on ui-test with "fontSize:10" for string: "abc[...]wxy"
+						});
+						const maxLabelWidth = labelUIWidths.Max();
+						if (maxLabelWidth < nodeUI_width_final) {*/
+
+						const allLabelsText = labels.join("   "); // gap = ~3chars
+						const fontSize = allLabelsText.length >= 30 ? 9 :
+							allLabelsText.length >= 15 ? 10 :
+							11;
+						return <ToolBarButton key={index} {...sharedProps} panel="tags" style={{overflow: "hidden"}}
+							text={allLabelsText} // used for estimating width-required for button
+							textComp={
+								<Row style={{
+									width: "100%", /*height: "calc(100% + 1px)",*/ fontSize, flexWrap: "wrap", justifyContent: "center",
+									gap: "1px 5px", // use gap of 1, to compensate for {mt:-1,mb:-1} of items, such that they only overlap 1px 
+									//alignItems: "center",
+									alignItems: /*"center"*/ "initial", // don't use centering of items, else messes up margins (rely on centering of this container as a whole)
+								}}>
+									{labels.map((label, labelI)=>{
+										return <Text key={labelI} mt={-1} mb={-1} p="0 5px"
+											style={E(
+												{display: "inline-block", background: HSLA(0, 0, 1, .3), borderRadius: 5, cursor: "pointer"},
+												GADDemo && {
+													background: "transparent", border: "1px solid rgba(43,55,85,.7)", color: "rgba(43,55,85,1)",
+												},
+											)}>
+												{label}
+											</Text>;
+									})}
+								</Row>
+							}/>;
+					}
+
 					return <ToolBarButton key={index} {...sharedProps} text={labelsAndOtherTags > 0 ? `Tags: ${labelsAndOtherTags}` : "Tags"} panel="tags"/>;
 				}
 				if (item.panel == "phrasings") {
@@ -107,13 +145,13 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 
 @Observer
 class ToolBarButton extends BaseComponent<{
-	node: MapNodeL3, text: string, enabled?: boolean, disabledInfo?: string, panel?: string,
+	node: MapNodeL3, text: string, textComp?: JSX.Element, enabled?: boolean, disabledInfo?: string, panel?: string,
 	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onClick?: (e: React.MouseEvent)=>any, onHoverChange?: (hovered: boolean)=>any,
-	leftPanelShow: boolean,
+	leftPanelShow: boolean, style?: any,
 } & NodeToolbar_SharedProps, {}> {
 	render() {
-		let {node, path, text, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, nodeUI_width_final, leftPanelShow, buttonCount} = this.props;
+		let {node, path, text, textComp, enabled = true, disabledInfo, panel, first, last, panelToShow, onPanelButtonClick, onClick, onHoverChange, nodeUI_width_final, leftPanelShow, style, buttonCount} = this.props;
 		const [hovered, setHovered] = useState(false);
 		let highlight = panel && panelToShow == panel;
 		const {toolbarRatingPreviews} = store.main.maps;
@@ -138,12 +176,14 @@ class ToolBarButton extends BaseComponent<{
 		}
 		const highlightOrHovered = highlight || hovered;
 
-		const textComp = enabled
-			? <Text style={E(
-				{position: "relative", overflow: "hidden", textOverflow: "ellipsis"},
-				{fontSize: [null, 10, 10, 8][sizeIndex]},
-			)}>{text}</Text>
-			: <InfoButton text={disabledInfo!}/>;
+		if (textComp == null) {
+			textComp = enabled
+				? <Text style={E(
+					{position: "relative", overflow: "hidden", textOverflow: "ellipsis"},
+					{fontSize: [null, 10, 10, 8][sizeIndex]},
+				)}>{text}</Text>
+				: <InfoButton text={disabledInfo!}/>;
+		}
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
 		const {key, css} = cssHelper(this);
@@ -185,6 +225,7 @@ class ToolBarButton extends BaseComponent<{
 					},
 					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},
+					style,
 				)}
 				onClick={e=>{
 					if (!enabled) return;

@@ -118,7 +118,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 						<Pre>Toolbar:</Pre>
 						<Text>Show:</Text>
 						<CheckBox ml={5} enabled={enabled} value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
-						<TextPlus ml={5} info={`
+						<TextPlus ml={10} info={`
 							* If no items are enabled, the default toolbar-items will be shown.
 							* For an item to be shown, it still must be valid for the given node.
 						`.AsMultiline(0)}>Items:</TextPlus>
