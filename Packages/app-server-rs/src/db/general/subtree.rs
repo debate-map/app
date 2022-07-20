@@ -84,7 +84,7 @@ impl Subtree {
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Descendant {
     id: String,
-    link_id: String,
+    link_id: Option<String>,
     distance: i32,
 }
 impl From<tokio_postgres::row::Row> for Descendant {
