@@ -175,7 +175,7 @@ pub fn get_cors_layer() -> CorsLayer {
         .allow_credentials(true)
 }
 
-fn set_up_globals() -> (ABSender<LogEntry>, ABReceiver<LogEntry>) {
+fn set_up_globals() /*-> (ABSender<LogEntry>, ABReceiver<LogEntry>)*/ {
     //panic::always_abort();
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
@@ -189,16 +189,18 @@ fn set_up_globals() -> (ABSender<LogEntry>, ABReceiver<LogEntry>) {
         std::process::abort();
     }));
 
-    let (mut s1, r1): (ABSender<LogEntry>, ABReceiver<LogEntry>) = async_broadcast::broadcast(10000);
+    /*let (mut s1, r1): (ABSender<LogEntry>, ABReceiver<LogEntry>) = async_broadcast::broadcast(10000);
     s1.set_overflow(true);
     set_up_logging(s1.clone());
-    (s1, r1)
+    (s1, r1)*/
+    set_up_logging();
 }
 
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    let (log_entry_sender, log_entry_receiver) = set_up_globals();
+    //let (log_entry_sender, log_entry_receiver) = set_up_globals();
+    set_up_globals();
     println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
     GLOBAL.reset();
@@ -232,8 +234,6 @@ async fn main() {
     let app = app
         .layer(AddExtensionLayer::new(app_state))
         .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
-        .layer(AddExtensionLayer::new(log_entry_sender))
-        .layer(AddExtensionLayer::new(log_entry_receiver))
         .layer(get_cors_layer());
 
     let _handler = tokio::spawn(async move {

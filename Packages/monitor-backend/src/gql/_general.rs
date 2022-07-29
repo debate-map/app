@@ -16,11 +16,11 @@ use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 use hyper_tls::HttpsConnector;
 
+use crate::links::app_server_rs_types::{MtxData, LogEntry};
 use crate::utils::futures::make_reliable;
 use crate::{GeneralMessage};
-use crate::links::app_server_rs_link::LogEntry;
 use crate::migrations::v2::migrate_db_to_v2;
-use crate::store::storage::{Mtx, AppStateWrapper};
+use crate::store::storage::{AppStateWrapper};
 use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::{JSONValue, ABSender, ABReceiver};
 
@@ -44,12 +44,12 @@ impl QueryShard_General {
     /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
     
-    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<Mtx>, Error> {
+    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<MtxData>, Error> {
         if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
         let mtx_results = app_state.mtx_results.read().await.to_vec();
-        let mtx_results_filtered: Vec<Mtx> = mtx_results.into_iter().filter(|mtx| {
+        let mtx_results_filtered: Vec<MtxData> = mtx_results.into_iter().filter(|mtx| {
             for lifetime in mtx.section_lifetimes.values() {
                 let section_start = lifetime.start_time;
                 let section_end = match lifetime.duration {

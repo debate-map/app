@@ -134,7 +134,7 @@ pub async fn start_streaming_changes(
             else if event[0] == b'k' {
                 let last_byte = event.last().unwrap();
                 let timeout_imminent = last_byte == &1;
-                trace!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
+                debug!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
                 if timeout_imminent {
                     // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
                     const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946_684_800;
@@ -158,7 +158,7 @@ pub async fn start_streaming_changes(
 
                     let buf = Bytes::from(data_to_send);
 
-                    trace!("Responding to keepalive message/warning... @response:{:x?}", buf);
+                    debug!("Responding to keepalive message/warning... @response:{:x?}", buf);
                     let mut next_step = 1;
                     future::poll_fn(|cx| {
                         loop {

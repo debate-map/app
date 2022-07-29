@@ -36,7 +36,7 @@ use axum::{
     headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
 use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
-use links::app_server_rs_link::LogEntry;
+use links::app_server_rs_types::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use tracing::{error, info, Level, Metadata};
@@ -51,7 +51,7 @@ use tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::{store::storage::{AppState, AppStateWrapper}, connections::from_app_server_rs::send_mtx_results, links::app_server_rs_link::connect_to_app_server_rs, utils::type_aliases::{ABReceiver, ABSender}};
+use crate::{store::storage::{AppState, AppStateWrapper}, links::app_server_rs_link::connect_to_app_server_rs, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
 mod gql {
@@ -60,6 +60,7 @@ mod gql {
 //mod proxy_to_asjs;
 mod pgclient;
 mod links {
+    pub mod app_server_rs_types;
     pub mod app_server_rs_link;
 }
 mod utils {
@@ -70,9 +71,9 @@ mod utils {
 mod store {
     pub mod storage;
 }
-mod connections {
+/*mod connections {
     pub mod from_app_server_rs;
-}
+}*/
 mod migrations {
     pub mod v2;
 }
@@ -144,7 +145,7 @@ async fn main() {
             <p>This is the URL for the monitor-backend.</p>
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/
-        .route("/send-mtx-results", post(send_mtx_results))
+        //.route("/send-mtx-results", post(send_mtx_results))
         .fallback(get(handler));
 
     //let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
@@ -153,7 +154,7 @@ async fn main() {
     let (mut msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = async_broadcast::broadcast(10000);
     msg_sender.set_overflow(true);
     //tokio::spawn(connect_to_app_server_rs(msg_sender_test.clone()));
-    tokio::spawn(connect_to_app_server_rs(msg_sender.clone()));
+    tokio::spawn(connect_to_app_server_rs(app_state.clone(), msg_sender.clone()));
 
     let app = gql_::extend_router(app, msg_sender, msg_receiver, /*msg_sender_test, msg_receiver_test,*/ app_state.clone()).await;
 

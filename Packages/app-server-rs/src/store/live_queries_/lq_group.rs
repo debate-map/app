@@ -215,7 +215,7 @@ impl LQGroup {
             mtx.section("4:get or create watcher, for the given stream");
             //let watcher = entry.get_or_create_watcher(stream_id);
             let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
-            let watcher_info_str = format!("@watcher_count_for_this_lq_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
+            let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
             debug!("LQ-watcher started. {}", watcher_info_str);
             // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
             if new_watcher_count > 4 {
@@ -415,7 +415,7 @@ impl LQGroup {
             debug!("Watcher count for live-query entry dropped to 0, so removing.");
         }
 
-        debug!("LQ-watcher drop complete. @watcher_count_for_this_lq_entry:{} @lq_entry_count:{}", new_watcher_count, lq_instances.len());
+        debug!("LQ-watcher drop complete. @watcher_count_for_entry:{} @lq_entry_count:{}", new_watcher_count, lq_instances.len());
     }
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {

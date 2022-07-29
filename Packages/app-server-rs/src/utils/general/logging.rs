@@ -5,15 +5,24 @@ use futures::executor::block_on;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use rust_shared::time_since_epoch_ms;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tracing::{Level, error, Subscriber, Metadata, subscriber::Interest, span, Event, metadata::LevelFilter, field::{Visit, Field}};
 use tracing_subscriber::{filter, Layer, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, layer::{Filter, Context}};
 
-use crate::utils::type_aliases::ABSender;
+use crate::{utils::type_aliases::ABSender, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB}};
+
+/*
+Logging levels: (as interpreted in the debate-map codebase)
+* ERROR: Indicates some flaw in the codebase that should be fixed, or an issue in the user/externally supplied data serious enough that the given operation did not proceed.
+* WARN: Indicates some unexpected state that *might* be pointing toward an error/thing-to-fix, but could also just be something unusual.
+* INFO: Something significant enough that it should show in the process' standard output.
+* DEBUG: For low-level information that's fine to stream to the monitor-backend.
+* TRACE: For low-level information that's not fine to stream to the monitor-backend. (eg. due to the expected trigger-rate being too high, to where it might congest the local network, or other layer of processing)
+*/
 
 // keep fields synced with struct in app_server_rs_link.rs (this one's the "source")
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LogEntry {
     pub time: f64,
     pub level: String,
@@ -27,29 +36,34 @@ pub struct LogEntry {
     pub message: String,
 }
 
-pub fn should_event_be_kept(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
+pub fn should_event_be_kept_according_to_x(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
+    if levels_to_exclude.contains(metadata.level()) {
+        return false;
+    }
+    true
+}
+pub fn should_event_be_printed(metadata: &Metadata) -> bool {
     // temp
     if !metadata.target().starts_with("app_server_rs") {
         return false;
     }
-    if levels_to_exclude.contains(metadata.level()) {
+
+    should_event_be_kept_according_to_x(metadata, &[Level::TRACE, Level::DEBUG])
+    //should_event_be_kept_according_to_x(metadata, &[Level::TRACE])
+}
+pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
+    // temp
+    if !metadata.target().starts_with("app_server_rs") {
         return false;
     }
-       
-    // If this *is* "interesting_span", make sure to enable it.
-    /*if metadata.is_span() && metadata.name() == "interesting_span" {
-        return true;
-    }
-    // Otherwise, are we in an interesting span?
-    if let Some(current_span) = cx.lookup_current() {
-        return current_span..name() == "interesting_span";
-    }
-    false*/
 
-    true
+    //should_event_be_kept_according_to_x(metadata, &[])
+    // don't send TRACE atm, because that's intended for logging that's potentially *very* verbose, and could conceivably cause local network congestion
+    // (long-term, the plan is to make a way for the monitor tool to request that verbose data for a time-slice the user specifies, if/when needed)
+    should_event_be_kept_according_to_x(metadata, &[Level::TRACE])
 }
 
-pub fn set_up_logging(s1: ABSender<LogEntry>) /*-> Receiver<LogEntry>*/ {
+pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {
     //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::unbounded();
     //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::bounded(10000);
 
@@ -60,13 +74,13 @@ pub fn set_up_logging(s1: ABSender<LogEntry>) /*-> Receiver<LogEntry>*/ {
         should_event_be_kept(metadata)
     });*/
     let printing_layer_func = filter::filter_fn(move |metadata| {
-        should_event_be_kept(metadata, &[Level::TRACE, Level::DEBUG])
-        //should_event_be_kept(metadata, &[Level::TRACE])
+        should_event_be_printed(metadata)
     });
 
     let printing_layer = tracing_subscriber::fmt::layer().with_filter(printing_layer_func);
     //let sending_layer = Layer_WithIntercept::new(s1, r1.clone());
-    let sending_layer = Layer_WithIntercept::new(s1);
+    //let sending_layer = Layer_WithIntercept::new(s1);
+    let sending_layer = Layer_WithIntercept {};
     tracing_subscriber::registry()
         .with(sending_layer)
         .with(printing_layer)
@@ -75,31 +89,12 @@ pub fn set_up_logging(s1: ABSender<LogEntry>) /*-> Receiver<LogEntry>*/ {
     //r1
 }
 
-pub struct Layer_WithIntercept/*<F>*/ {
-    /*event_sender: Sender<LogEntry>,
-    event_receiver: Receiver<LogEntry>,*/
-    event_sender: ABSender<LogEntry>,
-    //event_receiver: broadcast::Receiver<LogEntry>,
-}
-impl/*<F>*/ Layer_WithIntercept/*<F>*/ {
-    pub fn new(
-        /*event_sender: Sender<LogEntry>,
-        event_receiver: Receiver<LogEntry>,*/
-        event_sender: ABSender<LogEntry>,
-        //event_receiver: broadcast::Receiver<LogEntry>,
-    ) -> Self {
-        //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::unbounded();
-        Self {
-            event_sender,
-            //event_receiver,
-        }
-    }
-}
+pub struct Layer_WithIntercept {}
 //impl<S: Subscriber, F: 'static + Layer<S>> Layer<S> for Layer_WithIntercept<F> {
 impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
     fn on_event(&self, event: &Event<'_>, _ctx: Context<'_, S>) {
         let metadata = event.metadata();
-        if should_event_be_kept(metadata, &[]) {
+        if should_event_be_sent_to_monitor(metadata) {
             let mut entry = LogEntry {
                 time: time_since_epoch_ms(),
                 level: metadata.level().to_string(),
@@ -118,7 +113,16 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
 
             //let start = std::time::Instant::now();
             block_on(async {
-                match self.event_sender.broadcast(entry).await {
+                /*match self.event_sender.broadcast(entry).await {
+                    Ok(_) => {},
+                    // if a send fails (ie. no receivers attached yet), that's fine; just print a message
+                    Err(entry) => println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")
+                };*/
+                /*if let Err(err) =  {
+                    //error!("Errored while broadcasting LogEntryAdded message. @error:{}", err);
+                    println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")
+                }*/
+                match MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::LogEntryAdded { entry }).await {
                     Ok(_) => {},
                     // if a send fails (ie. no receivers attached yet), that's fine; just print a message
                     Err(entry) => println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")

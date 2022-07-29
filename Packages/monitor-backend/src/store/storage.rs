@@ -25,13 +25,16 @@ use tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
+use crate::links::app_server_rs_types::{MtxSection, MtxData};
+
 pub type AppStateWrapper = Arc<AppState>;
 #[derive(Default)]
 pub struct AppState {
-    pub mtx_results: RwLock<Vec<Mtx>>,
+    //pub mtx_results: RwLock<Vec<Mtx>>,
+    pub mtx_results: RwLock<Vec<MtxData>>,
 }
 
-wrap_slow_macros!{
+/*wrap_slow_macros!{
 
 // derived from struct in app-server-rs/.../mtx.rs
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
@@ -44,12 +47,4 @@ pub struct Mtx {
     pub section_lifetimes: HashMap<String, MtxSection>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct MtxSection {
-    pub path: String,
-    pub extra_info: Option<String>,
-    pub start_time: f64,
-    pub duration: Option<f64>,
-}
-
-}
+}*/

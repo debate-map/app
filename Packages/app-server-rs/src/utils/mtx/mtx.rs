@@ -72,7 +72,7 @@ use tokio::{time};
 use tracing::{trace, error, info};
 use uuid::Uuid;
 
-use crate::utils::{type_aliases::JSONValue, general::general::{body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}};
+use crate::{utils::{type_aliases::JSONValue, general::general::{body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}}, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB}};
 
 pub enum MtxMessage {
     /// tuple.0 is the section's path and time (see section_lifetimes description); tuple.1 is the SectionLifetime struct, with times as ms-since-epoch
@@ -282,23 +282,6 @@ impl Drop for Mtx {
     }
 }
 
-pub const MTX_FINAL_SECTION_NAME: &'static str = "$end-marker$";
-
-#[derive(Debug, Clone, Serialize)]
-pub struct MtxSection {
-    pub path: String,
-    pub extra_info: Option<String>,
-    pub start_time: f64,
-    pub duration: Option<f64>,
-}
-impl MtxSection {
-    pub fn get_key(&self) -> String {
-        // use "#" as the separator, so that it sorts earlier than "/" (such that children show up after the parent, when sorting by path-plus-time)
-        let new_section_path_plus_time = format!("{}#{}", self.path, self.start_time);
-        new_section_path_plus_time
-    }
-}
-
 /*//wrap_slow_macros!{
 
 // derived from struct in from_app_server_rs.rs
@@ -325,84 +308,71 @@ async fn try_send_mtx_data_to_monitor_backend(
     //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
     last_data_as_str: Option<String>,
 ) -> Option<String> {
-    let data_as_str = match mtx_data_to_str(id, section_lifetimes).await {
-        Ok(a) => a,
-        Err(err) => {
-            error!("Got error while converting mtx-tree to string... @err:{}", err);
-            return None;
-        }
-    };
+    let mtx_data = MtxData::from(id, section_lifetimes).await;
+
+    // we stringify the data an additional time here, so we can check if the new data actually needs to be sent
+    let data_as_str = serde_json::to_string(&mtx_data).unwrap();
     let proceed = match last_data_as_str {
         Some(last) => data_as_str != last,
         None => true,
     };
+
     if proceed {
-        let send_attempt_fut = send_mtx_tree_to_monitor_backend(data_as_str.clone());
-        match time::timeout(Duration::from_secs(3), send_attempt_fut).await {
-            // if timeout happens, just ignore (there might have been local network glitch or something)
-            Err(_err) => {
-                error!("Timed out trying to send mtx-tree to monitor-backend...");
-            }
-            Ok(regular_result) => {
-                match regular_result {
-                    Ok(_) => {},
-                    // if sending mtx-result to monitor fails, print the error, but don't crash the server
-                    Err(err) => {
-                        error!("Got error while sending mtx-tree to monitor-backend... @err:{}", err);
-                    }
-                }
-            },
-        };
+        if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::MtxEntryDone { mtx: mtx_data }).await {
+            error!("Errored while broadcasting MtxEntryDone message. @error:{}", err);
+        }
     }
+
     Some(data_as_str)
 }
 
-pub async fn mtx_data_to_str(
-    id: Arc<Uuid>,
-    section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
-    //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
-) -> Result<String, Error> {
-    let mut data_as_map = Map::new();
-    data_as_map.insert("id".to_owned(), serde_json::to_value((*id).clone())?);
-
-    let data_as_str = {
+impl MtxData {
+    async fn from(
+        id: Arc<Uuid>,
+        section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
+        //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
+    ) -> MtxData {
         let section_lifetimes = section_lifetimes.read().unwrap();
-        data_as_map.insert("section_lifetimes".to_owned(), serde_json::to_value((*section_lifetimes).clone())?);
-        /*let guard = section_lifetimes.guard();
-        /*let section_lifetimes_as_hashmap = flurry_hashmap_into_hashmap(&section_lifetimes, guard);
-        data_as_map.insert("section_lifetimes".to_owned(), serde_json::to_value(section_lifetimes_as_hashmap)?);*/
-        let section_lifetimes_as_json_map = flurry_hashmap_into_json_map(&section_lifetimes, guard, true)?;
-        data_as_map.insert("section_lifetimes".to_owned(), JSONValue::Object(section_lifetimes_as_json_map));*/
-
-        //let self_as_str = json_obj_1field("mtx", self).map(|a| a.to_string()).unwrap_or("failed to serialize mtx-instance".to_string());
-        let mut wrapper = Map::new();
-        wrapper.insert("mtx".to_owned(), JSONValue::Object(data_as_map));
-        JSONValue::Object(wrapper).to_string()
-    };
-    Ok(data_as_str)
+        MtxData {
+            //id: (*id).clone(),
+            id: (*id).to_string(),
+            section_lifetimes: (*section_lifetimes).clone(),
+        }
+    }
 }
 
-// todo: have the data transfered over a websocket, rather than individual requests (eg. to avoid the DNS-overloading issue that has caused requests to drop/timeout)
-pub async fn send_mtx_tree_to_monitor_backend(
-    //mtx_root: &Mtx
-    mtx_root_as_str: String
-) -> Result<(), Error> {
-    //println!("Sending mtx-tree to monitor-backend:{}", serde_json::to_string_pretty(mtx_root).unwrap());
-    let client = Client::new();
+pub const MTX_FINAL_SECTION_NAME: &'static str = "$end-marker$";
 
-    let req = Request::builder()
-        .method(Method::POST)
-        //.uri(format!("http://{}/post", get_host_of_other_pod("dm-monitor-backend", "default", "5130")))
-        .uri("http://dm-monitor-backend.default.svc.cluster.local:5130/send-mtx-results")
-        .header("Content-Type", "application/json")
-        //.body(serde_json::to_string(&SendMtxResults_Request { mtx: mtx_root }).unwrap().into())
-        .body(
-            //json_obj_1field("mtx", mtx_root)?.to_string()
-            mtx_root_as_str
-            .into()
-        )?;
-    let _res = client.request(req).await?;
-    //println!("Done! Response:{}", body_to_str(res.into_body()).await?);
+impl MtxSection {
+    pub fn get_key(&self) -> String {
+        // use "#" as the separator, so that it sorts earlier than "/" (such that children show up after the parent, when sorting by path-plus-time)
+        let new_section_path_plus_time = format!("{}#{}", self.path, self.start_time);
+        new_section_path_plus_time
+    }
+}
 
-    Ok::<(), Error>(())
+// sync with "app_server_rs_types.rs" in monitor-backend
+// ==========
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MtxSection {
+    pub path: String,
+    pub extra_info: Option<String>,
+    pub start_time: f64,
+    pub duration: Option<f64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MtxData {
+    //pub id: Uuid,
+    pub id: String, // changed to String here, for easier usage with gql in monitor-backend (agql's OutputType isn't implemented for Uuid)
+
+    // use this in app-server-rs codebase
+    pub section_lifetimes: IndexMap<String, MtxSection>,
+    
+    // use this in monitor-backend codebase
+    // use HashMap here, since agql has OutputType implemented for it
+    // (but tell serde to serialize the HashMap using the ordered_map function, which collects the entries into a temporary BTreeMap -- which is sorted)
+    /*#[serde(serialize_with = "crate::utils::general::ordered_map")]
+    pub section_lifetimes: HashMap<String, MtxSection>,*/
 }

@@ -85,11 +85,13 @@ class LogConstraintUI extends BaseComponent<{constraint: LogConstraint, index: n
 					<InfoButton ml={5} text={`
 						You can supply a regular-expression here by starting and ending the string with a forward-slash. (eg: /(my)?(regex)?/)
 					`.AsMultiline(0)}/>*/}
-					{Level_values.map(levelVal=>{
-						return <CheckBox key={levelVal} ml={5} text={levelVal} value={constraint.level_matchVals.includes(levelVal)} onChange={val=>{
-							Change(constraint.level_matchVals = Level_values.filter(a=>(a == levelVal ? val : constraint.level_matchVals.includes(a))));
-						}}/>;
-					})}
+					{Level_values
+						.filter(a=>a != "TRACE") // atm at least, trace logs are not sent to monitor-backend (would be too much traffic), so it's not relevant to the user currently
+						.map(levelVal=>{
+							return <CheckBox key={levelVal} ml={5} text={levelVal} value={constraint.level_matchVals.includes(levelVal)} onChange={val=>{
+								Change(constraint.level_matchVals = Level_values.filter(a=>(a == levelVal ? val : constraint.level_matchVals.includes(a))));
+							}}/>;
+						})}
 				</Row>
 				<Row center>
 					<CheckBox ml={5} text="Target:" value={constraint.target_matchEnabled} onChange={val=>Change(constraint.target_matchEnabled = val)}/>
