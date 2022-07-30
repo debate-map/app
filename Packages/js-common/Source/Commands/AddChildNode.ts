@@ -11,6 +11,7 @@ import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
 import {AddNode} from "./AddNode.js";
 import {LinkNode} from "./LinkNode.js";
+import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 
 @MapEdit
 @UserEdit
@@ -53,16 +54,17 @@ export class AddChildNode extends Command<{mapID?: string|n, parentID: string, n
 		this.payload.link = E(new NodeChildLink(), this.payload.link);
 		this.payload.link.parent = parentID;
 
-		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID, node, revision}), a=>a.recordAsNodeEdit = this.recordAsNodeEdit);
-		this.payload.link.child = this.sub_addNode.payload.node.id;
-
-		this.IntegrateSubcommand(()=>this.sub_addLink, null, ()=>new LinkNode({mapID, link: this.payload.link!}));
-
 		// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
 		this.parent_oldData =
 			this.Up(AddArgumentAndClaim)?.Check(a=>a.sub_addClaim == this)?.payload.argumentNode
 			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this)?.transferData[0].addNodeCommand?.payload.node
+			?? this.Up(LinkNode_HighLevel)?.Check(a=>a.sub_addArgumentWrapper == this)?.newParent_data
 			?? GetNode.NN(parentID)!;
+
+		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID, node, revision}), a=>a.recordAsNodeEdit = this.recordAsNodeEdit);
+		this.payload.link.child = this.sub_addNode.payload.node.id;
+
+		this.IntegrateSubcommand(()=>this.sub_addLink, null, ()=>new LinkNode({mapID, link: this.payload.link!}));
 
 		this.returnData = {
 			nodeID: this.sub_addNode.payload.node.id,

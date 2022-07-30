@@ -11,6 +11,9 @@ import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNodeTag} from "./AddNodeTag.js";
 import {LinkNode} from "./LinkNode.js";
+import {CheckValidityOfLink, CheckValidityOfNewLink, GetNode} from "../DB/nodes.js";
+import {MapNodeType_Info} from "../DB/nodes/@MapNodeType.js";
+import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 
 @MGLClass({schemaDeps: [
 	/*"UUID",*/ // commented for now, since the schema-dependency system seems to get stuck with it, fsr (perhaps failure for multiple deps)
@@ -86,7 +89,7 @@ AddSchema("NodeTagCloneType", {enum: GetValues(NodeTagCloneType)});
 
 class TransferData {
 	addNodeCommand?: AddChildNode;
-	linkChildCommands = [] as LinkNode[];
+	linkChildCommands = [] as (LinkNode | LinkNode_HighLevel)[];
 	addTagCommands = [] as AddNodeTag[];
 }
 
@@ -134,6 +137,8 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				const newParentID = transfer.newParentID ?? prevTransferData.addNodeCommand?.returnData.nodeID;
 				AssertV(newParentID != null, "Parent-node-id is still null!");
 				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParentID).genNext().toString();
+				/*const newParent = transfer.newParentID ? GetNode(transfer.newParentID) : prevTransferData.addNodeCommand?.sub_addNode.payload.node;
+				AssertV(newParent != null, "Parent-node is still null!");*/
 
 				const newNode = Clone(AsNodeL1(node)) as MapNode;
 				if (transfer.clone_newType != null && transfer.clone_newType != node.type) {
@@ -176,8 +181,36 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 							()=>transferData.linkChildCommands[i2],
 							cmd=>transferData.linkChildCommands[i2] = cmd,
 							()=>{
+								const newLink = {...link};
+								newLink.parent = transferData.addNodeCommand!.returnData.nodeID;
+
+								// if we're changing the node's type, check for child-links it has that are invalid (eg. wrong child-group), and try to change them to be valid
+								if (newNode.type != node.type && CheckValidityOfLink(newNode.type, newLink.group, newLink.c_childType!) != null) {
+									const firstValidGroupForChildType = [...MapNodeType_Info.for[newNode.type].childGroup_childTypes.entries()].filter(a=>a[1].includes(newLink.c_childType!));
+									Assert(firstValidGroupForChildType != null, `Cannot clone node while both changing type and keeping children, because there are children whose type (${newLink.c_childType}) cannot be placed into any of the new node's child-groups.`);
+									newLink.group = firstValidGroupForChildType[0][0];
+								}
+
+								// hard-coded exception here: if old-node-type is category (with claim children), and new-node-type is claim, then have children claims be wrapped into argument nodes
+								if (node.type == MapNodeType.category && newNode.type == MapNodeType.claim && newLink.c_childType == MapNodeType.claim) {
+									const linkCommand = new LinkNode_HighLevel({
+										/*mapID: null,
+										oldParentID: null,*/
+										newParentID: newNodeID,
+										childGroup: ChildGroup.truth,
+										nodeID: newLink.child,
+										newForm: newLink.form,
+										newPolarity: newLink.polarity,
+										deleteEmptyArgumentWrapper: false,
+										unlinkFromOldParent: false,
+									});
+									linkCommand.newParent_data = newNode;
+									linkCommand.orderKeyForOuterNode = newLink.orderKey;
+									return linkCommand;
+								}
+
 								const linkCommand = new LinkNode({
-									link: {...link, parent: transferData.addNodeCommand!.returnData.nodeID},
+									link: newLink,
 								});
 								return linkCommand;
 							},

@@ -47,6 +47,7 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 			?? this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.Up(TransferNodes)?.Check(a=>a.transferData[1]?.addNodeCommand == this.up)?.transferData[0].addNodeCommand?.payload.node
 			?? this.Up(TransferNodes)?.Check(a=>a.transferData[0]?.linkChildCommands.includes(this))?.transferData[0].addNodeCommand?.payload.node
 			?? this.Up(TransferNodes)?.Check(a=>a.transferData[1]?.linkChildCommands.includes(this))?.transferData[1].addNodeCommand?.payload.node
+			?? this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this)?.parent_oldData
 			?? GetNode.NN(link.parent);
 		AssertV(this.parent_oldData, "Cannot link child-node to parent that does not exist!");
 

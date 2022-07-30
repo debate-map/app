@@ -40,7 +40,7 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 }
 
 type Payload = {
-	mapID: string|n, oldParentID: string|n, newParentID: string, nodeID: string,
+	mapID?: string|n, oldParentID?: string|n, newParentID: string, nodeID: string,
 	newForm?: ClaimForm|n, newPolarity?: Polarity|n,
 	//createWrapperArg?: boolean,
 	childGroup: ChildGroup,
@@ -94,6 +94,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 	map_data: Map|n;
 	node_data: MapNode;
 	newParent_data: MapNode;
+	orderKeyForOuterNode: string;
 
 	sub_addArgumentWrapper: AddChildNode;
 	sub_linkToNewParent: LinkNode;
@@ -111,8 +112,9 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.node_data = GetNodeL2.NN(nodeID);
 		const oldParent = GetNodeL2(oldParentID);
 		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");
-		this.newParent_data = GetNodeL2.NN(newParentID);
-		const orderKeyForOuterNode = GetHighestLexoRankUnderParent(newParentID).genNext().toString();
+		// "this.X ?? X" checks needed for usage from TransferNodes.ts
+		this.newParent_data = this.newParent_data ?? GetNodeL2.NN(newParentID);
+		this.orderKeyForOuterNode = this.orderKeyForOuterNode ?? GetHighestLexoRankUnderParent(newParentID).genNext().toString();
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		//const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
@@ -150,7 +152,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, null, ()=>new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-				link: new NodeChildLink({group: childGroup, orderKey: orderKeyForOuterNode, polarity: newPolarity}),
+				link: new NodeChildLink({group: childGroup, orderKey: this.orderKeyForOuterNode, polarity: newPolarity}),
 			}));
 
 			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
@@ -164,7 +166,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
 				form: newForm,
 				polarity: this.node_data.type == MapNodeType.argument ? newPolarity : null,
-				orderKey: wrapperArgNeeded ? VLexoRank.middle().toString() : orderKeyForOuterNode,
+				orderKey: wrapperArgNeeded ? VLexoRank.middle().toString() : this.orderKeyForOuterNode,
 			},
 		}));
 
