@@ -7,6 +7,7 @@ import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {DatabaseState} from "./main/database.js";
 import {DebatesPageState} from "./main/debates.js";
 import {MapsState} from "./main/maps.js";
+import {MorePageState} from "./main/more.js";
 import {ProfileState} from "./main/profile.js";
 import {RatingUIState} from "./main/ratingUI.js";
 import {SearchState} from "./main/search.js";
@@ -47,7 +48,7 @@ export class MainState {
 	@O database = new DatabaseState();
 	@O feedback = {} as {subpage: string};
 	// forum: Forum;
-	@O more = {} as {subpage: string};
+	@O more = new MorePageState();
 	@O home = {} as {subpage: string};
 	@O social = new SocialPageState();
 	@O debates = new DebatesPageState();

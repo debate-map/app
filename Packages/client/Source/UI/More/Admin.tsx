@@ -1,10 +1,13 @@
 import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions.js";
 import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {PageContainer, Observer} from "web-vcore";
+import {PageContainer, Observer, RunInAction_Set} from "web-vcore";
 import {HasAdminPermissions, MeID, GraphDBShape} from "dm_common";
+import {gql} from "web-vcore/nm/@apollo/client";
+import {store} from "../../Store/index.js";
+import {apolloClient} from "../../Utils/LibIntegrations/Apollo.js";
 
 @Observer
 export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes: [] as number[], dbUpgrade_entryCounts: [] as number[]}) {
@@ -55,6 +58,21 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 					<Button text={"Throw async error"} onClick={async()=>{
 						await SleepAsync(1000);
 						throw new Error("Oh no!");
+					}}/>
+				</Row>
+				<Row><h4>GraphQL test</h4></Row>
+				<Row>
+					<TextArea autoSize={true} value={store.main.more.graphqlTestQuery} onChange={val=>RunInAction_Set(this, ()=>store.main.more.graphqlTestQuery = val)}/>
+				</Row>
+				<Row mt={5}>
+					<Button text="Execute" onClick={async()=>{
+						const result = await apolloClient.query({
+							query: gql(store.main.more.graphqlTestQuery),
+							variables: {},
+						});
+						console.log("GraphQL result:", result);
+						const resultData = result.data;
+						alert(`GraphQL result data: ${JSON.stringify(resultData)}`);
 					}}/>
 				</Row>
 
