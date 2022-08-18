@@ -38,6 +38,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
+use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::utils::type_aliases::JSONValue;
@@ -68,7 +69,9 @@ use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, G
 wrap_slow_macros!{
 
 #[derive(MergedObject, Default)]
-pub struct QueryRoot(QueryShard_General, QueryShard_General_Subtree, QueryShard_General_Subtree_Old);
+pub struct QueryRoot(
+    QueryShard_General, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search,
+);
 
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(MutationShard_General, MutationShard_General_Subtree);

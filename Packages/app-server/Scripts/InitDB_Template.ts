@@ -290,6 +290,125 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			return true;
 		end $$ language plpgsql;
 
+
+
+
+
+
+		-- search-related indexes/functions
+
+		CREATE OR REPLACE FUNCTION pick_phrasing(base TEXT, question TEXT) RETURNS TEXT AS $$
+			SELECT (CASE
+				WHEN base IS NOT NULL AND length(base) > 0 AND regexp_match(base, '\[Paragraph [0-9]\]') IS NULL THEN base
+				WHEN question IS NOT NULL AND length(question) > 0 AND regexp_match(question, '\[Paragraph [0-9]\]') IS NULL THEN question 
+				ELSE ''
+				END)
+		$$ LANGUAGE SQL IMMUTABLE;
+
+
+		CREATE OR REPLACE FUNCTION phrasings_to_tsv(base TEXT, question TEXT) RETURNS tsvector AS $$
+		SELECT to_tsvector('public.english_nostop'::regconfig, pick_phrasing(base, question));
+		$$ LANGUAGE SQL IMMUTABLE;
+
+		CREATE OR REPLACE FUNCTION pick_rev_phrasing(phrasing JSONB) RETURNS TEXT AS $$
+			SELECT pick_phrasing((phrasing #> '{text_base}')::text, (phrasing #> '{text_question}')::text);
+		$$ LANGUAGE SQL IMMUTABLE;
+
+		CREATE OR REPLACE FUNCTION rev_phrasing_to_tsv(phrasing JSONB) RETURNS tsvector AS $$
+			SELECT to_tsvector('public.english_nostop'::regconfig, pick_rev_phrasing(phrasing));
+		$$ LANGUAGE SQL IMMUTABLE;
+
+
+		CREATE OR REPLACE FUNCTION phrasing_row_to_tsv(p app_public."nodePhrasings") RETURNS tsvector AS $$
+			SELECT phrasings_to_tsv(p.text_base, p.text_question)
+		$$ LANGUAGE SQL STABLE;
+
+
+		CREATE OR REPLACE FUNCTION rev_row_phrasing_to_tsv(p app_public."nodeRevisions") RETURNS tsvector AS $$
+			SELECT rev_phrasing_to_tsv(p.phrasing)
+		$$ LANGUAGE SQL STABLE;
+
+		CREATE OR REPLACE FUNCTION attachment_quotes_table(attachments JSONB) RETURNS TABLE (quote TEXT) AS $$
+			SELECT jsonb_array_elements_text(jsonb_path_query_array(attachments,'$[*].quote.content')) AS quote;
+		$$ LANGUAGE SQL IMMUTABLE;
+
+		CREATE OR REPLACE FUNCTION attachment_quotes(attachments JSONB) RETURNS TEXT AS $$
+			SELECT string_agg(t, '\n\n') FROM attachment_quotes_table(attachments) AS t;
+		$$ LANGUAGE SQL IMMUTABLE;
+
+
+		CREATE OR REPLACE FUNCTION attachments_to_tsv(attachments JSONB) RETURNS tsvector AS $$
+			SELECT jsonb_to_tsvector('public.english_nostop'::regconfig, jsonb_path_query_array(attachments,'$[*].quote.content'), '["string"]');
+		$$ LANGUAGE SQL IMMUTABLE;
+
+		CREATE OR REPLACE FUNCTION rev_row_quote_to_tsv(r app_public."nodeRevisions") RETURNS tsvector AS $$
+			SELECT attachments_to_tsv(r.attachments);
+		$$ LANGUAGE SQL STABLE;
+
+		CREATE INDEX node_phrasings_text_en_idx on app_public."nodePhrasings" using gin (phrasings_to_tsv(text_base, text_question));
+		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(rev_phrasing_to_tsv(phrasing));
+		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_to_tsv(attachments));
+
+		CREATE OR REPLACE FUNCTION local_search(
+			root text, query text,
+			slimit INTEGER DEFAULT 20, soffset INTEGER DEFAULT 0, depth INTEGER DEFAULT 10,
+			quote_rank_factor FLOAT DEFAULT 0.9, alt_phrasing_rank_factor FLOAT default 0.95
+		) RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text TEXT) AS $$
+		  WITH d AS (SELECT id FROM descendants2(root, depth)),
+				 lrev AS (SELECT DISTINCT ON (node) node, id FROM app_public."nodeRevisions" ORDER BY node, "createdAt" DESC),
+				 p AS (
+						SELECT rev.node AS node_id,
+							ts_rank(rev_phrasing_to_tsv(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS rank,
+							'standard' AS type,
+							ts_headline('public.english_nostop'::regconfig, pick_rev_phrasing(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
+							FROM app_public."nodeRevisions" rev
+							JOIN lrev USING (id)
+							JOIN d ON rev.node = d.id
+							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev_phrasing_to_tsv(rev.phrasing)
+					 UNION (
+						SELECT rev.node AS node_id,
+							ts_rank(attachments_to_tsv(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * quote_rank_factor AS rank,
+							'quote' AS type,
+							ts_headline('public.english_nostop'::regconfig, attachment_quotes(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
+							FROM app_public."nodeRevisions" rev
+							JOIN lrev USING (id)
+							JOIN d ON rev.node = d.id
+							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ attachments_to_tsv(rev.attachments)
+					) UNION (
+						SELECT phrasing.node AS node_id,
+							ts_rank(phrasing_row_to_tsv(phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * alt_phrasing_rank_factor AS rank,
+							phrasing.type AS type,
+							ts_headline('public.english_nostop'::regconfig, pick_phrasing(text_base, text_question), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS found_text
+							FROM app_public."nodePhrasings" AS phrasing
+							JOIN d ON phrasing.node = d.id
+							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing_row_to_tsv(phrasing)
+					)
+				 ),
+				 op AS (SELECT DISTINCT ON (node_id) node_id, rank, type, found_text FROM p ORDER BY node_id, rank DESC),
+				 op2 AS (
+					SELECT op.*, pick_rev_phrasing(rev.phrasing) AS node_text
+				  FROM op
+					JOIN lrev ON (op.node_id = lrev.node)
+					JOIN app_public."nodeRevisions" AS rev USING (id))
+		  SELECT * FROM op2 ORDER BY rank DESC LIMIT slimit OFFSET soffset;
+		$$ LANGUAGE SQL STABLE;
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
 		-- simple RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access [without user-specific block], or entry's policy has user-specific grant)
 
 		alter table app_public."terms" enable row level security;

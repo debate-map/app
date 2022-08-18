@@ -85,7 +85,8 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
         body_as_str.contains("ancestors(") ||
         body_as_str.contains("shortestPath(") ||
         body_as_str.contains("refreshLQData(payload: $payload)") ||
-        body_as_str.contains("cloneSubtree(payload: $payload)")
+        body_as_str.contains("cloneSubtree(payload: $payload)") ||
+        body_as_str.contains("searchSubtree(payload: $payload)")
     {
         proxy_request_to_asjs = false;
     }
