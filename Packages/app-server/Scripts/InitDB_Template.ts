@@ -293,6 +293,27 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 
 
+		-- adding replaced_by field (well for long-term, this stores the triggers)
+
+		-- these commented, since handled by @DB(...)
+		-- alter table app_public."nodeRevisions" add column replaced_by text;
+		-- alter table app_public."nodeRevisions" add constraint "fk @from(replaced_by) @to(nodeRevisions.id)" FOREIGN KEY (replaced_by) REFERENCES "nodeRevisions" (id);
+
+		CREATE OR REPLACE FUNCTION app_public.after_insert_node_revision() RETURNS TRIGGER LANGUAGE plpgsql AS $$
+		DECLARE rev_id text;
+		BEGIN
+			SELECT id INTO rev_id FROM app_public."nodeRevisions" nr WHERE node = NEW.node AND "createdAt" < NEW."createdAt" ORDER BY "createdAt" DESC LIMIT 1;
+			IF rev_id IS NOT NULL THEN
+				UPDATE app_public."nodeRevisions" SET replaced_by = NEW.id WHERE id = rev_id;
+			END IF;
+			RETURN NEW;
+		END$$;
+
+		CREATE TRIGGER after_insert_node_revision AFTER INSERT ON app_public."nodeRevisions" FOR EACH ROW EXECUTE FUNCTION app_public.after_insert_node_revision();
+
+
+
+
 
 
 		-- search-related indexes/functions
@@ -346,8 +367,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		$$ LANGUAGE SQL STABLE;
 
 		CREATE INDEX node_phrasings_text_en_idx on app_public."nodePhrasings" using gin (phrasings_to_tsv(text_base, text_question));
-		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(rev_phrasing_to_tsv(phrasing));
-		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_to_tsv(attachments));
+		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(rev_phrasing_to_tsv(phrasing)) WHERE replaced_by IS NULL;
+		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_to_tsv(attachments)) WHERE replaced_by IS NULL;
 
 		CREATE OR REPLACE FUNCTION local_search(
 			root text, query text,
@@ -364,7 +385,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 							FROM app_public."nodeRevisions" rev
 							JOIN lrev USING (id)
 							JOIN d ON rev.node = d.id
-							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev_phrasing_to_tsv(rev.phrasing)
+							WHERE rev.replaced_by IS NULL AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev_phrasing_to_tsv(rev.phrasing)
 					 UNION (
 						SELECT rev.node AS node_id,
 							ts_rank(attachments_to_tsv(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * quote_rank_factor AS rank,
@@ -373,7 +394,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 							FROM app_public."nodeRevisions" rev
 							JOIN lrev USING (id)
 							JOIN d ON rev.node = d.id
-							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ attachments_to_tsv(rev.attachments)
+							WHERE rev.replaced_by IS NULL AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ attachments_to_tsv(rev.attachments)
 					) UNION (
 						SELECT phrasing.node AS node_id,
 							ts_rank(phrasing_row_to_tsv(phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * alt_phrasing_rank_factor AS rank,

@@ -41,6 +41,7 @@ pub struct MediaAttachment {
 pub struct MapNodeRevision {
     pub id: ID,
     pub node: String,
+    pub replaced_by: String,
     pub creator: String,
     pub createdAt: i64,
     pub phrasing: JSONValue,
@@ -57,6 +58,7 @@ impl From<tokio_postgres::row::Row> for MapNodeRevision {
 		Self {
             id: ID::from(&row.get::<_, String>("id")),
             node: row.get("node"),
+            replaced_by: row.get("replaced_by"),
             creator: row.get("creator"),
             createdAt: row.get("createdAt"),
             phrasing: row.get("phrasing"),

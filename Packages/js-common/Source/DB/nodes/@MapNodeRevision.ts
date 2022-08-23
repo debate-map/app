@@ -155,6 +155,10 @@ export class MapNodeRevision {
 	@Field({type: "string"})
 	node: string;
 
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodeRevisions`).DeferRef())
+	@Field({type: "string"})
+	replaced_by: string;
+
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})
 	creator: string;
