@@ -1,7 +1,7 @@
 
 use std::time::Duration;
 
-use async_graphql::SimpleObject;
+use async_graphql::{SimpleObject, Json};
 use flume::Sender;
 use futures_util::StreamExt;
 use indexmap::IndexMap;
@@ -99,22 +99,26 @@ pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSend
                         mtx_results.drain(0..entries_to_remove);
                     }
                 },
-                Message_ASToMB::LQInstanceUpdated { table_name, filter, last_entries, watchers_count } => {
+                Message_ASToMB::LQInstanceUpdated { table_name, filter, last_entries, watchers_count, deleting } => {
                     info!("LQ-instance updated:{}", json!({
                         "table_name": table_name,
                         "filter": filter,
                         "last_entries": last_entries,
                         "watchers_count": watchers_count,
+                        "deleting": deleting,
                     }).to_string());
 
                     let mut lqi_data = app_state.lqi_data.write().await;
                     let key = get_lq_instance_key(&table_name, &filter);
-                    lqi_data.insert(key, LQInstance_Partial {
-                        table_name,
-                        filter,
-                        last_entries,
-                        entry_watcher_count: watchers_count as usize,
-                    });
+                    match deleting {
+                        false => lqi_data.insert(key, LQInstance_Partial {
+                            table_name,
+                            filter,
+                            last_entries: Json::from(last_entries),
+                            entry_watcher_count: watchers_count as usize,
+                        }),
+                        true => lqi_data.remove(&key),
+                    };
                 }
             }
         }

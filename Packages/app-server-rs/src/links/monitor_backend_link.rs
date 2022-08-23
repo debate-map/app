@@ -103,5 +103,6 @@ pub enum Message_ASToMB {
         filter: JSONValue,
         last_entries: Vec<RowData>,
         watchers_count: u32,
+        deleting: bool,
     },
 }

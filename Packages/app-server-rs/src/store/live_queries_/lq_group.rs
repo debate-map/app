@@ -42,6 +42,7 @@ use tracing::{info, warn, debug, error};
 use anyhow::{anyhow, Error};
 use uuid::Uuid;
 
+use crate::links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB};
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
@@ -411,12 +412,30 @@ impl LQGroup {
             // commented the `.expect`, since was failing occasionally, and I don't have time to debug atm [maybe fixed after change to get_or_create_lq_instance?]
             //let _removed_value = entry_watchers.remove(&stream_id).expect(&format!("Trying to drop LQWatcher, but failed, since no entry was found with this key:{}", lq_key));
             entry_watchers.remove(&stream_id);
+
+            // only send update for lqi if we're not about to be deleted
+            if entry_watchers.len() > 0 {
+                // todo: try to find a way to provide an up-to-date result_entries without getting a read-lock here (since wasn't necessary before sending-to-backend behavior)
+                let current_entries = lq_instance.last_entries.read().await.clone();
+                lq_instance.send_self_to_monitor_backend(current_entries, entry_watchers.len()).await;
+            }
             
             entry_watchers.len()
         };
         if new_watcher_count == 0 {
             lq_instances.remove(&lq_key);
             debug!("Watcher count for live-query entry dropped to 0, so removing.");
+
+            //let lq_key = get_lq_instance_key(&self.table_name, &self.filter);
+            if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::LQInstanceUpdated {
+                table_name: table_name.to_owned(),
+                filter: serde_json::to_value(filter.clone()).unwrap(),
+                last_entries: vec![],
+                watchers_count: 0u32,
+                deleting: true,
+            }).await {
+                error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
+            }
         }
 
         debug!("LQ-watcher drop complete. @watcher_count_for_entry:{} @lq_entry_count:{}", new_watcher_count, lq_instances.len());

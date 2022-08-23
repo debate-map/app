@@ -101,6 +101,7 @@ impl LQInstance {
             filter: serde_json::to_value(self.filter.clone()).unwrap(),
             last_entries: entries,
             watchers_count: watcher_count as u32,
+            deleting: false, // deletion event is sent from drop_lq_watcher func in lq_group.rs
         }).await {
             error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
         }
@@ -219,3 +220,23 @@ impl LQInstance {
         new_result
     }*/
 }
+/*impl Drop for LQInstance {
+    fn drop(&mut self) {
+        let table_name = self.table_name.to_owned();
+        let filter = self.filter.clone();
+        // there might be an issue here where this async-chain ends up broadcasting later than it should, causing it to "overwrite" some "later" event
+        // todo: fix this possible issue (perhaps by storing timestamp here, then canceling broadcast if another broadcast occurs before our actual broadcast)
+        tokio::spawn(async move {
+            //let lq_key = get_lq_instance_key(&self.table_name, &self.filter);
+            if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::LQInstanceUpdated {
+                table_name,
+                filter: serde_json::to_value(filter).unwrap(),
+                last_entries: vec![],
+                watchers_count: 0u32,
+                deleting: true,
+            }).await {
+                error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
+            }
+        });
+    }
+}*/

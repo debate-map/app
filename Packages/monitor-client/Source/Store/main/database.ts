@@ -8,6 +8,7 @@ export class DatabaseState {
 	constructor() { makeObservable(this); }
 	@O subpage: "requests" | "watchers" | "migrate";
 	@O requests = new RequestsState();
+	@O watchers = new WatchersState();
 }
 
 export class RequestsState {
@@ -18,4 +19,7 @@ export class RequestsState {
 
 	// groups
 	@O.ref @version(2) groups: MtxGroup[] = [];
+}
+export class WatchersState {
+	//constructor() { makeObservable(this); }
 }

@@ -1,4 +1,4 @@
-use async_graphql::SimpleObject;
+use async_graphql::{SimpleObject, Json};
 use axum::{
     response::{Html},
     routing::{get, any_service, post, get_service},
@@ -35,10 +35,13 @@ pub struct AppState {
     pub lqi_data: RwLock<HashMap<String, LQInstance_Partial>>,
 }
 
+#[derive(SimpleObject)] // in monitor-backend only
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LQInstance_Partial {
     pub table_name: String,
     pub filter: JSONValue,
-    pub last_entries: Vec<RowData>,
+    //pub last_entries: Vec<RowData>,
+    pub last_entries: Json<Vec<RowData>>,
     pub entry_watcher_count: usize,
 }
 

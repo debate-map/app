@@ -20,7 +20,7 @@ use crate::links::app_server_rs_types::{MtxData, LogEntry};
 use crate::utils::futures::make_reliable;
 use crate::{GeneralMessage};
 use crate::migrations::v2::migrate_db_to_v2;
-use crate::store::storage::{AppStateWrapper};
+use crate::store::storage::{AppStateWrapper, LQInstance_Partial};
 use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::{JSONValue, ABSender, ABReceiver};
 
@@ -30,6 +30,12 @@ pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> 
         error!("Admin-key is incorrect! Submitted:{}", admin_key);
     }
     return result;
+}
+pub fn ensure_admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> Result<(), Error> {
+    if !admin_key_is_correct(admin_key, print_message_if_wrong) {
+        return Err(anyhow!("Admin-key is incorrect!"));
+    }
+    Ok(())
 }
 
 wrap_slow_macros!{
@@ -45,7 +51,7 @@ impl QueryShard_General {
     async fn empty(&self) -> &str { "" }
     
     async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<MtxData>, Error> {
-        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
         let mtx_results = app_state.mtx_results.read().await.to_vec();
@@ -65,8 +71,29 @@ impl QueryShard_General {
         Ok(mtx_results_filtered)
     }
     
+    async fn lqInstances(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<LQInstance_Partial>, Error> {
+        ensure_admin_key_is_correct(admin_key, true)?;
+        
+        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let lqis: Vec<LQInstance_Partial> = app_state.lqi_data.read().await.values().map(|a| a.clone()).collect();
+        /*let lqis_filtered: Vec<LQInstance_Partial> = lqis.into_iter().filter(|mtx| {
+            for lifetime in mtx.section_lifetimes.values() {
+                let section_start = lifetime.start_time;
+                let section_end = match lifetime.duration {
+                    Some(duration) => section_start + duration,
+                    None => f64::MAX, // for this context of filtering, consider a not-yet-ended section to extend to max-time
+                };
+                if section_start < end_time && section_end > start_time {
+                    return true;
+                }
+            }
+            false
+        }).collect();*/
+        Ok(lqis)
+    }
+    
     async fn basicInfo(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, Error> {
-        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        ensure_admin_key_is_correct(admin_key, true)?;
         
         let basic_info = get_basic_info_from_app_server_rs().await?;
         Ok(basic_info)
@@ -167,7 +194,7 @@ pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
     /*async fn clearLogEntries(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
-        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
         let mut mtx_results = app_state.mtx_results.write().await;
@@ -179,7 +206,7 @@ impl MutationShard_General {
     }*/
     
     async fn restartAppServer(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
-        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        ensure_admin_key_is_correct(admin_key, true)?;
         
         tell_k8s_to_restart_app_server().await?;
         
@@ -189,7 +216,7 @@ impl MutationShard_General {
     }
 
     async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
-        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
         let mut mtx_results = app_state.mtx_results.write().await;
@@ -201,7 +228,7 @@ impl MutationShard_General {
     }
     
     async fn startMigration(&self, ctx: &async_graphql::Context<'_>, admin_key: String, to_version: usize) -> Result<StartMigration_Result, Error> {
-        if !admin_key_is_correct(admin_key, true) { return Err(anyhow!("Admin-key is incorrect!")); }
+        ensure_admin_key_is_correct(admin_key, true)?;
         
         let msg_sender = ctx.data::<Sender<GeneralMessage>>().unwrap();
         let migration_result = match to_version {
