@@ -373,6 +373,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		CREATE INDEX node_phrasings_text_en_idx on app_public."nodePhrasings" using gin (phrasing_tsvector);
 		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(phrasing1_tsvector) WHERE replaced_by IS NULL;
 		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_tsvector) WHERE replaced_by IS NULL;
+		CREATE INDEX node_revisions_node_idx ON app_public."nodeRevisions" (node);
+		CREATE INDEX node_phrasings_node_idx ON app_public."nodePhrasings" (node);
 
 		CREATE OR REPLACE FUNCTION local_search(
 			root text, query text,
