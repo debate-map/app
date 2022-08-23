@@ -43,9 +43,9 @@ pub fn to_anyhow_with_extra<
 
 /// Alternative to `my_hash_map.entry(key).or_insert_with(...)`, for when the hashmap is wrapped in a RwLock, and you want a "write" lock to only be obtained if a "read" lock is insufficient. (see: https://stackoverflow.com/a/57057033)
 /// Returns tuple of:
-/// 0) The value that was found/created.
-/// 1) The new number of entries in the map.
-/// 2) `true` if the entry didn't exist and had to be created -- `false` otherwise.
+/// * 0: The value that was found/created.
+/// * 1: `true` if the entry didn't exist and had to be created -- `false` otherwise.
+/// * 2: The new number of entries in the map.
 pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: Clone>(map: &RwLock<HashMap<K, V>>, key: K, insert_func: impl FnOnce() -> V, mtx_p: Option<&Mtx>) -> (V, bool, usize)
     where K: Sized, K: Hash + Eq
 {

@@ -27,7 +27,7 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
     let node_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT nodes.* from descendants($1, $2) as d JOIN nodes USING (id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     let link_rows: Vec<Row> = {
         if max_depth > 0 {
-            let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
+            //let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
             //ctx.tx.query_raw(r#"SELECT links.* from "nodeChildLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
             //ctx.tx.query_raw(r#"SELECT links.* from "nodeChildLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
             ctx.tx.query_raw(r#"SELECT links.* from descendants($1, $2) as d JOIN "nodeChildLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
@@ -87,7 +87,7 @@ pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_d
     let node_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT nodes.* from descendants2($1, $2) as d JOIN nodes USING (id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
     let link_rows: Vec<Row> = {
         if max_depth > 0 {
-            let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
+            //let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
             //ctx.tx.query_raw(r#"SELECT links.* from "nodeChildLinks" links JOIN descendants2($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
             ctx.tx.query_raw(r#"SELECT links.* from descendants2($1, $2) as d JOIN "nodeChildLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
         } else {
@@ -126,7 +126,7 @@ pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_d
         ) AS media_ids_from_revisions ON (medias.id = media_ids_from_revisions.id#>>'{}')
     "#, params(&[&root_id, &max_depth])).await?.try_collect().await?;
 
-    let mut subtree = Subtree {
+    let subtree = Subtree {
         terms: term_rows.into_iter().map(|a| a.into()).collect(),
         medias: media_rows.into_iter().map(|a| a.into()).collect(),
         nodes: node_rows.into_iter().map(|a| a.into()).collect(),

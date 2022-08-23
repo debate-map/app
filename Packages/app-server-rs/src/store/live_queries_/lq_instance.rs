@@ -32,11 +32,14 @@ use axum::Error;
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
+use tracing::error;
 use uuid::Uuid;
 
+use crate::links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB};
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
-use crate::utils::db::pg_stream_parsing::{LDChange, RowData};
+use crate::utils::db::pg_stream_parsing::{LDChange};
+use crate::utils::type_aliases::RowData;
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::general::rw_locked_hashmap__get_entry_or_insert_with;
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
@@ -91,12 +94,27 @@ impl LQInstance {
         }
     }
 
-    pub async fn get_or_create_watcher(&self, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (LQEntryWatcher, bool, usize) {
+    pub async fn send_self_to_monitor_backend(&self, entries: Vec<RowData>, watcher_count: usize) {
+        //let lq_key = get_lq_instance_key(&self.table_name, &self.filter);
+        if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::LQInstanceUpdated {
+            table_name: self.table_name.clone(),
+            filter: serde_json::to_value(self.filter.clone()).unwrap(),
+            last_entries: entries,
+            watchers_count: watcher_count as u32,
+        }).await {
+            error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
+        }
+    }
+
+    pub async fn get_or_create_watcher(&self, stream_id: Uuid, mtx_p: Option<&Mtx>, current_entries: Vec<RowData>) -> (LQEntryWatcher, bool, usize) {
         /*let entry_watchers = self.entry_watchers.write().await;
         let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);
         (watcher, create_new)*/
-        rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new, mtx_p).await
+        let (watcher, just_created, new_count) = rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new, mtx_p).await;
+        self.send_self_to_monitor_backend(current_entries, new_count).await;
+        (watcher, just_created, new_count)
+
     }
     /*pub fn get_or_create_watcher(&mut self, stream_id: Uuid) -> (&LQEntryWatcher, usize) {
         let watcher = self.entry_watchers.entry(stream_id).or_insert(LQEntryWatcher::new());
@@ -176,7 +194,9 @@ impl LQInstance {
         //self.new_entries_channel_sender.send(new_entries.clone());
 
         mtx.section("4:update the last_entries list");
-        self.set_last_entries(new_entries).await;
+        self.set_last_entries(new_entries.clone()).await;
+
+        self.send_self_to_monitor_backend(new_entries, entry_watchers.len()).await;
     }
 
     pub async fn set_last_entries(&self, mut new_entries: Vec<RowData>) {

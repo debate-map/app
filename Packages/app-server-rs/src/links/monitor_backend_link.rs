@@ -9,7 +9,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tracing::error;
 
-use crate::utils::{general::logging::LogEntry, type_aliases::{ABReceiver, ABSender}, mtx::mtx::{Mtx, MtxData}};
+use crate::utils::{general::logging::LogEntry, type_aliases::{ABReceiver, ABSender, RowData, JSONValue}, mtx::mtx::{Mtx, MtxData}};
 
 pub fn is_addr_from_pod(addr: &SocketAddr) -> bool {
     addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.")
@@ -52,7 +52,7 @@ pub static MESSAGE_SENDER_TO_MONITOR_BACKEND: Lazy<(ABSender<Message_ASToMB>, AB
 });
 
 async fn read(mut receiver: SplitStream<WebSocket>) {
-    while let Some(Ok(msg)) = receiver.next().await {
+    while let Some(Ok(_msg)) = receiver.next().await {
         /*match msg {
             Text(json) => {
                 
@@ -85,7 +85,7 @@ async fn write(mut sender: SplitSink<WebSocket, Message>) {
     }
 }
 
-// section to keep synchronized with "app_server_rs_link.rs" in monitor-backend
+// section to keep synchronized with "app_server_rs_types.rs" in monitor-backend
 // ==========
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -97,4 +97,11 @@ pub enum Message_MBToAS {
 pub enum Message_ASToMB {
     LogEntryAdded { entry: LogEntry },
     MtxEntryDone { mtx: MtxData },
+    LQInstanceUpdated {
+        //key: String,
+        table_name: String,
+        filter: JSONValue,
+        last_entries: Vec<RowData>,
+        watchers_count: u32,
+    },
 }

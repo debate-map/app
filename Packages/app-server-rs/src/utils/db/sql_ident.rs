@@ -37,12 +37,12 @@ impl ToSql for SQLIdent {
     fn accepts(_ty: &tokio_postgres::types::Type) -> bool where Self: Sized {
         panic!("A SQLIdent instance was attempted to be serialized as a sql-param!");
     }
-    fn to_sql_checked(&self, typ: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+    fn to_sql_checked(&self, _typ: &tokio_postgres::types::Type, _out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
         panic!("A SQLIdent instance was attempted to be serialized as a sql-param!");
     }
 }
 impl SQLParam_ for SQLIdent {
-    fn prep_integrate(&self, offered_slot: i32) -> Result<(bool, &str, String), Error> {
+    fn prep_integrate(&self, _offered_slot: i32) -> Result<(bool, &str, String), Error> {
         // defensive (actually: atm, this is required for safety); do extra checks to ensure identifiers only ever consist of alphanumerics and underscores
         lazy_static! {
             static ref REGEX_SAFE_IDENT: Regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();

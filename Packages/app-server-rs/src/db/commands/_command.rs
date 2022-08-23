@@ -11,7 +11,7 @@ use tokio_postgres::{Row, types::ToSql};
 use anyhow::{anyhow, Error, Context};
 use deadpool_postgres::{Transaction, Pool};
 
-use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, pg_stream_parsing::RowData, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::{SQLParam, CustomPGSerializer}}, general::{general::{to_anyhow, match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::PGClientObject};
+use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::{SQLParam, CustomPGSerializer}}, general::{general::{to_anyhow, match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::{PGClientObject, RowData}};
 use crate::{utils::type_aliases::JSONValue};
 
 pub struct UserInfo {
@@ -139,10 +139,10 @@ pub struct ToSqlWrapper {
     pub data: Box<dyn SQLParam>,
 }
 impl ToSql for ToSqlWrapper {
-    fn accepts(ty: &tokio_postgres::types::Type) -> bool where Self: Sized {
+    fn accepts(_ty: &tokio_postgres::types::Type) -> bool where Self: Sized {
         panic!("Call to_sql_checked instead.");
     }
-    fn to_sql(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> where Self: Sized {
+    fn to_sql(&self, _ty: &tokio_postgres::types::Type, _out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> where Self: Sized {
         panic!("Call to_sql_checked instead.");
     }
     fn to_sql_checked(&self, ty: &tokio_postgres::types::Type, out: &mut bytes::BytesMut) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {

@@ -41,7 +41,8 @@ pub struct MediaAttachment {
 pub struct MapNodeRevision {
     pub id: ID,
     pub node: String,
-    pub replaced_by: Option<String>,
+    #[graphql(name = "replaced_by")]
+    pub replaced_by: Option<String>, // todo: make this casing consistent with the rest
     pub creator: String,
     pub createdAt: i64,
     pub phrasing: JSONValue,

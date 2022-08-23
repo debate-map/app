@@ -6,7 +6,7 @@ use serde_json::{json, Map};
 use tokio_postgres::{Column, types};
 use tokio_postgres::types::{Type, FromSql};
 use tokio_postgres::{Row};
-use crate::utils::db::pg_stream_parsing::RowData;
+use crate::utils::type_aliases::RowData;
 use crate::{utils::{type_aliases::JSONValue}};
 
 pub fn postgres_row_to_struct<'a, T: for<'de> Deserialize<'de>>(row: Row) -> Result<T, Error> {

@@ -29,7 +29,7 @@ use crate::db::nodes::MapNode;
 use crate::db::terms::Term;
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::db::filter::{QueryFilter, FilterInput};
-use crate::utils::db::pg_stream_parsing::RowData;
+use crate::utils::type_aliases::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::start_read_transaction;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};

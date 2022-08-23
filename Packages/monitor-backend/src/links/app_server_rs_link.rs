@@ -14,7 +14,7 @@ use url::Url;
 use tokio_tungstenite::{tungstenite::{connect, Message}, connect_async};
 use uuid::Uuid;
 
-use crate::{GeneralMessage, utils::type_aliases::ABSender, store::storage::AppStateWrapper, links::app_server_rs_types::{Message_ASToMB, LogEntry}};
+use crate::{GeneralMessage, utils::type_aliases::{ABSender, JSONValue}, store::storage::{AppStateWrapper, LQInstance_Partial}, links::app_server_rs_types::{Message_ASToMB, LogEntry}};
 
 pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSender<GeneralMessage>) {
     loop {
@@ -99,7 +99,33 @@ pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSend
                         mtx_results.drain(0..entries_to_remove);
                     }
                 },
+                Message_ASToMB::LQInstanceUpdated { table_name, filter, last_entries, watchers_count } => {
+                    info!("LQ-instance updated:{}", json!({
+                        "table_name": table_name,
+                        "filter": filter,
+                        "last_entries": last_entries,
+                        "watchers_count": watchers_count,
+                    }).to_string());
+
+                    let mut lqi_data = app_state.lqi_data.write().await;
+                    let key = get_lq_instance_key(&table_name, &filter);
+                    lqi_data.insert(key, LQInstance_Partial {
+                        table_name,
+                        filter,
+                        last_entries,
+                        entry_watcher_count: watchers_count as usize,
+                    });
+                }
             }
         }
     }
+}
+
+// from lq_instance.rs in app-server-rs
+fn get_lq_instance_key(table_name: &str, filter: &JSONValue) -> String {
+    //format!("@table:{} @filter:{:?}", table_name, filter)
+    json!({
+        "table": table_name,
+        "filter": filter,
+    }).to_string()
 }

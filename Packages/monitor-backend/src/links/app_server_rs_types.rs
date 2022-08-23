@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use async_graphql::{Object, SimpleObject};
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
+use serde_json::Map;
 use uuid::Uuid;
+
+use crate::utils::type_aliases::{JSONValue, RowData};
 
 //wrap_slow_macros! {
 
@@ -60,6 +63,12 @@ pub enum Message_MBToAS {
 pub enum Message_ASToMB {
     LogEntryAdded { entry: LogEntry },
     MtxEntryDone { mtx: MtxData },
+    LQInstanceUpdated {
+        table_name: String,
+        filter: JSONValue,
+        last_entries: Vec<RowData>,
+        watchers_count: u32,
+    },
 }
 
 //}

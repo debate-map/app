@@ -3,12 +3,12 @@ use anyhow::{anyhow, bail, Context, Error};
 use indexmap::IndexMap;
 use rust_macros::{wrap_slow_macros, unchanged};
 use serde::Serialize;
-use crate::{utils::general::{extensions::IteratorV, general::match_cond_to_iter}, store::live_queries_::lq_param::{LQParam}};
+use crate::{utils::{general::{extensions::IteratorV, general::match_cond_to_iter}, type_aliases::RowData}, store::live_queries_::lq_param::{LQParam}};
 use itertools::{chain, Itertools};
 use serde_json::Map;
 use tokio_postgres::types::ToSql;
 use crate::{utils::type_aliases::JSONValue};
-use super::{sql_fragment::{SQLFragment, SF}, pg_stream_parsing::RowData, sql_ident::{SQLIdent}, sql_param::SQLParamBoxed};
+use super::{sql_fragment::{SQLFragment, SF}, sql_ident::{SQLIdent}, sql_param::SQLParamBoxed};
 
 //pub type Filter = Option<Map<String, JSONValue>>;
 pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
@@ -266,10 +266,10 @@ pub fn json_value_to_guessed_sql_value_param_fragment(json_val: &JSONValue) -> R
             Ok(SF::value(Box::new(json_val.clone())))
             // todo: make sure this is correct
         },
-        _ => {
+        /*_ => {
             //SQLParam::Value(op_val.to_string().replace('\"', "'").replace('[', "(").replace(']', ")"))
             bail!("Conversion from this type of json-value ({json_val:?}) to a SQLParam is not yet implemented. Instead, provide one of: Null, Bool, Number, String, Array, Object");
-        },
+        },*/
     }
 }
 pub fn json_vals_to_sql_array_fragment(json_vals: &Vec<JSONValue>) -> Result<SQLFragment, Error> {

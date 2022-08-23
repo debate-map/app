@@ -324,8 +324,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 		CREATE OR REPLACE FUNCTION pick_phrasing(base TEXT, question TEXT) RETURNS TEXT AS $$
 			SELECT (CASE
-				WHEN base IS NOT NULL AND length(base) > 0 AND regexp_match(base, '\[Paragraph [0-9]\]') IS NULL THEN base
-				WHEN question IS NOT NULL AND length(question) > 0 AND regexp_match(question, '\[Paragraph [0-9]\]') IS NULL THEN question 
+				WHEN base IS NOT NULL AND length(base) > 0 AND regexp_match(base, '\\[Paragraph [0-9]\\]') IS NULL THEN base
+				WHEN question IS NOT NULL AND length(question) > 0 AND regexp_match(question, '\\[Paragraph [0-9]\\]') IS NULL THEN question 
 				ELSE ''
 				END)
 		$$ LANGUAGE SQL IMMUTABLE;

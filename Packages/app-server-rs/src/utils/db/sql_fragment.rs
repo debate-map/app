@@ -128,7 +128,7 @@ impl SQLFragment {
                     // identifiers are (safely -- that's the goal, anyway) inlined into the sql-text, so don't send them to tokio-postgres/the-db as "actual" params
                     result.0
                 }
-                Err(err) => false,
+                Err(_err) => false,
             }
         }).collect();
         

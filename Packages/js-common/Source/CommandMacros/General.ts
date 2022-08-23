@@ -25,10 +25,10 @@ Command.augmentValidate = (command: Command<any>)=>{
 	if (DMCommon_InServer()) {
 		// todo: change this to only find command-runs that are older than X days (eg. 3)
 		//command["_commandRuns"] = GetCommandRuns(undefined, undefined, true);
-		Object.defineProperty(command, "_commandRuns", {value: GetCommandRuns(undefined, undefined, true)});
+		Object.defineProperty(command, "_commandRuns", {configurable: true, value: GetCommandRuns(undefined, undefined, true)});
 	} else {
 		//command["_commandRuns"] = emptyArray;
-		Object.defineProperty(command, "_commandRuns", {value: emptyArray});
+		Object.defineProperty(command, "_commandRuns", {configurable: true, value: emptyArray});
 	}
 };
 

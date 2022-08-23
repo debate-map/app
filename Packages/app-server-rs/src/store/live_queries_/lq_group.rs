@@ -45,7 +45,8 @@ use uuid::Uuid;
 use crate::store::live_queries_::lq_instance::get_lq_instance_key;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
-use crate::utils::db::pg_stream_parsing::{LDChange, RowData};
+use crate::utils::db::pg_stream_parsing::{LDChange};
+use crate::utils::type_aliases::RowData;
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::extensions::ResultV;
 use crate::utils::general::general::{AtomicF64};
@@ -210,11 +211,11 @@ impl LQGroup {
             let result_entries = instance.last_entries.read().await.clone();
 
             mtx.section("3:convert result-set to rust types");
-            let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries);
+            let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries.clone());
 
             mtx.section("4:get or create watcher, for the given stream");
             //let watcher = entry.get_or_create_watcher(stream_id);
-            let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx)).await;
+            let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx), result_entries).await;
             let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?} @lqi_active:{}", new_watcher_count, table_name, filter, lqi_active);
             debug!("LQ-watcher started. {}", watcher_info_str);
             // atm, we do not expect more than 20 users online at the same time; so if there are more than 20 watchers of a single query, log a warning
@@ -247,7 +248,10 @@ impl LQGroup {
         }
     }
     async fn create_new_lq_instance(&self, table_name: &str, filter: &QueryFilter, lq_key: &str, client: &PGClientObject, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, usize), Error> {
-        let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), vec![]);
+        let entries = vec![];
+        let new_lqi = LQInstance::new(table_name.to_owned(), filter.clone(), entries.clone());
+        new_lqi.send_self_to_monitor_backend(entries, 0).await;
+
         //live_queries.insert(lq_key.clone(), Arc::new(new_entry));
         let new_lqi_arc = Arc::new(new_lqi);
         let lqis_buffered_already = self.schedule_lqi_init_within_batch(lq_key, new_lqi_arc.clone(), client, parent_mtx).await?;

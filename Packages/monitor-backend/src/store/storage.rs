@@ -25,13 +25,21 @@ use tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::links::app_server_rs_types::{MtxSection, MtxData};
+use crate::{links::app_server_rs_types::{MtxSection, MtxData}, utils::type_aliases::{JSONValue, RowData}};
 
 pub type AppStateWrapper = Arc<AppState>;
 #[derive(Default)]
 pub struct AppState {
     //pub mtx_results: RwLock<Vec<Mtx>>,
     pub mtx_results: RwLock<Vec<MtxData>>,
+    pub lqi_data: RwLock<HashMap<String, LQInstance_Partial>>,
+}
+
+pub struct LQInstance_Partial {
+    pub table_name: String,
+    pub filter: JSONValue,
+    pub last_entries: Vec<RowData>,
+    pub entry_watcher_count: usize,
 }
 
 /*wrap_slow_macros!{
