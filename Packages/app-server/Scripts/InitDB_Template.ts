@@ -293,11 +293,15 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 
 
-		-- adding replaced_by field (well for long-term, this stores the triggers)
+		-- set of changes needed for new local_search implementation
 
 		-- these commented, since handled by @DB(...)
 		-- alter table app_public."nodeRevisions" add column replaced_by text;
 		-- alter table app_public."nodeRevisions" add constraint "fk @from(replaced_by) @to(nodeRevisions.id)" FOREIGN KEY (replaced_by) REFERENCES "nodeRevisions" (id);
+
+		ALTER TABLE app_public."nodeRevisions" ADD COLUMN phrasing1_tsvector tsvector GENERATED ALWAYS AS (rev_phrasing_to_tsv(phrasing)) STORED NOT NULL;
+		ALTER TABLE app_public."nodeRevisions" ADD COLUMN attachments_tsvector tsvector GENERATED ALWAYS AS (attachments_to_tsv(attachments)) STORED NOT NULL;
+		ALTER TABLE app_public."nodePhrasings" ADD COLUMN phrasing_tsvector tsvector GENERATED ALWAYS AS (phrasings_to_tsv(text_base, text_question)) STORED NOT NULL;
 
 		CREATE OR REPLACE FUNCTION app_public.after_insert_node_revision() RETURNS TRIGGER LANGUAGE plpgsql AS $$
 		DECLARE rev_id text;
@@ -366,52 +370,59 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			SELECT attachments_to_tsv(r.attachments);
 		$$ LANGUAGE SQL STABLE;
 
-		CREATE INDEX node_phrasings_text_en_idx on app_public."nodePhrasings" using gin (phrasings_to_tsv(text_base, text_question));
-		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(rev_phrasing_to_tsv(phrasing)) WHERE replaced_by IS NULL;
-		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_to_tsv(attachments)) WHERE replaced_by IS NULL;
+		CREATE INDEX node_phrasings_text_en_idx on app_public."nodePhrasings" using gin (phrasing_tsvector);
+		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(phrasing1_tsvector) WHERE replaced_by IS NULL;
+		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_tsvector) WHERE replaced_by IS NULL;
 
 		CREATE OR REPLACE FUNCTION local_search(
 			root text, query text,
 			slimit INTEGER DEFAULT 20, soffset INTEGER DEFAULT 0, depth INTEGER DEFAULT 10,
 			quote_rank_factor FLOAT DEFAULT 0.9, alt_phrasing_rank_factor FLOAT default 0.95
 		) RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text TEXT) AS $$
-		  WITH d AS (SELECT id FROM descendants2(root, depth)),
-				 lrev AS (SELECT DISTINCT ON (node) node, id FROM app_public."nodeRevisions" ORDER BY node, "createdAt" DESC),
-				 p AS (
+			WITH d AS (SELECT id FROM descendants2(root, depth)),
+				lrev AS (SELECT DISTINCT ON (node) node, id FROM app_public."nodeRevisions" ORDER BY node, "createdAt" DESC),
+				p AS (
+					SELECT rev.node AS node_id,
+						NULL AS phrasing_id,
+						ts_rank(rev.phrasing1_tsvector, websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS rank,
+						'standard' AS type
+						FROM app_public."nodeRevisions" rev
+						JOIN lrev USING (id)
+						JOIN d ON rev.node = d.id
+						WHERE rev.replaced_by IS NULL AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev.phrasing1_tsvector
+					UNION (
 						SELECT rev.node AS node_id,
-							ts_rank(rev_phrasing_to_tsv(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS rank,
-							'standard' AS type,
-							ts_headline('public.english_nostop'::regconfig, pick_rev_phrasing(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
+							NULL AS phrasing_id,
+							ts_rank(rev.attachments_tsvector, websearch_to_tsquery('public.english_nostop'::regconfig, query)) * quote_rank_factor AS rank,
+							'quote' AS type
 							FROM app_public."nodeRevisions" rev
 							JOIN lrev USING (id)
 							JOIN d ON rev.node = d.id
-							WHERE rev.replaced_by IS NULL AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev_phrasing_to_tsv(rev.phrasing)
-					 UNION (
-						SELECT rev.node AS node_id,
-							ts_rank(attachments_to_tsv(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * quote_rank_factor AS rank,
-							'quote' AS type,
-							ts_headline('public.english_nostop'::regconfig, attachment_quotes(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
-							FROM app_public."nodeRevisions" rev
-							JOIN lrev USING (id)
-							JOIN d ON rev.node = d.id
-							WHERE rev.replaced_by IS NULL AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ attachments_to_tsv(rev.attachments)
+							WHERE rev.replaced_by IS NULL AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev.attachments_tsvector
 					) UNION (
 						SELECT phrasing.node AS node_id,
-							ts_rank(phrasing_row_to_tsv(phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * alt_phrasing_rank_factor AS rank,
-							phrasing.type AS type,
-							ts_headline('public.english_nostop'::regconfig, pick_phrasing(text_base, text_question), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS found_text
+							phrasing.id AS phrasing_id,
+							ts_rank(phrasing.phrasing_tsvector, websearch_to_tsquery('public.english_nostop'::regconfig, query)) * alt_phrasing_rank_factor AS rank,
+							phrasing.type AS type
 							FROM app_public."nodePhrasings" AS phrasing
 							JOIN d ON phrasing.node = d.id
-							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing_row_to_tsv(phrasing)
+							WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing.phrasing_tsvector
 					)
-				 ),
-				 op AS (SELECT DISTINCT ON (node_id) node_id, rank, type, found_text FROM p ORDER BY node_id, rank DESC),
-				 op2 AS (
-					SELECT op.*, pick_rev_phrasing(rev.phrasing) AS node_text
-				  FROM op
-					JOIN lrev ON (op.node_id = lrev.node)
-					JOIN app_public."nodeRevisions" AS rev USING (id))
-		  SELECT * FROM op2 ORDER BY rank DESC LIMIT slimit OFFSET soffset;
+				),
+				op AS (SELECT DISTINCT ON (node_id) node_id, phrasing_id, rank, type FROM p ORDER BY node_id, rank DESC),
+				op2 AS (SELECT * FROM op ORDER BY rank DESC LIMIT slimit OFFSET soffset)
+			SELECT op2.node_id, op2.rank, op2.type,
+				(CASE
+					WHEN op2.type = 'quote' THEN ts_headline('public.english_nostop'::regconfig, attachment_quotes(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query))
+					WHEN op2.type = 'standard' AND phrasing_id IS NULL THEN ts_headline('public.english_nostop'::regconfig, pick_rev_phrasing(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query))
+					ELSE ts_headline('public.english_nostop'::regconfig, pick_phrasing(phrasing.text_base, phrasing.text_question), websearch_to_tsquery('public.english_nostop'::regconfig, query))
+					END
+				) AS found_text,
+				pick_rev_phrasing(rev.phrasing) AS node_text
+				FROM op2
+				JOIN lrev ON (op2.node_id = lrev.node)
+				JOIN app_public."nodeRevisions" AS rev USING (id)
+				LEFT JOIN app_public."nodePhrasings" AS phrasing ON phrasing.id = op2.phrasing_id;
 		$$ LANGUAGE SQL STABLE;
 
     

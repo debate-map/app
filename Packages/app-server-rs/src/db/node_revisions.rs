@@ -41,7 +41,7 @@ pub struct MediaAttachment {
 pub struct MapNodeRevision {
     pub id: ID,
     pub node: String,
-    pub replaced_by: String,
+    pub replaced_by: Option<String>,
     pub creator: String,
     pub createdAt: i64,
     pub phrasing: JSONValue,
