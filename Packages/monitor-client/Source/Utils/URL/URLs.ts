@@ -14,6 +14,7 @@ export const pageTree = new Page({}, {
 		watchers: new Page({}),
 		migrate: new Page({}),
 	}),
+	testing: new Page(),
 	netdata: new Page(),
 	grafana: new Page(),
 	prometheus: new Page(),

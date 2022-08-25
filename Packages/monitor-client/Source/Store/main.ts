@@ -5,6 +5,7 @@ import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {store} from "./index.js";
 import {DatabaseState} from "./main/database.js";
 import {LogsState} from "./main/logs.js";
+import {TestingState} from "./main/testing.js";
 
 export type URLParam = {name: string, value: string};
 export class MainState {
@@ -22,6 +23,7 @@ export class MainState {
 	@O home = {} as {subpage: string};
 	@O logs = new LogsState();
 	@O db = new DatabaseState();
+	@O testing = new TestingState();
 	/*@O netdata = {} as {subpage: string};
 	@O grafana = {} as {subpage: string};
 	@O prometheus = {} as {subpage: string};
