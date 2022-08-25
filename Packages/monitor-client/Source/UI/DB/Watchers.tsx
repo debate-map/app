@@ -29,11 +29,6 @@ query($adminKey: String!) {
 
 export const columnWidths = [.04, .06, .3, .6];
 
-// todo: investigate why this decorator approach doesn't work for this case
-/*@Observer
-export class WatchersUI extends BaseComponent<{}, {}> {
-	render() {*/
-
 export const WatchersUI = observer(()=>{
 	const adminKey = store.main.adminKey;
 	const uiState = store.main.db.watchers;

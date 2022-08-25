@@ -13,6 +13,9 @@ export class TestSequence {
 	steps: TestStep[] = [];
 }
 export class TestStep {
+	preWait?: number;
+	postWait?: number;
+
 	addNodeRevision?: TS_AddNodeRevision;
 }
 export class TS_AddNodeRevision {

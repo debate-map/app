@@ -29,7 +29,7 @@ pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> Token
 }
 
 static MACROS_TO_REMOVE: &'static [&'static str] = &["graphql", "Object", "Subscription"];
-static DERIVE_MACROS_TO_REMOVE: &'static [&'static str] = &["SimpleObject", "MergedObject", "MergedSubscription"];
+static DERIVE_MACROS_TO_REMOVE: &'static [&'static str] = &["SimpleObject", "MergedObject", "MergedSubscription", "InputObject"];
 fn remove_graphql_tags(tokens: TokenStream) -> TokenStream {
     let mut result = tokens;
     result = remove_token_sequences_for_macros(result, MACROS_TO_REMOVE);

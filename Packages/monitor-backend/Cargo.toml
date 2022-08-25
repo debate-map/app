@@ -33,6 +33,7 @@ async-recursion = "1.0.0"
 tokio-tungstenite = "*"
 lazy_static = "1.4.0"
 hyper-tls = "0.5.0"
+#gql_client = "1.0.6"
 
 # needed for async-graphql "scalar!" macro
 serde = "*"

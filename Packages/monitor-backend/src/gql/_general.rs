@@ -17,6 +17,7 @@ use std::{time::Duration, pin::Pin, task::Poll};
 use hyper_tls::HttpsConnector;
 
 use crate::links::app_server_rs_types::{MtxData, LogEntry};
+use crate::testing::general::{execute_test_sequence, TestSequence};
 use crate::utils::futures::make_reliable;
 use crate::{GeneralMessage};
 use crate::migrations::v2::migrate_db_to_v2;
@@ -178,7 +179,7 @@ pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
 // mutations
 // ==========
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Deserialize)]
 struct GenericMutation_Result {
     message: String,
 }
@@ -230,7 +231,7 @@ impl MutationShard_General {
     async fn startMigration(&self, ctx: &async_graphql::Context<'_>, admin_key: String, to_version: usize) -> Result<StartMigration_Result, Error> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
-        let msg_sender = ctx.data::<Sender<GeneralMessage>>().unwrap();
+        let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
         let migration_result = match to_version {
             2 => migrate_db_to_v2(msg_sender.clone()).await,
             _ => Err(anyhow!("No migration-code exists for migrating to version {to_version}!")),
@@ -244,7 +245,50 @@ impl MutationShard_General {
             migrationID: migration_id,
         })
     }
+
+    async fn executeTestSequence(&self, ctx: &async_graphql::Context<'_>, admin_key: String, sequence: TestSequence) -> Result<GenericMutation_Result, Error> {
+        ensure_admin_key_is_correct(admin_key.clone(), true)?;
+        
+        //let message = execute_test_sequence_on_app_server_rs(admin_key, sequence).await?;
+
+        let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
+        execute_test_sequence(sequence, msg_sender.clone()).await?;
+        /*if let Err(ref err) = migration_result {
+            error!("Got error while running migration:{}", err);
+        }*/
+
+        Ok(GenericMutation_Result {
+            message: "success".to_owned(),
+        })
+    }
 }
+
+/*#[derive(Serialize)]
+pub struct ExecuteTestSequence_Vars {
+   adminKey: String,
+   sequence: JSONValue,
+}
+
+pub async fn execute_test_sequence_on_app_server_rs(admin_key: String, sequence: JSONValue) -> Result<String, Error> {
+    let endpoint = "http://dm-app-server-rs.default.svc.cluster.local:5110/graphql";
+    let query = r#"
+        mutation($adminKey: String!, $sequence: JSON!) {
+            executeTestSequence(adminKey: $adminKey, sequence: $sequence) {
+                message
+            }
+        }
+    "#;
+
+    let client = gql_client::Client::new(endpoint);
+    let vars = ExecuteTestSequence_Vars { adminKey: admin_key, sequence };
+    let data_opt = client.query_with_vars::<GenericMutation_Result, ExecuteTestSequence_Vars>(query, vars).await
+        .map_err(|a| anyhow!("GraphQL error:{}", a.message()))?; // todo: probably have this include all the error information
+    let data = data_opt.ok_or(anyhow!("Data was none/empty."))?;
+
+    //println!("Id: {}, Name: {}", data.user.id, data.user.name);
+
+    Ok(data.message)
+}*/
 
 // subscriptions
 // ==========
@@ -259,6 +303,10 @@ struct Ping_Result {
 }
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MigrationLogEntry {
+    pub text: String,
+}
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+pub struct TestingLogEntry {
     pub text: String,
 }
 //#[derive(Clone, SimpleObject)] pub struct GQLSet_LogEntry { nodes: Vec<LogEntry> }
@@ -316,6 +364,7 @@ impl SubscriptionShard_General {
                         //println!("Msg#:{messages_processed} @msg:{:?}", msg);
                         match msg {
                             GeneralMessage::MigrateLogMessageAdded(_text) => {},
+                            GeneralMessage::TestingLogMessageAdded(_text) => {},
                             GeneralMessage::LogEntryAdded(entry) => {
                                 //entries_sent += 1;
                                 //entry.message = entries_sent.to_string() + "     " + &entry.message;
@@ -360,10 +409,35 @@ impl SubscriptionShard_General {
                 //match msg_receiver.next().await {
                     Err(_err) => break, // channel closed (program must have crashed), end loop
                     Ok(msg) => match msg {
+                        GeneralMessage::LogEntryAdded(_entry) => {},
+                        GeneralMessage::TestingLogMessageAdded(_text) => {},
                         GeneralMessage::MigrateLogMessageAdded(text) => {
                             yield Ok(MigrationLogEntry { text });
                         },
+                    }
+                }
+            }
+        };
+        base_stream
+    }
+
+    async fn testingLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<TestingLogEntry, SubError>> + 'a {
+        let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
+        let mut msg_receiver = msg_sender.new_receiver();
+
+        let base_stream = async_stream::stream! {
+            if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
+
+            yield Ok(TestingLogEntry { text: "Stream started...".to_owned() });
+            loop {
+                match msg_receiver.recv().await {
+                    Err(_err) => break, // channel closed (program must have crashed), end loop
+                    Ok(msg) => match msg {
                         GeneralMessage::LogEntryAdded(_entry) => {},
+                        GeneralMessage::MigrateLogMessageAdded(_text) => {},
+                        GeneralMessage::TestingLogMessageAdded(text) => {
+                            yield Ok(TestingLogEntry { text });
+                        },
                     }
                 }
             }

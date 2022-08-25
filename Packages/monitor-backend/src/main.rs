@@ -71,6 +71,9 @@ mod utils {
 mod store {
     pub mod storage;
 }
+mod testing {
+    pub mod general;
+}
 /*mod connections {
     pub mod from_app_server_rs;
 }*/
@@ -101,6 +104,7 @@ pub fn get_cors_layer() -> CorsLayer {
 pub enum GeneralMessage {
     LogEntryAdded(LogEntry),
     MigrateLogMessageAdded(String),
+    TestingLogMessageAdded(String),
 }
 
 // for some very-strange reason, using the tokio::broadcast::[Sender/Receiver] to transmit LogEntry's (from app_server_rs_link.rs to _general.rs) silently fails

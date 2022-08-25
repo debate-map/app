@@ -2,9 +2,9 @@ use anyhow::Error;
 use flume::Sender;
 use tracing::{error, info};
 
-use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::JSONValue};
+use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::{JSONValue, ABSender}};
 
-pub async fn migrate_db_to_v2(msg_sender: Sender<GeneralMessage>) -> Result<String, Error> {
+pub async fn migrate_db_to_v2(msg_sender: ABSender<GeneralMessage>) -> Result<String, Error> {
     let (mut client, connection) = create_client(false).await;
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     // (maybe switch to using a shared program-wide pool, to avoid the need for this)
@@ -16,18 +16,32 @@ pub async fn migrate_db_to_v2(msg_sender: Sender<GeneralMessage>) -> Result<Stri
     });
     
     let migration_id = "1".to_owned();
-    let log = |text: &str| {
+    /*let log = |text: &str| {
         info!("MigrateLog: {text}");
-        msg_sender.send(GeneralMessage::MigrateLogMessageAdded(text.to_owned())).unwrap();
+        //msg_sender.send(GeneralMessage::MigrateLogMessageAdded(text.to_owned())).unwrap();
+        match msg_sender.broadcast(GeneralMessage::MigrateLogMessageAdded(text.to_owned())).await {
+            Ok(_) => {},
+            Err(err) => error!("Cannot send migrate-log-entry; all receivers were dropped. @err:{err}"),
+        }
+    };*/
+    let log = |text: String| {
+        let msg_sender_clone = msg_sender.clone();
+        async move {
+            info!("MigrateLog: {text}");
+            match msg_sender_clone.broadcast(GeneralMessage::MigrateLogMessageAdded(text.to_owned())).await {
+                Ok(_) => {},
+                Err(err) => error!("Cannot send migrate-log-entry; all receivers were dropped. @err:{err}"),
+            }
+        }
     };
 
-    log("Starting migration to version: 2");
+    log("Starting migration to version: 2".to_owned()).await;
     let tx = client.build_transaction().isolation_level(tokio_postgres::IsolationLevel::Serializable).start().await?;
 
-    log("Adding new column...");
+    log("Adding new column...".to_owned()).await;
     tx.execute(r#"ALTER TABLE app_public."nodeRevisions" ADD attachments jsonb NOT NULL DEFAULT '[]'::json;"#, &[]).await?;
 
-    log("Updating rows...");
+    log("Updating rows...".to_owned()).await;
     let rows = tx.query(r#"SELECT * from app_public."nodeRevisions""#, &[]).await?;
     for row in rows {
         let id: String = row.get("id");
@@ -60,14 +74,14 @@ pub async fn migrate_db_to_v2(msg_sender: Sender<GeneralMessage>) -> Result<Stri
         }
     }
 
-    log("Deleting old columns...");
+    log("Deleting old columns...".to_owned()).await;
     tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN equation;"#, &[]).await?;
     tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN media;"#, &[]).await?;
     tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN "references";"#, &[]).await?;
     tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN "quote";"#, &[]).await?;
 
-    log("Committing transaction...");
+    log("Committing transaction...".to_owned()).await;
     tx.commit().await?;
-    log("Migration complete!");
+    log("Migration complete!".to_owned()).await;
     return Ok(migration_id);
 }
