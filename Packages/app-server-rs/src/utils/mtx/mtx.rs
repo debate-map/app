@@ -20,7 +20,8 @@ macro_rules! fn_name {
 }
 use std::{sync::{Arc, RwLock, RwLockWriteGuard}, cell::RefCell, time::{Instant, Duration}, borrow::Cow, rc::Rc};
 
-use anyhow::Error;
+use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::{anyhow::Error, serde_json, tokio};
 use flume::{Sender, Receiver};
 pub(crate) use fn_name;
 
@@ -64,15 +65,15 @@ macro_rules! new_mtx {
 use hyper::{Client, Method, Request, Body};
 use indexmap::IndexMap;
 pub(crate) use new_mtx;
-use rust_macros::wrap_slow_macros;
+use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::time_since_epoch_ms;
-use serde::{Serialize, Deserialize};
-use serde_json::{json, Map};
-use tokio::{time};
+use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde_json::{json, Map};
+use rust_shared::tokio::{time};
 use tracing::{trace, error, info};
-use uuid::Uuid;
+use rust_shared::uuid::Uuid;
 
-use crate::{utils::{type_aliases::JSONValue, general::general::{body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}}, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB}};
+use crate::{utils::{general::general::{body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}}, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB}};
 
 pub enum MtxMessage {
     /// tuple.0 is the section's path and time (see section_lifetimes description); tuple.1 is the SectionLifetime struct, with times as ms-since-epoch
@@ -354,7 +355,7 @@ impl MtxSection {
 // sync with "app_server_rs_types.rs" in monitor-backend
 // ==========
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct MtxSection {
     pub path: String,
     pub extra_info: Option<String>,
@@ -362,7 +363,7 @@ pub struct MtxSection {
     pub duration: Option<f64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct MtxData {
     //pub id: Uuid,
     pub id: String, // changed to String here, for easier usage with gql in monitor-backend (agql's OutputType isn't implemented for Uuid)

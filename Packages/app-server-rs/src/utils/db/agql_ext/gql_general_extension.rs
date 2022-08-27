@@ -1,11 +1,11 @@
 use std::fmt::Write;
 use std::sync::Arc;
 
-use async_graphql::extensions::{
+use rust_shared::async_graphql::extensions::{
     Extension, ExtensionContext, ExtensionFactory, NextExecute, NextParseQuery, NextSubscribe,
 };
-use async_graphql::parser::types::{ExecutableDocument, OperationType, Selection};
-use async_graphql::{PathSegment, Response, ServerResult, Variables};
+use rust_shared::async_graphql::parser::types::{ExecutableDocument, OperationType, Selection};
+use rust_shared::async_graphql::{PathSegment, Response, ServerResult, Variables};
 use futures_util::stream::BoxStream;
 
 /// Logger extension

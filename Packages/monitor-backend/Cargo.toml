@@ -5,21 +5,10 @@ edition = "2021"
 publish = false
 
 [dependencies]
-futures = "0.3"
-#axum = { version = "0.4.5", features = ["ws"] }
-axum = { git = "https://github.com/tokio-rs/axum.git", rev = "15914c4f15b375d5785b7f95be7685abba326c5e", features = ["ws", "headers", "json"] }
-async-graphql = "3.0.28"
-async-graphql-axum = "3.0.28"
-tokio = { version = "1", features = ["full"] }
-tower = { version = "0.4", features = ["util"] }
-#tower-web = "0.3.7"
-tower-http = { version = "0.2.0", features = ["cors", "fs"] }
 tracing = "0.1"
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
-anyhow = "1.0"
 async-trait = "0.1.52"
 url = "2"
-uuid = { version = "0.8", features = ["serde", "v4"] }
 #crossbeam-channel = "0.5.2"
 flume = "0.10.10"
 #postage = { version = "0.4.1", features = ["futures-traits"] }
@@ -35,27 +24,15 @@ lazy_static = "1.4.0"
 hyper-tls = "0.5.0"
 #gql_client = "1.0.6"
 
-# needed for async-graphql "scalar!" macro
-serde = "*"
-serde_json = "1.0.76"
-# needed for tokio-postgres
-bytes = "1.0"
-
 # needed for async-graphql examples-base, for now
 slab = "0.4.2"
 futures-util = "0.3.0"
 futures-timer = "3.0.2"
 
-# needed for async-graphql-axum customization
-tower-service = "0.3"
-
-rust-macros = { path = "../rust-macros" }
+#rust-macros = { path = "../rust-macros" }
 rust-shared = { path = "../rust-shared" }
 
-[dependencies.tokio-postgres]
-git = "https://github.com/petrosagg/rust-postgres.git"
-branch = "copy-both"
-features = [
-	"with-serde_json-1", # needed for serde_json::Value to auto-convert to a declared struct
-	"array-impls"
-]
+# sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
+# ==========
+
+serde = "1.0.144"

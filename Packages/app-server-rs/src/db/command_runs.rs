@@ -1,9 +1,9 @@
-use rust_shared::SubError;
-use async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::{SubError, serde, serde_json, async_graphql};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
-use rust_macros::{wrap_slow_macros, wrap_serde_macros, Deserialize_Stub, Serialize_Stub};
-use serde::{Serialize, Deserialize};
-use tokio_postgres::{Client};
+use rust_shared::rust_macros::{wrap_slow_macros, wrap_serde_macros, Deserialize_Stub, Serialize_Stub};
+use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::tokio_postgres::{Row, Client};
 
 use crate::utils::db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}};
 
@@ -37,7 +37,7 @@ id = "command_runs"
 excludeLinesWith = "#[graphql(name"
 "##;*/
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct CommandRun {
     pub id: ID,
     pub actor: String,
@@ -49,8 +49,8 @@ pub struct CommandRun {
     pub returnData: serde_json::Value,
     pub rlsTargets: serde_json::Value,
 }
-impl From<tokio_postgres::row::Row> for CommandRun {
-	fn from(row: tokio_postgres::row::Row) -> Self {
+impl From<Row> for CommandRun {
+	fn from(row: Row) -> Self {
 		Self {
             id: ID::from(&row.get::<_, String>("id")),
             actor: row.get("actor"),

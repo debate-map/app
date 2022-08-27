@@ -1,4 +1,4 @@
-use anyhow::{Error, ensure};
+use rust_shared::anyhow::{Error, ensure};
 use itertools::Itertools;
 use regex::Regex;
 use lazy_static::lazy_static;

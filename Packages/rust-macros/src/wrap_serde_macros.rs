@@ -28,7 +28,7 @@ pub fn wrap_serde_macros_impl(input: TokenStream, force_proceed: bool) -> TokenS
 
 static MACROS_TO_REMOVE: &'static [&'static str] = &["serde"];
 static DERIVE_MACRO_REPLACEMENTS_FROM: &'static [&'static str] = &["Serialize", "Deserialize"];
-static DERIVE_MACRO_REPLACEMENTS_TO: &'static [&'static str] = &["rust_macros::Serialize_Stub", "rust_macros::Deserialize_Stub"];
+static DERIVE_MACRO_REPLACEMENTS_TO: &'static [&'static str] = &["rust_shared::rust_macros::Serialize_Stub", "rust_shared::rust_macros::Deserialize_Stub"];
 fn replace_serde_macros(tokens: TokenStream) -> TokenStream {
     let mut result = tokens;
     

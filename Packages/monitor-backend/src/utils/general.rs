@@ -1,8 +1,8 @@
 use std::{collections::{BTreeMap, HashMap}};
 
-use anyhow::Error;
+use rust_shared::{anyhow::Error, serde, serde_json};
 use hyper::Body;
-use serde::Serialize;
+use rust_shared::serde::Serialize;
 
 pub async fn body_to_str(body: Body) -> Result<String, Error> {
     let bytes1 = hyper::body::to_bytes(body).await?;
@@ -21,7 +21,7 @@ pub fn sort_alphabetically<T: Serialize, S: serde::Serializer>(value: &T, serial
     let value = serde_json::to_value(value).map_err(serde::ser::Error::custom)?;
     value.serialize(serializer)
 }
-#[derive(Serialize)]
+#[derive(Serialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct SortAlphabetically<T: Serialize>(
     #[serde(serialize_with = "sort_alphabetically")]
     T

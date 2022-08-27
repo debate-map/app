@@ -1,8 +1,10 @@
-use rust_macros::wrap_slow_macros;
-use serde::Deserialize;
-use serde_json::Map;
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::{serde::Deserialize, utils::type_aliases::JSONValue};
+use rust_shared::serde_json::{Map, self};
+use rust_shared::async_graphql;
+use rust_shared::serde;
 
-use crate::{utils::type_aliases::{JSONValue, RowData}};
+use crate::{utils::type_aliases::{RowData}};
 
 #[cfg(test)]
 mod tests {
@@ -125,7 +127,7 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
     result_as_strings
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct LDChange {
     pub kind: String,
     /// Present in data from lds, but not used for anything atm (within app-server-rs).

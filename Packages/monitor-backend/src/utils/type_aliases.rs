@@ -1,6 +1,6 @@
 use deadpool::managed::Object;
 use deadpool_postgres::Manager;
-use serde_json::Map;
+use rust_shared::serde_json::{Map, self};
 
 // sync with type_aliases.rs in app-server-rs
 // ==========

@@ -1,6 +1,6 @@
-use anyhow::Error;
+use rust_shared::anyhow::Error;
 use base64::URL_SAFE_NO_PAD;
-use uuid::{Uuid, Bytes};
+use rust_shared::uuid::{Uuid, Bytes};
 
 pub fn uuid_to_b64(id: Uuid) -> String {
     let bytes = id.as_bytes();

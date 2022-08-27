@@ -5,4 +5,41 @@ edition = "2021"
 publish = false
 
 [dependencies]
+futures = "0.3"
 tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+uuid = { version = "0.8", features = ["serde", "v4"] }
+
+tower = { version = "0.4", features = ["util"] }
+#tower-web = "0.3.7"
+tower-http = { version = "0.2.0", features = ["cors", "fs"] }
+#axum = { version = "0.4.5", features = ["ws"] }
+axum = { git = "https://github.com/tokio-rs/axum.git", rev = "15914c4f15b375d5785b7f95be7685abba326c5e", features = ["ws", "headers", "json"] }
+
+serde_json = "1.0.76"
+async-graphql = "3.0.28"
+async-graphql-axum = "3.0.28"
+
+# needed for async-graphql-axum customization
+tower-service = "0.3"
+
+# needed for tokio-postgres
+bytes = "1.0"
+
+rust-macros = { path = "../rust-macros" }
+
+# sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
+# ==========
+
+serde = "1.0.144"
+
+# detailed dependencies section
+# ==========
+
+[dependencies.tokio-postgres]
+git = "https://github.com/petrosagg/rust-postgres.git"
+branch = "copy-both"
+features = [
+	"with-serde_json-1", # needed for serde_json::Value to auto-convert to a declared struct
+	"array-impls"
+]

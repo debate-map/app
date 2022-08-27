@@ -1,4 +1,4 @@
-use std::{env};
+use std::{env, str::FromStr, time::{SystemTime, UNIX_EPOCH}};
 use proc_macro2::{TokenStream};
 
 use crate::utils::{remove_token_sequences_for_derive_macros, remove_token_sequences_for_macros};
@@ -25,7 +25,16 @@ pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> Token
     
     let output = input.clone();
     let output = remove_graphql_tags(output);
-    output
+    //output
+
+    // add unused alias of async_graphql crate (so that if dev forgets "use rust_shared::async_graphql", they'll get a reminder even in cargo-check)
+    /*let pre_tokens = proc_macro::TokenStream::from(quote! {
+        use async_graphql as _async_graphql_unused_alias;
+    });*/
+    let pre_tokens = TokenStream::from_str(format!("use async_graphql as _async_graphql_unused_alias_{};", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()).as_str()).unwrap();
+    pre_tokens.into_iter()
+        .chain(output)
+        .collect()
 }
 
 static MACROS_TO_REMOVE: &'static [&'static str] = &["graphql", "Object", "Subscription"];

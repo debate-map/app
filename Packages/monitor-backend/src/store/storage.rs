@@ -1,4 +1,5 @@
-use async_graphql::{SimpleObject, Json};
+use rust_shared::{async_graphql, async_graphql::{SimpleObject, Json}};
+use rust_shared::{futures, axum, tower, tower_http};
 use axum::{
     response::{Html},
     routing::{get, any_service, post, get_service},
@@ -10,18 +11,18 @@ use axum::{
 };
 use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
 use indexmap::IndexMap;
-use rust_macros::wrap_slow_macros;
-use serde::{Serialize, Deserialize};
-use serde_json::Serializer;
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde_json::Serializer;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
-use uuid::Uuid;
+use rust_shared::uuid::Uuid;
 use std::{
     collections::{HashSet, HashMap, BTreeMap},
     net::{SocketAddr, IpAddr},
     sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible, str::FromStr,
 };
-use tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
+use rust_shared::tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
@@ -36,7 +37,7 @@ pub struct AppState {
 }
 
 #[derive(SimpleObject)] // in monitor-backend only
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct LQInstance_Partial {
     pub table_name: String,
     pub filter: JSONValue,

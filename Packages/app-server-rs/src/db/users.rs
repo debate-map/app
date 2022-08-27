@@ -1,19 +1,18 @@
-use rust_shared::SubError;
-use anyhow::Context;
-use async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
+use rust_shared::{SubError, serde, serde_json, async_graphql};
+use rust_shared::anyhow::Context;
+use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
-use rust_macros::wrap_slow_macros;
-use serde::{Serialize, Deserialize};
-use serde_json::json;
-use tokio_postgres::{Client};
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde_json::json;
+use rust_shared::tokio_postgres::{Row, Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
-use crate::utils::type_aliases::{JSONValue};
 
-#[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)] //#[serde(crate = "rust_shared::serde")]
 #[allow(clippy::struct_excessive_bools)]
 pub struct PermissionGroups {
     basic: bool,
@@ -49,8 +48,8 @@ pub struct User {
 }
 // todo: MS these converters can be removed (eg. using approach similar to clone_ldchange_val_0with_type_fixes(), or by using crate: https://github.com/dac-gmbh/serde_postgres)
 // [actually, just make a nice proc-macro wrapper around the postgres_row_to_json_value function, as seen in node_tags.rs]
-impl From<tokio_postgres::row::Row> for User {
-    fn from(row: tokio_postgres::row::Row) -> Self {
+impl From<Row> for User {
+    fn from(row: Row) -> Self {
         //println!("ID as string:{}", row.get::<_, String>("id"));
         Self {
             //id: ID::from(row.get("id")),

@@ -52,21 +52,15 @@ checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 name = "app-server-rs"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-broadcast",
- "async-graphql",
- "async-graphql-axum",
  "async-recursion",
  "async-trait",
- "axum 0.4.4",
  "base64",
- "bytes",
  "deadpool",
  "deadpool-postgres",
  "dyn-clone",
  "flume",
  "flurry",
- "futures",
  "futures-timer",
  "futures-util",
  "hyper",
@@ -79,20 +73,12 @@ dependencies = [
  "num_cpus",
  "once_cell",
  "regex",
- "rust-macros",
  "rust-shared",
  "serde",
- "serde_json",
  "slab",
- "tokio",
- "tokio-postgres",
- "tower",
- "tower-http",
- "tower-service",
  "tracing",
  "tracing-subscriber",
  "url",
- "uuid",
 ]
 
 [[package]]
@@ -1273,39 +1259,25 @@ dependencies = [
 name = "monitor-backend"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-broadcast",
- "async-graphql",
- "async-graphql-axum",
  "async-recursion",
  "async-trait",
- "axum 0.4.4",
- "bytes",
  "deadpool",
  "deadpool-postgres",
  "flume",
- "futures",
  "futures-timer",
  "futures-util",
  "hyper",
  "hyper-tls",
  "indexmap",
  "lazy_static",
- "rust-macros",
  "rust-shared",
  "serde",
- "serde_json",
  "slab",
- "tokio",
- "tokio-postgres",
  "tokio-tungstenite",
- "tower",
- "tower-http",
- "tower-service",
  "tracing",
  "tracing-subscriber",
  "url",
- "uuid",
 ]
 
 [[package]]
@@ -1910,7 +1882,21 @@ dependencies = [
 name = "rust-shared"
 version = "0.0.1"
 dependencies = [
+ "anyhow",
+ "async-graphql",
+ "async-graphql-axum",
+ "axum 0.4.4",
+ "bytes",
+ "futures",
+ "rust-macros",
+ "serde",
+ "serde_json",
  "tokio",
+ "tokio-postgres",
+ "tower",
+ "tower-http",
+ "tower-service",
+ "uuid",
 ]
 
 [[package]]
@@ -1970,18 +1956,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.137"
+version = "1.0.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61ea8d54c77f8315140a05f4c7237403bf38b72704d031543aa1d16abbf517d1"
+checksum = "0f747710de3dcd43b88c9168773254e809d8ddbdf9653b84e2554ab219f17860"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.137"
+version = "1.0.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f26faba0c3959972377d3b2d306ee9f71faee9714294e41bb777f83f88578be"
+checksum = "94ed3a816fb1d101812f83e789f888322c34e291f894f19590dc310963e87a00"
 dependencies = [
  "proc-macro2",
  "quote",

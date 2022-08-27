@@ -1,12 +1,12 @@
 use std::{fmt, collections::HashMap, ops::Sub};
 
 use flume::{Sender, Receiver, TrySendError};
-use futures::executor::block_on;
+use rust_shared::futures::executor::block_on;
 use indexmap::IndexMap;
 use itertools::Itertools;
 use rust_shared::time_since_epoch_ms;
-use serde::{Serialize, Deserialize};
-use serde_json::json;
+use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde_json::json;
 use tracing::{Level, error, Subscriber, Metadata, subscriber::Interest, span, Event, metadata::LevelFilter, field::{Visit, Field}};
 use tracing_subscriber::{filter, Layer, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, layer::{Filter, Context}};
 
@@ -22,7 +22,7 @@ Logging levels: (as interpreted in the debate-map codebase)
 */
 
 // keep fields synced with struct in app_server_rs_link.rs (this one's the "source")
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct LogEntry {
     pub time: f64,
     pub level: String,

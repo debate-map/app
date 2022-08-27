@@ -1,15 +1,16 @@
 use std::net::SocketAddr;
 
+use rust_shared::{futures, axum, tower, tower_http};
 use axum::{body::{Body}, Error, extract::{ws::{WebSocket, Message}, WebSocketUpgrade, Extension, ConnectInfo}, response::IntoResponse, body::HttpBody};
 use flume::Receiver;
 use futures::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
 use hyper::{StatusCode, Response};
 use once_cell::sync::Lazy;
-use serde::{Serialize, Deserialize};
-use serde_json::json;
+use rust_shared::{serde::{Serialize, Deserialize}, serde_json, tokio, utils::type_aliases::JSONValue};
+use rust_shared::serde_json::json;
 use tracing::error;
 
-use crate::utils::{general::logging::LogEntry, type_aliases::{ABReceiver, ABSender, RowData, JSONValue}, mtx::mtx::{Mtx, MtxData}};
+use crate::utils::{general::logging::LogEntry, type_aliases::{ABReceiver, ABSender, RowData}, mtx::mtx::{Mtx, MtxData}};
 
 pub fn is_addr_from_pod(addr: &SocketAddr) -> bool {
     addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.")
@@ -88,12 +89,12 @@ async fn write(mut sender: SplitSink<WebSocket, Message>) {
 // section to keep synchronized with "app_server_rs_types.rs" in monitor-backend
 // ==========
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub enum Message_MBToAS {
     //TODO,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub enum Message_ASToMB {
     LogEntryAdded { entry: LogEntry },
     MtxEntryDone { mtx: MtxData },
