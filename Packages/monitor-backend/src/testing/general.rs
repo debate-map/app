@@ -18,7 +18,13 @@ pub struct TestStep {
 	preWait: Option<f64>,
 	postWait: Option<f64>,
 
+	stepBatch: Option<TS_StepBatch>,
 	addNodeRevision: Option<TS_AddNodeRevision>,
+}
+#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
+pub struct TS_StepBatch {
+	steps: Vec<TestStep>,
+    repeatCount: Option<i32>,
 }
 #[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TS_AddNodeRevision {
@@ -55,7 +61,21 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
     let sequence_info_str = format!("@steps:{}", sequence.steps.len());
     log(format!("Starting execution of test-sequence. {}", sequence_info_str)).await;
 
-    for step in sequence.steps {
+    let mut flattened_steps: Vec<TestStep> = vec![];
+    for step in  sequence.steps {
+        if let Some(batch) = step.stepBatch {
+            let repeat_count = batch.repeatCount.unwrap_or(1);
+            for _i in 0..repeat_count {
+                for step2 in batch.steps.clone() {
+                    flattened_steps.push(step2);
+                }
+            }
+        } else {
+            flattened_steps.push(step);
+        }
+    }
+
+    for step in flattened_steps {
         log(format!("Executing test-step:{}", serde_json::to_string(&step).unwrap())).await;
         // todo
     }

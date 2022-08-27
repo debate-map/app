@@ -16,7 +16,12 @@ export class TestStep {
 	preWait?: number;
 	postWait?: number;
 
+	stepBatch?: TS_StepBatch;
 	addNodeRevision?: TS_AddNodeRevision;
+}
+export class TS_StepBatch {
+	steps: TestStep[] = [];
+	repeatCount?: number;
 }
 export class TS_AddNodeRevision {
 	nodeID: string;
