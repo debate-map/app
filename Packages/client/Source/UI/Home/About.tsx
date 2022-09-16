@@ -15,7 +15,7 @@ Those involved could still make progress, but it was far from ideal. The underly
 I worked on a couple variations of the idea for a few years, but had not yet done much networking. I eventually came across a few people that seemed to have a very similar goal as mine, most notably Timothy High.
 We got in contact with each other, and after some months (during which time new members joined), we eventually formed a group, called the "Canonical Debate Lab'.
 * Slack (project chat): [Invite link](${slackInviteLink})
-* Github organization: [https://github.com/canonical-debate-lab](https://github.com/canonical-debate-lab)
+* Github organization: [https://github.com/debate-map](https://github.com/debate-map)
 
 Since then, I've been continuing to develop my implementation, while conversing with the group to help design a shared "tier-1 service layer" that each of our implementations can use for the cross-site data, eg. the public claims and arguments.
 
