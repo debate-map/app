@@ -234,6 +234,7 @@ Notes:
 <details><summary><b>[setup-backend] Setting up base tools needed for local/remote k8s deployments</b></summary>
 
 Required:
+* 1\) Install Rust via the `rustup` toolkit: https://www.rust-lang.org/tools/install
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt
 * 3\) Install Helm (eg. for some Tilt extensions): https://helm.sh/docs/intro/install
 	* 3.1\) On Windows, recommended install steps:
@@ -256,12 +257,52 @@ Additional tools: (frontend devs can skip)
 </details>
 
 <!----><a name="setup-k8s"></a>
-<details><summary><b>[setup-k8s] Setting up local k8s cluster</b></summary>
+<details><summary><b>[setup-k8s] Setting up local k8s cluster (recommended route)</b></summary>
 
 Prerequisite steps: [setup-backend](#setup-backend)
 
-Options:
-* Docker Desktop Kubernetes **(the recommended/supported option)**
+> There are multiple ways to set up a local Kubernetes cluster, but this guide-module assumes you'll be using the recommended option of Docker Desktop. If for some reason you instead want to use K3d, Kind, etc., see the [setup-k8s-alt](#setup-k8s-alt) module.
+
+#### Setup for Docker Desktop Kubernetes **(recommended k8s system)**
+
+* 1\) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
+
+> To delete and recreate the cluster, use the settings panel.
+
+#### After steps
+
+* 1\) Create an alias/copy of the k8s context you just created, renaming it to "local":
+	* 1.1\) For Docker Desktop, this means:
+		* 1.1.1\) Open: `<%HOME% or $HOME>/.kube/config`
+		* 1.1.2\) Find the section with these contents:
+		```
+		- context:
+		    cluster: docker-desktop
+		    user: docker-desktop
+		  name: docker-desktop
+		```
+		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: local`.
+* 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
+
+#### Troubleshooting
+
+* 1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards (from your Kubernetes pods to your localhost ports). See [here](https://superuser.com/a/1671710/231129) for the fix. (worth checking ahead of time on Windows, as it wasted considerable time for me)
+* 2\) If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"`
+	* 2.1\) If that is insufficient, you can either:
+		* 2.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
+		* 2.1.2\) Reset the whole Kubernetes cluster. (eg. using the Docker Desktop UI)
+* 3\) When the list of images/containers in Docker Desktop gets annoyingly long, see the [docker-trim](#docker-trim) module.
+
+</details>
+
+<!----><a name="setup-k8s-alt"></a>
+<details><summary><b>[setup-k8s-alt] Setting up local k8s cluster (using alternative k8s systems)</b></summary>
+
+Prerequisite steps: [setup-backend](#setup-backend)
+
+> There are multiple ways to set up a local Kubernetes cluster, with the recommened route being to use Docker Desktop, as described in the [setup-k8s](#setup-k8s) module. This module is for if you're certain you want to use an alternative like K3d or Kind.
+
+Alternative options:
 * K3d
 * Kind
 
@@ -270,12 +311,6 @@ Notes:
 * K3d has the fastest deletion and recreation of clusters. (so restarting from scratch frequently is more doable)
 * Docker Desktop seems to be the slowest running; I'd estimate that k3d is ~2x, at least for the parts I saw (eg. startup time).
 * Docker Desktop seems to have more issues with some networking details; for example, I haven't been able to get the node-exporter to work on it, despite it work alright on k3d (on k3d, you sometimes need to restart tilt, but at least it works on that second try; with Docker Desktop, node-exporters has never been able to work). However, it's worth noting that it's possible it's (at least partly) due to some sort of ordering conflict; I have accidentally had docker-desktop and k3d and kind running at the same time often, so the differences I see may just be reflections of a problematic setup.
-
-#### Setup for Docker Desktop Kubernetes **(recommended)**
-
-* 1\) Create your Kubernetes cluster in Docker Desktop, by checking "Enable Kubernetes" in the settings, and pressing apply/restart.
-
-> To delete and recreate the cluster, use the settings panel.
 
 #### Setup for K3d
 
@@ -295,19 +330,9 @@ Notes:
 
 > To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
 
-#### After steps
+#### After steps and troubleshooting
 
-* 1\) Create an alias/copy of the k8s context you just created, renaming it to "local". (edit `$HOME/.kube/config`)
-* 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
-
-#### Troubleshooting
-
-* 1\) If on Windows, your dynamic-ports range may start out misconfigured, which will (sometimes) cause conflicts with attempted port-forwards (from your Kubernetes pods to your localhost ports). See [here](https://superuser.com/a/1671710/231129) for the fix. (worth checking ahead of time on Windows, as it wasted considerable time for me)
-* 2\) If your namespace gets messed up, delete it using this (regular kill command gets stuck): `npm start "backend.forceKillNS NAMESPACE_TO_KILL"`
-	* 2.1\) If that is insufficient, you can either:
-		* 2.1.1\) Help the namespace to get deleted, by editing its manifest to no longer have any "finalizers", as [shown here](https://stackoverflow.com/a/52012367).
-		* 2.1.2\) Reset the whole Kubernetes cluster. (eg. using the Docker Desktop UI)
-* 3\) When the list of images/containers in Docker Desktop gets too long, see the [docker-trim](#docker-trim) module.
+* For this info, open the [setup-k8s](#setup-k8s) module, and read through the "After steps" and "Troubleshooting" sections.
 
 </details>
 
@@ -525,7 +550,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 2.1\) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)  
 	* 2.2\) In the "node type" step, select an option. (cheapest is Discovery d2-4 at ~$12/mo, but I use d2-8 at ~$22/mo to avoid occasional OOM issues)
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
-* 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (edit `$HOME/.kube/config`)
+* 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (open `<%HOME% or $HOME>/.kube/config`, copy the aforementioned context section, then change the copy's name to `ovh`)
 * 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
