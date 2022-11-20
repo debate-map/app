@@ -1,8 +1,7 @@
 import {version} from "mobx-sync";
-import {Mtx, MtxSection} from "UI/DB/Requests";
 import {O} from "web-vcore";
 import {makeObservable} from "web-vcore/nm/mobx";
-import {MtxGroup} from "./database/MtxGroup";
+import {MtxGroup} from "./database/MtxGroup.js";
 
 export class DatabaseState {
 	constructor() { makeObservable(this); }

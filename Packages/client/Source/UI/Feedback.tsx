@@ -2,30 +2,25 @@ import {Column, Switch} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ProposalsUI} from "UI/Feedback/ProposalsUI.js";
 import {store} from "Store";
-import {SubNavBar, SubNavBarButton} from "web-vcore";
+import {Observer, PageContainer, SubNavBar, SubNavBarButton, VReactMarkdown} from "web-vcore";
+import React from "react";
 
+@Observer
 export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		/* if (true) {
-			return (
-				<PageContainer scrollable={true}>
-					<article>
-						<VReactMarkdown source={'Feedback page is temporarily disabled for maintenance.'} className='selectable'/>
-					</article>
-				</PageContainer>
-			);
-		} */
 		const currentSubpage = store.main.feedback.subpage;
 		const page = "feedback";
 		return (
 			<>
 				<SubNavBar>
-					<SubNavBarButton page={page} subpage="proposals" text="Proposals" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
+					<SubNavBarButton page={page} subpage="new" text="New" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
+					<SubNavBarButton page={page} subpage="old" text="Old" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
 					{/* <SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
 					<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/> */}
 				</SubNavBar>
 				<Switch>
-					<ProposalsUI/>
+					<ProposalsUI_Stub/>
+					{currentSubpage == "old" && <ProposalsUI/>}
 					{/* currentSubpage == "roadmap" && <RoadmapUI/>}
 					{currentSubpage == "neutrality" && <NeutralityUI/> */}
 				</Switch>
@@ -33,3 +28,23 @@ export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
 		);
 	}
 }
+
+class ProposalsUI_Stub extends BaseComponent<{}, {}> {
+	render() {
+		return (
+			<PageContainer scrollable={true}>
+				<article>
+					<VReactMarkdown source={source} className="selectable"/>
+				</article>
+			</PageContainer>
+		);
+	}
+}
+
+const source = `
+The tracking of proposals and tasks is currently managed on the Debate Map's GitHub repo.
+* Structured view: [https://github.com/orgs/debate-map/projects/1](https://github.com/orgs/debate-map/projects/1)
+* Flat-list view: [https://github.com/debate-map/app/issues](https://github.com/debate-map/app/issues)
+
+To see the old task-tracking system, visit the "Old" subpage linked above. (in the long-term, the two systems will be merged)
+`.AsMultiline(0);
