@@ -22,7 +22,7 @@ Building/Running:
 
 Setup:
 * 1\) Follow steps in module [setup-backend](https://github.com/debate-map/app#setup-backend).
-* 2\) Follow steps in module [setup-k8s](https://github.com/debate-map/app#setup-k8s).
+* 2\) Follow steps in module [setup-k8s](https://github.com/debate-map/app#setup-k8s). (don't miss the "After steps" section!)
 * 3\) Populate the local backend's database to a fresh state, by following module [reset-db-local](https://github.com/debate-map/app#reset-db-local).
 
 Building/Running:

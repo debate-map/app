@@ -418,7 +418,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s local db:postgres"`)
 * 2\) Run: `npm start "db.initDB_freshScript_k8s local"`
 
-> Note: This guide-module is outdated; will write an update soon explaining the new approach. (which will use a simple psql script, rather than the Knex ORM)
+> Note: This guide-module is outdated; I'll write an update soon explaining the new approach. (which will use a simple psql script, rather than a JS script that uses the Knex ORM)
 
 </details>
 
@@ -434,9 +434,9 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.1.2\) Run (in repo root): `npm start backend.tiltUp_local`
 		* 2.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
-		* 2.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on #43 to avoid need for special env-var)
-		* 2.2.2\) Start web server (if needed): `cd Packages/web-server-rs; cargo run` (not yet tested; also, waiting on #43 to avoid need for special env-var)
-			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-serving) described in the [run-frontend-local](#run-frontend-local) module.
+		* 2.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
+		* 2.2.2\) Start web server (if needed): `cd Packages/web-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
+			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
 * 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
 
