@@ -5,6 +5,8 @@ import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {writeFileSync} from "fs";
 
+// todo: probably find a way to make these generated UUIDs pseudo-random, with a consistent seed, so that the UUIDs do not all change whenever the seed-db script is regenerated
+
 // mobx-graphlink import was having issue ("Named export 'v4' not found."), so use the new crypto.randomUUID() instead
 // ==========
 /*export const generatedUUIDHistory = [] as string[];
@@ -140,7 +142,10 @@ const maps = TypeCheck(Map, {
 		createdAt: Date.now(),
 		rootNode: globalRootNodeID,
 		defaultExpandDepth: 3,
-		editors: [],
+		//editors: [],
+		// temp-fix for cell with pgsql `text[]` type being misunderstood (while generating apply commands) as a cell of type `jsonb` that *contains* an array
+		// (this alternate `{}` is seen by pgsql as something that can be interpreted as an empty `text[]`)
+		editors: "{}" as any,
 		edits: 0,
 		editedAt: Date.now(),
 		extras: {},
@@ -182,10 +187,13 @@ function AddRaw(str: string) {
 	if (sqlText.length > 0) sqlText += "\n";
 	sqlText += str;
 }
-function Add(query: Knex.QueryBuilder<any, any>) {
+/*function Add(query: Knex.QueryBuilder<any, any>) {
 	if (sqlText.length > 0) sqlText += "\n";
 
-	const lineSQL_base = `${query.toString()};`;
+	//const lineSQL_base = `${query.toString()};`;
+	const lineSQL_base = `${query.toSQL().toNative().sql};`;
+	//const lineSQL_base = `${JSON.stringify(query.toSQL().toNative())};`;
+	//const lineSQL_base = `${query.toSQL().sql};`;
 
 	// add quoting around outermost brackets, for jsonb values/cells
 	let lineSQL_final = "";
@@ -215,8 +223,27 @@ function Add(query: Knex.QueryBuilder<any, any>) {
 	}
 
 	sqlText += lineSQL_final;
-	//sqlText += `${query.toSQL().toNative().sql};`;
-	//sqlText += `${query.toSQL().sql};`;
+}*/
+function Add(query: Knex.QueryBuilder<any, any>) {
+	if (sqlText.length > 0) sqlText += "\n";
+
+	const sqlData = query.toSQL().toNative();
+	const lineSQL_base = `${sqlData.sql};`;
+	let lineSQL_final = lineSQL_base;
+	for (let i = 0; i < sqlData.bindings.length; i++) {
+		if (lineSQL_final.includes(`$${i + 1}`)) {
+			let argAsStr = JSON.stringify(sqlData.bindings[i]);
+			if (argAsStr.startsWith("\"")) {
+				argAsStr = `'${argAsStr.slice(1, -1)}'`;
+			}
+			if (argAsStr.startsWith("{") || argAsStr.startsWith("[")) {
+				argAsStr = `'${argAsStr.replace(/'/g, "\\'")}'`;
+			}
+			lineSQL_final = lineSQL_final.replace(new RegExp(`\\$${i + 1}`), argAsStr);
+		}
+	}
+
+	sqlText += lineSQL_final;
 }
 
 export default async function seed(knex: Knex) {

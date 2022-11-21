@@ -26,10 +26,18 @@ pub trait GQLSet<T> {
 }
 
 pub fn json_values_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<JSONValue>) -> Vec<T> {
-    json_entries.into_iter().map(|a| serde_json::from_value(a).unwrap()).collect()
+    json_entries.into_iter().map(|a|
+        //serde_json::from_value(a).unwrap()
+        serde_json::from_value(a.clone())
+            .with_context(|| serde_json::to_string(&a).unwrap_or("[cannot stringify]".to_owned())).unwrap()
+    ).collect()
 }
 pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<Map<String, JSONValue>>) -> Vec<T> {
-    json_entries.into_iter().map(|a| serde_json::from_value(serde_json::Value::Object(a)).unwrap()).collect()
+    json_entries.into_iter().map(|a|
+        //serde_json::from_value(serde_json::Value::Object(a)).unwrap()
+        serde_json::from_value(serde_json::Value::Object(a.clone()))
+            .with_context(|| serde_json::to_string(&a).unwrap_or("[cannot stringify]".to_owned())).unwrap()
+    ).collect()
 }
 
 pub async fn handle_generic_gql_collection_request<'a,
