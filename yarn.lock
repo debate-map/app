@@ -2404,7 +2404,7 @@ __metadata:
   resolution: "@debate-map/app@workspace:."
   dependencies:
     "@wewatch/lexorank": ^1.0.3
-    chalk: ^4.1.2
+    chalk: ^4.1.1
     cross-env: ^7.0.3
     file-syncer: ^0.0.8
     nps: ^5.10.0
@@ -5275,7 +5275,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^4.0.0, chalk@npm:^4.1.2":
+"chalk@npm:^4.0.0, chalk@npm:^4.1.1":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
   dependencies:

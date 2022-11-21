@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@wewatch/lexorank": "^1.0.3",
-    "chalk": "^4.1.2",
+    "chalk": "^4.1.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
