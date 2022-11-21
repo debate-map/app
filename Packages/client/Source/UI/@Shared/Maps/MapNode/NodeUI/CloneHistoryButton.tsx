@@ -4,7 +4,7 @@ import React from "react";
 import {store} from "Store";
 import {SearchResultRow} from "UI/@Shared/NavBar/SearchPanel.js";
 import {ES, Observer} from "web-vcore";
-import {MapWithBailHandling} from "web-vcore/.yalc/mobx-graphlink";
+import {MapWithBailHandling} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";

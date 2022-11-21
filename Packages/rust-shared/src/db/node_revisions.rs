@@ -21,8 +21,8 @@ pub struct Attachment {
 pub struct MapNodeRevision {
     pub id: ID,
     pub node: String,
-    #[graphql(name = "replaced_by")]
-    pub replaced_by: Option<String>, // todo: make this casing consistent with the rest
+    //#[graphql(name = "replaced_by")]
+    pub replacedBy: Option<String>, 
     pub creator: String,
     pub createdAt: i64,
     pub phrasing: JSONValue,
@@ -35,11 +35,11 @@ pub struct MapNodeRevision {
     //pub attachments: Vec<JSONValue>,
 }
 impl From<Row> for MapNodeRevision {
-	fn from(row: Row) -> Self {
-		Self {
+    fn from(row: Row) -> Self {
+        Self {
             id: ID::from(&row.get::<_, String>("id")),
             node: row.get("node"),
-            replaced_by: row.get("replaced_by"),
+            replacedBy: row.get("replaced_by"), // todo: make db-column's name-casing consistent with the rest
             creator: row.get("creator"),
             createdAt: row.get("createdAt"),
             phrasing: row.get("phrasing"),
@@ -53,8 +53,8 @@ impl From<Row> for MapNodeRevision {
             quote: row.get("quote"),
             media: row.get("media"),*/
             attachments: serde_json::from_value(row.get("attachments")).unwrap(),
-		}
-	}
+        }
+    }
 }
 
 }

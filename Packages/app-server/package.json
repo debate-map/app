@@ -47,7 +47,7 @@
 		"postgraphile": "^4.12.8",
 		"postgraphile-plugin-connection-filter": "^2.2.2",
 		"rookout": "^0.44.0",
-		"segfault-raub": "^1.2.0",
+		"segfault-raub": "~1.2.0",
 		"ws": "^7.5.6"
 	}
 }

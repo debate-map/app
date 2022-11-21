@@ -4,7 +4,7 @@ import {MtxGroup} from "Store/main/database/MtxGroup.js";
 import {GetHashForString_cyrb53, RNG_Mulberry32} from "ui-debug-kit";
 import {MainSkin} from "Utils/Styles/MainSkin.js";
 import {Chroma, chroma_maxDarken, ES, Observer} from "web-vcore";
-import {GetPercentFromXToY} from "web-vcore/.yalc/js-vextensions";
+import {GetPercentFromXToY} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {Mtx, MtxSection} from "../Requests.js";

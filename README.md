@@ -235,6 +235,7 @@ Notes:
 
 Required:
 * 1\) Install Rust via the `rustup` toolkit: https://www.rust-lang.org/tools/install
+	* 1.1\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt
 * 3\) Install Helm (eg. for some Tilt extensions): https://helm.sh/docs/intro/install
 	* 3.1\) On Windows, recommended install steps:

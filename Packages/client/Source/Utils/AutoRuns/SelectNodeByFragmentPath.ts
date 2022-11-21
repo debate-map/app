@@ -3,8 +3,8 @@ import {store} from "Store";
 import {ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {JumpToNode} from "UI/@Shared/NavBar/SearchPanel.js";
 import {AddNotificationMessage} from "web-vcore";
-import {Assert, AssertWarn} from "web-vcore/.yalc/js-vextensions";
-import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
+import {Assert, AssertWarn} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let selectNode_fragmentPath_last;

@@ -1,5 +1,5 @@
 import {MapNodeType, ChildGroup, ClaimForm, Polarity, MapNodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
-import {Command} from "web-vcore/.yalc/mobx-graphlink";
+import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 
 export type PayloadOf<T> = T extends Command<infer Payload> ? Payload : never;

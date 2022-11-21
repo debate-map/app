@@ -9,7 +9,7 @@ import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
 import {GADDemo_Main} from "UI/@GAD/GAD";
-import {CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
 import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 

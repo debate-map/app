@@ -3,7 +3,7 @@ import {StreamUI} from "UI/Social/StreamUI";
 import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {Timer} from "web-vcore/.yalc/js-vextensions";
+import {Timer} from "web-vcore/nm/js-vextensions.js";
 import {Observer} from "web-vcore";
 import {store} from "Store";
 
