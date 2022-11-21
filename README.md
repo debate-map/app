@@ -443,7 +443,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s local db:postgres"`)
 * 2\) Run: `npm start "db.initDB local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@InitDB.sql` script)
 * 3\) Run: `npm start "db.seedDB local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
-	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run the `db.seedDB_freshScript` script again.
+	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run `npm start "db.seedDB_freshScript local"`.
 
 </details>
 

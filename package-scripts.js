@@ -537,9 +537,10 @@ Object.assign(scripts, {
 			//execSync(`npm start db.buildSeedDBScript`).toString().trim();
 			execSync(GetBuildSeedDBScriptCommand(), {stdio: "inherit"});
 
-			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
+			/*const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
 			psqlProcess.stdin.write(`\\i ./Scripts/SeedDB/@SeedDB.sql\n`);
-			psqlProcess.stdin.write(`exit\n`);
+			psqlProcess.stdin.write(`exit\n`);*/
+			execSync(`npm start "db.seedDB ${K8sContext_Arg_Required()}"`, {stdio: "inherit"});
 		}),
 		// ==========
 
