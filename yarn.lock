@@ -2411,7 +2411,7 @@ __metadata:
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0
     sync-directory: ^2.2.22
-    tree-grapher: 0.0.4
+    tree-grapher: 0.0.5
     ts-loader: 9.2.3
     ts-node: ^10.0.0
     ts-node-dev: 1.1.6
@@ -16375,9 +16375,9 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-grapher@npm:0.0.4":
-  version: 0.0.4
-  resolution: "tree-grapher@npm:0.0.4"
+"tree-grapher@npm:0.0.5":
+  version: 0.0.5
+  resolution: "tree-grapher@npm:0.0.5"
   dependencies:
     "@types/d3-hierarchy": ^3.0.2
     d3-hierarchy: ^3.1.1
@@ -16392,7 +16392,7 @@ resolve@^2.0.0-next.3:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-  checksum: 34fa0c3075ae827e265decfafe4f0a95068e9269a1a46a48674ba4f14ec363ca5dc3ec8000bfbee3929eead7c0419048e8c531396e0bb452f0104de8d73f95aa
+  checksum: 62d911b7c4ffa2427422383cd9dc3162e2a3aeb8c10fd698ac4d903b7c6a16ffc7295185b585943aa7383993dd59a12d58c185c9ca50bb5c0d50e3c535305d7f
   languageName: node
   linkType: hard
 
