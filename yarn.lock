@@ -34,95 +34,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/react-common@npm:^3.1.4":
-  version: 3.1.4
-  resolution: "@apollo/react-common@npm:3.1.4"
-  dependencies:
-    ts-invariant: ^0.4.4
-    tslib: ^1.10.0
-  peerDependencies:
-    "@types/react": ^16.8.0
-    apollo-client: ^2.6.4
-    apollo-utilities: ^1.3.2
-    graphql: ^14.3.1
-    react: ^16.8.0
-  checksum: 1851fa5bf4e87ca1edc556b810617b960968fac4fe0691f263b9c0d04ce19f346c6be33349e3ae41c490115ad345855a8e717254401c11c0a16c748d2e7ebf07
-  languageName: node
-  linkType: hard
-
-"@apollo/react-components@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "@apollo/react-components@npm:3.1.5"
-  dependencies:
-    "@apollo/react-common": ^3.1.4
-    "@apollo/react-hooks": ^3.1.5
-    prop-types: ^15.7.2
-    ts-invariant: ^0.4.4
-    tslib: ^1.10.0
-  peerDependencies:
-    "@types/react": ^16.8.0
-    apollo-cache: ^1.3.2
-    apollo-client: ^2.6.4
-    apollo-link: ^1.2.12
-    apollo-utilities: ^1.3.2
-    graphql: ^14.3.1
-    react: ^16.8.0
-    react-dom: ^16.8.0
-  checksum: a96911fa191d99398cc565a69789529eca255a8f24c888b1c2f3c1b72c8f2ba41bc818bff70f04993f6788353c0cb72ab35dcf024aaf5f46b07b1bd82b75f4f7
-  languageName: node
-  linkType: hard
-
-"@apollo/react-hoc@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "@apollo/react-hoc@npm:3.1.5"
-  dependencies:
-    "@apollo/react-common": ^3.1.4
-    "@apollo/react-components": ^3.1.5
-    hoist-non-react-statics: ^3.3.0
-    ts-invariant: ^0.4.4
-    tslib: ^1.10.0
-  peerDependencies:
-    "@types/react": ^16.8.0
-    apollo-client: ^2.6.4
-    graphql: ^14.3.1
-    react: ^16.8.0
-    react-dom: ^16.8.0
-  checksum: b54af496548b333c367e776a3257696a85c1f9af7e636ff703c6700fc3e9ac8ea201a891ade3acc143c84a56f9ae78fc4c316219cc563bb0f8254ac1054e95ec
-  languageName: node
-  linkType: hard
-
-"@apollo/react-hooks@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "@apollo/react-hooks@npm:3.1.5"
-  dependencies:
-    "@apollo/react-common": ^3.1.4
-    "@wry/equality": ^0.1.9
-    ts-invariant: ^0.4.4
-    tslib: ^1.10.0
-  peerDependencies:
-    "@types/react": ^16.8.0
-    apollo-client: ^2.6.4
-    graphql: ^14.3.1
-    react: ^16.8.0
-    react-dom: ^16.8.0
-  checksum: fb1b2d53248a67f3b65da315add64897c59ad41b768ad22af51b98c42c804e151ef1b9e257bf33a2df41182124b9ee77204dad652b59aca01d5a44482f7d15d5
-  languageName: node
-  linkType: hard
-
-"@apollo/react-ssr@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "@apollo/react-ssr@npm:3.1.5"
-  dependencies:
-    "@apollo/react-common": ^3.1.4
-    "@apollo/react-hooks": ^3.1.5
-    tslib: ^1.10.0
-  peerDependencies:
-    react: ^16.8.0
-    react-dom: ^16.8.0
-  checksum: 1480ec59fb689fda48b660034264a17edc4c8cf780c97f457218a30af0d6a72f4c20d4991a3cfb36b416853231841726cf1b0968d21a727f6719a1c41c2ee86b
-  languageName: node
-  linkType: hard
-
 "@babel/code-frame@npm:7.12.11":
   version: 7.12.11
   resolution: "@babel/code-frame@npm:7.12.11"
@@ -2507,7 +2418,7 @@ __metadata:
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.5
-    web-vcore: 0.0.48
+    web-vcore: 0.0.52
   languageName: unknown
   linkType: soft
 
@@ -3719,15 +3630,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vforks/get-graphql-from-jsonschema@npm:8.0.12-5":
-  version: 8.0.12-5
-  resolution: "@vforks/get-graphql-from-jsonschema@npm:8.0.12-5"
+"@vforks/get-graphql-from-jsonschema@npm:8.0.12-7":
+  version: 8.0.12-7
+  resolution: "@vforks/get-graphql-from-jsonschema@npm:8.0.12-7"
   dependencies:
     "@types/common-tags": 1.8.1
     "@types/json-schema": 7.0.8
     common-tags: 1.8.0
     defekt: 7.3.1
-  checksum: ecf98cfc4176c6f18c8d773cee8aa00856fa06db9cc7f96359f908fc081218f569c2c54e8275dfdbfcc3352f99471be97fba893af2d05569ec41af804deda526
+  checksum: df44b44120d6fbdd6ca8124384a8afc69196b725f8706c57397ddf81d736029976d43a46501521f5052f0b1e05ae3931b92c05cf3120b54205df44142f3e40b7
   languageName: node
   linkType: hard
 
@@ -3928,15 +3839,6 @@ __metadata:
   dependencies:
     tslib: ^2.3.0
   checksum: 4187863175061a8f54659f124e3e5c202e010b2b65bf886b4de9777ce8a45cf183b6f6d88f1f537002cbcbea52103a2eadc337d494106490def10acaf9522c5d
-  languageName: node
-  linkType: hard
-
-"@wry/equality@npm:^0.1.9":
-  version: 0.1.11
-  resolution: "@wry/equality@npm:0.1.11"
-  dependencies:
-    tslib: ^1.9.3
-  checksum: 1a26a0fd11e3e3a6a197d9a54a5bec523caf693daa24ad2709f496e43dd3cd12290a0d17df81f8a783437795f6c64a1ca2717cdac6e79022bde4450c11e705c9
   languageName: node
   linkType: hard
 
@@ -6694,7 +6596,7 @@ __metadata:
     knex: ^0.95.6
     lightrun: ^1.3.0
     newrelic: ^8.6.0
-    node-fetch: ^2.6.1
+    node-fetch: ^2.6.7
     ofe: ^0.6.0
     passport: ^0.4.1
     passport-google-oauth20: ^2.0.0
@@ -6765,7 +6667,6 @@ __metadata:
     katex: ^0.9.0
     keycode: ^2.1.8
     react: 16.9.0
-    react-apollo: ^3.1.5
     react-color: ^2.14.1
     react-katex: ^2.0.2
     react-list: 0.8.11
@@ -8760,7 +8661,34 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"graphql-feedback@0.0.4, graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback":
+"graphql-feedback@npm:0.0.5":
+  version: 0.0.5
+  resolution: "graphql-feedback@npm:0.0.5"
+  dependencies:
+    classnames: ^2.3.1
+    codemirror: ^5.62.2
+    mobx-sync: ^3.0.0
+    react-vmarkdown: ^1.0.3
+    slugid: ^2.0.0
+  peerDependencies:
+    "@apollo/client": ^3.3.20
+    js-vextensions: ^0.0.1
+    mobx: ^6.3.2
+    mobx-graphlink: ^0.0.6
+    mobx-react: ^7.2.0
+    postgraphile: ^4.12.3
+    react: ^17.0.2
+    react-beautiful-dnd: ^10.0.4
+    react-dom: ^17.0.2
+    react-vcomponents: ^1.0.39
+    react-vextensions: ^1.0.15
+    react-vmessagebox: 0.0.1
+    react-vscrollview: 0.0.2
+  checksum: c8c0feaed68c6e08c8e82d18ef05572cd6952bb8a7403a75dcb18f75892beb3021eed334e8e3622727fab9d58deecd665c6604dc53d8235832657017adeea245
+  languageName: node
+  linkType: hard
+
+"graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback":
   version: 0.0.0-use.local
   resolution: "graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback"
   dependencies:
@@ -10102,11 +10030,18 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"js-vextensions@1.0.69, js-vextensions@^1.0.65, js-vextensions@^1.0.69, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
+"js-vextensions@^1.0.65, js-vextensions@^1.0.69, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
   version: 0.0.0-use.local
   resolution: "js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions"
   languageName: unknown
   linkType: soft
+
+"js-vextensions@npm:1.0.70":
+  version: 1.0.70
+  resolution: "js-vextensions@npm:1.0.70"
+  checksum: dbcec1865114bc628dcc429823aae461669d583061e1a1f0d408461551492a13f99686a17cdedc6ca58c4a2d6a3e0e255d79fd449272b3700dab2efb08fc46ac
+  languageName: node
+  linkType: hard
 
 "js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.0, js-yaml@npm:^3.9.0":
   version: 3.14.1
@@ -11406,13 +11341,13 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.21, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
+"mobx-graphlink@0.0.31, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
   version: 0.0.0-use.local
   resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
   dependencies:
     "@types/json-schema": ^7.0.8
     "@types/node": ^15.12.4
-    "@vforks/get-graphql-from-jsonschema": 8.0.12-5
+    "@vforks/get-graphql-from-jsonschema": 8.0.12-7
     ajv: ^8.8.1
     ajv-keywords: ^5.0.0
     buffer: ^6.0.3
@@ -11699,6 +11634,20 @@ fsevents@~2.3.2:
   version: 2.6.1
   resolution: "node-fetch@npm:2.6.1"
   checksum: 91075bedd57879117e310fbcc36983ad5d699e522edb1ebcdc4ee5294c982843982652925c3532729fdc86b2d64a8a827797a745f332040d91823c8752ee4d7c
+  languageName: node
+  linkType: hard
+
+"node-fetch@npm:^2.6.7":
+  version: 2.6.7
+  resolution: "node-fetch@npm:2.6.7"
+  dependencies:
+    whatwg-url: ^5.0.0
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: 8d816ffd1ee22cab8301c7756ef04f3437f18dace86a1dae22cf81db8ef29c0bf6655f3215cb0cdb22b420b6fe141e64b26905e7f33f9377a7fa59135ea3e10b
   languageName: node
   linkType: hard
 
@@ -13937,25 +13886,6 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-apollo@npm:^3.1.5":
-  version: 3.1.5
-  resolution: "react-apollo@npm:3.1.5"
-  dependencies:
-    "@apollo/react-common": ^3.1.4
-    "@apollo/react-components": ^3.1.5
-    "@apollo/react-hoc": ^3.1.5
-    "@apollo/react-hooks": ^3.1.5
-    "@apollo/react-ssr": ^3.1.5
-  peerDependencies:
-    "@types/react": ^16.8.0
-    apollo-client: ^2.6.4
-    graphql: ^14.3.1
-    react: ^16.8.0
-    react-dom: ^16.8.0
-  checksum: 45e76993b5c31f8a098fe68e1be8f1c588ac66a6a30a83a12340a620e74e62bbb7faf84bf9e3368196ad4da16a4ab3c700ac6ddd05558afae806d61a9d2811da
-  languageName: node
-  linkType: hard
-
 "react-beautiful-dnd@npm:^13.1.0":
   version: 13.1.0
   resolution: "react-beautiful-dnd@npm:13.1.0"
@@ -14155,7 +14085,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-uplot@0.0.7, react-uplot@workspace:.yalc/web-vcore/.yalc/react-uplot":
+"react-uplot@0.0.8, react-uplot@workspace:.yalc/web-vcore/.yalc/react-uplot":
   version: 0.0.0-use.local
   resolution: "react-uplot@workspace:.yalc/web-vcore/.yalc/react-uplot"
   peerDependencies:
@@ -14165,7 +14095,22 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vcomponents@1.0.39, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
+"react-vcomponents@npm:1.0.40":
+  version: 1.0.40
+  resolution: "react-vcomponents@npm:1.0.40"
+  dependencies:
+    classnames: ^2.2.5
+    keycode: ^2.2.0
+    react-textarea-autosize: ^7.1.2
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    react-vextensions: ^1.0.14
+  checksum: 8c10e6859695f7b14b94884f98909f7523e77fc73435021214c042859e53c0ff89f347f17c9220a9f189efb9a98920636f5895f9745170bca4915dc55a380ab9
+  languageName: node
+  linkType: hard
+
+"react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
   version: 0.0.0-use.local
   resolution: "react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents"
   dependencies:
@@ -14218,9 +14163,9 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vmessagebox@npm:1.0.12":
-  version: 1.0.12
-  resolution: "react-vmessagebox@npm:1.0.12"
+"react-vmessagebox@npm:1.0.14":
+  version: 1.0.14
+  resolution: "react-vmessagebox@npm:1.0.14"
   dependencies:
     classnames: ^2.2.5
     mobx-react: ^7.2.0
@@ -14231,7 +14176,7 @@ fsevents@~2.3.2:
     react-dom: ^17.0.2
     react-vcomponents: ^1.0.33
     react-vextensions: ^1.0.10
-  checksum: bce37dfafc2bad74d59c9ed0ab6f2d80c25bec657410fbedde540467b12e01ae1e4a36ae0a51c212bdd94b2822e625682076099ebbf3fb6a9ae45f5919c1aa38
+  checksum: dc3bf0d1a6a569aa4894f76528665c6bdb3c0c6e3f99c7648cb81a26404e14442b29a2c7ab1eec5d8975cd375a1dbe2a3a3bf83a00cc660808f684ca57de3b50
   languageName: node
   linkType: hard
 
@@ -16462,6 +16407,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"tr46@npm:~0.0.3":
+  version: 0.0.3
+  resolution: "tr46@npm:0.0.3"
+  checksum: 726321c5eaf41b5002e17ffbd1fb7245999a073e8979085dacd47c4b4e8068ff5777142fc6726d6ca1fd2ff16921b48788b87225cbc57c72636f6efa8efbffe3
+  languageName: node
+  linkType: hard
+
 "traverse@npm:^0.6.6":
   version: 0.6.6
   resolution: "traverse@npm:0.6.6"
@@ -16532,15 +16484,6 @@ resolve@^2.0.0-next.3:
   dependencies:
     glob: ^7.1.2
   checksum: 2e2e3bf37b4b05db2e2a1d60329960a4aa697ad7a89bd97c66f5f4da83977897c29c704276e62bca62d055d8078065bc08a1c7a01f409de11c6592af8b442cbe
-  languageName: node
-  linkType: hard
-
-"ts-invariant@npm:^0.4.4":
-  version: 0.4.4
-  resolution: "ts-invariant@npm:0.4.4"
-  dependencies:
-    tslib: ^1.9.3
-  checksum: 58b32fb6b7c479e602e55b9eb63bb99a203c5db09367d3aa7c3cbe000ba62f919eea7f031f55172df9b6d362a6f1a87e906df84b04b8c74c88e507ac58f7a554
   languageName: node
   linkType: hard
 
@@ -17451,7 +17394,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.48, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.52, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -17494,17 +17437,17 @@ typescript@~3.7.3:
     file-loader: ^6.2.0
     fs-extra: ^8.1.0
     graphql: ^15.5.0
-    graphql-feedback: 0.0.4
+    graphql-feedback: 0.0.5
     graphql-tag: 2.12.5
     history: ^4.10.1
     html-webpack-plugin: ^5.3.1
     immer: ^7.0.7
     ip: ^1.1.5
-    js-vextensions: 1.0.69
+    js-vextensions: 1.0.70
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.21
+    mobx-graphlink: 0.0.31
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0
@@ -17520,12 +17463,12 @@ typescript@~3.7.3:
     react-dom: ^17.0.2
     react-markdown: ^6.0.3
     react-universal-hooks: 0.5.1
-    react-uplot: 0.0.7
-    react-vcomponents: 1.0.39
+    react-uplot: 0.0.8
+    react-vcomponents: 1.0.40
     react-vextensions: 1.0.15
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14
-    react-vmessagebox: 1.0.12
+    react-vmessagebox: 1.0.14
     react-vscrollview: 1.0.4
     remarkable: ^2.0.1
     remarkable-react: ^1.4.3
@@ -17563,6 +17506,13 @@ typescript@~3.7.3:
       optional: true
   languageName: unknown
   linkType: soft
+
+"webidl-conversions@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "webidl-conversions@npm:3.0.1"
+  checksum: c92a0a6ab95314bde9c32e1d0a6dfac83b578f8fa5f21e675bc2706ed6981bc26b7eb7e6a1fab158e5ce4adf9caa4a0aee49a52505d4d13c7be545f15021b17c
+  languageName: node
+  linkType: hard
 
 "webpack-cli@npm:^4.7.2":
   version: 4.9.1
@@ -17708,6 +17658,16 @@ typescript@~3.7.3:
   bin:
     webpack: bin/webpack.js
   checksum: 62ac598291374fa5269c80fcd82ad3cbf8e8c3f837c2bf6ea80812812154d9f4d3390c6fdc1ce85323e6fdd46132e3e3db08cde9a1b4d61197879e867c7c1375
+  languageName: node
+  linkType: hard
+
+"whatwg-url@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "whatwg-url@npm:5.0.0"
+  dependencies:
+    tr46: ~0.0.3
+    webidl-conversions: ^3.0.0
+  checksum: b8daed4ad3356cc4899048a15b2c143a9aed0dfae1f611ebd55073310c7b910f522ad75d727346ad64203d7e6c79ef25eafd465f4d12775ca44b90fa82ed9e2c
   languageName: node
   linkType: hard
 
