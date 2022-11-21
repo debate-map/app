@@ -9,6 +9,12 @@ module.exports.scripts = scripts;
 //const CurrentTime_SafeStr = ()=>new Date().toISOString().replace(/:/g, "-");
 const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 
+// ungrouped scripts
+Object.assign(scripts, {
+	// if using "yalc push" from web-vcore and such (see its readme for me details), run this script instead of "yarn install"
+	"yalc-i": "yarn install && git checkout HEAD -- yarn.lock",
+});
+
 Object.assign(scripts, {
 	client: {
 		tsc: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,

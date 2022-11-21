@@ -10,6 +10,12 @@
 			"isBackground": true,
 			"group": "build"
 		},
+		{
+			"label": "## yalc-i (yarn install, then reset yarn.lock, for use with yalc)",
+			"type": "shell",
+			"command": "npm start yalc-i",
+			"group": "build",
+		},
 
 		// backend
 		{
