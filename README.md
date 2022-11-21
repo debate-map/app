@@ -67,10 +67,10 @@ Development of Debate Map is partially supported by [The Society Library](https:
 <!----><a name="setup-general"></a>
 <details><summary><b>[setup-general] General repo setup</b></summary>
 
-* 1\) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
+* 1\) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/install) needed for Yarn workspaces.
 * 2\) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
 * 3\) Install this repo's dependencies by running: `yarn install`
-* 4\) There is an ugly additional step that used to be required here, relating to a messy transition in the NPM ecosystem from commonjs to esm modules. For now, I believe this step is solved through use of [these](https://github.com/debate-map/app/tree/master/patches) and [these](https://github.com/Venryx/web-vcore/tree/master/patches) patch files. However, if you get strange webpack/typescript build errors relating to commonjs/esm modules, it's probably related to [this issue](https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662), which may then require another look at the patch files (or attempting to find a more reliable solution).
+* 4\) There is an ugly additional step that used to be required here, relating to a messy transition in the NPM ecosystem from commonjs to esm modules. For now, this issue is being worked around in this repo through use of [these](https://github.com/debate-map/app/tree/master/patches) and [these](https://github.com/Venryx/web-vcore/tree/master/patches) patch files (which are auto-applied by npm/yarn). However, if you get strange webpack/typescript build errors relating to commonjs/esm modules, it's probably related to [this issue](https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662), which may then require another look at the patch files (or attempting to find a more reliable solution).
 * 5\) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. At the moment, regular frontend and backend devs can ignore this step; only backend deployers/maintainers (ie. those pushing changes to the cloud for production) have environment-variables they need to fill in.
 
 > If you're looking for a higher-level "quick start" guide, see here: [Quick start](https://github.com/debate-map/app/tree/master/Docs/QuickStart.md)
