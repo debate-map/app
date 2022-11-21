@@ -10,7 +10,6 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
-import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
 type Props = {map: Map, node: MapNodeL3, path: string, group: ChildGroup, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',

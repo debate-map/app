@@ -4,13 +4,12 @@ import {store} from "Store";
 import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
-import {Clone, GetEntries, ModifyString, NN, StartDownload} from "web-vcore/nm/js-vextensions.js";
+import {Assert, Clone, GetEntries, ModifyString, NN, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {ClassKeys, CreateAccessor, GetSchemaJSON, TableNameToDocSchemaName} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, CheckBox, Column, Row, RowLR, Select, Spinner, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
