@@ -496,11 +496,13 @@ Object.assign(scripts, {
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"});
 		}),
 
+		// old (using knex to directly connect)
+		// ==========
 		// db-shape and such
-		buildInitDBScript: GetBuildInitDBScriptCommand(false),
+		/*buildInitDBScript: GetBuildInitDBScriptCommand(false),
 		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
 
-		// db setup
+		// db setup (old approach, using knex to send commands)
 		//initDB: "psql -f ./Packages/app-server/Scripts/InitDB.sql debate-map",
 		//initDB: TSScript("app-server", "Scripts/InitDB.ts"),
 		// init-db, base (without env-vars set, this controls port-5432/native/non-k8s postgres instance -- which is not recommended)
@@ -514,7 +516,32 @@ Object.assign(scripts, {
 		initDB_freshScript_k8s: Dynamic(()=>{
 			ImportPGUserSecretAsEnvVars(K8sContext_Arg_Required());
 			return `${pathToNPMBin("nps.cmd", 0, true, true)} db.initDB_freshScript`;
+		}),*/
+		// ===========
+
+		// new (using psql to run standard .sql files)
+		// ==========
+		buildSeedDBScript: GetBuildSeedDBScriptCommand(),
+		initDB: Dynamic(()=>{
+			// we have to connect to the "postgres" database at first, since the "debate-map" might not exist yet (the @InitDB.sql script will switch to the "debate-map" db once confirmed present)
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "postgres");
+			psqlProcess.stdin.write(`\\i ./Scripts/InitDB/@InitDB.sql\n`);
+			psqlProcess.stdin.write(`exit\n`);
 		}),
+		seedDB: Dynamic(()=>{
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
+			psqlProcess.stdin.write(`\\i ./Scripts/SeedDB/@SeedDB.sql\n`);
+			psqlProcess.stdin.write(`exit\n`);
+		}),
+		seedDB_freshScript: Dynamic(()=>{
+			//execSync(`npm start db.buildSeedDBScript`).toString().trim();
+			execSync(GetBuildSeedDBScriptCommand(), {stdio: "inherit"});
+
+			const psqlProcess = StartPSQLInK8s(K8sContext_Arg_Required(), "debate-map");
+			psqlProcess.stdin.write(`\\i ./Scripts/SeedDB/@SeedDB.sql\n`);
+			psqlProcess.stdin.write(`exit\n`);
+		}),
+		// ==========
 
 		// db clearing/reset
 		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
@@ -541,12 +568,15 @@ Object.assign(scripts, {
 	},
 });
 
-function GetBuildInitDBScriptCommand(watch) {
+/*function GetBuildInitDBScriptCommand(watch) {
 	return TSScript({pkg: "app-server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
 		`--classFolders ../../Packages/js-common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
 		`--templateFile ./Scripts/InitDB_Template.ts`,
 		`--outFile ./Scripts/InitDB_Generated.ts`,
 		watch ? "--watch" : "");
+}*/
+function GetBuildSeedDBScriptCommand() {
+	return TSScript({tsConfigPath: "./Scripts/SeedDBGenerator/tsconfig.json"}, `./Scripts/SeedDBGenerator/GenerateSeedDB.ts`);
 }
 
 // if server-start command/flags change, update the entry in "launch.json" as well

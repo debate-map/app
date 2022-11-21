@@ -441,9 +441,9 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 
 * 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s local"`
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s local db:postgres"`)
-* 2\) Run: `npm start "db.initDB_freshScript_k8s local"`
-
-> Note: This guide-module is outdated; I'll write an update soon explaining the new approach. (which will use a simple psql script, rather than a JS script that uses the Knex ORM)
+* 2\) Run: `npm start "db.initDB local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@InitDB.sql` script)
+* 3\) Run: `npm start "db.seedDB local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
+	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run the `db.seedDB_freshScript` script again.
 
 </details>
 
@@ -707,8 +707,7 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 	1.2\) If you've changed files in `web-server` or `app-server`, then follow its ts->js transpilation instructions.
 * 2\) Run: `npm start backend.tiltUp_ovh` (reminder: if you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package)
 * 3\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5210`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
-* 4\) If you haven't yet, initialize the DB:
-	* 4.1\) Run: `npm start "db.initDB_freshScript_k8s ovh"`
+* 4\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `local` context listed in the commands with `ovh`.
 * 5\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)

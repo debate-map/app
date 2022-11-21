@@ -157,7 +157,7 @@ export class MapNodeRevision {
 
 	@DB((t, n)=>t.text(n).nullable()) //.references("id").inTable(`nodeRevisions`).DeferRef()) // disabled for now, relating to deletion
 	@Field({type: ["null", "string"]}, {opt: true})
-	replaced_by: string;
+	replaced_by?: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})

@@ -4,7 +4,7 @@ const paths = require("path");
 exports.pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
 	let path = `./node_modules/.bin/${binaryName}`;
 	for (let i = 0; i < depth; i++) {
-		path = "../" + path;
+		path = `../${path}`;
 	}
 	if (normalize) path = paths.normalize(path);
 	if (abs) path = paths.resolve(path);
@@ -12,7 +12,7 @@ exports.pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
 };
 
 const _packagesRootStr = exports._packagesRootStr = "{packagesRoot}"; // useful for setting working-directory to "./Packages/", eg. so when running webpack, its error paths are "resolvable" by vscode window #1
-exports.TSScript = (/** @type {{pkg: string, envStrAdd: string}} */ opts, scriptSubpath, ...args)=>{
+exports.TSScript = (/** @type {{pkg: string, envStrAdd: string, tsConfigPath: string}} */ opts, scriptSubpath, ...args)=>{
 	let cdCommand = "";
 	let tsConfigPath = "";
 	if (opts.pkg) {
@@ -23,6 +23,9 @@ exports.TSScript = (/** @type {{pkg: string, envStrAdd: string}} */ opts, script
 			cdCommand = `cd Packages/${opts.pkg} && `;
 			tsConfigPath = "Scripts/tsconfig.json";
 		}
+	}
+	if (opts.tsConfigPath) {
+		tsConfigPath = opts.tsConfigPath;
 	}
 
 	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true ${opts.envStrAdd ?? ""}`;
@@ -41,7 +44,6 @@ exports.FindPackagePath = (packageName, asAbsolute = true)=>{
 	}
 	throw new Error(`Could not find package: "${packageName}"`);
 };
-
 
 //console.log("Argv:", process.argv);
 // process.argv example: ["XXX/node.exe", "XXX/nps.js", "app-server.initDB_k8s ovh"]

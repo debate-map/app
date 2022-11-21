@@ -1,0 +1,19 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"rootDir": ".",
+		"esModuleInterop": true,
+	},
+	"include": [
+		"./**/*.js",
+		//"./**/*.jsx"
+		"./**/*.ts",
+		//"./**/*.tsx"
+	],
+	"references": [
+		// in-repo packages
+		{"path": "../../Packages/js-common"},
+		// external packages
+		{"path": "../../node_modules/web-vcore"},
+	]
+}
