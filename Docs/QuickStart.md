@@ -23,7 +23,7 @@ Building/Running:
 Setup:
 * 1\) Follow steps in module [setup-backend](https://github.com/debate-map/app#setup-backend).
 * 2\) Follow steps in module [setup-k8s](https://github.com/debate-map/app#setup-k8s). (don't miss the "After steps" section!)
-* 3\) Populate the local backend's database to a fresh state, by following module [reset-db-local](https://github.com/debate-map/app#reset-db-local).
 
 Building/Running:
 * 1\) Follow steps in module [run-backend-local](https://github.com/debate-map/app#setup-backend).
+* 2\) If this is the first time you've launched the backend in k8s, the database will be empty, so the website will have no content (and may have other issues). You'll want to populate the local backend's database to a base valid state, by following module [reset-db-local](https://github.com/debate-map/app#reset-db-local). If there are pods that had been erroring before this step, you may need to restart them. (using the tilt web-ui, or by restarting the tilt-up command)

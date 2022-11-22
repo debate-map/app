@@ -68,10 +68,11 @@ Development of Debate Map is partially supported by [The Society Library](https:
 <details><summary><b>[setup-general] General repo setup</b></summary>
 
 * 1\) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/install) needed for Yarn workspaces.
+	* Note: Installation of a new command-line tool generally requires that you restart your terminal/IDE in order for its binaries to be accessible simply by name (assuming the installer has added its folder to the `Path` environment-variable automatically). So if a step fails due to "Command X is not recognized", check this first. (To save space, this "restart your terminal/IDE before proceeding" note will not be repeated in other guide-modules/steps.)
 * 2\) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
 * 3\) Install this repo's dependencies by running: `yarn install`
 * 4\) There is an ugly additional step that used to be required here, relating to a messy transition in the NPM ecosystem from commonjs to esm modules. For now, this issue is being worked around in this repo through use of [these](https://github.com/debate-map/app/tree/master/patches) and [these](https://github.com/Venryx/web-vcore/tree/master/patches) patch files (which are auto-applied by npm/yarn). However, if you get strange webpack/typescript build errors relating to commonjs/esm modules, it's probably related to [this issue](https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662), which may then require another look at the patch files (or attempting to find a more reliable solution).
-* 5\) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. At the moment, regular frontend and backend devs can ignore this step; only backend deployers/maintainers (ie. those pushing changes to the cloud for production) have environment-variables they need to fill in.
+* 5\) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. At the moment, regular frontend and backend devs don't need to make any modifications to the new `.env` file; only backend deployers/maintainers (ie. those pushing changes to the cloud for production) have environment-variables they need to fill in.
 
 > If you're looking for a higher-level "quick start" guide, see here: [Quick start](https://github.com/debate-map/app/tree/master/Docs/QuickStart.md)
 
@@ -192,7 +193,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 	* 2.2\) Option 2, using the web-server package within k8s:
 		* 2.2.1\) If you've made code changes, build the frontend's webpack bundle into an actual file, in production mode, by running `npm start client.build.prodQuick` (has vsc-1 task).
 		* 2.2.2\) Run (in repo root): `npm start backend.tiltUp_local`
-		* 2.2.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+		* 2.2.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 * 3\) Open the locally-served frontend, by opening in your browser: `localhost:5101` (webpack), or `localhost:5100` (k8s web-server) (if you want to connect to the remote db, add `?db=prod` to the end of the url)
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
@@ -237,12 +238,14 @@ Required:
 * 1\) Install Rust via the `rustup` toolkit: https://www.rust-lang.org/tools/install
 	* 1.1\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt
+	* 2.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
 * 3\) Install Helm (eg. for some Tilt extensions): https://helm.sh/docs/intro/install
 	* 3.1\) On Windows, recommended install steps:
 		* 3.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
 		* 3.1.2\) Run: `choco install kubernetes-helm`
 * 3\) Install a Docker container system.
 	* 3.1\) On Windows and Mac, this means installing [Docker Desktop](https://docs.docker.com/desktop).
+		* 3.1.1\) On Windows (as mentioned on Docker Desktop's install page), you will need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) first. For the simple case, this involves running `wsl --install`, restarting, waiting for WSL2's post-restart installation process to complete, then entering a username and password (which is probably worth recording); then you can proceed with running the Docker Desktop installer (which then requires another restart/logout).
 	* 3.2\) On Linux, it's also recommended to install [Docker Desktop](https://docs.docker.com/desktop). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
 
 Highly recommended: (frontend devs can skip, if setting up a minimal local backend)
@@ -274,7 +277,7 @@ Prerequisite steps: [setup-backend](#setup-backend)
 
 * 1\) Create an alias/copy of the k8s context you just created, renaming it to "local":
 	* 1.1\) For Docker Desktop, this means:
-		* 1.1.1\) Open: `<%HOME% or $HOME>/.kube/config`
+		* 1.1.1\) Open: `$HOME/.kube/config`
 		* 1.1.2\) Find the section with these contents:
 		```
 		- context:
@@ -284,6 +287,7 @@ Prerequisite steps: [setup-backend](#setup-backend)
 		```
 		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: local`.
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
+* 3\) For now, manually create an empty file at path `Packages/deploy/PGO/postgres/gcs-key.json`. (postgres-operator expects this file to be present; when deploying to the cloud we would need to fill in its contents, but for now an empty file is fine)
 
 #### Troubleshooting
 
@@ -458,7 +462,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 	* 2.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
 		* 2.1.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
 		* 2.1.2\) Run (in repo root): `npm start backend.tiltUp_local`
-		* 2.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (can use the Tilt webpage/ui, or press `s` in the tilt terminal, to monitor)
+		* 2.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
 		* 2.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
@@ -515,7 +519,7 @@ Note: We use Google Cloud here, but others could be used.
 			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
 			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
-	* 3.3\) Move (or copy) the JSON file to the following path: `Packages/deploy/PGO/postgres/gcs-key.json`
+	* 3.3\) Move (or copy) the JSON file to the following path: `Packages/deploy/PGO/postgres/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
 	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Packages/deploy/PGO/postgres/gcs-key.json`
 	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Packages/deploy/PGO/postgres/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
 
@@ -551,7 +555,7 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 2.1\) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)  
 	* 2.2\) In the "node type" step, select an option. (cheapest is Discovery d2-4 at ~$12/mo, but I use d2-8 at ~$22/mo to avoid occasional OOM issues)
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
-* 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (open `<%HOME% or $HOME>/.kube/config`, copy the aforementioned context section, then change the copy's name to `ovh`)
+* 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (open `$HOME/.kube/config`, copy the aforementioned context section, then change the copy's name to `ovh`)
 * 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
@@ -707,9 +711,10 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 	1.1\) If you've changed files in `client`, then follow its ts->js transpilation instructions, then build the webpack bundle into an actual file, in production mode, by running `npm start client.build.prodQuick` (has vsc-1 task).
 	1.2\) If you've changed files in `web-server` or `app-server`, then follow its ts->js transpilation instructions.
 * 2\) Run: `npm start backend.tiltUp_ovh` (reminder: if you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package)
-* 3\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5210`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
-* 4\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `local` context listed in the commands with `ovh`.
-* 5\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
+* 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
+* 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5210`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
+* 5\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `local` context listed in the commands with `ovh`.
+* 6\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
 
