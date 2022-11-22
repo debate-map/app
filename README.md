@@ -244,12 +244,12 @@ Required:
 		* 3.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
 		* 3.1.2\) Run: `choco install kubernetes-helm`
 * 3\) Install a Docker container system.
-	* 3.1\) On Windows and Mac, this means installing [Docker Desktop](https://docs.docker.com/desktop).
-		* 3.1.1\) On Windows (as mentioned on Docker Desktop's install page), you will need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) first. For the simple case, this involves...
-    		* 3.1.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
-    		* 3.1.1.2\) Proceed, by running the Docker Desktop installer. (which then requires another restart/logout)
-    		* 3.1.1.3\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources. (you'll need to [shutdown WSL](https://stackoverflow.com/a/66797264) and Docker Desktop then restart them for the limits to take effect, unless you apply these changes prior to the computer restart in the previous step of course)
-	* 3.2\) On Linux, it's also recommended to install [Docker Desktop](https://docs.docker.com/desktop). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
+	* 3.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
+		* 3.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
+		* 3.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
+	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with Kubernetes v1.21.5 (as part of Docker Desktop 4.2.0) and v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)), so it's recommended to install one of those versions (preferably the latest).
+	* 3.3\) On Windows and Mac, this means installing Docker Desktop (see step 3.2 above for recommended install link).
+	* 3.4\) On Linux, it's also recommended to install Docker Desktop (see step 3.2 above for recommended install link). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
 
 Highly recommended: (frontend devs can skip, if setting up a minimal local backend)
 * 1\) Install [Lens](https://k8slens.dev), a very handy, general-purpose k8s inspection tool. 

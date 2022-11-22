@@ -2418,7 +2418,7 @@ __metadata:
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.6
-    web-vcore: 0.0.53
+    web-vcore: 0.0.55
   languageName: unknown
   linkType: soft
 
@@ -17350,9 +17350,9 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@npm:0.0.53":
-  version: 0.0.53
-  resolution: "web-vcore@npm:0.0.53"
+"web-vcore@npm:0.0.55":
+  version: 0.0.55
+  resolution: "web-vcore@npm:0.0.55"
   dependencies:
     "@apollo/client": 3.5.0-beta.4
     "@babel/core": ^7.14.6
@@ -17460,7 +17460,7 @@ typescript@~3.7.3:
       optional: true
     mobx-firelink:
       optional: true
-  checksum: 9462f87e276cba286e2b29387e90ee6d4b224fa64d4c4a81e84a83c307ddc1da3968f314aa6df131c89266010844934b197bee2c1d6e45c7236395c4031e2f59
+  checksum: 518c5ddcf2585a55d08b667861858b865a202e3b4420580f8026793dc0e88dcca18d8e7a02d8cd3ab73785771691e393c49ab9c3b23d97c8ffd5ab22defafbd3
   languageName: node
   linkType: hard
 
