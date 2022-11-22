@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "start": "nps",
-    "preinstall": "npx only-allow yarn",
+    "#preinstall[disabled; can error in docker]": "npx only-allow yarn",
     "postinstall_old": "patch-package --patch-dir ./node_modules/web-vcore/patches && patch-package --patch-dir ./patches",
     "postinstall_old2": "patch-package --patch-dir ./patches",
     "postinstall_old3": "node ./node_modules/web-vcore/Scripts_Dist/ApplyPatches.js && patch-package --patch-dir ./patches",

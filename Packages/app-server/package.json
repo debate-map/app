@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"start": "cd ../.. && npx nps",
-		"preinstall": "npx only-allow yarn"
+		"#preinstall[disabled; can error in docker]": "npx only-allow yarn"
 	},
 	"devDependencies": {
 		"@types/passport": "^1.0.6",

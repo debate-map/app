@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"start": "cd ../.. && npx nps",
-		"preinstall": "npx only-allow yarn"
+		"#preinstall[disabled; can error in docker]": "npx only-allow yarn"
 	},
 	"dependencies": {
 		"@types/express": "^4.17.12",

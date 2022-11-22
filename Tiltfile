@@ -263,16 +263,13 @@ NEXT_k8s_resource(new_name="crunchy-others",
 # reflector
 # ==========
 
-'''load('ext://helm_remote', 'helm_remote')
 helm_remote('reflector',
 	#repo_name='stable',
 	#repo_url='https://charts.helm.sh/stable',
 	repo_url='https://emberstack.github.io/helm-charts',
-	version='5.4.17',
-)'''
-
-# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
-k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
+	#version='5.4.17',
+	version='6.1.47',
+)
 k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
 NEXT_k8s_resource("reflector",
 	objects=[
@@ -281,6 +278,17 @@ NEXT_k8s_resource("reflector",
 		"reflector:serviceaccount",
 	],
 )
+
+# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
+'''k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
+k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
+NEXT_k8s_resource("reflector",
+	objects=[
+		"reflector:clusterrole",
+		"reflector:clusterrolebinding",
+		"reflector:serviceaccount",
+	],
+)'''
 
 # load-balancer/reverse-proxy (traefik, ingress-based [old])
 # ==========

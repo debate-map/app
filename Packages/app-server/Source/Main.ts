@@ -1,4 +1,5 @@
 import "./Start_0.js"; // this must come first // eslint-disable-line
+// should probably comment this out for now (not really using atm, partly due to forgotten issue hit with it earlier)
 //import "./newrelic.js"; // import this next (it may need to come early) // eslint-disable-line
 import "newrelic"; // import this next (it may need to come early) // eslint-disable-line
 
