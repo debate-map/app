@@ -41,8 +41,13 @@ def NEXT_k8s_resource_batch(entries = []):
 	results = []
 	for entry in entries:
 		if "resource_deps" in entry:
-			fail("Cannot specify resource_deps, for resource \"" + thisResourceName + "\". (if you want to customize resource_deps, use the regular k8s_resource function)") # throw error # why?
-		entry["resource_deps"] = resource_deps
+			fail("Cannot directly specify resource_deps, for resource \"" + thisResourceName + "\", since that field is handled by NEXT_k8s_resource_batch."
+				+ " (if you want to add resource_deps beyond those added by NEXT_k8s_resource_batch, use the the resource_deps_extra field, or the regular k8s_resource function)")
+		entry["resource_deps"] = resource_deps[:] # copy array
+		if "resource_deps_extra" in entry:
+			for extra_dep in entry["resource_deps_extra"]:
+				entry["resource_deps"].append(extra_dep)
+			entry.pop("resource_deps_extra", None)
 
 		thisResourceName = entry["new_name"] if "new_name" in entry else entry["workload"]
 		batch_resourceNames.append(thisResourceName)
@@ -181,6 +186,11 @@ k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
 	"TILT_PLACEHOLDER:bucket_uniformPrivate_name": bucket_uniformPrivate_name,
 }))
 
+# temp: before deploying the postgres-resources, run "docker pull X" for the large postgres images
+# (fix for bug in Kubernetes 1.24.2 where in-container image-pulls that take longer than 2m get interrupted/timed-out: https://github.com/docker/for-mac/issues/6300#issuecomment-1324044788)
+local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.33-1")
+local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.3-1")
+
 # todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
 pgo_crdName = "postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition"
 NEXT_k8s_resource(new_name='pgo_crd-definition',
@@ -190,6 +200,7 @@ NEXT_k8s_resource(new_name='pgo_crd-definition',
 	],
 	pod_readiness='ignore',
 	labels=["database_DO-NOT-RESTART-THESE"],
+	resource_deps_extra=["pre-pull-large-image-1", "pre-pull-large-image-2"]
 )
 
 # Wait until the CRDs are ready.
@@ -262,6 +273,9 @@ NEXT_k8s_resource(new_name="crunchy-others",
 
 # reflector
 # ==========
+
+# todo: try switching back to the non-helm approach (since faster)
+# (I think the fixing of the error hit may have just been due to restart or something, rather than from the switch to helm)
 
 helm_remote('reflector',
 	#repo_name='stable',
