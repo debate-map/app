@@ -73,7 +73,9 @@ RUN apk --no-cache --virtual build-dependencies add python3 make g++ libexecinfo
 # for additional options (such as enableInlineBuilds), modify the .yarnrc.yml file
 
 # *now* copy the .yalc folder, and rerun the yarn install (to apply the yalc-overrides)
-COPY .yalc/ .yalc/
+#COPY .yalc/ .yalc/
+# use `.yal[c]` trick to avoid error, in case of .yalc folder not existing (yalc usage is optional)
+COPY .yal[c]/ .yalc/
 RUN yarn workspaces focus --all --production \
 	&& rm -r /dm_repo/.yarn/cache && rm -r /root/.yarn/berry/cache \
 	#&& rm -r /dm_repo/node_modules/typescript \

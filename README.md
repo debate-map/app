@@ -245,7 +245,10 @@ Required:
 		* 3.1.2\) Run: `choco install kubernetes-helm`
 * 3\) Install a Docker container system.
 	* 3.1\) On Windows and Mac, this means installing [Docker Desktop](https://docs.docker.com/desktop).
-		* 3.1.1\) On Windows (as mentioned on Docker Desktop's install page), you will need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) first. For the simple case, this involves running `wsl --install`, restarting, waiting for WSL2's post-restart installation process to complete, then entering a username and password (which is probably worth recording); then you can proceed with running the Docker Desktop installer (which then requires another restart/logout).
+		* 3.1.1\) On Windows (as mentioned on Docker Desktop's install page), you will need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) first. For the simple case, this involves...
+    		* 3.1.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
+    		* 3.1.1.2\) Proceed, by running the Docker Desktop installer. (which then requires another restart/logout)
+    		* 3.1.1.3\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources. (you'll need to [shutdown WSL](https://stackoverflow.com/a/66797264) and Docker Desktop then restart them for the limits to take effect, unless you apply these changes prior to the computer restart in the previous step of course)
 	* 3.2\) On Linux, it's also recommended to install [Docker Desktop](https://docs.docker.com/desktop). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
 
 Highly recommended: (frontend devs can skip, if setting up a minimal local backend)
@@ -457,18 +460,19 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
-* 1\) If changes were made to the `app-server` or `web-server` pods (two js backend packages we're transitioning away from), run the relevant `dev` script(s): `npm start app-server.dev` and/or `npm start web-server.dev` (has vsc-2 tasks)
-* 2\) Launch the backend pods necessary for the behavior you want to test:
-	* 2.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
-		* 2.1.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
-		* 2.1.2\) Run (in repo root): `npm start backend.tiltUp_local`
-		* 2.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
-	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
-		* 2.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
-		* 2.2.2\) Start web server (if needed): `cd Packages/web-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
-			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
+* 1\) If this is the first run, or if changes were made to the `app-server` or `web-server` pods (two js backend packages we're transitioning away from), run the relevant `dev` script(s): `npm start app-server.dev` and/or `npm start web-server.dev` (has vsc-2 tasks)
+* 2\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 3\) Launch the backend pods necessary for the behavior you want to test:
+	* 3.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
+		* 3.1.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
+		* 3.1.2\) Run (in repo root): `npm start backend.tiltUp_local`
+		* 3.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
+	* 3.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
+		* 3.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
+		* 3.2.2\) Start web server (if needed): `cd Packages/web-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
+			* 3.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
-* 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
+* 4\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
 
