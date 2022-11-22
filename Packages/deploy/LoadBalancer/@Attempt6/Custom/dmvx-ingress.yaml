@@ -1,5 +1,5 @@
 kind: Ingress
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 metadata:
   name: dmvx-ingress
   annotations:
@@ -22,26 +22,38 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: dm-web-server
-              servicePort: 5100
+              service:
+                name: dm-web-server
+                port:
+                  number: 5100
+            pathType: ImplementationSpecific
     - host: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
         paths:
           - backend:
-              serviceName: dm-app-server-rs
-              servicePort: 5110
+              service:
+                name: dm-app-server-rs
+                port:
+                  number: 5110
+            pathType: ImplementationSpecific
     - host: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
         paths:
           - backend:
-              serviceName: dm-app-server-js
-              servicePort: 5115
+              service:
+                name: dm-app-server-js
+                port:
+                  number: 5115
+            pathType: ImplementationSpecific
     - host: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
         paths:
           - backend:
-              serviceName: dm-monitor-backend
-              servicePort: 5130
+              service:
+                name: dm-monitor-backend
+                port:
+                  number: 5130
+            pathType: ImplementationSpecific
     # these are the domains end-users should be accessing the site from
     - host: debates.app
       http:
@@ -68,11 +80,14 @@ spec:
             # pathType: "Prefix"
             # priority: 1
             backend:
-              #serviceName: dmvx-service
-              serviceName: dm-web-server
-              #servicePort: 8765
-              #servicePort: 8080
-              servicePort: 5100
+              service:
+                #name: dmvx-service
+                name: dm-web-server
+                #port: 8765
+                #port: 8080
+                port:
+                  number: 5100
+            pathType: ImplementationSpecific
           # - path: "/app-server/"
           #   pathType: "Prefix"
           #   priority: 2
@@ -83,17 +98,26 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: dm-app-server-rs
-              servicePort: 5110
+              service:
+                name: dm-app-server-rs
+                port:
+                  number: 5110
+            pathType: ImplementationSpecific
     - host: app-server-js.debates.app
       http:
         paths:
           - backend:
-              serviceName: dm-app-server-js
-              servicePort: 5115
+              service:
+                name: dm-app-server-js
+                port:
+                  number: 5115
+            pathType: ImplementationSpecific
     - host: monitor.debates.app
       http:
         paths:
           - backend:
-              serviceName: dm-monitor-backend
-              servicePort: 5130
+              service:
+                name: dm-monitor-backend
+                port:
+                  number: 5130
+            pathType: ImplementationSpecific

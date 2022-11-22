@@ -72,7 +72,7 @@ spec:
 
 # give monitor-backend various kubernetes-api permissions
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: role-for-dm-privileged-pods
@@ -89,7 +89,7 @@ rules:
   ]
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: dm-monitor-backend
