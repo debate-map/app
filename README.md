@@ -247,7 +247,7 @@ Required:
 	* 3.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
 		* 3.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
 		* 3.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
-	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with Kubernetes v1.21.5 (as part of Docker Desktop 4.2.0) and v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)), so it's recommended to install one of those versions (preferably the latest).
+	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with Kubernetes v1.21.5 (as part of Docker Desktop 4.2.0) and v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)), so it's recommended to install one of those versions (preferably the newer one).
 	* 3.3\) On Windows and Mac, this means installing Docker Desktop (see step 3.2 above for recommended install link).
 	* 3.4\) On Linux, it's also recommended to install Docker Desktop (see step 3.2 above for recommended install link). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
 
@@ -260,6 +260,21 @@ Additional tools: (frontend devs can skip)
 	* 1.1\) Also install the [Pod File System Explorer](https://marketplace.visualstudio.com/items?itemName=sandipchitale.kubernetes-file-system-explorer) component, enabling the Kubernetes extension to display the file-tree of running pods, and open their files.
 * 2\) Install the VSCode [Bridge to Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=mindaro.mindaro), for replacing a service in a remote kubernetes cluster with one running locally (for easier/faster debugging).
 * 3\) See here for more helpful tools: https://collabnix.github.io/kubetools
+
+</details>
+
+<!----><a name="setup-psql"></a>
+<details><summary><b>[setup-psql] Setting up the psql tool</b></summary>
+
+> Note: While installation of the `psql` tool on your host machine should not strictly be necessary (since there is an instance of it that can be accessed through some postgres-related docker containers), it is best to install it for more ergonomic usage: many of the helper scripts rely on it, and having it on your host machine makes it easier to use certain features, such as execution of .sql files present only on the host machine (eg. for when running the init-db and seed-db scripts).
+
+Steps:
+* 1\) First, make a note of which major version of Postgres you need. This should be Postgres v13 (unless this step has become outdated); to confirm, you can run `npm start ssh.db`, then in that shell run `psql --version`.
+* 2\) Next, download/install the package containing the `psql` binary. This means either...
+	* 2.1\) Option 1, installing the full Postgres software (keep same major version noted above): https://www.postgresql.org/download
+	* 2.2\) Option 2, installing just the Postgres binaries needed for `psql` to operate.
+		* 2.2.1\) On Windows, this means downloading and extracting the contents from the zip file here (keep same major version noted above): https://www.enterprisedb.com/download-postgresql-binaries
+* 3\) Ensure the `psql` binary is added to your `Path` environment-variable.
 
 </details>
 
@@ -445,7 +460,7 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 <!----><a name="reset-db-local"></a>
 <details><summary><b>[reset-db-local] How to init/reset the database in your local k8s cluster</b></summary>
 
-Prerequisite steps: [setup-k8s](#setup-k8s)
+Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
 * 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s local"`
 	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s local db:postgres"`)
