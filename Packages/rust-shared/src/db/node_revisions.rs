@@ -21,7 +21,6 @@ pub struct Attachment {
 pub struct MapNodeRevision {
     pub id: ID,
     pub node: String,
-    //#[graphql(name = "replaced_by")]
     pub replacedBy: Option<String>, 
     pub creator: String,
     pub createdAt: i64,
@@ -39,7 +38,7 @@ impl From<Row> for MapNodeRevision {
         Self {
             id: ID::from(&row.get::<_, String>("id")),
             node: row.get("node"),
-            replacedBy: row.get("replaced_by"), // todo: make db-column's name-casing consistent with the rest
+            replacedBy: row.get("replacedBy"),
             creator: row.get("creator"),
             createdAt: row.get("createdAt"),
             phrasing: row.get("phrasing"),

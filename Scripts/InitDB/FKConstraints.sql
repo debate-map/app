@@ -68,4 +68,4 @@ ALTER TABLE ONLY app_public."visibilityDirectives"
     ADD CONSTRAINT "fk @from(target_nodeChildLink) @to(nodeChildLinks.id)" FOREIGN KEY ("target_nodeChildLink") REFERENCES app_public."nodeChildLinks"(id) DEFERRABLE;
     
 -- commented atm, due to issue hit at runtime (when deleting an entry or something)
--- alter table app_public."nodeRevisions" add constraint "fk @from(replaced_by) @to(nodeRevisions.id)" FOREIGN KEY (replaced_by) REFERENCES "nodeRevisions" (id);
+-- alter table app_public."nodeRevisions" add constraint "fk @from(replacedBy) @to(nodeRevisions.id)" FOREIGN KEY ("replacedBy") REFERENCES "nodeRevisions" (id);

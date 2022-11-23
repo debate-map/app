@@ -1,12 +1,13 @@
 import {Assert, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Div, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {Link, Observer} from "web-vcore";
+import {InfoButton, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import React from "react";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -20,7 +21,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 					background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 				}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
-					<SignInPanel />
+					<SignInPanel/>
 				</Column>
 			);
 		}
@@ -67,9 +68,11 @@ export function ShowSignInPopup() {
 }
 
 @SimpleShouldUpdate
-export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, {}> {
+export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, {username: string}> {
+	static initialState = {username: "Dev1"};
 	render() {
 		const {style, onSignIn} = this.props;
+		const {username} = this.state;
 		return (
 			<Column style={style}>
 				{/*<SignInButton provider="google" text="Sign in with Google" onSignIn={onSignIn}/>*/}
@@ -122,6 +125,43 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, 
 				{/* <SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/> */}
+
+				{g.DB == "development" &&
+				<Column style={{width: 300}}>
+					<Row mt={6} pt={3} style={{display: "block", borderTop: "2px solid gray"}}>
+						{`You're connected to a dev-mode server, where fake/passwordless sign-in is used.`}
+						<InfoButton ml={5} text={`
+							Google sign-in can work in dev-mode, but only if you fill out the "CLIENT_ID" and "CLIENT_SECRET" vars in the root .env file before building/deploying the app-server pod.
+							(also, I may remove the ability to use Google sign-in in dev-mode later on, since having it active requires adding localhost entries to the client registration, which might have drawbacks)
+						`.AsMultiline(0)}/>
+					</Row>
+					<Row>
+						<Text>Username:</Text>
+						<TextInput ml={5} style={{flex: 1}} value={username} onChange={val=>this.SetState({username: val})}/>
+						<Button ml={5} text="Sign in" onClick={async()=>{
+							/*await fetch(GetAppServerURL("/auth/dev"), {
+								method: "POST",
+								//method: "GET",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({username, password: "[dev-mode, so password is ignored]"}),
+							});*/
+
+							// we have to use a temp-form, in order to make the POST request "be a full page load", so that CORS restrictions don't apply
+							const tempForm = document.createElement("form");
+							Object.assign(tempForm, {method: "POST", action: GetAppServerURL("/auth/dev")});
+							const form_username = document.createElement("input");
+							tempForm.appendChild(form_username);
+							Object.assign(form_username, {type: "text", name: "username", value: username});
+							const form_password = document.createElement("input");
+							tempForm.appendChild(form_password);
+							Object.assign(form_password, {type: "password", name: "password", value: "[dev-mode, so password is ignored]"});
+							document.body.appendChild(tempForm); // must temporarily connect, in order to submit
+							tempForm.submit();
+						}}/>
+					</Row>
+				</Column>}
 			</Column>
 		);
 	}

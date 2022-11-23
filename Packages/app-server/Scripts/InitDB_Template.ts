@@ -296,8 +296,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		-- set of changes needed for new local_search implementation
 
 		-- these commented, since handled by @DB(...)
-		-- alter table app_public."nodeRevisions" add column replaced_by text;
-		-- alter table app_public."nodeRevisions" add constraint "fk @from(replaced_by) @to(nodeRevisions.id)" FOREIGN KEY (replaced_by) REFERENCES "nodeRevisions" (id);
+		-- alter table app_public."nodeRevisions" add column "replacedBy" text;
+		-- alter table app_public."nodeRevisions" add constraint "fk @from(replacedBy) @to(nodeRevisions.id)" FOREIGN KEY ("replacedBy") REFERENCES "nodeRevisions" (id);
 
 		ALTER TABLE app_public."nodeRevisions" ADD COLUMN phrasing1_tsvector tsvector GENERATED ALWAYS AS (rev_phrasing_to_tsv(phrasing)) STORED NOT NULL;
 		ALTER TABLE app_public."nodeRevisions" ADD COLUMN attachments_tsvector tsvector GENERATED ALWAYS AS (attachments_to_tsv(attachments)) STORED NOT NULL;
@@ -308,7 +308,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		BEGIN
 			SELECT id INTO rev_id FROM app_public."nodeRevisions" nr WHERE node = NEW.node AND "createdAt" < NEW."createdAt" ORDER BY "createdAt" DESC LIMIT 1;
 			IF rev_id IS NOT NULL THEN
-				UPDATE app_public."nodeRevisions" SET replaced_by = NEW.id WHERE id = rev_id;
+				UPDATE app_public."nodeRevisions" SET "replacedBy" = NEW.id WHERE id = rev_id;
 			END IF;
 			RETURN NEW;
 		END$$;
@@ -371,8 +371,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		$$ LANGUAGE SQL STABLE;
 
 		CREATE INDEX node_phrasings_text_en_idx on app_public."nodePhrasings" using gin (phrasing_tsvector);
-		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(phrasing1_tsvector) WHERE replaced_by IS NULL;
-		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_tsvector) WHERE replaced_by IS NULL;
+		CREATE INDEX node_revisions_phrasing_en_idx on app_public."nodeRevisions" using gin(phrasing1_tsvector) WHERE "replacedBy" IS NULL;
+		CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" using gin(attachments_tsvector) WHERE "replacedBy" IS NULL;
 		CREATE INDEX node_revisions_node_idx ON app_public."nodeRevisions" (node);
 		CREATE INDEX node_phrasings_node_idx ON app_public."nodePhrasings" (node);
 
@@ -393,7 +393,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 						JOIN lrev USING (id)
 						JOIN d ON rev.node = d.id
 						JOIN q ON (true)
-						WHERE rev.replaced_by IS NULL AND q @@ rev.phrasing1_tsvector
+						WHERE rev."replacedBy" IS NULL AND q @@ rev.phrasing1_tsvector
 					UNION (
 						SELECT rev.node AS node_id,
 							NULL AS phrasing_id,
@@ -403,7 +403,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 							JOIN lrev USING (id)
 							JOIN d ON rev.node = d.id
 							JOIN q ON (true)
-							WHERE rev.replaced_by IS NULL AND q @@ rev.attachments_tsvector
+							WHERE rev."replacedBy" IS NULL AND q @@ rev.attachments_tsvector
 					) UNION (
 						SELECT phrasing.node AS node_id,
 							phrasing.id AS phrasing_id,

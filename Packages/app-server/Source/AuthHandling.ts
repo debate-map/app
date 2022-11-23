@@ -1,17 +1,19 @@
 import passport from "passport";
-import {Strategy as GoogleStrategy} from "passport-google-oauth20";
+import {Profile, Strategy as GoogleStrategy} from "passport-google-oauth20";
 import express, {Request, RequestHandler} from "express";
 import cookieSession from "cookie-session";
-import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, GetServerURL} from "dm_common";
+import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name, GetServerURL, PermissionGroupSet} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert, SleepAsync, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {pgPool} from "./Main.js";
 import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
+import {PrepPassportJS_Dev, SetUpAuthHandling_Dev} from "./AuthHandling_Dev.js";
 
 const DEV = process.env.ENV == "dev";
 
 //type ExpressApp = Express.Application;
 type ExpressApp = ReturnType<typeof express>;
+export type DoneCallback = (err?, result?)=>any;
 
 type GoogleAuth_ProviderData = {
 	displayName: string;
@@ -56,6 +58,9 @@ Object.defineProperty(Object.prototype, "callbackURL", {
 });
 /* eslint-enable */
 
+// fake/dev strategy
+PrepPassportJS_Dev();
+
 let currentAuthRequest: Request<{}, any, any, any, Record<string, any>>;
 passport.use(new GoogleStrategy(
 	{
@@ -71,78 +76,88 @@ passport.use(new GoogleStrategy(
 		// use relative url here; apparently passport-oauth supports this: https://github.com/jaredhanson/passport-oauth2/blob/86a6ae476e09c0864aef97456822d3e2915727f3/lib/strategy.js#L142
 		//callbackURL: "/auth/google/callback",
 	},
-	async(accessToken, refreshToken, profile, done)=>{
-		//console.log("Test1");
-		const profile_firstEmail = profile.emails?.map(a=>a.value).find(a=>a);
-		if (profile_firstEmail == null) return void done("Account must have associated email-address to sign-in.");
-		const Timeout_5s = <T extends Function>(message: number|string, func: T)=>Timeout(func, 5000, (resolve, reject)=>{
-			const finalMessage = `Database query timed out. [${message}]`;
-			reject(finalMessage);
-			done(finalMessage);
-		});
-
-		//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
-
-		const userHiddensData = await pgPool.query(`SELECT * FROM "userHiddens"`);
-		const existingUserHiddens = userHiddensData.rows as UserHidden[];
-		console.log("Existing user emails:", existingUserHiddens.map(a=>a.email));
-
-		//const existingUser = await GetAsync(()=>GetUsers()));
-		const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling_final: "log"});
-		if (existingUser_hidden != null) {
-			console.log("Found existing user for email:", profile_firstEmail);
-			const existingUser = await Timeout_5s(2, GetAsync)(()=>GetUser(existingUser_hidden.id), {errorHandling_final: "log"});
-			console.log("Also found user-data:", existingUser);
-			Assert(existingUser != null, `Could not find user with id matching that of the entry in userHiddens (${existingUser_hidden.id}), which was found based on your provided account's email (${existingUser_hidden.email}).`);
-			return void done(null, existingUser);
-		}
-
-		console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
-
-		const permissionGroups = {basic: true, verified: true, mod: false, admin: false};
-
-		// temp; make every new user who signs up a mod
-		//permissionGroups.mod = true;
-
-		// maybe temp; make first (non-system) user an admin
-		//if (existingUserHiddens.length <= 1) {
-		const usersCountData = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
-		const usersCount = ToInt(usersCountData.rows[0].count);
-		if (usersCount <= 1) {
-			console.log("First non-system user signing-in; marking as admin.");
-			permissionGroups.VSet({mod: true, admin: true});
-		}
-
-		const user = new User({
-			displayName: profile.displayName,
-			permissionGroups,
-			photoURL: profile.photos?.[0]?.value,
-		});
-		const defaultPolicyID = await Timeout_5s(3, GetAsync)(()=>GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name));
-		const userHidden = new UserHidden({
-			email: profile_firstEmail,
-			providerData: [profile._json],
-			lastAccessPolicy: defaultPolicyID,
-		});
-		const command = new AddUser({user, userHidden});
-		command._userInfo_override = graph.userInfo; // use system-user to run the AddUser command
-		const {id: newID} = (await command.RunLocally()).returnData;
-		console.log("AddUser done! NewID:", newID);
-
-		//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)
-
-		const result = await Timeout_5s(4, GetAsync)(()=>GetUser(newID), {errorHandling_final: "log"});
-		console.log("User result:", result);
-		done(null, result!);
+	async(accessToken, refreshToken, profile, done: DoneCallback)=>{
+		await StoreUserDataForGoogleSignIn(accessToken, refreshToken, profile, done);
 	},
 ));
-type UserBasicInfo = {id: string, displayName: string, photoURL: string|n};
-passport.serializeUser((user: User, done)=>{
+export async function StoreUserDataForGoogleSignIn(accessToken, refreshToken, profile: Profile, done: DoneCallback, forceAsAdmin = false) {
+	//console.log("Test1");
+	const profile_firstEmail = profile.emails?.map(a=>a.value).find(a=>a);
+	if (profile_firstEmail == null) return void done("Account must have associated email-address to sign-in.");
+	const Timeout_5s = <T extends Function>(message: number|string, func: T)=>Timeout(func, 5000, (resolve, reject)=>{
+		const finalMessage = `Database query timed out. [${message}]`;
+		reject(finalMessage);
+		done(finalMessage);
+	});
+
+	//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
+
+	const userHiddensData = await pgPool.query(`SELECT * FROM "userHiddens"`);
+	const existingUserHiddens = userHiddensData.rows as UserHidden[];
+	console.log("Existing user emails:", existingUserHiddens.map(a=>a.email));
+
+	//const existingUser = await GetAsync(()=>GetUsers()));
+	const existingUser_hidden = await Timeout_5s(1, GetAsync)(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling_final: "log"});
+	if (existingUser_hidden != null) {
+		console.log("Found existing user for email:", profile_firstEmail);
+		const existingUser = await Timeout_5s(2, GetAsync)(()=>GetUser(existingUser_hidden.id), {errorHandling_final: "log"});
+		console.log("Also found user-data:", existingUser);
+		Assert(existingUser != null, `Could not find user with id matching that of the entry in userHiddens (${existingUser_hidden.id}), which was found based on your provided account's email (${existingUser_hidden.email}).`);
+		return void done(null, existingUser);
+	}
+
+	console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
+
+	const permissionGroups = {basic: true, verified: true, mod: false, admin: false};
+
+	// temp; make every new user who signs up a mod
+	//permissionGroups.mod = true;
+
+	// maybe temp; make first (non-system) user an admin
+	//if (existingUserHiddens.length <= 1) {
+	const usersCountData = await pgPool.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+	const usersCount = ToInt(usersCountData.rows[0].count);
+	if (usersCount <= 1 || forceAsAdmin) {
+		console.log("First non-system user signing-in; marking as admin.");
+		permissionGroups.VSet({mod: true, admin: true});
+	}
+
+	const user = new User({
+		displayName: profile.displayName,
+		permissionGroups,
+		photoURL: profile.photos?.[0]?.value,
+	});
+	const defaultPolicyID = await Timeout_5s(3, GetAsync)(()=>GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name));
+	const userHidden = new UserHidden({
+		email: profile_firstEmail,
+		providerData: [profile._json],
+		lastAccessPolicy: defaultPolicyID,
+	});
+	const command = new AddUser({user, userHidden});
+	command._userInfo_override = graph.userInfo; // use system-user to run the AddUser command
+	const {id: newID} = (await command.RunLocally()).returnData;
+	console.log("AddUser done! NewID:", newID);
+
+	//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)
+
+	const result = await Timeout_5s(4, GetAsync)(()=>GetUser(newID), {errorHandling_final: "log"});
+	console.log("User result:", result);
+	done(null, result!);
+}
+
+export type UserBasicInfo = {id: string, displayName: string, photoURL: string|n};
+passport.serializeUser((user: User, done: DoneCallback)=>{
 	//console.log("Test1.5:"); //, JSON.stringify(user));
 	const basicInfo: UserBasicInfo = {id: user["id"], displayName: user["displayName"], photoURL: user["photoURL"]}; // todo: maybe serialize just the user-id, like before
 	done(null, basicInfo);
 });
-passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
+passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done: DoneCallback)=>{
+	/*const user_devMode = await DeserializeUser_Dev(userBasicInfo);
+	if (user_devMode != null) {
+		done(null, user_devMode);
+		return;
+	}*/
+
 	/*const {rows} = await pgClient.query("select * from users where id = $1", []);
 	if (rows.length == 0) done(`Cannot find user with id "${id}".`);*/
 	//console.log("Test2:", JSON.stringify(userBasicInfo));
@@ -229,6 +244,9 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	}));*/
 	app.use(passport.initialize());
 	app.use(passport.session());
+
+	// fake/dev login
+	SetUpAuthHandling_Dev(app);
 
 	// server-side access-token-retrieval approach
 	app.get("/auth/google",
