@@ -45,3 +45,22 @@ rust-shared = { path = "../rust-shared" }
 # ==========
 
 serde = "1.0.144"
+
+# build-time test
+# ==========
+
+itoa = "1.0.4"
+
+# To calculate build time:
+# 1) Run tilt-up-local and wait for everything to deploy and settle.
+# 2) Change the version of the "itoa" crate to one of these variants: 1.0.0 -> [...] -> 1.0.4
+# 3) In the tilt ui, press the update-pod button for the app-server-rs pod.
+# 4) Observe the logs, to find the "[done: Xs]" value shown for the "RUN RUSTC_BOOTSTRAP=1 cargo build" step in Packages/deploy/@RustBase/Dockerfile.
+# 5) Observe the logs, to find the "[done: Xs]" value shown for the "RUN RUSTC_BOOTSTRAP=1 cargo rustc" step in Packages/app-server-rs/Dockerfile.
+# 6) Calculate: "build time" = the sum of the two values observed in steps 4-5. (might as well include the individual timings as well)
+
+# Results:
+# v-desktop, base #1: 9m11s (8m5s + 1m6s)
+# v-desktop, base #2: 7m17s (6m14s + 1m3s)
+# v-desktop, with volumes, no base-build #1: 30s
+# v-desktop, with volumes, no base-build #2: 1.355s (cargo build realized that nothing actually needed recompiling)

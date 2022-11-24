@@ -13,11 +13,33 @@
 	ARG env_ENV
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
+	ARG copy_from_path
 # ----------
 
 # initial arg processing
 ENV ENV=$env_ENV
 RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
+
+# temp, for mount test
+# ==========
+COPY Packages/rust-macros/Cargo.toml Packages/rust-macros/Cargo.toml
+COPY Packages/rust-shared/Cargo.toml Packages/rust-shared/Cargo.toml
+COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
+COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
+
+# copy "dummy content" for each of the packages (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
+# RUN mkdir Packages/rust-macros/src/
+# RUN mkdir Packages/rust-shared/src/
+# RUN mkdir Packages/app-server-rs/src/
+RUN mkdir Packages/monitor-backend/src/
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-macros/src/lib.rs
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-shared/src/lib.rs
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
+
+# attempt 2: just copy rust-macros verbatim for now; this means everything will need a rebuild, but I haven't been able to find an alternative atm
+COPY Packages/rust-macros/ Packages/rust-macros/
+# ==========
 
 # now copy the actual code for each relevant package
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
@@ -26,9 +48,29 @@ COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
 # ensure rust_shared was copied correctly
 RUN echo rerun_flag_1 && cat /dm_repo/Packages/rust-shared/src/lib.rs
 
+RUN echo rerun_flag_1 && cat /dm_repo/Packages/rust-shared/Cargo.toml
+RUN echo rerun_flag_1 && cat /dm_repo/Packages/rust-macros/Cargo.toml
+RUN ls /dm_repo/Packages/rust-macros
+
 # now build everything
 WORKDIR /dm_repo/Packages/app-server-rs
-RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+# to clear the cache below (and all other mount-caches), run: docker builder prune --filter type=exec.cachemount
+#RUN --mount=type=cache,target=/usr/local/cargo,from=dm-rust-base,source=/usr/local/cargo \
+RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
+	--mount=type=cache,target=/dm_repo/target \
+#	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
+	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
+	mv ${copy_from_path} /dm_repo/Packages/app-server-rs/app-server-rs-binary
+
+
+RUN ls /usr/local/cargo
+RUN ls /dm_repo/target
+#RUN ls /dm_repo/Packages/app-server-rs/target
+
+# list all paths under "target" that contain "macros" or "shared"
+#RUN cd /dm_repo/target && tree -fa | grep -E '(macros|shared)'
+
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 # WORKDIR /dm_repo/
 # RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
@@ -42,7 +84,7 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 	# use debian v12 (bookworm), because that is what our linker (mold) was built on [mold only has releases for debian v12+], which makes the produced binary require it as well
 	#FROM debian:bookworm-slim@sha256:5007b106fd828d768975b21cfdcecb51a8eeea9aab815a9e4a169acde464fb89
 	FROM debian:bookworm-20221114-slim
-	ARG copy_from_path
+	#ARG copy_from_path
 # ----------
 
 WORKDIR /dm_repo/Packages/app-server-rs
@@ -51,7 +93,8 @@ WORKDIR /dm_repo/Packages/app-server-rs
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/x86_64-unknown-linux-musl/debug/app-server-rs .
 #COPY --from=cargo-build /dm_repo/Packages/app-server-rs/target/debug/app-server-rs .
 #COPY --from=cargo-build /dm_repo/target/debug/app-server-rs .
-COPY --from=cargo-build ${copy_from_path} .
+#COPY --from=cargo-build ${copy_from_path} .
+COPY --from=cargo-build /dm_repo/Packages/app-server-rs/app-server-rs-binary .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
 # regular running
@@ -59,7 +102,7 @@ COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./
 
 CMD echo Starting Rust program...; \
 #	./app-server-rs; \
-	RUST_BACKTRACE=full ./app-server-rs; \
+	RUST_BACKTRACE=full ./app-server-rs-binary; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456789
 

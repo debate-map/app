@@ -70,73 +70,79 @@ COPY Cargo.lock Cargo.lock
 # when building app-server-rs, we don't care about the other Rust pod codebases; replace their entries in the root Cargo.toml (sed syntax: https://askubuntu.com/a/20416)
 #RUN sed -i 's~"Packages/monitor-backend",~~g' Cargo.toml
 
-COPY Packages/rust-macros/Cargo.toml Packages/rust-macros/Cargo.toml
-COPY Packages/rust-shared/Cargo.toml Packages/rust-shared/Cargo.toml
-COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
-COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
+# COPY Packages/rust-macros/Cargo.toml Packages/rust-macros/Cargo.toml
+# COPY Packages/rust-shared/Cargo.toml Packages/rust-shared/Cargo.toml
+# COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
+# COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
 
-# attempt 1, part 1: rust-macros is a proc-macro crate, which has special handling during compilation; disable that special handling (at this placeholder-stage), by stripping that field (sed syntax: https://askubuntu.com/a/20416)
-#RUN sed -i 's~proc-macro = true~~g' Cargo.toml
+# # attempt 1, part 1: rust-macros is a proc-macro crate, which has special handling during compilation; disable that special handling (at this placeholder-stage), by stripping that field (sed syntax: https://askubuntu.com/a/20416)
+# #RUN sed -i 's~proc-macro = true~~g' Cargo.toml
 
-# copy "dummy content" for each of the packages (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
-RUN mkdir Packages/rust-macros/src/
-RUN mkdir Packages/rust-shared/src/
-RUN mkdir Packages/app-server-rs/src/
-RUN mkdir Packages/monitor-backend/src/
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-macros/src/lib.rs
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-shared/src/lib.rs
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
+# # copy "dummy content" for each of the packages (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
+# RUN mkdir Packages/rust-macros/src/
+# RUN mkdir Packages/rust-shared/src/
+# RUN mkdir Packages/app-server-rs/src/
+# RUN mkdir Packages/monitor-backend/src/
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-macros/src/lib.rs
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/rust-shared/src/lib.rs
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
+# RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
 
-# attempt 2: just copy rust-macros verbatim for now; this means everything will need a rebuild, but I haven't been able to find an alternative atm
-COPY Packages/rust-macros/ Packages/rust-macros/
+# # attempt 2: just copy rust-macros verbatim for now; this means everything will need a rebuild, but I haven't been able to find an alternative atm
+# COPY Packages/rust-macros/ Packages/rust-macros/
 
-# build the dependencies
-RUN RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag}
-#RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
-#RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile -Z self-profile-events=default,args
+# # build the dependencies
+# RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
+# 	--mount=type=cache,target=/dm_repo/target \
+# 	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag}
+# #RUN RUSTC_BOOTSTRAP=1 cargo rustc -Z timings ${debug_vs_release_flag}
+# #RUN RUSTC_BOOTSTRAP=1 cargo rustc -- -Z self-profile -Z self-profile-events=default,args
 
-# list all paths under "target" that contain "macros" or "shared"
-RUN cd /dm_repo/target && tree -fa | grep -E '(macros|shared)'
-#RUN echo rerun_flag_0 && ls /dm_repo/Packages/app-server-rs
-#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}
-#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/build
-#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/deps
-#RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/incremental
+# RUN ls /usr/local/cargo
+# RUN ls /dm_repo/target
+# #RUN ls /dm_repo/Packages/app-server-rs/target
 
-# remove the build output of the "dummy versions" of packages (needed for subsequent compile)
-#RUN rm -f /dm_repo/Packages/app-server-rs/target/${debug_vs_release}/deps/app_server_rs*
-RUN echo clearing_placeholder_build_data_1 && \
-	rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared* && \
-	rm -f /dm_repo/target/${debug_vs_release}/deps/librust_shared* && \
-	#rm -f /dm_repo/target/${debug_vs_release}/deps/rust_macros* && \
-	#rm -f /dm_repo/target/${debug_vs_release}/deps/librust_macros* && \
-	rm -f /dm_repo/target/${debug_vs_release}/deps/app_server_rs* && \
-	rm -f /dm_repo/target/${debug_vs_release}/deps/monitor_backend*
+# # list all paths under "target" that contain "macros" or "shared"
+# RUN cd /dm_repo/target && tree -fa | grep -E '(macros|shared)'
+# # #RUN echo rerun_flag_0 && ls /dm_repo/Packages/app-server-rs
+# # #RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}
+# # #RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/build
+# # #RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/deps
+# # #RUN echo rerun_flag_1 && ls /dm_repo/target/${debug_vs_release}/incremental
 
-# also delete this stuff
-RUN rm -f /dm_repo/target/${debug_vs_release}/rust-shared* && \
-	rm -f /dm_repo/target/${debug_vs_release}/rust_shared* && \
-	rm -f /dm_repo/target/${debug_vs_release}/librust-shared* && \
-	rm -f /dm_repo/target/${debug_vs_release}/librust_shared* && \
-	rm -f /dm_repo/target/${debug_vs_release}/app-server-rs* && \
-	rm -f /dm_repo/target/${debug_vs_release}/app_server_rs* && \
-	rm -f /dm_repo/target/${debug_vs_release}/monitor-backend* && \
-	rm -f /dm_repo/target/${debug_vs_release}/monitor_backend*
-	#rm -rf /dm_repo/target/${debug_vs_release}/incremental && \
-	#rm -rf /dm_repo/target/${debug_vs_release}/deps && \
-	#rm -rf /dm_repo/target/${debug_vs_release}/build && \
+# # remove the build output of the "dummy versions" of packages (needed for subsequent compile)
+# #RUN rm -f /dm_repo/Packages/app-server-rs/target/${debug_vs_release}/deps/app_server_rs*
+# RUN echo clearing_placeholder_build_data_1 && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/deps/rust_shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/deps/librust_shared* && \
+# 	#rm -f /dm_repo/target/${debug_vs_release}/deps/rust_macros* && \
+# 	#rm -f /dm_repo/target/${debug_vs_release}/deps/librust_macros* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/deps/app_server_rs* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/deps/monitor_backend*
 
-# this special pass is only needed for rust-macros (since it's a proc-macro crate, with special handling)
-# RUN rm -f /dm_repo/target/${debug_vs_release}/rust_macros* && \
-# 	rm -f /dm_repo/target/${debug_vs_release}/rust-macros* && \
-# 	rm -f /dm_repo/target/${debug_vs_release}/librust_macros* && \
-# 	rm -f /dm_repo/target/${debug_vs_release}/librust-macros* && \
-# 	rm -fr /dm_repo/target/${debug_vs_release}/incremental/rust_macros* && \
-# 	rm -fr /dm_repo/target/${debug_vs_release}/.fingerprint/rust-macros*
+# # also delete this stuff
+# RUN rm -f /dm_repo/target/${debug_vs_release}/rust-shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/rust_shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/librust-shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/librust_shared* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/app-server-rs* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/app_server_rs* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/monitor-backend* && \
+# 	rm -f /dm_repo/target/${debug_vs_release}/monitor_backend*
+# 	#rm -rf /dm_repo/target/${debug_vs_release}/incremental && \
+# 	#rm -rf /dm_repo/target/${debug_vs_release}/deps && \
+# 	#rm -rf /dm_repo/target/${debug_vs_release}/build && \
 
-# relist all paths under "target" that contain "macros" or "shared", to confirm none are left
-RUN cd /dm_repo/target && tree -fa | grep -E '(macros|shared)'
+# # this special pass is only needed for rust-macros (since it's a proc-macro crate, with special handling)
+# # RUN rm -f /dm_repo/target/${debug_vs_release}/rust_macros* && \
+# # 	rm -f /dm_repo/target/${debug_vs_release}/rust-macros* && \
+# # 	rm -f /dm_repo/target/${debug_vs_release}/librust_macros* && \
+# # 	rm -f /dm_repo/target/${debug_vs_release}/librust-macros* && \
+# # 	rm -fr /dm_repo/target/${debug_vs_release}/incremental/rust_macros* && \
+# # 	rm -fr /dm_repo/target/${debug_vs_release}/.fingerprint/rust-macros*
 
-# attempt 1, part 2: now copy actual rust-macros Cargo.toml file, for real build
-#COPY Packages/rust-macros/Cargo.toml Packages/rust-macros/Cargo.toml
+# # relist all paths under "target" that contain "macros" or "shared", to confirm none are left
+# #RUN cd /dm_repo/target && tree -fa | grep -E '(macros|shared)'
+
+# # attempt 1, part 2: now copy actual rust-macros Cargo.toml file, for real build
+# #COPY Packages/rust-macros/Cargo.toml Packages/rust-macros/Cargo.toml

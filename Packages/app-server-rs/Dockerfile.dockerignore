@@ -86,3 +86,16 @@ Packages/web-server/*
 **/yarn.lock
 **/yarn-lock-for-docker.lock
 **/.yalc
+
+# temp, for mount test
+# ==========
+
+# but re-include the Cargo.toml files (in the rust packages)
+#!Packages/rust-macros/Cargo.toml
+# temp: must copy whole rust-macros folder atm (see Dockerfile)
+!Packages/rust-macros/*
+!Packages/rust-shared/Cargo.toml
+!Packages/monitor-backend/Cargo.toml
+!Packages/app-server-rs/Cargo.toml
+
+#!Packages/rust-macros/*
