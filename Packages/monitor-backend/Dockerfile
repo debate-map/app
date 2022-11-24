@@ -13,22 +13,35 @@
 	ARG env_ENV
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
+	ARG copy_from_path
 # ----------
 
 # initial arg processing
 ENV ENV=$env_ENV
 RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
 
-# now copy the actual code for each relevant package
+# copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
+
+# copy this package
 COPY Packages/monitor-backend/ /dm_repo/Packages/monitor-backend/
-# ensure rust_shared was copied correctly
-RUN echo rerun_flag_1 && cat /dm_repo/Packages/rust-shared/src/lib.rs
+
+# copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
+COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
+RUN mkdir Packages/app-server-rs/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
 
 # now build everything
 WORKDIR /dm_repo/Packages/monitor-backend
-RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+# to clear the cache below (and all other mount-caches), run: docker builder prune --filter type=exec.cachemount
+RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
+	--mount=type=cache,target=/dm_repo/target \
+#	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
+	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
+	mv ${copy_from_path} /dm_repo/Packages/monitor-backend/monitor-backend-binary
+
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
 # STAGE 3 (base-image: debian)
@@ -39,7 +52,6 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 	# todo: switch to this newer debian image, to match with app-server-rs -- once error relating to libssl is resolved
 	# (error being: "error while loading shared libraries: libssl.so.1.1: cannot open shared object file: No such file or directory")
 	#FROM debian:bookworm-20221114-slim
-	ARG copy_from_path
 # ----------
 
 WORKDIR /dm_repo/Packages/monitor-backend
@@ -78,7 +90,7 @@ RUN apt-get update && apt-get install -y ca-certificates
 #     && ln -sf /usr/local/ssl/bin/openssl 'which openssl'
 # ==========
 
-COPY --from=cargo-build ${copy_from_path} .
+COPY --from=cargo-build /dm_repo/Packages/monitor-backend/monitor-backend-binary .
 COPY --from=cargo-build /dm_repo/Packages/monitor-backend/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
 # copy frontend files from monitor-client package (monitor-backend is the web-server for those static files)
@@ -90,5 +102,5 @@ CMD echo Starting Rust program...; \
 	cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt >> /usr/local/share/ca-certificates/k8s_ca.crt; \
 	update-ca-certificates; \
 \
-	RUST_BACKTRACE=full ./monitor-backend; \
+	RUST_BACKTRACE=full ./monitor-backend-binary; \
 	sleep 1; echo Rust program crashed...

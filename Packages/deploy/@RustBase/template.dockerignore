@@ -10,13 +10,15 @@ Packages/rust-macros/*
 Packages/rust-shared/*
 Packages/web-server/*
 
-# but re-include the Cargo.toml files (in the rust packages)
-#!Packages/rust-macros/Cargo.toml
-# temp: must copy whole rust-macros folder atm (see Dockerfile)
-!Packages/rust-macros/*
+# but re-include all Cargo.toml files, in the rust packages (keep this block the same in all "template.dockerignore" files -- well, those in rust packages)
+!Packages/rust-macros/Cargo.toml
 !Packages/rust-shared/Cargo.toml
 !Packages/monitor-backend/Cargo.toml
 !Packages/app-server-rs/Cargo.toml
+
+# and reinclude the shared packages
+!Packages/rust-macros/*
+!Packages/rust-shared/*
 
 # we don't care about any of the npm/yarn stuff
 **/package.json
