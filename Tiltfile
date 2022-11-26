@@ -530,6 +530,17 @@ docker_build(imageURL_monitorBackend, '.', dockerfile='Packages/monitor-backend/
 		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/monitor-backend",
 	},
 )
+imageURL_webServerRS = registryURL + '/dm-web-server-rs-' + os.getenv("ENV")
+docker_build(imageURL_webServerRS, '.', dockerfile='Packages/web-server-rs/Dockerfile',
+	build_args={
+		"RUST_BASE_URL": imageURL_rustBase,
+		"env_ENV": os.getenv("ENV") or "dev",
+		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
+		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
+		# docker doesn't seem to support string interpolation in COPY command, so do it here
+		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/web-server-rs",
+	},
+)
 imageURL_appServerRS = registryURL + '/dm-app-server-rs-' + os.getenv("ENV")
 docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
 	build_args={
@@ -549,23 +560,23 @@ docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Docke
 imageURL_jsBase = registryURL + '/dm-js-base-' + os.getenv("ENV")
 docker_build(imageURL_jsBase, '.', dockerfile='Packages/deploy/@JSBase/Dockerfile')
 
-imageURL_webServer = registryURL + '/dm-web-server-' + os.getenv("ENV")
-docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile',
-	build_args={
-		"JS_BASE_URL": imageURL_jsBase,
-		"env_ENV": os.getenv("ENV") or "dev",
-	},
-	# this lets Tilt update the listed files directly, without involving Docker at all (though must enable this, per session, through tilt-ui)
-	# live_update=[
-	# 	#sync('./NMOverwrites/', '/dm_repo/'),
-	# 	sync('./.yalc/', '/dm_repo/.yalc/'),
-	# 	sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
-	# 	#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
-	# 	sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
-	# 	# temp-synced folder (eg. for adding temp log-lines to node-modules) 
-	# 	#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
-	# ]
-)
+# imageURL_webServer = registryURL + '/dm-web-server-' + os.getenv("ENV")
+# docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile',
+# 	build_args={
+# 		"JS_BASE_URL": imageURL_jsBase,
+# 		"env_ENV": os.getenv("ENV") or "dev",
+# 	},
+# 	# this lets Tilt update the listed files directly, without involving Docker at all (though must enable this, per session, through tilt-ui)
+# 	# live_update=[
+# 	# 	#sync('./NMOverwrites/', '/dm_repo/'),
+# 	# 	sync('./.yalc/', '/dm_repo/.yalc/'),
+# 	# 	sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
+# 	# 	#sync('./Packages/web-server/Dist/', '/dm_repo/Packages/web-server/Dist/'),
+# 	# 	sync('./Packages/web-server/', '/dm_repo/Packages/web-server/'),
+# 	# 	# temp-synced folder (eg. for adding temp log-lines to node-modules) 
+# 	# 	#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
+# 	# ]
+# )
 imageURL_appServerJS = registryURL + '/dm-app-server-js-' + os.getenv("ENV")
 docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
@@ -593,9 +604,12 @@ k8s_yaml('./namespace.yaml')
 k8s_yaml(ReadFileWithReplacements('./Packages/monitor-backend/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_monitorBackend": imageURL_monitorBackend,
 }))
-k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
-	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
+k8s_yaml(ReadFileWithReplacements('./Packages/web-server-rs/deployment.yaml', {
+	"TILT_PLACEHOLDER:imageURL_webServerRS": imageURL_webServerRS,
 }))
+# k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
+# 	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
+# }))
 k8s_yaml(ReadFileWithReplacements('./Packages/app-server-rs/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_appServerRS": imageURL_appServerRS,
 }))
@@ -616,13 +630,19 @@ NEXT_k8s_resource_batch([
 		"labels": ["app"],
 	},
 	{
-		"workload": 'dm-web-server',
+		"workload": 'dm-web-server-rs',
 		"trigger_mode": TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
-		#"extra_pod_selectors": {"app": "dm-web-server"}, # this is needed fsr
-		#"port_forwards": '5100:31005')
 		"port_forwards": '5200:5100' if REMOTE else '5100',
 		"labels": ["app"],
 	},
+	# {
+	# 	"workload": 'dm-web-server',
+	# 	"trigger_mode": TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
+	# 	#"extra_pod_selectors": {"app": "dm-web-server"}, # this is needed fsr
+	# 	#"port_forwards": '5100:31005')
+	# 	"port_forwards": '5200:5100' if REMOTE else '5100',
+	# 	"labels": ["app"],
+	# },
 	{
 		"workload": 'dm-app-server-rs',
 		# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]

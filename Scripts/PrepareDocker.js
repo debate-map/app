@@ -28,6 +28,7 @@ function PrepareDockerIgnoreFiles() {
 		// rust
 		"Packages/deploy/@RustBase",
 		"Packages/monitor-backend",
+		"Packages/web-server-rs",
 		"Packages/app-server-rs",
 	];
 	for (const path of dockerPackages) {

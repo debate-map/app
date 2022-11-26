@@ -1,0 +1,20 @@
+[package]
+name = "web-server-rs"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+log = "0.4.16"
+tracing = "0.1"
+tracing-subscriber = { version="0.3", features = ["env-filter"] }
+#include_dir = "0.7.3"
+#mime_guess = "2.0.4"
+
+#rust-macros = { path = "../rust-macros" }
+rust-shared = { path = "../rust-shared" }
+
+# sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)
+# ==========
+
+serde = "1.0.144"

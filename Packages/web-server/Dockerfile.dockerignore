@@ -76,8 +76,10 @@ Packages/rust-macros/*
 Packages/rust-shared/*
 Packages/web-server/*
 
-# but re-include these
+# and reinclude the shared packages
 !Packages/js-common/*
+
+# and reinclude this package itself
 !Packages/web-server/*
 
 # web-server needs access to the client's output files

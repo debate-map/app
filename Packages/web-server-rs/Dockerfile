@@ -25,18 +25,18 @@ COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
 
 # copy this package
-COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
+COPY Packages/web-server-rs/ /dm_repo/Packages/web-server-rs/
 
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
 RUN mkdir Packages/monitor-backend/src/
 RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
-COPY Packages/web-server-rs/Cargo.toml Packages/web-server-rs/Cargo.toml
-RUN mkdir Packages/web-server-rs/src/
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/web-server-rs/src/main.rs
+COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
+RUN mkdir Packages/app-server-rs/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
 
 # now build everything
-WORKDIR /dm_repo/Packages/app-server-rs
+WORKDIR /dm_repo/Packages/web-server-rs
 # to clear the cache below (and all other mount-caches), run: docker builder prune --filter type=exec.cachemount
 #RUN --mount=type=cache,target=/usr/local/cargo,from=dm-rust-base,source=/usr/local/cargo \
 RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo
 #	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
 	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
 	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
-	mv ${copy_from_path} /dm_repo/Packages/app-server-rs/app-server-rs-binary
+	mv ${copy_from_path} /dm_repo/Packages/web-server-rs/web-server-rs-binary
 
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
@@ -59,17 +59,20 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 	FROM debian:bookworm-20221114-slim
 # ----------
 
-WORKDIR /dm_repo/Packages/app-server-rs
+WORKDIR /dm_repo/Packages/web-server-rs
 
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/app-server-rs-binary .
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
+COPY --from=cargo-build /dm_repo/Packages/web-server-rs/web-server-rs-binary .
+COPY --from=cargo-build /dm_repo/Packages/web-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
+
+# copy frontend files (to be served)
+COPY Packages/client/Dist/ /dm_repo/Packages/client/Dist/
 
 # regular running
 # ==========
 
 CMD echo Starting Rust program...; \
-#	./app-server-rs; \
-	RUST_BACKTRACE=full ./app-server-rs-binary; \
+#	./web-server-rs; \
+	RUST_BACKTRACE=full ./web-server-rs-binary; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456789
 
@@ -82,11 +85,11 @@ CMD echo Starting Rust program...; \
 # 	apt-get -y install procps
 
 # run the program, with heaptrack enabled
-# CMD RUST_BACKTRACE=full heaptrack ./app-server-rs; sleep 123456789
+# CMD RUST_BACKTRACE=full heaptrack ./web-server-rs; sleep 123456789
 
 # once running, and you've collected enough profiling data, do the following to view:
 # 1) Find program's process-id: `ps aux --sort -rss`
 # 2) Kill program: `kill -9 <pid>`
-# 3) Copy the profiler-data to host computer: `kubectl cp dm-app-server-rs-XXX:/dm_repo/Packages/app-server-rs/heaptrack.app-server-rs.XXX.gz heaptrack.app-server-rs.XXX.gz`
+# 3) Copy the profiler-data to host computer: `kubectl cp dm-web-server-rs-XXX:/dm_repo/Packages/web-server-rs/heaptrack.web-server-rs.XXX.gz heaptrack.web-server-rs.XXX.gz`
 # 4) If on Windows, install `heaptrack_gui` in linux-vm (eg. ubuntu desktop): `apt-get update && apt-get -y install heaptrack-gui`
 # 5) Run heaptrack-gui: `heaptrack-gui PATH_TO_PROFILER_DATA`

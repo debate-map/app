@@ -89,12 +89,11 @@ Packages/web-server-rs/*
 !Packages/rust-shared/*
 
 # and reinclude this package itself
-!Packages/monitor-backend/*
+!Packages/web-server-rs/*
 
-# we also need access to monitor-client's output files
-!Packages/monitor-client/Dist
-!Packages/monitor-client/Resources
-#!Packages/monitor-client/Scripts
+# web-server needs access to the client's output files
+!Packages/client/Dist
+!Packages/client/Scripts
 
 # we don't care about any of the npm/yarn stuff
 **/package.json

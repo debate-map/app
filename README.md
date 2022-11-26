@@ -38,6 +38,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 # Packages
 
 * [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
+* [web-server-rs](https://github.com/debate-map/app/tree/master/Packages/web-server-rs): New version of the web-server; implementation still in progress. (Rust)
 * [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (TypeScript, NodeJS)
 * [app-server-rs](https://github.com/debate-map/app/tree/master/Packages/app-server-rs): Serves database queries and backend commands. (Rust)
 * [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Old version of the app-server, based on [Postgraphile](https://github.com/graphile/postgraphile). (TypeScript, NodeJS) [to be removed]

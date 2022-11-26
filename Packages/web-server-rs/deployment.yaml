@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dm-web-server-rs
+  #namespace: app
+  labels:
+    app: dm-web-server-rs
+spec:
+  #clusterIP: None
+  selector:
+    app: dm-web-server-rs
+  # to make it accessible outside of cluster
+  #type: NodePort
+  ports:
+    - name: main
+      port: 5100
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dm-web-server-rs
+  #namespace: app
+  labels:
+    app: dm-web-server-rs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dm-web-server-rs
+  template:
+    metadata:
+      labels:
+        app: dm-web-server-rs
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+      - name: dm-web-server-rs
+        image: "TILT_PLACEHOLDER:imageURL_webServerRS"
+        resources:
+          limits:
+            #cpu: "900m" # commented atm, due to limits apparently causing slowdown, even if limit not reached (see: https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits)
+            # if it ends up using more than this, it is likely a memory leak; kill and restart should restore regular performance
+            memory: 500Mi
+        livenessProbe:
+          httpGet:
+            path: /health-check
+            port: 5100
+          initialDelaySeconds: 10999999 # mode: profiling
+          #initialDelaySeconds: 20 # mode: normal
+          periodSeconds: 10
+          timeoutSeconds: 3
+        env:
+        - name: PROXY_ADDRESS_FORWARDING
+          value: "true"

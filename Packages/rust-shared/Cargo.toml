@@ -12,7 +12,7 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 
 tower = { version = "0.4", features = ["util"] }
 #tower-web = "0.3.7"
-tower-http = { version = "0.2.1", features = ["cors", "fs"] }
+tower-http = { version = "0.2.1", features = ["cors", "fs", "trace"] }
 #axum = { version = "0.4.5", features = ["ws"] }
 axum = { git = "https://github.com/tokio-rs/axum.git", rev = "15914c4f15b375d5785b7f95be7685abba326c5e", features = ["ws", "headers", "json"] }
 

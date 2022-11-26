@@ -1,4 +1,4 @@
-# default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
+# default all files under "Packages" to being excluded... (keep this block the same in all rust-package "template.dockerignore" files)
 Packages/app-server/*
 Packages/app-server-rs/*
 Packages/client/*
@@ -9,6 +9,7 @@ Packages/monitor-client/*
 Packages/rust-macros/*
 Packages/rust-shared/*
 Packages/web-server/*
+Packages/web-server-rs/*
 
 # but re-include all Cargo.toml files, in the rust packages (keep this block the same in all "template.dockerignore" files -- well, those in rust packages)
 !Packages/rust-macros/Cargo.toml
@@ -20,6 +21,12 @@ Packages/web-server/*
 # and reinclude the shared packages
 !Packages/rust-macros/*
 !Packages/rust-shared/*
+
+# and reinclude this package itself
+!Packages/web-server-rs/*
+
+# web-server needs access to the client's output files
+!Packages/client/Dist
 
 # we don't care about any of the npm/yarn stuff
 **/package.json
