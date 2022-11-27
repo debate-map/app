@@ -2,7 +2,7 @@
 members = [
 	"Packages/rust-macros",
 	"Packages/rust-shared",
-	"Packages/web-server-rs",
+	"Packages/web-server",
 	"Packages/app-server-rs",
 	"Packages/monitor-backend",
 	#"Packages/graphlink-server",

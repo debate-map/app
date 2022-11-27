@@ -15,7 +15,7 @@ Packages/web-server/*
 !Packages/rust-shared/Cargo.toml
 !Packages/monitor-backend/Cargo.toml
 !Packages/app-server-rs/Cargo.toml
-!Packages/web-server-rs/Cargo.toml
+!Packages/web-server/Cargo.toml
 
 # and reinclude the shared packages
 !Packages/rust-macros/*

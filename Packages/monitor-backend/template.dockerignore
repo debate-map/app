@@ -9,14 +9,13 @@ Packages/monitor-client/*
 Packages/rust-macros/*
 Packages/rust-shared/*
 Packages/web-server/*
-Packages/web-server-rs/*
 
 # but re-include all Cargo.toml files, in the rust packages (keep this block the same in all "template.dockerignore" files -- well, those in rust packages)
 !Packages/rust-macros/Cargo.toml
 !Packages/rust-shared/Cargo.toml
 !Packages/monitor-backend/Cargo.toml
 !Packages/app-server-rs/Cargo.toml
-!Packages/web-server-rs/Cargo.toml
+!Packages/web-server/Cargo.toml
 
 # and reinclude the shared packages
 !Packages/rust-macros/*

@@ -38,8 +38,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 # Packages
 
 * [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
-* [web-server-rs](https://github.com/debate-map/app/tree/master/Packages/web-server-rs): New version of the web-server; implementation still in progress. (Rust)
-* [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (TypeScript, NodeJS)
+* [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (Rust)
 * [app-server-rs](https://github.com/debate-map/app/tree/master/Packages/app-server-rs): Serves database queries and backend commands. (Rust)
 * [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Old version of the app-server, based on [Postgraphile](https://github.com/graphile/postgraphile). (TypeScript, NodeJS) [to be removed]
 * [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. (TypeScript)
@@ -441,7 +440,7 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 <!----><a name="pod-quick-edits"></a>
 <details><summary><b>[pod-quick-edits] How to modify code of running pod quickly</b></summary>
 
-* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/js-common, Packages/web-server (in web-server pod), Packages/app-server (in app-server pod)
+* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/js-common, Packages/app-server (in app-server pod)
 * 2\) If you want to quickly synchronize changes to an arbitrary node-module (or other location), do the following:
 	* 2.1\) Copy the node-module's folder, and paste it into the `Temp_Synced` folder.
 	* 2.2\) Open a shell in the target pod. (see [k8s-ssh](#k8s-ssh))
@@ -475,7 +474,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
-* 1\) If this is the first run, or if changes were made to the `app-server` or `web-server` pods (two js backend packages we're transitioning away from), run the relevant `dev` script(s): `npm start app-server.dev` and/or `npm start web-server.dev` (has vsc-2 tasks)
+* 1\) If this is the first run, or if changes were made to the `app-server` pod (a js backend package we're transitioning away from), run the relevant `dev` script(s): `npm start app-server.dev` (has vsc-2 tasks)
 * 2\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
 * 3\) Launch the backend pods necessary for the behavior you want to test:
 	* 3.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
@@ -484,7 +483,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 3.1.3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 	* 3.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
 		* 3.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
-		* 3.2.2\) Start web server (if needed): `cd Packages/web-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
+		* 3.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
 			* 3.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
 * 4\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
@@ -728,10 +727,10 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
 * 1\) Ensure that the distribution files are ready for any packages you've made changes to:
 	1.1\) If you've changed files in `client`, then follow its ts->js transpilation instructions, then build the webpack bundle into an actual file, in production mode, by running `npm start client.build.prodQuick` (has vsc-1 task).
-	1.2\) If you've changed files in `web-server` or `app-server`, then follow its ts->js transpilation instructions.
+	1.2\) If you've changed files in `app-server`, then follow its ts->js transpilation instructions.
 * 2\) Run: `npm start backend.tiltUp_ovh` (reminder: if you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package)
 * 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
-* 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5210`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
+* 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5200`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
 * 5\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `local` context listed in the commands with `ovh`.
 * 6\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 

@@ -44,7 +44,5 @@ Packages/js-common/Source
 
 Packages/app-server/Source
 
-Packages/web-server/Source
-
 Packages/deploy/**
 !Packages/deploy/package.json

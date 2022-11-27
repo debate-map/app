@@ -13,7 +13,6 @@ Packages/web-server/*
 # but re-include the package.json files (in the rust packages)
 !Packages/client/package.json
 !Packages/js-common/package.json
-!Packages/web-server/package.json
 !Packages/app-server/package.json
 !Packages/monitor-client/package.json
 !Packages/deploy/package.json

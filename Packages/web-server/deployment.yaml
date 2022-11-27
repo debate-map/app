@@ -12,19 +12,9 @@ spec:
   # to make it accessible outside of cluster
   #type: NodePort
   ports:
-    # - port: 5100
-    #   targetPort: 5100
-    #   nodePort: 31005
-    #   protocol: TCP
-      #name: web
-      #name: websecure
-
-    - name: http
-      #port: 8765
-      #targetPort: 5100
-      #port: 8080
+    - name: main
       port: 5100
-
+      protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,14 +36,21 @@ spec:
       imagePullSecrets:
         - name: registry-credentials
       containers:
-        - name: dm-web-server
-          image: "TILT_PLACEHOLDER:imageURL_webServer"
-
-          # env:
-          #   - name: PORT
-          #     value: "8080"
-              
-          #livenessProbe: TODO
-          # ports:
-          #   - name: websecure
-          #     containerPort: 5100
+      - name: dm-web-server
+        image: "TILT_PLACEHOLDER:imageURL_webServer"
+        resources:
+          limits:
+            #cpu: "900m" # commented atm, due to limits apparently causing slowdown, even if limit not reached (see: https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits)
+            # if it ends up using more than this, it is likely a memory leak; kill and restart should restore regular performance
+            memory: 500Mi
+        livenessProbe:
+          httpGet:
+            path: /health-check
+            port: 5100
+          initialDelaySeconds: 10999999 # mode: profiling
+          #initialDelaySeconds: 20 # mode: normal
+          periodSeconds: 10
+          timeoutSeconds: 3
+        env:
+        - name: PROXY_ADDRESS_FORWARDING
+          value: "true"

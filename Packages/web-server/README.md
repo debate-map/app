@@ -1,6 +1,6 @@
-# Debate Map (Web Server)
+# Debate Map (App Server Rust)
 
-Codebase for the [Debate Map](https://debatemap.app) website's web-server. (ie. provider of the static html, css, js, etc. files)
+Codebase for the [Debate Map](https://debatemap.app) website's Rust-based web-server. (serving the raw frontend files)
 
 ## Guide modules
 
