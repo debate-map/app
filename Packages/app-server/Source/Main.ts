@@ -20,7 +20,7 @@ import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {GetUser, GetUserHiddensWithEmail, systemUserID, User} from "dm_common";
 import fs from "fs";
 import v8 from "v8";
-import SegfaultHandler from "segfault-raub";
+//import SegfaultHandler from "segfault-raub";
 import {IncomingMessage} from "http";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin, GetIPAddress} from "./Mutations/AuthenticationPlugin.js";
@@ -81,7 +81,7 @@ fs.writeFileSync(`StartedAt_${Date.now()}`, "");
 //SegfaultHandler.causeSegfault(); // simulates a buggy native module that dereferences NULL
 
 // second module, similar to segfault-raub
-require("ofe").call();
+//require("ofe").call();
 //require('ofe').trigger();
 
 console.log("Test1:", require("child_process").execSync("sysctl vm.max_map_count").toString());
