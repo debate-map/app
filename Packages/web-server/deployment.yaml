@@ -39,6 +39,8 @@ spec:
       - name: dm-web-server
         image: "TILT_PLACEHOLDER:imageURL_webServer"
         resources:
+          requests:
+            memory: 100Mi
           limits:
             #cpu: "900m" # commented atm, due to limits apparently causing slowdown, even if limit not reached (see: https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits)
             # if it ends up using more than this, it is likely a memory leak; kill and restart should restore regular performance

@@ -74,6 +74,7 @@ export const TestingUI = observer(()=>{
 						});
 						console.log("Got result:", result);
 					}}/>
+					<Button ml="auto" text="Clear logs (local)" onClick={()=>setLogEntries([])}/>
 				</Row>
 				{/*<Row>Results:</Row>
 				<Row style={{flex: 1}}>
