@@ -45,6 +45,10 @@ pub mod db {
 pub mod errors;
 pub mod locks;
 pub mod utils {
+    pub mod db {
+        pub mod uuid;
+    }
+    pub mod db_constants;
     pub mod type_aliases;
 }
 

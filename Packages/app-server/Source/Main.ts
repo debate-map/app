@@ -17,10 +17,11 @@ import cookieParser from "cookie-parser";
 import {AddSchema, CreateCommandsPlugin, DBUpdate, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert, FancyFormat, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
-import {GetUserHiddensWithEmail, User} from "dm_common";
+import {GetUser, GetUserHiddensWithEmail, systemUserID, User} from "dm_common";
 import fs from "fs";
 import v8 from "v8";
 import SegfaultHandler from "segfault-raub";
+import {IncomingMessage} from "http";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin, GetIPAddress} from "./Mutations/AuthenticationPlugin.js";
 import {DBPreloadPlugin} from "./Mutations/DBPreloadPlugin.js";
@@ -344,13 +345,23 @@ app.use(
 					//logTypeDefs: true,
 					//logTypeDefs_detailed: ["PermissionSet"],
 
-					preCommandRun: info=>{
+					preCommandRun: async info=>{
+						const req = info.context.req;
+						// if request has no user authenticated, but this request is from an internal pod (as proven by SecretForRunAsSystem header), treat it as being authed as the system-user (temp)
+						const secretForRunAsSystem = req.headers["SecretForRunAsSystem".toLowerCase()]; // header-names are normalized to lowercase by postgraphile apparently
+						if (req.user == null && process.env.DB_PASSWORD != null && secretForRunAsSystem == process.env.DB_PASSWORD) {
+							const systemUser = await GetAsync(()=>GetUser(systemUserID));
+							info.context.req = {...req, user: systemUser} as any;
+							// we must also update this field afterward (since it's derivative)
+							info.command._userInfo_override = systemUser;
+						}
+
 						//console.log("User in command resolver:", info.context.req.user?.id);
 						Assert(info.context.req.user != null, "Cannot run command on server unless logged in.");
 						console.log(`Preparing to run command "${info.command.constructor.name}". @args:`, info.args, "@userID:", info.context.req.user.id);
 						serverWS_currentCommandUser = info.context.req.user;
 					},
-					postCommandRun: info=>{
+					postCommandRun: async info=>{
 						if (info.error) {
 							const commandInfoStr_deep = FancyFormat({toJSON_opts: {
 								trimDuplicates: true,
@@ -388,7 +399,7 @@ app.use(
 			disableDefaultMutations: true, // we use custom mutations for everything, letting us use TypeScript+MobXGraphlink for all validations
 
 			//pgDefaultRole: "pg_execute_server_program", // have postgraphile use the "pg_execute_server_program" user for client requests (which, by default, has no beyond-base permissions), rather than the "postgres" superuser (needed for RLS policies to work)
-			pgSettings: req=>{
+			pgSettings: (req: IncomingMessage)=>{
 				const settings = {};
 
 				//const isServerWS = req.headers.searchLaunchID && req.headers.searchLaunchID == serverLaunchID;

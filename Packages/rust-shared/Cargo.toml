@@ -9,6 +9,7 @@ futures = "0.3"
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
 uuid = { version = "0.8", features = ["serde", "v4"] }
+base64 = "0.13.0"
 
 tower = { version = "0.4", features = ["util"] }
 #tower-web = "0.3.7"

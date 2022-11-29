@@ -17,6 +17,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
 use rust_shared::tokio_postgres::types::ToSql;
+use rust_shared::utils::db_constants::{SYSTEM_USER_ID};
 use tracing::info;
 use std::collections::HashSet;
 use std::path::Path;
@@ -39,7 +40,7 @@ use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::type_aliases::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::{start_read_transaction, start_write_transaction};
-use crate::utils::db::uuid::new_uuid_v4_as_b64;
+use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
 use crate::utils::general::general::{to_anyhow, to_anyhow_with_extra};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
@@ -66,8 +67,6 @@ lazy_static! {
     });
     static ref CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED: JSONSchema = JSONSchema::compile(&CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON).expect("A valid schema");
 }
-
-pub const SYSTEM_USER_ID: &'static str = "DM_SYSTEM_000000000001";
 
 pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JSONValue) -> Result<GenericMutation_Result, Error> {
     let output: BasicOutput = CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON_COMPILED.apply(&payload_raw).basic();

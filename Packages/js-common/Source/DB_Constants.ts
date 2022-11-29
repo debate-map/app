@@ -1,3 +1,5 @@
+// note: keep in-sync with rust-shared/src/utils/db_constants.rs
+
 // hard-coded UUIDs (22-chars, matching regular uuids/slug-ids)
 // ==========
 

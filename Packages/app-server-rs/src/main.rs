@@ -94,7 +94,6 @@ mod utils {
         pub mod sql_ident;
         pub mod sql_param;
         pub mod transactions;
-        pub mod uuid;
     }
     pub mod general {
         pub mod data_anchor;

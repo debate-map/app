@@ -1,6 +1,7 @@
-use rust_shared::anyhow::Error;
+use anyhow::Error;
+use async_graphql::ID;
 use base64::URL_SAFE_NO_PAD;
-use rust_shared::uuid::{Uuid, Bytes};
+use uuid::{Uuid, Bytes};
 
 pub fn uuid_to_b64(id: Uuid) -> String {
     let bytes = id.as_bytes();
@@ -34,4 +35,7 @@ pub fn uuid_from_b64(str: String) -> Result<Uuid, Error> {
 pub fn new_uuid_v4_as_b64() -> String {
     let uuid = Uuid::new_v4();
     uuid_to_b64(uuid)
+}
+pub fn new_uuid_v4_as_b64_id() -> ID {
+    ID(new_uuid_v4_as_b64())
 }

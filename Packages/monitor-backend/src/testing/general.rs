@@ -1,12 +1,20 @@
+use std::env;
+use std::str::FromStr;
+
+use hyper::Method;
 use rust_shared::anyhow::Error;
+use rust_shared::serde_json::json;
+use rust_shared::utils::db::uuid::new_uuid_v4_as_b64_id;
 use rust_shared::{async_graphql, async_graphql::{SimpleObject, InputObject}};
+use rust_shared::utils::db_constants::{SYSTEM_USER_ID};
 use flume::Sender;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::{self as rust_shared, serde_json, tokio, tokio_sleep};
+use rust_shared::{self as rust_shared, serde_json, tokio, tokio_sleep, time_since_epoch_ms};
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde;
 use tracing::{error, info};
 
+use crate::utils::general::body_to_str;
 use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::{JSONValue, ABSender}};
 
 wrap_slow_macros!{
@@ -15,20 +23,25 @@ wrap_slow_macros!{
 pub struct TestSequence {
 	steps: Vec<TestStep>,
 }
-#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
+#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TestStep {
 	preWait: Option<u64>,
 	postWait: Option<u64>,
 
 	stepBatch: Option<TS_StepBatch>,
+	//signIn: Option<TS_SignIn>,
 	addNodeRevision: Option<TS_AddNodeRevision>,
 }
-#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
+#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TS_StepBatch {
 	steps: Vec<TestStep>,
     repeatCount: Option<u32>,
 }
-#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
+/*#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
+pub struct TS_SignIn {
+	username: String,
+}*/
+#[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TS_AddNodeRevision {
 	nodeID: String,
 }
@@ -102,7 +115,7 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
         let preWait = step.preWait.unwrap_or(0);
         let postWait = step.postWait.unwrap_or(0);
         tokio_sleep(preWait).await;
-        execute_test_step(step).await;
+        execute_test_step(step).await?;
         tokio_sleep(postWait).await;
     }
     
@@ -110,8 +123,41 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
     return Ok(());
 }
 
-async fn execute_test_step(step: TestStep) {
+async fn execute_test_step(step: TestStep) -> Result<(), Error> {
+    //if let Some(comp) = step.signIn {}
     if let Some(comp) = step.addNodeRevision {
-        // todo
+        post_request_to_app_server_rs(json!({
+            "operationName": "AddNodeRevision",
+            "variables": {
+                "mapID": "GLOBAL_MAP_00000000001",
+                "revision": {
+                    "id": new_uuid_v4_as_b64_id(),
+                    "node": comp.nodeID,
+                    "creator": SYSTEM_USER_ID,
+                    "createdAt": time_since_epoch_ms(),
+                    "phrasing": {"terms": [], "text_base": format!("ValForTestRevision_At:{}", time_since_epoch_ms())},
+                    "attachments": []
+                }
+            },
+            "query": "mutation AddNodeRevision($mapID: String, $revision: MapNodeRevisionT0) { AddNodeRevision(mapID: $mapID, revision: $revision) { id __typename } }"
+        })).await?;
     }
+    Ok(())
+}
+
+async fn post_request_to_app_server_rs(message: serde_json::Value) -> Result<JSONValue, Error> {
+    let client = hyper::Client::new();
+    let req = hyper::Request::builder()
+        .method(Method::POST)
+        .uri("http://dm-app-server-rs.default.svc.cluster.local:5110/graphql")
+        .header("Content-Type", "application/json")
+        // temp; use db-password as way to prove this request is from an internal pod, and thus doesn't need to be signed-in
+        .header("SecretForRunAsSystem", env::var("DB_PASSWORD").unwrap())
+        .body(message.to_string().into())?;
+    let res = client.request(req).await?;
+    let res_as_json_str = body_to_str(res.into_body()).await?;
+    let res_as_json = JSONValue::from_str(&res_as_json_str)?;
+    println!("Done! Response:{}", res_as_json);
+
+    Ok(res_as_json)
 }
