@@ -348,7 +348,8 @@ Notes:
 #### Setup for Kind
 
 * 1\) Download and install from here: https://kind.sigs.k8s.io/docs/user/quick-start/#installation
-* 2\) Run: `kind create cluster --name main-1` (resulting image will be named `kind-main-1`)
+* 2\) Run: `kind create cluster --name main-1 --image kindest/node:v1.24.2` (only versions 1.21.5 to 1.24.2 are known to work). The resulting image will be named `kind-main-1`
+* 3\) Your cluster might fail with `too many open files` errors. Follow the guide at https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
 
 > To delete and recreate the cluster: `kind delete cluster --name main-1 && kind create cluster --name main-1`
 
