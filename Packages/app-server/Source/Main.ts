@@ -3,33 +3,34 @@ import "./Start_0.js"; // this must come first // eslint-disable-line
 //import "./newrelic.js"; // import this next (it may need to come early) // eslint-disable-line
 import "newrelic"; // import this next (it may need to come early) // eslint-disable-line
 
-import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
 import {program} from "commander";
 import cors from "cors";
 import express from "express";
 import {createRequire} from "module";
 import pg from "pg";
-import {makePluginHook, postgraphile} from "postgraphile";
+import {postgraphile} from "postgraphile";
 //import "web-vcore/nm/js-vextensions_ApplyCETypes.ts";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {AddSchema, CreateCommandsPlugin, DBUpdate, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, GenerateUUID, GetAsync, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert, FancyFormat, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
-import {GetUser, GetUserHiddensWithEmail, systemUserID, User} from "dm_common";
+import {User} from "dm_common";
 import fs from "fs";
 import v8 from "v8";
 //import SegfaultHandler from "segfault-raub";
 import {IncomingMessage} from "http";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin, GetIPAddress} from "./Mutations/AuthenticationPlugin.js";
-import {DBPreloadPlugin} from "./Mutations/DBPreloadPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
 import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.js";
+import {CreateCommandsPlugin_Main} from "./Plugins/CommandsPlugin.js";
+import {userBlockMiddleware} from "./Plugins/WSMiddlewares/UserBlockMiddleware.js";
+import {CreatePluginHook_Main} from "./Plugins/@PluginHook.js";
 
 /*const startTime = new Date().toLocaleString("sv");
 setInterval(()=>console.log(`Still alive. @launch:${startTime} @now:${new Date().toLocaleString("sv")}`), 1000);*/
@@ -38,8 +39,6 @@ process["exit" as any] = function(code) {
 	console.log("TRYING TO EXIT WITH CODE:", code);
 	return exit_orig.apply(this, arguments);
 };
-
-//import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -60,17 +59,9 @@ rookout.start({
 });*/
 
 //program.option("-v, --variant <type>", "Which server variant to use (base, patches)");
-
-// for testing scaffold-sync
-/*while (true) {
-	//console.log("TestUpdate_early:", fs.readFileSync("/dm_repo/node_modules/web-vcore/nm/js-vextensions.js").toString());
-	console.log("TestUpdate:", FancyFormat({}, Date.now()));
-	await new Promise(resolve=>setTimeout(resolve, 1000));
-}*/
-
 program.parse(process.argv);
 export const launchOpts = program.opts();
-export const variant = launchOpts.variant;
+export const wsTransferVariant = launchOpts.variant;
 
 // I found out (using "kubectl describe pod XXX") that segfaults were happening when trying to use chrome's inspector remotely, so added this (import of segfault-raub above)
 /*SegfaultHandler["registerHandler"]("crash.log", (signal, address, stack)=>{
@@ -89,10 +80,6 @@ console.log("Test1:", require("child_process").execSync("sysctl vm.max_map_count
 if (!globalThis.fetch) {
 	globalThis.fetch = fetch;
 }
-/*if (!globalThis.WebSocket) {
-	const WebSocket = require("ws");
-	globalThis.WebSocket = WebSocket;
-}*/
 
 const app = express();
 export const serverLaunchID = GenerateUUID(); // token used to identify the server-to-server websocket
@@ -124,37 +111,6 @@ if (dbURL == null) {
 		dbURL = `postgres://${env.PGUSER}:${encodeURIComponent(env.DBPASSWORD!)}@localhost:5432/debate-map`;
 	}
 }
-
-const liveSubscribeOps_timesSeen = new Map<string, number>();
-const websocketRequestExtras = new WeakMap<Request, WebsocketRequestExtras>();
-class WebsocketRequestExtras {
-	liveSubscribeOps_timesSeen = new Map<string, number>();
-}
-export class LogSubscribeCalls_Hook {
-	"postgraphile:liveSubscribe:executionResult"(result, {contextValue, operationName, variableValues}) {
-		if (!websocketRequestExtras.has(contextValue.req)) websocketRequestExtras.set(contextValue.req, new WebsocketRequestExtras());
-		const reqExtras = websocketRequestExtras.get(contextValue.req)!;
-
-		const opKey = `@opName:${operationName} @vals:${JSON.stringify(variableValues)}`;
-		const timesSeen = (liveSubscribeOps_timesSeen.get(opKey) ?? 0) + 1;
-		const timesSeen_req = (reqExtras.liveSubscribeOps_timesSeen.get(opKey) ?? 0) + 1;
-		// only show entries with variables present atm, since otherwise we can't tell between duplicates and just connection-filter-filtered ones
-		if (Object.keys(variableValues).length > 0) {
-			const wsReqs = reqExtras.liveSubscribeOps_timesSeen;
-			console.log(`Got liveSubscribe exec-result. @reqCalls:(ws:${timesSeen_req},all:${timesSeen}) @wsReqs:(types:${[...wsReqs.keys()].length},calls:${[...wsReqs.values()].Sum()}) @ip:${GetIPAddress(contextValue.req)
-				} ${opKey}`);
-		}
-		liveSubscribeOps_timesSeen.set(opKey, timesSeen);
-		reqExtras.liveSubscribeOps_timesSeen.set(opKey, timesSeen_req);
-
-		return result;
-	}
-}
-const pluginHook = makePluginHook([
-	// todo: turn this variant on, and add the client-side plugin, for more efficient list-change messages
-	variant == "patches" && new GeneratePatchesPlugin(),
-	new LogSubscribeCalls_Hook(),
-] as any[]);
 
 export const pgPool = new Pool({
 	connectionString: dbURL,
@@ -244,33 +200,10 @@ app.get("/db-user-count", async(req, res)=>{
 // set up auth-handling before postgraphile; this way postgraphile resolvers have access to request.user
 SetUpAuthHandling(app);
 
-/*let req_real;
-app.use((req, res, next)=>{
-	req_real = req;
-	next();
-});*/
-
-//let serverWS_currentCommandUserID: string|n;
 let serverWS_currentCommandUser: User|n;
-
-const userBlockMiddleware = (req, res, next)=>{
-	// uncomment this if you want to restrict the users that can connect to postgraphile (eg. only you, while testing something)
-	/*const ip = GetIPAddress(req);
-	console.log("Got request. @ip:", ip, "@user:", req["user"]);
-	const ipStr = ip.toString();
-	const allowConditions = [
-		a=>a == "::ffff:127.0.0.1",
-		a=>a.startsWith(process.env.PGLRequiredIPStart ?? "n/a"),
-	] as ((str: string)=>boolean)[];
-	if (!allowConditions.Any(a=>a(ipStr))) {
-		//res.status(403).end("Temporarily blocked for maintenance.");
-		console.log("Blocking connection.");
-		return;
-	}
-	console.log("Proceeding:", ip);*/
-
-	next();
-};
+export function SetServerWS_CurrentCommandUser(value: User|n) {
+	serverWS_currentCommandUser = value;
+}
 
 app.use(
 	userBlockMiddleware,
@@ -286,7 +219,7 @@ app.use(
 			graphiql: true,
 			enhanceGraphiql: true,
 			// server/cli plugins
-			pluginHook,
+			pluginHook: CreatePluginHook_Main(),
 			// schema-builder plugins
 			appendPlugins: [
 				CustomBuildHooksPlugin,
@@ -301,87 +234,7 @@ app.use(
 				AuthExtrasPlugin,
 				//DBPreloadPlugin,
 				//OtherResolversPlugin,
-				CreateCommandsPlugin({
-					schemaDeps_auto: true,
-					// till we find way to auto-avoid conflicts with pgl introspection types, use this // commented; not needed anymore, since "get-graphql-from-jsonschema" adds "T0" to end of type-names
-					//schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),
-					//schemaDeps_auto_exclude: ["MapView", "MapNodeView"], // exclude classes we know aren't needed for the graphql api, and which cause warnings (eg. "$ref" cycles)
-					//schemaDeps: ["MapNode_Partial", "MapNodeRevision_Partial"],
-					/*typeDefFinalizer: typeDef=>{
-						function CleanUpGraphQLTypeName(name: string) {
-							if (name.includes("T0")) name = name.replace(/T0/g, ".").replace(/\.$/, "");
-							return name;
-						}
-						typeDef.name = CleanUpGraphQLTypeName(typeDef.name);
-						typeDef.str = typeDef.str.replace(/(\W)(.*?T0.*?)(\W)/g, (str, g1, typeName, g3)=>{
-							return `${g1}${CleanUpGraphQLTypeName(typeName)}${g3}`;
-						});
-						return typeDef;
-					},*/
-					typeDefStrFinalizer: str=>{
-						const replacements = {
-							//Uuid: "UUID",
-							// replace refs to scalar json-schemas, with just their scalar type (no graphql types are created for these, since graphql can't represent them as a separate type)
-							// commented; now automated within mobx-graphlink (in FindGQLTypeName())
-							//UUIDT0: "String",
-						};
-
-						// undo the underscore-removing that jsonschema2graphql does
-						/*for (const key of schemaEntryJSONs.keys()) {
-							if (key.includes("_")) {
-								replacements[key.replace(/_/g, "")] = key;
-							}
-						}*/
-
-						for (const [from, to] of Object.entries(replacements)) {
-							//str = str.replace(new RegExp(from, "g"), to);
-							str = str.replace(new RegExp(`(^|[^a-zA-Z0-9_])(${from})([^a-zA-Z0-9_]|$)`, "g"), (matchStr, g1, typeName, g3)=>{
-								return `${g1}${to}${g3}`;
-							});
-						}
-
-						return str;
-					},
-					//logTypeDefs: true,
-					//logTypeDefs_detailed: ["PermissionSet"],
-
-					preCommandRun: async info=>{
-						const req = info.context.req;
-						// if request has no user authenticated, but this request is from an internal pod (as proven by SecretForRunAsSystem header), treat it as being authed as the system-user (temp)
-						const secretForRunAsSystem = req.headers["SecretForRunAsSystem".toLowerCase()]; // header-names are normalized to lowercase by postgraphile apparently
-						if (req.user == null && process.env.DB_PASSWORD != null && secretForRunAsSystem == process.env.DB_PASSWORD) {
-							const systemUser = await GetAsync(()=>GetUser(systemUserID));
-							info.context.req = {...req, user: systemUser} as any;
-							// we must also update this field afterward (since it's derivative)
-							info.command._userInfo_override = systemUser;
-						}
-
-						//console.log("User in command resolver:", info.context.req.user?.id);
-						Assert(info.context.req.user != null, "Cannot run command on server unless logged in.");
-						console.log(`Preparing to run command "${info.command.constructor.name}". @args:`, info.args, "@userID:", info.context.req.user.id);
-						serverWS_currentCommandUser = info.context.req.user;
-					},
-					postCommandRun: async info=>{
-						if (info.error) {
-							const commandInfoStr_deep = FancyFormat({toJSON_opts: {
-								trimDuplicates: true,
-								entryReplacer_post: (key, value)=>{
-									//if (typeof value == "object" && value?.options?.graph) {
-									if (key == "options" && value?.graph) {
-										return {$omit: true};
-									}
-								},
-							}}, info.command);
-							console.error(`Command "${info.command.constructor.name}" errored!`,
-								`\n@Command:`, commandInfoStr_deep, // NodeJS logging doesn't show deep enough
-								`\n@DBUpdates:\n${(info["dbUpdates"] as DBUpdate[] ?? []).map(a=>`\t${a.path} -> set to -> ${JSON.stringify(a.value)}`).join("\n") || "none (eg. error during Validate function)"}`,
-								`\n@error:`, info.error);
-						} else {
-							console.log(`Command "${info.command.constructor.name}" done! @returnData:`, info.returnData);
-						}
-						serverWS_currentCommandUser = null;
-					},
-				}),
+				CreateCommandsPlugin_Main(),
 			],
 			skipPlugins: [
 				require("graphile-build").NodePlugin,
@@ -506,7 +359,6 @@ for (let i = 0; i < 20; i++) {
 }*/
 
 const serverPort = env.PORT || 5115 as number;
-//if (inK8s) {}
 app.listen(serverPort);
 console.log("App-server started on:", serverPort, "@memInfo:", GetMemInfo());
 
