@@ -44,6 +44,7 @@ pub struct TS_SignIn {
 #[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TS_AddNodeRevision {
 	nodeID: String,
+    text: Option<String>,
 }
 
 }
@@ -135,7 +136,10 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
                     "node": comp.nodeID,
                     "creator": SYSTEM_USER_ID,
                     "createdAt": time_since_epoch_ms(),
-                    "phrasing": {"terms": [], "text_base": format!("ValForTestRevision_At:{}", time_since_epoch_ms())},
+                    "phrasing": {
+                        "terms": [],
+                        "text_base": comp.text.unwrap_or(format!("ValForTestRevision_At:{}", time_since_epoch_ms())),
+                    },
                     "attachments": []
                 }
             },

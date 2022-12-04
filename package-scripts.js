@@ -1,7 +1,7 @@
 const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
-const {_packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
+const {SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
 
 const scripts = {};
 module.exports.scripts = scripts;
@@ -142,7 +142,7 @@ function GetServeCommand(nodeEnv = null, pkg = "client") {
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
-	"cargo-test": "set RUSTC_BOOTSTRAP=1& cargo test", // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
+	"cargo-test": `${SetEnvVarsCmd({RUSTC_BOOTSTRAP: 1})} cargo test`, // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
 	// gets stuff we might want, from the k8s pods
 	kget: {
 		"app-server-rs": Dynamic(()=>{
@@ -401,12 +401,11 @@ Object.assign(scripts, {
 });
 scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./Packages/deploy/@JSBase/Dockerfile -t registry.gitlab.com/venryx/debate-map .`;
 function SetTileEnvCmd(prod, context) {
-	if (process.platform === "win32") {
-		return `set TILT_WATCH_WINDOWS_BUFFER_SIZE=65536999&& ${prod ? "set ENV=prod&&" : "set ENV=dev&&"} ${context ? `set CONTEXT=${context}&&` : ""}`;
-	} else {
-		return `${prod ? "export ENV=prod &&" : "export ENV=dev &&"} ${context ? `export CONTEXT=${context}&&` : ""}`;
-	}
-
+	return SetEnvVarsCmd({
+		TILT_WATCH_WINDOWS_BUFFER_SIZE: "65536999",
+		ENV: prod ? "prod" : "dev",
+		CONTEXT: context,
+	});
 }
 
 function GetK8sPGUserAdminSecretData(context) {

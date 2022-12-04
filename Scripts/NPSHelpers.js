@@ -1,6 +1,19 @@
 const fs = require("fs");
 const paths = require("path");
 
+exports.SetEnvVarsCmd = vars=>{
+	const win32 = process.platform === "win32";
+	let result = "";
+	for (const [key, value] of Object.entries(vars)) {
+		if (value == null) continue;
+		result += win32 ? "set " : "export ";
+		result += `${key}=${value}`;
+		result += win32 ? "&& " : " && "; // yes, windows command-line is weird (space before the "&&" would be interpreted as part of previous env-var's value)
+	}
+	if (result.length > 0) result = result.slice(0, -1); // remove final space
+	return result;
+};
+
 exports.pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
 	let path = `./node_modules/.bin/${binaryName}`;
 	for (let i = 0; i < depth; i++) {
