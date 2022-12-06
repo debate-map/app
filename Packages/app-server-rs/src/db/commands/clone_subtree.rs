@@ -56,6 +56,7 @@ pub struct CloneSubtreePayload {
     rootNodeID: String,
     maxDepth: usize,
 }
+// todo: maybe remove the json-schema-based validation (Rust's stronger type guarantees arguably make it not worth the effort)
 lazy_static! {
     static ref CLONE_SUBTREE_PAYLOAD_SCHEMA_JSON: JSONValue = json!({
         "properties": {

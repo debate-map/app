@@ -1,4 +1,4 @@
-use async_graphql::{ID, SimpleObject};
+use async_graphql::{ID, SimpleObject, InputObject};
 use serde::{Serialize, Deserialize};
 use tokio_postgres::Row;
 use rust_macros::wrap_slow_macros;
@@ -8,7 +8,8 @@ use crate::utils::type_aliases::JSONValue;
 
 wrap_slow_macros!{
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+#[graphql(input_name = "AttachmentT0")] // temp
 pub struct Attachment {
     pub equation: Option<JSONValue>,
     pub references: Option<JSONValue>,
@@ -17,7 +18,7 @@ pub struct Attachment {
     //pub media: Option<MediaAttachment>,
 }
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeRevision {
     pub id: ID,
     pub node: String,

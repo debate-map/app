@@ -39,6 +39,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
+use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
@@ -75,7 +76,11 @@ pub struct QueryRoot(
 );
 
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(MutationShard_General, MutationShard_General_Subtree);
+pub struct MutationRoot(
+    MutationShard_General, MutationShard_General_Subtree,
+    // commands
+    MutationShard_AddTerm,
+);
 
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(
@@ -107,15 +112,6 @@ async fn graphql_playground() -> impl IntoResponse {
 }
 
 pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWrapper) -> Router {
-    //let client_for_graphql = pool.get().await.unwrap();
-    // the connection object performs the actual communication with the database, so spawn it off to run on its own // commented; don't think this is needed anymore, since using pool
-    /*tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        } else {
-            println!("Postgres connection formed, for fulfilling subscriptions.");
-        }
-    });*/
     let schema =
         wrap_agql_schema_build!{
             Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())

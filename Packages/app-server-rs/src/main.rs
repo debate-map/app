@@ -120,6 +120,7 @@ mod db {
         pub mod clone_subtree;
         pub mod refresh_lq_data;
         //pub mod transfer_nodes;
+        pub mod add_term;
     }
     pub mod _general;
     pub mod general {
@@ -148,7 +149,6 @@ mod db {
     pub mod nodes;
     pub mod shares;
 }
-
 
 #[global_allocator]
 static GLOBAL: Trallocator<System> = Trallocator::new(System);

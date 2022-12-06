@@ -1,7 +1,7 @@
 use rust_shared::anyhow::Error;
 use rust_shared::{SubError, serde_json, futures};
 use rust_shared::async_graphql;
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::db::node_revisions::Attachment;
@@ -10,6 +10,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::{node_revisions::{get_node_revision}};
@@ -38,7 +39,21 @@ id = "command_runs"
 excludeLinesWith = "#[graphql(name"
 "##;*/
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+#[graphql(input_name = "TermT0")] // temp
+pub struct TermInput {
+    pub accessPolicy: String,
+    pub name: String,
+	pub forms: Vec<String>,
+    pub disambiguation: Option<String>,
+    pub r#type: String,
+    pub definition: String,
+    pub note: Option<String>,
+    pub attachments: Vec<Attachment>,
+}
+
+#[derive(SimpleObject, /*InputObject,*/ Clone, Serialize, Deserialize)]
+//#[graphql(input_name = "TermT0")] // temp
 pub struct Term {
     pub id: ID,
     pub accessPolicy: String,
@@ -53,7 +68,8 @@ pub struct Term {
     pub attachments: Vec<Attachment>,
 }
 impl From<Row> for Term {
-	fn from(row: Row) -> Self {
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+	/*fn from(row: Row) -> Self {
 		Self {
             id: ID::from(&row.get::<_, String>("id")),
             accessPolicy: row.get("accessPolicy"),
@@ -67,7 +83,7 @@ impl From<Row> for Term {
             note: row.get("note"),
             attachments: serde_json::from_value(row.get("attachments")).unwrap(),
 		}
-	}
+	}*/
 }
 
 #[derive(Clone)] pub struct GQLSet_Term { nodes: Vec<Term> }

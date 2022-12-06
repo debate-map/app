@@ -75,9 +75,9 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
     let (mut req, req2) = clone_request(req).await;
     let body_as_str = body_to_str(req2.into_body()).await.unwrap();
     // if request is running one of the commands that's already been rewritten in app-server-rs, don't proxy the request to app-server-js
-    /*if body_as_str.contains("transferNodes(payload: $payload)") {
+    if body_as_str.contains("mutation AddTerm(") {
         proxy_request_to_asjs = false;
-    }*/
+    }
     // todo: make-so this command-type checking actually parses the message properly, rather than just substring-searching!
     if 
         // queries

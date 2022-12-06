@@ -3,6 +3,7 @@ use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream,
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::utils::db_constants::SYSTEM_USER_ID;
 use rust_shared::{async_graphql, serde_json};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -15,6 +16,8 @@ use std::{time::Duration, pin::Pin, task::Poll};
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::general::body_to_str;
 
+use super::commands::_command::UserInfo;
+use super::commands::add_term::{AddTermReturnData};
 use super::commands::refresh_lq_data::refresh_lq_data;
 
 //use super::commands::transfer_nodes::transfer_nodes;
@@ -67,6 +70,14 @@ impl MutationShard_General {
         let result = refresh_lq_data(ctx, payload).await?;
         Ok(result)
     }
+
+    // for now, place mutations for command-classes here (edit: actually, create a new mutation-shared in each command's file)
+    // ----------
+
+    /*async fn addTerm(&self, gql_ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<AddTermReturnData, Error> {
+        let user_info = UserInfo { id: SYSTEM_USER_ID.to_string() }; // temp
+        Ok(add_term(gql_ctx, user_info, payload).await?)
+    }*/
 }
 #[derive(SimpleObject)]
 pub struct GenericMutation_Result {
