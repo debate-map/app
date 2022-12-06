@@ -7,6 +7,7 @@ import {gql, useSubscription} from "web-vcore/nm/@apollo/client";
 import {observer} from "web-vcore/nm/mobx-react";
 import {Button, Column, Row, TextArea, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 
 export class TestingLogEntry {
 	text: string;
@@ -81,9 +82,11 @@ export const TestingUI = observer(()=>{
 					<TextArea style={{flex: 1}} editable={false} value={""}/>
 				</Row>*/}
 				<Row>Testing log-messages:</Row>
-				{logEntries.map((entry, index)=>{
-					return <LogMessageUI key={index} message={entry}/>;
-				})}
+				<ScrollView className="selectable">
+					{logEntries.map((entry, index)=>{
+						return <LogMessageUI key={index} message={entry}/>;
+					})}
+				</ScrollView>
 			</Column>
 		</Row>
 	);

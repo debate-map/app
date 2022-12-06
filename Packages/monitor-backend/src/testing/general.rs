@@ -9,7 +9,7 @@ use rust_shared::{async_graphql, async_graphql::{SimpleObject, InputObject}};
 use rust_shared::utils::db_constants::{SYSTEM_USER_ID};
 use flume::Sender;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::{self as rust_shared, serde_json, tokio, tokio_sleep, time_since_epoch_ms};
+use rust_shared::{self as rust_shared, serde_json, tokio, tokio_sleep, time_since_epoch_ms, tokio_sleep_until, time_since_epoch_ms_i64};
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde;
 use tracing::{error, info};
@@ -25,8 +25,10 @@ pub struct TestSequence {
 }
 #[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TestStep {
-	preWait: Option<u64>,
-	postWait: Option<u64>,
+	preWait: Option<i64>,
+	postWait: Option<i64>,
+    waitTillComplete: Option<bool>,
+    waitTillDurationX: Option<i64>,
 
 	stepBatch: Option<TS_StepBatch>,
 	//signIn: Option<TS_SignIn>,
@@ -113,11 +115,16 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
 
     for step in flattened_steps {
         log(format!("Executing test-step:{}", serde_json::to_string(&step).unwrap())).await;
-        let preWait = step.preWait.unwrap_or(0);
-        let postWait = step.postWait.unwrap_or(0);
-        tokio_sleep(preWait).await;
+        let start_time = time_since_epoch_ms_i64();
+        let pre_wait = step.preWait.unwrap_or(0);
+        let post_wait = step.postWait.unwrap_or(0);
+        let min_duration = step.waitTillDurationX.unwrap_or(0);
+
+        tokio_sleep(pre_wait).await;
         execute_test_step(step).await?;
-        tokio_sleep(postWait).await;
+        tokio_sleep(post_wait).await;
+        
+        tokio_sleep_until(start_time + min_duration).await;
     }
     
     log(format!("Ending execution of test-sequence. {}", sequence_info_str)).await;
@@ -127,7 +134,7 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
 async fn execute_test_step(step: TestStep) -> Result<(), Error> {
     //if let Some(comp) = step.signIn {}
     if let Some(comp) = step.addNodeRevision {
-        post_request_to_app_server_rs(json!({
+        let fut = post_request_to_app_server_rs(json!({
             "operationName": "AddNodeRevision",
             "variables": {
                 "mapID": "GLOBAL_MAP_00000000001",
@@ -144,7 +151,17 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
                 }
             },
             "query": "mutation AddNodeRevision($mapID: String, $revision: MapNodeRevisionT0) { AddNodeRevision(mapID: $mapID, revision: $revision) { id __typename } }"
-        })).await?;
+        }));
+
+        if step.waitTillComplete.unwrap_or(true) {
+            fut.await?;
+        } else {
+            tokio::spawn(async move {
+                if let Err(err) = fut.await {
+                    error!("Got error during non-awaited execution of test-step with type addNodeRevision:{:?}", err);
+                }
+            });
+        }
     }
     Ok(())
 }

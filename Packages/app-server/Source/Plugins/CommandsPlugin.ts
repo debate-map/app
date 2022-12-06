@@ -1,10 +1,11 @@
 import {GetUser, systemUserID} from "dm_common";
+import {gql, makeExtendSchemaPlugin} from "postgraphile";
 import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions.js";
 import {CreateCommandsPlugin, DBUpdate, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {SetServerWS_CurrentCommandUser} from "../Main.js";
 
 export function CreateCommandsPlugin_Main() {
-	return CreateCommandsPlugin({
+	return CreateCommandsPlugin({makeExtendSchemaPlugin, gql}, {
 		schemaDeps_auto: true,
 		// till we find way to auto-avoid conflicts with pgl introspection types, use this // commented; not needed anymore, since "get-graphql-from-jsonschema" adds "T0" to end of type-names
 		//schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),

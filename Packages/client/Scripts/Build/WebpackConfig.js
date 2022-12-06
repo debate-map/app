@@ -19,8 +19,8 @@ const require = createRequire(import.meta.url);
 export const webpackConfig = CreateWebpackConfig({
 	config,
 	npmPatch_replacerConfig,
+	name: "client",
 	ext_deep: {
-		name: "client",
 		resolve: {
 			fallback: {
 				stream: require.resolve("stream-browserify"),
