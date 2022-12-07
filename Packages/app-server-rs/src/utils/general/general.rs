@@ -5,7 +5,7 @@ use deadpool_postgres::Pool;
 use flume::Sender;
 use flurry::Guard;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
-use hyper::Body;
+use rust_shared::hyper::Body;
 use itertools::Itertools;
 use rust_shared::serde::{Serialize, Deserialize, de::DeserializeOwned};
 use rust_shared::serde_json::{json, Map};
@@ -19,7 +19,7 @@ use std::hash::Hash;
 use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{mtx::mtx::{new_mtx, Mtx}}};
 
 pub async fn body_to_str(body: Body) -> Result<String, Error> {
-    let bytes1 = hyper::body::to_bytes(body).await?;
+    let bytes1 = rust_shared::hyper::body::to_bytes(body).await?;
     let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
     Ok(req_as_str)
 }

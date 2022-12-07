@@ -4,7 +4,7 @@ use rust_shared::{futures, axum, tower, tower_http};
 use axum::{body::{Body}, Error, extract::{ws::{WebSocket, Message}, WebSocketUpgrade, Extension, ConnectInfo}, response::IntoResponse, body::HttpBody};
 use flume::Receiver;
 use futures::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
-use hyper::{StatusCode, Response};
+use rust_shared::hyper::{StatusCode, Response};
 use once_cell::sync::Lazy;
 use rust_shared::{serde::{Serialize, Deserialize}, serde_json, tokio, utils::type_aliases::JSONValue};
 use rust_shared::serde_json::json;

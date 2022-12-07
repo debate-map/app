@@ -96,7 +96,7 @@ mod tests {
     use std::{sync::Arc, iter::once};
 
     use itertools::chain;
-    use rust_shared::{time_since_epoch_ms, utils::type_aliases::JSONValue};
+    use rust_shared::{utils::time::time_since_epoch_ms, utils::type_aliases::JSONValue};
     use rust_shared::serde_json::json;
     use crate::{store::live_queries_::{lq_batch_::sql_generator, lq_instance::LQInstance, lq_param::LQParam}, utils::{db::filter::{FilterOp, QueryFilter}}};
 

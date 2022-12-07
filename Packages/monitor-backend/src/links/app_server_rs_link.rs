@@ -10,7 +10,7 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, self};
 use rust_shared::tokio::{time, self};
 use tracing::{debug, error, info, trace};
-use url::Url;
+use rust_shared::url::Url;
 use tokio_tungstenite::{tungstenite::{connect, Message}, connect_async};
 use rust_shared::uuid::Uuid;
 

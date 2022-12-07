@@ -62,11 +62,11 @@ macro_rules! new_mtx {
         let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!(), $first_section_name, parent_mtx, $extra_info);
     };
 }
-use hyper::{Client, Method, Request, Body};
+use rust_shared::hyper::{Client, Method, Request, Body};
 use indexmap::IndexMap;
 pub(crate) use new_mtx;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::time_since_epoch_ms;
+use rust_shared::utils::time::time_since_epoch_ms;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::{json, Map};
 use rust_shared::tokio::{time};

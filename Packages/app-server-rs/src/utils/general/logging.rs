@@ -4,7 +4,7 @@ use flume::{Sender, Receiver, TrySendError};
 use rust_shared::futures::executor::block_on;
 use indexmap::IndexMap;
 use itertools::Itertools;
-use rust_shared::time_since_epoch_ms;
+use rust_shared::utils::time::time_since_epoch_ms;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use tracing::{Level, error, Subscriber, Metadata, subscriber::Interest, span, Event, metadata::LevelFilter, field::{Visit, Field}};

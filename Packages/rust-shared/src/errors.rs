@@ -1,4 +1,4 @@
-use std::{error::Error, fmt};
+use std::{error::Error, fmt::{self, Debug}};
 
 // BasicError
 // ==========
@@ -36,6 +36,24 @@ impl SubError {
     pub fn new(message: String) -> Self {
         Self { message }
     }
+}
+
+/// Use like this:
+/// ```
+/// some_func().map_err(to_sub_err)?;
+/// ```
+/*pub fn to_sub_err(base_err: anyhow::Error) -> SubError {
+    //SubError::new(base_err.to_string()) // this only provides the first line (in some cases anyway)
+    SubError::new(format!("{:?}", base_err))
+}*/
+
+/// Use like this:
+/// ```
+/// some_func().map_err(to_sub_err)?;
+/// ```
+pub fn to_sub_err<T: Debug>(base_err: T) -> SubError {
+    //SubError::new(base_err.to_string()) // this only provides the first line (in some cases anyway)
+    SubError::new(format!("{:?}", base_err))
 }
 
 impl Error for SubError {}

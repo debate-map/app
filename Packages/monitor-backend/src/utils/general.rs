@@ -1,7 +1,7 @@
 use std::{collections::{BTreeMap, HashMap}};
 
 use rust_shared::{anyhow::Error, serde, serde_json};
-use hyper::Body;
+use rust_shared::hyper::Body;
 use rust_shared::serde::Serialize;
 
 pub async fn body_to_str(body: Body) -> Result<String, Error> {

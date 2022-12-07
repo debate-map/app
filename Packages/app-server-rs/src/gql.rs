@@ -9,9 +9,9 @@ use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfi
 use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables};
 use rust_shared::bytes::Bytes;
 use deadpool_postgres::{Pool, Manager};
-use hyper::header::CONTENT_LENGTH;
-use hyper::{Body, service};
-use hyper::client::HttpConnector;
+use rust_shared::hyper::header::CONTENT_LENGTH;
+use rust_shared::hyper::{Body, service};
+use rust_shared::hyper::client::HttpConnector;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::tokio_postgres::{Client};
 use rust_shared::{axum, tower, tower_http};
@@ -34,15 +34,17 @@ use axum::{
     extract::Extension,
 };
 use tracing::info;
-use url::Url;
+use rust_shared::url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::general::search::QueryShard_General_Search;
+use crate::db::general::sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
+use crate::store::storage::AppStateWrapper;
 use crate::{get_cors_layer};
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
@@ -84,7 +86,8 @@ pub struct MutationRoot(
 
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(
-    SubscriptionShard_General,
+    SubscriptionShard_General, SubscriptionShard_SignIn,
+    // table-specific
     SubscriptionShard_User, SubscriptionShard_UserHidden,
     SubscriptionShard_GlobalData, SubscriptionShard_Map,
     SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
@@ -111,7 +114,7 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWrapper) -> Router {
+pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWrapper, lq_storage_wrapper: LQStorageWrapper) -> Router {
     let schema =
         wrap_agql_schema_build!{
             Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
@@ -119,6 +122,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: LQStorageWr
         //.data(client_for_graphql)
         .data(pool)
         .data(storage_wrapper)
+        .data(lq_storage_wrapper)
         //.data(connection)
         .finish();
 

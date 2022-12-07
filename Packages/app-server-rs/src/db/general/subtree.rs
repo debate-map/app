@@ -5,7 +5,7 @@ use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
-use hyper::{Body, Method};
+use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::db::node_revisions::MapNodeRevision;
 use rust_shared::serde::{Serialize, Deserialize};

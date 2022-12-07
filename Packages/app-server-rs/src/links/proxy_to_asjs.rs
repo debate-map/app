@@ -4,10 +4,10 @@ use std::str::FromStr;
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::{futures, axum, tower, tower_http, async_graphql_axum};
 use axum::body::HttpBody;
-use hyper::server::conn::AddrStream;
-use hyper::{client::HttpConnector, Body, Server, StatusCode};
-use hyper::client::{Client};
-use hyper::service::{service_fn, make_service_fn};
+use rust_shared::hyper::server::conn::AddrStream;
+use rust_shared::hyper::{client::HttpConnector, Body, Server, StatusCode};
+use rust_shared::hyper::client::{Client};
+use rust_shared::hyper::service::{service_fn, make_service_fn};
 use axum::extract::{FromRequest, RequestParts, Extension};
 use axum::http::{Method, HeaderValue};
 use axum::http::header::CONTENT_TYPE;
@@ -21,7 +21,7 @@ use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use rust_shared::serde_json::{json, self};
 use rust_shared::utils::type_aliases::JSONValue;
 use tracing::info;
-use url::Url;
+use rust_shared::url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
 use tower_http::cors::{CorsLayer, Origin};
 use futures::future::{self, Future};
@@ -30,7 +30,7 @@ use crate::gql::RootSchema;
 use crate::utils::general::general::body_to_str;
 use crate::utils::http::clone_request;
 
-pub type HyperClient = hyper::client::Client<HttpConnector, Body>;
+pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
 
 pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster.local:5115";
 

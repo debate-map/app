@@ -9,7 +9,7 @@ use axum::{
     },
     headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
-use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
+use rust_shared::hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
 use indexmap::IndexMap;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};

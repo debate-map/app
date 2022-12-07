@@ -4,7 +4,7 @@ use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputTyp
 use deadpool_postgres::Pool;
 use flume::{Sender, Receiver};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
-use hyper::Body;
+use rust_shared::hyper::Body;
 use rust_shared::SubError;
 use rust_shared::serde::{Serialize, Deserialize, de::DeserializeOwned};
 use rust_shared::serde_json::{json, Map};

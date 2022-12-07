@@ -52,8 +52,7 @@ pub struct TermInput {
     pub attachments: Vec<Attachment>,
 }
 
-#[derive(SimpleObject, /*InputObject,*/ Clone, Serialize, Deserialize)]
-//#[graphql(input_name = "TermT0")] // temp
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Term {
     pub id: ID,
     pub accessPolicy: String,
@@ -69,21 +68,6 @@ pub struct Term {
 }
 impl From<Row> for Term {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-	/*fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            accessPolicy: row.get("accessPolicy"),
-            creator: row.get("creator"),
-            createdAt: row.get("createdAt"),
-            name: row.get("name"),
-            forms: row.get("forms"),
-            disambiguation: row.get("disambiguation"),
-            r#type: row.get("type"),
-            definition: row.get("definition"),
-            note: row.get("note"),
-            attachments: serde_json::from_value(row.get("attachments")).unwrap(),
-		}
-	}*/
 }
 
 #[derive(Clone)] pub struct GQLSet_Term { nodes: Vec<Term> }

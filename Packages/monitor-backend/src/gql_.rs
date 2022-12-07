@@ -9,9 +9,9 @@ use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfi
 use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables, self};
 use rust_shared::bytes::Bytes;
 use deadpool_postgres::{Pool, Manager};
-use hyper::header::CONTENT_LENGTH;
-use hyper::{Body, service};
-use hyper::client::HttpConnector;
+use rust_shared::hyper::header::CONTENT_LENGTH;
+use rust_shared::hyper::{Body, service};
+use rust_shared::hyper::client::HttpConnector;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::tokio_postgres::{Client};
 use tower::make::Shared;
@@ -33,7 +33,7 @@ use axum::Error;
 use axum::{
     extract::Extension,
 };
-use url::Url;
+use rust_shared::url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};

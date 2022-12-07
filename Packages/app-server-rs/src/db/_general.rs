@@ -1,7 +1,7 @@
 use rust_shared::anyhow::{Context, Error};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use hyper::{Body, Method};
+use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::utils::db_constants::SYSTEM_USER_ID;
 use rust_shared::{async_graphql, serde_json};
@@ -70,14 +70,6 @@ impl MutationShard_General {
         let result = refresh_lq_data(ctx, payload).await?;
         Ok(result)
     }
-
-    // for now, place mutations for command-classes here (edit: actually, create a new mutation-shared in each command's file)
-    // ----------
-
-    /*async fn addTerm(&self, gql_ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<AddTermReturnData, Error> {
-        let user_info = UserInfo { id: SYSTEM_USER_ID.to_string() }; // temp
-        Ok(add_term(gql_ctx, user_info, payload).await?)
-    }*/
 }
 #[derive(SimpleObject)]
 pub struct GenericMutation_Result {
@@ -156,7 +148,7 @@ async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<
         "variables":{},
     }).to_string();
 
-    let request = hyper::Request::builder()
+    let request = rust_shared::hyper::Request::builder()
         .method(Method::POST)
         .uri(format!("{}/graphql", APP_SERVER_JS_URL))
         .header("Content-Type", "application/json")

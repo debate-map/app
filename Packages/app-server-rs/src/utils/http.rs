@@ -1,6 +1,6 @@
 use rust_shared::axum::http;
 use futures_util::TryStreamExt;
-use hyper::{Request, Body};
+use rust_shared::hyper::{Request, Body};
 
 pub async fn clone_request(req: Request<Body>) -> (Request<Body>, Request<Body>) {
     let (parts, body) = req.into_parts();
@@ -8,7 +8,7 @@ pub async fn clone_request(req: Request<Body>) -> (Request<Body>, Request<Body>)
     clone_request_from_parts(parts, body).await
 }
 pub async fn clone_request_from_parts(
-    parts: http::request::Parts, body: hyper::Body,
+    parts: http::request::Parts, body: rust_shared::hyper::Body,
     // modifications
     //new_url: String
 ) -> (Request<Body>, Request<Body>) {

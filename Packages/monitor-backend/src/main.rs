@@ -37,7 +37,7 @@ use axum::{
     },
     headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
-use hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
+use rust_shared::hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
 use links::app_server_rs_types::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
@@ -66,7 +66,6 @@ mod links {
     pub mod app_server_rs_link;
 }
 mod utils {
-    pub mod futures;
     pub mod general;
     pub mod type_aliases;
 }

@@ -49,8 +49,9 @@ use std::{
 use std::alloc::System;
 use tracing::{info, error, metadata::LevelFilter};
 use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, Layer, util::SubscriberInitExt, filter};
+use dotenv::dotenv;
 
-use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}};
+use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::sign_in};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:RUSTC_BOOTSTRAP="1"; $env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -125,6 +126,7 @@ mod db {
     pub mod _general;
     pub mod general {
         pub mod search;
+        pub mod sign_in;
         pub mod subtree_old;
         pub mod subtree_collector_old;
         pub mod subtree;
@@ -190,6 +192,8 @@ fn set_up_globals() /*-> (ABSender<LogEntry>, ABReceiver<LogEntry>)*/ {
         std::process::abort();
     }));
 
+    dotenv().ok(); // load the environment variables from the ".env" file
+
     /*let (mut s1, r1): (ABSender<LogEntry>, ABReceiver<LogEntry>) = async_broadcast::broadcast(10000);
     s1.set_overflow(true);
     set_up_logging(s1.clone());
@@ -207,7 +211,7 @@ async fn main() {
     GLOBAL.reset();
     info!("memory used: {} bytes", GLOBAL.get());
 
-    let app_state = AppStateWrapper::new(AppState {});
+    let app_state = AppState::new_in_wrapper();
     //let storage = Storage::<'static>::default();
     let lq_storage = LQStorage::new_in_wrapper();
 
@@ -229,7 +233,10 @@ async fn main() {
 
     //let (client, connection) = pgclient::create_client(false).await;
     let pool = pgclient::create_db_pool();
-    let app = gql::extend_router(app, pool, lq_storage.clone()).await;
+    let app = gql::extend_router(app, pool, app_state.clone(), lq_storage.clone()).await;
+
+    // add sign-in routes
+    let app = sign_in::extend_router(app, app_state.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app

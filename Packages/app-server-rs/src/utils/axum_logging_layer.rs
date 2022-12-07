@@ -35,7 +35,7 @@ where
     B: axum::body::HttpBody<Data = Bytes>,
     B::Error: std::fmt::Display,
 {
-    let bytes = match hyper::body::to_bytes(body).await {
+    let bytes = match rust_shared::hyper::body::to_bytes(body).await {
         Ok(bytes) => bytes,
         Err(err) => {
             return Err((

@@ -17,6 +17,7 @@
 # ----------
 
 # initial arg processing
+WORKDIR "/dm_repo"
 ENV ENV=$env_ENV
 RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
 
@@ -61,14 +62,23 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 
 WORKDIR /dm_repo/Packages/app-server-rs
 
+# temp (for ssl connections; will look for cleaner way soon)
+#RUN apt-get update && apt-get install -y ca-certificates
+
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/app-server-rs-binary .
 COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
+
+# other files needed
+COPY .env .
+
+# check binary size
+#RUN stat app-server-rs-binary
+RUN ls -lh app-server-rs-binary
 
 # regular running
 # ==========
 
 CMD echo Starting Rust program...; \
-#	./app-server-rs; \
 	RUST_BACKTRACE=full ./app-server-rs-binary; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456789

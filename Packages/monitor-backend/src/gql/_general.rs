@@ -1,10 +1,11 @@
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use flume::{Receiver, Sender};
+use rust_shared::utils::futures::make_reliable;
 use rust_shared::{futures, axum, tower, tower_http};
 use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use hyper::{Body, Method};
+use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::SubError;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -20,7 +21,6 @@ use hyper_tls::HttpsConnector;
 
 use crate::links::app_server_rs_types::{MtxData, LogEntry};
 use crate::testing::general::{execute_test_sequence, TestSequence};
-use crate::utils::futures::make_reliable;
 use crate::{GeneralMessage};
 use crate::migrations::v2::migrate_db_to_v2;
 use crate::store::storage::{AppStateWrapper, LQInstance_Partial};

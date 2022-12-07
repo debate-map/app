@@ -6,7 +6,7 @@ use rust_shared::{async_graphql, serde_json, anyhow};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error};
-use rust_shared::{time_since_epoch_ms_i64};
+use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
@@ -37,25 +37,12 @@ impl MutationShard_AddTerm {
 	#[graphql(name = "AddTerm")]
 	async fn add_term(&self, gql_ctx: &async_graphql::Context<'_>, term_: TermInput) -> Result<AddTermReturnData, Error> {
         let user_info = UserInfo { id: SYSTEM_USER_ID.to_string() }; // temp
+		// todo: provide actual caller's user-data here // break point
+
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
-		//Ok(add_term(gql_ctx, user_info, payload).await?)
 		let mut return_data = AddTermReturnData {id: "<tbd>".to_owned()};
 		
-		info!("part 1");
-		/*let term = Term {
-			// added
-			id: ID(new_uuid_v4_as_b64()),
-			creator: user_info.id,
-			createdAt: time_since_epoch_ms_i64(),
-			.. term_   // unfortunately, this fails; Rust requires the types to match, not just have compatible fields
-		};*/
-		/*let mut term_as_val = serde_json::to_value(term_).unwrap();
-		let term_fields = term_as_val.as_object_mut().unwrap();
-		term_fields.insert("id".to_owned(), json!(new_uuid_v4_as_b64()));
-		term_fields.insert("creator".to_owned(), json!(user_info.id));
-		term_fields.insert("createdAt".to_owned(), json!(time_since_epoch_ms_i64()));
-		let term: Term = serde_json::from_value(Value::Object(term_fields.clone())).unwrap();*/
 		let term = Term {
 			// pass-through
 			accessPolicy: term_.accessPolicy,
@@ -84,12 +71,6 @@ impl MutationShard_AddTerm {
 }
 
 }
-
-/*pub async fn add_term(gql_ctx: &async_graphql::Context<'_>, user_info: UserInfo, payload_raw: JSONValue) -> Result<AddTermReturnData, Error> {
-	let payload: AddTermPayload = serde_json::from_value(payload_raw)?;
-	let AddTermPayload {mut term} = payload;
-	...
-}*/
 
 // todo: maybe use a different way to do validation that is "beyond rust's type-system" (eg. by switching to using json-schema again)
 pub fn validate_term(term: &Term) -> Result<(), Error> {
