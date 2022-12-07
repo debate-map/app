@@ -51,47 +51,11 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 # ==================================================
 # ----------
 	# use debian v12 (bookworm), because that is what our linker (mold) was built on [mold only has releases for debian v12+], which makes the produced binary require it as well
-	FROM debian:bookworm-slim@sha256:5007b106fd828d768975b21cfdcecb51a8eeea9aab815a9e4a169acde464fb89
-	# todo: switch to this newer debian image, to match with app-server-rs -- once error relating to libssl is resolved
-	# (error being: "error while loading shared libraries: libssl.so.1.1: cannot open shared object file: No such file or directory")
-	#FROM debian:bookworm-20221114-slim
+	#FROM debian:bookworm-slim@sha256:5007b106fd828d768975b21cfdcecb51a8eeea9aab815a9e4a169acde464fb89
+	FROM debian:bookworm-20221114-slim
 # ----------
 
 WORKDIR /dm_repo/Packages/monitor-backend
-
-# temp (for ssl connections; will look for cleaner way soon)
-#RUN cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt >> /etc/ssl/certs/ca-certificates.crt
-#RUN cp /var/run/secrets/kubernetes.io/serviceaccount/ca.crt /etc/ssl/certs/ca-certificates.crt
-RUN apt-get update && apt-get install -y ca-certificates
-#RUN mkdir /usr/local/share/ca-certificates
-#RUN update-ca-certificates
-
-# check openssl version included with OS
-#RUN openssl version -v
-# for "debian:bookworm-20221114-slim", we get: "OpenSSL 3.0.7 1 Nov 2022 (Library: OpenSSL 3.0.7 1 Nov 2022)"
-
-# install required version of libssl
-# ==========
-#RUN apt-get update && apt-get install -y ca-certificates libssl-dev
-#RUN apt-get update && apt-get install -y libssl-1.1
-
-#RUN apt-get update
-#RUN apt-get install -y build-essential cmake zlib1g-dev libcppunit-dev git subversion wget && rm -rf /var/lib/apt/lists/*
-#RUN wget https://www.openssl.org/source/openssl-1.1.0g.tar.gz -O - | tar -xz
-#WORKDIR /openssl-1.1.0g
-#RUN ./config --prefix=/usr/local/openssl --openssldir=/usr/local/openssl && make && make install
-
-# RUN apt-get update
-# RUN apt-get -y remove openssl
-# RUN apt-get -y install gcc
-# RUN DEBIAN_FRONTEND=noninteractive apt-get -q update && apt-get -qy install wget make \
-#     && wget https://www.openssl.org/source/openssl-1.1.0g.tar.gz \
-#     && tar -xzvf openssl-1.1.0g.tar.gz \
-#     && cd openssl-1.1.0g \
-#     && ./config \
-#     && make install \
-#     && ln -sf /usr/local/ssl/bin/openssl 'which openssl'
-# ==========
 
 COPY --from=cargo-build /dm_repo/Packages/monitor-backend/monitor-backend-binary .
 COPY --from=cargo-build /dm_repo/Packages/monitor-backend/kgetOutput_buildTime/ ./kgetOutput_buildTime/
@@ -100,10 +64,5 @@ COPY --from=cargo-build /dm_repo/Packages/monitor-backend/kgetOutput_buildTime/ 
 COPY Packages/monitor-client/Dist/ /dm_repo/Packages/monitor-client/Dist/
 
 CMD echo Starting Rust program...; \
-\
-	# try to find better way to enable ssl connections...
-	cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt >> /usr/local/share/ca-certificates/k8s_ca.crt; \
-	update-ca-certificates; \
-\
 	RUST_BACKTRACE=full ./monitor-backend-binary; \
 	sleep 1; echo Rust program crashed...

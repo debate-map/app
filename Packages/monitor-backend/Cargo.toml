@@ -8,12 +8,10 @@ publish = false
 tracing = "0.1"
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
 async-trait = "0.1.52"
-url = "2"
 #crossbeam-channel = "0.5.2"
 flume = "0.10.10"
 #postage = { version = "0.4.1", features = ["futures-traits"] }
 async-broadcast = "0.4.0"
-hyper = {version = "0.14.18", features = ["client"] }
 deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
 deadpool-postgres = "0.10.1"
 indexmap = {version = "1.8.0", features = ["serde"]}
@@ -21,7 +19,6 @@ async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
 tokio-tungstenite = "*"
 lazy_static = "1.4.0"
-hyper-tls = "0.5.0"
 #gql_client = "1.0.6"
 
 # needed for async-graphql examples-base, for now

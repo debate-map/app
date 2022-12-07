@@ -168,8 +168,8 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
 }
 
 async fn post_request_to_app_server_rs(message: serde_json::Value) -> Result<JSONValue, Error> {
-    let client = hyper::Client::new();
-    let req = hyper::Request::builder()
+    let client = rust_shared::hyper::Client::new();
+    let req = rust_shared::hyper::Request::builder()
         .method(Method::POST)
         .uri("http://dm-app-server-rs.default.svc.cluster.local:5110/graphql")
         .header("Content-Type", "application/json")

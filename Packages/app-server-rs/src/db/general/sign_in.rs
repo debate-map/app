@@ -83,10 +83,7 @@ impl SubscriptionShard_SignIn {
     /// Begin sign-in flow, resulting in a JWT string being returned. (to then be used with `signInAttach`)
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google"]
     /// * `jwtDuration` - How long until the generated JWT should expire, in minutes. [i64]
-    async fn signInStart(&self, ctx: &async_graphql::Context<'_>, provider: String, jwtDuration: i64)
-        //-> impl Stream<Item = SignInStart_Result>
-        -> impl Stream<Item = Result<SignInStart_Result, SubError>>
-    {
+    async fn signInStart(&self, ctx: &async_graphql::Context<'_>, provider: String, jwtDuration: i64) -> impl Stream<Item = Result<SignInStart_Result, SubError>> {
         let google_client_id = ClientId::new(env::var("CLIENT_ID").expect("Missing the CLIENT_ID environment variable."));
         let google_client_secret = ClientSecret::new(env::var("CLIENT_SECRET").expect("Missing the CLIENT_SECRET environment variable."));
         let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string()).expect("Invalid authorization endpoint URL");
@@ -109,11 +106,6 @@ impl SubscriptionShard_SignIn {
         // (The csrf_state is essentially an "attempt ID"; use this to match up this attempt's callback-data with our async code-run here.)
         let (authorize_url, csrf_state) = client
             .authorize_url(CsrfToken::new_random)
-            // This example is requesting access to the "calendar" features and the user's profile.
-            //.add_scope(Scope::new("https://www.googleapis.com/auth/calendar".to_string()))
-            //.add_scope(Scope::new("https://www.googleapis.com/auth/plus.me".to_string()))
-            //.add_scope(Scope::new("https://www.googleapis.com/auth/profile".to_string()))
-            //.add_scope(Scope::new("https://www.googleapis.com/auth/userinfo.profile".to_string()))
             .add_scope(Scope::new("email".to_string()))
             .add_scope(Scope::new("profile".to_string()))
             .set_pkce_challenge(pkce_code_challenge)
@@ -124,11 +116,7 @@ impl SubscriptionShard_SignIn {
             authorize_url.to_string()
         );
 
-        //let msg_receiver = ctx.data::<Receiver<SignInMessage>>().unwrap();
-        //let msg_sender = ctx.data::<ABSender<SignInMsg>>().unwrap();
         let msg_sender = &ctx.data::<AppStateWrapper>().unwrap().channel_for_sign_in_messages__sender_base;
-        //let mut msg_receiver = msg_sender.subscribe();
-        //let mut temp = msg_sender.subscribe().peekable();
         let mut msg_receiver = msg_sender.new_receiver();
 
         let base_stream = async_stream::stream! {
@@ -151,7 +139,6 @@ impl SubscriptionShard_SignIn {
                                     // Exchange the code with a token.
                                     let token_response = client
                                         .exchange_code(code)
-                                        //.set_pkce_verifier(pkce_code_verifier)
                                         .set_pkce_verifier(pkce_code_verifier_copy)
                                         .request_async(async_http_client).await;
 
@@ -165,16 +152,6 @@ impl SubscriptionShard_SignIn {
                                         .append_pair("access_token", &token_str)
                                         .finish();
 
-                                    /*let request = hyper::Request::builder()
-                                        .method(Method::GET)
-                                        .uri(format!("https://www.googleapis.com/oauth2/v3/userinfo{params_str}"))
-                                        .body(Body::from(""))
-                                        .unwrap();
-                                    // one example of why this can fail: if the app-server-js pod crashed
-                                    let client = HyperClient::new();
-                                    let response = client.request(request).await.with_context(|| "Error occurred while trying to send _PassConnectionID message to app-server-js.").map_err(to_sub_err)?;
-                                    let response_as_str = body_to_str(response.into_body()).await.with_context(|| "Could not convert response into string.").map_err(to_sub_err)?;*/
-                                    
                                     let response_as_str = rust_shared::reqwest::get(format!("https://www.googleapis.com/oauth2/v3/userinfo?{params_str}"))
                                         .await.map_err(to_sub_err)?
                                         .text()

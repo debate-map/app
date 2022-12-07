@@ -13,11 +13,12 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client};
 use rust_shared::serde;
 use tracing::{error, info};
+use std::fs::File;
+use std::io::Read;
 use std::{env, fs};
 use std::path::Path;
 use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
-use hyper_tls::HttpsConnector;
 
 use crate::links::app_server_rs_types::{MtxData, LogEntry};
 use crate::testing::general::{execute_test_sequence, TestSequence};
@@ -104,8 +105,8 @@ impl QueryShard_General {
 }
 
 pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
-    let client = hyper::Client::new();
-    let req = hyper::Request::builder()
+    let client = rust_shared::hyper::Client::new();
+    let req = rust_shared::hyper::Request::builder()
         .method(Method::GET)
         .uri("http://dm-app-server-rs.default.svc.cluster.local:5110/basic-info")
         .header("Content-Type", "application/json")
@@ -118,23 +119,35 @@ pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
     Ok(res_as_json)
 }
 
+pub fn get_reqwest_client_with_k8s_certs() -> Result<rust_shared::reqwest::Client, Error> {
+    /*let mut buf = Vec::new();
+    File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?
+        .read_to_end(&mut buf)?;
+    let cert = rust_shared::reqwest::Certificate::from_pem(&buf)?;
+    Ok(rust_shared::reqwest::ClientBuilder::new()
+        .add_root_certificate(cert).build()?)*/
+
+    // temp: For now, completely disable cert-verification for connecting to the k8s service, to avoid "presented server name type wasn't supported" error.
+    // This step won't be necessary once the issue below is resolved:
+    // * issue in rustls (key comment): https://github.com/rustls/rustls/issues/184#issuecomment-1116235856
+    // * pull-request in webpki subdep: https://github.com/briansmith/webpki/pull/260
+    Ok(rust_shared::reqwest::ClientBuilder::new()
+        .danger_accept_invalid_certs(true).build()?)
+}
+
 pub async fn get_k8s_pod_names(namespace: &str) -> Result<Vec<String>, Error> {
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
     let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
     let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
 
-    let req = hyper::Request::builder()
-        .method(Method::GET)
-        .uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods/"))
+    let client = get_reqwest_client_with_k8s_certs()?;
+    let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods/"))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
-        .body(json!({}).to_string().into())?;
-    /*let client = hyper::Client::new();
-    let res = client.request(req).await?;*/
-    let https = HttpsConnector::new();
-    let res = hyper::Client::builder().build::<_, hyper::Body>(https).request(req).await?;
+        .body(json!({}).to_string()).build()?;
+    let res = client.execute(req).await?;
 
-    let res_as_json_str = body_to_str(res.into_body()).await?;
+    let res_as_json_str = res.text().await?;
     info!("Got list of k8s pods (in namespace \"{namespace}\"): {}", res_as_json_str);
     let res_as_json = JSONValue::from_str(&res_as_json_str)?;
 
@@ -160,18 +173,14 @@ pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
     let app_server_pod_name: String = get_k8s_pod_names("default").await?
         .iter().find(|a| a.starts_with("dm-app-server-rs-")).ok_or(anyhow!("App-server pod not found in list of active pods."))?.to_owned();
 
-    let req = hyper::Request::builder()
-        .method(Method::DELETE)
-        .uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/pods/{app_server_pod_name}"))
+    let client = get_reqwest_client_with_k8s_certs()?;
+    let req = client.delete(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/pods/{app_server_pod_name}"))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
-        .body(json!({}).to_string().into())?;
-    /*let client = hyper::Client::new();
-    let res = client.request(req).await?;*/
-    let https = HttpsConnector::new();
-    let res = hyper::Client::builder().build::<_, hyper::Body>(https).request(req).await?;
-    
-    let res_as_json_str = body_to_str(res.into_body()).await?;
+        .body(json!({}).to_string()).build()?;
+    let res = client.execute(req).await?;
+
+    let res_as_json_str = res.text().await?;
     info!("Got response from k8s server, on trying to restart pod \"{app_server_pod_name}\": {}", res_as_json_str);
     let res_as_json = JSONValue::from_str(&res_as_json_str)?;
 

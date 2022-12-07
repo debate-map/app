@@ -72,7 +72,6 @@ COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./
 COPY .env .
 
 # check binary size
-#RUN stat app-server-rs-binary
 RUN ls -lh app-server-rs-binary
 
 # regular running
