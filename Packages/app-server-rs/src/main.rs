@@ -1,5 +1,3 @@
-#![feature(backtrace)]
-#![feature(fn_traits)]
 #![feature(iterator_try_collect)]
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
@@ -7,8 +5,9 @@
 #![feature(let_chains)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
-#![feature(integer_atomics, const_fn_trait_bound)] // needed for mem_alloc.rs
-#![feature(box_patterns)]
+//#![feature(integer_atomics, const_fn_trait_bound)] // needed for mem_alloc.rs
+//#![feature(box_patterns)]
+//#![feature(fn_traits)]
 
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(

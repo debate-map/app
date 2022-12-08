@@ -1,14 +1,3 @@
-#![feature(backtrace)]
-#![feature(fn_traits)]
-#![feature(iterator_try_collect)]
-#![feature(try_trait_v2)]
-#![feature(try_trait_v2_residual)]
-#![feature(duration_checked_float)]
-#![feature(let_chains)]
-//#![feature(unsized_locals)]
-//#![feature(unsized_fn_params)]
-#![feature(box_patterns)]
-
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
     unused_imports, // makes refactoring a pain (eg. you comment out a line to test something, and now must scroll-to-top and comment lots of stuff)

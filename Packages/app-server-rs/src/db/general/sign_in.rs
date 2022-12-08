@@ -26,6 +26,7 @@ use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream};
 use tracing::info;
+use jwt_simple::prelude::{HS256Key};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
@@ -183,6 +184,9 @@ impl SubscriptionShard_SignIn {
 
                                     info!("Committing transaction...");
                                     ctx.tx.commit().await.map_err(to_sub_err)?;
+
+                                    // create a new key for the `HS256` JWT algorithm
+                                    let key = HS256Key::generate();
 
                                     // todo: create a JWT containing the user-data, and return it to the graphql caller
 

@@ -1,10 +1,3 @@
-#![feature(backtrace)]
-#![feature(fn_traits)]
-#![feature(type_alias_impl_trait)]
-//#![feature(let_chains)] // commented for now, till there's a Rust 1.60 image that Dockerfile can point to (to have consistent behavior)
-//#![feature(unsized_locals)]
-//#![feature(unsized_fn_params)]
-
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
