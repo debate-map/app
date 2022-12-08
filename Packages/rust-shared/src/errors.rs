@@ -1,5 +1,8 @@
 use std::{error::Error, fmt::{self, Debug}};
 
+use async_graphql::async_stream;
+use futures::Stream;
+
 // BasicError
 // ==========
 
@@ -54,6 +57,12 @@ impl SubError {
 pub fn to_sub_err<T: Debug>(base_err: T) -> SubError {
     //SubError::new(base_err.to_string()) // this only provides the first line (in some cases anyway)
     SubError::new(format!("{:?}", base_err))
+}
+
+pub fn to_sub_err_in_stream<T0, T: Debug>(base_err: T) -> impl Stream<Item = Result<T0, SubError>> {
+    async_stream::stream! {
+        yield Err(to_sub_err(base_err))
+    }
 }
 
 impl Error for SubError {}

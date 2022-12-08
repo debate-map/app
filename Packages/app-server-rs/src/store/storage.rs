@@ -52,7 +52,7 @@ pub struct AppState {
 }
 impl AppState {
     fn new() -> Self {
-        let (mut s1, r1): (ABSender<SignInMsg>, ABReceiver<SignInMsg>) = async_broadcast::broadcast(1000);
+        let (s1, r1): (ABSender<SignInMsg>, ABReceiver<SignInMsg>) = async_broadcast::broadcast(1000);
         Self {
             channel_for_sign_in_messages__sender_base: s1,
             channel_for_sign_in_messages__receiver_base: r1,

@@ -2,29 +2,41 @@ use std::collections::HashMap;
 use std::env;
 use std::time::Duration;
 
+use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::hyper::{Request, Body, Method};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use oauth2::{PkceCodeChallenge, RevocationUrl, RedirectUrl, TokenUrl, AuthUrl, Scope, CsrfToken, ClientSecret, ClientId, AuthorizationCode, StandardRevocableToken};
 use oauth2::TokenResponse;
-use rust_shared::anyhow::Context;
+use rust_shared::anyhow::{Context, anyhow, Error};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
-use futures_util::{Stream};
+use futures_util::{Stream, TryStreamExt};
 use rust_shared::axum::response::IntoResponse;
 use rust_shared::axum::{Router, AddExtensionLayer, response};
 use rust_shared::axum::extract::{Extension, Path};
 use rust_shared::axum::routing::get;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
+use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde_json::json;
+use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
+use rust_shared::utils::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::get_uri_params;
+use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{async_graphql, serde_json, SubError, to_sub_err};
+use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream};
 use tracing::info;
 
 use crate::db::_general::GenericMutation_Result;
+use crate::db::access_policies::{get_access_policy, get_system_access_policy};
+use crate::db::commands::_command::set_db_entry_by_id_for_struct;
+use crate::db::general::subtree_collector::params;
+use crate::db::user_hiddens::UserHidden;
+use crate::db::users::{get_user, User, PermissionGroups};
 use crate::links::proxy_to_asjs::HyperClient;
 use crate::store::storage::{AppStateWrapper, SignInMsg};
+use crate::utils::db::accessors::{AccessorContext, get_db_entries};
+use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::body_to_str;
 use crate::utils::type_aliases::ABSender;
 
@@ -83,7 +95,7 @@ impl SubscriptionShard_SignIn {
     /// Begin sign-in flow, resulting in a JWT string being returned. (to then be used with `signInAttach`)
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google"]
     /// * `jwtDuration` - How long until the generated JWT should expire, in minutes. [i64]
-    async fn signInStart(&self, ctx: &async_graphql::Context<'_>, provider: String, jwtDuration: i64) -> impl Stream<Item = Result<SignInStart_Result, SubError>> {
+    async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, provider: String, jwtDuration: i64) -> impl Stream<Item = Result<SignInStart_Result, SubError>> + 'a {
         let google_client_id = ClientId::new(env::var("CLIENT_ID").expect("Missing the CLIENT_ID environment variable."));
         let google_client_secret = ClientSecret::new(env::var("CLIENT_SECRET").expect("Missing the CLIENT_SECRET environment variable."));
         let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string()).expect("Invalid authorization endpoint URL");
@@ -116,10 +128,12 @@ impl SubscriptionShard_SignIn {
             authorize_url.to_string()
         );
 
-        let msg_sender = &ctx.data::<AppStateWrapper>().unwrap().channel_for_sign_in_messages__sender_base;
+        let msg_sender = &gql_ctx.data::<AppStateWrapper>().unwrap().channel_for_sign_in_messages__sender_base;
         let mut msg_receiver = msg_sender.new_receiver();
 
         let base_stream = async_stream::stream! {
+            if provider != "google" { yield Err(SubError::new(format!("Invalid provider. Valid options: google"))); return; }
+
             loop {
                 match make_reliable(msg_receiver.recv(), Duration::from_millis(10)).await {
                     Err(_err) => break, // channel closed (program must have crashed), end loop
@@ -152,15 +166,25 @@ impl SubscriptionShard_SignIn {
                                         .append_pair("access_token", &token_str)
                                         .finish();
 
-                                    let response_as_str = rust_shared::reqwest::get(format!("https://www.googleapis.com/oauth2/v3/userinfo?{params_str}"))
-                                        .await.map_err(to_sub_err)?
-                                        .text()
-                                        .await.map_err(to_sub_err)?;
+                                    let response_as_str = rust_shared::reqwest::get(format!("https://www.googleapis.com/oauth2/v3/userinfo?{params_str}")).await.map_err(to_sub_err)?
+                                        .text().await.map_err(to_sub_err)?;
                                     
                                     // example str: {"data":{"_PassConnectionID":{"userID":"ABC123ABC123ABC123ABC1"}}}
-                                    let response_as_json = serde_json::from_str::<JSONValue>(&response_as_str).with_context(|| format!("Could not parse response-str as json:{}", response_as_str)).map_err(to_sub_err)?;
+                                    /*let response_as_json = serde_json::from_str::<JSONValue>(&response_as_str).with_context(|| format!("Could not parse response-str as json:{}", response_as_str)).map_err(to_sub_err)?;
+                                    info!("Got response json:{:?}", response_as_json);*/
                                     
-                                    info!("Got response json:{:?}", response_as_json);
+                                    let user_info = serde_json::from_str::<GoogleUserInfoResult>(&response_as_str).with_context(|| format!("Could not parse response-str as user-info struct:{}", response_as_str)).map_err(to_sub_err)?;
+                                    info!("Got response user-info:{:?}", user_info);
+
+                                    let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+                                    let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await.unwrap();
+
+                                    let user_data = store_user_data_for_google_sign_in(user_info, &ctx).await.map_err(to_sub_err)?;
+
+                                    info!("Committing transaction...");
+                                    ctx.tx.commit().await.map_err(to_sub_err)?;
+
+                                    // todo: create a JWT containing the user-data, and return it to the graphql caller
 
                                     yield Ok(SignInStart_Result {});
                                 }
@@ -175,7 +199,9 @@ impl SubscriptionShard_SignIn {
 
     /// Attaches the provided sign-in data (`jwt`) to the current websocket connection, authenticating subsequent requests sent over it.
     async fn signInAttach(&self, _ctx: &async_graphql::Context<'_>, jwt: String) -> impl Stream<Item = GenericMutation_Result> {
-        // todo
+        // todo: validate JWT, and extract user-data
+
+        // todo: store user-data in some place where commands and such will be able to access it (for requests/commands made on this same websocket connection, of course)
 
         async_stream::stream! {
             yield GenericMutation_Result {
@@ -185,4 +211,85 @@ impl SubscriptionShard_SignIn {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct GoogleUserInfoResult {
+    email: String,
+    email_verified: bool,
+    family_name: String,
+    given_name: String,
+    locale: String,
+    name: String,
+    picture: String,
+    sub: String, 
+}
+
+}
+
+pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>) -> Result<User, Error> {
+    /*let user_hiddens_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * FROM "userHiddens""#, params(&[])).await?.try_collect().await?;
+    let user_hiddens: Vec<UserHidden> = user_hiddens_rows.into_iter().map(|a| a.into()).collect();
+	info!("Existing user emails:{}", user_hiddens.iter().map(|a| a.email).collect());*/
+
+    let user_hiddens_with_email: Vec<UserHidden> = get_db_entries(ctx, "userHiddens", &Some(json!({
+        "email": {"equalTo": profile.email}
+    }))).await?;
+    match user_hiddens_with_email.len() {
+        0 => {},
+        1 => {
+            let existing_user_hidden = user_hiddens_with_email.get(0).ok_or(anyhow!("Row missing somehow?"))?;
+            info!("Found existing user for email:{}", profile.email);
+            let existing_user = get_user(ctx, &existing_user_hidden.id).await
+                .map_err(|_| anyhow!(r#"Could not find user with id matching that of the entry in userHiddens ({}), which was found based on your provided account's email ({})."#, existing_user_hidden.id.as_str(), existing_user_hidden.email))?;
+            info!("Also found user-data:{:?}", existing_user);
+            return Ok(existing_user);
+        },
+        _ => return Err(anyhow!("More than one user found with same email! This shouldn't happen.")),
+    }
+
+	info!(r#"User not found for email "{}". Creating new."#, profile.email);
+
+	let mut permissionGroups = PermissionGroups {basic: true, verified: true, r#mod: false, admin: false};
+
+	// maybe temp; make first (non-system) user an admin
+    let users_count_rows: Vec<Row> = ctx.tx.query_raw("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;", params(&[])).await?.try_collect().await?;
+    let users_count: i64 = users_count_rows.get(0).ok_or(anyhow!("No rows"))?.try_get(0)?;
+	if users_count <= 1 { //|| forceAsAdmin {
+		info!("First non-system user signing-in; marking as admin.");
+		permissionGroups.r#mod = true;
+        permissionGroups.admin = true;
+	}
+
+    let profile_clone = profile.clone();
+	let user = User {
+        id: new_uuid_v4_as_b64_id(),
+		displayName: profile.name,
+		permissionGroups,
+		photoURL: Some(profile.picture),
+        joinDate: time_since_epoch_ms_i64(),
+        edits: 0,
+        lastEditAt: None,
+	};
+    let new_user_id = user.id.as_str().to_owned();
+	let default_policy = get_system_access_policy(ctx, &SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?;
+	let user_hidden = UserHidden {
+        id: new_uuid_v4_as_b64_id(),
+		email: profile.email,
+		providerData: serde_json::to_value(vec![profile_clone])?,
+		lastAccessPolicy: Some(default_policy.id.as_str().to_owned()),
+        backgroundID: None,
+        backgroundCustom_enabled: None,
+        backgroundCustom_color: None,
+        backgroundCustom_url: None,
+        backgroundCustom_position: None,
+        addToStream: true,
+        extras: serde_json::Value::Object(serde_json::Map::new()),
+	};
+
+    set_db_entry_by_id_for_struct(&ctx, "users".to_owned(), user.id.to_string(), user).await?;
+    set_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), user_hidden.id.to_string(), user_hidden).await?;
+	info!("Creation of new user semi-complete! NewID:{}", new_user_id); // "semi" complete, because transaction hasn't been committed yet
+
+    let result = get_user(ctx, new_user_id.as_str()).await?;
+	info!("User result:{:?}", result);
+	Ok(result)
 }

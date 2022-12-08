@@ -1,5 +1,5 @@
 use rust_shared::{SubError, serde, serde_json, async_graphql};
-use rust_shared::anyhow::Context;
+use rust_shared::anyhow::{Context, Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
@@ -10,17 +10,27 @@ use rust_shared::tokio_postgres::{Row, Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
+use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-#[derive(serde::Serialize, serde::Deserialize, Clone)] //#[serde(crate = "rust_shared::serde")]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)] //#[serde(crate = "rust_shared::serde")]
 #[allow(clippy::struct_excessive_bools)]
 pub struct PermissionGroups {
-    basic: bool,
-    verified: bool,
-    r#mod: bool,
-    admin: bool,
+    pub basic: bool,
+    pub verified: bool,
+    pub r#mod: bool,
+    pub admin: bool,
 }
 scalar!(PermissionGroups);
+
+pub async fn get_user(ctx: &AccessorContext<'_>, id: &str) -> Result<User, Error> {
+    get_db_entry(ctx, "users", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
+/*pub async fn get_users(ctx: &AccessorContext<'_>) -> Result<Vec<User>, Error> {
+    get_db_entries(ctx, "users", &None).await
+}*/
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
@@ -33,7 +43,7 @@ excludeLinesWith = "#[graphql(name"
 "##;*/
 
 //type User = String;
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, Clone, Serialize, Deserialize, Debug)]
 pub struct User {
     pub id: ID,
     pub displayName: String,
