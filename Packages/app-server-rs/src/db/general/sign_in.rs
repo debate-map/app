@@ -260,7 +260,7 @@ pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
     Ok(result.to_owned())
 }
 
-pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>) -> Result<User, Error> {
+pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>) -> Result<UserInfoForJWT, Error> {
     let user_hiddens_with_email = get_user_hiddens(ctx, Some(profile.email.clone())).await?;
     match user_hiddens_with_email.len() {
         0 => {},
@@ -270,7 +270,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
             let existing_user = get_user(ctx, &existing_user_hidden.id).await
                 .map_err(|_| anyhow!(r#"Could not find user with id matching that of the entry in userHiddens ({}), which was found based on your provided account's email ({})."#, existing_user_hidden.id.as_str(), existing_user_hidden.email))?;
             info!("Also found user-data:{:?}", existing_user);
-            return Ok(existing_user);
+            return Ok(UserInfoForJWT { id: existing_user.id.0, email: existing_user_hidden.email.to_owned() });
         },
         _ => return Err(anyhow!("More than one user found with same email! This shouldn't happen.")),
     }
@@ -315,12 +315,13 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
 	};
 
     set_db_entry_by_id_for_struct(&ctx, "users".to_owned(), user.id.to_string(), user).await?;
-    set_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), user_hidden.id.to_string(), user_hidden).await?;
+    set_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), user_hidden.id.to_string(), user_hidden.clone()).await?;
 	info!("Creation of new user semi-complete! NewID:{}", new_user_id); // "semi" complete, because transaction hasn't been committed yet
 
-    let result = get_user(ctx, new_user_id.as_str()).await?;
-	info!("User result:{:?}", result);
-	Ok(result)
+    let user = get_user(ctx, new_user_id.as_str()).await?;
+	info!("User data:{:?}", user);
+
+	Ok(UserInfoForJWT { id: user.id.0, email: user_hidden.email.to_owned() })
 }
 
 pub async fn get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<User, Error> {
@@ -354,13 +355,19 @@ pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) 
         //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
         .. VerificationOptions::default()
     };
-    let claims = key.verify_token::<User>(jwt, Some(verify_opts)).map_err(to_sub_err)?;
-    let user_info: User = claims.custom;
+    let claims = key.verify_token::<UserInfoForJWT>(jwt, Some(verify_opts)).map_err(to_sub_err)?;
+    let user_info: UserInfoForJWT = claims.custom;
 
-    // rather than simply reading the user-data baked into the jwt, we grab the id, then re-retrieve the user-data from database
-    // (this way it is up-to-date if user changed their username, their permissions changed, etc.)
     let user_hidden = get_user_hidden(&ctx, user_info.id.as_str()).await.map_err(to_sub_err)?;
     let user = get_user(&ctx, &user_hidden.id).await?;
     
     Ok(user)
+}
+
+/// Rather than baking the permissions and such into the jwt, we store only the id and email (which are unchanging fields).
+/// We later use that minimal info to retrieve the full user-data from the database. (this way it's up-to-date if the user's username, permissions, etc. change)
+#[derive(Serialize, Deserialize)]
+pub struct UserInfoForJWT {
+    id: String,
+    email: String,
 }
