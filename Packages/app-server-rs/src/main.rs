@@ -1,7 +1,6 @@
 #![feature(iterator_try_collect)]
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
-#![feature(duration_checked_float)]
 #![feature(let_chains)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]

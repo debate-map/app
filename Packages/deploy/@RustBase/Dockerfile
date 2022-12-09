@@ -1,17 +1,9 @@
 # STAGE 1 (base-image: rust)
 # ==================================================
 # ----------
-	#FROM rust:1.58 as cargo-build
-	# rather than use a mutable "version", lock the source image to a specific digest (so ~nightly "rust:XXX" image changes doesn't cause complete rebuilds of our build-chain)
-	#FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
-	# temp, to be (closer to) matching with cargo 1.60.0-beta.3 on dev-machine
-	#FROM rustlang/rust:nightly-bullseye@sha256:80046c08dad9ac3941941be072ea5db5c105a6208cff73ca36496f761c2f5c9c
-
-	# We kind of want to use nightly here (to match with rust-toolchain.toml, due to use of feature flags), but that means basing on rust-nightly, which is not a "stable" image
-	#     (eg. it can change at any time [currently every 24 hours], and we don't want to rebuild our build-chain every time it does; see here: https://github.com/rust-lang/docker-rust-nightly/issues/3).
 	#FROM rust:1.65.0-bullseye
 
-	# Nevermind, the image below exists as a mirror of rust-nightly, and lets us pin to a specific nightly. (so we don't rebuild our build-chain every time rust-nightly changes)
+	# use the instrumentisto mirror of rust-nightly, so we can pin to a specific build (avoiding a rebuild of the whole build-chain every 24hrs, when the regular rust-nightly image gets re-pushed)
 	FROM instrumentisto/rust:nightly-bullseye-2022-12-07
 
 	ARG env_ENV
