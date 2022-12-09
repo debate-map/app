@@ -85,6 +85,7 @@ mod utils {
         pub mod agql_ext {
             pub mod gql_general_extension;
             pub mod gql_result_stream;
+            pub mod gql_utils;
         }
         pub mod filter;
         pub mod sql_fragment;

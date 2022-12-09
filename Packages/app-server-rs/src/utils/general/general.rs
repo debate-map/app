@@ -6,7 +6,7 @@ use flume::Sender;
 use flurry::Guard;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use rust_shared::hyper::Body;
-use itertools::Itertools;
+use rust_shared::itertools::Itertools;
 use rust_shared::serde::{Serialize, Deserialize, de::DeserializeOwned};
 use rust_shared::serde_json::{json, Map};
 use rust_shared::tokio::sync::RwLock;

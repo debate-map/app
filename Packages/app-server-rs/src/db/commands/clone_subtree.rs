@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use itertools::Itertools;
+use rust_shared::itertools::Itertools;
 use jsonschema::JSONSchema;
 use jsonschema::output::BasicOutput;
 use lazy_static::lazy_static;

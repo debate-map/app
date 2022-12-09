@@ -7,7 +7,7 @@ use rust_shared::async_graphql::{Result};
 use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
 use indexmap::IndexMap;
-use itertools::{chain, Itertools};
+use rust_shared::itertools::{chain, Itertools};
 use rust_shared::to_anyhow_with_extra;
 use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::types::ToSql;

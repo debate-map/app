@@ -42,6 +42,13 @@
 		"FOR_RUST_ANALYZER": "1",
 		"STRIP_ASYNC_GRAPHQL": "1",
 	},
+	"rust-analyzer.runnableEnv": {
+		// this allows us to use unstable features (as is true for the Docker builds), without rust-analyzer showing an error on the "#![feature(XXX)]" line
+		"RUSTC_BOOTSTRAP": "1",
+		// custom flags
+		"FOR_RUST_ANALYZER": "1",
+		"STRIP_ASYNC_GRAPHQL": "1",
+	},
 	//"rust-analyzer.checkOnSave.enable": false,
 	// have RA's cargo-check use a separate cache-directory (otherwise, eg. running cargo-check in terminal with different flags will mess up RA's cargo-check cache, requiring a full re-check for RA)
 	"rust-analyzer.checkOnSave.extraArgs": [

@@ -2,7 +2,7 @@
 
 use std::iter::{once, empty};
 
-use itertools::{chain, Itertools};
+use rust_shared::itertools::{chain, Itertools};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{bytes, serde_json};
 use rust_shared::serde::Serialize;

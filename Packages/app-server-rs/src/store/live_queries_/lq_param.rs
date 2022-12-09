@@ -1,6 +1,6 @@
 use std::{fmt::Display, sync::atomic::AtomicI32, iter::{once, Once, empty}};
 use rust_shared::anyhow::{anyhow, bail, Context, Error, ensure};
-use itertools::{Itertools, chain};
+use rust_shared::itertools::{Itertools, chain};
 use regex::{Regex, Captures};
 use rust_shared::serde_json::Map;
 use rust_shared::tokio_postgres::types::ToSql;

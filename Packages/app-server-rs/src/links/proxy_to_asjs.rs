@@ -27,6 +27,7 @@ use tower_http::cors::{CorsLayer, Origin};
 use futures::future::{self, Future};
 
 use crate::gql::RootSchema;
+use crate::utils::db::agql_ext::gql_utils::get_root_fields_in_doc;
 use crate::utils::general::general::body_to_str;
 use crate::utils::http::clone_request;
 
@@ -37,11 +38,11 @@ pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
     // retrieve auth-data/JWT from http-headers
     let mut jwt: Option<String> = None;
-    info!("Headers2:{:?}", req.headers().keys());
+    //info!("Headers2:{:?}", req.headers().keys());
     if let Some(header) = req.headers().get("authorization") {
-        info!("Found authorization header.");
+        //info!("Found authorization header.");
         if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
-            info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
+            //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
             jwt = Some(parts.1.to_owned());
         }
     }
@@ -91,26 +92,30 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
     
     let (mut req, req2) = clone_request(req).await;
     let body_as_str = body_to_str(req2.into_body()).await.unwrap();
-    // if request is running one of the commands that's already been rewritten in app-server-rs, don't proxy the request to app-server-js
-    if body_as_str.contains("mutation AddTerm(") {
-        proxy_request_to_asjs = false;
-    }
-    // todo: make-so this command-type checking actually parses the message properly, rather than just substring-searching!
-    if 
-        // queries
-        //body_as_str.contains("subtree(rootNodeId: $rootNodeID, maxDepth: $maxDepth)") ||
-        body_as_str.contains("subtree(") ||
-        body_as_str.contains("subtree2(") ||
-        body_as_str.contains("descendants(") ||
-        body_as_str.contains("ancestors(") ||
-        body_as_str.contains("descendants2(") ||
-        body_as_str.contains("shortestPath(") ||
-        body_as_str.contains("searchSubtree(") ||
-        // commands
-        body_as_str.contains("refreshLQData(payload: $payload)") ||
-        body_as_str.contains("cloneSubtree(payload: $payload)")
-    {
-        proxy_request_to_asjs = false;
+    let body_as_json = JSONValue::from_str(&body_as_str).unwrap();
+    let query_field = body_as_json["query"].as_str().unwrap();
+
+    //info!("Got query_field str:{}", query_field);
+    let doc = async_graphql::parser::parse_query(query_field).unwrap();
+    // check which root-fields/root-resolver-functions/"endpoints" are accessed by the query in `doc`
+    let query_fields = get_root_fields_in_doc(doc);
+    info!("query_fields:{:?}", query_fields);
+
+    // endpoints originally written in rust
+    let queries_originally_in_asrs = vec!["subtree", "subtree2", "descendants", "ancestors", "descendants2", "shortestPath", "searchSubtree"];
+    let commands_originally_in_asrs = vec!["refreshLQData", "cloneSubtree"];
+    // endpoints ported to rust (don't proxy these to app-server-js)
+    let commands_in_asrs = vec!["AddTerm"];
+
+    // if any of the endpoints used in the request have an implementation in rust, don't proxy the request to app-server-js
+    for query_field in query_fields {
+        if queries_originally_in_asrs.contains(&query_field.as_str())
+            || commands_originally_in_asrs.contains(&query_field.as_str())
+            || commands_in_asrs.contains(&query_field.as_str())
+        {
+            proxy_request_to_asjs = false;
+            break;
+        }
     }
 
     // if not proxying to app-server-js, then send the request to the GraphQL component of this app-server-rs

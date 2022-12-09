@@ -6,7 +6,7 @@ use rust_shared::async_graphql::{Result};
 use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
 use indexmap::IndexMap;
-use itertools::{chain, Itertools};
+use rust_shared::itertools::{chain, Itertools};
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
 use crate::utils::db::filter::{QueryFilter};
@@ -95,7 +95,7 @@ pub fn prepare_sql_query(table_name: &str, lq_param_protos: &Vec<LQParam>, query
 mod tests {
     use std::{sync::Arc, iter::once};
 
-    use itertools::chain;
+    use rust_shared::itertools::chain;
     use rust_shared::{utils::time::time_since_epoch_ms, utils::type_aliases::JSONValue};
     use rust_shared::serde_json::json;
     use crate::{store::live_queries_::{lq_batch_::sql_generator, lq_instance::LQInstance, lq_param::LQParam}, utils::{db::filter::{FilterOp, QueryFilter}}};

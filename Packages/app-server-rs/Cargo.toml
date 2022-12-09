@@ -21,7 +21,6 @@ async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
 metrics = "0.18.1"
 regex = "1.5.5"
-itertools = "0.10.3"
 lazy_static = "1.4.0"
 num_cpus = "1.0"
 jsonschema = "0.16"

@@ -1,3 +1,4 @@
+use rust_shared::itertools::Itertools;
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use flume::{Receiver, Sender};
@@ -120,32 +121,44 @@ pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
     Ok(res_as_json)
 }
 
-pub async fn get_k8s_pod_names(namespace: &str) -> Result<Vec<String>, Error> {
+#[derive(Debug)]
+pub struct K8sPodBasicInfo {
+    pub name: String,
+    //pub creation_time: i64,
+    pub creation_time_str: String,
+}
+pub async fn get_k8s_pod_basic_infos(namespace: &str, filter_to_running_pods: bool) -> Result<Vec<K8sPodBasicInfo>, Error> {
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
     let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
     let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
 
     let client = get_reqwest_client_with_k8s_certs()?;
-    let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods/"))
+    let pod_filters_str = if filter_to_running_pods { "?fieldSelector=status.phase=Running" } else { "" };
+    let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods{pod_filters_str}"))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
         .body(json!({}).to_string()).build()?;
     let res = client.execute(req).await?;
 
     let res_as_json_str = res.text().await?;
-    info!("Got list of k8s pods (in namespace \"{namespace}\"): {}", res_as_json_str);
+    //info!("Got list of k8s pods (in namespace \"{namespace}\"): {}", res_as_json_str);
     let res_as_json = JSONValue::from_str(&res_as_json_str)?;
 
-    let pod_names = (|| {
-        let mut pod_names: Vec<String> = vec![];
-        for pod_info in res_as_json.as_object()?.get("items")?.as_array()? {
-            let pod_name = pod_info.as_object()?.get("metadata")?.as_object()?.get("name")?.as_str()?;
-            pod_names.push(pod_name.to_owned());
+    let pod_infos = (|| {
+        let mut pod_infos: Vec<K8sPodBasicInfo> = vec![];
+        for pod_info_json in res_as_json.as_object()?.get("items")?.as_array()? {
+            let metadata = pod_info_json.as_object()?.get("metadata")?.as_object()?;
+            let pod_name = metadata.get("name")?.as_str()?;
+            let creation_time_str = metadata.get("creationTimestamp")?.as_str()?;
+            //let creation_time = chrono::DateTime::parse_from_rfc3339(creation_time_str)?;
+            pod_infos.push({
+                K8sPodBasicInfo { name: pod_name.to_owned(), creation_time_str: creation_time_str.to_owned() }
+            });
         }
-        Some(pod_names)
+        Some(pod_infos)
     })().ok_or_else(|| anyhow!("Response from kubernetes API is malformed:{res_as_json_str}"))?;
 
-    Ok(pod_names)
+    Ok(pod_infos)
 }
 
 pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
@@ -154,19 +167,22 @@ pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
     let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
     let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
 
-    // todo: improve this to ignore pods that are already terminating (eg. for if trying to restart app-server right shortly after a previous restart)
-    let app_server_pod_name: String = get_k8s_pod_names("default").await?
-        .iter().find(|a| a.starts_with("dm-app-server-rs-")).ok_or(anyhow!("App-server pod not found in list of active pods."))?.to_owned();
+    // supply "true", to ignore pods that are already terminating [edit: this doesn't actually work, because terminating pods still show up as "running"; see below for working fix, through use of creation-time field]
+    let k8s_pods = get_k8s_pod_basic_infos("default", true).await?;
+    info!("Got k8s_pods: {:?}", k8s_pods);
+    let app_server_pod_info = k8s_pods.iter().filter(|a| a.name.starts_with("dm-app-server-rs-"))
+        .sorted_by_key(|a| &a.creation_time_str).last() // sort by creation-time, then find last (this way we kill the most recent, if multiple pod matches exist)
+        .ok_or(anyhow!("App-server pod not found in list of active pods."))?.to_owned();
 
     let client = get_reqwest_client_with_k8s_certs()?;
-    let req = client.delete(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/pods/{app_server_pod_name}"))
+    let req = client.delete(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/pods/{}", app_server_pod_info.name))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
         .body(json!({}).to_string()).build()?;
     let res = client.execute(req).await?;
 
     let res_as_json_str = res.text().await?;
-    info!("Got response from k8s server, on trying to restart pod \"{app_server_pod_name}\": {}", res_as_json_str);
+    //info!("Got response from k8s server, on trying to restart pod \"{app_server_pod_name}\": {}", res_as_json_str);
     let res_as_json = JSONValue::from_str(&res_as_json_str)?;
 
     Ok(res_as_json)

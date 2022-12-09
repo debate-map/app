@@ -2,7 +2,7 @@ use std::{fmt::Display, sync::atomic::AtomicI32, iter::{once, Once}};
 use rust_shared::{tokio_postgres, anyhow::{anyhow, bail, Context, Error, ensure}, bytes, utils::type_aliases::JSONValue};
 use rust_shared::bytes::BytesMut;
 use dyn_clone::DynClone;
-use itertools::Itertools;
+use rust_shared::itertools::Itertools;
 use regex::{Regex, Captures};
 use rust_shared::BasicError;
 use rust_shared::serde_json::Map;

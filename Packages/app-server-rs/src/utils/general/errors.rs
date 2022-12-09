@@ -1,5 +1,5 @@
 use rust_shared::anyhow::{Error, ensure};
-use itertools::Itertools;
+use rust_shared::itertools::Itertools;
 use regex::Regex;
 use lazy_static::lazy_static;
 

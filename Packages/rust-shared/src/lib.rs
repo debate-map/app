@@ -28,6 +28,7 @@ pub extern crate async_graphql_axum;
 pub extern crate axum;
 pub extern crate bytes;
 pub extern crate indoc;
+pub extern crate itertools;
 pub extern crate uuid;
 pub extern crate url;
 pub extern crate futures;

@@ -20,7 +20,7 @@ use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
 use flume::{Sender, Receiver, unbounded};
 use indexmap::IndexMap;
-use itertools::Itertools;
+use rust_shared::itertools::Itertools;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{utils::time::time_since_epoch_ms, RwLock_Tracked, tokio, serde_json};
 use rust_shared::serde::de::DeserializeOwned;
