@@ -22,23 +22,24 @@
 use std::time::{UNIX_EPOCH, SystemTime, Duration};
 
 // subcrate re-exports (todo: probably replace with "pub use ? as ?;" syntax, as seen here: https://www.reddit.com/r/rust/comments/ayibls/comment/ei0ypg3)
-pub extern crate futures;
-pub extern crate tokio;
 pub extern crate anyhow;
+pub extern crate async_graphql;
+pub extern crate async_graphql_axum;
+pub extern crate axum;
+pub extern crate bytes;
+pub extern crate indoc;
 pub extern crate uuid;
 pub extern crate url;
+pub extern crate futures;
 pub extern crate hyper;
 pub extern crate reqwest;
+pub extern crate serde;
+pub extern crate serde_json;
+pub extern crate tokio;
+pub extern crate tokio_postgres;
 pub extern crate tower;
 pub extern crate tower_http;
 pub extern crate tower_service;
-pub extern crate axum;
-pub extern crate serde;
-pub extern crate serde_json;
-pub extern crate async_graphql;
-pub extern crate async_graphql_axum;
-pub extern crate bytes;
-pub extern crate tokio_postgres;
 pub extern crate rust_macros;
 
 // this crate's modules

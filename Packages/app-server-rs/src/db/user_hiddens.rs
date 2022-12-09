@@ -28,12 +28,6 @@ pub async fn get_user_hiddens(ctx: &AccessorContext<'_>, email: Option<String>) 
 
 wrap_slow_macros!{
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
-
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct UserHidden {
     pub id: ID,
@@ -69,13 +63,6 @@ impl From<Row> for UserHidden {
 		}
 	}
 }
-
-/*#[derive(Default)]
-pub struct MutationShard_UserHidden;
-#[Object]
-impl MutationShard_UserHidden {
-    async fn empty(&self) -> &str { &"" }
-}*/
 
 #[derive(Clone)] pub struct GQLSet_UserHidden { nodes: Vec<UserHidden> }
 #[Object] impl GQLSet_UserHidden { async fn nodes(&self) -> &Vec<UserHidden> { &self.nodes } }

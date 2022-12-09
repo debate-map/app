@@ -36,12 +36,6 @@ pub async fn get_user(ctx: &AccessorContext<'_>, id: &str) -> Result<User, Error
 
 wrap_slow_macros!{
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
-
 //type User = String;
 #[derive(SimpleObject, Clone, Serialize, Deserialize, Debug)]
 pub struct User {
@@ -49,10 +43,7 @@ pub struct User {
     pub displayName: String,
     pub photoURL: Option<String>,
     pub joinDate: i64,
-    //pub permissionGroups: PermissionGroups,
     pub permissionGroups: PermissionGroups,
-    //pub permissionGroups: async_graphql::Value,
-    //pub permissionGroups: String,
     pub edits: i32,
     pub lastEditAt: Option<i64>,
 }

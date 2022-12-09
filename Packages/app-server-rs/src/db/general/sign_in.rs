@@ -23,6 +23,7 @@ use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
 use rust_shared::utils::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::get_uri_params;
+use rust_shared::indoc::indoc;
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
@@ -49,7 +50,10 @@ async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req:
     let attempt_id = params.get("state").map(|a| a.clone()).unwrap_or("n/a".to_owned());
 
     info!("Got uri:{:?} @attemptID:{}", uri, attempt_id);
-    state.channel_for_sign_in_messages__sender_base.broadcast(SignInMsg::GotCallbackData(uri.clone())).await;
+    if let Err(err) = state.channel_for_sign_in_messages__sender_base.broadcast(SignInMsg::GotCallbackData(uri.clone())).await {
+        error!("Got error while broadcasting callback-data:{}", err);
+        return response::Html(format!("Got error while broadcasting callback-data. Please refresh page to try again."));
+    }
     response::Html(format!("Data has been broadcast through the sign-in-message channel... (you can close this page now)"))
 }
 
@@ -61,15 +65,6 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateWrapper) -> Rou
 }
 
 wrap_slow_macros!{
-
-// queries
-// ==========
-
-// mutations
-// ==========
-
-// subscriptions
-// ==========
 
 struct SignInStart_Result {
     auth_link: Option<String>,
@@ -202,40 +197,13 @@ impl SubscriptionShard_SignIn {
         base_stream
     }
 
-    /// Attaches the provided sign-in data (`jwt`) to the current websocket connection, authenticating subsequent requests sent over it.
-    async fn signInAttach<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, jwt: String) -> impl Stream<Item = Result<GenericMutation_Result, SubError>> + 'a {
+    // todo: implement this, once authentication is required for some of the "read" operations (assuming we want an existing websocket-connection to be able to authenticate "later on") 
+    // Attaches the provided sign-in data (`jwt`) to the current websocket connection, authenticating subsequent requests sent over it.
+    /*async fn signInAttach<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, jwt: String) -> impl Stream<Item = Result<GenericMutation_Result, SubError>> + 'a {
         async_stream::stream! {
-            let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
-
-            let verify_opts = VerificationOptions {
-                //accept_future: true, // accept tokens that will only be valid in the future
-                //time_tolerance: Some(JWTDuration::from_mins(15)), // accept tokens even if they have expired up to 15 minutes after the deadline
-                //max_validity: Some(JWTDuration::from_hours(1)), // reject tokens if they were issued more than 1 hour ago
-                //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
-                .. VerificationOptions::default()
-            };
-            let claims = key.verify_token::<GoogleUserInfoResult>(&jwt, Some(verify_opts)).map_err(to_sub_err)?;
-            let user_info: GoogleUserInfoResult = claims.custom;
-            let user_email = user_info.email;
-
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await.unwrap();
-            let user_hiddens_with_email = get_user_hiddens(&ctx, Some(user_email.clone())).await.map_err(to_sub_err)?;
-            match user_hiddens_with_email.len() {
-                0 => {
-                    let message = format!("Could not find user with an email matching that claimed in the provided JWT. @email:{user_email}");
-                    warn!("{}", message);
-                    yield Err(SubError::new(message));
-                    return;
-                },
-                1 => {},
-                count => {
-                    let message = format!("Multiple users ({count}) found with the same email as that claimed in the provided JWT! @email:{user_email}");
-                    error!("{}", message);
-                    yield Err(SubError::new(message));
-                    return;
-                }
-            }
+            let user_info = resolve_jwt_to_user_info(&ctx, jwt).await?;
 
             // todo: store user-data in some place where commands and such will be able to access it (for requests/commands made on this same websocket connection, of course)
 
@@ -243,7 +211,7 @@ impl SubscriptionShard_SignIn {
                 message: "Command completed successfully.".to_owned(),
             });
         }
-    }
+    }*/
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -355,11 +323,15 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
 	Ok(result)
 }
 
-//pub async fn resolve_jwt_to_user_info<'a>(gql_ctx: &'a async_graphql::Context<'a>, jwt: String) -> Result<User, Error> {
 pub async fn get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<User, Error> {
     let user_info = try_get_user_info_from_gql_ctx(gql_ctx, ctx).await?;
     match user_info {
-        None => Err(anyhow!("This endpoint requires auth-data to be supplied!")),
+        None => Err(anyhow!(indoc!{"
+            This endpoint requires auth-data to be supplied!
+            For website browsing, this means signing-in using the panel at the top-right.
+            For direct requests to the graphql api, this means obtaining auth-data manually (see the \"signInStart\" endpoint at \"http://debates.app/gql-playground\"), and attaching it to your commands/requests.
+            Specifically, your http requests should have an \"authorization\" header, with contents matching: \"Bearer <jwt string here>\"
+        "})),
         Some(user_info) => Ok(user_info),
     }
 }
@@ -372,41 +344,6 @@ pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Cont
     let user_info = resolve_jwt_to_user_info(ctx, jwt).await?;
     Ok(Some(user_info))
 }
-/*pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
-    let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
-
-    let verify_opts = VerificationOptions {
-        //accept_future: true, // accept tokens that will only be valid in the future
-        //time_tolerance: Some(JWTDuration::from_mins(15)), // accept tokens even if they have expired up to 15 minutes after the deadline
-        //max_validity: Some(JWTDuration::from_hours(1)), // reject tokens if they were issued more than 1 hour ago
-        //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
-        .. VerificationOptions::default()
-    };
-    let claims = key.verify_token::<GoogleUserInfoResult>(jwt, Some(verify_opts)).map_err(to_sub_err)?;
-    let user_info: GoogleUserInfoResult = claims.custom;
-    let user_email = user_info.email;
-
-    /*let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-    let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await.unwrap();*/
-    let user_hiddens_with_email = get_user_hiddens(&ctx, Some(user_email.clone())).await.map_err(to_sub_err)?;
-    match user_hiddens_with_email.len() {
-        0 => {
-            let message = format!("Could not find user with an email matching that claimed in the provided JWT. @email:{user_email}");
-            warn!("{}", message);
-            return Err(anyhow!("{}", message));
-        },
-        1 => {},
-        count => {
-            let message = format!("Multiple users ({count}) found with the same email as that claimed in the provided JWT! @email:{user_email}");
-            error!("{}", message);
-            return Err(anyhow!("{}", message));
-        }
-    }
-
-    let user_hidden = user_hiddens_with_email.get(0).ok_or(anyhow!("Single user-hidden match vanished!"))?;
-    let user = get_user(&ctx, &user_hidden.id).await?;
-    Ok(user)
-}*/
 pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
     let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
 

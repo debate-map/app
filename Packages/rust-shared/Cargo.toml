@@ -11,6 +11,7 @@ tracing = "0.1"
 anyhow = "1.0"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 base64 = "0.13.0"
+indoc = "1.0.7"
 
 url = "2"
 hyper = {version = "0.14.16", features = ["client"] }
