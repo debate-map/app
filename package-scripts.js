@@ -408,6 +408,7 @@ function SetTileEnvCmd(prod, context) {
 	});
 }
 
+// todo: add function for easily retrieving other "generated within k8s cluster" secrets (eg. dm-jwt-secret-hs256)
 function GetK8sPGUserAdminSecretData(context) {
 	const fromBase64 = str=>Buffer.from(str, "base64");
 	const secretsStr = execSync(`kubectl${context ? ` --context ${context}` : ""} get secrets -n postgres-operator debate-map-pguser-admin -o go-template='{{.data}}'`).toString();

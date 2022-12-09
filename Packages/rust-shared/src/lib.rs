@@ -53,6 +53,10 @@ pub mod utils {
     }
     pub mod db_constants;
     pub mod futures;
+    pub mod _k8s;
+    pub mod k8s {
+        pub mod k8s_structs;
+    }
     pub mod general;
     pub mod time;
     pub mod type_aliases;

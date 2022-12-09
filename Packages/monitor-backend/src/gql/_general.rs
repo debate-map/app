@@ -1,6 +1,7 @@
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use flume::{Receiver, Sender};
+use rust_shared::utils::_k8s::get_reqwest_client_with_k8s_certs;
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::{futures, axum, tower, tower_http};
 use futures::executor::block_on;
@@ -117,22 +118,6 @@ pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
     //println!("Done! Response:{}", res_as_json);
 
     Ok(res_as_json)
-}
-
-pub fn get_reqwest_client_with_k8s_certs() -> Result<rust_shared::reqwest::Client, Error> {
-    /*let mut buf = Vec::new();
-    File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?
-        .read_to_end(&mut buf)?;
-    let cert = rust_shared::reqwest::Certificate::from_pem(&buf)?;
-    Ok(rust_shared::reqwest::ClientBuilder::new()
-        .add_root_certificate(cert).build()?)*/
-
-    // temp: For now, completely disable cert-verification for connecting to the k8s service, to avoid "presented server name type wasn't supported" error.
-    // This step won't be necessary once the issue below is resolved:
-    // * issue in rustls (key comment): https://github.com/rustls/rustls/issues/184#issuecomment-1116235856
-    // * pull-request in webpki subdep: https://github.com/briansmith/webpki/pull/260
-    Ok(rust_shared::reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true).build()?)
 }
 
 pub async fn get_k8s_pod_names(namespace: &str) -> Result<Vec<String>, Error> {

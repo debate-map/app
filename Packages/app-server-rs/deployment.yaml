@@ -68,3 +68,38 @@ spec:
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
+
+# give app-server-rs various kubernetes-api permissions
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-for-dm-app-server-rs-pod
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: [
+    "get",
+    "create",
+    # "list",
+    # "read",
+    # "add",
+    # "post",
+    # "put",
+    # "patch",
+    # "replace"
+  ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: role-binding-for-dm-app-server-rs
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default
+roleRef:
+  kind: Role
+  name: role-for-dm-app-server-rs-pod
+  apiGroup: rbac.authorization.k8s.io

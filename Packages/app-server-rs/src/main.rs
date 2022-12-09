@@ -9,6 +9,7 @@
 //#![feature(box_patterns)]
 //#![feature(fn_traits)]
 
+// sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
     unused_imports, // makes refactoring a pain (eg. you comment out a line to test something, and now must scroll-to-top and comment lots of stuff)

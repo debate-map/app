@@ -24,9 +24,10 @@ use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::get_uri_params;
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
 use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream};
 use tracing::info;
-use jwt_simple::prelude::{HS256Key};
+use jwt_simple::prelude::{HS256Key, Claims, MACLike};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
@@ -39,7 +40,7 @@ use crate::store::storage::{AppStateWrapper, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::body_to_str;
-use crate::utils::type_aliases::ABSender;
+use crate::utils::type_aliases::{ABSender, JWTDuration};
 
 async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req: Request<Body>) -> impl IntoResponse {
     let uri = req.uri();
@@ -69,7 +70,10 @@ wrap_slow_macros!{
 // subscriptions
 // ==========
 
-struct SignInStart_Result {}
+struct SignInStart_Result {
+    auth_link: Option<String>,
+    result_jwt: Option<String>,
+}
 #[Object]
 impl SignInStart_Result {
     async fn instructions(&self) -> Vec<String> {
@@ -79,14 +83,8 @@ impl SignInStart_Result {
             "3) TODO".to_owned(),
         ]
     }
-    async fn authLink(&self) -> String {
-        // todo
-        "".to_owned()
-    }
-    async fn resultJWT(&self) -> String {
-        // todo
-        "".to_owned()
-    }
+    async fn authLink(&self) -> Option<String> { self.auth_link.clone() }
+    async fn resultJWT(&self) -> Option<String> { self.result_jwt.clone() }
 }
 
 #[derive(Default)]
@@ -123,17 +121,19 @@ impl SubscriptionShard_SignIn {
             .add_scope(Scope::new("profile".to_string()))
             .set_pkce_challenge(pkce_code_challenge)
             .url();
-    
-        println!(
-            "Open this URL in your browser:\n{}\n",
-            authorize_url.to_string()
-        );
 
         let msg_sender = &gql_ctx.data::<AppStateWrapper>().unwrap().channel_for_sign_in_messages__sender_base;
         let mut msg_receiver = msg_sender.new_receiver();
 
         let base_stream = async_stream::stream! {
             if provider != "google" { yield Err(SubError::new(format!("Invalid provider. Valid options: google"))); return; }
+
+            yield Ok(SignInStart_Result {
+                auth_link: Some(authorize_url.to_string()),
+                result_jwt: None,
+            });
+            // temp; log to console for manual opening
+            println!("Open this URL in your browser:\n{}\n", authorize_url.to_string());
 
             loop {
                 match make_reliable(msg_receiver.recv(), Duration::from_millis(10)).await {
@@ -185,12 +185,25 @@ impl SubscriptionShard_SignIn {
                                     info!("Committing transaction...");
                                     ctx.tx.commit().await.map_err(to_sub_err)?;
 
-                                    // create a new key for the `HS256` JWT algorithm
-                                    let key = HS256Key::generate();
+                                    // ensure a k8s-secret exists, and use it as the key for the `HS256` JWT algorithm
+                                    let new_secret_data_if_missing = json!({
+                                        "key": base64::encode(HS256Key::generate().to_bytes()),
+                                    });
+                                    let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), new_secret_data_if_missing).await.map_err(to_sub_err)?;
+                                    //let key = HS256Key::from_bytes(key_bytes.as_slice());
+                                    let key_str_bytes = base64::decode(secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!")).map_err(to_sub_err)?).map_err(to_sub_err)?;
+                                    let key = HS256Key::from_bytes(&key_str_bytes);
+                                    info!("Read/created secret key:{:?}", key);
+                                    
+                                    let month_in_secs = 30 * 24 * 60 * 60;
+                                    let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(month_in_secs));
+                                    let jwt = key.authenticate(claims).map_err(to_sub_err)?;
+                                    info!("Generated JWT:{}", jwt);
 
-                                    // todo: create a JWT containing the user-data, and return it to the graphql caller
-
-                                    yield Ok(SignInStart_Result {});
+                                    yield Ok(SignInStart_Result {
+                                        auth_link: Some(authorize_url.to_string()),
+                                        result_jwt: Some(jwt.to_string()),
+                                    });
                                 }
                             },
                         }
