@@ -236,50 +236,32 @@ pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
     Ok(key)
 }
 static JWT_KEY_HS256_STR: OnceCell<String> = OnceCell::new();
+/// Retrieves and/or creates the hs256 secret-key for use in generating JWTs.
+/// Why do retrieval manually rather than having k8s import it as an environment-variable at startup?
+/// Because k8s converts the base64 string into a utf8 string, which makes conversion complicated. (we want to decode it simply as a raw byte-array, for passing to HS256Key::from_bytes)
 pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
-    // first, try to read key from env-var (which is set from the specified secret, but only if it existed at pod launch)
-    /*if let Ok(key_str_as_utf8) = env::var("JWT_KEY_HS256") {
-        // When k8s converted the secret data to an env-var, it already decoded it -- but incorrectly, to a utf8 string.
-        // So we have to turn it back into the original byte-array, then re-encode it as base64 string. (to standardize on storage format, with route below)
-        let key_as_orig_bytes = key_str_as_utf8.as_bytes();
-        let key_as_base64_str = base64::encode(key_as_orig_bytes);
-        info!("Retrieved secret key from env-var:{:?}", key_as_base64_str);
-        return Ok(key_as_base64_str);
-    }*/
-
-    // first, try to read from global variable
+    // first, try to read the key from a global variable (in case this func has already been run)
     if let Some(key_as_base64_str) = JWT_KEY_HS256_STR.get() {
-        info!("Retrieved secret key from global-var:{:?}", key_as_base64_str);
+        //info!("Retrieved secret key from global-var:{:?}", key_as_base64_str);
         return Ok(key_as_base64_str.to_owned());
     }
     
-    // ensure a k8s-secret exists, and use it as the key for the `HS256` JWT algorithm
+    // create a new key, and try to store it as a k8s secret
     let new_secret_data_if_missing = json!({
         "key": base64::encode(HS256Key::generate().to_bytes()),
     });
     let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), new_secret_data_if_missing).await?;
     let key_as_base64_str = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;
-    info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
+    //info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
 
-    // now that we have the key, store it in simple env-var for faster retrieval
-    //env::set_var("JWT_KEY_HS256", key_as_base64_str);
-    // now that we have the key, store it in simple global-variable for faster retrieval
-    //JWT_KEY_HS256.set(key_as_base64_str.to_owned()).map_err(anyhow!("Cell already has a value! An earlier call must have just stored a value; recall this func to get the stored key."))?;
-    // now that we have the key, store it in simple global-variable for faster retrieval (use get_or_init for safe handling in case this func was called by two threads concurrently)
-    let result = JWT_KEY_HS256_STR.get_or_init(|| {
-        info!("Storing secret key in global-var:{:?}", key_as_base64_str);
-        key_as_base64_str.to_owned()
-    });
+    // now that we have the key, store it in global-var for faster retrieval (use get_or_init for safe handling in case this func was called by two threads concurrently)
+    let result = JWT_KEY_HS256_STR.get_or_init(|| key_as_base64_str.to_owned());
     
     //Ok(key_as_base64_str.to_owned())
     Ok(result.to_owned())
 } 
 
 pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>) -> Result<User, Error> {
-    /*let user_hiddens_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * FROM "userHiddens""#, params(&[])).await?.try_collect().await?;
-    let user_hiddens: Vec<UserHidden> = user_hiddens_rows.into_iter().map(|a| a.into()).collect();
-	info!("Existing user emails:{}", user_hiddens.iter().map(|a| a.email).collect());*/
-
     let user_hiddens_with_email: Vec<UserHidden> = get_db_entries(ctx, "userHiddens", &Some(json!({
         "email": {"equalTo": profile.email}
     }))).await?;
