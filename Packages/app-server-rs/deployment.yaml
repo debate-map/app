@@ -66,6 +66,10 @@ spec:
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: user } }
         - name: DB_PASSWORD
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
+        # commented; When converting secret to env-var, k8s insists on automatically decoding the base64 string (found in the json) to a utf8 string.
+        # This is bad because it's supposed to be decoded into a byte-array rather than a string, making correct handling complicated/inconsistent. (better to just use existing `get_or_create_k8s_secret` func)
+        # - name: JWT_KEY_HS256
+        #   valueFrom: { secretKeyRef: { name: dm-jwt-secret-hs256, key: key, optional: true } }
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
 
@@ -82,13 +86,6 @@ rules:
   verbs: [
     "get",
     "create",
-    # "list",
-    # "read",
-    # "add",
-    # "post",
-    # "put",
-    # "patch",
-    # "replace"
   ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

@@ -3,6 +3,7 @@ use std::env;
 use std::time::Duration;
 
 use deadpool_postgres::tokio_postgres::Row;
+use once_cell::sync::{Lazy, OnceCell};
 use rust_shared::hyper::{Request, Body, Method};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
@@ -166,13 +167,8 @@ impl SubscriptionShard_SignIn {
                                     let params_str = rust_shared::url::form_urlencoded::Serializer::new(String::new())
                                         .append_pair("access_token", &token_str)
                                         .finish();
-
                                     let response_as_str = rust_shared::reqwest::get(format!("https://www.googleapis.com/oauth2/v3/userinfo?{params_str}")).await.map_err(to_sub_err)?
                                         .text().await.map_err(to_sub_err)?;
-                                    
-                                    // example str: {"data":{"_PassConnectionID":{"userID":"ABC123ABC123ABC123ABC1"}}}
-                                    /*let response_as_json = serde_json::from_str::<JSONValue>(&response_as_str).with_context(|| format!("Could not parse response-str as json:{}", response_as_str)).map_err(to_sub_err)?;
-                                    info!("Got response json:{:?}", response_as_json);*/
                                     
                                     let user_info = serde_json::from_str::<GoogleUserInfoResult>(&response_as_str).with_context(|| format!("Could not parse response-str as user-info struct:{}", response_as_str)).map_err(to_sub_err)?;
                                     info!("Got response user-info:{:?}", user_info);
@@ -185,16 +181,7 @@ impl SubscriptionShard_SignIn {
                                     info!("Committing transaction...");
                                     ctx.tx.commit().await.map_err(to_sub_err)?;
 
-                                    // ensure a k8s-secret exists, and use it as the key for the `HS256` JWT algorithm
-                                    let new_secret_data_if_missing = json!({
-                                        "key": base64::encode(HS256Key::generate().to_bytes()),
-                                    });
-                                    let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), new_secret_data_if_missing).await.map_err(to_sub_err)?;
-                                    //let key = HS256Key::from_bytes(key_bytes.as_slice());
-                                    let key_str_bytes = base64::decode(secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!")).map_err(to_sub_err)?).map_err(to_sub_err)?;
-                                    let key = HS256Key::from_bytes(&key_str_bytes);
-                                    info!("Read/created secret key:{:?}", key);
-                                    
+                                    let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
                                     let month_in_secs = 30 * 24 * 60 * 60;
                                     let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(month_in_secs));
                                     let jwt = key.authenticate(claims).map_err(to_sub_err)?;
@@ -241,6 +228,52 @@ pub struct GoogleUserInfoResult {
 }
 
 }
+
+pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
+    let key_str = get_or_create_jwt_key_hs256_str().await?;
+    let key_str_bytes = base64::decode(key_str)?;
+    let key = HS256Key::from_bytes(&key_str_bytes);
+    Ok(key)
+}
+static JWT_KEY_HS256_STR: OnceCell<String> = OnceCell::new();
+pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
+    // first, try to read key from env-var (which is set from the specified secret, but only if it existed at pod launch)
+    /*if let Ok(key_str_as_utf8) = env::var("JWT_KEY_HS256") {
+        // When k8s converted the secret data to an env-var, it already decoded it -- but incorrectly, to a utf8 string.
+        // So we have to turn it back into the original byte-array, then re-encode it as base64 string. (to standardize on storage format, with route below)
+        let key_as_orig_bytes = key_str_as_utf8.as_bytes();
+        let key_as_base64_str = base64::encode(key_as_orig_bytes);
+        info!("Retrieved secret key from env-var:{:?}", key_as_base64_str);
+        return Ok(key_as_base64_str);
+    }*/
+
+    // first, try to read from global variable
+    if let Some(key_as_base64_str) = JWT_KEY_HS256_STR.get() {
+        info!("Retrieved secret key from global-var:{:?}", key_as_base64_str);
+        return Ok(key_as_base64_str.to_owned());
+    }
+    
+    // ensure a k8s-secret exists, and use it as the key for the `HS256` JWT algorithm
+    let new_secret_data_if_missing = json!({
+        "key": base64::encode(HS256Key::generate().to_bytes()),
+    });
+    let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), new_secret_data_if_missing).await?;
+    let key_as_base64_str = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;
+    info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
+
+    // now that we have the key, store it in simple env-var for faster retrieval
+    //env::set_var("JWT_KEY_HS256", key_as_base64_str);
+    // now that we have the key, store it in simple global-variable for faster retrieval
+    //JWT_KEY_HS256.set(key_as_base64_str.to_owned()).map_err(anyhow!("Cell already has a value! An earlier call must have just stored a value; recall this func to get the stored key."))?;
+    // now that we have the key, store it in simple global-variable for faster retrieval (use get_or_init for safe handling in case this func was called by two threads concurrently)
+    let result = JWT_KEY_HS256_STR.get_or_init(|| {
+        info!("Storing secret key in global-var:{:?}", key_as_base64_str);
+        key_as_base64_str.to_owned()
+    });
+    
+    //Ok(key_as_base64_str.to_owned())
+    Ok(result.to_owned())
+} 
 
 pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>) -> Result<User, Error> {
     /*let user_hiddens_rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * FROM "userHiddens""#, params(&[])).await?.try_collect().await?;

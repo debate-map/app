@@ -9,16 +9,3 @@ pub struct K8sSecret {
     pub kind: String,
     pub r#type: String,
 }
-
-/*{
-	"apiVersion": "v1",
-	"data": {
-		"custom_field1": "custom_value1",
-		"custom_field2": "custom_value2"
-	},
-    "metadata": {
-        [...]
-    },
-	"kind": "Secret",
-	"type": "Opaque"
-}*/

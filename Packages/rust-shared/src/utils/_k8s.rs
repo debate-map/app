@@ -68,10 +68,3 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
 
     Ok(new_secret)
 }
-/*pub async fn get_or_create_k8s_secret_as_ascii_bytes(name: String, new_val_if_missing_as_bytes: Vec<u8>) -> Result<Vec<u8>, Error> {
-    //let new_val_if_missing_str = String::from_utf8(new_val_if_missing)?;
-    let new_val_if_missing_as_str = base64::encode(new_val_if_missing_as_bytes);
-    let result_str = get_or_create_k8s_secret(name, new_val_if_missing_as_str).await?;
-    let result_bytes = base64::decode(result_str)?;
-    Ok(result_bytes)
-}*/
