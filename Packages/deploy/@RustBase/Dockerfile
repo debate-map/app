@@ -6,7 +6,14 @@
 	#FROM rust@sha256:fe410a9711ba354e2a27da5db5c1bcf2df50e63b8746b0f40fbb85878d60eb95 as cargo-build
 	# temp, to be (closer to) matching with cargo 1.60.0-beta.3 on dev-machine
 	#FROM rustlang/rust:nightly-bullseye@sha256:80046c08dad9ac3941941be072ea5db5c105a6208cff73ca36496f761c2f5c9c
-	FROM rust:1.65.0-bullseye
+
+	# We kind of want to use nightly here (to match with rust-toolchain.toml, due to use of feature flags), but that means basing on rust-nightly, which is not a "stable" image
+	#     (eg. it can change at any time [currently every 24 hours], and we don't want to rebuild our build-chain every time it does; see here: https://github.com/rust-lang/docker-rust-nightly/issues/3).
+	#FROM rust:1.65.0-bullseye
+
+	# Nevermind, the image below exists as a mirror of rust-nightly, and lets us pin to a specific nightly. (so we don't rebuild our build-chain every time rust-nightly changes)
+	FROM instrumentisto/rust:nightly-bullseye-2022-12-07
+
 	ARG env_ENV
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
@@ -62,7 +69,8 @@ WORKDIR /dm_repo/update-index-helper
 # add one tiny dependency (with no subdeps), so cargo-build updates the index
 RUN echo "void = \"1\"" >> Cargo.toml
 #RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
-RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag}
+#RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag}
+RUN cargo rustc ${debug_vs_release_flag}
 
 WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml

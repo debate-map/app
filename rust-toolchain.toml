@@ -1,10 +1,7 @@
 [toolchain]
-channel = "1.65.0"
-# use nightly (at least outside of dockerfiles), so that it's easy to run tests and such
-# edit: not actually switching to nightly yet; usefulness for tests is diminished by:
-# 1) Incremental compiles take ~15-30s, due to lack of caching for proc-macros. (eg. async-graphql's)
-# 2) Found another way to enable the test-running, using `rust-analyzer.runnableEnv` in ".vscode/settings.json".
-#channel = "nightly-2022-12-08"
+#channel = "1.65.0"
+# use nightly, so that it's easy to run tests and such (no need for RUSTC_BOOTSTRAP=1 hack everywhere, due to use of feature flags)
+channel = "nightly-2022-12-07"
 
 #components = ["rustfmt", "rust-std", "clippy"]
 #targets = ["wasm32-unknown-unknown", "x86_64-unknown-linux-gnu"]

@@ -102,7 +102,7 @@ mod tests {
 
     use super::prepare_sql_query;
 
-    // run in PowerShell using: `$env:RUSTC_BOOTSTRAP="1"; cargo test sql_generator_simple -- --nocapture`
+    // run in PowerShell using: `cargo test sql_generator_simple -- --nocapture`
     #[test]
     fn sql_generator_simple() {
         //match std::panic::catch_unwind(|| {

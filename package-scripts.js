@@ -142,7 +142,8 @@ function GetServeCommand(nodeEnv = null, pkg = "client") {
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
-	"cargo-test": `${SetEnvVarsCmd({RUSTC_BOOTSTRAP: 1})} cargo test`, // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
+	//"cargo-test": `${SetEnvVarsCmd({RUSTC_BOOTSTRAP: 1})} cargo test`, // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
+	"cargo-test": `cargo test`,
 	// gets stuff we might want, from the k8s pods
 	kget: {
 		"app-server-rs": Dynamic(()=>{

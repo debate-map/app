@@ -43,7 +43,8 @@ WORKDIR /dm_repo/Packages/app-server-rs
 RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
 	--mount=type=cache,target=/dm_repo/target \
 #	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
-	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
+#	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
+	cargo build --timings ${debug_vs_release_flag} && \
 	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
 	mv ${copy_from_path} /dm_repo/Packages/app-server-rs/app-server-rs-binary
 
