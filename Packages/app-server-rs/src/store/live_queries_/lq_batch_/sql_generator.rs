@@ -19,7 +19,7 @@ use crate::utils::general::extensions::IteratorV;
 use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
 use crate::utils::mtx::mtx::{new_mtx, Mtx};
 use crate::utils::type_aliases::PGClientObject;
-use crate::{utils::{db::{sql_fragment::{SQLFragment}}, general::general::to_anyhow}};
+use crate::{utils::{db::{sql_fragment::{SQLFragment}}}};
 
 use super::super::lq_instance::LQInstance;
 use super::super::lq_param::LQParam;

@@ -89,7 +89,7 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     let req_as_str: String = body_to_str(req.into_body()).await.unwrap();
     let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
 
-    // send request to graphql engine
+    // prepare request for graphql engine
     //let gql_req = async_graphql::Request::new(req_as_str);
     let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().unwrap());
     let gql_req = match req_as_json["operationName"].as_str() {
@@ -98,7 +98,7 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     };
     let gql_req = gql_req.variables(Variables::from_json(req_as_json["variables"].clone()));
 
-    // read response from graphql engine
+    // send request to graphql engine, and read response
     let gql_response = schema.execute(gql_req).await;
     //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
     let response_str: String = serde_json::to_string(&gql_response).unwrap();

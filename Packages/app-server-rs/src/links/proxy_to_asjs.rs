@@ -35,11 +35,22 @@ pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
 pub const APP_SERVER_JS_URL: &str = "http://dm-app-server-js.default.svc.cluster.local:5115";
 
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
+    // retrieve auth-data/JWT from http-headers
+    let mut jwt: Option<String> = None;
+    info!("Headers2:{:?}", req.headers().keys());
+    if let Some(header) = req.headers().get("authorization") {
+        info!("Found authorization header.");
+        if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
+            info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
+            jwt = Some(parts.1.to_owned());
+        }
+    }
+    
     // read request's body (from frontend)
     let req_as_str = body_to_str(req.into_body()).await?;
     let req_as_json = JSONValue::from_str(&req_as_str)?;
 
-    // send request to graphql engine
+    // prepare request for graphql engine
     //let gql_req = async_graphql::Request::new(req_as_str);
     let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().ok_or(anyhow!("The \"query\" field must be a string."))?);
     let gql_req = match req_as_json["operationName"].as_str() {
@@ -48,7 +59,13 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     };
     let gql_req = gql_req.variables(Variables::from_json(req_as_json["variables"].clone()));
 
-    // read response from graphql engine
+    // attach auth-data to async-graphql context-data
+    let gql_req = match jwt {
+        Some(jwt) => gql_req.data(jwt),
+        None => gql_req, // if no auth data in headers, leave request unmodified (ie. without jwt data-entry)
+    };
+
+    // send request to graphql engine, and read response
     let gql_response = schema.execute(gql_req).await;
     //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
     let response_str: String = serde_json::to_string(&gql_response)?;

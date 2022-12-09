@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::time::Duration;
 
@@ -26,21 +26,21 @@ use rust_shared::utils::general::get_uri_params;
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
-use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream};
-use tracing::info;
-use jwt_simple::prelude::{HS256Key, Claims, MACLike};
+use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream, to_anyhow};
+use tracing::{info, error, warn};
+use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
 use crate::db::commands::_command::set_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
-use crate::db::user_hiddens::UserHidden;
+use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
 use crate::links::proxy_to_asjs::HyperClient;
 use crate::store::storage::{AppStateWrapper, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
-use crate::utils::general::general::body_to_str;
+use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender, JWTDuration};
 
 async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req: Request<Body>) -> impl IntoResponse {
@@ -79,9 +79,10 @@ struct SignInStart_Result {
 impl SignInStart_Result {
     async fn instructions(&self) -> Vec<String> {
         vec![
-            "1) TODO".to_owned(),
-            "2) TODO".to_owned(),
-            "3) TODO".to_owned(),
+            "1) After initial call to this endpoint, you'll see these instructions, and an \"authLink\" url below. Open that link in your browser to launch google sign-in.".to_owned(),
+            "2) On completion of sign-in, the \"resultJWT\" field below will populate with your JWT token.".to_owned(),
+            "3) Add the JWT token string to the \"authorization\" header, eg. in gql-playground, paste this into \"HTTP HEADERS\" panel at bottom left: {\"authorization\": \"Bearer <jwt text here>\"}".to_owned(),
+            "4) Run the commands that required authentication. Now that the JWT token is included in the http headers, it should succeed. (assuming your user entry has the correct permissions)".to_owned(),
         ]
     }
     async fn authLink(&self) -> Option<String> { self.auth_link.clone() }
@@ -94,7 +95,7 @@ pub struct SubscriptionShard_SignIn;
 impl SubscriptionShard_SignIn {
     /// Begin sign-in flow, resulting in a JWT string being returned. (to then be used with `signInAttach`)
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google"]
-    /// * `jwtDuration` - How long until the generated JWT should expire, in minutes. [i64]
+    /// * `jwtDuration` - How long until the generated JWT should expire, in seconds. [i64]
     async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, provider: String, jwtDuration: i64) -> impl Stream<Item = Result<SignInStart_Result, SubError>> + 'a {
         let google_client_id = ClientId::new(env::var("CLIENT_ID").expect("Missing the CLIENT_ID environment variable."));
         let google_client_secret = ClientSecret::new(env::var("CLIENT_SECRET").expect("Missing the CLIENT_SECRET environment variable."));
@@ -182,8 +183,8 @@ impl SubscriptionShard_SignIn {
                                     ctx.tx.commit().await.map_err(to_sub_err)?;
 
                                     let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
-                                    let month_in_secs = 30 * 24 * 60 * 60;
-                                    let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(month_in_secs));
+                                    //let month_in_secs = 30 * 24 * 60 * 60; // (2629800)
+                                    let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(jwtDuration.try_into().map_err(to_sub_err)?));
                                     let jwt = key.authenticate(claims).map_err(to_sub_err)?;
                                     info!("Generated JWT:{}", jwt);
 
@@ -202,15 +203,45 @@ impl SubscriptionShard_SignIn {
     }
 
     /// Attaches the provided sign-in data (`jwt`) to the current websocket connection, authenticating subsequent requests sent over it.
-    async fn signInAttach(&self, _ctx: &async_graphql::Context<'_>, jwt: String) -> impl Stream<Item = GenericMutation_Result> {
-        // todo: validate JWT, and extract user-data
-
-        // todo: store user-data in some place where commands and such will be able to access it (for requests/commands made on this same websocket connection, of course)
-
+    async fn signInAttach<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, jwt: String) -> impl Stream<Item = Result<GenericMutation_Result, SubError>> + 'a {
         async_stream::stream! {
-            yield GenericMutation_Result {
-                message: "Command completed successfully.".to_owned(),
+            let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
+
+            let verify_opts = VerificationOptions {
+                //accept_future: true, // accept tokens that will only be valid in the future
+                //time_tolerance: Some(JWTDuration::from_mins(15)), // accept tokens even if they have expired up to 15 minutes after the deadline
+                //max_validity: Some(JWTDuration::from_hours(1)), // reject tokens if they were issued more than 1 hour ago
+                //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
+                .. VerificationOptions::default()
             };
+            let claims = key.verify_token::<GoogleUserInfoResult>(&jwt, Some(verify_opts)).map_err(to_sub_err)?;
+            let user_info: GoogleUserInfoResult = claims.custom;
+            let user_email = user_info.email;
+
+            let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await.unwrap();
+            let user_hiddens_with_email = get_user_hiddens(&ctx, Some(user_email.clone())).await.map_err(to_sub_err)?;
+            match user_hiddens_with_email.len() {
+                0 => {
+                    let message = format!("Could not find user with an email matching that claimed in the provided JWT. @email:{user_email}");
+                    warn!("{}", message);
+                    yield Err(SubError::new(message));
+                    return;
+                },
+                1 => {},
+                count => {
+                    let message = format!("Multiple users ({count}) found with the same email as that claimed in the provided JWT! @email:{user_email}");
+                    error!("{}", message);
+                    yield Err(SubError::new(message));
+                    return;
+                }
+            }
+
+            // todo: store user-data in some place where commands and such will be able to access it (for requests/commands made on this same websocket connection, of course)
+
+            yield Ok(GenericMutation_Result {
+                message: "Command completed successfully.".to_owned(),
+            });
         }
     }
 }
@@ -259,12 +290,10 @@ pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
     
     //Ok(key_as_base64_str.to_owned())
     Ok(result.to_owned())
-} 
+}
 
 pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>) -> Result<User, Error> {
-    let user_hiddens_with_email: Vec<UserHidden> = get_db_entries(ctx, "userHiddens", &Some(json!({
-        "email": {"equalTo": profile.email}
-    }))).await?;
+    let user_hiddens_with_email = get_user_hiddens(ctx, Some(profile.email.clone())).await?;
     match user_hiddens_with_email.len() {
         0 => {},
         1 => {
@@ -324,4 +353,77 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
     let result = get_user(ctx, new_user_id.as_str()).await?;
 	info!("User result:{:?}", result);
 	Ok(result)
+}
+
+//pub async fn resolve_jwt_to_user_info<'a>(gql_ctx: &'a async_graphql::Context<'a>, jwt: String) -> Result<User, Error> {
+pub async fn get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<User, Error> {
+    let user_info = try_get_user_info_from_gql_ctx(gql_ctx, ctx).await?;
+    match user_info {
+        None => Err(anyhow!("This endpoint requires auth-data to be supplied!")),
+        Some(user_info) => Ok(user_info),
+    }
+}
+pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<Option<User>, Error> {
+    let jwt = match gql_ctx.data::<String>() {
+        Ok(val) => val,
+        // if no data-entry found in gql-context, return None for "no user data"
+        Err(_err) => return Ok(None),
+    };
+    let user_info = resolve_jwt_to_user_info(ctx, jwt).await?;
+    Ok(Some(user_info))
+}
+/*pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
+    let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
+
+    let verify_opts = VerificationOptions {
+        //accept_future: true, // accept tokens that will only be valid in the future
+        //time_tolerance: Some(JWTDuration::from_mins(15)), // accept tokens even if they have expired up to 15 minutes after the deadline
+        //max_validity: Some(JWTDuration::from_hours(1)), // reject tokens if they were issued more than 1 hour ago
+        //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
+        .. VerificationOptions::default()
+    };
+    let claims = key.verify_token::<GoogleUserInfoResult>(jwt, Some(verify_opts)).map_err(to_sub_err)?;
+    let user_info: GoogleUserInfoResult = claims.custom;
+    let user_email = user_info.email;
+
+    /*let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+    let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await.unwrap();*/
+    let user_hiddens_with_email = get_user_hiddens(&ctx, Some(user_email.clone())).await.map_err(to_sub_err)?;
+    match user_hiddens_with_email.len() {
+        0 => {
+            let message = format!("Could not find user with an email matching that claimed in the provided JWT. @email:{user_email}");
+            warn!("{}", message);
+            return Err(anyhow!("{}", message));
+        },
+        1 => {},
+        count => {
+            let message = format!("Multiple users ({count}) found with the same email as that claimed in the provided JWT! @email:{user_email}");
+            error!("{}", message);
+            return Err(anyhow!("{}", message));
+        }
+    }
+
+    let user_hidden = user_hiddens_with_email.get(0).ok_or(anyhow!("Single user-hidden match vanished!"))?;
+    let user = get_user(&ctx, &user_hidden.id).await?;
+    Ok(user)
+}*/
+pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
+    let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
+
+    let verify_opts = VerificationOptions {
+        //accept_future: true, // accept tokens that will only be valid in the future
+        //time_tolerance: Some(JWTDuration::from_mins(15)), // accept tokens even if they have expired up to 15 minutes after the deadline
+        //max_validity: Some(JWTDuration::from_hours(1)), // reject tokens if they were issued more than 1 hour ago
+        //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
+        .. VerificationOptions::default()
+    };
+    let claims = key.verify_token::<User>(jwt, Some(verify_opts)).map_err(to_sub_err)?;
+    let user_info: User = claims.custom;
+
+    // rather than simply reading the user-data baked into the jwt, we grab the id, then re-retrieve the user-data from database
+    // (this way it is up-to-date if user changed their username, their permissions changed, etc.)
+    let user_hidden = get_user_hidden(&ctx, user_info.id.as_str()).await.map_err(to_sub_err)?;
+    let user = get_user(&ctx, &user_hidden.id).await?;
+    
+    Ok(user)
 }

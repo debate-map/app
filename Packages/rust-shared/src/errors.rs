@@ -1,7 +1,32 @@
-use std::{error::Error, fmt::{self, Debug}};
+use std::{fmt::{self, Debug}};
+use anyhow::{anyhow};
 
 use async_graphql::async_stream;
 use futures::Stream;
+
+/*pub fn to_anyhow<
+    //T: std::error::Error
+    T: ToString
+>(err: T) -> anyhow::Error
+    where T: Into<anyhow::Error> + Send + Sync
+{
+    anyhow!(err)
+}
+pub fn to_anyhow_with_extra<
+    //T: std::error::Error
+    T: ToString
+>(err: T, extra: String) -> anyhow::Error
+    where T: Into<anyhow::Error> + Send + Sync
+{
+    anyhow!(err.to_string() + "\n@extra:" + &extra)
+}*/
+
+pub fn to_anyhow<T: Debug>(err: T) -> anyhow::Error {
+    anyhow!(format!("{:?}", err))
+}
+pub fn to_anyhow_with_extra<T: Debug>(err: T, extra: String) -> anyhow::Error {
+    anyhow!(format!("{:?}", err) + "\n@extra:" + &extra)
+}
 
 // BasicError
 // ==========
@@ -19,7 +44,7 @@ impl BasicError {
     }
 }
 
-impl Error for BasicError {}
+impl std::error::Error for BasicError {}
 
 impl fmt::Display for BasicError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -65,7 +90,7 @@ pub fn to_sub_err_in_stream<T0, T: Debug>(base_err: T) -> impl Stream<Item = Res
     }
 }
 
-impl Error for SubError {}
+impl std::error::Error for SubError {}
 
 impl fmt::Display for SubError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

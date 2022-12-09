@@ -1,4 +1,7 @@
+use rust_shared::serde_json::json;
+use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
+use rust_shared::anyhow::{Error};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -7,7 +10,21 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::accessors::{AccessorContext, get_db_entries, get_db_entry};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+
+pub async fn get_user_hidden(ctx: &AccessorContext<'_>, id: &str) -> Result<UserHidden, Error> {
+    get_db_entry(ctx, "userHiddens", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
+pub async fn get_user_hiddens(ctx: &AccessorContext<'_>, email: Option<String>) -> Result<Vec<UserHidden>, Error> {
+    let mut filter_map = serde_json::Map::new();
+    if let Some(email) = email {
+        filter_map.insert("email".to_owned(), json!({"equalTo": email}));
+    }
+    get_db_entries(ctx, "userHiddens", &Some(JSONValue::Object(filter_map))).await
+}
 
 wrap_slow_macros!{
 

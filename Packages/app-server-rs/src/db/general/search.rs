@@ -35,7 +35,6 @@ use crate::utils::type_aliases::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::start_read_transaction;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
-use crate::utils::general::general::to_anyhow;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
 use crate::utils::type_aliases::{PGClientObject};
 use crate::utils::db::accessors::{AccessorContext};

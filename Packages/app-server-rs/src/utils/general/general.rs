@@ -24,23 +24,6 @@ pub async fn body_to_str(body: Body) -> Result<String, Error> {
     Ok(req_as_str)
 }
 
-pub fn to_anyhow<
-    //T: std::error::Error
-    T: ToString
->(err: T) -> Error
-    where T: Into<Error> + Send + Sync
-{
-    anyhow!(err)
-}
-pub fn to_anyhow_with_extra<
-    //T: std::error::Error
-    T: ToString
->(err: T, extra: String) -> Error
-    where T: Into<Error> + Send + Sync
-{
-    anyhow!(err.to_string() + "\n@extra:" + &extra)
-}
-
 /// Alternative to `my_hash_map.entry(key).or_insert_with(...)`, for when the hashmap is wrapped in a RwLock, and you want a "write" lock to only be obtained if a "read" lock is insufficient. (see: https://stackoverflow.com/a/57057033)
 /// Returns tuple of:
 /// * 0: The value that was found/created.
