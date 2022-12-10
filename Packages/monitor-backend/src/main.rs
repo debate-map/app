@@ -20,6 +20,7 @@
 )]
 
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use rust_shared::utils::general::k8s_env;
 use rust_shared::{futures, axum, tower, tower_http, tokio};
 use axum::{
     response::{Html, self, IntoResponse},
@@ -165,7 +166,7 @@ async fn main() {
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info());
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
-    info!("Monitor-backend launched.");
+    info!("Monitor-backend launched. @env:{:?}", k8s_env());
     server_fut.await.unwrap();
 }
 

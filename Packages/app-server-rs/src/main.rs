@@ -29,7 +29,7 @@
     dead_code,
 )]
 
-use rust_shared::{futures, axum, tower, tower_http};
+use rust_shared::{futures, axum, tower, tower_http, utils::general::k8s_env};
 use axum::{
     response::{Html},
     routing::{get},
@@ -50,7 +50,7 @@ use tracing::{info, error, metadata::LevelFilter};
 use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, Layer, util::SubscriberInitExt, filter};
 use dotenv::dotenv;
 
-use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::sign_in};
+use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::_sign_in};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -126,7 +126,12 @@ mod db {
     pub mod _general;
     pub mod general {
         pub mod search;
-        pub mod sign_in;
+        pub mod _sign_in;
+        pub mod sign_in {
+            pub mod fake_user;
+            pub mod jwt_utils;
+            pub mod google;
+        }
         pub mod subtree_old;
         pub mod subtree_collector_old;
         pub mod subtree;
@@ -236,7 +241,7 @@ async fn main() {
     let app = gql::extend_router(app, pool, app_state.clone(), lq_storage.clone()).await;
 
     // add sign-in routes
-    let app = sign_in::extend_router(app, app_state.clone()).await;
+    let app = _sign_in::extend_router(app, app_state.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
@@ -266,6 +271,6 @@ async fn main() {
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
-    info!("App-server-rs launched. @logical_cpus:{} @physical_cpus:{}", num_cpus::get(), num_cpus::get_physical());
+    info!("App-server-rs launched. @env:{:?} @logical_cpus:{} @physical_cpus:{}", k8s_env(), num_cpus::get(), num_cpus::get_physical());
     server_fut.await.unwrap();
 }

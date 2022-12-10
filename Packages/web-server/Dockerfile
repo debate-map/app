@@ -58,9 +58,11 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 	# use debian v12 (bookworm), because that is what our linker (mold) was built on [mold only has releases for debian v12+], which makes the produced binary require it as well
 	#FROM debian:bookworm-slim@sha256:5007b106fd828d768975b21cfdcecb51a8eeea9aab815a9e4a169acde464fb89
 	FROM debian:bookworm-20221114-slim
+	ARG env_ENV
 # ----------
 
 WORKDIR /dm_repo/Packages/web-server
+ENV ENV=$env_ENV
 
 COPY --from=cargo-build /dm_repo/Packages/web-server/web-server-binary .
 COPY --from=cargo-build /dm_repo/Packages/web-server/kgetOutput_buildTime/ ./kgetOutput_buildTime/

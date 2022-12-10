@@ -126,7 +126,7 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, 
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/> */}
 
-				{g.DB == "development" &&
+				{g.DB == "dev" &&
 				<Column style={{width: 300}}>
 					<Row mt={6} pt={3} style={{display: "block", borderTop: "2px solid gray"}}>
 						{`You're connected to a dev-mode server, where fake/passwordless sign-in is used.`}

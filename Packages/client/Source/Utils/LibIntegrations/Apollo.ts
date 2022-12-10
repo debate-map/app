@@ -19,7 +19,7 @@ export function GetAppServerURL(subpath: string): string {
 	Assert(subpath.startsWith("/"));
 
 	// temp
-	/*if (location.host == "debates.app" || DB == "production") return `https://app-server.debates.app/${subpath.slice(1)}`;
+	/*if (location.host == "debates.app" || DB == "prod") return `https://app-server.debates.app/${subpath.slice(1)}`;
 
 	if (location.host == "localhost:5100" || location.host == "localhost:5101") return `http://localhost:5110/${subpath.slice(1)}`;
 	//if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
@@ -29,8 +29,8 @@ export function GetAppServerURL(subpath: string): string {
 
 	return `https://app-server.debatemap.app/${subpath.slice(1)}`;*#/
 
-	if (DB == "development") return `http://localhost:5110/${subpath.slice(1)}`;
-	if (DB == "production") {
+	if (DB == "dev") return `http://localhost:5110/${subpath.slice(1)}`;
+	if (DB == "prod") {
 		// maybe temp: for graphql/websocket to OVH host directly, use unencrypted http/ws rather than https/wss (since the server hasn't yet been set up with TLS itself)
 		/*if (window.location.host.endsWith(".ovh.us") && subpath == "/graphql") {
 			return `http://app-server.${window.location.host}/${subpath.slice(1)}`;
@@ -48,7 +48,7 @@ export function GetWebServerURL(subpath: string, preferredServerOrigin?: string)
 }
 export function GetAppServerURL(subpath: string, preferredServerOrigin?: string): string {
 	// if on localhost, but user has set the db/server override to "prod", do so
-	if (window.location.hostname == "localhost" && DB == "production") {
+	if (window.location.hostname == "localhost" && DB == "prod") {
 		return `https://app-server.debates.app/${subpath.slice(1)}`;
 	}
 

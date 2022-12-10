@@ -17,7 +17,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 		this.SetEnvironment(envSuffix);
 	}
 	SetEnvironment(env: string) {
-		var {version, firebaseConfig} = require(env == "production" ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
+		var {version, firebaseConfig} = require(env == "prod" ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
 		try {
 			Firebase.initializeApp(firebaseConfig);
 		} catch (err) {} // silence reinitialize warning (hot-reloading)

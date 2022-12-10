@@ -10,7 +10,7 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
-use crate::db::general::sign_in::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::terms::{Term, TermInput};
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;

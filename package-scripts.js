@@ -20,7 +20,7 @@ Object.assign(scripts, {
 		tsc: `cd Packages/client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		dev: {
 			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "npm start dev-part2"`,
-			default: GetServeCommand("development"),
+			default: GetServeCommand("dev"),
 			staticServe: GetServeCommand(), // same as above, except with NODE_ENV=null (for static-serving of files in Dist folder)
 			noDebug: `nps "dev --no_debug"`,
 			//part2: `cross-env TS_NODE_OPTIONS="--experimental-modules" ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server.js`,
@@ -69,7 +69,7 @@ Object.assign(scripts, {
 	monitorClient: {
 		tsc: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		dev: {
-			default: GetServeCommand("development", "monitor-client"),
+			default: GetServeCommand("dev", "monitor-client"),
 			part2: TSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
 		},
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
@@ -135,8 +135,9 @@ const PrepDockerCmd = ()=>{
 	return `node Scripts/PrepareDocker.js &&`;
 };
 
-function GetServeCommand(nodeEnv = null, pkg = "client") {
-	return `cross-env-shell ${nodeEnv ? `NODE_ENV=${nodeEnv} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start ${pkg}.dev.part2"`;
+function GetServeCommand(env_short = null, pkg = "client") {
+	const env_long = {dev: "development", prod: "production"}[env_short] ?? env_short;
+	return `cross-env-shell ${env_long ? `NODE_ENV=${env_long} ` : ""}_USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=8192" "npm start ${pkg}.dev.part2"`;
 }
 
 const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");

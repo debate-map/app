@@ -62,18 +62,18 @@ declare global { var ENV_COMPILE_TIME: string; }
 // only compile-time if compiled for production (otherwise, can be overriden)
 declare global { var ENV: string; var DEV: boolean; var PROD: boolean; var TEST: boolean; }
 
-// if environment at compile time was not "production" (ie. if these globals weren't set/locked), then set them here at runtime
-if (ENV_COMPILE_TIME != "production") {
+// if environment at compile time was not "prod" (ie. if these globals weren't set/locked), then set them here at runtime
+if (ENV_COMPILE_TIME != "prod") {
 	g.ENV = ENV_COMPILE_TIME;
 	const envStr = AsNotNull(startURL.GetQueryVar("env")) || storeTemp.main?.envOverride;
 	if (envStr) {
-		g.ENV = {dev: "development", prod: "production"}[envStr] || envStr;
+		g.ENV = {dev: "dev", prod: "prod"}[envStr] || envStr;
 		// alert("Using env: " + g.ENV);
 		console.log(`Using env: ${ENV}`);
 	}
 
-	g.DEV = ENV == "development";
-	g.PROD = ENV == "production";
+	g.DEV = ENV == "dev";
+	g.PROD = ENV == "prod";
 	g.TEST = ENV == "test";
 } else {
 	// else, turn the compile-time replacements into true globals
@@ -86,11 +86,11 @@ declare global { var DB: string; var DB_SHORT: string; }
 
 g.DB = g.ENV;
 if (location.host == "localhost:5100" || location.host == "localhost:5101") {
-	g.DB = "development";
+	g.DB = "dev";
 }
 const dbStr = AsNotNull(startURL.GetQueryVar("db")) || storeTemp.main?.dbOverride;
 if (dbStr) {
-	g.DB = {dev: "development", prod: "production"}[dbStr] || dbStr;
+	g.DB = {dev: "dev", prod: "prod"}[dbStr] || dbStr;
 	console.log(`Using db: ${DB}`);
 }
 g.DB_SHORT = {development: "dev", production: "prod"}[DB] || DB;

@@ -19,7 +19,7 @@
     dead_code,
 )]
 
-use rust_shared::{futures, axum::{self, response::{IntoResponse, Response}, body::{Empty, self, Full, Body, boxed}, extract::Path, http::{header, HeaderValue, StatusCode}}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, tokio::fs};
+use rust_shared::{futures, axum::{self, response::{IntoResponse, Response}, body::{Empty, self, Full, Body, boxed}, extract::Path, http::{header, HeaderValue, StatusCode}}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, tokio::fs, utils::general::k8s_env};
 use axum::{
     response::{Html},
     routing::{get},
@@ -31,7 +31,7 @@ use axum::{
 use rust_shared::{serde_json::json, tokio};
 use tower_http::cors::{CorsLayer, Origin};
 use tower_http::trace::TraceLayer;
-use tracing::Level;
+use tracing::{Level, info};
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, filter, Layer};
 use std::{
     net::{SocketAddr}, panic, backtrace::Backtrace, path::PathBuf, env,
@@ -91,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 5100));
 
-    log::info!("Listening on http://{}", addr);
+    info!("Web-server launched. @env:{:?} Listening on http://{}", k8s_env(), addr);
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
