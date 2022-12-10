@@ -170,6 +170,7 @@ Object.assign(scripts, {
 				const latestKGetFolder = folders.slice(-1)[0];
 				const profFile = paths.resolve(latestKGetFolder, "")
 			});*/
+			// eslint-disable-next-line global-require
 			require("globby")("./Temp/kget_as-rs_*/*profdata", {stats: true}).then(/** @param {import("globby").Entry[]} files */ files=>{
 				files.sort((a, b)=>a.stats.ctimeMs - b.stats.ctimeMs);
 				const latestProfDataFile = paths.resolve(files.slice(-1)[0].path);

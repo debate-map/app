@@ -6,6 +6,7 @@ import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCach
 import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
+import {setContext} from "@apollo/client/link/context";
 import {graph} from "./MobXGraphlink.js";
 
 /*export function GetWebServerURL(subpath: string) {
@@ -158,6 +159,17 @@ export function InitApollo() {
 			}
 
 			if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", operation);
+		}),
+		setContext((_, {headers})=>{
+			// get the authentication token from local storage if it exists
+			const token = localStorage.getItem("debate-map-user-jwt");
+			// return the headers to the context so httpLink can read them
+			return {
+				headers: {
+					...headers,
+					authorization: token ? `Bearer ${token}` : "",
+				},
+			};
 		}),
 		link,
 	]);

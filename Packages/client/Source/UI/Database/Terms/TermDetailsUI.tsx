@@ -3,6 +3,7 @@ import React from "react";
 import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
+import {RunCommand_AddTerm} from "Utils/DB/Command.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
 import {DEL, E, GetEntries} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -106,16 +107,16 @@ export async function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (
 		type: TermType.commonNoun,
 		definition: "",
 	}, initialData));
-	const getCommand = ()=>new AddTerm({term: newEntry});
+	//const getCommand = ()=>new AddTerm({term: newEntry});
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
 		message: observer(()=>{
-			const tempCommand = getCommand();
+			/*const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
 				title: tempCommand.ValidateErrorStr,
-			};
+			};*/
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
@@ -128,7 +129,8 @@ export async function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (
 			);
 		}),
 		onOK: async()=>{
-			const {id} = await getCommand().RunOnServer();
+			//const {id} = await getCommand().RunOnServer();
+			const {id} = await RunCommand_AddTerm({term: newEntry});
 			if (postAdd) postAdd(id);
 		},
 	});

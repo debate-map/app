@@ -35,7 +35,7 @@ use axum::{
     routing::{get},
     AddExtensionLayer, Router, http::{
         Method,
-        header::{CONTENT_TYPE}
+        header::{CONTENT_TYPE, AUTHORIZATION}
     }, middleware,
 };
 use flume::Receiver;
@@ -179,7 +179,10 @@ pub fn get_cors_layer() -> CorsLayer {
             Method::TRACE,
         ])
         //.allow_headers(vec!["*", "Authorization", HeaderName::any(), FORWARDED, "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Requested-With"])
-        .allow_headers(vec![CONTENT_TYPE]) // needed, because the POST requests include a content-type header (which is not on the approved-by-default list)
+        .allow_headers(vec![
+            CONTENT_TYPE, // needed, because the POST requests include a content-type header (which is not on the approved-by-default list)
+            AUTHORIZATION, // needed for attaching of auth-data
+        ])
         .allow_credentials(true)
 }
 

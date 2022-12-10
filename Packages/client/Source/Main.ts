@@ -1,15 +1,15 @@
 // "static" imports
 //type __ = typeof import("js-vextensions/Helpers/@ApplyCETypes");
-import "./Utils/PreRunners/Start_0";
+import "./Utils/PreRunners/Start_0.js";
 //import "babel-polyfill";
 import "web-vcore/nm/webpack-runtime-require";
-import "./Utils/ClassExtensions/CE_General";
-import "./Utils/PreRunners/Start_1";
+import "./Utils/ClassExtensions/CE_General.js";
+import "./Utils/PreRunners/Start_1.js";
 import "web-vcore/nm/codemirror";
 import "web-vcore/nm/@opt/codemirror_deep_simplescrollbars";
-import "./Utils/UI/CodeMirrorConfig";
+import "./Utils/UI/CodeMirrorConfig.js";
 // needed to fix odd ts issue (where, if first "import" call for library is in wvc, all subsequent imports of it are assumed to be referencing that under-wvc version)
-import "web-vcore/nm/mobx-graphlink";
+import "web-vcore/nm/mobx-graphlink.js";
 
 import {VURL} from "web-vcore/nm/js-vextensions.js";
 import {RootState} from "Store";
@@ -134,7 +134,8 @@ export const hasHotReloaded = false;
 
 function LoadHotModules() {
 	// Log("Reloading hot modules...");
-	require("./Main_Hot");
+	// eslint-disable-next-line global-require
+	require("./Main_Hot.js");
 }
 
 // delay useful for, eg. letting mobx dev-tools load before page loads

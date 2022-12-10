@@ -2,12 +2,13 @@ import {Assert, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Div, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {InfoButton, Link, Observer} from "web-vcore";
+import {ES, InfoButton, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
-import {GetAppServerURL} from "Utils/LibIntegrations/Apollo";
+import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
+import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -21,7 +22,12 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 					background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 				}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
-					<SignInPanel/>
+
+					<Row mt={10}>JS backend:</Row>
+					<SignInPanel backend="js"/>
+
+					<Row mt={10}>Rust backend:</Row>
+					<SignInPanel backend="rs"/>
 				</Column>
 			);
 		}
@@ -48,6 +54,10 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						window.location.href = GetAppServerURL("/signOut");
 					}} />
 				</Row>
+
+				{/* even when "signed in", still show the rust-backend sign-in panel, since the "are we signed-in" logic is currently still based on the js backend */}
+				<Row mt={10}>Rust backend:</Row>
+				<SignInPanel backend="rs"/>
 			</Column>
 		);
 	}
@@ -60,7 +70,7 @@ export function ShowSignInPopup() {
 			return (
 				<div>
 					<div>Takes under 30 seconds.</div>
-					<SignInPanel style={{marginTop: 5}} onSignIn={()=>boxController.Close()} />
+					<SignInPanel style={{marginTop: 5}} onSignIn={()=>boxController.Close()} backend="rs"/>
 				</div>
 			);
 		},
@@ -68,13 +78,13 @@ export function ShowSignInPopup() {
 }
 
 @SimpleShouldUpdate
-export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, {username: string}> {
+export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void, backend: "rs" | "js"}, {username: string}> {
 	static initialState = {username: "Dev1"};
 	render() {
-		const {style, onSignIn} = this.props;
+		const {style, onSignIn, backend} = this.props;
 		const {username} = this.state;
 		return (
-			<Column style={style}>
+			<Column style={ES(style, backend == "js" && {background: "orange"})}>
 				{/*<SignInButton provider="google" text="Sign in with Google" onSignIn={onSignIn}/>*/}
 				{/*<div id="g_id_onload"
 					data-client_id={googleClientID}
@@ -100,28 +110,21 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, 
 
 					const options: GsiButtonConfiguration = {};
 					//g.google.accounts.id.renderButton(c, options);
-					g.google.accounts.id.renderButton(c, options, ()=>{
-						// rather than using client-side retrieval of access-token, use server-side retrieval (it's safer)
-						//window.location.href = `${window.location.origin}/auth/google`;
-						//window.location.href = GetAppServerURL("/auth/google");
-						// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
-						// todo: make sure the access-token data that server retrieves is never made accessible to frontend code (eg. use cookies, and set to http-only)
-						// todo: make this sign-in flow not require our main page to redirect (instead use a new-tab or popup-window)
+					g.google.accounts.id.renderButton(c, options, async()=>{
+						if (backend == "js") {
+							// rather than using client-side retrieval of access-token, use server-side retrieval (it's safer)
+							//window.location.href = `${window.location.origin}/auth/google`;
+							//window.location.href = GetAppServerURL("/auth/google");
+							// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
+							// todo: make sure the access-token data that server retrieves is never made accessible to frontend code (eg. use cookies, and set to http-only)
 
-						const url = GetAppServerURL("/auth/google");
-						const name = "google_login";
+							OpenSignInPopup(GetAppServerURL("/auth/google"));
+							return;
+						}
 
-						//const specs = "width=500,height=500";
-						//var width = 500, height = 370;
-						var width = 470, height = 580;
-						var w = window.outerWidth - width, h = window.outerHeight - height;
-						var left = Math.round(window.screenX + (w / 2));
-						var top = Math.round(window.screenY + (h / 2.5));
-						const specs = `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0`;
-
-						window.open(url, name, specs);
+						await DoSignInFlow("google");
 					});
-				}} />
+				}}/>
 				{/* <SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/> */}
@@ -139,32 +142,84 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: () => void}, 
 						<Text>Username:</Text>
 						<TextInput ml={5} style={{flex: 1}} value={username} onChange={val=>this.SetState({username: val})}/>
 						<Button ml={5} text="Sign in" onClick={async()=>{
-							/*await fetch(GetAppServerURL("/auth/dev"), {
-								method: "POST",
-								//method: "GET",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({username, password: "[dev-mode, so password is ignored]"}),
-							});*/
+							if (backend == "js") {
+								/*await fetch(GetAppServerURL("/auth/dev"), {
+									method: "POST",
+									//method: "GET",
+									headers: {
+										"Content-Type": "application/json",
+									},
+									body: JSON.stringify({username, password: "[dev-mode, so password is ignored]"}),
+								});*/
 
-							// we have to use a temp-form, in order to make the POST request "be a full page load", so that CORS restrictions don't apply
-							const tempForm = document.createElement("form");
-							Object.assign(tempForm, {method: "POST", action: GetAppServerURL("/auth/dev")});
-							const form_username = document.createElement("input");
-							tempForm.appendChild(form_username);
-							Object.assign(form_username, {type: "text", name: "username", value: username});
-							const form_password = document.createElement("input");
-							tempForm.appendChild(form_password);
-							Object.assign(form_password, {type: "password", name: "password", value: "[dev-mode, so password is ignored]"});
-							document.body.appendChild(tempForm); // must temporarily connect, in order to submit
-							tempForm.submit();
+								// we have to use a temp-form, in order to make the POST request "be a full page load", so that CORS restrictions don't apply
+								const tempForm = document.createElement("form");
+								Object.assign(tempForm, {method: "POST", action: GetAppServerURL("/auth/dev")});
+								const form_username = document.createElement("input");
+								tempForm.appendChild(form_username);
+								Object.assign(form_username, {type: "text", name: "username", value: username});
+								const form_password = document.createElement("input");
+								tempForm.appendChild(form_password);
+								Object.assign(form_password, {type: "password", name: "password", value: "[dev-mode, so password is ignored]"});
+								document.body.appendChild(tempForm); // must temporarily connect, in order to submit
+								tempForm.submit();
+								return;
+							}
+
+							await DoSignInFlow("dev", username);
 						}}/>
 					</Row>
 				</Column>}
 			</Column>
 		);
 	}
+}
+
+async function DoSignInFlow(provider: "google" | "dev", username?: string) {
+	const monthInSecs = 2629800;
+	const fetchResult_subscription = apolloClient.subscribe({
+		query: gql`
+			subscription($provider: String!, $jwtDuration: Int!, $preferredUsername: String) {
+				signInStart(provider: $provider, jwtDuration: $jwtDuration, preferredUsername: $preferredUsername) {
+					instructions
+					authLink
+					resultJWT
+				}
+			}
+		`,
+		variables: {provider, jwtDuration: monthInSecs, preferredUsername: username},
+	});
+	let popupOpened = false;
+	const resultJWT = await new Promise<string>(resolve=>{
+		const subscription = fetchResult_subscription.subscribe(data=>{
+			if (data.data.signInStart.authLink && !popupOpened) {
+				popupOpened = true;
+				OpenSignInPopup(data.data.signInStart.authLink);
+			}
+
+			if (data.data.signInStart.resultJWT) {
+				subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+				resolve(data.data.signInStart.resultJWT);
+			}
+		});
+	});
+
+	// store jwt in local-storage
+	localStorage.setItem("debate-map-user-jwt", resultJWT);
+}
+
+function OpenSignInPopup(url: string) {
+	const name = "sign_in_popup";
+
+	//const specs = "width=500,height=500";
+	//var width = 500, height = 370;
+	var width = 470, height = 580;
+	var w = window.outerWidth - width, h = window.outerHeight - height;
+	var left = Math.round(window.screenX + (w / 2));
+	var top = Math.round(window.screenY + (h / 2.5));
+	const specs = `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=0,status=0,resizable=0,location=0,menuBar=0`;
+
+	window.open(url, name, specs);
 }
 
 // from: https://developers.google.com/identity/gsi/web/reference/js-reference
