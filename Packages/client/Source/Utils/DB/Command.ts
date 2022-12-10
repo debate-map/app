@@ -5,14 +5,14 @@ import {gql} from "web-vcore/nm/@apollo/client";
 export async function RunCommand_AddTerm(commandArgs: {term: Term}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`
-			mutation($term: TermInput!) {
-				AddTerm(term: $term) {
+			mutation($input: AddTermInput!) {
+				addTerm(input: $input) {
 					id
 				}
 			}
 		`,
-		variables: commandArgs,
+		variables: {input: commandArgs},
 	});
 	console.log("Add-term result:", result);
-	return result.data.AddTerm as {id: string};
+	return result.data.addTerm as {id: string};
 }

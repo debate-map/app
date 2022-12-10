@@ -10,6 +10,8 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
 
+// todo: MS when "debate-map-user-jwt" token expires, the codebase and UI respond appropriately (ie. showing user as not signed-in)
+
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
 	render() {

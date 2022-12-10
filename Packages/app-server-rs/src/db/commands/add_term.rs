@@ -1,4 +1,4 @@
-use rust_shared::async_graphql::{ID, SimpleObject};
+use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::utils::db_constants::SYSTEM_USER_ID;
@@ -20,13 +20,13 @@ use super::_command::{set_db_entry_by_id_for_struct, UserInfo};
 
 wrap_slow_macros!{
 
-#[derive(Deserialize)]
-pub struct AddTermPayload {
+#[derive(InputObject, Deserialize)]
+pub struct AddTermInput {
 	term: TermInput,
 }
 
 #[derive(SimpleObject)]
-pub struct AddTermReturnData {
+pub struct AddTermResult {
 	id: String,
 }
 
@@ -34,13 +34,12 @@ pub struct AddTermReturnData {
 pub struct MutationShard_AddTerm;
 #[Object]
 impl MutationShard_AddTerm {
-    //async fn addTerm(&self, gql_ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<AddTermReturnData, Error> {
-	#[graphql(name = "AddTerm")]
-	async fn add_term(&self, gql_ctx: &async_graphql::Context<'_>, term_: TermInput) -> Result<AddTermReturnData, Error> {
+	async fn add_term(&self, gql_ctx: &async_graphql::Context<'_>, input: AddTermInput) -> Result<AddTermResult, Error> {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
-		let mut return_data = AddTermReturnData {id: "<tbd>".to_owned()};
+		let AddTermInput { term: term_ } = input;
+		let mut result = AddTermResult {id: "<tbd>".to_owned()};
 		
 		let term = Term {
 			// pass-through
@@ -57,7 +56,7 @@ impl MutationShard_AddTerm {
 			creator: user_info.id.to_string(),
 			createdAt: time_since_epoch_ms_i64(),
 		};
-		return_data.id = term.id.to_string();
+		result.id = term.id.to_string();
 
 		validate_term(&term)?;
 		set_db_entry_by_id_for_struct(&ctx, "terms".to_owned(), term.id.to_string(), term).await?;
@@ -65,7 +64,7 @@ impl MutationShard_AddTerm {
 		info!("Committing transaction...");
 		ctx.tx.commit().await?;
 		info!("Add-term command complete!");
-		Ok(return_data)
+		Ok(result)
     }
 }
 

@@ -17,7 +17,7 @@ use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::general::body_to_str;
 
 use super::commands::_command::UserInfo;
-use super::commands::add_term::{AddTermReturnData};
+use super::commands::add_term::{AddTermResult};
 use super::commands::refresh_lq_data::refresh_lq_data;
 
 //use super::commands::transfer_nodes::transfer_nodes;
