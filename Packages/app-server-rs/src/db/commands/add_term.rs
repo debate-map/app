@@ -25,7 +25,7 @@ pub struct AddTermInput {
 	term: TermInput,
 }
 
-#[derive(SimpleObject)]
+#[derive(SimpleObject, Debug)]
 pub struct AddTermResult {
 	id: String,
 }
@@ -42,6 +42,10 @@ impl MutationShard_AddTerm {
 		let mut result = AddTermResult {id: "<tbd>".to_owned()};
 		
 		let term = Term {
+			// set by server
+			id: ID(new_uuid_v4_as_b64()),
+			creator: user_info.id.to_string(),
+			createdAt: time_since_epoch_ms_i64(),
 			// pass-through
 			accessPolicy: term_.accessPolicy,
 			attachments: term_.attachments,
@@ -51,19 +55,14 @@ impl MutationShard_AddTerm {
 			name: term_.name,
 			note: term_.note,
 			r#type: term_.r#type,
-			// set by server
-			id: ID(new_uuid_v4_as_b64()),
-			creator: user_info.id.to_string(),
-			createdAt: time_since_epoch_ms_i64(),
 		};
 		result.id = term.id.to_string();
 
 		validate_term(&term)?;
 		set_db_entry_by_id_for_struct(&ctx, "terms".to_owned(), term.id.to_string(), term).await?;
 
-		info!("Committing transaction...");
 		ctx.tx.commit().await?;
-		info!("Add-term command complete!");
+		info!("Command completed! Result:{:?}", result);
 		Ok(result)
     }
 }

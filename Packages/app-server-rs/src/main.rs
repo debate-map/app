@@ -122,6 +122,7 @@ mod db {
         pub mod refresh_lq_data;
         //pub mod transfer_nodes;
         pub mod add_term;
+        pub mod add_access_policy;
     }
     pub mod _general;
     pub mod general {

@@ -5,7 +5,7 @@ use rust_shared::serde_json::json;
 use rust_shared::utils::db_constants::SYSTEM_USER_ID;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, SubError, serde, serde_json};
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -37,11 +37,13 @@ pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> 
 
 wrap_slow_macros!{
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct AccessPolicyInput {
+    pub name: String,
+    pub permissions: serde_json::Value,
+    #[graphql(name = "permissions_userExtends")]
+    pub permissions_userExtends: serde_json::Value,
+}
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct AccessPolicy {

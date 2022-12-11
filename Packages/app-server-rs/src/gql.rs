@@ -39,6 +39,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
+use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::_sign_in::SubscriptionShard_SignIn;
@@ -82,6 +83,7 @@ pub struct MutationRoot(
     MutationShard_General, MutationShard_General_Subtree,
     // commands
     MutationShard_AddTerm,
+    MutationShard_AddAccessPolicy,
 );
 
 #[derive(MergedSubscription, Default)]

@@ -4,6 +4,7 @@ import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {userIDPlaceholder} from "UI/@Shared/Maps/MapUI/ActionBar_Left/PeopleDropDown";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
+import {RunCommand_AddAccessPolicy} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, observer_simple, TextPlus} from "web-vcore";
 import {Clone, E} from "web-vcore/nm/js-vextensions.js";
@@ -169,16 +170,16 @@ export function ShowAddAccessPolicyDialog(initialData?: Partial<AccessPolicy>, p
 	let newEntry = new AccessPolicy(E({
 		name: "",
 	}, initialData));
-	const getCommand = ()=>new AddAccessPolicy({policy: newEntry});
+	//const getCommand = ()=>new AddAccessPolicy({policy: newEntry});
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add access-policy", cancelButton: true,
 		message: observer(()=>{
-			const tempCommand = getCommand();
+			/*const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
 				title: tempCommand.ValidateErrorStr,
-			};
+			};*/
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
@@ -191,7 +192,8 @@ export function ShowAddAccessPolicyDialog(initialData?: Partial<AccessPolicy>, p
 			);
 		}),
 		onOK: async()=>{
-			const {id} = await getCommand().RunOnServer();
+			//const {id} = await getCommand().RunOnServer();
+			const {id} = await RunCommand_AddAccessPolicy({policy: newEntry});
 			if (postAdd) postAdd(id);
 		},
 	});
