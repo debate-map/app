@@ -1,7 +1,7 @@
 use rust_shared::anyhow::Error;
 use rust_shared::SubError;
 use rust_shared::async_graphql;
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -10,8 +10,9 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
-
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
+
+use super::commands::_command::FieldUpdate;
 
 pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Error> {
     get_db_entry(ctx, "medias", &Some(json!({
@@ -20,12 +21,6 @@ pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Err
 }
 
 wrap_slow_macros!{
-
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Media {
@@ -51,6 +46,24 @@ impl From<Row> for Media {
             description: row.get("description"),
 		}
 	}
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct MediaInput {
+    pub accessPolicy: String,
+    pub name: String,
+    pub r#type: String,
+    pub url: String,
+    pub description: String,
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct MediaUpdates {
+    pub accessPolicy: FieldUpdate<String>,
+    pub name: FieldUpdate<String>,
+    pub r#type: FieldUpdate<String>,
+    pub url: FieldUpdate<String>,
+    pub description: FieldUpdate<String>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Media { nodes: Vec<Media> }

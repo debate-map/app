@@ -18,7 +18,7 @@ use deadpool_postgres::{Transaction, Pool};
 use crate::utils::db::sql_param::{SQLParamBoxed};
 use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::{SQLParam, CustomPGSerializer}}, general::{general::{match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::{PGClientObject, RowData}};
 
-pub struct UserInfo {
+/*pub struct UserInfo {
     pub id: String,
 }
 
@@ -26,7 +26,7 @@ pub struct UserInfo {
 pub trait Command {
     async fn Validate(&self, ctx: &AccessorContext<'_>) -> Result<JSONValue, Error>;
     fn Commit(&self, ctx: &AccessorContext<'_>) -> Result<(), Error>;
-}
+}*/
 
 // command helpers
 // ==========
@@ -117,24 +117,13 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
     let (sql_text, params) = final_query.into_query_args()?;
 
     let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
-
-    // this basically "unboxes" the params into refs; this is needed for each entry to satisfy the ToSql constraint
-    // (see here for more info: https://github.com/sfackler/rust-postgres/issues/712)
-    /*let params_as_refs: Vec<&(dyn ToSql + Sync)> = params.iter()
-        .map(|x| x/*.as_ref()*/ as &(dyn ToSql + Sync))
-        .collect();*/
-
+    // wrap params into boxes, then refs, to satisfy ToSql constraint generically; not ideal, but best approach known atm; see: https://github.com/sfackler/rust-postgres/issues/712
     let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
     let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
 
-    //let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params).await.map_err(to_anyhow)?.try_collect().await.map_err(to_anyhow)?;
     let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params_as_refs).await
-        .map_err(|err| {
-            anyhow!("Got error while running query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
-        })?
-        .try_collect().await.map_err(|err| {
-            anyhow!("Got error while collecting results of db-query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
-        })?;
+        .map_err(|err| anyhow!("Got error while running query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str))?
+        .try_collect().await.map_err(|err| anyhow!("Got error while collecting results of db-query, for setting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str))?;
     Ok(rows)
 }
 
@@ -150,17 +139,13 @@ pub async fn delete_db_entry_by_field_value(ctx: &AccessorContext<'_>, table_nam
     let (sql_text, params) = final_query.into_query_args()?;
 
     let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
-
+    // wrap params into boxes, then refs, to satisfy ToSql constraint generically; not ideal, but best approach known atm; see: https://github.com/sfackler/rust-postgres/issues/712
     let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
     let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
 
     let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params_as_refs).await
-        .map_err(|err| {
-            anyhow!("Got error while running query, for deleting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
-        })?
-        .try_collect().await.map_err(|err| {
-            anyhow!("Got error while collecting results of db-query, for deleting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
-        })?;
+        .map_err(|err| anyhow!("Got error while running query, for deleting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str))?
+        .try_collect().await.map_err(|err| anyhow!("Got error while collecting results of db-query, for deleting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str))?;
     Ok(rows)
 }
 

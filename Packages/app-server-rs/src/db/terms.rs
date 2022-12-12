@@ -59,7 +59,6 @@ impl From<Row> for Term {
 }
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]
-//#[graphql(input_name = "TermT0")] // temp
 pub struct TermInput {
     pub accessPolicy: String,
     pub name: String,

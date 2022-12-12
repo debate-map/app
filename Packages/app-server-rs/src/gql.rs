@@ -40,10 +40,13 @@ use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
+use crate::db::commands::add_media::MutationShard_AddMedia;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::commands::delete_access_policy::MutationShard_DeleteAccessPolicy;
+use crate::db::commands::delete_media::MutationShard_DeleteMedia;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
 use crate::db::commands::update_access_policy::MutationShard_UpdateAccessPolicy;
+use crate::db::commands::update_media::MutationShard_UpdateMedia;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
 use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::_sign_in::SubscriptionShard_SignIn;
@@ -86,9 +89,9 @@ pub struct QueryRoot(
 pub struct MutationRoot(
     MutationShard_General, MutationShard_General_Subtree,
     // commands
-    MutationShard_AddAccessPolicy, MutationShard_AddTerm,
-    MutationShard_DeleteAccessPolicy, MutationShard_DeleteTerm,
-    MutationShard_UpdateAccessPolicy, MutationShard_UpdateTerm,
+    MutationShard_AddAccessPolicy, MutationShard_AddMedia, MutationShard_AddTerm,
+    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMedia, MutationShard_DeleteTerm,
+    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateTerm,
 );
 
 #[derive(MergedSubscription, Default)]

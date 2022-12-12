@@ -1,4 +1,4 @@
-import {AccessPolicy, Term} from "dm_common";
+import {AccessPolicy, Media, Term} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -14,6 +14,20 @@ export async function RunCommand_AddAccessPolicy(commandArgs: {policy: AccessPol
 		variables: {input: commandArgs},
 	});
 	return result.data.addAccessPolicy as {id: string};
+}
+
+export async function RunCommand_AddMedia(commandArgs: {media: Media}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`
+			mutation($input: AddMediaInput!) {
+				addMedia(input: $input) {
+					id
+				}
+			}
+		`,
+		variables: {input: commandArgs},
+	});
+	return result.data.addMedia as {id: string};
 }
 
 export async function RunCommand_AddTerm(commandArgs: {term: Term}) {
@@ -42,6 +56,18 @@ export async function RunCommand_DeleteAccessPolicy(commandArgs: {id: string}) {
 	return result.data.deleteAccessPolicy as {};
 }
 
+export async function RunCommand_DeleteMedia(commandArgs: {id: string}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`
+			mutation($input: DeleteMediaInput!) {
+				deleteMedia(input: $input) { __typename }
+			}
+		`,
+		variables: {input: commandArgs},
+	});
+	return result.data.deleteMedia as {};
+}
+
 export async function RunCommand_DeleteTerm(commandArgs: {id: string}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`
@@ -64,6 +90,18 @@ export async function RunCommand_UpdateAccessPolicy(commandArgs: {id: string, up
 		variables: {input: commandArgs},
 	});
 	return result.data.updateAccessPolicy as {};
+}
+
+export async function RunCommand_UpdateMedia(commandArgs: {id: string, updates: Partial<Media>}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`
+			mutation($input: UpdateMediaInput!) {
+				updateMedia(input: $input) { __typename }
+			}
+		`,
+		variables: {input: commandArgs},
+	});
+	return result.data.updateMedia as {};
 }
 
 export async function RunCommand_UpdateTerm(commandArgs: {id: string, updates: Partial<Term>}) {

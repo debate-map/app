@@ -38,7 +38,7 @@ use async_trait::async_trait;
 
 use crate::{db::{node_revisions::MapNodeRevision, general::accessor_helpers::AccessorContext, nodes::{get_node, MapNode}}, utils::{type_aliases::JSONValue, db::uuid::new_uuid_v4_as_b64}};
 
-use super::_command::{Command, db_set, UserInfo};
+use super::_command::{Command, db_set};
 
 #[derive(Serialize, Deserialize)]
 pub struct AddNodeRevisionPayload {

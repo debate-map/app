@@ -3,6 +3,11 @@ use rust_shared::anyhow::anyhow;
 use crate::{utils::db::accessors::AccessorContext, db::{users::User, access_policies::{AccessPolicy, get_access_policy}}};
 use rust_shared::anyhow::Error;
 
+/*pub fn assert_user_is_mod(user_info: &User) -> Result<(), Error> {
+    if user_info.permissionGroups.r#mod { return Ok(()); }
+    Err(anyhow!("This action requires moderator permissions."))
+}*/
+
 pub async fn assert_user_can_update(_ctx: &AccessorContext<'_>, user_info: &User, creator: &str, _access_policy_id: &str) -> Result<(), Error> {
     //let policy = get_access_policy(ctx, access_policy_id).await?;
     Ok(assert_user_can_update_simple(user_info, creator)?)

@@ -117,12 +117,15 @@ mod db {
     pub mod commands {
         pub mod _command;
         pub mod add_access_policy;
+        pub mod add_media;
         //pub mod add_node_revision; // temp-removed
         pub mod add_term;
         pub mod clone_subtree;
         pub mod delete_access_policy;
+        pub mod delete_media;
         pub mod delete_term;
         pub mod update_access_policy;
+        pub mod update_media;
         pub mod update_term;
         pub mod refresh_lq_data;
         //pub mod transfer_nodes;

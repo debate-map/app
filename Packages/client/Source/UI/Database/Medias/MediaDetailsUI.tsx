@@ -9,6 +9,7 @@ import {Button, Column, Pre, Row, RowLR, Select, Span, TextInput} from "web-vcor
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {observer} from "web-vcore/nm/mobx-react";
+import {RunCommand_AddMedia} from "Utils/DB/Command.js";
 import {PolicyPicker} from "../Policies/PolicyPicker.js";
 import {store} from "../../../Store/index.js";
 
@@ -88,35 +89,36 @@ export async function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?:
 		return {accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy};
 	});
 
-	let newMedia = new Media(E({
+	let newEntry = new Media(E({
 		accessPolicy: prep.accessPolicy,
 		name: "",
 		type: MediaType.image,
 		description: "",
 	}, initialData));
-	const getCommand = ()=>new AddMedia({media: newMedia});
+	//const getCommand = ()=>new AddMedia({media: newEntry});
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add media", cancelButton: true,
 		message: observer(()=>{
-			const tempCommand = getCommand();
+			/*const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
 				title: tempCommand.ValidateErrorStr,
-			};
+			};*/
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					<MediaDetailsUI baseData={newMedia} phase="create"
+					<MediaDetailsUI baseData={newEntry} phase="create"
 						onChange={(val, error)=>{
-							newMedia = val;
+							newEntry = val;
 							boxController.UpdateUI();
 						}}/>
 				</Column>
 			);
 		}),
 		onOK: async()=>{
-			const {id} = await getCommand().RunOnServer();
+			//const {id} = await getCommand().RunOnServer();
+			const {id} = await RunCommand_AddMedia({media: newEntry});
 			if (postAdd) postAdd(id);
 		},
 	});

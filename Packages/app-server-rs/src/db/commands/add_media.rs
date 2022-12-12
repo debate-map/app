@@ -10,9 +10,8 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
-use crate::db::access_policies::{AccessPolicyInput, AccessPolicy};
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::terms::{Term, TermInput};
+use crate::db::medias::{Media, MediaInput};
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
@@ -22,39 +21,43 @@ use super::_command::{set_db_entry_by_id_for_struct};
 wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
-pub struct AddAccessPolicyInput {
-	policy: AccessPolicyInput,
+pub struct AddMediaInput {
+	media: MediaInput,
 }
 
 #[derive(SimpleObject, Debug)]
-pub struct AddAccessPolicyResult {
+pub struct AddMediaResult {
 	id: String,
 }
 
 #[derive(Default)]
-pub struct MutationShard_AddAccessPolicy;
+pub struct MutationShard_AddMedia;
 #[Object]
-impl MutationShard_AddAccessPolicy {
-	async fn add_access_policy(&self, gql_ctx: &async_graphql::Context<'_>, input: AddAccessPolicyInput) -> Result<AddAccessPolicyResult, Error> {
+impl MutationShard_AddMedia {
+	async fn add_media(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMediaInput) -> Result<AddMediaResult, Error> {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
-		let AddAccessPolicyInput { policy: policy_ } = input;
-		let mut result = AddAccessPolicyResult {id: "<tbd>".to_owned()};
+		let AddMediaInput { media: media_ } = input;
+		let mut result = AddMediaResult {id: "<tbd>".to_owned()};
 		
-		let policy = AccessPolicy {
+		let media = Media {
 			// set by server
 			id: ID(new_uuid_v4_as_b64()),
 			creator: user_info.id.to_string(),
 			createdAt: time_since_epoch_ms_i64(),
 			// pass-through
-			name: policy_.name,
-			permissions: policy_.permissions,
-			permissions_userExtends: policy_.permissions_userExtends,
+			accessPolicy: media_.accessPolicy,
+			name: media_.name,
+			r#type: media_.r#type,
+			url: media_.url,
+			description: media_.description,
 		};
-		result.id = policy.id.to_string();
+		result.id = media.id.to_string();
 
-		set_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy).await?;
+		//assert_user_is_mod(&user_info)?;
+		if !user_info.permissionGroups.r#mod { return Err(anyhow!("Only moderators can add media currently. (till review/approval system is implemented)")); }
+		set_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), media.id.to_string(), media).await?;
 
 		ctx.tx.commit().await?;
 		info!("Command completed! Result:{:?}", result);

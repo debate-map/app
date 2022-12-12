@@ -9,6 +9,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMedia, DeleteMedia} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {RunCommand_DeleteMedia, RunCommand_UpdateMedia} from "Utils/DB/Command.js";
 import {MediaDetailsUI, ShowAddMediaDialog} from "./Medias/MediaDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 
@@ -72,7 +73,8 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 										onClick={async e=>{
 											Assert(selectedMedia); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedMedia, selectedMedia_newData);
-											await new UpdateMedia({id: selectedMedia.id, updates}).RunOnServer();
+											//await new UpdateMedia({id: selectedMedia.id, updates}).RunOnServer();
+											await RunCommand_UpdateMedia({id: selectedMedia.id, updates});
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -82,7 +84,8 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 											title: `Delete "${selectedMedia.name}"`, cancelButton: true,
 											message: `Delete the media "${selectedMedia.name}"?`,
 											onOK: async()=>{
-												await new DeleteMedia({id: selectedMedia.id}).RunOnServer();
+												//await new DeleteMedia({id: selectedMedia.id}).RunOnServer();
+												await RunCommand_DeleteMedia({id: selectedMedia.id});
 											},
 										});
 									}}/>}
