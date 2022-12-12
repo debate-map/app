@@ -55,6 +55,7 @@ impl<T: SQLParam + ?Sized> SQLParam_ for Box<T> {
     }
 }
 impl<T: SQLParam + ?Sized + std::clone::Clone> SQLParam for Box<T> {}
+// rather than this, just use `Box::new(x)`
 /*pub fn sql_param_boxed<T: SQLParam>(val: T) -> SQLParamBoxed {
     Box::new(val)
 }*/

@@ -2,7 +2,7 @@ import {AccessPolicy, CanGetBasicPermissions, DeleteAccessPolicy, GetAccessPolic
 import React from "react";
 import {store} from "Store";
 import {GetSelectedPolicy, GetSelectedPolicyID} from "Store/main/database";
-import {ES, GetUpdates, Observer, RunInAction_Set} from "web-vcore";
+import {ES, GetUpdates, Observer, RunInAction_Set, chroma_maxDarken} from "web-vcore";
 import {AddSpacesAt_Options, Assert, E, ToJSON_Advanced} from "web-vcore/nm/js-vextensions.js";
 import {JSONStringify_NoQuotesForKeys} from "web-vcore/nm/mobx-graphlink";
 import {Button, Column, Div, Pre, Row, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -10,7 +10,7 @@ import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {chroma_maxDarken} from "web-vcore";
+import {RunCommand_DeleteAccessPolicy} from "Utils/DB/Command.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {PolicyDetailsUI, ShowAddAccessPolicyDialog} from "./Policies/PolicyDetailsUI.js";
 
@@ -83,7 +83,8 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 												title: `Delete "${selectedPolicy.name}"`, cancelButton: true,
 												message: `Delete the access-policy "${selectedPolicy.name}"?`,
 												onOK: async()=>{
-													await new DeleteAccessPolicy({id: selectedPolicy.id}).RunOnServer();
+													//await new DeleteAccessPolicy({id: selectedPolicy.id}).RunOnServer();
+													await RunCommand_DeleteAccessPolicy({id: selectedPolicy.id});
 												},
 											});
 										}}/>}

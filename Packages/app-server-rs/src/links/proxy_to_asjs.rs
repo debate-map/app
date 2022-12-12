@@ -106,7 +106,10 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
         let queries_originally_in_asrs = vec!["subtree", "subtree2", "descendants", "ancestors", "descendants2", "shortestPath", "searchSubtree"];
         let commands_originally_in_asrs = vec!["refreshLQData", "cloneSubtree"];
         // endpoints ported to rust (don't proxy these to app-server-js)
-        let commands_in_asrs = vec!["addTerm", "addAccessPolicy"];
+        let commands_in_asrs = vec![
+            "addAccessPolicy", "addTerm",
+            "deleteAccessPolicy", "deleteTerm",
+        ];
 
         // if any of the endpoints used in the request have an implementation in rust, don't proxy the request to app-server-js
         for query_field in query_fields {

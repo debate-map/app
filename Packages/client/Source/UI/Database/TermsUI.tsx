@@ -2,7 +2,7 @@ import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermi
 import {useEffect} from "react";
 import {store} from "Store";
 import {GetSelectedTerm, GetSelectedTermID} from "Store/main/database";
-import {ES, GetUpdates, Observer, RunInAction} from "web-vcore";
+import {ES, GetUpdates, Observer, RunInAction, chroma_maxDarken} from "web-vcore";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -10,7 +10,7 @@ import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {chroma_maxDarken} from "web-vcore";
+import {RunCommand_DeleteTerm} from "Utils/DB/Command.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 
@@ -84,7 +84,8 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 												title: `Delete "${GetFullNameP(selectedTerm)}"`, cancelButton: true,
 												message: `Delete the term "${GetFullNameP(selectedTerm)}"?`,
 												onOK: async()=>{
-													await new DeleteTerm({id: selectedTerm.id}).RunOnServer();
+													//await new DeleteTerm({id: selectedTerm.id}).RunOnServer();
+													await RunCommand_DeleteTerm({id: selectedTerm.id});
 												},
 											});
 										}}/>}

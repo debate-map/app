@@ -2,6 +2,7 @@
 
 use std::iter::{once, empty};
 
+use rust_shared::indoc::indoc;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{bytes, serde_json};
@@ -13,6 +14,7 @@ use rust_shared::{tokio_postgres, tokio_postgres::{Row, types::ToSql}};
 use rust_shared::anyhow::{anyhow, Error, Context};
 use deadpool_postgres::{Transaction, Pool};
 
+use crate::utils::db::sql_param::{SQLParamBoxed};
 use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::{SQLParam, CustomPGSerializer}}, general::{general::{match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::{PGClientObject, RowData}};
 
 pub struct UserInfo {
@@ -135,6 +137,32 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
     Ok(rows)
 }
 
+pub async fn delete_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String) -> Result<Vec<Row>, Error> {
+    Ok(delete_db_entry_by_field_value(ctx, table_name, "id".to_owned(), Box::new(id)).await?)
+}
+pub async fn delete_db_entry_by_field_value(ctx: &AccessorContext<'_>, table_name: String, field_name: String, field_value: SQLParamBoxed) -> Result<Vec<Row>, Error> {
+    let mut final_query = SF::new("DELETE FROM $I WHERE $I = $V RETURNING *", vec![
+        SQLIdent::new_boxed(table_name.clone())?,
+        SQLIdent::new_boxed(field_name.clone())?,
+        field_value,
+    ]);
+    let (sql_text, params) = final_query.into_query_args()?;
+
+    let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
+
+    let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
+    let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
+
+    let rows: Vec<Row> = ctx.tx.query_raw(&sql_text, params_as_refs).await
+        .map_err(|err| {
+            anyhow!("Got error while running query, for deleting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
+        })?
+        .try_collect().await.map_err(|err| {
+            anyhow!("Got error while collecting results of db-query, for deleting db-entry. @error:{}\n{}", err.to_string(), &debug_info_str)
+        })?;
+    Ok(rows)
+}
+
 #[derive(Debug)]
 pub struct ToSqlWrapper {
     pub data: Box<dyn SQLParam>,
@@ -151,4 +179,8 @@ impl ToSql for ToSqlWrapper {
         test.to_sql_checked_(ty, out)*/
         self.data.to_sql_checked_(ty, out)
     }
+}
+
+pub fn gql_placeholder() -> String {
+    "Do not request this field; it's here transiently merely to satisfy graphql (see: https://github.com/graphql/graphql-spec/issues/568). Instead, request the hidden \"__typename\" field, as that will always exist.".to_owned()
 }

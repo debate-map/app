@@ -116,16 +116,18 @@ mod utils {
 mod db {
     pub mod commands {
         pub mod _command;
-        // temp-removed
-        //pub mod add_node_revision;
+        pub mod add_access_policy;
+        //pub mod add_node_revision; // temp-removed
+        pub mod add_term;
         pub mod clone_subtree;
+        pub mod delete_access_policy;
+        pub mod delete_term;
         pub mod refresh_lq_data;
         //pub mod transfer_nodes;
-        pub mod add_term;
-        pub mod add_access_policy;
     }
     pub mod _general;
     pub mod general {
+        pub mod permission_helpers;
         pub mod search;
         pub mod _sign_in;
         pub mod sign_in {
