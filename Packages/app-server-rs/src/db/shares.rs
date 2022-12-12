@@ -54,7 +54,7 @@ impl SubscriptionShard_Share {
     async fn shares<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Share, SubError>> + 'a {
         handle_generic_gql_collection_request::<Share, GQLSet_Share>(ctx, "shares", filter).await
     }
-    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<Share>, SubError>> + 'a {
+    async fn share<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Share>, SubError>> + 'a {
         handle_generic_gql_doc_request::<Share>(ctx, "shares", id).await
     }
 }

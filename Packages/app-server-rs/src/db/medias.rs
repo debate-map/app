@@ -9,6 +9,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 
@@ -34,18 +35,7 @@ pub struct Media {
     pub description: String,
 }
 impl From<Row> for Media {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            accessPolicy: row.get("accessPolicy"),
-            creator: row.get("creator"),
-            createdAt: row.get("createdAt"),
-            name: row.get("name"),
-            r#type: row.get("type"),
-            url: row.get("url"),
-            description: row.get("description"),
-		}
-	}
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]
@@ -80,7 +70,7 @@ impl SubscriptionShard_Media {
     async fn medias<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Media, SubError>> + 'a {
         handle_generic_gql_collection_request::<Media, GQLSet_Media>(ctx, "medias", filter).await
     }
-    async fn media<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<Media>, SubError>> + 'a {
+    async fn media<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Media>, SubError>> + 'a {
         handle_generic_gql_doc_request::<Media>(ctx, "medias", id).await
     }
 }

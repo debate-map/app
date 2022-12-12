@@ -97,7 +97,7 @@ impl SubscriptionShard_MapNodeTag {
     async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeTag, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNodeTag, GQLSet_MapNodeTag>(ctx, "nodeTags", filter).await
     }
-    async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<MapNodeTag>, SubError>> + 'a {
+    async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<MapNodeTag>, SubError>> + 'a {
         handle_generic_gql_doc_request::<MapNodeTag>(ctx, "nodeTags", id).await
     }
 }

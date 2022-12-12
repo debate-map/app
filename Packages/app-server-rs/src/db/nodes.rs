@@ -71,7 +71,7 @@ impl SubscriptionShard_MapNode {
     async fn nodes<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNode, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNode, GQLSet_MapNode>(ctx, "nodes", filter).await
     }
-    async fn node<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<MapNode>, SubError>> + 'a {
+    async fn node<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<MapNode>, SubError>> + 'a {
         handle_generic_gql_doc_request::<MapNode>(ctx, "nodes", id).await
     }
 }

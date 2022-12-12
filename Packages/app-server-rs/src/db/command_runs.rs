@@ -78,7 +78,7 @@ impl SubscriptionShard_CommandRun {
     async fn commandRuns<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_CommandRun, SubError>> + 'a {
         handle_generic_gql_collection_request::<CommandRun, GQLSet_CommandRun>(ctx, "commandRuns", filter).await
     }
-    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<CommandRun>, SubError>> + 'a {
+    async fn commandRun<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<CommandRun>, SubError>> + 'a {
         handle_generic_gql_doc_request::<CommandRun>(ctx, "commandRuns", id).await
     }
 }

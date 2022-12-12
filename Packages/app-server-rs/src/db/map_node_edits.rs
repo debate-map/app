@@ -51,7 +51,7 @@ impl SubscriptionShard_MapNodeEdit {
     async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
     }
-    async fn mapNodeEdit<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<MapNodeEdit>, SubError>> + 'a {
+    async fn mapNodeEdit<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<MapNodeEdit>, SubError>> + 'a {
         handle_generic_gql_doc_request::<MapNodeEdit>(ctx, "mapNodeEdits", id).await
     }
 }

@@ -57,7 +57,7 @@ impl SubscriptionShard_Proposal {
         handle_generic_gql_collection_request::<Proposal, GQLSet_Proposal>(ctx, "feedback_proposals", filter).await
     }
     #[graphql(name = "feedback_proposal")]
-    async fn feedback_proposal<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<Proposal>, SubError>> + 'a {
+    async fn feedback_proposal<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Proposal>, SubError>> + 'a {
         handle_generic_gql_doc_request::<Proposal>(ctx, "feedback_proposals", id).await
     }
 }

@@ -83,7 +83,7 @@ impl SubscriptionShard_NodeChildLink {
     async fn nodeChildLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeChildLink, SubError>> + 'a {
         handle_generic_gql_collection_request::<NodeChildLink, GQLSet_NodeChildLink>(ctx, "nodeChildLinks", filter).await
     }
-    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String, _filter: Option<FilterInput>) -> impl Stream<Item = Result<Option<NodeChildLink>, SubError>> + 'a {
+    async fn nodeChildLink<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeChildLink>, SubError>> + 'a {
         handle_generic_gql_doc_request::<NodeChildLink>(ctx, "nodeChildLinks", id).await
     }
 }
