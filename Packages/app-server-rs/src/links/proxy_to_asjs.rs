@@ -109,6 +109,7 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
         let commands_in_asrs = vec![
             "addAccessPolicy", "addTerm",
             "deleteAccessPolicy", "deleteTerm",
+            "updateAccessPolicy", "updateTerm",
         ];
 
         // if any of the endpoints used in the request have an implementation in rust, don't proxy the request to app-server-js

@@ -1,6 +1,6 @@
 use rust_shared::anyhow::Error;
 use rust_shared::{SubError, serde_json, futures};
-use rust_shared::async_graphql;
+use rust_shared::async_graphql::{self, MaybeUndefined};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -13,6 +13,7 @@ use rust_shared::serde;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
+use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
 use super::{node_revisions::{get_node_revision}};
 
 pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
@@ -31,26 +32,13 @@ pub async fn get_terms_attached(ctx: &AccessorContext<'_>, node_rev_id: &str) ->
     Ok(terms)
 }
 
-wrap_slow_macros!{
-
 /*cached_expand!{
 const ce_args: &str = r##"
 id = "command_runs"
 excludeLinesWith = "#[graphql(name"
 "##;*/
 
-#[derive(InputObject, Clone, Serialize, Deserialize)]
-//#[graphql(input_name = "TermT0")] // temp
-pub struct TermInput {
-    pub accessPolicy: String,
-    pub name: String,
-	pub forms: Vec<String>,
-    pub disambiguation: Option<String>,
-    pub r#type: String,
-    pub definition: String,
-    pub note: Option<String>,
-    pub attachments: Vec<Attachment>,
-}
+wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Term {
@@ -68,6 +56,31 @@ pub struct Term {
 }
 impl From<Row> for Term {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+//#[graphql(input_name = "TermT0")] // temp
+pub struct TermInput {
+    pub accessPolicy: String,
+    pub name: String,
+	pub forms: Vec<String>,
+    pub disambiguation: Option<String>,
+    pub r#type: String,
+    pub definition: String,
+    pub note: Option<String>,
+    pub attachments: Vec<Attachment>,
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct TermUpdates {
+    pub accessPolicy: FieldUpdate<String>,
+    pub name: FieldUpdate<String>,
+	pub forms: FieldUpdate<Vec<String>>,
+    pub disambiguation: FieldUpdate_Nullable<String>,
+    pub r#type: FieldUpdate<String>,
+    pub definition: FieldUpdate<String>,
+    pub note: FieldUpdate_Nullable<String>,
+    pub attachments: FieldUpdate<Vec<Attachment>>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Term { nodes: Vec<Term> }

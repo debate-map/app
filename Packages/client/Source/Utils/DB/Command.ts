@@ -53,3 +53,27 @@ export async function RunCommand_DeleteTerm(commandArgs: {id: string}) {
 	});
 	return result.data.deleteTerm as {};
 }
+
+export async function RunCommand_UpdateAccessPolicy(commandArgs: {id: string, updates: Partial<AccessPolicy>}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`
+			mutation($input: UpdateAccessPolicyInput!) {
+				updateAccessPolicy(input: $input) { __typename }
+			}
+		`,
+		variables: {input: commandArgs},
+	});
+	return result.data.updateAccessPolicy as {};
+}
+
+export async function RunCommand_UpdateTerm(commandArgs: {id: string, updates: Partial<Term>}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`
+			mutation($input: UpdateTermInput!) {
+				updateTerm(input: $input) { __typename }
+			}
+		`,
+		variables: {input: commandArgs},
+	});
+	return result.data.updateTerm as {};
+}

@@ -122,6 +122,8 @@ mod db {
         pub mod clone_subtree;
         pub mod delete_access_policy;
         pub mod delete_term;
+        pub mod update_access_policy;
+        pub mod update_term;
         pub mod refresh_lq_data;
         //pub mod transfer_nodes;
     }

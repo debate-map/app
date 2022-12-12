@@ -15,6 +15,8 @@ use rust_shared::tokio_postgres::Row;
 use crate::utils::db::accessors::{get_db_entry, get_db_entries, AccessorContext};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}}};
 
+use super::commands::_command::FieldUpdate;
+
 pub async fn get_access_policy(ctx: &AccessorContext<'_>, id: &str) -> Result<AccessPolicy, Error> {
     get_db_entry(ctx, "accessPolicies", &Some(json!({
         "id": {"equalTo": id}
@@ -37,14 +39,6 @@ pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> 
 
 wrap_slow_macros!{
 
-#[derive(InputObject, Clone, Serialize, Deserialize)]
-pub struct AccessPolicyInput {
-    pub name: String,
-    pub permissions: serde_json::Value,
-    #[graphql(name = "permissions_userExtends")]
-    pub permissions_userExtends: serde_json::Value,
-}
-
 #[derive(SimpleObject, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct AccessPolicy {
     pub id: ID,
@@ -66,6 +60,22 @@ impl From<Row> for AccessPolicy {
             permissions_userExtends: serde_json::from_value(row.get("permissions_userExtends")).unwrap(),
 		}
 	}
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct AccessPolicyInput {
+    pub name: String,
+    pub permissions: serde_json::Value,
+    #[graphql(name = "permissions_userExtends")]
+    pub permissions_userExtends: serde_json::Value,
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct AccessPolicyUpdates {
+    pub name: FieldUpdate<String>,
+    pub permissions: FieldUpdate<serde_json::Value>,
+    #[graphql(name = "permissions_userExtends")]
+    pub permissions_userExtends: FieldUpdate<serde_json::Value>,
 }
 
 #[derive(Clone)] pub struct GQLSet_AccessPolicy { nodes: Vec<AccessPolicy> }

@@ -2,6 +2,7 @@
 
 use std::iter::{once, empty};
 
+use rust_shared::async_graphql::MaybeUndefined;
 use rust_shared::indoc::indoc;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::utils::type_aliases::JSONValue;
@@ -183,4 +184,21 @@ impl ToSql for ToSqlWrapper {
 
 pub fn gql_placeholder() -> String {
     "Do not request this field; it's here transiently merely to satisfy graphql (see: https://github.com/graphql/graphql-spec/issues/568). Instead, request the hidden \"__typename\" field, as that will always exist.".to_owned()
+}
+
+pub type FieldUpdate<T> = Option<T>;
+pub type FieldUpdate_Nullable<T> = MaybeUndefined<T>;
+
+pub fn update_field<T>(val_in_updates: FieldUpdate<T>, old_val: T) -> T {
+    match val_in_updates {
+        None => old_val,
+        Some(val) => val,
+    }
+}
+pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val: Option<T>) -> Option<T> {
+    match val_in_updates {
+        MaybeUndefined::Undefined => old_val,
+        MaybeUndefined::Null => None,
+        MaybeUndefined::Value(val) => Some(val),
+    }
 }

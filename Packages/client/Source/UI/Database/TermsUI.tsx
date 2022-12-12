@@ -10,7 +10,7 @@ import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {RunCommand_DeleteTerm} from "Utils/DB/Command.js";
+import {RunCommand_DeleteTerm, RunCommand_UpdateTerm} from "Utils/DB/Command.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 
@@ -73,7 +73,8 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 										onClick={async e=>{
 											Assert(selectedTerm); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedTerm, selectedTerm_newData);
-											await new UpdateTerm({id: selectedTerm.id, updates}).RunOnServer();
+											//await new UpdateTerm({id: selectedTerm.id, updates}).RunOnServer();
+											await RunCommand_UpdateTerm({id: selectedTerm.id, updates});
 											// this.SetState({selectedTerm_newData: null});
 										}}/>}
 								{creatorOrMod &&

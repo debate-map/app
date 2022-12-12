@@ -10,7 +10,7 @@ import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {RunCommand_DeleteAccessPolicy} from "Utils/DB/Command.js";
+import {RunCommand_DeleteAccessPolicy, RunCommand_UpdateAccessPolicy} from "Utils/DB/Command.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 import {PolicyDetailsUI, ShowAddAccessPolicyDialog} from "./Policies/PolicyDetailsUI.js";
 
@@ -72,7 +72,8 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 										onClick={async e=>{
 											Assert(selectedPolicy); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedPolicy, selectedPolicy_newData);
-											await new UpdateAccessPolicy({id: selectedPolicy.id, updates}).RunOnServer();
+											//await new UpdateAccessPolicy({id: selectedPolicy.id, updates}).RunOnServer();
+											await RunCommand_UpdateAccessPolicy({id: selectedPolicy.id, updates});
 											// this.SetState({selectedPolicy_newData: null});
 										}}/>}
 								{creatorOrAdmin &&
