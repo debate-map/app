@@ -1,6 +1,6 @@
 use rust_shared::anyhow::Error;
 use rust_shared::{SubError, serde_json};
-use rust_shared::async_graphql;
+use rust_shared::async_graphql::{self, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -9,6 +9,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
@@ -21,11 +22,14 @@ pub async fn get_node_phrasings(ctx: &AccessorContext<'_>, node_id: &str) -> Res
 
 wrap_slow_macros!{
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum MapNodePhrasingType {
+    #[graphql(name = "standard")] standard,
+    #[graphql(name = "simple")] simple,
+    #[graphql(name = "technical")] technical,
+    #[graphql(name = "humor")] humor,
+    #[graphql(name = "web")] web,
+}
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodePhrasing {
@@ -33,7 +37,7 @@ pub struct MapNodePhrasing {
 	pub creator: String,
 	pub createdAt: i64,
 	pub node: String,
-	pub r#type: String,
+	pub r#type: MapNodePhrasingType,
     #[graphql(name = "text_base")]
 	pub text_base: String,
     #[graphql(name = "text_negation")]
@@ -45,21 +49,7 @@ pub struct MapNodePhrasing {
 	pub references: Vec<String>,
 }
 impl From<Row> for MapNodePhrasing {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            creator: row.get("creator"),
-            createdAt: row.get("createdAt"),
-            node: row.get("node"),
-            r#type: row.get("type"),
-            text_base: row.get("text_base"),
-            text_negation: row.get("text_negation"),
-            text_question: row.get("text_question"),
-            note: row.get("note"),
-            terms: row.get("terms"),
-            references: row.get("references"),
-		}
-	}
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(Clone)] pub struct GQLSet_MapNodePhrasing { nodes: Vec<MapNodePhrasing> }

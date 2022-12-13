@@ -1,5 +1,6 @@
 use rust_shared::SubError;
 use rust_shared::async_graphql;
+use rust_shared::async_graphql::Enum;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -7,15 +8,17 @@ use rust_shared::serde;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 wrap_slow_macros!{
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum ChangeType {
+    #[graphql(name = "add")] add,
+    #[graphql(name = "edit")] edit,
+    #[graphql(name = "remove")] remove,
+}
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeEdit {
@@ -23,18 +26,10 @@ pub struct MapNodeEdit {
 	pub map: String,
 	pub node: String,
 	pub time: i64,
-	pub r#type: String,
+	pub r#type: ChangeType,
 }
 impl From<Row> for MapNodeEdit {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            map: row.get("map"),
-            node: row.get("node"),
-            time: row.get("time"),
-            r#type: row.get("type"),
-		}
-	}
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(Clone)] pub struct GQLSet_MapNodeEdit { nodes: Vec<MapNodeEdit> }

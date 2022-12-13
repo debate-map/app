@@ -5,15 +5,9 @@ use rust_shared::SubError;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, pg_row_to_json::postgres_row_to_struct}};
 
 //wrap_slow_macros!{
-
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct Proposal {
@@ -27,18 +21,7 @@ pub struct Proposal {
 	pub completedAt: Option<i64>,
 }
 impl From<Row> for Proposal {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            r#type: row.get("type"),
-            title: row.get("title"),
-            text: row.get("text"),
-            creator: row.get("creator"),
-            createdAt: row.get("createdAt"),
-            editedAt: row.get("editedAt"),
-            completedAt: row.get("completedAt"),
-		}
-	}
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(Clone)] pub struct GQLSet_Proposal { nodes: Vec<Proposal> }

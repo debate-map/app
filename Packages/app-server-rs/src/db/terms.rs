@@ -1,6 +1,6 @@
 use rust_shared::anyhow::Error;
 use rust_shared::{SubError, serde_json, futures};
-use rust_shared::async_graphql::{self, MaybeUndefined};
+use rust_shared::async_graphql::{self, MaybeUndefined, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -40,6 +40,15 @@ excludeLinesWith = "#[graphql(name"
 
 wrap_slow_macros!{
 
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum TermType {
+	#[graphql(name = "commonNoun")] commonNoun,
+	#[graphql(name = "properNoun")] properNoun,
+	#[graphql(name = "adjective")] adjective,
+	#[graphql(name = "verb")] verb,
+	#[graphql(name = "adverb")] adverb,
+}
+
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Term {
     pub id: ID,
@@ -49,7 +58,7 @@ pub struct Term {
     pub name: String,
 	pub forms: Vec<String>,
     pub disambiguation: Option<String>,
-    pub r#type: String,
+    pub r#type: TermType,
     pub definition: String,
     pub note: Option<String>,
     pub attachments: Vec<Attachment>,
@@ -64,7 +73,7 @@ pub struct TermInput {
     pub name: String,
 	pub forms: Vec<String>,
     pub disambiguation: Option<String>,
-    pub r#type: String,
+    pub r#type: TermType,
     pub definition: String,
     pub note: Option<String>,
     pub attachments: Vec<Attachment>,
@@ -76,7 +85,7 @@ pub struct TermUpdates {
     pub name: FieldUpdate<String>,
 	pub forms: FieldUpdate<Vec<String>>,
     pub disambiguation: FieldUpdate_Nullable<String>,
-    pub r#type: FieldUpdate<String>,
+    pub r#type: FieldUpdate<TermType>,
     pub definition: FieldUpdate<String>,
     pub note: FieldUpdate_Nullable<String>,
     pub attachments: FieldUpdate<Vec<Attachment>>,

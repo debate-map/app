@@ -1,7 +1,7 @@
 use rust_shared::anyhow::Error;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
-use rust_shared::async_graphql;
+use rust_shared::async_graphql::{self, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -10,6 +10,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
 
 pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&str>, child_id: Option<&str>) -> Result<Vec<NodeChildLink>, Error> {
@@ -25,11 +26,15 @@ pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&
 
 wrap_slow_macros!{
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum ChildGroup {
+    #[graphql(name = "generic")] generic,
+    #[graphql(name = "truth")] truth,
+    #[graphql(name = "relevance")] relevance,
+    // testing
+    #[graphql(name = "neutrality")] neutrality,
+    #[graphql(name = "freeform")] freeform,
+}
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeChildLink {
@@ -38,7 +43,7 @@ pub struct NodeChildLink {
 	pub createdAt: i64,
 	pub parent: String,
 	pub child: String,
-	pub group: String,
+	pub group: ChildGroup,
 	pub orderKey: String,
 	pub form: Option<String>,
 	pub seriesAnchor: Option<bool>,
@@ -50,23 +55,7 @@ pub struct NodeChildLink {
 	pub c_childType: Option<String>,
 }
 impl From<Row> for NodeChildLink {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            creator: row.get("creator"),
-            createdAt: row.get("createdAt"),
-            parent: row.get("parent"),
-            child: row.get("child"),
-            group: row.get("group"),
-            orderKey: row.get("orderKey"),
-            form: row.get("form"),
-            seriesAnchor: row.get("seriesAnchor"),
-            seriesEnd: row.get("seriesEnd"),
-            polarity: row.get("polarity"),
-            c_parentType: row.get("c_parentType"),
-            c_childType: row.get("c_childType"),
-		}
-	}
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(Clone)] pub struct GQLSet_NodeChildLink { nodes: Vec<NodeChildLink> }

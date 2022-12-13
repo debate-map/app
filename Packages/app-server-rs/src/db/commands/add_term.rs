@@ -58,7 +58,6 @@ impl MutationShard_AddTerm {
 		};
 		result.id = term.id.to_string();
 
-		validate_term(&term)?;
 		set_db_entry_by_id_for_struct(&ctx, "terms".to_owned(), term.id.to_string(), term).await?;
 
 		ctx.tx.commit().await?;
@@ -67,28 +66,4 @@ impl MutationShard_AddTerm {
     }
 }
 
-}
-
-// todo: maybe use a different way to do validation that is "beyond rust's type-system" (eg. by switching to using json-schema again)
-pub fn validate_term(term: &Term) -> Result<(), Error> {
-	x_is_one_of(term.r#type.as_str(), &["commonNoun", "properNoun", "adjective", "verb", "adverb"])?;
-	Ok(())
-}
-
-// utility functions (ie. lightweight versions of some checks that used to be done by json-schema)
-/*pub fn x_is_one_of<T: Eq + std::fmt::Debug>(x: &T, list: Vec<T>) -> Result<(), Error> {
-	for val in &list {
-		if val.eq(x) {
-			return Ok(());
-		}
-	}
-	Err(anyhow!("Supplied value for field does not match any of the valid options:{:?}", list))
-}*/
-pub fn x_is_one_of<T: Eq + std::fmt::Debug + ?Sized>(x: &T, list: &[&T]) -> Result<(), Error> {
-	for val in list {
-		if val.eq(&x) {
-			return Ok(());
-		}
-	}
-	Err(anyhow!("Supplied value for field does not match any of the valid options:{:?}", list))
 }

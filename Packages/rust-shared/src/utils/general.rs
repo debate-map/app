@@ -41,3 +41,12 @@ pub fn get_uri_params(uri: &Uri) -> HashMap<String, String> {
         .unwrap_or_else(HashMap::new);
     params
 }
+
+/*pub fn x_is_one_of<T: Eq + std::fmt::Debug + ?Sized>(x: &T, list: &[&T]) -> Result<(), Error> {
+	for val in list {
+		if val.eq(&x) {
+			return Ok(());
+		}
+	}
+	Err(anyhow!("Supplied value for field does not match any of the valid options:{:?}", list))
+}*/

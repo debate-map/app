@@ -1,6 +1,7 @@
 use rust_shared::anyhow::Error;
 use rust_shared::SubError;
 use rust_shared::async_graphql;
+use rust_shared::async_graphql::Enum;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -23,6 +24,12 @@ pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Err
 
 wrap_slow_macros!{
 
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum MediaType {
+    #[graphql(name = "image")] image,
+    #[graphql(name = "video")] video,
+}
+
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Media {
     pub id: ID,
@@ -30,7 +37,7 @@ pub struct Media {
 	pub creator: String,
 	pub createdAt: i64,
     pub name: String,
-    pub r#type: String,
+    pub r#type: MediaType,
     pub url: String,
     pub description: String,
 }
@@ -42,7 +49,7 @@ impl From<Row> for Media {
 pub struct MediaInput {
     pub accessPolicy: String,
     pub name: String,
-    pub r#type: String,
+    pub r#type: MediaType,
     pub url: String,
     pub description: String,
 }
@@ -51,7 +58,7 @@ pub struct MediaInput {
 pub struct MediaUpdates {
     pub accessPolicy: FieldUpdate<String>,
     pub name: FieldUpdate<String>,
-    pub r#type: FieldUpdate<String>,
+    pub r#type: FieldUpdate<MediaType>,
     pub url: FieldUpdate<String>,
     pub description: FieldUpdate<String>,
 }
