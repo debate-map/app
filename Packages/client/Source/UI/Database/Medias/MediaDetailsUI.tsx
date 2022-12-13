@@ -118,7 +118,7 @@ export async function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?:
 		}),
 		onOK: async()=>{
 			//const {id} = await getCommand().RunOnServer();
-			const {id} = await RunCommand_AddMedia({media: newEntry});
+			const {id} = await RunCommand_AddMedia(newEntry);
 			if (postAdd) postAdd(id);
 		},
 	});

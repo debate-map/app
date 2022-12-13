@@ -2,6 +2,7 @@ import {AddShare, GetMap, GetShares, MeID, Share, ShareType, Timeline, UpdateSha
 import {store} from "Store";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {ExpandType, ScrollToType} from "Store/main/shareUI.js";
+import {RunCommand_AddShare, RunCommand_UpdateShare} from "Utils/DB/Command.js";
 import {Observer, RunInAction_Set} from "web-vcore";
 import {CopyText, GetEntries, ToJSON, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -15,7 +16,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 		const {timeline, justCopied_type} = this.state;
 		const uiState = store.main.shareUI;
 		const userSharesForMap = GetShares(MeID.NN(), mapID);
-		
+
 		const currentShare = userSharesForMap.OrderByDescending(a=>a.createdAt)[0];
 		const currentShare_shortURL = GetShareShortURL(currentShare);
 		const currentShare_longURL = GetShareLongURL(currentShare);
@@ -28,8 +29,8 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 			type: ShareType.map,
 			mapID,
 			mapView: GetMapView(mapID),
-			createdAt: Date.now(), // overridden by server, but added for informational convenience, for mere copy-pastes
 		});
+		Object.defineProperty(newShareData, "createdAt", {enumerable: false, value: Date.now()}); // overridden by server, but added for informational convenience, for mere copy-pastes
 		/*if (uiState.expandType == ExpandType.MapDefault) {
 			// todo
 		} else if (uiState.expandType == ExpandType.ToSelectedNode) {
@@ -75,12 +76,14 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 					<TextArea style={{height: 200, resize: "vertical"}} editable={false} value={newShareJSON}/>
 				</Row>}
 				<Row mt={5}>
-					<Button text="Update current" enabled={currentShare != null && newShare_updatesFromCurrent.VKeys().length > 0} onClick={()=>{
-						new UpdateShare({id: currentShare.id, updates: newShare_updatesFromCurrent}).RunOnServer();
+					<Button text="Update current" enabled={currentShare != null && newShare_updatesFromCurrent.VKeys().length > 0} onClick={async()=>{
+						//new UpdateShare({id: currentShare.id, updates: newShare_updatesFromCurrent}).RunOnServer();
+						await RunCommand_UpdateShare({id: currentShare.id, updates: newShare_updatesFromCurrent});
 					}}/>
-					<Button ml={5} text="Create new share" onClick={()=>{
+					<Button ml={5} text="Create new share" onClick={async()=>{
 						const share = new Share(newShareData);
-						new AddShare({share}).RunOnServer();
+						//new AddShare({share}).RunOnServer();
+						await RunCommand_AddShare(share);
 					}}/>
 					<Text ml={5}>Changes: {currentShare == null ? "n/a" : (newShare_updatesFromCurrent.VKeys().length ? newShare_updatesFromCurrent.VKeys().join(", ") : "none")}</Text>
 				</Row>
@@ -90,8 +93,9 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 				</Row>
 				<RowLR mt={5} splitAt={80}>
 					<Text>Name:</Text>
-					<TextInput enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={val=>{
-						new UpdateShare({id: currentShare.id, updates: {name: val}}).RunOnServer();
+					<TextInput enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={async val=>{
+						//new UpdateShare({id: currentShare.id, updates: {name: val}}).RunOnServer();
+						await RunCommand_UpdateShare({id: currentShare.id, updates: {name: val}});
 					}}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={80}>

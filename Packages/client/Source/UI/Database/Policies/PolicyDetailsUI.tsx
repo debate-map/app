@@ -193,7 +193,7 @@ export function ShowAddAccessPolicyDialog(initialData?: Partial<AccessPolicy>, p
 		}),
 		onOK: async()=>{
 			//const {id} = await getCommand().RunOnServer();
-			const {id} = await RunCommand_AddAccessPolicy({policy: newEntry});
+			const {id} = await RunCommand_AddAccessPolicy(newEntry);
 			if (postAdd) postAdd(id);
 		},
 	});

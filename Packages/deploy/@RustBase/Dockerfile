@@ -4,6 +4,7 @@
 	#FROM rust:1.65.0-bullseye
 
 	# use the instrumentisto mirror of rust-nightly, so we can pin to a specific build (avoiding a rebuild of the whole build-chain every 24hrs, when the regular rust-nightly image gets re-pushed)
+	# NOTE: sync with entry in Tiltfile
 	FROM instrumentisto/rust:nightly-bullseye-2022-12-07
 
 	ARG env_ENV

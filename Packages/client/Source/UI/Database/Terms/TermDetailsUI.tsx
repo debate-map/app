@@ -130,7 +130,7 @@ export async function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (
 		}),
 		onOK: async()=>{
 			//const {id} = await getCommand().RunOnServer();
-			const {id} = await RunCommand_AddTerm({term: newEntry});
+			const {id} = await RunCommand_AddTerm(newEntry);
 			if (postAdd) postAdd(id);
 		},
 	});

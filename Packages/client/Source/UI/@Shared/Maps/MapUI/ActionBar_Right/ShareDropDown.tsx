@@ -9,6 +9,7 @@ import {GetOpenMapID} from "Store/main";
 import {ShareTab} from "Store/main/shareUI.js";
 import {Observer, RunInAction_Set, GetCurrentURL, InfoButton} from "web-vcore";
 import moment from "web-vcore/nm/moment";
+import {RunCommand_DeleteShare} from "Utils/DB/Command.js";
 import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
 
 export function GetShareShortURL(share: Share) {
@@ -79,8 +80,9 @@ class SharesListUI extends BaseComponentPlus({} as {filter_mapID: string|n}, {})
 											title: `Delete share "${share.name}"`, cancelButton: true,
 											message: `Delete the share named "${share.name}"?`,
 											onOK: async()=>{
-												const command = new DeleteShare({id: share.id});
-												await command.RunOnServer();
+												/*const command = new DeleteShare({id: share.id});
+												await command.RunOnServer();*/
+												await RunCommand_DeleteShare({id: share.id});
 											},
 										});
 									}}/>

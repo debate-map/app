@@ -191,6 +191,9 @@ k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
 local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.33-1")
 local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.3-1")
 
+# test: before building the rust-based images, pre-pull the rust base-image, so it's "named" in the local docker registry; this keeps docker from (apparently) garbage-collecting it for being "unused" [well, we'll see; not yet tested]
+local_resource("pre-pull-rust-base-image", "docker pull instrumentisto/rust:nightly-bullseye-2022-12-07")
+
 # todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
 pgo_crdName = "postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition"
 NEXT_k8s_resource(new_name='pgo_crd-definition',
@@ -200,7 +203,10 @@ NEXT_k8s_resource(new_name='pgo_crd-definition',
 	],
 	pod_readiness='ignore',
 	labels=["database_DO-NOT-RESTART-THESE"],
-	resource_deps_extra=["pre-pull-large-image-1", "pre-pull-large-image-2"]
+	resource_deps_extra=[
+		"pre-pull-large-image-1", "pre-pull-large-image-2",
+		"pre-pull-rust-base-image"
+	]
 )
 
 # Wait until the CRDs are ready.
