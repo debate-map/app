@@ -1,7 +1,8 @@
 use rust_shared::anyhow::Error;
+use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::async_graphql::{self, Enum};
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -14,6 +15,13 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
+use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+
+pub async fn get_node_phrasing(ctx: &AccessorContext<'_>, id: &str) -> Result<NodePhrasing, Error> {
+    get_db_entry(ctx, "nodePhrasings", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
 pub async fn get_node_phrasings(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<NodePhrasing>, Error> {
     get_db_entries(ctx, "nodePhrasings", &Some(json!({
         "node": {"equalTo": node_id}
@@ -45,11 +53,40 @@ pub struct NodePhrasing {
     #[graphql(name = "text_question")]
 	pub text_question: Option<String>,
 	pub note: Option<String>,
-	pub terms: Vec<serde_json::Value>,
+	pub terms: Vec<JSONValue>,
 	pub references: Vec<String>,
 }
 impl From<Row> for NodePhrasing {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct NodePhrasingInput {
+	pub node: String,
+	pub r#type: NodePhrasingType,
+    #[graphql(name = "text_base")]
+	pub text_base: String,
+    #[graphql(name = "text_negation")]
+	pub text_negation: Option<String>,
+    #[graphql(name = "text_question")]
+	pub text_question: Option<String>,
+	pub note: Option<String>,
+	pub terms: Vec<JSONValue>,
+	pub references: Vec<String>,
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct NodePhrasingUpdates {
+	pub r#type: FieldUpdate<NodePhrasingType>,
+    #[graphql(name = "text_base")]
+	pub text_base: FieldUpdate<String>,
+    #[graphql(name = "text_negation")]
+	pub text_negation: FieldUpdate_Nullable<String>,
+    #[graphql(name = "text_question")]
+	pub text_question: FieldUpdate_Nullable<String>,
+	pub note: FieldUpdate_Nullable<String>,
+	pub terms: FieldUpdate<Vec<JSONValue>>,
+	pub references: FieldUpdate<Vec<String>>,
 }
 
 #[derive(Clone)] pub struct GQLSet_NodePhrasing { nodes: Vec<NodePhrasing> }

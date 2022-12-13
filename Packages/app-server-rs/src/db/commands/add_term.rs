@@ -39,7 +39,7 @@ impl MutationShard_AddTerm {
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 		let AddTermInput { term: term_ } = input;
-		let mut result = AddTermResult {id: "<tbd>".to_owned()};
+		let mut result = AddTermResult { id: "<tbd>".to_owned() };
 		
 		let term = Term {
 			// set by server

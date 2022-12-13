@@ -39,7 +39,7 @@ impl MutationShard_AddNodeTag {
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 		let AddNodeTagInput { nodeTag: nodeTag_ } = input;
-		let mut result = AddNodeTagResult {id: "<tbd>".to_owned()};
+		let mut result = AddNodeTagResult { id: "<tbd>".to_owned() };
 		
 		let nodeTag = NodeTag {
 			// set by server

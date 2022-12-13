@@ -41,16 +41,19 @@ use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
 use crate::db::commands::add_media::MutationShard_AddMedia;
+use crate::db::commands::add_node_phrasing::MutationShard_AddNodePhrasing;
 use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
 use crate::db::commands::add_share::MutationShard_AddShare;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::commands::delete_access_policy::MutationShard_DeleteAccessPolicy;
 use crate::db::commands::delete_media::MutationShard_DeleteMedia;
+use crate::db::commands::delete_node_phrasing::MutationShard_DeleteNodePhrasing;
 use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
 use crate::db::commands::delete_share::MutationShard_DeleteShare;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
 use crate::db::commands::update_access_policy::MutationShard_UpdateAccessPolicy;
 use crate::db::commands::update_media::MutationShard_UpdateMedia;
+use crate::db::commands::update_node_phrasing::MutationShard_UpdateNodePhrasing;
 use crate::db::commands::update_node_tag::MutationShard_UpdateNodeTag;
 use crate::db::commands::update_share::MutationShard_UpdateShare;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
@@ -95,9 +98,9 @@ pub struct QueryRoot(
 pub struct MutationRoot(
     MutationShard_General, MutationShard_General_Subtree,
     // commands
-    MutationShard_AddAccessPolicy, MutationShard_AddMedia, MutationShard_AddNodeTag, MutationShard_AddShare, MutationShard_AddTerm,
-    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMedia, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
-    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
+    MutationShard_AddAccessPolicy, MutationShard_AddMedia, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag, MutationShard_AddShare, MutationShard_AddTerm,
+    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMedia, MutationShard_DeleteNodePhrasing, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
+    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
 );
 
 #[derive(MergedSubscription, Default)]

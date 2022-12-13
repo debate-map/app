@@ -39,7 +39,7 @@ impl MutationShard_AddShare {
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 		let AddShareInput { share: share_ } = input;
-		let mut result = AddShareResult {id: "<tbd>".to_owned()};
+		let mut result = AddShareResult { id: "<tbd>".to_owned() };
 		
 		let share = Share {
 			// set by server

@@ -10,6 +10,7 @@ import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
 import {GADDemo_Main} from "UI/@GAD/GAD";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {RunCommand_AddNodePhrasing} from "Utils/DB/Command";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
 import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
@@ -225,7 +226,8 @@ export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType) {
 			);
 		},
 		onOK: ()=>{
-			new AddPhrasing({phrasing: newEntry}).RunOnServer();
+			//new AddPhrasing({phrasing: newEntry}).RunOnServer();
+			RunCommand_AddNodePhrasing(newEntry);
 		},
 	});
 }

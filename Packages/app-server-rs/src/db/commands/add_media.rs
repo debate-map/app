@@ -39,7 +39,7 @@ impl MutationShard_AddMedia {
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 		let AddMediaInput { media: media_ } = input;
-		let mut result = AddMediaResult {id: "<tbd>".to_owned()};
+		let mut result = AddMediaResult { id: "<tbd>".to_owned() };
 		
 		let media = Media {
 			// set by server

@@ -5,6 +5,7 @@ import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
 import {GetUpdates, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {NodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, NodeL3} from "dm_common";
+import {RunCommand_DeleteNodePhrasing, RunCommand_UpdateNodePhrasing} from "Utils/DB/Command";
 
 @Observer
 export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {node: NodeL3, phrasing: NodePhrasing}, {dataError: null as string|n}) {
@@ -28,7 +29,8 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {node: NodeL
 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 							const phrasingUpdates = GetUpdates(phrasing, this.detailsUI.GetNewData());
 							if (phrasingUpdates.VKeys().length) {
-								await new UpdatePhrasing(E({id: phrasing.id, updates: phrasingUpdates})).RunOnServer();
+								//await new UpdatePhrasing(E({id: phrasing.id, updates: phrasingUpdates})).RunOnServer();
+								await RunCommand_UpdateNodePhrasing(E({id: phrasing.id, updates: phrasingUpdates}));
 							}
 						}}/>
 						<Button ml="auto" text="Delete" onLeftClick={async()=>{
@@ -42,7 +44,8 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {node: NodeL
 										phrasing.text_question == null ? "" : `\nText (question): ${phrasing.text_question}`}
 								`.AsMultiline(0),
 								onOK: async()=>{
-									await new DeletePhrasing({id: phrasing.id}).RunOnServer();
+									//await new DeletePhrasing({id: phrasing.id}).RunOnServer();
+									await RunCommand_DeleteNodePhrasing({id: phrasing.id});
 								},
 							});
 						}}/>
