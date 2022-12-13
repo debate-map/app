@@ -1,16 +1,16 @@
-import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, MapNode, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeChildLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
+import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeChildLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
 import {ModifyString} from "js-vextensions";
 import {Command, CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
 import {FS_SourceChain, FS_SourceType} from "./FSDataModel/FS_Attachments.js";
-import {FS_NodeL3, FS_NodeType, FS_ClaimForm, FS_Polarity} from "./FSDataModel/FS_MapNode.js";
+import {FS_NodeL3, FS_NodeType, FS_ClaimForm, FS_Polarity} from "./FSDataModel/FS_Node.js";
 import {FS_ArgumentType} from "./FSDataModel/FS_NodeRevision.js";
 
-type MapNode_WithPath = MapNode & {path: number[]};
+type NodeL1_WithPath = NodeL1 & {path: number[]};
 export const GetResourcesInImportSubtree = CreateAccessor((data: FS_NodeL3, id?: string, path: number[] = [])=>{
 	const result = [] as ImportResource[];
 
-	const node = new MapNode({
+	const node = new NodeL1({
 		id: id ?? GenerateUUID(),
 		type: data.type ? ModifyString(FS_NodeType[data.type], m=>[m.startUpper_to_lower]) as NodeType : NodeType.category,
 		accessPolicy: GetSystemAccessPolicyID("Public, ungoverned (standard)"),

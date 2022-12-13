@@ -6,7 +6,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeChildLink} from "../DB.js";
 import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {ClaimForm, MapNode, NodeL3, Polarity} from "../DB/nodes/@MapNode.js";
+import {ClaimForm, NodeL1, NodeL3, Polarity} from "../DB/nodes/@Node.js";
 import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNodeTag} from "./AddNodeTag.js";
@@ -140,7 +140,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				/*const newParent = transfer.newParentID ? GetNode(transfer.newParentID) : prevTransferData.addNodeCommand?.sub_addNode.payload.node;
 				AssertV(newParent != null, "Parent-node is still null!");*/
 
-				const newNode = Clone(AsNodeL1(node)) as MapNode;
+				const newNode = Clone(AsNodeL1(node)) as NodeL1;
 				if (transfer.clone_newType != null && transfer.clone_newType != node.type) {
 					newNode.type = transfer.clone_newType;
 				}
@@ -254,7 +254,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 					);
 				}
 			} else if (transfer.transferType == TransferType.shim) {
-				const argumentWrapper = new MapNode({
+				const argumentWrapper = new NodeL1({
 					accessPolicy: accessPolicyID,
 					type: NodeType.argument,
 				});

@@ -6,8 +6,8 @@ import {InfoButton, Link, Observer} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerm, GetTermsByForm, TermAttachment, Term, GetUser} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {TermDefinitionPanel} from "../../@Shared/Maps/MapNode/DetailBoxes/Panels/DefinitionsPanel.js";
-import {NodeDetailsUI_SharedProps} from "../../@Shared/Maps/MapNode/NodeDetailsUI.js";
+import {TermDefinitionPanel} from "../../@Shared/Maps/Node/DetailBoxes/Panels/DefinitionsPanel.js";
+import {NodeDetailsUI_SharedProps} from "../../@Shared/Maps/Node/NodeDetailsUI.js";
 import {PhrasingDetailsUI_SharedProps} from "./PhrasingDetailsUI.js";
 
 @Observer

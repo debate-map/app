@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, GetNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, VLexoRank} from "dm_common";
+import {NodeType, GetNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, VLexoRank} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
@@ -32,7 +32,7 @@ export class AddChildHelper {
 		if (userHidden == null) {
 			throw new Error("Child-adding helper could not query user's default access-policy. (The websocket connection to the server was probably lost; refreshing the page should resolve it.)");
 		}
-		this.node = new MapNode({
+		this.node = new NodeL1({
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 			//parents: {[this.Node_ParentID]: {_: true}},
@@ -51,7 +51,7 @@ export class AddChildHelper {
 
 		if (childType == NodeType.argument) {
 			this.node.argumentType = ArgumentType.all;
-			this.subNode = new MapNode({
+			this.subNode = new NodeL1({
 				//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
@@ -77,10 +77,10 @@ export class AddChildHelper {
 	node_parentPath: string;
 	// get Node_Parent() { return GetNodeL3(this.node_parentPath); }
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }
-	node: MapNode;
+	node: NodeL1;
 	node_revision: NodeRevision;
 	node_link: NodeChildLink;
-	subNode?: MapNode;
+	subNode?: NodeL1;
 	subNode_revision?: NodeRevision;
 	subNode_link: NodeChildLink;
 

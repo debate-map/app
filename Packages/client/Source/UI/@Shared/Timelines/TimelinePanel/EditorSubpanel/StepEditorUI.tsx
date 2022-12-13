@@ -147,7 +147,7 @@
 // 						onChange={val=>{
 // 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {message: val}}).RunOnServer();
 // 						}}/>
-// 					<Droppable type="MapNode" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", stepID: step.id}))} isDropDisabled={!creatorOrMod}>
+// 					<Droppable type="NodeL1" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", stepID: step.id}))} isDropDisabled={!creatorOrMod}>
 // 						{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
 // 							const dragIsOverDropArea = provided.placeholder.props["on"] != null;
 // 							if (dragIsOverDropArea) {

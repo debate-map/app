@@ -40,7 +40,7 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 
 		this.SetState({ adding: true });
 
-		const newNode = new MapNode(EV({ type: NodeType.claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) }));
+		const newNode = new NodeL1(EV({ type: NodeType.claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) }));
 		const newRevision = new NodeRevision({ titles: { base: premiseTitle } });
 		const newLink = { _: true, form: ClaimForm.base } as NodeChildLink;
 

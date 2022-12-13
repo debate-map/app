@@ -8,7 +8,7 @@ import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, Spinner, TextIn
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
-import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
+import {PermissionsPanel} from "./Node/NodeDetailsUI/PermissionsPanel.js";
 
 @Observer
 export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {

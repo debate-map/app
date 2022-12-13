@@ -5,7 +5,7 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeChildLink, GetAccessPolicy, NodeL2} from "dm_common";
+import {NodeL1, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeChildLink, GetAccessPolicy, NodeL2} from "dm_common";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
 import React from "react";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
@@ -16,15 +16,15 @@ import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 
 type Props = {
-	baseData: MapNode,
+	baseData: NodeL1,
 	baseRevisionData: NodeRevision,
 	baseLinkData: NodeChildLink|n, parent: NodeL3|n,
 	forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
-	style?, onChange?: (newData: MapNode, newRevisionData: NodeRevision, newLinkData: NodeChildLink, component: NodeDetailsUI)=>void,
+	style?, onChange?: (newData: NodeL1, newRevisionData: NodeRevision, newLinkData: NodeChildLink, component: NodeDetailsUI)=>void,
 	// onSetError: (error: string)=>void,
-	// validateNewData: (newData: MapNode, newRevisionData: NodeRevision)=>void,
+	// validateNewData: (newData: NodeL1, newRevisionData: NodeRevision)=>void,
 };
-type State = {newData: MapNode, newRevisionData: NodeRevision, newLinkData: NodeChildLink};
+type State = {newData: NodeL1, newRevisionData: NodeRevision, newLinkData: NodeChildLink};
 export type NodeDetailsUI_SharedProps = Props & State & {newDataAsL2: NodeL2, Change, SetState};
 
 @Observer
@@ -93,8 +93,8 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 	GetNewData() {
 		const {newData} = this.state;
 		//Assert(newData["policy"] == null); // catch regressions
-		AssertValidate("MapNode", newData, "NodeDetailsUI returned map-node data that is invalid. Is the AsNodeL1() function up-to-date?"); // catch regressions
-		return CloneWithPrototypes(newData) as MapNode;
+		AssertValidate("NodeL1", newData, "NodeDetailsUI returned map-node data that is invalid. Is the AsNodeL1() function up-to-date?"); // catch regressions
+		return CloneWithPrototypes(newData) as NodeL1;
 	}
 	GetNewRevisionData() {
 		const {newRevisionData} = this.state;

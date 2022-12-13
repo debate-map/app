@@ -1,11 +1,6 @@
-import {MapNode, NodeType, GetSystemAccessPolicyID, ArgumentType, systemUserID, NodeChildLink, ClaimForm, Polarity, NodeRevision, MediaAttachment, QuoteAttachment, ReferencesAttachment, CullNodePhrasingToBeEmbedded, NodePhrasing, NodePhrasingType, SourceChain, Source, SourceType, ChildGroup} from "dm_common";
-import {ModifyString} from "js-vextensions";
+import {ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, NodeChildLink, NodeL1, NodePhrasing, NodeRevision, NodeType, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
 import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
-import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat";
-import {FS_SourceChain, FS_SourceType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Attachments";
-import {FS_NodeL3, FS_NodeType, FS_ClaimForm, FS_Polarity} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode";
-import {FS_ArgumentType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_NodeRevision";
 import {CSV_SL_Row} from "./DataModel.js";
 
 export const GetResourcesInImportSubtree_CSV_SL = CreateAccessor((rows: CSV_SL_Row[])=>{
@@ -21,7 +16,7 @@ export const GetResourcesInImportSubtree_CSV_SL = CreateAccessor((rows: CSV_SL_R
 
 const accessPolicyID = "O0v-8gPfRoq8_enYa4QSuA";
 export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
-	const node = new MapNode({
+	const node = new NodeL1({
 		id: GenerateUUID(),
 		type: NodeType.claim,
 		accessPolicy: accessPolicyID,

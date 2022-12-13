@@ -5,7 +5,7 @@
 // import {store} from "Store";
 // import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
 // import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions.js";
-// import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner.js";
+// import {NodeUI_Inner} from "UI/@Shared/Maps/Node/NodeUI_Inner.js";
 // import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 // import {GetViewportRect} from "web-vcore";
 // import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink.js";

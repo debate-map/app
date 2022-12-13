@@ -1,15 +1,15 @@
 import {A, GetEntries, GetValues, NN} from "web-vcore/nm/js-vextensions.js";
 import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, MapNode, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
+import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, NodeL1, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
 import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
-import {NodeDetailsUI_SharedProps} from "../Maps/MapNode/NodeDetailsUI.js";
+import {NodeDetailsUI_SharedProps} from "../Maps/Node/NodeDetailsUI.js";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 
-/*export function CanNodeHaveAttachments(node: MapNode) {
+/*export function CanNodeHaveAttachments(node: NodeL1) {
 	//return node.type == NodeType.claim;
 	// maybe temp; allow attachments on everything except arguments (disallowed since attachment should just be added to its premise in that case)
 	return node.type != NodeType.argument;

@@ -7,7 +7,7 @@ import {AttachmentsEditorUI} from "UI/Database/Terms/AttachmentsEditorUI";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
-/*export function CanNodeHaveAttachments(node: MapNode) {
+/*export function CanNodeHaveAttachments(node: NodeL1) {
 	//return node.type == NodeType.claim;
 	// maybe temp; allow attachments on everything except arguments (disallowed since attachment should just be added to its premise in that case)
 	return node.type != NodeType.argument;

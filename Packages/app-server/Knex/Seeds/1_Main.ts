@@ -1,4 +1,4 @@
-import {MapNode, NodeRevision, Map, NodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
+import {NodeL1, NodeRevision, Map, NodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
 import {GlobalData} from "dm_common/Dist/DB/globalData/@GlobalData";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
@@ -120,7 +120,7 @@ const maps = TypeCheck(Map, {
 	},
 });
 
-const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: NodeRevision}), {
+const nodes = TypeCheck(NodeL1 as new()=>(NodeL1 & {revision: NodeRevision}), {
 	globalRoot: {
 		//id: GenerateUUID(),
 		id: globalRootNodeID,

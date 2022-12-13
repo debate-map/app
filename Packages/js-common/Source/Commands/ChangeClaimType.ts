@@ -3,7 +3,7 @@ import {Command, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AttachmentType} from "../DB/@Shared/Attachments/@Attachment.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 
 export const conversionTypes = [
@@ -30,12 +30,12 @@ export function CanConvertFromClaimTypeXToY(from: AttachmentType, to: Attachment
 })
 export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, newType: AttachmentType}, {}> {
 	oldType: AttachmentType;
-	newData: MapNode;
+	newData: NodeL1;
 	newRevision: NodeRevision;
 	newRevisionID: string;
 	Validate() {
 		/*const {nodeID, newType} = this.payload;
-		// let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
+		// let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as NodeL1;
 		const oldData = AV.NonNull = GetNodeL2(nodeID);
 		this.oldType = GetAttachmentType(oldData);
 
@@ -57,7 +57,7 @@ export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, 
 			}
 		}
 		AssertV(CanConvertFromClaimTypeXToY(this.oldType, newType), `Cannot convert from claim-type ${AttachmentType[this.oldType]} to ${AttachmentType[newType]}.`);
-		AssertValidate("MapNode", this.newData, "New node-data invalid");
+		AssertValidate("NodeL1", this.newData, "New node-data invalid");
 		AssertValidate("NodeRevision", this.newRevisionID, "New revision-data invalid");*/
 	}
 

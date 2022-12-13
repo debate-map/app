@@ -1,5 +1,5 @@
 import {AssertV, AssertValidate, AssertValidate_Full, Command, CommandMeta, DBHelper, dbp, GenerateUUID, GetSchemaJSON, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
 
@@ -12,7 +12,7 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 		$revision: {$ref: "NodeRevision_Partial"},
 	}),
 })
-export class AddNode extends Command<{mapID?: string|n, node: MapNode, revision: NodeRevision}, {}> {
+export class AddNode extends Command<{mapID?: string|n, node: NodeL1, revision: NodeRevision}, {}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 
@@ -37,10 +37,10 @@ export class AddNode extends Command<{mapID?: string|n, node: MapNode, revision:
 
 		// if sub of AddChildNode for new argument, ignore the "childrenOrder" prop requirement (gets added by later link-impact-node subcommand)
 		if (this.parentCommand) {
-			const mapNodeSchema = GetSchemaJSON("MapNode").ExcludeKeys("allOf");
-			AssertValidate_Full(mapNodeSchema, "MapNode", node, "Node invalid");
+			const mapNodeSchema = GetSchemaJSON("NodeL1").ExcludeKeys("allOf");
+			AssertValidate_Full(mapNodeSchema, "NodeL1", node, "Node invalid");
 		} else {
-			AssertValidate("MapNode", node, "Node invalid");
+			AssertValidate("NodeL1", node, "Node invalid");
 		}
 	}
 

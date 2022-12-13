@@ -1,5 +1,5 @@
 import {Command, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNode} from "../../DB/nodes/@MapNode.js";
+import {NodeL1} from "../../DB/nodes/@Node.js";
 import {DeleteNode} from "../DeleteNode.js";
 
 /*
@@ -32,7 +32,7 @@ await RR.ApplyDBUpdates({}, temp1)
 }*/
 
 export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: number}, {}> {
-	nodesInSubtree: MapNode[];
+	nodesInSubtree: NodeL1[];
 
 	subs_deleteNodes: DeleteNode[];
 	Validate() {

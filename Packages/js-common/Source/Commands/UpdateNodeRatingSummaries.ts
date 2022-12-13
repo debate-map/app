@@ -1,5 +1,5 @@
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNode, RatingSummary} from "../DB/nodes/@MapNode.js";
+import {NodeL1, RatingSummary} from "../DB/nodes/@Node.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatingTypeInfo, NodeRatingType, RatingValueIsInRange} from "../DB/nodeRatings/@NodeRatingType.js";
@@ -38,7 +38,7 @@ export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingTy
 		this.newArgumentImpactSummaries = new Map();
 		const argumentNodes =
 			ratingType == NodeRatingType.relevance ? [GetNode.NN(nodeID)] :
-			ratingType == NodeRatingType.truth ? (GetNodeParents(nodeID) as MapNode[]).filter(a=>a.type == NodeType.argument) :
+			ratingType == NodeRatingType.truth ? (GetNodeParents(nodeID) as NodeL1[]).filter(a=>a.type == NodeType.argument) :
 			[];
 		for (const argument of argumentNodes) {
 			const premises = GetNodeChildren(argument.id).filter(a=>a.type == NodeType.claim);

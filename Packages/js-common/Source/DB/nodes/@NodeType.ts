@@ -1,6 +1,6 @@
 import {Assert, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, MapNode, NodeL3, Polarity} from "./@MapNode.js";
+import {ClaimForm, NodeL1, NodeL3, Polarity} from "./@Node.js";
 
 export enum ChildGroup {
 	generic = "generic",
@@ -94,7 +94,7 @@ export class NodeType_Info {
 	return NodeType_Info.for[type];
 }*/
 
-export function GetNodeTypeDisplayName(type: NodeType, parentNode: MapNode, parentNodeForm: ClaimForm, polarity: Polarity) {
+export function GetNodeTypeDisplayName(type: NodeType, parentNode: NodeL1, parentNodeForm: ClaimForm, polarity: Polarity) {
 	if (type == NodeType.category) return "category";
 	if (type == NodeType.package) return "package";
 	if (type == NodeType.multiChoiceQuestion) return "multi-choice question";

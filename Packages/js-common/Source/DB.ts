@@ -33,7 +33,7 @@ export * from "./DB/nodes.js";
 export * from "./DB/nodes/$node.js";
 //export * from "./DB/nodes/$node/$impactPremise.js";
 export * from "./DB/nodes/$node/equation.js";
-export * from "./DB/nodes/@MapNode.js";
+export * from "./DB/nodes/@Node.js";
 export * from "./DB/nodes/@NodeRevision.js";
 export * from "./DB/nodes/@NodeType.js";
 export * from "./DB/shares.js";

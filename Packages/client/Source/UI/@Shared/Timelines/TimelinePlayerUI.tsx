@@ -8,7 +8,7 @@
 // import {TimelineStep} from "dm_common";
 // import {GetNodeL2, AsNodeL3} from "dm_common";
 // import {Map} from "dm_common";
-// import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner.js";
+// import {NodeUI_Inner} from "../Maps/Node/NodeUI_Inner.js";
 
 // function GetPropsFromPropsStr(propsStr: string) {
 // 	const propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);

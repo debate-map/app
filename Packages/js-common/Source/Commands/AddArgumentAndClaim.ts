@@ -1,14 +1,14 @@
 import {AssertValidate, Command, CommandMeta, CommandRunInfo, DBHelper, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AddChildNode} from "./AddChildNode.js";
 
 type Payload = {
 	mapID: string|n,
-	argumentParentID: string, argumentNode: MapNode, argumentRevision: NodeRevision, argumentLink?: NodeChildLink,
-	claimNode: MapNode, claimRevision: NodeRevision, claimLink?: NodeChildLink,
+	argumentParentID: string, argumentNode: NodeL1, argumentRevision: NodeRevision, argumentLink?: NodeChildLink,
+	claimNode: NodeL1, claimRevision: NodeRevision, claimLink?: NodeChildLink,
 };
 
 /*@CommandRunMeta({

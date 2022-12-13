@@ -5,7 +5,7 @@ import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeChildren} from "../DB/nodes.js";
 import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
-import {MapNode, NodeL2} from "../DB/nodes/@MapNode.js";
+import {NodeL1, NodeL2} from "../DB/nodes/@Node.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
 
 @MapEdit
@@ -19,7 +19,7 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 })
 export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, nodeID: string, multiPremiseArgument: boolean}, {}> {
 	oldNodeData: NodeL2;
-	newNodeData: MapNode;
+	newNodeData: NodeL1;
 	sub_addRevision: AddNodeRevision;
 	Validate() {
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
@@ -46,7 +46,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 			//this.newNodeData.childrenOrder = null;
 		}
 
-		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
+		AssertValidate("NodeL1", this.newNodeData, "New node-data invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

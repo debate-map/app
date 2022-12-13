@@ -12,7 +12,7 @@ import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetNodeRevisions} from "../DB/nodeRevisions.js";
 import {ForDelete_GetError} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
-import {NodeL2} from "../DB/nodes/@MapNode.js";
+import {NodeL2} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 

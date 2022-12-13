@@ -1,6 +1,6 @@
 import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "web-vcore/nm/mobx-graphlink.js";
 import {GetValues_ForSchema, ModifyString, CE, Assert, Clone} from "web-vcore/nm/js-vextensions.js";
-import {Polarity} from "../nodes/@MapNode.js";
+import {Polarity} from "../nodes/@Node.js";
 import {NodeTagCloneType} from "../../Commands.js";
 
 @MGLClass({table: "nodeTags"})

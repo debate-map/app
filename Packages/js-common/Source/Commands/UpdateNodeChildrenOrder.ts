@@ -1,13 +1,13 @@
 import {Command, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 
 @MapEdit
 @UserEdit
 export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: string, childrenOrder: string[]}, {}> {
-	oldNodeData: MapNode;
-	newNodeData: MapNode;
+	oldNodeData: NodeL1;
+	newNodeData: NodeL1;
 	Validate() {
 		/*AssertValidate({
 			properties: {
@@ -27,7 +27,7 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 		AssertV(changeable_final, "You don't have permission to change this node's children-order.");
 		
 		this.newNodeData = {...this.oldNodeData, childrenOrder};
-		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");*/
+		AssertValidate("NodeL1", this.newNodeData, "New node-data invalid");*/
 
 		// todo: this should basically
 		// 1) verify the actor has permission (currently, this is basically just whether they're the parent-node owner)

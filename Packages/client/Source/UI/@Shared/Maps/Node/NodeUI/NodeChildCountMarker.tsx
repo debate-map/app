@@ -1,5 +1,5 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI.js";
+import {LimitBarPos} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {E, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import React from "react";
 import {Column} from "react-vcomponents";

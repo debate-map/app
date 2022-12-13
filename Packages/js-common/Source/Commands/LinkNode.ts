@@ -6,7 +6,7 @@ import {AddArgumentAndClaim, AddChildNode} from "../Commands.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {CheckValidityOfLink, GetNode} from "../DB/nodes.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {TransferNodes} from "./TransferNodes.js";
@@ -29,8 +29,8 @@ import {TransferNodes} from "./TransferNodes.js";
 	}),
 })
 export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group" | "orderKey">}, {linkID: string}> {
-	child_oldData: MapNode|n;
-	parent_oldData: MapNode;
+	child_oldData: NodeL1|n;
+	parent_oldData: NodeL1;
 	Validate() {
 		this.payload.link = E(new NodeChildLink(), this.payload.link); // for props the caller didn't specify, but which have default values, use them
 		const {link} = this.payload;

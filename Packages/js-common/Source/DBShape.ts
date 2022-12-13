@@ -7,7 +7,7 @@ import {Map} from "./DB/maps/@Map.js";
 import {Media} from "./DB/media/@Media.js";
 import {NodeChildLink} from "./DB/nodeChildLinks/@NodeChildLink.js";
 import {NodeRating} from "./DB/nodeRatings/@NodeRating.js";
-import {MapNode} from "./DB/nodes/@MapNode.js";
+import {NodeL1} from "./DB/nodes/@Node.js";
 import {NodeRevision} from "./DB/nodes/@NodeRevision.js";
 import {NodeTag} from "./DB/nodeTags/@NodeTag.js";
 import {Share} from "./DB/shares/@Share.js";
@@ -44,11 +44,11 @@ export class GraphDBShape {
 	medias = DefineCollection(Media);
 	maps = DefineCollection(Map);
 	mapNodeEdits = DefineCollection(MapNodeEdit);
-	nodes = DefineCollection(MapNode);
+	nodes = DefineCollection(NodeL1);
 	//nodeExtras = DefineCollection(any);
 	nodeRatings = DefineCollection(NodeRating);
 	nodeRevisions = DefineCollection(NodeRevision);
-	//nodeStats = DefineCollection(MapNodeStats);
+	//nodeStats = DefineCollection(NodeL1Stats);
 	nodePhrasings = DefineCollection(NodePhrasing);
 	nodeChildLinks = DefineCollection(NodeChildLink);
 	nodeTags = DefineCollection(NodeTag);
@@ -74,11 +74,11 @@ export class GraphDBShape {
 	maps: Collection<Map, {
 		nodeEditTimes: Collection<NodeEditTimes>,
 	}>;
-	nodes: Collection<MapNode, {
+	nodes: Collection<NodeL1, {
 		ratings: Collection<RatingsRoot>, // $ratingType -> $userID -> value -> $value
 		// extras: Collection<any>,
 		revisions: Collection<NodeRevision>,
-		// stats: Collection<MapNodeStats>,
+		// stats: Collection<NodeL1Stats>,
 		// viewers: Collection<ViewerSet>, // removed due to privacy concerns
 		phrasings: Collection<NodePhrasing>,
 	}>;

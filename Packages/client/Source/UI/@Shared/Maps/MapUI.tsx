@@ -15,10 +15,10 @@ import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {ExpandableBox} from "./MapNode/ExpandableBox.js";
-import {NodeUI} from "./MapNode/NodeUI.js";
-import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots.js";
-import {NodeUI_Inner} from "./MapNode/NodeUI_Inner.js";
+import {ExpandableBox} from "./Node/ExpandableBox.js";
+import {NodeUI} from "./Node/NodeUI.js";
+import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
+import {NodeUI_Inner} from "./Node/NodeUI_Inner.js";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 

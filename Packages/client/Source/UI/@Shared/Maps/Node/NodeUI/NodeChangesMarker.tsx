@@ -1,5 +1,5 @@
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI.js";
+import {LimitBarPos} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {GetChangeTypeOutlineColor, ChangeType} from "dm_common";

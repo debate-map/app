@@ -18,12 +18,12 @@ declare const { AddMap }: typeof import('../../../Source/Server/Commands/AddMap'
 declare const { Assert }: typeof import('../../../../../@Modules/react-vscrollview/Main/dist/Utils');
 declare const { MeID }: typeof import('../../../Source/Store/firebase/users');
 declare const { AddChildNode }: typeof import('../../../Source/Server/Commands/AddChildNode');
-declare const { MapNode }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
+declare const { NodeL1 }: typeof import('../../../Source/Store/firebase/nodes/@Node');
 declare const { NodeType }: typeof import('../../../Source/Store/firebase/nodes/@NodeType');
 declare const { NodeRevision }: typeof import('../../../Source/Store/firebase/nodes/@NodeRevision');
-declare const { ClaimForm }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
-declare const { Polarity }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
-declare const { AddChildHelper }: typeof import('../../../Source/UI/@Shared/Maps/MapNode/NodeUI_Menu/Dialogs/AddChildDialog');
+declare const { ClaimForm }: typeof import('../../../Source/Store/firebase/nodes/@Node');
+declare const { Polarity }: typeof import('../../../Source/Store/firebase/nodes/@Node');
+declare const { AddChildHelper }: typeof import('../../../Source/UI/@Shared/Maps/Node/NodeUI_Menu/Dialogs/AddChildDialog');
 
 // declare const global;
 /* declare global {

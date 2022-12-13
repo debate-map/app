@@ -7,11 +7,11 @@
 	});
 }
 
-type Props = {mapID: string, anchorNode: MapNode, anchorNodePath: string, boxController: BoxController};
-class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: MapNode, newRevision: NodeRevision, newLink: NodeChildLink, validationError: string}) {
+type Props = {mapID: string, anchorNode: NodeL1, anchorNodePath: string, boxController: BoxController};
+class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: NodeL1, newRevision: NodeRevision, newLink: NodeChildLink, validationError: string}) {
 	constructor(props) {
 		super(props);
-		const newNode = new MapNode({
+		const newNode = new NodeL1({
 			type: NodeType.claim,
 		});
 		const newRevision = new NodeRevision({});

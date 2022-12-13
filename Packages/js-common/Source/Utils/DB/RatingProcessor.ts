@@ -4,10 +4,10 @@ import {GetRating, GetRatingAverage, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/nodes/$node.js";
-import {ClaimForm, MapNode, NodeL2} from "../../DB/nodes/@MapNode.js";
+import {ClaimForm, NodeL1, NodeL2} from "../../DB/nodes/@Node.js";
 import {ArgumentType} from "../../DB/nodes/@NodeRevision.js";
 
-export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNode, premises: MapNode[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
+export const GetArgumentImpactPseudoRating = CreateAccessor((argument: NodeL1, premises: NodeL1[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
@@ -65,14 +65,14 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNode, 
 		value: CE(result * 100).RoundTo(1),
 	};
 });
-// export function GetArgumentStrengthEntries(nodeChildren: MapNode[], users: string[]) {
-/* export function GetArgumentStrengthPseudoRatings(nodeChildren: MapNode[]): Rating[] {
+// export function GetArgumentStrengthEntries(nodeChildren: NodeL1[], users: string[]) {
+/* export function GetArgumentStrengthPseudoRatings(nodeChildren: NodeL1[]): Rating[] {
 	if (nodeChildren.Any(a=>a == null)) return []; // must still be loading
 	let impactPremise = nodeChildren.First(a=>a.impactPremise != null);
 	let premises = nodeChildren.Except(impactPremise);
 	if (premises.length == 0) return [];
 
-	let usersWhoRated = nodeChildren.SelectMany(child=>GetRatings(child._id, MapNode.GetMainRatingTypes(child)[0]).map(a=>a.id)).Distinct();
+	let usersWhoRated = nodeChildren.SelectMany(child=>GetRatings(child._id, NodeL1.GetMainRatingTypes(child)[0]).map(a=>a.id)).Distinct();
 	let result = usersWhoRated.map(userID=>GetArgumentStrengthPseudoRating(nodeChildren, userID));
 	return result;
 } */
@@ -89,7 +89,7 @@ export function RatingListAfterRemovesAndAdds(baseList: NodeRating[], ratingsToR
 }
 
 export const GetArgumentImpactPseudoRatings = CreateAccessor((
-	argument: MapNode, premises: MapNode[], userIDs?: string[]|n,
+	argument: NodeL1, premises: NodeL1[], userIDs?: string[]|n,
 	useAverageForMissing = false, ratingsBeingRemoved?: string[], ratingsBeingAdded?: NodeRating[],
 ): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
@@ -121,7 +121,7 @@ export const GetArgumentImpactPseudoRatings = CreateAccessor((
 	return result;
 });
 
-/* export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
+/* export function CalculateArgumentStrength(nodeChildren: NodeL1[]) {
 	if (nodeChildren.Any(a=>a == null)) return 0; // must still be loading
 	let impactPremise = nodeChildren.First(a=>a.impactPremise != null);
 	let premises = nodeChildren.Except(impactPremise);

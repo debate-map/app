@@ -1,10 +1,10 @@
-import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, MapNode, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeChildLink, Polarity, SourceType, systemUserID} from "dm_common";
+import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeChildLink, Polarity, SourceType, systemUserID} from "dm_common";
 import React, {ComponentProps} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
 import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
 import {DataExchangeFormat, ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
-import {FS_NodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode.js";
+import {FS_NodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Node.js";
 import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -575,7 +575,7 @@ export async function GetCommandToCreateAncestorForResource(res: ImportResource,
 		link: new NodeChildLink({
 			group: parentOfNewNode.type == NodeType.category ? ChildGroup.generic : ChildGroup.freeform,
 		}),
-		node: new MapNode({
+		node: new NodeL1({
 			type: NodeType.category,
 			accessPolicy: newNodeAccessPolicy,
 			creator: systemUserID,

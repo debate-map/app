@@ -6,7 +6,7 @@ import {Map} from "../DB/maps/@Map.js";
 import {GetHighestLexoRankUnderParent, GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckValidityOfLink} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
-import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
+import {ClaimForm, NodeL1, Polarity} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {ChildGroup, NodeType} from "../DB/nodes/@NodeType.js";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
@@ -92,8 +92,8 @@ export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parent_chil
 })
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {
 	map_data: Map|n;
-	node_data: MapNode;
-	newParent_data: MapNode;
+	node_data: NodeL1;
+	newParent_data: NodeL1;
 	orderKeyForOuterNode: string;
 
 	sub_addArgumentWrapper: AddChildNode;
@@ -141,7 +141,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			//const createWrapperArg = canCreateWrapperArg && createWrapperArg;
 			// Assert(newPolarity, 'Since this command has to create a wrapper-argument, you must supply the newPolarity property.');
 			newPolarity = newPolarity || Polarity.supporting; // if new-polarity isn't supplied, just default to Supporting (this can happen if a claim is copied from search-results)
-			const argumentWrapper = new MapNode({
+			const argumentWrapper = new NodeL1({
 				//EV({ownerMapID: OmitIfFalsy(this.newParent_data.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.node_data.accessPolicy,

@@ -4,7 +4,7 @@ import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "web-vcore/nm/js
 import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown.js";
-import {CleanUpdatedSourceChains, SourceChainsEditorUI} from "../../Maps/MapNode/SourceChainsEditorUI.js";
+import {CleanUpdatedSourceChains, SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
 
 //@ApplyBasicStyles
 export class QuoteInfoEditorUI extends DetailsUI_Base<QuoteAttachment, QuoteInfoEditorUI> {

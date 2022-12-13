@@ -1,7 +1,7 @@
 import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema, GetValues, ToInt, IsInt} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node.js";
-import {NodeL2, NodeL3, Polarity} from "../nodes/@MapNode.js";
+import {NodeL2, NodeL3, Polarity} from "../nodes/@Node.js";
 import {NodeType} from "../nodes/@NodeType.js";
 import {ArgumentType} from "../nodes/@NodeRevision.js";
 

@@ -16,7 +16,7 @@ import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {MapUI} from "../Maps/MapUI.js";
-import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
+import {NodeUI_Menu_Stub} from "../Maps/Node/NodeUI_Menu.js";
 
 const columnWidths = [0.68, 0.2, 0.12];
 

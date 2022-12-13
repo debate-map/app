@@ -29,7 +29,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		const nodeForm = AV.NonNull = GetNodeForm(baseNode, baseNodePath);
 		const nodePolarity = AV.NonNull = GetLinkAtPath(baseNodePath).polarity;
 
-		const newChildNode = Clone(baseNode).VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL, parents: DEL}) as MapNode;
+		const newChildNode = Clone(baseNode).VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL, parents: DEL}) as NodeL1;
 
 		const newChildRevision = Clone(baseNode.current).VSet({node: DEL});
 

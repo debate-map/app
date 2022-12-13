@@ -3,7 +3,7 @@ import {Field, MGLClass} from "mobx-graphlink";
 import {NodeRevision} from "../../nodes/@NodeRevision.js";
 import {QuoteAttachment} from "./@QuoteAttachment.js";
 import {MediaAttachment} from "./@MediaAttachment.js";
-import {NodeL2} from "../../nodes/@MapNode.js";
+import {NodeL2} from "../../nodes/@Node.js";
 import {NodeType} from "../../nodes/@NodeType.js";
 import {EquationAttachment} from "./@EquationAttachment.js";
 import {ReferencesAttachment} from "./@ReferencesAttachment.js";

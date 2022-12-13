@@ -258,7 +258,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: NodeL3}, {}> {
 								<UUIDStub id={childID}/>
 							</Row>
 							<Div sel style={ES({flex: 1, whiteSpace: "normal"})}>{childTitle}</Div>
-							{/* <TextInput enabled={false} style={ES({flex: 1})} required pattern={MapNode_id}
+							{/* <TextInput enabled={false} style={ES({flex: 1})} required pattern={NodeL1_id}
 								value={`#${childID.toString()}: ${childTitle}`}
 								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
 							/> *#/}

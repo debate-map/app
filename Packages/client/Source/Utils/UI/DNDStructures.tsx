@@ -25,7 +25,7 @@ export class DraggableInfo {
 		this.VSet(initialData);
 	}
 
-	// if MapNode (in NodeChildHolder)
+	// if NodeL1 (in NodeChildHolder)
 	mapID?: UUID;
 	nodePath?: string;
 

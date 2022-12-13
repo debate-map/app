@@ -59,7 +59,7 @@ export type NodeUI_Inner_Props = {
 	if (!IsUserCreatorOrMod(MeID(), node)) return null;
 	if (!path.includes('/')) return null; // don't make draggable if root-node of map
 	return {
-		type: 'MapNode',
+		type: 'NodeL1',
 		draggableInfo: new DraggableInfo({ nodePath: path }),
 		index: indexInNodeList,
 	};
@@ -449,7 +449,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (!IsUserCreatorOrMod(MeID(), node)) return null;
 			if (!path.includes("/")) return null; // don't make draggable if root-node of map
 			return {
-				type: "MapNode",
+				type: "NodeL1",
 				draggableInfo: new DraggableInfo({nodePath: path, mapID: map?.id}), // mapID needed for DND-completer to create the link command
 				index: indexInNodeList,
 			};

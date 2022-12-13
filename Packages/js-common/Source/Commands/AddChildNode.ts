@@ -6,7 +6,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim, TransferNodes} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetNode} from "../DB/nodes.js";
-import {MapNode, Polarity} from "../DB/nodes/@MapNode.js";
+import {NodeL1, Polarity} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 import {AddNode} from "./AddNode.js";
@@ -41,13 +41,13 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		$doneAt: {type: "number"},
 	}),
 })
-export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: MapNode, revision: NodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
+export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: NodeL1, revision: NodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 
 	sub_addNode: AddNode;
 	sub_addLink: LinkNode;
-	parent_oldData: MapNode|n;
+	parent_oldData: NodeL1|n;
 	Validate() {
 		const {mapID, parentID, node, revision} = this.payload;
 		//const link = this.payload.link = this.payload.link ?? {} as NodeChildLink;

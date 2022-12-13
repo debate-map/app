@@ -8,8 +8,8 @@ import {Link, Observer, InfoButton} from "web-vcore";
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {SourceChainsEditorUI} from "../../Maps/MapNode/SourceChainsEditorUI.js";
-import {TermDefinitionPanel} from "../../Maps/MapNode/DetailBoxes/Panels/DefinitionsPanel.js";
+import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
+import {TermDefinitionPanel} from "../../Maps/Node/DetailBoxes/Panels/DefinitionsPanel.js";
 
 @Observer
 export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, MediaAttachmentEditorUI, {target: AttachmentTarget}> {

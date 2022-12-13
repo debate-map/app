@@ -162,7 +162,7 @@ class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false
 /* @Connect((state, {map, node}: NodeRow_Props)=> ({
 	nodeEnhanced: GetNodeL3(node._id),
 }))
-class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: NodeL2}, {}> {
+class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: NodeL1, nodeEnhanced: NodeL2}, {}> {
 	render() {
 		let {map, node} = this.props;
 		return (

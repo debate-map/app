@@ -1,6 +1,6 @@
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray, CE, eal} from "web-vcore/nm/js-vextensions.js";
-import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType, NodeL3, GetNodeL2, NodeL2} from "dm_common";
+import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, NodeL1, ChangeType, NodeL3, GetNodeL2, NodeL2} from "dm_common";
 import {GetLastAcknowledgementTime} from "../main/maps.js";
 
 // Why is this needed, when we can just directly call GetNodeChangeType() for each node? Well, because we also want to see change-markers for not-yet-expanded descendant paths.

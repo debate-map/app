@@ -1,6 +1,6 @@
 import {GetValues_ForSchema, CE} from "js-vextensions";
 import {FS_TermAttachment, FS_EquationAttachment, FS_ReferencesAttachment, FS_QuoteAttachment, FS_MediaAttachment} from "./FS_Attachments";
-import {FS_AccessLevel} from "./FS_MapNode";
+import {FS_AccessLevel} from "./FS_Node.js";
 
 // classes to help with importing data from old firestore-based version of Debate Map
 // from: https://github.com/debate-map/server-old/blob/master/Source/%40Shared/Store/firebase/nodes/%40NodeRevision.ts

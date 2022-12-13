@@ -4,7 +4,7 @@ import {useCallback} from "react";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
-import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL, NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL, NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
@@ -147,7 +147,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 			//renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
 			return (
-				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
+				<Droppable type="NodeL1" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;
 					const pack = childrenHere.slice(0, childLimit)[index];
 					return RenderChild(pack, index, childrenHere);

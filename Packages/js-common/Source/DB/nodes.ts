@@ -5,7 +5,7 @@ import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
-import {MapNode, NodeL2, Polarity} from "./nodes/@MapNode.js";
+import {NodeL1, NodeL2, Polarity} from "./nodes/@Node.js";
 import {ChildGroup, NodeType, NodeType_Info} from "./nodes/@NodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@NodeTag.js";
@@ -35,11 +35,11 @@ export function PathSegmentToNodeID(segment: string|n): UUID {
 	Assert(false, "Segment text is invalid.");
 }
 
-/* export type NodeMap = ObservableMap<string, MapNode>;
+/* export type NodeMap = ObservableMap<string, NodeL1>;
 export const GetNodeMap = StoreAccessor((s) => (): NodeMap => {
 	return GetDocs((a) => a.nodes);
 }); */
-/* export const GetNodes = StoreAccessor((s) => (): MapNode[] => {
+/* export const GetNodes = StoreAccessor((s) => (): NodeL1[] => {
 	/* const nodeMap = GetNodeMap();
 	return CachedTransform('GetNodes', [], nodeMap, () => (nodeMap ? nodeMap.VValues(true) : [])); *#/
 	return GetDocs({}, (a) => a.nodes);
@@ -48,15 +48,15 @@ export const GetNodesL2 = StoreAccessor((s) => (): NodeL2[] => {
 	const nodes = GetNodes();
 	return nodes.map((a) => GetNodeL2(a));
 }); */
-/* export function GetNodes_Enhanced(): MapNode[] {
+/* export function GetNodes_Enhanced(): NodeL1[] {
 	let nodeMap = GetNodeMap();
 	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
 } */
-export const GetNodesByIDs = CreateAccessor((ids: string[]): MapNode[]=>{
+export const GetNodesByIDs = CreateAccessor((ids: string[]): NodeL1[]=>{
 	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "Normal"](id));
 	return ids.map(id=>GetNode.BIN(id));
 });
-/*export const GetNodesByTitle = CreateAccessor((title: string, titleKey: TitleKey): MapNode[]=>{
+/*export const GetNodesByTitle = CreateAccessor((title: string, titleKey: TitleKey): NodeL1[]=>{
 	const nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
 	return nodeRevisions.map(a=>GetNode.BIN(a.node));
 });*/
@@ -65,10 +65,10 @@ export const GetNode = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.nodes.get(id!));
 });
 /*export async function GetNodeAsync(id: string) {
-	return await GetDataAsync("nodes", id) as MapNode;
+	return await GetDataAsync("nodes", id) as NodeL1;
 }*/
 
-export const IsRootNode = CreateAccessor((node: MapNode)=>{
+export const IsRootNode = CreateAccessor((node: NodeL1)=>{
 	if (node.type != NodeType.category) return false;
 	const parents = GetNodeChildLinks(undefined, node.id);
 	if (parents.length != 0) return false; // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
@@ -123,7 +123,7 @@ export const GetNodeChildren = CreateAccessor((nodeID: string, includeMirrorChil
 	/*let node = GetNode(nodeID);
 	if (node == null) return emptyArray;
 	// special case, for demo map
-	if (node.children && node.children[0] instanceof MapNode) {
+	if (node.children && node.children[0] instanceof NodeL1) {
 		return node.children as any;
 	}*/
 
@@ -133,7 +133,7 @@ export const GetNodeChildren = CreateAccessor((nodeID: string, includeMirrorChil
 		return GetNode(link.child);
 	});*/
 	//let result = MapWithBailHandling(childLinks, link=>GetNode.BIN(link.child)); // BIN: we know link exists, so child-node should as well (so null must mean change loading)
-	let result = MapWithBailHandling(childLinks, link=>GetNode(link.child) as MapNode);
+	let result = MapWithBailHandling(childLinks, link=>GetNode(link.child) as NodeL1);
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
 		const tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
@@ -153,7 +153,7 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 	const tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 	//let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
 
-	let result = [] as MapNode[];
+	let result = [] as NodeL1[];
 	for (const tag of tags) {
 		const tagComps = GetFinalTagCompsForTag(tag);
 		for (const tagComp of tagComps) {
@@ -288,7 +288,7 @@ export const CheckValidityOfLink = CreateAccessor((parentType: NodeType, childGr
  * * Blocks if node is being linked as child of itself.
  * * Blocks if adding child to global-root, without user being an admin.
  * */
-export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet)=>{
+export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<NodeL1, "id" | "type">, permissions: PermissionGroupSet)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -336,14 +336,14 @@ export const ForCut_GetError = CreateAccessor((userID: string|n, node: NodeL2)=>
 	return null;
 });
 
-export const ForCopy_GetError = CreateAccessor((userID: string|n, node: MapNode)=>{
+export const ForCopy_GetError = CreateAccessor((userID: string|n, node: NodeL1)=>{
 	if (!CanGetBasicPermissions(userID)) return "You're not signed in, or lack basic permissions.";
 	if (IsRootNode(node)) return "Cannot copy the root-node of a map.";
 	//if (IsNodeSubnode(node)) return "Cannot copy a subnode.";
 	return null;
 });
 
-/* export function GetUnlinkErrorMessage(parent: MapNode, child: MapNode) {
+/* export function GetUnlinkErrorMessage(parent: NodeL1, child: NodeL1) {
 	//let childNodes = node.children.Select(a=>nodes[a]);
 	let parentNodes = nodes.filter(a=>a.children && a.children[node._id]);
 	if (parentNodes.length <= 1)

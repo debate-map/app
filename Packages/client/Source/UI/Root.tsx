@@ -24,7 +24,7 @@ import {GADDemo, ShowHeader} from "./@GAD/GAD.js";
 import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
 import {RootStyles} from "./@Root/RootStyles.js";
-import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer.js";
+import {NodeDetailBoxesLayer} from "./@Shared/Maps/Node/DetailBoxes/NodeDetailBoxesLayer.js";
 import {DatabaseUI} from "./Database.js";
 import {UserProfileUI} from "./Database/Users/UserProfile.js";
 import {DebatesUI} from "./Debates.js";

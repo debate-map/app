@@ -3,7 +3,7 @@ import {ArgumentType} from "../DB/nodes/@NodeRevision.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, GetNodeL2} from "../DB/nodes/$node.js";
-import {MapNode, NodeL2} from "../DB/nodes/@MapNode.js";
+import {NodeL1, NodeL2} from "../DB/nodes/@Node.js";
 
 @MapEdit
 @UserEdit
@@ -16,12 +16,12 @@ import {MapNode, NodeL2} from "../DB/nodes/@MapNode.js";
 })
 export class SetNodeArgumentType extends Command<{mapID?: string|n, nodeID: string, argumentType: ArgumentType}, {}> {
 	oldNodeData: NodeL2;
-	newNodeData: MapNode;
+	newNodeData: NodeL1;
 	Validate() {
 		const {nodeID, argumentType} = this.payload;
 		this.oldNodeData = GetNodeL2.NN(nodeID);
 		this.newNodeData = {...AsNodeL1(this.oldNodeData), argumentType};
-		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
+		AssertValidate("NodeL1", this.newNodeData, "New node-data invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

@@ -1,6 +1,6 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton.js";
+import {AddArgumentButton} from "UI/@Shared/Maps/Node/NodeUI/AddArgumentButton.js";
 import {NodeL3, Polarity, Map, ChildGroup, NodeType} from "dm_common";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {useCallback} from "react";

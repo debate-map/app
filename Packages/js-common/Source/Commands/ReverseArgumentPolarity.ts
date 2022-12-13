@@ -5,7 +5,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetParentNodeID} from "../DB/nodes.js";
 import {GetNodeL3, ReversePolarity} from "../DB/nodes/$node.js";
-import {NodeL3} from "../DB/nodes/@MapNode.js";
+import {NodeL3} from "../DB/nodes/@Node.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 
 @MapEdit

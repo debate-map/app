@@ -6,7 +6,7 @@ import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, GetNode} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
-import {ClaimForm, NodeL3, RatingSummary} from "./nodes/@MapNode.js";
+import {ClaimForm, NodeL3, RatingSummary} from "./nodes/@Node.js";
 import {ChildGroup, NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
@@ -176,11 +176,11 @@ export const GetMarkerPercent_AtPath = CreateAccessor((node: NodeL3, path: strin
 	}
 });
 
-/* export function GetPaths_MainRatingSet(node: MapNode) {
-	let mainRatingType = MapNode.GetMainRatingTypes(node)[0];
+/* export function GetPaths_MainRatingSet(node: NodeL1) {
+	let mainRatingType = NodeL1.GetMainRatingTypes(node)[0];
 	return [`nodeRatings/${node._id}/${mainRatingType}`];
 }
-export function GetPaths_MainRatingAverage(node: MapNode) {
+export function GetPaths_MainRatingAverage(node: NodeL1) {
 	let result = GetPaths_MainRatingSet(node);
 	if (node.type == NodeType.Argument || node.type == NodeType.Argument)
 		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
@@ -188,22 +188,22 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 } */
 
 /** Returns an int from 0 to 100. */
-/* export function GetMainRatingAverage(node: MapNode, resultIfNoData = null): number {
+/* export function GetMainRatingAverage(node: NodeL1, resultIfNoData = null): number {
 	// if static category, always show full bar
 	if (node._id < 100)
 		return 100;
-	return GetRatingAverage(node._id, MapNode.GetMainRatingTypes(node)[0], resultIfNoData);
+	return GetRatingAverage(node._id, NodeL1.GetMainRatingTypes(node)[0], resultIfNoData);
 } */
 
 /** Returns an int from 0 to 100. */
-/* export function GetMainRatingFillPercent(node: MapNode) {
+/* export function GetMainRatingFillPercent(node: NodeL1) {
 	let mainRatingAverage = GetMainRatingAverage(node);
 	if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 } */
 
-/* export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
+/* export function GetFillPercentForRatingAverage(node: NodeL1, ratingAverage: number, reverseRating?: boolean) {
 	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
 	/*if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
 		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*#/

@@ -4,7 +4,7 @@ import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {Map} from "../DB/maps/@Map.js";
 import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
@@ -31,7 +31,7 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		map.editedAt = map.createdAt;
 
 		const userHidden = GetUserHidden.NN(this.userInfo.id);
-		const newRootNode = new MapNode({
+		const newRootNode = new NodeL1({
 			//EV({ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID)}),
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			//accessPolicy: map.nodeAccessPolicy ?? userHidden.lastAccessPolicy,

@@ -21,13 +21,19 @@ export enum ClaimForm {
 //export type ClaimForm = typeof ClaimForm_values[number];
 AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});
 
-//export const MapNode_id = UUID_regex;
-//export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
+//export const NodeL1_id = UUID_regex;
+//export const NodeL1_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
+
+/**
+ * Why is this called "NodeL1" rather than just "Node" (as seen in Rust app-server)?
+ * Primary reason: "Node" conflicts with js global by same name.
+ * Secondary reason: "NodeL1" name matches with the "NodeL2" and "NodeL3" types.
+*/
 @MGLClass({table: "nodes"}, undefined, t=>{
-	//t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
+	//t.comment("@name NodeL1"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
 })
-export class MapNode {
-	constructor(initialData: {type: NodeType} & Partial<MapNode>) {
+export class NodeL1 {
+	constructor(initialData: {type: NodeType} & Partial<NodeL1>) {
 		CE(this).VSet(initialData);
 	}
 
@@ -80,14 +86,14 @@ export class MapNode {
 	@Field({$ref: "Node_Extras"})
 	extras = new Node_Extras();
 }
-AddSchema("Node_Partial", ["MapNode"], ()=>{
-	const schema = GetSchemaJSON_Cloned("MapNode");
+AddSchema("Node_Partial", ["NodeL1"], ()=>{
+	const schema = GetSchemaJSON_Cloned("NodeL1");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = ["type"];
 	return schema;
 });
-// disabled for now, simply because we haven't finished making all places that manipulate "MapNode.children" reliably update "MapNode.childrenOrder" as well
-/*AddAJVExtraCheck('MapNode', (node: MapNode) => {
+// disabled for now, simply because we haven't finished making all places that manipulate "NodeL1.children" reliably update "NodeL1.childrenOrder" as well
+/*AddAJVExtraCheck('NodeL1', (node: NodeL1) => {
 	if (node.type == NodeType.Argument) {
 		if ((node.childrenOrder ? node.childrenOrder.length : 0) !== (node.children ? node.children.VKeys().length : 0)) {
 			return 'Children and childrenOrder lengths differ!';
@@ -123,9 +129,9 @@ export class RatingSummary {
 }
 
 // helpers
-// export type NodeL2 = MapNode & {finalType: NodeType};
-/** MapNode, except with the access-policy and current-revision data attached. (no view-related stuff) */
-export interface NodeL2 extends MapNode {
+// export type NodeL2 = NodeL1 & {finalType: NodeType};
+/** NodeL1, except with the access-policy and current-revision data attached. (no view-related stuff) */
+export interface NodeL2 extends NodeL1 {
 	// todo: maybe make-so these added/attached cached-data properties have "_" at the start of their name, to make them easier to recognize
 	policy: AccessPolicy;
 	current: NodeRevision;

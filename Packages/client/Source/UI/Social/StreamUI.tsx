@@ -1,7 +1,7 @@
 import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun, GetUser, AddChildNode, NodeType, GetNode, GetNodeL2, GetNodeL3, AddNodeRevision, GetNodeRevision, AsNodeL3, AsNodeL2, GetAccessPolicy} from "dm_common";
 import React from "react";
 import {store} from "Store";
-import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
+import {NodeUI_Inner} from "UI/@Shared/Maps/Node/NodeUI_Inner";
 import useResizeObserver from "use-resize-observer";
 import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus} from "web-vcore";
 import {Assert} from "web-vcore/nm/js-vextensions";

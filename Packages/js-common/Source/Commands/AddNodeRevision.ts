@@ -6,7 +6,7 @@ import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {ChangeType, MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNode} from "../DB/nodes.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
+import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 
 /** Returned terms are all lowercase. */
@@ -44,7 +44,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: NodeRe
 	//lastNodeRevisionID_addAmount = 0;
 	recordAsNodeEdit = true;
 
-	node_oldData: MapNode|n;
+	node_oldData: NodeL1|n;
 	nodeEdit?: MapNodeEdit;
 	map_nodeEdits?: MapNodeEdit[];
 	Validate() {
