@@ -9,7 +9,7 @@ use crate::{utils::type_aliases::JSONValue, db::{_general::GenericMutation_Resul
 
 // temp
 type TransferType = String;
-type MapNodeType = String;
+type NodeType = String;
 type ClaimForm = String;
 type Polarity = String;
 type ChildGroup = String;
@@ -54,7 +54,7 @@ pub struct NodeInfoForTransfer {
 	nodeID: Option<String>, // can be null, if transfer is of type "shim"
 	oldParentID: Option<String>,
 	transferType: TransferType,
-	clone_newType: MapNodeType,
+	clone_newType: NodeType,
 	clone_keepChildren: bool,
 	clone_keepTags: NodeTagCloneType,
 

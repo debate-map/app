@@ -20,6 +20,7 @@ pub enum ChangeType {
     #[graphql(name = "remove")] remove,
 }
 
+// this is called "MapNodeEdit" rather than just "NodeEdit", due to it always being a node edit in the context of a map
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MapNodeEdit {
     pub id: ID,
@@ -40,9 +41,9 @@ impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
 }
 
 #[derive(Default)]
-pub struct SubscriptionShard_MapNodeEdit;
+pub struct SubscriptionShard_NodeEdit;
 #[Subscription]
-impl SubscriptionShard_MapNodeEdit {
+impl SubscriptionShard_NodeEdit {
     async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
         handle_generic_gql_collection_request::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
     }

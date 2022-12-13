@@ -9,7 +9,7 @@ import {NodeChildLink} from "./DB/nodeChildLinks/@NodeChildLink.js";
 import {NodeRating} from "./DB/nodeRatings/@NodeRating.js";
 import {MapNode} from "./DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "./DB/nodes/@MapNodeRevision.js";
-import {MapNodeTag} from "./DB/nodeTags/@MapNodeTag.js";
+import {NodeTag} from "./DB/nodeTags/@NodeTag.js";
 import {Share} from "./DB/shares/@Share.js";
 import {Term} from "./DB/terms/@Term.js";
 import {User} from "./DB/users/@User.js";
@@ -51,7 +51,7 @@ export class GraphDBShape {
 	//nodeStats = DefineCollection(MapNodeStats);
 	nodePhrasings = DefineCollection(MapNodePhrasing);
 	nodeChildLinks = DefineCollection(NodeChildLink);
-	nodeTags = DefineCollection(MapNodeTag);
+	nodeTags = DefineCollection(NodeTag);
 	shares = DefineCollection(Share);
 	terms = DefineCollection(Term);
 	//termNames = DefineCollection(any);

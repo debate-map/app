@@ -4,8 +4,8 @@ import {Polarity} from "../nodes/@MapNode.js";
 import {NodeTagCloneType} from "../../Commands.js";
 
 @MGLClass({table: "nodeTags"})
-export class MapNodeTag {
-	constructor(initialData: Partial<MapNodeTag>) {
+export class NodeTag {
+	constructor(initialData: Partial<NodeTag>) {
 		CE(this).VSet(initialData);
 	}
 
@@ -21,8 +21,8 @@ export class MapNodeTag {
 	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
-	//@Field({$ref: "MapNodeTagType"})
-	//type: MapNodeTagType;
+	//@Field({$ref: "NodeTagType"})
+	//type: NodeTagType;
 	//@Field({patternProperties: {[UUID_regex]: {type: "string"}}})
 	//nodes: {[key: string]: string};
 
@@ -67,10 +67,10 @@ export class MapNodeTag {
 	}, {opt: true})
 	cloneHistory?: TagComp_CloneHistory;
 }
-export function MaybeCloneAndRetargetNodeTag(tag: MapNodeTag, cloneType: NodeTagCloneType, oldNodeID: string, newNodeID: string): MapNodeTag|n {
+export function MaybeCloneAndRetargetNodeTag(tag: NodeTag, cloneType: NodeTagCloneType, oldNodeID: string, newNodeID: string): NodeTag|n {
 	const tagCloneLevel = [NodeTagCloneType.minimal, NodeTagCloneType.basics].indexOf(cloneType);
 
-	const newTag = Clone(tag) as MapNodeTag;
+	const newTag = Clone(tag) as NodeTag;
 	if (newTag.labels != null && tagCloneLevel >= 1) {
 		newTag.labels.nodeX = newNodeID;
 	}
@@ -93,7 +93,7 @@ export abstract class TagComp {
 	static key: string;
 	static displayName: string;
 	static description: string;
-	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array (field-value can be a node-id string, or an array of such strings)
+	static nodeKeys: string[]; // fields whose values should be added to NodeTag.nodes array (field-value can be a node-id string, or an array of such strings)
 	/*#* Method that retargets the tag-comp from one node to another. (called when a node and its tags are being cloned) */
 	//ChangeTarget(oldNodeID: string, newNodeID: string) {}
 
@@ -310,7 +310,7 @@ function CalculateTagCompClassStatics() {
 }
 
 export function CalculateTagCompKey(className: string) {
-	//return GetSchemaJSON("MapNodeTag").properties.Pairs().find(a=>a.value.$ref == className).key;
+	//return GetSchemaJSON("NodeTag").properties.Pairs().find(a=>a.value.$ref == className).key;
 	let displayName = className.replace(/TagComp_/, "");
 	displayName = ModifyString(displayName, m=>[m.startUpper_to_lower]);
 	return displayName;
@@ -330,32 +330,32 @@ export function CalculateTagCompDisplayName(className: string) {
 export function GetTagCompClassByDisplayName(displayName: string) {
 	return TagComp_classes.find(a=>a.displayName == displayName);
 }
-export function GetTagCompClassByTag(tag: MapNodeTag) {
+export function GetTagCompClassByTag(tag: NodeTag) {
 	return TagComp_classes.find(a=>tag[a.key] != null)!;
 	/*Assert(tag.constructor.name.startsWith("TagComp_"), "Tag-comp must have prototype re-applied before this point.");
 	return tag.constructor as TagComp_Class;*/
 }
-export function GetTagCompOfTag(tag: MapNodeTag): TagComp {
+export function GetTagCompOfTag(tag: NodeTag): TagComp {
 	const compClass = GetTagCompClassByTag(tag);
 	return tag[compClass.key];
 }
 
-/*export type MapNodeTagType = typeof TagComp_classes[number];
-export const MapNodeTagType_values = ["mirror children from X to Y"] as const; //, "example-based claim", "X extends Y"];
-//AddSchema("MapNodeTagType", {oneOf: MapNodeTagType_values.map(val=>({const: val}))});
-export const MapNodeTagType_keys = MapNodeTagType_values.map(type=>ConvertNodeTagTypeToKey(type));
-export function ConvertNodeTagTypeToKey(type: MapNodeTagType) {
+/*export type NodeTagType = typeof TagComp_classes[number];
+export const NodeTagType_values = ["mirror children from X to Y"] as const; //, "example-based claim", "X extends Y"];
+//AddSchema("NodeTagType", {oneOf: NodeTagType_values.map(val=>({const: val}))});
+export const NodeTagType_keys = NodeTagType_values.map(type=>ConvertNodeTagTypeToKey(type));
+export function ConvertNodeTagTypeToKey(type: NodeTagType) {
 	return ModifyString(type, m=>[m.spaceLower_to_spaceUpper, m.removeSpaces, m.hyphenLower_to_hyphenUpper, m.removeHyphens]);
 }
-export function GetNodeTagKey(tag: MapNodeTag) {
-	return MapNodeTagType_keys.find(key=>key in tag);
+export function GetNodeTagKey(tag: NodeTag) {
+	return NodeTagType_keys.find(key=>key in tag);
 }
-export function GetNodeTagType(tag: MapNodeTag) {
-	const compKeyIndex = MapNodeTagType_keys.findIndex(key=>key in tag);
-	return MapNodeTagType_values[compKeyIndex];
+export function GetNodeTagType(tag: NodeTag) {
+	const compKeyIndex = NodeTagType_keys.findIndex(key=>key in tag);
+	return NodeTagType_values[compKeyIndex];
 }*/
 
-export function CalculateNodeIDsForTag(tag: MapNodeTag) {
+export function CalculateNodeIDsForTag(tag: NodeTag) {
 	const compClass = GetTagCompClassByTag(tag);
 	const tagComp = GetTagCompOfTag(tag);
 	return CalculateNodeIDsForTagComp(tagComp, compClass);

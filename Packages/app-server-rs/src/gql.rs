@@ -41,14 +41,17 @@ use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
 use crate::db::commands::add_media::MutationShard_AddMedia;
+use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
 use crate::db::commands::add_share::MutationShard_AddShare;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::commands::delete_access_policy::MutationShard_DeleteAccessPolicy;
 use crate::db::commands::delete_media::MutationShard_DeleteMedia;
+use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
 use crate::db::commands::delete_share::MutationShard_DeleteShare;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
 use crate::db::commands::update_access_policy::MutationShard_UpdateAccessPolicy;
 use crate::db::commands::update_media::MutationShard_UpdateMedia;
+use crate::db::commands::update_node_tag::MutationShard_UpdateNodeTag;
 use crate::db::commands::update_share::MutationShard_UpdateShare;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
 use crate::db::general::search::QueryShard_General_Search;
@@ -63,14 +66,14 @@ use crate::db::command_runs::SubscriptionShard_CommandRun;
 use crate::db::feedback_proposals::SubscriptionShard_Proposal;
 use crate::db::feedback_user_infos::SubscriptionShard_UserInfo;
 use crate::db::global_data::SubscriptionShard_GlobalData;
-use crate::db::map_node_edits::SubscriptionShard_MapNodeEdit;
+use crate::db::map_node_edits::SubscriptionShard_NodeEdit;
 use crate::db::maps::SubscriptionShard_Map;
 use crate::db::medias::SubscriptionShard_Media;
 use crate::db::node_child_links::SubscriptionShard_NodeChildLink;
-use crate::db::node_phrasings::SubscriptionShard_MapNodePhrasing;
+use crate::db::node_phrasings::SubscriptionShard_NodePhrasing;
 use crate::db::node_ratings::SubscriptionShard_NodeRating;
-use crate::db::node_revisions::SubscriptionShard_MapNodeRevision;
-use crate::db::node_tags::SubscriptionShard_MapNodeTag;
+use crate::db::node_revisions::SubscriptionShard_NodeRevision;
+use crate::db::node_tags::SubscriptionShard_NodeTag;
 use crate::db::nodes::SubscriptionShard_MapNode;
 use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
@@ -92,9 +95,9 @@ pub struct QueryRoot(
 pub struct MutationRoot(
     MutationShard_General, MutationShard_General_Subtree,
     // commands
-    MutationShard_AddAccessPolicy, MutationShard_AddMedia, MutationShard_AddShare, MutationShard_AddTerm,
-    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMedia, MutationShard_DeleteShare, MutationShard_DeleteTerm,
-    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateShare, MutationShard_UpdateTerm,
+    MutationShard_AddAccessPolicy, MutationShard_AddMedia, MutationShard_AddNodeTag, MutationShard_AddShare, MutationShard_AddTerm,
+    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMedia, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
+    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
 );
 
 #[derive(MergedSubscription, Default)]
@@ -105,8 +108,8 @@ pub struct SubscriptionRoot(
     SubscriptionShard_GlobalData, SubscriptionShard_Map,
     SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
     SubscriptionShard_CommandRun, SubscriptionShard_Proposal, SubscriptionShard_UserInfo,
-    SubscriptionShard_MapNode, SubscriptionShard_NodeChildLink, SubscriptionShard_MapNodeEdit,
-    SubscriptionShard_MapNodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_MapNodeRevision, SubscriptionShard_MapNodeTag,
+    SubscriptionShard_MapNode, SubscriptionShard_NodeChildLink, SubscriptionShard_NodeEdit,
+    SubscriptionShard_NodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_NodeRevision, SubscriptionShard_NodeTag,
     SubscriptionShard_Share,
 );
 

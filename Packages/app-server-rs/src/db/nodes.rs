@@ -21,7 +21,7 @@ pub async fn get_node(ctx: &AccessorContext<'_>, id: &str) -> Result<MapNode, Er
 wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub enum MapNodeType {
+pub enum NodeType {
     #[graphql(name = "category")] category,
     #[graphql(name = "package")] package,
     #[graphql(name = "multiChoiceQuestion")] multiChoiceQuestion,
@@ -34,7 +34,7 @@ pub struct MapNode {
     pub id: ID,
 	pub creator: String,
 	pub createdAt: i64,
-    pub r#type: MapNodeType,
+    pub r#type: NodeType,
 	pub rootNodeForMap: Option<String>,
     #[graphql(name = "c_currentRevision")]
 	//pub c_currentRevision: Option<String>,

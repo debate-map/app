@@ -1,18 +1,18 @@
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNode} from "../DB/nodes.js";
-import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
+import {NodeTag} from "../DB/nodeTags/@NodeTag.js";
 import {HasModPermissions} from "../DB/users/$user.js";
 import {TransferNodes} from "./TransferNodes.js";
 
 @UserEdit
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
-		$tag: {$ref: MapNodeTag.name},
+		$tag: {$ref: NodeTag.name},
 	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
-export class AddNodeTag extends Command<{tag: MapNodeTag}, {id: string}> {
+export class AddNodeTag extends Command<{tag: NodeTag}, {id: string}> {
 	Validate() {
 		AssertV(HasModPermissions(this.userInfo.id), "Only moderators can add tags currently.");
 
@@ -21,7 +21,7 @@ export class AddNodeTag extends Command<{tag: MapNodeTag}, {id: string}> {
 		tag.id = this.GenerateUUID_Once("id");
 		tag.creator = this.userInfo.id;
 		tag.createdAt = Date.now();
-		AssertValidate("MapNodeTag", tag, "MapNodeTag invalid");
+		AssertValidate("NodeTag", tag, "NodeTag invalid");
 
 		for (const [i, nodeID] of tag.nodes.entries()) {
 			const isLastNode = i == tag.nodes.length - 1;

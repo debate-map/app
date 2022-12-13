@@ -1,7 +1,7 @@
 import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
-import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
+import {NodeTag} from "../DB/nodeTags/@NodeTag.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
@@ -11,7 +11,7 @@ import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 	}),
 })
 export class DeleteNodeTag extends Command<{id: string}, {}> {
-	oldData: MapNodeTag;
+	oldData: NodeTag;
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetNodeTag.NN(id);

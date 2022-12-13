@@ -7,7 +7,7 @@ use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::db::node_revisions::MapNodeRevision;
+use rust_shared::db::node_revisions::NodeRevision;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
@@ -25,8 +25,8 @@ use crate::db::access_policies::AccessPolicy;
 use crate::db::commands::clone_subtree::clone_subtree;
 use crate::db::medias::Media;
 use crate::db::node_child_links::NodeChildLink;
-use crate::db::node_phrasings::MapNodePhrasing;
-use crate::db::node_tags::MapNodeTag;
+use crate::db::node_phrasings::NodePhrasing;
+use crate::db::node_tags::NodeTag;
 use crate::db::nodes::MapNode;
 use crate::db::terms::Term;
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
@@ -53,9 +53,9 @@ pub struct Subtree {
     pub medias: Vec<Media>,
     pub nodes: Vec<MapNode>,
     pub nodeChildLinks: Vec<NodeChildLink>,
-    pub nodeRevisions: Vec<MapNodeRevision>,
-    pub nodePhrasings: Vec<MapNodePhrasing>,
-    pub nodeTags: Vec<MapNodeTag>,
+    pub nodeRevisions: Vec<NodeRevision>,
+    pub nodePhrasings: Vec<NodePhrasing>,
+    pub nodeTags: Vec<NodeTag>,
 }
 impl Subtree {
     pub fn get_all_ids(&self) -> HashSet<String> {

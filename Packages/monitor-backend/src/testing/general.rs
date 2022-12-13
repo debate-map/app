@@ -138,20 +138,22 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
         let fut = post_request_to_app_server_rs(json!({
             "operationName": "AddNodeRevision",
             "variables": {
-                "mapID": "GLOBAL_MAP_00000000001",
-                "revision": {
-                    "id": new_uuid_v4_as_b64_id(),
-                    "node": comp.nodeID,
-                    "creator": SYSTEM_USER_ID,
-                    "createdAt": time_since_epoch_ms(),
-                    "phrasing": {
-                        "terms": [],
-                        "text_base": comp.text.unwrap_or(format!("ValForTestRevision_At:{}", time_since_epoch_ms())),
-                    },
-                    "attachments": []
+                "input": {
+                    "mapID": "GLOBAL_MAP_00000000001",
+                    "revision": {
+                        "id": new_uuid_v4_as_b64_id(),
+                        "node": comp.nodeID,
+                        "creator": SYSTEM_USER_ID,
+                        "createdAt": time_since_epoch_ms(),
+                        "phrasing": {
+                            "terms": [],
+                            "text_base": comp.text.unwrap_or(format!("ValForTestRevision_At:{}", time_since_epoch_ms())),
+                        },
+                        "attachments": []
+                    }
                 }
             },
-            "query": "mutation AddNodeRevision($mapID: String, $revision: MapNodeRevisionT0) { AddNodeRevision(mapID: $mapID, revision: $revision) { id __typename } }"
+            "query": "mutation AddNodeRevision($input: AddNodeRevisionInput) { AddNodeRevision(input: $input) { id } }"
         }));
 
         if step.waitTillComplete.unwrap_or(true) {

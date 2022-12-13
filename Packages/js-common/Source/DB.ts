@@ -28,7 +28,7 @@ export * from "./DB/nodeRatings/ReasonScore.js";
 export * from "./DB/nodeRevisions.js";
 export * from "./DB/nodeTags.js";
 export * from "./DB/nodeTags/$nodeTag.js";
-export * from "./DB/nodeTags/@MapNodeTag.js";
+export * from "./DB/nodeTags/@NodeTag.js";
 export * from "./DB/nodes.js";
 export * from "./DB/nodes/$node.js";
 //export * from "./DB/nodes/$node/$impactPremise.js";

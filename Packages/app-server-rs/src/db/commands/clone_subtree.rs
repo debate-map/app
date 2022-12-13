@@ -30,8 +30,8 @@ use crate::db::access_policies::AccessPolicy;
 use crate::db::general::subtree_collector::get_node_subtree;
 use crate::db::medias::Media;
 use crate::db::node_child_links::{NodeChildLink, get_node_child_links};
-use crate::db::node_phrasings::MapNodePhrasing;
-use crate::db::node_tags::{MapNodeTag, TagComp_CloneHistory};
+use crate::db::node_phrasings::NodePhrasing;
+use crate::db::node_tags::{NodeTag, TagComp_CloneHistory};
 use crate::db::nodes::MapNode;
 use crate::db::terms::Term;
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
@@ -200,7 +200,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     }
     log("part 6.5");
     for old_node_id in nodes_still_needing_clone_history_tag {
-        let tag = MapNodeTag {
+        let tag = NodeTag {
             id: ID(new_uuid_v4_as_b64()),
             creator: actor_id(),
             createdAt: time_since_epoch_ms_i64(),

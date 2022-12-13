@@ -11,7 +11,7 @@ import {MapNodeRevision} from "./@MapNodeRevision.js";
 import {ChildGroup, MapNodeType} from "./@MapNodeType.js";
 import {PermissionGroupSet} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
-import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag.js";
+import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@NodeTag.js";
 import {SourceType, Source} from "../@Shared/Attachments/@SourceChain.js";
 import {GetNodeChildLinks} from "../nodeChildLinks.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";

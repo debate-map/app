@@ -1,11 +1,11 @@
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing.js";
-import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@MapNodeTag.js";
+import {NodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@NodeTag.js";
 import {GraphDBShape} from "../DBShape.js";
 
 // todo: probably add and use some sort of system where mobx-graphlink auto-reattaches data to their classes, based on AJV metadata
-export const GetNodeTags = CreateAccessor((nodeID: string, userIDs?: string[]|n): MapNodeTag[]=>{
+export const GetNodeTags = CreateAccessor((nodeID: string, userIDs?: string[]|n): NodeTag[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`nodes.${nodeID}`, ">", "")], // `if value > ""` means "if key exists"
 		//queryOps: [new WhereOp(`nodes`, "array-contains", nodeID)],
@@ -28,7 +28,7 @@ export const GetNodeTagComps = CreateAccessor((nodeID: string, unwrapCompositeTa
 		return unwrapCompositeTags ? GetFinalTagCompsForTag(tag) : [baseComp];
 	});
 });
-export const GetFinalTagCompsForTag = CreateAccessor((tag: MapNodeTag): TagComp[]=>{
+export const GetFinalTagCompsForTag = CreateAccessor((tag: NodeTag): TagComp[]=>{
 	const compClass = GetTagCompClassByTag(tag);
 	const comp = GetTagCompOfTag(tag);
 	//return comp.As(compClass).GetFinalTagComps();
@@ -38,7 +38,7 @@ export const GetFinalTagCompsForTag = CreateAccessor((tag: MapNodeTag): TagComp[
 	return comp.GetFinalTagComps();
 });
 
-export const GetNodeLabelCounts = CreateAccessor((tagsList: MapNodeTag[])=>{
+export const GetNodeLabelCounts = CreateAccessor((tagsList: NodeTag[])=>{
 	const labelCounts = new Map<string, number>();
 	for (const tag of tagsList) {
 		const labelsInTag = tag.labels?.labels ?? [];

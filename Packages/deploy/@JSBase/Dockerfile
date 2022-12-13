@@ -55,7 +55,8 @@ COPY Scripts/PostInstall.js Scripts/PostInstall.js
 # add python for some npm packages that need it
 # --no-cache: download package index on-the-fly, no need to cleanup afterwards
 # --virtual: bundle packages, remove whole bundle at once, when done
-RUN apk --no-cache --virtual build-dependencies add python3 make g++ libexecinfo-dev \
+#RUN apk --no-cache --virtual build-dependencies add python3 make g++ libexecinfo-dev \
+RUN apk --no-cache --virtual build-dependencies add python3 make g++ \
 # equivalent of yarn-v1's "yarn install --production" (as per: https://yarnpkg.com/cli/workspaces/focus#details) -- which avoids installing dev-deps, cutting down on image size
 	&& yarn workspaces focus --all --production \
 # remove python (and such) again, since not needed anymore

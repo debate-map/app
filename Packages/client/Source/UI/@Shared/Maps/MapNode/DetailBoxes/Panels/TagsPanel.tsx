@@ -1,4 +1,4 @@
-import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
+import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, Map, MapNodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
 import {Assert, Clone, E, emptyArray, GetEntries, GetValues} from "js-vextensions";
 import React, {useState} from "react";
 import {VMenuItem, VMenuStub} from "react-vmenu";
@@ -6,6 +6,7 @@ import {store} from "Store";
 import {TagsPanel_Subpanel} from "Store/main/maps";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
+import {RunCommand_AddNodeTag, RunCommand_DeleteNodeTag, RunCommand_UpdateNodeTag} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetUpdates, HSLA, Observer, RunInAction_Set} from "web-vcore";
 import {Button, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -32,28 +33,31 @@ export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map
 
 		const AddOwnLabel = (label: string)=>{
 			if (myLabelsTag == null) {
-				const tag = new MapNodeTag({
+				const tag = new NodeTag({
 					labels: new TagComp_Labels({nodeX: node.id}),
 					nodes: [node.id],
 				});
 				tag.labels!.labels = [label];
-				new AddNodeTag({tag}).RunOnServer();
+				//new AddNodeTag({tag}).RunOnServer();
+				RunCommand_AddNodeTag(tag);
 			} else {
 				const newLabelsComp = Clone(myLabelsTag.labels) as TagComp_Labels;
 				newLabelsComp.labels.push(label);
-				new UpdateNodeTag({
+				/*new UpdateNodeTag({
 					id: myLabelsTag!.id,
 					updates: {labels: newLabelsComp},
-				}).RunOnServer();
+				}).RunOnServer();*/
+				RunCommand_UpdateNodeTag({id: myLabelsTag!.id, updates: {labels: newLabelsComp}});
 			}
 		};
-		const RemoveLabelInTag = (label: string, tag: MapNodeTag)=>{
+		const RemoveLabelInTag = (label: string, tag: NodeTag)=>{
 			const newLabelsComp = Clone(tag.labels) as TagComp_Labels;
 			newLabelsComp.labels.Remove(label);
-			new UpdateNodeTag({
+			/*new UpdateNodeTag({
 				id: tag.id,
 				updates: {labels: newLabelsComp},
-			}).RunOnServer();
+			}).RunOnServer();*/
+			RunCommand_UpdateNodeTag({id: tag.id, updates: {labels: newLabelsComp}});
 		};
 
 		return (
@@ -127,7 +131,7 @@ export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map
 							ShowAddTagDialog({
 								mirrorChildrenFromXToY: new TagComp_MirrorChildrenFromXToY({nodeY: node.id}),
 								nodes: [node.id],
-							} as Partial<MapNodeTag>);
+							} as Partial<NodeTag>);
 						}}/>
 					</Row>
 					{tags.filter(a=>a.labels == null).map((tag, index)=>{
@@ -142,7 +146,7 @@ export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map
 }
 
 @Observer
-class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, index: number}, {newTag: null as MapNodeTag|n}) {
+class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: NodeTag, index: number}, {newTag: null as NodeTag|n}) {
 	//detailsUI: TagDetailsUI;
 	render() {
 		const {tag, index, node} = this.props;
@@ -151,9 +155,20 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 		const comp = tag.mirrorChildrenFromXToY;
 		const compClass = GetTagCompClassByTag(tag);
 
-		const tempCommand = new UpdateNodeTag({id: tag.id, updates: GetUpdates(tag, newTag)});
+		/*const tempCommand = new UpdateNodeTag({id: tag.id, updates: GetUpdates(tag, newTag)});
 		let tempCommand_valid = tempCommand.Validate_Safe() == null;
 		let tempCommand_error = tempCommand.ValidateErrorStr;
+		if (tempCommand_valid && !newTag.nodes.Contains(node.id)) {
+			tempCommand_valid = false;
+			tempCommand_error = `
+				The selected-node cannot be detached from a tag through the Tags panel.
+
+				To proceed, select a different attached node${/*, use the Database->Tags page*#/""}, or delete and recreate for the target node.
+			`.AsMultiline(0);
+		}*/
+
+		let tempCommand_valid = true;
+		let tempCommand_error: string | undefined;
 		if (tempCommand_valid && !newTag.nodes.Contains(node.id)) {
 			tempCommand_valid = false;
 			tempCommand_error = `
@@ -171,7 +186,8 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 				{creatorOrMod &&
 					<Row mt={5}>
 						<Button text="Save" enabled={tempCommand_valid} title={tempCommand_error} onLeftClick={async()=>{
-							await tempCommand.RunOnServer();
+							//await tempCommand.RunOnServer();
+							await RunCommand_UpdateNodeTag({id: tag.id, updates: GetUpdates(tag, newTag)});
 						}}/>
 						<Button ml="auto" text="Delete" onLeftClick={async()=>{
 							ShowMessageBox({
@@ -182,7 +198,8 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 									Type: ${compClass.displayName}
 								`.AsMultiline(0),
 								onOK: async()=>{
-									await new DeleteNodeTag({id: tag.id}).RunOnServer();
+									//await new DeleteNodeTag({id: tag.id}).RunOnServer();
+									await RunCommand_DeleteNodeTag({id: tag.id});
 								},
 							});
 						}}/>

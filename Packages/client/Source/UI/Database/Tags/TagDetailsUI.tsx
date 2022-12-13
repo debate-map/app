@@ -5,13 +5,14 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
+import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, NodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
 import {observer} from "web-vcore/nm/mobx-react";
+import {RunCommand_AddNodeTag} from "Utils/DB/Command";
 
-export type TagDetailsUI_SharedProps = DetailsUI_Base_Props<MapNodeTag, TagDetailsUI> & DetailsUI_Base_State<MapNodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
-export class TagDetailsUI extends DetailsUI_Base<MapNodeTag, TagDetailsUI> {
+export type TagDetailsUI_SharedProps = DetailsUI_Base_Props<NodeTag, TagDetailsUI> & DetailsUI_Base_State<NodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
+export class TagDetailsUI extends DetailsUI_Base<NodeTag, TagDetailsUI> {
 	render() {
 		const {baseData, style} = this.props;
 		const {newData} = this.state;
@@ -233,14 +234,14 @@ class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & 
 	}
 }
 
-export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id: string)=>void) {
-	let newTag = new MapNodeTag(initialData);
-	const getCommand = ()=>new AddNodeTag({tag: newTag});
+export function ShowAddTagDialog(initialData: Partial<NodeTag>, postAdd?: (id: string)=>void) {
+	let newTag = new NodeTag(initialData);
+	//const getCommand = ()=>new AddNodeTag({tag: newTag});
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add tag", cancelButton: true,
 		message: observer(()=>{
-			const tempCommand = getCommand();
+			/*const tempCommand = getCommand();
 			const oldProps = boxController.options.okButtonProps;
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
@@ -249,7 +250,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 			// temp (till react-vmessagebox is updated to allow more ergonomic ok-button-enabledness updating)
 			if (boxController.options.okButtonProps.enabled != !!oldProps?.enabled) {
 				boxController.UpdateUI();
-			}
+			}*/
 
 			return (
 				<Column style={{padding: "10px 0", width: 500}}>
@@ -262,7 +263,8 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 			);
 		}),
 		onOK: async()=>{
-			const {id} = await getCommand().RunOnServer();
+			//const {id} = await getCommand().RunOnServer();
+			const {id} = await RunCommand_AddNodeTag(newTag);
 			if (postAdd) postAdd(id);
 		},
 	});

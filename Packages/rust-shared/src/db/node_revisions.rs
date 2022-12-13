@@ -19,7 +19,7 @@ pub struct Attachment {
 }
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
-pub struct MapNodeRevision {
+pub struct NodeRevision {
     pub id: ID,
     pub node: String,
     pub replacedBy: Option<String>, 
@@ -34,7 +34,7 @@ pub struct MapNodeRevision {
     pub attachments: Vec<Attachment>,
     //pub attachments: Vec<JSONValue>,
 }
-impl From<Row> for MapNodeRevision {
+impl From<Row> for NodeRevision {
     fn from(row: Row) -> Self {
         Self {
             id: ID::from(&row.get::<_, String>("id")),

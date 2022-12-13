@@ -24,7 +24,7 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {type: "string"},
-		revision: {$ref: MapNodeRevision.name},
+		revision: {$ref: NodeRevision.name},
 	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })*/
@@ -36,14 +36,14 @@ use rust_shared::serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use async_trait::async_trait;
 
-use crate::{db::{node_revisions::MapNodeRevision, general::accessor_helpers::AccessorContext, nodes::{get_node, MapNode}}, utils::{type_aliases::JSONValue, db::uuid::new_uuid_v4_as_b64}};
+use crate::{db::{node_revisions::NodeRevision, general::accessor_helpers::AccessorContext, nodes::{get_node, MapNode}}, utils::{type_aliases::JSONValue, db::uuid::new_uuid_v4_as_b64}};
 
 use super::_command::{Command, db_set};
 
 #[derive(Serialize, Deserialize)]
 pub struct AddNodeRevisionPayload {
     mapID: Option<String>,
-    revision: MapNodeRevision,
+    revision: NodeRevision,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -100,7 +100,7 @@ impl Command for AddNodeRevision {
 		self.return_data = AddNodeRevisionReturnData {revisionID: revision.id.0};
 
         // todo: add this back
-		//AssertValidate("MapNodeRevision", revision, "Revision invalid");*/
+		//AssertValidate("NodeRevision", revision, "Revision invalid");*/
 
         Ok(JSONValue::Null)
 	}
