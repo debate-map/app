@@ -3,7 +3,7 @@ import {FS_TermAttachment, FS_EquationAttachment, FS_ReferencesAttachment, FS_Qu
 import {FS_AccessLevel} from "./FS_MapNode";
 
 // classes to help with importing data from old firestore-based version of Debate Map
-// from: https://github.com/debate-map/server-old/blob/master/Source/%40Shared/Store/firebase/nodes/%40MapNodeRevision.ts
+// from: https://github.com/debate-map/server-old/blob/master/Source/%40Shared/Store/firebase/nodes/%40NodeRevision.ts
 
 export type FS_TitleKey = "base" | "negation" | "yesNoQuestion";
 export class FS_TitlesMap {
@@ -23,7 +23,7 @@ export enum FS_PermissionInfoType {
 export class FS_PermissionInfo {
 	type: FS_PermissionInfoType;
 }
-export class FS_MapNodeRevision {
+export class FS_NodeRevision {
 	_key?: string;
 	node: string; // probably todo: rename to nodeID
 	creator?: string; // probably todo: rename to creatorID

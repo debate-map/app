@@ -3,10 +3,10 @@ import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUU
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {Map} from "../DB/maps/@Map.js";
-import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
+import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
+import {NodeType} from "../DB/nodes/@NodeType.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNode} from "./AddNode.js";
@@ -36,10 +36,10 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			//accessPolicy: map.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 			accessPolicy: map.accessPolicy, // add-map dialog doesn't let user choose node-access-policy yet, so use the map's accessor policy for the root-node
-			type: MapNodeType.category, creator: map.creator, rootNodeForMap: map.id,
+			type: NodeType.category, creator: map.creator, rootNodeForMap: map.id,
 		});
-		//const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: "Root"})}));
-		const newRootNodeRevision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: "Root"})});
+		//const newRootNodeRevision = new NodeRevision(E(map.nodeDefaults, {phrasing: NodePhrasing.Embedded({text_base: "Root"})}));
+		const newRootNodeRevision = new NodeRevision({phrasing: NodePhrasing.Embedded({text_base: "Root"})});
 		this.IntegrateSubcommand(()=>this.sub_addNode, null, ()=>new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}));
 
 		map.rootNode = this.sub_addNode.payload.node.id;

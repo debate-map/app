@@ -1,4 +1,4 @@
-import {ArgumentType, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, HasAdminPermissions, MapNodeType, MeID, NodeRevisionDisplayDetails, ChildOrdering, ChildOrdering_infoText} from "dm_common";
+import {ArgumentType, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, HasAdminPermissions, NodeType, MeID, NodeRevisionDisplayDetails, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React from "react";
 import {TextPlus} from "web-vcore";
 import {GetEntries, ModifyString, ToNumber} from "web-vcore/nm/js-vextensions.js";

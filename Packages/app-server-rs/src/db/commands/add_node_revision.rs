@@ -36,7 +36,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use async_trait::async_trait;
 
-use crate::{db::{node_revisions::NodeRevision, general::accessor_helpers::AccessorContext, nodes::{get_node, MapNode}}, utils::{type_aliases::JSONValue, db::uuid::new_uuid_v4_as_b64}};
+use crate::{db::{node_revisions::NodeRevision, general::accessor_helpers::AccessorContext, nodes::{get_node, Node}}, utils::{type_aliases::JSONValue, db::uuid::new_uuid_v4_as_b64}};
 
 use super::_command::{Command, db_set};
 
@@ -62,7 +62,7 @@ pub struct AddNodeRevision {
     // todo: add this back
 	//recordAsNodeEdit = true,
 
-	node_old_data: Option<MapNode>,
+	node_old_data: Option<Node>,
     // todo: add this back
 	/*nodeEdit: Option<Map_NodeEdit>,
 	map_nodeEdits: Option<Vec<Map_NodeEdit>>,*/
@@ -94,7 +94,7 @@ impl Command for AddNodeRevision {
 			};
 			AssertValidate("Map_NodeEdit", self.nodeEdit, "Node-edit entry invalid");
 
-			self.map_nodeEdits = GetMapNodeEdits(mapID);
+			self.map_nodeEdits = GetNodeEdits(mapID);
 		}*/
 
 		self.return_data = AddNodeRevisionReturnData {revisionID: revision.id.0};

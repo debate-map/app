@@ -1,4 +1,4 @@
-import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetRatingTypesForNode, Map, MapNodeL2} from "dm_common";
+import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetRatingTypesForNode, Map, NodeL2} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Link} from "web-vcore";
@@ -14,14 +14,14 @@ import {SocialPanel} from "./DetailBoxes/Panels/SocialPanel.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {NodeUI_Inner} from "./NodeUI_Inner.js";
 
-type Props = {map: Map, node: MapNodeL2};
+type Props = {map: Map, node: NodeL2};
 export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 	innerUI: NodeUI_Inner;
 	render() {
 		const {map, node} = this.props;
 		const mapView = GetMapView(GetOpenMapID()!);
-		const nodeParents = GetNodeParentsL2(node.id) as MapNodeL2[];
-		const nodeChildren = GetNodeChildrenL2(node.id) as MapNodeL2[];
+		const nodeParents = GetNodeParentsL2(node.id) as NodeL2[];
+		const nodeChildren = GetNodeChildrenL2(node.id) as NodeL2[];
 		if (mapView == null || nodeParents.Any(a=>a == null) || nodeChildren.Any(a=>a == null)) return <div/>;
 
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error

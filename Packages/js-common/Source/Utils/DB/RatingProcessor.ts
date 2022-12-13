@@ -4,8 +4,8 @@ import {GetRating, GetRatingAverage, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/nodes/$node.js";
-import {ClaimForm, MapNode, MapNodeL2} from "../../DB/nodes/@MapNode.js";
-import {ArgumentType} from "../../DB/nodes/@MapNodeRevision.js";
+import {ClaimForm, MapNode, NodeL2} from "../../DB/nodes/@MapNode.js";
+import {ArgumentType} from "../../DB/nodes/@NodeRevision.js";
 
 export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNode, premises: MapNode[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading

@@ -1,5 +1,5 @@
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
-import {GetNodeChildrenL3, GetNodeRevisions, MapNodeL3, MapNodeRevision, MapNodeType, Polarity} from "dm_common";
+import {GetNodeChildrenL3, GetNodeRevisions, NodeL3, NodeRevision, NodeType, Polarity} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Chroma_Safe, HSLA} from "web-vcore";
@@ -7,35 +7,35 @@ import {Assert} from "js-vextensions";
 import {store} from "Store";
 import {NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
 
-export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarity, current?: MapNodeRevision}, type: "raw" | "background" = "background", allowOverrides = true): chroma.Color {
+export function GetNodeColor(node: {type: NodeType, displayPolarity?: Polarity, current?: NodeRevision}, type: "raw" | "background" = "background", allowOverrides = true): chroma.Color {
 	let result: chroma.Color;
-	/*if (node.type == MapNodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
-	else if (node.type == MapNodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
-	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("rgb(90,50,180)"); //chroma("hsl(258,57%,45%)");
-	else if (node.type == MapNodeType.claim) result = chroma("rgb(0,80,150)"); //chroma("hsl(208,100%,29%)");
-	else if (node.type == MapNodeType.argument) {
+	/*if (node.type == NodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
+	else if (node.type == NodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
+	else if (node.type == NodeType.multiChoiceQuestion) result = chroma("rgb(90,50,180)"); //chroma("hsl(258,57%,45%)");
+	else if (node.type == NodeType.claim) result = chroma("rgb(0,80,150)"); //chroma("hsl(208,100%,29%)");
+	else if (node.type == NodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = chroma("rgb(30,100,30)"); //chroma("hsl(120,54%,25%)");
 		else result = chroma("rgb(100,30,30)");
 	} else {
 		Assert(false);
 	}*/
 
-	/*if (node.type == MapNodeType.category) result = chroma("hsl(210,33%,24%)");
-	else if (node.type == MapNodeType.package) result = chroma("hsl(195,67%,35%)");
-	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,57%,45%)");
-	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,100%,29%)");
-	else if (node.type == MapNodeType.argument) {
+	/*if (node.type == NodeType.category) result = chroma("hsl(210,33%,24%)");
+	else if (node.type == NodeType.package) result = chroma("hsl(195,67%,35%)");
+	else if (node.type == NodeType.multiChoiceQuestion) result = chroma("hsl(258,57%,45%)");
+	else if (node.type == NodeType.claim) result = chroma("hsl(208,100%,29%)");
+	else if (node.type == NodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,54%,25%)");
 		else result = chroma("hsl(0,54%,25%)");
 	} else {
 		Assert(false);
 	}*/
 
-	if (node.type == MapNodeType.category) result = Chroma_Safe("hsl(210,15%,24%)");
-	else if (node.type == MapNodeType.package) result = Chroma_Safe("hsl(195,35%,35%)");
-	else if (node.type == MapNodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
-	else if (node.type == MapNodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
-	else if (node.type == MapNodeType.argument) {
+	if (node.type == NodeType.category) result = Chroma_Safe("hsl(210,15%,24%)");
+	else if (node.type == NodeType.package) result = Chroma_Safe("hsl(195,35%,35%)");
+	else if (node.type == NodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
+	else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
+	else if (node.type == NodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,25%,25%)");
 		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,40%,25%)");
 		else result = Chroma_Safe("hsl(210,15%,24%)");
@@ -43,11 +43,11 @@ export function GetNodeColor(node: {type: MapNodeType, displayPolarity?: Polarit
 		Assert(false);
 	}
 
-	/*if (node.type == MapNodeType.category) result = chroma("hsl(210,30%,70%)");
-	else if (node.type == MapNodeType.package) result = chroma("hsl(195,40%,70%)");
-	else if (node.type == MapNodeType.multiChoiceQuestion) result = chroma("hsl(258,15%,70%)");
-	else if (node.type == MapNodeType.claim) result = chroma("hsl(208,40%,70%)");
-	else if (node.type == MapNodeType.argument) {
+	/*if (node.type == NodeType.category) result = chroma("hsl(210,30%,70%)");
+	else if (node.type == NodeType.package) result = chroma("hsl(195,40%,70%)");
+	else if (node.type == NodeType.multiChoiceQuestion) result = chroma("hsl(258,15%,70%)");
+	else if (node.type == NodeType.claim) result = chroma("hsl(208,40%,70%)");
+	else if (node.type == NodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,20%,70%)");
 		else result = chroma("hsl(0,25%,70%)");
 	} else {
@@ -85,7 +85,7 @@ export function GetNodeBackgroundColorFromRawColor(color: Color) {
 	return result;
 }
 
-export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false): MapNodeL3[]=>{
+export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false): NodeL3[]=>{
 	path = path || nodeID;
 
 	/*const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
@@ -118,7 +118,7 @@ export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: 
 	return nodeChildrenL3;
 });
 
-/*export const GetCurrentRevision = CreateAccessor((nodeID: string, path: string, mapID: string|n): MapNodeRevision=>{
+/*export const GetCurrentRevision = CreateAccessor((nodeID: string, path: string, mapID: string|n): NodeRevision=>{
 	const revisions = GetNodeRevisions(nodeID);
 	// todo: make this take into account the "current lens", etc.
 	return revisions.OrderBy(a=>a.createdAt).Last();

@@ -1,11 +1,11 @@
 import {Clone} from "web-vcore/nm/js-vextensions.js";
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodeChildren} from "../DB/nodes.js";
 import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
-import {MapNode, MapNodeL2} from "../DB/nodes/@MapNode.js";
+import {MapNode, NodeL2} from "../DB/nodes/@MapNode.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
 
 @MapEdit
@@ -18,7 +18,7 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 	}),
 })
 export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, nodeID: string, multiPremiseArgument: boolean}, {}> {
-	oldNodeData: MapNodeL2;
+	oldNodeData: NodeL2;
 	newNodeData: MapNode;
 	sub_addRevision: AddNodeRevision;
 	Validate() {
@@ -31,7 +31,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 			//this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
 
 			if ((this.oldNodeData.current.phrasing.text_base?.length ?? 0) == 0) {
-				const newRevision = Clone(this.oldNodeData.current) as MapNodeRevision;
+				const newRevision = Clone(this.oldNodeData.current) as NodeRevision;
 
 				const children = GetNodeChildren(this.oldNodeData.id);
 				//const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;

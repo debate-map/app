@@ -5,13 +5,13 @@ import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
-import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map, ChildGroup} from "dm_common";
+import {NodeL3, Polarity, ClaimForm, NodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map, ChildGroup} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
 
-type Props = {map: Map, node: MapNodeL3, path: string, group: ChildGroup, polarity: Polarity, style?};
+type Props = {map: Map, node: NodeL3, path: string, group: ChildGroup, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',
 	{
 		canDrop(props: Props, monitor) {
@@ -65,7 +65,7 @@ type Props = {map: Map, node: MapNodeL3, path: string, group: ChildGroup, polari
 export class AddArgumentButton extends BaseComponent<Props> {
 	render() {
 		const {map, node, path, group, polarity, style} = this.props;
-		const backgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: polarity} as MapNodeL3, "background", false);
+		const backgroundColor = GetNodeColor({type: NodeType.argument, displayPolarity: polarity} as NodeL3, "background", false);
 		const parent = GetParentNodeL3(path);
 
 		const polarity_short = GetPolarityShortStr(polarity);
@@ -112,13 +112,13 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						if (node.link?.form == ClaimForm.negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, userID, group, map.id);
+						ShowAddChildDialog(path, NodeType.argument, newChildPolarity, userID, group, map.id);
 					} else {
 						let newChildPolarity = polarity;
 						if (contributeInfo_polarity.reversePolarities) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, userID, group, map.id);
+						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, NodeType.argument, newChildPolarity, userID, group, map.id);
 					}
 				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, group, map.id, node.id, node.link?.form, path, polarity])}/>
 		);

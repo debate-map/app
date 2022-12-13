@@ -4,7 +4,7 @@ import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "web-vc
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing, MapNodeRevision, MapNode, MapNodeType, GetAttachmentType_Node, MapNodeL2, AttachmentType, MapNodePhrasing_Embedded, TermAttachment, MapNodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, MapNodeL3, GetMainAttachment} from "dm_common";
+import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, MapNode, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, NodeL3, GetMainAttachment} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
@@ -14,12 +14,12 @@ import {TermAttachmentsUI} from "./TermAttachmentsUI";
 import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
 type Props = {
-	baseData: MapNodePhrasing_Embedded & {id?: string},
-	node: MapNodeL3, // node properties are used to constrain what phrasing options are available
-	forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodePhrasing, error: string)=>void,
+	baseData: NodePhrasing_Embedded & {id?: string},
+	node: NodeL3, // node properties are used to constrain what phrasing options are available
+	forNew: boolean, enabled?: boolean, style?, onChange?: (newData: NodePhrasing, error: string)=>void,
 	embeddedInNodeRevision?: boolean,
 };
-type State = {newData: MapNodePhrasing, dataError: string|n};
+type State = {newData: NodePhrasing, dataError: string|n};
 export type PhrasingDetailsUI_SharedProps = Props & State & {splitAt: number, Change};
 
 function OmitRef<T>(props: T): T {
@@ -64,11 +64,11 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 				{forNew && node.link?.id != null &&
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
-					<Select options={GetEntries(MapNodePhrasingType)} enabled={false} style={ES({flex: 1})}
+					<Select options={GetEntries(NodePhrasingType)} enabled={false} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>}
 				<Title_Base {...sharedProps}/>
-				{node.type == MapNodeType.claim &&
+				{node.type == NodeType.claim &&
 					<OtherTitles {...sharedProps}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>{noteField_label}: </Pre>
@@ -76,7 +76,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
 				<TermAttachmentsUI {...sharedProps}/>
-				{newData.type == MapNodePhrasingType.web &&
+				{newData.type == NodePhrasingType.web &&
 					<PhrasingReferencesUI {...sharedProps}/>}
 			</Column>
 		);
@@ -87,7 +87,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 
 	GetNewData() {
 		const {newData} = this.state;
-		return CloneWithPrototypes(newData) as MapNodePhrasing;
+		return CloneWithPrototypes(newData) as NodePhrasing;
 	}
 }
 
@@ -98,7 +98,7 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 
 		return (
 			<>
-				{node.type == MapNodeType.claim && (attachmentType == AttachmentType.quote || attachmentType == AttachmentType.media) &&
+				{node.type == NodeType.claim && (attachmentType == AttachmentType.quote || attachmentType == AttachmentType.media) &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>If no title override is specified, a generic source-assertion claim title will be shown.</Pre>
 					</Row>}
@@ -106,7 +106,7 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 					<Text>Title (base): </Text>
 					<TitleInput {...OmitRef(this.props)} titleKey="text_base" innerRef={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}/>
 				</RowLR>
-				{forNew && node.type == MapNodeType.argument &&
+				{forNew && node.type == NodeType.argument &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>{`
 							An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
@@ -125,9 +125,9 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	}
 }
 
-const WillNodePreferQuestionTitleHere = CreateAccessor((node: MapNodeL2, linkData: NodeChildLink|n)=>{
+const WillNodePreferQuestionTitleHere = CreateAccessor((node: NodeL2, linkData: NodeChildLink|n)=>{
 	const mainAttachment = GetMainAttachment(node.current);
-	return Boolean(node.type == MapNodeType.claim && mainAttachment?.quote == null && linkData && linkData.form == ClaimForm.question);
+	return Boolean(node.type == NodeType.claim && mainAttachment?.quote == null && linkData && linkData.form == ClaimForm.question);
 });
 
 class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
@@ -160,7 +160,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 		const {titleKey, newData, node, enabled, Change} = this.props;
 		let extraProps = {};
 		if (titleKey == "text_base") {
-			//const hasOtherTitles = newDataAsL2.type == MapNodeType.claim && newDataAsL2 == AttachmentType.none;
+			//const hasOtherTitles = newDataAsL2.type == NodeType.claim && newDataAsL2 == AttachmentType.none;
 			const hasOtherTitlesEntered = newData.text_negation || newData.text_question;
 			const willPreferYesNoTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
 			extraProps = {
@@ -171,7 +171,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 		return (
 			//<TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
 			<TextArea
-				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
+				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={NodeRevision_titlePattern} autoSize={true}
 				value={newData[titleKey]} onChange={val=>{
 					// find any term-markers, adding entries for them then removing the markers (eg. "some {term} name" -> "some term name")
 					const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
@@ -198,8 +198,8 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 	}
 }
 
-export function ShowAddPhrasingDialog(node: MapNodeL3, type: MapNodePhrasingType) {
-	let newEntry = new MapNodePhrasing({
+export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType) {
+	let newEntry = new NodePhrasing({
 		node: node.id,
 		type,
 	});

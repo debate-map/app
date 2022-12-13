@@ -5,7 +5,7 @@ import {Observer, RunInAction} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID, Polarity, MapNodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID, Polarity, NodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
@@ -16,10 +16,10 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 		if (copiedNode == null) return null;
 		if (inList) return null;
 		const copiedNode_parent = GetParentNodeL3(copiedNodePath);
-		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
+		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 		let newPolarity =
-			(copiedNode.type == MapNodeType.argument ? copiedNode.link?.polarity : null) // if node itself has polarity, use it
-			|| (copiedNode_parent?.type == MapNodeType.argument ? copiedNode_parent.link?.polarity : null); // else if our parent has a polarity, use that
+			(copiedNode.type == NodeType.argument ? copiedNode.link?.polarity : null) // if node itself has polarity, use it
+			|| (copiedNode_parent?.type == NodeType.argument ? copiedNode_parent.link?.polarity : null); // else if our parent has a polarity, use that
 
 		const contributeInfo = GetNodeContributionInfo(node.id);
 		let contributeInfo_polarity: NodeContributionInfo_ForPolarity|n;
@@ -35,7 +35,7 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 		// use memo, so we don't keep recreating command each render (since that causes new id's to be generated, causing new db-requests, making cycle keep repeating)
 		const linkCommand = UseMemo(()=>new LinkNode_HighLevel({
 			mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode.id,
-			newForm: copiedNode.type == MapNodeType.claim ? formForClaimChildren : null,
+			newForm: copiedNode.type == NodeType.claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
 			//createWrapperArg: childGroup != ChildGroup.generic || !node.multiPremiseArgument,
 			childGroup,
@@ -50,7 +50,7 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					if (copiedNode.type == MapNodeType.argument && !copiedNode_asCut) {
+					if (copiedNode.type == NodeType.argument && !copiedNode_asCut) {
 						// eslint-disable-next-line
 						return void ShowMessageBox({
 							title: "Argument at two locations?", cancelButton: true, onOK: proceed,

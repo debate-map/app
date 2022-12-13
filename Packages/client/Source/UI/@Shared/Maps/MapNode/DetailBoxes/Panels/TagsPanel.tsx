@@ -1,4 +1,4 @@
-import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, Map, MapNodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
+import {AddNodeTag, DeleteNodeTag, GetNodeLabelCounts, GetNodeTags, GetTagCompClassByTag, HasAdminPermissions, HasModPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeTag, MeID, TagComp_Labels, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
 import {Assert, Clone, E, emptyArray, GetEntries, GetValues} from "js-vextensions";
 import React, {useState} from "react";
 import {VMenuItem, VMenuStub} from "react-vmenu";
@@ -14,7 +14,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 @Observer
-export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {}) {
+export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {}) {
 	render() {
 		const {show, node} = this.props;
 		const uiState = store.main.maps.tagsPanel;
@@ -146,7 +146,7 @@ export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map
 }
 
 @Observer
-class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: NodeTag, index: number}, {newTag: null as NodeTag|n}) {
+class TagRow extends BaseComponentPlus({} as {node: NodeL3, tag: NodeTag, index: number}, {newTag: null as NodeTag|n}) {
 	//detailsUI: TagDetailsUI;
 	render() {
 		const {tag, index, node} = this.props;

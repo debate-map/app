@@ -3,14 +3,14 @@ import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm
 import {TermAttachment} from "../@Shared/Attachments/@TermAttachment.js";
 
 @MGLClass({table: "nodePhrasings"})
-export class MapNodePhrasing {
-	static Embedded(data: Partial<MapNodePhrasing>) {
-		const base = new MapNodePhrasing(data);
-		const result = CullMapNodePhrasingToBeEmbedded(base);
+export class NodePhrasing {
+	static Embedded(data: Partial<NodePhrasing>) {
+		const base = new NodePhrasing(data);
+		const result = CullNodePhrasingToBeEmbedded(base);
 		return result;
 	}
 
-	constructor(data: Partial<MapNodePhrasing>) {
+	constructor(data: Partial<NodePhrasing>) {
 		CE(this).VSet(data);
 	}
 
@@ -31,8 +31,8 @@ export class MapNodePhrasing {
 	node: string;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "MapNodePhrasingType"})
-	type: MapNodePhrasingType;
+	@Field({$ref: "NodePhrasingType"})
+	type: NodePhrasingType;
 
 	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
@@ -63,12 +63,12 @@ export class MapNodePhrasing {
 	references: string[] = [];
 }
 
-const MapNodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "note", "terms"] as const;
-export type MapNodePhrasing_Embedded = Pick<MapNodePhrasing, typeof MapNodePhrasing_Embedded_keys[number]>;
-AddSchema("MapNodePhrasing_Embedded", DeriveJSONSchema(MapNodePhrasing, {includeOnly: MapNodePhrasing_Embedded_keys as any}));
-export function CullMapNodePhrasingToBeEmbedded(phrasing: MapNodePhrasing): MapNodePhrasing_Embedded {
+const NodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "note", "terms"] as const;
+export type NodePhrasing_Embedded = Pick<NodePhrasing, typeof NodePhrasing_Embedded_keys[number]>;
+AddSchema("NodePhrasing_Embedded", DeriveJSONSchema(NodePhrasing, {includeOnly: NodePhrasing_Embedded_keys as any}));
+export function CullNodePhrasingToBeEmbedded(phrasing: NodePhrasing): NodePhrasing_Embedded {
 	for (const key of Object.keys(phrasing)) {
-		if (!MapNodePhrasing_Embedded_keys.includes(key as any)) {
+		if (!NodePhrasing_Embedded_keys.includes(key as any)) {
 			delete phrasing[key];
 		}
 	}
@@ -78,11 +78,11 @@ export function CullMapNodePhrasingToBeEmbedded(phrasing: MapNodePhrasing): MapN
 export const TitleKey_values = ["text_base", "text_negation", "text_question"] as const;
 export type TitleKey = typeof TitleKey_values[number];
 
-export enum MapNodePhrasingType {
+export enum NodePhrasingType {
 	standard = "standard",
 	simple = "simple",
 	technical = "technical",
 	humor = "humor",
 	web = "web",
 }
-AddSchema("MapNodePhrasingType", {enum: GetValues(MapNodePhrasingType)});
+AddSchema("NodePhrasingType", {enum: GetValues(NodePhrasingType)});

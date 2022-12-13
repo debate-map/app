@@ -10,7 +10,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
-use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{MapNode, get_node}, node_child_links::{NodeChildLink, get_node_child_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
+use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{Node, get_node}, node_child_links::{NodeChildLink, get_node_child_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
 use super::{subtree::Subtree};
 
 #[derive(Default)]
@@ -19,7 +19,7 @@ pub struct SubtreeCollector_Old {
 
     pub terms: IndexMap<String, Term>,
     pub medias: IndexMap<String, Media>,
-    pub nodes: IndexMap<String, MapNode>,
+    pub nodes: IndexMap<String, Node>,
     pub node_child_links: IndexMap<String, NodeChildLink>,
     pub node_revisions: IndexMap<String, NodeRevision>,
     pub node_phrasings: IndexMap<String, NodePhrasing>,

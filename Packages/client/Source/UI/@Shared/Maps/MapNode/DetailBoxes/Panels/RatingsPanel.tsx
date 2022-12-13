@@ -1,4 +1,4 @@
-import {DeleteNodeRating, GetAccessPolicy, GetRating, GetRatingTypeInfo, GetSystemAccessPolicyID, MapNodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, TransformRatingForContext} from "dm_common";
+import {DeleteNodeRating, GetAccessPolicy, GetRating, GetRatingTypeInfo, GetSystemAccessPolicyID, NodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, TransformRatingForContext} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
@@ -8,7 +8,7 @@ import {Button, Column, Row, Select, Text} from "web-vcore/nm/react-vcomponents.
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "./RatingsPanel_Old";
 
-type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};
+type RatingsPanel_Props = {node: NodeL3, path: string, ratingType: NodeRatingType, asNodeUIOverlay?: boolean};
 
 @Observer
 export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}) {

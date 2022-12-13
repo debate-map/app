@@ -1,6 +1,6 @@
 import {GetMap, GetNode, GetNodeChildLinks} from "dm_common";
 import {store} from "Store";
-import {ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {JumpToNode} from "UI/@Shared/NavBar/SearchPanel.js";
 import {AddNotificationMessage} from "web-vcore";
 import {Assert, AssertWarn} from "web-vcore/nm/js-vextensions.js";
@@ -50,6 +50,6 @@ async function SelectNodeByFragmentPath(mapID: string, nodePathFragments: string
 		}
 	}
 	const finalNodePath = nodeIDs.join("/");
-	ACTMapNodeSelect(mapID, finalNodePath);
+	ACTNodeSelect(mapID, finalNodePath);
 	JumpToNode(mapID, finalNodePath);
 }

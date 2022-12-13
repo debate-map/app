@@ -8,10 +8,11 @@ export enum ChangeType {
 }
 AddSchema("ChangeType", {enum: GetValues(ChangeType)});
 
+// this is called "MapNodeEdit" rather than just "NodeEdit", due to it always being a node edit in the context of a map
 //@MGLClass({table: "map_nodeEdits"})
 @MGLClass({table: "mapNodeEdits"})
-export class Map_NodeEdit {
-	constructor(data?: Partial<Map_NodeEdit>) {
+export class MapNodeEdit {
+	constructor(data?: Partial<MapNodeEdit>) {
 		Object.assign(this, data);
 	}
 

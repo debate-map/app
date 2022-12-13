@@ -9,8 +9,8 @@ export function CreateCommandsPlugin_Main() {
 		schemaDeps_auto: true,
 		// till we find way to auto-avoid conflicts with pgl introspection types, use this // commented; not needed anymore, since "get-graphql-from-jsonschema" adds "T0" to end of type-names
 		//schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),
-		//schemaDeps_auto_exclude: ["MapView", "MapNodeView"], // exclude classes we know aren't needed for the graphql api, and which cause warnings (eg. "$ref" cycles)
-		//schemaDeps: ["MapNode_Partial", "MapNodeRevision_Partial"],
+		//schemaDeps_auto_exclude: ["MapView", "NodeView"], // exclude classes we know aren't needed for the graphql api, and which cause warnings (eg. "$ref" cycles)
+		//schemaDeps: ["Node_Partial", "NodeRevision_Partial"],
 		/*typeDefFinalizer: typeDef=>{
 			function CleanUpGraphQLTypeName(name: string) {
 				if (name.includes("T0")) name = name.replace(/T0/g, ".").replace(/\.$/, "");

@@ -2,13 +2,13 @@ import {AssertValidate, Command, CommandMeta, CommandRunInfo, DBHelper, DeriveJS
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AddChildNode} from "./AddChildNode.js";
 
 type Payload = {
 	mapID: string|n,
-	argumentParentID: string, argumentNode: MapNode, argumentRevision: MapNodeRevision, argumentLink?: NodeChildLink,
-	claimNode: MapNode, claimRevision: MapNodeRevision, claimLink?: NodeChildLink,
+	argumentParentID: string, argumentNode: MapNode, argumentRevision: NodeRevision, argumentLink?: NodeChildLink,
+	claimNode: MapNode, claimRevision: NodeRevision, claimLink?: NodeChildLink,
 };
 
 /*@CommandRunMeta({
@@ -22,10 +22,10 @@ type Payload = {
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$mapID: {type: "string"},
-		$argumentParentID: {type: "string"}, $argumentNode: {$ref: "MapNode_Partial"}, $argumentRevision: {$ref: "MapNodeRevision_Partial"},
+		$argumentParentID: {type: "string"}, $argumentNode: {$ref: "Node_Partial"}, $argumentRevision: {$ref: "NodeRevision_Partial"},
 		//argumentLink: {$ref: NodeChildLink.name},
 		argumentLink: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
-		$claimNode: {$ref: "MapNode_Partial"}, $claimRevision: {$ref: "MapNodeRevision_Partial"},
+		$claimNode: {$ref: "Node_Partial"}, $claimRevision: {$ref: "NodeRevision_Partial"},
 		//claimLink: {$ref: NodeChildLink.name},
 		claimLink: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
 	}),

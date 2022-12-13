@@ -1,6 +1,6 @@
 import {Assert, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode.js";
+import {ClaimForm, MapNode, NodeL3, Polarity} from "./@MapNode.js";
 
 export enum ChildGroup {
 	generic = "generic",
@@ -12,41 +12,41 @@ export enum ChildGroup {
 }
 AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
 
-export enum MapNodeType {
+export enum NodeType {
 	category = "category",
 	package = "package",
 	multiChoiceQuestion = "multiChoiceQuestion",
 	claim = "claim",
 	argument = "argument",
 }
-//AddSchema("MapNodeType", {enum: GetValues(MapNodeType)});
-AddSchema("MapNodeType", {enum: GetValues(MapNodeType)});
+//AddSchema("NodeType", {enum: GetValues(NodeType)});
+AddSchema("NodeType", {enum: GetValues(NodeType)});
 
-const freeformTypes = [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim, MapNodeType.argument];
+const freeformTypes = [NodeType.category, NodeType.package, NodeType.multiChoiceQuestion, NodeType.claim, NodeType.argument];
 
-export class MapNodeType_Info {
+export class NodeType_Info {
 	static for = {
-		[MapNodeType.category]: new MapNodeType_Info({
+		[NodeType.category]: new NodeType_Info({
 			childGroup_childTypes: new Map([
-				[ChildGroup.generic, [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim]],
+				[ChildGroup.generic, [NodeType.category, NodeType.package, NodeType.multiChoiceQuestion, NodeType.claim]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			minWidth: 150, maxWidth: 250,
 			/*mainRatingTypes: ["significance"],
 			otherRatingTypes: [],*/
 		}),
-		[MapNodeType.package]: new MapNodeType_Info({
+		[NodeType.package]: new NodeType_Info({
 			childGroup_childTypes: new Map([
-				[ChildGroup.generic, [MapNodeType.claim]],
+				[ChildGroup.generic, [NodeType.claim]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			minWidth: 150, maxWidth: 250,
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
-		[MapNodeType.multiChoiceQuestion]: new MapNodeType_Info({
+		[NodeType.multiChoiceQuestion]: new NodeType_Info({
 			childGroup_childTypes: new Map([
-				[ChildGroup.generic, [MapNodeType.claim]],
+				[ChildGroup.generic, [NodeType.claim]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			minWidth: 150, maxWidth: 600,
@@ -54,9 +54,9 @@ export class MapNodeType_Info {
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
-		[MapNodeType.claim]: new MapNodeType_Info({
+		[NodeType.claim]: new NodeType_Info({
 			childGroup_childTypes: new Map([
-				[ChildGroup.truth, [MapNodeType.argument]],
+				[ChildGroup.truth, [NodeType.argument]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			minWidth: 350, maxWidth: 600,
@@ -65,24 +65,24 @@ export class MapNodeType_Info {
 			/* mainRatingTypes: ["probability", "truth"],
 			otherRatingTypes: [], */
 		}),
-		[MapNodeType.argument]: new MapNodeType_Info({
+		[NodeType.argument]: new NodeType_Info({
 			childGroup_childTypes: new Map([
-				[ChildGroup.generic, [MapNodeType.claim]],
-				[ChildGroup.relevance, [MapNodeType.argument]],
+				[ChildGroup.generic, [NodeType.claim]],
+				[ChildGroup.relevance, [NodeType.argument]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			minWidth: 150, maxWidth: 600,
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
 		}),
-	} as {[key: string]: MapNodeType_Info};
+	} as {[key: string]: NodeType_Info};
 
-	private constructor(initialData: Partial<MapNodeType_Info>) {
+	private constructor(initialData: Partial<NodeType_Info>) {
 		CE(this).VSet(initialData);
 	}
 
-	// displayName: (parentNode: MapNodeL2)=>string;
-	childGroup_childTypes: Map<ChildGroup, MapNodeType[]>;
+	// displayName: (parentNode: NodeL2)=>string;
+	childGroup_childTypes: Map<ChildGroup, NodeType[]>;
 	minWidth: number;
 	maxWidth: number;
 	// fontSize?: number;
@@ -90,19 +90,19 @@ export class MapNodeType_Info {
 	/* mainRatingTypes: RatingType[];
 	otherRatingTypes: RatingType[]; */
 }
-/*export function GetMapNodeTypeInfo(type: MapNodeType) {
-	return MapNodeType_Info.for[type];
+/*export function GetNodeTypeInfo(type: NodeType) {
+	return NodeType_Info.for[type];
 }*/
 
-export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode, parentNodeForm: ClaimForm, polarity: Polarity) {
-	if (type == MapNodeType.category) return "category";
-	if (type == MapNodeType.package) return "package";
-	if (type == MapNodeType.multiChoiceQuestion) return "multi-choice question";
-	if (type == MapNodeType.claim) {
-		if (parentNode && parentNode.type == MapNodeType.category) { return "claim / binary question"; }
+export function GetNodeTypeDisplayName(type: NodeType, parentNode: MapNode, parentNodeForm: ClaimForm, polarity: Polarity) {
+	if (type == NodeType.category) return "category";
+	if (type == NodeType.package) return "package";
+	if (type == NodeType.multiChoiceQuestion) return "multi-choice question";
+	if (type == NodeType.claim) {
+		if (parentNode && parentNode.type == NodeType.category) { return "claim / binary question"; }
 		return "claim";
 	}
-	if (type == MapNodeType.argument) {
+	if (type == NodeType.argument) {
 		return polarity == Polarity.supporting ? "supporting argument" : "opposing argument";
 	}
 	Assert(false, "Invalid node type.");

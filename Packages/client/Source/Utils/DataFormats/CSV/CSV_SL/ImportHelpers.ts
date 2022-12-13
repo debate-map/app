@@ -1,11 +1,11 @@
-import {MapNode, MapNodeType, GetSystemAccessPolicyID, ArgumentType, systemUserID, NodeChildLink, ClaimForm, Polarity, MapNodeRevision, MediaAttachment, QuoteAttachment, ReferencesAttachment, CullMapNodePhrasingToBeEmbedded, MapNodePhrasing, MapNodePhrasingType, SourceChain, Source, SourceType, ChildGroup} from "dm_common";
+import {MapNode, NodeType, GetSystemAccessPolicyID, ArgumentType, systemUserID, NodeChildLink, ClaimForm, Polarity, NodeRevision, MediaAttachment, QuoteAttachment, ReferencesAttachment, CullNodePhrasingToBeEmbedded, NodePhrasing, NodePhrasingType, SourceChain, Source, SourceType, ChildGroup} from "dm_common";
 import {ModifyString} from "js-vextensions";
 import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat";
 import {FS_SourceChain, FS_SourceType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Attachments";
-import {FS_MapNodeL3, FS_MapNodeType, FS_ClaimForm, FS_Polarity} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode";
-import {FS_ArgumentType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNodeRevision";
+import {FS_NodeL3, FS_NodeType, FS_ClaimForm, FS_Polarity} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode";
+import {FS_ArgumentType} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_NodeRevision";
 import {CSV_SL_Row} from "./DataModel.js";
 
 export const GetResourcesInImportSubtree_CSV_SL = CreateAccessor((rows: CSV_SL_Row[])=>{
@@ -23,7 +23,7 @@ const accessPolicyID = "O0v-8gPfRoq8_enYa4QSuA";
 export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
 	const node = new MapNode({
 		id: GenerateUUID(),
-		type: MapNodeType.claim,
+		type: NodeType.claim,
 		accessPolicy: accessPolicyID,
 		createdAt: Date.now(),
 		creator: systemUserID,
@@ -35,7 +35,7 @@ export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
 		//polarity: row.Orientation.trim().toLowerCase() == "Con" ? Polarity.opposing : Polarity.supporting,
 		group: ChildGroup.generic,
 	});
-	const revision = new MapNodeRevision({
+	const revision = new NodeRevision({
 		id: GenerateUUID(),
 		createdAt: node.createdAt,
 		creator: systemUserID,
@@ -55,7 +55,7 @@ export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
 		],
 		node: node.id,
 		//note: undefined, // note cells added to phrasing.note instead (since we don't necessarily want the info showing in TitlePanel)
-		phrasing: CullMapNodePhrasingToBeEmbedded(new MapNodePhrasing({
+		phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
 			text_base: row.title,
 			note: [row.note1.trim(), row.note2.trim(), row.note3.trim()].filter(a=>a).join(" | "),
 		})),

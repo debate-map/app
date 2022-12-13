@@ -4,10 +4,10 @@ import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
-import {ChangeType, Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
+import {ChangeType, MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 
 /** Returned terms are all lowercase. */
 export function GetSearchTerms(str: string) {
@@ -35,18 +35,18 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
-		revision: {$ref: MapNodeRevision.name},
+		revision: {$ref: NodeRevision.name},
 	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
-export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNodeRevision}, {id: string}> {
+export class AddNodeRevision extends Command<{mapID?: string|n, revision: NodeRevision}, {id: string}> {
 	// controlled by parent
 	//lastNodeRevisionID_addAmount = 0;
 	recordAsNodeEdit = true;
 
 	node_oldData: MapNode|n;
-	nodeEdit?: Map_NodeEdit;
-	map_nodeEdits?: Map_NodeEdit[];
+	nodeEdit?: MapNodeEdit;
+	map_nodeEdits?: MapNodeEdit[];
 	Validate() {
 		const {mapID, revision} = this.payload;
 
@@ -63,7 +63,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 		}
 
 		if (mapID != null && this.recordAsNodeEdit) {
-			this.nodeEdit = new Map_NodeEdit({
+			this.nodeEdit = new MapNodeEdit({
 				id: this.GenerateUUID_Once("nodeEdit.id"),
 				map: mapID,
 				node: revision.node,
@@ -77,7 +77,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 
 		this.returnData = {id: revision.id};
 
-		AssertValidate("MapNodeRevision", revision, "Revision invalid");
+		AssertValidate("NodeRevision", revision, "Revision invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

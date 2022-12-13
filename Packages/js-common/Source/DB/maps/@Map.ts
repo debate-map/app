@@ -1,7 +1,7 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {ChildOrdering} from "../nodeRatings.js";
-import {ChildLayout} from "../nodes/@MapNodeRevision.js";
+import {ChildLayout} from "../nodes/@NodeRevision.js";
 
 /*export enum MapType {
 	private = "private",
@@ -11,7 +11,7 @@ import {ChildLayout} from "../nodes/@MapNodeRevision.js";
 
 //export const Map_namePattern = '^\\S.*$'; // must start with non-whitespace // todo: probably switch to a more lax pattern like this, eg. so works for other languages
 export const Map_namePattern = '^[a-zA-Z0-9 ,\'"%:.?\\-()\\/]+$';
-@MGLClass({table: "maps", schemaDeps: ["MapNodeRevision"]})
+@MGLClass({table: "maps", schemaDeps: ["NodeRevision"]})
 export class Map {
 	constructor(initialData: {name: string} & Partial<Map>) {
 		CE(this).VSet(initialData);
@@ -20,7 +20,7 @@ export class Map {
 			this.requireMapEditorsCanEdit = this.type == MapType.private;
 		}*/
 		/*if (!("nodeDefaults" in initialData)) {
-			this.nodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap();
+			this.nodeDefaults = NodeRevision_Defaultable_DefaultsForMap();
 		}*/
 	}
 
@@ -66,9 +66,9 @@ export class Map {
 
 	/*@DB((t, n)=>t.jsonb(n).nullable())
 	@Field(()=>NewSchema({
-		properties: CE(GetSchemaJSON("MapNodeRevision").properties!).IncludeKeys(...MapNodeRevision_Defaultable_props),
+		properties: CE(GetSchemaJSON("NodeRevision").properties!).IncludeKeys(...NodeRevision_Defaultable_props),
 	}))
-	nodeDefaults?: MapNodeRevision_Defaultable;*/
+	nodeDefaults?: NodeRevision_Defaultable;*/
 
 	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({$ref: "UUID"}, {opt: true})

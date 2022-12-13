@@ -3,7 +3,7 @@ import {Vector2, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {accessorMetadata, AddSchema, CreateAccessor, DB, defaultGraphOptions, Field, MGLClass, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {GetNode, GetNodeID, GetParentNodeID, ToPathNodes} from "../../DB/nodes.js";
-import {MapNodeType} from "../../DB/nodes/@MapNodeType.js";
+import {NodeType} from "../../DB/nodes/@NodeType.js";
 
 // this module is in "dm_common", so avoid import from web-vcore (just be careful, since the new @O doesn't warn about classes with missing makeObservable calls)
 //import {O} from "web-vcore";
@@ -13,16 +13,16 @@ const O = observable;
 export class MapView {
 	constructor() { makeObservable(this); }
 
-	// @O rootNodeViews = observable.map<string, MapNodeView>();
+	// @O rootNodeViews = observable.map<string, NodeView>();
 	// use simple object rather than observable-map, since observable-map would lose its prototype on page refresh (when mobx-sync starts loading stored data, this path is not initialized-with-types, since it's nested/non-static)
 	// maybe todo: update mobx-sync to at least be able to handle the mobx classes (observable.map, observable.array, etc.)
 
 	//@DB((t, n)=>t.jsonb(n))
 	@Field({
 		$gqlType: "JSON",
-		patternProperties: {".{22}": {$ref: "MapNodeView"}},
+		patternProperties: {".{22}": {$ref: "NodeView"}},
 	})
-	@O rootNodeViews = {} as {[key: string]: MapNodeView};
+	@O rootNodeViews = {} as {[key: string]: NodeView};
 
 	// client-side only, for when rendering for crawler/bot
 	@O bot_currentNodeID?: string;
@@ -37,16 +37,16 @@ export const GetDefaultExpansionFieldsForNodeView = CreateAccessor((path: string
 	//console.log("Checking. @nodeID:", nodeID, "@parentID:", parentID, "@node:", node, "@parentNode:", parentNode);
 
 	const result = {expanded: false, expanded_truth: false, expanded_relevance: false};
-	if (node?.type == MapNodeType.argument && !node.multiPremiseArgument) {
+	if (node?.type == NodeType.argument && !node.multiPremiseArgument) {
 		result.expanded = true;
-	} else if (node?.type == MapNodeType.claim && parentNode?.multiPremiseArgument) {
+	} else if (node?.type == NodeType.claim && parentNode?.multiPremiseArgument) {
 		result.expanded = true;
 	}
 	return result;
 });
 
 @MGLClass()
-export class MapNodeView {
+export class NodeView {
 	constructor(path: string|n, tryUseNodeDataForExpansionFields = true) {
 		makeObservable(this);
 		//const pathNodes = path ? ToPathNodes(path) : null;
@@ -69,7 +69,7 @@ export class MapNodeView {
 	// constructor(childLimit: number) {
 	/*constructor() {
 		//this.childLimit = State(a=>a.main.initialChildLimit);
-		// try to catch cause of odd "MapNodeView.children is undefined" issue hit sometimes
+		// try to catch cause of odd "NodeView.children is undefined" issue hit sometimes
 		Assert(this.children != null);
 		new Timer(100, ()=>Assert(this.children != null), 1).Start();
 	}*/
@@ -108,16 +108,16 @@ export class MapNodeView {
 	@O openPanel_source?: PanelOpenSource;*/
 
 	@Field({
-		$gqlType: "JSON", // currently needed, because get-graphql-from-jsonschema can't handle the "{items: {...}}" structure, and a MapNodeView gql-type is not currently auto-added by postgraphile 
+		$gqlType: "JSON", // currently needed, because get-graphql-from-jsonschema can't handle the "{items: {...}}" structure, and a NodeView gql-type is not currently auto-added by postgraphile 
 		items: {type: "string"},
 	}, {opt: true})
 	@O openTermIDs?: string[];
 
-	@Field({patternProperties: {".{22}": {$ref: "MapNodeView"}}})
-	// @O children? = observable.map<string, MapNodeView>();
+	@Field({patternProperties: {".{22}": {$ref: "NodeView"}}})
+	// @O children? = observable.map<string, NodeView>();
 	// this field shouldn't ever be null; but given that somehow it is, mark that fact with the TypeScript "?" operator
-	//@O children = {} as {[key: string]: MapNodeView};
-	@O children? = {} as {[key: string]: MapNodeView};
+	//@O children = {} as {[key: string]: NodeView};
+	@O children? = {} as {[key: string]: NodeView};
 
 	@Field({type: "number"}, {opt: true})
 	@O childLimit_up?: number;
@@ -129,11 +129,11 @@ export class MapNodeView {
 	//@O @ignore renderedChildrenOrder = [] as string[];
 	//@O @ignore renderedChildrenOrder?: string[]; // can't rely on default-value, because mobx-sync doesn't use it (perhaps because of @ignore flag)
 }
-export const emptyNodeView = new MapNodeView(null, false);
-//RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("MapNodeView")));
+export const emptyNodeView = new NodeView(null, false);
+//RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("NodeView")));
 
-// export type MapNodeView_SelfOnly = Omit<MapNodeView, 'children'>;
-// export const MapNodeView_SelfOnly_props = ['expanded', 'expanded_truth', 'expanded_relevance', 'selected', 'focused', 'viewOffset', 'openPanel', 'openTermID', 'childLimit_up', 'childLimit_down'];
+// export type NodeView_SelfOnly = Omit<NodeView, 'children'>;
+// export const NodeView_SelfOnly_props = ['expanded', 'expanded_truth', 'expanded_relevance', 'selected', 'focused', 'viewOffset', 'openPanel', 'openTermID', 'childLimit_up', 'childLimit_down'];
 
 /*export function NormalizedMapView(mapView: MapView) {
 	const result = Clone(mapView);

@@ -1,14 +1,14 @@
 import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor, BailUnless, BIN, BU} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeType} from "../nodes/@MapNodeType.js";
+import {NodeType} from "../nodes/@NodeType.js";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node.js";
 import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
-import {Polarity, MapNodeL3, MapNodeL3_Argument} from "../nodes/@MapNode.js";
-import {ArgumentType} from "../nodes/@MapNodeRevision.js";
+import {Polarity, NodeL3, NodeL3_Argument} from "../nodes/@MapNode.js";
+import {ArgumentType} from "../nodes/@NodeRevision.js";
 
 export const RS_CalculateTruthScore = CreateAccessor((claimID: string, calculationPath: string[] = []): number=>{
 	const claim = GetNodeL2(claimID);
-	Assert(claim && claim.type == MapNodeType.claim, "RS truth-score can only be calculated for a claim.");
+	Assert(claim && claim.type == NodeType.claim, "RS truth-score can only be calculated for a claim.");
 
 	// if we've hit a cycle back to a claim we've already started calculating for (the root claim), consider the truth-score at this lower-location to be 100%
 	if (calculationPath.length && calculationPath.indexOf(CE(calculationPath).Last()) < calculationPath.length - 1) return 1;
@@ -19,7 +19,7 @@ export const RS_CalculateTruthScore = CreateAccessor((claimID: string, calculati
 	let runningAverage;
 	let weightTotalSoFar = 0;
 	for (const argument of childArguments) {
-		const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == MapNodeType.claim);
+		const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == NodeType.claim);
 		if (premises.length == 0) continue;
 
 		let truthScoreComposite = RS_CalculateTruthScoreComposite(argument.id, calculationPath.concat(argument.id));
@@ -45,9 +45,9 @@ export const RS_CalculateTruthScore = CreateAccessor((claimID: string, calculati
 });
 export const RS_CalculateTruthScoreComposite = CreateAccessor((argumentID: string, calculationPath = [] as string[])=>{
 	const argument = GetNodeL2(argumentID);
-	Assert(argument && argument.type == MapNodeType.argument, "RS truth-score-composite can only be calculated for an argument.");
+	Assert(argument && argument.type == NodeType.argument, "RS truth-score-composite can only be calculated for an argument.");
 
-	const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == MapNodeType.claim);
+	const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == NodeType.claim);
 	if (premises.length == 0) return 0;
 
 	const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
@@ -65,7 +65,7 @@ export const RS_CalculateBaseWeight = CreateAccessor((claimID: string, calculati
 });
 export const RS_CalculateWeightMultiplier = CreateAccessor((nodeID: string, calculationPath = [] as string[])=>{
 	const node = GetNodeL2(nodeID);
-	Assert(node && node.type == MapNodeType.argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
+	Assert(node && node.type == NodeType.argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
 
 	const childArguments = GetChildArguments(node.id);
 	if (childArguments == null || childArguments.length == 0) return 1;
@@ -73,7 +73,7 @@ export const RS_CalculateWeightMultiplier = CreateAccessor((nodeID: string, calc
 	let runningMultiplier = 1;
 	let runningDivisor = 1;
 	for (const argument of childArguments) {
-		const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == MapNodeType.claim);
+		const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == NodeType.claim);
 		if (premises.length == 0) continue;
 
 		const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
@@ -103,13 +103,13 @@ export const RS_GetAllValues = CreateAccessor((nodeID: string, path: string, use
 	const node = GetNodeL2.BIN(nodeID);
 	const parent = GetParentNodeL3(path);
 	const argument =
-		node.type == MapNodeType.argument ? node :
-		parent?.type == MapNodeType.argument ? parent :
+		node.type == NodeType.argument ? node :
+		parent?.type == NodeType.argument ? parent :
 		null;
-	const premises = argument != null ? GetNodeChildrenL3(argument.id, path).filter(a=>a && a.type == MapNodeType.claim) : [node];
+	const premises = argument != null ? GetNodeChildrenL3(argument.id, path).filter(a=>a && a.type == NodeType.claim) : [node];
 
 	let claimTruthScore: number|n, claimBaseWeight: number|n;
-	if (node.type == MapNodeType.claim) {
+	if (node.type == NodeType.claim) {
 		claimTruthScore = RS_CalculateTruthScore(node.id, calculationPath);
 		claimBaseWeight = RS_CalculateBaseWeight(node.id, calculationPath);
 	}
@@ -144,10 +144,10 @@ function CombinePremiseTruthScores(truthScores: number[], argumentType: Argument
 	return CE(truthScores).Max(); // ArgumentType.Any
 }
 
-const GetChildArguments = CreateAccessor((nodeID: string): MapNodeL3_Argument[]=>{
+const GetChildArguments = CreateAccessor((nodeID: string): NodeL3_Argument[]=>{
 	const children = GetNodeChildrenL3(nodeID);
 	if (children == emptyArray_forLoading || CE(children).Any(a=>a == null)) return emptyArray_forLoading;
-	const childArguments = children.filter(a=>a.type == MapNodeType.argument) as MapNodeL3_Argument[];
+	const childArguments = children.filter(a=>a.type == NodeType.argument) as NodeL3_Argument[];
 	for (const child of childArguments) {
 		const childChildren = GetNodeChildrenL3(nodeID);
 		if (childChildren == emptyArray_forLoading || CE(childChildren).Any(a=>a == null)) return emptyArray_forLoading;

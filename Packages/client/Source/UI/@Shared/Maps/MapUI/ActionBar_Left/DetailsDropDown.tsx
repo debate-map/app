@@ -12,7 +12,7 @@ import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
 import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
-/*export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {
+/*export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: NodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {
 	if (!CanEditNode(MeID(), nodeID)) return;
 	const node = await GetAsync(()=>GetNodeL2(nodeID));
 	if (runInfo.revisionsUpdated.has(node.currentRevision)) return;

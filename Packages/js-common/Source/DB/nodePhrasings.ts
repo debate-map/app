@@ -12,7 +12,7 @@ export const GetNodePhrasings = CreateAccessor((nodeID: string)=>{
 	}, a=>a.nodePhrasings);
 });
 
-/* export function GetPhrasings(nodeID: string): MapNodePhrasing[] {
+/* export function GetPhrasings(nodeID: string): NodePhrasing[] {
 	const entryMap = GetData({ collection: true }, 'nodePhrasings', nodeID, 'phrasings');
 	return CachedTransform('GetPhrasings', [], entryMap, () => (entryMap ? entryMap.VValues(true) : []));
 } */

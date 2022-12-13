@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -11,7 +11,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
+export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;
@@ -28,9 +28,9 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const parentPath = SlicePath(path, 1) as string;
 		const parentCreatorOrMod = IsUserCreatorOrMod(userID, parent);
 
-		let nodeArgOrParentSPArg_info: {node: MapNodeL3, path: string, creatorOrMod: boolean}|n;
-		if (node.type == MapNodeType.argument) nodeArgOrParentSPArg_info = {node, path, creatorOrMod};
-		else if (parent?.type === MapNodeType.argument) nodeArgOrParentSPArg_info = {node: parent, path: parentPath, creatorOrMod: parentCreatorOrMod};
+		let nodeArgOrParentSPArg_info: {node: NodeL3, path: string, creatorOrMod: boolean}|n;
+		if (node.type == NodeType.argument) nodeArgOrParentSPArg_info = {node, path, creatorOrMod};
+		else if (parent?.type === NodeType.argument) nodeArgOrParentSPArg_info = {node: parent, path: parentPath, creatorOrMod: parentCreatorOrMod};
 
 		const convertToTypes = GetEntries(AttachmentType).filter(pair=>CanConvertFromClaimTypeXToY(GetAttachmentType_Node(node), pair.value as any));
 		convertToType = convertToType ?? convertToTypes.map(a=>a.value as any as AttachmentType).FirstOrX();
@@ -58,7 +58,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const mirrorChildren = GetNodeMirrorChildren(node.id);
 		/*const childOrderTypeChangeable = node.ownerMapID != null // if private node
 			|| HasAdminPermissions(MeID()) // or has admin permissions
-			|| (node.type === MapNodeType.argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
+			|| (node.type === NodeType.argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
 				<GenericEntryInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt} accessPolicyID={node.accessPolicy}
@@ -140,7 +140,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						}}/>
 					</Row>
 				</>}
-				{/*node.type == MapNodeType.claim && convertToTypes.length > 0 &&
+				{/*node.type == NodeType.claim && convertToTypes.length > 0 &&
 					<Row center>
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
@@ -165,14 +165,14 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 	}
 }
 
-class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> {
+class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 	render() {
 		const {node, path} = this.props;
 		if (path.split("/").length === 0) return <div/>; // if the root of a map, or subnode
 
 		let canSetAsNegation = false;
 		let canSetAsSeriesAnchor = false;
-		if (node.type == MapNodeType.claim && node.link) {
+		if (node.type == NodeType.claim && node.link) {
 			const claimType = GetAttachmentType_Node(node);
 			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.question;
 			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.attachments[0]?.equation!.isStep; // && !creating;
@@ -224,7 +224,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 }
 
 /*@Observer
-class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> {
+class ChildrenOrder extends BaseComponent<{mapID: string, node: NodeL3}, {}> {
 	render() {
 		const {mapID, node} = this.props;
 		const oldChildrenOrder = node.childrenOrder || [];

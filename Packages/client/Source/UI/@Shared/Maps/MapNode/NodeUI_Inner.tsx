@@ -1,10 +1,10 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MapNodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetMainAttachment} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetMainAttachment} from "dm_common";
 import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
-import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
@@ -21,7 +21,7 @@ import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
-import {MapNodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
+import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "./ExpandableBox.js";
@@ -49,7 +49,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 export type NodeUI_Inner_Props = {
-	indexInNodeList: number, node: MapNodeL3, path: string, treePath: string, map?: Map,
+	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map,
 	width?: number/*|string*/|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	usePortalForDetailBoxes?: boolean,
@@ -76,7 +76,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 ) {
 	root: ExpandableBox|n;
 	titlePanel: TitlePanel|n;
-	leftPanel: MapNodeUI_LeftBox|n;
+	leftPanel: NodeUI_LeftBox|n;
 	bottomPanel: NodeUI_BottomPanel|n;
 
 	// todo: replace this system by just using the new IsMouseEnterReal and IsMouseLeaveReal functions
@@ -113,9 +113,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// connector part
 		// ==========
 
-		const [local_nodeView, setLocal_nodeView] = useState({} as MapNodeView);
+		const [local_nodeView, setLocal_nodeView] = useState({} as NodeView);
 		const nodeView = useLocalPanelState ? local_nodeView : GetNodeView(map?.id, path);
-		const UpdateLocalNodeView = (updates: Partial<MapNodeView>)=>{
+		const UpdateLocalNodeView = (updates: Partial<NodeView>)=>{
 			//setLocal_nodeView({...local_nodeView, ...updates});
 			// rather than call setLocal_nodeView, mutate the existing object, then force-update; this way multiple UpdateLocalNodeView calls in the same tick will succeed (eg. onClick and onPanelButtonClick)
 			local_nodeView.VSet(updates);
@@ -146,7 +146,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, MeID());
 		const mainRating_mine = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({ includeUser: MeID() }))); */
 
-		const useReasonScoreValuesForThisNode = store.main.maps.childOrdering == ChildOrdering.reasonScore && (node.type == MapNodeType.argument || node.type == MapNodeType.claim);
+		const useReasonScoreValuesForThisNode = store.main.maps.childOrdering == ChildOrdering.reasonScore && (node.type == NodeType.argument || node.type == NodeType.claim);
 		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node.id, path, true) as ReasonScoreValues_RSPrefix;
 
 		//const backgroundFillPercent = backgroundFillPercentOverride ?? GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
@@ -186,7 +186,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			}
 		});
 
-		const nodeTypeInfo = MapNodeType_Info.for[node.type];
+		const nodeTypeInfo = NodeType_Info.for[node.type];
 		let backgroundColor = GetNodeColor(node);
 		/* const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		// const offsetByAnotherDrag = dragInfo && dragInfo.provided.draggableProps.style.transform;
@@ -230,7 +230,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
-		//const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
+		//const subPanelShow = node.type == NodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const mainAttachment = GetMainAttachment(node.current);
 		const subPanelShow = mainAttachment?.references || mainAttachment?.quote || mainAttachment?.media;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
@@ -254,7 +254,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			}
 
 			if (!nodeView?.selected && map) {
-				ACTMapNodeSelect(map.id, path);
+				ACTNodeSelect(map.id, path);
 			}
 		}, [local_nodeView.selected, map, nodeView?.selected, path, useLocalPanelState]);
 		if (usePortalForDetailBoxes) {
@@ -278,11 +278,11 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const toggleExpanded = UseCallback(e=>{
 			const newExpanded = !expanded;
 			const recursivelyCollapsing = newExpanded == false && e.altKey;
-			ACTMapNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
+			ACTNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 
 			// if this node is premise of single-premise arg, change the expansion state of the parent-node (the wrapper argument) as well
 			if (combinedWithParentArgument) {
-				ACTMapNodeExpandedSet({mapID: map?.id, path: parentPath!, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
+				ACTNodeExpandedSet({mapID: map?.id, path: parentPath!, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 			}
 
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
@@ -326,9 +326,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 			//const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath);
 
-			let width_final = widthOverride ?? width ?? MapNodeType_Info.for[node.type].minWidth;
+			let width_final = widthOverride ?? width ?? NodeType_Info.for[node.type].minWidth;
 			//if (IsNumber(width_final))
-			width_final = width_final.KeepAtLeast(MapNodeType_Info.for[node.type].minWidth);
+			width_final = width_final.KeepAtLeast(NodeType_Info.for[node.type].minWidth);
 
 			return (
 				<ExpandableBox
@@ -371,7 +371,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					onDirectClick={onDirectClick}
 					beforeChildren={<>
 						{leftPanelShow &&
-						<MapNodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
+						<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
 							ref={c=>this.leftPanel = c}
 							usePortal={usePortalForDetailBoxes} nodeUI={this}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
@@ -380,7 +380,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						>
 							{/* fixes click-gap */}
 							{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
-						</MapNodeUI_LeftBox>}
+						</NodeUI_LeftBox>}
 						{/* fixes click-gap */}
 						{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
 					</>}
@@ -389,7 +389,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						{!GADDemo && (()=>{
 							// include this in "text" prop, because that makes the sizing exclude the +/- button
 							let ratingsPanel: JSX.Element;
-							if (node.type == MapNodeType.claim && combinedWithParentArgument) {
+							if (node.type == NodeType.claim && combinedWithParentArgument) {
 								const argumentNode = NN(parent);
 								const argumentPath = NN(SlicePath(path, 1));
 								ratingsPanel = <RatingsPanel node={argumentNode} path={argumentPath} ratingType={NodeRatingType.impact} asNodeUIOverlay={true}/>;
@@ -486,17 +486,17 @@ WaitXThenRun(0, ()=>{
 	document.body.appendChild(portal);
 });
 
-class ReasonScoreValueMarkers extends BaseComponent<{node: MapNodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
+class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
 	render() {
 		const {node, reasonScoreValues, combinedWithParentArgument} = this.props;
-		const mainScore = node.type == MapNodeType.argument ? RS_CalculateTruthScoreComposite(node.id) : RS_CalculateTruthScore(node.id);
+		const mainScore = node.type == NodeType.argument ? RS_CalculateTruthScoreComposite(node.id) : RS_CalculateTruthScore(node.id);
 		const {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
 		return (
 			<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
-				{node.type == MapNodeType.argument && `Truth score: ${mainScore.ToPercentStr()}${
+				{node.type == NodeType.argument && `Truth score: ${mainScore.ToPercentStr()}${
 					` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(0.01)} = ${rs_argWeight.RoundTo_Str(0.01)}`
 				}`}
-				{node.type == MapNodeType.claim && `Truth score: ${mainScore.ToPercentStr()}${
+				{node.type == NodeType.claim && `Truth score: ${mainScore.ToPercentStr()}${
 					combinedWithParentArgument
 						? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(0.01)}x${rs_argWeightMultiplier.RoundTo_Str(0.01)} = ${rs_argWeight.RoundTo_Str(0.01)}`
 						: ""

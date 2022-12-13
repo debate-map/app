@@ -7,8 +7,8 @@ import {AddArgumentAndClaim, TransferNodes} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode, Polarity} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
+import {NodeType} from "../DB/nodes/@NodeType.js";
 import {AddNode} from "./AddNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
@@ -27,8 +27,8 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
 		$parentID: {type: ["null", "string"]},
-		$node: {$ref: "MapNode_Partial"},
-		$revision: {$ref: "MapNodeRevision_Partial"},
+		$node: {$ref: "Node_Partial"},
+		$revision: {$ref: "NodeRevision_Partial"},
 		//link: {$ref: NodeChildLink.name},
 		// todo: clean up handling of "link" field (it's marked optional, yet error occurs if left out, due to child-group not being set; and this line doesn't make enough of link's fields optional)
 		link: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
@@ -41,7 +41,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		$doneAt: {type: "number"},
 	}),
 })
-export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
+export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: MapNode, revision: NodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 

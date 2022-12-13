@@ -1,10 +1,10 @@
-import {AddChildNode, ChildGroup, CullMapNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, MapNode, MapNodeL3, MapNodePhrasing, MapNodeRevision, MapNodeType, MeID, NodeChildLink, Polarity, SourceType, systemUserID} from "dm_common";
+import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, MapNode, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeChildLink, Polarity, SourceType, systemUserID} from "dm_common";
 import React, {ComponentProps} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
 import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
 import {DataExchangeFormat, ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
-import {FS_MapNodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode.js";
+import {FS_NodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_MapNode.js";
 import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -69,7 +69,7 @@ export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportRe
 				<VMenuItem text="Recreate import-node here (1st)" style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 					if (e.button != 0) return;
 					const res = selectedIRs_nodeAndRev[0];
-					/*if (res.node.type == MapNodeType.argument) {
+					/*if (res.node.type == NodeType.argument) {
 						const command = new AddArgumentAndClaim({
 							mapID: map?.id,
 							argumentParentID: node.id, argumentNode: res.node, argumentRevision: res.revision, argumentLink: res.link,
@@ -109,7 +109,7 @@ class ImportSubtreeUI extends BaseComponent<
 		// left panel
 		sourceText: string,
 		sourceText_parseError: string|n,
-		forJSONDM_subtreeData: FS_MapNodeL3|n,
+		forJSONDM_subtreeData: FS_NodeL3|n,
 		forCSVSL_subtreeData: CSV_SL_Row[]|n,
 
 		// right-panel
@@ -211,9 +211,9 @@ class ImportSubtreeUI extends BaseComponent<
 
 								const sourceText = this.state.sourceText;
 								if (uiState.sourceType == DataExchangeFormat.json_dm) {
-									let subtreeData_new: FS_MapNodeL3|n = null;
+									let subtreeData_new: FS_NodeL3|n = null;
 									try {
-										subtreeData_new = FromJSON(sourceText) as FS_MapNodeL3;
+										subtreeData_new = FromJSON(sourceText) as FS_NodeL3;
 										this.SetState({
 											forJSONDM_subtreeData: subtreeData_new,
 											sourceText_parseError: null,
@@ -391,7 +391,7 @@ class ImportSubtreeUI extends BaseComponent<
 @Observer
 class ImportResourceUI extends BaseComponent<
 	{
-		rootNodeForImport: MapNodeL3, resource: ImportResource, index: number, resources: ImportResource[],
+		rootNodeForImport: NodeL3, resource: ImportResource, index: number, resources: ImportResource[],
 		autoSearchByTitle: boolean,
 		searchQueryGen: number, onNodeCreated: ()=>any,
 	},
@@ -449,7 +449,7 @@ class ImportResourceUI extends BaseComponent<
 						<Text ml={5} mr={5} style={{flex: 1, display: "block"}}>
 							<Text mr={3} style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}>
 								{ModifyString(res.node.type, m=>[m.startLower_to_upper])}
-								{res.node.type == MapNodeType.argument && res.link.polarity != null &&
+								{res.node.type == NodeType.argument && res.link.polarity != null &&
 									<Text style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}> [{res.link.polarity == Polarity.supporting ? "pro" : "con"}]</Text>}
 								{":"}
 							</Text>
@@ -573,16 +573,16 @@ export async function GetCommandToCreateAncestorForResource(res: ImportResource,
 	return new AddChildNode({
 		mapID, parentID: parentIDOfNewNode,
 		link: new NodeChildLink({
-			group: parentOfNewNode.type == MapNodeType.category ? ChildGroup.generic : ChildGroup.freeform,
+			group: parentOfNewNode.type == NodeType.category ? ChildGroup.generic : ChildGroup.freeform,
 		}),
 		node: new MapNode({
-			type: MapNodeType.category,
+			type: NodeType.category,
 			accessPolicy: newNodeAccessPolicy,
 			creator: systemUserID,
 		}),
-		revision: new MapNodeRevision({
+		revision: new NodeRevision({
 			creator: systemUserID,
-			phrasing: CullMapNodePhrasingToBeEmbedded(new MapNodePhrasing({
+			phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
 				text_base: newNodeTitle,
 			})),
 		}),

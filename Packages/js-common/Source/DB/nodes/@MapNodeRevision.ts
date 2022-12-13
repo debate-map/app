@@ -1,9 +1,9 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "web-vcore/nm/mobx-graphlink.js";
 import {Map} from "../maps/@Map.js";
-import {AccessLevel, MapNodeL3} from "./@MapNode.js";
-import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
-import {ChildGroup, MapNodeType_Info} from "./@MapNodeType.js";
+import {AccessLevel, NodeL3} from "./@MapNode.js";
+import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasing.js";
+import {ChildGroup, NodeType_Info} from "./@NodeType.js";
 import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment, Attachment} from "../../DB.js";
 import {ChildOrdering} from "../nodeRatings.js";
 
@@ -69,7 +69,7 @@ The final ordering-type is determined by the first provided value (ie. not set t
 2) Map setting, in map's Details dropdown (if map has "Allow special" for child-layouts enabled)
 3) Fallback value of "Debate Map standard"
 `.AsMultiline(0);
-export function GetChildLayout_Final(revision: MapNodeRevision, map?: Map): ChildLayout {
+export function GetChildLayout_Final(revision: NodeRevision, map?: Map): ChildLayout {
 	let result = ChildLayout.dmStandard;
 	if (map?.extras.allowSpecialChildLayouts) {
 		if (map.extras.defaultChildLayout) result = map.extras.defaultChildLayout;
@@ -112,9 +112,9 @@ const ChildGroupLayout_mapping = new globalThis.Map<ChildLayout, globalThis.Map<
 export function GetChildGroupLayout(group: ChildGroup, overallLayout: ChildLayout) {
 	return ChildGroupLayout_mapping.get(overallLayout)?.get(group);
 }
-export function ShouldChildGroupBoxBeVisible(node: MapNodeL3|n, group: ChildGroup, overallLayout: ChildLayout, nodeChildren: MapNodeL3[]|null) {
+export function ShouldChildGroupBoxBeVisible(node: NodeL3|n, group: ChildGroup, overallLayout: ChildLayout, nodeChildren: NodeL3[]|null) {
 	if (node == null) return false;
-	const groupValidForNode = MapNodeType_Info.for[node.type].childGroup_childTypes.has(group);
+	const groupValidForNode = NodeType_Info.for[node.type].childGroup_childTypes.has(group);
 	if (!groupValidForNode) return false;
 
 	const groupLayout = GetChildGroupLayout(group, overallLayout);
@@ -123,16 +123,16 @@ export function ShouldChildGroupBoxBeVisible(node: MapNodeL3|n, group: ChildGrou
 	return false;
 }
 
-/*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
-export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/
-/*export const MapNodeRevision_Defaultable_props = [] as const;
-export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, never>;
-export function MapNodeRevision_Defaultable_DefaultsForMap(): MapNodeRevision_Defaultable {
+/*export const NodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
+export type NodeRevision_Defaultable = Pick<NodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/
+/*export const NodeRevision_Defaultable_props = [] as const;
+export type NodeRevision_Defaultable = Pick<NodeRevision, never>;
+export function NodeRevision_Defaultable_DefaultsForMap(): NodeRevision_Defaultable {
 	return {};
 }*/
 
-//export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
-export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace
+//export const NodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
+export const NodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace
 @MGLClass({table: "nodeRevisions"}, {
 	allOf: [
 		// if not an argument or content-node, require "phrasing" prop
@@ -142,8 +142,8 @@ export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-wh
 		},
 	],
 })
-export class MapNodeRevision {
-	constructor(initialData?: Partial<MapNodeRevision>|n) {
+export class NodeRevision {
+	constructor(initialData?: Partial<NodeRevision>|n) {
 		CE(this).VSet(initialData);
 	}
 
@@ -171,15 +171,15 @@ export class MapNodeRevision {
 	//approved = false;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: "MapNodePhrasing_Embedded"})
-	phrasing = MapNodePhrasing.Embedded({text_base: ""});
+	@Field({$ref: "NodePhrasing_Embedded"})
+	phrasing = NodePhrasing.Embedded({text_base: ""});
 
 	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable())
 	//@Field({type: "null"}) // user should not pass this in themselves
 	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
 	phrasing_tsvector?: any;
 
-	// todo: probably remove this, since the UI currently gives no way to edit it! (it seems superseded by MapNodePhrasing.note, which can be edited atm, but isn't shown in TitlePanel)
+	// todo: probably remove this, since the UI currently gives no way to edit it! (it seems superseded by NodePhrasing.note, which can be edited atm, but isn't shown in TitlePanel)
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: ["null", "string"]}, {opt: true}) // add null-type, for later when the payload-validation schema is derived from the main schema
 	note?: string;
@@ -198,8 +198,8 @@ export class MapNodeRevision {
 	})
 	attachments: Attachment[] = [];
 }
-AddSchema("MapNodeRevision_Partial", ["MapNodeRevision"], ()=>{
-	const schema = GetSchemaJSON_Cloned("MapNodeRevision");
+AddSchema("NodeRevision_Partial", ["NodeRevision"], ()=>{
+	const schema = GetSchemaJSON_Cloned("NodeRevision");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = [];
 	return schema;

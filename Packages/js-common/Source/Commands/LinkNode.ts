@@ -7,7 +7,7 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {CheckValidityOfLink, GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeType} from "../DB/nodes/@NodeType.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {TransferNodes} from "./TransferNodes.js";
 
@@ -66,7 +66,7 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 		link.createdAt = Date.now();
 		link.c_parentType = this.parent_oldData.type;
 		link.c_childType = this.child_oldData.type;
-		if (this.child_oldData.type == MapNodeType.argument) {
+		if (this.child_oldData.type == NodeType.argument) {
 			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.");
 		} else {
 			AssertV(this.payload.link.polarity == null, "Only argument nodes should have a polarity value specified in its parent-link.");

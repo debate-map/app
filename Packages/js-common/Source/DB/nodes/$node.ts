@@ -6,9 +6,9 @@ import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
 import {CheckValidityOfLink, CheckValidityOfNewLink, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
-import {ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode.js";
-import {MapNodeRevision} from "./@MapNodeRevision.js";
-import {ChildGroup, MapNodeType} from "./@MapNodeType.js";
+import {ClaimForm, MapNode, NodeL2, NodeL3, Polarity} from "./@MapNode.js";
+import {NodeRevision} from "./@NodeRevision.js";
+import {ChildGroup, NodeType} from "./@NodeType.js";
 import {PermissionGroupSet} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@NodeTag.js";
@@ -17,7 +17,7 @@ import {GetNodeChildLinks} from "../nodeChildLinks.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
-import {MapNodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@MapNodePhrasing.js";
+import {NodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
 import {Attachment} from "../@Shared/Attachments/@Attachment.js";
 
 export function PreProcessLatex(text: string) {
@@ -32,53 +32,53 @@ export function PreProcessLatex(text: string) {
 	return text;
 }
 
-export const GetMainAttachment = CreateAccessor((rev: MapNodeRevision)=>{
+export const GetMainAttachment = CreateAccessor((rev: NodeRevision)=>{
 	if (rev == null) return null;
 	return rev.attachments[0] as Attachment|n;
 });
 
-export function GetFontSizeForNode(node: MapNodeL2/*, isSubnode = false*/) {
+export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
 	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
 	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
 	//if (isSubnode) return 11;
 	return 14;
 }
-export function GetPaddingForNode(node: MapNodeL2/*, isSubnode = false*/) {
+export function GetPaddingForNode(node: NodeL2/*, isSubnode = false*/) {
 	//return isSubnode ? "1px 4px 2px" : "5px 5px 4px";
 	return "5px 5px 4px";
 }
 export type RatingTypeInfo = {type: NodeRatingType, main?: boolean, collapsed?: boolean};
-export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
-	if (node.type == MapNodeType.category) {
+export function GetRatingTypesForNode(node: NodeL2): RatingTypeInfo[] {
+	if (node.type == NodeType.category) {
 		if (PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return [];
 		return [{type: NodeRatingType.significance, main: true}];
 	}
-	if (node.type == MapNodeType.package) {
+	if (node.type == NodeType.package) {
 		return [{type: NodeRatingType.significance, main: true}];
 	}
-	if (node.type == MapNodeType.multiChoiceQuestion) {
+	if (node.type == NodeType.multiChoiceQuestion) {
 		return [{type: NodeRatingType.significance, main: true}];
 	}
-	if (node.type == MapNodeType.claim) {
+	if (node.type == NodeType.claim) {
 		let result: RatingTypeInfo[];
 		// result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
 		result = [{type: NodeRatingType.truth, main: true}]; // , {type: "relevance", main: true}];
-		/* if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
+		/* if ((node as NodeL2).link && (node as NodeL2).link.form == ClaimForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
 		} */
 		return result;
 	}
-	if (node.type == MapNodeType.argument) {
+	if (node.type == NodeType.argument) {
 		// return [{type: "strength", main: true}, {type: "impact", main: true}];
 		return [{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}];
 	}
 	Assert(false);
 }
-export const GetMainRatingType = CreateAccessor((node: MapNodeL2)=>{
+export const GetMainRatingType = CreateAccessor((node: NodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;
 });
-export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
+export function GetSortByRatingType(node: NodeL3): NodeRatingType|n {
 	if (node.link && node.link.form == ClaimForm.question) {
 		return NodeRatingType.significance;
 	}
@@ -88,8 +88,8 @@ export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.supporting ? Polarity.opposing : Polarity.supporting;
 }
-export const GetDisplayPolarityAtPath = CreateAccessor((node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
-	Assert(node.type == MapNodeType.argument, "Only argument nodes have polarity.");
+export const GetDisplayPolarityAtPath = CreateAccessor((node: NodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
+	Assert(node.type == NodeType.argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.supporting; // can be null, if for NodeUI_ForBots
 
@@ -110,7 +110,7 @@ export function GetDisplayPolarity(basePolarity: Polarity, parentForm: ClaimForm
 export function IsNodeL1(node): node is MapNode {
 	return !node["current"];
 }
-export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
+export function AsNodeL1(node: NodeL2 | NodeL3) {
 	const result = E(node) as any;
 	delete result.policy;
 	delete result.current;
@@ -119,18 +119,18 @@ export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
 	return result as MapNode;
 }
 
-export function IsNodeL2(node: MapNode): node is MapNodeL2 {
+export function IsNodeL2(node: MapNode): node is NodeL2 {
 	return node["current"];
 }
-export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, accessPolicy: AccessPolicy) {
+export function AsNodeL2(node: MapNode, currentRevision: NodeRevision, accessPolicy: AccessPolicy) {
 	Assert(currentRevision, "Empty node-revision sent to AsNodeL2!");
 	Assert(accessPolicy, "Empty access-policy sent to AsNodeL2!");
 
-	// Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
+	// Assert(currentRevision.titles, "A NodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
 	const result = E(node, {
 		policy: accessPolicy,
 		current: currentRevision,
-	}) as MapNodeL2;
+	}) as NodeL2;
 	delete result["displayPolarity"];
 	delete result["link"];
 	return result;
@@ -140,7 +140,7 @@ export const GetNodeL2 = CreateAccessor((nodeID: string | MapNode | n, path?: st
 	if (nodeID == null) return null;
 	const node = nodeID as MapNode;
 
-	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
+	// if any of the data in a NodeL2 is not loaded yet, just return null (we want it to be all or nothing)
 	//const currentRevision = GetNodeRevision(node.currentRevision);
 	//const currentRevision = GetCurrentRevision(node.id, path, mapID);
 	const currentRevision = GetNodeRevision(node.c_currentRevision);
@@ -153,9 +153,9 @@ export const GetNodeL2 = CreateAccessor((nodeID: string | MapNode | n, path?: st
 	return nodeL2;
 });
 
-export function IsNodeL3(node: MapNode): node is MapNodeL3 {
+export function IsNodeL3(node: MapNode): node is NodeL3 {
 	//return node["displayPolarity"] && node["link"];
-	//if (node.type == MapNodeType.category) {
+	//if (node.type == NodeType.category) {
 
 	// merely check for prop existence (values can be null, yet valid)
 	return "displayPolarity" in node && "link" in node;
@@ -164,7 +164,7 @@ export function IsNodeL3(node: MapNode): node is MapNodeL3 {
 	// check for both existence and non-nullness (values must be non-null to be valid)
 	return node["displayPolarity"] != null && node["link"] != null;*/
 }
-/*export function AsNodeL3(node: MapNodeL2, displayPolarity?: Polarity, link?: NodeChildLink) {
+/*export function AsNodeL3(node: NodeL2, displayPolarity?: Polarity, link?: NodeChildLink) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	displayPolarity = displayPolarity || Polarity.supporting;
 	link = link ?? {
@@ -172,11 +172,11 @@ export function IsNodeL3(node: MapNode): node is MapNodeL3 {
 		seriesAnchor: false,
 		polarity: Polarity.supporting,
 	};
-	return E(node, {displayPolarity, link}) as MapNodeL3;
+	return E(node, {displayPolarity, link}) as NodeL3;
 }*/
-export function AsNodeL3(node: MapNodeL2, link: PartialBy<NodeChildLink, "polarity">|n, displayPolarity: Polarity|n = Polarity.supporting) {
+export function AsNodeL3(node: NodeL2, link: PartialBy<NodeChildLink, "polarity">|n, displayPolarity: Polarity|n = Polarity.supporting) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
-	return E(node, {displayPolarity, link}) as MapNodeL3;
+	return E(node, {displayPolarity, link}) as NodeL3;
 }
 export const GetNodeL3 = CreateAccessor((path: string | n, tagsToIgnore?: string[])=>{
 	if (path == null) return null;
@@ -184,8 +184,8 @@ export const GetNodeL3 = CreateAccessor((path: string | n, tagsToIgnore?: string
 	const node = GetNodeL2(nodeID);
 	if (node == null) return null;
 
-	// if any of the data in a MapNodeL3 is not loaded yet, just bail (we want it to be all or nothing)
-	const displayPolarity = node.type == MapNodeType.argument ? GetDisplayPolarityAtPath.BIN(node, path, tagsToIgnore) : null;
+	// if any of the data in a NodeL3 is not loaded yet, just bail (we want it to be all or nothing)
+	const displayPolarity = node.type == NodeType.argument ? GetDisplayPolarityAtPath.BIN(node, path, tagsToIgnore) : null;
 
 	/*const isSubnode = IsNodeSubnode(node);
 	if (!isSubnode) {*/
@@ -306,16 +306,16 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 	return null;
 }
 
-export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[] {
+export function GetAllNodeRevisionTitles(nodeRevision: NodeRevision): string[] {
 	if (nodeRevision == null || nodeRevision.phrasing == null) return [];
 	return TitleKey_values.map(key=>nodeRevision.phrasing[key]).filter(a=>a != null) as string[];
 }
 
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
+export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, form?: ClaimForm): string=>{
 	form = form || GetNodeForm(node, path);
-	const phrasing = node.current.phrasing || {} as MapNodePhrasing_Embedded;
+	const phrasing = node.current.phrasing || {} as NodePhrasing_Embedded;
 
 	const [simpleTitle, simpleTitleFallback] = ((): [string | undefined, string]=>{
 		if (form) {
@@ -331,15 +331,15 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
-	if (node.type == MapNodeType.argument && !node.multiPremiseArgument && !phrasing.text_base) {
+	if (node.type == NodeType.argument && !node.multiPremiseArgument && !phrasing.text_base) {
 		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
-		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.claim)[0];
+		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == NodeType.claim)[0];
 		if (baseClaim) return GetNodeDisplayText(baseClaim);
 	}
 	//const mainAttachment = node.current.attachments[0] as Attachment|n;
 	const mainAttachment = GetMainAttachment(node.current);
-	if (node.type == MapNodeType.claim) {
+	if (node.type == NodeType.claim) {
 		if (mainAttachment?.equation) {
 			let result = mainAttachment.equation.text;
 			//if (node.current.equation.latex && !isBot) {
@@ -404,21 +404,21 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 	return simpleTitle || simpleTitleFallback;
 });
 
-export function GetValidChildTypes(nodeType: MapNodeType, path: string, group: ChildGroup) {
-	const nodeTypes = GetValues(MapNodeType);
+export function GetValidChildTypes(nodeType: NodeType, path: string, group: ChildGroup) {
+	const nodeTypes = GetValues(NodeType);
 	const validChildTypes = nodeTypes.filter(type=>CheckValidityOfLink(nodeType, group, type) == null);
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parent: MapNodeL2, childGroup: ChildGroup, permissions: PermissionGroupSet) {
-	const nodeTypes = GetValues(MapNodeType);
+export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, permissions: PermissionGroupSet) {
+	const nodeTypes = GetValues(NodeType);
 	const validChildTypes = nodeTypes.filter(type=>CheckValidityOfNewLink(parent.id, childGroup, {type} as any, permissions) == null);
 
 	// if in relevance or truth group, claims cannot be direct children (must be within argument)
 	/*if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {
-		validChildTypes = validChildTypes.Exclude(MapNodeType.claim);
+		validChildTypes = validChildTypes.Exclude(NodeType.claim);
 	} else {
 		// in the other cases, arguments cannot be direct children (those are only meant for in relevance/truth groups)
-		validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
+		validChildTypes = validChildTypes.Exclude(NodeType.argument);
 	}*/
 
 	return validChildTypes;
@@ -427,12 +427,12 @@ export function GetValidNewChildTypes(parent: MapNodeL2, childGroup: ChildGroup,
 /** Returns whether the node provided is an argument, and marked as single-premise. */
 export const IsSinglePremiseArgument = CreateAccessor((node: MapNode|n)=>{
 	if (node == null) return false;
-	return node.type == MapNodeType.argument && !node.multiPremiseArgument;
+	return node.type == NodeType.argument && !node.multiPremiseArgument;
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
 export const IsMultiPremiseArgument = CreateAccessor((node: MapNode|n)=>{
 	if (node == null) return false;
-	return node.type == MapNodeType.argument && node.multiPremiseArgument;
+	return node.type == NodeType.argument && node.multiPremiseArgument;
 });
 
 /*export function IsPrivateNode(node: MapNode) {
@@ -444,17 +444,17 @@ export function IsPublicNode(node: MapNode) {
 
 export const IsPremiseOfSinglePremiseArgument = CreateAccessor((node: MapNode, parent: MapNode|n)=>{
 	if (parent == null) return false;
-	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
+	return node.type == NodeType.claim && IsSinglePremiseArgument(parent);
 });
 export const IsPremiseOfMultiPremiseArgument = CreateAccessor((node: MapNode, parent: MapNode|n)=>{
 	if (parent == null) return false;
-	return node.type == MapNodeType.claim && IsMultiPremiseArgument(parent);
+	return node.type == NodeType.claim && IsMultiPremiseArgument(parent);
 });
 
 export function GetArgumentNode(node: MapNode, parent: MapNode|n) {
 	const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 	const argumentNode =
-		node.type == MapNodeType.argument ? node :
+		node.type == NodeType.argument ? node :
 		isPremiseOfSinglePremiseArg ? parent :
 		null;
 	return argumentNode;

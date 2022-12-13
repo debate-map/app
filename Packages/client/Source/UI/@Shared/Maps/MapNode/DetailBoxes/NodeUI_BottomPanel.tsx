@@ -1,4 +1,4 @@
-import {Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
+import {Map, NodeL3, NodeType, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -30,7 +30,7 @@ export const nodeBottomPanel_minWidth = 600;
 @Observer
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
-		map: Map|n, node: MapNodeL3, path: string, parent: MapNodeL3|n,
+		map: Map|n, node: NodeL3, path: string, parent: NodeL3|n,
 		width: number|string|n,
 		minWidth: number|n, // is this still needed?
 		panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,
@@ -130,7 +130,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 				},
 			)}>
 				{GetValues(NodeRatingType).Contains(panelToShow) && (()=>{
-					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.claim) {
+					if (["impact", "relevance"].Contains(panelToShow) && node.type == NodeType.claim) {
 						const argumentNode = NN(parent);
 						const argumentPath = NN(SlicePath(path, 1));
 						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as NodeRatingType}/>;

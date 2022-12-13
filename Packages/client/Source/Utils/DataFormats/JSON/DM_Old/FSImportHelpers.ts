@@ -1,18 +1,18 @@
-import {ArgumentType, ChildGroup, ClaimForm, CullMapNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, MapNode, MapNodePhrasing, MapNodePhrasingType, MapNodeRevision, MapNodeType, MapNodeType_Info, MediaAttachment, NodeChildLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
+import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, MapNode, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeChildLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
 import {ModifyString} from "js-vextensions";
 import {Command, CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
 import {FS_SourceChain, FS_SourceType} from "./FSDataModel/FS_Attachments.js";
-import {FS_MapNodeL3, FS_MapNodeType, FS_ClaimForm, FS_Polarity} from "./FSDataModel/FS_MapNode.js";
-import {FS_ArgumentType} from "./FSDataModel/FS_MapNodeRevision.js";
+import {FS_NodeL3, FS_NodeType, FS_ClaimForm, FS_Polarity} from "./FSDataModel/FS_MapNode.js";
+import {FS_ArgumentType} from "./FSDataModel/FS_NodeRevision.js";
 
 type MapNode_WithPath = MapNode & {path: number[]};
-export const GetResourcesInImportSubtree = CreateAccessor((data: FS_MapNodeL3, id?: string, path: number[] = [])=>{
+export const GetResourcesInImportSubtree = CreateAccessor((data: FS_NodeL3, id?: string, path: number[] = [])=>{
 	const result = [] as ImportResource[];
 
 	const node = new MapNode({
 		id: id ?? GenerateUUID(),
-		type: data.type ? ModifyString(FS_MapNodeType[data.type], m=>[m.startUpper_to_lower]) as MapNodeType : MapNodeType.category,
+		type: data.type ? ModifyString(FS_NodeType[data.type], m=>[m.startUpper_to_lower]) as NodeType : NodeType.category,
 		accessPolicy: GetSystemAccessPolicyID("Public, ungoverned (standard)"),
 		argumentType: ModifyString(FS_ArgumentType[data.current.argumentType ?? FS_ArgumentType.All], m=>[m.startUpper_to_lower]) as ArgumentType,
 		c_currentRevision: data.currentRevision,
@@ -30,7 +30,7 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_MapNodeL3, i
 		//group: undefined, // this is filled in at paste-time
 	});
 	const revData = data.current;
-	const revision = new MapNodeRevision({
+	const revision = new NodeRevision({
 		id: data.currentRevision,
 		createdAt: revData.createdAt,
 		creator: systemUserID,
@@ -53,9 +53,9 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_MapNodeL3, i
 		].filter(a=>a),
 		node: node.id,
 		note: revData.note,
-		phrasing: CullMapNodePhrasingToBeEmbedded(new MapNodePhrasing({
+		phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
 			id: GenerateUUID(),
-			type: MapNodePhrasingType.standard,
+			type: NodePhrasingType.standard,
 			createdAt: revData.createdAt,
 			creator: systemUserID,
 			node: node.id,

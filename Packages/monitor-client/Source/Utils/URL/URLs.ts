@@ -1,4 +1,4 @@
-import {GetMap, GetNodeDisplayText, MapNodeL2} from "dm_common";
+import {GetMap, GetNodeDisplayText, NodeL2} from "dm_common";
 import {RootState, store} from "Store";
 import {GetPage, GetSubpage} from "Store/main";
 import {Page} from "web-vcore";
@@ -56,7 +56,7 @@ export function GetCrawlerURLStrForMap(mapID: string) {
 	return result;
 }
 
-export function GetCrawlerURLStrForNode(node: MapNodeL2) {
+export function GetCrawlerURLStrForNode(node: NodeL2) {
 	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z0-9]/g, "-");
 	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
 	while (result.Contains("--")) {

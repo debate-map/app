@@ -1,4 +1,4 @@
-import {GetMainAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, MapNodeL2, MapNodeL3, MapNodePhrasing, MapNodeRevision, Media, MeID, NodeChildLink, Term} from "dm_common";
+import {GetMainAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeChildLink, Term} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -54,18 +54,18 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		nodesToLink: {} as {[key: string]: string},
 		error: null as string|n, dbUpdates: null,
 		/*ignoreKeys: {
-			nodes: ClassKeys<MapNodeL3>("creator", "createdAt", "accessPolicy", "policy", "current", "displayPolarity", "link"),
+			nodes: ClassKeys<NodeL3>("creator", "createdAt", "accessPolicy", "policy", "current", "displayPolarity", "link"),
 			nodeChildLinks: ClassKeys<NodeChildLink>("creator", "createdAt", "c_parentType", "c_childType", "_mirrorLink", "seriesAnchor", "seriesEnd", "slot"),
-			nodeRevisions: ClassKeys<MapNodeRevision>("creator", "createdAt", "displayDetails", "equation", "phrasing_tsvector", "quote"),
-			nodePhrasings: ClassKeys<MapNodePhrasing>("creator", "createdAt"),
+			nodeRevisions: ClassKeys<NodeRevision>("creator", "createdAt", "displayDetails", "equation", "phrasing_tsvector", "quote"),
+			nodePhrasings: ClassKeys<NodePhrasing>("creator", "createdAt"),
 			terms: ClassKeys<Term>("creator", "createdAt"),
 			medias: ClassKeys<Media>("creator", "createdAt", "accessPolicy"),
 		},*/
 		includeKeys: {
-			nodes: ClassKeys<MapNodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType"),
+			nodes: ClassKeys<NodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType"),
 			nodeChildLinks: ClassKeys<NodeChildLink>("id", "parent", "child", "form", "polarity"),
-			nodeRevisions: ClassKeys<MapNodeRevision>("id", "node", "phrasing", "note", "attachments"),
-			nodePhrasings: ClassKeys<MapNodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "note", "terms", "references"),
+			nodeRevisions: ClassKeys<NodeRevision>("id", "node", "phrasing", "note", "attachments"),
+			nodePhrasings: ClassKeys<NodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "note", "terms", "references"),
 			terms: ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note"),
 			medias: ClassKeys<Media>("id", "name", "type", "url", "description"),
 		},
@@ -139,7 +139,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 							const docSchemaName = TableNameToDocSchemaName(tableName);
 							const schema = GetSchemaJSON(docSchemaName);
 							const fieldNames = Object.keys(schema.properties!);
-							if (tableName == "nodes") fieldNames.push("policy", "current", "displayPolarity", "link"); // extra fields attached for MapNodeL3
+							if (tableName == "nodes") fieldNames.push("policy", "current", "displayPolarity", "link"); // extra fields attached for NodeL3
 							const fieldNames_oldEnabled = includeKeys[tableName];
 
 							const splitAt_includeKeys = 120;
@@ -204,13 +204,13 @@ export class GetSubtree_SearchInfo {
 
 	// temp
 	rootPathSegments: string[];
-	//nodes_nextToProcess: MapNodeL2[] = [];
+	//nodes_nextToProcess: NodeL2[] = [];
 
 	// result
-	nodes = new Map<string, MapNodeL3>();
+	nodes = new Map<string, NodeL3>();
 	nodeChildLinks = new Map<string, NodeChildLink>();
-	nodeRevisions = new Map<string, MapNodeRevision>();
-	nodePhrasings = new Map<string, MapNodePhrasing>();
+	nodeRevisions = new Map<string, NodeRevision>();
+	nodePhrasings = new Map<string, NodePhrasing>();
 	terms = new Map<string, Term>();
 	medias = new Map<string, Media>();
 }

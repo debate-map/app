@@ -1,10 +1,10 @@
 import {CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 import {Field, MGLClass} from "mobx-graphlink";
-import {MapNodeRevision} from "../../nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../../nodes/@NodeRevision.js";
 import {QuoteAttachment} from "./@QuoteAttachment.js";
 import {MediaAttachment} from "./@MediaAttachment.js";
-import {MapNodeL2} from "../../nodes/@MapNode.js";
-import {MapNodeType} from "../../nodes/@MapNodeType.js";
+import {NodeL2} from "../../nodes/@MapNode.js";
+import {NodeType} from "../../nodes/@NodeType.js";
 import {EquationAttachment} from "./@EquationAttachment.js";
 import {ReferencesAttachment} from "./@ReferencesAttachment.js";
 
@@ -19,7 +19,7 @@ export enum AttachmentType {
 	equation = "equation",
 }
 
-export function GetAttachmentType_Node(node: MapNodeL2) {
+export function GetAttachmentType_Node(node: NodeL2) {
 	const mainAttachment = node.current.attachments[0];
 	if (mainAttachment == null) return AttachmentType.none;
 	return GetAttachmentType(mainAttachment);

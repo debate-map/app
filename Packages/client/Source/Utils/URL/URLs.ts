@@ -5,8 +5,8 @@ import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {MaybeLog, Page} from "web-vcore";
-import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
-import {ACTMapNodeSelect, GetFocusedNodeID, GetSelectedNodePathNodes} from "Store/main/maps/mapViews/$mapView";
+import {GetMap, NodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
+import {ACTNodeSelect, GetFocusedNodeID, GetSelectedNodePathNodes} from "Store/main/maps/mapViews/$mapView";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
@@ -83,7 +83,7 @@ export function GetURLStrForMap(mapID: string) {
 	return result;
 }
 
-export function GetURLStrForNode(node: MapNodeL2) {
+export function GetURLStrForNode(node: NodeL2) {
 	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z0-9]/g, "-");
 	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
 	while (result.Contains("--")) {

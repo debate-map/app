@@ -1,7 +1,7 @@
 import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
-import {Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
+import {MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
@@ -18,7 +18,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 	oldData: Map;
 	userMapInfoSets: UserMapInfoSet[];
 	sub_deleteNode: DeleteNode;
-	nodeEdits: Map_NodeEdit[];
+	nodeEdits: MapNodeEdit[];
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetMap.NN(id);

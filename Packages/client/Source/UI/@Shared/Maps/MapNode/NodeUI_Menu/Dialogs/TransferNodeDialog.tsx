@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, MapNodeL3, MapNodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
+import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, NodeL3, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
@@ -140,7 +140,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 
 		const earlierNodeInfos = payload.nodes.slice(0, index);
 		const earlierNodeInfo_transferring = earlierNodeInfos.find(a=>a.transferType != "ignore");
-		/*let newParent: MapNodeL3|n;
+		/*let newParent: NodeL3|n;
 		if (earlierNodeInfo_transferring?.transferType == "shim") newParent = null;
 		else if (earlierNodeInfo_transferring != null) newParent = GetNodeL3(`${earlierNodeInfo_transferring.nodeID}`);
 		else newParent = uiState.destinationParent;*/
@@ -152,7 +152,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 		const node = GetNodeL3(path);
 		if (node == null) return;
 
-		const nodeTypeEntries = GetEntries(MapNodeType, "ui");
+		const nodeTypeEntries = GetEntries(NodeType, "ui");
 		const nodeTypeEntry_orig = nodeTypeEntries.find(a=>a.value == node.type)!;
 		nodeTypeEntries.Move(nodeTypeEntry_orig, 0);
 		nodeTypeEntry_orig.name = `Keep original type (${nodeTypeEntry_orig.name})`;
@@ -280,7 +280,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 									// todo
 								}}/>
 						</Row>
-						{finalType == MapNodeType.claim &&
+						{finalType == NodeType.claim &&
 						<Row ml={5}>
 							<Text>Claim form:</Text>
 							<Select ml={5} options={GetEntries(ClaimForm)} value={nodeInfo.claimForm}
@@ -289,7 +289,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 									// todo
 								}}/>
 						</Row>}
-						{finalType == MapNodeType.argument &&
+						{finalType == NodeType.argument &&
 						<Row ml={5}>
 							<Text>Argument polarity:</Text>
 							<Select ml={5} options={GetEntries(Polarity)} value={nodeInfo.argumentPolarity}
@@ -318,7 +318,7 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 }
 
 @Observer
-class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node: MapNodeL3|n, index: number}, {menuOpened: boolean}> {
+class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node: NodeL3|n, index: number}, {menuOpened: boolean}> {
 	render() {
 		const {panel, node, index} = this.props;
 		const {menuOpened} = this.state;
@@ -349,7 +349,7 @@ class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node
 				{menuOpened && node &&
 				<Row mt={5}>
 					{/*<Text>{panel == "source" ? "Source info:" : "Destination info:"}</Text>*/}
-					<InfoRect text={`Type: ${MapNodeType[node.type]}`} first={true}/>
+					<InfoRect text={`Type: ${NodeType[node.type]}`} first={true}/>
 					<InfoRect text={`ID: ${node.id}`}/>
 					{/*<InfoRect text="Created at: todo"/>
 					<InfoRect text="Created by: todo"/>*/}

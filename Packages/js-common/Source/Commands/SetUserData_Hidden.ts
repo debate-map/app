@@ -2,7 +2,7 @@ import {Command, AssertV, AssertValidate, GetSchemaJSON, NewSchema, dbp, Command
 import {CE, GetEntries, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeType} from "../DB/nodes/@NodeType.js";
 
 const MTClass = UserHidden;
 type MT = typeof MTClass.prototype;

@@ -3,7 +3,7 @@ import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {VLexoRank} from "../Utils.js";
 import {DMCommon_InServer} from "../Utils/General/General.js";
 import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
-import {ChildGroup} from "./nodes/@MapNodeType.js";
+import {ChildGroup} from "./nodes/@NodeType.js";
 
 export const GetNodeChildLink = CreateAccessor((id: string)=>{
 	if (id == null || IsNaN(id)) return null;

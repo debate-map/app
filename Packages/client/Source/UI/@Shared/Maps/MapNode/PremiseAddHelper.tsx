@@ -2,11 +2,11 @@ import keycode from "keycode";
 import {Button, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
-import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 
-/* export class PremiseAddHelper extends BaseComponentPlus({} as {mapID: string, parentNode: MapNodeL3, parentPath: string}, { premiseTitle: '', adding: false }) {
+/* export class PremiseAddHelper extends BaseComponentPlus({} as {mapID: string, parentNode: NodeL3, parentPath: string}, { premiseTitle: '', adding: false }) {
 	render() {
 		const { mapID, parentNode, parentPath } = this.props;
 		const { premiseTitle, adding } = this.state;
@@ -17,7 +17,7 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 			<Row style={{ alignItems: 'stretch', padding: '5px 0px' }}>
 				{/* <TextInput placeholder="Type the argument's first claim/premise here." style={ES({flex: 1})}
 					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/> *#/}
-				<TextArea className="noValidationColoring" required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={{ width: '100%' }}
+				<TextArea className="noValidationColoring" required={true} pattern={NodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={{ width: '100%' }}
 					placeholder="Type the argument's first claim/premise here."
 					onKeyDown={async (e) => {
 						if (e.keyCode == keycode.codes.enter) {
@@ -25,7 +25,7 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 						}
 					}}
 					value={premiseTitle} onChange={(val) => this.SetState({ premiseTitle: val })}/>
-				<Button enabled={premiseTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{ borderRadius: '0 5px 5px 0' }}
+				<Button enabled={premiseTitle.match(NodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{ borderRadius: '0 5px 5px 0' }}
 					onClick={() => this.CreatePremise()}/>
 			</Row>
 		);
@@ -40,12 +40,12 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 
 		this.SetState({ adding: true });
 
-		const newNode = new MapNode(EV({ type: MapNodeType.claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) }));
-		const newRevision = new MapNodeRevision({ titles: { base: premiseTitle } });
+		const newNode = new MapNode(EV({ type: NodeType.claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) }));
+		const newRevision = new NodeRevision({ titles: { base: premiseTitle } });
 		const newLink = { _: true, form: ClaimForm.base } as NodeChildLink;
 
 		const info = await new AddChildNode({ mapID, parentID: parentNode.id, node: newNode, revision: newRevision, link: newLink }).RunOnServer();
-		ACTMapNodeExpandedSet({ mapID, path: `${parentPath}/${info.nodeID}`, expanded: true, resetSubtree: false });
+		ACTNodeExpandedSet({ mapID, path: `${parentPath}/${info.nodeID}`, expanded: true, resetSubtree: false });
 		runInAction('PremiseAddHelper.CreatePremise', () => store.main.nodeLastAcknowledgementTimes.set(info.nodeID, Date.now()));
 
 		// await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);

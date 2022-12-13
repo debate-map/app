@@ -2,18 +2,18 @@ import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vc
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
-import {Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
+import {MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetNodePhrasings} from "../DB/nodePhrasings.js";
-import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
+import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetNodeRevisions} from "../DB/nodeRevisions.js";
 import {ForDelete_GetError} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
-import {MapNodeL2} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeL2} from "../DB/nodes/@MapNode.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @MapEdit
@@ -32,14 +32,14 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 
 	sub_deleteContainerArgument: DeleteNode;
 
-	oldData: MapNodeL2|n;
-	oldRevisions: MapNodeRevision[];
-	oldPhrasings: MapNodePhrasing[];
+	oldData: NodeL2|n;
+	oldRevisions: NodeRevision[];
+	oldPhrasings: NodePhrasing[];
 	oldRatings: NodeRating[];
 	//oldParentChildrenOrders: string[][];
 	linksAsParent: NodeChildLink[];
 	linksAsChild: NodeChildLink[];
-	mapNodeEdits: Map_NodeEdit[];
+	mapNodeEdits: MapNodeEdit[];
 	Validate() {
 		const {mapID, nodeID} = this.payload;
 		const {asPartOfMapDelete, parentsToIgnore, childrenToIgnore} = this;

@@ -2,7 +2,7 @@ import {GetMap, GetNodeChildLinks, GetNodeL2, MapView, Me} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {ACTMapNodeExpandedSet, GetFocusedNodePath, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet, GetFocusedNodePath, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {RunInAction} from "web-vcore";
 import {Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
@@ -50,7 +50,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 			//console.log('NodeView:', path, GetNodeView(map.id, path, false));
 			if (GetNodeView(map.id, path, false) == null) {
 				//console.log('Expanding:', path);
-				ACTMapNodeExpandedSet({mapID: map.id, path, expanded: true, resetSubtree: false});
+				ACTNodeExpandedSet({mapID: map.id, path, expanded: true, resetSubtree: false});
 			}
 			const childLinks = await GetAsync(()=>GetNodeChildLinks(node.id));
 			if (childLinks.length) {

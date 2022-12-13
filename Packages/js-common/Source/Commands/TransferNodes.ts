@@ -3,16 +3,16 @@ import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON
 import {MaybeCloneAndRetargetNodeTag, NodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@NodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, MapNodeRevision, MapNodeType, NodeChildLink} from "../DB.js";
+import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeChildLink} from "../DB.js";
 import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../DB/nodes/@MapNode.js";
+import {ClaimForm, MapNode, NodeL3, Polarity} from "../DB/nodes/@MapNode.js";
 import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNodeTag} from "./AddNodeTag.js";
 import {LinkNode} from "./LinkNode.js";
 import {CheckValidityOfLink, CheckValidityOfNewLink, GetNode} from "../DB/nodes.js";
-import {MapNodeType_Info} from "../DB/nodes/@MapNodeType.js";
+import {NodeType_Info} from "../DB/nodes/@NodeType.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 
 @MGLClass({schemaDeps: [
@@ -38,8 +38,8 @@ export class NodeInfoForTransfer {
 	@Field({$ref: "TransferType"})
 	transferType: TransferType;
 
-	@Field({$ref: "MapNodeType"})
-	clone_newType: MapNodeType;
+	@Field({$ref: "NodeType"})
+	clone_newType: NodeType;
 
 	@Field({type: "boolean"})
 	clone_keepChildren: boolean;
@@ -70,7 +70,7 @@ export class NodeInfoForTransfer {
 	//"delete", // for the case of moving a claim to a place not needing an argument wrapper, where the old argument-wrapper would otherwise be left empty
 ] as const;
 export type TransferType = typeof TransferType_values[number];
-AddSchema("TransferType", {enum: GetValues(MapNodeType)});*/
+AddSchema("TransferType", {enum: GetValues(NodeType)});*/
 export enum TransferType {
 	ignore = "ignore",
 	move = "move",
@@ -145,12 +145,12 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 					newNode.type = transfer.clone_newType;
 				}
 				newNode.accessPolicy = accessPolicyID;
-				const newRev = Clone(node.current) as MapNodeRevision;
+				const newRev = Clone(node.current) as NodeRevision;
 
 				const newLink = Clone(node.link) as NodeChildLink;
 				newLink.group = transfer.childGroup;
 				newLink.orderKey = orderKeyForNewNode;
-				if (newNode.type == MapNodeType.argument) {
+				if (newNode.type == NodeType.argument) {
 					newLink.polarity = transfer.argumentPolarity ?? Polarity.supporting;
 				}
 
@@ -186,13 +186,13 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 
 								// if we're changing the node's type, check for child-links it has that are invalid (eg. wrong child-group), and try to change them to be valid
 								if (newNode.type != node.type && CheckValidityOfLink(newNode.type, newLink.group, newLink.c_childType!) != null) {
-									const firstValidGroupForChildType = [...MapNodeType_Info.for[newNode.type].childGroup_childTypes.entries()].filter(a=>a[1].includes(newLink.c_childType!));
+									const firstValidGroupForChildType = [...NodeType_Info.for[newNode.type].childGroup_childTypes.entries()].filter(a=>a[1].includes(newLink.c_childType!));
 									Assert(firstValidGroupForChildType != null, `Cannot clone node while both changing type and keeping children, because there are children whose type (${newLink.c_childType}) cannot be placed into any of the new node's child-groups.`);
 									newLink.group = firstValidGroupForChildType[0][0];
 								}
 
 								// hard-coded exception here: if old-node-type is category (with claim children), and new-node-type is claim, then have children claims be wrapped into argument nodes
-								if (node.type == MapNodeType.category && newNode.type == MapNodeType.claim && newLink.c_childType == MapNodeType.claim) {
+								if (node.type == NodeType.category && newNode.type == NodeType.claim && newLink.c_childType == NodeType.claim) {
 									const linkCommand = new LinkNode_HighLevel({
 										/*mapID: null,
 										oldParentID: null,*/
@@ -256,9 +256,9 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 			} else if (transfer.transferType == TransferType.shim) {
 				const argumentWrapper = new MapNode({
 					accessPolicy: accessPolicyID,
-					type: MapNodeType.argument,
+					type: NodeType.argument,
 				});
-				const argumentWrapperRevision = new MapNodeRevision();
+				const argumentWrapperRevision = new NodeRevision();
 
 				AssertV(transfer.newParentID != null, `For transfer of type "shim", the new-parent-id must be specified.`);
 				const newParent = GetNodeL2.NN(transfer.newParentID);

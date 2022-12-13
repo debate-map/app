@@ -1,9 +1,9 @@
 import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
-import {MapNodeRevision} from "./nodes/@MapNodeRevision.js";
+import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
+import {NodeRevision} from "./nodes/@NodeRevision.js";
 
-export function CleanNodeRevision<T extends(MapNodeRevision|n)>(source: T): T {
+export function CleanNodeRevision<T extends(NodeRevision|n)>(source: T): T {
 	if (source != null) {
 		// the phrasing_tsvector field, when stringified, contains unusual unicode characters, which app-server-js is unable to write to the db;
 		// thus, we strip that field at read-time, so we don't accidentally send it later on [it'd be useless to send anyway, since the server overwrites that field itself]
@@ -23,7 +23,7 @@ export const GetNodeRevision = CreateAccessor((id: string|n)=>{
 // todo2 (nvm, canceled): actually, maybe instead just use approach used for map-node-phrasings (having separate db-path for each node's phrasing-collection) -- assuming it has no unforeseen issues
 
 // removed this download-and-watch-whole-collection function because it slows down the website way too much
-/* export function GetNodeRevisions(nodeID: string): MapNodeRevision[] {
+/* export function GetNodeRevisions(nodeID: string): NodeRevision[] {
 	const entryMap = GetData({ collection: true }, 'nodeRevisions');
 	return CachedTransform('GetNodeRevisions', [nodeID], entryMap, () => (entryMap ? entryMap.VValues(true).filter(a => a && a.node == nodeID) : []));
 } */
@@ -36,7 +36,7 @@ export const GetNodeRevision = CreateAccessor((id: string|n)=>{
 	const docIDs = docs.map(a => a.id);
 	return docIDs;
 } */
-export const GetNodeRevisions = CreateAccessor((nodeID: string): MapNodeRevision[]=>{
+export const GetNodeRevisions = CreateAccessor((nodeID: string): NodeRevision[]=>{
 	/* const entryMap = GetData_Query(
 		{
 			// key: `GetNodeRevisions_${nodeID}`,
@@ -55,7 +55,7 @@ export const GetNodeRevisions = CreateAccessor((nodeID: string): MapNodeRevision
 	}, a=>a.nodeRevisions).map(a=>CleanNodeRevision(a));
 });
 // commented for now, as support is not yet added for this type of "contains" filter (ie. targeting something within jsonb), in app-server-rs
-/*export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): MapNodeRevision[]=>{
+/*export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): NodeRevision[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
 		params: {filter: {

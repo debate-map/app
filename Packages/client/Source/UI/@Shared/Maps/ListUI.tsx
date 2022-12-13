@@ -120,7 +120,7 @@ export class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
 	}
 }
 
-type NodeRow_Props = {map: Map, node: MapNodeL2, first: boolean};
+type NodeRow_Props = {map: Map, node: NodeL2, first: boolean};
 class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false }) {
 	render() {
 		const { map, node, first } = this.props;
@@ -134,7 +134,7 @@ class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false
 		const path = `${node.id}`;
 
 		const backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
-		const nodeTypeInfo = MapNodeType_Info.for[node.type];
+		const nodeTypeInfo = NodeType_Info.for[node.type];
 
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
@@ -162,7 +162,7 @@ class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false
 /* @Connect((state, {map, node}: NodeRow_Props)=> ({
 	nodeEnhanced: GetNodeL3(node._id),
 }))
-class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: MapNodeL2}, {}> {
+class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: NodeL2}, {}> {
 	render() {
 		let {map, node} = this.props;
 		return (
@@ -171,7 +171,7 @@ class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnh
 	}
 } *#/
 
-type NodeColumn_Props = {map: Map, node: MapNodeL2};
+type NodeColumn_Props = {map: Map, node: NodeL2};
 class NodeColumn extends BaseComponentPlus({} as NodeColumn_Props, { width: null as number, hoverPanel: null as string }) {
 	render() {
 		const { map, node } = this.props;
@@ -183,9 +183,9 @@ class NodeColumn extends BaseComponentPlus({} as NodeColumn_Props, { width: null
 
 		const nodeL3 = AsNodeL3(node);
 		const path = `${node.id}`;
-		const nodeTypeInfo = MapNodeType_Info.for[node.type];
+		const nodeTypeInfo = NodeType_Info.for[node.type];
 		const backgroundColor = GetNodeColor(nodeL3);
-		const nodeView = new MapNodeView();
+		const nodeView = new NodeView();
 		nodeView.openPanel = openPanel;
 
 		let panelToShow = hoverPanel || openPanel;
@@ -205,7 +205,7 @@ class NodeColumn extends BaseComponentPlus({} as NodeColumn_Props, { width: null
 				}} onResize={()=> {
 					if (this.refs.ratingsPanel) GetInnerComp(this.refs.ratingsPanel).Update();
 				}}/> *#/}
-				<MapNodeUI_LeftBox {...{ map, path, node: nodeL3, ratingsRoot, backgroundColor }}
+				<NodeUI_LeftBox {...{ map, path, node: nodeL3, ratingsRoot, backgroundColor }}
 					onPanelButtonHover={(panel) => this.SetState({ hoverPanel: panel })}
 					onPanelButtonClick={(panel) => mapInfo.list_selectedNode_openPanel = panel}
 					asHover={false} inList={true} style={{ marginTop: 25 }}/>

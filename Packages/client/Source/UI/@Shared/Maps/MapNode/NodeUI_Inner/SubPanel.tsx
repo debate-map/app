@@ -1,6 +1,6 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed, Chroma} from "web-vcore";
-import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment, GetAttachmentType} from "dm_common";
+import {NodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment, GetAttachmentType} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React, {Fragment, useState} from "react";
 import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
@@ -9,7 +9,7 @@ import {ButtonChain} from "Utils/ReactComponents/ButtonChain.js";
 import {SourcesUI} from "./SourcesUI.js";
 
 @Observer
-export class SubPanel extends BaseComponent<{node: MapNodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
+export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
 	render() {
 		const {node, toolbarShowing, ...rest} = this.props;
 		const attachments_all = node.current.attachments;

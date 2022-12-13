@@ -19,8 +19,8 @@ declare const { Assert }: typeof import('../../../../../@Modules/react-vscrollvi
 declare const { MeID }: typeof import('../../../Source/Store/firebase/users');
 declare const { AddChildNode }: typeof import('../../../Source/Server/Commands/AddChildNode');
 declare const { MapNode }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
-declare const { MapNodeType }: typeof import('../../../Source/Store/firebase/nodes/@MapNodeType');
-declare const { MapNodeRevision }: typeof import('../../../Source/Store/firebase/nodes/@MapNodeRevision');
+declare const { NodeType }: typeof import('../../../Source/Store/firebase/nodes/@NodeType');
+declare const { NodeRevision }: typeof import('../../../Source/Store/firebase/nodes/@NodeRevision');
 declare const { ClaimForm }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
 declare const { Polarity }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
 declare const { AddChildHelper }: typeof import('../../../Source/UI/@Shared/Maps/MapNode/NodeUI_Menu/Dialogs/AddChildDialog');
@@ -134,12 +134,12 @@ async function SeedDB(firebase) {
 		return nodeID;
 	}
 
-	const claimNodeID = await AddNode(rootNodeID, MapNodeType.claim, 'Claim');
+	const claimNodeID = await AddNode(rootNodeID, NodeType.claim, 'Claim');
 	for (let i1 = 0; i1 < 5; i1++) {
-		const sub1ProID = await AddNode(`${rootNodeID}/${claimNodeID}`, MapNodeType.argument, `L1.Pro${i1 + 1}`, Polarity.supporting, false);
-		const sub1ConID = await AddNode(`${rootNodeID}/${claimNodeID}`, MapNodeType.argument, `L1.Con${i1 + 1}`, Polarity.opposing);
+		const sub1ProID = await AddNode(`${rootNodeID}/${claimNodeID}`, NodeType.argument, `L1.Pro${i1 + 1}`, Polarity.supporting, false);
+		const sub1ConID = await AddNode(`${rootNodeID}/${claimNodeID}`, NodeType.argument, `L1.Con${i1 + 1}`, Polarity.opposing);
 		for (let i2 = 0; i2 < 5; i2++) {
-			await AddNode(`${rootNodeID}/${claimNodeID}/${sub1ConID}`, MapNodeType.argument, `L2.Pro${i2 + 1}`, Polarity.supporting, false);
+			await AddNode(`${rootNodeID}/${claimNodeID}/${sub1ConID}`, NodeType.argument, `L2.Pro${i2 + 1}`, Polarity.supporting, false);
 		}
 	}
 

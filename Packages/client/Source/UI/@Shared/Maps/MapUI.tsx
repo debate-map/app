@@ -1,10 +1,10 @@
-import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType_Info} from "dm_common";
+import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, NodeL3, NodeType_Info} from "dm_common";
 import React, {useCallback, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
-import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI} from "tree-grapher";
 import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -92,7 +92,7 @@ export function GetMapUICSSFilter() {
 }
 
 type Props = {
-	mapID: string, rootNode?: MapNodeL3, withinPage?: boolean,
+	mapID: string, rootNode?: NodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
 	//subNavBarWidth?: number,
 } & HTMLProps<"div">;
@@ -179,7 +179,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
 
 		const rootNode = (()=>{
-			let result: MapNodeL3|n = rootNode_passed;
+			let result: NodeL3|n = rootNode_passed;
 			if (result == null && map && map.rootNode) {
 				result = GetNodeL3(`${map.rootNode}`);
 			}
@@ -274,7 +274,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 								if (this.downPos && new Vector2(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 								const mapView = GetMapView(GetOpenMapID());
 								if (GetSelectedNodePath(map.id)) {
-									ACTMapNodeSelect(map.id, null);
+									ACTNodeSelect(map.id, null);
 									// UpdateFocusNodeAndViewOffset(map._id);
 								}
 							}}
@@ -298,7 +298,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 								<ConnectorLinesUI/>
 								{/*playingTimeline != null &&
 								<TimelineIntroBox timeline={playingTimeline}/>*/}
-								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" widthOverride={MapNodeType_Info.for[rootNode.type].minWidth}/>
+								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" widthOverride={NodeType_Info.for[rootNode.type].minWidth}/>
 								{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
 								{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 									this.LoadScroll();

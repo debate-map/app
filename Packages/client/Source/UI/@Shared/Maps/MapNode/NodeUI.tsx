@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, ShouldChildGroupBoxBeVisible, TagComp_CloneHistory} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, NodeL3, NodeType, NodeType_Info, ShouldChildGroupBoxBeVisible, TagComp_CloneHistory} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -43,7 +43,7 @@ export const GUTTER_WIDTH_SMALL = 20;
 @Observer
 export class NodeUI extends BaseComponentPlus(
 	{} as {
-		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, treePath: string, style?,
+		indexInNodeList: number, map: Map, node: NodeL3, path: string, treePath: string, style?,
 		inBelowGroup?: boolean,
 		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
@@ -79,14 +79,14 @@ export class NodeUI extends BaseComponentPlus(
 
 		performance.mark("NodeUI_1");
 
-		const GetNodeChildren = (node2: MapNodeL3|n, path2: string|n): MapNodeL3[]=>(node2 && path2 ? GetNodeChildrenL3(node2.id, path2) : ea);
-		const GetNodeChildrenToShow = (node2: MapNodeL3|n, path2: string|n): MapNodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true, true) : ea);
+		const GetNodeChildren = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3(node2.id, path2) : ea);
+		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true, true) : ea);
 
 		const nodeChildren = GetNodeChildren(node, path);
 		const nodeChildrenToShow = GetNodeChildrenToShow(node, path);
 		const nodeForm = GetNodeForm(node, path);
 		const nodeView = GetNodeView(map.id, path);
-		const nodeTypeInfo = MapNodeType_Info.for[node.type];
+		const nodeTypeInfo = NodeType_Info.for[node.type];
 
 		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes.CatchBail(emptyArray, map.id, sinceTime, path); // catch bail, to lazy-load path-changes
@@ -96,12 +96,12 @@ export class NodeUI extends BaseComponentPlus(
 		const parent = GetParentNodeL3(path);
 		const parentPath = GetParentPath(path);
 		//const parentNodeView = GetNodeView(map.id, parentPath);
-		//const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
+		//const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<NodeL3>();
 
 		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		const hereArg = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
+		const hereArg = node.type == NodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
 		const hereArgNodePath = hereArg == node ? path : hereArg == parent ? parentPath : null;
 		const hereArgChildren = hereArg ? GetNodeChildren(hereArg, hereArgNodePath) : null;
 		const hereArgChildrenToShow = hereArg ? GetNodeChildrenToShow(hereArg, hereArgNodePath).filter(a=>a.id != node.id) : null;
@@ -109,7 +109,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
-		//const directChildrenArePolarized = childGroupsShowingDirect.length == 1 && && node.type == MapNodeType.claim;
+		//const directChildrenArePolarized = childGroupsShowingDirect.length == 1 && && node.type == NodeType.claim;
 		const truthBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.truth, childLayout, nodeChildrenToShow);
 		const relevanceBoxVisible = ShouldChildGroupBoxBeVisible(hereArg, ChildGroup.relevance, childLayout, hereArgChildrenToShow);
 		const freeformBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.freeform, childLayout, nodeChildrenToShow);
@@ -117,9 +117,9 @@ export class NodeUI extends BaseComponentPlus(
 
 		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
-		const hereArgChildrenToShow_relevance = hereArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea as MapNodeL3[];
+		const hereArgChildrenToShow_relevance = hereArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea as NodeL3[];
 		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
-		const ncToShow_direct: MapNodeL3[] = [
+		const ncToShow_direct: NodeL3[] = [
 			...ncToShow_generic,
 			...(truthBoxVisible ? [] : ncToShow_truth),
 			//...(relevanceBoxVisible ? [] : hereArgChildrenToShow_relevance),
@@ -157,7 +157,7 @@ export class NodeUI extends BaseComponentPlus(
 		let innerUIOverride_baseClaimMissing: JSX.Element|n;
 		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
 		if (isSinglePremiseArgument) {
-			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.claim);
+			const premises = nodeChildren.filter(a=>a && a.type == NodeType.claim);
 			if (premises.length) {
 				AssertWarn(premises.length == 1, `Single-premise argument #${node.id} has more than one premise! (${premises.map(a=>a.id).join(",")})`);
 				const premise = premises[0];
@@ -199,7 +199,7 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 
-		// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.claim), "Single-premise argument has more than one premise!");
+		// Assert(!relevanceArguments.Any(a=>a.type == NodeType.claim), "Single-premise argument has more than one premise!");
 		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 			// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
 			// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
@@ -247,12 +247,12 @@ export class NodeUI extends BaseComponentPlus(
 			this.CheckForChanges();
 		}, []);*/
 		if (usingDirect && boxExpanded) {
-			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
+			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == NodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
 				treePath={treePath}
 				treePath_priorChildCount={nextChildFullIndex} // because we use this, this group must go last
 				ref={nodeChildHolder_direct_ref}
-				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
+				// type={node.type == NodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
 				belowNodeUI={isMultiPremiseArgument}

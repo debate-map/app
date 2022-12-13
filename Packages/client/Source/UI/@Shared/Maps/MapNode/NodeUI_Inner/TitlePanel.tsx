@@ -6,7 +6,7 @@ import {Button, Pre, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey, GetMainAttachment} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetMainAttachment} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -17,7 +17,7 @@ import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
 
-/* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style};
+/* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: NodeL2, nodeView: NodeView, path: string, indexInNodeList: number, style};
 const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
 	displayText: GetNodeDisplayText(node, path),
 	$1: node.current.image && GetMedia(node.current.image.id),
@@ -28,7 +28,7 @@ const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
 
 /* export type TitlePanelInternals = {OnDoubleClick};
 export function TitlePanel(props: VProps<TitlePanelInternals, {
-	parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style,
+	parent: NodeUI_Inner, map: Map, node: NodeL2, nodeView: NodeView, path: string, indexInNodeList: number, style,
 }>) { */
 
 export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
@@ -60,7 +60,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @WarnOfTransientObjectProps
 @Observer
 export class TitlePanel extends BaseComponentPlus(
-	{} as {parent: NodeUI_Inner, map: Map|n, node: MapNodeL2, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
+	{} as {parent: NodeUI_Inner, map: Map|n, node: NodeL2, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
 	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{
@@ -157,7 +157,7 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{!applyingEdit &&
-							<TextArea required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
+							<TextArea required={true} pattern={NodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
 								instant // must be instant-apply, since rb-dnd blocks button-triggered on-blur
 								ref={a=>a && a.DOM_HTML.focus()}
 								onKeyDown={e=>{
@@ -169,7 +169,7 @@ export class TitlePanel extends BaseComponentPlus(
 								}}
 								value={edit_newTitle!} onChange={val=>this.SetState({edit_newTitle: val})}/>}
 						{!applyingEdit &&
-							<Button enabled={edit_newTitle!.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
+							<Button enabled={edit_newTitle!.match(NodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
 								onClick={()=>this.ApplyEdit()}/>}
 						{applyingEdit && <Row>Applying edit...</Row>}
 					</Row>}
@@ -183,7 +183,7 @@ export class TitlePanel extends BaseComponentPlus(
 						{/*noteText*/}
 						{RenderNodeDisplayText(noteText, termsToSearchFor, this)}
 					</Pre>}
-				{node.type == MapNodeType.claim && mainAttachment?.quote &&
+				{node.type == NodeType.claim && mainAttachment?.quote &&
 					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
 			</div>
 		);
@@ -199,7 +199,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const form = GetNodeForm(node, path);
 		const titleKey: TitleKey = {[ClaimForm.negation]: "text_negation", [ClaimForm.question]: "text_question"}[form] || "text_base";
-		const newRevision = (Clone(node.current) as MapNodeRevision).ExcludeKeys("phrasing_tsvector").OmitUndefined(true);
+		const newRevision = (Clone(node.current) as NodeRevision).ExcludeKeys("phrasing_tsvector").OmitUndefined(true);
 		if (newRevision.phrasing[titleKey] != edit_newTitle) {
 			newRevision.phrasing[titleKey] = edit_newTitle;
 

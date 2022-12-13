@@ -1,10 +1,10 @@
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
-import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
+import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-const MTClass = MapNodePhrasing;
+const MTClass = NodePhrasing;
 type MT = typeof MTClass.prototype;
 const MTName = MTClass.name;
 

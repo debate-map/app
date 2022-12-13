@@ -38,8 +38,8 @@ export const SearchUpFromNodeForNodeMatchingX = CreateAccessor((startNodeID: str
 	result.rootNodeViews[pathNodes[0]] = CreateNodeViewForPath(pathNodes.Skip(1));
 	return result;
 }
-export function CreateNodeViewForPath(pathFromSelfToDescendent: string[]): MapNodeView {
-	const result = new MapNodeView();
+export function CreateNodeViewForPath(pathFromSelfToDescendent: string[]): NodeView {
+	const result = new NodeView();
 	result.expanded = true;
 
 	if (pathFromSelfToDescendent.length) {

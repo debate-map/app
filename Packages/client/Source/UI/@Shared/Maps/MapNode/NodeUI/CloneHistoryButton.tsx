@@ -1,4 +1,4 @@
-import {GetNode, GetNodeTagComps, GetNodeTags, MapNodeL3, TagComp_CloneHistory} from "dm_common";
+import {GetNode, GetNodeTagComps, GetNodeTags, NodeL3, TagComp_CloneHistory} from "dm_common";
 import {Clone} from "js-vextensions";
 import React from "react";
 import {store} from "Store";
@@ -11,7 +11,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 
 @Observer
-export class CloneHistoryButton extends BaseComponent<{node: MapNodeL3}, {}> {
+export class CloneHistoryButton extends BaseComponent<{node: NodeL3}, {}> {
 	render() {
 		const {node} = this.props;
 		if (!store.main.maps.showCloneHistoryButtons) return null;
@@ -60,7 +60,7 @@ export function CSVCell(text: string) {
 
 @Observer
 class CloneHistoryUI extends BaseComponentPlus(
-	{} as {node: MapNodeL3, controller: BoxController},
+	{} as {node: NodeL3, controller: BoxController},
 	{
 		tab: 0,
 	},
@@ -88,7 +88,7 @@ class CloneHistoryUI extends BaseComponentPlus(
 	}
 }
 
-class CloneHistoryCompUI extends BaseComponent<{node: MapNodeL3, comp: TagComp_CloneHistory}, {}> {
+class CloneHistoryCompUI extends BaseComponent<{node: NodeL3, comp: TagComp_CloneHistory}, {}> {
 	render() {
 		const {node, comp} = this.props;
 		return (

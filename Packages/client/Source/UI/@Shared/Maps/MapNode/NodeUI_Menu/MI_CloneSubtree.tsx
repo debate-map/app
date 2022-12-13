@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNodeL3, GetParentNodeL3, HasAdminPermissions, MapNodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
+import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNodeL3, GetParentNodeL3, HasAdminPermissions, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
@@ -29,11 +29,11 @@ export class MI_CloneSubtree extends BaseComponent<MI_SharedProps, {}> {
 		const {map, node, path, childGroup, combinedWithParentArg, inList} = this.props;
 		if (inList) return null;
 		if (!HasAdminPermissions(MeID())) return null;
-		//const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
+		//const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		// we "initiate a clone" for the "outer" argument node, if there's a box combining an argument and claim (this is how the dialog expects such a case)
 		let pathToClone = path;
-		if (node.type == MapNodeType.claim && combinedWithParentArg) {
+		if (node.type == NodeType.claim && combinedWithParentArg) {
 			pathToClone = SlicePath(path, 1)!;
 		}
 		const nodeToClone = GetNodeL3(pathToClone);

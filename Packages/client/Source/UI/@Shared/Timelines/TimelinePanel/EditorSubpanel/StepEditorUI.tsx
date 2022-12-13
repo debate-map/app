@@ -20,7 +20,7 @@
 // import {TimelineStep, NodeReveal} from "dm_common";
 // import {GetNodeID, GetNode} from "dm_common";
 // import {GetNodeL2, GetNodeL3, GetNodeDisplayText} from "dm_common";
-// import {MapNodeType} from "dm_common";
+// import {NodeType} from "dm_common";
 // import {SearchUpFromNodeForNodeMatchingX} from "dm_common";
 // import {Map} from "dm_common";
 // import {GetNodeColor} from "Store/firebase_ext/nodes";
@@ -258,7 +258,7 @@
 // 			displayText = `[path invalid] ${displayText}`;
 // 		}
 
-// 		const backgroundColor = GetNodeColor(nodeL3 || {type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
+// 		const backgroundColor = GetNodeColor(nodeL3 || {type: NodeType.category} as any).desaturate(0.5).alpha(0.8);
 // 		// if (node == null || nodeL3 == null) return null;
 // 		return (
 // 			<>

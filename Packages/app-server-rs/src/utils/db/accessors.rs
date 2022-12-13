@@ -75,15 +75,15 @@ pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<
 }
 
 /*#[derive(Serialize, Deserialize)]
-struct MapNodeL3 {
+struct NodeL3 {
     // todo
 }
-pub async fn get_node_l3(ctx: &AccessorContext<'_>, path: String) -> Option<MapNodeL3> {
+pub async fn get_node_l3(ctx: &AccessorContext<'_>, path: String) -> Option<NodeL3> {
     let id = path.split("/").last();
-    let node: Option<MapNode> = get_db_entry(ctx, "nodes", &Some(json!({
+    let node: Option<Node> = get_db_entry(ctx, "nodes", &Some(json!({
         "id": {"equalTo": id}
     }))).await;
 
-    let node_l3: MapNodeL3 = node;
+    let node_l3: NodeL3 = node;
     Some(node_l3)
 }*/

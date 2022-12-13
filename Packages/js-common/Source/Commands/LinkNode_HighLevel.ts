@@ -7,8 +7,8 @@ import {GetHighestLexoRankUnderParent, GetNodeChildLinks} from "../DB/nodeChildL
 import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckValidityOfLink} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {ChildGroup, MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
+import {ChildGroup, NodeType} from "../DB/nodes/@NodeType.js";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
@@ -26,11 +26,11 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 	// const draggedNode_parent = GetParentNodeL3(draggedNodePath);
 	const dropOnNode_parent = GetParentNodeL3(dropOnNodePath);
 	//const childGroup = GetChildGroup(dropOnNode.type, dropOnNode_parent?.type);
-	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
+	const formForClaimChildren = dropOnNode.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
 	return new LinkNode_HighLevel({
 		mapID, oldParentID: GetParentNodeID(draggedNodePath)!, newParentID: dropOnNode.id, nodeID: draggedNode.id,
-		newForm: draggedNode.type == MapNodeType.claim ? formForClaimChildren : null,
+		newForm: draggedNode.type == NodeType.claim ? formForClaimChildren : null,
 		newPolarity: polarity,
 		//createWrapperArg: childGroup != ChildGroup.generic || !dropOnNode.multiPremiseArgument,
 		//createWrapperArg: true, // todo
@@ -50,21 +50,21 @@ type Payload = {
 
 const IDIsOfNodeThatIsRootOfMap = id=>GetNode(id)?.rootNodeForMap != null;
 
-/*export function CheckValidityOfChildTypeInChildGroup(parentType: MapNodeType, childGroup: ChildGroup, childType: MapNodeType) {
-	if (parentType == MapNodeType.argument && childGroup == ChildGroup.generic && childType != MapNodeType.claim) {
+/*export function CheckValidityOfChildTypeInChildGroup(parentType: NodeType, childGroup: ChildGroup, childType: NodeType) {
+	if (parentType == NodeType.argument && childGroup == ChildGroup.generic && childType != NodeType.claim) {
 		return "Where parent is an argument, and child-group is generic, a claim child is expected.";
 	}
-	if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != MapNodeType.argument) {
+	if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != NodeType.argument) {
 		return `Where child-group is ${childGroup}, an argument child is expected.`;
 	}
 	return null;
 }*/
-export function IsWrapperArgNeededForTransfer(parent_type: MapNodeType, parent_childGroup: ChildGroup, transferNode_type: MapNodeType, transferNode_childGroup?: ChildGroup) {
+export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parent_childGroup: ChildGroup, transferNode_type: NodeType, transferNode_childGroup?: ChildGroup) {
 	/*const transferNodeIsValidAlready = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, transferNode_type) == null;
-	const wrapperArgWouldBeValidInParent = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, MapNodeType.argument) == null;*/
+	const wrapperArgWouldBeValidInParent = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, NodeType.argument) == null;*/
 	const transferNodeIsValidAlready = CheckValidityOfLink(parent_type, parent_childGroup, transferNode_type) == null;
-	const wrapperArgWouldBeValidInParent = CheckValidityOfLink(parent_type, parent_childGroup, MapNodeType.argument) == null;
-	const transferNodeCanBePlacedInWrapperArg = transferNode_type == MapNodeType.claim && (transferNode_childGroup == null || transferNode_childGroup == ChildGroup.generic);
+	const wrapperArgWouldBeValidInParent = CheckValidityOfLink(parent_type, parent_childGroup, NodeType.argument) == null;
+	const transferNodeCanBePlacedInWrapperArg = transferNode_type == NodeType.claim && (transferNode_childGroup == null || transferNode_childGroup == ChildGroup.generic);
 	return !transferNodeIsValidAlready && wrapperArgWouldBeValidInParent && transferNodeCanBePlacedInWrapperArg;
 }
 
@@ -117,8 +117,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.orderKeyForOuterNode = this.orderKeyForOuterNode ?? GetHighestLexoRankUnderParent(newParentID).genNext().toString();
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
-		//const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
-		const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && childGroup == ChildGroup.relevance;
+		//const pastingPremiseAsRelevanceArg = this.node_data.type == NodeType.claim && createWrapperArg;
+		const pastingPremiseAsRelevanceArg = this.node_data.type == NodeType.claim && childGroup == ChildGroup.relevance;
 		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
 		//AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
@@ -145,9 +145,9 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				//EV({ownerMapID: OmitIfFalsy(this.newParent_data.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.node_data.accessPolicy,
-				type: MapNodeType.argument,
+				type: NodeType.argument,
 			});
-			const argumentWrapperRevision = new MapNodeRevision();
+			const argumentWrapperRevision = new NodeRevision();
 
 			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, null, ()=>new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
@@ -165,7 +165,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				parent: newParentID_forClaim, child: nodeID,
 				group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
 				form: newForm,
-				polarity: this.node_data.type == MapNodeType.argument ? newPolarity : null,
+				polarity: this.node_data.type == NodeType.argument ? newPolarity : null,
 				orderKey: wrapperArgNeeded ? VLexoRank.middle().toString() : this.orderKeyForOuterNode,
 			},
 		}));
@@ -177,7 +177,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 			// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
 			const children = GetNodeChildLinks(oldParentID);
-			if (oldParent.type == MapNodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
+			if (oldParent.type == NodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
 				this.IntegrateSubcommand(()=>this.sub_deleteOldParent, null,
 					()=>new DeleteNode({mapID, nodeID: oldParentID!}),
 					a=>a.childrenToIgnore = [nodeID]); // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)

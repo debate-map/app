@@ -4,7 +4,7 @@ import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AttachmentType} from "../DB/@Shared/Attachments/@Attachment.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 
 export const conversionTypes = [
 	// from normal to...
@@ -31,7 +31,7 @@ export function CanConvertFromClaimTypeXToY(from: AttachmentType, to: Attachment
 export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, newType: AttachmentType}, {}> {
 	oldType: AttachmentType;
 	newData: MapNode;
-	newRevision: MapNodeRevision;
+	newRevision: NodeRevision;
 	newRevisionID: string;
 	Validate() {
 		/*const {nodeID, newType} = this.payload;
@@ -58,7 +58,7 @@ export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, 
 		}
 		AssertV(CanConvertFromClaimTypeXToY(this.oldType, newType), `Cannot convert from claim-type ${AttachmentType[this.oldType]} to ${AttachmentType[newType]}.`);
 		AssertValidate("MapNode", this.newData, "New node-data invalid");
-		AssertValidate("MapNodeRevision", this.newRevisionID, "New revision-data invalid");*/
+		AssertValidate("NodeRevision", this.newRevisionID, "New revision-data invalid");*/
 	}
 
 	DeclareDBUpdates(db: DBHelper) {

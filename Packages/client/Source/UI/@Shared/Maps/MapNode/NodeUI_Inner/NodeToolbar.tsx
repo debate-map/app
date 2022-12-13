@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, MapNodeL3, MapNodeType, NodeRatingType, Polarity} from "dm_common";
+import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, NodeL3, NodeType, NodeRatingType, Polarity} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {Vector2} from "react-vmenu/Dist/Utils/FromJSVE";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -49,13 +49,13 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;
 		const getToolbarItemUIs = ()=>{
 			return toolbarItems.map((item, index)=>{
-				if (item.panel == "truth" && (node.type == MapNodeType.claim || node.type == MapNodeType.argument)) {
+				if (item.panel == "truth" && (node.type == NodeType.claim || node.type == NodeType.argument)) {
 					return <ToolBarButton key={index} {...sharedProps} text="Agreement" panel="truth"
-						enabled={node.type == MapNodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
+						enabled={node.type == NodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
 				}
-				if (item.panel == "relevance" && (node.type == MapNodeType.argument || isPremiseOfArg)) {
+				if (item.panel == "relevance" && (node.type == NodeType.argument || isPremiseOfArg)) {
 					return <ToolBarButton key={index} {...sharedProps} text="Relevance" panel="relevance"
-						enabled={node.type == MapNodeType.argument || isPremiseOfSinglePremiseArg}
+						enabled={node.type == NodeType.argument || isPremiseOfSinglePremiseArg}
 						disabledInfo={
 							isPremiseOfMultiPremiseArg
 								? "This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises."
@@ -145,7 +145,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 
 @Observer
 class ToolBarButton extends BaseComponent<{
-	node: MapNodeL3, text: string, textComp?: JSX.Element, enabled?: boolean, disabledInfo?: string, panel?: string,
+	node: NodeL3, text: string, textComp?: JSX.Element, enabled?: boolean, disabledInfo?: string, panel?: string,
 	first?: boolean, last?: boolean, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onClick?: (e: React.MouseEvent)=>any, onHoverChange?: (hovered: boolean)=>any,
 	leftPanelShow: boolean, style?: any,
@@ -245,7 +245,7 @@ class ToolBarButton extends BaseComponent<{
 }
 
 @Observer
-export class RatingsPreviewBackground extends BaseComponent<{path: string, node: MapNodeL3, ratingType: NodeRatingType} & NodeToolbar_SharedProps, {}> {
+export class RatingsPreviewBackground extends BaseComponent<{path: string, node: NodeL3, ratingType: NodeRatingType} & NodeToolbar_SharedProps, {}> {
 	render() {
 		const {path, node, ratingType, backgroundColor} = this.props;
 		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.none) return null;
@@ -282,8 +282,8 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 			//if (ratings.length == 0) return null;
 
 			/*const nodeColor = GetNodeColor(node, "raw");
-			const redNodeColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: Polarity.opposing} as MapNodeL3, "raw");*/
-			const redNodeBackgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: Polarity.opposing} as MapNodeL3, "background");
+			const redNodeColor = GetNodeColor({type: NodeType.argument, displayPolarity: Polarity.opposing} as NodeL3, "raw");*/
+			const redNodeBackgroundColor = GetNodeColor({type: NodeType.argument, displayPolarity: Polarity.opposing} as NodeL3, "background");
 
 			//const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
 			const baselineValue = (ratingSummary.countsByRange.Max() / 10).KeepAtLeast(.1);

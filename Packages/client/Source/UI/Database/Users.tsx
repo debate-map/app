@@ -36,24 +36,24 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 						<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
 							<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
 								enabled={page > 0} onClick={()=> {
-									//store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: page - 1}));
-									store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: page - 1}));
+									//store.dispatch(new ACTNodeListPageSet({mapID: map._id, page: page - 1}));
+									store.dispatch(new ACTNodeListPageSet({mapID: map._id, page: page - 1}));
 								}}/>
 							<Div ml={10} mr={7}>Page: </Div>
 							<TextInput mr={10} pattern="[0-9]+" style={{width: 30}} value={page + 1}
 								onChange={val=> {
 									if (!IsNumberString(val)) return;
-									store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage)}))
+									store.dispatch(new ACTNodeListPageSet({mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage)}))
 								}}/>
 							<Button text={<Icon icon="arrow-right" size={15}/>} title="Next page"
 								enabled={page < lastPage} onClick={()=> {
-									store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: page + 1}));
+									store.dispatch(new ACTNodeListPageSet({mapID: map._id, page: page + 1}));
 								}}/>
 						</Row>
 						<Div mlr="auto"/>
 						<Pre>Filter:</Pre>
 						<InfoButton text="Hides nodes without the given text. Regular expressions can be used, ex: /there are [0-9]+ dimensions/"/>
-						<TextInput ml={2} value={filter} onChange={val=>store.dispatch(new ACTMapNodeListFilterSet({mapID: map._id, filter: val}))}/>
+						<TextInput ml={2} value={filter} onChange={val=>store.dispatch(new ACTNodeListFilterSet({mapID: map._id, filter: val}))}/>
 					</Row> */}
 					<Row style={{height: 40, padding: 10}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Name</span>

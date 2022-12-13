@@ -5,7 +5,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, NodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
+import {GetNodeL2, AsNodeL3, GetNodeDisplayText, NodeType, AddNodeTag, NodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
 import {observer} from "web-vcore/nm/mobx-react";
@@ -165,7 +165,7 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 		const nodeID = comp[nodeKey];
 		const nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
 		let displayText = `(Node not found for ID: ${nodeID})`;
-		let backgroundColor = GetNodeColor({type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
+		let backgroundColor = GetNodeColor({type: NodeType.category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
 			const path = nodeL2.id;
 			const nodeL3 = AsNodeL3(nodeL2, null);
@@ -204,7 +204,7 @@ class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & 
 		const nodeID = nodeEntry;
 		const nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
 		let displayText = `(Node not found for ID: ${nodeID})`;
-		let backgroundColor = GetNodeColor({type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
+		let backgroundColor = GetNodeColor({type: NodeType.category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
 			const path = nodeL2.id;
 			const nodeL3 = AsNodeL3(nodeL2, null);

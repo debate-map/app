@@ -1,7 +1,7 @@
 import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
-import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
+import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
@@ -11,7 +11,7 @@ import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 	}),
 })
 export class DeletePhrasing extends Command<{id: string}, {}> {
-	oldData: MapNodePhrasing;
+	oldData: NodePhrasing;
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetNodePhrasing.NN(id);

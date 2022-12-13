@@ -20,7 +20,7 @@ export class QuoteInfoEditorUI extends DetailsUI_Base<QuoteAttachment, QuoteInfo
 					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.claim, current: {quote: CleanUpdatedQuoteAttachment(Clone(newData))}} as any, undefined, ClaimForm.base)}
+							{GetNodeDisplayText({type: NodeType.claim, current: {quote: CleanUpdatedQuoteAttachment(Clone(newData))}} as any, undefined, ClaimForm.base)}
 							<SubPanel_Quote attachment={newData} fontSize={15}/>
 						</Pre>
 					</Column>

@@ -5,7 +5,7 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeChildLink, GetAccessPolicy, MapNodeL2} from "dm_common";
+import {MapNode, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeChildLink, GetAccessPolicy, NodeL2} from "dm_common";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
 import React from "react";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
@@ -17,15 +17,15 @@ import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 
 type Props = {
 	baseData: MapNode,
-	baseRevisionData: MapNodeRevision,
-	baseLinkData: NodeChildLink|n, parent: MapNodeL3|n,
+	baseRevisionData: NodeRevision,
+	baseLinkData: NodeChildLink|n, parent: NodeL3|n,
 	forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
-	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: NodeChildLink, component: NodeDetailsUI)=>void,
+	style?, onChange?: (newData: MapNode, newRevisionData: NodeRevision, newLinkData: NodeChildLink, component: NodeDetailsUI)=>void,
 	// onSetError: (error: string)=>void,
-	// validateNewData: (newData: MapNode, newRevisionData: MapNodeRevision)=>void,
+	// validateNewData: (newData: MapNode, newRevisionData: NodeRevision)=>void,
 };
-type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: NodeChildLink};
-export type NodeDetailsUI_SharedProps = Props & State & {newDataAsL2: MapNodeL2, Change, SetState};
+type State = {newData: MapNode, newRevisionData: NodeRevision, newLinkData: NodeChildLink};
+export type NodeDetailsUI_SharedProps = Props & State & {newDataAsL2: NodeL2, Change, SetState};
 
 @Observer
 export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {
@@ -98,7 +98,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 	}
 	GetNewRevisionData() {
 		const {newRevisionData} = this.state;
-		return CloneWithPrototypes(newRevisionData) as MapNodeRevision;
+		return CloneWithPrototypes(newRevisionData) as NodeRevision;
 	}
 	GetNewLinkData() {
 		const {newLinkData} = this.state;

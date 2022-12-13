@@ -1,6 +1,6 @@
 import {GetValues_ForSchema, CE} from "js-vextensions";
 import {UUID} from "mobx-graphlink";
-import {FS_MapNodeRevision} from "./FS_MapNodeRevision";
+import {FS_NodeRevision} from "./FS_NodeRevision";
 
 // classes to help with importing data from old firestore-based version of Debate Map
 // from: https://github.com/debate-map/server-old/blob/master/Source/%40Shared/Store/firebase/nodes/%40MapNode.ts
@@ -22,7 +22,7 @@ export enum FS_ClaimForm {
 	YesNoQuestion = 30,
 }
 
-export enum FS_MapNodeType {
+export enum FS_NodeType {
 	Category = 10,
 	Package = 20,
 	MultiChoiceQuestion = 30,
@@ -32,7 +32,7 @@ export enum FS_MapNodeType {
 
 export class FS_MapNode {
 	_key?: string;
-	type?: FS_MapNodeType;
+	type?: FS_NodeType;
 	creator?: string;
 	createdAt: number;
 	rootNodeForMap?: string;
@@ -44,15 +44,15 @@ export class FS_MapNode {
 	multiPremiseArgument?: boolean;
 	layerPlusAnchorParents: FS_LayerPlusAnchorParentSet;
 }
-export interface FS_MapNodeL2 extends FS_MapNode {
-	current: FS_MapNodeRevision;
+export interface FS_NodeL2 extends FS_MapNode {
+	current: FS_NodeRevision;
 }
-export interface FS_MapNodeL3 extends FS_MapNodeL2 {
+export interface FS_NodeL3 extends FS_NodeL2 {
 	displayPolarity: FS_Polarity;
 	link: FS_ChildEntry;
 
 	// added during export (see: https://github.com/debate-map/app/blob/client_old/Source/UI/%40Shared/Maps/MapNode/NodeUI_Menu/MI_ExportSubtree.tsx)
-	childrenData?: {[key: string]: FS_MapNodeL3};
+	childrenData?: {[key: string]: FS_NodeL3};
 }
 
 export enum FS_Polarity {

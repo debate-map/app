@@ -2,8 +2,8 @@ import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} fr
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
-import {ArgumentType, MapNodeRevision} from "./@MapNodeRevision.js";
-import {MapNodeType} from "./@MapNodeType.js";
+import {ArgumentType, NodeRevision} from "./@NodeRevision.js";
+import {NodeType} from "./@NodeType.js";
 
 export enum AccessLevel {
 	basic = "basic",
@@ -27,7 +27,7 @@ AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});
 	//t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
 })
 export class MapNode {
-	constructor(initialData: {type: MapNodeType} & Partial<MapNode>) {
+	constructor(initialData: {type: NodeType} & Partial<MapNode>) {
 		CE(this).VSet(initialData);
 	}
 
@@ -47,8 +47,8 @@ export class MapNode {
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "MapNodeType"})
-	type: MapNodeType;
+	@Field({$ref: "NodeType"})
+	type: NodeType;
 
 	// cannot be modified manually, but entry will become null if the map is deleted
 	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`maps`).DeferRef())
@@ -77,10 +77,10 @@ export class MapNode {
 	argumentType?: ArgumentType;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: "MapNode_Extras"})
-	extras = new MapNode_Extras();
+	@Field({$ref: "Node_Extras"})
+	extras = new Node_Extras();
 }
-AddSchema("MapNode_Partial", ["MapNode"], ()=>{
+AddSchema("Node_Partial", ["MapNode"], ()=>{
 	const schema = GetSchemaJSON_Cloned("MapNode");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = ["type"];
@@ -88,7 +88,7 @@ AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 });
 // disabled for now, simply because we haven't finished making all places that manipulate "MapNode.children" reliably update "MapNode.childrenOrder" as well
 /*AddAJVExtraCheck('MapNode', (node: MapNode) => {
-	if (node.type == MapNodeType.Argument) {
+	if (node.type == NodeType.Argument) {
 		if ((node.childrenOrder ? node.childrenOrder.length : 0) !== (node.children ? node.children.VKeys().length : 0)) {
 			return 'Children and childrenOrder lengths differ!';
 		}
@@ -96,8 +96,8 @@ AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 });*/
 
 @MGLClass()
-export class MapNode_Extras {
-	constructor(data?: Partial<MapNode_Extras>) {
+export class Node_Extras {
+	constructor(data?: Partial<Node_Extras>) {
 		Object.assign(this, data);
 	}
 
@@ -123,22 +123,22 @@ export class RatingSummary {
 }
 
 // helpers
-// export type MapNodeL2 = MapNode & {finalType: MapNodeType};
+// export type NodeL2 = MapNode & {finalType: NodeType};
 /** MapNode, except with the access-policy and current-revision data attached. (no view-related stuff) */
-export interface MapNodeL2 extends MapNode {
+export interface NodeL2 extends MapNode {
 	// todo: maybe make-so these added/attached cached-data properties have "_" at the start of their name, to make them easier to recognize
 	policy: AccessPolicy;
-	current: MapNodeRevision;
+	current: NodeRevision;
 }
-/** MapNodeL2, except with some view-related stuff included. (eg. display-polarity based on path, current lens) */
-export interface MapNodeL3 extends MapNodeL2 {
+/** NodeL2, except with some view-related stuff included. (eg. display-polarity based on path, current lens) */
+export interface NodeL3 extends NodeL2 {
 	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
 	displayPolarity: Polarity;
 	link: NodeChildLink|n;
 	//linkToParent: ChildEntry;
 	//parentLinkToGrandParent: ChildEntry;
 }
-export type MapNodeL3_Argument = MapNodeL3 & Required<Pick<MapNodeL3, "argumentType" | "multiPremiseArgument">>;
+export type NodeL3_Argument = NodeL3 & Required<Pick<NodeL3, "argumentType" | "multiPremiseArgument">>;
 
 /*export enum Polarity {
 	Supporting = 10,

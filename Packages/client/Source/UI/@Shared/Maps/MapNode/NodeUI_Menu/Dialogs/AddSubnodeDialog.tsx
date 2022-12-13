@@ -1,4 +1,4 @@
-/* export function ShowAddSubnodeDialog(mapID: string, anchorNode: MapNodeL2, anchorNodePath: string) {
+/* export function ShowAddSubnodeDialog(mapID: string, anchorNode: NodeL2, anchorNodePath: string) {
 	let dialog: AddSubnodeDialog;
 	const boxController = ShowMessageBox({
 		title: 'Add subnode (to layer)', cancelButton: true,
@@ -8,14 +8,14 @@
 }
 
 type Props = {mapID: string, anchorNode: MapNode, anchorNodePath: string, boxController: BoxController};
-class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: MapNode, newRevision: MapNodeRevision, newLink: NodeChildLink, validationError: string}) {
+class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: MapNode, newRevision: NodeRevision, newLink: NodeChildLink, validationError: string}) {
 	constructor(props) {
 		super(props);
 		const newNode = new MapNode({
-			type: MapNodeType.claim,
+			type: NodeType.claim,
 		});
-		const newRevision = new MapNodeRevision({});
-		const newLink = E({ _: true }, newNode.type == MapNodeType.claim && { form: ClaimForm.base }) as NodeChildLink; // not actually used
+		const newRevision = new NodeRevision({});
+		const newLink = E({ _: true }, newNode.type == NodeType.claim && { form: ClaimForm.base }) as NodeChildLink; // not actually used
 		this.state = { newNode, newRevision, newLink } as any;
 	}
 	UpdateOKButton() {
@@ -51,7 +51,7 @@ class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Laye
 						<Pre>Layer: </Pre>
 						<Select options={layerOptions} value={layer} onChange={(val) => this.SetState({ layer: val })}/>
 					</Row>
-					{newNode.type == MapNodeType.claim &&
+					{newNode.type == NodeType.claim &&
 					<Row mt={5}>
 						<Pre>Type: </Pre>
 						<Select displayType="button bar" options={claimTypes} style={{ display: 'inline-block' }}
@@ -107,7 +107,7 @@ class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Laye
 			mapID, layerID: layer.id, anchorNodeID: anchorNode.id,
 			subnode: newNode, subnodeRevision: newRevision, // link: newLink,
 		}).RunOnServer();
-		// store.dispatch(new ACTMapNodeExpandedSet_InLayer({mapID, anchorNodePath, layerID: layer._id, layerPath: newNodeID, expanded: true, recursive: false}));
+		// store.dispatch(new ACTNodeExpandedSet_InLayer({mapID, anchorNodePath, layerID: layer._id, layerPath: newNodeID, expanded: true, recursive: false}));
 	}
 }
 

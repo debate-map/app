@@ -6,7 +6,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {ES, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "dm_common";
+import {Map, NodeL3, GetUser, NodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "dm_common";
 
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
@@ -14,7 +14,7 @@ import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
 
 @Observer
-export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {}) {
+export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {}) {
 	detailsUI: NodeDetailsUI;
 	render() {
 		const {show, map, node, path} = this.props;
@@ -52,7 +52,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 	}
 }
 
-type RevisionEntryUI_Props = {index: number, last: boolean, revision: MapNodeRevision, node: MapNodeL3, path: string};
+type RevisionEntryUI_Props = {index: number, last: boolean, revision: NodeRevision, node: NodeL3, path: string};
 @Observer
 class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {}) {
 	render() {

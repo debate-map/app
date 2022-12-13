@@ -8,9 +8,9 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
 /*export function CanNodeHaveAttachments(node: MapNode) {
-	//return node.type == MapNodeType.claim;
+	//return node.type == NodeType.claim;
 	// maybe temp; allow attachments on everything except arguments (disallowed since attachment should just be added to its premise in that case)
-	return node.type != MapNodeType.argument;
+	return node.type != NodeType.argument;
 }*/
 
 export function GetPhaseFromNodeDetailsUIProps(props: {forNew: boolean, enabled: boolean}): DetailsUI_Phase {

@@ -1,7 +1,7 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 import {ChildGroup} from "../../DB.js";
-import {MapNodeType} from "../../DB/nodes/@MapNodeType.js";
+import {NodeType} from "../../DB/nodes/@NodeType.js";
 import {ClaimForm, Polarity} from "../nodes/@MapNode.js";
 
 @MGLClass({table: "nodeChildLinks"})
@@ -60,12 +60,12 @@ export class NodeChildLink {
 	polarity?: Polarity|n;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "MapNodeType"}, {opt: true})
-	c_parentType?: MapNodeType; // derived from "nodes" table
+	@Field({$ref: "NodeType"}, {opt: true})
+	c_parentType?: NodeType; // derived from "nodes" table
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "MapNodeType"}, {opt: true})
-	c_childType?: MapNodeType; // derived from "nodes" table
+	@Field({$ref: "NodeType"}, {opt: true})
+	c_childType?: NodeType; // derived from "nodes" table
 
 	// runtime only
 	declare _mirrorLink?: boolean;

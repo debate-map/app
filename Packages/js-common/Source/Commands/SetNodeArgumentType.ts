@@ -1,9 +1,9 @@
 import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {ArgumentType} from "../DB/nodes/@MapNodeRevision.js";
+import {ArgumentType} from "../DB/nodes/@NodeRevision.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, GetNodeL2} from "../DB/nodes/$node.js";
-import {MapNode, MapNodeL2} from "../DB/nodes/@MapNode.js";
+import {MapNode, NodeL2} from "../DB/nodes/@MapNode.js";
 
 @MapEdit
 @UserEdit
@@ -15,7 +15,7 @@ import {MapNode, MapNodeL2} from "../DB/nodes/@MapNode.js";
 	}),
 })
 export class SetNodeArgumentType extends Command<{mapID?: string|n, nodeID: string, argumentType: ArgumentType}, {}> {
-	oldNodeData: MapNodeL2;
+	oldNodeData: NodeL2;
 	newNodeData: MapNode;
 	Validate() {
 		const {nodeID, argumentType} = this.payload;

@@ -3,15 +3,15 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
-import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {MapNodeType, GetMapNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, VLexoRank} from "dm_common";
+import {NodeType, GetNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, VLexoRank} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
-	constructor(public payload: {parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n}) {}
+	constructor(public payload: {parentPath: string, childType: NodeType, title: string, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n}) {}
 
 	Prepare() {
 		const {parentPath, childType, title, childPolarity, userID, group, mapID} = this.payload;
@@ -39,25 +39,25 @@ export class AddChildHelper {
 			type: childType,
 			//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 		});
-		this.node_revision = new MapNodeRevision();
+		this.node_revision = new NodeRevision();
 		this.node_link = E(
 			{
 				group,
 				orderKey: orderKeyForOuterNode,
 			},
-			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base},
-			childType == MapNodeType.argument && {polarity: childPolarity},
+			childType == NodeType.claim && {form: parentNode.type == NodeType.category ? ClaimForm.question : ClaimForm.base},
+			childType == NodeType.argument && {polarity: childPolarity},
 		) as NodeChildLink;
 
-		if (childType == MapNodeType.argument) {
+		if (childType == NodeType.argument) {
 			this.node.argumentType = ArgumentType.all;
 			this.subNode = new MapNode({
 				//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
-				type: MapNodeType.claim, creator: userID,
+				type: NodeType.claim, creator: userID,
 			});
-			this.subNode_revision = new MapNodeRevision({phrasing: MapNodePhrasing.Embedded({text_base: title})});
+			this.subNode_revision = new NodeRevision({phrasing: NodePhrasing.Embedded({text_base: title})});
 			this.subNode_link = new NodeChildLink({
 				group: ChildGroup.generic,
 				orderKey: VLexoRank.middle().toString(),
@@ -65,7 +65,7 @@ export class AddChildHelper {
 			});
 		} else {
 			let usedTitleKey = "text_base";
-			if (childType == MapNodeType.claim) {
+			if (childType == NodeType.claim) {
 				usedTitleKey = `text_${ClaimForm[this.node_link.form!].replace(/^./, ch=>ch.toLowerCase())}`;
 			}
 			this.node_revision.phrasing[usedTitleKey] = title;
@@ -78,15 +78,15 @@ export class AddChildHelper {
 	// get Node_Parent() { return GetNodeL3(this.node_parentPath); }
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }
 	node: MapNode;
-	node_revision: MapNodeRevision;
+	node_revision: NodeRevision;
 	node_link: NodeChildLink;
 	subNode?: MapNode;
-	subNode_revision?: MapNodeRevision;
+	subNode_revision?: NodeRevision;
 	subNode_link: NodeChildLink;
 
 	GetCommand(): AddArgumentAndClaim | AddChildNode {
 		let result;
-		if (this.node.type == MapNodeType.argument) {
+		if (this.node.type == NodeType.argument) {
 			result = new AddArgumentAndClaim({
 				mapID: this.mapID,
 				argumentParentID: this.Node_ParentID, argumentNode: this.node, argumentRevision: this.node_revision, argumentLink: this.node_link,
@@ -112,7 +112,7 @@ export class AddChildHelper {
 
 		const command = this.GetCommand();
 		let runResult_copy;
-		if (this.node.type == MapNodeType.argument) {
+		if (this.node.type == NodeType.argument) {
 			if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
 			const runResult = runResult_copy = await command.RunOnServer();
 			RunInAction("AddChildDialog.Apply_mid", ()=>{
@@ -121,8 +121,8 @@ export class AddChildHelper {
 			});
 
 			if (opt.expandSelf) {
-				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}`, expanded: true, resetSubtree: false});
-				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}/${runResult.claimNodeID}`, expanded: true,
+				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}`, expanded: true, resetSubtree: false});
+				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}/${runResult.claimNodeID}`, expanded: true,
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
 			}
 		} else {
@@ -131,7 +131,7 @@ export class AddChildHelper {
 			RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, runResult.doneAt));
 
 			if (opt.expandSelf) {
-				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,
+				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
 			}
 		}
@@ -146,14 +146,14 @@ enum AddChildDialogTab {
 	Argument,
 	Claim,
 }
-export async function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n) {
+export async function ShowAddChildDialog(parentPath: string, childType: NodeType, childPolarity: Polarity, userID: string, group: ChildGroup, mapID: string|n) {
 	const helper = new AddChildHelper({parentPath, childType, title: "", childPolarity, userID, group, mapID});
 	const prep = await GetAsync(()=>{
 		helper.Prepare();
 		const parentNode = GetNodeL3(parentPath);
 		if (parentNode == null) return {canceled: true}; // musta been deleted while prepping
 		const parentForm = GetNodeForm(parentNode);
-		const displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm, childPolarity);
+		const displayName = GetNodeTypeDisplayName(childType, parentNode, parentForm, childPolarity);
 		//const map = GetMap(mapID); // "not in observer" -- humbug; technically true, but map-data must be loaded already, for this func to be called
 		return {parentNode, displayName};
 	});
@@ -194,9 +194,9 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 			const advanced = store.main.maps.addChildDialog.advanced;
 			return (
 				<Column ref={c=>root = c} style={{width: 600}}>
-					{childType == MapNodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
+					{childType == NodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
 					<Row center mb={5}>
-						{childType == MapNodeType.argument && advanced &&
+						{childType == NodeType.argument && advanced &&
 						<>
 							<Text>Data:</Text>
 							<Select ml={5} displayType="button bar" options={GetEntries(AddChildDialogTab, "ui")} style={{display: "inline-block"}}
@@ -227,7 +227,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 					</>}
 					{tab == AddChildDialogTab.Claim &&
 					<>
-						{childType == MapNodeType.argument &&
+						{childType == NodeType.argument &&
 						<>
 							{!advanced &&
 							<Column>
@@ -238,7 +238,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 									`.trim()}/> */}
 								</Row>
 								<Row style={{display: "flex", alignItems: "center"}}>
-									<TextArea required={true} pattern={MapNodeRevision_titlePattern}
+									<TextArea required={true} pattern={NodeRevision_titlePattern}
 										allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
 										value={helper.subNode_revision!.phrasing["text_base"]}
 										onChange={val=>Change(helper.subNode_revision!.phrasing["text_base"] = val)}/>
@@ -256,8 +256,8 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 									Change();
 								}}/>}
 						</>}
-						{childType != MapNodeType.argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == MapNodeType.claim ? "5px 0 0 0" : 0}} parent={prep.parentNode}
+						{childType != NodeType.argument &&
+						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == NodeType.claim ? "5px 0 0 0" : 0}} parent={prep.parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 								/*if (map?.requireMapEditorsCanEdit) {

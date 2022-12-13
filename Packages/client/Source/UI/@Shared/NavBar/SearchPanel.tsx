@@ -10,7 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced} from "dm_common";
+import {GetNodeRevision, MapView, NodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeChildLinks, GetNodeRevisions, NodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
@@ -87,7 +87,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
 		const searchResultIDs = store.main.search.searchResults_nodeRevisionIDs.Take(100);
 
-		let results_nodeRevisions = searchResultIDs.map(id=>GetNodeRevision(id)).filter(a=>a != null) as MapNodeRevision[]; // filter, cause search-results may be old (before an entry's deletion)
+		let results_nodeRevisions = searchResultIDs.map(id=>GetNodeRevision(id)).filter(a=>a != null) as NodeRevision[]; // filter, cause search-results may be old (before an entry's deletion)
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
 		if (searchResults_partialTerms.length) {
 			for (const term of searchResults_partialTerms) {
@@ -130,22 +130,22 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 					{/* <Row style={{ height: 40, padding: 10 }}>
 						<Pre>Sort by: </Pre>
 						<Select options={GetEntries(SortType, name => EnumNameToDisplayName(name))}
-							value={sortBy} onChange={val => store.dispatch(new ACTMapNodeListSortBySet({ mapID: map._id, sortBy: val }))}/>
+							value={sortBy} onChange={val => store.dispatch(new ACTNodeListSortBySet({ mapID: map._id, sortBy: val }))}/>
 						<Row width={200} style={{ position: 'absolute', left: 'calc(50% - 100px)' }}>
 							<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"
 								enabled={page > 0} onClick={() => {
-									// store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: page - 1}));
-									store.dispatch(new ACTMapNodeListPageSet({ mapID: map._id, page: page - 1 }));
+									// store.dispatch(new ACTNodeListPageSet({mapID: map._id, page: page - 1}));
+									store.dispatch(new ACTNodeListPageSet({ mapID: map._id, page: page - 1 }));
 								}}/>
 							<Div ml={10} mr={7}>Page: </Div>
 							<TextInput mr={10} pattern="[0-9]+" style={{ width: 30 }} value={page + 1}
 								onChange={(val) => {
 									if (!IsNumberString(val)) return;
-									store.dispatch(new ACTMapNodeListPageSet({ mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage) }));
+									store.dispatch(new ACTNodeListPageSet({ mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage) }));
 								}}/>
 							<Button text={<Icon icon="arrow-right" size={15}/>} title="Next page"
 								enabled={page < lastPage} onClick={() => {
-									store.dispatch(new ACTMapNodeListPageSet({ mapID: map._id, page: page + 1 }));
+									store.dispatch(new ACTNodeListPageSet({ mapID: map._id, page: page + 1 }));
 								}}/>
 							</Row>
 					</Row> */}
@@ -195,7 +195,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			for (const upPath of upPathAttempts) {
 				const nodeID = upPath.split("/").First();
 				const node = await GetAsync(()=>GetNodeL2(nodeID));
-				// const node = (yield GetAsync(() => GetNodeL2(nodeID))) as MapNodeL2;
+				// const node = (yield GetAsync(() => GetNodeL2(nodeID))) as NodeL2;
 				if (node == null) {
 					LogWarning(`Could not find node #${nodeID}, as parent of #${upPath.split("/").XFromLast(1)}.`);
 					continue;
@@ -270,7 +270,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const path = `${node.id}`;
 
 		const backgroundColor = GetNodeColor(nodeL3)/*.desaturate(0.5)*/.alpha(0.8);
-		const nodeTypeInfo = MapNodeType_Info.for[node.type];
+		const nodeTypeInfo = NodeType_Info.for[node.type];
 
 		return (
 			<Column>
@@ -349,8 +349,8 @@ export function JumpToNode(mapID: string, path: string) {
 		// "new Map[Node]View()" causes unwanted fields attached (now that "useDefineForClassFields:true" is enabled), so create empty object isntead
 		//const mapView = new MapView();
 		const mapView = {rootNodeViews: {}} as MapView;
-		//const rootNodeView = new MapNodeView(path);
-		const rootNodeView = {children: {}} as MapNodeView;
+		//const rootNodeView = new NodeView(path);
+		const rootNodeView = {children: {}} as NodeView;
 		mapView.rootNodeViews[pathNodeIDs[0]] = rootNodeView;
 
 		let currentParentView = rootNodeView;
@@ -366,8 +366,8 @@ export function JumpToNode(mapID: string, path: string) {
 			currentParentView.expanded_relevance = true;
 			currentParentView.expanded_freeform = true;
 
-			//const childView = new MapNodeView(descendantPath);
-			const childView = {children: {}} as MapNodeView;
+			//const childView = new NodeView(descendantPath);
+			const childView = {children: {}} as NodeView;
 			currentParentView.children ??= {};
 			currentParentView.children[descendantID] = childView;
 			currentParentView = childView;

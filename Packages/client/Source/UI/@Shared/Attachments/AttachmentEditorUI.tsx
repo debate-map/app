@@ -1,7 +1,7 @@
 import {A, GetEntries, GetValues, NN} from "web-vcore/nm/js-vextensions.js";
 import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetAttachmentType_Node, AttachmentType, ResetAttachment, MapNodeType, MapNode, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
+import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, MapNode, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
 import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
@@ -10,9 +10,9 @@ import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachme
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 
 /*export function CanNodeHaveAttachments(node: MapNode) {
-	//return node.type == MapNodeType.claim;
+	//return node.type == NodeType.claim;
 	// maybe temp; allow attachments on everything except arguments (disallowed since attachment should just be added to its premise in that case)
-	return node.type != MapNodeType.argument;
+	return node.type != NodeType.argument;
 }*/
 
 export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: AttachmentTarget, allowedAttachmentTypes?: AttachmentType[]}> {

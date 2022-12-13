@@ -1,6 +1,6 @@
 import {AssertV, AssertValidate, AssertValidate_Full, Command, CommandMeta, DBHelper, dbp, GenerateUUID, GetSchemaJSON, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
 
 /** Do not try to use this from client. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
@@ -8,11 +8,11 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 	exposeToGraphQL: false, // server-internal
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
-		$node: {$ref: "MapNode_Partial"},
-		$revision: {$ref: "MapNodeRevision_Partial"},
+		$node: {$ref: "Node_Partial"},
+		$revision: {$ref: "NodeRevision_Partial"},
 	}),
 })
-export class AddNode extends Command<{mapID?: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
+export class AddNode extends Command<{mapID?: string|n, node: MapNode, revision: NodeRevision}, {}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 

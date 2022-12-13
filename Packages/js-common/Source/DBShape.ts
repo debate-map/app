@@ -2,20 +2,20 @@ import {Collection} from "web-vcore/nm/mobx-graphlink.js";
 import {Proposal, Feedback_UserInfo} from "web-vcore/nm/graphql-feedback.js";
 import {CommandRun} from "./DB/commandRuns/@CommandRun.js";
 import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
-import {Map_NodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
+import {MapNodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
 import {Map} from "./DB/maps/@Map.js";
 import {Media} from "./DB/media/@Media.js";
 import {NodeChildLink} from "./DB/nodeChildLinks/@NodeChildLink.js";
 import {NodeRating} from "./DB/nodeRatings/@NodeRating.js";
 import {MapNode} from "./DB/nodes/@MapNode.js";
-import {MapNodeRevision} from "./DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "./DB/nodes/@NodeRevision.js";
 import {NodeTag} from "./DB/nodeTags/@NodeTag.js";
 import {Share} from "./DB/shares/@Share.js";
 import {Term} from "./DB/terms/@Term.js";
 import {User} from "./DB/users/@User.js";
 import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
-import {MapNodePhrasing} from "./DB/nodePhrasings/@MapNodePhrasing.js";
+import {NodePhrasing} from "./DB/nodePhrasings/@NodePhrasing.js";
 import {GlobalData} from "./DB/globalData/@GlobalData.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
@@ -43,13 +43,13 @@ export class GraphDBShape {
 	commandRuns = DefineCollection(CommandRun);
 	medias = DefineCollection(Media);
 	maps = DefineCollection(Map);
-	mapNodeEdits = DefineCollection(Map_NodeEdit);
+	mapNodeEdits = DefineCollection(MapNodeEdit);
 	nodes = DefineCollection(MapNode);
 	//nodeExtras = DefineCollection(any);
 	nodeRatings = DefineCollection(NodeRating);
-	nodeRevisions = DefineCollection(MapNodeRevision);
+	nodeRevisions = DefineCollection(NodeRevision);
 	//nodeStats = DefineCollection(MapNodeStats);
-	nodePhrasings = DefineCollection(MapNodePhrasing);
+	nodePhrasings = DefineCollection(NodePhrasing);
 	nodeChildLinks = DefineCollection(NodeChildLink);
 	nodeTags = DefineCollection(NodeTag);
 	shares = DefineCollection(Share);
@@ -77,10 +77,10 @@ export class GraphDBShape {
 	nodes: Collection<MapNode, {
 		ratings: Collection<RatingsRoot>, // $ratingType -> $userID -> value -> $value
 		// extras: Collection<any>,
-		revisions: Collection<MapNodeRevision>,
+		revisions: Collection<NodeRevision>,
 		// stats: Collection<MapNodeStats>,
 		// viewers: Collection<ViewerSet>, // removed due to privacy concerns
-		phrasings: Collection<MapNodePhrasing>,
+		phrasings: Collection<NodePhrasing>,
 	}>;
 	terms: Collection<Term, {
 		components: Collection<TermComponent>,

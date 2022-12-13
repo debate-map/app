@@ -7,7 +7,7 @@ import {LinkNode} from "./LinkNode.js";
 import {SetNodeRating} from "./SetNodeRating.js";
 import {HasAdminPermissions} from "../DB/users/$user.js";
 import {AsNodeL1} from "../DB/nodes/$node.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {Source} from "../DB/nodeRevisions/@SourceChain.js";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
@@ -57,7 +57,7 @@ export class ImportSubtree extends Command<{
 		const {mapID, importRatings, importRatings_userIDs} = this.payload;
 
 		const node = AsNodeL1(WithoutHelpers(subtreeData).ExcludeKeys("ratings", "childrenData", "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
-		const revision = WithoutHelpers(subtreeData.current).ExcludeKeys("node", "approved", "relative", "voteLevel") as MapNodeRevision;
+		const revision = WithoutHelpers(subtreeData.current).ExcludeKeys("node", "approved", "relative", "voteLevel") as NodeRevision;
 		if (revision.media) revision.media.id = `${revision.media.id}`;
 		if (revision["contentNode"]) {
 			CE(revision).VSet({quote: revision["contentNode"], contentNode: DEL});

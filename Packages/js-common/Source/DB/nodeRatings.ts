@@ -6,12 +6,12 @@ import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, GetNode} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
-import {ClaimForm, MapNodeL3, RatingSummary} from "./nodes/@MapNode.js";
-import {ChildGroup, MapNodeType} from "./nodes/@MapNodeType.js";
+import {ClaimForm, NodeL3, RatingSummary} from "./nodes/@MapNode.js";
+import {ChildGroup, NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
-import {Map, MapNodeRevision} from "../DB.js";
+import {Map, NodeRevision} from "../DB.js";
 
 export const GetRatingSummary = CreateAccessor((nodeID: string, ratingType: NodeRatingType)=>{
 	const node = GetNode(nodeID);
@@ -37,7 +37,7 @@ export const GetRatings = CreateAccessor(<
 		const node = GetNodeL2(nodeID);
 		if (node === null) return emptyArray;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
-		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.claim);
+		const premises = nodeChildren.filter(a=>a == null || a.type == NodeType.claim);
 		return GetArgumentImpactPseudoRatings(node, premises, userIDs);
 	}
 
@@ -79,7 +79,7 @@ export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: Node
 	const ratingSummary = GetRatingSummary(nodeID, ratingType);
 	return ratingSummary?.average;
 });
-export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userIDs?: string[]|n, resultIfNoData?: T): number|T=>{
+export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: NodeL3, ratingType: NodeRatingType, userIDs?: string[]|n, resultIfNoData?: T): number|T=>{
 	let result = GetRatingAverage(node.id, ratingType, userIDs);
 	if (result == null) return resultIfNoData as T;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
@@ -107,7 +107,7 @@ The final ordering-type is determined by the first provided value (ie. not set t
 
 Note: If children have identical ordering values (eg. by votes, but neither has votes), then they're sub-sorted by manual-ordering data.
 `.AsMultiline(0);
-export function GetChildOrdering_Final(parentNodeRev: MapNodeRevision, map?: Map, userOverride?: ChildOrdering) {
+export function GetChildOrdering_Final(parentNodeRev: NodeRevision, map?: Map, userOverride?: ChildOrdering) {
 	let result = ChildOrdering.votes;
 	if (map?.extras.defaultChildOrdering) result = map.extras.defaultChildOrdering;
 	if (parentNodeRev.displayDetails?.childOrdering) result = parentNodeRev.displayDetails.childOrdering;
@@ -126,8 +126,8 @@ export function AssertBetween0And100OrNull(val: number|n) {
 	Assert(val == null || (val >= 0 && val <= 100), `Fill-percent (${val}) not in range, and not null.`);
 }
 
-const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
-export const GetOrderingValue_AtPath = CreateAccessor((node: MapNodeL3, path: string, orderingType: ChildOrdering, boxType?: ChildGroup|n, ratingType?: NodeRatingType): number | string=>{
+const rsCompatibleNodeTypes = [NodeType.argument, NodeType.claim];
+export const GetOrderingValue_AtPath = CreateAccessor((node: NodeL3, path: string, orderingType: ChildOrdering, boxType?: ChildGroup|n, ratingType?: NodeRatingType): number | string=>{
 	if (orderingType == ChildOrdering.manual && node.link) {
 		return node.link.orderKey;
 	}
@@ -142,10 +142,10 @@ export const GetOrderingValue_AtPath = CreateAccessor((node: MapNodeL3, path: st
 
 		// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
 		const ratingScore = (()=>{
-			if (node.type == MapNodeType.claim) {
+			if (node.type == NodeType.claim) {
 				return claimTruthScore * 100;
 			}
-			if (node.type == MapNodeType.argument) {
+			if (node.type == NodeType.argument) {
 				if (boxType == ChildGroup.relevance) {
 					// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
 					return Lerp(0, 100, argWeightMultiplier);
@@ -164,7 +164,7 @@ export const GetOrderingValue_AtPath = CreateAccessor((node: MapNodeL3, path: st
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = ChildOrdering.votes)=>{
+export const GetMarkerPercent_AtPath = CreateAccessor((node: NodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = ChildOrdering.votes)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
 	const meID = MeID();
@@ -182,7 +182,7 @@ export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: st
 }
 export function GetPaths_MainRatingAverage(node: MapNode) {
 	let result = GetPaths_MainRatingSet(node);
-	if (node.type == MapNodeType.Argument || node.type == MapNodeType.Argument)
+	if (node.type == NodeType.Argument || node.type == NodeType.Argument)
 		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
 	return result;
 } */
@@ -233,12 +233,12 @@ export function TransformRatingForContext(ratingValue: number|n, reverseRating: 
 	if (reverseRating) return 100 - ratingValue;
 	return ratingValue;
 }
-/* export function GetFillPercentForRatingType(node: MapNodeL3, path: string, ratingType: RatingType, filter?: RatingFilter) {
+/* export function GetFillPercentForRatingType(node: NodeL3, path: string, ratingType: RatingType, filter?: RatingFilter) {
 	if (ratingType == "impact") {
 		let nodeChildren = GetNodeChildrenL3(node, path);
 		//let nodeChildren = GetNodeChildrenL2(node).map(child=>AsNodeL3(child, Polarity.Supporting, GetLinkUnderParent(child._id, node)));
 		if (nodeChildren.Any(a=>a == null)) return 0;
-		let premises = nodeChildren.filter(a=>a.type == MapNodeType.Claim);
+		let premises = nodeChildren.filter(a=>a.type == NodeType.Claim);
 		let averageTruth = premises.map(premise=>GetRatingAverage_AtPath(premise, "truth", filter, null)).Average();
 		//Log(`Node: ${node._id} @averageTruth: ${averageTruth}`);
 
@@ -254,8 +254,8 @@ export function TransformRatingForContext(ratingValue: number|n, reverseRating: 
 	//return nodeReversed || (contextReversed && ratingType == "adjustment");
 	return nodeReversed;
 } */
-export function ShouldRatingTypeBeReversed(node: MapNodeL3, ratingType: NodeRatingType) {
-	// return node.type == MapNodeType.Argument && node.finalPolarity != node.link.polarity;
+export function ShouldRatingTypeBeReversed(node: NodeL3, ratingType: NodeRatingType) {
+	// return node.type == NodeType.Argument && node.finalPolarity != node.link.polarity;
 	// if (["impact", "relevance"].Contains(ratingType)) return false;
 	return node.link?.form == ClaimForm.negation;
 }

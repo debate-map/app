@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, NodeL3, Polarity, GetNodeTypeDisplayName, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
@@ -36,8 +36,8 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?:
 	}
 }
 
-type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, childGroup: ChildGroup};
-export type MI_SharedProps = Props & {mapID: string|n, combinedWithParentArg: boolean, copiedNode: MapNodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
+type Props = {map?: Map, node: NodeL3, path: string, inList?: boolean, childGroup: ChildGroup};
+export type MI_SharedProps = Props & {mapID: string|n, combinedWithParentArg: boolean, copiedNode: NodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
@@ -64,14 +64,14 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const mapID = map ? map.id : null;
 		const forChildHolderBox = childGroup != ChildGroup.generic;
 
-		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
+		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		//const childLayout_forStructuredHeaders = addChildGroups_structured.length <= 1 ? "below" : "right";
 		const childLayout_forStructuredHeaders = "right";
 		const headerStyle = ES(liveSkin.Style_VMenuItem(), {opacity: 1});
 
-		const GetAddChildItems = (node2: MapNodeL3, path2: string, childGroup2: ChildGroup)=>{
+		const GetAddChildItems = (node2: NodeL3, path2: string, childGroup2: ChildGroup)=>{
 			const validChildTypes = GetValidNewChildTypes(node2, childGroup2, permissions);
 			if (validChildTypes.length == 0) return null;
 
@@ -80,11 +80,11 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 			return <>
 				{validChildTypes.map(childType=>{
-					const childTypeInfo = MapNodeType_Info.for[childType];
-					//let displayName = GetMapNodeTypeDisplayName(childType, node, form);
-					const polarities = childType == MapNodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
+					const childTypeInfo = NodeType_Info.for[childType];
+					//let displayName = GetNodeTypeDisplayName(childType, node, form);
+					const polarities = childType == NodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
 					return polarities.map(polarity=>{
-						const displayName = GetMapNodeTypeDisplayName(childType, node2, ClaimForm.base, polarity);
+						const displayName = GetNodeTypeDisplayName(childType, node2, ClaimForm.base, polarity);
 						return (
 							<VMenuItem key={`${childType}_${polarity}`} text={`New ${displayName}`} style={liveSkin.Style_VMenuItem()}
 								onClick={e=>{
@@ -140,7 +140,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							}
 
 							const pathToCut = path;
-							/*if (node.type == MapNodeType.claim && combinedWithParentArg) {
+							/*if (node.type == NodeType.claim && combinedWithParentArg) {
 								pathToCut = SlicePath(path, 1)!;
 							}*/
 							ACTCopyNode(pathToCut, true);
@@ -156,7 +156,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							}
 
 							const pathToCopy = path;
-							/*if (node.type == MapNodeType.claim && combinedWithParentArg) {
+							/*if (node.type == NodeType.claim && combinedWithParentArg) {
 								pathToCopy = SlicePath(path, 1)!;
 							}*/
 							ACTCopyNode(pathToCopy, false);
@@ -170,7 +170,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 					</VMenuItem>}
 				{/*<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>*/}
 				<MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>
-				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
+				{IsUserCreatorOrMod(userID, parent) && node.type == NodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
 					<VMenuItem text="Convert to multi-premise" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{
 							if (e.button != 0) return;
@@ -178,7 +178,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).RunOnServer();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
-					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !forChildHolderBox &&
+					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == NodeType.claim).length == 1 && !forChildHolderBox &&
 					<VMenuItem text="Convert to single-premise" style={liveSkin.Style_VMenuItem()}
 						onClick={async e=>{
 							if (e.button !== 0) return;
@@ -218,7 +218,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 				{/*IsUserCreatorOrMod(userID, node) && !forChildHolderBox && map?.extras.allowSpecialChildLayouts &&
 					<VMenuItem text={`Toggle children layout (${childLayout} -> ${InvertChildLayout(childLayout)})`} style={styles.vMenuItem}
 						onClick={async e=>{
-							const newRevision = Clone(node.current) as MapNodeRevision;
+							const newRevision = Clone(node.current) as NodeRevision;
 							newRevision.displayDetails = {...newRevision.displayDetails, childLayout: InvertChildLayout(childLayout)};
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							RunInAction("ToggleChildrenLayout", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));

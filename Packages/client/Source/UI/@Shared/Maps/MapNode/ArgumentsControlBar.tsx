@@ -1,7 +1,7 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton.js";
-import {MapNodeL3, Polarity, Map, ChildGroup, MapNodeType} from "dm_common";
+import {NodeL3, Polarity, Map, ChildGroup, NodeType} from "dm_common";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {useCallback} from "react";
 import {Observer} from "web-vcore";
@@ -10,13 +10,13 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "./NodeUI";
 
 @Observer
-export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
+export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {
 	render() {
 		const {map, node, path, treePath, inBelowGroup, group, childBeingAdded} = this.props;
-		// const backgroundColor = GetNodeColor({ type: MapNodeType.category } as MapNodeL3);
+		// const backgroundColor = GetNodeColor({ type: NodeType.category } as NodeL3);
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: GetNodeColor({type: MapNodeType.claim}, "raw", false).css(),
+			color: GetNodeColor({type: NodeType.claim}, "raw", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		}, true);
 

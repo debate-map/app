@@ -1,4 +1,4 @@
-import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, IsMultiPremiseArgument, Map, MapNodeL3, MapNodeType, MapNodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, IsMultiPremiseArgument, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -16,7 +16,7 @@ import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {ChildLimitBar} from "./ChildLimitBar.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, treePath: string, treePath_priorChildCount?: number, nodeChildrenToShow: MapNodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
+	map: Map, node: NodeL3, path: string, treePath: string, treePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
 	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 };
@@ -54,8 +54,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		//let nodeChildrenToShowInRelevanceBox;
 		/*if (IsMultiPremiseArgument(node) && group == ChildGroup.generic) {
-			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a.type == MapNodeType.claim);
-			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
+			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a.type == NodeType.claim);
+			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == NodeType.argument);
 		}*/
 		// always apply an initial sorting by manual-ordering data, so that if main ordering values are the same for a set (eg. no vote data), the set still has sub-sorting
 		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(node.current, map, store.main.maps.childOrdering));
@@ -68,7 +68,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		let childLimit_up = (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
-		const showAll = node.id == map.rootNode || node.type == MapNodeType.argument;
+		const showAll = node.id == map.rootNode || node.type == NodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
 
 		// helper
@@ -163,7 +163,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 								<Column ref={c=>{ this[`${polarityGroup}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
 									style={E(
 										{position: "relative"},
-										childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.claim].minWidth, height: 100},
+										childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: NodeType_Info.for[NodeType.claim].minWidth, height: 100},
 									)}>
 									{/* childrenHere.length == 0 && <div style={{ position: 'absolute', top: '100%', width: '100%', height: 200 }}/> */}
 									{provided.placeholder}

@@ -24,7 +24,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 
 		const baseNodeID = CE(SplitStringBySlash_Cached(baseNodePath)).Last();
 		const baseNode = AV.NonNull = GetNodeL2(baseNodeID);
-		const isArgument = baseNode.type == MapNodeType.Argument;
+		const isArgument = baseNode.type == NodeType.Argument;
 
 		const nodeForm = AV.NonNull = GetNodeForm(baseNode, baseNodePath);
 		const nodePolarity = AV.NonNull = GetLinkAtPath(baseNodePath).polarity;

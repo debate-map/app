@@ -1,12 +1,12 @@
 import {Assert, CE, emptyArray_forLoading, GetValues, IsString} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, BailError, CreateAccessor, GetDoc, MapWithBailHandling, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeL3} from "../DB.js";
+import {NodeL3} from "../DB.js";
 import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
-import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
+import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
-import {MapNode, MapNodeL2, Polarity} from "./nodes/@MapNode.js";
-import {ChildGroup, MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType.js";
+import {MapNode, NodeL2, Polarity} from "./nodes/@MapNode.js";
+import {ChildGroup, NodeType, NodeType_Info} from "./nodes/@NodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@NodeTag.js";
 import {CanGetBasicPermissions, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
@@ -44,7 +44,7 @@ export const GetNodeMap = StoreAccessor((s) => (): NodeMap => {
 	return CachedTransform('GetNodes', [], nodeMap, () => (nodeMap ? nodeMap.VValues(true) : [])); *#/
 	return GetDocs({}, (a) => a.nodes);
 });
-export const GetNodesL2 = StoreAccessor((s) => (): MapNodeL2[] => {
+export const GetNodesL2 = StoreAccessor((s) => (): NodeL2[] => {
 	const nodes = GetNodes();
 	return nodes.map((a) => GetNodeL2(a));
 }); */
@@ -69,7 +69,7 @@ export const GetNode = CreateAccessor((id: string|n)=>{
 }*/
 
 export const IsRootNode = CreateAccessor((node: MapNode)=>{
-	if (node.type != MapNodeType.category) return false;
+	if (node.type != NodeType.category) return false;
 	const parents = GetNodeChildLinks(undefined, node.id);
 	if (parents.length != 0) return false; // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
 	return true;
@@ -176,7 +176,7 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 					mirrorChildren = mirrorChildren.map(child=> {
 						let newChild = child;
 						if (child.link.polarity) {
-							newChild = Clone(child).VSet({_key: child.id}) as MapNodeL3;
+							newChild = Clone(child).VSet({_key: child.id}) as NodeL3;
 							newChild.link.polarity = ReversePolarity(newChild.link.polarity);
 						}
 						return newChild;
@@ -252,34 +252,34 @@ export const GetPremiseOfSinglePremiseArgument = CreateAccessor((argumentNodeID:
 	return childPremise;
 });
 
-export function GetChildGroup(childType: MapNodeType, parentType: MapNodeType|n) {
-	if (parentType == MapNodeType.argument) {
-		if (childType == MapNodeType.argument) return ChildGroup.relevance;
-	} else if (parentType == MapNodeType.claim) {
-		if (childType == MapNodeType.argument) return ChildGroup.truth;
+export function GetChildGroup(childType: NodeType, parentType: NodeType|n) {
+	if (parentType == NodeType.argument) {
+		if (childType == NodeType.argument) return ChildGroup.relevance;
+	} else if (parentType == NodeType.claim) {
+		if (childType == NodeType.argument) return ChildGroup.truth;
 	}
 	return ChildGroup.generic;
 }
 
 /** Does basic checking of validity of parent<>child linkage. See `CheckValidityOfNewLink` for a more thorough validation. */
-export const CheckValidityOfLink = CreateAccessor((parentType: MapNodeType, childGroup: ChildGroup, childType: MapNodeType)=>{
+export const CheckValidityOfLink = CreateAccessor((parentType: NodeType, childGroup: ChildGroup, childType: NodeType)=>{
 	// redundant check, improving error-message clarity for certain issues
-	if (!MapNodeType_Info.for[parentType].childGroup_childTypes.has(childGroup)) {
-		return `Where parent's type is ${MapNodeType[parentType]}, no "${ChildGroup[childGroup]}" child-group exists.`;
+	if (!NodeType_Info.for[parentType].childGroup_childTypes.has(childGroup)) {
+		return `Where parent's type is ${NodeType[parentType]}, no "${ChildGroup[childGroup]}" child-group exists.`;
 	}
 
-	const validChildTypes = MapNodeType_Info.for[parentType].childGroup_childTypes.get(childGroup) ?? [];
+	const validChildTypes = NodeType_Info.for[parentType].childGroup_childTypes.get(childGroup) ?? [];
 	if (!validChildTypes.includes(childType)) {
 		// redundant checks, improving error-message clarity for certain issues
-		if (parentType == MapNodeType.argument && childGroup == ChildGroup.generic && childType != MapNodeType.claim) {
-			return `Where parent is an argument, and child-group is generic, a claim child is expected (instead it's a ${MapNodeType[childType]}).`;
+		if (parentType == NodeType.argument && childGroup == ChildGroup.generic && childType != NodeType.claim) {
+			return `Where parent is an argument, and child-group is generic, a claim child is expected (instead it's a ${NodeType[childType]}).`;
 		}
-		if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != MapNodeType.argument) {
-			return `Where child-group is ${childGroup}, an argument child is expected (instead it's a ${MapNodeType[childType]}).`;
+		if (childGroup.IsOneOf(ChildGroup.truth, ChildGroup.relevance, ChildGroup.neutrality) && childType != NodeType.argument) {
+			return `Where child-group is ${childGroup}, an argument child is expected (instead it's a ${NodeType[childType]}).`;
 		}
 
 		// give generic message
-		return `The child's type (${MapNodeType[childType]}) is not valid here. (parent type: ${MapNodeType[parentType]}, child group: ${ChildGroup[childGroup]})`;
+		return `The child's type (${NodeType[childType]}) is not valid here. (parent type: ${NodeType[parentType]}, child group: ${ChildGroup[childGroup]})`;
 	}
 });
 /**
@@ -312,7 +312,7 @@ export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChild
 	return CheckValidityOfLink(parent.type, newChildGroup, newChild.type);
 });
 
-export const ForDelete_GetError = CreateAccessor((userID: string|n, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
+export const ForDelete_GetError = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	const parentLinks = GetNodeChildLinks(undefined, node.id);
@@ -327,7 +327,7 @@ export const ForDelete_GetError = CreateAccessor((userID: string|n, node: MapNod
 	return null;
 });
 
-export const ForCut_GetError = CreateAccessor((userID: string|n, node: MapNodeL2)=>{
+export const ForCut_GetError = CreateAccessor((userID: string|n, node: NodeL2)=>{
 	const baseText = `Cannot unlink node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
 	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;

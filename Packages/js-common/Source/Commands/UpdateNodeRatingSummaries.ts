@@ -4,7 +4,7 @@ import {GetRatings} from "../DB/nodeRatings.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatingTypeInfo, NodeRatingType, RatingValueIsInRange} from "../DB/nodeRatings/@NodeRatingType.js";
 import {GetArgumentImpactPseudoRating, GetArgumentImpactPseudoRatings, RatingListAfterRemovesAndAdds} from "../Utils/DB/RatingProcessor.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeType} from "../DB/nodes/@NodeType.js";
 import {GetNode, GetNodeChildren, GetNodeChildrenL2, GetNodeParents} from "../DB/nodes.js";
 import {GetArgumentNode} from "../DB/nodes/$node.js";
 
@@ -38,10 +38,10 @@ export class UpdateNodeRatingSummaries extends Command<{nodeID: string, ratingTy
 		this.newArgumentImpactSummaries = new Map();
 		const argumentNodes =
 			ratingType == NodeRatingType.relevance ? [GetNode.NN(nodeID)] :
-			ratingType == NodeRatingType.truth ? (GetNodeParents(nodeID) as MapNode[]).filter(a=>a.type == MapNodeType.argument) :
+			ratingType == NodeRatingType.truth ? (GetNodeParents(nodeID) as MapNode[]).filter(a=>a.type == NodeType.argument) :
 			[];
 		for (const argument of argumentNodes) {
-			const premises = GetNodeChildren(argument.id).filter(a=>a.type == MapNodeType.claim);
+			const premises = GetNodeChildren(argument.id).filter(a=>a.type == NodeType.claim);
 			const ratingTypeInfo_impact = GetRatingTypeInfo(NodeRatingType.impact);
 			const ratings_impact = GetArgumentImpactPseudoRatings(argument, premises, null, false, ratingsBeingRemoved, ratingsBeingAdded);
 			const ratings_impact_inEachRange = ratingTypeInfo_impact.valueRanges.map(range=>{

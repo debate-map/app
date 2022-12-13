@@ -74,7 +74,7 @@ use crate::db::node_phrasings::SubscriptionShard_NodePhrasing;
 use crate::db::node_ratings::SubscriptionShard_NodeRating;
 use crate::db::node_revisions::SubscriptionShard_NodeRevision;
 use crate::db::node_tags::SubscriptionShard_NodeTag;
-use crate::db::nodes::SubscriptionShard_MapNode;
+use crate::db::nodes::SubscriptionShard_Node;
 use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
@@ -108,7 +108,7 @@ pub struct SubscriptionRoot(
     SubscriptionShard_GlobalData, SubscriptionShard_Map,
     SubscriptionShard_Term, SubscriptionShard_AccessPolicy, SubscriptionShard_Media,
     SubscriptionShard_CommandRun, SubscriptionShard_Proposal, SubscriptionShard_UserInfo,
-    SubscriptionShard_MapNode, SubscriptionShard_NodeChildLink, SubscriptionShard_NodeEdit,
+    SubscriptionShard_Node, SubscriptionShard_NodeChildLink, SubscriptionShard_NodeEdit,
     SubscriptionShard_NodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_NodeRevision, SubscriptionShard_NodeTag,
     SubscriptionShard_Share,
 );

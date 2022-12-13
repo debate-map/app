@@ -1,4 +1,4 @@
-import {GetFontSizeForNode, GetMainAttachment, GetNodeDisplayText, MapNodeL3, MapNodeType_Info} from "dm_common";
+import {GetFontSizeForNode, GetMainAttachment, GetNodeDisplayText, NodeL3, NodeType_Info} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
@@ -12,8 +12,8 @@ import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 }); */
 
-export const GetMeasurementInfoForNode = CreateAccessor((node: MapNodeL3, path: string, leftMarginForLines?: number|n)=>{
-	const nodeTypeInfo = MapNodeType_Info.for[node.type];
+export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: string, leftMarginForLines?: number|n)=>{
+	const nodeTypeInfo = NodeType_Info.for[node.type];
 	const maxWidth_normal = nodeTypeInfo.maxWidth;
 	const maxWidth_final = maxWidth_normal - (leftMarginForLines != null ? leftMarginForLines : 0);
 

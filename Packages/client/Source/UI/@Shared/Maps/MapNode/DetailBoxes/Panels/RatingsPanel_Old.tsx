@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Chroma, Chroma_Safe, ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, RunInAction_Set, uplotDefaults} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, MapNodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
+import {NodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, NodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
 import {UPlot} from "web-vcore/nm/react-uplot.js";
@@ -20,7 +20,7 @@ import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
 type RatingsPanel_Props = {
-	node: MapNodeL3, path: string, ratingType: NodeRatingType,
+	node: NodeL3, path: string, ratingType: NodeRatingType,
 	asNodeUIOverlay?: boolean, uplotData_override?: uPlot.AlignedData,
 	ownRatingOpacity?: number, customAlphaMultiplier?: number,
 };
@@ -62,7 +62,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		const parentNode = GetNodeL3(SlicePath(path, 1));
 
 		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
-		const nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.displayPolarity);
+		const nodeTypeDisplayName = GetNodeTypeDisplayName(node.type, node, form, node.displayPolarity);
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		//const {labels, values} = ratingTypeInfo;

@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MapNodeView, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -17,15 +17,15 @@ import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 export const NodeUI_LeftBox_width = 130;
 
 type Props = {
-	map: Map|n, path: string, node: MapNodeL3,
-	panelsPosition?: "left" | "below", local_nodeView?: MapNodeView|n,
+	map: Map|n, path: string, node: NodeL3,
+	panelsPosition?: "left" | "below", local_nodeView?: NodeView|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 	usePortal?: boolean, nodeUI?: NodeUI_Inner,
 	onHoverChange?: (hovered: boolean)=>any,
 };
 @Observer
-export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} as Props, {}) {
+export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} as Props, {}) {
 	loadingUI(bailInfo: BailInfo) {
 		if (this.props.usePortal) return <div/>; // don't show loading-ui in portal, else layout flashes
 		return <DefaultLoadingUI comp={bailInfo.comp} bailMessage={bailInfo.bailMessage}/>;
@@ -49,10 +49,10 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 		const parentNode = GetParentNodeL3(path);
 
 		const nodeReversed = form == ClaimForm.negation;
-		const nodeTypeInfo = MapNodeType_Info.for[node.type];
+		const nodeTypeInfo = NodeType_Info.for[node.type];
 
 		const combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
-		let argumentNode: MapNodeL3|n, argumentPath: string|n;
+		let argumentNode: NodeL3|n, argumentPath: string|n;
 		if (combinedWithParent) {
 			argumentNode = parentNode;
 			argumentPath = SlicePath(path, 1);

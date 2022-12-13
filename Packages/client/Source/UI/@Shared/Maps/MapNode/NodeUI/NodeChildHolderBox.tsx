@@ -1,7 +1,7 @@
-import {ArgumentType, ChangeType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3, MapNodeType, NodeRatingType} from "dm_common";
+import {ArgumentType, ChangeType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, NodeL3, NodeType, NodeRatingType} from "dm_common";
 import React, {useCallback} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
@@ -23,7 +23,7 @@ import {NodeChildHolder} from "./NodeChildHolder.js";
 import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "../NodeUI.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, treePath: string, inBelowGroup: boolean, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
+	map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, nodeChildren: NodeL3[], nodeChildrenToShow: NodeL3[],
 	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onSizesChange?: (aboveHeight: number, belowHeight: number)=>void,
 	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
@@ -43,7 +43,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		const {map, node, path, treePath, inBelowGroup, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
 		const {lineHolderHeight, hovered, hovered_button} = this.state;
 
-		// const nodeView = GetNodeView(map.id, path) ?? new MapNodeView();
+		// const nodeView = GetNodeView(map.id, path) ?? new NodeView();
 		// const nodeView = GetNodeView(map.id, path, true);
 		const nodeView = GetNodeView(map.id, path);
 		const parent = GetParentNodeL3(path);
@@ -68,9 +68,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 			else if (node.argumentType == ArgumentType.anyTwo) text = "If 2 (or more) of these claims were true, would they be relevant?";
 		}*/
 		// let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
-		const backgroundColor = GetNodeColor({type: group == ChildGroup.freeform ? MapNodeType.category : MapNodeType.claim} as any as MapNodeL3);
+		const backgroundColor = GetNodeColor({type: group == ChildGroup.freeform ? NodeType.category : NodeType.claim} as any as NodeL3);
 		// let lineColor = GetNodeColor(node, "raw");
-		const lineColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3, "raw");
+		const lineColor = GetNodeColor({type: NodeType.claim} as any as NodeL3, "raw");
 
 		//const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
 		// let expandKey = type == ChildGroup.truth ? "expanded_truth" : "expanded_relevance";
@@ -78,9 +78,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		const expandKey = `expanded_${childGroupStr}`;
 		const expanded = nodeView[expandKey]; // this.Expanded
 
-		//const separateChildren = (node.type == MapNodeType.claim || node.type == MapNodeType.argument) && group != ChildGroup.freeform;
+		//const separateChildren = (node.type == NodeType.claim || node.type == NodeType.argument) && group != ChildGroup.freeform;
 		const separateChildren = group == ChildGroup.truth || group == ChildGroup.relevance;
-		const showArgumentsControlBar = /* (node.type == MapNodeType.claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading && group != ChildGroup.freeform;
+		const showArgumentsControlBar = /* (node.type == NodeType.claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading && group != ChildGroup.freeform;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {
@@ -102,7 +102,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: group == ChildGroup.truth || group == ChildGroup.relevance
 				? GetNodeColor({type: "claim"} as any, "raw", false).css()
-				: GetNodeColor({type: MapNodeType.category} as any, "raw", false).css(),
+				: GetNodeColor({type: NodeType.category} as any, "raw", false).css(),
 				gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		});
 
@@ -163,18 +163,18 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 						const recursivelyCollapsing = !newExpanded && e.altKey;
 						RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
 							if (group == ChildGroup.truth) {
-								ACTMapNodeExpandedSet({
+								ACTNodeExpandedSet({
 									mapID: map.id, path, resetSubtree: recursivelyCollapsing,
 									[expandKey]: newExpanded,
 								});
 							} else {
-								ACTMapNodeExpandedSet({
+								ACTNodeExpandedSet({
 									mapID: map.id, path, resetSubtree: false,
 									[expandKey]: newExpanded,
 								});
 								if (recursivelyCollapsing) {
 									for (const child of nodeChildrenToShow) {
-										ACTMapNodeExpandedSet({
+										ACTNodeExpandedSet({
 											mapID: map.id, path: `${path}/${child.id}`, resetSubtree: true,
 											[expandKey]: newExpanded,
 										});

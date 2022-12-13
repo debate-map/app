@@ -41,7 +41,7 @@ import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 		const {mapID, importRatings, importRatings_userIDs} = this.payload;
 
 		const node = AsNodeL1(WithoutHelpers(subtreeData).ExcludeKeys("ratings", "childrenData", "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
-		const revision = WithoutHelpers(subtreeData.current).ExcludeKeys("node", "approved", "relative", "voteLevel") as MapNodeRevision;
+		const revision = WithoutHelpers(subtreeData.current).ExcludeKeys("node", "approved", "relative", "voteLevel") as NodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
 		if (revision["contentNode"]) {
 			revision.VSet({quote: revision["contentNode"], contentNode: DEL});

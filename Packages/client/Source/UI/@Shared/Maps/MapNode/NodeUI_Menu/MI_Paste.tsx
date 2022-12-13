@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeDisplayText, MapNodeType, MeID, TransferType} from "dm_common";
+import {ClaimForm, GetNodeDisplayText, NodeType, MeID, TransferType} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -18,7 +18,7 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 		if (copiedNode == null || copiedNodePath == null) return null;
 		if (inList) return null;
 
-		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
+		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		const [commandData_initial, uiState_initial] = GetTransferNodesInitialData(map, copiedNode, copiedNodePath, node, childGroup, copiedNode_asCut ? TransferType.move : TransferType.link);
 		if (commandData_initial == null || uiState_initial == null) return;
@@ -39,10 +39,10 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 // ==========
 
 // const copiedNode_parent = GetParentNodeL3(copiedNodePath);
-// const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
+// const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 // let newPolarity =
-// 	(copiedNode.type == MapNodeType.argument ? copiedNode.link?.polarity : null) // if node itself has polarity, use it
-// 	|| (copiedNode_parent?.type == MapNodeType.argument ? copiedNode_parent.link?.polarity : null); // else if our parent has a polarity, use that
+// 	(copiedNode.type == NodeType.argument ? copiedNode.link?.polarity : null) // if node itself has polarity, use it
+// 	|| (copiedNode_parent?.type == NodeType.argument ? copiedNode_parent.link?.polarity : null); // else if our parent has a polarity, use that
 
 // const contributeInfo = GetNodeContributionInfo(node.id);
 // let contributeInfo_polarity: NodeContributionInfo_ForPolarity|n;
@@ -58,7 +58,7 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 // // use memo, so we don't keep recreating command each render (since that causes new id's to be generated, causing new db-requests, making cycle keep repeating)
 // const linkCommand = UseMemo(()=>new LinkNode_HighLevel({
 // 	mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode.id,
-// 	newForm: copiedNode.type == MapNodeType.claim ? formForClaimChildren : null,
+// 	newForm: copiedNode.type == NodeType.claim ? formForClaimChildren : null,
 // 	newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
 // 	//createWrapperArg: childGroup != ChildGroup.generic || !node.multiPremiseArgument,
 // 	childGroup,
@@ -94,9 +94,9 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 // const advanced = store.main.maps.addChildDialog.advanced;
 // return (
 // 	<Column ref={c=>root = c} style={{width: 600}}>
-// 		{childType == MapNodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
+// 		{childType == NodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
 // 		<Row center mb={5}>
-// 			{childType == MapNodeType.argument && advanced &&
+// 			{childType == NodeType.argument && advanced &&
 // 			<>
 // 				<Text>Data:</Text>
 // 				<Select ml={5} displayType="button bar" options={GetEntries(AddChildDialogTab, "ui")} style={{display: "inline-block"}}
@@ -127,7 +127,7 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 // 		</>}
 // 		{tab == AddChildDialogTab.Claim &&
 // 		<>
-// 			{childType == MapNodeType.argument &&
+// 			{childType == NodeType.argument &&
 // 			<>
 // 				{!advanced &&
 // 				<Column>
@@ -138,7 +138,7 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 // 						`.trim()}/> */}
 // 					</Row>
 // 					<Row style={{display: "flex", alignItems: "center"}}>
-// 						<TextArea required={true} pattern={MapNodeRevision_titlePattern}
+// 						<TextArea required={true} pattern={NodeRevision_titlePattern}
 // 							allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
 // 							value={helper.subNode_revision!.phrasing["text_base"]}
 // 							onChange={val=>Change(helper.subNode_revision!.phrasing["text_base"] = val)}/>
@@ -156,8 +156,8 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 // 						Change();
 // 					}}/>}
 // 			</>}
-// 			{childType != MapNodeType.argument &&
-// 			<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == MapNodeType.claim ? "5px 0 0 0" : 0}} parent={prep.parentNode}
+// 			{childType != NodeType.argument &&
+// 			<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == NodeType.claim ? "5px 0 0 0" : 0}} parent={prep.parentNode}
 // 				baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 // 				onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 // 					/*if (map?.requireMapEditorsCanEdit) {

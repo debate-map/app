@@ -1,7 +1,7 @@
 // import {autorun, action} from "web-vcore/nm/mobx.js";
 // import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 // import {GetOpenMapID} from "Store/main";
-// import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
+// import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 // import {store} from "Store";
 // import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
 // import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions.js";
@@ -80,7 +80,7 @@
 
 // 	for (const path of paths) {
 // 		const parentPath = SlicePath(path, 1);
-// 		ACTMapNodeExpandedSet({mapID, path: parentPath, expanded: true, expandAncestors: true});
+// 		ACTNodeExpandedSet({mapID, path: parentPath, expanded: true, expandAncestors: true});
 // 	}
 
 // 	let mapUI: MapUI;

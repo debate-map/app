@@ -2,7 +2,7 @@ import {Button, Column, Pre, Row, Select} from "web-vcore/nm/react-vcomponents.j
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {InfoButton, Observer} from "web-vcore";
-import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType, Map, GetAccessPolicy, CanAddPhrasing, MapNodeL3, PermitCriteriaPermitsNoOne, GetTermsAttached} from "dm_common";
+import {NodeL2, GetNodePhrasings, NodePhrasing, NodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, NodeType, Map, GetAccessPolicy, CanAddPhrasing, NodeL3, PermitCriteriaPermitsNoOne, GetTermsAttached} from "dm_common";
 import {GetEntries} from "web-vcore/nm/js-vextensions";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -14,7 +14,7 @@ import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeUI_Inner/Tit
 const Phrasing_FakeID = "FAKE";
 
 @Observer
-export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map: Map|n, node: MapNodeL3, path: string}, {selectedPhrasingType: MapNodePhrasingType.standard, selectedPhrasingID: null as string|n}) {
+export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map: Map|n, node: NodeL3, path: string}, {selectedPhrasingType: NodePhrasingType.standard, selectedPhrasingID: null as string|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		const {selectedPhrasingType, selectedPhrasingID} = this.state;
@@ -22,14 +22,14 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 
 		// add one fake "precise" phrasing, matching the node's current text (temp)
 		phrasings = phrasings.slice();
-		phrasings.push(new MapNodePhrasing({id: Phrasing_FakeID, node: node.id, type: MapNodePhrasingType.standard, text_base: GetNodeDisplayText(node)}));
+		phrasings.push(new NodePhrasing({id: Phrasing_FakeID, node: node.id, type: NodePhrasingType.standard, text_base: GetNodeDisplayText(node)}));
 
 		//const mapAccessPolicy = GetAccessPolicy.NN(map.accessPolicy);
 		const accessPolicy = GetAccessPolicy.NN(node.accessPolicy);
-		const phrasingTypeOptions = GetEntries(MapNodePhrasingType, "ui");
+		const phrasingTypeOptions = GetEntries(NodePhrasingType, "ui");
 		// unless phrasing-adding is restricted to a hand-picked user-list, disallow "humor" type
 		/*if (!PermitCriteriaPermitsNoOne(accessPolicy.permissions.nodes.addPhrasing)) {
-			phrasingTypeOptions = phrasingTypeOptions.filter(a=>a.value != MapNodePhrasingType.humor);
+			phrasingTypeOptions = phrasingTypeOptions.filter(a=>a.value != NodePhrasingType.humor);
 		}*/
 
 		return (
@@ -66,7 +66,7 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 }
 
 @Observer
-export class PhrasingRow extends BaseComponent<{phrasing: MapNodePhrasing, node: MapNodeL3, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
+export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: NodeL3, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
 	render() {
 		const {phrasing, node, index, selected, toggleSelected} = this.props;
 		const termsToSearchFor = (phrasing.terms?.map(attachment=>{
@@ -104,10 +104,10 @@ export class PhrasingRow extends BaseComponent<{phrasing: MapNodePhrasing, node:
 	}
 }
 
-class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: MapNodePhrasing, node: MapNodeL3}, {}) {
+class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasing, node: NodeL3}, {}) {
 	render() {
 		const {phrasing, node} = this.props;
-		const backgroundColor = GetNodeColor({type: MapNodeType.category} as any);
+		const backgroundColor = GetNodeColor({type: NodeType.category} as any);
 		return (
 			<Row
 				style={{

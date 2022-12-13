@@ -6,13 +6,13 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import _ from "lodash";
-import {MapNodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions} from "dm_common";
+import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 @Observer
-export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {dataError: null as string|n}) {
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {dataError: null as string|n}) {
 	detailsUI: NodeDetailsUI|n;
 	render() {
 		const {show, map, node, path} = this.props;

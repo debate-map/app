@@ -1,4 +1,4 @@
-import {NodeChildLink, MapNode, MapNodeRevision, MapNodeType, systemUserID, CullMapNodePhrasingToBeEmbedded, MapNodePhrasing, ChildGroup, AddChildNode} from "dm_common";
+import {NodeChildLink, MapNode, NodeRevision, NodeType, systemUserID, CullNodePhrasingToBeEmbedded, NodePhrasing, ChildGroup, AddChildNode} from "dm_common";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 
@@ -21,7 +21,7 @@ export class IR_NodeAndRevision extends ImportResource {
 	}
 	link: NodeChildLink;
 	node: MapNode;
-	revision: MapNodeRevision;
+	revision: NodeRevision;
 	CanSearchByTitle() {
 		return this.revision.phrasing.text_base.trim().length > 0;
 	}
