@@ -70,7 +70,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: NodeRe
 				time: Date.now(),
 				type: ChangeType.edit,
 			});
-			AssertValidate("Map_NodeEdit", this.nodeEdit, "Node-edit entry invalid");
+			AssertValidate("MapNodeEdit", this.nodeEdit, "Node-edit entry invalid");
 
 			this.map_nodeEdits = GetMapNodeEdits(mapID);
 		}

@@ -9,6 +9,13 @@ use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryF
 
 use super::transactions::{start_read_transaction, start_write_transaction};
 
+/// Helper function to defer constraints in a database transaction.
+/// This is generally used to avoid foreign-key constraint violations, when multiple rows (linked with each other through foreign-key constraints) are being updated within the same command/transaction.
+pub async fn defer_constraints(tx: &Transaction<'_>) -> Result<(), Error>{
+    tx.execute("SET CONSTRAINTS ALL DEFERRED", &[]).await?;
+    Ok(())
+}
+
 pub struct AccessorContext<'a> {
     pub tx: Transaction<'a>,
 }
@@ -24,6 +31,12 @@ impl<'a> AccessorContext<'a> {
     }
     pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
         let tx = start_write_transaction(anchor, gql_ctx).await?;
+
+        // Some commands (eg. deleteNode) need foreign-key contraint-deferring till end of transaction, so just do so always.
+        // This is safer, since it protects against "forgotten deferral" in commands where an fk-constraint is *temporarily violated* -- but only in an "uncommon conditional branch".
+        // (Deferring always is not much of a negative anyway; instant constraint-checking doesn't improve debugging much in this context, since fk-violations are generally easy to identify once triggered.)
+		defer_constraints(&tx).await?;
+
         Ok(Self { tx })
     }
 }

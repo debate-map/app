@@ -11,7 +11,7 @@ use rust_shared::serde::{Deserialize};
 use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
-use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, defer_constraints};
+use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder};
 use crate::db::commands::_shared::increment_map_edits::{increment_map_edits, increment_map_edits_if_valid};
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
@@ -47,7 +47,6 @@ impl MutationShard_DeleteNode {
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 		let DeleteNodeInput { mapID, nodeID } = input;
 		let result = DeleteNodeResult { __: gql_placeholder() };
-		defer_constraints(&ctx).await?;
 		
 		let old_data = get_node(&ctx, &nodeID).await?;
 		assert_user_can_delete_node(&ctx, &user_info, &old_data, false, vec![], vec![]).await?;

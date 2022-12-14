@@ -187,10 +187,3 @@ pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val
         MaybeUndefined::Value(val) => Some(val),
     }
 }
-
-/// Helper function to defer constraints in a database transaction.
-/// This is generally used to avoid foreign-key constraint violations, when multiple rows (linked with each other through foreign-key constraints) are being updated within the same command/transaction.
-pub async fn defer_constraints(ctx: &AccessorContext<'_>) -> Result<(), Error>{
-    ctx.tx.execute("SET CONSTRAINTS ALL DEFERRED", &[]).await?;
-    Ok(())
-}
