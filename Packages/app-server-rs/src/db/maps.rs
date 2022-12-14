@@ -1,25 +1,25 @@
+use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::async_graphql;
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-wrap_slow_macros!{
+use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
 
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
+wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Map {
     pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
     pub accessPolicy: String,
     pub name: String,
     pub note: Option<String>,
@@ -29,32 +29,41 @@ pub struct Map {
     pub nodeAccessPolicy: Option<String>,
     pub featured: Option<bool>,
 	pub editors: Vec<String>,
-	pub creator: String,
-	pub createdAt: i64,
 	pub edits: i32,
 	pub editedAt: Option<i64>,
-    pub extras: serde_json::Value,
+    pub extras: JSONValue,
 }
 impl From<Row> for Map {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            accessPolicy: row.get("accessPolicy"),
-            name: row.get("name"),
-            note: row.get("note"),
-            noteInline: row.get("noteInline"),
-            rootNode: row.get("rootNode"),
-            defaultExpandDepth: row.get("defaultExpandDepth"),
-            nodeAccessPolicy: row.get("nodeAccessPolicy"),
-            featured: row.get("featured"),
-            editors: row.get("editors"),
-            creator: row.get("creator"),
-            createdAt: row.get("createdAt"),
-            edits: row.get("edits"),
-            editedAt: row.get("editedAt"),
-            extras: serde_json::from_value(row.get("extras")).unwrap(),
-		}
-	}
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct MapInput {
+    pub accessPolicy: String,
+    pub name: String,
+    pub note: Option<String>,
+    pub noteInline: Option<bool>,
+    pub rootNode: String,
+    pub defaultExpandDepth: i32,
+    pub nodeAccessPolicy: Option<String>,
+    pub featured: Option<bool>,
+	pub editors: Vec<String>,
+	pub edits: i32,
+	pub editedAt: Option<i64>,
+    pub extras: JSONValue,
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct MapUpdates {
+    pub accessPolicy: FieldUpdate<String>,
+    pub name: FieldUpdate<String>,
+    pub note: FieldUpdate_Nullable<String>,
+    pub noteInline: FieldUpdate_Nullable<bool>,
+    pub defaultExpandDepth: FieldUpdate<i32>,
+    pub nodeAccessPolicy: FieldUpdate_Nullable<String>,
+    pub featured: FieldUpdate_Nullable<bool>,
+	pub editors: FieldUpdate<Vec<String>>,
+    pub extras: FieldUpdate<JSONValue>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Map { nodes: Vec<Map> }

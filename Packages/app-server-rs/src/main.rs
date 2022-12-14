@@ -7,6 +7,9 @@
 //#![feature(integer_atomics, const_fn_trait_bound)] // needed for mem_alloc.rs
 //#![feature(box_patterns)]
 //#![feature(fn_traits)]
+// needed atm for GQLError (see TODO.rs)
+#![feature(auto_traits)]
+#![feature(negative_impls)]
 
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
@@ -117,8 +120,9 @@ mod db {
     pub mod commands {
         pub mod _command;
         pub mod add_access_policy;
+        //pub mod add_map;
         pub mod add_media;
-        //pub mod add_node_revision; // temp-removed
+        pub mod add_node_revision;
         pub mod add_node_phrasing;
         pub mod add_node_tag;
         pub mod add_share;

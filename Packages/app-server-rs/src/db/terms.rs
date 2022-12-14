@@ -4,7 +4,6 @@ use rust_shared::async_graphql::{self, MaybeUndefined, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::db::node_revisions::Attachment;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
@@ -14,6 +13,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
+use super::node_revisions::Attachment;
 use super::{node_revisions::{get_node_revision}};
 
 pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
@@ -52,9 +52,9 @@ pub enum TermType {
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Term {
     pub id: ID,
-    pub accessPolicy: String,
 	pub creator: String,
 	pub createdAt: i64,
+    pub accessPolicy: String,
     pub name: String,
 	pub forms: Vec<String>,
     pub disambiguation: Option<String>,

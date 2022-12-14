@@ -36,31 +36,41 @@ pub struct LogEntry {
     pub message: String,
 }
 
-pub fn should_event_be_kept_according_to_x(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
+/*pub fn does_event_match_conditions(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
     if levels_to_exclude.contains(metadata.level()) {
         return false;
     }
     true
-}
-pub fn should_event_be_printed(metadata: &Metadata) -> bool {
-    // temp
-    if !metadata.target().starts_with("app_server_rs") {
+}*/
+pub fn does_event_match_conditions(metadata: &Metadata, levels_to_include: &[Level]) -> bool {
+    if !levels_to_include.contains(metadata.level()) {
         return false;
     }
+    true
+}
 
-    should_event_be_kept_according_to_x(metadata, &[Level::TRACE, Level::DEBUG])
-    //should_event_be_kept_according_to_x(metadata, &[Level::TRACE])
+pub fn should_event_be_printed(metadata: &Metadata) -> bool {
+    match metadata.target() {
+        a if a.starts_with("app_server_rs") => {
+            does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO])
+            //should_event_be_kept_according_to_x(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
+        },
+        "async-graphql" => {
+            does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN])
+        },
+        _ => false
+    }
 }
 pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
-    // temp
-    if !metadata.target().starts_with("app_server_rs") {
-        return false;
+    match metadata.target() {
+        a if a.starts_with("app_server_rs") => {
+            //does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG, Level::TRACE])
+            // don't send TRACE atm, because that's intended for logging that's potentially *very* verbose, and could conceivably cause local network congestion
+            // (long-term, the plan is to make a way for the monitor tool to request that verbose data for a time-slice the user specifies, if/when needed)
+            does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
+        },
+        _ => false
     }
-
-    //should_event_be_kept_according_to_x(metadata, &[])
-    // don't send TRACE atm, because that's intended for logging that's potentially *very* verbose, and could conceivably cause local network congestion
-    // (long-term, the plan is to make a way for the monitor tool to request that verbose data for a time-slice the user specifies, if/when needed)
-    should_event_be_kept_according_to_x(metadata, &[Level::TRACE])
 }
 
 pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {

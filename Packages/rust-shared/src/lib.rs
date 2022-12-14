@@ -44,9 +44,6 @@ pub extern crate tower_service;
 pub extern crate rust_macros;
 
 // this crate's modules
-pub mod db {
-    pub mod node_revisions;
-}
 pub mod errors;
 pub mod locks;
 pub mod utils {

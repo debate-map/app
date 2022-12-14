@@ -68,19 +68,15 @@ pub struct NodeTagUpdates {
 }
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
-//#[graphql(name = "TagComp_Labels", input_name = "TagComp_LabelsInput")]
-// can't set custom name for both SimpleObject and InputObject, so just extend auto-generated name
-// (interestingly though, it *should* work, as per the following test: https://github.com/async-graphql/async-graphql/blob/8ee44a3ea404a215c8452c7693277974a9e3860c/tests/input_object.rs#L411)
 #[graphql(input_name = "TagCompLabelsInput")]
+//#[graphql(name = "TagComp_Labels", input_name = "TagComp_LabelsInput")] # todo: use this approach once async-graphql is updated
 pub struct TagComp_Labels {
 	pub nodeX: String,
 	pub labels: Vec<String>,
 }
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
-//#[graphql(name = "TagComp_CloneHistory", input_name = "TagComp_CloneHistoryInput")]
-// can't set custom name for both SimpleObject and InputObject, so just extend auto-generated name
-// (interestingly though, it *should* work, as per the following test: https://github.com/async-graphql/async-graphql/blob/8ee44a3ea404a215c8452c7693277974a9e3860c/tests/input_object.rs#L411)
 #[graphql(input_name = "TagCompCloneHistoryInput")]
+//#[graphql(name = "TagComp_CloneHistory", input_name = "TagComp_CloneHistoryInput")] # todo: use this approach once async-graphql is updated
 pub struct TagComp_CloneHistory {
     pub cloneChain: Vec<String>,
 }

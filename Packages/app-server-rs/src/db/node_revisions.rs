@@ -1,14 +1,17 @@
+use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::anyhow::Error;
 use rust_shared::SubError;
 use rust_shared::async_graphql;
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::db::node_revisions::NodeRevision;
 use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::serde_json;
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client};
+use rust_shared::utils::type_aliases::JSONValue;
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeRevision, Error> {
@@ -18,6 +21,44 @@ pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<No
 }
 
 wrap_slow_macros!{
+
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+#[graphql(input_name = "AttachmentInput")]
+pub struct Attachment {
+    pub equation: Option<JSONValue>,
+    pub references: Option<JSONValue>,
+    pub quote: Option<JSONValue>,
+    pub media: Option<JSONValue>,
+    //pub media: Option<MediaAttachment>,
+}
+
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+pub struct NodeRevision {
+    pub id: ID,
+    pub creator: String,
+    pub createdAt: i64,
+    pub node: String,
+    pub replacedBy: Option<String>, 
+    pub phrasing: JSONValue,
+    #[graphql(name = "phrasing_tsvector")]
+    #[serde(skip_serializing)] // makes-so when serializing the struct for saving to the db, this field is excluded (as it must be, since it's auto-generated)
+    pub phrasing_tsvector: String,
+    pub note: Option<String>,
+    pub displayDetails: Option<JSONValue>,
+    pub attachments: Vec<Attachment>,
+}
+impl From<Row> for NodeRevision {
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct NodeRevisionInput {
+    pub node: String,
+    pub phrasing: JSONValue,
+    pub note: Option<String>,
+    pub displayDetails: Option<JSONValue>,
+    pub attachments: Vec<Attachment>,
+}
 
 /*#[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct MediaAttachment {

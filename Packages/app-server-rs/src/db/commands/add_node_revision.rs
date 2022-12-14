@@ -1,145 +1,98 @@
-/*/** Returned terms are all lowercase. */
-export function GetSearchTerms(str: string) {
-	return GetSearchTerms_Advanced(str, false).wholeTerms;
-}
-/** Returned terms are all lowercase. */
-export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard = true) {
-	//const terms = str.toLowerCase().replace(/[^a-zA-Z0-9*\-]/g, " ").replace(/ +/g, " ").trim().split(" ").filter(a=>a != ""); // eslint-disable-line
-	const terms = str.replace(/ +/g, " ").trim().split(" ").filter(a=>a != ""); // eslint-disable-line
-	const wholeTerms = CE(terms.filter(a=>(separateTermsWithWildcard ? !a.includes("*") : true)).map(a=>a.replace(/\*###/g, ""))).Distinct().filter(a=>a != "");
-	const partialTerms = CE(terms.filter(a=>(separateTermsWithWildcard ? a.includes("*") : false)).map(a=>a.replace(/\*###/g, ""))).Distinct().filter(a=>a != "");
-	return {wholeTerms, partialTerms};
-}*/
+use std::fmt::{Formatter, Display};
 
-/*@MapEdit
-@UserEdit
-@CommandRunMeta({
-	record: true,
-	record_cancelIfAncestorCanBeInStream: true,
-	canShowInStream: true,
-	rlsTargetPaths: [
-		{table: "nodes", fieldPath: ["payload", "revision", "node"]},
-	],
-})
-@CommandMeta({
-	payloadSchema: ()=>SimpleSchema({
-		mapID: {type: "string"},
-		revision: {$ref: NodeRevision.name},
-	}),
-	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
-})*/
+use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde_json::{Value, json};
+use rust_shared::utils::db_constants::SYSTEM_USER_ID;
+use rust_shared::{async_graphql, serde_json, anyhow, FullyBakedError};
+use rust_shared::async_graphql::{Object};
+use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::anyhow::{anyhow, Error, Context};
+use rust_shared::utils::time::{time_since_epoch_ms_i64};
+use rust_shared::serde::{Deserialize};
+use tracing::info;
 
-use rust_shared::anyhow::{anyhow, Error};
-use rust_shared::async_graphql::ID;
-use rust_shared::time_since_epoch_ms;
-use rust_shared::serde::{Serialize, Deserialize};
-use uuid::Uuid;
-use async_trait::async_trait;
+use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
+use crate::db::node_revisions::{NodeRevisionInput, NodeRevision};
+use crate::utils::db::accessors::AccessorContext;
+use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
+use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use crate::{db::{node_revisions::NodeRevision, general::accessor_helpers::AccessorContext, nodes::{get_node, Node}}, utils::{type_aliases::JSONValue, db::uuid::new_uuid_v4_as_b64}};
+use super::_command::{set_db_entry_by_id_for_struct};
 
-use super::_command::{Command, db_set};
+wrap_slow_macros!{
 
-#[derive(Serialize, Deserialize)]
-pub struct AddNodeRevisionPayload {
-    mapID: Option<String>,
-    revision: NodeRevision,
+#[derive(InputObject, Deserialize)]
+pub struct AddNodeRevisionInput {
+	mapID: Option<String>,
+	revision: NodeRevisionInput,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct AddNodeRevisionReturnData {
-    revisionID: String,
+#[derive(SimpleObject, Debug)]
+pub struct AddNodeRevisionResult {
+	id: String,
 }
 
-pub struct AddNodeRevision {
-    payload: AddNodeRevisionPayload,
-    return_data: AddNodeRevisionReturnData,
-    // generic stuff
-    parent_command: Option<Box<dyn Command>>,
-    user_info: UserInfo, // for now, just holds id
+#[derive(Default)]
+pub struct MutationShard_AddNodeRevision;
+#[Object]
+impl MutationShard_AddNodeRevision {
+	async fn add_node_revision(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeRevisionInput) -> Result<AddNodeRevisionResult, FullyBakedError> {
+		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
+		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
+		let AddNodeRevisionInput { mapID, revision: revision_ } = input;
+		let mut result = AddNodeRevisionResult { id: "<tbd>".to_owned() };
+		
+		let revision = NodeRevision {
+			// set by server
+			id: ID(new_uuid_v4_as_b64()),
+			creator: user_info.id.to_string(),
+			createdAt: time_since_epoch_ms_i64(),
+			phrasing_tsvector: "<tbd>".to_owned(), // set by database
+			replacedBy: None,
+			// pass-through
+			node: revision_.node,
+			phrasing: revision_.phrasing,
+			note: revision_.note,
+			displayDetails: revision_.displayDetails,
+			attachments: revision_.attachments,
+		};
+		result.id = revision.id.to_string();
 
-    // controlled by parent
-    // todo: add this back
-	//recordAsNodeEdit = true,
+		set_db_entry_by_id_for_struct(&ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
 
-	node_old_data: Option<Node>,
-    // todo: add this back
-	/*nodeEdit: Option<Map_NodeEdit>,
-	map_nodeEdits: Option<Vec<Map_NodeEdit>>,*/
-}
-#[async_trait(?Send)]
-impl Command for AddNodeRevision {
-	async fn Validate(&self, ctx: &AccessorContext<'_>) -> Result<JSONValue, Error> {
-		/*let AddNodeRevisionPayload {mapID, revision} = self.payload;
+		// also update node's "c_currentRevision" field
+		ctx.tx.execute(r#"UPDATE "nodes" SET "c_currentRevision" = $1 WHERE id = $2"#, &[&revision.id.as_str(), &revision.node]).await?;
 
-		revision.id = ID(new_uuid_v4_as_b64());
-		revision.creator = self.user_info.id;
-		revision.createdAt = time_since_epoch_ms() as i64; // todo: confirm correct
+		// if node-revision was added from within a map, then add a map-node-edit entry (while also doing cleanup of old map-node-edit entries)
+		if let Some(mapID) = mapID {
+			// delete prior node-edit entries for this map+node (only need last entry for each)
+			// todo: maybe change this to only remove old entries of same map+node+type
+			ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE map = $1 AND node = $2"#, &[&mapID, &revision.node]).await?;
 
-		/*const titles_joined = CE(revision.titles || {}).VValues().join(" ");
-		revision.titles.allTerms = CE(GetSearchTerms(titles_joined)).ToMapObj(a=>a, ()=>true);*/
+			// delete old node-edits (ie. older than last 100) for this map, in mapNodeEdits, to avoid table getting too large
+			// (we also limit the number of rows removed to 30, to avoid the possibility of hundreds of rows being removed all at once -- which caused a crash in the past)
+			ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE id IN (
+				SELECT id FROM "mapNodeEdits" WHERE map = $1 ORDER BY time DESC OFFSET 100 LIMIT 30
+			)"#, &[&mapID]).await?;
 
-		if self.parent_command.is_none() {
-			self.node_old_data = Some(get_node(ctx, revision.node.as_str()).await?);
+			// add new node-edit entry
+			let edit = MapNodeEdit {
+				id: ID(new_uuid_v4_as_b64()),
+				map: mapID,
+				node: revision.node.clone(),
+				time: time_since_epoch_ms_i64(),
+				r#type: ChangeType::edit,
+			};
+			set_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 		}
 
-        // todo: add this back
-		/*if mapID.is_some() && self.recordAsNodeEdit {
-			self.nodeEdit = Map_NodeEdit {
-				id: self.GenerateUUID_Once("nodeEdit.id"),
-				map: mapID,
-				node: revision.node,
-				time: Date.now(),
-				type: ChangeType.edit,
-			};
-			AssertValidate("Map_NodeEdit", self.nodeEdit, "Node-edit entry invalid");
+		ctx.tx.commit().await?;
+		info!("Command completed! Result:{:?}", result);
+		Ok(result)
+    }
+}
 
-			self.map_nodeEdits = GetNodeEdits(mapID);
-		}*/
-
-		self.return_data = AddNodeRevisionReturnData {revisionID: revision.id.0};
-
-        // todo: add this back
-		//AssertValidate("NodeRevision", revision, "Revision invalid");*/
-
-        Ok(JSONValue::Null)
-	}
-
-	fn Commit(&self, ctx: &AccessorContext<'_>) -> Result<(), Error> {
-		/*let AddNodeRevisionPayload {mapID, revision} = self.payload;
-		// needed, since "node.c_currentRevision" and "nodeRevision.node" are fk-refs to each other
-		//db.DeferConstraints = true; // commented; done globally in Command.augmentDBUpdates now (instant-checking doesn't really improve debugging in this context)
-
-		//db.set('general/data/.lastNodeRevisionID', self.revisionID);
-		db_set(ctx, &["nodes", revision.node.as_str(), ".c_currentRevision"], JSONValue::String(revision.id.0));
-		//delete revision.phrasing_tsvector; // db populates this automatically
-        revision.phrasing_tsvector = "".to_owned(); // db populates this automatically
-		db_set(ctx, &["nodeRevisions", revision.id.0.as_str()], revision);
-
-        // todo: add this back
-		/*if mapID.is_some() && self.recordAsNodeEdit {
-			if !(self.map_nodeEdits && self.nodeEdit) { return Err(anyhow!("Node-edit property not prepared!")); }
-
-			// delete prior node-edits entries for this map+node (only need last entry for each)
-			// todo: maybe change this to only remove old entries of same map+node+type
-			let map_nodeEdits_forSameNode = self.map_nodeEdits.filter(|a| a.node == self.nodeEdit.node);
-			for edit in map_nodeEdits_forSameNode {
-				db_set(ctx, &["mapNodeEdits", edit.id.0.as_str()], None);
-			}
-
-			// delete old node-edits (ie. older than last 100) for this map, in mapNodeEdits
-			let map_nodeEdits_remaining = self.map_nodeEdits.Exclude(...map_nodeEdits_forSameNode);
-			let nodeEditsBeforeLast100 = map_nodeEdits_remaining.OrderByDescending(|a| a.time).Skip(100)
-				.Take(10); // limit node-edits-to-remove to 10 entries (else server can be overwhelmed and crash; exact diagnosis unknown, but happened for command-runs for case of 227-at-once)
-			for edit in nodeEditsBeforeLast100 {
-				db_set(ctx, &["mapNodeEdits", edit.id.0.as_str()], None);
-			}
-
-			//db_set(ctx, dbp`maps/${mapID}/nodeEditTimes/data/.${revision.node}`, revision.createdAt);
-			//db_set(ctx, dbp`mapNodeEditTimes/${mapID}/.${revision.node}`, WrapDBValue(revision.createdAt, {merge: true}));
-			db_set(ctx, &["mapNodeEdits", self.nodeEdit.id.0.as_str()], self.nodeEdit);
-		}*/*/
-
-        Ok(())
-	}
 }

@@ -136,7 +136,6 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
     //if let Some(comp) = step.signIn {}
     if let Some(comp) = step.addNodeRevision {
         let fut = post_request_to_app_server_rs(json!({
-            "operationName": "AddNodeRevision",
             "variables": {
                 "input": {
                     "mapID": "GLOBAL_MAP_00000000001",
@@ -153,7 +152,7 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
                     }
                 }
             },
-            "query": "mutation AddNodeRevision($input: AddNodeRevisionInput) { AddNodeRevision(input: $input) { id } }"
+            "query": "mutation($input: AddNodeRevisionInput) { addNodeRevision(input: $input) { id } }"
         }));
 
         if step.waitTillComplete.unwrap_or(true) {

@@ -6,7 +6,7 @@ use std::future::Future;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig, graphiql_source};
-use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables};
+use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables, extensions};
 use rust_shared::bytes::Bytes;
 use deadpool_postgres::{Pool, Manager};
 use rust_shared::hyper::header::CONTENT_LENGTH;
@@ -42,6 +42,7 @@ use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, Tr
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
 use crate::db::commands::add_media::MutationShard_AddMedia;
 use crate::db::commands::add_node_phrasing::MutationShard_AddNodePhrasing;
+use crate::db::commands::add_node_revision::MutationShard_AddNodeRevision;
 use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
 use crate::db::commands::add_share::MutationShard_AddShare;
 use crate::db::commands::add_term::MutationShard_AddTerm;
@@ -62,6 +63,7 @@ use crate::db::general::_sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::store::storage::AppStateWrapper;
+use crate::utils::db::agql_ext::gql_general_extension::{CustomExtension, CustomExtensionCreator};
 use crate::{get_cors_layer};
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
@@ -97,10 +99,12 @@ pub struct QueryRoot(
 #[derive(MergedObject, Default)]
 pub struct MutationRoot(
     MutationShard_General, MutationShard_General_Subtree,
-    // commands
+    // commands, matching standard add/delete/update pattern
     MutationShard_AddAccessPolicy, MutationShard_AddMedia, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag, MutationShard_AddShare, MutationShard_AddTerm,
     MutationShard_DeleteAccessPolicy, MutationShard_DeleteMedia, MutationShard_DeleteNodePhrasing, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
     MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
+    // commands, others
+    MutationShard_AddNodeRevision,
 );
 
 #[derive(MergedSubscription, Default)]
@@ -142,6 +146,8 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWra
         .data(pool)
         .data(storage_wrapper)
         .data(lq_storage_wrapper)
+        //.extension(extensions::Logger)
+        .extension(CustomExtensionCreator)
         //.data(connection)
         .finish();
 

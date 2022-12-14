@@ -11,7 +11,7 @@ use rust_shared::serde::{Deserialize};
 use tracing::info;
 
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_phrasings::{NodePhrasing, NodePhrasingInput};
+use crate::db::node_phrasings::{NodePhrasingInput, NodePhrasing};
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
@@ -22,7 +22,7 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddNodePhrasingInput {
-	nodePhrasing: NodePhrasingInput,
+	phrasing: NodePhrasingInput,
 }
 
 #[derive(SimpleObject, Debug)]
@@ -38,27 +38,27 @@ impl MutationShard_AddNodePhrasing {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
-		let AddNodePhrasingInput { nodePhrasing: nodePhrasing_ } = input;
+		let AddNodePhrasingInput { phrasing: phrasing_ } = input;
 		let mut result = AddNodePhrasingResult { id: "<tbd>".to_owned() };
 		
-		let nodePhrasing = NodePhrasing {
+		let phrasing = NodePhrasing {
 			// set by server
 			id: ID(new_uuid_v4_as_b64()),
 			creator: user_info.id.to_string(),
 			createdAt: time_since_epoch_ms_i64(),
 			// pass-through
-			node: nodePhrasing_.node,
-			r#type: nodePhrasing_.r#type,
-			text_base: nodePhrasing_.text_base,
-			text_negation: nodePhrasing_.text_negation,
-			text_question: nodePhrasing_.text_question,
-			note: nodePhrasing_.note,
-			terms: nodePhrasing_.terms,
-			references: nodePhrasing_.references,
+			node: phrasing_.node,
+			r#type: phrasing_.r#type,
+			text_base: phrasing_.text_base,
+			text_negation: phrasing_.text_negation,
+			text_question: phrasing_.text_question,
+			note: phrasing_.note,
+			terms: phrasing_.terms,
+			references: phrasing_.references,
 		};
-		result.id = nodePhrasing.id.to_string();
+		result.id = phrasing.id.to_string();
 
-		set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), nodePhrasing.id.to_string(), nodePhrasing).await?;
+		set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
 
 		ctx.tx.commit().await?;
 		info!("Command completed! Result:{:?}", result);

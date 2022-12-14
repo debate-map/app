@@ -11,7 +11,6 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
-use rust_shared::db::node_revisions::NodeRevision;
 use rust_shared::serde;
 use std::collections::HashSet;
 use std::path::Path;

@@ -13,6 +13,7 @@ import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
@@ -203,8 +204,9 @@ export class TitlePanel extends BaseComponentPlus(
 		if (newRevision.phrasing[titleKey] != edit_newTitle) {
 			newRevision.phrasing[titleKey] = edit_newTitle;
 
-			const command = new AddNodeRevision({mapID: map?.id, revision: newRevision});
-			const revisionID = await command.RunOnServer();
+			/*const command = new AddNodeRevision({mapID: map?.id, revision: newRevision});
+			const revisionID = await command.RunOnServer();*/
+			const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: newRevision.ExcludeKeys("id", "creator", "createdAt")});
 			RunInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 			//await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
 			//await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
