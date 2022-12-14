@@ -84,3 +84,11 @@ export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string, r
 	});
 	return result.data.addNodeRevision as {id: string};
 }
+
+export async function RunCommand_DeleteNode(inputFields: {mapID?: string, nodeID: string}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: DeleteNodeInput!) { deleteNode(input: $input) { __typename } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.deleteNode as {};
+}

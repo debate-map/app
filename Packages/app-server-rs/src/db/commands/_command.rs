@@ -85,13 +85,13 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
                     //Some(SF::value(key_and_val.1.to_owned())),
                     Some({
                         // temp; hard-code the correct type for fields that the guesser guesses wrong (this system really needs cleanup to avoid this ugly hack...)
-                        if table_name == "nodePhrasings" && key_and_val.0 == "references" {
+                        if table_name == "maps" && key_and_val.0 == "editors" {
                             let as_array = key_and_val.1.as_array().unwrap().clone();
                             let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
-                            /*let mut as_array_of_strings: Vec<String> = vec![];
-                            for val in as_array {
-                                as_array_of_strings.push(val.as_str().unwrap().to_owned());
-                            }*/
+                            SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
+                        } else if table_name == "nodePhrasings" && key_and_val.0 == "references" {
+                            let as_array = key_and_val.1.as_array().unwrap().clone();
+                            let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
                             SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
                         } else if table_name == "nodePhrasings" && key_and_val.0 == "terms" {
                             let as_array = key_and_val.1.as_array().unwrap().clone();
@@ -186,4 +186,11 @@ pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val
         MaybeUndefined::Null => None,
         MaybeUndefined::Value(val) => Some(val),
     }
+}
+
+/// Helper function to defer constraints in a database transaction.
+/// This is generally used to avoid foreign-key constraint violations, when multiple rows (linked with each other through foreign-key constraints) are being updated within the same command/transaction.
+pub async fn defer_constraints(ctx: &AccessorContext<'_>) -> Result<(), Error>{
+    ctx.tx.execute("SET CONSTRAINTS ALL DEFERRED", &[]).await?;
+    Ok(())
 }

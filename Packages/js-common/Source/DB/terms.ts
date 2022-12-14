@@ -31,6 +31,7 @@ export const GetTermsByForm = CreateAccessor((form: string): Term[]=>{
 		params: {filter: {forms: {contains: [form]}}},
 	}, a=>a.terms);
 });
+// sync:rs
 export const GetTermsAttached = CreateAccessor((nodeRevisionID: string): Term[]=>{
 	const revision = GetNodeRevision(nodeRevisionID);
 	if (revision == null) return emptyArray;

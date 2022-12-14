@@ -21,6 +21,7 @@ pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error
         "id": {"equalTo": id}
     }))).await
 }
+// sync:js
 pub async fn get_terms_attached(ctx: &AccessorContext<'_>, node_rev_id: &str) -> Result<Vec<Term>, Error> {
     let rev = get_node_revision(ctx, node_rev_id).await?;
     let empty = &vec![];
@@ -31,12 +32,6 @@ pub async fn get_terms_attached(ctx: &AccessorContext<'_>, node_rev_id: &str) ->
     let terms: Vec<Term> = futures::future::join_all(terms_futures).await;
     Ok(terms)
 }
-
-/*cached_expand!{
-const ce_args: &str = r##"
-id = "command_runs"
-excludeLinesWith = "#[graphql(name"
-"##;*/
 
 wrap_slow_macros!{
 

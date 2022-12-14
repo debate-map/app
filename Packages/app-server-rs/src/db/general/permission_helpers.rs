@@ -3,6 +3,13 @@ use rust_shared::anyhow::anyhow;
 use crate::{utils::db::accessors::AccessorContext, db::{users::User, access_policies::{AccessPolicy, get_access_policy}}};
 use rust_shared::anyhow::Error;
 
+/// If user is the creator, also requires that they (still) have basic permissions.
+pub fn is_user_creator_or_mod(user_info: &User, creator: &str) -> bool {
+    if user_info.id == creator && user_info.permissionGroups.basic { return true; }
+    if user_info.permissionGroups.r#mod { return true; }
+    false
+}
+
 /*pub fn assert_user_is_mod(user_info: &User) -> Result<(), Error> {
     if user_info.permissionGroups.r#mod { return Ok(()); }
     Err(anyhow!("This action requires moderator permissions."))

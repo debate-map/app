@@ -35,23 +35,6 @@ export function PathSegmentToNodeID(segment: string|n): UUID {
 	Assert(false, "Segment text is invalid.");
 }
 
-/* export type NodeMap = ObservableMap<string, NodeL1>;
-export const GetNodeMap = StoreAccessor((s) => (): NodeMap => {
-	return GetDocs((a) => a.nodes);
-}); */
-/* export const GetNodes = StoreAccessor((s) => (): NodeL1[] => {
-	/* const nodeMap = GetNodeMap();
-	return CachedTransform('GetNodes', [], nodeMap, () => (nodeMap ? nodeMap.VValues(true) : [])); *#/
-	return GetDocs({}, (a) => a.nodes);
-});
-export const GetNodesL2 = StoreAccessor((s) => (): NodeL2[] => {
-	const nodes = GetNodes();
-	return nodes.map((a) => GetNodeL2(a));
-}); */
-/* export function GetNodes_Enhanced(): NodeL1[] {
-	let nodeMap = GetNodeMap();
-	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
-} */
 export const GetNodesByIDs = CreateAccessor((ids: string[]): NodeL1[]=>{
 	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "Normal"](id));
 	return ids.map(id=>GetNode.BIN(id));
@@ -64,10 +47,8 @@ export const GetNodesByIDs = CreateAccessor((ids: string[]): NodeL1[]=>{
 export const GetNode = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.nodes.get(id!));
 });
-/*export async function GetNodeAsync(id: string) {
-	return await GetDataAsync("nodes", id) as NodeL1;
-}*/
 
+// sync:rs
 export const IsRootNode = CreateAccessor((node: NodeL1)=>{
 	if (node.type != NodeType.category) return false;
 	const parents = GetNodeChildLinks(undefined, node.id);
@@ -312,16 +293,19 @@ export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChild
 	return CheckValidityOfLink(parent.type, newChildGroup, newChild.type);
 });
 
-export const ForDelete_GetError = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
+// sync:rs
+export const AssertUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	const parentLinks = GetNodeChildLinks(undefined, node.id);
 	if (parentLinks.map(a=>a.parent).Exclude(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
-	const nodeChildren = GetNodeChildrenL2(node.id);
+	/*const nodeChildren = GetNodeChildrenL2(node.id, false);
 	if (CE(nodeChildren).Any(a=>a == null)) return "[still loading children...]";
-	if (CE(nodeChildren.map(a=>a.id)).Exclude(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
+	if (CE(nodeChildren.map(a=>a.id)).Exclude(...(subcommandInfo?.childrenToIgnore ?? [])).length) {*/
+	const childLinks = GetNodeChildLinks(node.id);
+	if (CE(childLinks.map(a=>a.child)).Exclude(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
 		return `Cannot delete this node (#${node.id}) until all its children have been unlinked or deleted.`;
 	}
 	return null;
@@ -343,8 +327,8 @@ export const ForCopy_GetError = CreateAccessor((userID: string|n, node: NodeL1)=
 	return null;
 });
 
-/* export function GetUnlinkErrorMessage(parent: NodeL1, child: NodeL1) {
+/*export function GetUnlinkErrorMessage(parent: NodeL1, child: NodeL1) {
 	//let childNodes = node.children.Select(a=>nodes[a]);
 	let parentNodes = nodes.filter(a=>a.children && a.children[node._id]);
 	if (parentNodes.length <= 1)
-} */
+}*/

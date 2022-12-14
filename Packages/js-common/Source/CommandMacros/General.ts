@@ -43,7 +43,7 @@ function CommandXOrAncestorCanShowInStream(command: Command<any>|n) {
 }
 
 Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
-	// some commands (eg. AddNodeRevision) need contraint-deferring till end of transaction, so just do that always (instant-checking doesn't really improve debugging in this context anyway)
+	// some commands (eg. DeleteNode) need contraint-deferring till end of transaction, so just do that always (instant-checking doesn't really improve debugging in this context anyway)
 	db.DeferConstraints = true;
 
 	const commandClass = command.constructor as typeof Command;

@@ -118,6 +118,9 @@ mod utils {
 }
 mod db {
     pub mod commands {
+        pub mod _shared {
+            pub mod increment_map_edits;
+        }
         pub mod _command;
         pub mod add_access_policy;
         //pub mod add_map;
@@ -130,6 +133,7 @@ mod db {
         pub mod clone_subtree;
         pub mod delete_access_policy;
         pub mod delete_media;
+        pub mod delete_node;
         pub mod delete_node_phrasing;
         pub mod delete_node_tag;
         pub mod delete_share;

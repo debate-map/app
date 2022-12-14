@@ -1,3 +1,5 @@
+use rust_shared::anyhow::Error;
+use rust_shared::serde_json::json;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::async_graphql;
@@ -8,10 +10,17 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::accessors::{AccessorContext, get_db_entry};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+
+pub async fn get_map(ctx: &AccessorContext<'_>, id: &str) -> Result<Map, Error> {
+    get_db_entry(ctx, "maps", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
 
 wrap_slow_macros!{
 
