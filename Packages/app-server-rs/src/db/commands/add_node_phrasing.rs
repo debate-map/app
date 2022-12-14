@@ -22,12 +22,12 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddNodePhrasingInput {
-	phrasing: NodePhrasingInput,
+	pub phrasing: NodePhrasingInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddNodePhrasingResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

@@ -22,12 +22,12 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddShareInput {
-	share: ShareInput,
+	pub share: ShareInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddShareResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

@@ -25,8 +25,8 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct UpdateMediaInput {
-	id: String,
-	updates: MediaUpdates,
+	pub id: String,
+	pub updates: MediaUpdates,
 }
 
 #[derive(SimpleObject, Debug)]

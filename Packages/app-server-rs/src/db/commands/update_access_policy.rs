@@ -24,8 +24,8 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct UpdateAccessPolicyInput {
-	id: String,
-	updates: AccessPolicyUpdates,
+	pub id: String,
+	pub updates: AccessPolicyUpdates,
 }
 
 #[derive(SimpleObject, Debug)]

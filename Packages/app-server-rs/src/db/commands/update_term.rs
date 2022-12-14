@@ -25,8 +25,8 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct UpdateTermInput {
-	id: String,
-	updates: TermUpdates,
+	pub id: String,
+	pub updates: TermUpdates,
 }
 
 #[derive(SimpleObject, Debug)]

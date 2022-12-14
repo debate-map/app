@@ -22,12 +22,12 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddTermInput {
-	term: TermInput,
+	pub term: TermInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddTermResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

@@ -22,12 +22,12 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddMediaInput {
-	media: MediaInput,
+	pub media: MediaInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddMediaResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

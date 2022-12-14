@@ -9,6 +9,7 @@ import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
+import {RunCommand_DeleteMap} from "Utils/DB/Command.js";
 import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
@@ -99,18 +100,19 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>*/}
 								<Button ml={5} text="Delete" onLeftClick={async()=>{
 									const rootNode = NN(await GetAsync(()=>GetNodeL2(map.rootNode)));
-									if (GetNodeChildLinks(rootNode.id).length != 0) {
+									/*if (GetNodeChildLinks(rootNode.id).length != 0) {
 										return void ShowMessageBox({
 											title: "Still has children",
 											message: "Cannot delete this map until all the children of its root-node have been unlinked or deleted.",
 										});
-									}
+									}*/
 
 									ShowMessageBox({
 										title: `Delete "${map.name}"`, cancelButton: true,
 										message: `Delete the map "${map.name}"?`,
 										onOK: async()=>{
-											await new DeleteMap({id: map.id}).RunOnServer();
+											//await new DeleteMap({id: map.id}).RunOnServer();
+											await RunCommand_DeleteMap({id: map.id});
 											RunInAction("DeleteMap.onDone", ()=>store.main.debates.selectedMapID = null);
 										},
 									});

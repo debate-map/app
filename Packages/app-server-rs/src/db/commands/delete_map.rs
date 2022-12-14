@@ -1,0 +1,79 @@
+use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde_json::{Value, json};
+use rust_shared::utils::db_constants::SYSTEM_USER_ID;
+use rust_shared::{async_graphql, serde_json, anyhow, GQLError, to_anyhow};
+use rust_shared::async_graphql::{Object};
+use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::utils::time::{time_since_epoch_ms_i64};
+use rust_shared::serde::{Deserialize};
+
+use crate::db::access_policies::get_access_policy;
+use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, command_boilerplate};
+use crate::db::commands::_shared::increment_map_edits::{increment_map_edits, increment_map_edits_if_valid};
+use crate::db::commands::delete_node::{DeleteNodeInput, delete_node};
+use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
+use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::maps::{Map, get_map};
+use crate::db::users::User;
+use crate::utils::db::accessors::AccessorContext;
+use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
+use crate::utils::general::data_anchor::{DataAnchorFor1};
+
+use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::delete_node::DeleteNodeExtras;
+
+wrap_slow_macros!{
+
+#[derive(Default)]
+pub struct MutationShard_DeleteMap;
+#[Object]
+impl MutationShard_DeleteMap {
+	async fn delete_map(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteMapInput) -> Result<DeleteMapResult, GQLError> {
+		/*let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
+		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
+
+		let result = delete_map(&ctx, input, &user_info).await?;
+
+		ctx.tx.commit().await?;
+		info!("Command completed! Result:{:?}", result);
+		Ok(result)*/
+
+		/*command_boilerplate_pre!(gql_ctx, input, ctx, user_info);
+		let result = delete_map(&ctx, input, &user_info).await?;
+		command_boilerplate_post!(ctx, result);*/
+
+		command_boilerplate!(gql_ctx, input, delete_map);
+
+		//Ok(standard_command(gql_ctx, input, delete_map).await?)
+    }
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct DeleteMapInput {
+	pub id: String,
+}
+
+#[derive(SimpleObject, Debug)]
+pub struct DeleteMapResult {
+	#[graphql(name = "_useTypenameFieldInstead")] __: String,
+}
+
+}
+
+pub async fn delete_map(ctx: &AccessorContext<'_>, input: DeleteMapInput, user_info: &User, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
+	let DeleteMapInput { id } = input;
+	let result = DeleteMapResult { __: gql_placeholder() };
+	
+	let old_data = get_map(ctx, &id).await?;
+	assert_user_can_delete(ctx, user_info, &old_data.creator, &old_data.accessPolicy).await?;
+
+	// first delete the root-node
+	delete_node(ctx, DeleteNodeInput { mapID: Some(id.clone()), nodeID: old_data.rootNode }, user_info, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
+
+	delete_db_entry_by_id(ctx, "maps".to_owned(), id.to_string()).await?;
+
+	Ok(result)
+}

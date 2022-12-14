@@ -25,7 +25,7 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct DeleteMediaInput {
-	id: String,
+	pub id: String,
 }
 
 #[derive(SimpleObject, Debug)]

@@ -26,13 +26,13 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddNodeRevisionInput {
-	mapID: Option<String>,
-	revision: NodeRevisionInput,
+	pub mapID: Option<String>,
+	pub revision: NodeRevisionInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddNodeRevisionResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

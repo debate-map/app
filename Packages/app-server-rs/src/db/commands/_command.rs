@@ -2,19 +2,20 @@
 
 use std::iter::{once, empty};
 
-use rust_shared::async_graphql::MaybeUndefined;
+use rust_shared::async_graphql::{MaybeUndefined, self};
 use rust_shared::indoc::indoc;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{bytes, serde_json};
 use rust_shared::serde::Serialize;
 use async_trait::async_trait;
-use futures_util::{TryStreamExt};
+use futures_util::{TryStreamExt, Future};
 use rust_shared::serde_json::json;
 use rust_shared::{tokio_postgres, tokio_postgres::{Row, types::ToSql}};
 use rust_shared::anyhow::{anyhow, Error, Context};
 use deadpool_postgres::{Transaction, Pool};
 
+use crate::db::users::User;
 use crate::utils::db::sql_param::{SQLParamBoxed};
 use crate::utils::{db::{sql_fragment::{SQLFragment, SF}, filter::{FilterInput, QueryFilter, json_value_to_guessed_sql_value_param_fragment}, queries::get_entries_in_collection_basic, accessors::AccessorContext, sql_ident::SQLIdent, sql_param::{SQLParam, CustomPGSerializer}}, general::{general::{match_cond_to_iter}, data_anchor::{DataAnchor, DataAnchorFor1}, extensions::IteratorV}, type_aliases::{PGClientObject, RowData}};
 
@@ -187,3 +188,58 @@ pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val
         MaybeUndefined::Value(val) => Some(val),
     }
 }
+
+/*macro_rules! command_boilerplate_pre {
+    ($gql_ctx:ident, $input:ident, $ctx:ident, $user_info:ident) => {
+        let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
+		let $ctx = $crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, $gql_ctx).await?;
+		let $user_info = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &$ctx).await?;
+    }
+}
+pub(crate) use command_boilerplate_pre;
+macro_rules! command_boilerplate_post {
+    ($ctx:ident, $result:ident) => {
+		$ctx.tx.commit().await?;
+		tracing::info!("Command completed! Result:{:?}", $result);
+		return Ok($result);
+    }
+}
+pub(crate) use command_boilerplate_post;*/
+
+macro_rules! command_boilerplate {
+    ($gql_ctx:ident, $input:ident, $command_impl_func:ident) => {
+        let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
+		let ctx = $crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, $gql_ctx).await?;
+		let user_info = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
+
+		let result = $command_impl_func(&ctx, $input, &user_info, Default::default()).await?;
+
+		ctx.tx.commit().await?;
+		tracing::info!("Command completed! Result:{:?}", result);
+		return Ok(result);
+    }
+}
+pub(crate) use command_boilerplate;
+
+pub type NoExtras = bool;
+
+// I couldn't quite get this working (error relating to lifetimes)
+/*pub async fn standard_command<InputT, ResultT, Fut>(
+    gql_ctx: &async_graphql::Context<'_>,
+    input: InputT,
+    command_impl_func: impl Fn(&AccessorContext, InputT, User) -> Fut
+) -> Result<ResultT, Error>
+    where
+        ResultT: std::fmt::Debug,
+        Fut: Future<Output = Result<ResultT, Error>>
+{
+    let mut anchor = crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
+    let ctx = crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, gql_ctx).await?;
+    let user_info = crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
+
+    let result = command_impl_func(&ctx, input, user_info).await?;
+
+    ctx.tx.commit().await?;
+    tracing::info!("Command completed! Result:{:?}", result);
+    return Ok(result);
+}*/

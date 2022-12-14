@@ -22,12 +22,12 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddNodeTagInput {
-	tag: NodeTagInput,
+	pub tag: NodeTagInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddNodeTagResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

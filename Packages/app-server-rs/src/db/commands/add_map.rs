@@ -22,12 +22,12 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddMapInput {
-	map: MapInput,
+	pub map: MapInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddMapResult {
-	id: String,
+	pub id: String,
 }
 
 #[derive(Default)]

@@ -112,6 +112,11 @@ impl Display for GQLError {
 		write!(f, "{}", self.full_error_info_string)
 	}
 }
+/*impl Debug for GQLError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.full_error_info_string)
+    }
+}*/
 impl<E> From<E> for GQLError where E: Into<anyhow::Error> + Send + Sync + 'static {
 	fn from(error: E) -> Self {
 		let as_anyhow_error_with_backtrace: anyhow::Error = error.into();

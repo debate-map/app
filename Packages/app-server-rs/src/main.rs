@@ -132,6 +132,7 @@ mod db {
         pub mod add_term;
         pub mod clone_subtree;
         pub mod delete_access_policy;
+        pub mod delete_map;
         pub mod delete_media;
         pub mod delete_node;
         pub mod delete_node_phrasing;

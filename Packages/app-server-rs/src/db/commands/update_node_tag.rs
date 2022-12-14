@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct UpdateNodeTagInput {
-	id: String,
-	updates: NodeTagUpdates,
+	pub id: String,
+	pub updates: NodeTagUpdates,
 }
 
 #[derive(SimpleObject, Debug)]

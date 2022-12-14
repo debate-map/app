@@ -25,7 +25,7 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct DeleteShareInput {
-	id: String,
+	pub id: String,
 }
 
 #[derive(SimpleObject, Debug)]

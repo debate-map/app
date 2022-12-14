@@ -27,7 +27,7 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct DeleteAccessPolicyInput {
-	id: String,
+	pub id: String,
 }
 
 #[derive(SimpleObject, Debug)]
