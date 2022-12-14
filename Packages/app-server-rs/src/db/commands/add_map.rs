@@ -34,7 +34,7 @@ pub struct AddMapResult {
 pub struct MutationShard_AddMap;
 #[Object]
 impl MutationShard_AddMap {
-	async fn add_map(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMapInput) -> Result<AddMapResult, Error> {
+	async fn add_map(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMapInput) -> Result<AddMapResult, GQLError> {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;

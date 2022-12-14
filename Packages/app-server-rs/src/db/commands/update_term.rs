@@ -2,7 +2,7 @@ use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::utils::db_constants::SYSTEM_USER_ID;
-use rust_shared::{async_graphql, serde_json, anyhow};
+use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error};
@@ -38,7 +38,7 @@ pub struct UpdateTermResult {
 pub struct MutationShard_UpdateTerm;
 #[Object]
 impl MutationShard_UpdateTerm {
-	async fn update_term(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateTermInput) -> Result<UpdateTermResult, Error> {
+	async fn update_term(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateTermInput) -> Result<UpdateTermResult, GQLError> {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;

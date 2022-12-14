@@ -53,7 +53,7 @@ impl fmt::Display for BasicError {
 }
 
 // SubError (special one for async-graphql subscriptions)
-// todo: probably merge this with FullyBakedError
+// todo: probably merge this with GQLError
 // ==========
 
 // Clone is needed for it to be used under async-graphql's `#[Subscription]` macro
@@ -99,66 +99,23 @@ impl fmt::Display for SubError {
     }
 }
 
-// "fully-baked" error
+// graphql-error (could alternately be called the "fully-baked error" type)
 // * An error-type that auto-wraps the base-error into an anyhow::Error (for backtrace info), then stringifies its full error info for repeating in its `impl Display`.
 // * Needed for use in async-graphql, where our logger extension wants backtrace data, but can only access the result of `error.to_string()` rather than the source error itself.
 // ==========
 
-/*fn with_backtrace(base_error: rust_shared::tokio_postgres::Error) -> anyhow::Error {
-	let as_anyhow_error_with_backtrace: anyhow::Error = base_error.into();
-	let error_full_info_as_simple_string = format!("{:?}", as_anyhow_error_with_backtrace);
-	anyhow!("{}", error_full_info_as_simple_string)
-}*/
-
-/*auto trait NotAnyhowError {}
-// double negation: `anyhow::Error` is not a "not `anyhow::Error`"
-impl !NotAnyhowError for anyhow::Error {}*/
-
-/*auto trait NotGQLError {}
-impl !NotGQLError for GQLError {}*/
-
-pub struct FullyBakedError {
+pub struct GQLError {
 	full_error_info_string: String,
 }
-impl Display for FullyBakedError {
+impl Display for GQLError {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		write!(f, "{}", self.full_error_info_string)
 	}
 }
-
-/*impl<E: NotAnyhowError> From<E> for GQLError where E: std::error::Error + Send + Sync + 'static {
-    fn from(error: E) -> Self {
-        let as_anyhow_error_with_backtrace: anyhow::Error = error.into();
-		let error_full_info_as_simple_string = format!("{:?}", as_anyhow_error_with_backtrace);
-		GQLError {
-			full_error_info_string: error_full_info_as_simple_string,
-		}
-    }
-}*/
-/*impl From<anyhow::Error> for GQLError {
-    fn from(anyhow_error: anyhow::Error) -> Self {
-		let error_full_info_as_simple_string = format!("{:?}", anyhow_error); // it's an anyhow error, so it already has backtrace data
-		GQLError {
-			full_error_info_string: error_full_info_as_simple_string,
-		}
-    }
-}*/
-//impl !Send for GQLError {}
-/*impl<E> From<E> for GQLError where E: std::fmt::Debug + Send + Sync + 'static {
-    fn from(error_info: E) -> Self {
-		let as_anyhow_error_with_backtrace: anyhow::Error = anyhow!("{:?}", error_info);
-		let error_full_info_as_simple_string = format!("{:?}", as_anyhow_error_with_backtrace);
-		GQLError {
-			full_error_info_string: error_full_info_as_simple_string,
-		}
-	}
-}*/
-
-impl<E> From<E> for FullyBakedError where E: Into<anyhow::Error> + Send + Sync + 'static {
+impl<E> From<E> for GQLError where E: Into<anyhow::Error> + Send + Sync + 'static {
 	fn from(error: E) -> Self {
-		//let as_anyhow_error: anyhow::Error = anyhow::Error::from(error);
 		let as_anyhow_error_with_backtrace: anyhow::Error = error.into();
-		FullyBakedError {
+		GQLError {
 			full_error_info_string: format!("{:?}", as_anyhow_error_with_backtrace),
 		}
 	}

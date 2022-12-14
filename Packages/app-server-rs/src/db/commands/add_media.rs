@@ -2,7 +2,7 @@ use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::utils::db_constants::SYSTEM_USER_ID;
-use rust_shared::{async_graphql, serde_json, anyhow};
+use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error};
@@ -34,7 +34,7 @@ pub struct AddMediaResult {
 pub struct MutationShard_AddMedia;
 #[Object]
 impl MutationShard_AddMedia {
-	async fn add_media(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMediaInput) -> Result<AddMediaResult, Error> {
+	async fn add_media(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMediaInput) -> Result<AddMediaResult, GQLError> {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
 		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
@@ -56,7 +56,7 @@ impl MutationShard_AddMedia {
 		result.id = media.id.to_string();
 
 		//assert_user_is_mod(&user_info)?;
-		if !user_info.permissionGroups.r#mod { return Err(anyhow!("Only moderators can add media currently. (till review/approval system is implemented)")); }
+		if !user_info.permissionGroups.r#mod { Err(anyhow!("Only moderators can add media currently. (till review/approval system is implemented)"))? }
 		set_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), media.id.to_string(), media).await?;
 
 		ctx.tx.commit().await?;

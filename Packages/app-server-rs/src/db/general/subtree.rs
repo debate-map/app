@@ -12,7 +12,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::serde;
+use rust_shared::{serde, GQLError};
 use std::collections::HashSet;
 use std::path::Path;
 use std::rc::Rc;
@@ -112,7 +112,7 @@ impl From<Row> for PathNodeFromDB {
 pub struct QueryShard_General_Subtree;
 #[Object]
 impl QueryShard_General_Subtree {
-    async fn subtree(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
+    async fn subtree(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 
@@ -122,7 +122,7 @@ impl QueryShard_General_Subtree {
     }
 
     // temp
-    async fn subtree2(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
+    async fn subtree2(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 
@@ -132,7 +132,7 @@ impl QueryShard_General_Subtree {
     }
 
     // lower-level functions
-    async fn descendants(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, Error> {
+    async fn descendants(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
@@ -141,7 +141,7 @@ impl QueryShard_General_Subtree {
         let descendants: Vec<Descendant> = rows.into_iter().map(|a| a.into()).collect();
         Ok(descendants)
     }
-    async fn ancestors(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Ancestor>, Error> {
+    async fn ancestors(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Ancestor>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
@@ -150,7 +150,7 @@ impl QueryShard_General_Subtree {
         let ancestors: Vec<Ancestor> = rows.into_iter().map(|a| a.into()).collect();
         Ok(ancestors)
     }
-    async fn shortestPath(&self, gql_ctx: &async_graphql::Context<'_>, start_node: String, end_node: String) -> Result<Vec<PathNodeFromDB>, Error> {
+    async fn shortestPath(&self, gql_ctx: &async_graphql::Context<'_>, start_node: String, end_node: String) -> Result<Vec<PathNodeFromDB>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 
@@ -159,7 +159,7 @@ impl QueryShard_General_Subtree {
         Ok(path_nodes)
     }
 
-    async fn descendants2(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, Error> {
+    async fn descendants2(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
@@ -177,7 +177,7 @@ impl QueryShard_General_Subtree {
 pub struct MutationShard_General_Subtree;
 #[Object]
 impl MutationShard_General_Subtree {
-    async fn cloneSubtree(&self, gql_ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, Error> {
+    async fn cloneSubtree(&self, gql_ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
         let result = clone_subtree(gql_ctx, payload).await?;
         Ok(result)
     }

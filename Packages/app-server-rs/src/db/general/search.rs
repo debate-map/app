@@ -11,7 +11,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
-use rust_shared::serde;
+use rust_shared::{serde, GQLError};
 use std::collections::HashSet;
 use std::path::Path;
 use std::rc::Rc;
@@ -66,7 +66,7 @@ impl QueryShard_General_Search {
         root_node_id: String, max_depth: Option<usize>, query: String,
         search_limit: usize, search_offset: Option<usize>,
         alt_phrasing_rank_factor: Option<f64>, quote_rank_factor: Option<f64>,
-    ) -> Result<Vec<SearchResult>, Error> {
+    ) -> Result<Vec<SearchResult>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 

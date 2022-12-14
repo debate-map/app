@@ -32,10 +32,7 @@ impl Extension for CustomExtension {
             .filter(|(_, operation)| operation.node.ty == OperationType::Query)
             .any(|(_, operation)| operation.node.selection_set.node.items.iter().any(|selection| matches!(&selection.node, Selection::Field(field) if field.node.name.node == "__schema")));
         if !is_schema {
-            log::info!(
-                target: "async-graphql",
-                "[Execute] {}", ctx.stringify_execute_doc(&document, variables)
-            );
+            log::info!(target: "async-graphql", "[Execute] {}", ctx.stringify_execute_doc(&document, variables));
         }
         Ok(document)
     }
@@ -66,30 +63,12 @@ impl Extension for CustomExtension {
                             PathSegment::Index(idx) => { let _ = write!(&mut path, "{}", idx); }
                             PathSegment::Field(name) => { let _ = write!(&mut path, "{}", name); }
                         }
-                        /*#[allow(unused_must_use)] {
-                            match s {
-                                PathSegment::Index(idx) => write!(&mut path, "{}", idx),
-                                PathSegment::Field(name) => write!(&mut path, "{}", name),
-                            };
-                        }*/
                     }
 
-                    log::warn!(
-                        target: "async-graphql",
-                        "[Error] path={} locations={:?} message={}", path, err.locations, err.message
-                        //"[Error] path={} message={} FullInfo:{:?}", path, err.message, err
-                    );
+                    log::warn!(target: "async-graphql", "[Error] path={} locations={:?} message={}", path, err.locations, err.message);
                 } else {
-                    log::warn!(
-                        target: "async-graphql",
-                        "[Error] locations={:?} message={}", err.locations, err.message
-                        //"[Error] message={} FullInfo:{:?}", err.message, err
-                    );
+                    log::warn!(target: "async-graphql", "[Error] locations={:?} message={}", err.locations, err.message);
                 }
-
-                // now that we've logged the full error-info to the server log, remove the backtrace-info from the response (so that it doesn't get sent to the client)
-                /*let message_before_backtrace = err.message.split("Stack backtrace:").next().unwrap_or(&err.message);
-                err.message.replace_range(.., message_before_backtrace);*/
             }
         }
 

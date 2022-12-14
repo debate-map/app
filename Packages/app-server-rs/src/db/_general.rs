@@ -4,7 +4,7 @@ use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::utils::db_constants::SYSTEM_USER_ID;
-use rust_shared::{async_graphql, serde_json};
+use rust_shared::{async_graphql, serde_json, GQLError};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
@@ -54,18 +54,18 @@ pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
     #[graphql(name = "_GetConnectionID")]
-    async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result, Error> {
+    async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result, GQLError> {
         Ok(GetConnectionID_Result {
             id: "todo".to_owned()
         })
     }
 
     // todo: move this to an appropriate location (make some structuring similar to the Command system in app-server-js)
-    /*async fn transferNodes(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result> {
+    /*async fn transferNodes(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
         let result = transfer_nodes(ctx, payload).await?;
         Ok(result)
     }*/
-    async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, Error> {
+    async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
         let result = refresh_lq_data(ctx, payload).await?;
         Ok(result)
     }

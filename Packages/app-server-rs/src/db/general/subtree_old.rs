@@ -1,6 +1,7 @@
 use jsonschema::JSONSchema;
 use jsonschema::output::BasicOutput;
 use lazy_static::lazy_static;
+use rust_shared::GQLError;
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use deadpool_postgres::{Pool, Client, Transaction};
@@ -57,7 +58,7 @@ wrap_slow_macros!{
 pub struct QueryShard_General_Subtree_Old;
 #[Object]
 impl QueryShard_General_Subtree_Old {
-    async fn subtree_old(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, Error> {
+    async fn subtree_old(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 

@@ -4,7 +4,7 @@ use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async
 use flume::{Receiver, Sender};
 use rust_shared::utils::_k8s::get_reqwest_client_with_k8s_certs;
 use rust_shared::utils::futures::make_reliable;
-use rust_shared::{futures, axum, tower, tower_http};
+use rust_shared::{futures, axum, tower, tower_http, GQLError};
 use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
@@ -56,7 +56,7 @@ impl QueryShard_General {
     /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
     
-    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<MtxData>, Error> {
+    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<MtxData>, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
@@ -77,7 +77,7 @@ impl QueryShard_General {
         Ok(mtx_results_filtered)
     }
     
-    async fn lqInstances(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<LQInstance_Partial>, Error> {
+    async fn lqInstances(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<LQInstance_Partial>, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
@@ -98,7 +98,7 @@ impl QueryShard_General {
         Ok(lqis)
     }
     
-    async fn basicInfo(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, Error> {
+    async fn basicInfo(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         let basic_info = get_basic_info_from_app_server_rs().await?;
@@ -206,7 +206,7 @@ struct StartMigration_Result {
 pub struct MutationShard_General;
 #[Object]
 impl MutationShard_General {
-    /*async fn clearLogEntries(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+    /*async fn clearLogEntries(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
@@ -218,7 +218,7 @@ impl MutationShard_General {
         })
     }*/
     
-    async fn restartAppServer(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+    async fn restartAppServer(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         tell_k8s_to_restart_app_server().await?;
@@ -228,7 +228,7 @@ impl MutationShard_General {
         })
     }
 
-    async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, Error> {
+    async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         let app_state = ctx.data::<AppStateWrapper>().unwrap();
@@ -240,7 +240,7 @@ impl MutationShard_General {
         })
     }
     
-    async fn startMigration(&self, ctx: &async_graphql::Context<'_>, admin_key: String, to_version: usize) -> Result<StartMigration_Result, Error> {
+    async fn startMigration(&self, ctx: &async_graphql::Context<'_>, admin_key: String, to_version: usize) -> Result<StartMigration_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
         let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
@@ -258,7 +258,7 @@ impl MutationShard_General {
         })
     }
 
-    async fn executeTestSequence(&self, ctx: &async_graphql::Context<'_>, admin_key: String, sequence: TestSequence) -> Result<GenericMutation_Result, Error> {
+    async fn executeTestSequence(&self, ctx: &async_graphql::Context<'_>, admin_key: String, sequence: TestSequence) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key.clone(), true)?;
         
         //let message = execute_test_sequence_on_app_server_rs(admin_key, sequence).await?;
