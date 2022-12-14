@@ -69,6 +69,9 @@ pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
             // (long-term, the plan is to make a way for the monitor tool to request that verbose data for a time-slice the user specifies, if/when needed)
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
         },
+        "async-graphql" => {
+            does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN])
+        },
         _ => false
     }
 }
