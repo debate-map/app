@@ -22,10 +22,8 @@ use super::_command::{set_db_entry_by_id_for_struct, command_boilerplate, NoExtr
 
 wrap_slow_macros!{
 
-#[derive(Default)]
-pub struct MutationShard_AddAccessPolicy;
-#[Object]
-impl MutationShard_AddAccessPolicy {
+#[derive(Default)] pub struct MutationShard_AddAccessPolicy;
+#[Object] impl MutationShard_AddAccessPolicy {
 	async fn add_access_policy(&self, gql_ctx: &async_graphql::Context<'_>, input: AddAccessPolicyInput) -> Result<AddAccessPolicyResult, GQLError> {
 		command_boilerplate!(gql_ctx, input, add_access_policy);
     }
@@ -43,7 +41,7 @@ pub struct AddAccessPolicyResult {
 
 }
 
-pub async fn add_access_policy(ctx: &AccessorContext<'_>, input: AddAccessPolicyInput, user_info: &User, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
+pub async fn add_access_policy(ctx: &AccessorContext<'_>, user_info: &User, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
 	let AddAccessPolicyInput { policy: policy_ } = input;
 	let mut result = AddAccessPolicyResult { id: "<tbd>".to_owned() };
 	

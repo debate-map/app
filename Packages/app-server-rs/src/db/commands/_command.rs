@@ -189,6 +189,12 @@ pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val
     }
 }
 
+/* Usage example:
+```
+command_boilerplate_pre!(gql_ctx, input, ctx, user_info);
+let result = delete_map(&ctx, input, &user_info).await?;
+command_boilerplate_post!(ctx, result);
+```*/
 /*macro_rules! command_boilerplate_pre {
     ($gql_ctx:ident, $input:ident, $ctx:ident, $user_info:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
@@ -206,13 +212,14 @@ macro_rules! command_boilerplate_post {
 }
 pub(crate) use command_boilerplate_post;*/
 
+// Usage example: `command_boilerplate!(gql_ctx, input, delete_map);`
 macro_rules! command_boilerplate {
     ($gql_ctx:ident, $input:ident, $command_impl_func:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
 		let ctx = $crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, $gql_ctx).await?;
 		let user_info = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
 
-		let result = $command_impl_func(&ctx, $input, &user_info, Default::default()).await?;
+		let result = $command_impl_func(&ctx, &user_info, $input, Default::default()).await?;
 
 		ctx.tx.commit().await?;
 		tracing::info!("Command completed! Result:{:?}", result);
@@ -224,6 +231,7 @@ pub(crate) use command_boilerplate;
 pub type NoExtras = bool;
 
 // I couldn't quite get this working (error relating to lifetimes)
+// Usage example: `Ok(standard_command(gql_ctx, input, delete_map).await?)`
 /*pub async fn standard_command<InputT, ResultT, Fut>(
     gql_ctx: &async_graphql::Context<'_>,
     input: InputT,

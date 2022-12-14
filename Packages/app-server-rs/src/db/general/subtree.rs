@@ -173,10 +173,8 @@ impl QueryShard_General_Subtree {
 // mutations
 // ==========
 
-#[derive(Default)]
-pub struct MutationShard_General_Subtree;
-#[Object]
-impl MutationShard_General_Subtree {
+#[derive(Default)] pub struct MutationShard_General_Subtree;
+#[Object] impl MutationShard_General_Subtree {
     async fn cloneSubtree(&self, gql_ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
         let result = clone_subtree(gql_ctx, payload).await?;
         Ok(result)

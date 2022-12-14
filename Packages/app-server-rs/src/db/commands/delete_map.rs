@@ -26,28 +26,10 @@ use super::delete_node::DeleteNodeExtras;
 
 wrap_slow_macros!{
 
-#[derive(Default)]
-pub struct MutationShard_DeleteMap;
-#[Object]
-impl MutationShard_DeleteMap {
+#[derive(Default)] pub struct MutationShard_DeleteMap;
+#[Object] impl MutationShard_DeleteMap {
 	async fn delete_map(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteMapInput) -> Result<DeleteMapResult, GQLError> {
-		/*let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
-		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
-
-		let result = delete_map(&ctx, input, &user_info).await?;
-
-		ctx.tx.commit().await?;
-		info!("Command completed! Result:{:?}", result);
-		Ok(result)*/
-
-		/*command_boilerplate_pre!(gql_ctx, input, ctx, user_info);
-		let result = delete_map(&ctx, input, &user_info).await?;
-		command_boilerplate_post!(ctx, result);*/
-
 		command_boilerplate!(gql_ctx, input, delete_map);
-
-		//Ok(standard_command(gql_ctx, input, delete_map).await?)
     }
 }
 
@@ -63,7 +45,7 @@ pub struct DeleteMapResult {
 
 }
 
-pub async fn delete_map(ctx: &AccessorContext<'_>, input: DeleteMapInput, user_info: &User, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
+pub async fn delete_map(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteMapInput, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
 	let DeleteMapInput { id } = input;
 	let result = DeleteMapResult { __: gql_placeholder() };
 	
@@ -71,7 +53,7 @@ pub async fn delete_map(ctx: &AccessorContext<'_>, input: DeleteMapInput, user_i
 	assert_user_can_delete(ctx, user_info, &old_data.creator, &old_data.accessPolicy).await?;
 
 	// first delete the root-node
-	delete_node(ctx, DeleteNodeInput { mapID: Some(id.clone()), nodeID: old_data.rootNode }, user_info, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
+	delete_node(ctx, user_info, DeleteNodeInput { mapID: Some(id.clone()), nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
 
 	delete_db_entry_by_id(ctx, "maps".to_owned(), id.to_string()).await?;
 

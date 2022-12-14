@@ -100,12 +100,12 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>*/}
 								<Button ml={5} text="Delete" onLeftClick={async()=>{
 									const rootNode = NN(await GetAsync(()=>GetNodeL2(map.rootNode)));
-									/*if (GetNodeChildLinks(rootNode.id).length != 0) {
+									if (GetNodeChildLinks(rootNode.id).length != 0) {
 										return void ShowMessageBox({
 											title: "Still has children",
 											message: "Cannot delete this map until all the children of its root-node have been unlinked or deleted.",
 										});
-									}*/
+									}
 
 									ShowMessageBox({
 										title: `Delete "${map.name}"`, cancelButton: true,

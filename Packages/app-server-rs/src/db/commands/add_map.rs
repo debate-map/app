@@ -30,10 +30,8 @@ pub struct AddMapResult {
 	pub id: String,
 }
 
-#[derive(Default)]
-pub struct MutationShard_AddMap;
-#[Object]
-impl MutationShard_AddMap {
+#[derive(Default)] pub struct MutationShard_AddMap;
+#[Object] impl MutationShard_AddMap {
 	async fn add_map(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMapInput) -> Result<AddMapResult, GQLError> {
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
 		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;

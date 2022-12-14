@@ -49,10 +49,8 @@ impl GetConnectionID_Result {
     async fn id(&self) -> &str { &self.id }
 }
 
-#[derive(Default)]
-pub struct MutationShard_General;
-#[Object]
-impl MutationShard_General {
+#[derive(Default)] pub struct MutationShard_General;
+#[Object] impl MutationShard_General {
     #[graphql(name = "_GetConnectionID")]
     async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result, GQLError> {
         Ok(GetConnectionID_Result {

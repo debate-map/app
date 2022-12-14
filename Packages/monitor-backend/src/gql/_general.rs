@@ -202,10 +202,8 @@ struct StartMigration_Result {
     migrationID: String,
 }
 
-#[derive(Default)]
-pub struct MutationShard_General;
-#[Object]
-impl MutationShard_General {
+#[derive(Default)] pub struct MutationShard_General;
+#[Object] impl MutationShard_General {
     /*async fn clearLogEntries(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         

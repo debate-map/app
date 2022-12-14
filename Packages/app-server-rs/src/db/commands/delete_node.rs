@@ -26,21 +26,9 @@ use super::_command::{set_db_entry_by_id_for_struct, command_boilerplate};
 
 wrap_slow_macros!{
 
-#[derive(Default)]
-pub struct MutationShard_DeleteNode;
-#[Object]
-impl MutationShard_DeleteNode {
+#[derive(Default)] pub struct MutationShard_DeleteNode;
+#[Object] impl MutationShard_DeleteNode {
 	async fn delete_node(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodeInput) -> Result<DeleteNodeResult, GQLError> {
-		/*let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-		let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await?;
-		let user_info = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
-		
-		let result = delete_node(&ctx, input, &user_info).await?;
-
-		ctx.tx.commit().await?;
-		info!("Command completed! Result:{:?}", result);
-		Ok(result)*/
-		
 		command_boilerplate!(gql_ctx, input, delete_node);
     }
 }
@@ -66,7 +54,7 @@ pub struct DeleteNodeExtras {
 	//pub child_node_ids: Vec<String>,
 }
 
-pub async fn delete_node(ctx: &AccessorContext<'_>, input: DeleteNodeInput, user_info: &User, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
+pub async fn delete_node(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
 	let DeleteNodeInput { mapID, nodeID } = input;
 	let result = DeleteNodeResult { __: gql_placeholder() };
 	
