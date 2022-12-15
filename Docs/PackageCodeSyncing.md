@@ -10,9 +10,17 @@ In those cases, there still needs to be some way for developers to "coordinate" 
 
 ### Standard synchronization categories
 
-* The structs/classes/enums representing the information present in the database.
+* The structs/classes/enums representing the information present in the database should all be synced.
 	* JavaScript path: https://github.com/debate-map/app/tree/master/Packages/js-common/Source/db
 	* Rust path: https://github.com/debate-map/app/tree/master/Packages/app-server-rs/src/db
+* For the logic determining whether a "command" is allowed, the situation is not quite as clear-cut. Basically though:
+	* For "basic checks" (eg. whether user has general permission for action X on object Y), the logic should be present on both the client and server (generally using a single call to a function like `IsUserCreatorOrMod` -- or soon, to some generic function that performs checks based on the relevant access policy/policies); generally the frontend should "apply" these basic checks at the visibility level, rather than "graying out" the option or the like. (eg. for a node that a non-mod user had no part in creating, they would not expect a "Delete" option to show up at all)
+	* For "complex checks", whether the logic is replicated on the client depends on whether the action already shows a dialog to the user when clicked.
+		* If it doesn't show a dialog when clicked, then the logic should be replicated on the client, and validation errors should show in the UI prior to clicking. (generally by graying-out the option and showing a little warning icon, which the user can hover over to get an explanation of its being disabled)
+		* If it *does* show a dialog when clicked, then the logic should be present on the server only.
+			* Reason 1: For these actions that show dialogs, many of them have complex enough logic that it's too much of a maintenance burden to replicate those checks on the client as well. (eg. multi-layered checks relating to node-orphaning and such)
+			* Reason 2: These complex check failures are arguably better to present to the user in a dialog-box anyway, where context and visualizations can be provided; when doing so, we can simply ask the server to validate the command for us (as soon as the dialog is opened), removing the need for a client-side version of the checks. (this is done by supplying the `onlyValidate: true` flag as part of the command's arguments; the server will run the regular command function, except decline to actually commit the transaction, while also skipping any other "persistence" actions)
+			* For cases where the error hit is "complex" (eg. a node can't be deleted because some other user did such and such), then the server should include an "error code" of some kind (eg. `@code:pasting-under-same-parent`), such that the dialog is able to understand it and provide context and visualizations for the issue (in a clear enough way that newcomers should be able to understand it).
 
 ### Notations for other synchronizations
 

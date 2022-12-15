@@ -47,6 +47,7 @@ use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
 use crate::db::commands::add_share::MutationShard_AddShare;
 use crate::db::commands::add_term::MutationShard_AddTerm;
 use crate::db::commands::delete_access_policy::MutationShard_DeleteAccessPolicy;
+use crate::db::commands::delete_argument::MutationShard_DeleteArgument;
 use crate::db::commands::delete_map::MutationShard_DeleteMap;
 use crate::db::commands::delete_media::MutationShard_DeleteMedia;
 use crate::db::commands::delete_node::MutationShard_DeleteNode;
@@ -54,6 +55,7 @@ use crate::db::commands::delete_node_phrasing::MutationShard_DeleteNodePhrasing;
 use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
 use crate::db::commands::delete_share::MutationShard_DeleteShare;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
+use crate::db::commands::unlink_node::MutationShard_UnlinkNode;
 use crate::db::commands::update_access_policy::MutationShard_UpdateAccessPolicy;
 use crate::db::commands::update_media::MutationShard_UpdateMedia;
 use crate::db::commands::update_node_phrasing::MutationShard_UpdateNodePhrasing;
@@ -107,7 +109,8 @@ pub struct MutationRoot(
     MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
     // commands, others
     MutationShard_AddNodeRevision,
-    MutationShard_DeleteMap, MutationShard_DeleteNode,
+    MutationShard_DeleteArgument, MutationShard_DeleteMap, MutationShard_DeleteNode,
+    MutationShard_UnlinkNode,
 );
 
 #[derive(MergedSubscription, Default)]

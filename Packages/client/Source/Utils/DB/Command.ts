@@ -77,7 +77,7 @@ export const RunCommand_UpdateTerm = CreateFunc_RunCommand_UpdateX(Term);
 	Omit<Partial<NodeRevision>, "id" | "creator" | "createdAt">
 	& {id?: never, creator?: never, createdAt?: never};*/
 type NodeRevisionInput = Partial<NodeRevision> & {id?: never, creator?: never, createdAt?: never};
-export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string, revision: NodeRevisionInput}) {
+export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string|n, revision: NodeRevisionInput}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: AddNodeRevisionInput!) { addNodeRevision(input: $input) { id } }`,
 		variables: {input: inputFields},
@@ -85,12 +85,28 @@ export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string, r
 	return result.data.addNodeRevision as {id: string};
 }
 
+export async function RunCommand_DeleteArgument(inputFields: {mapID?: string|n, argumentID: string, claimID: string, deleteClaim: boolean}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: DeleteArgumentInput!) { deleteArgument(input: $input) { __typename } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.deleteArgument as {};
+}
+
 export const RunCommand_DeleteMap = CreateFunc_RunCommand_DeleteX(Map);
 
-export async function RunCommand_DeleteNode(inputFields: {mapID?: string, nodeID: string}) {
+export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, nodeID: string}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: DeleteNodeInput!) { deleteNode(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
 	return result.data.deleteNode as {};
+}
+
+export async function RunCommand_UnlinkNode(inputFields: {mapID?: string|n, parentID: string, childID: string}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: UnlinkNodeInput!) { unlinkNode(input: $input) { __typename } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.unlinkNode as {};
 }

@@ -6,6 +6,7 @@ import {Observer} from "web-vcore";
 import {GetNodeL3, GetNodeDisplayText, IsUserCreatorOrMod, MeID, UnlinkNode, ChildGroup} from "dm_common";
 import {Assert, NN} from "web-vcore/nm/js-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {RunCommand_UnlinkNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -25,17 +26,18 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 		const argumentParent = GetNodeL3(argumentParentPath);
 		Assert(argumentParent, "Cannot find parent of specified argument.");
 
-		const command = new UnlinkNode({mapID, parentID: argumentParent.id, childID: argument.id});
+		//const command = new UnlinkNode({mapID, parentID: argumentParent.id, childID: argument.id});
 		return (
 			<VMenuItem text="Unlink argument"
-				enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr ?? undefined}
+				//enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr ?? undefined}
 				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 					ShowMessageBox({
 						title: `Unlink "${argumentText}"`, cancelButton: true,
 						message: `Unlink the argument "${argumentText}"?`,
 						onOK: async()=>{
-							command.RunOnServer();
+							//command.RunOnServer();
+							await RunCommand_UnlinkNode({mapID, parentID: argumentParent.id, childID: argument.id});
 						},
 					});
 				}}/>

@@ -53,7 +53,7 @@ pub async fn delete_map(ctx: &AccessorContext<'_>, user_info: &User, input: Dele
 	assert_user_can_delete(ctx, user_info, &old_data.creator, &old_data.accessPolicy).await?;
 
 	// first delete the root-node
-	delete_node(ctx, user_info, DeleteNodeInput { mapID: Some(id.clone()), nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
+	delete_node(ctx, user_info, DeleteNodeInput { mapID: None, nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
 
 	delete_db_entry_by_id(ctx, "maps".to_owned(), id.to_string()).await?;
 

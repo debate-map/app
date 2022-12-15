@@ -33,7 +33,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 						message: `Delete the node "${nodeText}"${contextStr}?`,
 						onOK: async()=>{
 							//await command.RunOnServer();
-							await RunCommand_DeleteNode({mapID: mapID ?? undefined, nodeID: node.id});
+							await RunCommand_DeleteNode({mapID, nodeID: node.id});
 						},
 					});
 				}}/>

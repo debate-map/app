@@ -1,4 +1,5 @@
 import {ChildGroup, DeleteArgument, GetNodeChildLinks, GetNodeDisplayText, GetNodeL3, IsUserCreatorOrMod, MeID} from "dm_common";
+import {RunCommand_DeleteArgument} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
@@ -26,11 +27,12 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 		const claimParentLinks = GetNodeChildLinks(null, node.id);
 		const deleteClaim = canDeleteBaseClaim && claimParentLinks.length <= 1;
 
-		const command = new DeleteArgument({mapID, argumentID: argument.id, claimID: node.id, deleteClaim});
-		const error = command.Validate_Safe();
+		/*const command = new DeleteArgument({mapID, argumentID: argument.id, claimID: node.id, deleteClaim});
+		const error = command.Validate_Safe();*/
 
 		return (
-			<VMenuItem text="Delete argument" enabled={error == null} title={error}
+			<VMenuItem text="Delete argument"
+				//enabled={error == null} title={error}
 				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 
@@ -38,7 +40,8 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 						title: `Delete "${argumentText}"`, cancelButton: true,
 						message: `Delete the argument "${argumentText}", and ${deleteClaim ? "delete" : "unlink"} its base-claim?`,
 						onOK: async()=>{
-							await command.RunOnServer();
+							//await command.RunOnServer();
+							await RunCommand_DeleteArgument({mapID, argumentID: argument.id, claimID: node.id, deleteClaim});
 						},
 					});
 				}}/>
