@@ -29,8 +29,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UnlinkNode;
 #[Object] impl MutationShard_UnlinkNode {
-	async fn unlink_node(&self, gql_ctx: &async_graphql::Context<'_>, input: UnlinkNodeInput) -> Result<UnlinkNodeResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, unlink_node);
+	async fn unlink_node(&self, gql_ctx: &async_graphql::Context<'_>, input: UnlinkNodeInput, only_validate: Option<bool>) -> Result<UnlinkNodeResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, unlink_node);
     }
 }
 

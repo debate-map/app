@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateShare;
 #[Object] impl MutationShard_UpdateShare {
-	async fn update_share(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateShareInput) -> Result<UpdateShareResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, update_share);
+	async fn update_share(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateShareInput, only_validate: Option<bool>) -> Result<UpdateShareResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, update_share);
     }
 }
 

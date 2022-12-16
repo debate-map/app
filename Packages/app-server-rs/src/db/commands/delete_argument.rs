@@ -28,8 +28,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteArgument;
 #[Object] impl MutationShard_DeleteArgument {
-	async fn delete_argument(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteArgumentInput) -> Result<DeleteArgumentResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_argument);
+	async fn delete_argument(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteArgumentInput, only_validate: Option<bool>) -> Result<DeleteArgumentResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_argument);
     }
 }
 

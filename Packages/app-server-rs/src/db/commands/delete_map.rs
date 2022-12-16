@@ -28,8 +28,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteMap;
 #[Object] impl MutationShard_DeleteMap {
-	async fn delete_map(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteMapInput) -> Result<DeleteMapResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_map);
+	async fn delete_map(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteMapInput, only_validate: Option<bool>) -> Result<DeleteMapResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_map);
     }
 }
 

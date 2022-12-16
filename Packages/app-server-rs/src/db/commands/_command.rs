@@ -212,17 +212,23 @@ macro_rules! command_boilerplate_post {
 }
 pub(crate) use command_boilerplate_post;*/
 
-// Usage example: `command_boilerplate!(gql_ctx, input, delete_map);`
+// Usage example: `command_boilerplate!(gql_ctx, input, only_validate, delete_map);`
 macro_rules! command_boilerplate {
-    ($gql_ctx:ident, $input:ident, $command_impl_func:ident) => {
+    ($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
-		let ctx = $crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, $gql_ctx).await?;
+		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, $only_validate).await?;
 		let user_info = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
 
 		let result = $command_impl_func(&ctx, &user_info, $input, Default::default()).await?;
 
-		ctx.tx.commit().await?;
-		tracing::info!("Command completed! Result:{:?}", result);
+		if $only_validate.unwrap_or(false) {
+            // the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain
+            ctx.tx.rollback().await?;
+            tracing::info!("Command completed a \"validation only\" run without hitting errors. Result:{:?}", result);
+        } else {
+            ctx.tx.commit().await?;
+            tracing::info!("Command executed. Result:{:?}", result);
+        }
 		return Ok(result);
     }
 }

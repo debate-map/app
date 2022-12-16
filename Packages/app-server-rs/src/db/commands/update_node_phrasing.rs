@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateNodePhrasing;
 #[Object] impl MutationShard_UpdateNodePhrasing {
-	async fn update_node_phrasing(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateNodePhrasingInput) -> Result<UpdateNodePhrasingResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, update_node_phrasing);
+	async fn update_node_phrasing(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateNodePhrasingInput, only_validate: Option<bool>) -> Result<UpdateNodePhrasingResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, update_node_phrasing);
     }
 }
 

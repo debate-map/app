@@ -24,8 +24,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddAccessPolicy;
 #[Object] impl MutationShard_AddAccessPolicy {
-	async fn add_access_policy(&self, gql_ctx: &async_graphql::Context<'_>, input: AddAccessPolicyInput) -> Result<AddAccessPolicyResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, add_access_policy);
+	async fn add_access_policy(&self, gql_ctx: &async_graphql::Context<'_>, input: AddAccessPolicyInput, only_validate: Option<bool>) -> Result<AddAccessPolicyResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, add_access_policy);
     }
 }
 

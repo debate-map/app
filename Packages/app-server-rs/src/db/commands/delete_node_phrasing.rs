@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteNodePhrasing;
 #[Object] impl MutationShard_DeleteNodePhrasing {
-	async fn delete_node_phrasing(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodePhrasingInput) -> Result<DeleteNodePhrasingResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_node_phrasing);
+	async fn delete_node_phrasing(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodePhrasingInput, only_validate: Option<bool>) -> Result<DeleteNodePhrasingResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_node_phrasing);
     }
 }
 

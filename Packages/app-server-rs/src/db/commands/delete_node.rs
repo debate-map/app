@@ -28,8 +28,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteNode;
 #[Object] impl MutationShard_DeleteNode {
-	async fn delete_node(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodeInput) -> Result<DeleteNodeResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_node);
+	async fn delete_node(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodeInput, only_validate: Option<bool>) -> Result<DeleteNodeResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_node);
     }
 }
 

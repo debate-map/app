@@ -28,8 +28,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodeRevision;
 #[Object] impl MutationShard_AddNodeRevision {
-	async fn add_node_revision(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeRevisionInput) -> Result<AddNodeRevisionResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, add_node_revision);
+	async fn add_node_revision(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeRevisionInput, only_validate: Option<bool>) -> Result<AddNodeRevisionResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, add_node_revision);
     }
 }
 

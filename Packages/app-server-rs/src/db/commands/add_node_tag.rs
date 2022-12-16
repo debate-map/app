@@ -23,8 +23,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodeTag;
 #[Object] impl MutationShard_AddNodeTag {
-	async fn add_node_tag(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeTagInput) -> Result<AddNodeTagResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, add_node_tag);
+	async fn add_node_tag(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeTagInput, only_validate: Option<bool>) -> Result<AddNodeTagResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, add_node_tag);
     }
 }
 

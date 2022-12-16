@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateTerm;
 #[Object] impl MutationShard_UpdateTerm {
-	async fn update_term(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateTermInput) -> Result<UpdateTermResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, update_term);
+	async fn update_term(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateTermInput, only_validate: Option<bool>) -> Result<UpdateTermResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, update_term);
     }
 }
 

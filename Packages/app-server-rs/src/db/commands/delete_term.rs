@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteTerm;
 #[Object] impl MutationShard_DeleteTerm {
-	async fn delete_term(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteTermInput) -> Result<DeleteTermResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_term);
+	async fn delete_term(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteTermInput, only_validate: Option<bool>) -> Result<DeleteTermResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_term);
     }
 }
 

@@ -24,8 +24,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddMedia;
 #[Object] impl MutationShard_AddMedia {
-	async fn add_media(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMediaInput) -> Result<AddMediaResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, add_media);
+	async fn add_media(&self, gql_ctx: &async_graphql::Context<'_>, input: AddMediaInput, only_validate: Option<bool>) -> Result<AddMediaResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, add_media);
     }
 }
 

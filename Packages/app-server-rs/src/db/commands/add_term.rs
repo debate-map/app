@@ -24,8 +24,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddTerm;
 #[Object] impl MutationShard_AddTerm {
-	async fn add_term(&self, gql_ctx: &async_graphql::Context<'_>, input: AddTermInput) -> Result<AddTermResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, add_term);
+	async fn add_term(&self, gql_ctx: &async_graphql::Context<'_>, input: AddTermInput, only_validate: Option<bool>) -> Result<AddTermResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, add_term);
     }
 }
 

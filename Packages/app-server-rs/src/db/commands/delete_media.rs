@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteMedia;
 #[Object] impl MutationShard_DeleteMedia {
-	async fn delete_media(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteMediaInput) -> Result<DeleteMediaResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_media);
+	async fn delete_media(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteMediaInput, only_validate: Option<bool>) -> Result<DeleteMediaResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_media);
     }
 }
 

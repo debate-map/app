@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteShare;
 #[Object] impl MutationShard_DeleteShare {
-	async fn delete_share(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteShareInput) -> Result<DeleteShareResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_share);
+	async fn delete_share(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteShareInput, only_validate: Option<bool>) -> Result<DeleteShareResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_share);
     }
 }
 

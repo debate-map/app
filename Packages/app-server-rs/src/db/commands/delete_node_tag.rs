@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteNodeTag;
 #[Object] impl MutationShard_DeleteNodeTag {
-	async fn delete_node_tag(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodeTagInput) -> Result<DeleteNodeTagResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_node_tag);
+	async fn delete_node_tag(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteNodeTagInput, only_validate: Option<bool>) -> Result<DeleteNodeTagResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_node_tag);
     }
 }
 

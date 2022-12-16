@@ -26,8 +26,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateMedia;
 #[Object] impl MutationShard_UpdateMedia {
-	async fn update_media(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateMediaInput) -> Result<UpdateMediaResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, update_media);
+	async fn update_media(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateMediaInput, only_validate: Option<bool>) -> Result<UpdateMediaResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, update_media);
     }
 }
 

@@ -27,8 +27,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateNodeTag;
 #[Object] impl MutationShard_UpdateNodeTag {
-	async fn update_node_tag(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateNodeTagInput) -> Result<UpdateNodeTagResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, update_node_tag);
+	async fn update_node_tag(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateNodeTagInput, only_validate: Option<bool>) -> Result<UpdateNodeTagResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, update_node_tag);
     }
 }
 

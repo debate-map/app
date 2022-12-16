@@ -28,8 +28,8 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteAccessPolicy;
 #[Object] impl MutationShard_DeleteAccessPolicy {
-	async fn delete_access_policy(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteAccessPolicyInput) -> Result<DeleteAccessPolicyResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, delete_access_policy);
+	async fn delete_access_policy(&self, gql_ctx: &async_graphql::Context<'_>, input: DeleteAccessPolicyInput, only_validate: Option<bool>) -> Result<DeleteAccessPolicyResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, delete_access_policy);
     }
 }
 
