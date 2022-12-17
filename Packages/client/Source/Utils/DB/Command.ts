@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeChildLink, NodeL1} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -34,9 +34,9 @@ function CreateFunc_RunCommand_DeleteX<ResultShape = {}, T = any>(classConstruct
 		return result.data[`delete${className}`] as ResultShape;
 	};
 }
-function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T) {
+function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstructor: new(..._)=>T, classNameAsStr_override?: string) {
 	return async function(inputFields: {id: string, updates: Partial<T>}) {
-		const className = classConstructor.name;
+		const className = classNameAsStr_override ?? classConstructor.name;
 		const result = await apolloClient.mutate({
 			mutation: gql`
 				mutation($input: Update${className}Input!) {
@@ -112,3 +112,7 @@ export async function RunCommand_UnlinkNode(inputFields: {mapID?: string|n, pare
 	});
 	return result.data.unlinkNode as {};
 }
+
+export const RunCommand_UpdateLink = CreateFunc_RunCommand_UpdateX(NodeChildLink, "Link");
+export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(Map);
+export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");

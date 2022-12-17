@@ -189,6 +189,34 @@ pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val
     }
 }
 
+/// Variant of `update_field` for use with the `extras` field of db-structs, allowing easy updating of its data through the standard `update_x` commands, while preserving locked subfields.
+pub fn update_field_of_extras(val_in_updates: FieldUpdate<JSONValue>, old_val: JSONValue, locked_subfields: Vec<&str>) -> Result<JSONValue, Error> {
+    let mut result = match val_in_updates {
+        None => old_val.clone(),
+        Some(val) => val,
+    };
+    
+    let old_val_map = old_val.as_object().ok_or(anyhow!("The old-value for the \"extras\" field was not a json map/object!"))?;
+    let result_map = result.as_object_mut().ok_or(anyhow!("The final value for the \"extras\" field was somehow not a json map/object!"))?;
+    for key in locked_subfields {
+        let subfield_old_val = old_val_map.get(key).clone();
+        let subfield_new_val = result_map.get(key).clone();
+        
+        // throw error if user is trying to update the locked subfield
+        if format!("{:?}", subfield_old_val) != format!("{:?}", subfield_new_val) {
+            return Err(anyhow!("The `extras->{key}` jsonb-subfield cannot be updated from this generic update command; look for a command that deals with updating it specifically. @oldVal:{subfield_old_val:?} @newVal:{subfield_new_val:?}"));
+        }
+
+        // in case the stringification above fails to catch a change (eg. flawed Debug implementation), make certain that it doesn't go through, by always resetting the subfield to its old value
+        match old_val.get(key) {
+            None => result_map.remove(key),
+            Some(val) => result_map.insert(key.to_owned(), val.clone()),
+        };
+    }
+
+    Ok(result)
+}
+
 /* Usage example:
 ```
 command_boilerplate_pre!(gql_ctx, input, ctx, user_info);

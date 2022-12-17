@@ -2,7 +2,7 @@ use rust_shared::anyhow::{Error, anyhow};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::async_graphql::{self, Enum};
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -13,6 +13,8 @@ use rust_shared::serde;
 use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
+
+use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
 
 pub async fn get_node_child_link(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeChildLink, Error> {
     get_db_entry(ctx, "nodeChildLinks", &Some(json!({
@@ -75,6 +77,29 @@ pub struct NodeChildLink {
 }
 impl From<Row> for NodeChildLink {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+/*#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct NodeChildLinkInput {
+	pub parent: String,
+	pub child: String,
+	pub group: ChildGroup,
+	pub orderKey: String,
+	pub form: Option<ClaimForm>,
+	pub seriesAnchor: Option<bool>,
+	pub seriesEnd: Option<bool>,
+	pub polarity: Option<String>,
+    #[graphql(name = "c_parentType")]
+	pub c_parentType: Option<String>,
+    #[graphql(name = "c_childType")]
+	pub c_childType: Option<String>,
+}*/
+
+#[derive(InputObject, Deserialize)]
+pub struct NodeChildLinkUpdates {
+	pub orderKey: FieldUpdate<String>,
+	pub form: FieldUpdate_Nullable<ClaimForm>,
+	pub polarity: FieldUpdate_Nullable<String>,
 }
 
 #[derive(Clone)] pub struct GQLSet_NodeChildLink { nodes: Vec<NodeChildLink> }

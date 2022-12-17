@@ -8,6 +8,7 @@ import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
 import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, Map} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {RunCommand_UpdateMap} from "Utils/DB/Command";
 
 export const userIDPlaceholder = "[user-id placeholder]";
 
@@ -28,10 +29,11 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						<Text>Editors:</Text>
 						<InfoButton ml={5} text="Editors have extended permissions, like being able to contribute anywhere in the map. (use node permissions to restrict other users)"/>
 						{creatorOrMod &&
-						<Button ml="auto" text="Add editor" onClick={()=>{
+						<Button ml="auto" text="Add editor" onClick={async()=>{
 							const newEditors = CloneWithPrototypes(map.editors || []);
 							newEditors.push(userIDPlaceholder);
-							new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+							//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+							await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
 						}}/>}
 					</Row>
 					{map.editors.map((editorID, index)=>{
@@ -39,10 +41,11 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						const displayName = editor?.displayName ?? "n/a";
 						return (
 							<Row key={index} mt={5}>
-								<UserPicker value={editorID} onChange={val=>{
+								<UserPicker value={editorID} onChange={async val=>{
 									const newEditors = CloneWithPrototypes(map.editors);
 									newEditors[index] = val;
-									new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+									//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+									await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
 								}}>
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
@@ -51,10 +54,11 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 									ShowMessageBox({
 										title: `Remove editor "${displayName}"`, cancelButton: true,
 										message: `Remove editor "${displayName}" (id: ${editorID})?`,
-										onOK: ()=>{
+										onOK: async()=>{
 											const newEditors = CloneWithPrototypes(map.editors);
 											newEditors.RemoveAt(index);
-											new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+											//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+											await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
 										},
 									});
 								}}/>}

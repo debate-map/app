@@ -146,7 +146,10 @@ mod db {
         pub mod delete_term;
         pub mod unlink_node;
         pub mod update_access_policy;
+        pub mod update_link;
+        pub mod update_map;
         pub mod update_media;
+        pub mod update_node;
         pub mod update_node_phrasing;
         pub mod update_node_tag;
         pub mod update_share;

@@ -2,6 +2,7 @@ import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimTy
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
+import {RunCommand_UpdateLink, RunCommand_UpdateNode} from "Utils/DB/Command.js";
 import {Observer} from "web-vcore";
 import {E, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
@@ -63,8 +64,9 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
 				<GenericEntryInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt} accessPolicyID={node.accessPolicy}
 					accessPolicyButton={
-						<PolicyPicker containerStyle={{flex: "none"}} value={node.accessPolicy} onChange={val=>{
-							new UpdateNodeAccessPolicy({nodeID: node.id, accessPolicy: val}).RunOnServer();
+						<PolicyPicker containerStyle={{flex: "none"}} value={node.accessPolicy} onChange={async val=>{
+							//new UpdateNodeAccessPolicy({nodeID: node.id, accessPolicy: val}).RunOnServer();
+							await RunCommand_UpdateNode({id: node.id, updates: {accessPolicy: val}});
 						}}>
 							{/*<Button ml={5} enabled={creatorOrMod} text={accessPolicy ? `${accessPolicy.name} (id: ${accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>*/}
 							<Button ml={5} p="3px 7px" enabled={creatorOrMod} text="Change" style={{width: "100%"}}/>
@@ -97,10 +99,11 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 								const newOrderKeys = [] as string[];
 								for (const [i, childLink] of childLinks.entries()) {
 									newOrderKeys[i] = i == 0 ? VLexoRank.middle().toString() : VLexoRank.parse(newOrderKeys.Last()).genNext().toString();
-									await new UpdateLink({
+									/*await new UpdateLink({
 										linkID: childLink.id,
 										linkUpdates: {orderKey: newOrderKeys[i]},
-									}).RunOnServer();
+									}).RunOnServer();*/
+									await RunCommand_UpdateLink({id: childLink.id, updates: {orderKey: newOrderKeys[i]}});
 								}
 								ShowMessageBox({title: "Complete", message: "Simplification of children order-keys is complete."});
 							},
@@ -122,8 +125,9 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 					<Row mt={5}>
 						<Pre>Type: If </Pre>
 						<Select options={GetEntries(ArgumentType, name=>ModifyString(name, m=>[m.lowerUpper_to_lowerSpaceLower]))}
-							enabled={nodeArgOrParentSPArg_info.creatorOrMod} value={nodeArgOrParentSPArg_info.node.argumentType} onChange={val=>{
-								new SetNodeArgumentType({mapID, nodeID: nodeArgOrParentSPArg_info!.node.id, argumentType: val}).RunOnServer();
+							enabled={nodeArgOrParentSPArg_info.creatorOrMod} value={nodeArgOrParentSPArg_info.node.argumentType} onChange={async val=>{
+								//new SetNodeArgumentType({mapID, nodeID: nodeArgOrParentSPArg_info!.node.id, argumentType: val}).RunOnServer();
+								await RunCommand_UpdateNode({id: nodeArgOrParentSPArg_info!.node.id, updates: {argumentType: val}});
 							}}/>
 						<Pre> premises are true, they impact the parent.</Pre>
 					</Row>
@@ -188,22 +192,24 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 				{node.link &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Order key: </Pre>
-						<TextInput value={node.link.orderKey} onChange={val=>{
-							new UpdateLink({
+						<TextInput value={node.link.orderKey} onChange={async val=>{
+							/*new UpdateLink({
 								linkID: node.link!.id,
 								linkUpdates: {orderKey: val},
-							}).RunOnServer();
+							}).RunOnServer();*/
+							await RunCommand_UpdateLink({id: node.link!.id, updates: {orderKey: val}});
 						}}/>
 					</Row>}
 				{node.link && canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as negation: </Pre>
 						<CheckBox value={node.link.form == ClaimForm.negation}
-							onChange={val=>{
-								new UpdateLink({
+							onChange={async val=>{
+								/*new UpdateLink({
 									linkID: node.link!.id,
 									linkUpdates: {form: val ? ClaimForm.negation : ClaimForm.base},
-								}).RunOnServer();
+								}).RunOnServer();*/
+								await RunCommand_UpdateLink({id: node.link!.id, updates: {form: val ? ClaimForm.negation : ClaimForm.base}});
 							}}/>
 					</Row>}
 				{node.link && canSetAsSeriesAnchor &&
@@ -211,11 +217,12 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 						<Pre>Show as series anchor: </Pre>
 						<CheckBox value={node.link.seriesAnchor ?? false}
 							// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
-							onChange={val=>{
-								new UpdateLink({
+							onChange={async val=>{
+								/*new UpdateLink({
 									linkID: node.link!.id,
 									linkUpdates: {seriesAnchor: val || undefined},
-								}).RunOnServer();
+								}).RunOnServer();*/
+								await RunCommand_UpdateLink({id: node.link!.id, updates: {seriesAnchor: val || undefined}});
 							}}/>
 					</Row>}
 			</Column>

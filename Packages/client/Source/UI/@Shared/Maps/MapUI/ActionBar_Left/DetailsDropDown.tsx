@@ -9,7 +9,7 @@ import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
-import {RunCommand_DeleteMap} from "Utils/DB/Command.js";
+import {RunCommand_DeleteMap, RunCommand_UpdateMap} from "Utils/DB/Command.js";
 import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
@@ -49,7 +49,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 		const Button_Final = GADDemo ? Button_GAD : Button;
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
 
-		const setMapFeaturedCommand = new SetMapFeatured({id: map.id, featured: !map.featured});
+		const setMapFeaturedCommand = new SetMapFeatured({id: map.id, featured: !map.featured}); // kept atm just for permission-checking
 
 		return (
 			<DropDown>
@@ -62,16 +62,20 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 						<Row>
 							<Button mt={5} text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 								const mapUpdates = GetUpdates(map, this.detailsUI!.GetNewData()).ExcludeKeys("layers", "timelines");
-								await new UpdateMapDetails({id: map.id, updates: mapUpdates}).RunOnServer();
+								//await new UpdateMapDetails({id: map.id, updates: mapUpdates}).RunOnServer();
+								await RunCommand_UpdateMap({id: map.id, updates: mapUpdates});
 							}}/>
 						</Row>}
 					{creatorOrMod &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row mt={5} center>
-								<CheckBox text="Featured" enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.ValidateErrorStr} value={map.featured ?? false} onChange={val=>{
-									setMapFeaturedCommand.RunOnServer();
-								}}/>
+								<CheckBox text="Featured"
+									enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.ValidateErrorStr}
+									value={map.featured ?? false} onChange={async val=>{
+										//setMapFeaturedCommand.RunOnServer();
+										await RunCommand_UpdateMap({id: map.id, updates: {featured: val}});
+									}}/>
 							</Row>
 							<Row center>
 								<Text>Actions:</Text>
