@@ -16,6 +16,7 @@ import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {observer} from "web-vcore/nm/mobx-react";
+import {RunCommand_DeleteNodeRating} from "Utils/DB/Command.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
@@ -204,8 +205,9 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					const boxController = ShowMessageBox({
 						title: "Delete rating", cancelButton: true,
 						message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
-						onOK: ()=>{
-							new DeleteNodeRating({id: myRating_raw.id}).RunOnServer();
+						onOK: async()=>{
+							//new DeleteNodeRating({id: myRating_raw.id}).RunOnServer();
+							await RunCommand_DeleteNodeRating({id: myRating_raw.id});
 						},
 					});
 				}}>

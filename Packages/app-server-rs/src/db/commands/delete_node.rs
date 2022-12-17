@@ -16,7 +16,7 @@ use crate::db::commands::_shared::increment_map_edits::{increment_map_edits, inc
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_child_links::get_node_child_links;
-use crate::db::nodes::{Node, get_node, is_root_node, assert_user_can_delete_node};
+use crate::db::nodes::{get_node, is_root_node, assert_user_can_delete_node};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;

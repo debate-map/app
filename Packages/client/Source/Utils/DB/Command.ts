@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -102,6 +102,8 @@ export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, node
 	});
 	return result.data.deleteNode as {};
 }
+
+export const RunCommand_DeleteNodeRating = CreateFunc_RunCommand_DeleteX(NodeRating);
 
 export async function RunCommand_UnlinkNode(inputFields: {mapID?: string|n, parentID: string, childID: string}) {
 	const result = await apolloClient.mutate({

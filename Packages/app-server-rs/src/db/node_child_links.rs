@@ -1,4 +1,4 @@
-use rust_shared::anyhow::Error;
+use rust_shared::anyhow::{Error, anyhow};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::async_graphql::{self, Enum};
@@ -10,9 +10,15 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
 
+pub async fn get_node_child_link(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeChildLink, Error> {
+    get_db_entry(ctx, "nodeChildLinks", &Some(json!({
+        "id": {"equalTo": id}
+    }))).await
+}
 pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&str>, child_id: Option<&str>) -> Result<Vec<NodeChildLink>, Error> {
     let mut filter_map = serde_json::Map::new();
     if let Some(parent_id) = parent_id {
@@ -22,6 +28,12 @@ pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&
         filter_map.insert("child".to_owned(), json!({"equalTo": child_id}));
     }
     get_db_entries(ctx, "nodeChildLinks", &Some(JSONValue::Object(filter_map))).await
+}
+
+/// Does not handle mirror-children atm.
+pub async fn get_link_under_parent(ctx: &AccessorContext<'_>, node_id: &str, parent_id: &str) -> Result<NodeChildLink, Error> {
+	let parent_child_links = get_node_child_links(ctx, Some(parent_id), Some(node_id)).await?;
+    Ok(parent_child_links.into_iter().nth(0).ok_or(anyhow!("No link found between claimed parent #{} and child #{}.", parent_id, node_id))?)
 }
 
 wrap_slow_macros!{
@@ -36,6 +48,13 @@ pub enum ChildGroup {
     #[graphql(name = "freeform")] freeform,
 }
 
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum ClaimForm {
+    #[graphql(name = "base")] base,
+    #[graphql(name = "negation")] negation,
+    #[graphql(name = "question")] question,
+}
+
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeChildLink {
     pub id: ID,
@@ -45,7 +64,7 @@ pub struct NodeChildLink {
 	pub child: String,
 	pub group: ChildGroup,
 	pub orderKey: String,
-	pub form: Option<String>,
+	pub form: Option<ClaimForm>,
 	pub seriesAnchor: Option<bool>,
 	pub seriesEnd: Option<bool>,
 	pub polarity: Option<String>,

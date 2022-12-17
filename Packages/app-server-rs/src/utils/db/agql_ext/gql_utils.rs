@@ -13,6 +13,7 @@ pub fn get_root_fields_in_doc(doc: ExecutableDocument) -> Vec<String> {
     query_fields
 }
 
+#[cfg(test)]
 mod tests {
     use rust_shared::async_graphql;
 

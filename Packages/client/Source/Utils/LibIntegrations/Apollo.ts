@@ -277,11 +277,32 @@ async function AuthenticateWebSocketConnection() {
 		// rather than getting user-id from cookie, get it from the server's websocket-helper response
 		// (and supply the user-data to mobx-graphlink every time, because this is needed to clear out any non-authenticated data/responses it had previously cached)
 		//if (graph.userInfo == null) {
+
 		graph.SetUserInfo({
 			//id: store.main.userID_apollo!,
 			id: userID,
 		});
+
+		// get the authentication token from local storage if it exists
+		/*const token = localStorage.getItem("debate-map-user-jwt");
+		if (token != null) {
+			const {id: id_from_jwt, email: email_from_jwt} = ParseJWT(token);
+			graph.SetUserInfo({
+				id: id_from_jwt,
+			});
+		}*/
 	});
+}
+
+// source struct is `UserInfoForJWT` in jwt_utils.rs
+function ParseJWT(token: string) {
+	var base64Url = token.split(".")[1];
+	var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+	var jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c=>{
+		return `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`;
+	}).join(""));
+
+	return JSON.parse(jsonPayload) as {id: string, email: string};
 }
 
 /*let apolloSignInPromise_resolve;

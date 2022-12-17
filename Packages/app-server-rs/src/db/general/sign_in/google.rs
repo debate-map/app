@@ -100,7 +100,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
     let new_user_id = user.id.as_str().to_owned();
 	let default_policy = get_system_access_policy(ctx, &SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?;
 	let user_hidden = UserHidden {
-        id: new_uuid_v4_as_b64_id(),
+        id: user.id.clone(),
 		email: profile.email,
 		providerData: serde_json::to_value(vec![profile_clone])?,
 		lastAccessPolicy: Some(default_policy.id.as_str().to_owned()),

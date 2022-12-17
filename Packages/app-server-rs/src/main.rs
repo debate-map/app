@@ -120,6 +120,9 @@ mod db {
     pub mod commands {
         pub mod _shared {
             pub mod increment_map_edits;
+            pub mod jsonb_utils;
+            pub mod rating_processor;
+            pub mod update_node_rating_summaries;
         }
         pub mod _command;
         pub mod add_access_policy;
@@ -137,6 +140,7 @@ mod db {
         pub mod delete_media;
         pub mod delete_node;
         pub mod delete_node_phrasing;
+        pub mod delete_node_rating;
         pub mod delete_node_tag;
         pub mod delete_share;
         pub mod delete_term;
@@ -164,6 +168,12 @@ mod db {
         pub mod subtree_collector_old;
         pub mod subtree;
         pub mod subtree_collector;
+    }
+    pub mod nodes_ {
+        pub mod _node;
+    }
+    pub mod node_ratings_ {
+        pub mod _node_rating_type;
     }
     pub mod users;
     pub mod user_hiddens;

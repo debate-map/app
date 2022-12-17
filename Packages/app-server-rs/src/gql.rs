@@ -52,6 +52,7 @@ use crate::db::commands::delete_map::MutationShard_DeleteMap;
 use crate::db::commands::delete_media::MutationShard_DeleteMedia;
 use crate::db::commands::delete_node::MutationShard_DeleteNode;
 use crate::db::commands::delete_node_phrasing::MutationShard_DeleteNodePhrasing;
+use crate::db::commands::delete_node_rating::MutationShard_DeleteNodeRating;
 use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
 use crate::db::commands::delete_share::MutationShard_DeleteShare;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
@@ -109,7 +110,7 @@ pub struct MutationRoot(
     MutationShard_UpdateAccessPolicy, MutationShard_UpdateMedia, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
     // commands, others
     MutationShard_AddNodeRevision,
-    MutationShard_DeleteArgument, MutationShard_DeleteMap, MutationShard_DeleteNode,
+    MutationShard_DeleteArgument, MutationShard_DeleteMap, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
     MutationShard_UnlinkNode,
 );
 

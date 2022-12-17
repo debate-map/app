@@ -1,5 +1,7 @@
 use std::{collections::HashMap, env};
+use anyhow::{anyhow, Error};
 
+use async_graphql::{EnumType, resolver_utils::enum_value};
 use axum::http::Uri;
 
 pub enum K8sEnv {
@@ -42,6 +44,23 @@ pub fn get_uri_params(uri: &Uri) -> HashMap<String, String> {
     params
 }
 
+pub fn as_debug_str(obj: &impl std::fmt::Debug) -> String {
+    format!("{:?}", obj)
+}
+pub fn as_json_str<T: serde::Serialize>(obj: &T) -> Result<String, Error> {
+    let as_json_value = serde_json::to_value(obj)?;
+    let as_str = as_json_value.as_str().ok_or(anyhow!("The object did not serialize to a json string!"))?;
+    Ok(as_str.to_owned())
+}
+
+// project-specific; basically all our enums have derive(Serialize), so use that for serialization
+pub fn enum_to_string<T: serde::Serialize>(obj: &T) -> String {
+    as_json_str(obj).unwrap()
+}
+/*pub fn enum_to_string<T: EnumType>(obj: T) -> String {
+    enum_value(obj).to_string()
+}*/
+
 /*pub fn x_is_one_of<T: Eq + std::fmt::Debug + ?Sized>(x: &T, list: &[&T]) -> Result<(), Error> {
 	for val in list {
 		if val.eq(&x) {
@@ -50,3 +69,7 @@ pub fn get_uri_params(uri: &Uri) -> HashMap<String, String> {
 	}
 	Err(anyhow!("Supplied value for field does not match any of the valid options:{:?}", list))
 }*/
+
+pub fn average(numbers: &[f64]) -> f64 {
+    numbers.iter().sum::<f64>() as f64 / numbers.len() as f64
+}

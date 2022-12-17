@@ -3,6 +3,7 @@ import React from "react";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
+import {RunCommand_DeleteNodeRating} from "Utils/DB/Command";
 import {ES, Observer, Slider} from "web-vcore";
 import {Button, Column, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -28,7 +29,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		const myRating_raw = GetRating.CatchBail(null, node.id, ratingType, meID); // catch bail (ie. allow lazy-load)
 		const myRating_displayVal = TransformRatingForContext(myRating_raw?.value, reverseRatings);
 		const myRating_accessPolicy = GetAccessPolicy(myRating_raw?.accessPolicy);
-		
+
 		//const [showOptionalRatings, setExpanded] = useState(false);
 		const showOptionalRatings = store.main.ratingUI.showOptionalRatings;
 
@@ -56,7 +57,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 							return ES(
 								{display: "inline-flex", /*flex: 1,*/ minWidth: 0, /*padding: "5px 0",*/ whiteSpace: "initial", wordBreak: "normal", textAlign: "center", alignItems: "center", justifyContent: "center"},
 								//(index == 0 || index == ratingTypeInfo.valueRanges.length - 1) && {flex:}
-								{flex: `0 0 ${valueRange.max - valueRange.min}%`}
+								{flex: `0 0 ${valueRange.max - valueRange.min}%`},
 							);
 						}}
 						value={myRating_displayVal}
@@ -73,8 +74,9 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 					</Row>
 					<Row center>
 						<Text mr={5}>Your rating: {myRating_displayVal}</Text>
-						<Button mdIcon="delete" title="Delete your rating." onClick={()=>{
-							new DeleteNodeRating({id: myRating_raw.id!}).RunOnServer();
+						<Button mdIcon="delete" title="Delete your rating." onClick={async()=>{
+							//new DeleteNodeRating({id: myRating_raw.id!}).RunOnServer();
+							await RunCommand_DeleteNodeRating({id: myRating_raw.id!});
 						}}/>
 						<Text ml={10} mr={5}>Access-policy:</Text>
 						<PolicyPicker containerStyle={{flex: null}}
@@ -163,7 +165,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 
 class Group extends BaseComponent<{mt?: number, title: string, headerChildren?: JSX.Element}, {}> {
 	render() {
-		let {mt, title, children, headerChildren} = this.props;
+		const {mt, title, children, headerChildren} = this.props;
 		return (
 			<Column mt={mt} style={{/*padding: 5, borderRadius: 5, background: "rgba(150,150,150,.3)", border: "1px solid rgba(255,255,255,.1)"*/}}>
 				<Header text={title}>
@@ -179,7 +181,7 @@ class Group extends BaseComponent<{mt?: number, title: string, headerChildren?: 
 
 class Header extends BaseComponent<{text: string}, {}> {
 	render() {
-		let {text, children} = this.props;
+		const {text, children} = this.props;
 		return (
 			<Row style={{marginBottom: 5, height: 18, borderRadius: 3, paddingLeft: 5, background: "rgba(255,255,255,.1)"}}>
 				<Text style={{fontSize: 12}}>{text}</Text>

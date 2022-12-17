@@ -7,6 +7,7 @@ import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/no
 import {ClaimForm, NodeL1, NodeL2} from "../../DB/nodes/@Node.js";
 import {ArgumentType} from "../../DB/nodes/@NodeRevision.js";
 
+// sync:rs
 export const GetArgumentImpactPseudoRating = CreateAccessor((argument: NodeL1, premises: NodeL1[], userID: string, useAverageForMissing = false): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
@@ -50,7 +51,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor((argument: NodeL1, p
 			return null;
 		}
 	}
-	
+
 	// let strengthForType = adjustment.Distance(50) / 50;
 	const result = combinedTruthOfPremises * (relevance / 100);
 	Assert(IsNumber(result), `Impact pseudo-rating is null. @combinedTruthOfPremises:${combinedTruthOfPremises} @relevance:${relevance}`);
@@ -88,6 +89,7 @@ export function RatingListAfterRemovesAndAdds(baseList: NodeRating[], ratingsToR
 	return result;
 }
 
+// sync:rs[loosely]
 export const GetArgumentImpactPseudoRatings = CreateAccessor((
 	argument: NodeL1, premises: NodeL1[], userIDs?: string[]|n,
 	useAverageForMissing = false, ratingsBeingRemoved?: string[], ratingsBeingAdded?: NodeRating[],

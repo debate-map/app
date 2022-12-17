@@ -38,7 +38,7 @@ export function RatingValueIsInRange(value: number, range: ValueRange) {
 	// we use different logic on left and right sides; when value is exactly between two ranges, categorize it as being in the range farther from 50 (the mid-point)
 	if (leftSide && min_adjusted != 0) min_adjusted += .001;
 	if (rightSide && max_adjusted != 100) max_adjusted -= .001;
-	
+
 	return value >= min_adjusted && value <= max_adjusted;
 }
 
@@ -54,6 +54,7 @@ export class RatingType_Info {
 	tickInterval: number;*/
 	valueRanges: ValueRange[];
 }
+// sync:rs
 export const baseRatingTypeInfo = {
 	[NodeRatingType.significance]: new RatingType_Info({
 		displayText: "Significance",
@@ -86,6 +87,7 @@ export function GetRatingTypeInfo(ratingType: NodeRatingType, node?: NodeL3, par
 	return baseRatingTypeInfo[ratingType];
 }
 
+// sync:rs
 function GenerateValRangesFromLabels(labels: string[]) {
 	let ranges: [number, number][];
 	if (labels.length == 1) {
