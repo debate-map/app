@@ -1,9 +1,10 @@
+use indexmap::IndexMap;
 use rust_shared::serde_json::json;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::anyhow::{Error};
 use rust_shared::async_graphql;
-use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
+use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -11,6 +12,7 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::utils::db::accessors::{AccessorContext, get_db_entries, get_db_entry};
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
 pub async fn get_user_hidden(ctx: &AccessorContext<'_>, id: &str) -> Result<UserHidden, Error> {
@@ -32,7 +34,7 @@ wrap_slow_macros!{
 pub struct UserHidden {
     pub id: ID,
     pub email: String,
-    pub providerData: serde_json::Value,
+    pub providerData: JSONValue,
     pub backgroundID: Option<String>,
     #[graphql(name = "backgroundCustom_enabled")]
     pub backgroundCustom_enabled: Option<bool>,
@@ -44,24 +46,26 @@ pub struct UserHidden {
     pub backgroundCustom_position: Option<String>,
     pub addToStream: bool,
     pub lastAccessPolicy: Option<String>,
-    pub extras: serde_json::Value,
+    pub extras: JSONValue,
 }
 impl From<Row> for UserHidden {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            email: row.get("email"),
-            providerData: serde_json::from_value(row.get("providerData")).unwrap(),
-            backgroundID: row.get("backgroundID"),
-            backgroundCustom_enabled: row.get("backgroundCustom_enabled"),
-            backgroundCustom_color: row.get("backgroundCustom_color"),
-            backgroundCustom_url: row.get("backgroundCustom_url"),
-            backgroundCustom_position: row.get("backgroundCustom_position"),
-            addToStream: row.get("addToStream"),
-            lastAccessPolicy: row.get("lastAccessPolicy"),
-            extras: serde_json::from_value(row.get("extras")).unwrap(),
-		}
-	}
+	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UserHidden_Extras {
+    pub userFollows: Option<IndexMap<String, UserFollow>>,
+}
+
+#[derive(InputObject, Clone, Serialize, Deserialize)]
+pub struct UserFollow {
+	pub markRatings: bool,
+    #[graphql(name = "markRatings_symbol")]
+	pub markRatings_symbol: String,
+    #[graphql(name = "markRatings_color")]
+	pub markRatings_color: String,
+    #[graphql(name = "markRatings_size")]
+	pub markRatings_size: f64,
 }
 
 #[derive(Clone)] pub struct GQLSet_UserHidden { nodes: Vec<UserHidden> }

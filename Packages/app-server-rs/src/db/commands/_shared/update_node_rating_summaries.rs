@@ -30,7 +30,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::jsonb_utils::jsonb_set;
 use super::rating_processor::get_argument_impact_pseudo_ratings;
 
-pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, user_info: &User, node_id: String, rating_type: NodeRatingType) -> Result<(), Error> {
+pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, _user_info: &User, node_id: String, rating_type: NodeRatingType) -> Result<(), Error> {
 	let ratingTypeInfo = get_rating_type_info(rating_type);
 	let ratings = get_node_ratings_base(ctx, &node_id, Some(rating_type), None).await?;
 	let ratings_in_each_range = ratingTypeInfo.valueRanges.iter().map(|range|{
@@ -39,7 +39,7 @@ pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, user_info: 
 
 	let new_summary = RatingSummary {
 		average: if ratings.len() > 0 { Some(average(&ratings.into_iter().map(|a|a.value).collect_vec())) } else { None },
-		countsByRange: ratingTypeInfo.valueRanges.iter().enumerate().map(|(i, range)| ratings_in_each_range[i].len() as i64).collect_vec(),
+		countsByRange: ratingTypeInfo.valueRanges.iter().enumerate().map(|(i, _range)| ratings_in_each_range[i].len() as i64).collect_vec(),
 	};
 
 	jsonb_set(&ctx.tx, "nodes", &node_id, "extras", vec!["ratingSummaries".to_owned(), enum_to_string(&rating_type)], Some(serde_json::to_value(new_summary)?)).await?;
@@ -84,7 +84,7 @@ pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, user_info: 
 
 		let new_impact_summary = RatingSummary {
 			average: Some(average_loose),
-			countsByRange: ratingTypeInfo_impact.valueRanges.iter().enumerate().map(|(i, range)| ratings_impact_inEachRange[i].len() as i64).collect_vec(),
+			countsByRange: ratingTypeInfo_impact.valueRanges.iter().enumerate().map(|(i, _range)| ratings_impact_inEachRange[i].len() as i64).collect_vec(),
 		};
 		
 		jsonb_set(&ctx.tx, "nodes", argument.id.as_str(), "extras", vec!["ratingSummaries".to_owned(), "impact".to_owned()], Some(serde_json::to_value(new_impact_summary)?)).await?;

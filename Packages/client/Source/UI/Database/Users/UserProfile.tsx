@@ -12,6 +12,7 @@ import chroma from "web-vcore/nm/chroma-js.js";
 import {ProfilePanel} from "Store/main/profile";
 import {store} from "Store";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {RunCommand_SetUserFollowData} from "Utils/DB/Command";
 
 // todo: move these to a better, more widely usable place
 /*type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -67,7 +68,7 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 	render() {
 		const {user, meID, me, ownProfile, profileUser_h} = this.props;
 		const userPermissionGroups = GetUserPermissionGroups(user ? user.id : null);
-		const meFollows = GetUserFollows_List(user.id);
+		const meFollows = GetUserFollows_List(meID);
 		const profileUserFollow = meFollows.find(a=>a.targetUser == user.id);
 
 		return <>
@@ -86,41 +87,42 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 			</Row>
 			{!ownProfile &&
 			<Row mt={3}>
-				<CheckBox text="Follow" value={profileUserFollow != null} onChange={val=>{
+				<CheckBox text="Follow" value={profileUserFollow != null} onChange={async val=>{
 					if (val) {
-						new SetUserFollowData({targetUser: user.id, userFollow: new UserFollow()}).RunOnServer();
+						//new SetUserFollowData({targetUser: user.id, userFollow: new UserFollow()}).RunOnServer();
+						await RunCommand_SetUserFollowData({targetUser: user.id, userFollow: new UserFollow()});
 					} else {
-						new SetUserFollowData({targetUser: user.id, userFollow: null}).RunOnServer();
+						await RunCommand_SetUserFollowData({targetUser: user.id, userFollow: null});
 					}
 				}}/>
 				{profileUserFollow &&
 				<>
-					<CheckBox ml={5} text="Mark ratings" value={profileUserFollow.markRatings} onChange={val=>{
-						new SetUserFollowData({
+					<CheckBox ml={5} text="Mark ratings" value={profileUserFollow.markRatings} onChange={async val=>{
+						await RunCommand_SetUserFollowData({
 							targetUser: user.id,
 							userFollow: {...profileUserFollow, markRatings: val},
-						}).RunOnServer();
+						});
 					}}/>
 					<Text ml={5}>Symbol:</Text>
-					<TextInput ml={5} style={{width: 30}} value={profileUserFollow.markRatings_symbol} onChange={val=>{
-						new SetUserFollowData({
+					<TextInput ml={5} style={{width: 30}} value={profileUserFollow.markRatings_symbol} onChange={async val=>{
+						await RunCommand_SetUserFollowData({
 							targetUser: user.id,
 							userFollow: {...profileUserFollow, markRatings_symbol: val},
-						}).RunOnServer();
+						});
 					}}/>
 					<Text ml={5} mr={5}>Color:</Text>
-					<ColorPickerBox color={Chroma_Safe(profileUserFollow.markRatings_color).rgba()} onChange={val=>{
-						new SetUserFollowData({
+					<ColorPickerBox color={Chroma_Safe(profileUserFollow.markRatings_color).rgba()} onChange={async val=>{
+						await RunCommand_SetUserFollowData({
 							targetUser: user.id,
 							userFollow: {...profileUserFollow, markRatings_color: Chroma(val).css()},
-						}).RunOnServer();
+						});
 					}}/>
 					<Text ml={5}>Size:</Text>
-					<Spinner ml={5} value={profileUserFollow.markRatings_size} onChange={val=>{
-						new SetUserFollowData({
+					<Spinner ml={5} value={profileUserFollow.markRatings_size} onChange={async val=>{
+						await RunCommand_SetUserFollowData({
 							targetUser: user.id,
 							userFollow: {...profileUserFollow, markRatings_size: val},
-						}).RunOnServer();
+						});
 					}}/>
 				</>}
 			</Row>}
