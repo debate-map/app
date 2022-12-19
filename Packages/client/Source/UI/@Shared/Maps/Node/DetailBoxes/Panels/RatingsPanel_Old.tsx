@@ -16,7 +16,7 @@ import {Annotation, AnnotationsPlugin} from "web-vcore/nm/uplot-vplugins.js";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {observer} from "web-vcore/nm/mobx-react";
-import {RunCommand_DeleteNodeRating} from "Utils/DB/Command.js";
+import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
@@ -194,7 +194,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 								type: ratingType,
 								value: newRating_xValue_final,
 							});
-							new SetNodeRating({rating: newRating}).RunOnServer();
+							//new SetNodeRating({rating: newRating}).RunOnServer();
+							RunCommand_SetNodeRating({rating: newRating});
 						},
 					});
 				}}

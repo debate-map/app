@@ -27,7 +27,7 @@ pub trait IteratorV : Iterator {
         core::iter::Iterator::try_collect::<Vec<B>>(self)
     }*/
 }
-impl<T: ?Sized> IteratorV for T where T: Iterator { }
+impl<T: ?Sized> IteratorV for T where T: Iterator {}
 
 // this doesn't work, since Result is an enum, not a trait
 /*pub trait ResultV<T, E> : Result<T, E> {

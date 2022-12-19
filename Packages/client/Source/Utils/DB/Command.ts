@@ -105,6 +105,14 @@ export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, node
 
 export const RunCommand_DeleteNodeRating = CreateFunc_RunCommand_DeleteX(NodeRating);
 
+export async function RunCommand_SetNodeRating(inputFields: {rating: NodeRating}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: SetNodeRatingInput!) { setNodeRating(input: $input) { __typename } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.setNodeRating as {id: string};
+}
+
 export async function RunCommand_SetUserFollowData(inputFields: {targetUser: string, userFollow: UserFollow|n}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: SetUserFollowDataInput!) { setUserFollowData(input: $input) { __typename } }`,

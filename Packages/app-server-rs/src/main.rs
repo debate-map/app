@@ -144,6 +144,7 @@ mod db {
         pub mod delete_node_tag;
         pub mod delete_share;
         pub mod delete_term;
+        pub mod set_node_rating;
         pub mod set_user_follow_data;
         pub mod unlink_node;
         pub mod update_access_policy;

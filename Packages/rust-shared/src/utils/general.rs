@@ -73,3 +73,11 @@ pub fn enum_to_string<T: serde::Serialize>(obj: &T) -> String {
 pub fn average(numbers: &[f64]) -> f64 {
     numbers.iter().sum::<f64>() as f64 / numbers.len() as f64
 }
+
+pub trait ToStringV : ToString {
+    /// Simply an alias for `.to_string()`.
+    fn s(&self) -> String {
+        self.to_string()
+    }
+}
+impl<T> ToStringV for T where T: ToString {}

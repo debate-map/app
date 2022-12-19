@@ -3,7 +3,7 @@ import React from "react";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
-import {RunCommand_DeleteNodeRating} from "Utils/DB/Command";
+import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command";
 import {ES, Observer, Slider} from "web-vcore";
 import {Button, Column, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -44,7 +44,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 				type: ratingType,
 				value: newRating_xValue_final,
 			});
-			new SetNodeRating({rating: newRating}).RunOnServer();
+			RunCommand_SetNodeRating({rating: newRating});
 		}
 
 		return (
