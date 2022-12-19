@@ -11,6 +11,7 @@ import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, Assert
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
+import {RunCommand_SetNodeIsMultiPremiseArgument} from "Utils/DB/Command.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
 import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument.js";
@@ -175,7 +176,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button != 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).RunOnServer();
+							await RunCommand_SetNodeIsMultiPremiseArgument({id: parent!.id, multiPremiseArgument: true});
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
 					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == NodeType.claim).length == 1 && !forChildHolderBox &&
@@ -183,7 +184,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button !== 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
+							await RunCommand_SetNodeIsMultiPremiseArgument({id: node.id, multiPremiseArgument: false});
 						}}/>}
 				{// this is too slow, checking the paths merely when right-clicking; instead, just always have the option visible, and delay the path-finding till when clicking it
 				/*pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&

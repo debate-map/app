@@ -39,7 +39,7 @@ pub struct Node {
 	#[graphql(name = "c_currentRevision")]
 	//pub c_currentRevision: Option<String>,
 	pub c_currentRevision: String,
-	pub multiPremiseArgument: Option<bool>,
+	pub multiPremiseArgument: Option<bool>, // todo: probably make this non-nullable
 	pub argumentType: Option<ArgumentType>,
 	pub extras: JSONValue,
 	//pub extras: Node_Extras,

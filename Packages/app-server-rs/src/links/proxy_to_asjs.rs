@@ -114,7 +114,7 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
             // commands, others
             "addNodeRevision",
             "deleteArgument", "deleteMap", "deleteNode", "deleteNodeRating",
-            "setNodeRating", "setUserFollowData",
+            "setNodeIsMultiPremiseArgument", "setNodeRating", "setUserFollowData",
             "unlinkNode",
             "updateLink", "updateMap", "updateNode", "updateUser", "updateUserHidden",
         ];

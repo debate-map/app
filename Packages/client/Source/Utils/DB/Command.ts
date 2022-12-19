@@ -113,6 +113,14 @@ export async function RunCommand_SetNodeRating(inputFields: {rating: NodeRating}
 	return result.data.setNodeRating as {id: string};
 }
 
+export async function RunCommand_SetNodeIsMultiPremiseArgument(inputFields: {id: string, multiPremiseArgument: boolean|n}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: SetNodeIsMultiPremiseArgumentInput!) { setNodeIsMultiPremiseArgument(input: $input) { __typename } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.setNodeIsMultiPremiseArgument as {};
+}
+
 export async function RunCommand_SetUserFollowData(inputFields: {targetUser: string, userFollow: UserFollow|n}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: SetUserFollowDataInput!) { setUserFollowData(input: $input) { __typename } }`,
