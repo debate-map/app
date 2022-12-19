@@ -43,7 +43,6 @@ pub struct AddTermResult {
 
 pub async fn add_term(ctx: &AccessorContext<'_>, actor: &User, input: AddTermInput, _extras: NoExtras) -> Result<AddTermResult, Error> {
 	let AddTermInput { term: term_ } = input;
-	let mut result = AddTermResult { id: "<tbd>".to_owned() };
 	
 	let term = Term {
 		// set by server
@@ -60,9 +59,8 @@ pub async fn add_term(ctx: &AccessorContext<'_>, actor: &User, input: AddTermInp
 		note: term_.note,
 		r#type: term_.r#type,
 	};
-	result.id = term.id.to_string();
 
-	set_db_entry_by_id_for_struct(&ctx, "terms".to_owned(), term.id.to_string(), term).await?;
+	set_db_entry_by_id_for_struct(&ctx, "terms".to_owned(), term.id.to_string(), term.clone()).await?;
 
-	Ok(result)
+	Ok(AddTermResult { id: term.id.to_string() })
 }

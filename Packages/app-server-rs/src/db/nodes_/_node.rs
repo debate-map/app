@@ -53,9 +53,15 @@ impl From<Row> for Node {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-/*#[derive(InputObject, Clone, Serialize, Deserialize)]
+#[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeInput {
-}*/
+	pub accessPolicy: String,
+	pub r#type: NodeType,
+	pub rootNodeForMap: Option<String>,
+	pub multiPremiseArgument: Option<bool>,
+	pub argumentType: Option<ArgumentType>,
+	//pub extras: JSONValue, // to set this, use updateNode command instead (this consolidates/simplifies the subfield-sensitive validation code)
+}
 
 #[derive(InputObject, Deserialize)]
 pub struct NodeUpdates {

@@ -42,7 +42,6 @@ pub struct AddNodeTagResult {
 
 pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeTagInput, _extras: NoExtras) -> Result<AddNodeTagResult, Error> {
 	let AddNodeTagInput { tag: tag_ } = input;
-	let mut result = AddNodeTagResult { id: "<tbd>".to_owned() };
 	
 	let tag = NodeTag {
 		// set by server
@@ -58,9 +57,8 @@ pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: AddNod
 		restrictMirroringOfX: tag_.restrictMirroringOfX,
 		cloneHistory: tag_.cloneHistory,
 	};
-	result.id = tag.id.to_string();
 
-	set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
+	set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag.clone()).await?;
 
-	Ok(result)
+	Ok(AddNodeTagResult { id: tag.id.to_string() })
 }

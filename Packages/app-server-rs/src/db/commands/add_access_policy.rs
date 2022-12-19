@@ -43,7 +43,6 @@ pub struct AddAccessPolicyResult {
 
 pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
 	let AddAccessPolicyInput { policy: policy_ } = input;
-	let mut result = AddAccessPolicyResult { id: "<tbd>".to_owned() };
 	
 	let policy = AccessPolicy {
 		// set by server
@@ -55,9 +54,8 @@ pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: A
 		permissions: policy_.permissions,
 		permissions_userExtends: policy_.permissions_userExtends,
 	};
-	result.id = policy.id.to_string();
 
-	set_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy).await?;
+	set_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy.clone()).await?;
 
-	Ok(result)
+	Ok(AddAccessPolicyResult { id: policy.id.to_string() })
 }

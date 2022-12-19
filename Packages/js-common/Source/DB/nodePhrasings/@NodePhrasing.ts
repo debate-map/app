@@ -52,7 +52,11 @@ export class NodePhrasing {
 
 	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
 	@DB((t, n)=>t.specificType(n, "jsonb[]"))
-	@Field({items: {$ref: TermAttachment.name}})
+	@Field({
+		items: {$ref: TermAttachment.name},
+		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
+		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
+	})
 	terms: TermAttachment[] = [];
 
 	// for web phrasings

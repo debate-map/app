@@ -171,7 +171,11 @@ export class NodeRevision {
 	//approved = false;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: "NodePhrasing_Embedded"})
+	@Field({
+		$ref: "NodePhrasing_Embedded",
+		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
+		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
+	})
 	phrasing = NodePhrasing.Embedded({text_base: ""});
 
 	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable())
@@ -190,11 +194,11 @@ export class NodeRevision {
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({
+		items: {$ref: "Attachment"},
 		//$gqlType: "[Attachment!]!",
 		//$gqlType: "[AttachmentT0!]", // app-server-js needs this to match the postgraphile-generated graphql type-name atm (postgraphile's functionality has not yet been merged into app-server-rs)
 		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
 		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
-		items: {$ref: "Attachment"},
 	})
 	attachments: Attachment[] = [];
 }

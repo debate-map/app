@@ -15,6 +15,7 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
+use super::_shared::attachments::TermAttachment;
 use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
 
 pub async fn get_node_phrasing(ctx: &AccessorContext<'_>, id: &str) -> Result<NodePhrasing, Error> {
@@ -39,6 +40,21 @@ pub enum NodePhrasingType {
     #[graphql(name = "web")] web,
 }
 
+/// Variant of NodePhrasing struct that keeps only the fields relevant for phrasings that are "embedded" within a node-revision.
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+#[graphql(input_name = "NodePhrasingEmbeddedInput")]
+//#[graphql(name = "NodePhrasing_Embedded", input_name = "NodePhrasing_EmbeddedInput")] # todo: use this approach once async-graphql is updated
+pub struct NodePhrasing_Embedded {
+    #[graphql(name = "text_base")]
+	pub text_base: String,
+    #[graphql(name = "text_negation")]
+	pub text_negation: Option<String>,
+    #[graphql(name = "text_question")]
+	pub text_question: Option<String>,
+	pub note: Option<String>,
+	pub terms: Vec<TermAttachment>,
+}
+
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodePhrasing {
     pub id: ID,
@@ -53,7 +69,7 @@ pub struct NodePhrasing {
     #[graphql(name = "text_question")]
 	pub text_question: Option<String>,
 	pub note: Option<String>,
-	pub terms: Vec<JSONValue>,
+	pub terms: Vec<TermAttachment>,
 	pub references: Vec<String>,
 }
 impl From<Row> for NodePhrasing {
@@ -71,7 +87,7 @@ pub struct NodePhrasingInput {
     #[graphql(name = "text_question")]
 	pub text_question: Option<String>,
 	pub note: Option<String>,
-	pub terms: Vec<JSONValue>,
+	pub terms: Vec<TermAttachment>,
 	pub references: Vec<String>,
 }
 
@@ -85,7 +101,7 @@ pub struct NodePhrasingUpdates {
     #[graphql(name = "text_question")]
 	pub text_question: FieldUpdate_Nullable<String>,
 	pub note: FieldUpdate_Nullable<String>,
-	pub terms: FieldUpdate<Vec<JSONValue>>,
+	pub terms: FieldUpdate<Vec<TermAttachment>>,
 	pub references: FieldUpdate<Vec<String>>,
 }
 

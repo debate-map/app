@@ -42,7 +42,6 @@ pub struct AddShareResult {
 
 pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, input: AddShareInput, _extras: NoExtras) -> Result<AddShareResult, Error> {
 	let AddShareInput { share: share_ } = input;
-	let mut result = AddShareResult { id: "<tbd>".to_owned() };
 	
 	let share = Share {
 		// set by server
@@ -55,9 +54,8 @@ pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, input: AddShareI
 		mapID: share_.mapID,
 		mapView: share_.mapView,
 	};
-	result.id = share.id.to_string();
 
-	set_db_entry_by_id_for_struct(&ctx, "shares".to_owned(), share.id.to_string(), share).await?;
+	set_db_entry_by_id_for_struct(&ctx, "shares".to_owned(), share.id.to_string(), share.clone()).await?;
 
-	Ok(result)
+	Ok(AddShareResult { id: share.id.to_string() })
 }

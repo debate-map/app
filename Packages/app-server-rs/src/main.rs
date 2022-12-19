@@ -112,8 +112,12 @@ mod utils {
     }
 }
 mod db {
+    pub mod _shared {
+        pub mod attachments;
+    }
     pub mod commands {
         pub mod _shared {
+            pub mod add_node;
             pub mod increment_map_edits;
             pub mod jsonb_utils;
             pub mod rating_processor;
@@ -121,7 +125,7 @@ mod db {
         }
         pub mod _command;
         pub mod add_access_policy;
-        //pub mod add_map;
+        pub mod add_map;
         pub mod add_media;
         pub mod add_node_revision;
         pub mod add_node_phrasing;

@@ -46,7 +46,6 @@ pub struct SetNodeRatingResult {
 
 pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: SetNodeRatingInput, _extras: NoExtras) -> Result<SetNodeRatingResult, Error> {
 	let SetNodeRatingInput { rating: rating_ } = input;
-	let mut result = SetNodeRatingResult { id: "<tbd>".o() };
 	
 	ensure!(rating_.r#type != NodeRatingType::impact, "Cannot set impact rating directly.");
 
@@ -66,11 +65,10 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: Set
 		r#type: rating_.r#type,
 		value: rating_.value,
 	};
-	result.id = rating.id.to_string();
 
 	set_db_entry_by_id_for_struct(&ctx, "nodeRatings".o(), rating.id.to_string(), rating.clone()).await?;
 
 	update_node_rating_summaries(ctx, actor, rating.node, rating.r#type).await?;
 
-	Ok(result)
+	Ok(SetNodeRatingResult { id: rating.id.to_string() })
 }

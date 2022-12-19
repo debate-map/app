@@ -46,13 +46,17 @@ pub struct AddNodeRevisionResult {
 
 }
 
-pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeRevisionInput, _extras: NoExtras) -> Result<AddNodeRevisionResult, Error> {
+#[derive(Default)]
+pub struct AddNodeRevisionExtras {
+	pub id_override: Option<String>,
+}
+
+pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeRevisionInput, extras: AddNodeRevisionExtras) -> Result<AddNodeRevisionResult, Error> {
 	let AddNodeRevisionInput { mapID, revision: revision_ } = input;
-	let mut result = AddNodeRevisionResult { id: "<tbd>".to_owned() };
 	
 	let revision = NodeRevision {
 		// set by server
-		id: ID(new_uuid_v4_as_b64()),
+		id: ID(extras.id_override.unwrap_or(new_uuid_v4_as_b64())),
 		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		phrasing_tsvector: "<tbd>".to_owned(), // set by database
@@ -64,7 +68,6 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 		displayDetails: revision_.displayDetails,
 		attachments: revision_.attachments,
 	};
-	result.id = revision.id.to_string();
 	set_db_entry_by_id_for_struct(&ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
 
 	// also update node's "c_currentRevision" field
@@ -95,5 +98,5 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 
 	increment_map_edits_if_valid(&ctx, mapID).await?;
 
-	Ok(result)
+	Ok(AddNodeRevisionResult { id: revision.id.to_string() })
 }

@@ -43,7 +43,6 @@ pub struct AddNodePhrasingResult {
 
 pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
 	let AddNodePhrasingInput { phrasing: phrasing_ } = input;
-	let mut result = AddNodePhrasingResult { id: "<tbd>".to_owned() };
 	
 	let phrasing = NodePhrasing {
 		// set by server
@@ -60,9 +59,8 @@ pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: A
 		terms: phrasing_.terms,
 		references: phrasing_.references,
 	};
-	result.id = phrasing.id.to_string();
 
-	set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
+	set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing.clone()).await?;
 
-	Ok(result)
+	Ok(AddNodePhrasingResult { id: phrasing.id.to_string() })
 }

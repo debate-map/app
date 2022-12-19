@@ -43,7 +43,6 @@ pub struct AddMediaResult {
 
 pub async fn add_media(ctx: &AccessorContext<'_>, actor: &User, input: AddMediaInput, _extras: NoExtras) -> Result<AddMediaResult, Error> {
 	let AddMediaInput { media: media_ } = input;
-	let mut result = AddMediaResult { id: "<tbd>".to_owned() };
 	
 	let media = Media {
 		// set by server
@@ -57,11 +56,10 @@ pub async fn add_media(ctx: &AccessorContext<'_>, actor: &User, input: AddMediaI
 		url: media_.url,
 		description: media_.description,
 	};
-	result.id = media.id.to_string();
 
 	//assert_user_is_mod(&user_info)?;
 	if !actor.permissionGroups.r#mod { Err(anyhow!("Only moderators can add media currently. (till review/approval system is implemented)"))? }
-	set_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), media.id.to_string(), media).await?;
+	set_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), media.id.to_string(), media.clone()).await?;
 
-	Ok(result)
+	Ok(AddMediaResult { id: media.id.to_string() })
 }

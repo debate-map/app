@@ -52,13 +52,12 @@ pub struct MapInput {
     pub name: String,
     pub note: Option<String>,
     pub noteInline: Option<bool>,
-    pub rootNode: String,
     pub defaultExpandDepth: i32,
     pub nodeAccessPolicy: Option<String>,
     pub featured: Option<bool>,
 	pub editors: Vec<String>,
-	pub edits: i32,
-	pub editedAt: Option<i64>,
+	//pub edits: i32,
+	//pub editedAt: Option<i64>,
     pub extras: JSONValue,
 }
 

@@ -1,6 +1,7 @@
 import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
+import {RunCommand_AddMap} from "Utils/DB/Command.js";
 import {Observer, TextPlus} from "web-vcore";
 import {DEL, GetEntries, ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -203,7 +204,7 @@ export async function ShowAddMapDialog() {
 			);
 		},
 		onOK: ()=>{
-			new AddMap({map: newMap}).RunOnServer();
+			RunCommand_AddMap(newMap);
 		},
 	});
 }

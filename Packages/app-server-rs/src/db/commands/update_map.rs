@@ -65,6 +65,9 @@ pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMa
 		featured: update_field_nullable(updates.featured, old_data.featured),
 		editors: update_field(updates.editors, old_data.editors),
 		extras: update_field(updates.extras, old_data.extras),
+		// set by server
+		//edits: old_data.edits + 1,
+		editedAt: Some(time_since_epoch_ms_i64()),
 		..old_data
 	};
 

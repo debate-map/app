@@ -169,6 +169,13 @@ impl ToSql for ToSqlWrapper {
     }
 }
 
+/// Use this to fill in the string value for a field that must be set, but whose value will only be known (and set by the server) shortly.
+/// This should be used only in cases where more robust approaches would be painful to implement, since it reduces type-safety of the field a bit. (ie. field might now be "set", but left as something invalid)
+/// * `func_that_will_provide_value`: Indicates which function will end up setting the value. (used to provide greater clarity)
+pub fn tbd(func_that_will_provide_value: &str) -> String {
+    format!("<tbd; value will be set by server shortly, in function {func_that_will_provide_value}>")
+}
+
 pub fn gql_placeholder() -> String {
     "Do not request this field; it's here transiently merely to satisfy graphql (see: https://github.com/graphql/graphql-spec/issues/568). Instead, request the hidden \"__typename\" field, as that will always exist.".to_owned()
 }
