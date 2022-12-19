@@ -1,10 +1,10 @@
 use std::{fmt::Display, sync::atomic::AtomicI32, iter::{once, Once, empty}};
 use rust_shared::anyhow::{anyhow, bail, Context, Error, ensure};
 use rust_shared::itertools::{Itertools, chain};
-use regex::{Regex, Captures};
+use rust_shared::regex::{Regex, Captures};
 use rust_shared::serde_json::Map;
 use rust_shared::tokio_postgres::types::ToSql;
-use crate::{utils::{db::{filter::FilterOp, sql_param::{SQLParam}, sql_fragment::{SQLFragment, SF}, sql_ident::SQLIdent}, general::{general::match_cond_to_iter, extensions::IteratorV}}};
+use crate::{utils::{db::{filter::FilterOp, sql_param::{SQLParam}, sql_fragment::{SQLFragment, SF}, sql_ident::SQLIdent}, general::{general::match_cond_to_iter}}};
 
 use super::lq_instance::LQInstance;
 

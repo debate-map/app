@@ -51,7 +51,6 @@ use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::pg_stream_parsing::{LDChange};
 use crate::utils::type_aliases::RowData;
 use crate::utils::db::queries::{get_entries_in_collection};
-use crate::utils::general::extensions::ResultV;
 use crate::utils::general::general::{AtomicF64};
 use crate::utils::mtx::mtx::{Mtx, new_mtx};
 use crate::utils::type_aliases::{PGClientObject, ABReceiver, ABSender};

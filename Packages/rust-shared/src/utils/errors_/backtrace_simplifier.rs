@@ -1,7 +1,7 @@
-use rust_shared::anyhow::{Error, ensure};
-use rust_shared::itertools::Itertools;
+use crate::anyhow::{Error, ensure};
+use crate::itertools::Itertools;
+use once_cell::sync::Lazy;
 use regex::Regex;
-use lazy_static::lazy_static;
 
 #[derive(Clone)]
 enum StackTraceLine {
@@ -24,15 +24,13 @@ impl StackTraceLine {
 }
 
 #[allow(non_upper_case_globals)]
-pub fn simplify_stack_trace_str(source: String) -> String {
+pub fn simplify_backtrace_str(source: String) -> String {
     let lines_raw = source.split("\n");
-    lazy_static! {
-        static ref regex__func_name: Regex = Regex::new(r"^ +(\d+):").unwrap();
-        static ref regex__code_path: Regex = Regex::new(r"^ +at ").unwrap();
-        static ref regex__code_path_for_own_code: Regex = Regex::new(r"^ +at \./").unwrap();
-        static ref regex__github_path: Regex = Regex::new("/usr/local/cargo/registry/src/github.com-([0-9a-f]+)/").unwrap();
-        static ref regex__rustc_path: Regex = Regex::new("/rustc/([0-9a-f]+)/").unwrap();
-    }
+    static regex__func_name: Lazy<Regex> = Lazy::new(|| Regex::new(r"^ +(\d+):").unwrap());
+    static regex__code_path: Lazy<Regex> = Lazy::new(|| Regex::new(r"^ +at ").unwrap());
+    static regex__code_path_for_own_code: Lazy<Regex> = Lazy::new(|| Regex::new(r"^ +at \./").unwrap());
+    static regex__github_path: Lazy<Regex> = Lazy::new(|| Regex::new("/usr/local/cargo/registry/src/github.com-([0-9a-f]+)/").unwrap());
+    static regex__rustc_path: Lazy<Regex> = Lazy::new(|| Regex::new("/rustc/([0-9a-f]+)/").unwrap());
 
     let lines = lines_raw.map(|line| {
         if regex__func_name.is_match(line) {

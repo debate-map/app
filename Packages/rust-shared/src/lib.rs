@@ -1,3 +1,8 @@
+// for IteratorV
+#![feature(iterator_try_collect)]
+#![feature(try_trait_v2)]
+#![feature(try_trait_v2_residual)]
+
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
@@ -29,6 +34,8 @@ pub extern crate axum;
 pub extern crate bytes;
 pub extern crate indoc;
 pub extern crate itertools;
+pub extern crate regex;
+pub extern crate once_cell;
 pub extern crate uuid;
 pub extern crate url;
 pub extern crate futures;
@@ -44,22 +51,28 @@ pub extern crate tower_service;
 pub extern crate rust_macros;
 
 // this crate's modules
-pub mod errors;
-pub mod locks;
+pub mod db_constants;
 pub mod utils {
     pub mod db {
         pub mod uuid;
     }
-    pub mod db_constants;
+    pub mod errors;
+    pub mod errors_ {
+        pub mod backtrace_simplifier;
+    }
     pub mod futures;
     pub mod _k8s;
     pub mod k8s {
         pub mod k8s_structs;
     }
+    pub mod locks;
     pub mod general;
+    pub mod general_ {
+        pub mod extensions;
+    }
     pub mod time;
     pub mod type_aliases;
 }
 
-pub use errors::*;
-pub use locks::*;
+pub use utils::errors::*;
+pub use utils::locks::*;

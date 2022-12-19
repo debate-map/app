@@ -1,7 +1,7 @@
 use std::{fmt::Display, sync::atomic::AtomicI32, iter::{once, Once}};
 use rust_shared::anyhow::{anyhow, bail, Context, Error, ensure};
 use rust_shared::itertools::Itertools;
-use regex::{Regex, Captures};
+use rust_shared::regex::{Regex, Captures};
 use rust_shared::serde_json::Map;
 use rust_shared::tokio_postgres::types::ToSql;
 use lazy_static::lazy_static;

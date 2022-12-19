@@ -3,7 +3,7 @@ use rust_shared::{tokio_postgres, anyhow::{anyhow, bail, Context, Error, ensure}
 use rust_shared::bytes::BytesMut;
 use dyn_clone::DynClone;
 use rust_shared::itertools::Itertools;
-use regex::{Regex, Captures};
+use rust_shared::regex::{Regex, Captures};
 use rust_shared::BasicError;
 use rust_shared::serde_json::Map;
 use rust_shared::tokio_postgres::types::{ToSql, WrongType, Type, IsNull, Kind};

@@ -5,7 +5,7 @@ use axum::{body::{Body}, Error, extract::{ws::{WebSocket, Message}, WebSocketUpg
 use flume::Receiver;
 use futures::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
 use rust_shared::hyper::{StatusCode, Response};
-use once_cell::sync::Lazy;
+use rust_shared::once_cell::sync::Lazy;
 use rust_shared::{serde::{Serialize, Deserialize}, serde_json, tokio, utils::type_aliases::JSONValue};
 use rust_shared::serde_json::json;
 use tracing::error;

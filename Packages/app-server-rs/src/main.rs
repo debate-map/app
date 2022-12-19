@@ -1,6 +1,3 @@
-#![feature(iterator_try_collect)]
-#![feature(try_trait_v2)]
-#![feature(try_trait_v2_residual)]
 #![feature(let_chains)]
 //#![feature(unsized_locals)]
 //#![feature(unsized_fn_params)]
@@ -32,7 +29,7 @@
     dead_code,
 )]
 
-use rust_shared::{futures, axum, tower, tower_http, utils::general::k8s_env};
+use rust_shared::{futures, axum, tower, tower_http, utils::{general::k8s_env, errors_::backtrace_simplifier::simplify_backtrace_str}};
 use axum::{
     response::{Html},
     routing::{get},
@@ -53,7 +50,7 @@ use tracing::{info, error, metadata::LevelFilter};
 use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, Layer, util::SubscriberInitExt, filter};
 use dotenv::dotenv;
 
-use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response, general::errors::simplify_stack_trace_str}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::_sign_in};
+use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::_sign_in};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -101,8 +98,6 @@ mod utils {
     }
     pub mod general {
         pub mod data_anchor;
-        pub mod errors;
-        pub mod extensions;
         pub mod general;
         pub mod logging;
         pub mod mem_alloc;
@@ -236,7 +231,7 @@ fn set_up_globals() /*-> (ABSender<LogEntry>, ABReceiver<LogEntry>)*/ {
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
-        let stacktrace_str_simplified = simplify_stack_trace_str(stacktrace.to_string());
+        let stacktrace_str_simplified = simplify_backtrace_str(stacktrace.to_string());
 
         // if panic occurs, first do a simple logging with println!, in case the panic occurred within the logging-system
         println!("Got panic. @info:{} [see next log-message for stack-trace]", info);

@@ -17,7 +17,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
 use rust_shared::tokio_postgres::types::ToSql;
-use rust_shared::utils::db_constants::{SYSTEM_USER_ID};
+use rust_shared::db_constants::{SYSTEM_USER_ID};
 use tracing::info;
 use std::collections::HashSet;
 use std::path::Path;

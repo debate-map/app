@@ -1,9 +1,9 @@
 use std::iter::empty;
 
 use deadpool_postgres::{Transaction, tokio_postgres::types::ToSql};
-use rust_shared::{utils::type_aliases::JSONValue, itertools::{chain, Itertools}, anyhow::{anyhow, Error, Context}, serde_json};
+use rust_shared::{utils::{type_aliases::JSONValue, general_::extensions::IteratorV}, itertools::{chain, Itertools}, anyhow::{anyhow, Error, Context}, serde_json};
 
-use crate::{utils::{db::{sql_fragment::{SF, SQLFragment}, sql_param::{SQLParamBoxed, CustomPGSerializer}, sql_ident::SQLIdent}, general::{general::match_cond_to_iter, extensions::IteratorV}}, db::commands::_command::ToSqlWrapper};
+use crate::{utils::{db::{sql_fragment::{SF, SQLFragment}, sql_param::{SQLParamBoxed, CustomPGSerializer}, sql_ident::SQLIdent}, general::{general::match_cond_to_iter}}, db::commands::_command::ToSqlWrapper};
 
 pub async fn jsonb_set(tx: &Transaction<'_>, table: &str, id: &str, field: &str, jsonb_path: Vec<String>, value: Option<JSONValue>) -> Result<(), Error> {
     let mut sql_fragment = jsonb_set_to_sql_fragment(table, id, field, jsonb_path, value)?;

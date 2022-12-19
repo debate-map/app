@@ -3,7 +3,7 @@ use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream,
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::utils::db_constants::SYSTEM_USER_ID;
+use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::{async_graphql, serde_json, GQLError};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::serde::{Serialize, Deserialize};

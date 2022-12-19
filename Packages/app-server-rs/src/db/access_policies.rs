@@ -2,7 +2,7 @@ use std::panic;
 
 use rust_shared::anyhow::{Error, anyhow};
 use rust_shared::serde_json::json;
-use rust_shared::utils::db_constants::SYSTEM_USER_ID;
+use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{async_graphql, SubError, serde, serde_json};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};

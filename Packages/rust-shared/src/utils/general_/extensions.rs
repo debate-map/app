@@ -1,8 +1,25 @@
 use std::{ops::{Residual, Try}, fmt};
 
-use crate::utils::general::errors::simplify_stack_trace_str;
+use crate::utils::errors_::backtrace_simplifier::simplify_backtrace_str;
 
 pub type ChangeOutputType<T, V> = <<T as Try>::Residual as Residual<V>>::TryType;
+
+// commented in favor of `.o()` (seen below), as that communicates the "narrowness of the intended application" better (ie. for &str->String conversions, not as a general-purpose "to_string" method)
+/*pub trait ToStringV : ToString {
+    /// Simply an alias for `.to_string()`.
+    fn s(&self) -> String {
+        self.to_string()
+    }
+}
+impl<T> ToStringV for T where T: ToString {}*/
+
+pub trait ToOwnedV where Self : ToOwned {
+    /// Simply an alias for `.to_owned()`.
+    fn o(&self) -> <Self as ToOwned>::Owned {
+        self.to_owned()
+    }
+}
+impl<T: ?Sized> ToOwnedV for T where T: ToOwned {}
 
 pub trait IteratorV : Iterator {
     /// Alias for `core::iter::Iterator::try_collect` (needed for when import of itertools "shadows" that core implementation, which I prefer)
@@ -61,7 +78,7 @@ impl<T, E> ResultV<T, E> for Result<T, E> {
             Ok(t) => t,
             Err(err) => {
                 let err_str = format!("{err:?}");
-                let err_str_simplified = simplify_stack_trace_str(err_str);
+                let err_str_simplified = simplify_backtrace_str(err_str);
                 let msg = msg_getter(err);
                 panic!("{}\n\t@base_error:{}", msg, indent_all_lines(&err_str_simplified, 1));
             },

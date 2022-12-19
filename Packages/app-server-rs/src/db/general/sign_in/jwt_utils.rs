@@ -3,7 +3,7 @@ use std::env;
 use std::time::Duration;
 
 use deadpool_postgres::tokio_postgres::Row;
-use once_cell::sync::{Lazy, OnceCell};
+use rust_shared::once_cell::sync::{Lazy, OnceCell};
 use rust_shared::hyper::{Request, Body, Method};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
@@ -20,7 +20,7 @@ use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
-use rust_shared::utils::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
+use rust_shared::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::get_uri_params;
 use rust_shared::indoc::indoc;

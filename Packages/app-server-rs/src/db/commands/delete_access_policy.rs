@@ -2,7 +2,7 @@ use deadpool_postgres::tokio_postgres::GenericClient;
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
-use rust_shared::utils::db_constants::SYSTEM_USER_ID;
+use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;

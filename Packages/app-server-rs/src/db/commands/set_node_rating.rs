@@ -1,8 +1,8 @@
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
-use rust_shared::utils::db_constants::SYSTEM_USER_ID;
-use rust_shared::utils::general::ToStringV;
+use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::utils::general_::extensions::{ToOwnedV};
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
@@ -46,19 +46,19 @@ pub struct SetNodeRatingResult {
 
 pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: SetNodeRatingInput, _extras: NoExtras) -> Result<SetNodeRatingResult, Error> {
 	let SetNodeRatingInput { rating: rating_ } = input;
-	let mut result = SetNodeRatingResult { id: "<tbd>".s() };
+	let mut result = SetNodeRatingResult { id: "<tbd>".o() };
 	
 	ensure!(rating_.r#type != NodeRatingType::impact, "Cannot set impact rating directly.");
 
-	let old_ratings = get_node_ratings(ctx, &rating_.node, Some(rating_.r#type), Some(&vec![actor.id.s()])).await?;
+	let old_ratings = get_node_ratings(ctx, &rating_.node, Some(rating_.r#type), Some(&vec![actor.id.to_string()])).await?;
 	for old_rating in old_ratings {
-		delete_node_rating(ctx, actor, DeleteNodeRatingInput { id: old_rating.id.s() }, Default::default()).await?;
+		delete_node_rating(ctx, actor, DeleteNodeRatingInput { id: old_rating.id.to_string() }, Default::default()).await?;
 	}
 
 	let rating = NodeRating {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: actor.id.s(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		accessPolicy: rating_.accessPolicy,
@@ -66,9 +66,9 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: Set
 		r#type: rating_.r#type,
 		value: rating_.value,
 	};
-	result.id = rating.id.s();
+	result.id = rating.id.to_string();
 
-	set_db_entry_by_id_for_struct(&ctx, "nodeRatings".s(), rating.id.s(), rating.clone()).await?;
+	set_db_entry_by_id_for_struct(&ctx, "nodeRatings".o(), rating.id.to_string(), rating.clone()).await?;
 
 	update_node_rating_summaries(ctx, actor, rating.node, rating.r#type).await?;
 

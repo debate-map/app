@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use once_cell::sync::Lazy;
+use rust_shared::once_cell::sync::Lazy;
 use rust_shared::itertools::Itertools;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::async_graphql;
