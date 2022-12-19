@@ -54,12 +54,12 @@ pub struct DeleteNodeExtras {
 	//pub child_node_ids: Vec<String>,
 }
 
-pub async fn delete_node(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
+pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
 	let DeleteNodeInput { mapID, nodeID } = input;
 	let result = DeleteNodeResult { __: gql_placeholder() };
 	
 	let old_data = get_node(&ctx, &nodeID).await?;
-	assert_user_can_delete_node(&ctx, &user_info, &old_data, extras.as_part_of_map_delete, vec![], vec![]).await?;
+	assert_user_can_delete_node(&ctx, &actor, &old_data, extras.as_part_of_map_delete, vec![], vec![]).await?;
 
 	// first delete the rows in other tables that reference this node
 	// (will likely need to update this later, when completing permission system; have to decide how to handle deletion of node, when other users created linked phrasings, ratings, etc.)

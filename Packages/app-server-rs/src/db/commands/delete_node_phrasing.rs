@@ -43,13 +43,13 @@ pub struct DeleteNodePhrasingResult {
 
 }
 
-pub async fn delete_node_phrasing(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteNodePhrasingInput, _extras: NoExtras) -> Result<DeleteNodePhrasingResult, Error> {
+pub async fn delete_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodePhrasingInput, _extras: NoExtras) -> Result<DeleteNodePhrasingResult, Error> {
 	let DeleteNodePhrasingInput { id } = input;
 	let result = DeleteNodePhrasingResult { __: gql_placeholder() };
 	
 	let old_data = get_node_phrasing(&ctx, &id).await?;
-	//assert_user_can_delete(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
-	assert_user_can_delete_simple(&user_info, &old_data.creator)?;
+	//assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_delete_simple(&actor, &old_data.creator)?;
 
 	delete_db_entry_by_id(&ctx, "nodePhrasings".to_owned(), id.to_string()).await?;
 

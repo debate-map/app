@@ -155,6 +155,8 @@ mod db {
         pub mod update_node_tag;
         pub mod update_share;
         pub mod update_term;
+        pub mod update_user;
+        pub mod update_user_hidden;
         pub mod refresh_lq_data;
         //pub mod transfer_nodes;
     }

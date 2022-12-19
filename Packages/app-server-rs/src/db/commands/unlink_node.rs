@@ -53,7 +53,7 @@ pub struct UnlinkNodeExtras {
 	pub allow_orphaning: bool,
 }
 
-pub async fn unlink_node(ctx: &AccessorContext<'_>, user_info: &User, input: UnlinkNodeInput, extras: UnlinkNodeExtras) -> Result<UnlinkNodeResult, Error> {
+pub async fn unlink_node(ctx: &AccessorContext<'_>, actor: &User, input: UnlinkNodeInput, extras: UnlinkNodeExtras) -> Result<UnlinkNodeResult, Error> {
 	let UnlinkNodeInput { mapID, parentID, childID } = input;
 	let result = UnlinkNodeResult { __: gql_placeholder() };
 	
@@ -64,7 +64,7 @@ pub async fn unlink_node(ctx: &AccessorContext<'_>, user_info: &User, input: Unl
 	let old_data = get_node(ctx, &childID).await?;
 
 	let base_text = format!("Cannot unlink node #{}, since ", old_data.id.as_str());
-	ensure!(is_user_creator_or_mod(user_info, old_data.creator.as_str()), "{base_text}you are not its owner. (or a mod)");
+	ensure!(is_user_creator_or_mod(actor, old_data.creator.as_str()), "{base_text}you are not its owner. (or a mod)");
 	ensure!(extras.allow_orphaning || child_number_of_parents > 1, "{base_text}doing so would orphan it. Try deleting it instead.");
 	ensure!(!is_root_node(ctx, &old_data).await?, "{base_text}it's the root-node of a map.");
 	//ensure!(!IsNodeSubnode(oldData), "{baseText}it's a subnode. Try deleting it instead.");

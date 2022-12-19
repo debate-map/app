@@ -46,12 +46,12 @@ pub struct SetUserFollowDataResult {
 
 }
 
-pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, user_info: &User, input: SetUserFollowDataInput, _extras: NoExtras) -> Result<SetUserFollowDataResult, Error> {
+pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, actor: &User, input: SetUserFollowDataInput, _extras: NoExtras) -> Result<SetUserFollowDataResult, Error> {
 	let SetUserFollowDataInput { targetUser, userFollow } = input;
 	let result = SetUserFollowDataResult { __: gql_placeholder() };
 	
 	let user_follow_as_json_value = if let Some(userFollow) = userFollow { Some(serde_json::to_value(userFollow)?) } else { None };
-	jsonb_set(&ctx.tx, "userHiddens", &user_info.id, "extras", vec!["userFollows".to_owned(), targetUser], user_follow_as_json_value).await?;
+	jsonb_set(&ctx.tx, "userHiddens", &actor.id, "extras", vec!["userFollows".to_owned(), targetUser], user_follow_as_json_value).await?;
 
 	Ok(result)
 }

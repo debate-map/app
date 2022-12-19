@@ -48,18 +48,18 @@ pub struct DeleteArgumentResult {
 
 }
 
-pub async fn delete_argument(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteArgumentInput, _extras: NoExtras) -> Result<DeleteArgumentResult, Error> {
+pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, input: DeleteArgumentInput, _extras: NoExtras) -> Result<DeleteArgumentResult, Error> {
 	let DeleteArgumentInput { mapID, argumentID, claimID, deleteClaim } = input;
 	let result = DeleteArgumentResult { __: gql_placeholder() };
 	
 	if deleteClaim {
-		delete_node(ctx, user_info, DeleteNodeInput { mapID: None, nodeID: claimID }, Default::default()).await?;
+		delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: claimID }, Default::default()).await?;
 	} else {
-		unlink_node(ctx, user_info, UnlinkNodeInput { mapID: None, parentID: argumentID.clone(), childID: claimID }, Default::default()).await?;
+		unlink_node(ctx, actor, UnlinkNodeInput { mapID: None, parentID: argumentID.clone(), childID: claimID }, Default::default()).await?;
 	}
 
-	//delete_node(ctx, user_info, DeleteNodeInput { mapID: None, nodeID: argumentID }, DeleteNodeExtras { childrenToIgnore: vec![claimID] }).await?;
-	delete_node(ctx, user_info, DeleteNodeInput { mapID: None, nodeID: argumentID }, Default::default()).await?;
+	//delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: argumentID }, DeleteNodeExtras { childrenToIgnore: vec![claimID] }).await?;
+	delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: argumentID }, Default::default()).await?;
 
 	increment_map_edits_if_valid(&ctx, mapID).await?;
 

@@ -15,6 +15,8 @@ use crate::utils::db::accessors::{AccessorContext, get_db_entries, get_db_entry}
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
+use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+
 pub async fn get_user_hidden(ctx: &AccessorContext<'_>, id: &str) -> Result<UserHidden, Error> {
     get_db_entry(ctx, "userHiddens", &Some(json!({
         "id": {"equalTo": id}
@@ -50,6 +52,16 @@ pub struct UserHidden {
 }
 impl From<Row> for UserHidden {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct UserHiddenUpdates {
+	pub backgroundID: FieldUpdate_Nullable<String>,
+	pub backgroundCustom_enabled: FieldUpdate_Nullable<bool>,
+	pub backgroundCustom_color: FieldUpdate_Nullable<String>,
+	pub backgroundCustom_url: FieldUpdate_Nullable<String>,
+	pub backgroundCustom_position: FieldUpdate_Nullable<String>,
+	pub addToStream: FieldUpdate<bool>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

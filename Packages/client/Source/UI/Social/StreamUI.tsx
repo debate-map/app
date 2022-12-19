@@ -3,6 +3,7 @@ import React from "react";
 import {store} from "Store";
 import {NodeUI_Inner} from "UI/@Shared/Maps/Node/NodeUI_Inner";
 import useResizeObserver from "use-resize-observer";
+import {RunCommand_UpdateUserHidden} from "Utils/DB/Command";
 import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus} from "web-vcore";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {Command} from "web-vcore/nm/mobx-graphlink";
@@ -25,7 +26,8 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 				<Row center mb={5}>
 					<Text>Recent changes:</Text>
 					<CheckBox ml="auto" text="Add to stream" enabled={userHidden != null} value={userHidden?.addToStream ?? false} onChange={val=>{
-						new SetUserData_Hidden({id: MeID()!, updates: {addToStream: val}}).RunOnServer();
+						//new SetUserData_Hidden({id: MeID()!, updates: {addToStream: val}}).RunOnServer();
+						RunCommand_UpdateUserHidden({id: MeID()!, updates: {addToStream: val}});
 					}}/>
 					<InfoButton ml={5} text="When enabled, contributions you make to maps and such will be shown on the Social page and Stream panel. (to users not excluded from the relevant access-policies)"/>
 					{Me()?.permissionGroups.admin && <>

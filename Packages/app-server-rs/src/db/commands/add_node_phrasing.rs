@@ -41,14 +41,14 @@ pub struct AddNodePhrasingResult {
 
 }
 
-pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, user_info: &User, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
+pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
 	let AddNodePhrasingInput { phrasing: phrasing_ } = input;
 	let mut result = AddNodePhrasingResult { id: "<tbd>".to_owned() };
 	
 	let phrasing = NodePhrasing {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: user_info.id.to_string(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		node: phrasing_.node,

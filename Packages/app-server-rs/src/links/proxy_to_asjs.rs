@@ -116,7 +116,7 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
             "deleteArgument", "deleteMap", "deleteNode", "deleteNodeRating",
             "setUserFollowData",
             "unlinkNode",
-            "updateLink", "updateMap", "updateNode",
+            "updateLink", "updateMap", "updateNode", "updateUser", "updateUserHidden",
         ];
 
         // if any of the endpoints used in the request have an implementation in rust, don't proxy the request to app-server-js

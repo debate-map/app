@@ -67,6 +67,8 @@ use crate::db::commands::update_node_phrasing::MutationShard_UpdateNodePhrasing;
 use crate::db::commands::update_node_tag::MutationShard_UpdateNodeTag;
 use crate::db::commands::update_share::MutationShard_UpdateShare;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
+use crate::db::commands::update_user::MutationShard_UpdateUser;
+use crate::db::commands::update_user_hidden::MutationShard_UpdateUserHidden;
 use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::_sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
@@ -117,7 +119,7 @@ pub struct MutationRoot(
     MutationShard_DeleteArgument, MutationShard_DeleteMap, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
     MutationShard_SetUserFollowData,
     MutationShard_UnlinkNode,
-    MutationShard_UpdateLink, MutationShard_UpdateMap, MutationShard_UpdateNode,
+    MutationShard_UpdateLink, MutationShard_UpdateMap, MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
 );
 
 #[derive(MergedSubscription, Default)]

@@ -40,14 +40,14 @@ pub struct AddShareResult {
 
 }
 
-pub async fn add_share(ctx: &AccessorContext<'_>, user_info: &User, input: AddShareInput, _extras: NoExtras) -> Result<AddShareResult, Error> {
+pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, input: AddShareInput, _extras: NoExtras) -> Result<AddShareResult, Error> {
 	let AddShareInput { share: share_ } = input;
 	let mut result = AddShareResult { id: "<tbd>".to_owned() };
 	
 	let share = Share {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: user_info.id.to_string(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		name: share_.name,

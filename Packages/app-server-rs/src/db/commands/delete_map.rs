@@ -45,15 +45,15 @@ pub struct DeleteMapResult {
 
 }
 
-pub async fn delete_map(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteMapInput, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
+pub async fn delete_map(ctx: &AccessorContext<'_>, actor: &User, input: DeleteMapInput, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
 	let DeleteMapInput { id } = input;
 	let result = DeleteMapResult { __: gql_placeholder() };
 	
 	let old_data = get_map(ctx, &id).await?;
-	assert_user_can_delete(ctx, user_info, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_delete(ctx, actor, &old_data.creator, &old_data.accessPolicy).await?;
 
 	// first delete the root-node
-	delete_node(ctx, user_info, DeleteNodeInput { mapID: None, nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
+	delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;
 
 	delete_db_entry_by_id(ctx, "maps".to_owned(), id.to_string()).await?;
 

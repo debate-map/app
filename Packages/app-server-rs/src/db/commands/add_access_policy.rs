@@ -41,14 +41,14 @@ pub struct AddAccessPolicyResult {
 
 }
 
-pub async fn add_access_policy(ctx: &AccessorContext<'_>, user_info: &User, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
+pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
 	let AddAccessPolicyInput { policy: policy_ } = input;
 	let mut result = AddAccessPolicyResult { id: "<tbd>".to_owned() };
 	
 	let policy = AccessPolicy {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: user_info.id.to_string(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		name: policy_.name,

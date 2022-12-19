@@ -40,14 +40,14 @@ pub struct AddNodeTagResult {
 
 }
 
-pub async fn add_node_tag(ctx: &AccessorContext<'_>, user_info: &User, input: AddNodeTagInput, _extras: NoExtras) -> Result<AddNodeTagResult, Error> {
+pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeTagInput, _extras: NoExtras) -> Result<AddNodeTagResult, Error> {
 	let AddNodeTagInput { tag: tag_ } = input;
 	let mut result = AddNodeTagResult { id: "<tbd>".to_owned() };
 	
 	let tag = NodeTag {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: user_info.id.to_string(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		nodes: tag_.nodes,

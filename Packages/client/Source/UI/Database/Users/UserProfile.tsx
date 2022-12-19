@@ -12,7 +12,7 @@ import chroma from "web-vcore/nm/chroma-js.js";
 import {ProfilePanel} from "Store/main/profile";
 import {store} from "Store";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {RunCommand_SetUserFollowData} from "Utils/DB/Command";
+import {RunCommand_SetUserFollowData, RunCommand_UpdateUser, RunCommand_UpdateUserHidden} from "Utils/DB/Command";
 
 // todo: move these to a better, more widely usable place
 /*type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -80,7 +80,8 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 					return (
 						<CheckBox key={index} mr={index < 3 ? 5 : 0} text={PropNameToTitle(group)} value={(userPermissionGroups || {})[group]} enabled={admin && !changingOwnAdminState} onChange={val=>{
 							const newPermissionGroups = E(userPermissionGroups, {[group]: val});
-							new SetUserData({id: user.id, updates: {permissionGroups: newPermissionGroups}}).RunOnServer();
+							//new SetUserData({id: user.id, updates: {permissionGroups: newPermissionGroups}}).RunOnServer();
+							RunCommand_UpdateUser({id: user.id, updates: {permissionGroups: newPermissionGroups}});
 						}}/>
 					);
 				})}
@@ -184,7 +185,8 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 										selected && {border: "1px solid rgba(255,255,255,.7)"},
 									)}
 									onClick={()=>{
-										new SetUserData_Hidden({id: user.id, updates: {backgroundID: id}}).RunOnServer();
+										//new SetUserData_Hidden({id: user.id, updates: {backgroundID: id}}).RunOnServer();
+										RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundID: id}});
 									}}>
 								</Div>
 							);
@@ -193,30 +195,30 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 				</ScrollView>
 				<Row mt={5}>
 					<CheckBox text="Custom background" value={profileUser_h.backgroundCustom_enabled ?? false} onChange={val=>{
-						new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_enabled: val}}).RunOnServer();
+						RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_enabled: val}});
 					}}/>
 				</Row>
 				<Row mt={5}>
 					<Pre>Color: </Pre>
 					<ColorPickerBox color={Chroma_Safe(profileUser_h.backgroundCustom_color ?? "#FFFFFF").rgba()} onChange={val=>{
-						new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_color: Chroma(val).css()}}).RunOnServer();
+						RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_color: Chroma(val).css()}});
 					}}/>
 					<Button ml={5} text="Clear" onClick={()=>{
-						new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_color: null}}).RunOnServer();
+						RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_color: null}});
 					}}/>
 				</Row>
 				<Row mt={5}>
 					<Pre>URL: </Pre>
 					<TextInput style={ES({flex: 1})}
 						value={profileUser_h.backgroundCustom_url} onChange={val=>{
-							new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_url: val}}).RunOnServer();
+							RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_url: val}});
 						}}/>
 				</Row>
 				<Row mt={5}>
 					<Pre>Anchor: </Pre>
 					<Select options={[{name: "top", value: "center top"}, {name: "center", value: "center center"}, {name: "bottom", value: "center bottom"}]}
 						value={profileUser_h.backgroundCustom_position || "center center"} onChange={val=>{
-							new SetUserData_Hidden({id: user.id, updates: {backgroundCustom_position: val}}).RunOnServer();
+							RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_position: val}});
 						}}/>
 				</Row>
 			</Fragment>}
@@ -319,7 +321,8 @@ export function ShowChangeDisplayNameDialog(userID: string, oldDisplayName: stri
 			);
 		},
 		onOK: ()=>{
-			new SetUserData({id: userID, updates: {displayName: newDisplayName}}).RunOnServer();
+			//new SetUserData({id: userID, updates: {displayName: newDisplayName}}).RunOnServer();
+			RunCommand_UpdateUser({id: userID, updates: {displayName: newDisplayName}});
 		},
 	});
 }

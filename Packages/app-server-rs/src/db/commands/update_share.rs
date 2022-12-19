@@ -44,13 +44,13 @@ pub struct UpdateShareResult {
 
 }
 
-pub async fn update_share(ctx: &AccessorContext<'_>, user_info: &User, input: UpdateShareInput, _extras: NoExtras) -> Result<UpdateShareResult, Error> {
+pub async fn update_share(ctx: &AccessorContext<'_>, actor: &User, input: UpdateShareInput, _extras: NoExtras) -> Result<UpdateShareResult, Error> {
 	let UpdateShareInput { id, updates } = input;
 	let result = UpdateShareResult { __: gql_placeholder() };
 	
 	let old_data = get_share(&ctx, &id).await?;
-	//assert_user_can_update(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
-	assert_user_can_update_simple(&user_info, &old_data.creator)?;
+	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_update_simple(&actor, &old_data.creator)?;
 	let new_data = Share {
 		name: update_field(updates.name, old_data.name),
 		mapID: update_field_nullable(updates.mapID, old_data.mapID),

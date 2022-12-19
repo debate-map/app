@@ -45,17 +45,17 @@ pub struct UpdateNodeTagResult {
 
 }
 
-pub async fn update_node_tag(ctx: &AccessorContext<'_>, user_info: &User, input: UpdateNodeTagInput, _extras: NoExtras) -> Result<UpdateNodeTagResult, Error> {
+pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeTagInput, _extras: NoExtras) -> Result<UpdateNodeTagResult, Error> {
 	let UpdateNodeTagInput { id, updates } = input;
 	let result = UpdateNodeTagResult { __: gql_placeholder() };
 	
 	let old_data = get_node_tag(&ctx, &id).await?;
-	//assert_user_can_update(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
+	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
 	/*for node_id in old_data.nodes {
 		let node = get_node(&ctx, &node_id).await?;
-		assert_user_can_update(&ctx, &user_info, node.creator, node.access_policy).await?;
+		assert_user_can_update(&ctx, &actor, node.creator, node.access_policy).await?;
 	}*/
-	assert_user_can_update_simple(&user_info, &old_data.creator)?; // this maybe is insufficient, but it's fine for now
+	assert_user_can_update_simple(&actor, &old_data.creator)?; // this maybe is insufficient, but it's fine for now
 	let new_data = NodeTag {
 		nodes: update_field(updates.nodes, old_data.nodes),
 		labels: update_field_nullable(updates.labels, old_data.labels),

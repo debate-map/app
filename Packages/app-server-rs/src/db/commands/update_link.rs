@@ -44,13 +44,13 @@ pub struct UpdateLinkResult {
 
 }
 
-pub async fn update_link(ctx: &AccessorContext<'_>, user_info: &User, input: UpdateLinkInput, _extras: NoExtras) -> Result<UpdateLinkResult, Error> {
+pub async fn update_link(ctx: &AccessorContext<'_>, actor: &User, input: UpdateLinkInput, _extras: NoExtras) -> Result<UpdateLinkResult, Error> {
 	let UpdateLinkInput { id, updates } = input;
 	let result = UpdateLinkResult { __: gql_placeholder() };
 	
 	let old_data = get_node_child_link(&ctx, &id).await?;
-	//assert_user_can_update(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
-	assert_user_can_update_simple(&user_info, &old_data.creator)?;
+	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_update_simple(&actor, &old_data.creator)?;
 	let new_data = NodeChildLink {
 		orderKey: update_field(updates.orderKey, old_data.orderKey),
 		form: update_field_nullable(updates.form, old_data.form),

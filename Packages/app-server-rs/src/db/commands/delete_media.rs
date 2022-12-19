@@ -43,12 +43,12 @@ pub struct DeleteMediaResult {
 
 }
 
-pub async fn delete_media(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteMediaInput, _extras: NoExtras) -> Result<DeleteMediaResult, Error> {
+pub async fn delete_media(ctx: &AccessorContext<'_>, actor: &User, input: DeleteMediaInput, _extras: NoExtras) -> Result<DeleteMediaResult, Error> {
 	let DeleteMediaInput { id } = input;
 	let result = DeleteMediaResult { __: gql_placeholder() };
 	
 	let old_data = get_media(&ctx, &id).await?;
-	assert_user_can_delete(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
 
 	delete_db_entry_by_id(&ctx, "medias".to_owned(), id.to_string()).await?;
 

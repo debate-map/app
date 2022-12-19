@@ -46,14 +46,14 @@ pub struct AddNodeRevisionResult {
 
 }
 
-pub async fn add_node_revision(ctx: &AccessorContext<'_>, user_info: &User, input: AddNodeRevisionInput, _extras: NoExtras) -> Result<AddNodeRevisionResult, Error> {
+pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeRevisionInput, _extras: NoExtras) -> Result<AddNodeRevisionResult, Error> {
 	let AddNodeRevisionInput { mapID, revision: revision_ } = input;
 	let mut result = AddNodeRevisionResult { id: "<tbd>".to_owned() };
 	
 	let revision = NodeRevision {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: user_info.id.to_string(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		phrasing_tsvector: "<tbd>".to_owned(), // set by database
 		replacedBy: None,

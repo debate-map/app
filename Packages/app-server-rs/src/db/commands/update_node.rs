@@ -45,12 +45,12 @@ pub struct UpdateNodeResult {
 
 }
 
-pub async fn update_node(ctx: &AccessorContext<'_>, user_info: &User, input: UpdateNodeInput, _extras: NoExtras) -> Result<UpdateNodeResult, Error> {
+pub async fn update_node(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeInput, _extras: NoExtras) -> Result<UpdateNodeResult, Error> {
 	let UpdateNodeInput { id, updates } = input;
 	let result = UpdateNodeResult { __: gql_placeholder() };
 	
 	let old_data = get_node(&ctx, &id).await?;
-	assert_user_can_update(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
 	let new_data = Node {
 		accessPolicy: update_field(updates.accessPolicy, old_data.accessPolicy),
 		//multiPremiseArgument: update_field_nullable(updates.multiPremiseArgument, old_data.multiPremiseArgument),

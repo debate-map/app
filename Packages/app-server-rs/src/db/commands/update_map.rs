@@ -44,16 +44,16 @@ pub struct UpdateMapResult {
 
 }
 
-pub async fn update_map(ctx: &AccessorContext<'_>, user_info: &User, input: UpdateMapInput, _extras: NoExtras) -> Result<UpdateMapResult, Error> {
+pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMapInput, _extras: NoExtras) -> Result<UpdateMapResult, Error> {
 	let UpdateMapInput { id, updates } = input;
 	let result = UpdateMapResult { __: gql_placeholder() };
 
 	
 	let old_data = get_map(&ctx, &id).await?;
-	assert_user_can_update(&ctx, &user_info, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
 
 	// when trying to modify certain fields, extra permissions are required
-	if !updates.featured.is_undefined() { ensure!(is_user_mod(user_info), "Only mods can set whether a map is featured.") }
+	if !updates.featured.is_undefined() { ensure!(is_user_mod(actor), "Only mods can set whether a map is featured.") }
 
 	let new_data = Map {
 		accessPolicy: update_field(updates.accessPolicy, old_data.accessPolicy),

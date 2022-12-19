@@ -43,12 +43,12 @@ pub struct UpdateAccessPolicyResult {
 
 }
 
-pub async fn update_access_policy(ctx: &AccessorContext<'_>, user_info: &User, input: UpdateAccessPolicyInput, _extras: NoExtras) -> Result<UpdateAccessPolicyResult, Error> {
+pub async fn update_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: UpdateAccessPolicyInput, _extras: NoExtras) -> Result<UpdateAccessPolicyResult, Error> {
 	let UpdateAccessPolicyInput { id, updates } = input;
 	let result = UpdateAccessPolicyResult { __: gql_placeholder() };
 	
 	let old_data = get_access_policy(&ctx, &id).await?;
-	assert_user_can_update_simple(&user_info, &old_data.creator)?;
+	assert_user_can_update_simple(&actor, &old_data.creator)?;
 	let new_data = AccessPolicy {
 		name: update_field(updates.name, old_data.name),
 		permissions: update_field(updates.permissions, old_data.permissions),

@@ -30,7 +30,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::jsonb_utils::jsonb_set;
 use super::rating_processor::get_argument_impact_pseudo_ratings;
 
-pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, _user_info: &User, node_id: String, rating_type: NodeRatingType) -> Result<(), Error> {
+pub async fn update_node_rating_summaries(ctx: &AccessorContext<'_>, _actor: &User, node_id: String, rating_type: NodeRatingType) -> Result<(), Error> {
 	let ratingTypeInfo = get_rating_type_info(rating_type);
 	let ratings = get_node_ratings_base(ctx, &node_id, Some(rating_type), None).await?;
 	let ratings_in_each_range = ratingTypeInfo.valueRanges.iter().map(|range|{

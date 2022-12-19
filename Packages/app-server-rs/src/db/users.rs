@@ -1,6 +1,6 @@
 use rust_shared::{SubError, serde, serde_json, async_graphql};
 use rust_shared::anyhow::{Context, Error};
-use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
+use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -11,7 +11,10 @@ use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+
+use super::commands::_command::FieldUpdate;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)] //#[serde(crate = "rust_shared::serde")]
 #[allow(clippy::struct_excessive_bools)]
@@ -47,37 +50,15 @@ pub struct User {
     pub edits: i32,
     pub lastEditAt: Option<i64>,
 }
-// todo: MS these converters can be removed (eg. using approach similar to clone_ldchange_val_0with_type_fixes(), or by using crate: https://github.com/dac-gmbh/serde_postgres)
-// [actually, just make a nice proc-macro wrapper around the postgres_row_to_json_value function, as seen in node_tags.rs]
 impl From<Row> for User {
-    fn from(row: Row) -> Self {
-        //println!("ID as string:{}", row.get::<_, String>("id"));
-        Self {
-            //id: ID::from(row.get("id")),
-            //id: serde_json::from_value(row.get("id")).unwrap(),
-            //id: serde_json::from_str(row.get("id")).unwrap(),
-            //id: serde_json::from_str(&row.get::<_, String>("id")).unwrap(),
-            id: ID::from(&row.get::<_, String>("id")),
-            displayName: row.get("displayName"),
-            photoURL: row.get("photoURL"),
-            joinDate: row.get("joinDate"),
-            /*permissionGroups: PermissionGroups {
-            //permissionGroups: Json::from(PermissionGroups {
-                basic: true,
-                verified: true,
-                r#mod: true,
-                admin: true,
-            },*/
-            //permissionGroups: row.get("permissionGroups"),
-            permissionGroups: serde_json::from_value(row.get("permissionGroups")).unwrap(),
-            //permissionGroups: async_graphql::value!("{}"),
-            //permissionGroups: "{}".to_owned(),
-            edits: row.get("edits"),
-            lastEditAt: row.get("lastEditAt"),
-        }
-    }
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
+#[derive(InputObject, Deserialize)]
+pub struct UserUpdates {
+	pub displayName: FieldUpdate<String>,
+	pub permissionGroups: FieldUpdate<PermissionGroups>,
+}
 
 //#[derive(SimpleObject, Clone)] #[derive(Clone)] pub struct GQLSet_User<T> { nodes: Vec<T> }
 /*#[derive(Clone)] pub struct GQLSet_User<T> { nodes: Vec<T> }

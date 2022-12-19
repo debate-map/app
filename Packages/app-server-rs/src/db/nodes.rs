@@ -80,12 +80,12 @@ pub async fn is_root_node(ctx: &AccessorContext<'_>, node: &Node) -> Result<bool
 }
 
 // sync:js
-pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, user_info: &User, node: &Node, as_part_of_map_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), Error> {
+pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User, node: &Node, as_part_of_map_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), Error> {
 	// first check generic delete permissions
-	//assert_user_can_delete(&ctx, &user_info, &node.creator, &node.accessPolicy).await?;
+	//assert_user_can_delete(&ctx, &actor, &node.creator, &node.accessPolicy).await?;
 	
 	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
-	if !is_user_creator_or_mod(user_info, &node.creator) {
+	if !is_user_creator_or_mod(actor, &node.creator) {
 		return Err(anyhow!("{base_text}you are not the owner of this node. (or a mod)"));
 	}
 	let parent_links = get_node_child_links(ctx, None, Some(node.id.as_str())).await?;

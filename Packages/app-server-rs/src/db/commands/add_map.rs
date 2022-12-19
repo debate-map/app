@@ -42,7 +42,7 @@ pub struct AddMapResult {
 		let map = Map {
 			// set by server
 			id: ID(new_uuid_v4_as_b64()),
-			creator: user_info.id.to_string(),
+			creator: actor.id.to_string(),
 			createdAt: time_since_epoch_ms_i64(),
 			// pass-through
 			accessPolicy: map_.accessPolicy,

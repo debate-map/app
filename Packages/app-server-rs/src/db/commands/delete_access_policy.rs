@@ -45,12 +45,12 @@ pub struct DeleteAccessPolicyResult {
 
 }
 
-pub async fn delete_access_policy(ctx: &AccessorContext<'_>, user_info: &User, input: DeleteAccessPolicyInput, _extras: NoExtras) -> Result<DeleteAccessPolicyResult, Error> {
+pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: DeleteAccessPolicyInput, _extras: NoExtras) -> Result<DeleteAccessPolicyResult, Error> {
 	let DeleteAccessPolicyInput { id } = input;
 	let result = DeleteAccessPolicyResult { __: gql_placeholder() };
 	
 	let old_data = get_access_policy(&ctx, &id).await?;
-	assert_user_can_delete_simple(&user_info, &old_data.creator)?;
+	assert_user_can_delete_simple(&actor, &old_data.creator)?;
 	delete_db_entry_by_id(&ctx, "accessPolicies".to_owned(), id.to_string()).await?;
 
 	/*let user_hiddens_referencing_policy = get_db_entries(&ctx, "userHiddens", &Some(json!({

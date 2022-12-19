@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeChildLink, NodeL1, UserFollow} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeChildLink, NodeL1, UserFollow, User, UserHidden} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -124,3 +124,5 @@ export async function RunCommand_UnlinkNode(inputFields: {mapID?: string|n, pare
 export const RunCommand_UpdateLink = CreateFunc_RunCommand_UpdateX(NodeChildLink, "Link");
 export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(Map);
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");
+export const RunCommand_UpdateUser = CreateFunc_RunCommand_UpdateX(User);
+export const RunCommand_UpdateUserHidden = CreateFunc_RunCommand_UpdateX(UserHidden);

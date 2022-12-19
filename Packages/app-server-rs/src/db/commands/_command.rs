@@ -245,9 +245,9 @@ macro_rules! command_boilerplate {
     ($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
 		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, $only_validate).await?;
-		let user_info = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
+		let actor = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
 
-		let result = $command_impl_func(&ctx, &user_info, $input, Default::default()).await?;
+		let result = $command_impl_func(&ctx, &actor, $input, Default::default()).await?;
 
 		if $only_validate.unwrap_or(false) {
             // the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain

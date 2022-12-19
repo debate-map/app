@@ -41,14 +41,14 @@ pub struct AddTermResult {
 
 }
 
-pub async fn add_term(ctx: &AccessorContext<'_>, user_info: &User, input: AddTermInput, _extras: NoExtras) -> Result<AddTermResult, Error> {
+pub async fn add_term(ctx: &AccessorContext<'_>, actor: &User, input: AddTermInput, _extras: NoExtras) -> Result<AddTermResult, Error> {
 	let AddTermInput { term: term_ } = input;
 	let mut result = AddTermResult { id: "<tbd>".to_owned() };
 	
 	let term = Term {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
-		creator: user_info.id.to_string(),
+		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
 		accessPolicy: term_.accessPolicy,
