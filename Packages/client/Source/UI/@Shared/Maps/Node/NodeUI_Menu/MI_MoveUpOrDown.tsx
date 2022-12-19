@@ -2,7 +2,7 @@ import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeChildLinks, Ge
 import React from "react";
 import {store} from "Store";
 import {ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
-import {RunCommand_UpdateLink} from "Utils/DB/Command.js";
+import {RunCommand_UpdateNodeChildLink} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
@@ -68,7 +68,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 						linkID: nodeToMove.link!.id,
 						linkUpdates: {orderKey: newOrderKey!},
 					}).RunOnServer();*/
-					await RunCommand_UpdateLink({id: nodeToMove.link!.id, updates: {orderKey: newOrderKey!}});
+					await RunCommand_UpdateNodeChildLink({id: nodeToMove.link!.id, updates: {orderKey: newOrderKey!}});
 				}}/>
 		);
 	}

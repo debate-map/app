@@ -24,29 +24,29 @@ use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
 
 wrap_slow_macros!{
 
-#[derive(Default)] pub struct MutationShard_UpdateLink;
-#[Object] impl MutationShard_UpdateLink {
-	async fn update_link(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateLinkInput, only_validate: Option<bool>) -> Result<UpdateLinkResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, only_validate, update_link);
+#[derive(Default)] pub struct MutationShard_UpdateNodeChildLink;
+#[Object] impl MutationShard_UpdateNodeChildLink {
+	async fn update_node_child_link(&self, gql_ctx: &async_graphql::Context<'_>, input: UpdateNodeChildLinkInput, only_validate: Option<bool>) -> Result<UpdateNodeChildLinkResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, update_node_child_link);
     }
 }
 
 #[derive(InputObject, Deserialize)]
-pub struct UpdateLinkInput {
+pub struct UpdateNodeChildLinkInput {
 	pub id: String,
 	pub updates: NodeChildLinkUpdates,
 }
 
 #[derive(SimpleObject, Debug)]
-pub struct UpdateLinkResult {
+pub struct UpdateNodeChildLinkResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
 }
 
-pub async fn update_link(ctx: &AccessorContext<'_>, actor: &User, input: UpdateLinkInput, _extras: NoExtras) -> Result<UpdateLinkResult, Error> {
-	let UpdateLinkInput { id, updates } = input;
-	let result = UpdateLinkResult { __: gql_placeholder() };
+pub async fn update_node_child_link(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeChildLinkInput, _extras: NoExtras) -> Result<UpdateNodeChildLinkResult, Error> {
+	let UpdateNodeChildLinkInput { id, updates } = input;
+	let result = UpdateNodeChildLinkResult { __: gql_placeholder() };
 	
 	let old_data = get_node_child_link(&ctx, &id).await?;
 	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;

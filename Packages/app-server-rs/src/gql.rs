@@ -61,7 +61,7 @@ use crate::db::commands::set_node_rating::MutationShard_SetNodeRating;
 use crate::db::commands::set_user_follow_data::MutationShard_SetUserFollowData;
 use crate::db::commands::unlink_node::MutationShard_UnlinkNode;
 use crate::db::commands::update_access_policy::MutationShard_UpdateAccessPolicy;
-use crate::db::commands::update_link::MutationShard_UpdateLink;
+use crate::db::commands::update_node_child_link::MutationShard_UpdateNodeChildLink;
 use crate::db::commands::update_map::MutationShard_UpdateMap;
 use crate::db::commands::update_media::MutationShard_UpdateMedia;
 use crate::db::commands::update_node::MutationShard_UpdateNode;
@@ -121,7 +121,7 @@ pub struct MutationRoot(
     MutationShard_DeleteArgument, MutationShard_DeleteMap, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
     MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
     MutationShard_UnlinkNode,
-    MutationShard_UpdateLink, MutationShard_UpdateMap, MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
+    MutationShard_UpdateMap, MutationShard_UpdateNode, MutationShard_UpdateNodeChildLink, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
 );
 
 #[derive(MergedSubscription, Default)]
