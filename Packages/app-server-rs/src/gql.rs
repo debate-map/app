@@ -40,8 +40,10 @@ use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
+use crate::db::commands::add_child_node::MutationShard_AddChildNode;
 use crate::db::commands::add_map::MutationShard_AddMap;
 use crate::db::commands::add_media::MutationShard_AddMedia;
+use crate::db::commands::add_node_child_link::MutationShard_AddNodeChildLink;
 use crate::db::commands::add_node_phrasing::MutationShard_AddNodePhrasing;
 use crate::db::commands::add_node_revision::MutationShard_AddNodeRevision;
 use crate::db::commands::add_node_tag::MutationShard_AddNodeTag;
@@ -52,6 +54,7 @@ use crate::db::commands::delete_argument::MutationShard_DeleteArgument;
 use crate::db::commands::delete_map::MutationShard_DeleteMap;
 use crate::db::commands::delete_media::MutationShard_DeleteMedia;
 use crate::db::commands::delete_node::MutationShard_DeleteNode;
+use crate::db::commands::delete_node_child_link::MutationShard_DeleteNodeChildLink;
 use crate::db::commands::delete_node_phrasing::MutationShard_DeleteNodePhrasing;
 use crate::db::commands::delete_node_rating::MutationShard_DeleteNodeRating;
 use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
@@ -60,7 +63,6 @@ use crate::db::commands::delete_term::MutationShard_DeleteTerm;
 use crate::db::commands::set_node_is_multi_premise_argument::MutationShard_SetNodeIsMultiPremiseArgument;
 use crate::db::commands::set_node_rating::MutationShard_SetNodeRating;
 use crate::db::commands::set_user_follow_data::MutationShard_SetUserFollowData;
-use crate::db::commands::unlink_node::MutationShard_UnlinkNode;
 use crate::db::commands::update_access_policy::MutationShard_UpdateAccessPolicy;
 use crate::db::commands::update_node_child_link::MutationShard_UpdateNodeChildLink;
 use crate::db::commands::update_map::MutationShard_UpdateMap;
@@ -114,15 +116,14 @@ pub struct QueryRoot(
 pub struct MutationRoot(
     MutationShard_General, MutationShard_General_Subtree,
     // commands, matching standard add/delete/update pattern
-    MutationShard_AddAccessPolicy, MutationShard_AddMap, MutationShard_AddMedia, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag, MutationShard_AddShare, MutationShard_AddTerm,
-    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMap, MutationShard_DeleteMedia, MutationShard_DeleteNodePhrasing, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
-    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMap, MutationShard_UpdateMedia, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
+    MutationShard_AddAccessPolicy, MutationShard_AddMap, MutationShard_AddMedia, MutationShard_AddNodeChildLink, MutationShard_AddNodePhrasing, MutationShard_AddNodeTag, MutationShard_AddShare, MutationShard_AddTerm,
+    MutationShard_DeleteAccessPolicy, MutationShard_DeleteMap, MutationShard_DeleteMedia, MutationShard_DeleteNodeChildLink, MutationShard_DeleteNodePhrasing, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
+    MutationShard_UpdateAccessPolicy, MutationShard_UpdateMap, MutationShard_UpdateMedia, MutationShard_UpdateNodeChildLink, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
     // commands, others
-    MutationShard_AddNodeRevision,
+    MutationShard_AddChildNode, MutationShard_AddNodeRevision,
     MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
     MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
-    MutationShard_UnlinkNode,
-    MutationShard_UpdateNode, MutationShard_UpdateNodeChildLink, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
+    MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
 );
 
 #[derive(MergedSubscription, Default)]

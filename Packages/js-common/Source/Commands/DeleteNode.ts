@@ -10,7 +10,7 @@ import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetNodeRevisions} from "../DB/nodeRevisions.js";
-import {AssertUserCanDeleteNode} from "../DB/nodes.js";
+import {CheckUserCanDeleteNode} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
 import {NodeL2} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
@@ -46,7 +46,7 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 
 		this.oldData = GetNodeL2(nodeID);
 		//AssertUserCanDelete(this, this.oldData);
-		const earlyError = AssertUserCanDeleteNode(this.userInfo.id, this.oldData!, this.parentCommand && {asPartOfMapDelete, parentsToIgnore, childrenToIgnore});
+		const earlyError = CheckUserCanDeleteNode(this.userInfo.id, this.oldData!, this.parentCommand && {asPartOfMapDelete, parentsToIgnore, childrenToIgnore});
 		AssertV(earlyError == null, earlyError);
 
 		//this.oldRevisions = await GetAsync(() => GetNodeRevisions(nodeID));

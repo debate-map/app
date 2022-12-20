@@ -8,6 +8,7 @@ import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
 import {NodeType, GetNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, VLexoRank} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
+import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
@@ -84,21 +85,6 @@ export class AddChildHelper {
 	subNode_revision?: NodeRevision;
 	subNode_link: NodeChildLink;
 
-	GetCommand(): AddArgumentAndClaim | AddChildNode {
-		let result;
-		if (this.node.type == NodeType.argument) {
-			result = new AddArgumentAndClaim({
-				mapID: this.mapID,
-				argumentParentID: this.Node_ParentID, argumentNode: this.node, argumentRevision: this.node_revision, argumentLink: this.node_link,
-				claimNode: this.subNode!, claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
-			});
-		} else {
-			result = new AddChildNode({
-				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node, revision: this.node_revision, link: this.node_link,
-			});
-		}
-		return result;
-	}
 	async Apply(opt?: {expandSelf?: boolean, expandTruthAndRelevance?: boolean}) {
 		opt = E({expandSelf: true, expandTruthAndRelevance: true}, opt);
 		/* if (validationError) {
@@ -110,10 +96,15 @@ export class AddChildHelper {
 			this.node.multiPremiseArgument = true;
 		}*/
 
-		const command = this.GetCommand();
+		//const command = this.GetCommand();
 		let runResult_copy;
 		if (this.node.type == NodeType.argument) {
-			if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
+			//if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
+			const command = new AddArgumentAndClaim({
+				mapID: this.mapID,
+				argumentParentID: this.Node_ParentID, argumentNode: this.node, argumentRevision: this.node_revision, argumentLink: this.node_link,
+				claimNode: this.subNode!, claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
+			});
 			const runResult = runResult_copy = await command.RunOnServer();
 			RunInAction("AddChildDialog.Apply_mid", ()=>{
 				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.argumentNodeID, runResult.doneAt);
@@ -126,8 +117,10 @@ export class AddChildHelper {
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
 			}
 		} else {
-			if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
-			const runResult = runResult_copy = await command.RunOnServer();
+			//if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
+			const runResult = runResult_copy = await RunCommand_AddChildNode({
+				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node.ExcludeKeys("extras"), revision: this.node_revision, link: this.node_link,
+			});
 			RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, runResult.doneAt));
 
 			if (opt.expandSelf) {
@@ -168,7 +161,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 		title: `Add ${prep.displayName}`, cancelButton: true,
 		//message: observer_simple(()=>{
 		message: observer(()=>{
-			try {
+			/*try {
 				const tempCommand = helper.GetCommand();
 				boxController.options.okButtonProps = {
 					enabled: tempCommand.Validate_Safe() == null,
@@ -183,7 +176,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 					return <div>Loading...</div>;
 				}
 				throw ex;
-			}
+			}*/
 
 			const accessPolicy = GetAccessPolicy.CatchBail(null, helper.node.accessPolicy);
 			if (accessPolicy == null) return null as any as JSX.Element; // wait

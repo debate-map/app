@@ -12,6 +12,7 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
+use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
@@ -62,7 +63,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 		phrasing_tsvector: "<tbd>".to_owned(), // set by database
 		replacedBy: None,
 		// pass-through
-		node: revision_.node,
+		node: revision_.node.ok_or(err_should_be_populated("revision.node"))?,
 		phrasing: revision_.phrasing,
 		note: revision_.note,
 		displayDetails: revision_.displayDetails,

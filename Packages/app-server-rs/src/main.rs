@@ -114,6 +114,7 @@ mod utils {
 mod db {
     pub mod _shared {
         pub mod attachments;
+        pub mod common_errors;
     }
     pub mod commands {
         pub mod _shared {
@@ -125,8 +126,10 @@ mod db {
         }
         pub mod _command;
         pub mod add_access_policy;
+        pub mod add_child_node;
         pub mod add_map;
         pub mod add_media;
+        pub mod add_node_child_link;
         pub mod add_node_revision;
         pub mod add_node_phrasing;
         pub mod add_node_tag;
@@ -138,6 +141,7 @@ mod db {
         pub mod delete_map;
         pub mod delete_media;
         pub mod delete_node;
+        pub mod delete_node_child_link;
         pub mod delete_node_phrasing;
         pub mod delete_node_rating;
         pub mod delete_node_tag;
@@ -146,7 +150,6 @@ mod db {
         pub mod set_node_is_multi_premise_argument;
         pub mod set_node_rating;
         pub mod set_user_follow_data;
-        pub mod unlink_node;
         pub mod update_access_policy;
         pub mod update_map;
         pub mod update_media;
@@ -178,6 +181,7 @@ mod db {
     }
     pub mod nodes_ {
         pub mod _node;
+        pub mod _node_type;
     }
     pub mod node_ratings_ {
         pub mod _node_rating_type;

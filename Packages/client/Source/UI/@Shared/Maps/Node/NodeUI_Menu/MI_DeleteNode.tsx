@@ -3,7 +3,7 @@ import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup, AssertUserCanDeleteNode} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, ChildGroup, CheckUserCanDeleteNode} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_DeleteNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
@@ -17,7 +17,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		const nodeText = GetNodeDisplayText(node, path);
 
 		//const command = new DeleteNode(E({mapID, nodeID: node.id}));
-		const error = AssertUserCanDeleteNode(MeID(), node);
+		const error = CheckUserCanDeleteNode(MeID(), node);
 		return (
 			<VMenuItem text={`Delete${combinedWithParentArg ? " claim" : ""}`}
 				//enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}

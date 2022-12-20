@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, NodeL3, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
+import {CheckLinkIsValid, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, NodeL3, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
@@ -300,14 +300,14 @@ class TransferNodeUI extends BaseComponent<TransferNodeDialog_SharedProps & {nod
 						</Row>}
 					</RowLR>
 					{(()=>{
-						const childGroupsThisNodeIsValidIn = GetValues(ChildGroup).filter(group=>CheckValidityOfLink(newParentType, group, finalType) == null);
+						const childGroupsThisNodeIsValidIn = GetValues(ChildGroup).filter(group=>CheckLinkIsValid(newParentType, group, finalType) == null);
 						if (!childGroupsThisNodeIsValidIn.includes(nodeInfo.childGroup)) {
 							return <Row mt={5} style={{color: "red"}}
 								// temp; add special class-name, which blocks dialog from proceeding / having OK pressed
 								className="transferNodeBlocker"
 							>
 								{/*`Issue: This transfer's selected child-group (${ChildGroup[nodeInfo.childGroup]}) is not valid given its transfer context. (${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)})`*/}
-								{`Issue: ${CheckValidityOfLink(newParentType, nodeInfo.childGroup, finalType)}`}
+								{`Issue: ${CheckLinkIsValid(newParentType, nodeInfo.childGroup, finalType)}`}
 							</Row>;
 						}
 					})()}

@@ -52,6 +52,7 @@ function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstruct
 export const RunCommand_AddAccessPolicy = CreateFunc_RunCommand_AddX(AccessPolicy, "policy");
 export const RunCommand_AddMap = CreateFunc_RunCommand_AddX(Map, "map");
 export const RunCommand_AddMedia = CreateFunc_RunCommand_AddX(Media, "media");
+export const RunCommand_AddNodeChildLink = CreateFunc_RunCommand_AddX(NodeChildLink, "link");
 export const RunCommand_AddNodePhrasing = CreateFunc_RunCommand_AddX(NodePhrasing, "phrasing");
 export const RunCommand_AddNodeTag = CreateFunc_RunCommand_AddX(NodeTag, "tag");
 export const RunCommand_AddShare = CreateFunc_RunCommand_AddX(Share, "share");
@@ -60,6 +61,7 @@ export const RunCommand_AddTerm = CreateFunc_RunCommand_AddX(Term, "term");
 export const RunCommand_DeleteAccessPolicy = CreateFunc_RunCommand_DeleteX(AccessPolicy);
 export const RunCommand_DeleteMap = CreateFunc_RunCommand_DeleteX(Map);
 export const RunCommand_DeleteMedia = CreateFunc_RunCommand_DeleteX(Media);
+export const RunCommand_DeleteNodeChildLink = CreateFunc_RunCommand_DeleteX(NodeChildLink);
 export const RunCommand_DeleteNodePhrasing = CreateFunc_RunCommand_DeleteX(NodePhrasing);
 export const RunCommand_DeleteNodeTag = CreateFunc_RunCommand_DeleteX(NodeTag);
 export const RunCommand_DeleteShare = CreateFunc_RunCommand_DeleteX(Share);
@@ -68,6 +70,7 @@ export const RunCommand_DeleteTerm = CreateFunc_RunCommand_DeleteX(Term);
 export const RunCommand_UpdateAccessPolicy = CreateFunc_RunCommand_UpdateX(AccessPolicy);
 export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(Map);
 export const RunCommand_UpdateMedia = CreateFunc_RunCommand_UpdateX(Media);
+export const RunCommand_UpdateNodeChildLink = CreateFunc_RunCommand_UpdateX(NodeChildLink);
 export const RunCommand_UpdateNodePhrasing = CreateFunc_RunCommand_UpdateX(NodePhrasing);
 export const RunCommand_UpdateNodeTag = CreateFunc_RunCommand_UpdateX(NodeTag);
 export const RunCommand_UpdateShare = CreateFunc_RunCommand_UpdateX(Share);
@@ -75,6 +78,20 @@ export const RunCommand_UpdateTerm = CreateFunc_RunCommand_UpdateX(Term);
 
 // other commands
 // ==========
+
+export async function RunCommand_AddChildNode(inputFields: {
+	mapID: string|n,
+	parentID: string,
+	node: Partial<Omit<NodeL1, "extras"> & {extras: never}>,
+	revision: Partial<NodeRevision>,
+	link: Partial<NodeChildLink>,
+}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: AddChildNodeInput!) { addChildNode(input: $input) { nodeID revisionID linkID doneAt } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.addChildNode as {nodeID: string, revisionID: string, linkID: string, doneAt: number};
+}
 
 /*type NodeRevisionInput =
 	Omit<Partial<NodeRevision>, "id" | "creator" | "createdAt">
@@ -130,15 +147,6 @@ export async function RunCommand_SetUserFollowData(inputFields: {targetUser: str
 	return result.data.setUserFollowData as {id: string};
 }
 
-export async function RunCommand_UnlinkNode(inputFields: {mapID?: string|n, parentID: string, childID: string}) {
-	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: UnlinkNodeInput!) { unlinkNode(input: $input) { __typename } }`,
-		variables: {input: inputFields},
-	});
-	return result.data.unlinkNode as {};
-}
-
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");
-export const RunCommand_UpdateNodeChildLink = CreateFunc_RunCommand_UpdateX(NodeChildLink);
 export const RunCommand_UpdateUser = CreateFunc_RunCommand_UpdateX(User);
 export const RunCommand_UpdateUserHidden = CreateFunc_RunCommand_UpdateX(UserHidden);

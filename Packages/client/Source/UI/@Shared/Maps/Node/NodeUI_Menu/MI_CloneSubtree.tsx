@@ -1,4 +1,4 @@
-import {CheckValidityOfLink, ChildGroup, ClaimForm, GetNodeL3, GetParentNodeL3, HasAdminPermissions, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
+import {CheckLinkIsValid, ChildGroup, ClaimForm, GetNodeL3, GetParentNodeL3, HasAdminPermissions, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";

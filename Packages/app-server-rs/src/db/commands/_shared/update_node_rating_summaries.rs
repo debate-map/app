@@ -21,7 +21,8 @@ use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_
 use crate::db::node_ratings_::_node_rating_type::{rating_value_is_in_range, get_rating_type_info, NodeRatingType};
 use crate::db::node_ratings::{NodeRatingInput, get_node_ratings, get_node_ratings_base};
 use crate::db::nodes::{get_node, get_node_parents, get_node_children};
-use crate::db::nodes_::_node::{RatingSummary, NodeType};
+use crate::db::nodes_::_node::{RatingSummary};
+use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;

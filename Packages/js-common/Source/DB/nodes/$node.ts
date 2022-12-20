@@ -5,7 +5,7 @@ import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
-import {CheckValidityOfLink, CheckValidityOfNewLink, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
+import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
 import {ClaimForm, NodeL1, NodeL2, NodeL3, Polarity} from "./@Node.js";
 import {NodeRevision} from "./@NodeRevision.js";
 import {ChildGroup, NodeType} from "./@NodeType.js";
@@ -406,12 +406,12 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 
 export function GetValidChildTypes(nodeType: NodeType, path: string, group: ChildGroup) {
 	const nodeTypes = GetValues(NodeType);
-	const validChildTypes = nodeTypes.filter(type=>CheckValidityOfLink(nodeType, group, type) == null);
+	const validChildTypes = nodeTypes.filter(type=>CheckLinkIsValid(nodeType, group, type) == null);
 	return validChildTypes;
 }
 export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, permissions: PermissionGroupSet) {
 	const nodeTypes = GetValues(NodeType);
-	const validChildTypes = nodeTypes.filter(type=>CheckValidityOfNewLink(parent.id, childGroup, {type} as any, permissions) == null);
+	const validChildTypes = nodeTypes.filter(type=>CheckNewLinkIsValid(parent.id, childGroup, {type} as any, permissions) == null);
 
 	// if in relevance or truth group, claims cannot be direct children (must be within argument)
 	/*if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {

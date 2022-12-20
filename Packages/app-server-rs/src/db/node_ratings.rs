@@ -23,7 +23,8 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 use super::commands::_shared::rating_processor::get_argument_impact_pseudo_ratings;
 use super::node_ratings_::_node_rating_type::{NodeRatingType, get_rating_type_info};
 use super::nodes::get_node_children;
-use super::nodes_::_node::{NodeType, RatingSummary};
+use super::nodes_::_node::{RatingSummary};
+use super::nodes_::_node_type::NodeType;
 
 pub async fn get_node_rating(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeRating, Error> {
     get_db_entry(ctx, "nodeRatings", &Some(json!({

@@ -4,7 +4,7 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetHighestLexoRankUnderParent, GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckValidityOfLink} from "../DB/nodes.js";
+import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckLinkIsValid} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, NodeL1, Polarity} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
@@ -62,8 +62,8 @@ const IDIsOfNodeThatIsRootOfMap = id=>GetNode(id)?.rootNodeForMap != null;
 export function IsWrapperArgNeededForTransfer(parent_type: NodeType, parent_childGroup: ChildGroup, transferNode_type: NodeType, transferNode_childGroup?: ChildGroup) {
 	/*const transferNodeIsValidAlready = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, transferNode_type) == null;
 	const wrapperArgWouldBeValidInParent = CheckValidityOfChildTypeInChildGroup(parent_type, parent_childGroup, NodeType.argument) == null;*/
-	const transferNodeIsValidAlready = CheckValidityOfLink(parent_type, parent_childGroup, transferNode_type) == null;
-	const wrapperArgWouldBeValidInParent = CheckValidityOfLink(parent_type, parent_childGroup, NodeType.argument) == null;
+	const transferNodeIsValidAlready = CheckLinkIsValid(parent_type, parent_childGroup, transferNode_type) == null;
+	const wrapperArgWouldBeValidInParent = CheckLinkIsValid(parent_type, parent_childGroup, NodeType.argument) == null;
 	const transferNodeCanBePlacedInWrapperArg = transferNode_type == NodeType.claim && (transferNode_childGroup == null || transferNode_childGroup == ChildGroup.generic);
 	return !transferNodeIsValidAlready && wrapperArgWouldBeValidInParent && transferNodeCanBePlacedInWrapperArg;
 }

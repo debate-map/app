@@ -32,7 +32,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		//link: {$ref: NodeChildLink.name},
 		// todo: clean up handling of "link" field (it's marked optional, yet error occurs if left out, due to child-group not being set; and this line doesn't make enough of link's fields optional)
 		link: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
-		asMapRoot: {type: "boolean"},
+		//asMapRoot: {type: "boolean"},
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$nodeID: {$ref: "UUID"},

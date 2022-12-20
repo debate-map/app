@@ -15,6 +15,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
 
 use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::nodes_::_node_type::NodeType;
 
 pub async fn get_node_child_link(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeChildLink, Error> {
     get_db_entry(ctx, "nodeChildLinks", &Some(json!({
@@ -33,14 +34,14 @@ pub async fn get_node_child_links(ctx: &AccessorContext<'_>, parent_id: Option<&
 }
 
 /// Does not handle mirror-children atm.
-pub async fn get_link_under_parent(ctx: &AccessorContext<'_>, node_id: &str, parent_id: &str) -> Result<NodeChildLink, Error> {
+pub async fn get_first_link_under_parent(ctx: &AccessorContext<'_>, node_id: &str, parent_id: &str) -> Result<NodeChildLink, Error> {
 	let parent_child_links = get_node_child_links(ctx, Some(parent_id), Some(node_id)).await?;
     Ok(parent_child_links.into_iter().nth(0).ok_or(anyhow!("No link found between claimed parent #{} and child #{}.", parent_id, node_id))?)
 }
 
 wrap_slow_macros!{
 
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
 pub enum ChildGroup {
     #[graphql(name = "generic")] generic,
     #[graphql(name = "truth")] truth,
@@ -71,29 +72,27 @@ pub struct NodeChildLink {
 	pub seriesEnd: Option<bool>,
 	pub polarity: Option<String>,
     #[graphql(name = "c_parentType")]
-	pub c_parentType: Option<String>,
+	pub c_parentType: NodeType,
     #[graphql(name = "c_childType")]
-	pub c_childType: Option<String>,
+	pub c_childType: NodeType,
 }
 impl From<Row> for NodeChildLink {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-/*#[derive(InputObject, Clone, Serialize, Deserialize)]
+#[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeChildLinkInput {
-	pub parent: String,
-	pub child: String,
+    /// Marked as optional, since in some contexts it's not needed. (eg. for add_child_node)
+	pub parent: Option<String>,
+    /// Marked as optional, since in some contexts it's not needed. (eg. for add_child_node)
+	pub child: Option<String>,
 	pub group: ChildGroup,
 	pub orderKey: String,
 	pub form: Option<ClaimForm>,
 	pub seriesAnchor: Option<bool>,
 	pub seriesEnd: Option<bool>,
 	pub polarity: Option<String>,
-    #[graphql(name = "c_parentType")]
-	pub c_parentType: Option<String>,
-    #[graphql(name = "c_childType")]
-	pub c_childType: Option<String>,
-}*/
+}
 
 #[derive(InputObject, Deserialize)]
 pub struct NodeChildLinkUpdates {

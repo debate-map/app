@@ -56,7 +56,8 @@ impl From<Row> for NodeRevision {
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeRevisionInput {
-    pub node: String,
+    /// Marked as optional, since in some contexts it's not needed. (eg. for add_node, add_child_node, etc.)
+    pub node: Option<String>,
     pub phrasing: NodePhrasing_Embedded,
     pub note: Option<String>,
     pub displayDetails: Option<JSONValue>,

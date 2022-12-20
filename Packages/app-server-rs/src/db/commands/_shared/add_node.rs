@@ -13,13 +13,15 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
+use crate::db::_shared::common_errors::err_should_be_null;
 use crate::db::commands::_command::{command_boilerplate, set_db_entry_by_id_for_struct, tbd};
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
 use crate::db::commands::add_node_revision::{add_node_revision, AddNodeRevisionResult, self, AddNodeRevisionInput, AddNodeRevisionExtras};
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::node_revisions::{NodeRevisionInput, NodeRevision};
-use crate::db::nodes_::_node::{Node, NodeInput, NodeType};
+use crate::db::nodes_::_node::{Node, NodeInput};
+use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -60,8 +62,8 @@ pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput,
 	set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node.clone()).await?;
 
     // add node-revision to db
-    ensure!(revision.node == tbd("add_node"), r#"The revision.node field must be set to: tbd("add_node")"#);
-    revision.node = node.id.to_string();
+    ensure!(revision.node.is_none(), err_should_be_null("revision.node").to_string());
+    revision.node = Some(node.id.to_string());
     let add_rev_result = add_node_revision(
         ctx, actor,
         AddNodeRevisionInput { mapID: None, revision },

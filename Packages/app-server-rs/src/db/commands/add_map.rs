@@ -20,7 +20,8 @@ use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::maps::{MapInput, Map};
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
-use crate::db::nodes_::_node::{NodeInput, NodeType};
+use crate::db::nodes_::_node::{NodeInput};
+use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -90,7 +91,7 @@ pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, input: AddMapInput
 			note: None,
 			terms: vec![],
 		},
-		node: tbd("add_node"),
+		node: None,
 		note: None,
 		displayDetails: None,
 		attachments: vec![],

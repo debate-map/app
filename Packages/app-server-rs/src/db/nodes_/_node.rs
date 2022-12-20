@@ -8,18 +8,11 @@ use serde::{Serialize, Deserialize};
 
 use crate::db::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::{db::node_child_links::{get_node_child_links, ClaimForm, get_link_under_parent}, utils::db::accessors::AccessorContext};
+use crate::{db::node_child_links::{get_node_child_links, ClaimForm, get_first_link_under_parent}, utils::db::accessors::AccessorContext};
+
+use super::_node_type::NodeType;
 
 wrap_slow_macros!{
-
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub enum NodeType {
-	#[graphql(name = "category")] category,
-	#[graphql(name = "package")] package,
-	#[graphql(name = "multiChoiceQuestion")] multiChoiceQuestion,
-	#[graphql(name = "claim")] claim,
-	#[graphql(name = "argument")] argument,
-}
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ArgumentType {
@@ -88,6 +81,6 @@ pub struct RatingSummary {
 }
 
 pub async fn get_node_form(ctx: &AccessorContext<'_>, node_id: &str, parent_id: &str) -> Result<ClaimForm, Error> {
-	let link = get_link_under_parent(ctx, &node_id, &parent_id).await?;
+	let link = get_first_link_under_parent(ctx, &node_id, &parent_id).await?;
 	Ok(link.form.unwrap_or(ClaimForm::base))
 }

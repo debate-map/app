@@ -108,15 +108,14 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
         // endpoints ported to rust (don't proxy these to app-server-js)
         let commands_in_asrs = vec![
             // commands, matching standard add/delete/update pattern
-            "addAccessPolicy", "addMap", "addMedia", "addNodePhrasing", "addNodeTag", "addShare", "addTerm",
-            "deleteAccessPolicy", "deleteMap", "deleteMedia", "deleteNodePhrasing", "deleteNodeTag", "deleteShare", "deleteTerm",
-            "updateAccessPolicy", "updateMap", "updateMedia", "updateNodePhrasing", "updateNodeTag", "updateShare", "updateTerm",
+            "addAccessPolicy", "addMap", "addMedia", "addNodeChildLink", "addNodePhrasing", "addNodeTag", "addShare", "addTerm",
+            "deleteAccessPolicy", "deleteMap", "deleteMedia", "deleteNodeChildLink", "deleteNodePhrasing", "deleteNodeTag", "deleteShare", "deleteTerm",
+            "updateAccessPolicy", "updateMap", "updateMedia", "updateNodeChildLink", "updateNodePhrasing", "updateNodeTag", "updateShare", "updateTerm",
             // commands, others
-            "addNodeRevision",
+            "addChildNode", "addNodeRevision",
             "deleteArgument", "deleteNode", "deleteNodeRating",
             "setNodeIsMultiPremiseArgument", "setNodeRating", "setUserFollowData",
-            "unlinkNode",
-            "updateNode", "updateNodeChildLink", "updateUser", "updateUserHidden",
+            "updateNode", "updateUser", "updateUserHidden",
         ];
 
         // if any of the endpoints used in the request have an implementation in rust, don't proxy the request to app-server-js

@@ -24,6 +24,7 @@ import {GetOpenMapID} from "Store/main.js";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
+import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -78,10 +79,7 @@ export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportRe
 						command.RunOnServer();
 					} else {*/
 					res.link.group = childGroup;
-					const command = new AddChildNode({
-						mapID: map?.id, parentID: node.id, node: res.node, revision: res.revision, link: res.link,
-					});
-					command.RunOnServer();
+					await RunCommand_AddChildNode({mapID: map?.id, parentID: node.id, node: res.node.ExcludeKeys("extras"), revision: res.revision, link: res.link});
 				}}/>}
 			</>
 		);
@@ -340,22 +338,21 @@ class ImportSubtreeUI extends BaseComponent<
 			if (insertPath_indexOfFirstMissingNode != -1) {
 				const parentNodeID = insertPath_indexOfFirstMissingNode == 0 ? rootNodeForImport.id : insertPath_resolvedNodeIDs[insertPath_indexOfFirstMissingNode - 1]!;
 				const newNodeText = insertPath[insertPath_indexOfFirstMissingNode];
-				const commandForAncestor = await GetCommandToCreateAncestorForResource(res, map?.id, parentNodeID, newNodeText, res.node.accessPolicy);
-				if (!commandForAncestor) {
+				const success = await CreateAncestorForResource(res, map?.id, parentNodeID, newNodeText, res.node.accessPolicy);
+				if (!success) {
 					AddNotificationMessage(`Could not create ancestor "${newNodeText}".`);
 					this.SetTimerEnabled(false);
 					return;
 				}
 
-				await commandForAncestor.RunOnServer();
+				//await commandForAncestor.RunOnServer();
 				this.TriggerSearchesToRerun();
 				setTimeout(()=>this.nodeCreationTimer.func(), 1000); // run next iteration in 1s
 				return;
 			}
 
 			// if insert path is resolved, then create the selected-resource's node itself
-			const command = GetCommandToCreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
-			await command.RunOnServer();
+			await CreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
 			RunInAction_Set("MI_ImportSubtree.nodeCreationTimer.tickCompletion", ()=>{
 				uiState.selectedImportResources.delete(res);
 			});
@@ -524,9 +521,9 @@ class ImportResourceUI extends BaseComponent<
 												NewNode:${segment}
 											`.AsMultiline(0),
 											onOK: async()=>{
-												const command = await GetCommandToCreateAncestorForResource(res, map?.id, prevResolvedNodeID, segment, res.node.accessPolicy);
-												if (command) {
-													await command.RunOnServer();
+												const success = await CreateAncestorForResource(res, map?.id, prevResolvedNodeID, segment, res.node.accessPolicy);
+												if (success) {
+													//await command.RunOnServer();
 													onNodeCreated();
 												} else {
 													AddNotificationMessage(`Could not create ancestor "${segment}".`);
@@ -544,8 +541,7 @@ class ImportResourceUI extends BaseComponent<
 						{res instanceof IR_NodeAndRevision &&
 						<>
 							<Button text="Create" p="0 10px" enabled={insertPath_resolvedNodeIDs.Last() != null} onClick={async()=>{
-								const command = GetCommandToCreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
-								await command.RunOnServer();
+								await CreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
 								onNodeCreated();
 							}}/>
 						</>}
@@ -567,10 +563,10 @@ export const ResolveNodeIDsForInsertPath = CreateAccessor((rootNodeID: string, i
 	return resolvedNodeIDs;
 });
 
-export async function GetCommandToCreateAncestorForResource(res: ImportResource, mapID: string|n, parentIDOfNewNode: string, newNodeTitle: string, newNodeAccessPolicy: string) {
+export async function CreateAncestorForResource(res: ImportResource, mapID: string|n, parentIDOfNewNode: string, newNodeTitle: string, newNodeAccessPolicy: string): Promise<boolean> {
 	const parentOfNewNode = await GetAsync(()=>GetNode(parentIDOfNewNode));
-	if (parentOfNewNode == null) return null;
-	return new AddChildNode({
+	if (parentOfNewNode == null) return false;
+	await RunCommand_AddChildNode({
 		mapID, parentID: parentIDOfNewNode,
 		link: new NodeChildLink({
 			group: parentOfNewNode.type == NodeType.category ? ChildGroup.generic : ChildGroup.freeform,
@@ -579,7 +575,7 @@ export async function GetCommandToCreateAncestorForResource(res: ImportResource,
 			type: NodeType.category,
 			accessPolicy: newNodeAccessPolicy,
 			creator: systemUserID,
-		}),
+		}).ExcludeKeys("extras"),
 		revision: new NodeRevision({
 			creator: systemUserID,
 			phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
@@ -587,15 +583,15 @@ export async function GetCommandToCreateAncestorForResource(res: ImportResource,
 			})),
 		}),
 	});
+	return true;
 }
 
-export function GetCommandToCreateResource(res: ImportResource, mapID: string|n, parentID: string) {
+export async function CreateResource(res: ImportResource, mapID: string|n, parentID: string) {
 	if (res instanceof IR_NodeAndRevision) {
-		const command = new AddChildNode({
+		await RunCommand_AddChildNode({
 			mapID, parentID,
-			node: res.node, revision: res.revision, link: res.link,
+			node: res.node.ExcludeKeys("extras"), revision: res.revision, link: res.link,
 		});
-		return command;
 	}
 	Assert(false, `Cannot generate command to create resource of type "${res.constructor.name}".`);
 }

@@ -243,7 +243,8 @@ export function GetChildGroup(childType: NodeType, parentType: NodeType|n) {
 }
 
 /** Does basic checking of validity of parent<>child linkage. See `CheckValidityOfNewLink` for a more thorough validation. */
-export const CheckValidityOfLink = CreateAccessor((parentType: NodeType, childGroup: ChildGroup, childType: NodeType)=>{
+// sync: rs[assert_link_is_valid]
+export const CheckLinkIsValid = CreateAccessor((parentType: NodeType, childGroup: ChildGroup, childType: NodeType)=>{
 	// redundant check, improving error-message clarity for certain issues
 	if (!NodeType_Info.for[parentType].childGroup_childTypes.has(childGroup)) {
 		return `Where parent's type is ${NodeType[parentType]}, no "${ChildGroup[childGroup]}" child-group exists.`;
@@ -269,7 +270,8 @@ export const CheckValidityOfLink = CreateAccessor((parentType: NodeType, childGr
  * * Blocks if node is being linked as child of itself.
  * * Blocks if adding child to global-root, without user being an admin.
  * */
-export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<NodeL1, "id" | "type">, permissions: PermissionGroupSet)=>{
+// sync: rs[assert_link_is_valid]
+export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<NodeL1, "id" | "type">, permissions: PermissionGroupSet)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -290,11 +292,11 @@ export const CheckValidityOfNewLink = CreateAccessor((parentID: string, newChild
 	}*/
 	if (isAlreadyChild) return "Node is already a child of the parent.";
 
-	return CheckValidityOfLink(parent.type, newChildGroup, newChild.type);
+	return CheckLinkIsValid(parent.type, newChildGroup, newChild.type);
 });
 
-// sync:rs
-export const AssertUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
+// sync:rs[assert_user_can_delete_node]
+export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	const parentLinks = GetNodeChildLinks(undefined, node.id);

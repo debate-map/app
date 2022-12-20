@@ -14,6 +14,7 @@ use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, command_boilerplate};
 use crate::db::general::permission_helpers::assert_user_can_delete;
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::node_child_links::get_node_child_links;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -22,7 +23,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::increment_map_edits::increment_map_edits_if_valid;
 use super::delete_node::{delete_node, DeleteNodeInput};
-use super::unlink_node::{UnlinkNodeInput, unlink_node};
+use super::delete_node_child_link::{DeleteNodeChildLinkInput, delete_node_child_link};
 
 wrap_slow_macros!{
 
@@ -55,7 +56,10 @@ pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, input: Del
 	if deleteClaim {
 		delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: claimID }, Default::default()).await?;
 	} else {
-		unlink_node(ctx, actor, UnlinkNodeInput { mapID: None, parentID: argumentID.clone(), childID: claimID }, Default::default()).await?;
+		let links = get_node_child_links(ctx, Some(&argumentID), Some(&claimID)).await?;
+		for link in links {
+			delete_node_child_link(ctx, actor, DeleteNodeChildLinkInput { mapID: None, id: link.id.to_string() }, Default::default()).await?;
+		}
 	}
 
 	//delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: argumentID }, DeleteNodeExtras { childrenToIgnore: vec![claimID] }).await?;
