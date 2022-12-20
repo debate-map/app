@@ -6,7 +6,7 @@ import {Observer} from "web-vcore";
 import {GetNodeL3, GetNodeDisplayText, IsUserCreatorOrMod, MeID, UnlinkNode, ChildGroup} from "dm_common";
 import {Assert, NN} from "web-vcore/nm/js-vextensions";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {RunCommand_DeleteNodeChildLink} from "Utils/DB/Command.js";
+import {RunCommand_DeleteNodeLink} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -37,7 +37,7 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 						message: `Unlink the argument "${argumentText}"?`,
 						onOK: async()=>{
 							//command.RunOnServer();
-							await RunCommand_DeleteNodeChildLink({/*mapID,*/ id: argument.link!.id});
+							await RunCommand_DeleteNodeLink({/*mapID,*/ id: argument.link!.id});
 						},
 					});
 				}}/>

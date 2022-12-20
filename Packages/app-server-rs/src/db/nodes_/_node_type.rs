@@ -8,7 +8,7 @@ use rust_shared::async_graphql::{Enum};
 use rust_shared::utils::general::average;
 use serde::{Serialize, Deserialize};
 
-use crate::db::node_child_links::ChildGroup;
+use crate::db::node_links::ChildGroup;
 
 wrap_slow_macros!{
 

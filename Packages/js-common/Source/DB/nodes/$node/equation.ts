@@ -1,4 +1,4 @@
-import {GetNodeChildLinks} from "../../nodeChildLinks.js";
+import {GetNodeLinks} from "../../nodeLinks.js";
 import {GetNodeID, GetParentNode} from "../../nodes.js";
 
 export function GetEquationStepNumber(path: string) {
@@ -6,7 +6,7 @@ export function GetEquationStepNumber(path: string) {
 	const parent = GetParentNode(path);
 	if (parent == null) return 0;
 
-	const parentChildLinks = GetNodeChildLinks.BILA(parent.id);
+	const parentChildLinks = GetNodeLinks.BILA(parent.id);
 
 	// let equationStepNodeIDs = parent.children.VKeys().map(a=>a.ToInt());
 	/*let equationStepNodes = GetNodeChildrenL2(parent.id).filter(a=>{

@@ -3,8 +3,8 @@ import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {GetMapNodeEdits} from "../DB/mapNodeEdits.js";
 import {MapNodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
-import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeLinks} from "../DB/nodeLinks.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {GetNodePhrasings} from "../DB/nodePhrasings.js";
 import {NodePhrasing} from "../DB/nodePhrasings/@NodePhrasing.js";
 import {GetRatings} from "../DB/nodeRatings.js";
@@ -37,8 +37,8 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 	oldPhrasings: NodePhrasing[];
 	oldRatings: NodeRating[];
 	//oldParentChildrenOrders: string[][];
-	linksAsParent: NodeChildLink[];
-	linksAsChild: NodeChildLink[];
+	linksAsParent: NodeLink[];
+	linksAsChild: NodeLink[];
 	mapNodeEdits: MapNodeEdit[];
 	Validate() {
 		const {mapID, nodeID} = this.payload;
@@ -63,8 +63,8 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 		/*const parentIDs = CE(this.oldData.parents || {}).VKeys();
 		this.oldParentChildrenOrders = parentIDs.map(parentID=>GetNode(parentID)?.childrenOrder);
 		//AssertV(this.oldParentChildrenOrders.All((a) => a != null), 'oldParentChildrenOrders has null entries.');*/
-		this.linksAsParent = GetNodeChildLinks(nodeID);
-		this.linksAsChild = GetNodeChildLinks(null, nodeID);
+		this.linksAsParent = GetNodeLinks(nodeID);
+		this.linksAsChild = GetNodeLinks(null, nodeID);
 		this.mapNodeEdits = GetMapNodeEdits(null, nodeID);
 	}
 
@@ -79,10 +79,10 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 		}
 
 		for (const link of this.linksAsParent) {
-			db.set(dbp`nodeChildLinks/${link.id}`, null);
+			db.set(dbp`nodeLinks/${link.id}`, null);
 		}
 		for (const link of this.linksAsChild) {
-			db.set(dbp`nodeChildLinks/${link.id}`, null);
+			db.set(dbp`nodeLinks/${link.id}`, null);
 		}
 		// delete edit-time entries within each map (where such entries exist)
 		for (const edit of this.mapNodeEdits) {

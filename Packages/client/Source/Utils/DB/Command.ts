@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeChildLink, NodeL1, UserFollow, User, UserHidden} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -52,7 +52,7 @@ function CreateFunc_RunCommand_UpdateX<ResultShape = {}, T = any>(classConstruct
 export const RunCommand_AddAccessPolicy = CreateFunc_RunCommand_AddX(AccessPolicy, "policy");
 export const RunCommand_AddMap = CreateFunc_RunCommand_AddX(Map, "map");
 export const RunCommand_AddMedia = CreateFunc_RunCommand_AddX(Media, "media");
-export const RunCommand_AddNodeChildLink = CreateFunc_RunCommand_AddX(NodeChildLink, "link");
+export const RunCommand_AddNodeLink = CreateFunc_RunCommand_AddX(NodeLink, "link");
 export const RunCommand_AddNodePhrasing = CreateFunc_RunCommand_AddX(NodePhrasing, "phrasing");
 export const RunCommand_AddNodeTag = CreateFunc_RunCommand_AddX(NodeTag, "tag");
 export const RunCommand_AddShare = CreateFunc_RunCommand_AddX(Share, "share");
@@ -61,7 +61,7 @@ export const RunCommand_AddTerm = CreateFunc_RunCommand_AddX(Term, "term");
 export const RunCommand_DeleteAccessPolicy = CreateFunc_RunCommand_DeleteX(AccessPolicy);
 export const RunCommand_DeleteMap = CreateFunc_RunCommand_DeleteX(Map);
 export const RunCommand_DeleteMedia = CreateFunc_RunCommand_DeleteX(Media);
-export const RunCommand_DeleteNodeChildLink = CreateFunc_RunCommand_DeleteX(NodeChildLink);
+export const RunCommand_DeleteNodeLink = CreateFunc_RunCommand_DeleteX(NodeLink);
 export const RunCommand_DeleteNodePhrasing = CreateFunc_RunCommand_DeleteX(NodePhrasing);
 export const RunCommand_DeleteNodeTag = CreateFunc_RunCommand_DeleteX(NodeTag);
 export const RunCommand_DeleteShare = CreateFunc_RunCommand_DeleteX(Share);
@@ -70,7 +70,7 @@ export const RunCommand_DeleteTerm = CreateFunc_RunCommand_DeleteX(Term);
 export const RunCommand_UpdateAccessPolicy = CreateFunc_RunCommand_UpdateX(AccessPolicy);
 export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(Map);
 export const RunCommand_UpdateMedia = CreateFunc_RunCommand_UpdateX(Media);
-export const RunCommand_UpdateNodeChildLink = CreateFunc_RunCommand_UpdateX(NodeChildLink);
+export const RunCommand_UpdateNodeLink = CreateFunc_RunCommand_UpdateX(NodeLink);
 export const RunCommand_UpdateNodePhrasing = CreateFunc_RunCommand_UpdateX(NodePhrasing);
 export const RunCommand_UpdateNodeTag = CreateFunc_RunCommand_UpdateX(NodeTag);
 export const RunCommand_UpdateShare = CreateFunc_RunCommand_UpdateX(Share);
@@ -84,7 +84,7 @@ export async function RunCommand_AddChildNode(inputFields: {
 	parentID: string,
 	node: Partial<Omit<NodeL1, "extras"> & {extras: never}>,
 	revision: Partial<NodeRevision>,
-	link: Partial<NodeChildLink>,
+	link: Partial<NodeLink>,
 }) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: AddChildNodeInput!) { addChildNode(input: $input) { nodeID revisionID linkID doneAt } }`,

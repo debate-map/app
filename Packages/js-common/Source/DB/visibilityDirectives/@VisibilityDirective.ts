@@ -1,4 +1,4 @@
-import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
+/*import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 
 @MGLClass({table: "visibilityDirectives"})
 export class VisibilityDirective {
@@ -26,9 +26,9 @@ export class VisibilityDirective {
 	@Field({type: "string"}, {opt: true})
 	target_node?: string;
 
-	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`nodeChildLinks`).DeferRef())
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`nodeLinks`).DeferRef())
 	@Field({type: "string"}, {opt: true})
-	target_nodeChildLink?: string;
+	target_nodeLink?: string;
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
@@ -37,4 +37,4 @@ export class VisibilityDirective {
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	visibility_nodes?: string;
-}
+}*/

@@ -1,4 +1,4 @@
-import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeChildLink, Polarity, SourceType, systemUserID} from "dm_common";
+import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeLink, Polarity, SourceType, systemUserID} from "dm_common";
 import React, {ComponentProps} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
@@ -568,7 +568,7 @@ export async function CreateAncestorForResource(res: ImportResource, mapID: stri
 	if (parentOfNewNode == null) return false;
 	await RunCommand_AddChildNode({
 		mapID, parentID: parentIDOfNewNode,
-		link: new NodeChildLink({
+		link: new NodeLink({
 			group: parentOfNewNode.type == NodeType.category ? ChildGroup.generic : ChildGroup.freeform,
 		}),
 		node: new NodeL1({

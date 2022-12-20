@@ -1,4 +1,4 @@
-import {GetMap, GetNodeChildLinks, GetNodeL2, MapView, Me} from "dm_common";
+import {GetMap, GetNodeLinks, GetNodeL2, MapView, Me} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
@@ -52,7 +52,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 				//console.log('Expanding:', path);
 				ACTNodeExpandedSet({mapID: map.id, path, expanded: true, resetSubtree: false});
 			}
-			const childLinks = await GetAsync(()=>GetNodeChildLinks(node.id));
+			const childLinks = await GetAsync(()=>GetNodeLinks(node.id));
 			if (childLinks.length) {
 				newPathsToExpand.push(...childLinks.map(a=>`${path}/${a.child}`));
 			}

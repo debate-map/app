@@ -1,4 +1,4 @@
-import {GetMap, GetNode, GetNodeChildLinks} from "dm_common";
+import {GetMap, GetNode, GetNodeLinks} from "dm_common";
 import {store} from "Store";
 import {ACTNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {JumpToNode} from "UI/@Shared/NavBar/SearchPanel.js";
@@ -40,7 +40,7 @@ async function SelectNodeByFragmentPath(mapID: string, nodePathFragments: string
 			nodeIDs.push(fragment);
 		} else {
 			const lastNodeID = nodeIDs.Last();
-			const lastNode_childLinks = await GetAsync(()=>GetNodeChildLinks(lastNodeID));
+			const lastNode_childLinks = await GetAsync(()=>GetNodeLinks(lastNodeID));
 			const childLinkMatchingFragment = lastNode_childLinks.find(a=>a.child.startsWith(fragment));
 			if (childLinkMatchingFragment == null) {
 				AddNotificationMessage(`Could not find child-node matching the fragment "${fragment}" at the correct position, in order to select the node specified in the url. (map structure was probably just changed)`);

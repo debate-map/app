@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, NodeChildLink, NodeL1, NodePhrasing, NodeRevision, NodeType, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
+import {ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, NodeLink, NodeL1, NodePhrasing, NodeRevision, NodeType, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
 import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat";
 import {CSV_SL_Row} from "./DataModel.js";
@@ -23,7 +23,7 @@ export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
 		createdAt: Date.now(),
 		creator: systemUserID,
 	});
-	const link = new NodeChildLink({
+	const link = new NodeLink({
 		createdAt: node.createdAt,
 		creator: systemUserID,
 		form: ClaimForm.base,

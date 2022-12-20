@@ -33,7 +33,7 @@ Simple: (tables where row-access is entirely controlled by own-field access-poli
 
 Derivative: (tables where row-access involves checking access-policies of associated rows, eg. `row -> refToOtherTableRow -> otherTableRow [verify by attempting other-table-row access]`):
 * mapNodeEdits (must pass map's policy + node's policy)
-* nodeChildLinks (must pass policy of parent and child, denying if either denies)
+* nodeLinks (must pass policy of parent and child, denying if either denies)
 * nodePhrasings (must pass node's policy)
 * nodeRatings (must pass own policy + node's policy)
 * nodeRevisions (must pass node's policy)

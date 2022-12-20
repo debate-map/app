@@ -2,7 +2,7 @@ import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {GetParentNodeID} from "../DB/nodes.js";
 import {GetNodeL3, ReversePolarity} from "../DB/nodes/$node.js";
 import {NodeL3} from "../DB/nodes/@Node.js";
@@ -23,7 +23,7 @@ import {NodeType} from "../DB/nodes/@NodeType.js";
 export class ReverseArgumentPolarity extends Command<{mapID?: string|n, nodeID: string, path: string}, {}> {
 	parentID: string;
 	oldNodeData: NodeL3;
-	newLinkData: NodeChildLink;
+	newLinkData: NodeLink;
 	Validate() {
 		const {nodeID, path} = this.payload;
 
@@ -36,10 +36,10 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string|n, nodeID: 
 		Assert(this.newLinkData.polarity, "Polarity must be non-null, if calling ReverseArgumentPolarity.");
 		this.newLinkData.polarity = ReversePolarity(this.newLinkData.polarity);
 
-		AssertValidate(NodeChildLink.name, this.newLinkData, "New link-data invalid");
+		AssertValidate(NodeLink.name, this.newLinkData, "New link-data invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		db.set(dbp`nodeChildLinks/${this.newLinkData.id}`, this.newLinkData);
+		db.set(dbp`nodeLinks/${this.newLinkData.id}`, this.newLinkData);
 	}
 }

@@ -1,4 +1,4 @@
-import {GetMap, GetNode, GetNodeChildLinks, GetNodeChildrenL3, GetNodeL2, GetNodeRevisions, GetNodeTags, NodeView} from "dm_common";
+import {GetMap, GetNode, GetNodeLinks, GetNodeChildrenL3, GetNodeL2, GetNodeRevisions, GetNodeTags, NodeView} from "dm_common";
 import {CatchBail, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMapView} from "../maps/mapViews/$mapView";
 
@@ -46,7 +46,7 @@ export const GetPreloadData_ForMapLoad = CreateAccessor((mapID: string)=>{
 		//GetRatings.CatchBail(null, nodeID, NodeRatingType.truth);
 		//GetRatings.CatchBail(null, nodeID, NodeRatingType.relevance);
 
-		GetNodeChildLinks.CatchBail(null, nodeID);
+		GetNodeLinks.CatchBail(null, nodeID);
 		//CatchBail(null, ()=>GetNodeChildrenL3.CatchItemBails(null, nodeID));
 		GetNodeChildrenL3.CatchBail(null, nodeID);
 	}

@@ -5,7 +5,7 @@ import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
 import {MapNodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
 import {Map} from "./DB/maps/@Map.js";
 import {Media} from "./DB/media/@Media.js";
-import {NodeChildLink} from "./DB/nodeChildLinks/@NodeChildLink.js";
+import {NodeLink} from "./DB/nodeLinks/@NodeLink.js";
 import {NodeRating} from "./DB/nodeRatings/@NodeRating.js";
 import {NodeL1} from "./DB/nodes/@Node.js";
 import {NodeRevision} from "./DB/nodes/@NodeRevision.js";
@@ -14,7 +14,6 @@ import {Share} from "./DB/shares/@Share.js";
 import {Term} from "./DB/terms/@Term.js";
 import {User} from "./DB/users/@User.js";
 import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
-import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 import {NodePhrasing} from "./DB/nodePhrasings/@NodePhrasing.js";
 import {GlobalData} from "./DB/globalData/@GlobalData.js";
 
@@ -50,7 +49,7 @@ export class GraphDBShape {
 	nodeRevisions = DefineCollection(NodeRevision);
 	//nodeStats = DefineCollection(NodeL1Stats);
 	nodePhrasings = DefineCollection(NodePhrasing);
-	nodeChildLinks = DefineCollection(NodeChildLink);
+	nodeLinks = DefineCollection(NodeLink);
 	nodeTags = DefineCollection(NodeTag);
 	shares = DefineCollection(Share);
 	terms = DefineCollection(Term);
@@ -60,7 +59,7 @@ export class GraphDBShape {
 	users = DefineCollection(User);
 	userHiddens = DefineCollection(UserHidden);
 	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
-	visibilityDirectives = DefineCollection(VisibilityDirective);
+	//visibilityDirectives = DefineCollection(VisibilityDirective);
 }
 
 /* export interface FirebaseDBShape {

@@ -8,14 +8,14 @@
 }
 
 type Props = {mapID: string, anchorNode: NodeL1, anchorNodePath: string, boxController: BoxController};
-class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: NodeL1, newRevision: NodeRevision, newLink: NodeChildLink, validationError: string}) {
+class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: NodeL1, newRevision: NodeRevision, newLink: NodeLink, validationError: string}) {
 	constructor(props) {
 		super(props);
 		const newNode = new NodeL1({
 			type: NodeType.claim,
 		});
 		const newRevision = new NodeRevision({});
-		const newLink = E({ _: true }, newNode.type == NodeType.claim && { form: ClaimForm.base }) as NodeChildLink; // not actually used
+		const newLink = E({ _: true }, newNode.type == NodeType.claim && { form: ClaimForm.base }) as NodeLink; // not actually used
 		this.state = { newNode, newRevision, newLink } as any;
 	}
 	UpdateOKButton() {

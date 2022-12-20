@@ -3,8 +3,8 @@ import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSON
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim, AddChildNode} from "../Commands.js";
-import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeLinks} from "../DB/nodeLinks.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {CheckLinkIsValid, GetNode} from "../DB/nodes.js";
 import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
@@ -22,17 +22,17 @@ import {TransferNodes} from "./TransferNodes.js";
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		mapID: {$ref: "UUID"},
-		$link: DeriveJSONSchema(NodeChildLink, {makeOptional_all: true, makeRequired: ["parent", "child", "group"]}),
+		$link: DeriveJSONSchema(NodeLink, {makeOptional_all: true, makeRequired: ["parent", "child", "group"]}),
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$linkID: {type: "string"},
 	}),
 })
-export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partial<NodeChildLink>, "parent" | "child" | "group" | "orderKey">}, {linkID: string}> {
+export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partial<NodeLink>, "parent" | "child" | "group" | "orderKey">}, {linkID: string}> {
 	child_oldData: NodeL1|n;
 	parent_oldData: NodeL1;
 	Validate() {
-		this.payload.link = E(new NodeChildLink(), this.payload.link); // for props the caller didn't specify, but which have default values, use them
+		this.payload.link = E(new NodeLink(), this.payload.link); // for props the caller didn't specify, but which have default values, use them
 		const {link} = this.payload;
 		AssertV(link.parent != link.child, "Parent-id and child-id cannot be the same!");
 
@@ -53,7 +53,7 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 
 		const parentToChildLinks =
 			(this.Up(AddChildNode)?.Check(a=>a.sub_addLink == this) ? [] : null)
-			?? GetNodeChildLinks(link.parent, link.child);
+			?? GetNodeLinks(link.parent, link.child);
 		AssertV(parentToChildLinks.length == 0, `Node #${link.child} is already a child of node #${link.parent}.`);
 
 		// confirm that the parent-child combination is valid
@@ -73,10 +73,10 @@ export class LinkNode extends Command<{mapID?: string|n, link: RequiredBy<Partia
 		}
 
 		this.returnData = {linkID: link.id};
-		AssertValidate("NodeChildLink", link, "Node-child-link invalid");
+		AssertValidate("NodeLink", link, "Node-child-link invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		db.set(dbp`nodeChildLinks/${this.payload.link.id!}`, this.payload.link);
+		db.set(dbp`nodeLinks/${this.payload.link.id!}`, this.payload.link);
 	}
 }

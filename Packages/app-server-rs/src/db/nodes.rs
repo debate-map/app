@@ -16,7 +16,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
-use super::node_child_links::get_node_child_links;
+use super::node_links::get_node_links;
 use super::nodes_::_node::{Node};
 use super::nodes_::_node_type::NodeType;
 use super::users::User;
@@ -52,7 +52,7 @@ pub async fn get_node(ctx: &AccessorContext<'_>, id: &str) -> Result<Node, Error
 
 /// Does not include mirror-children atm.
 pub async fn get_node_children(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<Node>, Error> {
-	let child_links = get_node_child_links(ctx, Some(node_id), None).await?;
+	let child_links = get_node_links(ctx, Some(node_id), None).await?;
 	//let result = child_links.iter().map(|link| get_node(ctx, &link.child).await?);
 	let mut result = vec![];
 	for link in child_links {
@@ -63,7 +63,7 @@ pub async fn get_node_children(ctx: &AccessorContext<'_>, node_id: &str) -> Resu
 
 /// Does not include mirror-parents.
 pub async fn get_node_parents(ctx: &AccessorContext<'_>, node_id: &str) -> Result<Vec<Node>, Error> {
-	let child_links = get_node_child_links(ctx, None, Some(node_id)).await?;
+	let child_links = get_node_links(ctx, None, Some(node_id)).await?;
 	//let result = child_links.iter().map(|link| get_node(ctx, &link.parent).await?);
 	let mut result = vec![];
 	for link in child_links {
@@ -75,7 +75,7 @@ pub async fn get_node_parents(ctx: &AccessorContext<'_>, node_id: &str) -> Resul
 // sync:js
 pub async fn is_root_node(ctx: &AccessorContext<'_>, node: &Node) -> Result<bool, Error> {
 	if node.r#type != NodeType::category { return Ok(false); }
-	let parents = get_node_child_links(ctx, None, Some(node.id.as_str())).await?;
+	let parents = get_node_links(ctx, None, Some(node.id.as_str())).await?;
 	if parents.len() != 0 { return Ok(false); } // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
 	Ok(true)
 }
@@ -89,7 +89,7 @@ pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User
 	if !is_user_creator_or_mod(actor, &node.creator) {
 		bail!("{base_text}you are not the owner of this node. (or a mod)");
 	}
-	let parent_links = get_node_child_links(ctx, None, Some(node.id.as_str())).await?;
+	let parent_links = get_node_links(ctx, None, Some(node.id.as_str())).await?;
 	if parent_links.into_iter().map(|a| a.parent).filter(|a| !parents_to_ignore.contains(a)).collect::<Vec<String>>().len() > 1 {
 		bail!("{base_text}it has more than one parent. Try unlinking it instead.");
 	}
@@ -99,7 +99,7 @@ pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User
 
 	/*let node_children = get_node_children(ctx, node.id.as_str()).await?;
 	if node_children.iter().map(|a| a.id).Exclude(children_to_ignore).len() {*/
-	let child_links = get_node_child_links(ctx, Some(node.id.as_str()), None).await?;
+	let child_links = get_node_links(ctx, Some(node.id.as_str()), None).await?;
 	if child_links.into_iter().map(|a| a.child).filter(|a| !children_to_ignore.contains(a)).next().is_some() {
 		bail!("Cannot delete this node (#{}) until all its children have been unlinked or deleted.", node.id.as_str());
 	}

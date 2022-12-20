@@ -13,7 +13,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
-use crate::db::node_child_links::get_node_child_links;
+use crate::db::node_links::get_node_links;
 use crate::db::nodes::get_node;
 use crate::utils::db::accessors::{get_db_entries, AccessorContext};
 use crate::utils::db::accessors::get_db_entry;

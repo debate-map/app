@@ -23,7 +23,7 @@ use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::AccessPolicy;
 use crate::db::commands::clone_subtree::clone_subtree;
 use crate::db::medias::Media;
-use crate::db::node_child_links::NodeChildLink;
+use crate::db::node_links::NodeLink;
 use crate::db::node_phrasings::NodePhrasing;
 use crate::db::node_revisions::NodeRevision;
 use crate::db::node_tags::NodeTag;
@@ -52,7 +52,7 @@ pub struct Subtree {
     pub terms: Vec<Term>,
     pub medias: Vec<Media>,
     pub nodes: Vec<Node>,
-    pub nodeChildLinks: Vec<NodeChildLink>,
+    pub nodeLinks: Vec<NodeLink>,
     pub nodeRevisions: Vec<NodeRevision>,
     pub nodePhrasings: Vec<NodePhrasing>,
     pub nodeTags: Vec<NodeTag>,
@@ -63,7 +63,7 @@ impl Subtree {
         for entry in &self.terms { result.insert(entry.id.to_string()); }
         for entry in &self.medias { result.insert(entry.id.to_string()); }
         for entry in &self.nodes { result.insert(entry.id.to_string()); }
-        for entry in &self.nodeChildLinks { result.insert(entry.id.to_string()); }
+        for entry in &self.nodeLinks { result.insert(entry.id.to_string()); }
         for entry in &self.nodeRevisions { result.insert(entry.id.to_string()); }
         for entry in &self.nodePhrasings { result.insert(entry.id.to_string()); }
         for entry in &self.nodeTags { result.insert(entry.id.to_string()); }
@@ -75,7 +75,7 @@ impl Subtree {
         self.terms.sort_by(|x, y| x.id.cmp(&y.id));
         self.medias.sort_by(|x, y| x.id.cmp(&y.id));
         self.nodes.sort_by(|x, y| x.id.cmp(&y.id));
-        self.nodeChildLinks.sort_by(|x, y| x.id.cmp(&y.id));
+        self.nodeLinks.sort_by(|x, y| x.id.cmp(&y.id));
         self.nodeRevisions.sort_by(|x, y| x.id.cmp(&y.id));
         self.nodePhrasings.sort_by(|x, y| x.id.cmp(&y.id));
         self.nodeTags.sort_by(|x, y| x.id.cmp(&y.id));

@@ -1,4 +1,4 @@
-import {NodeChildLink, NodeL1, NodeRevision, NodeType, systemUserID, CullNodePhrasingToBeEmbedded, NodePhrasing, ChildGroup, AddChildNode} from "dm_common";
+import {NodeLink, NodeL1, NodeRevision, NodeType, systemUserID, CullNodePhrasingToBeEmbedded, NodePhrasing, ChildGroup, AddChildNode} from "dm_common";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 
@@ -19,7 +19,7 @@ export class IR_NodeAndRevision extends ImportResource {
 		super();
 		Object.assign(this, data);
 	}
-	link: NodeChildLink;
+	link: NodeLink;
 	node: NodeL1;
 	revision: NodeRevision;
 	CanSearchByTitle() {

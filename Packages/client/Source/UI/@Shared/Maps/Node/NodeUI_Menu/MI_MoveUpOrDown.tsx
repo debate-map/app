@@ -1,8 +1,8 @@
-import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeChildLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, MeID, Polarity, UpdateLink} from "dm_common";
+import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, MeID, Polarity, UpdateLink} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
-import {RunCommand_UpdateNodeChildLink} from "Utils/DB/Command.js";
+import {RunCommand_UpdateNodeLink} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
@@ -25,7 +25,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 		const orderingParentID = GetParentNodeID(nodeToMove_path);
 		const orderingParent = GetNodeL2(orderingParentID);
 		const orderingParent_childOrdering = orderingParent?.current ? GetChildOrdering_Final(orderingParent?.current, map, store.main.maps.childOrdering) : null;
-		const orderingParent_childLinks_ordered = GetNodeChildLinks(orderingParentID);
+		const orderingParent_childLinks_ordered = GetNodeLinks(orderingParentID);
 		const ownIndexAmongPeers = orderingParent_childLinks_ordered.findIndex(a=>a.child == nodeToMove.id);
 		if (ownIndexAmongPeers == -1) return null; // defensive; this shouldn't happen, but if it does, cancel rendering until data resolves properly
 
@@ -68,7 +68,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 						linkID: nodeToMove.link!.id,
 						linkUpdates: {orderKey: newOrderKey!},
 					}).RunOnServer();*/
-					await RunCommand_UpdateNodeChildLink({id: nodeToMove.link!.id, updates: {orderKey: newOrderKey!}});
+					await RunCommand_UpdateNodeLink({id: nodeToMove.link!.id, updates: {orderKey: newOrderKey!}});
 				}}/>
 		);
 	}

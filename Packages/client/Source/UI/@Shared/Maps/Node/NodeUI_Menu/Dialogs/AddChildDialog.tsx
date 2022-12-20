@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, GetNodeTypeDisplayName, NodeChildLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeChildLinks, VLexoRank} from "dm_common";
+import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, VLexoRank} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
@@ -24,7 +24,7 @@ export class AddChildHelper {
 		const parentNode = GetNode(this.Node_ParentID);
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
 
-		const parent_childLinks = GetNodeChildLinks(this.Node_ParentID);
+		const parent_childLinks = GetNodeLinks(this.Node_ParentID);
 		const parent_lastOrderKey = parent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? VLexoRank.middle().toString();
 		const orderKeyForOuterNode = VLexoRank.parse(parent_lastOrderKey).genNext().toString();
 
@@ -48,7 +48,7 @@ export class AddChildHelper {
 			},
 			childType == NodeType.claim && {form: parentNode.type == NodeType.category ? ClaimForm.question : ClaimForm.base},
 			childType == NodeType.argument && {polarity: childPolarity},
-		) as NodeChildLink;
+		) as NodeLink;
 
 		if (childType == NodeType.argument) {
 			this.node.argumentType = ArgumentType.all;
@@ -59,7 +59,7 @@ export class AddChildHelper {
 				type: NodeType.claim, creator: userID,
 			});
 			this.subNode_revision = new NodeRevision({phrasing: NodePhrasing.Embedded({text_base: title})});
-			this.subNode_link = new NodeChildLink({
+			this.subNode_link = new NodeLink({
 				group: ChildGroup.generic,
 				orderKey: VLexoRank.middle().toString(),
 				form: ClaimForm.base,
@@ -80,10 +80,10 @@ export class AddChildHelper {
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }
 	node: NodeL1;
 	node_revision: NodeRevision;
-	node_link: NodeChildLink;
+	node_link: NodeLink;
 	subNode?: NodeL1;
 	subNode_revision?: NodeRevision;
-	subNode_link: NodeChildLink;
+	subNode_link: NodeLink;
 
 	async Apply(opt?: {expandSelf?: boolean, expandTruthAndRelevance?: boolean}) {
 		opt = E({expandSelf: true, expandTruthAndRelevance: true}, opt);

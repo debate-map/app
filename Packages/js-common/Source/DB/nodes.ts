@@ -2,7 +2,7 @@ import {Assert, CE, emptyArray_forLoading, GetValues, IsString} from "web-vcore/
 import {AddSchema, BailError, CreateAccessor, GetDoc, MapWithBailHandling, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeL3} from "../DB.js";
 import {globalRootNodeID} from "../DB_Constants.js";
-import {GetNodeChildLinks} from "./nodeChildLinks.js";
+import {GetNodeLinks} from "./nodeLinks.js";
 import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
 import {NodeL1, NodeL2, Polarity} from "./nodes/@Node.js";
@@ -51,7 +51,7 @@ export const GetNode = CreateAccessor((id: string|n)=>{
 // sync:rs
 export const IsRootNode = CreateAccessor((node: NodeL1)=>{
 	if (node.type != NodeType.category) return false;
-	const parents = GetNodeChildLinks(undefined, node.id);
+	const parents = GetNodeLinks(undefined, node.id);
 	if (parents.length != 0) return false; // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
 	return true;
 });
@@ -90,7 +90,7 @@ export const GetNodeID = CreateAccessor(<{
 }));
 
 export const GetNodeParents = CreateAccessor((nodeID: string)=>{
-	const parentLinks = GetNodeChildLinks(undefined, nodeID);
+	const parentLinks = GetNodeLinks(undefined, nodeID);
 	return parentLinks.map(a=>GetNode.BIN(a.parent)); // BIN: we know link exists, so parent-node should as well (so null must mean change loading)
 });
 export const GetNodeParentsL2 = CreateAccessor((nodeID: string)=>{
@@ -108,7 +108,7 @@ export const GetNodeChildren = CreateAccessor((nodeID: string, includeMirrorChil
 		return node.children as any;
 	}*/
 
-	const childLinks = GetNodeChildLinks(nodeID);
+	const childLinks = GetNodeLinks(nodeID);
 	/*let result = childLinks.map(link=>{
 		if (c.catchItemBails) return GetNode.CatchBail(c.catchItemBails_asX, link.child);
 		return GetNode(link.child);
@@ -282,7 +282,7 @@ export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildGro
 	// if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != MeID()) return false;
 	if (parent.id == newChild.id) return "Cannot link node as its own child.";
 
-	const parentChildLinks = GetNodeChildLinks(parentID, null, newChildGroup); // query it with "childID" null, so it's cached once for all such calls
+	const parentChildLinks = GetNodeLinks(parentID, null, newChildGroup); // query it with "childID" null, so it's cached once for all such calls
 	const isAlreadyChild = parentChildLinks.Any(a=>a.child == newChild.id);
 
 	// if new-holder-type is not specified, consider "any" and so don't check
@@ -299,14 +299,14 @@ export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildGro
 export const CheckUserCanDeleteNode = CreateAccessor((userID: string|n, node: NodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
-	const parentLinks = GetNodeChildLinks(undefined, node.id);
+	const parentLinks = GetNodeLinks(undefined, node.id);
 	if (parentLinks.map(a=>a.parent).Exclude(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
 	/*const nodeChildren = GetNodeChildrenL2(node.id, false);
 	if (CE(nodeChildren).Any(a=>a == null)) return "[still loading children...]";
 	if (CE(nodeChildren.map(a=>a.id)).Exclude(...(subcommandInfo?.childrenToIgnore ?? [])).length) {*/
-	const childLinks = GetNodeChildLinks(node.id);
+	const childLinks = GetNodeLinks(node.id);
 	if (CE(childLinks.map(a=>a.child)).Exclude(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
 		return `Cannot delete this node (#${node.id}) until all its children have been unlinked or deleted.`;
 	}

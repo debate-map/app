@@ -13,8 +13,8 @@ import {PermissionGroupSet} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@NodeTag.js";
 import {SourceType, Source} from "../@Shared/Attachments/@SourceChain.js";
-import {GetNodeChildLinks} from "../nodeChildLinks.js";
-import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
+import {GetNodeLinks} from "../nodeLinks.js";
+import {NodeLink} from "../nodeLinks/@NodeLink.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
@@ -164,7 +164,7 @@ export function IsNodeL3(node: NodeL1): node is NodeL3 {
 	// check for both existence and non-nullness (values must be non-null to be valid)
 	return node["displayPolarity"] != null && node["link"] != null;*/
 }
-/*export function AsNodeL3(node: NodeL2, displayPolarity?: Polarity, link?: NodeChildLink) {
+/*export function AsNodeL3(node: NodeL2, displayPolarity?: Polarity, link?: NodeLink) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	displayPolarity = displayPolarity || Polarity.supporting;
 	link = link ?? {
@@ -174,7 +174,7 @@ export function IsNodeL3(node: NodeL1): node is NodeL3 {
 	};
 	return E(node, {displayPolarity, link}) as NodeL3;
 }*/
-export function AsNodeL3(node: NodeL2, link: PartialBy<NodeChildLink, "polarity">|n, displayPolarity: Polarity|n = Polarity.supporting) {
+export function AsNodeL3(node: NodeL2, link: PartialBy<NodeLink, "polarity">|n, displayPolarity: Polarity|n = Polarity.supporting) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	return E(node, {displayPolarity, link}) as NodeL3;
 }
@@ -221,7 +221,7 @@ export const GetNodeForm = CreateAccessor((node: NodeL1, pathOrParent?: string |
 export const GetLinkUnderParent = CreateAccessor((nodeID: string, parent: NodeL1|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
 	if (parent == null) return null;
 	//let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
-	const parentChildLinks = GetNodeChildLinks(parent.id, nodeID);
+	const parentChildLinks = GetNodeLinks(parent.id, nodeID);
 	let link = parentChildLinks[0];
 	if (includeMirrorLinks && link == null) {
 		const tags = GetNodeTags(parent.id).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
@@ -237,7 +237,7 @@ export const GetLinkUnderParent = CreateAccessor((nodeID: string, parent: NodeL1
 					const nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
 					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
 					if (nodeL3ForNodeAsMirrorChildInThisTag) {
-						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link) as NodeChildLink;
+						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link) as NodeLink;
 						Object.defineProperty(link, "_mirrorLink", {value: true});
 						if (comp.reversePolarities && link.polarity) {
 							link.polarity = ReversePolarity(link.polarity);

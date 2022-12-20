@@ -131,11 +131,11 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
 		-- field collation fixes (ideal would be to, database-wide, have collation default to case-sensitive, but for now we just do it for a few key fields for which "ORDER BY" clauses exist)
-		ALTER TABLE "nodeChildLinks" ALTER COLUMN "orderKey" SET DATA TYPE TEXT COLLATE "C"
-		ALTER TABLE "nodeChildLinks" ALTER COLUMN "id" SET DATA TYPE TEXT COLLATE "C"
+		ALTER TABLE "nodeLinks" ALTER COLUMN "orderKey" SET DATA TYPE TEXT COLLATE "C"
+		ALTER TABLE "nodeLinks" ALTER COLUMN "id" SET DATA TYPE TEXT COLLATE "C"
 
 		-- indexes
-		create index nodeChildLinks_parent_child on app_public."nodeChildLinks" (parent, child);
+		create index nodeLinks_parent_child on app_public."nodeLinks" (parent, child);
 
 		-- helper functions (eg. optimized tree-traversal)
 		CREATE OR REPLACE FUNCTION encode_uuid(id UUID) RETURNS varchar(22) LANGUAGE SQL IMMUTABLE AS $$1
@@ -156,14 +156,14 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 				SELECT
 					p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
 				FROM
-					app_public."nodeChildLinks" AS p
+					app_public."nodeLinks" AS p
 				WHERE
 					p.parent=root
 				UNION
 					SELECT
 						c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
 					FROM
-						app_public."nodeChildLinks" AS c, children
+						app_public."nodeLinks" AS c, children
 					WHERE c.parent = children.id AND NOT is_cycle AND children.depth < max_depth
 			) SELECT
 				min(id) as id, link_id, min(depth) as depth
@@ -181,14 +181,14 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 					SELECT
 						p.parent, 1, false, ARRAY[p.child]
 					FROM
-						app_public."nodeChildLinks" AS p
+						app_public."nodeLinks" AS p
 					WHERE
 						p.child=root
 					UNION
 						SELECT
 							c.parent, parents.depth+1, c.parent = ANY(parents.nodes_path), nodes_path || c.child
 						FROM
-							app_public."nodeChildLinks" AS c, parents
+							app_public."nodeLinks" AS c, parents
 						WHERE c.child = parents.id AND NOT is_cycle AND parents.depth < max_depth
 				) SELECT
 					id, min(depth) as depth
@@ -209,14 +209,14 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 				SELECT
 					p.id, p.parent, p.child, 0, false, ARRAY[p.child], ARRAY[p.id]
 				FROM
-					app_public."nodeChildLinks" AS p
+					app_public."nodeLinks" AS p
 				WHERE
 					p.child=dest
 				UNION
 					SELECT
 						c.id, c.parent, c.child, parents.depth+1, c.parent = ANY(nodes_path), nodes_path || c.child, links_path || c.id
 					FROM
-						app_public."nodeChildLinks" AS c, parents
+						app_public."nodeLinks" AS c, parents
 					WHERE c.child = parents.parent AND NOT is_cycle
 			) SELECT
 				parents.nodes_path, parents.links_path INTO STRICT node_ids, link_ids
@@ -239,14 +239,14 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 				SELECT
 					p.parent, p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
 				FROM
-					app_public."nodeChildLinks" AS p
+					app_public."nodeLinks" AS p
 				WHERE
 					p.parent=root
 				UNION
 					SELECT
 						c.parent, c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
 					FROM
-						app_public."nodeChildLinks" AS c, children
+						app_public."nodeLinks" AS c, children
 					WHERE c.parent = children.child_id AND NOT is_cycle AND children.depth < max_depth
 			) SELECT DISTINCT ON (link_id) parent_id, child_id, depth, order_key, link_id
 			FROM
@@ -485,10 +485,10 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			);
 		end $$;
 
-		alter table app_public."nodeChildLinks" enable row level security;
+		alter table app_public."nodeLinks" enable row level security;
 		do $$ begin
-			drop policy if exists "nodeChildLinks_rls" on app_public."nodeChildLinks";
-			create policy "nodeChildLinks_rls" on app_public."nodeChildLinks" as permissive for all using (
+			drop policy if exists "nodeLinks_rls" on app_public."nodeLinks";
+			create policy "nodeLinks_rls" on app_public."nodeLinks" as permissive for all using (
 				IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "parent"), 'nodes')
 				and IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "child"), 'nodes')
 			);

@@ -1,9 +1,9 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
-import {GetHighestLexoRankUnderParent, GetNodeChildLinks} from "../DB/nodeChildLinks.js";
+import {GetHighestLexoRankUnderParent, GetNodeLinks} from "../DB/nodeLinks.js";
 import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, CheckLinkIsValid} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, NodeL1, Polarity} from "../DB/nodes/@Node.js";
@@ -152,7 +152,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.IntegrateSubcommand(()=>this.sub_addArgumentWrapper, null, ()=>new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-				link: new NodeChildLink({group: childGroup, orderKey: this.orderKeyForOuterNode, polarity: newPolarity}),
+				link: new NodeLink({group: childGroup, orderKey: this.orderKeyForOuterNode, polarity: newPolarity}),
 			}));
 
 			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
@@ -176,7 +176,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				a=>a.allowOrphaning = true); // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 
 			// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
-			const children = GetNodeChildLinks(oldParentID);
+			const children = GetNodeLinks(oldParentID);
 			if (oldParent.type == NodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
 				this.IntegrateSubcommand(()=>this.sub_deleteOldParent, null,
 					()=>new DeleteNode({mapID, nodeID: oldParentID!}),

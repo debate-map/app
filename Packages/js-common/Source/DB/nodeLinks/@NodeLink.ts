@@ -1,12 +1,12 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 import {ChildGroup} from "../../DB.js";
-import {NodeType} from "../../DB/nodes/@NodeType.js";
+import {NodeType} from "../nodes/@NodeType.js";
 import {ClaimForm, Polarity} from "../nodes/@Node.js";
 
-@MGLClass({table: "nodeChildLinks"})
-export class NodeChildLink {
-	constructor(data?: Partial<NodeChildLink>) {
+@MGLClass({table: "nodeLinks"})
+export class NodeLink {
+	constructor(data?: Partial<NodeLink>) {
 		CE(this).VSet(data);
 	}
 

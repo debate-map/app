@@ -1,7 +1,7 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
-import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
+import {NodeLink} from "../nodeLinks/@NodeLink.js";
 import {ArgumentType, NodeRevision} from "./@NodeRevision.js";
 import {NodeType} from "./@NodeType.js";
 
@@ -140,7 +140,7 @@ export interface NodeL2 extends NodeL1 {
 export interface NodeL3 extends NodeL2 {
 	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
 	displayPolarity: Polarity;
-	link: NodeChildLink|n;
+	link: NodeLink|n;
 	//linkToParent: ChildEntry;
 	//parentLinkToGrandParent: ChildEntry;
 }

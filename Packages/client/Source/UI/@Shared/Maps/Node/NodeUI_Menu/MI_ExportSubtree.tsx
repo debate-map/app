@@ -1,4 +1,4 @@
-import {GetMainAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeChildLink, Term} from "dm_common";
+import {GetMainAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeLink, Term} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -55,7 +55,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		error: null as string|n, dbUpdates: null,
 		/*ignoreKeys: {
 			nodes: ClassKeys<NodeL3>("creator", "createdAt", "accessPolicy", "policy", "current", "displayPolarity", "link"),
-			nodeChildLinks: ClassKeys<NodeChildLink>("creator", "createdAt", "c_parentType", "c_childType", "_mirrorLink", "seriesAnchor", "seriesEnd", "slot"),
+			nodeLinks: ClassKeys<NodeLink>("creator", "createdAt", "c_parentType", "c_childType", "_mirrorLink", "seriesAnchor", "seriesEnd", "slot"),
 			nodeRevisions: ClassKeys<NodeRevision>("creator", "createdAt", "displayDetails", "equation", "phrasing_tsvector", "quote"),
 			nodePhrasings: ClassKeys<NodePhrasing>("creator", "createdAt"),
 			terms: ClassKeys<Term>("creator", "createdAt"),
@@ -63,7 +63,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		},*/
 		includeKeys: {
 			nodes: ClassKeys<NodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType"),
-			nodeChildLinks: ClassKeys<NodeChildLink>("id", "parent", "child", "form", "polarity"),
+			nodeLinks: ClassKeys<NodeLink>("id", "parent", "child", "form", "polarity"),
 			nodeRevisions: ClassKeys<NodeRevision>("id", "node", "phrasing", "note", "attachments"),
 			nodePhrasings: ClassKeys<NodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "note", "terms", "references"),
 			terms: ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note"),
@@ -83,14 +83,14 @@ class ExportSubtreeUI extends BaseComponentPlus(
 				subtreeExportData = JSON.stringify({
 					// todo: make-so the UI lets you choose which fields to keep, whether to include old node-revisions, etc.
 					nodes: [...searchInfo.nodes.values()].map(node=>node.IncludeKeys(...includeKeys.nodes)),
-					nodeChildLinks: [...searchInfo.nodeChildLinks.values()].map(link=>link.IncludeKeys(...includeKeys.nodeChildLinks)),
+					nodeLinks: [...searchInfo.nodeLinks.values()].map(link=>link.IncludeKeys(...includeKeys.nodeLinks)),
 					nodeRevisions: [...searchInfo.nodeRevisions.values()].map(revision=>revision.IncludeKeys(...includeKeys.nodeRevisions)),
 					nodePhrasings: [...searchInfo.nodePhrasings.values()].map(phrasing=>phrasing.IncludeKeys(...includeKeys.nodePhrasings)),
 					terms: [...searchInfo.terms.values()].map(term=>term.IncludeKeys(...includeKeys.terms)),
 					medias: [...searchInfo.medias.values()].map(media=>media.IncludeKeys(...includeKeys.medias)),
 				}, (key, value)=>{
 					// also apply include-keys filtering to embedded links/revisions/phrasings
-					if (key == "link" && typeof value == "object") return value.IncludeKeys(...includeKeys.nodeChildLinks);
+					if (key == "link" && typeof value == "object") return value.IncludeKeys(...includeKeys.nodeLinks);
 					if (key == "current") return value.IncludeKeys(...includeKeys.nodeRevisions);
 					if (key == "phrasing") return value.IncludeKeys(...includeKeys.nodePhrasings);
 					return value;
@@ -208,7 +208,7 @@ export class GetSubtree_SearchInfo {
 
 	// result
 	nodes = new Map<string, NodeL3>();
-	nodeChildLinks = new Map<string, NodeChildLink>();
+	nodeLinks = new Map<string, NodeLink>();
 	nodeRevisions = new Map<string, NodeRevision>();
 	nodePhrasings = new Map<string, NodePhrasing>();
 	terms = new Map<string, Term>();
@@ -223,7 +223,7 @@ const PopulateSearchInfoUsingSubtree = CreateAccessor((currentPath: string, sear
 
 	// check link first, because link can differ depending on path (ie. even if node has been seen, this link may not have been)
 	const isSubtreeRoot = pathSegments.join("/") == searchInfo.rootPathSegments.join("/");
-	if (node.link && !isSubtreeRoot && !searchInfo.nodeChildLinks.has(node.link.id)) searchInfo.nodeChildLinks.set(node.link.id, node.link);
+	if (node.link && !isSubtreeRoot && !searchInfo.nodeLinks.has(node.link.id)) searchInfo.nodeLinks.set(node.link.id, node.link);
 
 	// now check if node itself has been seen/processed; if so, ignore the rest of its data
 	if (searchInfo.nodes.has(node.id)) return searchInfo;

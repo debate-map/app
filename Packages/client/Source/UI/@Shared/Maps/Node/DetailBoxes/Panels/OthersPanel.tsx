@@ -1,8 +1,8 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
-import {RunCommand_UpdateNodeChildLink, RunCommand_UpdateNode} from "Utils/DB/Command.js";
+import {RunCommand_UpdateNodeLink, RunCommand_UpdateNode} from "Utils/DB/Command.js";
 import {Observer} from "web-vcore";
 import {Assert, E, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
@@ -55,8 +55,8 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const changeControlTypeCommand = new ChangeNodeOwnerMap(EV({nodeID: node.id, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?.id)}));
 		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node.id, newOrderType: node.childrenOrderType == ChildOrderType.manual ? ChildOrderType.byRating : ChildOrderType.manual}));*/
 
-		const parentLinks = GetNodeChildLinks(null, node.id);
-		const childLinks = GetNodeChildLinks(node.id);
+		const parentLinks = GetNodeLinks(null, node.id);
+		const childLinks = GetNodeLinks(node.id);
 		const mirrorChildren = GetNodeMirrorChildren(node.id);
 		/*const childOrderTypeChangeable = node.ownerMapID != null // if private node
 			|| HasAdminPermissions(MeID()) // or has admin permissions
@@ -104,7 +104,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 										linkID: childLink.id,
 										linkUpdates: {orderKey: newOrderKeys[i]},
 									}).RunOnServer();*/
-									await RunCommand_UpdateNodeChildLink({id: childLink.id, updates: {orderKey: newOrderKeys[i]}});
+									await RunCommand_UpdateNodeLink({id: childLink.id, updates: {orderKey: newOrderKeys[i]}});
 								}
 								ShowMessageBox({title: "Complete", message: "Simplification of children order-keys is complete."});
 							},
@@ -142,7 +142,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 									//new ReverseArgumentPolarity({mapID, nodeID: nodeArgOrParentSPArg_info!.node.id, path: nodeArgOrParentSPArg_info!.path}).RunOnServer();
 									const link = nodeArgOrParentSPArg_linkUnderParent!;
 									Assert(link.polarity, "Attempting to reverse polarity of an argument node, but the argument node's polarity is null!");
-									RunCommand_UpdateNodeChildLink({id: link.id, updates: {polarity: ReversePolarity(link.polarity)}});
+									RunCommand_UpdateNodeLink({id: link.id, updates: {polarity: ReversePolarity(link.polarity)}});
 								},
 							});
 						}}/>
@@ -201,7 +201,7 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 								linkID: node.link!.id,
 								linkUpdates: {orderKey: val},
 							}).RunOnServer();*/
-							await RunCommand_UpdateNodeChildLink({id: node.link!.id, updates: {orderKey: val}});
+							await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {orderKey: val}});
 						}}/>
 					</Row>}
 				{node.link && canSetAsNegation &&
@@ -213,7 +213,7 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 									linkID: node.link!.id,
 									linkUpdates: {form: val ? ClaimForm.negation : ClaimForm.base},
 								}).RunOnServer();*/
-								await RunCommand_UpdateNodeChildLink({id: node.link!.id, updates: {form: val ? ClaimForm.negation : ClaimForm.base}});
+								await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {form: val ? ClaimForm.negation : ClaimForm.base}});
 							}}/>
 					</Row>}
 				{node.link && canSetAsSeriesAnchor &&
@@ -226,7 +226,7 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 									linkID: node.link!.id,
 									linkUpdates: {seriesAnchor: val || undefined},
 								}).RunOnServer();*/
-								await RunCommand_UpdateNodeChildLink({id: node.link!.id, updates: {seriesAnchor: val || undefined}});
+								await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {seriesAnchor: val || undefined}});
 							}}/>
 					</Row>}
 			</Column>

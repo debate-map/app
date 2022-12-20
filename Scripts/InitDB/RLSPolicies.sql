@@ -35,10 +35,10 @@ do $$ begin
 	);
 end $$;
 
-alter table app_public."nodeChildLinks" enable row level security;
+alter table app_public."nodeLinks" enable row level security;
 do $$ begin
-	drop policy if exists "nodeChildLinks_rls" on app_public."nodeChildLinks";
-	create policy "nodeChildLinks_rls" on app_public."nodeChildLinks" as permissive for all using (
+	drop policy if exists "nodeLinks_rls" on app_public."nodeLinks";
+	create policy "nodeLinks_rls" on app_public."nodeLinks" as permissive for all using (
 		IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "parent"), 'nodes')
 		and IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = "child"), 'nodes')
 	);

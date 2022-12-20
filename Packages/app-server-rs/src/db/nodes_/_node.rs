@@ -8,7 +8,7 @@ use serde::{Serialize, Deserialize};
 
 use crate::db::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::{db::node_child_links::{get_node_child_links, ClaimForm, get_first_link_under_parent}, utils::db::accessors::AccessorContext};
+use crate::{db::node_links::{get_node_links, ClaimForm, get_first_link_under_parent}, utils::db::accessors::AccessorContext};
 
 use super::_node_type::NodeType;
 

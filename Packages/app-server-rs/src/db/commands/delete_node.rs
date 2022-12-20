@@ -15,7 +15,7 @@ use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder};
 use crate::db::commands::_shared::increment_map_edits::{increment_map_edits, increment_map_edits_if_valid};
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_child_links::get_node_child_links;
+use crate::db::node_links::get_node_links;
 use crate::db::nodes::{get_node, is_root_node, assert_user_can_delete_node};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
@@ -66,8 +66,8 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteN
 	// (first step will probably be adding a "soft delete" system, in place-of/addition-to the hard-delete behavior that currently occurs)
 	ctx.tx.execute(r#"DELETE FROM "nodePhrasings" WHERE node = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "nodeRatings" WHERE node = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "nodeChildLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "nodeChildLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
+	ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
+	ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE node = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "nodeRevisions" WHERE node = $1"#, &[&nodeID]).await?;
 	// todo: delete any tags for which this node is the only associated node

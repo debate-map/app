@@ -4,7 +4,7 @@ import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AddArgumentAndClaim, TransferNodes} from "../Commands.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {GetNode} from "../DB/nodes.js";
 import {NodeL1, Polarity} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
@@ -29,9 +29,9 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		$parentID: {type: ["null", "string"]},
 		$node: {$ref: "Node_Partial"},
 		$revision: {$ref: "NodeRevision_Partial"},
-		//link: {$ref: NodeChildLink.name},
+		//link: {$ref: NodeLink.name},
 		// todo: clean up handling of "link" field (it's marked optional, yet error occurs if left out, due to child-group not being set; and this line doesn't make enough of link's fields optional)
-		link: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
+		link: DeriveJSONSchema(NodeLink, {makeOptional: ["parent", "child"]}),
 		//asMapRoot: {type: "boolean"},
 	}),
 	returnSchema: ()=>SimpleSchema({
@@ -41,7 +41,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 		$doneAt: {type: "number"},
 	}),
 })
-export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: NodeL1, revision: NodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
+export class AddChildNode extends Command<{mapID?: string|n, parentID: string, node: NodeL1, revision: NodeRevision, link?: NodeLink}, {nodeID: string, revisionID: string, linkID: string, doneAt: number}> {
 	// controlled by parent
 	recordAsNodeEdit = true;
 
@@ -50,8 +50,8 @@ export class AddChildNode extends Command<{mapID?: string|n, parentID: string, n
 	parent_oldData: NodeL1|n;
 	Validate() {
 		const {mapID, parentID, node, revision} = this.payload;
-		//const link = this.payload.link = this.payload.link ?? {} as NodeChildLink;
-		this.payload.link = E(new NodeChildLink(), this.payload.link);
+		//const link = this.payload.link = this.payload.link ?? {} as NodeLink;
+		this.payload.link = E(new NodeLink(), this.payload.link);
 		this.payload.link.parent = parentID;
 
 		// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];

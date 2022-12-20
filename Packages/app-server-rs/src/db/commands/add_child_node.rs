@@ -15,9 +15,9 @@ use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
-use crate::db::commands::add_node_child_link::{add_node_child_link, AddNodeChildLinkInput};
+use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_child_links::{NodeChildLinkInput, NodeChildLink};
+use crate::db::node_links::{NodeLinkInput, NodeLink};
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes::get_node;
@@ -45,7 +45,7 @@ pub struct AddChildNodeInput {
 	pub parentID: String,
 	pub node: NodeInput,
     pub revision: NodeRevisionInput,
-    pub link: NodeChildLinkInput,
+    pub link: NodeLinkInput,
 }
 
 #[derive(SimpleObject, Debug)]
@@ -62,7 +62,7 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, input: AddC
 	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input;
 	
     let node_id = new_uuid_v4_as_b64();
-    let link = NodeChildLinkInput {
+    let link = NodeLinkInput {
         // set by server
         parent: Some(parentID.clone()),
         child: Some(node_id.clone()),
@@ -73,14 +73,14 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, input: AddC
 	let add_node_result = add_node(ctx, actor, node_, Some(node_id.clone()), revision_).await?;
     ensure!(add_node_result.nodeID == node_id, "The node-id returned by add_node didn't match the node-id-override supplied to it!");
 
-	let add_node_child_link_result = add_node_child_link(ctx, actor, AddNodeChildLinkInput { link }, Default::default()).await?;
+	let add_node_link_result = add_node_link(ctx, actor, AddNodeLinkInput { link }, Default::default()).await?;
     
 	increment_map_edits_if_valid(&ctx, mapID).await?;
 
 	Ok(AddChildNodeResult {
         nodeID: add_node_result.nodeID,
         revisionID: add_node_result.revisionID,
-        linkID: add_node_child_link_result.id,
+        linkID: add_node_link_result.id,
         doneAt: time_since_epoch_ms_i64(),
     })
 }

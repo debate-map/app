@@ -19,7 +19,7 @@ begin;
 	\ir Tables/mapNodeEdits.sql
 	\ir Tables/maps.sql
 	\ir Tables/medias.sql
-	\ir Tables/nodeChildLinks.sql
+	\ir Tables/nodeLinks.sql
 	\ir Tables/nodePhrasings.sql
 	\ir Tables/nodeRatings.sql
 	\ir Tables/nodeRevisions.sql
@@ -29,7 +29,7 @@ begin;
 	\ir Tables/terms.sql
 	\ir Tables/userHiddens.sql
 	\ir Tables/users.sql
-	\ir Tables/visibilityDirectives.sql
+	--\ir Tables/visibilityDirectives.sql
 
 	\ir Funcs/General.sql
 	\ir Funcs/GraphTraversal.sql

@@ -1,4 +1,4 @@
-import {ChildGroup, DeleteArgument, GetNodeChildLinks, GetNodeDisplayText, GetNodeL3, IsUserCreatorOrMod, MeID} from "dm_common";
+import {ChildGroup, DeleteArgument, GetNodeLinks, GetNodeDisplayText, GetNodeL3, IsUserCreatorOrMod, MeID} from "dm_common";
 import {RunCommand_DeleteArgument} from "Utils/DB/Command.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Observer} from "web-vcore";
@@ -24,7 +24,7 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 		if (!IsUserCreatorOrMod(MeID(), argument)) return null;
 
 		const canDeleteBaseClaim = IsUserCreatorOrMod(MeID(), node);
-		const claimParentLinks = GetNodeChildLinks(null, node.id);
+		const claimParentLinks = GetNodeLinks(null, node.id);
 		const deleteClaim = canDeleteBaseClaim && claimParentLinks.length <= 1;
 
 		/*const command = new DeleteArgument({mapID, argumentID: argument.id, claimID: node.id, deleteClaim});

@@ -1,4 +1,4 @@
-import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeChildLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
+import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
 import {ModifyString} from "js-vextensions";
 import {Command, CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -21,7 +21,7 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_NodeL3, id?:
 		multiPremiseArgument: data.multiPremiseArgument,
 		rootNodeForMap: undefined,
 	});
-	const link = new NodeChildLink({
+	const link = new NodeLink({
 		createdAt: node.createdAt,
 		creator: systemUserID,
 		form: data.link.form ? ModifyString(FS_ClaimForm[data.link.form], m=>[m.startUpper_to_lower]) as ClaimForm : null,

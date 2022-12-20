@@ -1,5 +1,5 @@
 import {CreateAccessor} from "mobx-graphlink";
-import {GetNodeChildLinks} from "../../DB/nodeChildLinks.js";
+import {GetNodeLinks} from "../../DB/nodeLinks.js";
 import {GetNode} from "../../DB/nodes.js";
 
 export const SearchUpFromNodeForNodeMatchingX = CreateAccessor((startNodeID: string, xMatchFunc: (nodeID: string, data: any)=>boolean, xMatchFunc_data?: any, nodeIDsToIgnore?: string[]): string|n=>{
@@ -20,7 +20,7 @@ export const SearchUpFromNodeForNodeMatchingX = CreateAccessor((startNodeID: str
 		const newLayerHeads = [] as {id: string, path: string[]}[];
 		for (const layerHead of currentLayerHeads) {
 			const node = GetNode.BIN(layerHead.id);
-			const parentLinks = GetNodeChildLinks(undefined, node.id);
+			const parentLinks = GetNodeLinks(undefined, node.id);
 			for (const parentID of parentLinks.map(a=>a.parent)) {
 				if (layerHead.path.includes(parentID)) continue; // parent-id is already part of path; ignore, so we don't cause infinite-loop
 				if (nodeIDsToIgnore?.includes(parentID)) continue;

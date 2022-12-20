@@ -2,8 +2,8 @@ import {FancyFormat} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeLinks} from "../DB/nodeLinks.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {IsRootNode} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
 import {IsUserCreatorOrMod} from "../DB/users/$user.js";
@@ -22,11 +22,11 @@ import {IsUserCreatorOrMod} from "../DB/users/$user.js";
 export class UnlinkNode extends Command<{mapID: string|n, parentID: string, childID: string}, {}> {
 	allowOrphaning = false; // could also be named "asPartOfCut", to be consistent with ForUnlink_GetError parameter
 
-	parentToChildLinks: NodeChildLink[];
+	parentToChildLinks: NodeLink[];
 	Validate() {
 		const {parentID, childID} = this.payload;
-		const childParents = GetNodeChildLinks(undefined, childID);
-		this.parentToChildLinks = GetNodeChildLinks(parentID, childID);
+		const childParents = GetNodeLinks(undefined, childID);
+		this.parentToChildLinks = GetNodeLinks(parentID, childID);
 		AssertV(this.parentToChildLinks.length == 1, FancyFormat({}, `There should be 1 and only 1 link between parent and child. Links:`, this.parentToChildLinks));
 
 		/* let {parentID, childID} = this.payload;
@@ -44,7 +44,7 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 
 	DeclareDBUpdates(db: DBHelper) {
 		for (const link of this.parentToChildLinks) {
-			db.set(dbp`nodeChildLinks/${link.id}`, null);
+			db.set(dbp`nodeLinks/${link.id}`, null);
 		}
 	}
 }

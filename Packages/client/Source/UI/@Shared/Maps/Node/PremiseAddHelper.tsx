@@ -42,7 +42,7 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 
 		const newNode = new NodeL1(EV({ type: NodeType.claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) }));
 		const newRevision = new NodeRevision({ titles: { base: premiseTitle } });
-		const newLink = { _: true, form: ClaimForm.base } as NodeChildLink;
+		const newLink = { _: true, form: ClaimForm.base } as NodeLink;
 
 		const info = await new AddChildNode({ mapID, parentID: parentNode.id, node: newNode, revision: newRevision, link: newLink }).RunOnServer();
 		ACTNodeExpandedSet({ mapID, path: `${parentPath}/${info.nodeID}`, expanded: true, resetSubtree: false });

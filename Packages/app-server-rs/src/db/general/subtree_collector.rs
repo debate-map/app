@@ -8,7 +8,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
-use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_child_links::{NodeChildLink, get_node_child_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}, commands::_command::ToSqlWrapper}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
+use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_links::{NodeLink, get_node_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}, commands::_command::ToSqlWrapper}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
 use super::{subtree::Subtree};
 
 /// Helper to make it easier to provide inline sql-params of different types.
@@ -28,9 +28,9 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
     let link_rows: Vec<Row> = {
         if max_depth > 0 {
             //let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
-            //ctx.tx.query_raw(r#"SELECT links.* from "nodeChildLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
-            //ctx.tx.query_raw(r#"SELECT links.* from "nodeChildLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
-            ctx.tx.query_raw(r#"SELECT links.* from descendants($1, $2) as d JOIN "nodeChildLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
+            //ctx.tx.query_raw(r#"SELECT links.* from "nodeLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
+            //ctx.tx.query_raw(r#"SELECT links.* from "nodeLinks" links JOIN descendants($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
+            ctx.tx.query_raw(r#"SELECT links.* from descendants($1, $2) as d JOIN "nodeLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
         } else {
             vec![]
         }
@@ -71,7 +71,7 @@ pub async fn get_node_subtree(ctx: &AccessorContext<'_>, root_id: String, max_de
         terms: term_rows.into_iter().map(|a| a.into()).collect(),
         medias: media_rows.into_iter().map(|a| a.into()).collect(),
         nodes: node_rows.into_iter().map(|a| a.into()).collect(),
-        nodeChildLinks: link_rows.into_iter().map(|a| a.into()).collect(),
+        nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
         nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
         nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
         nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),
@@ -88,8 +88,8 @@ pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_d
     let link_rows: Vec<Row> = {
         if max_depth > 0 {
             //let max_depth_minus_1 = max_depth - 1; // must reduce depth by 1, to avoid finding links "from the lowest depth, to one depth beyond the depth limit"
-            //ctx.tx.query_raw(r#"SELECT links.* from "nodeChildLinks" links JOIN descendants2($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
-            ctx.tx.query_raw(r#"SELECT links.* from descendants2($1, $2) as d JOIN "nodeChildLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
+            //ctx.tx.query_raw(r#"SELECT links.* from "nodeLinks" links JOIN descendants2($1, $2) AS d ON (links.parent = d.id)"#, params(&[&root_id, &max_depth_minus_1])).await?.try_collect().await?
+            ctx.tx.query_raw(r#"SELECT links.* from descendants2($1, $2) as d JOIN "nodeLinks" links ON (links.id = d.link_id)"#, params(&[&root_id, &max_depth])).await?.try_collect().await?
         } else {
             vec![]
         }
@@ -130,7 +130,7 @@ pub async fn get_node_subtree2(ctx: &AccessorContext<'_>, root_id: String, max_d
         terms: term_rows.into_iter().map(|a| a.into()).collect(),
         medias: media_rows.into_iter().map(|a| a.into()).collect(),
         nodes: node_rows.into_iter().map(|a| a.into()).collect(),
-        nodeChildLinks: link_rows.into_iter().map(|a| a.into()).collect(),
+        nodeLinks: link_rows.into_iter().map(|a| a.into()).collect(),
         nodeRevisions: revision_rows.into_iter().map(|a| a.into()).collect(),
         nodePhrasings: phrasing_rows.into_iter().map(|a| a.into()).collect(),
         nodeTags: tag_rows.into_iter().map(|a| a.into()).collect(),

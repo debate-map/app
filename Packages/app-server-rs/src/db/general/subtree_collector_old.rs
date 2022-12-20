@@ -11,7 +11,7 @@ use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
 use crate::db::node_revisions::NodeRevision;
 use crate::db::nodes_::_node::Node;
-use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_child_links::{NodeChildLink, get_node_child_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
+use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_links::{NodeLink, get_node_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
 use super::{subtree::Subtree};
 
 #[derive(Default)]
@@ -21,7 +21,7 @@ pub struct SubtreeCollector_Old {
     pub terms: IndexMap<String, Term>,
     pub medias: IndexMap<String, Media>,
     pub nodes: IndexMap<String, Node>,
-    pub node_child_links: IndexMap<String, NodeChildLink>,
+    pub node_links: IndexMap<String, NodeLink>,
     pub node_revisions: IndexMap<String, NodeRevision>,
     pub node_phrasings: IndexMap<String, NodePhrasing>,
     pub node_tags: IndexMap<String, NodeTag>,
@@ -32,7 +32,7 @@ impl SubtreeCollector_Old {
             terms: self.terms.clone().into_values().collect(),
             medias: self.medias.clone().into_values().collect(),
             nodes: self.nodes.clone().into_values().collect(),
-            nodeChildLinks: self.node_child_links.clone().into_values().collect(),
+            nodeLinks: self.node_links.clone().into_values().collect(),
             nodeRevisions: self.node_revisions.clone().into_values().collect(),
             nodePhrasings: self.node_phrasings.clone().into_values().collect(),
             nodeTags: self.node_tags.clone().into_values().collect(),
@@ -61,7 +61,7 @@ pub async fn populate_subtree_collector_old(ctx: &AccessorContext<'_>, current_p
     let node = get_node(ctx, &node_id).await?;
     // use match, so we can reuse outer async-context (don't know how to handle new ones in .map() easily yet)
     let node_link = match parent_node_id {
-        Some(parent_id) => get_node_child_links(ctx, Some(&parent_id), Some(&node_id)).await?.into_iter().nth(0),
+        Some(parent_id) => get_node_links(ctx, Some(&parent_id), Some(&node_id)).await?.into_iter().nth(0),
         None => None,
     };
     let node_current = get_node_revision(ctx, &node.c_currentRevision).await?;
@@ -86,8 +86,8 @@ pub async fn populate_subtree_collector_old(ctx: &AccessorContext<'_>, current_p
         let mut collector = arc_clone.write().await;
         let isSubtreeRoot = path_segments.join("/") == root_path_segments.join("/");
         if let Some(node_link) = node_link {
-            if !isSubtreeRoot && !collector.node_child_links.contains_key(&node_link.id.0) {
-                collector.node_child_links.insert(node_link.id.to_string(), node_link);
+            if !isSubtreeRoot && !collector.node_links.contains_key(&node_link.id.0) {
+                collector.node_links.insert(node_link.id.to_string(), node_link);
             }
         }
 
@@ -126,11 +126,11 @@ pub async fn populate_subtree_collector_old(ctx: &AccessorContext<'_>, current_p
     // populate-data from descendants/subtree underneath the current node (must happen after store-data, else the collector.nodes.contains_key checks might get skipped past)
     let currentDepth = path_segments.len() - root_path_segments.len();
     if currentDepth < max_depth {
-        /*for link in get_node_child_links(ctx, Some(&node_id), None).await? {
+        /*for link in get_node_links(ctx, Some(&node_id), None).await? {
             let child_id = link.child;
             populate_subtree_collector(ctx, format!("{}/{}", current_path, child_id), max_depth, collector).await?;
         }*/
-        let links = get_node_child_links(ctx, Some(&node_id), None).await?;
+        let links = get_node_links(ctx, Some(&node_id), None).await?;
         let mut futures = vec![];
         for link in links {
             let child_id = link.child;

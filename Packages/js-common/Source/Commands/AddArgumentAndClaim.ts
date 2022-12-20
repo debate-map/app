@@ -1,14 +1,14 @@
 import {AssertValidate, Command, CommandMeta, CommandRunInfo, DBHelper, DeriveJSONSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {CommandRunMeta} from "../CommandMacros/CommandRunMeta.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {NodeLink} from "../DB/nodeLinks/@NodeLink.js";
 import {NodeL1} from "../DB/nodes/@Node.js";
 import {NodeRevision} from "../DB/nodes/@NodeRevision.js";
 import {AddChildNode} from "./AddChildNode.js";
 
 type Payload = {
 	mapID: string|n,
-	argumentParentID: string, argumentNode: NodeL1, argumentRevision: NodeRevision, argumentLink?: NodeChildLink,
-	claimNode: NodeL1, claimRevision: NodeRevision, claimLink?: NodeChildLink,
+	argumentParentID: string, argumentNode: NodeL1, argumentRevision: NodeRevision, argumentLink?: NodeLink,
+	claimNode: NodeL1, claimRevision: NodeRevision, claimLink?: NodeLink,
 };
 
 /*@CommandRunMeta({
@@ -23,11 +23,11 @@ type Payload = {
 	payloadSchema: ()=>SimpleSchema({
 		$mapID: {type: "string"},
 		$argumentParentID: {type: "string"}, $argumentNode: {$ref: "Node_Partial"}, $argumentRevision: {$ref: "NodeRevision_Partial"},
-		//argumentLink: {$ref: NodeChildLink.name},
-		argumentLink: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
+		//argumentLink: {$ref: NodeLink.name},
+		argumentLink: DeriveJSONSchema(NodeLink, {makeOptional: ["parent", "child"]}),
 		$claimNode: {$ref: "Node_Partial"}, $claimRevision: {$ref: "NodeRevision_Partial"},
-		//claimLink: {$ref: NodeChildLink.name},
-		claimLink: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
+		//claimLink: {$ref: NodeLink.name},
+		claimLink: DeriveJSONSchema(NodeLink, {makeOptional: ["parent", "child"]}),
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$argumentNodeID: {$ref: "UUID"},

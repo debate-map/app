@@ -22,7 +22,7 @@ use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::AccessPolicy;
 use crate::db::commands::clone_subtree::clone_subtree;
 use crate::db::medias::Media;
-use crate::db::node_child_links::NodeChildLink;
+use crate::db::node_links::NodeLink;
 use crate::db::node_phrasings::NodePhrasing;
 use crate::db::node_tags::NodeTag;
 use crate::db::terms::Term;

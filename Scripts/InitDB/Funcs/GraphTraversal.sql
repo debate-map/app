@@ -6,14 +6,14 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		SELECT
 			p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
 		FROM
-			app_public."nodeChildLinks" AS p
+			app_public."nodeLinks" AS p
 		WHERE
 			p.parent=root
 		UNION
 			SELECT
 				c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
 			FROM
-				app_public."nodeChildLinks" AS c, children
+				app_public."nodeLinks" AS c, children
 			WHERE c.parent = children.id AND NOT is_cycle AND children.depth < max_depth
 	) SELECT
 		min(id) as id, link_id, min(depth) as depth
@@ -31,14 +31,14 @@ RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 			SELECT
 				p.parent, 1, false, ARRAY[p.child]
 			FROM
-				app_public."nodeChildLinks" AS p
+				app_public."nodeLinks" AS p
 			WHERE
 				p.child=root
 			UNION
 				SELECT
 					c.parent, parents.depth+1, c.parent = ANY(parents.nodes_path), nodes_path || c.child
 				FROM
-					app_public."nodeChildLinks" AS c, parents
+					app_public."nodeLinks" AS c, parents
 				WHERE c.child = parents.id AND NOT is_cycle AND parents.depth < max_depth
 		) SELECT
 			id, min(depth) as depth
@@ -59,14 +59,14 @@ BEGIN
 		SELECT
 			p.id, p.parent, p.child, 0, false, ARRAY[p.child], ARRAY[p.id]
 		FROM
-			app_public."nodeChildLinks" AS p
+			app_public."nodeLinks" AS p
 		WHERE
 			p.child=dest
 		UNION
 			SELECT
 				c.id, c.parent, c.child, parents.depth+1, c.parent = ANY(nodes_path), nodes_path || c.child, links_path || c.id
 			FROM
-				app_public."nodeChildLinks" AS c, parents
+				app_public."nodeLinks" AS c, parents
 			WHERE c.child = parents.parent AND NOT is_cycle
 	) SELECT
 		parents.nodes_path, parents.links_path INTO STRICT node_ids, link_ids
@@ -89,14 +89,14 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		SELECT
 			p.parent, p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
 		FROM
-			app_public."nodeChildLinks" AS p
+			app_public."nodeLinks" AS p
 		WHERE
 			p.parent=root
 		UNION
 			SELECT
 				c.parent, c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
 			FROM
-				app_public."nodeChildLinks" AS c, children
+				app_public."nodeLinks" AS c, children
 			WHERE c.parent = children.child_id AND NOT is_cycle AND children.depth < max_depth
 	) SELECT DISTINCT ON (link_id) parent_id, child_id, depth, order_key, link_id
 	FROM

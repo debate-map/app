@@ -10,7 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, NodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeChildLinks, GetNodeRevisions, NodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced} from "dm_common";
+import {GetNodeRevision, MapView, NodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeLinks, GetNodeRevisions, NodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
@@ -207,8 +207,8 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 				}
 
 				//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
-				//const parentIDs = GetNodeChildLinks(null, node.id).map(a=>a.parent);
-				const parentLinks = await GetAsync(()=>GetNodeChildLinks(null, node.id));
+				//const parentIDs = GetNodeLinks(null, node.id).map(a=>a.parent);
+				const parentLinks = await GetAsync(()=>GetNodeLinks(null, node.id));
 				const parentIDs = parentLinks.map(a=>a.parent);
 				for (const parentID of parentIDs) {
 					const newUpPath = `${parentID}/${upPath}`;

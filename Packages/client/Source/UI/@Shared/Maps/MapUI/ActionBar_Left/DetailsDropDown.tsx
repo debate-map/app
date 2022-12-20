@@ -3,7 +3,7 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
-import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeChildLinks} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
@@ -104,7 +104,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>*/}
 								<Button ml={5} text="Delete" onLeftClick={async()=>{
 									const rootNode = NN(await GetAsync(()=>GetNodeL2(map.rootNode)));
-									if (GetNodeChildLinks(rootNode.id).length != 0) {
+									if (GetNodeLinks(rootNode.id).length != 0) {
 										return void ShowMessageBox({
 											title: "Still has children",
 											message: "Cannot delete this map until all the children of its root-node have been unlinked or deleted.",

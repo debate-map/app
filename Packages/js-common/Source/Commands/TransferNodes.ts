@@ -3,9 +3,9 @@ import {AddSchema, AssertV, Command, CommandMeta, DBHelper, Field, GetSchemaJSON
 import {MaybeCloneAndRetargetNodeTag, NodeTag, TagComp_CloneHistory} from "../DB/nodeTags/@NodeTag.js";
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
-import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeChildLink} from "../DB.js";
+import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeLink} from "../DB.js";
 import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
-import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
+import {GetNodeLinks} from "../DB/nodeLinks.js";
 import {ClaimForm, NodeL1, NodeL3, Polarity} from "../DB/nodes/@Node.js";
 import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
 import {AddChildNode} from "./AddChildNode.js";
@@ -147,7 +147,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				newNode.accessPolicy = accessPolicyID;
 				const newRev = Clone(node.current) as NodeRevision;
 
-				const newLink = Clone(node.link) as NodeChildLink;
+				const newLink = Clone(node.link) as NodeLink;
 				newLink.group = transfer.childGroup;
 				newLink.orderKey = orderKeyForNewNode;
 				if (newNode.type == NodeType.argument) {
@@ -175,7 +175,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				const newNodeID = transferData.addNodeCommand!.returnData.nodeID;
 
 				if (transfer.clone_keepChildren) {
-					const oldChildLinks = GetNodeChildLinks(node.id);
+					const oldChildLinks = GetNodeLinks(node.id);
 					for (const [i2, link] of oldChildLinks.entries()) {
 						this.IntegrateSubcommand(
 							()=>transferData.linkChildCommands[i2],
@@ -276,7 +276,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 							node: argumentWrapper,
 							revision: argumentWrapperRevision,
 							// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-							link: new NodeChildLink({
+							link: new NodeLink({
 								group: transfer.childGroup,
 								orderKey: orderKeyForNewNode,
 								polarity: transfer.argumentPolarity ?? Polarity.supporting,

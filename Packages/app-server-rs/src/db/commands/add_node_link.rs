@@ -13,7 +13,7 @@ use tracing::info;
 use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::node_child_links::{NodeChildLink, NodeChildLinkInput, get_node_child_links, ChildGroup};
+use crate::db::node_links::{NodeLink, NodeLinkInput, get_node_links, ChildGroup};
 use crate::db::nodes::get_node;
 use crate::db::nodes_::_node::{Node};
 use crate::db::nodes_::_node_type::{get_node_type_info, NodeType};
@@ -26,34 +26,34 @@ use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
 
 wrap_slow_macros!{
 
-#[derive(Default)] pub struct MutationShard_AddNodeChildLink;
-#[Object] impl MutationShard_AddNodeChildLink {
-	async fn add_node_child_link(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeChildLinkInput, only_validate: Option<bool>) -> Result<AddNodeChildLinkResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, only_validate, add_node_child_link);
+#[derive(Default)] pub struct MutationShard_AddNodeLink;
+#[Object] impl MutationShard_AddNodeLink {
+	async fn add_node_link(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeLinkInput, only_validate: Option<bool>) -> Result<AddNodeLinkResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, add_node_link);
     }
 }
 
 #[derive(InputObject, Deserialize)]
-pub struct AddNodeChildLinkInput {
-	pub link: NodeChildLinkInput,
+pub struct AddNodeLinkInput {
+	pub link: NodeLinkInput,
 }
 
 #[derive(SimpleObject, Debug)]
-pub struct AddNodeChildLinkResult {
+pub struct AddNodeLinkResult {
 	pub id: String,
 }
 
 }
 
-pub async fn add_node_child_link(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeChildLinkInput, _extras: NoExtras) -> Result<AddNodeChildLinkResult, Error> {
-	let AddNodeChildLinkInput { link: link_ } = input;
+pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeLinkInput, _extras: NoExtras) -> Result<AddNodeLinkResult, Error> {
+	let AddNodeLinkInput { link: link_ } = input;
 	
 	let parent_id = link_.parent.ok_or(err_should_be_populated("link.parent"))?;
 	let child_id = link_.child.ok_or(err_should_be_populated("link.child"))?;
 	let parent = get_node(&ctx, &parent_id).await?;
 	let child = get_node(&ctx, &child_id).await?;
 
-	let link = NodeChildLink {
+	let link = NodeLink {
 		// set by server
 		id: ID(new_uuid_v4_as_b64()),
 		creator: actor.id.to_string(),
@@ -73,7 +73,7 @@ pub async fn add_node_child_link(ctx: &AccessorContext<'_>, actor: &User, input:
 
 	// validations
 	{
-		/*let parent_to_child_links = get_node_child_links(ctx, Some(&parent_id), Some(&child_id)).await?;
+		/*let parent_to_child_links = get_node_links(ctx, Some(&parent_id), Some(&child_id)).await?;
 		ensure!(parent_to_child_links.len() == 0, "Node #{child_id} is already a child of node #{parent_id}.");*/
 
 		assert_new_link_is_valid(ctx, &parent_id, link.group, &link.child, link.c_childType, &actor.permissionGroups).await?;
@@ -85,9 +85,9 @@ pub async fn add_node_child_link(ctx: &AccessorContext<'_>, actor: &User, input:
 		}
 	}
 	
-	set_db_entry_by_id_for_struct(&ctx, "nodeChildLinks".to_owned(), link.id.to_string(), link.clone()).await?;
+	set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link.clone()).await?;
 
-	Ok(AddNodeChildLinkResult { id: link.id.to_string() })
+	Ok(AddNodeLinkResult { id: link.id.to_string() })
 }
 
 /// Does basic checking of validity of parent<>child linkage. See `assert_new_link_is_valid` for a more thorough validation.
@@ -126,7 +126,7 @@ pub async fn assert_new_link_is_valid(ctx: &AccessorContext<'_>, parent_id: &str
 	if parent.id == GLOBAL_ROOT_NODE_ID && !permissions.admin { bail!("Only admins can add children to the global-root."); }
 	if parent.id == new_child_id { bail!("Cannot link node as its own child."); }
 
-	let is_already_child = get_node_child_links(ctx, Some(parent_id), Some(&new_child_id)).await?.len() > 0;
+	let is_already_child = get_node_links(ctx, Some(parent_id), Some(&new_child_id)).await?.len() > 0;
 	if is_already_child { bail!("Node is already a child of the parent."); }
 
 	assert_link_is_valid(parent.r#type, new_child_group, new_child_type)

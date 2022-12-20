@@ -129,7 +129,7 @@ mod db {
         pub mod add_child_node;
         pub mod add_map;
         pub mod add_media;
-        pub mod add_node_child_link;
+        pub mod add_node_link;
         pub mod add_node_revision;
         pub mod add_node_phrasing;
         pub mod add_node_tag;
@@ -141,7 +141,7 @@ mod db {
         pub mod delete_map;
         pub mod delete_media;
         pub mod delete_node;
-        pub mod delete_node_child_link;
+        pub mod delete_node_link;
         pub mod delete_node_phrasing;
         pub mod delete_node_rating;
         pub mod delete_node_tag;
@@ -154,7 +154,7 @@ mod db {
         pub mod update_map;
         pub mod update_media;
         pub mod update_node;
-        pub mod update_node_child_link;
+        pub mod update_node_link;
         pub mod update_node_phrasing;
         pub mod update_node_tag;
         pub mod update_share;
@@ -197,7 +197,7 @@ mod db {
     pub mod feedback_proposals;
     pub mod feedback_user_infos;
     pub mod map_node_edits;
-    pub mod node_child_links;
+    pub mod node_links;
     pub mod node_phrasings;
     pub mod node_ratings;
     pub mod node_revisions;

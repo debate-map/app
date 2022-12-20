@@ -4,7 +4,7 @@ import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "web-vc
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeChildLink, ClaimForm, NodeL3, GetMainAttachment} from "dm_common";
+import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetMainAttachment} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
@@ -126,7 +126,7 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	}
 }
 
-const WillNodePreferQuestionTitleHere = CreateAccessor((node: NodeL2, linkData: NodeChildLink|n)=>{
+const WillNodePreferQuestionTitleHere = CreateAccessor((node: NodeL2, linkData: NodeLink|n)=>{
 	const mainAttachment = GetMainAttachment(node.current);
 	return Boolean(node.type == NodeType.claim && mainAttachment?.quote == null && linkData && linkData.form == ClaimForm.question);
 });

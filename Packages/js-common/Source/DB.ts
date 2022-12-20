@@ -17,8 +17,8 @@ export * from "./DB/mapNodeEdits/@MapNodeEdit.js";
 export * from "./DB/maps.js";
 export * from "./DB/maps/$map.js";
 export * from "./DB/maps/@Map.js";
-export * from "./DB/nodeChildLinks.js";
-export * from "./DB/nodeChildLinks/@NodeChildLink.js";
+export * from "./DB/nodeLinks.js";
+export * from "./DB/nodeLinks/@NodeLink.js";
 export * from "./DB/nodePhrasings.js";
 export * from "./DB/nodePhrasings/@NodePhrasing.js";
 export * from "./DB/nodeRatings.js";
@@ -53,5 +53,5 @@ export * from "./DB/users/$user.js";
 export * from "./DB/users/@User.js";
 export * from "./DB/userHiddens.js";
 export * from "./DB/userHiddens/@UserHidden.js";
-export * from "./DB/visibilityDirectives.js";
-export * from "./DB/visibilityDirectives/@VisibilityDirective.js";
+/*export * from "./DB/visibilityDirectives.js";
+export * from "./DB/visibilityDirectives/@VisibilityDirective.js";*/

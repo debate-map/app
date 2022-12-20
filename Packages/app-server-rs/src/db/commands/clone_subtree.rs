@@ -29,7 +29,7 @@ use crate::db::_general::GenericMutation_Result;
 use crate::db::access_policies::AccessPolicy;
 use crate::db::general::subtree_collector::get_node_subtree;
 use crate::db::medias::Media;
-use crate::db::node_child_links::{NodeChildLink, get_node_child_links};
+use crate::db::node_links::{NodeLink, get_node_links};
 use crate::db::node_phrasings::NodePhrasing;
 use crate::db::node_tags::{NodeTag, TagComp_CloneHistory};
 use crate::db::terms::Term;
@@ -107,7 +107,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
 
     log("part 1");
     // first, add a new link from the old-node's parent to the new-node (which we've generated an id for, and are about to construct)
-    let old_root_links = get_node_child_links(&ctx, Some(payload.parentNodeID.as_str()), Some(payload.rootNodeID.as_str())).await?;
+    let old_root_links = get_node_links(&ctx, Some(payload.parentNodeID.as_str()), Some(payload.rootNodeID.as_str())).await?;
     let old_root_link = old_root_links.get(0).ok_or(anyhow!("No child-link found between provided root-node \"{}\" and parent \"{}\".", payload.rootNodeID, payload.parentNodeID))?;
     let mut new_root_link = old_root_link.clone();
     new_root_link.id = ID(new_uuid_v4_as_b64());
@@ -116,7 +116,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     //new_root_link.child = id_replacements.get(&payload.rootNodeID).ok_or(anyhow!("Generation of new id for clone of root-node failed somehow."))?.to_owned();
     new_root_link.child = get_new_id_str(&payload.rootNodeID);
     log("part 1.5");
-    set_db_entry_by_id_for_struct(&ctx, "nodeChildLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
+    set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 
     log("part 2");
     //let mut nodes_needing_clone_history_tag: HashSet<String> = HashSet::new();
@@ -154,14 +154,14 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
         set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
     }
     log("part 5");
-    for link_old in subtree.nodeChildLinks {
+    for link_old in subtree.nodeLinks {
         let mut link = link_old.clone();
         link.id = get_new_id(&link.id);
         link.creator = actor_id();
         link.createdAt = time_since_epoch_ms_i64();
         link.parent = get_new_id_str(&link.parent);
         link.child = get_new_id_str(&link.child);
-        set_db_entry_by_id_for_struct(&ctx, "nodeChildLinks".to_owned(), link.id.to_string(), link).await?;
+        set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link).await?;
     }
     log("part 6");
     for tag_old in subtree.nodeTags {
