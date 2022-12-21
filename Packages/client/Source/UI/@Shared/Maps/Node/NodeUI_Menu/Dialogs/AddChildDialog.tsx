@@ -104,7 +104,7 @@ export class AddChildHelper {
 			const runResult = runResult_copy = await command.RunOnServer();*/
 			const runResult = runResult_copy = await RunCommand_AddArgumentAndClaim({
 				mapID: this.mapID,
-				argumentParentID: this.Node_ParentID, argumentNode: this.node as any, argumentRevision: this.node_revision, argumentLink: this.node_link,
+				argumentParentID: this.Node_ParentID, argumentNode: AsNodeL1Input(this.node), argumentRevision: this.node_revision, argumentLink: this.node_link,
 				claimNode: AsNodeL1Input(this.subNode!), claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
 			});
 			RunInAction("AddChildDialog.Apply_mid", ()=>{

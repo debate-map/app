@@ -91,15 +91,6 @@ impl Extension for CustomExtension {
         }
         Ok(document)
     }
-
-    // commented; not needed anymore, since root `request` handler catches all the same error entries
-    /*async fn execute(&self, ctx: &ExtensionContext<'_>, operation_name: Option<&str>, next: NextExecute<'_>) -> Response {
-        let resp = next.run(ctx, operation_name).await;
-        for err in &resp.errors {
-            log::warn!(target: "async-graphql", "[error in gql.execute] operation_name={} path={} locations={:?} message={}", operation_name.unwrap_or("n/a"), path_to_str(&err.path), err.locations, err.message);
-        }
-        Response { errors: strip_stacktraces_from_errors(resp.errors), ..resp }
-    }*/
 }
 
 /*struct DropListener;

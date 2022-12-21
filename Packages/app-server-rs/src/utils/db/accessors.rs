@@ -15,6 +15,11 @@ pub async fn defer_constraints(tx: &Transaction<'_>) -> Result<(), Error>{
     tx.execute("SET CONSTRAINTS ALL DEFERRED", &[]).await?;
     Ok(())
 }
+pub async fn trigger_deferred_constraints(tx: &Transaction<'_>) -> Result<(), Error>{
+    // this triggers previously-deferred constraints to be checked immediately (see: https://www.postgresql.org/docs/current/sql-set-constraints.html)
+    tx.execute("SET CONSTRAINTS ALL IMMEDIATE", &[]).await?;
+    Ok(())
+}
 
 pub struct AccessorContext<'a> {
     pub tx: Transaction<'a>,

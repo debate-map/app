@@ -258,6 +258,9 @@ macro_rules! command_boilerplate {
 		let result = $command_impl_func(&ctx, &actor, $input, Default::default()).await?;
 
 		if $only_validate.unwrap_or(false) {
+            // before rolling back, ensure that none of the constraints are violated at this point (we must check manually, since commit is never called)
+            $crate::utils::db::accessors::trigger_deferred_constraints(&ctx.tx).await?;
+            
             // the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain
             ctx.tx.rollback().await?;
             tracing::info!("Command completed a \"validation only\" run without hitting errors. Result:{:?}", result);
