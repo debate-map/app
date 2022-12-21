@@ -40,6 +40,7 @@ use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
+use crate::db::commands::add_argument_and_claim::MutationShard_AddArgumentAndClaim;
 use crate::db::commands::add_child_node::MutationShard_AddChildNode;
 use crate::db::commands::add_map::MutationShard_AddMap;
 use crate::db::commands::add_media::MutationShard_AddMedia;
@@ -120,7 +121,7 @@ pub struct MutationRoot(
     MutationShard_DeleteAccessPolicy, MutationShard_DeleteMap, MutationShard_DeleteMedia, MutationShard_DeleteNodeLink, MutationShard_DeleteNodePhrasing, MutationShard_DeleteNodeTag, MutationShard_DeleteShare, MutationShard_DeleteTerm,
     MutationShard_UpdateAccessPolicy, MutationShard_UpdateMap, MutationShard_UpdateMedia, MutationShard_UpdateNodeLink, MutationShard_UpdateNodePhrasing, MutationShard_UpdateNodeTag, MutationShard_UpdateShare, MutationShard_UpdateTerm,
     // commands, others
-    MutationShard_AddChildNode, MutationShard_AddNodeRevision,
+    MutationShard_AddArgumentAndClaim, MutationShard_AddChildNode, MutationShard_AddNodeRevision,
     MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
     MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
     MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,

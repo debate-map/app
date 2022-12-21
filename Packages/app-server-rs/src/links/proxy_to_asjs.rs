@@ -75,6 +75,24 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
 }
 
 pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
+    let result = maybe_proxy_to_asjs_handler_impl(client, schema, req).await;
+    match result {
+        Ok(response) => response,
+        Err(err) => {
+            let response_json = json!({
+                "error": format!("Error occurred while deciding on whether to send proxy the request to app-server-js. @error:{}", err),
+            });
+            let response = Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .header(CONTENT_TYPE, "application/json")
+                .body(Body::from(response_json.to_string()))
+                .unwrap();
+            response
+        }
+    }
+}
+
+pub async fn maybe_proxy_to_asjs_handler_impl(client: HyperClient, schema: RootSchema, req: Request<Body>) -> Result<Response<Body>, Error> {
     let mut proxy_request_to_asjs = true;
     
     // if client is on the "/gql-playground" or "/graphiql-new" pages, don't proxy the request to app-server-js
@@ -91,13 +109,13 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
     }
     
     let (mut req, req2) = clone_request(req).await;
-    let body_as_str = body_to_str(req2.into_body()).await.unwrap();
+    let body_as_str = body_to_str(req2.into_body()).await?;
     // all of rust's endpoints require a json-body for the request, so put that handling in an if-branch
     if let Ok(body_as_json) = JSONValue::from_str(&body_as_str) {
-        let query_field = body_as_json["query"].as_str().unwrap();
+        let query_field = body_as_json["query"].as_str().ok_or(anyhow!("No \"query\" field."))?;
 
         //info!("Got query_field str:{}", query_field);
-        let doc = async_graphql::parser::parse_query(query_field).unwrap();
+        let doc = async_graphql::parser::parse_query(query_field)?;
         // check which root-fields/root-resolver-functions/"endpoints" are accessed by the query in `doc`
         let query_fields = get_root_fields_in_doc(doc);
         info!("query_fields:{:?}", query_fields);
@@ -112,7 +130,7 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
             "deleteAccessPolicy", "deleteMap", "deleteMedia", "deleteNodeLink", "deleteNodePhrasing", "deleteNodeTag", "deleteShare", "deleteTerm",
             "updateAccessPolicy", "updateMap", "updateMedia", "updateNodeLink", "updateNodePhrasing", "updateNodeTag", "updateShare", "updateTerm",
             // commands, others
-            "addChildNode", "addNodeRevision",
+            "addArgumentAndClaim", "addChildNode", "addNodeRevision",
             "deleteArgument", "deleteNode", "deleteNodeRating",
             "setNodeIsMultiPremiseArgument", "setNodeRating", "setUserFollowData",
             "updateNode", "updateUser", "updateUserHidden",
@@ -138,9 +156,9 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
         };
 
         // send response (to frontend)
-        let mut response = Response::builder().body(axum::body::Body::from(response_str)).unwrap();
+        let mut response = Response::builder().body(axum::body::Body::from(response_str))?;
         response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
-        return response;
+        return Ok(response);
     }
 
 
@@ -153,18 +171,18 @@ pub async fn maybe_proxy_to_asjs_handler(Extension(client): Extension<HyperClien
     //let uri = format!("http://127.0.0.1:5115{}", path_query);
     let uri = format!("{}{}", APP_SERVER_JS_URL, path_query);
 
-    *req.uri_mut() = Uri::try_from(uri).unwrap();
+    *req.uri_mut() = Uri::try_from(uri)?;
 
     match client.request(req).await {
-        Ok(response) => response,
+        Ok(response) => Ok(response),
         // one example of why this can fail: if the app-server-js pod crashed
         Err(err) => {
             // send response as json, since the caller will be expecting json
             let json = json!({
                 "error": format!("Error occurred while trying to send get/post command to app-server-js:{}", err),
             });
-            Response::builder().status(StatusCode::BAD_GATEWAY)
-                .body(Body::from(json.to_string())).unwrap()
+            Ok(Response::builder().status(StatusCode::BAD_GATEWAY)
+                .body(Body::from(json.to_string()))?)
             /*Json(json!({
                 "error": format!("Error occurred while trying to send get/post command to app-server-js:{}", err),
             }))*/

@@ -107,7 +107,7 @@ pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Cont
     Ok(Some(user_info))
 }
 pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
-    let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
+    let key = get_or_create_jwt_key_hs256().await?;
 
     let verify_opts = VerificationOptions {
         //accept_future: true, // accept tokens that will only be valid in the future
@@ -116,10 +116,10 @@ pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) 
         //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
         .. VerificationOptions::default()
     };
-    let claims = key.verify_token::<UserInfoForJWT>(jwt, Some(verify_opts)).map_err(to_sub_err)?;
+    let claims = key.verify_token::<UserInfoForJWT>(jwt, Some(verify_opts))?;
     let user_info: UserInfoForJWT = claims.custom;
 
-    let user_hidden = get_user_hidden(&ctx, user_info.id.as_str()).await.map_err(to_sub_err)?;
+    let user_hidden = get_user_hidden(&ctx, user_info.id.as_str()).await?;
     let user = get_user(&ctx, &user_hidden.id).await?;
     
     Ok(user)

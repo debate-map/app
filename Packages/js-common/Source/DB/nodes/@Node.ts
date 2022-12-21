@@ -1,5 +1,6 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
+import {PickOnly} from "../../Utils/General/General.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodeLink} from "../nodeLinks/@NodeLink.js";
 import {ArgumentType, NodeRevision} from "./@NodeRevision.js";
@@ -100,6 +101,12 @@ AddSchema("Node_Partial", ["NodeL1"], ()=>{
 		}
 	}
 });*/
+
+//export type NodeL1_NoExtras = Omit<NodeL1, "extras"> & {extras: never};
+//export type NodeL1Input = Pick<NodeL1, "accessPolicy" | "type" | "rootNodeForMap" | "multiPremiseArgument" | "argumentType">;
+export const NodeL1Input_keys = ["accessPolicy", "type", "rootNodeForMap", "multiPremiseArgument", "argumentType"] as const;
+export type NodeL1Input = PickOnly<NodeL1, typeof NodeL1Input_keys[number]>;
+export const AsNodeL1Input = (node: NodeL1)=>node.IncludeKeys(...NodeL1Input_keys) as NodeL1Input;
 
 @MGLClass()
 export class Node_Extras {

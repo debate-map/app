@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -79,10 +79,27 @@ export const RunCommand_UpdateTerm = CreateFunc_RunCommand_UpdateX(Term);
 // other commands
 // ==========
 
+export async function RunCommand_AddArgumentAndClaim(inputFields: {
+	mapID: string|n,
+	argumentParentID: string,
+	argumentNode: NodeL1Input,
+	argumentRevision: Partial<NodeRevision>,
+	argumentLink: Partial<NodeLink>,
+	claimNode: NodeL1Input,
+	claimRevision: Partial<NodeRevision>,
+	claimLink: Partial<NodeLink>,
+}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: AddArgumentAndClaimInput!) { addArgumentAndClaim(input: $input) { argumentNodeID argumentRevisionID claimNodeID claimRevisionID doneAt } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.addArgumentAndClaim as {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string, doneAt: number};
+}
+
 export async function RunCommand_AddChildNode(inputFields: {
 	mapID: string|n,
 	parentID: string,
-	node: Partial<Omit<NodeL1, "extras"> & {extras: never}>,
+	node: NodeL1Input,
 	revision: Partial<NodeRevision>,
 	link: Partial<NodeLink>,
 }) {

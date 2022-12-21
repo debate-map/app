@@ -5,10 +5,10 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, VLexoRank} from "dm_common";
+import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, VLexoRank, NodeL1Input_keys, AsNodeL1Input} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
-import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
+import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
@@ -100,12 +100,13 @@ export class AddChildHelper {
 		let runResult_copy;
 		if (this.node.type == NodeType.argument) {
 			//if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
-			const command = new AddArgumentAndClaim({
+			/*const command = new AddArgumentAndClaim({...});
+			const runResult = runResult_copy = await command.RunOnServer();*/
+			const runResult = runResult_copy = await RunCommand_AddArgumentAndClaim({
 				mapID: this.mapID,
-				argumentParentID: this.Node_ParentID, argumentNode: this.node, argumentRevision: this.node_revision, argumentLink: this.node_link,
-				claimNode: this.subNode!, claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
+				argumentParentID: this.Node_ParentID, argumentNode: this.node as any, argumentRevision: this.node_revision, argumentLink: this.node_link,
+				claimNode: AsNodeL1Input(this.subNode!), claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
 			});
-			const runResult = runResult_copy = await command.RunOnServer();
 			RunInAction("AddChildDialog.Apply_mid", ()=>{
 				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.argumentNodeID, runResult.doneAt);
 				store.main.maps.nodeLastAcknowledgementTimes.set(runResult.claimNodeID, runResult.doneAt);
@@ -119,7 +120,7 @@ export class AddChildHelper {
 		} else {
 			//if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
 			const runResult = runResult_copy = await RunCommand_AddChildNode({
-				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node.ExcludeKeys("extras"), revision: this.node_revision, link: this.node_link,
+				mapID: this.mapID, parentID: this.Node_ParentID, node: AsNodeL1Input(this.node), revision: this.node_revision, link: this.node_link,
 			});
 			RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, runResult.doneAt));
 

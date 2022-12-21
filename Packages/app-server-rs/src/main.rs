@@ -126,6 +126,7 @@ mod db {
         }
         pub mod _command;
         pub mod add_access_policy;
+        pub mod add_argument_and_claim;
         pub mod add_child_node;
         pub mod add_map;
         pub mod add_media;

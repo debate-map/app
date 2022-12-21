@@ -1,4 +1,4 @@
-import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeLink, Polarity, SourceType, systemUserID} from "dm_common";
+import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeLink, Polarity, SourceType, systemUserID, AsNodeL1Input} from "dm_common";
 import React, {ComponentProps} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
@@ -79,7 +79,7 @@ export class MI_ImportSubtree extends BaseComponent<MI_SharedProps, {}, ImportRe
 						command.RunOnServer();
 					} else {*/
 					res.link.group = childGroup;
-					await RunCommand_AddChildNode({mapID: map?.id, parentID: node.id, node: res.node.ExcludeKeys("extras"), revision: res.revision, link: res.link});
+					await RunCommand_AddChildNode({mapID: map?.id, parentID: node.id, node: AsNodeL1Input(res.node), revision: res.revision, link: res.link});
 				}}/>}
 			</>
 		);
@@ -571,11 +571,11 @@ export async function CreateAncestorForResource(res: ImportResource, mapID: stri
 		link: new NodeLink({
 			group: parentOfNewNode.type == NodeType.category ? ChildGroup.generic : ChildGroup.freeform,
 		}),
-		node: new NodeL1({
+		node: AsNodeL1Input(new NodeL1({
 			type: NodeType.category,
 			accessPolicy: newNodeAccessPolicy,
 			creator: systemUserID,
-		}).ExcludeKeys("extras"),
+		})),
 		revision: new NodeRevision({
 			creator: systemUserID,
 			phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
@@ -590,7 +590,7 @@ export async function CreateResource(res: ImportResource, mapID: string|n, paren
 	if (res instanceof IR_NodeAndRevision) {
 		await RunCommand_AddChildNode({
 			mapID, parentID,
-			node: res.node.ExcludeKeys("extras"), revision: res.revision, link: res.link,
+			node: AsNodeL1Input(res.node), revision: res.revision, link: res.link,
 		});
 	}
 	Assert(false, `Cannot generate command to create resource of type "${res.constructor.name}".`);

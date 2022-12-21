@@ -3,6 +3,7 @@ use anyhow::{anyhow};
 
 use async_graphql::async_stream;
 use futures::Stream;
+use tracing::log;
 
 /*pub fn to_anyhow<
     //T: std::error::Error
@@ -63,6 +64,10 @@ pub struct SubError {
 }
 impl SubError {
     pub fn new(message: String) -> Self {
+        // When a SubError is constructed, immediately log it to the console, since async-graphql does not print it to the server's log itself (it only sends it to the client).
+        // (ideally, we would do this in gql_general_extension.subscribe [cleaner, and more universal, eg. also catches syntax errors], but I haven't figured out how yet)
+        log::warn!(target: "async-graphql", "[error in SubError/gql.subscribe] {:?}", anyhow!(message.clone())); // wrap in anyhow!, to get stacktrace
+
         Self { message }
     }
 }
