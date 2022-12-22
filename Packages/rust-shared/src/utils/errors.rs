@@ -3,7 +3,14 @@ use anyhow::{anyhow};
 
 use async_graphql::async_stream;
 use futures::Stream;
-use tracing::log;
+use tracing::log::{self, error};
+
+/// Use this as a "safer alternative" to `option.unwrap()`; it returns an error (as well as immediately `error!(...)` logging it) rather than panicking.
+pub fn should_be_unreachable() -> anyhow::Error {
+    let result = anyhow!("This code-path should be unreachable! However, to be safe, we're returning an error (and logging it) rather than panicking.");
+    error!("{:?}", result);
+    result
+}
 
 /*pub fn to_anyhow<
     //T: std::error::Error

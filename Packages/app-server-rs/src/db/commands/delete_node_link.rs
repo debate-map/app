@@ -47,12 +47,12 @@ pub struct DeleteNodeLinkResult {
 
 }
 
-#[derive(Default)]
+/*#[derive(Default)]
 pub struct DeleteNodeLinkExtras {
 	pub allow_orphaning: bool,
-}
+}*/
 
-pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeLinkInput, extras: DeleteNodeLinkExtras) -> Result<DeleteNodeLinkResult, Error> {
+pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeLinkInput, _extras: NoExtras) -> Result<DeleteNodeLinkResult, Error> {
 	let DeleteNodeLinkInput { mapID, id } = input;
 	let result = DeleteNodeLinkResult { __: gql_placeholder() };
 	
@@ -72,7 +72,7 @@ pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: De
 	let child_node = get_node(ctx, child_id).await?;
 	let child_number_of_parents = get_node_links(ctx, None, Some(child_id)).await?.len();
 	//ensure!(is_user_creator_or_mod(actor, node.creator.as_str()), "{base_text}you are not its owner. (or a mod)");
-	ensure!(extras.allow_orphaning || child_number_of_parents > 1, "{base_text}doing so would orphan it. Try deleting it instead.");
+	ensure!(/*extras.allow_orphaning ||*/ child_number_of_parents > 1, "{base_text}doing so would orphan it. Try deleting it instead.");
 	ensure!(!is_root_node(ctx, &child_node).await?, "{base_text}it's the root-node of a map.");
 	//ensure!(!IsNodeSubnode(oldData), "{baseText}it's a subnode. Try deleting it instead.");
 

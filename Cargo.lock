@@ -65,6 +65,7 @@ dependencies = [
  "async-recursion",
  "async-trait",
  "base64",
+ "bisection_key",
  "deadpool",
  "deadpool-postgres",
  "dotenv",
@@ -382,6 +383,12 @@ name = "binstring"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e0d60973d9320722cb1206f412740e162a33b8547ea8d6be75d7cff237c7a85"
+
+[[package]]
+name = "bisection_key"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0e8a5d2fdca745fa90f890a6ed31a5bb72f1a05c93e0de901d4840565b4be2f"
 
 [[package]]
 name = "bit-set"

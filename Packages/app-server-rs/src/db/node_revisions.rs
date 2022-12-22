@@ -54,7 +54,7 @@ impl From<Row> for NodeRevision {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(InputObject, Clone, Serialize, Deserialize)]
+#[derive(InputObject, Clone, Serialize, Deserialize, Default)]
 pub struct NodeRevisionInput {
     /// Marked as optional, since in some contexts it's not needed. (eg. for add_node, add_child_node, etc.)
     pub node: Option<String>,

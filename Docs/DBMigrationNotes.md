@@ -2,6 +2,12 @@
 
 ## Main series
 
+### Pushed on 2022-12-21
+
+* 1\) Updated all `nodeLinks.orderKey` cells, replacing any substrings of `0|` or `:` with an empty string. (changes done to make the old lexorank order-keys compatible with the new bisection-key crate)
+	* Response:
+		* 1\) Run the following SQL command: `UPDATE "nodeLinks" SET "orderKey" = replace(replace("orderKey", '0|', ''), ':', '')`
+
 ### Pushed on 2022-12-19
 
 * 1\) Renamed table: `nodeChildLinks` -> `nodeLinks`

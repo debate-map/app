@@ -73,3 +73,23 @@ pub fn enum_to_string<T: serde::Serialize>(obj: &T) -> String {
 pub fn average(numbers: &[f64]) -> f64 {
     numbers.iter().sum::<f64>() as f64 / numbers.len() as f64
 }
+
+/*macro_rules! default(
+    // Create a new T where T is known.
+    // let x = default!(Foo, x:1);
+    ($T:ident, $($k:ident: $v:expr), *) => (
+        $T { $($k: $v), *, ..::std::default::Default::default() }
+    );
+
+    // Create a new T where T is known, but with defaults.
+    // let x = default!(Foo);
+    ($T:ident) => (
+        $T { ..::std::default::Default::default() }
+    );
+
+    // Create a new T where T is not known.
+    // let x: T = default!();
+    () => (
+        ::std::default::Default::default();
+    );
+);*/

@@ -61,6 +61,7 @@ use crate::db::commands::delete_node_rating::MutationShard_DeleteNodeRating;
 use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
 use crate::db::commands::delete_share::MutationShard_DeleteShare;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
+use crate::db::commands::link_node::MutationShard_LinkNode;
 use crate::db::commands::set_node_is_multi_premise_argument::MutationShard_SetNodeIsMultiPremiseArgument;
 use crate::db::commands::set_node_rating::MutationShard_SetNodeRating;
 use crate::db::commands::set_user_follow_data::MutationShard_SetUserFollowData;
@@ -123,6 +124,7 @@ pub struct MutationRoot(
     // commands, others
     MutationShard_AddArgumentAndClaim, MutationShard_AddChildNode, MutationShard_AddNodeRevision,
     MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
+    MutationShard_LinkNode,
     MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
     MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,
 );

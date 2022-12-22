@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -140,9 +140,25 @@ export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, node
 
 export const RunCommand_DeleteNodeRating = CreateFunc_RunCommand_DeleteX(NodeRating);
 
+type LinkNodeInputFields = {
+	mapID?: string|n, oldParentID?: string|n, newParentID: string, nodeID: string,
+	newForm?: ClaimForm|n, newPolarity?: Polarity|n,
+	//createWrapperArg?: boolean,
+	childGroup: ChildGroup,
+	//linkAsArgument?: boolean,
+	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
+};
+export async function RunCommand_LinkNode(inputFields: LinkNodeInputFields) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: LinkNodeInput!) { linkNode(input: $input) { argumentWrapperID } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.linkNode as {argumentWrapperID: string};
+}
+
 export async function RunCommand_SetNodeRating(inputFields: {rating: NodeRating}) {
 	const result = await apolloClient.mutate({
-		mutation: gql`mutation($input: SetNodeRatingInput!) { setNodeRating(input: $input) { __typename } }`,
+		mutation: gql`mutation($input: SetNodeRatingInput!) { setNodeRating(input: $input) { id } }`,
 		variables: {input: inputFields},
 	});
 	return result.data.setNodeRating as {id: string};
@@ -161,7 +177,7 @@ export async function RunCommand_SetUserFollowData(inputFields: {targetUser: str
 		mutation: gql`mutation($input: SetUserFollowDataInput!) { setUserFollowData(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
-	return result.data.setUserFollowData as {id: string};
+	return result.data.setUserFollowData as {};
 }
 
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");

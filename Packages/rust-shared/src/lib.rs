@@ -69,6 +69,7 @@ pub mod utils {
     pub mod general;
     pub mod general_ {
         pub mod extensions;
+        pub mod func_types;
     }
     pub mod time;
     pub mod type_aliases;

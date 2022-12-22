@@ -41,7 +41,7 @@ pub enum NodePhrasingType {
 }
 
 /// Variant of NodePhrasing struct that keeps only the fields relevant for phrasings that are "embedded" within a node-revision.
-#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize, Default)]
 #[graphql(input_name = "NodePhrasingEmbeddedInput")]
 //#[graphql(name = "NodePhrasing_Embedded", input_name = "NodePhrasing_EmbeddedInput")] # todo: use this approach once async-graphql is updated
 pub struct NodePhrasing_Embedded {

@@ -101,6 +101,7 @@ mod utils {
         pub mod general;
         pub mod logging;
         pub mod mem_alloc;
+        pub mod order_keys;
     }
     pub mod http;
     pub mod mtx {
@@ -115,6 +116,7 @@ mod db {
     pub mod _shared {
         pub mod attachments;
         pub mod common_errors;
+        pub mod path_finder;
     }
     pub mod commands {
         pub mod _shared {
@@ -148,6 +150,7 @@ mod db {
         pub mod delete_node_tag;
         pub mod delete_share;
         pub mod delete_term;
+        pub mod link_node;
         pub mod set_node_is_multi_premise_argument;
         pub mod set_node_rating;
         pub mod set_user_follow_data;

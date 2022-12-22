@@ -30,6 +30,7 @@ oauth2 = "4.3.0"
 dotenv = "0.15.0"
 jwt-simple = "0.11.2"
 base64 = "0.13.1"
+bisection_key = "0.0.1"
 
 # needed for async-graphql examples-base, for now
 slab = "0.4.2"

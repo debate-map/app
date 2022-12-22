@@ -28,6 +28,7 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodeLink;
 #[Object] impl MutationShard_AddNodeLink {
+	/// This is a low-level function; for many use-cases, the higher-level `linkNode` command is preferred.
 	async fn add_node_link(&self, gql_ctx: &async_graphql::Context<'_>, input: AddNodeLinkInput, only_validate: Option<bool>) -> Result<AddNodeLinkResult, GQLError> {
 		command_boilerplate!(gql_ctx, input, only_validate, add_node_link);
     }

@@ -5,8 +5,9 @@ import {Observer, RunInAction} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID, Polarity, NodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID, Polarity, NodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup, CheckNewLinkIsValid, Me, PermissionGroupSet} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {RunCommand_LinkNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -33,7 +34,7 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 		}
 
 		// use memo, so we don't keep recreating command each render (since that causes new id's to be generated, causing new db-requests, making cycle keep repeating)
-		const linkCommand = UseMemo(()=>new LinkNode_HighLevel({
+		/*const linkCommand = UseMemo(()=>new LinkNode_HighLevel({
 			mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode.id,
 			newForm: copiedNode.type == NodeType.claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
@@ -41,7 +42,9 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 			childGroup,
 			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
 		}.OmitNull()), [childGroup, contributeInfo_polarity?.hostNodeID, contributeInfo_polarity?.reversePolarities, copiedNode.id, copiedNode.type, copiedNodePath, copiedNode_asCut, formForClaimChildren, map?.id, newPolarity, node.id]);
-		const error = linkCommand.Validate_Safe();
+		const error = linkCommand.Validate_Safe();*/
+		const newParentID = contributeInfo_polarity?.hostNodeID ?? node.id;
+		const error = CheckNewLinkIsValid(newParentID, childGroup, copiedNode, Me()?.permissionGroups ?? new PermissionGroupSet());
 
 		return (
 			<VMenuItem text={`Paste (${copiedNode_asCut ? "move" : "link"}) as ${childGroup == "freeform" ? "freeform" : "structured"} child${{truth: " (re. truth)", relevance: " (re. relevance)"}[childGroup] ?? ""}`}
@@ -64,7 +67,15 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 					proceed();
 
 					async function proceed() {
-						const {argumentWrapperID} = await linkCommand.RunOnServer();
+						//const {argumentWrapperID} = await linkCommand.RunOnServer();
+						const {argumentWrapperID} = await RunCommand_LinkNode({
+							mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode!.id,
+							newForm: copiedNode!.type == NodeType.claim ? formForClaimChildren : null,
+							newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
+							//createWrapperArg: childGroup != ChildGroup.generic || !node.multiPremiseArgument,
+							childGroup,
+							unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
+						});
 						if (argumentWrapperID) {
 							RunInAction("PasteAsLink_MenuItem.proceed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
