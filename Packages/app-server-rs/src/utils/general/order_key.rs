@@ -71,7 +71,7 @@ impl Serialize for OrderKey {
 impl<'de> Deserialize<'de> for OrderKey {
     fn deserialize<D>(deserializer: D) -> Result<OrderKey, D::Error> where D: Deserializer<'de> {
         let str_val = String::deserialize(deserializer)?;
-        Ok(OrderKey { key: str_val.o() })
+        Ok(OrderKey::new(&str_val).map_err(|err| serde::de::Error::custom(err.to_string()))?)
     }
 }
 
