@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -99,7 +99,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 							onOK: async()=>{
 								const newOrderKeys = [] as string[];
 								for (const [i, childLink] of childLinks.entries()) {
-									newOrderKeys[i] = i == 0 ? VLexoRank.middle().toString() : VLexoRank.parse(newOrderKeys.Last()).genNext().toString();
+									newOrderKeys[i] = i == 0 ? OrderKey.mid().key : new OrderKey(newOrderKeys.Last()).next().key;
 									/*await new UpdateLink({
 										linkID: childLink.id,
 										linkUpdates: {orderKey: newOrderKeys[i]},

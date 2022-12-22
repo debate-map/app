@@ -1,7 +1,7 @@
 import {Assert, IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {VLexoRank} from "../Utils.js";
 import {DMCommon_InServer} from "../Utils/General/General.js";
+import {OrderKey} from "../Utils/General/OrderKey.js";
 import {NodeLink} from "./nodeLinks/@NodeLink.js";
 import {ChildGroup} from "./nodes/@NodeType.js";
 
@@ -43,6 +43,6 @@ export const GetNodeLinks = CreateAccessor((parentID?: string|n, childID?: strin
 
 export const GetHighestLexoRankUnderParent = CreateAccessor((parentID?: string|n)=>{
 	const parent_childLinks = GetNodeLinks(parentID);
-	const parent_lastOrderKey = parent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? VLexoRank.middle().toString();
-	return VLexoRank.parse(parent_lastOrderKey);
+	const parent_lastOrderKey = parent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? OrderKey.mid().key;
+	return new OrderKey(parent_lastOrderKey);
 });

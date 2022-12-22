@@ -14,7 +14,7 @@ import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
-import {VLexoRank} from "../Utils/General/LexoRank.js";
+import {OrderKey} from "../Utils/General/OrderKey.js";
 
 // todo: eventually retire this Command, once TransferNodes has been developed enough to cover all this one's use-cases
 
@@ -114,7 +114,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");
 		// "this.X ?? X" checks needed for usage from TransferNodes.ts
 		this.newParent_data = this.newParent_data ?? GetNodeL2.NN(newParentID);
-		this.orderKeyForOuterNode = this.orderKeyForOuterNode ?? GetHighestLexoRankUnderParent(newParentID).genNext().toString();
+		this.orderKeyForOuterNode = this.orderKeyForOuterNode ?? GetHighestLexoRankUnderParent(newParentID).next().key;
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		//const pastingPremiseAsRelevanceArg = this.node_data.type == NodeType.claim && createWrapperArg;
@@ -166,7 +166,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 				group: wrapperArgNeeded ? ChildGroup.generic : childGroup,
 				form: newForm,
 				polarity: this.node_data.type == NodeType.argument ? newPolarity : null,
-				orderKey: wrapperArgNeeded ? VLexoRank.middle().toString() : this.orderKeyForOuterNode,
+				orderKey: wrapperArgNeeded ? OrderKey.mid().key : this.orderKeyForOuterNode,
 			},
 		}));
 

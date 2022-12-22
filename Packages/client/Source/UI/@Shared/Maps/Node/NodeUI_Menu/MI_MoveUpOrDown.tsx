@@ -1,4 +1,4 @@
-import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, VLexoRank, MeID, Polarity, UpdateLink} from "dm_common";
+import {ChildGroup, ChildOrdering, GetChildOrdering_Final, GetNodeLinks, GetNodeL2, GetNodeL3, GetParentNodeID, GetParentPath, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, MeID, Polarity, UpdateLink, OrderKey} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -40,17 +40,17 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 		//let error: string|n;
 		if (orderKeyToJumpPast != null) {
 			const orderKeyToJumpTo = orderingParent_childLinks_ordered[ownIndexAmongPeers + (towardMin ? -2 : 2)]?.orderKey;
-			const jumpPast = VLexoRank.parse(orderKeyToJumpPast);
+			const jumpPast = new OrderKey(orderKeyToJumpPast);
 			if (orderKeyToJumpTo) {
-				const jumpTo = VLexoRank.parse(orderKeyToJumpTo);
-				if (jumpPast.equals(jumpTo)) {
-					newOrderKey = towardMin ? jumpPast.genPrev().toString() : jumpPast.genNext().toString();
+				const jumpTo = new OrderKey(orderKeyToJumpTo);
+				if (jumpPast.key == jumpTo.key) {
+					newOrderKey = towardMin ? jumpPast.prev().key : jumpPast.next().key;
 				} else {
 					//newOrderKey = VLexoRank.between(jumpPast.decimal, VLexoRank.parse(orderKeyToJumpTo));
-					newOrderKey = jumpPast.between(VLexoRank.parse(orderKeyToJumpTo)).toString();
+					newOrderKey = jumpPast.between(new OrderKey(orderKeyToJumpTo)).key;
 				}
 			} else {
-				newOrderKey = towardMin ? jumpPast.genPrev().toString() : jumpPast.genNext().toString();
+				newOrderKey = towardMin ? jumpPast.prev().key : jumpPast.next().key;
 			}
 			/*} catch (ex) {
 				console.error(ex);

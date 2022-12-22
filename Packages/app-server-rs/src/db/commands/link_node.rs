@@ -1,6 +1,5 @@
 use std::fmt::{Formatter, Display};
 
-use bisection_key::LexiconKey;
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
@@ -28,7 +27,7 @@ use crate::db::nodes_::_node::{NodeInput, ArgumentType};
 use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
-use crate::utils::general::order_keys::OrderKey;
+use crate::utils::general::order_key::OrderKey;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
@@ -81,7 +80,7 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeI
 	//let old_parent = oldParentID.map_or(async { None }, |a| get_node(ctx, &a)).await?;
 	let old_parent = if let Some(oldParentID) = &oldParentID { Some(get_node(ctx, oldParentID).await?) } else { None };
 	let new_parent = get_node(ctx, &newParentID).await?;
-	let order_key_for_outer_node = get_highest_order_key_under_parent(ctx, Some(&newParentID)).await?.bisect_end()?;
+	let order_key_for_outer_node = get_highest_order_key_under_parent(ctx, Some(&newParentID)).await?.next()?;
 
 	let pasting_premise_as_relevance_arg = node_data.r#type == NodeType::claim && childGroup == ChildGroup::relevance;
 	ensure!(oldParentID.as_ref() != Some(&newParentID) || pasting_premise_as_relevance_arg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
@@ -148,12 +147,14 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeI
 	}, Default::default()).await?;
 
 	if unlink_from_old_parent && let Some(old_parent) = old_parent {
-		let link = get_first_link_under_parent(ctx, old_parent.id.as_str(), &nodeID).await?;
-		delete_node_link(ctx, actor, DeleteNodeLinkInput { mapID: None, id: link.id.to_string() }, Default::default()).await?;
+		//let link = get_first_link_under_parent(ctx, &nodeID, old_parent.id.as_str()).await?;
+		for link in get_node_links(ctx, Some(old_parent.id.as_str()), Some(nodeID.as_str())).await? {
+			delete_node_link(ctx, actor, DeleteNodeLinkInput { mapID: None, id: link.id.to_string() }, Default::default()).await?;
+		}
 
-		// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
-		let child_count = get_node_links(ctx, Some(old_parent.id.as_str()), None).await?.len();
-		if old_parent.r#type == NodeType::argument && child_count == 1 && delete_empty_argument_wrapper {
+		// if parent was argument, and it now has no children left, and the actor allows it (ie. their view has node as single-premise arg), then also delete the argument parent
+		let new_child_count = get_node_links(ctx, Some(old_parent.id.as_str()), None).await?.len();
+		if old_parent.r#type == NodeType::argument && new_child_count == 0 && delete_empty_argument_wrapper {
 			delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: old_parent.id.to_string() }, Default::default()).await?;
 		}
 	}

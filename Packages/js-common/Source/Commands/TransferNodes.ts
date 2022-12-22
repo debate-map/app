@@ -136,7 +136,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 				}
 				const newParentID = transfer.newParentID ?? prevTransferData.addNodeCommand?.returnData.nodeID;
 				AssertV(newParentID != null, "Parent-node-id is still null!");
-				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParentID).genNext().toString();
+				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParentID).next().key;
 				/*const newParent = transfer.newParentID ? GetNode(transfer.newParentID) : prevTransferData.addNodeCommand?.sub_addNode.payload.node;
 				AssertV(newParent != null, "Parent-node is still null!");*/
 
@@ -262,7 +262,7 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 
 				AssertV(transfer.newParentID != null, `For transfer of type "shim", the new-parent-id must be specified.`);
 				const newParent = GetNodeL2.NN(transfer.newParentID);
-				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParent.id).genNext().toString();
+				const orderKeyForNewNode = GetHighestLexoRankUnderParent(newParent.id).next().key;
 
 				this.IntegrateSubcommand(
 					()=>(this.transferData[i]?.addNodeCommand as any),

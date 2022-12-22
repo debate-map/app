@@ -101,7 +101,7 @@ mod utils {
         pub mod general;
         pub mod logging;
         pub mod mem_alloc;
-        pub mod order_keys;
+        pub mod order_key;
     }
     pub mod http;
     pub mod mtx {

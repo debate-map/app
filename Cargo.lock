@@ -65,7 +65,6 @@ dependencies = [
  "async-recursion",
  "async-trait",
  "base64",
- "bisection_key",
  "deadpool",
  "deadpool-postgres",
  "dotenv",
@@ -79,6 +78,7 @@ dependencies = [
  "jsonschema",
  "jwt-simple",
  "lazy_static",
+ "lexicon_fractional_index",
  "log",
  "metrics",
  "num_cpus",
@@ -383,12 +383,6 @@ name = "binstring"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e0d60973d9320722cb1206f412740e162a33b8547ea8d6be75d7cff237c7a85"
-
-[[package]]
-name = "bisection_key"
-version = "0.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0e8a5d2fdca745fa90f890a6ed31a5bb72f1a05c93e0de901d4840565b4be2f"
 
 [[package]]
 name = "bit-set"
@@ -1457,6 +1451,12 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 dependencies = [
  "spin 0.5.2",
 ]
+
+[[package]]
+name = "lexicon_fractional_index"
+version = "0.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b14c52534dd690e23b687bdbbbe300d7ec5c45f25e9261f72b70751af67067d3"
 
 [[package]]
 name = "libc"

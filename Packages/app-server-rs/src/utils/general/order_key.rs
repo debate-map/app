@@ -3,7 +3,7 @@ use std::{
     fmt::{Debug, Display},
 };
 
-use bisection_key::{BalancedKey, LexiconKey};
+use lexicon_fractional_index::{key_between, float64_approx};
 use rust_shared::{
     anyhow::Error,
     async_graphql::{self as async_graphql, InputValueResult, Scalar, ScalarType, Value, InputValueError},
@@ -22,24 +22,35 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 //#[derive(SimpleObject, InputObject)]
 pub struct OrderKey {
-    pub inner: LexiconKey,
+    pub key: String,
 }
 impl OrderKey {
     pub fn mid() -> OrderKey {
-        OrderKey { inner: LexiconKey::default() }
+        OrderKey { key: key_between(&None, &None).unwrap() }
+    }
+    pub fn validate(key: &str) -> Result<(), Error> {
+        //float64_approx(key).map_err(to_anyhow)?;
+        // the base library's `validate_key` function is private, so pass key to its `key_between` function instead (since it calls `validate_key` internally)
+        key_between(&Some(key.o()), &None).map_err(to_anyhow)?;
+        Ok(())
     }
 
     pub fn new(str: &str) -> Result<OrderKey, Error> {
-        Ok(OrderKey { inner: LexiconKey::new(str).map_err(to_anyhow)? })
+        Self::validate(str)?;
+        Ok(OrderKey { key: str.o() })
     }
-    pub fn bisect_start(&self) -> Result<OrderKey, Error> {
-        Ok(OrderKey { inner: self.inner.bisect_beginning().map_err(to_anyhow)? })
+    pub fn prev(&self) -> Result<OrderKey, Error> {
+        Ok(OrderKey { key: key_between(&None, &Some(self.key.o())).map_err(to_anyhow)? })
     }
-    pub fn bisect_end(&self) -> Result<OrderKey, Error> {
-        Ok(OrderKey { inner: self.inner.bisect_end().map_err(to_anyhow)? })
+    pub fn next(&self) -> Result<OrderKey, Error> {
+        Ok(OrderKey { key: key_between(&Some(self.key.o()), &None).map_err(to_anyhow)? })
     }
-    pub fn bisect(&self, other: &OrderKey) -> Result<OrderKey, Error> {
-        Ok(OrderKey { inner: self.inner.bisect(&other.inner).map_err(to_anyhow)? })
+    pub fn between(&self, other: &OrderKey) -> Result<OrderKey, Error> {
+        // swap order when self is greater than other (base library enforces this restriction)
+        if self.key > other.key {
+            return other.between(self);
+        }
+        Ok(OrderKey { key: key_between(&Some(self.key.o()), &Some(other.key.o())).map_err(to_anyhow)? })
     }
 }
 
@@ -48,21 +59,19 @@ impl OrderKey {
 
 impl Clone for OrderKey {
     fn clone(&self) -> Self {
-        OrderKey::new(&self.inner.to_string()).unwrap()
+        OrderKey::new(&self.key.to_string()).unwrap()
     }
 }
 impl Serialize for OrderKey {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
         //serializer.serialize_str(self.inner.to_string().as_str())
-        self.inner.to_string().serialize(serializer)
+        self.key.to_string().serialize(serializer)
     }
 }
 impl<'de> Deserialize<'de> for OrderKey {
     fn deserialize<D>(deserializer: D) -> Result<OrderKey, D::Error> where D: Deserializer<'de> {
         let str_val = String::deserialize(deserializer)?;
-        Ok(OrderKey {
-            inner: LexiconKey::new(&str_val).map_err(serde::de::Error::custom)?,
-        })
+        Ok(OrderKey { key: str_val.o() })
     }
 }
 
@@ -75,7 +84,7 @@ impl ScalarType for OrderKey {
         }
     }
     fn to_value(&self) -> Value {
-        Value::String(self.inner.to_string())
+        Value::String(self.key.to_string())
     }
 }
 
@@ -84,14 +93,14 @@ impl ScalarType for OrderKey {
 
 impl Eq for OrderKey {}
 impl PartialEq for OrderKey {
-    fn eq(&self, other: &OrderKey) -> bool { self.inner.eq(&other.inner) }
+    fn eq(&self, other: &OrderKey) -> bool { self.key.eq(&other.key) }
 }
 impl Ord for OrderKey {
-    fn cmp(&self, other: &OrderKey) -> Ordering { self.inner.cmp(&other.inner) }
+    fn cmp(&self, other: &OrderKey) -> Ordering { self.key.cmp(&other.key) }
 }
 impl PartialOrd for OrderKey {
-    fn partial_cmp(&self, other: &OrderKey) -> Option<Ordering> { self.inner.partial_cmp(&other.inner) }
+    fn partial_cmp(&self, other: &OrderKey) -> Option<Ordering> { self.key.partial_cmp(&other.key) }
 }
 impl Display for OrderKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { std::fmt::Display::fmt(&self.inner, f) }
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { std::fmt::Display::fmt(&self.key, f) }
 }
