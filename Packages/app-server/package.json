@@ -32,7 +32,7 @@
 		"cors": "^2.8.5",
 		"dm_common": "workspace:*",
 		"dotenv": "^10.0.0",
-		"express": "^4.17.1",
+		"express": "^4.17.3",
 		"express-session": "^1.17.2",
 		"get-graphql-from-jsonschema": "^8.0.12",
 		"ip-address": "^8.1.0",
