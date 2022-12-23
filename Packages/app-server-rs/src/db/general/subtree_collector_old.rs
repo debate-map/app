@@ -11,7 +11,7 @@ use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
 use crate::db::node_revisions::NodeRevision;
 use crate::db::nodes_::_node::Node;
-use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_links::{NodeLink, get_node_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags_for}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
+use crate::{db::{medias::{Media, get_media}, terms::{Term, get_terms_attached}, nodes::{get_node}, node_links::{NodeLink, get_node_links}, node_revisions::{get_node_revision}, node_phrasings::{NodePhrasing, get_node_phrasings}, node_tags::{NodeTag, get_node_tags}}, utils::{db::{queries::{get_entries_in_collection_basic}, sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, accessors::AccessorContext}}};
 use super::{subtree::Subtree};
 
 #[derive(Default)]
@@ -77,7 +77,7 @@ pub async fn populate_subtree_collector_old(ctx: &AccessorContext<'_>, current_p
         }
         temp
     };
-    let tags = get_node_tags_for(ctx, &node_id).await?;
+    let tags = get_node_tags(ctx, &node_id).await?;
 
     // store data
     {

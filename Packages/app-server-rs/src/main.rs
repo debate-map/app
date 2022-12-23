@@ -11,7 +11,7 @@
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
-    unused_imports, // makes refactoring a pain (eg. you comment out a line to test something, and now must scroll-to-top and comment lots of stuff)
+    unused_imports, // makes refactoring a pain (eg. you comment out a line to test something, and now must scroll-to-top and comment lots of stuff) [more importantly, conflicts with wrap_slow_macros! atm; need to resolve that]
     non_camel_case_types,
     non_snake_case, // makes field-names inconsistent with graphql and such, for db-struct fields
     clippy::module_name_repetitions, // too many false positives
@@ -126,6 +126,10 @@ mod db {
             pub mod rating_processor;
             pub mod update_node_rating_summaries;
         }
+        pub mod transfer_nodes_ {
+            pub mod transfer_using_clone;
+            pub mod transfer_using_shim;
+        }
         pub mod _command;
         pub mod add_access_policy;
         pub mod add_argument_and_claim;
@@ -154,6 +158,7 @@ mod db {
         pub mod set_node_is_multi_premise_argument;
         pub mod set_node_rating;
         pub mod set_user_follow_data;
+        pub mod transfer_nodes;
         pub mod update_access_policy;
         pub mod update_map;
         pub mod update_media;

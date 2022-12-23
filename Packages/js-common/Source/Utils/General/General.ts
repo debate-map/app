@@ -54,3 +54,12 @@ acceptsIDOrMore(shouldWork1);
 acceptsIDOrMore(shouldWork2);
 acceptsIDOrMore(shouldFail1);
 acceptsIDOrMore(shouldFail2);*/
+
+/** Used to let mobx-graphlink know that a given db-class' field needs to have its subfields included/expanded, in queries. */
+export function MarkerForNonScalarField() {
+	return {
+		//$gqlType: className,
+		// env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
+		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false,
+	};
+}

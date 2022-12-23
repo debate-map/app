@@ -46,7 +46,6 @@ pub struct UpdateMediaResult {
 
 pub async fn update_media(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMediaInput, _extras: NoExtras) -> Result<UpdateMediaResult, Error> {
 	let UpdateMediaInput { id, updates } = input;
-	let result = UpdateMediaResult { __: gql_placeholder() };
 	
 	let old_data = get_media(&ctx, &id).await?;
 	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -61,5 +60,5 @@ pub async fn update_media(ctx: &AccessorContext<'_>, actor: &User, input: Update
 
 	set_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateMediaResult { __: gql_placeholder() })
 }

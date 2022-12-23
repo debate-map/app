@@ -44,7 +44,6 @@ pub struct UpdateUserHiddenResult {
 
 pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, input: UpdateUserHiddenInput, _extras: NoExtras) -> Result<UpdateUserHiddenResult, Error> {
 	let UpdateUserHiddenInput { id, updates } = input;
-	let result = UpdateUserHiddenResult { __: gql_placeholder() };
 	
 	let old_data = get_user_hidden(&ctx, &id).await?;
 	ensure!(id == actor.id.to_string(), "Cannot change the user-hidden-data of another user!");
@@ -61,5 +60,5 @@ pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, input: 
 
 	set_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateUserHiddenResult { __: gql_placeholder() })
 }

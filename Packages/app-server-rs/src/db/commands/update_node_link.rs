@@ -46,7 +46,6 @@ pub struct UpdateNodeLinkResult {
 
 pub async fn update_node_link(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeLinkInput, _extras: NoExtras) -> Result<UpdateNodeLinkResult, Error> {
 	let UpdateNodeLinkInput { id, updates } = input;
-	let result = UpdateNodeLinkResult { __: gql_placeholder() };
 	
 	let old_data = get_node_link(&ctx, &id).await?;
 	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -60,5 +59,5 @@ pub async fn update_node_link(ctx: &AccessorContext<'_>, actor: &User, input: Up
 
 	set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateNodeLinkResult { __: gql_placeholder() })
 }

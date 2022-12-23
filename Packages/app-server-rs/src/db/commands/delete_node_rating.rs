@@ -46,7 +46,6 @@ pub struct DeleteNodeRatingResult {
 
 pub async fn delete_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeRatingInput, _extras: NoExtras) -> Result<DeleteNodeRatingResult, Error> {
 	let DeleteNodeRatingInput { id } = input;
-	let result = DeleteNodeRatingResult { __: gql_placeholder() };
 	
 	let old_data = get_node_rating(&ctx, &id).await?;
 	assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -56,5 +55,5 @@ pub async fn delete_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: 
 
 	update_node_rating_summaries(ctx, actor, old_data.node, old_data.r#type).await?;
 
-	Ok(result)
+	Ok(DeleteNodeRatingResult { __: gql_placeholder() })
 }

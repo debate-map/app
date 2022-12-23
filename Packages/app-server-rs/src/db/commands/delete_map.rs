@@ -47,7 +47,6 @@ pub struct DeleteMapResult {
 
 pub async fn delete_map(ctx: &AccessorContext<'_>, actor: &User, input: DeleteMapInput, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
 	let DeleteMapInput { id } = input;
-	let result = DeleteMapResult { __: gql_placeholder() };
 	
 	let old_data = get_map(ctx, &id).await?;
 	assert_user_can_delete(ctx, actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -57,5 +56,5 @@ pub async fn delete_map(ctx: &AccessorContext<'_>, actor: &User, input: DeleteMa
 
 	delete_db_entry_by_id(ctx, "maps".to_owned(), id.to_string()).await?;
 
-	Ok(result)
+	Ok(DeleteMapResult { __: gql_placeholder() })
 }

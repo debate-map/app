@@ -48,7 +48,6 @@ pub struct SetNodeIsMultiPremiseArgumentResult {
 
 pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor: &User, input: SetNodeIsMultiPremiseArgumentInput, _extras: NoExtras) -> Result<SetNodeIsMultiPremiseArgumentResult, Error> {
 	let SetNodeIsMultiPremiseArgumentInput { id, multiPremiseArgument } = input;
-	let result = SetNodeIsMultiPremiseArgumentResult { __: gql_placeholder() };
 	
 	let old_data = get_node(&ctx, &id).await?;
 	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -59,5 +58,5 @@ pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor
 
 	set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(SetNodeIsMultiPremiseArgumentResult { __: gql_placeholder() })
 }

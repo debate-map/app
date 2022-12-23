@@ -56,7 +56,6 @@ pub struct DeleteNodeExtras {
 
 pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
 	let DeleteNodeInput { mapID, nodeID } = input;
-	let result = DeleteNodeResult { __: gql_placeholder() };
 	
 	let old_data = get_node(&ctx, &nodeID).await?;
 	assert_user_can_delete_node(&ctx, &actor, &old_data, extras.as_part_of_map_delete, vec![], vec![]).await?;
@@ -76,5 +75,5 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteN
 
 	increment_map_edits_if_valid(&ctx, mapID).await?;
 
-	Ok(result)
+	Ok(DeleteNodeResult { __: gql_placeholder() })
 }

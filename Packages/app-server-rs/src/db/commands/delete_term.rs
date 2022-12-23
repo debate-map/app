@@ -45,12 +45,11 @@ pub struct DeleteTermResult {
 
 pub async fn delete_term(ctx: &AccessorContext<'_>, actor: &User, input: DeleteTermInput, _extras: NoExtras) -> Result<DeleteTermResult, Error> {
 	let DeleteTermInput { id } = input;
-	let result = DeleteTermResult { __: gql_placeholder() };
 	
 	let old_data = get_term(&ctx, &id).await?;
 	assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
 
 	delete_db_entry_by_id(&ctx, "terms".to_owned(), id.to_string()).await?;
 
-	Ok(result)
+	Ok(DeleteTermResult { __: gql_placeholder() })
 }

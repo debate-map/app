@@ -47,7 +47,6 @@ pub struct UpdateNodeTagResult {
 
 pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeTagInput, _extras: NoExtras) -> Result<UpdateNodeTagResult, Error> {
 	let UpdateNodeTagInput { id, updates } = input;
-	let result = UpdateNodeTagResult { __: gql_placeholder() };
 	
 	let old_data = get_node_tag(&ctx, &id).await?;
 	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -69,5 +68,5 @@ pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: Upd
 
 	set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateNodeTagResult { __: gql_placeholder() })
 }

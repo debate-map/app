@@ -46,7 +46,6 @@ pub struct UpdateNodePhrasingResult {
 
 pub async fn update_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodePhrasingInput, _extras: NoExtras) -> Result<UpdateNodePhrasingResult, Error> {
 	let UpdateNodePhrasingInput { id, updates } = input;
-	let result = UpdateNodePhrasingResult { __: gql_placeholder() };
 	
 	let old_data = get_node_phrasing(&ctx, &id).await?;
 	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -64,5 +63,5 @@ pub async fn update_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input
 
 	set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateNodePhrasingResult { __: gql_placeholder() })
 }

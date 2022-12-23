@@ -134,6 +134,7 @@ pub async fn maybe_proxy_to_asjs_handler_impl(client: HyperClient, schema: RootS
             "deleteArgument", "deleteNode", "deleteNodeRating",
             "linkNode",
             "setNodeIsMultiPremiseArgument", "setNodeRating", "setUserFollowData",
+            "transferNodes",
             "updateNode", "updateUser", "updateUserHidden",
         ];
 

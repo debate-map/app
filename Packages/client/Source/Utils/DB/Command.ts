@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -178,6 +178,14 @@ export async function RunCommand_SetUserFollowData(inputFields: {targetUser: str
 		variables: {input: inputFields},
 	});
 	return result.data.setUserFollowData as {};
+}
+
+export async function RunCommand_TransferNodes(inputFields: {mapID?: string|n, nodes: NodeInfoForTransfer[]}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: TransferNodesInput!) { transferNodes(input: $input) { __typename } }`,
+		variables: {input: inputFields},
+	});
+	return result.data.transferNodes as {};
 }
 
 export const RunCommand_UpdateNode = CreateFunc_RunCommand_UpdateX(NodeL1, "Node");

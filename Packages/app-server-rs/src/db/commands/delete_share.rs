@@ -45,7 +45,6 @@ pub struct DeleteShareResult {
 
 pub async fn delete_share(ctx: &AccessorContext<'_>, actor: &User, input: DeleteShareInput, _extras: NoExtras) -> Result<DeleteShareResult, Error> {
 	let DeleteShareInput { id } = input;
-	let result = DeleteShareResult { __: gql_placeholder() };
 	
 	let old_data = get_share(&ctx, &id).await?;
 	//assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -53,5 +52,5 @@ pub async fn delete_share(ctx: &AccessorContext<'_>, actor: &User, input: Delete
 
 	delete_db_entry_by_id(&ctx, "shares".to_owned(), id.to_string()).await?;
 
-	Ok(result)
+	Ok(DeleteShareResult { __: gql_placeholder() })
 }

@@ -1,6 +1,7 @@
 import {CheckLinkIsValid, ChildGroup, ClaimForm, GetNode, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetUserPermissionGroups, GetValidNewChildTypes, IsWrapperArgNeededForTransfer, LinkNode_HighLevel, NodeL3, NodeType, MeID, NodeInfoForTransfer, NodeTagCloneType, Polarity, TransferNodes, TransferNodesPayload, TransferType} from "dm_common";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
+import {RunCommand_TransferNodes} from "Utils/DB/Command.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {ES, InfoButton, Observer} from "web-vcore";
@@ -87,8 +88,9 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 					},
 					//fetchPolicy: "network-only",
 				});*/
-				const command = new TransferNodes(payload);
-				const result = await command.RunOnServer();
+				/*const command = new TransferNodes(payload);
+				const result = await command.RunOnServer();*/
+				const result = await RunCommand_TransferNodes(payload);
 				console.log("Got result:", result);
 			})();
 		},

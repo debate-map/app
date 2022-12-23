@@ -1,6 +1,7 @@
 import {AddSchema, DB, DeriveJSONSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {TermAttachment} from "../@Shared/Attachments/@TermAttachment.js";
+import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
 @MGLClass({table: "nodePhrasings"})
 export class NodePhrasing {
@@ -52,11 +53,7 @@ export class NodePhrasing {
 
 	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
 	@DB((t, n)=>t.specificType(n, "jsonb[]"))
-	@Field({
-		items: {$ref: TermAttachment.name},
-		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
-		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
-	})
+	@Field({items: {$ref: TermAttachment.name}, ...MarkerForNonScalarField()})
 	terms: TermAttachment[] = [];
 
 	// for web phrasings

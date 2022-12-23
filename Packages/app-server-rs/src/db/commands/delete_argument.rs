@@ -51,7 +51,6 @@ pub struct DeleteArgumentResult {
 
 pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, input: DeleteArgumentInput, _extras: NoExtras) -> Result<DeleteArgumentResult, Error> {
 	let DeleteArgumentInput { mapID, argumentID, claimID, deleteClaim } = input;
-	let result = DeleteArgumentResult { __: gql_placeholder() };
 	
 	if deleteClaim {
 		delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: claimID }, Default::default()).await?;
@@ -67,5 +66,5 @@ pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, input: Del
 
 	increment_map_edits_if_valid(&ctx, mapID).await?;
 
-	Ok(result)
+	Ok(DeleteArgumentResult { __: gql_placeholder() })
 }

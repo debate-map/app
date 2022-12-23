@@ -47,7 +47,6 @@ pub struct DeleteAccessPolicyResult {
 
 pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: DeleteAccessPolicyInput, _extras: NoExtras) -> Result<DeleteAccessPolicyResult, Error> {
 	let DeleteAccessPolicyInput { id } = input;
-	let result = DeleteAccessPolicyResult { __: gql_placeholder() };
 	
 	let old_data = get_access_policy(&ctx, &id).await?;
 	assert_user_can_delete_simple(&actor, &old_data.creator)?;
@@ -60,5 +59,5 @@ pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, input
 
 	ctx.tx.query_raw(r#"UPDATE "userHiddens" as t1 SET "lastAccessPolicy" = NULL WHERE t1."lastAccessPolicy" = $1"#, params(&[&id])).await?;
 
-	Ok(result)
+	Ok(DeleteAccessPolicyResult { __: gql_placeholder() })
 }

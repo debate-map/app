@@ -46,7 +46,6 @@ pub struct UpdateShareResult {
 
 pub async fn update_share(ctx: &AccessorContext<'_>, actor: &User, input: UpdateShareInput, _extras: NoExtras) -> Result<UpdateShareResult, Error> {
 	let UpdateShareInput { id, updates } = input;
-	let result = UpdateShareResult { __: gql_placeholder() };
 	
 	let old_data = get_share(&ctx, &id).await?;
 	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -60,5 +59,5 @@ pub async fn update_share(ctx: &AccessorContext<'_>, actor: &User, input: Update
 
 	set_db_entry_by_id_for_struct(&ctx, "shares".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateShareResult { __: gql_placeholder() })
 }

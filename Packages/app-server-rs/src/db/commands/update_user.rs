@@ -45,7 +45,6 @@ pub struct UpdateUserResult {
 
 pub async fn update_user(ctx: &AccessorContext<'_>, actor: &User, input: UpdateUserInput, _extras: NoExtras) -> Result<UpdateUserResult, Error> {
 	let UpdateUserInput { id, updates } = input;
-	let result = UpdateUserResult { __: gql_placeholder() };
 	
 	let old_data = get_user(&ctx, &id).await?;
 
@@ -69,5 +68,5 @@ pub async fn update_user(ctx: &AccessorContext<'_>, actor: &User, input: UpdateU
 
 	set_db_entry_by_id_for_struct(&ctx, "users".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateUserResult { __: gql_placeholder() })
 }

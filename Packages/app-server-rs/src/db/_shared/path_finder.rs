@@ -4,6 +4,10 @@ use rust_shared::anyhow::Error;
 
 use crate::{db::{nodes::get_node, node_links::get_node_links}, utils::db::accessors::AccessorContext};
 
+pub async fn id_is_of_node_that_is_root_of_map(ctx: &AccessorContext<'_>, id: &str, _extra_data: Option<&JSONValue>) -> Result<bool, Error> {
+	Ok(get_node(ctx, id).await?.rootNodeForMap.is_some())
+}
+
 pub async fn search_up_from_node_for_node_matching_x(
     ctx: &AccessorContext<'_>,
     start_node_id: &str,

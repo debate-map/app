@@ -46,8 +46,6 @@ pub struct UpdateMapResult {
 
 pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMapInput, _extras: NoExtras) -> Result<UpdateMapResult, Error> {
 	let UpdateMapInput { id, updates } = input;
-	let result = UpdateMapResult { __: gql_placeholder() };
-
 	
 	let old_data = get_map(&ctx, &id).await?;
 	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -73,5 +71,5 @@ pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMa
 
 	set_db_entry_by_id_for_struct(&ctx, "maps".to_owned(), id.to_string(), new_data).await?;
 
-	Ok(result)
+	Ok(UpdateMapResult { __: gql_placeholder() })
 }

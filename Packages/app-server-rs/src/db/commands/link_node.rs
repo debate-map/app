@@ -13,7 +13,7 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
-use crate::db::_shared::path_finder::search_up_from_node_for_node_matching_x;
+use crate::db::_shared::path_finder::{search_up_from_node_for_node_matching_x, id_is_of_node_that_is_root_of_map};
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::add_node_link::{AddNodeLinkInput, add_node_link};
 use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
@@ -67,11 +67,12 @@ pub struct LinkNodeResult {
 
 }
 
-async fn id_is_of_node_that_is_root_of_map(ctx: &AccessorContext<'_>, id: &str, _extra_data: Option<&JSONValue>) -> Result<bool, Error> {
-	Ok(get_node(ctx, id).await?.rootNodeForMap.is_some())
+#[derive(Default)]
+pub struct LinkNodeExtras {
+	pub order_key_for_outer_node: Option<OrderKey>,
 }
 
-pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeInput, _extras: NoExtras) -> Result<LinkNodeResult, Error> {
+pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeInput, extras: LinkNodeExtras) -> Result<LinkNodeResult, Error> {
 	let LinkNodeInput { mapID, oldParentID, newParentID, nodeID, childGroup, newForm, newPolarity, unlinkFromOldParent, deleteEmptyArgumentWrapper } = input;
 	let unlink_from_old_parent = unlinkFromOldParent.unwrap_or(false);
 	let delete_empty_argument_wrapper = deleteEmptyArgumentWrapper.unwrap_or(false);
@@ -80,7 +81,11 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeI
 	//let old_parent = oldParentID.map_or(async { None }, |a| get_node(ctx, &a)).await?;
 	let old_parent = if let Some(oldParentID) = &oldParentID { Some(get_node(ctx, oldParentID).await?) } else { None };
 	let new_parent = get_node(ctx, &newParentID).await?;
-	let order_key_for_outer_node = get_highest_order_key_under_parent(ctx, Some(&newParentID)).await?.next()?;
+	let order_key_for_outer_node = if let Some(order_key) = extras.order_key_for_outer_node {
+		order_key
+	} else {
+		get_highest_order_key_under_parent(ctx, Some(&newParentID)).await?.next()?
+	};
 
 	let pasting_premise_as_relevance_arg = node_data.r#type == NodeType::claim && childGroup == ChildGroup::relevance;
 	ensure!(oldParentID.as_ref() != Some(&newParentID) || pasting_premise_as_relevance_arg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");

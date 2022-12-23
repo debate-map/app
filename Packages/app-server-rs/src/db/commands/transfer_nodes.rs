@@ -1,110 +1,132 @@
-use rust_shared::anyhow::{anyhow, Error};
-use jsonschema::{JSONSchema, output::BasicOutput};
+use std::fmt::{Formatter, Display};
+
+use rust_shared::async_graphql::{ID, SimpleObject, InputObject, Enum};
+use rust_shared::rust_macros::wrap_slow_macros;
+use rust_shared::serde_json::{Value, json};
+use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::utils::general_::extensions::ToOwnedV;
+use rust_shared::{async_graphql, serde_json, anyhow, GQLError, to_anyhow};
+use rust_shared::async_graphql::{Object};
+use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::anyhow::{anyhow, Error, Context, ensure, bail};
+use rust_shared::utils::time::{time_since_epoch_ms_i64};
+use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use rust_shared::serde::{Serialize, Deserialize};
-use rust_shared::serde_json::json;
-use lazy_static::lazy_static;
-use deadpool_postgres::Pool;
+use tracing::info;
 
-use crate::{utils::type_aliases::JSONValue, db::{_general::GenericMutation_Result, nodes::get_node, general::accessor_helpers::AccessorContext}};
+use crate::db::_shared::path_finder::search_up_from_node_for_node_matching_x;
+use crate::db::commands::_command::command_boilerplate;
+use crate::db::commands::add_node_link::{AddNodeLinkInput, add_node_link};
+use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
+use crate::db::commands::delete_node_link::{self, delete_node_link, DeleteNodeLinkInput};
+use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::node_links::{NodeLinkInput, ClaimForm, ChildGroup, Polarity, get_node_links, get_first_link_under_parent, get_highest_order_key_under_parent};
+use crate::db::node_phrasings::NodePhrasing_Embedded;
+use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
+use crate::db::nodes::get_node;
+use crate::db::nodes_::_node::{NodeInput, ArgumentType};
+use crate::db::nodes_::_node_type::NodeType;
+use crate::db::users::User;
+use crate::utils::db::accessors::AccessorContext;
+use crate::utils::general::order_key::OrderKey;
+use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-// temp
-type TransferType = String;
-type NodeType = String;
-type ClaimForm = String;
-type Polarity = String;
-type ChildGroup = String;
-type NodeTagCloneType = String;
+use super::_command::{set_db_entry_by_id_for_struct, NoExtras, tbd, gql_placeholder};
+use super::_shared::add_node::add_node;
+use super::_shared::increment_map_edits::increment_map_edits_if_valid;
+use super::add_child_node::{add_child_node, AddChildNodeInput};
+use super::add_node_link::assert_link_is_valid;
+use super::transfer_nodes_::transfer_using_clone::TransferResult_Clone;
+use super::transfer_nodes_::transfer_using_shim::TransferResult_Shim;
+use super::transfer_nodes_::{transfer_using_clone::transfer_using_clone, transfer_using_shim::transfer_using_shim};
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct TransferNodesPayload {
-	nodes: Vec<NodeInfoForTransfer>,
-}
-lazy_static! {
-    static ref TRANSFER_NODES_PAYLOAD_SCHEMA_JSON: JSONValue = json!({
-        "properties": {
-            "nodes": {
-                "items": {
-                    "properties": {
-                        "nodeID": {"type": "string"},
-                        "transferType": {"type": "string"},
-                        "clone_newType": {"type": "string"},
-                        "clone_keepChildren": {"type": "boolean"},
-                        "clone_keepTags": {"type": "boolean"},
+wrap_slow_macros!{
 
-                        "newParentID": {"type": "string"},
-                        "childGroup": {"type": "string"},
-                        "claimForm": {"type": "string"},
-                        "argumentPolarity": {"type": "string"},
-                    },
-                    "required": [
-                        "transferType",
-                        //"clone_newType", "clone_keepChildren",
-                        "childGroup",
-                    ],
-                },
-            },
-        },
-        "required": ["nodes"],
-    });
-    static ref TRANSFER_NODES_PAYLOAD_SCHEMA_JSON_COMPILED: JSONSchema = JSONSchema::compile(&TRANSFER_NODES_PAYLOAD_SCHEMA_JSON).expect("A valid schema");
+#[derive(Default)] pub struct MutationShard_TransferNodes;
+#[Object] impl MutationShard_TransferNodes {
+	/// This is a higher-level wrapper around `addNodeLink`, which handles unlinking from old parent (if requested), etc.
+	async fn transfer_nodes(&self, gql_ctx: &async_graphql::Context<'_>, input: TransferNodesInput, only_validate: Option<bool>) -> Result<TransferNodesResult, GQLError> {
+		command_boilerplate!(gql_ctx, input, only_validate, transfer_nodes);
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(InputObject, Deserialize)]
+pub struct TransferNodesInput {
+	pub mapID: Option<String>,
+	pub nodes: Vec<NodeInfoForTransfer>,
+}
+
+#[derive(InputObject, Deserialize)]
 pub struct NodeInfoForTransfer {
-	nodeID: Option<String>, // can be null, if transfer is of type "shim"
-	oldParentID: Option<String>,
-	transferType: TransferType,
-	clone_newType: NodeType,
-	clone_keepChildren: bool,
-	clone_keepTags: NodeTagCloneType,
+	pub nodeID: Option<String>, // can be null, if transfer is of type "shim"
+	pub oldParentID: Option<String>,
+	pub transferType: TransferType,
+    #[graphql(name = "clone_newType")]
+	pub clone_newType: NodeType,
+    #[graphql(name = "clone_keepChildren")]
+	pub clone_keepChildren: bool,
+    #[graphql(name = "clone_keepTags")]
+	pub clone_keepTags: NodeTagCloneType,
 
-	newParentID: Option<String>,
-	childGroup: ChildGroup,
-	claimForm: Option<ClaimForm>,
-	argumentPolarity: Option<Polarity>,
+	pub newParentID: Option<String>,
+	pub newAccessPolicyID: Option<String>,
+	pub childGroup: ChildGroup,
+	pub claimForm: Option<ClaimForm>,
+	pub argumentPolarity: Option<Polarity>,
 }
 
-// todo: expand this from just node-cloning, to also work for node moving/linking (as intended)
-pub async fn transfer_nodes(gql_ctx: &async_graphql::Context<'_>, payload_raw: JSONValue) -> Result<GenericMutation_Result, Error> {
-    let output: BasicOutput = TRANSFER_NODES_PAYLOAD_SCHEMA_JSON_COMPILED.apply(&payload_raw).basic();
-    if !output.is_valid() {
-        let output_json = serde_json::to_value(output).expect("Failed to serialize output");
-        return Err(anyhow!(output_json));
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
+pub enum TransferType {
+	#[graphql(name = "ignore")] ignore,
+	#[graphql(name = "move")] r#move,
+	#[graphql(name = "link")] link,
+	#[graphql(name = "clone")] clone,
+	#[graphql(name = "shim")] shim,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
+pub enum NodeTagCloneType {
+	#[graphql(name = "minimal")] minimal,
+	#[graphql(name = "basics")] basics,
+	//#[graphql(name = "full")] full,
+}
+
+#[derive(SimpleObject, Debug)]
+pub struct TransferNodesResult {
+	#[graphql(name = "_useTypenameFieldInstead")] __: String,
+}
+
+}
+
+pub enum TransferResult {
+    Ignore,
+    Clone(TransferResult_Clone),
+    Shim(TransferResult_Shim),
+}
+
+pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, input: TransferNodesInput, _extras: NoExtras) -> Result<TransferNodesResult, Error> {
+	let TransferNodesInput { mapID, nodes } = input;
+
+    let mut transfer_results: Vec<TransferResult> = vec![];
+	
+	for (i, transfer) in nodes.iter().enumerate() {
+        //let _prev_transfer = nodes.get(i - 1);
+        //let prev_transfer_result = i.checked_sub(1).and_then(|i| transfer_results.get(i));
+        let prev_transfer_result = if i == 0 { None } else { transfer_results.get(i - 1) };
+        
+        let node_id = transfer.nodeID.as_ref().ok_or(anyhow!("For any transfer type, nodeID must be specified."))?;
+
+        let result = match transfer.transferType {
+            TransferType::ignore => TransferResult::Ignore,
+            TransferType::r#move => bail!("Not yet implemented."),
+            TransferType::link => bail!("Not yet implemented."),
+            TransferType::clone => transfer_using_clone(ctx, actor, transfer, prev_transfer_result, node_id).await?,
+            TransferType::shim => transfer_using_shim(ctx, actor, transfer, prev_transfer_result, node_id).await?,
+        };
+        transfer_results.push(result);
     }
-    let payload: TransferNodesPayload = serde_json::from_value(payload_raw)?;
+	
+	increment_map_edits_if_valid(&ctx, mapID).await?;
 
-    let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-    let tx = start_transaction(&mut anchor, gql_ctx).await?;
-    let ctx = AccessorContext::new(tx);
-
-    for (i, node_info) in payload.nodes.iter().enumerate() {
-        let _prev_node_info = payload.nodes.get(i - 1);
-        match node_info.transferType.as_str() {
-            "ignore" => {},
-            "move" => {
-                return Err(anyhow!("Not yet implemented."));
-                // todo
-            },
-            "link" => {
-                return Err(anyhow!("Not yet implemented."));
-                // todo
-            },
-            "clone" => {
-                //println!("Found clone transfer:{node:?}");
-                let node_id = node_info.nodeID.as_ref().ok_or(anyhow!("For transfer of type \"clone\", nodeID must be specified."))?;
-                let node = get_node(&ctx, node_id).await?;
-            },
-            "shim" => {
-                return Err(anyhow!("Not yet implemented."));
-                // todo
-            },
-            transfer_type => {
-                return Err(anyhow!("Invalid transfer type \"{transfer_type}\"."));
-            },
-        }
-    }
-
-    Ok(GenericMutation_Result {
-        message: "Command completed successfully.".to_owned(),
-    })
+	Ok(TransferNodesResult { __: gql_placeholder() })
 }

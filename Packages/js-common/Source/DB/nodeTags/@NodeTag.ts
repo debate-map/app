@@ -2,6 +2,7 @@ import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} fro
 import {GetValues_ForSchema, ModifyString, CE, Assert, Clone} from "web-vcore/nm/js-vextensions.js";
 import {Polarity} from "../nodes/@Node.js";
 import {NodeTagCloneType} from "../../Commands.js";
+import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
 @MGLClass({table: "nodeTags"})
 export class NodeTag {
@@ -34,37 +35,27 @@ export class NodeTag {
 	// ==========
 
 	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({
-		//$gqlType: "TagComp_Labels",
-		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
-		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
-		$ref: "TagComp_Labels",
-	}, {opt: true})
+	@Field({$ref: "TagComp_Labels", ...MarkerForNonScalarField()}, {opt: true})
 	labels?: TagComp_Labels;
 
 	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: "TagComp_MirrorChildrenFromXToY"}, {opt: true})
+	@Field({$ref: "TagComp_MirrorChildrenFromXToY", ...MarkerForNonScalarField()}, {opt: true})
 	mirrorChildrenFromXToY?: TagComp_MirrorChildrenFromXToY;
 
 	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: "TagComp_XIsExtendedByY"}, {opt: true})
+	@Field({$ref: "TagComp_XIsExtendedByY", ...MarkerForNonScalarField()}, {opt: true})
 	xIsExtendedByY?: TagComp_XIsExtendedByY;
 
 	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: "TagComp_MutuallyExclusiveGroup"}, {opt: true})
+	@Field({$ref: "TagComp_MutuallyExclusiveGroup", ...MarkerForNonScalarField()}, {opt: true})
 	mutuallyExclusiveGroup?: TagComp_MutuallyExclusiveGroup;
 
 	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({$ref: "TagComp_RestrictMirroringOfX"}, {opt: true})
+	@Field({$ref: "TagComp_RestrictMirroringOfX", ...MarkerForNonScalarField()}, {opt: true})
 	restrictMirroringOfX?: TagComp_RestrictMirroringOfX;
 
 	@DB((t, n)=>t.jsonb(n).nullable())
-	@Field({
-		//$gqlType: "TagComp_CloneHistory",
-		// let mobx-graphlink know that this field needs to have its subfields included/expanded, in queries
-		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false, // env-flag is temp-fix for usage in app-server-js; see ecosystem.config.js
-		$ref: "TagComp_CloneHistory",
-	}, {opt: true})
+	@Field({$ref: "TagComp_CloneHistory", ...MarkerForNonScalarField()}, {opt: true})
 	cloneHistory?: TagComp_CloneHistory;
 }
 export function MaybeCloneAndRetargetNodeTag(tag: NodeTag, cloneType: NodeTagCloneType, oldNodeID: string, newNodeID: string): NodeTag|n {

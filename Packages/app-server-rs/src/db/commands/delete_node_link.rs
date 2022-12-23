@@ -54,7 +54,6 @@ pub struct DeleteNodeLinkExtras {
 
 pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeLinkInput, _extras: NoExtras) -> Result<DeleteNodeLinkResult, Error> {
 	let DeleteNodeLinkInput { mapID, id } = input;
-	let result = DeleteNodeLinkResult { __: gql_placeholder() };
 	
 	/*let child_number_of_parents = get_node_links(ctx, None, Some(&childID)).await?.len();
 	let parent_to_child_links = get_node_links(ctx, Some(&parentID), Some(&childID)).await?;
@@ -83,5 +82,5 @@ pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: De
 
 	increment_map_edits_if_valid(&ctx, mapID).await?;
 
-	Ok(result)
+	Ok(DeleteNodeLinkResult { __: gql_placeholder() })
 }

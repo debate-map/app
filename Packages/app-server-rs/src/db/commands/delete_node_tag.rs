@@ -45,7 +45,6 @@ pub struct DeleteNodeTagResult {
 
 pub async fn delete_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeTagInput, _extras: NoExtras) -> Result<DeleteNodeTagResult, Error> {
 	let DeleteNodeTagInput { id } = input;
-	let result = DeleteNodeTagResult { __: gql_placeholder() };
 	
 	let old_data = get_node_tag(&ctx, &id).await?;
 	//assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
@@ -53,5 +52,5 @@ pub async fn delete_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: Del
 
 	delete_db_entry_by_id(&ctx, "nodeTags".to_owned(), id.to_string()).await?;
 
-	Ok(result)
+	Ok(DeleteNodeTagResult { __: gql_placeholder() })
 }
