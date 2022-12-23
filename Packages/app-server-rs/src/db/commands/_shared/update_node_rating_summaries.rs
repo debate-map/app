@@ -17,7 +17,7 @@ use tracing::info;
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
 use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_update};
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_ratings_::_node_rating_type::{rating_value_is_in_range, get_rating_type_info, NodeRatingType};
 use crate::db::node_ratings::{NodeRatingInput, get_node_ratings, get_node_ratings_base};
 use crate::db::nodes::{get_node, get_node_parents, get_node_children};

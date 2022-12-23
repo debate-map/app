@@ -10,7 +10,7 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::shares::{Share, ShareInput};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;

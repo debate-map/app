@@ -14,7 +14,7 @@ use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder};
 use crate::db::commands::_shared::increment_map_edits::{increment_map_edits, increment_map_edits_if_valid};
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::get_node_links;
 use crate::db::nodes::{get_node, is_root_node, assert_user_can_delete_node};
 use crate::db::users::User;

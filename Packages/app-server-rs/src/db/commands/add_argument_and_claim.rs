@@ -14,7 +14,7 @@ use rust_shared::serde::{Deserialize};
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::NodeLinkInput;
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};

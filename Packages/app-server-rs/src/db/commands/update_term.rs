@@ -13,7 +13,7 @@ use tracing::info;
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
 use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_update};
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::terms::{Term, TermInput, get_term, TermUpdates};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;

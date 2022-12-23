@@ -11,7 +11,7 @@ use rust_shared::serde::{Deserialize};
 use tracing::info;
 
 use crate::db::access_policies::{AccessPolicyInput, AccessPolicy};
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::terms::{Term, TermInput};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;

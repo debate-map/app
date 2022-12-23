@@ -19,7 +19,7 @@ use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::add_node_link::{AddNodeLinkInput, add_node_link};
 use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
 use crate::db::commands::delete_node_link::{self, delete_node_link, DeleteNodeLinkInput};
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, ClaimForm, ChildGroup, Polarity, get_node_links, get_first_link_under_parent, get_highest_order_key_under_parent};
 use crate::db::node_phrasings::NodePhrasing_Embedded;
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};

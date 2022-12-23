@@ -17,7 +17,7 @@ use crate::db::_shared::common_errors::err_should_be_null;
 use crate::db::commands::_command::{command_boilerplate, set_db_entry_by_id_for_struct, tbd};
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
 use crate::db::commands::add_node_revision::{add_node_revision, AddNodeRevisionResult, self, AddNodeRevisionInput, AddNodeRevisionExtras};
-use crate::db::general::sign_in::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
+use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::node_revisions::{NodeRevisionInput, NodeRevision};
 use crate::db::nodes_::_node::{Node, NodeInput};

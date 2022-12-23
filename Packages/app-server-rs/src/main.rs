@@ -50,7 +50,7 @@ use tracing::{info, error, metadata::LevelFilter};
 use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, Layer, util::SubscriberInitExt, filter};
 use dotenv::dotenv;
 
-use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::_sign_in};
+use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::sign_in};
 
 // for testing cargo-check times
 // (in powershell, first run `$env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
@@ -177,8 +177,8 @@ mod db {
     pub mod general {
         pub mod permission_helpers;
         pub mod search;
-        pub mod _sign_in;
-        pub mod sign_in {
+        pub mod sign_in;
+        pub mod sign_in_ {
             pub mod fake_user;
             pub mod jwt_utils;
             pub mod google;
@@ -302,7 +302,7 @@ async fn main() {
     let app = gql::extend_router(app, pool, app_state.clone(), lq_storage.clone()).await;
 
     // add sign-in routes
-    let app = _sign_in::extend_router(app, app_state.clone()).await;
+    let app = sign_in::extend_router(app, app_state.clone()).await;
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app

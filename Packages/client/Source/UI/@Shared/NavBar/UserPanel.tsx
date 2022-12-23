@@ -181,15 +181,15 @@ async function DoSignInFlow(provider: "google" | "dev", username?: string) {
 	const monthInSecs = 2629800;
 	const fetchResult_subscription = apolloClient.subscribe({
 		query: gql`
-			subscription($provider: String!, $jwtDuration: Int!, $preferredUsername: String) {
-				signInStart(provider: $provider, jwtDuration: $jwtDuration, preferredUsername: $preferredUsername) {
+			subscription($input: SignInStartInput!) {
+				signInStart(input: $input) {
 					instructions
 					authLink
 					resultJWT
 				}
 			}
 		`,
-		variables: {provider, jwtDuration: monthInSecs, preferredUsername: username},
+		variables: {input: {provider, jwtDuration: monthInSecs, preferredUsername: username}},
 	});
 	let popupOpened = false;
 	const resultJWT = await new Promise<string>(resolve=>{

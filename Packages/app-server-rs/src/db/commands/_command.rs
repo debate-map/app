@@ -235,7 +235,7 @@ command_boilerplate_post!(ctx, result);
     ($gql_ctx:ident, $input:ident, $ctx:ident, $user_info:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
 		let $ctx = $crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, $gql_ctx).await?;
-		let $user_info = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &$ctx).await?;
+		let $user_info = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &$ctx).await?;
     }
 }
 pub(crate) use command_boilerplate_pre;
@@ -253,7 +253,7 @@ macro_rules! command_boilerplate {
     ($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
 		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, $only_validate).await?;
-		let actor = $crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
+		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
 
 		let result = $command_impl_func(&ctx, &actor, $input, Default::default()).await?;
 
@@ -288,7 +288,7 @@ pub type NoExtras = bool;
 {
     let mut anchor = crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
     let ctx = crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, gql_ctx).await?;
-    let user_info = crate::db::general::sign_in::jwt_utils::get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
+    let user_info = crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 
     let result = command_impl_func(&ctx, input, user_info).await?;
 

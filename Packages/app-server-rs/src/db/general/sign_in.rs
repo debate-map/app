@@ -10,7 +10,7 @@ use oauth2::reqwest::async_http_client;
 use oauth2::{PkceCodeChallenge, RevocationUrl, RedirectUrl, TokenUrl, AuthUrl, Scope, CsrfToken, ClientSecret, ClientId, AuthorizationCode, StandardRevocableToken};
 use oauth2::TokenResponse;
 use rust_shared::anyhow::{Context, anyhow, Error};
-use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
+use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject};
 use futures_util::{Stream, TryStreamExt};
 use rust_shared::axum::response::IntoResponse;
 use rust_shared::axum::{Router, AddExtensionLayer, response};
@@ -32,11 +32,11 @@ use tracing::{info, error, warn};
 use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
 use crate::db::_general::GenericMutation_Result;
-use crate::db::general::sign_in::fake_user::username_to_fake_user_data;
+use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
 use crate::db::commands::_command::set_db_entry_by_id_for_struct;
-use crate::db::general::sign_in::google::{store_user_data_for_google_sign_in, GoogleUserInfoResult};
-use crate::db::general::sign_in::jwt_utils::get_or_create_jwt_key_hs256;
+use crate::db::general::sign_in_::google::{store_user_data_for_google_sign_in, GoogleUserInfoResult};
+use crate::db::general::sign_in_::jwt_utils::get_or_create_jwt_key_hs256;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
@@ -47,7 +47,7 @@ use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender, JWTDuration};
 
-use super::sign_in::jwt_utils::UserInfoForJWT;
+use super::sign_in_::jwt_utils::UserInfoForJWT;
 
 async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req: Request<Body>) -> impl IntoResponse {
     let uri = req.uri();
@@ -70,6 +70,13 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateWrapper) -> Rou
 }
 
 wrap_slow_macros!{
+
+#[derive(InputObject, Deserialize)]
+pub struct SignInStartInput {
+	pub provider: String,
+    pub jwtDuration: i64,
+    pub preferredUsername: Option<String>,
+}
 
 struct SignInStart_Result {
     auth_link: Option<String>,
@@ -97,7 +104,9 @@ impl SubscriptionShard_SignIn {
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google", "dev"]
     /// * `jwtDuration` - How long until the generated JWT should expire, in seconds. [i64]
     /// * `preferredUsername` - Used by the "dev" provider as part of the constructed user-data. [string]
-    async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, provider: String, jwtDuration: i64, preferredUsername: Option<String>) -> impl Stream<Item = Result<SignInStart_Result, SubError>> + 'a {
+    async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: SignInStartInput) -> impl Stream<Item = Result<SignInStart_Result, SubError>> + 'a {
+        let SignInStartInput { provider, jwtDuration, preferredUsername } = input;
+        
         let google_client_id = ClientId::new(env::var("CLIENT_ID").expect("Missing the CLIENT_ID environment variable."));
         let google_client_secret = ClientSecret::new(env::var("CLIENT_SECRET").expect("Missing the CLIENT_SECRET environment variable."));
         let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string()).expect("Invalid authorization endpoint URL");
