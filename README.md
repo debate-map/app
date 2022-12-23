@@ -33,7 +33,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
 * [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md)
 * [Node revisions](https://github.com/debate-map/app/tree/master/Docs/NodeRevisions.md)
-* [DB migration notes](https://github.com/debate-map/app/tree/master/Docs/DBMigrationNotes.md)
+* [Migration notes](https://github.com/debate-map/app/tree/master/Docs/MigrationNotes.md)
 * [Package code-syncing](https://github.com/debate-map/app/tree/master/Docs/PackageCodeSyncing.md)
 
 # Packages
