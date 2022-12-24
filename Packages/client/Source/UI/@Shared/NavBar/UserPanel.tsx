@@ -2,15 +2,14 @@ import {Assert, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Div, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ES, InfoButton, Link, Observer} from "web-vcore";
+import {ES, GetCurrentURL, InfoButton, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
-import {apolloClient, GetAppServerURL, RefreshUserInfoFromStoredJWT} from "Utils/LibIntegrations/Apollo";
+import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
-
-// todo: MS when "debate-map-user-jwt" token expires, the codebase and UI respond appropriately (ie. showing user as not signed-in)
+import {RefreshUserInfoFromStoredJWT} from "Utils/AutoRuns/UserInfoCheck";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -24,12 +23,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 					background: liveSkin.NavBarPanelBackgroundColor().css(), border: liveSkin.OverlayBorder(),
 				}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
-
-					<Row mt={10}>Rust backend:</Row>
-					<SignInPanel backend="rs"/>
-
-					<Row mt={10}>JS backend:</Row>
-					<SignInPanel backend="js"/>
+					<SignInPanel/>
 				</Column>
 			);
 		}
@@ -53,16 +47,10 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<Button text="Edit profile" style={{width: 110}} />
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 110}} onClick={()=>{
-						//window.location.href = GetAppServerURL("/signOut");
 						localStorage.removeItem("debate-map-user-jwt");
-						//window.location.reload();
 						RefreshUserInfoFromStoredJWT();
 					}} />
 				</Row>
-
-				{/* even when "signed in", still show the js-backend sign-in panel, since the "are we signed-in" logic is based on the rs backend */}
-				<Row mt={10}>JS backend:</Row>
-				<SignInPanel backend="js"/>
 			</Column>
 		);
 	}
@@ -75,7 +63,7 @@ export function ShowSignInPopup() {
 			return (
 				<div>
 					<div>Takes under 30 seconds.</div>
-					<SignInPanel style={{marginTop: 5}} onSignIn={()=>boxController.Close()} backend="rs"/>
+					<SignInPanel style={{marginTop: 5}} onSignIn={()=>boxController.Close()}/>
 				</div>
 			);
 		},
@@ -83,28 +71,14 @@ export function ShowSignInPopup() {
 }
 
 @SimpleShouldUpdate
-export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void, backend: "rs" | "js"}, {username: string}> {
+export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {username: string}> {
 	static initialState = {username: "Dev1"};
 	render() {
-		const {style, onSignIn, backend} = this.props;
+		const {style, onSignIn} = this.props;
 		const {username} = this.state;
 		return (
-			<Column style={ES(style, backend == "js" && {background: "orange"})}>
+			<Column style={ES(style)}>
 				{/*<SignInButton provider="google" text="Sign in with Google" onSignIn={onSignIn}/>*/}
-				{/*<div id="g_id_onload"
-					data-client_id={googleClientID}
-					//data-login_uri="https://your.domain/your_login_endpoint"
-					data-callback="handleCredentialResponse"
-					data-auto_prompt="false">
-				</div>
-				<div className="g_id_signin"
-					data-type="standard"
-					data-size="large"
-					data-theme="outline"
-					data-text="sign_in_with"
-					data-shape="rectangular"
-					data-logo_alignment="left">
-				</div>*/}
 				<div ref={c=>{
 					if (!c) return;
 					if (g.google == null) {
@@ -116,23 +90,12 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void, bac
 					const options: GsiButtonConfiguration = {};
 					//g.google.accounts.id.renderButton(c, options);
 					g.google.accounts.id.renderButton(c, options, async()=>{
-						if (backend == "js") {
-							// rather than using client-side retrieval of access-token, use server-side retrieval (it's safer)
-							//window.location.href = `${window.location.origin}/auth/google`;
-							//window.location.href = GetAppServerURL("/auth/google");
-							// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
-							// todo: make sure the access-token data that server retrieves is never made accessible to frontend code (eg. use cookies, and set to http-only)
-
-							OpenSignInPopup(GetAppServerURL("/auth/google"));
-							return;
-						}
-
 						await DoSignInFlow("google");
 					});
 				}}/>
-				{/* <SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
+				{/*<SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
-				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/> */}
+				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/>*/}
 
 				{g.DB == "dev" &&
 				<Column style={{width: 300}}>
@@ -147,30 +110,6 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void, bac
 						<Text>Username:</Text>
 						<TextInput ml={5} style={{flex: 1}} value={username} onChange={val=>this.SetState({username: val})}/>
 						<Button ml={5} text="Sign in" onClick={async()=>{
-							if (backend == "js") {
-								/*await fetch(GetAppServerURL("/auth/dev"), {
-									method: "POST",
-									//method: "GET",
-									headers: {
-										"Content-Type": "application/json",
-									},
-									body: JSON.stringify({username, password: "[dev-mode, so password is ignored]"}),
-								});*/
-
-								// we have to use a temp-form, in order to make the POST request "be a full page load", so that CORS restrictions don't apply
-								const tempForm = document.createElement("form");
-								Object.assign(tempForm, {method: "POST", action: GetAppServerURL("/auth/dev")});
-								const form_username = document.createElement("input");
-								tempForm.appendChild(form_username);
-								Object.assign(form_username, {type: "text", name: "username", value: username});
-								const form_password = document.createElement("input");
-								tempForm.appendChild(form_password);
-								Object.assign(form_password, {type: "password", name: "password", value: "[dev-mode, so password is ignored]"});
-								document.body.appendChild(tempForm); // must temporarily connect, in order to submit
-								tempForm.submit();
-								return;
-							}
-
 							await DoSignInFlow("dev", username);
 						}}/>
 					</Row>
@@ -182,6 +121,7 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void, bac
 
 async function DoSignInFlow(provider: "google" | "dev", username?: string) {
 	const monthInSecs = 2629800;
+	//const monthInSecs = GetCurrentURL().GetQueryVar("test1")?.ToInt() ?? 2629800;
 	const fetchResult_subscription = apolloClient.subscribe({
 		query: gql`
 			subscription($input: SignInStartInput!) {
@@ -268,31 +208,3 @@ export const googleID_handleCredentialResponse = async(response: GoogleID_Creden
 		}),
 	});
 };
-
-/*@SimpleShouldUpdate
-// @ApplyBasicStyles
-class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twitter" | "github", text: string, style?, onSignIn?: ()=>void}, {loading: boolean}> {
-	render() {
-		const {provider, text, style, onSignIn} = this.props;
-		const {loading} = this.state;
-		return (
-			// <SocialButton social={provider} text={text} loading={loading} btnProps={{
-			//	style: E({outline: "none"}, BasicStyles(this.props), style),
-			//	onClick: async ()=> {
-			<Button text={text} style={E({outline: "none"}, BasicStyles(this.props), style)} onClick={async()=>{
-				this.SetState({loading: true});
-				try {
-					const account = await graph.LogIn(/*{provider, type: "popup"}*#/);
-					//const account = await store.firelink.LogIn({provider, type: "popup"});
-					if (this.mounted == false) return;
-					this.SetState({loading: false});
-					if (onSignIn) onSignIn();
-				} catch (ex) {
-					this.SetState({loading: false});
-					if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
-					HandleError(ex);
-				}
-			}}/>
-		);
-	}
-}*/

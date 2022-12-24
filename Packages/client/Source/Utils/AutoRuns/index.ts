@@ -8,3 +8,4 @@ import "./LoadShare.js";
 import "./PageViewRecorder.js";
 import "./SelectNodeByFragmentPath.js";
 import "./TimelineNodeFocuser.js";
+import "./UserInfoCheck.js";

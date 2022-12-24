@@ -23,7 +23,7 @@ use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
 use rust_shared::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::{get_uri_params, k8s_dev};
-use rust_shared::indoc::indoc;
+use rust_shared::indoc::{indoc, formatdoc};
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
@@ -59,7 +59,10 @@ async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req:
         error!("Got error while broadcasting callback-data:{}", err);
         return response::Html(format!("Got error while broadcasting callback-data. Please refresh page to try again."));
     }
-    response::Html(format!("Data has been broadcast through the sign-in-message channel... (you can close this page now)"))
+    response::Html(formatdoc!(r#"<html>
+        <head><script>window.close();</script></head>
+        <body><div>Data has been broadcast through the sign-in-message channel... (you can close this page now)</div></body>
+    </html>"#))
 }
 
 pub async fn extend_router(app: Router, storage_wrapper: AppStateWrapper) -> Router {
