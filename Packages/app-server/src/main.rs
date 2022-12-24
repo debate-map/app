@@ -52,167 +52,13 @@ use dotenv::dotenv;
 
 use crate::{store::{live_queries::{LQStorage}, storage::{AppStateWrapper, AppState}}, utils::{axum_logging_layer::print_request_response}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::sign_in};
 
-// for testing cargo-check times
-// (in powershell, first run `$env:FOR_RUST_ANALYZER="1"; $env:STRIP_ASYNC_GRAPHQL="1";`, then run `cargo check` for future calls in that terminal)
-pub fn test1() {
-    println!("123");
-}
-
+// folders (we only use "folder_x/mod.rs" files one-layer deep; keeps the mod-tree structure out of main.rs, while avoiding tons of mod.rs files littering the codebase)
+mod db;
+mod links;
+mod store;
+mod utils;
+// files
 mod gql;
-mod links {
-    pub mod monitor_backend_link;
-    pub mod pgclient;
-}
-mod store {
-    pub mod storage;
-    pub mod live_queries;
-    pub mod live_queries_ {
-        pub mod lq_batch;
-        pub mod lq_batch_ {
-            pub mod sql_generator;
-        }
-        pub mod lq_group;
-        pub mod lq_instance;
-        pub mod lq_param;
-    }
-}
-mod utils {
-    pub mod axum_logging_layer;
-    pub mod db {
-        pub mod accessors;
-        pub mod agql_ext {
-            pub mod gql_general_extension;
-            pub mod gql_result_stream;
-            pub mod gql_utils;
-        }
-        pub mod filter;
-        pub mod sql_fragment;
-        pub mod handlers;
-        pub mod pg_stream_parsing;
-        pub mod pg_row_to_json;
-        pub mod queries;
-        pub mod sql_ident;
-        pub mod sql_param;
-        pub mod transactions;
-    }
-    pub mod general {
-        pub mod data_anchor;
-        pub mod general;
-        pub mod logging;
-        pub mod mem_alloc;
-        pub mod order_key;
-    }
-    pub mod http;
-    pub mod mtx {
-        pub mod mtx;
-    }
-    pub mod type_aliases;
-    pub mod quick_tests {
-        pub mod quick1;
-    }
-}
-mod db {
-    pub mod _shared {
-        pub mod attachments;
-        pub mod common_errors;
-        pub mod path_finder;
-    }
-    pub mod commands {
-        pub mod _shared {
-            pub mod add_node;
-            pub mod increment_map_edits;
-            pub mod jsonb_utils;
-            pub mod rating_processor;
-            pub mod update_node_rating_summaries;
-        }
-        pub mod transfer_nodes_ {
-            pub mod transfer_using_clone;
-            pub mod transfer_using_shim;
-        }
-        pub mod _command;
-        pub mod add_access_policy;
-        pub mod add_argument_and_claim;
-        pub mod add_child_node;
-        pub mod add_map;
-        pub mod add_media;
-        pub mod add_node_link;
-        pub mod add_node_revision;
-        pub mod add_node_phrasing;
-        pub mod add_node_tag;
-        pub mod add_share;
-        pub mod add_term;
-        pub mod clone_subtree;
-        pub mod delete_access_policy;
-        pub mod delete_argument;
-        pub mod delete_map;
-        pub mod delete_media;
-        pub mod delete_node;
-        pub mod delete_node_link;
-        pub mod delete_node_phrasing;
-        pub mod delete_node_rating;
-        pub mod delete_node_tag;
-        pub mod delete_share;
-        pub mod delete_term;
-        pub mod link_node;
-        pub mod set_node_is_multi_premise_argument;
-        pub mod set_node_rating;
-        pub mod set_user_follow_data;
-        pub mod transfer_nodes;
-        pub mod update_access_policy;
-        pub mod update_map;
-        pub mod update_media;
-        pub mod update_node;
-        pub mod update_node_link;
-        pub mod update_node_phrasing;
-        pub mod update_node_tag;
-        pub mod update_share;
-        pub mod update_term;
-        pub mod update_user;
-        pub mod update_user_hidden;
-        pub mod refresh_lq_data;
-        //pub mod transfer_nodes;
-    }
-    pub mod _general;
-    pub mod general {
-        pub mod permission_helpers;
-        pub mod search;
-        pub mod sign_in;
-        pub mod sign_in_ {
-            pub mod fake_user;
-            pub mod jwt_utils;
-            pub mod google;
-        }
-        pub mod subtree_old;
-        pub mod subtree_collector_old;
-        pub mod subtree;
-        pub mod subtree_collector;
-    }
-    pub mod nodes_ {
-        pub mod _node;
-        pub mod _node_type;
-    }
-    pub mod node_ratings_ {
-        pub mod _node_rating_type;
-    }
-    pub mod users;
-    pub mod user_hiddens;
-    pub mod global_data;
-    pub mod maps;
-    pub mod terms;
-    pub mod access_policies;
-    pub mod medias;
-    pub mod command_runs;
-    pub mod feedback_proposals;
-    pub mod feedback_user_infos;
-    pub mod map_node_edits;
-    pub mod node_links;
-    pub mod node_phrasings;
-    pub mod node_ratings;
-    pub mod node_revisions;
-    pub mod node_tags;
-    pub mod nodes;
-    pub mod shares;
-}
 
 #[global_allocator]
 static GLOBAL: Trallocator<System> = Trallocator::new(System);
@@ -259,22 +105,17 @@ fn set_up_globals() /*-> (ABSender<LogEntry>, ABReceiver<LogEntry>)*/ {
 
     dotenv().ok(); // load the environment variables from the ".env" file
 
-    /*let (mut s1, r1): (ABSender<LogEntry>, ABReceiver<LogEntry>) = async_broadcast::broadcast(10000);
-    s1.set_overflow(true);
-    set_up_logging(s1.clone());
-    (s1, r1)*/
     set_up_logging();
 }
 
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    //let (log_entry_sender, log_entry_receiver) = set_up_globals();
     set_up_globals();
     println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
     GLOBAL.reset();
-    info!("memory used: {} bytes", GLOBAL.get());
+    info!("Memory used: {} bytes", GLOBAL.get());
 
     let app_state = AppState::new_in_wrapper();
     //let storage = Storage::<'static>::default();
