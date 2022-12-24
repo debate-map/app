@@ -43,17 +43,14 @@ spec:
     # origin/ovh
     - {name: https-ovh, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     - {name: https-ovh-as, hostname: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
-    - {name: https-ovh-asjs, hostname: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     - {name: https-ovh-monitor, hostname: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     # debating.app
     - {name: https-d1, hostname: debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     - {name: https-d1-as, hostname: app-server.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
-    - {name: https-d1-asjs, hostname: app-server-js.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     - {name: https-d1-monitor, hostname: monitor.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     # debates.app
     - {name: https-d2, hostname: debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     - {name: https-d2-as, hostname: app-server.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
-    - {name: https-d2-asjs, hostname: app-server-js.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
     - {name: https-d2-monitor, hostname: monitor.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod8, kind: Secret, group: core}]}}
 
 
@@ -72,15 +69,12 @@ spec:
 #     # origin/ovh
 #     - {name: https-ovh, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-ovh, kind: Secret, group: core}]}}
 #     - {name: https-ovh-as, hostname: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-ovh-as, kind: Secret, group: core}]}}
-#     - {name: https-ovh-asjs, hostname: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-ovh-asjs, kind: Secret, group: core}]}}
 #     - {name: https-ovh-monitor, hostname: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-ovh-monitor, kind: Secret, group: core}]}}
 #     # debating.app
 #     - {name: https-d1, hostname: debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1, kind: Secret, group: core}]}}
 #     - {name: https-d1-as, hostname: app-server.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1-as, kind: Secret, group: core}]}}
-#     - {name: https-d1-asjs, hostname: app-server-js.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1-asjs, kind: Secret, group: core}]}}
 #     - {name: https-d1-monitor, hostname: monitor.debating.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1-monitor, kind: Secret, group: core}]}}
 #     # debates.app
 #     - {name: https-d2, hostname: debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2, kind: Secret, group: core}]}}
 #     - {name: https-d2-as, hostname: app-server.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2-as, kind: Secret, group: core}]}}
-#     - {name: https-d2-asjs, hostname: app-server-js.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2-asjs, kind: Secret, group: core}]}}
 #     - {name: https-d2-monitor, hostname: monitor.debates.app, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2-monitor, kind: Secret, group: core}]}}

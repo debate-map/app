@@ -1,6 +1,6 @@
 # Debate Map (Deploy)
 
-This subrepo/package is for deployment-related configuration and scripts. (other than the generation of the Docker image file, which is currently handled by the "app-server" package)
+This subrepo/package is for deployment-related configuration and scripts.
 
 ## Guide modules
 

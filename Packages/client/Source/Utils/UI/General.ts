@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import katex from "katex";
 import {MouseEvent} from "react";
 
-// expose katex on window, for use by $node.ts (in dm-app-server shared-code, when running on client)
+// expose katex on window, for use by $node.ts (in js-common's shared-code, when running on client)
 G({katex});
 
 // todo: probably remove, since outdated

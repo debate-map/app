@@ -179,7 +179,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWra
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        .route("/graphiql-new", get(graphiql)) // todo: rename this to just graphiql, once app-server-js is retired
+        .route("/graphiql", get(graphiql))
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
             // approach 1 (using standard routing functions)

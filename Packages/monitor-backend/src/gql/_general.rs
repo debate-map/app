@@ -170,7 +170,7 @@ pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {
     // supply "true", to ignore pods that are already terminating [edit: this doesn't actually work, because terminating pods still show up as "running"; see below for working fix, through use of creation-time field]
     let k8s_pods = get_k8s_pod_basic_infos("default", true).await?;
     info!("Got k8s_pods: {:?}", k8s_pods);
-    let app_server_pod_info = k8s_pods.iter().filter(|a| a.name.starts_with("dm-app-server-rs-"))
+    let app_server_pod_info = k8s_pods.iter().filter(|a| a.name.starts_with("dm-app-server-"))
         .sorted_by_key(|a| &a.creation_time_str).last() // sort by creation-time, then find last (this way we kill the most recent, if multiple pod matches exist)
         .ok_or(anyhow!("App-server pod not found in list of active pods."))?.to_owned();
 

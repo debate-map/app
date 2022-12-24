@@ -1,5 +1,4 @@
 # default all files under "Packages" to being excluded... (keep this block the same in all rust-package "template.dockerignore" files)
-Packages/app-server/*
 Packages/app-server-rs/*
 Packages/client/*
 Packages/deploy/*

@@ -58,11 +58,6 @@ impl GetConnectionID_Result {
         })
     }*/
 
-    // todo: move this to an appropriate location (make some structuring similar to the Command system in app-server-js)
-    /*async fn transferNodes(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
-        let result = transfer_nodes(ctx, payload).await?;
-        Ok(result)
-    }*/
     async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
         let result = refresh_lq_data(ctx, payload).await?;
         Ok(result)
@@ -133,7 +128,7 @@ impl SubscriptionShard_General {
 
 }
 
-async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<String>, Error> {
+/*async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<String>, Error> {
     let mut user_id = None;
     
     let client_to_asjs = HyperClient::new();
@@ -166,4 +161,4 @@ async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<
     }
 
     Ok(user_id)
-}
+}*/

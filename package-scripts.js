@@ -60,7 +60,7 @@ Object.assign(scripts, {
 	},
 	jsCommon: {
 		// helps for spotting typescript errors in the "Packages/js-common" (client.dev script can work too, but it's nice to have one just for errors in "common")
-		// (not really useful anymore; just use app-server.dev instead)
+		// (not really useful anymore; just use [edit: now non-existent] app-server.dev instead)
 		//tsc: "cd Packages/js-common && tsc --noEmit",
 		tsc: "tsc --noEmit --project Packages/js-common/tsconfig.json", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 	},
@@ -109,7 +109,6 @@ const GetPodName_DB = context=>{
 };
 const GetPodName_WebServer = context=>GetPodInfos(context, appNamespace, ["app=dm-web-server"])[0].name;
 const GetPodName_AppServerRS = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server-rs"])[0].name;
-const GetPodName_AppServerJS = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server-js"])[0].name;
 
 /** Gets the k8s context that is selected as the "current" one, in Docker Desktop. */
 function K8sContext_Current() {
@@ -205,9 +204,6 @@ Object.assign(scripts, {
 		}),
 		"app-server-rs": Dynamic(()=>{
 			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerRS(commandArgs[0])} -c dm-app-server-rs -- ${startBestShellCmd}`;
-		}),
-		"app-server-js": Dynamic(()=>{
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerJS(commandArgs[0])} -c dm-app-server-js -- ${startBestShellCmd}`;
 		}),
 
 		etcd_dumpAsJSON: Dynamic(()=>{
@@ -441,26 +437,6 @@ function ImportPGUserSecretAsEnvVars(context) {
 }
 
 Object.assign(scripts, {
-	"app-server": {
-		// first terminal
-		//dev: "cd Packages/app-server && tsc --build --watch",
-		dev: "tsc --build --watch Packages/app-server/tsconfig.json", // must do this way, else tsc output has "../js-common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
-
-		// second terminal
-		run: GetStartServerCommand(),
-
-		//dockerBuild: "cross-env DOCKER_BUILDKIT=1 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
-		dockerBuild: `${PrepDockerCmd()} docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .`,
-		//dockerBuild: "xcopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
-		// using robocopy works, but it's not much faster, if at all; seems slowdown is throughout the yarn install process (~3 minutes in docker, ~1s in Windows :/)
-		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
-		//dockerBuild: "robocopy \"../../@Modules/web-vcore/Main/.yarn/cache\" \".yarn/cache2\" /s /e && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .",
-		//dockerBuild: "robocopy \"node_modules\" \".yarn/test1\" /s /e /NFL /NDL /NJH /NJS /nc /ns /np && docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .", // this takes even longer than yarn install...
-		//dockerBuild: "tar -czh . | docker build -",
-		dockerBuild_fullLog: `${PrepDockerCmd()} cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .`, // variant which preserves complete log (may increase build time)
-		dockerBuild_ignoreCache: `${PrepDockerCmd()} docker build --no-cache -f ./Packages/app-server/Dockerfile -t dm-app-server-direct .`, // with cache disabled
-		dockerBuild_gitlab: `${PrepDockerCmd()} docker build -f ./Packages/app-server/Dockerfile -t registry.gitlab.com/venryx/debate-map .`,
-	},
 	"web-server": {
 		dockerBuild: `${PrepDockerCmd()} docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct .`,
 		dockerBuild_fullLog: `${PrepDockerCmd()} cross-env DOCKER_BUILDKIT=0 docker build -f ./Packages/web-server/Dockerfile -t dm-web-server-direct .`, // variant which preserves complete log (may increase build time)
@@ -509,31 +485,7 @@ Object.assign(scripts, {
 			const psqlProcess = StartPSQLInK8s(K8sContext_Arg(), database, {stdio: "inherit"});
 		}),
 
-		// old (using knex to directly connect)
-		// ==========
-		// db-shape and such
-		/*buildInitDBScript: GetBuildInitDBScriptCommand(false),
-		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
-
-		// db setup (old approach, using knex to send commands)
-		//initDB: "psql -f ./Packages/app-server/Scripts/InitDB.sql debate-map",
-		//initDB: TSScript("app-server", "Scripts/InitDB.ts"),
-		// init-db, base (without env-vars set, this controls port-5432/native/non-k8s postgres instance -- which is not recommended)
-		initDB: TSScript({pkg: "app-server"}, "Scripts/KnexWrapper.js", "initDB"),
-		initDB_freshScript: `nps db.buildInitDBScript && nps db.initDB`,
-		// init-db, for k8s postgres instance (standard)
-		initDB_k8s: Dynamic(()=>{
-			ImportPGUserSecretAsEnvVars(K8sContext_Arg_Required());
-			return `${pathToNPMBin("nps.cmd", 0, true, true)} db.initDB`;
-		}),
-		initDB_freshScript_k8s: Dynamic(()=>{
-			ImportPGUserSecretAsEnvVars(K8sContext_Arg_Required());
-			return `${pathToNPMBin("nps.cmd", 0, true, true)} db.initDB_freshScript`;
-		}),*/
-		// ===========
-
-		// new (using psql to run standard .sql files)
-		// ==========
+		// db init/seed commands (using psql to run standard .sql files)
 		buildSeedDBScript: GetBuildSeedDBScriptCommand(),
 		initDB: Dynamic(()=>{
 			// we have to connect to the "postgres" database at first, since the "debate-map" might not exist yet (the @InitDB.sql script will switch to the "debate-map" db once confirmed present)
@@ -555,10 +507,8 @@ Object.assign(scripts, {
 			psqlProcess.stdin.write(`exit\n`);*/
 			execSync(`npm start "db.seedDB ${K8sContext_Arg_Required()}"`, {stdio: "inherit"});
 		}),
-		// ==========
 
 		// db clearing/reset
-		//migrateDBToLatest: TSScript("app-server", "Scripts/KnexWrapper.js", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
 		dcAllDBSessions_nonK8s: `psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';"`,
 		//dcAllDBSessions_k8s: `psql TODO -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = 'debate-map';"`,
@@ -582,22 +532,6 @@ Object.assign(scripts, {
 	},
 });
 
-/*function GetBuildInitDBScriptCommand(watch) {
-	return TSScript({pkg: "app-server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
-		`--classFolders ../../Packages/js-common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
-		`--templateFile ./Scripts/InitDB_Template.ts`,
-		`--outFile ./Scripts/InitDB_Generated.ts`,
-		watch ? "--watch" : "");
-}*/
 function GetBuildSeedDBScriptCommand() {
 	return TSScript({tsConfigPath: "./Scripts/SeedDBGenerator/tsconfig.json"}, `./Scripts/SeedDBGenerator/GenerateSeedDB.ts`);
-}
-
-// if server-start command/flags change, update the entry in "launch.json" as well
-function GetStartServerCommand() {
-	//return TSScript("app-server", "Source/Main.ts");
-	// use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
-	//return TSScript({pkg: "app-server", envStrAdd: "DEV=true"}, "Dist/Main.js");
-
-	return `cd Packages/app-server && node --experimental-specifier-resolution=node ./Dist/Main.js`;
 }

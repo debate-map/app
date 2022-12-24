@@ -7,11 +7,13 @@ const deploysEnabled = {
 	appServer: true,
 };
 
-if (deploysEnabled.sharedBase) {
+/*if (deploysEnabled.sharedBase) {
 	var jsBase_info = DeployPackage("Packages/deploy/@JSBase/Dockerfile", {imageName_base: "dm-js-base"});
 }
 export const jsBase_baseImageName = jsBase_info!.baseImageName;
-export const jsBase_fullImageName = jsBase_info!.fullImageName;
+export const jsBase_fullImageName = jsBase_info!.fullImageName;*/
+
+// todo: probably need to add the rust-base dockerfile here (well, either that or remove the entries below, since they're likely either all needed or all not needed)
 
 if (deploysEnabled.webServer) {
 	var webServer_info = DeployPackage("Packages/web-server/Dockerfile", {imageName_base: "dm-web-server"});

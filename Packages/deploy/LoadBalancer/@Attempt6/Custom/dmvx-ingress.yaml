@@ -32,18 +32,9 @@ spec:
         paths:
           - backend:
               service:
-                name: dm-app-server-rs
+                name: dm-app-server
                 port:
                   number: 5110
-            pathType: ImplementationSpecific
-    - host: app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us
-      http:
-        paths:
-          - backend:
-              service:
-                name: dm-app-server-js
-                port:
-                  number: 5115
             pathType: ImplementationSpecific
     - host: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
@@ -99,18 +90,9 @@ spec:
         paths:
           - backend:
               service:
-                name: dm-app-server-rs
+                name: dm-app-server
                 port:
                   number: 5110
-            pathType: ImplementationSpecific
-    - host: app-server-js.debates.app
-      http:
-        paths:
-          - backend:
-              service:
-                name: dm-app-server-js
-                port:
-                  number: 5115
             pathType: ImplementationSpecific
     - host: monitor.debates.app
       http:

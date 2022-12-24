@@ -398,7 +398,6 @@ AddResourceNamesBatch_IfValid(["traefik-daemon-set", "traefik"])
 #    		"gateway-api-admission:validatingwebhookconfiguration",
 #    		# "route-web-server:httproute",
 #    		# "route-app-server:httproute",
-#    		# "route-app-server-js:httproute",
 #    		# "route-monitor:httproute",
 # 		],
 # 	},

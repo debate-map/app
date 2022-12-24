@@ -53,8 +53,6 @@ Packages/client/Source
 
 Packages/js-common/Source
 
-Packages/app-server/Source
-
 Packages/deploy/**
 !Packages/deploy/package.json
 
@@ -62,8 +60,7 @@ Packages/deploy/**
 # ========== SECTION FROM Packages/XXX/template.dockerignore BELOW ==========
 # ===========================================================================
 
-# default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
-Packages/app-server/*
+# default all files under "Packages" to being excluded... (keep this block the same in all rust-package "template.dockerignore" files)
 Packages/app-server-rs/*
 Packages/client/*
 Packages/deploy/*
@@ -74,6 +71,23 @@ Packages/rust-macros/*
 Packages/rust-shared/*
 Packages/web-server/*
 
-# but re-include these
-!Packages/app-server/**
-!Packages/js-common/**
+# but re-include all Cargo.toml files, in the rust packages (keep this block the same in all "template.dockerignore" files -- well, those in rust packages)
+!Packages/rust-macros/Cargo.toml
+!Packages/rust-shared/Cargo.toml
+!Packages/monitor-backend/Cargo.toml
+!Packages/app-server-rs/Cargo.toml
+!Packages/web-server/Cargo.toml
+
+# and reinclude the shared packages
+!Packages/rust-macros/*
+!Packages/rust-shared/*
+
+# and reinclude this package itself
+!Packages/app-server-rs/*
+
+# we don't care about any of the npm/yarn stuff
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/yarn-lock-for-docker.lock
+**/.yalc

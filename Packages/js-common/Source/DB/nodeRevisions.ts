@@ -5,7 +5,7 @@ import {NodeRevision} from "./nodes/@NodeRevision.js";
 
 export function CleanNodeRevision<T extends(NodeRevision|n)>(source: T): T {
 	if (source != null) {
-		// the phrasing_tsvector field, when stringified, contains unusual unicode characters, which app-server-js is unable to write to the db;
+		// the phrasing_tsvector field, when stringified, contains unusual unicode characters, which app-server is unable to write to the db;
 		// thus, we strip that field at read-time, so we don't accidentally send it later on [it'd be useless to send anyway, since the server overwrites that field itself]
 		delete source.phrasing_tsvector;
 	}

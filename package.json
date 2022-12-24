@@ -8,7 +8,6 @@
   "workspaces": [
     "Packages/client",
     "Packages/js-common",
-    "Packages/app-server",
     "Packages/monitor-client",
     "Packages/deploy",
     ".yalc/*"

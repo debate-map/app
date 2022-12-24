@@ -26,7 +26,6 @@ COPY .yarnrc.yml .
 COPY Others/yarn-lock-for-docker.lock yarn.lock
 COPY Packages/client/package.json Packages/client/package.json
 COPY Packages/js-common/package.json Packages/js-common/package.json
-COPY Packages/app-server/package.json Packages/app-server/package.json
 COPY Packages/deploy/package.json Packages/deploy/package.json
 
 #COPY .yalc/ .yalc/ # don't do it here; apply these as an update after the main install

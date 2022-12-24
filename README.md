@@ -28,7 +28,6 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [**Quick start**](https://github.com/debate-map/app/tree/master/Docs/QuickStart.md) (new devs should start here)
 * [Coding style](https://github.com/debate-map/app/tree/master/Docs/CodingStyle.md)
 * [General conventions](https://github.com/debate-map/app/tree/master/Docs/GeneralConventions.md)
-* [Client/server infrastructure](https://github.com/debate-map/app/tree/master/Docs/ClientServerInfrastructure.md)
 * [Authentication](https://github.com/debate-map/app/tree/master/Docs/Authentication.md)
 * [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
 * [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md)
@@ -41,7 +40,6 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
 * [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (Rust)
 * [app-server-rs](https://github.com/debate-map/app/tree/master/Packages/app-server-rs): Serves database queries and backend commands. (Rust)
-* [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Old version of the app-server, based on [Postgraphile](https://github.com/graphile/postgraphile). (TypeScript, NodeJS) [to be removed]
 * [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. (TypeScript)
 * [monitor-backend](https://github.com/debate-map/app/tree/master/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/master/Packages/monitor-backend#design-goals)). (Rust)
 * [js-common](https://github.com/debate-map/app/tree/master/Packages/js-common): Code shared between the various JS packages. (TypeScript)
@@ -122,18 +120,14 @@ Reasons:
 Local:
 * `localhost:5100`: local (k8s), web-server (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5101`: local (webpack), web-server (`client.dev` must be running)
-* `localhost:5110`: local (k8s), app-server-rs (`backend.[forward/tiltUp]_local` must be running)
-* `localhost:5115`: local (k8s), app-server-js (`backend.[forward/tiltUp]_local` must be running)
-* `localhost:5116`: local (k8s), app-server-js, nodejs-inspector stream (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:5110`: local (k8s), app-server (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5120`: local (k8s), postgres instance (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5130`: local (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5131`: local (webpack), monitor-client (alt web-server) (`monitorClient.dev` must be running)
 
 Remote (private port-forwards/proxies):
 * `localhost:5200`: remote (k8s), web-server (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:5210`: remote (k8s), app-server-rs (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:5215`: remote (k8s), app-server-js (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:5216`: remote (k8s), app-server-js, nodejs-inspector stream, served from kubernetes (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5210`: remote (k8s), app-server (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5220`: remote (k8s), postgres instance (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5230`: remote (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_ovh` must be running)
 
@@ -363,23 +357,7 @@ Notes:
 <!----><a name="continuous-profiling"></a>
 <details><summary><b>[continuous-profiling] How to set up continuous profiling of the NodeJS pods</b></summary>
 
-Note: We use New Relic here, but others could be used.  
-Note: New Relic doesn't, by default, implement actual "continuous profiling"; it may support this as a component however. (will investigate)
-
-* 1\) Create a New Relic account: https://newrelic.com
-* 2\) Create a Kubernetes installation. (I used default settings)
-	* 2.1\) Download the `newrelic-manifest.yaml` file, and place it in the `Packages/deploy/NewRelic` folder.
-	* 2.2\) Proceed; it will take a few minutes, but be patient (without controlling/restarting any pods), and it should eventually start transmitting data to the web console.
-* 3\) Add a NodeJS agent for the app-server pod.
-	* 3.1\) Press "APM -> Add app/agent" from toolbar.
-	* 3.2\) Proceed, and select "manual" for installation type. (manual installation persists past redeploys)
-	* 3.3\) Proceed, setting the name to `app-server`, downloading the configuration file, and placing it in the `Packages/app-server` folder, but with the changes below:
-		* 3.3.1\) Rename the file to `newrelic.cjs` rather than `newrelic.js`.
-	* 3.4\) Let tilt redeploy the app-server pod, then press "See your data" on the New Relic page.
-	* 3.5\) Wait a few minutes; the add-agent page in the New Relic console should eventually say it is receiving data, letting you then view the details.
-
-Troubleshooting:
-* You can try using the [nrdiag tool](https://docs.newrelic.com/docs/new-relic-solutions/solve-common-issues/diagnostics-cli-nrdiag/diagnostics-cli-nrdiag).
+We used to use NewRelic to try to do this, but that was cancelled. Tooling to use for this is "to be decided".
 
 </details>
 
@@ -447,8 +425,7 @@ foreach ($container in $containersToRemove) {
 <details><summary><b>[k8s-ssh] How to ssh into your k8s pods (web-server, app-server, database, etc.)</b></summary>
 
 * For web-server: `npm start ssh.web-server`
-* For app-server-rs: `npm start ssh.app-server-rs`
-* For app-server-js: `npm start ssh.app-server-js`
+* For app-server: `npm start ssh.app-server`
 * For database: `npm start ssh.db`
 * For others: `kubectl exec -it $(kubectl get pod -o name -n NAMESPACE -l LABEL_NAME=LABEL_VALUE) -- bash`
 
@@ -459,7 +436,9 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 <!----><a name="pod-quick-edits"></a>
 <details><summary><b>[pod-quick-edits] How to modify code of running pod quickly</b></summary>
 
-* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/js-common, Packages/app-server (in app-server pod)
+> Update 2022-12-24: Quick-syncing is no longer being used atm. (the nodejs backend pods, where it had been useful, were retired)
+
+* 1\) Tilt is set up to quickly synchronize changes in the following folders: .yalc, Temp_Synced, Packages/js-common
 * 2\) If you want to quickly synchronize changes to an arbitrary node-module (or other location), do the following:
 	* 2.1\) Copy the node-module's folder, and paste it into the `Temp_Synced` folder.
 	* 2.2\) Open a shell in the target pod. (see [k8s-ssh](#k8s-ssh))
@@ -493,39 +472,21 @@ Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
 Prerequisite steps: [setup-k8s](#setup-k8s)
 
-* 1\) If this is the first run, or if changes were made to the `app-server` pod (a js backend package we're transitioning away from), run the relevant `dev` script(s): `npm start app-server.dev` (has vsc-2 tasks)
-* 2\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
-* 3\) Launch the backend pods necessary for the behavior you want to test:
-	* 3.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
-		* 3.1.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
-		* 3.1.2\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
-		* 3.1.3\) Run (in repo root): `npm start backend.tiltUp_local`
-		* 3.1.4\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
-	* 3.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
-		* 3.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
-		* 3.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested; also, waiting on [#43](https://github.com/debate-map/app/issues/43) to avoid need for special env-var)
-			* 3.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
+* 1\) If this is the first run, or if changes were made to the `client` or `monitor-client` web/frontend codebases, run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 2\) Launch the backend pods necessary for the behavior you want to test:
+	* 2.1\) Option 1, by launching the entire backend in your local k8s cluster: **(recommended)**
+		* 2.1.1\) If you have made any changes to dependencies that the backend uses, ensure the `Others/yarn-lock-for-docker.lock` file is up-to-date, by running: `npm start backend.dockerPrep` (has vsc-2 task)
+		* 2.1.2\) If your docker/kubernetes system is not active yet, start it now. (eg. on Windows, launching Docker Desktop from the start menu)
+		* 2.1.3\) Run (in repo root): `npm start backend.tiltUp_local`
+		* 2.1.4\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
+	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
+		* 2.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested)
+		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
+			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).
-* 4\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
+* 3\) Backend should now be up and running. You can test the deployment by opening the main web frontend (eg. `localhost:[5100/5101]`), or interacting with one of the pages served by another pod (eg. the `graphiql` page at `localhost:5110/graphiql`).
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
-
-</details>
-
-<!----><a name="profiling"></a>
-<details><summary><b>[profiling] How to profile the NodeJS pods</b></summary>
-
-Prerequisite steps: [setup-k8s](#setup-k8s)
-
-Chrome dev-tools profiler:
-* 1\) Open the `Packages/app-server/[Dockerfile/deployment.yaml]` files, comment the `mode: normal` lines, and uncomment the `mode: profiling` lines. (and have tilt-up running, so these changes get applied)
-* 2\) Open the page `chrome:inspect` in Chrome, and make sure "Discover network targets" is enabled.
-* 3\) Press "Configure", and add `localhost:5115` and `localhost:5215` to the list.
-* 4\) Ensure a port-forward is set up for one of those ports, to the running/target app-server pod. (see: [port-forwarding](#port-forwarding))
-* 4.1\) It's possible that the port-fowards created by Tilt are not as "robust" as the ones created by `kubectl` (they seem to slightly more often have to "reconnect" during memory profiles, which breaks the transfer). If the kubectl port-forwards are desired, comment out the `... # for nodejs-inspector` line in `Tiltfile`, and then manually start the `npm start "backend.forward_remote onlyInspector"` command for step 4.
-* 5\) The remote target should show up in the list. (if it doesn't, try refreshing the page and waiting; you can also press "Open dedicated DevTools for Node", which seems to connect faster)
-* 6\) The dev-tools should work as expected. (Though note that I hit issues of the pod crashing in some cases [eg. memory dumps when memory usage was high], presumably from running out of memory. I'm not yet sure how to make this more reliable; perhaps by [enabling swap memory](https://kubernetes.io/blog/2021/08/09/run-nodes-with-swap-alpha).)
-* 7\) When you're done with profiling, revert the changes made in step 1.
 
 </details>
 
@@ -745,10 +706,8 @@ New steps:
 
 Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 
-* 1\) Ensure that the distribution files are ready for any packages you've made changes to:
-	1.1\) If you've changed files in `client`, then follow its ts->js transpilation instructions, then build the webpack bundle into an actual file, in production mode, by running `npm start client.build.prodQuick` (has vsc-1 task).
-	1.2\) If you've changed files in `app-server`, then follow its ts->js transpilation instructions.
-* 2\) Run: `npm start backend.tiltUp_ovh` (reminder: if you've made code changes, make sure the relevant ts->js transpilation and/or bundle-building has taken place, as accomplished through the `tsc`/`dev`/`build` scripts of each package)
+* 1\) If changes were made to the `client` or `monitor-client` web/frontend codebases (or you've never run these build commands before), run the relevant js-building and js-bundling script(s): [`npm start client.tsc` and `npm start client.build.prodQuick`] and/or [`npm start monitorClient.tsc` and `npm start monitorClient.build.prodQuick`] (has vsc-2 tasks)
+* 2\) Run: `npm start backend.tiltUp_ovh`
 * 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 * 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5200`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
 * 5\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `local` context listed in the commands with `ovh`.
@@ -835,7 +794,7 @@ To manually trigger the creation of a full backup:
 * 4\) Observe the logs in the Tilt UI, to track the progress of the restore. (it takes about 2.5 minutes just to start, so be patient; also, you can ignore the `WARN: --delta or --force specified but unable to find...` message, as that just means it's a fresh cluster that has to restore from scratch, which the restore module finds odd since it notices the useless [automatically added] delta/force flag)
 	* Note: Until the restore process is completely done (eg. with the pgo operator having had time to update the admin-user auth-data secret), the app-server will be failing to start/connect; this is normal/fine.
 * 5\) Check whether the restore operation succeeded, by loading up the website. (you may have to wait a bit for the app-server to reconnect; you can restart it manually to speed this up)
-	* 5.1\) If you get an error in the `app-server` pod about `error: password authentication failed for user "admin"`, then it seems the `debate-map-pguser-admin` secret was already created (by pgo) prior to the restore, which may have made it invalid after the restore was completed (if the credentials differ). To resolve this, you can either:
+	* 5.1\) If you get an error in the `app-server` pod along the lines of `error: password authentication failed for user "admin"`, then it seems the `debate-map-pguser-admin` secret was already created (by pgo) prior to the restore, which may have made it invalid after the restore was completed (if the credentials differ). To resolve this, you can either:
 		* 5.1.1\) Delete the `debate-map-pguser-admin` secret in the `postgres-operator` namespace; pgo will recreate it in a few seconds, with a working set of credentials (and the reflected version of the secret, in the `default` namespace, will be updated a few seconds later). Note that in this process, the admin user's password is actually reset to a new (random) value, so you will have to copy the secret's password value for use in third-party programs accessing the database (eg. DBeaver).
 		* 5.1.2\) Alternately, you can modify the `debate-map-pguser-admin` secret (in the `postgres-operator` namespace) to hold the password value that was stored in the postgres backup that was just restored (this approach not yet tested, but presumably should work). One place you may have the old password stored is in DBeaver's password store, which can you decrept using [these instructions](https://stackoverflow.com/a/58223703).
 * 6\) If the restore operation did not succeed, you'll want to either make sure it does complete, or cancel the restore operation (else it will keep trying to apply the restore, which may succeed later on when you don't want or expect it to, causing data loss). To cancel the restore:

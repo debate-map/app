@@ -27,12 +27,11 @@ function PrepareDockerIgnoreFiles() {
 	const dockerPackages = [
 		// js
 		"Packages/deploy/@JSBase",
-		"Packages/app-server",
 		// rust
 		"Packages/deploy/@RustBase",
 		"Packages/monitor-backend",
 		"Packages/web-server",
-		"Packages/app-server-rs",
+		"Packages/app-server",
 	];
 	for (const path of dockerPackages) {
 		const ignoreText_packageSpecific = fs.readFileSync(`${path}/template.dockerignore`).toString();

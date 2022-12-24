@@ -1,63 +1,58 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dm-app-server-js
+  name: dm-app-server-rs
   #namespace: app
   labels:
-    app: dm-app-server-js
+    app: dm-app-server-rs
 spec:
   #clusterIP: None
   selector:
-    app: dm-app-server-js
+    app: dm-app-server-rs
   # to make it accessible outside of cluster
   #type: NodePort
   ports:
     - name: main
-      port: 5115
-      protocol: TCP
-    # this port is for the NodeJS inspector
-    - name: nodejs-inspector
-      port: 5116
+      port: 5110
       protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dm-app-server-js
+  name: dm-app-server-rs
   #namespace: app
   labels:
-    app: dm-app-server-js
+    app: dm-app-server-rs
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dm-app-server-js
+      app: dm-app-server-rs
   template:
     metadata:
       labels:
-        app: dm-app-server-js
+        app: dm-app-server-rs
     spec:
       imagePullSecrets:
         - name: registry-credentials
       containers:
-      - name: dm-app-server-js
-        image: "TILT_PLACEHOLDER:imageURL_appServerJS"
+      - name: dm-app-server-rs
+        image: "TILT_PLACEHOLDER:imageURL_appServerRS"
         resources:
           requests:
             memory: 500Mi
           limits:
             #cpu: "900m" # commented atm, due to limits apparently causing slowdown, even if limit not reached (see: https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits)
             # if it ends up using more than this, it is likely a memory leak; kill and restart should restore regular performance
-            memory: 3000Mi
+            memory: 3000Mi # temp-increased to 3gb, to fix OOM issue hit (will try to debug/fix soon)
         livenessProbe:
           httpGet:
             path: /health-check
-            port: 5115
-          #initialDelaySeconds: 10999999 # mode: profiling
-          initialDelaySeconds: 20 # mode: normal
+            port: 5110
+          initialDelaySeconds: 10999999 # mode: profiling
+          #initialDelaySeconds: 20 # mode: normal
           periodSeconds: 10
-          #timeoutSeconds: 3
-          timeoutSeconds: 60 # temporarily increasing this to 60s; it seems the health-check responses have become too slow [~25s] sometimes! (not sure how; need to investigate)
+          timeoutSeconds: 3
         env:
         - name: DB_VENDOR
           value: "postgres"
@@ -73,3 +68,31 @@ spec:
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
+
+# give app-server-rs various kubernetes-api permissions
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-for-dm-app-server-rs-pod
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: [
+    "get",
+    "create",
+  ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: role-binding-for-dm-app-server-rs
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default
+roleRef:
+  kind: Role
+  name: role-for-dm-app-server-rs-pod
+  apiGroup: rbac.authorization.k8s.io

@@ -1,6 +1,6 @@
-# Debate Map (App Server JS)
+# Debate Map (App Server Rust)
 
-Codebase for the [Debate Map](https://debatemap.app) website's NodeJS portion of the app-server. (currently needed for running Command classes)
+Codebase for the [Debate Map](https://debatemap.app) website's Rust-based app-server. (serving the graphql api, which lets clients read database content through queries/subscriptions, and write/update database content through commands, ie. graphql mutations)
 
 ## Guide modules
 

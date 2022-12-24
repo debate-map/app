@@ -45,27 +45,8 @@ spec:
   - "app-server.debates.app"
   rules:
     - backendRefs:
-      - name: dm-app-server-rs
+      - name: dm-app-server
         port: 5110
-      #matches: [{path: {type: Exact, value: "/test1"}}]
----
-apiVersion: gateway.networking.k8s.io/v1alpha2
-kind: HTTPRoute
-metadata:
-  name: route-app-server-js
-  namespace: default
-spec:
-  parentRefs:
-    - name: gateway-http
-    - name: gateway-https
-  hostnames:
-  - "app-server-js.9m2x1z.nodes.c1.or1.k8s.ovh.us"
-  - "app-server-js.debating.app"
-  - "app-server-js.debates.app"
-  rules:
-    - backendRefs:
-      - name: dm-app-server-js
-        port: 5115
       #matches: [{path: {type: Exact, value: "/test1"}}]
 ---
 apiVersion: gateway.networking.k8s.io/v1alpha2

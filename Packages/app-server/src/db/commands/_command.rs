@@ -1,5 +1,3 @@
-// work-in-progress; once the new Command system is worked out here in Rust, I'll start migrating the Command classes from app-server-js into it
-
 use std::iter::{once, empty};
 
 use rust_shared::async_graphql::{MaybeUndefined, self};

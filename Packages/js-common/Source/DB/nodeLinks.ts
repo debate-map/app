@@ -10,7 +10,7 @@ export const GetNodeLink = CreateAccessor((id: string)=>{
 	return GetDoc({}, a=>a.nodeLinks.get(id));
 });
 export const GetNodeLinks = CreateAccessor((parentID?: string|n, childID?: string|n, group?: ChildGroup|n, orderByOrderKeys = true): NodeLink[]=>{
-	// temp; optimization that improves loading speed a bit (~10s to ~7s)
+	// temp; optimization that improves loading speed a bit (~10s to ~7s) [is this still true?]
 	if (parentID != null && !DMCommon_InServer()) { // had to disable this in app-server-js, since causing UnlinkNode to fail in some cases (not sure why)
 		const linksUnderParent = GetDocs({
 			params: {filter: {

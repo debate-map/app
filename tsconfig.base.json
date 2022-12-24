@@ -78,8 +78,6 @@
 		//"Packages/client/Source/**/*.tsx",
 		//"Packages/js-common/Source/**/*.ts",
 		//"Packages/js-common/Source/**/*.tsx",
-		//"Packages/app-server/Source/**/*.ts",
-		//"Packages/app-server/Source/**/*.tsx",
 		//"./Source/**/*.ts",
 		//"./Source/**/*.tsx",
 	],

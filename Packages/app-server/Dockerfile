@@ -1,84 +1,104 @@
 # STAGE 1 (base-image: none)
 # ==================================================
 # ----------
-	ARG JS_BASE_URL
-	#ARG JS_BASE_URL=gcr.io/debate-map-prod/dm-js-base
+	ARG RUST_BASE_URL
+	#ARG RUST_BASE_URL=gcr.io/debate-map-prod/dm-rust-base
 # ----------
 
-# STAGE 2 (base-image: dm-js-base)
+# STAGE 2 (base-image: dm-rust-base)
 # ==================================================
 # ----------
-	# see: ./Tiltfile (or source: Packages/deploy/@JSBase/Dockerfile)
-	FROM $JS_BASE_URL
+	# see: ./Tiltfile (or source: Packages/deploy/@RustBase/Dockerfile)
+	FROM $RUST_BASE_URL as cargo-build
 	ARG env_ENV
+	ARG debug_vs_release
+	ARG debug_vs_release_flag
+	ARG copy_from_path
 # ----------
 
 # initial arg processing
+WORKDIR "/dm_repo"
 ENV ENV=$env_ENV
-RUN echo "Env:$ENV"
+RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
 
-#COPY NMOverwrites/ /dm_repo/
+# copy the shared packages
+COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
+COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
 
-# note: the exclusion of large, unrelated folders (like node_modules) under the given paths is handled by the .dockerignore files
+# copy this package
+COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
 
-# split up the copying into multiple layers, for better caching
-COPY Temp_Synce[d]/ Temp_Synced/
-COPY Packages/js-common/ Packages/js-common/
-COPY Packages/app-server/ Packages/app-server/
-#COPY Scripts/COPY_opt.txt Scripts/COPY_opt.txt
-COPY tsconfig.base.json .
+# copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
+COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
+RUN mkdir Packages/monitor-backend/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
+COPY Packages/web-server/Cargo.toml Packages/web-server/Cargo.toml
+RUN mkdir Packages/web-server/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/web-server/src/main.rs
+
+# now build everything
+WORKDIR /dm_repo/Packages/app-server-rs
+# to clear the cache below (and all other mount-caches), run: docker builder prune --filter type=exec.cachemount
+#RUN --mount=type=cache,target=/usr/local/cargo,from=dm-rust-base,source=/usr/local/cargo \
+RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
+	--mount=type=cache,target=/dm_repo/target \
+#	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
+#	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
+	cargo build --timings ${debug_vs_release_flag} && \
+	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
+	mv ${copy_from_path} /dm_repo/Packages/app-server-rs/app-server-rs-binary
+
+RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
+
+# STAGE 3 (base-image: debian)
+# ==================================================
+# ----------
+	#FROM rust:1.58-slim-buster
+	#FROM debian:buster-slim
+	#FROM debian@sha256:f6e5cbc7eaaa232ae1db675d83eabfffdabeb9054515c15c2fb510da6bc618a7
+	# use debian v12 (bookworm), because that is what our linker (mold) was built on [mold only has releases for debian v12+], which makes the produced binary require it as well
+	#FROM debian:bookworm-slim@sha256:5007b106fd828d768975b21cfdcecb51a8eeea9aab815a9e4a169acde464fb89
+	FROM debian:bookworm-20221114-slim
+	ARG env_ENV
+# ----------
+
+WORKDIR /dm_repo/Packages/app-server-rs
+ENV ENV=$env_ENV
+
+# temp (for ssl connections; will look for cleaner way soon)
+#RUN apt-get update && apt-get install -y ca-certificates
+
+COPY --from=cargo-build /dm_repo/Packages/app-server-rs/app-server-rs-binary .
+COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
+
+# other files needed
 COPY .env .
 
-# these shouldn't be needed, but are fsr
-#COPY ./node_modules/web-vcore/nm/ ./node_modules/web-vcore/nm/
-#COPY ./node_modules/web-vcore/node_modules/mobx-graphlink/Dist/ ./node_modules/web-vcore/node_modules/mobx-graphlink/Dist/
-#COPY ./node_modules/mobx-graphlink/Dist/ ./node_modules/mobx-graphlink/Dist/
-#COPY ./node_modules/web-vcore/node_modules/mobx-graphlink/Dist/ ./node_modules/mobx-graphlink/Dist/
+# check binary size
+RUN ls -lh app-server-rs-binary
 
-EXPOSE 8080
+# regular running
+# ==========
 
-#CMD [ "/bin/sh", "-c", "cd Packages/app-server && ../../node_modules/.bin/cross-env TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js" ]
-#WORKDIR "Packages/app-server"
-#CMD [ "cross-env", "TS_NODE_SKIP_IGNORE=true", "TS_NODE_PROJECT=Scripts/tsconfig.json", "TS_NODE_TRANSPILE_ONLY=true", "DEV=true", "node", "--loader ts-node/esm.mjs", "--experimental-specifier-resolution=node", "./Dist/Main.js" ]
-WORKDIR "/dm_repo/Packages/app-server"
+CMD echo Starting Rust program...; \
+	RUST_BACKTRACE=full ./app-server-rs-binary; \
+	sleep 1; echo Rust program crashed...
+#	sleep 1; echo Rust program crashed...; sleep 123456789
 
-#ENV TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true DEV=true
-#CMD node --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
-#CMD ../../node_modules/.bin/nodemon --legacy-watch --watch Dist --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
-#CMD ../../node_modules/.bin/nodemon --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
-#CMD ../../node_modules/.bin/nodemon --ignore 'nothing' --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
-#CMD ../../node_modules/.bin/nodemon --legacy-watch --ignore 'nothing' --watch Dist --watch node_modules/web-vcore/nm --loader ts-node/esm.mjs --experimental-specifier-resolution=node ./Dist/Main.js
+# when you want to do memory-profiling
+# ==========
 
-# temp
-#COPY Temp_Synced/postgraphile node_modules/postgraphile
-#COPY Temp_Synced/postgraphile-core node_modules/postgraphile-core
-#COPY Temp_Synced/graphile-build node_modules/graphile-build
-#COPY Temp_Synced/graphile-build-pg node_modules/graphile-build-pg
-#COPY Test1.json Test1.json
+# install heaptrack tool, for memory-usage profiling; and "ps" and such (see instructions below)
+# RUN apt-get update && \
+# 	apt-get -y install heaptrack && \
+# 	apt-get -y install procps
 
-ENV PM2_DISCRETE_MODE=true
-ENV TS_NODE_SKIP_IGNORE=true TS_NODE_TRANSPILE_ONLY=true
-#ENV TS_NODE_PROJECT=../../tsconfig.base.json
-#ENV TS_NODE_PROJECT=Scripts/tsconfig.json
-#CMD ../../node_modules/.bin/pm2 start ./Dist/Main.js --watch --ignore-watch="nothing" --no-daemon --node-args="--loader ts-node/esm.mjs --experimental-specifier-resolution=node"
+# run the program, with heaptrack enabled
+# CMD RUST_BACKTRACE=full heaptrack ./app-server-rs; sleep 123456789
 
-# mode: normal
-# use "--no-daemon" so that the pm2 start command lasts as long as the program itself lasts [I think this is why anyway]
-CMD ../../node_modules/.bin/pm2 start ecosystem.config.cjs --no-daemon
-
-# mode: profiling
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=1024 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=8192 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception ./Dist/Main.js
-
-# this reliably causes the app-server to crash within a few seconds! (based on: https://github.com/nodejs/node/issues/38985#issuecomment-858795516)
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 --track-heap-objects ./Dist/Main.js
-#CMD node --experimental-specifier-resolution=node --track-heap-objects ./Dist/Main.js
-# note: after deepClone fix, a crash still occurs, but the source must be slightly different (since crash occurs ~20s later, rather than right away)
-
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 --heap-prof --track-heap-objects ./Dist/Main.js
-
-#CMD node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --abort-on-uncaught-exception --inspect=5115 --max-semi-space-size=5000 ./Dist/Main.js; sleep infinity
-#CMD strace node --experimental-specifier-resolution=node --max-old-space-size=15000 --heapsnapshot-near-heap-limit=3 --inspect=5115 ./Dist/Main.js
+# once running, and you've collected enough profiling data, do the following to view:
+# 1) Find program's process-id: `ps aux --sort -rss`
+# 2) Kill program: `kill -9 <pid>`
+# 3) Copy the profiler-data to host computer: `kubectl cp dm-app-server-rs-XXX:/dm_repo/Packages/app-server-rs/heaptrack.app-server-rs.XXX.gz heaptrack.app-server-rs.XXX.gz`
+# 4) If on Windows, install `heaptrack_gui` in linux-vm (eg. ubuntu desktop): `apt-get update && apt-get -y install heaptrack-gui`
+# 5) Run heaptrack-gui: `heaptrack-gui PATH_TO_PROFILER_DATA`

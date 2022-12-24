@@ -53,8 +53,6 @@ Packages/client/Source
 
 Packages/js-common/Source
 
-Packages/app-server/Source
-
 Packages/deploy/**
 !Packages/deploy/package.json
 
@@ -63,7 +61,6 @@ Packages/deploy/**
 # ===========================================================================
 
 # default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
-Packages/app-server/*
 Packages/app-server-rs/*
 Packages/client/*
 Packages/deploy/*
