@@ -5,7 +5,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ES, InfoButton, Link, Observer} from "web-vcore";
 import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
-import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
+import {apolloClient, GetAppServerURL, RefreshUserInfoFromStoredJWT} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
@@ -25,11 +25,11 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 				}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
 
-					<Row mt={10}>JS backend:</Row>
-					<SignInPanel backend="js"/>
-
 					<Row mt={10}>Rust backend:</Row>
 					<SignInPanel backend="rs"/>
+
+					<Row mt={10}>JS backend:</Row>
+					<SignInPanel backend="js"/>
 				</Column>
 			);
 		}
@@ -53,13 +53,16 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<Button text="Edit profile" style={{width: 110}} />
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 110}} onClick={()=>{
-						window.location.href = GetAppServerURL("/signOut");
+						//window.location.href = GetAppServerURL("/signOut");
+						localStorage.removeItem("debate-map-user-jwt");
+						//window.location.reload();
+						RefreshUserInfoFromStoredJWT();
 					}} />
 				</Row>
 
-				{/* even when "signed in", still show the rust-backend sign-in panel, since the "are we signed-in" logic is currently still based on the js backend */}
-				<Row mt={10}>Rust backend:</Row>
-				<SignInPanel backend="rs"/>
+				{/* even when "signed in", still show the js-backend sign-in panel, since the "are we signed-in" logic is based on the rs backend */}
+				<Row mt={10}>JS backend:</Row>
+				<SignInPanel backend="js"/>
 			</Column>
 		);
 	}
@@ -208,6 +211,7 @@ async function DoSignInFlow(provider: "google" | "dev", username?: string) {
 
 	// store jwt in local-storage
 	localStorage.setItem("debate-map-user-jwt", resultJWT);
+	RefreshUserInfoFromStoredJWT();
 }
 
 function OpenSignInPopup(url: string) {

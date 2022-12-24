@@ -80,6 +80,30 @@ export let apolloClient: ApolloClient<NormalizedCacheObject>;
 	document.onclick = e=>websocket.send(`Hi:${Date.now()}`);
 }*/
 
+// source struct is `UserInfoForJWT` in jwt_utils.rs
+function ParseJWT(token: string) {
+	var base64Url = token.split(".")[1];
+	var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+	var jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c=>{
+		return `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`;
+	}).join(""));
+
+	return JSON.parse(jsonPayload) as {id: string, email: string};
+}
+
+export function RefreshUserInfoFromStoredJWT() {
+	// get the authentication token from local storage if it exists
+	const token = localStorage.getItem("debate-map-user-jwt");
+	if (token != null) {
+		const {id: id_from_jwt, email: email_from_jwt} = ParseJWT(token);
+		graph.SetUserInfo({
+			id: id_from_jwt,
+		});
+	} else {
+		graph.SetUserInfo(null);
+	}
+}
+
 export function InitApollo() {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
@@ -89,7 +113,7 @@ export function InitApollo() {
 		},
 	});
 
-	//Test1();
+	RefreshUserInfoFromStoredJWT();
 
 	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
 		reconnect:
@@ -227,7 +251,7 @@ export async function SendPingOverWebSocket() {
 	return fetchResult;
 }
 
-async function AuthenticateWebSocketConnection() {
+/*async function AuthenticateWebSocketConnection() {
 	const wsConnectCountAtStart = wsClient_connectCount;
 	// if ws-client reconnects during auth process, we must cancel this run of it (so server doesn't receive then reject a 2nd attempt per ws)
 	const WSReconnected = ()=>wsClient_connectCount != wsConnectCountAtStart;
@@ -272,7 +296,7 @@ async function AuthenticateWebSocketConnection() {
 	//apolloSignInPromise_resolve({userID});
 	RunInAction("ApolloSignInDone", ()=>{
 		/*store.main.userID_apollo = userID;
-		store.main.userID_apollo_ready = true;*/
+		store.main.userID_apollo_ready = true;*#/
 
 		// rather than getting user-id from cookie, get it from the server's websocket-helper response
 		// (and supply the user-data to mobx-graphlink every time, because this is needed to clear out any non-authenticated data/responses it had previously cached)
@@ -282,27 +306,10 @@ async function AuthenticateWebSocketConnection() {
 			//id: store.main.userID_apollo!,
 			id: userID,
 		});
-
-		// get the authentication token from local storage if it exists
-		/*const token = localStorage.getItem("debate-map-user-jwt");
-		if (token != null) {
-			const {id: id_from_jwt, email: email_from_jwt} = ParseJWT(token);
-			graph.SetUserInfo({
-				id: id_from_jwt,
-			});
-		}*/
 	});
-}
-
-// source struct is `UserInfoForJWT` in jwt_utils.rs
-function ParseJWT(token: string) {
-	var base64Url = token.split(".")[1];
-	var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-	var jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c=>{
-		return `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`;
-	}).join(""));
-
-	return JSON.parse(jsonPayload) as {id: string, email: string};
+}*/
+function AuthenticateWebSocketConnection() {
+	// todo: implement, for new sign-in approach (not needed quite yet, since the websocket-based endpoints don't need auth atm)
 }
 
 /*let apolloSignInPromise_resolve;
