@@ -13,7 +13,6 @@ use tracing::{info, error};
 use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::general::general::body_to_str;
 
 use super::commands::add_term::{AddTermResult};
@@ -127,38 +126,3 @@ impl SubscriptionShard_General {
 }
 
 }
-
-/*async fn get_user_id_from_connection_id(connection_id: String) -> Result<Option<String>, Error> {
-    let mut user_id = None;
-    
-    let client_to_asjs = HyperClient::new();
-        
-    let query_as_str = format!("query {{ _PassConnectionID(connectionID: \"{}\") {{ userID }} }}", connection_id);
-    let request_body_as_str = json!({
-        //"operationName":"CustomOpName",
-        "query": query_as_str,
-        "variables":{},
-    }).to_string();
-
-    let request = rust_shared::hyper::Request::builder()
-        .method(Method::POST)
-        .uri(format!("{}/graphql", APP_SERVER_JS_URL))
-        .header("Content-Type", "application/json")
-        .body(Body::from(request_body_as_str))
-        .unwrap();
-
-    // one example of why this can fail: if the app-server-js pod crashed
-    let response = client_to_asjs.request(request).await.with_context(|| "Error occurred while trying to send _PassConnectionID message to app-server-js.")?;
-    let response_as_str = body_to_str(response.into_body()).await.with_context(|| "Could not convert response into string.")?;
-    
-    // example str: {"data":{"_PassConnectionID":{"userID":"ABC123ABC123ABC123ABC1"}}}
-    let response_as_json = serde_json::from_str::<JSONValue>(&response_as_str).with_context(|| format!("Could not parse response-str as json:{}", response_as_str))?;
-    let user_id_str = response_as_json["data"]["_PassConnectionID"]["userID"].as_str().with_context(|| format!("Response was malformed; should have GraphQL response shape. @response:{}", response_as_str))?;
-    if user_id_str.len() == 22 {
-        user_id = Some(user_id_str.to_owned());
-    } else {
-        error!("User-id in GraphQL response was invalid; should have a length of 22. Response:{}", response_as_str);
-    }
-
-    Ok(user_id)
-}*/

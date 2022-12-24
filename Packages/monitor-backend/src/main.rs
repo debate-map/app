@@ -53,7 +53,6 @@ mod gql_;
 mod gql {
     pub mod _general;
 }
-//mod proxy_to_asjs;
 mod pgclient;
 mod links {
     pub mod app_server_types;

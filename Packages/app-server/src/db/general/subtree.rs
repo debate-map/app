@@ -29,7 +29,6 @@ use crate::db::node_revisions::NodeRevision;
 use crate::db::node_tags::NodeTag;
 use crate::db::nodes_::_node::Node;
 use crate::db::terms::Term;
-use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::type_aliases::RowData;

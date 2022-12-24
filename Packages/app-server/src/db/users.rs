@@ -9,7 +9,6 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::links::proxy_to_asjs::{HyperClient, APP_SERVER_JS_URL};
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};

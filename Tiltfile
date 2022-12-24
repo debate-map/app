@@ -578,8 +578,8 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/web-server",
 	},
 )
-imageURL_appServerRS = registryURL + '/dm-app-server-' + os.getenv("ENV")
-docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server/Dockerfile',
+imageURL_appServer = registryURL + '/dm-app-server-' + os.getenv("ENV")
+docker_build(imageURL_appServer, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
 		"RUST_BASE_URL": imageURL_rustBase,
 		"env_ENV": os.getenv("ENV") or "dev",
@@ -601,7 +601,7 @@ k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
 }))
 k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
-	"TILT_PLACEHOLDER:imageURL_appServerRS": imageURL_appServerRS,
+	"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
 }))
 
 # port forwards (see readme's [project-service-urls] guide-module for details)

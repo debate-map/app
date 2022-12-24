@@ -62,7 +62,6 @@ mod gql;
 mod links {
     pub mod monitor_backend_link;
     pub mod pgclient;
-    pub mod proxy_to_asjs;
 }
 mod store {
     pub mod storage;
@@ -332,6 +331,6 @@ async fn main() {
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
-    info!("App-server-rs launched. @env:{:?} @logical_cpus:{} @physical_cpus:{}", k8s_env(), num_cpus::get(), num_cpus::get_physical());
+    info!("App-server launched. @env:{:?} @logical_cpus:{} @physical_cpus:{}", k8s_env(), num_cpus::get(), num_cpus::get_physical());
     server_fut.await.unwrap();
 }

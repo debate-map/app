@@ -38,7 +38,6 @@ use crate::db::commands::_command::set_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
-use crate::links::proxy_to_asjs::HyperClient;
 use crate::store::storage::{AppStateWrapper, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;

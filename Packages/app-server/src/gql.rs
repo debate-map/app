@@ -5,6 +5,7 @@ use std::env;
 use std::future::Future;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use rust_shared::anyhow::anyhow;
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig, graphiql_source};
 use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables, extensions};
 use rust_shared::bytes::Bytes;
@@ -12,9 +13,11 @@ use deadpool_postgres::{Pool, Manager};
 use rust_shared::hyper::header::CONTENT_LENGTH;
 use rust_shared::hyper::{Body, service};
 use rust_shared::hyper::client::HttpConnector;
+use rust_shared::anyhow::Error;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::tokio_postgres::{Client};
-use rust_shared::{axum, tower, tower_http};
+use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::{axum, tower, tower_http, serde_json};
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};
 use tower_http::cors::{CorsLayer, Origin};
@@ -29,7 +32,6 @@ use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
 use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
 use axum::http::{self, uri::Uri, Request, Response, StatusCode};
-use axum::Error;
 use axum::{
     extract::Extension,
 };
@@ -83,6 +85,7 @@ use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_Gene
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::store::storage::AppStateWrapper;
 use crate::utils::db::agql_ext::gql_general_extension::{CustomExtension, CustomExtensionCreator};
+use crate::utils::general::general::body_to_str;
 use crate::{get_cors_layer};
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
@@ -103,7 +106,6 @@ use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{SubscriptionShard_User};
-use crate::links::proxy_to_asjs::{maybe_proxy_to_asjs_handler, HyperClient, have_own_graphql_handle_request};
 use crate::store::live_queries::LQStorageWrapper;
 use rust_shared::{async_graphql_axum};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
@@ -183,51 +185,70 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWra
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
             // approach 1 (using standard routing functions)
-            on_service(MethodFilter::GET, gql_subscription_service.clone()).post(maybe_proxy_to_asjs_handler)
+            on_service(MethodFilter::GET, gql_subscription_service).post(handle_gql_query_or_mutation)
 
-            // approach 2 (custom first-layer service-function) [based on pattern here: https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40]
-            /*tower::service_fn({
-                let graphql_router_layered = Router::new()
-                    .route("/graphql", post(proxy_to_asjs_handler).on_service(MethodFilter::GET, gql_subscription_service.clone()))
-                    .layer(AddExtensionLayer::new(schema.clone()))
-                    .layer(AddExtensionLayer::new(client_to_asjs.clone()));
-                let schema2 = schema.clone();
-                move |req: Request<Body>| {
-                    let req_headers = req.headers().clone();
-                    let schema3 = schema2.clone();
-                    let graphql_router_layered = graphql_router_layered.clone();
-                    async move {
-                        // if we're on the "/gql-playground" page, always send the request to the app-server' regular handler (ie. not using the proxy to app-server-js)
-                        if let Some(referrer) = req_headers.get("Referer") {
-                            let referrer_str = &String::from_utf8_lossy(referrer.as_bytes());
-                            let referrer_url = Url::parse(referrer_str);
-                            if let Ok(referrer_url) = referrer_url {
-                                if referrer_url.path() == "/gql-playground" {
-                                    println!(r#"Sending "/graphql" request to force_regular branch. @referrer:{}"#, referrer_str);
-                                    let response_str = have_own_graphql_handle_request(req, schema3).await;
-
-                                    // send response (to frontend)
-                                    let mut response = Response::builder()
-                                        .body(HttpBody::map_err(axum::body::Body::from(response_str), |e| axum::Error::new("Test")).boxed_unsync())
-                                        .unwrap();
-                                    response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));
-                                    return Ok(response);
-                                };
-                            }
-                        }
-                        
-                        println!(r#"Sending "/graphql" request to layered branch"#);
-                        graphql_router_layered.oneshot(req).await.map_err(|err| match err {})
-                    }
-                }
-            })*/
+            // approach 2 (custom first-layer service-function)
+            // omitted for now; you can reference the "one-shot" pattern here: https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40
         )
-
-        // for endpoints not defined by app-server (eg. /check-mem), assume it is meant for app-server-js, and thus call the proxying function
-        .fallback(get(maybe_proxy_to_asjs_handler).merge(post(maybe_proxy_to_asjs_handler)))
+        //.fallback(get(handle_gql_query_or_mutation).merge(post(handle_gql_query_or_mutation)))
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(client_to_asjs));
 
     info!("Playground: http://localhost:[view readme]");
     result
+}
+
+pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
+pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
+    let response_str = match have_own_graphql_handle_request(req, schema).await {
+        Ok(a) => a,
+        Err(err) => format!("Got error during passing/execution of graphql request to/in app-server's gql engine:{err:?}"),
+    };
+
+    // send response (to frontend)
+    /*let mut response = Response::builder().body(axum::body::Body::from(response_str)).unwrap();
+    response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));*/
+    let response = Response::builder()
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::from(response_str))
+        .unwrap();
+    response
+}
+pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
+    // retrieve auth-data/JWT from http-headers
+    let mut jwt: Option<String> = None;
+    //info!("Headers2:{:?}", req.headers().keys());
+    if let Some(header) = req.headers().get("authorization") {
+        //info!("Found authorization header.");
+        if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
+            //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
+            jwt = Some(parts.1.to_owned());
+        }
+    }
+    
+    // read request's body (from frontend)
+    let req_as_str = body_to_str(req.into_body()).await?;
+    let req_as_json = JSONValue::from_str(&req_as_str)?;
+
+    // prepare request for graphql engine
+    //let gql_req = async_graphql::Request::new(req_as_str);
+    let gql_req = async_graphql::Request::new(req_as_json["query"].as_str().ok_or(anyhow!("The \"query\" field must be a string."))?);
+    let gql_req = match req_as_json["operationName"].as_str() {
+        Some(op_name) => gql_req.operation_name(op_name),
+        None => gql_req,
+    };
+    let gql_req = gql_req.variables(Variables::from_json(req_as_json["variables"].clone()));
+
+    // attach auth-data to async-graphql context-data
+    let gql_req = match jwt {
+        Some(jwt) => gql_req.data(jwt),
+        None => gql_req, // if no auth data in headers, leave request unmodified (ie. without jwt data-entry)
+    };
+
+    // send request to graphql engine, and read response
+    let gql_response = schema.execute(gql_req).await;
+    //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
+    let response_str: String = serde_json::to_string(&gql_response)?;
+    
+    Ok(response_str)
 }

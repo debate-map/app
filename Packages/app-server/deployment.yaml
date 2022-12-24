@@ -37,7 +37,7 @@ spec:
         - name: registry-credentials
       containers:
       - name: dm-app-server
-        image: "TILT_PLACEHOLDER:imageURL_appServerRS"
+        image: "TILT_PLACEHOLDER:imageURL_appServer"
         resources:
           requests:
             memory: 500Mi

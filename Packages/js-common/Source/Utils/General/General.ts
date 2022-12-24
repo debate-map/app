@@ -59,7 +59,6 @@ acceptsIDOrMore(shouldFail2);*/
 export function MarkerForNonScalarField() {
 	return {
 		//$gqlType: className,
-		// env-flag was temp-fix for usage in app-server-js (see ecosystem.config.js); probably not needed anymore
-		$gqlTypeIsScalar: (process.env.FORCE_ALL_DOC_FIELDS_SCALARS == "1" ? true : null) ?? false,
+		$gqlTypeIsScalar: false,
 	};
 }
