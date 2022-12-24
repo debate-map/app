@@ -302,8 +302,16 @@ NEXT_k8s_resource(new_name='pgo_late',
 # reflector
 # ==========
 
-# todo: try switching back to the non-helm approach (since faster)
-# (I think the fixing of the error hit may have just been due to restart or something, rather than from the switch to helm)
+# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
+# k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
+# k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
+# NEXT_k8s_resource("reflector",
+# 	objects=[
+# 		"reflector:clusterrole",
+# 		"reflector:clusterrolebinding",
+# 		"reflector:serviceaccount",
+# 	],
+# )
 
 # helm_remote('reflector',
 # 	#repo_name='stable',
@@ -311,6 +319,13 @@ NEXT_k8s_resource(new_name='pgo_late',
 # 	repo_url='https://emberstack.github.io/helm-charts',
 # 	#version='5.4.17',
 # 	version='6.1.47',
+# )
+# NEXT_k8s_resource("reflector",
+# 	objects=[
+# 		"reflector:clusterrole",
+# 		"reflector:clusterrolebinding",
+# 		"reflector:serviceaccount",
+# 	],
 # )
 
 helm_repo('emberstack', 'https://emberstack.github.io/helm-charts')
@@ -326,24 +341,6 @@ k8s_yaml(ReadFileWithReplacements('./Packages/deploy/Reflector/Reflections/debat
 	# only update this each time the "tilt up" command is started, not each iteration (switch back to using "timeOfThisTiltfileUpdate" if situation still problematic for new devs)
 	"TILT_PLACEHOLDER:currentTime": timeOfTiltUpCommand,
 }))
-# NEXT_k8s_resource("reflector",
-# 	objects=[
-# 		"reflector:clusterrole",
-# 		"reflector:clusterrolebinding",
-# 		"reflector:serviceaccount",
-# 	],
-# )
-
-# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
-'''k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")
-k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
-NEXT_k8s_resource("reflector",
-	objects=[
-		"reflector:clusterrole",
-		"reflector:clusterrolebinding",
-		"reflector:serviceaccount",
-	],
-)'''
 
 # load-balancer/reverse-proxy (traefik, ingress-based [old])
 # ==========
@@ -675,53 +672,6 @@ NEXT_k8s_resource_batch([
 		"labels": ["app"],
 	}
 ])
-
-# new relic (commented for now, because of apparent performance impact) [and left commented, because I want to find all open-source tools long-term -- or at least, totally customizable, which new-relic is not]
-# ==========
-
-# '''k8s_yaml('./Packages/deploy/NewRelic/px.dev_viziers.yaml', allow_duplicates=True)
-# k8s_yaml('./Packages/deploy/NewRelic/olm_crd.yaml', allow_duplicates=True)
-# k8s_yaml('./Packages/deploy/NewRelic/newrelic-manifest.yaml', allow_duplicates=True)'''
-
-# k8s_yaml_grouped('./Packages/deploy/NewRelic/px.dev_viziers.yaml', "new-relic")
-# k8s_yaml_grouped('./Packages/deploy/NewRelic/olm_crd.yaml', "new-relic")
-# # kubectl create namespace newrelic (for now, the "newrelic" namespace is created manually in ./namespace.yaml)
-# k8s_yaml_grouped('./Packages/deploy/NewRelic/newrelic-manifest.yaml', "new-relic", [
-# 	# stage +1
-# 	"nri-bundle-nri-metadata-injection-admission-create", # dep: nri-bundle-nri-metadata-injection-admission:serviceaccount
-# 	# stage +2
-# 	"nri-bundle-nri-metadata-injection", # dep: X
-# 	# stage +3
-# 	"nri-bundle-nri-metadata-injection-admission-patch", # dep: X
-# 	"pixie-operator-subscription:subscription", # dep: X:namespace
-# 	"olm-operators:operatorgroup", # dep: X:namespace
-# 	"olm-operator", # dep: X:namespace
-# 	"catalog-operator", # dep: X:namespace
-# 	# to not wait for
-# 	"nri-bundle-newrelic-pixie", # dep: pl-cluster-secrets->cluster-id, which takes time for other pods to push
-# 	"vizier-deleter", # dep: some service-account, which takes time for other pods to push
-# ])
-
-# NEXT_k8s_resource_batch([
-# 	"nri-bundle-nri-metadata-injection-admission-create",
-# ], labels=["new-relic"])
-
-# NEXT_k8s_resource_batch([
-# 	"nri-bundle-nri-metadata-injection",
-# ], labels=["new-relic"])
-
-# NEXT_k8s_resource_batch([
-# 	"nri-bundle-nri-metadata-injection-admission-patch",
-# 	"pixie-operator-subscription:subscription",
-# 	"olm-operators:operatorgroup",
-# 	"olm-operator",
-# 	"catalog-operator",
-# ], labels=["new-relic"])
-
-# NEXT_k8s_resource_batch([
-# 	"nri-bundle-newrelic-pixie",
-# 	"vizier-deleter",
-# ], pod_readiness='ignore', labels=["new-relic"])
 
 # netdata
 # ==========

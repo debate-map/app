@@ -274,7 +274,6 @@ multiBackupRepos:
 
 # pgBackRestConfig allows for the configuration of every pgBackRest option
 # except for "image", which is set by "pgBackRest".
-# v-added; note that this config ov
 pgBackRestConfig:
   TILTFILE_MANAGED_BLOCK1_whenGCSOff:
     repoHost:
