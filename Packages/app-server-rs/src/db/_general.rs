@@ -43,20 +43,20 @@ impl QueryShard_General {
 // mutations
 // ==========
 
-struct GetConnectionID_Result { id: String }
+/*struct GetConnectionID_Result { id: String }
 #[Object]
 impl GetConnectionID_Result {
     async fn id(&self) -> &str { &self.id }
-}
+}*/
 
 #[derive(Default)] pub struct MutationShard_General;
 #[Object] impl MutationShard_General {
-    #[graphql(name = "_GetConnectionID")]
+    /*#[graphql(name = "_GetConnectionID")]
     async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result, GQLError> {
         Ok(GetConnectionID_Result {
             id: "todo".to_owned()
         })
-    }
+    }*/
 
     // todo: move this to an appropriate location (make some structuring similar to the Command system in app-server-js)
     /*async fn transferNodes(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
@@ -76,11 +76,11 @@ pub struct GenericMutation_Result {
 // subscriptions
 // ==========
 
-struct PassConnectionID_Result { userID: Option<String> }
+/*struct PassConnectionID_Result { userID: Option<String> }
 #[Object]
 impl PassConnectionID_Result {
     async fn userID(&self) -> &Option<String> { &self.userID }
-}
+}*/
 
 struct Ping_Result {
     pong: String,
@@ -101,8 +101,8 @@ impl SubscriptionShard_General {
         stream::iter(0..100)
     }*/
     
-    #[graphql(name = "_Ping")]
-    async fn _Ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
+    #[graphql(name = "_ping")]
+    async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();
         // create the listed file in the app-server-rs pod (eg. using Lens), if you've made an update that you need all clients to refresh for
         let refreshPage = Path::new("./refreshPageForAllUsers_enabled").exists();
@@ -113,7 +113,7 @@ impl SubscriptionShard_General {
         } })
     }
 
-    #[graphql(name = "_PassConnectionID")]
+    /*#[graphql(name = "_PassConnectionID")]
     async fn _PassConnectionID(&self, _ctx: &async_graphql::Context<'_>, #[graphql(name = "connectionID")] connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
         info!("Connection-id was passed from client:{}", connectionID);
         //let userID = "DM_SYSTEM_000000000001".to_owned();
@@ -128,7 +128,7 @@ impl SubscriptionShard_General {
         stream::once(async { PassConnectionID_Result {
             userID,
         } })
-    }
+    }*/
 }
 
 }

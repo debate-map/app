@@ -203,7 +203,7 @@ export async function SendPingOverWebSocket() {
 	const fetchResult_subscription = apolloClient.subscribe({
 		query: gql`
 			subscription {
-				_Ping {
+				_ping {
 					pong
 					refreshPage
 				}
@@ -219,7 +219,7 @@ export async function SendPingOverWebSocket() {
 	});
 	//console.log("Got response to ping:", fetchResult);
 
-	const {pong, refreshPage} = fetchResult.data._Ping;
+	const {pong, refreshPage} = fetchResult.data._ping;
 	if (refreshPage) {
 		console.log("Refreshing page due to server request.");
 		window.location.reload();

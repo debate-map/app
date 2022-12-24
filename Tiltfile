@@ -591,33 +591,6 @@ docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Docke
 	},
 )
 
-# nodejs
-# -----
-
-# this is the nodejs-base dockerfile used for all subsequent js images
-imageURL_jsBase = registryURL + '/dm-js-base-' + os.getenv("ENV")
-docker_build(imageURL_jsBase, '.', dockerfile='Packages/deploy/@JSBase/Dockerfile')
-
-imageURL_appServerJS = registryURL + '/dm-app-server-js-' + os.getenv("ENV")
-docker_build(imageURL_appServerJS, '.', dockerfile='Packages/app-server/Dockerfile',
-	build_args={
-		"JS_BASE_URL": imageURL_jsBase,
-		"env_ENV": os.getenv("ENV") or "dev"
-	},
-	# this lets Tilt update the listed files directly, without involving Docker at all (though must enable this, per session, through tilt-ui)
-	# live_update=[
-	# 	#sync('./NMOverwrites/', '/dm_repo/'),
-	# 	sync('./.yalc/', '/dm_repo/.yalc/'),
-	# 	sync('./Packages/js-common/', '/dm_repo/Packages/js-common/'),
-	# 	#sync('./Packages/app-server/Dist/', '/dm_repo/Packages/app-server/Dist/'),
-	# 	sync('./Packages/app-server/', '/dm_repo/Packages/app-server/'),
-	# 	# temp-synced folder (eg. for adding temp log-lines to node-modules) 
-	# 	#sync('./Temp_Synced/', '/dm_repo/Temp_Synced/'),
-	# 	#sync('./Temp_Synced/@graphile/subscriptions-lds/dist', '/dm_repo/node_modules/@graphile/subscriptions-lds/dist'),
-	# 	#sync('./Temp_Synced/postgraphile', '/dm_repo/node_modules/postgraphile'),
-	# ]
-)
-
 # own app (deploy to kubernetes)
 # ==========
 
@@ -630,9 +603,6 @@ k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
 }))
 k8s_yaml(ReadFileWithReplacements('./Packages/app-server-rs/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_appServerRS": imageURL_appServerRS,
-}))
-k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
-	"TILT_PLACEHOLDER:imageURL_appServerJS": imageURL_appServerJS,
 }))
 
 # port forwards (see readme's [project-service-urls] guide-module for details)
@@ -662,15 +632,6 @@ NEXT_k8s_resource_batch([
 		],
 		"labels": ["app"],
 	},
-	{
-		"workload": 'dm-app-server-js',
-		"trigger_mode": TRIGGER_MODE_MANUAL,
-		"port_forwards": [
-			'5215:5115' if REMOTE else '5115',
-			'5216:5116' if REMOTE else '5116' # for nodejs-inspector
-		],
-		"labels": ["app"],
-	}
 ])
 
 # netdata

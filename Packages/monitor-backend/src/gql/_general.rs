@@ -323,8 +323,8 @@ pub struct TestingLogEntry {
 
 #[Subscription]
 impl SubscriptionShard_General {
-    #[graphql(name = "_Ping")]
-    async fn _Ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
+    #[graphql(name = "_ping")]
+    async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();
         // create the listed file in the app-server-rs pod (eg. using Lens), if you've made an update that you need all clients to refresh for
         let refreshPage = Path::new("./refreshPageForAllUsers_enabled").exists();
