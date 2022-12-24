@@ -479,6 +479,7 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions) {
 
 	//ImportPGUserSecretAsEnvVars(context);
 	const secret = GetK8sPGUserAdminSecretData(context);
+	//console.log("Got psql secret:", secret, "@password:", secret.GetField("password").toString());
 
 	const argsStr = `-h localhost -p ${context == "ovh" ? 5220 : 5120} -U admin -d ${database}`;
 

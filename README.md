@@ -238,7 +238,7 @@ Notes:
 Required:
 * 1\) Install Rust via the `rustup` toolkit: https://www.rust-lang.org/tools/install
 	* 1.1\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
-* 2\) Install Tilt: https://github.com/tilt-dev/tilt
+* 2\) Install Tilt: https://github.com/tilt-dev/tilt (I'm currently on version 0.30.13)
 	* 2.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
 * 3\) Install Helm (eg. for some Tilt extensions): https://helm.sh/docs/intro/install
 	* 3.1\) On Windows, recommended install steps:
@@ -248,7 +248,7 @@ Required:
 	* 3.1\) If on Windows, you'll first need to [install WSL2](https://learn.microsoft.com/en-us/windows/wsl/install). For the simple case, this involves...
 		* 3.1.1\) Run `wsl --install`, restart, wait for WSL2's post-restart installation process to complete, then enter a username and password (which is probably worth recording).
 		* 3.1.2\) It is highly recommended to set memory/cpu limits for the WSL system (as [seen here](https://stackoverflow.com/a/66797264)), otherwise it can (and likely will) consume nearly all of your device's resources.
-	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with Kubernetes v1.21.5 (as part of Docker Desktop 4.2.0) and v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)), so it's recommended to install one of those versions (preferably the newer one).
+	* 3.2\) Before installing your Docker container system, make sure the version you're installing is compatible with Debate Map's requirements. Currently, the repo is developed on machines with v1.24.2 (as part of [Docker Desktop 4.11.0](https://docs.docker.com/desktop/release-notes/#docker-desktop-4110)) and Kubernetes v1.25.2 (as part of Docker Desktop 4.15.0), so it's recommended to install one of those versions (preferably the newer one).
 	* 3.3\) On Windows and Mac, this means installing Docker Desktop (see step 3.2 above for recommended install link).
 	* 3.4\) On Linux, it's also recommended to install Docker Desktop (see step 3.2 above for recommended install link). (installing Docker Engine on its own is apparently also possible, though not recommended, since these docs are written assuming Docker Desktop is installed)
 
@@ -306,7 +306,6 @@ Prerequisite steps: [setup-backend](#setup-backend)
 		```
 		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: local`.
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
-* 3\) For now, manually create an empty file at path `Packages/deploy/PGO/postgres/gcs-key.json`. (postgres-operator expects this file to be present; when deploying to the cloud we would need to fill in its contents, but for now an empty file is fine)
 
 #### Troubleshooting
 
@@ -389,6 +388,23 @@ Troubleshooting:
 
 
 ### Tasks (occasional)
+
+<!----><a name="pgo-required-updates"></a>
+<details><summary><b>[pgo-required-updates] PGO (crunchydata postgres) required updates</b></summary>
+
+The cluster's database is an instance of the [CrunchyData Postgres Operator, v5](https://access.crunchydata.com/documentation/postgres-operator/v5); we use various docker images that they provide, under the `registry.developers.crunchydata.com/crunchydata/` path. However, they apparently do not keep those images up forever, meaning that at some point, updating to a new version is required (eg. since new devs/environments would then be unable to pull the images themselves).
+
+Here are some notes on doing that update process:
+* We are using the helm-based installation approach rather than kustomize-based one, since this way updates are less complicated/painful.
+* The official instructions for an initial install are [here](https://access.crunchydata.com/documentation/postgres-operator/v5/installation/helm).
+* To do an update of the postgres-operator, we:
+	* 1\) Do a fresh clone of the examples repo (referenced in the helm-based install instructions above).
+	* 2\) Make a temporary copy (placed somewhere outside dm's git repo) of the files under `Packages/deploy/PGO` that were "customized" from their initial contents. Currently, this means:
+		* 2.1\) File: `Packages/deploy/PGO/postgres/values.yaml`
+	* 3\) Replace the contents of the `Packages/deploy/PGO` folder with the contents of the `helm` folder, in the examples repo from step 1.
+	* 4\) For each non-commented key in your backup of `postgres/values.yaml`, paste it into the appropriate location in the new `PGO/postgres/values.yaml` file.
+
+</details>
 
 <!----><a name="docker-trim"></a>
 <details><summary><b>[image-inspect] Docker image/container inspection</b></summary>
@@ -541,9 +557,9 @@ Note: We use Google Cloud here, but others could be used.
 			* 3.2.3.3\) In the "Service account admins role" box, enter your email.
 			* 3.2.3.4\) In the "Service account users role" box, enter your email, and the email of anyone else you want to have access.
 			* 3.2.3.5\) Create a key for your service account, and download it as a JSON file (using the "Keys" tab): https://console.cloud.google.com/iam-admin/serviceaccounts
-	* 3.3\) Move (or copy) the JSON file to the following path: `Packages/deploy/PGO/postgres/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
-	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Packages/deploy/PGO/postgres/gcs-key.json`
-	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Packages/deploy/PGO/postgres/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
+	* 3.3\) Move (or copy) the JSON file to the following path: `Others/Secrets/gcs-key.json` (if there is an empty file here already, it's fine to overwrite it, as this would just be the placeholder you created in the [setup-k8s](#setup-k8s) module)
+	* 3.4\) Add the service-account to your gcloud-cli authentication, by passing it the service-account key-file (obtained from step 3.1 or 3.2.3.5): `gcloud auth activate-service-account FULL_SERVICE_ACCOUNT_NAME_AS_EMAIL --key-file=Others/Secrets/gcs-key.json`
+	* 3.5\) Add the service-account to your Docker authentication, in a similar way: `Get-Content Others/Secrets/gcs-key.json | & docker login -u _json_key --password-stdin https://gcr.io` (if you're using a specific subdomain of GCR, eg. us.gcr.io or eu.gcr.io, fix the domain part in this command)
 
 </details>
 

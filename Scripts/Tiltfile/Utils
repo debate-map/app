@@ -1,0 +1,146 @@
+def CreateNamespace(k8s_yaml, name):
+	k8s_yaml(blob('''apiVersion: v1
+kind: Namespace
+metadata:
+  name: ''' + name))
+
+def ReplaceInBlob(fileBlob, replacements):
+	blobAsStr = str(fileBlob)
+	for key, value in replacements.items():
+		blobAsStr_old = blobAsStr
+
+		op_useBase64 = "[@base64]" in key
+		if op_useBase64:
+			key_final = Base64Encode(key.replace("[@base64]", ""))
+			value_final = Base64Encode(value)
+			print("Replacing: " + key_final + " with " + value_final + "")
+			blobAsStr = blobAsStr.replace(key_final, value_final)
+		else:
+			blobAsStr = blobAsStr.replace(key, value)
+
+		if blobAsStr == blobAsStr_old:
+			fail("Error: ReplaceInBlob was called, but key not found in file: " + key)
+	return blob(blobAsStr)
+def ReadFileWithReplacements(filePath, replacements):
+	fileBlob = read_file(filePath)
+	fileBlob = ReplaceInBlob(fileBlob, replacements)
+	return fileBlob
+
+def ModifyLineRange(string, startMarker, endMarker, action):
+	lines = string.split("\n")
+	lines_new = []
+	inBlock = False
+	for line in lines:
+		if startMarker in line:
+			inBlock = True
+			# always keep the marker lines (so can chain them)
+			lines_new.append(line)
+			continue
+		if endMarker in line:
+			inBlock = False
+			# always keep the marker lines (so can chain them)
+			lines_new.append(line)
+			continue
+
+		if inBlock:
+			if action == "omit":
+				#print("Omitting line:" + line)
+				pass
+			elif action == "reduceIndent":
+				lines_new.append(line[2:]) # each "indent" is 2 spaces
+			else:
+				fail("Error: ModifyLineRange was called, but action is invalid: " + action)
+		else:
+			lines_new.append(line)
+	return "\n".join(lines_new)
+
+#data must be type of str or bytes
+# def Base64Encode(data):
+# 	result = None
+
+# 	#data = data.encode("UTF-8")
+
+# 	if type(data) == "string":
+# 		data = data.encode("ascii")
+
+# 	if result == None:
+# 		#construction base64Encoding
+# 		result = list()
+# 		#mapping A-Z
+# 		for key in range(0, 26):
+# 				result.append(chr(key + 65))
+# 		#mapping a-z
+# 		for key in range(0, 26):
+# 				result.append(chr(key + 97))
+# 		#mapping 0-9
+# 		for key in range(0, 10):
+# 				result.append(chr(key + 48))
+# 		#mapping +
+# 		result.append('+')
+# 		#mapping /
+# 		result.append('/')
+
+
+# 	if len(data) == 0:
+# 		return ""
+# 	length=len(data)
+
+# 	bytes_to_append = -(length%3)+(3 if length%3 != 0 else 0)
+# 	#print(f"{bytes_to_append=}")
+# 	binary_list = []
+# 	for s in data:
+# 		ascii_value = s
+# 		#binary = f"{ascii_value:08b}" 
+# 		format(ord(ascii_value), '08b') # v-added
+# 		#binary = bin(ascii_value)[2:]
+# 		#print(s, binary, type(binary))
+# 		for bit in binary:
+# 				binary_list.append(bit)
+# 	length=len(binary_list)
+# 	bits_to_append = -(length%6) + (6 if length%6 != 0 else 0)
+# 	binary_list.extend([0]*bits_to_append)
+
+# 	#print(f"{binary_list=}")
+
+# 	base64 = []
+
+# 	print(pow(2, 3))
+
+# 	value = 0
+# 	for index, bit in enumerate(reversed(binary_list)):
+# 		#print (f"{bit=}")
+# 		#converting block of 6 bits to integer value 
+
+# 		# v-replaced
+# 		#value += ( 2**(index%6) if bit=='1' else 0)
+# 		value += ( pow(2, index%6) if bit=='1' else 0)
+
+# 		#print(f"{value=}")
+# 		#print(bit, end = '')
+
+# 		if (index+1)%6 == 0:
+# 				base64.append(result[value])
+# 				#print(' ', end="")
+
+# 				#resetting value
+# 				value = 0
+# 				pass
+# 	#print()
+
+# 	#padding if there is less bytes and returning the result
+# 	return ''.join(reversed(base64))+''.join(['=']*bytes_to_append)
+
+# in tiltfile, check if strings ends with "test"
+
+def Base64Encode(strToEncode):
+	#return strToEncode.encode("utf-8").base64encode().decode("utf-8")
+	if '"' in strToEncode or "'" in strToEncode:
+		fail("Error: base64encode was called, but string contains quotes: " + strToEncode)
+	jsCode = "process.stdout.write(Buffer.from('" + strToEncode + "').toString('base64').slice(0, -2))"
+	result_blob = local(["node", "-e", jsCode], echo_off=True, quiet=True)
+	return str(result_blob)
+
+def GetDateTime():
+	jsCode = "process.stdout.write(new Date().toLocaleString('sv'))"
+	result_blob = local(["node", "-e", jsCode], echo_off=True, quiet=True)
+	return str(result_blob)

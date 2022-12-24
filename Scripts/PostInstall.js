@@ -4,11 +4,11 @@ const globby = require("globby");
 
 // needed to fix issue with ESM-imports in NodeJS; see here for more info: https://github.com/nodejs/node/issues/34515
 // (alternative to using patch-package, which is more of a hassle, due to patch-creation being difficult for yarn)
-fs.writeFileSync("./node_modules/@wewatch/lexorank/dist/esm/package.json", JSON.stringify({
+/*fs.writeFileSync("./node_modules/@wewatch/lexorank/dist/esm/package.json", JSON.stringify({
 	type: "module",
 }));
 const basePath = "./node_modules/@wewatch/lexorank/dist/esm/";
-globby("**/*.js", {
+globby("**#/*.js", {
 	cwd: basePath,
 	absolute: true,
 }).then(paths=>{
@@ -25,7 +25,7 @@ globby("**/*.js", {
 		});
 		fs.writeFileSync(path, newText);
 	}
-});
+});*/
 
 function resolveImportPath(cwdForImport, subpath) {
 	/*const cwd = process.cwd();

@@ -6,3 +6,6 @@ metadata:
  namespace: default
  annotations:
    reflector.v1.k8s.emberstack.com/reflects: "postgres-operator/debate-map-pguser-admin"
+   # We have the "reflected version" change every time the "tilt up" command is started; this way we (more) reliably avoid the issue of the secret being out-of-date.
+   # (Previously, I kept having issues where the reflector would not realize that its mirror of a secret was missing/out-of-date, eg. if first pgo deploy failed.)
+   reflector.v1.k8s.emberstack.com/reflected-version: "TILT_PLACEHOLDER:currentTime"

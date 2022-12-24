@@ -17,6 +17,16 @@ print("Context:", CONTEXT, "Remote:", REMOTE)
 
 # other tilt extensions
 load('ext://helm_remote', 'helm_remote')
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
+
+# custom tilt files
+load('./Scripts/Tiltfile/Utils', 'CreateNamespace', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'Base64Encode', "GetDateTime")
+
+# tacking of tiltfile runs
+timeOfThisTiltfileUpdate = GetDateTime()
+if os.getenv("TIME_OF_TILT_UP_COMMAND") == None:
+	os.putenv("TIME_OF_TILT_UP_COMMAND", timeOfThisTiltfileUpdate)
+timeOfTiltUpCommand = os.getenv("TIME_OF_TILT_UP_COMMAND")
 
 # if this chaining system is insufficient to yield reliable/deterministic cluster-initializations, then try adding (or possibly even replacing it with): update_settings(max_parallel_updates=1)
 
@@ -102,8 +112,7 @@ def k8s_yaml_grouped(pathOrBlob, groupName, resourcesToIgnore = []):
 # Never manually-restart this "namespaces" group! (deletion of namespaces can get frozen, and it's a pain to manually restart)
 NEXT_k8s_resource(new_name="namespaces",
 	objects=[
-		"postgres-operator:Namespace:default",
-		#"traefik-attempt4:namespace",
+		#"postgres-operator:Namespace:default",
 		"app:namespace",
 	],
 )
@@ -165,15 +174,7 @@ if not REMOTE:
 # crunchydata postgres operator
 # ==========
 
-def ReplaceInBlob(fileBlob, replacements):
-	blobAsStr = str(fileBlob)
-	for key, value in replacements.items():
-		blobAsStr = blobAsStr.replace(key, value)
-	return blob(blobAsStr)
-def ReadFileWithReplacements(filePath, replacements):
-	fileBlob = read_file(filePath)
-	fileBlob = ReplaceInBlob(fileBlob, replacements)
-	return fileBlob
+CreateNamespace(k8s_yaml, "postgres-operator")
 
 pulumiOutput = decode_json(str(read_file("./PulumiOutput_Public.json")))
 registryURL = pulumiOutput["registryURL"]
@@ -181,31 +182,48 @@ bucket_uniformPrivate_url = pulumiOutput["bucket_prod_uniformPrivate_url" if PRO
 bucket_uniformPrivate_name = pulumiOutput["bucket_prod_uniformPrivate_name" if PROD else "bucket_dev_uniformPrivate_name"]
 #print("bucket_uniformPrivate_url:", bucket_uniformPrivate_url)
 
-k8s_yaml(kustomize('./Packages/deploy/PGO/install'))
-k8s_yaml(ReplaceInBlob(kustomize('./Packages/deploy/PGO/postgres'), {
-	"TILT_PLACEHOLDER:bucket_uniformPrivate_name": bucket_uniformPrivate_name,
-}))
-
 # temp: before deploying the postgres-resources, run "docker pull X" for the large postgres images
 # (fix for bug in Kubernetes 1.24.2 where in-container image-pulls that take longer than 2m get interrupted/timed-out: https://github.com/docker/for-mac/issues/6300#issuecomment-1324044788)
-local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.33-1")
-local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-13.3-1")
+#local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2")
+#local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0")
 
-# test: before building the rust-based images, pre-pull the rust base-image, so it's "named" in the local docker registry; this keeps docker from (apparently) garbage-collecting it for being "unused" [well, we'll see; not yet tested]
-local_resource("pre-pull-rust-base-image", "docker pull instrumentisto/rust:nightly-bullseye-2022-12-07")
+k8s_yaml(helm('./Packages/deploy/PGO/install', namespace="postgres-operator"))
+
+gcsMissingMessage = "[gcs-key.json was not found]"
+gcsKeyFileContents = str(read_file("./Others/Secrets/gcs-key.json", gcsMissingMessage))
+if gcsKeyFileContents == gcsMissingMessage:
+	print("Warning: File \"Others/Secrets/gcs-key.json\" was not found; pgbackrest will not be enabled in this cluster. (this is normal if you're not a backend-deployer)")
+
+postgresYaml = str(ReplaceInBlob(helm('./Packages/deploy/PGO/postgres', namespace="postgres-operator"), {
+	"TILT_PLACEHOLDER:bucket_uniformPrivate_name": bucket_uniformPrivate_name,
+	"[@base64]TILT_PLACEHOLDER:gcsKeyAsString": gcsKeyFileContents.replace("\n", "\n    ")
+}))
+if gcsKeyFileContents == gcsMissingMessage:
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="reduceIndent")
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="omit")
+else:
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="omit")
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="reduceIndent")
+
+k8s_yaml(blob(postgresYaml))
+
+# now package up the postgres objects into the Tilt "database" section
+# ----------
 
 # todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
 pgo_crdName = "postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition"
+pgo_upgrades_crdName = "pgupgrades.postgres-operator.crunchydata.com"
 NEXT_k8s_resource(new_name='pgo_crd-definition',
 	objects=[
 		#"postgres-operator:Namespace:default",
 		pgo_crdName, # the CRD definition?
+		pgo_upgrades_crdName,
 	],
 	pod_readiness='ignore',
 	labels=["database_DO-NOT-RESTART-THESE"],
 	resource_deps_extra=[
-		"pre-pull-large-image-1", "pre-pull-large-image-2",
-		"pre-pull-rust-base-image"
+		#"pre-pull-large-image-1", "pre-pull-large-image-2",
+		#"pre-pull-rust-base-image"
 	]
 )
 
@@ -217,20 +235,24 @@ local_resource('pgo_crd-definition_ready',
 	labels=["database_DO-NOT-RESTART-THESE"])
 AddResourceNamesBatch_IfValid(["pgo_crd-definition_ready"])
 
-NEXT_k8s_resource(new_name='pgo_crd-instance',
-	objects=[
-		"debate-map:postgrescluster", # the CRD instance?
-	],
+# NEXT_k8s_resource(new_name='pgo_crd-instance',
+# 	objects=[
+# 		"debate-map:postgrescluster", # the CRD instance?
+# 	],
+# 	labels=["database_DO-NOT-RESTART-THESE"],
+# )
+NEXT_k8s_resource('pgo-upgrade',
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
 NEXT_k8s_resource('pgo',
 	objects=[
 		#"debate-map:postgrescluster", # the CRD instance?
-		"postgres-operator:clusterrole",
-		"postgres-operator:clusterrolebinding",
+		#"postgres-operator:clusterrole",
+		#"postgres-operator:clusterrolebinding",
 		"pgo:serviceaccount",
 		"debate-map-pguser-admin:secret",
-		"pgo-gcs-creds:secret",
+		#"pgo-gcs-creds:secret",
+		"debate-map-pgbackrest-secret:secret",
 	],
 	labels=["database_DO-NOT-RESTART-THESE"],
 )
@@ -250,32 +272,32 @@ NEXT_k8s_resource(new_name='pgo_late',
 # crunchydata prometheus
 # ==========
 
-k8s_yaml(kustomize('./Packages/deploy/Monitors/pg-monitor-pack'))
-# nothing depends on these pods, so don't wait for them to be "ready"
-NEXT_k8s_resource("crunchy-prometheus", pod_readiness='ignore', labels=["monitoring"])
-NEXT_k8s_resource("crunchy-alertmanager", pod_readiness='ignore', labels=["monitoring"])
-NEXT_k8s_resource("crunchy-grafana", pod_readiness='ignore', labels=["monitoring"],
-	port_forwards='4405:3000' if REMOTE else '3405:3000',
-)
-NEXT_k8s_resource(new_name="crunchy-others",
-	pod_readiness='ignore',
-	labels=["monitoring"],
-	objects=[
-		"alertmanager:serviceaccount",
-		"grafana:serviceaccount",
-		"prometheus-sa:serviceaccount",
-		"prometheus-cr:clusterrole",
-		"prometheus-crb:clusterrolebinding",
-		"alertmanagerdata:persistentvolumeclaim",
-		"grafanadata:persistentvolumeclaim",
-		"prometheusdata:persistentvolumeclaim",
-		"alertmanager-config:configmap",
-		"alertmanager-rules-config:configmap",
-		"crunchy-prometheus:configmap",
-		"grafana-dashboards:configmap",
-		"grafana-datasources:configmap",
-		"grafana-secret:secret",
-	])
+# k8s_yaml(kustomize('./Packages/deploy/Monitors/pg-monitor-pack'))
+# # nothing depends on these pods, so don't wait for them to be "ready"
+# NEXT_k8s_resource("crunchy-prometheus", pod_readiness='ignore', labels=["monitoring"])
+# NEXT_k8s_resource("crunchy-alertmanager", pod_readiness='ignore', labels=["monitoring"])
+# NEXT_k8s_resource("crunchy-grafana", pod_readiness='ignore', labels=["monitoring"],
+# 	port_forwards='4405:3000' if REMOTE else '3405:3000',
+# )
+# NEXT_k8s_resource(new_name="crunchy-others",
+# 	pod_readiness='ignore',
+# 	labels=["monitoring"],
+# 	objects=[
+# 		"alertmanager:serviceaccount",
+# 		"grafana:serviceaccount",
+# 		"prometheus-sa:serviceaccount",
+# 		"prometheus-cr:clusterrole",
+# 		"prometheus-crb:clusterrolebinding",
+# 		"alertmanagerdata:persistentvolumeclaim",
+# 		"grafanadata:persistentvolumeclaim",
+# 		"prometheusdata:persistentvolumeclaim",
+# 		"alertmanager-config:configmap",
+# 		"alertmanager-rules-config:configmap",
+# 		"crunchy-prometheus:configmap",
+# 		"grafana-dashboards:configmap",
+# 		"grafana-datasources:configmap",
+# 		"grafana-secret:secret",
+# 	])
 
 # reflector
 # ==========
@@ -283,21 +305,34 @@ NEXT_k8s_resource(new_name="crunchy-others",
 # todo: try switching back to the non-helm approach (since faster)
 # (I think the fixing of the error hit may have just been due to restart or something, rather than from the switch to helm)
 
-helm_remote('reflector',
-	#repo_name='stable',
-	#repo_url='https://charts.helm.sh/stable',
-	repo_url='https://emberstack.github.io/helm-charts',
-	#version='5.4.17',
-	version='6.1.47',
+# helm_remote('reflector',
+# 	#repo_name='stable',
+# 	#repo_url='https://charts.helm.sh/stable',
+# 	repo_url='https://emberstack.github.io/helm-charts',
+# 	#version='5.4.17',
+# 	version='6.1.47',
+# )
+
+helm_repo('emberstack', 'https://emberstack.github.io/helm-charts')
+helm_resource(
+  'reflector',
+  'emberstack/reflector',
+  #labels=['reflector'],
+  #resource_deps=['helm-repo-bitnami']
+  resource_deps=['pgo_late'] # this maybe fixes the errors we were hitting in postgres-operator pods, from reflector's code?
 )
-k8s_yaml('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
-NEXT_k8s_resource("reflector",
-	objects=[
-		"reflector:clusterrole",
-		"reflector:clusterrolebinding",
-		"reflector:serviceaccount",
-	],
-)
+k8s_yaml(ReadFileWithReplacements('./Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml', {
+	#"TILT_PLACEHOLDER:currentTime": timeOfThisTiltfileUpdate,
+	# only update this each time the "tilt up" command is started, not each iteration (switch back to using "timeOfThisTiltfileUpdate" if situation still problematic for new devs)
+	"TILT_PLACEHOLDER:currentTime": timeOfTiltUpCommand,
+}))
+# NEXT_k8s_resource("reflector",
+# 	objects=[
+# 		"reflector:clusterrole",
+# 		"reflector:clusterrolebinding",
+# 		"reflector:serviceaccount",
+# 	],
+# )
 
 # from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
 '''k8s_yaml("./Packages/deploy/Reflector/reflector.yaml")

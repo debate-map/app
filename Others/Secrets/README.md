@@ -1,0 +1,1 @@
+This folder is the "standard location" for placing "secret" files, ie. files that need to be made available to scripts and tools, but which should not become exposed as part of the git repo. All files in this folder (other than this readme file) are excluded by git, using an asterisk entry in the root `.gitignore` file.

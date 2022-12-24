@@ -26,3 +26,7 @@
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+
+# secrets
+Others/Secrets/*
+!Others/Secrets/README.md
