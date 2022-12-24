@@ -97,7 +97,7 @@ export async function ShowTransferNodeDialog(payload_initial: TransferNodesPaylo
 	});
 }
 
-// temp fix for app-server-rs validation issue, of newParentID field needing to be non-null
+// temp fix for app-server validation issue, of newParentID field needing to be non-null
 /*function RemoveNullProps(tree: Object) {
 	for (const [key, val] of Object.entries(tree)) {
 		if (val == null) {

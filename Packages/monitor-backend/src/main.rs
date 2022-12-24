@@ -32,7 +32,7 @@ use axum::{
     headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
 use rust_shared::hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
-use links::app_server_rs_types::LogEntry;
+use links::app_server_types::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use tracing::{error, info, Level, Metadata};
@@ -47,7 +47,7 @@ use rust_shared::tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::{store::storage::{AppState, AppStateWrapper}, links::app_server_rs_link::connect_to_app_server_rs, utils::type_aliases::{ABReceiver, ABSender}};
+use crate::{store::storage::{AppState, AppStateWrapper}, links::app_server_link::connect_to_app_server, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
 mod gql {
@@ -56,8 +56,8 @@ mod gql {
 //mod proxy_to_asjs;
 mod pgclient;
 mod links {
-    pub mod app_server_rs_types;
-    pub mod app_server_rs_link;
+    pub mod app_server_types;
+    pub mod app_server_link;
 }
 mod utils {
     pub mod general;
@@ -70,7 +70,7 @@ mod testing {
     pub mod general;
 }
 /*mod connections {
-    pub mod from_app_server_rs;
+    pub mod from_app_server;
 }*/
 mod migrations {
     pub mod v2;
@@ -102,7 +102,7 @@ pub enum GeneralMessage {
     TestingLogMessageAdded(String),
 }
 
-// for some very-strange reason, using the tokio::broadcast::[Sender/Receiver] to transmit LogEntry's (from app_server_rs_link.rs to _general.rs) silently fails
+// for some very-strange reason, using the tokio::broadcast::[Sender/Receiver] to transmit LogEntry's (from app_server_link.rs to _general.rs) silently fails
 // it fails for async-flume as well, but switching to sync-flume fixes it -- so we need this second-version of GeneralMessage that uses flume (maybe switch to flume completely later, eg. making a broadcast-like wrapper)
 // I suspect the issue has something to do with the "silent dropping of futures" that I had to work-around in handlers.rs...
 // ...but wasn't able to discover the "difference" between MigrateLogMessageAdded and LogEntryAdded pathway that would explain it (and thus suggest a proper solution)
@@ -152,8 +152,8 @@ async fn main() {
     //let (msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = postage::broadcast::channel(10000);
     let (mut msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = async_broadcast::broadcast(10000);
     msg_sender.set_overflow(true);
-    //tokio::spawn(connect_to_app_server_rs(msg_sender_test.clone()));
-    tokio::spawn(connect_to_app_server_rs(app_state.clone(), msg_sender.clone()));
+    //tokio::spawn(connect_to_app_server(msg_sender_test.clone()));
+    tokio::spawn(connect_to_app_server(app_state.clone(), msg_sender.clone()));
 
     let app = gql_::extend_router(app, msg_sender, msg_receiver, /*msg_sender_test, msg_receiver_test,*/ app_state.clone()).await;
 

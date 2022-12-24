@@ -1,5 +1,5 @@
 [package]
-name = "app-server-rs"
+name = "app-server"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -53,9 +53,9 @@ itoa = "1.0.4"
 # To calculate build time:
 # 1) Run tilt-up-local and wait for everything to deploy and settle.
 # 2) Change the version of the "itoa" crate to one of these variants: 1.0.0 -> [...] -> 1.0.4
-# 3) In the tilt ui, press the update-pod button for the app-server-rs pod.
+# 3) In the tilt ui, press the update-pod button for the app-server pod.
 # 4) Observe the logs, to find the "[done: Xs]" value shown for the "cargo build" step in Packages/deploy/@RustBase/Dockerfile.
-# 5) Observe the logs, to find the "[done: Xs]" value shown for the "cargo rustc" step in Packages/app-server-rs/Dockerfile.
+# 5) Observe the logs, to find the "[done: Xs]" value shown for the "cargo rustc" step in Packages/app-server/Dockerfile.
 # 6) Calculate: "build time" = the sum of the two values observed in steps 4-5. (might as well include the individual timings as well)
 
 # Results:

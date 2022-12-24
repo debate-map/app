@@ -61,7 +61,7 @@ Packages/deploy/**
 # ===========================================================================
 
 # default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
-Packages/app-server-rs/*
+Packages/app-server/*
 Packages/client/*
 Packages/deploy/*
 Packages/js-common/*
@@ -75,7 +75,7 @@ Packages/web-server/*
 !Packages/rust-macros/Cargo.toml
 !Packages/rust-shared/Cargo.toml
 !Packages/monitor-backend/Cargo.toml
-!Packages/app-server-rs/Cargo.toml
+!Packages/app-server/Cargo.toml
 !Packages/web-server/Cargo.toml
 
 # and reinclude the shared packages

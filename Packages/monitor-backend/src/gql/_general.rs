@@ -22,7 +22,7 @@ use std::path::Path;
 use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::links::app_server_rs_types::{MtxData, LogEntry};
+use crate::links::app_server_types::{MtxData, LogEntry};
 use crate::testing::general::{execute_test_sequence, TestSequence};
 use crate::{GeneralMessage};
 use crate::migrations::v2::migrate_db_to_v2;
@@ -101,16 +101,16 @@ impl QueryShard_General {
     async fn basicInfo(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<JSONValue, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
-        let basic_info = get_basic_info_from_app_server_rs().await?;
+        let basic_info = get_basic_info_from_app_server().await?;
         Ok(basic_info)
     }
 }
 
-pub async fn get_basic_info_from_app_server_rs() -> Result<JSONValue, Error> {
+pub async fn get_basic_info_from_app_server() -> Result<JSONValue, Error> {
     let client = rust_shared::hyper::Client::new();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::GET)
-        .uri("http://dm-app-server-rs.default.svc.cluster.local:5110/basic-info")
+        .uri("http://dm-app-server.default.svc.cluster.local:5110/basic-info")
         .header("Content-Type", "application/json")
         .body(json!({}).to_string().into())?;
     let res = client.request(req).await?;
@@ -259,7 +259,7 @@ struct StartMigration_Result {
     async fn executeTestSequence(&self, ctx: &async_graphql::Context<'_>, admin_key: String, sequence: TestSequence) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key.clone(), true)?;
         
-        //let message = execute_test_sequence_on_app_server_rs(admin_key, sequence).await?;
+        //let message = execute_test_sequence_on_app_server(admin_key, sequence).await?;
 
         let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
         execute_test_sequence(sequence, msg_sender.clone()).await?;
@@ -279,8 +279,8 @@ pub struct ExecuteTestSequence_Vars {
    sequence: JSONValue,
 }
 
-pub async fn execute_test_sequence_on_app_server_rs(admin_key: String, sequence: JSONValue) -> Result<String, Error> {
-    let endpoint = "http://dm-app-server-rs.default.svc.cluster.local:5110/graphql";
+pub async fn execute_test_sequence_on_app_server(admin_key: String, sequence: JSONValue) -> Result<String, Error> {
+    let endpoint = "http://dm-app-server.default.svc.cluster.local:5110/graphql";
     let query = r#"
         mutation($adminKey: String!, $sequence: JSON!) {
             executeTestSequence(adminKey: $adminKey, sequence: $sequence) {
@@ -326,7 +326,7 @@ impl SubscriptionShard_General {
     #[graphql(name = "_ping")]
     async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();
-        // create the listed file in the app-server-rs pod (eg. using Lens), if you've made an update that you need all clients to refresh for
+        // create the listed file in the app-server pod (eg. using Lens), if you've made an update that you need all clients to refresh for
         let refreshPage = Path::new("./refreshPageForAllUsers_enabled").exists();
         
         stream::once(async move { Ping_Result {

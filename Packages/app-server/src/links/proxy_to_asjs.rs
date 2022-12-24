@@ -102,7 +102,7 @@ pub async fn maybe_proxy_to_asjs_handler_impl(client: HyperClient, schema: RootS
         if let Ok(referrer_url) = referrer_url {
             let path = referrer_url.path();
             if path == "/gql-playground" || path == "/graphiql-new" {
-                info!(r#"Sending "/graphql" request to app-server-rs, since from "{path}". @referrer:{referrer_str}"#);
+                info!(r#"Sending "/graphql" request to app-server, since from "{path}". @referrer:{referrer_str}"#);
                 proxy_request_to_asjs = false;
             }
         }
@@ -150,11 +150,11 @@ pub async fn maybe_proxy_to_asjs_handler_impl(client: HyperClient, schema: RootS
         }
     }
 
-    // if not proxying to app-server-js, then send the request to the GraphQL component of this app-server-rs
+    // if not proxying to app-server-js, then send the request to the GraphQL component of this app-server
     if !proxy_request_to_asjs {
         let response_str = match have_own_graphql_handle_request(req, schema).await {
             Ok(a) => a,
-            Err(err) => format!("Got error in passing/execution of graphql request to app-server-rs' gql engine:{err:?}"),
+            Err(err) => format!("Got error in passing/execution of graphql request to app-server' gql engine:{err:?}"),
         };
 
         // send response (to frontend)

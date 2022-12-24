@@ -39,7 +39,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 
 * [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
 * [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (Rust)
-* [app-server-rs](https://github.com/debate-map/app/tree/master/Packages/app-server-rs): Serves database queries and backend commands. (Rust)
+* [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Serves database queries and backend commands. (Rust)
 * [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. (TypeScript)
 * [monitor-backend](https://github.com/debate-map/app/tree/master/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/master/Packages/monitor-backend#design-goals)). (Rust)
 * [js-common](https://github.com/debate-map/app/tree/master/Packages/js-common): Code shared between the various JS packages. (TypeScript)
@@ -480,7 +480,7 @@ Prerequisite steps: [setup-k8s](#setup-k8s)
 		* 2.1.3\) Run (in repo root): `npm start backend.tiltUp_local`
 		* 2.1.4\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 	* 2.2\) Option 2, by launching individual pods/components directly on your host machine: (arguably simpler, but not recommended long-term due to lower reliability for dependencies, eg. platform-specific build hazards and versioning issues)
-		* 2.2.1\) Start app server (if needed): `cd Packages/app-server-rs; cargo run` (not yet tested)
+		* 2.2.1\) Start app server (if needed): `cd Packages/app-server; cargo run` (not yet tested)
 		* 2.2.2\) Start web server (if needed): `cd Packages/web-server; cargo run` (not yet tested)
 			* 2.2.2.1\) As an alternative to starting the web server pod, you can try an alternative (webpack-based serving) described in the [run-frontend-local](#run-frontend-local) module.
 	* Note: If changes were made that require changes to the db schema, you may hit errors on app-server startup. To resolve this, you can either reset your local database (see: [#reset-db-local](#reset-db-local)), or write/run a database migration (see: [#db-migrate](#db-migrate)).

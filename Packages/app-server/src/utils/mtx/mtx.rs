@@ -285,7 +285,7 @@ impl Drop for Mtx {
 
 /*//wrap_slow_macros!{
 
-// derived from struct in from_app_server_rs.rs
+// derived from struct in from_app_server.rs
 #[derive(Serialize)]
 pub struct SendMtxResults_Request<'a> {
     mtx: &'a Mtx,
@@ -352,7 +352,7 @@ impl MtxSection {
     }
 }
 
-// sync with "app_server_rs_types.rs" in monitor-backend
+// sync with "app_server_types.rs" in monitor-backend
 // ==========
 
 #[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
@@ -368,7 +368,7 @@ pub struct MtxData {
     //pub id: Uuid,
     pub id: String, // changed to String here, for easier usage with gql in monitor-backend (agql's OutputType isn't implemented for Uuid)
 
-    // use this in app-server-rs codebase
+    // use this in app-server codebase
     pub section_lifetimes: IndexMap<String, MtxSection>,
     
     // use this in monitor-backend codebase

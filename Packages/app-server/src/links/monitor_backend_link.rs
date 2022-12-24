@@ -86,7 +86,7 @@ async fn write(mut sender: SplitSink<WebSocket, Message>) {
     }
 }
 
-// section to keep synchronized with "app_server_rs_types.rs" in monitor-backend
+// section to keep synchronized with "app_server_types.rs" in monitor-backend
 // ==========
 
 #[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]

@@ -21,7 +21,7 @@ Logging levels: (as interpreted in the debate-map codebase)
 * TRACE: For low-level information that's not fine to stream to the monitor-backend. (eg. due to the expected trigger-rate being too high, to where it might congest the local network, or other layer of processing)
 */
 
-// keep fields synced with struct in app_server_rs_link.rs (this one's the "source")
+// keep fields synced with struct in app_server_link.rs (this one's the "source")
 #[derive(Clone, Debug, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct LogEntry {
     pub time: f64,
@@ -51,7 +51,7 @@ pub fn does_event_match_conditions(metadata: &Metadata, levels_to_include: &[Lev
 
 pub fn should_event_be_printed(metadata: &Metadata) -> bool {
     match metadata.target() {
-        a if a.starts_with("app_server_rs") => {
+        a if a.starts_with("app_server") => {
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO])
             //should_event_be_kept_according_to_x(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
         },
@@ -63,7 +63,7 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
 }
 pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
     match metadata.target() {
-        a if a.starts_with("app_server_rs") => {
+        a if a.starts_with("app_server") => {
             //does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG, Level::TRACE])
             // don't send TRACE atm, because that's intended for logging that's potentially *very* verbose, and could conceivably cause local network congestion
             // (long-term, the plan is to make a way for the monitor tool to request that verbose data for a time-slice the user specifies, if/when needed)

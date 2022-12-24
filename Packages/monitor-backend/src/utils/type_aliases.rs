@@ -2,7 +2,7 @@ use deadpool::managed::Object;
 use deadpool_postgres::Manager;
 use rust_shared::serde_json::{Map, self};
 
-// sync with type_aliases.rs in app-server-rs
+// sync with type_aliases.rs in app-server
 // ==========
 
 //pub type GQLContext<'a> = async_graphql::Context<'a>; // couldn't get this working right, with #[Subscription] macro

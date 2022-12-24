@@ -31,9 +31,9 @@ COPY Packages/monitor-backend/ /dm_repo/Packages/monitor-backend/
 COPY Packages/web-server/Cargo.toml Packages/web-server/Cargo.toml
 RUN mkdir Packages/web-server/src/
 RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/web-server/src/main.rs
-COPY Packages/app-server-rs/Cargo.toml Packages/app-server-rs/Cargo.toml
-RUN mkdir Packages/app-server-rs/src/
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server-rs/src/main.rs
+COPY Packages/app-server/Cargo.toml Packages/app-server/Cargo.toml
+RUN mkdir Packages/app-server/src/
+RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server/src/main.rs
 
 # now build everything
 WORKDIR /dm_repo/Packages/monitor-backend

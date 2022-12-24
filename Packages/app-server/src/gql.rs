@@ -197,7 +197,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWra
                     let schema3 = schema2.clone();
                     let graphql_router_layered = graphql_router_layered.clone();
                     async move {
-                        // if we're on the "/gql-playground" page, always send the request to the app-server-rs' regular handler (ie. not using the proxy to app-server-js)
+                        // if we're on the "/gql-playground" page, always send the request to the app-server' regular handler (ie. not using the proxy to app-server-js)
                         if let Some(referrer) = req_headers.get("Referer") {
                             let referrer_str = &String::from_utf8_lossy(referrer.as_bytes());
                             let referrer_url = Url::parse(referrer_str);
@@ -223,7 +223,7 @@ pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWra
             })*/
         )
 
-        // for endpoints not defined by app-server-rs (eg. /check-mem), assume it is meant for app-server-js, and thus call the proxying function
+        // for endpoints not defined by app-server (eg. /check-mem), assume it is meant for app-server-js, and thus call the proxying function
         .fallback(get(maybe_proxy_to_asjs_handler).merge(post(maybe_proxy_to_asjs_handler)))
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(client_to_asjs));

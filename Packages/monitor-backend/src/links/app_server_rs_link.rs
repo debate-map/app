@@ -14,31 +14,31 @@ use rust_shared::url::Url;
 use tokio_tungstenite::{tungstenite::{connect, Message}, connect_async};
 use rust_shared::uuid::Uuid;
 
-use crate::{GeneralMessage, utils::type_aliases::{ABSender, JSONValue}, store::storage::{AppStateWrapper, LQInstance_Partial}, links::app_server_rs_types::{Message_ASToMB, LogEntry}};
+use crate::{GeneralMessage, utils::type_aliases::{ABSender, JSONValue}, store::storage::{AppStateWrapper, LQInstance_Partial}, links::app_server_types::{Message_ASToMB, LogEntry}};
 
-pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSender<GeneralMessage>) {
+pub async fn connect_to_app_server(app_state: AppStateWrapper, sender: ABSender<GeneralMessage>) {
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
 
-        let url = Url::parse("ws://dm-app-server-rs.default.svc.cluster.local:5110/monitor-backend-link").unwrap();
+        let url = Url::parse("ws://dm-app-server.default.svc.cluster.local:5110/monitor-backend-link").unwrap();
         let connect_attempt_fut = connect_async(url);
         let (mut socket, response) = match time::timeout(Duration::from_secs(3), connect_attempt_fut).await {
             // if timeout happens, just ignore (there might have been local network glitch or something)
             Err(_err) => {
-                error!("Timed out trying to connect to app-server-rs...");
+                error!("Timed out trying to connect to app-server...");
                 continue;
             },
             Ok(connect_result) => {
                 match connect_result {
                     Ok(a) => a,
                     Err(err) => {
-                        error!("Couldn't connect to app-server-rs websocket endpoint:{}", err);
+                        error!("Couldn't connect to app-server websocket endpoint:{}", err);
                         continue;
                     }
                 }
             },
         };
-        info!("Connection made with app-server-rs websocket endpoint. @response:{response:?}");
+        info!("Connection made with app-server websocket endpoint. @response:{response:?}");
 
         /*match socket.write_message(Message::Text(json!({
             "action": "listen",
@@ -48,7 +48,7 @@ pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSend
         }).to_string())) {
             Ok(_) => {},
             Err(err) => {
-                debug!("Link with app-server-rs lost:{}", err);
+                debug!("Link with app-server lost:{}", err);
                 return;
             },
         }*/
@@ -59,7 +59,7 @@ pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSend
                 Some(entry) => match entry {
                     Ok(msg) => msg,
                     Err(err) => {
-                        error!("Error reading message from link with app-server-rs:{}", err);
+                        error!("Error reading message from link with app-server:{}", err);
                         break;
                     }
                 },
@@ -125,7 +125,7 @@ pub async fn connect_to_app_server_rs(app_state: AppStateWrapper, sender: ABSend
     }
 }
 
-// from lq_instance.rs in app-server-rs
+// from lq_instance.rs in app-server
 fn get_lq_instance_key(table_name: &str, filter: &JSONValue) -> String {
     //format!("@table:{} @filter:{:?}", table_name, filter)
     json!({

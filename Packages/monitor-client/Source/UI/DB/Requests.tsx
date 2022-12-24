@@ -101,7 +101,7 @@ export const RequestsUI = observer(()=>{
 			}
 			return true;
 		});
-	// app-server-rs sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
+	// app-server sends the entries "ordered" by end-time (since that's when it knows it can send it), but we want the entries sorted by start-time
 	mtxResults = mtxResults.OrderBy(mtx=>{
 		const earliestLifetimeStart = Object.values(mtx.sectionLifetimes).map(a=>a.startTime).Min();
 		return earliestLifetimeStart;
@@ -117,7 +117,7 @@ export const RequestsUI = observer(()=>{
 					await refetch();
 					//forceUpdate(); // fsr, this is currently necessary
 				}}/>
-				<Button ml={5} text="Clear (on app-server-rs)" onClick={async()=>{
+				<Button ml={5} text="Clear (on app-server)" onClick={async()=>{
 					const {message} = (await clearMtxResults({
 						variables: {adminKey},
 					})).data.clearMtxResults;

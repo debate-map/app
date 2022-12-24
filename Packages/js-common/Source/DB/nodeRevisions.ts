@@ -54,7 +54,7 @@ export const GetNodeRevisions = CreateAccessor((nodeID: string): NodeRevision[]=
 		}},
 	}, a=>a.nodeRevisions).map(a=>CleanNodeRevision(a));
 });
-// commented for now, as support is not yet added for this type of "contains" filter (ie. targeting something within jsonb), in app-server-rs
+// commented for now, as support is not yet added for this type of "contains" filter (ie. targeting something within jsonb), in app-server
 /*export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): NodeRevision[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],

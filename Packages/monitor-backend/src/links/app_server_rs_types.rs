@@ -13,7 +13,7 @@ use crate::utils::type_aliases::{JSONValue, RowData};
 
 wrap_slow_macros! {
 
-// sync with "mtx.rs" in app-server-rs
+// sync with "mtx.rs" in app-server
 // ==========
 
 #[derive(SimpleObject)] // added in monitor-backend only
@@ -23,7 +23,7 @@ pub struct MtxData {
     //pub id: Uuid,
     pub id: String, // changed to String here, for easier usage with gql in monitor-backend (agql's OutputType isn't implemented for Uuid)
 
-    // use this in app-server-rs codebase
+    // use this in app-server codebase
     //pub section_lifetimes: IndexMap<String, MtxSection>,
 
     // use this in monitor-backend codebase
@@ -41,7 +41,7 @@ pub struct MtxSection {
     pub duration: Option<f64>,
 }
 
-// sync with "logging.rs" in app-server-rs
+// sync with "logging.rs" in app-server
 // ==========
 
 // keep fields synced with struct in logging.rs (this one's the "mirror")
@@ -54,7 +54,7 @@ pub struct LogEntry {
     pub message: String,
 }
 
-// sync with "monitor_backend_link.rs" in app-server-rs
+// sync with "monitor_backend_link.rs" in app-server
 // ==========
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

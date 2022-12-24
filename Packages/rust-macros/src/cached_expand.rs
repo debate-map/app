@@ -121,7 +121,7 @@ pub fn cached_expand_impl(input: TokenStream) -> TokenStream {
         .arg("--target-dir").arg("/tmp/cargo-expand-for-cached-expand")
         .env("FOR_CACHED_EXPAND", "1")
         //.current_dir(working_dir)
-        .current_dir(working_dir_str + "/Packages/app-server-rs")
+        .current_dir(working_dir_str + "/Packages/app-server")
         
         //.output()
         .stdout(Stdio::piped())

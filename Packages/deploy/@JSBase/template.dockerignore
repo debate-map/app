@@ -1,5 +1,5 @@
 # default all files under "Packages" to being excluded... (keep this block the same in all "template.dockerignore" files)
-Packages/app-server-rs/*
+Packages/app-server/*
 Packages/client/*
 Packages/deploy/*
 Packages/js-common/*

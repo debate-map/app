@@ -135,7 +135,7 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
 async fn execute_test_step(step: TestStep) -> Result<(), Error> {
     //if let Some(comp) = step.signIn {}
     if let Some(comp) = step.addNodeRevision {
-        let fut = post_request_to_app_server_rs(json!({
+        let fut = post_request_to_app_server(json!({
             "variables": {
                 "input": {
                     "mapID": "GLOBAL_MAP_00000000001",
@@ -168,11 +168,11 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
     Ok(())
 }
 
-async fn post_request_to_app_server_rs(message: serde_json::Value) -> Result<JSONValue, Error> {
+async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONValue, Error> {
     let client = rust_shared::hyper::Client::new();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::POST)
-        .uri("http://dm-app-server-rs.default.svc.cluster.local:5110/graphql")
+        .uri("http://dm-app-server.default.svc.cluster.local:5110/graphql")
         .header("Content-Type", "application/json")
         // temp; use db-password as way to prove this request is from an internal pod, and thus doesn't need to be signed-in
         .header("SecretForRunAsSystem", env::var("DB_PASSWORD").unwrap())

@@ -26,7 +26,7 @@ use rust_shared::tokio::{sync::{broadcast, Mutex, RwLock}, runtime::Runtime};
 use flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::{links::app_server_rs_types::{MtxSection, MtxData}, utils::type_aliases::{JSONValue, RowData}};
+use crate::{links::app_server_types::{MtxSection, MtxData}, utils::type_aliases::{JSONValue, RowData}};
 
 pub type AppStateWrapper = Arc<AppState>;
 #[derive(Default)]
@@ -48,7 +48,7 @@ pub struct LQInstance_Partial {
 
 /*wrap_slow_macros!{
 
-// derived from struct in app-server-rs/.../mtx.rs
+// derived from struct in app-server/.../mtx.rs
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Mtx {
     //pub id: Arc<Uuid>,

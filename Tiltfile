@@ -578,15 +578,15 @@ docker_build(imageURL_webServer, '.', dockerfile='Packages/web-server/Dockerfile
 		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/web-server",
 	},
 )
-imageURL_appServerRS = registryURL + '/dm-app-server-rs-' + os.getenv("ENV")
-docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server-rs/Dockerfile',
+imageURL_appServerRS = registryURL + '/dm-app-server-' + os.getenv("ENV")
+docker_build(imageURL_appServerRS, '.', dockerfile='Packages/app-server/Dockerfile',
 	build_args={
 		"RUST_BASE_URL": imageURL_rustBase,
 		"env_ENV": os.getenv("ENV") or "dev",
 		"debug_vs_release": "release" if USE_RELEASE_FLAG else "debug",
 		"debug_vs_release_flag": "--release" if USE_RELEASE_FLAG else "",
 		# docker doesn't seem to support string interpolation in COPY command, so do it here
-		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/app-server-rs",
+		"copy_from_path": "/dm_repo/target/" + ("release" if USE_RELEASE_FLAG else "debug") + "/app-server",
 	},
 )
 
@@ -600,7 +600,7 @@ k8s_yaml(ReadFileWithReplacements('./Packages/monitor-backend/deployment.yaml', 
 k8s_yaml(ReadFileWithReplacements('./Packages/web-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
 }))
-k8s_yaml(ReadFileWithReplacements('./Packages/app-server-rs/deployment.yaml', {
+k8s_yaml(ReadFileWithReplacements('./Packages/app-server/deployment.yaml', {
 	"TILT_PLACEHOLDER:imageURL_appServerRS": imageURL_appServerRS,
 }))
 
@@ -623,7 +623,7 @@ NEXT_k8s_resource_batch([
 		"labels": ["app"],
 	},
 	{
-		"workload": 'dm-app-server-rs',
+		"workload": 'dm-app-server',
 		# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
 		"trigger_mode": TRIGGER_MODE_MANUAL,
 		"port_forwards": [

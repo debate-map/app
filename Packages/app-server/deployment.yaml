@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dm-app-server-rs
+  name: dm-app-server
   #namespace: app
   labels:
-    app: dm-app-server-rs
+    app: dm-app-server
 spec:
   #clusterIP: None
   selector:
-    app: dm-app-server-rs
+    app: dm-app-server
   # to make it accessible outside of cluster
   #type: NodePort
   ports:
@@ -19,24 +19,24 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dm-app-server-rs
+  name: dm-app-server
   #namespace: app
   labels:
-    app: dm-app-server-rs
+    app: dm-app-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dm-app-server-rs
+      app: dm-app-server
   template:
     metadata:
       labels:
-        app: dm-app-server-rs
+        app: dm-app-server
     spec:
       imagePullSecrets:
         - name: registry-credentials
       containers:
-      - name: dm-app-server-rs
+      - name: dm-app-server
         image: "TILT_PLACEHOLDER:imageURL_appServerRS"
         resources:
           requests:
@@ -69,12 +69,12 @@ spec:
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
 
-# give app-server-rs various kubernetes-api permissions
+# give app-server various kubernetes-api permissions
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: role-for-dm-app-server-rs-pod
+  name: role-for-dm-app-server-pod
   namespace: default
 rules:
 - apiGroups: [""]
@@ -87,12 +87,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: role-binding-for-dm-app-server-rs
+  name: role-binding-for-dm-app-server
   namespace: default
 subjects:
   - kind: ServiceAccount
     name: default
 roleRef:
   kind: Role
-  name: role-for-dm-app-server-rs-pod
+  name: role-for-dm-app-server-pod
   apiGroup: rbac.authorization.k8s.io

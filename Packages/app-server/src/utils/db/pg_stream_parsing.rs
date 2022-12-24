@@ -130,7 +130,7 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
 #[derive(Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct LDChange {
     pub kind: String,
-    /// Present in data from lds, but not used for anything atm (within app-server-rs).
+    /// Present in data from lds, but not used for anything atm (within app-server).
     pub schema: String,
     pub table: String,
     pub columnnames: Option<Vec<String>>,

@@ -108,7 +108,7 @@ const GetPodName_DB = context=>{
 	return GetPodInfos(context, "postgres-operator", ["postgres-operator.crunchydata.com/cluster=debate-map", "postgres-operator.crunchydata.com/role=master"])[0].name;
 };
 const GetPodName_WebServer = context=>GetPodInfos(context, appNamespace, ["app=dm-web-server"])[0].name;
-const GetPodName_AppServerRS = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server-rs"])[0].name;
+const GetPodName_AppServer = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server"])[0].name;
 
 /** Gets the k8s context that is selected as the "current" one, in Docker Desktop. */
 function K8sContext_Current() {
@@ -146,15 +146,15 @@ Object.assign(scripts, {
 	"cargo-test": `cargo test`,
 	// gets stuff we might want, from the k8s pods
 	kget: {
-		"app-server-rs": Dynamic(()=>{
+		"app-server": Dynamic(()=>{
 			const localPath = `./Temp/kget_as-rs_${CurrentTime_SafeStr()}`;
 
 			// package up the files we want into a "temp_for_kget" folder, so we can copy the files in one k8s command (see: https://devops.stackexchange.com/a/14563)
 			/*const bundleFilesCmd = `sh -c "mkdir -p ./temp_for_kget && cp cargo-timing.html ./temp_for_kget/ && cp ./*profdata ./temp_for_kget/"`;
-			execSync(`${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerRS(commandArgs[0])} -c dm-app-server-rs -- ${bundleFilesCmd}`);*/
+			execSync(`${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServer(commandArgs[0])} -c dm-app-server -- ${bundleFilesCmd}`);*/
 
-			const podName = GetPodName_AppServerRS(commandArgs[0]);
-			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${podName}:/dm_repo/Packages/app-server-rs/kgetOutput_buildTime/. ${localPath}`);
+			const podName = GetPodName_AppServer(commandArgs[0]);
+			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${podName}:/dm_repo/Packages/app-server/kgetOutput_buildTime/. ${localPath}`);
 			console.log(`Files copied from "${podName}" to: ${paths.resolve(localPath)}`);
 
 			execSync(`start "" "${paths.resolve(localPath)}"`);
@@ -202,8 +202,8 @@ Object.assign(scripts, {
 		"web-server": Dynamic(()=>{
 			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_WebServer(commandArgs[0])} -c dm-web-server -- ${startBestShellCmd}`;
 		}),
-		"app-server-rs": Dynamic(()=>{
-			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServerRS(commandArgs[0])} -c dm-app-server-rs -- ${startBestShellCmd}`;
+		"app-server": Dynamic(()=>{
+			return `${KubeCTLCmd(commandArgs[0])} exec -ti -n ${appNamespace} ${GetPodName_AppServer(commandArgs[0])} -c dm-app-server -- ${startBestShellCmd}`;
 		}),
 
 		etcd_dumpAsJSON: Dynamic(()=>{
@@ -241,13 +241,13 @@ function GetPortForwardCommandsStr(context) {
 	if (commandArgs.includes("onlyDB")) return forDB;
 
 	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:5100`;
-	const forAppServerRS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerRS(context)} 5${d2}10:5110`;
+	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}10:5110`;
 	const forAppServerJS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} 5${d2}15:5115`;
 	const forAppServerJS_inspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} 5${d2}16:5116`;
-	const forMonitor = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerRS(context)} 5${d2}30:5130`;
+	const forMonitor = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}30:5130`;
 	if (commandArgs.includes("onlyInspector")) return forAppServerJS_inspector;
 
-	return `concurrently --kill-others --names db,ws,asr,asj,asji,mo "${forDB}" "${forWebServer}" "${forAppServerRS}" "${forAppServerJS}" "${forAppServerJS_inspector}" "${forMonitor}"`;
+	return `concurrently --kill-others --names db,ws,asr,asj,asji,mo "${forDB}" "${forWebServer}" "${forAppServer}" "${forAppServerJS}" "${forAppServerJS_inspector}" "${forMonitor}"`;
 }
 
 // for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)

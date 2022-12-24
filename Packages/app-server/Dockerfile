@@ -26,7 +26,7 @@ COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
 
 # copy this package
-COPY Packages/app-server-rs/ /dm_repo/Packages/app-server-rs/
+COPY Packages/app-server/ /dm_repo/Packages/app-server/
 
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
@@ -37,7 +37,7 @@ RUN mkdir Packages/web-server/src/
 RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/web-server/src/main.rs
 
 # now build everything
-WORKDIR /dm_repo/Packages/app-server-rs
+WORKDIR /dm_repo/Packages/app-server
 # to clear the cache below (and all other mount-caches), run: docker builder prune --filter type=exec.cachemount
 #RUN --mount=type=cache,target=/usr/local/cargo,from=dm-rust-base,source=/usr/local/cargo \
 RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
@@ -46,7 +46,7 @@ RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo
 #	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
 	cargo build --timings ${debug_vs_release_flag} && \
 	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
-	mv ${copy_from_path} /dm_repo/Packages/app-server-rs/app-server-rs-binary
+	mv ${copy_from_path} /dm_repo/Packages/app-server/app-server-binary
 
 RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildTime/ || :) && (cp ./*profdata ./kgetOutput_buildTime/ || :)
 
@@ -62,26 +62,26 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 	ARG env_ENV
 # ----------
 
-WORKDIR /dm_repo/Packages/app-server-rs
+WORKDIR /dm_repo/Packages/app-server
 ENV ENV=$env_ENV
 
 # temp (for ssl connections; will look for cleaner way soon)
 #RUN apt-get update && apt-get install -y ca-certificates
 
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/app-server-rs-binary .
-COPY --from=cargo-build /dm_repo/Packages/app-server-rs/kgetOutput_buildTime/ ./kgetOutput_buildTime/
+COPY --from=cargo-build /dm_repo/Packages/app-server/app-server-binary .
+COPY --from=cargo-build /dm_repo/Packages/app-server/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
 # other files needed
 COPY .env .
 
 # check binary size
-RUN ls -lh app-server-rs-binary
+RUN ls -lh app-server-binary
 
 # regular running
 # ==========
 
 CMD echo Starting Rust program...; \
-	RUST_BACKTRACE=full ./app-server-rs-binary; \
+	RUST_BACKTRACE=full ./app-server-binary; \
 	sleep 1; echo Rust program crashed...
 #	sleep 1; echo Rust program crashed...; sleep 123456789
 
@@ -94,11 +94,11 @@ CMD echo Starting Rust program...; \
 # 	apt-get -y install procps
 
 # run the program, with heaptrack enabled
-# CMD RUST_BACKTRACE=full heaptrack ./app-server-rs; sleep 123456789
+# CMD RUST_BACKTRACE=full heaptrack ./app-server; sleep 123456789
 
 # once running, and you've collected enough profiling data, do the following to view:
 # 1) Find program's process-id: `ps aux --sort -rss`
 # 2) Kill program: `kill -9 <pid>`
-# 3) Copy the profiler-data to host computer: `kubectl cp dm-app-server-rs-XXX:/dm_repo/Packages/app-server-rs/heaptrack.app-server-rs.XXX.gz heaptrack.app-server-rs.XXX.gz`
+# 3) Copy the profiler-data to host computer: `kubectl cp dm-app-server-XXX:/dm_repo/Packages/app-server/heaptrack.app-server.XXX.gz heaptrack.app-server.XXX.gz`
 # 4) If on Windows, install `heaptrack_gui` in linux-vm (eg. ubuntu desktop): `apt-get update && apt-get -y install heaptrack-gui`
 # 5) Run heaptrack-gui: `heaptrack-gui PATH_TO_PROFILER_DATA`
