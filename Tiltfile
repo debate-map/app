@@ -15,6 +15,10 @@ CONTEXT = os.getenv("CONTEXT")
 REMOTE = CONTEXT != "local"
 print("Context:", CONTEXT, "Remote:", REMOTE)
 
+# tilt config settings
+# for now, we're trying with complete-disabling of tilt's docker-prune behavior (to confirm if that's the cause of issue #169)
+docker_prune_settings(disable=True)
+
 # other tilt extensions
 load('ext://helm_remote', 'helm_remote')
 load('ext://helm_resource', 'helm_resource', 'helm_repo')
