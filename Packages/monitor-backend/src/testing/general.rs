@@ -3,14 +3,18 @@ use std::str::FromStr;
 
 use rust_shared::hyper::Method;
 use rust_shared::anyhow::Error;
+use rust_shared::jwt_simple::prelude::{Claims, MACLike};
 use rust_shared::serde_json::json;
+use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserInfoForJWT};
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64_id;
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::time::{time_since_epoch_ms_i64, tokio_sleep, tokio_sleep_until, time_since_epoch_ms};
+use rust_shared::utils::type_aliases::JWTDuration;
 use rust_shared::{async_graphql, async_graphql::{SimpleObject, InputObject}};
 use rust_shared::db_constants::{SYSTEM_USER_ID};
 use flume::Sender;
 use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::{self as rust_shared, serde_json, tokio};
+use rust_shared::{self as rust_shared, serde_json, tokio, to_sub_err};
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde;
 use tracing::{error, info};
@@ -140,10 +144,7 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
                 "input": {
                     "mapID": "GLOBAL_MAP_00000000001",
                     "revision": {
-                        "id": new_uuid_v4_as_b64_id(),
                         "node": comp.nodeID,
-                        "creator": SYSTEM_USER_ID,
-                        "createdAt": time_since_epoch_ms(),
                         "phrasing": {
                             "terms": [],
                             "text_base": comp.text.unwrap_or(format!("ValForTestRevision_At:{}", time_since_epoch_ms())),
@@ -169,13 +170,22 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
 }
 
 async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONValue, Error> {
+    // maybe temp; on every request, create a new JWT, authenticating this request as the system-user (less complicated, albeit not terribly elegant)
+    let user_data = UserInfoForJWT { id: SYSTEM_USER_ID.o(), email: "debatemap@gmail.com".o() };
+    let jwt_duration = 60 * 60 * 24 * 7; // = 604800 seconds = 1 week
+    let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
+    let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(jwt_duration.try_into().map_err(to_sub_err)?));
+    let jwt = key.authenticate(claims).map_err(to_sub_err)?;
+    //info!("Generated dev JWT:{}", jwt);
+
     let client = rust_shared::hyper::Client::new();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::POST)
         .uri("http://dm-app-server.default.svc.cluster.local:5110/graphql")
         .header("Content-Type", "application/json")
         // temp; use db-password as way to prove this request is from an internal pod, and thus doesn't need to be signed-in
-        .header("SecretForRunAsSystem", env::var("DB_PASSWORD").unwrap())
+        //.header("SecretForRunAsSystem", env::var("DB_PASSWORD").unwrap())
+        .header("authorization", format!("Bearer {}", jwt))
         .body(message.to_string().into())?;
     let res = client.request(req).await?;
     let res_as_json_str = body_to_str(res.into_body()).await?;

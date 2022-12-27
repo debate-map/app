@@ -2,8 +2,6 @@ use deadpool::managed::Object;
 use deadpool_postgres::Manager;
 use rust_shared::{serde_json::Map, utils::type_aliases::JSONValue};
 
-pub type JWTDuration = jwt_simple::prelude::Duration;
-
 // sync with type_aliases.rs in monitor-backend
 // ==========
 

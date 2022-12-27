@@ -27,6 +27,7 @@
 use std::time::{UNIX_EPOCH, SystemTime, Duration};
 
 // subcrate re-exports (todo: probably replace with "pub use ? as ?;" syntax, as seen here: https://www.reddit.com/r/rust/comments/ayibls/comment/ei0ypg3)
+pub extern crate rust_macros;
 pub extern crate anyhow;
 pub extern crate async_graphql;
 pub extern crate async_graphql_axum;
@@ -48,11 +49,14 @@ pub extern crate tokio_postgres;
 pub extern crate tower;
 pub extern crate tower_http;
 pub extern crate tower_service;
-pub extern crate rust_macros;
+pub extern crate jwt_simple;
 
 // this crate's modules
 pub mod db_constants;
 pub mod utils {
+    pub mod auth {
+        pub mod jwt_utils_base;
+    }
     pub mod db {
         pub mod uuid;
     }

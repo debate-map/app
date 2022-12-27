@@ -252,3 +252,8 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     
     Ok(response_str)
 }
+
+// todo: probably use a wrapper struct like this, rather than just storing the jwt as "the String entry" in the graphql context-data
+/*pub struct GQLDataFromHTTPRequest {
+    pub jwt: Option<String>,
+}*/

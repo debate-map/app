@@ -19,6 +19,7 @@ use rust_shared::axum::routing::get;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
+use rust_shared::utils::auth::jwt_utils_base::UserInfoForJWT;
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
 use rust_shared::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
@@ -29,7 +30,7 @@ use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
 use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream, to_anyhow};
 use tracing::{info, error, warn};
-use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
+use rust_shared::jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
@@ -42,9 +43,7 @@ use crate::store::storage::{AppStateWrapper, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
-use crate::utils::type_aliases::{ABSender, JWTDuration};
-
-use super::jwt_utils::UserInfoForJWT;
+use crate::utils::type_aliases::{ABSender};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GoogleUserInfoResult {

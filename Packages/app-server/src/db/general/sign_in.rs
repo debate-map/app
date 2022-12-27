@@ -25,18 +25,17 @@ use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::{get_uri_params, k8s_dev};
 use rust_shared::indoc::{indoc, formatdoc};
 use rust_shared::utils::time::time_since_epoch_ms_i64;
-use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::utils::type_aliases::{JSONValue, JWTDuration};
 use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
 use rust_shared::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_stream, to_anyhow};
 use tracing::{info, error, warn};
-use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
+use rust_shared::jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
 use crate::db::_general::GenericMutation_Result;
 use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
 use crate::db::commands::_command::set_db_entry_by_id_for_struct;
 use crate::db::general::sign_in_::google::{store_user_data_for_google_sign_in, GoogleUserInfoResult};
-use crate::db::general::sign_in_::jwt_utils::get_or_create_jwt_key_hs256;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
@@ -44,9 +43,9 @@ use crate::store::storage::{AppStateWrapper, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
-use crate::utils::type_aliases::{ABSender, JWTDuration};
+use crate::utils::type_aliases::{ABSender};
 
-use super::sign_in_::jwt_utils::UserInfoForJWT;
+use rust_shared::utils::auth::jwt_utils_base::{UserInfoForJWT, get_or_create_jwt_key_hs256};
 
 async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req: Request<Body>) -> impl IntoResponse {
     let uri = req.uri();
