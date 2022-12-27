@@ -164,7 +164,15 @@ impl LQInstance {
                             our_data_changed = true;
                         }
                     },
-                    None => {},
+                    None => {
+                        // if the modified entry wasn't part of the result-set, it must not have matched the filter before the update; but check if it matches now
+                        let filter_check_result = entry_matches_filter(&new_data, &self.filter)
+                            .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
+                        if filter_check_result {
+                            new_entries.push(new_data);
+                            our_data_changed = true;
+                        }
+                    },
                 };
             },
             "delete" => {
