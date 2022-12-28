@@ -16,6 +16,7 @@ itertools = "0.10.3"
 regex = "1.5.5"
 once_cell = "1.13.0"
 jwt-simple = "0.11.2"
+chrono = "0.4.23"
 
 url = "2"
 hyper = {version = "0.14.16", features = ["client"] }

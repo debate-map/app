@@ -173,7 +173,7 @@ lazy_static! {
 fn get_batch_execution_concurrency_limit() -> usize {
     let logical_cpus = num_cpus::get();
     match logical_cpus {
-        // prefer to leave one core free, for the various other processing that needs to occur
+        // if device has 3+ cores, leave one core free, for the various other processing that needs to occur
         3.. => logical_cpus - 1,
         _ => logical_cpus,
     }

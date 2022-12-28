@@ -13,8 +13,11 @@ export class TestSequence {
 	steps: TestStep[] = [];
 }
 export class TestStep {
+	enabled?: boolean;
 	preWait?: number;
 	postWait?: number;
+	waitTillComplete?: boolean;
+	waitTillDurationX?: number;
 
 	stepBatch?: TS_StepBatch;
 	addNodeRevision?: TS_AddNodeRevision;

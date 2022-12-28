@@ -1,12 +1,13 @@
 use std::env;
 use std::str::FromStr;
 
+use rust_shared::chrono::{Utc, SecondsFormat};
 use rust_shared::hyper::Method;
 use rust_shared::anyhow::Error;
 use rust_shared::jwt_simple::prelude::{Claims, MACLike};
 use rust_shared::serde_json::json;
 use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserInfoForJWT};
-use rust_shared::utils::db::uuid::new_uuid_v4_as_b64_id;
+use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64_id, new_uuid_v4_as_b64};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::time::{time_since_epoch_ms_i64, tokio_sleep, tokio_sleep_until, time_since_epoch_ms};
 use rust_shared::utils::type_aliases::JWTDuration;
@@ -30,6 +31,7 @@ pub struct TestSequence {
 }
 #[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)]
 pub struct TestStep {
+	enabled: Option<bool>,
 	preWait: Option<i64>,
 	postWait: Option<i64>,
     waitTillComplete: Option<bool>,
@@ -59,6 +61,8 @@ pub struct TS_AddNodeRevision {
 fn flatten_steps(steps: Vec<TestStep>) -> Vec<TestStep> {
     let mut result: Vec<TestStep> = vec![];
     for step in steps {
+        if !step.enabled.unwrap_or(true) { continue; }
+
         if let Some(batch) = &step.stepBatch {
             let substeps_flat_unrepeated = flatten_steps(batch.steps.clone());
             let mut substeps_final: Vec<TestStep> = vec![];
@@ -147,7 +151,13 @@ async fn execute_test_step(step: TestStep) -> Result<(), Error> {
                         "node": comp.nodeID,
                         "phrasing": {
                             "terms": [],
-                            "text_base": comp.text.unwrap_or(format!("ValForTestRevision_At:{}", time_since_epoch_ms())),
+                            "text_base": comp.text
+                                .unwrap_or("ValForTestRevision_At:[datetime-ms]".o())
+                                // some special values that can be used in the text
+                                .replace("[time]", &time_since_epoch_ms_i64().to_string())
+                                .replace("[datetime]", Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true).replace("T", " ").replace("Z", "").as_str())
+                                .replace("[datetime-ms]", Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true).replace("T", " ").replace("Z", "").as_str())
+                                .replace("[uuid]", &new_uuid_v4_as_b64())
                         },
                         "attachments": []
                     }

@@ -1,9 +1,12 @@
 use std::{sync::{Mutex, Arc}, ops::{Deref, DerefMut}};
+use anyhow::{anyhow, bail, Error};
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 /// Wrapper around RwLock, which:
 /// 1) Requires that anyone who takes a lock-guard must supply their "name".
 /// 2) Provides a way for anyone to get a list of "current lock-guard holders". (without having to take a lock-guard themselves)
+/// 3) Provides `read_checked` and `write_checked` functions; these allow you to get a read-lock, drop it, then get a write-lock later, while confirming
+///    that no other threads have obtained a write-lock during the "lock-free" period. (if they have, then the `write_checked` function will return an error)
 pub struct RwLock_Tracked<T> {
     l: RwLock<T>,
     live_guards: Arc<Mutex<Vec<String>>>,
@@ -23,6 +26,26 @@ impl<T> RwLock_Tracked<T> {
     pub async fn write(&self, caller: &str) -> RwLockWriteGuard_Tracked<'_, T> {
         let base_guard = self.l.write().await;
         RwLockWriteGuard_Tracked::new(base_guard, self.live_guards.clone(), caller.to_owned())
+    }
+
+    /// Same as `read`, except also returns a "prior write-lock count", which can later be provided to `write_checked`, to
+    /// confirm that no other threads have obtained a write-lock during the "lock-free" period. (if they have, then the `write_checked` function will return an error)
+    pub async fn read_checked(&self, caller: &str) -> (RwLockReadGuard_Tracked<'_, T>, i64) {
+        let prior_write_lock_count = self.live_guards.lock().unwrap().iter().filter(|a| a.ends_with(" [write]")).count() as i64;
+        let guard = self.read(caller).await;
+        (guard, prior_write_lock_count)
+    }
+    /// Same as `write`, except also checks whether other write-locks have been acquired since the time that the associated `read_checked` call as made. (ie. during this thread's "lock-free" period)
+    /// If other write-locks were acquired during that period, then this `write_checked` function will return an error. (meant to be used for call-paths that are "retry-capable")
+    pub async fn write_checked(&self, caller: &str, old_write_lock_count: i64) -> Result<RwLockWriteGuard_Tracked<'_, T>, Error> {
+        let guard = self.write(caller).await;
+        // check whether any other write-locks were acquired during the "lock-free" period
+        let new_write_lock_count = self.live_guards.lock().unwrap().iter().filter(|a| a.ends_with(" [write]")).count() as i64;
+        let other_write_locks_acquired = (new_write_lock_count - old_write_lock_count) - 1;
+        if other_write_locks_acquired > 0 {
+            bail!("write_checked failed: {other_write_locks_acquired} other write-lock(s) were acquired between the calling of `read_checked` and `write_checked`.");
+        }
+        Ok(guard)
     }
 
     pub fn get_live_guards(&self) -> Vec<String> {
