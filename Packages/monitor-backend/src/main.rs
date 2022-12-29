@@ -1,3 +1,5 @@
+#![feature(try_blocks)]
+
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(

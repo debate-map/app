@@ -3,11 +3,12 @@ use std::str::FromStr;
 
 use rust_shared::chrono::{Utc, SecondsFormat};
 use rust_shared::hyper::Method;
-use rust_shared::anyhow::Error;
+use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::jwt_simple::prelude::{Claims, MACLike};
 use rust_shared::serde_json::json;
 use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserInfoForJWT};
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64_id, new_uuid_v4_as_b64};
+use rust_shared::utils::general::{f64_to_str_rounded, f64_to_percent_str};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::time::{time_since_epoch_ms_i64, tokio_sleep, tokio_sleep_until, time_since_epoch_ms};
 use rust_shared::utils::type_aliases::JWTDuration;
@@ -21,6 +22,7 @@ use rust_shared::serde;
 use tracing::{error, info};
 
 use crate::utils::general::body_to_str;
+use crate::utils::type_aliases::{FSender, FReceiver};
 use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::{JSONValue, ABSender}};
 
 wrap_slow_macros!{
@@ -117,66 +119,136 @@ pub async fn execute_test_sequence(sequence: TestSequence, msg_sender: ABSender<
         }
     };
 
-    let sequence_info_str = format!("@steps:{}", sequence.steps.len());
-    log(format!("Starting execution of test-sequence. {}", sequence_info_str)).await;
-
+    let root_steps_len = sequence.steps.len();
     let flattened_steps = flatten_steps(sequence.steps);
+    let flattened_steps_len = flattened_steps.len();
 
-    for step in flattened_steps {
-        log(format!("Executing test-step:{}", serde_json::to_string(&step).unwrap())).await;
+    // set up receiver for errors directly encountered/returned during the test-steps' execution
+    let mut steps_with_errors = 0i64;
+    let (err_sender, err_receiver): (FSender<TestStepErrorMessage>, FReceiver<TestStepErrorMessage>) = flume::unbounded();
+
+    // set up receiver for general warnings/errors that app-server notifies us of, during the execution period (some may be unrelated, but still useful metric)
+    let mut other_warnings = 0i64;
+    let mut other_errors = 0i64;
+    let mut msg_receiver = msg_sender.new_receiver();
+
+    log(format!("Starting execution of test-sequence. @steps:{} (root: {})", flattened_steps_len, root_steps_len)).await;
+    for (i, step) in flattened_steps.into_iter().enumerate() {
+        log(format!("Executing test-step #{}:{}", i, serde_json::to_string(&step).unwrap())).await;
         let start_time = time_since_epoch_ms_i64();
         let pre_wait = step.preWait.unwrap_or(0);
         let post_wait = step.postWait.unwrap_or(0);
         let min_duration = step.waitTillDurationX.unwrap_or(0);
 
         tokio_sleep(pre_wait).await;
-        execute_test_step(step).await?;
+        execute_test_step(i as i64, step, err_sender.clone()).await;
         tokio_sleep(post_wait).await;
         
         tokio_sleep_until(start_time + min_duration).await;
+
+        // if this is the last step, wait 1 extra second, so that final "check for error notifications" loops don't miss out on error-notifications that were slightly delayed
+        if i == flattened_steps_len - 1 {
+            tokio_sleep(1000).await;
+        }
+
+        // do these error-checking loops "as we go", so that the entries adding to the testing-log are placed "closer to where/when they happened"
+        loop {
+            match err_receiver.try_recv() {
+                Ok((flattened_step_i, err)) => {
+                    steps_with_errors += 1;
+                    log(format!("Test-step #{flattened_step_i} failed. @err:{}", err)).await;
+                },
+                Err(flume::TryRecvError::Empty) => break,
+                Err(flume::TryRecvError::Disconnected) => break,
+            }
+        }
+        loop {
+            match msg_receiver.try_recv() {
+                Ok(msg) => match msg {
+                    GeneralMessage::LogEntryAdded(entry) => {
+                        if entry.level == "WARN" {
+                            other_warnings += 1;
+                            log(format!("Received notification of a (possibly unrelated) warning on app-server, during (or shortly before) execution of step #{i}. @warning:{}", entry.message)).await;
+                        } else if entry.level == "ERROR" {
+                            other_errors += 1;
+                            log(format!("Received notification of a (possibly unrelated) error on app-server, during (or shortly before) execution of step #{i}. @error:{}", entry.message)).await;
+                        }
+                    },
+                    _ => {},
+                },
+                Err(_) => break,
+            }
+        }
     }
-    
-    log(format!("Ending execution of test-sequence. {}", sequence_info_str)).await;
+
+    let x_rel = |x: i64| -> String { f64_to_percent_str(x as f64 / flattened_steps_len as f64, 2) };
+    log(format!("Ending execution of test-sequence. @steps:{} (root: {}) @steps_with_errors:{} ({}) @asjs_warnings:{} ({}, as ratio) @asjs_errors:{} ({}, as ratio)",
+        flattened_steps_len, root_steps_len, steps_with_errors, x_rel(steps_with_errors), other_warnings, x_rel(other_warnings), other_errors, x_rel(other_errors))).await;
     return Ok(());
 }
 
-async fn execute_test_step(step: TestStep) -> Result<(), Error> {
+type TestStepErrorMessage = (i64, String);
+async fn execute_test_step<'a>(flattened_index: i64, step: TestStep, err_sender: FSender<TestStepErrorMessage>) { //-> Result<(), Error> {
     //if let Some(comp) = step.signIn {}
-    if let Some(comp) = step.addNodeRevision {
-        let fut = post_request_to_app_server(json!({
-            "variables": {
-                "input": {
-                    "mapID": "GLOBAL_MAP_00000000001",
-                    "revision": {
-                        "node": comp.nodeID,
-                        "phrasing": {
-                            "terms": [],
-                            "text_base": comp.text
-                                .unwrap_or("ValForTestRevision_At:[datetime-ms]".o())
-                                // some special values that can be used in the text
-                                .replace("[time]", &time_since_epoch_ms_i64().to_string())
-                                .replace("[datetime]", Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true).replace("T", " ").replace("Z", "").as_str())
-                                .replace("[datetime-ms]", Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true).replace("T", " ").replace("Z", "").as_str())
-                                .replace("[uuid]", &new_uuid_v4_as_b64())
-                        },
-                        "attachments": []
+    let fut = {
+        if let Some(comp) = step.addNodeRevision {
+            post_request_to_app_server(json!({
+                "variables": {
+                    "input": {
+                        "mapID": "GLOBAL_MAP_00000000001",
+                        "revision": {
+                            "node": comp.nodeID,
+                            "phrasing": {
+                                "terms": [],
+                                "text_base": comp.text
+                                    .unwrap_or("ValForTestRevision_At:[datetime-ms]".o())
+                                    // some special values that can be used in the text
+                                    .replace("[time]", &time_since_epoch_ms_i64().to_string())
+                                    .replace("[datetime]", Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true).replace("T", " ").replace("Z", "").as_str())
+                                    .replace("[datetime-ms]", Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true).replace("T", " ").replace("Z", "").as_str())
+                                    .replace("[uuid]", &new_uuid_v4_as_b64())
+                            },
+                            "attachments": []
+                        }
                     }
-                }
-            },
-            "query": "mutation($input: AddNodeRevisionInput) { addNodeRevision(input: $input) { id } }"
-        }));
-
-        if step.waitTillComplete.unwrap_or(true) {
-            fut.await?;
+                },
+                "query": "mutation($input: AddNodeRevisionInput) { addNodeRevision(input: $input) { id } }"
+            }))
         } else {
-            tokio::spawn(async move {
-                if let Err(err) = fut.await {
-                    error!("Got error during non-awaited execution of test-step with type addNodeRevision:{:?}", err);
-                }
-            });
+            unimplemented!();
         }
+    };
+
+    let handle_graphql_response = move |response: JSONValue, err_sender: &FSender<TestStepErrorMessage>| {
+        let _: Result<i64, Error> = try {
+            let generic_err = || anyhow!("[generic-error, never logged]");
+            for err_obj in response.get("errors").ok_or_else(generic_err)?.as_array().ok_or_else(generic_err)? {
+                let err_message = err_obj.get("message").ok_or_else(generic_err)?.as_str().ok_or_else(generic_err)?;
+                err_sender.send((flattened_index, err_message.to_string())).unwrap();
+                error!("Got graphql error during awaited execution of test-step #{}:{:?}", flattened_index, err_message);
+            }
+            0
+        };
+    };
+    let handle_rust_error = move |err: Error, err_sender: &FSender<TestStepErrorMessage>| {
+        err_sender.send((flattened_index, err.to_string())).unwrap();
+        error!("Got rust error during awaited execution of test-step #{}:{:?}", flattened_index, err);
+    };
+
+    if step.waitTillComplete.unwrap_or(true) {
+        match fut.await {
+            Ok(response) => handle_graphql_response(response, &err_sender),
+            Err(err) => handle_rust_error(err, &err_sender),
+        }
+    } else {
+        tokio::spawn(async move {
+            match fut.await {
+                Ok(response) => handle_graphql_response(response, &err_sender),
+                Err(err) => handle_rust_error(err, &err_sender),
+            }
+        });
     }
-    Ok(())
+    //Ok(())
 }
 
 async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONValue, Error> {

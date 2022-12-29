@@ -74,6 +74,15 @@ pub fn average(numbers: &[f64]) -> f64 {
     numbers.iter().sum::<f64>() as f64 / numbers.len() as f64
 }
 
+pub fn f64_to_str_rounded(val: f64, fraction_digits: usize) -> String {
+    // see: https://stackoverflow.com/a/61101531
+    format!("{:.1$}", val, fraction_digits)
+}
+pub fn f64_to_percent_str(f: f64, fraction_digits: usize) -> String {
+    let val_as_percent = f * 100.0;
+    format!("{}%", f64_to_str_rounded(val_as_percent, fraction_digits))
+}
+
 /*macro_rules! default(
     // Create a new T where T is known.
     // let x = default!(Foo, x:1);

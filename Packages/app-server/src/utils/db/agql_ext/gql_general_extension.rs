@@ -10,6 +10,7 @@ use futures_util::stream::BoxStream;
 use rust_shared::indoc::{indoc, formatdoc};
 use rust_shared::utils::errors_::backtrace_simplifier::simplify_backtrace_str;
 use rust_shared::utils::general_::extensions::{indent_all_lines, ToOwnedV};
+use tracing::{warn, info};
 
 /// Logger extension
 #[cfg_attr(docsrs, doc(cfg(feature = "log")))]
@@ -58,7 +59,7 @@ impl Extension for CustomExtension {
             // todo: find way to have logs for errors here include the query-string and variables as well (helpful for debugging other devs' failed query attempts, as well as catching abuse attempts)
             let error_message_cleaned = simplify_backtrace_str(err.message.o());
             let error_message_final = indent_all_lines(&error_message_cleaned, 1);
-            log::warn!(target: "async-graphql", "[error in gql.request] path={} locations={:?} message={}", path_to_str(&err.path), err.locations, error_message_final);
+            warn!(target: "async-graphql", "[error in gql.request] path={} locations={:?} message={}", path_to_str(&err.path), err.locations, error_message_final);
         }
         Response { errors: strip_stacktraces_from_errors(resp.errors), ..resp }
     }
@@ -91,7 +92,7 @@ impl Extension for CustomExtension {
             .any(|(_, operation)| operation.node.selection_set.node.items.iter().any(|selection| matches!(&selection.node, Selection::Field(field) if field.node.name.node == "__schema")));
         if !is_schema {
             // this isn't really necessary, but can be helpful for debugging in some cases (not visible unless `INFO` logging for "async-graphql" target is enabled in logging.rs)
-            log::info!(target: "async-graphql", "[gql.execute] {}", ctx.stringify_execute_doc(&document, variables));
+            info!(target: "async-graphql", "[gql.execute] {}", ctx.stringify_execute_doc(&document, variables));
         }
         Ok(document)
     }

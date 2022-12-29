@@ -100,7 +100,7 @@ pub async fn connect_to_app_server(app_state: AppStateWrapper, sender: ABSender<
                     }
                 },
                 Message_ASToMB::LQInstanceUpdated { table_name, filter, last_entries, watchers_count, deleting } => {
-                    info!("LQ-instance updated:{}", json!({
+                    trace!("LQ-instance updated:{}", json!({
                         "table_name": table_name,
                         "filter": filter,
                         "last_entries": last_entries,

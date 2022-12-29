@@ -94,6 +94,9 @@ pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {
     //let sending_layer = Layer_WithIntercept::new(s1, r1.clone());
     //let sending_layer = Layer_WithIntercept::new(s1);
     let sending_layer = Layer_WithIntercept {};
+    
+    // IMPORTANT NOTE: For some reason, calls to `log::warn` and such get logged to the standard-out (probably passing through `printing_layer` above), but NOT to the `sending_layer`.
+    // So until the source issue is investigated, make sure to always using `tracing::X` instead of `log::X` in the codebase. (else those log-messages won't get sent to monitor-tool)
     tracing_subscriber::registry()
         .with(sending_layer)
         .with(printing_layer)
