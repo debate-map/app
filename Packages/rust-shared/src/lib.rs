@@ -3,6 +3,11 @@
 #![feature(try_trait_v2)]
 #![feature(try_trait_v2_residual)]
 
+// for lock-chain checks
+#![allow(incomplete_features)]
+#![feature(adt_const_params)]
+#![feature(generic_const_exprs)]
+
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
 #![allow(
@@ -66,6 +71,7 @@ pub mod utils {
         pub mod backtrace_simplifier;
     }
     pub mod locks {
+        pub mod check_lock_order;
         pub mod rwlock_tracked;
     }
     pub mod futures;
@@ -83,4 +89,5 @@ pub mod utils {
 }
 
 pub use utils::errors::*;
+pub use utils::locks::check_lock_order::*;
 pub use utils::locks::rwlock_tracked::*;

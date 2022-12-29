@@ -20,7 +20,7 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Map, self};
 use rust_shared::tokio::sync::{mpsc, Mutex, RwLock};
 use rust_shared::tokio_postgres::{Client, Row};
-use rust_shared::{futures, axum, tower, tower_http};
+use rust_shared::{futures, axum, tower, tower_http, Lock, check_lock_chain, check_lock_chain_impl, LockChain, check_lock_chain2, Assert, IsTrue, check_lock_chain3, a_less_than_b};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
 use rust_shared::async_graphql::futures_util::task::{Context, Poll};
@@ -96,14 +96,18 @@ impl LQInstance {
 
     pub async fn send_self_to_monitor_backend(&self, entries: Vec<RowData>, watcher_count: usize) {
         //let lq_key = get_lq_instance_key(&self.table_name, &self.filter);
-        if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::LQInstanceUpdated {
+        let message = self.get_lq_instance_updated_message(entries, watcher_count);
+        if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(message).await {
+            error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
+        }
+    }
+    pub fn get_lq_instance_updated_message(&self, entries: Vec<RowData>, watcher_count: usize) -> Message_ASToMB {
+        Message_ASToMB::LQInstanceUpdated {
             table_name: self.table_name.clone(),
             filter: serde_json::to_value(self.filter.clone()).unwrap(),
             last_entries: entries,
             watchers_count: watcher_count as u32,
             deleting: false, // deletion event is sent from drop_lq_watcher func in lq_group.rs
-        }).await {
-            error!("Errored while broadcasting LQInstanceUpdated message. @error:{}", err);
         }
     }
 
@@ -196,6 +200,9 @@ impl LQInstance {
         new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
         mtx.section("3:get entry_watchers read-lock, then notify each watcher of new_entries");
+        //check_lock_chain!({Lock::LQInstance_last_entries}, {Lock::LQInstance_entry_watchers});
+        //check_lock_chain_impl(LockChain::<{Lock::LQInstance_last_entries}, {Lock::LQInstance_entry_watchers}> {});
+        //check_lock_chain2::<{Lock::LQInstance_last_entries}, {Lock::LQInstance_entry_watchers}>();
         let entry_watchers = self.entry_watchers.read().await;
         for (_watcher_stream_id, watcher) in entry_watchers.iter() {
             watcher.new_entries_channel_sender.send(new_entries.clone()).unwrap();
@@ -203,12 +210,19 @@ impl LQInstance {
         //self.new_entries_channel_sender.send(new_entries.clone());
 
         mtx.section("4:update the last_entries list");
-        self.set_last_entries(new_entries.clone()).await;
+        self.set_last_entries::<{Lock::LQInstance_entry_watchers}>(new_entries.clone()).await;
 
         self.send_self_to_monitor_backend(new_entries, entry_watchers.len()).await;
     }
 
-    pub async fn set_last_entries(&self, mut new_entries: Vec<RowData>) {
+    pub async fn set_last_entries<const PRIOR_LOCK: Lock>(&self, mut new_entries: Vec<RowData>)
+        //where [(); {T as usize < ({Lock::LQInstance_last_entries} as usize)}]:
+        //where Assert::<{T as usize < {Lock::LQInstance_last_entries} as usize}>: IsTrue
+        //where Assert::<{a_less_than_b(T1, T2)}>: IsTrue,
+        where Assert::<{(PRIOR_LOCK as usize) < (6 as usize)}>: IsTrue
+    {
+        //check_lock_chain!(T, {Lock::LQInstance_last_entries});
+        //check_lock_chain3::<T, {Lock::LQInstance_last_entries as usize}>();
         let mut last_entries = self.last_entries.write().await;
         last_entries.drain(..);
         last_entries.append(&mut new_entries);

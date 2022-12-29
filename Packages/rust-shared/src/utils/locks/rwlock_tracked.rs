@@ -1,4 +1,4 @@
-use std::{sync::{Mutex, Arc}, ops::{Deref, DerefMut}};
+use std::{sync::{Mutex, Arc, atomic::{Ordering, AtomicI64}}, ops::{Deref, DerefMut}};
 use anyhow::{anyhow, bail, Error};
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
@@ -10,12 +10,14 @@ use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 pub struct RwLock_Tracked<T> {
     l: RwLock<T>,
     live_guards: Arc<Mutex<Vec<String>>>,
+    write_guards_acquired: AtomicI64,
 }
 impl<T> RwLock_Tracked<T> {
     pub fn new(lock_value: T) -> Self {
         Self {
             l: RwLock::new(lock_value),
             live_guards: Arc::new(Mutex::new(vec![])),
+            write_guards_acquired: AtomicI64::new(0),
         }
     }
 
@@ -25,13 +27,18 @@ impl<T> RwLock_Tracked<T> {
     }
     pub async fn write(&self, caller: &str) -> RwLockWriteGuard_Tracked<'_, T> {
         let base_guard = self.l.write().await;
+        // on orderings, see: https://stackoverflow.com/a/33293463 and https://reddit.com/r/rust/comments/p9a740
+        self.write_guards_acquired.fetch_add(1, Ordering::Acquire);
         RwLockWriteGuard_Tracked::new(base_guard, self.live_guards.clone(), caller.to_owned())
     }
 
     /// Same as `read`, except also returns a "prior write-lock count", which can later be provided to `write_checked`, to
     /// confirm that no other threads have obtained a write-lock during the "lock-free" period. (if they have, then the `write_checked` function will return an error)
     pub async fn read_checked(&self, caller: &str) -> (RwLockReadGuard_Tracked<'_, T>, i64) {
-        let prior_write_lock_count = self.live_guards.lock().unwrap().iter().filter(|a| a.ends_with(" [write]")).count() as i64;
+        //let prior_write_lock_count = self.live_guards.lock().unwrap().iter().filter(|a| a.ends_with(" [write]")).count() as i64;
+        // on orderings, see: https://stackoverflow.com/a/33293463 and https://reddit.com/r/rust/comments/p9a740
+        let prior_write_lock_count = self.write_guards_acquired.load(Ordering::Acquire);
+        
         let guard = self.read(caller).await;
         (guard, prior_write_lock_count)
     }
@@ -39,8 +46,13 @@ impl<T> RwLock_Tracked<T> {
     /// If other write-locks were acquired during that period, then this `write_checked` function will return an error. (meant to be used for call-paths that are "retry-capable")
     pub async fn write_checked(&self, caller: &str, old_write_lock_count: i64) -> Result<RwLockWriteGuard_Tracked<'_, T>, Error> {
         let guard = self.write(caller).await;
+
         // check whether any other write-locks were acquired during the "lock-free" period
-        let new_write_lock_count = self.live_guards.lock().unwrap().iter().filter(|a| a.ends_with(" [write]")).count() as i64;
+
+        //let new_write_lock_count = self.live_guards.lock().unwrap().iter().filter(|a| a.ends_with(" [write]")).count() as i64;
+        // on orderings, see: https://stackoverflow.com/a/33293463 and https://reddit.com/r/rust/comments/p9a740
+        let new_write_lock_count = self.write_guards_acquired.load(Ordering::Acquire);
+
         let other_write_locks_acquired = (new_write_lock_count - old_write_lock_count) - 1;
         if other_write_locks_acquired > 0 {
             bail!("write_checked failed: {other_write_locks_acquired} other write-lock(s) were acquired between the calling of `read_checked` and `write_checked`.");

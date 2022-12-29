@@ -8,7 +8,7 @@ use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
 use indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
-use rust_shared::to_anyhow_with_extra;
+use rust_shared::{to_anyhow_with_extra, Lock};
 use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::types::ToSql;
 use rust_shared::tokio_postgres::{Row, RowStream};
@@ -155,7 +155,7 @@ impl LQBatch {
         mtx.section("6:commit the new result-sets");
         for (i, lq_results) in lq_results_converted.into_iter().enumerate() {
             let lq_instance = query_instance_vals.get(i).unwrap();
-            lq_instance.set_last_entries(lq_results).await;
+            lq_instance.set_last_entries::<{Lock::unknown_prior}>(lq_results).await;
         }
 
         //self.execution_time.store(time_since_epoch_ms(), Ordering::Relaxed);
