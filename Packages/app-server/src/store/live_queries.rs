@@ -52,8 +52,6 @@ pub enum DropLQWatcherMsg {
 }
 
 pub type LQStorageWrapper = Arc<LQStorage>;
-//pub type LQStorageWrapper = Arc<RwLock<LQStorage>>;
-//#[derive(Default)]
 
 pub struct LQStorage {
     pub query_groups: RwLock<HashMap<String, Arc<LQGroup>>>,

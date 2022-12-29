@@ -20,7 +20,7 @@ use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Map, self};
 use rust_shared::tokio::sync::{mpsc, Mutex, RwLock};
 use rust_shared::tokio_postgres::{Client, Row};
-use rust_shared::{futures, axum, tower, tower_http, Lock, check_lock_chain, check_lock_chain_impl, LockChain, check_lock_chain2, Assert, IsTrue, check_lock_chain3, a_less_than_b};
+use rust_shared::{futures, axum, tower, tower_http, Lock, check_lock_order, Assert, IsTrue, lock_as_usize_LQInstance_last_entries};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
 use rust_shared::async_graphql::futures_util::task::{Context, Poll};
@@ -68,29 +68,20 @@ pub fn get_lq_instance_key(table_name: &str, filter: &QueryFilter) -> String {
     }).to_string()
 }
 
-//#[derive(Default)]
 /// Holds the data related to a specific query (ie. collection-name + filter).
 pub struct LQInstance {
     pub table_name: String,
     pub filter: QueryFilter,
-    //watcher_count: i32,
     pub last_entries: RwLock<Vec<RowData>>,
-    //pub change_listeners: HashMap<Uuid, LQChangeListener<'a>>,
     pub entry_watchers: RwLock<HashMap<Uuid, LQEntryWatcher>>,
-    /*pub new_entries_channel_sender: Sender<Vec<JSONValue>>,
-    pub new_entries_channel_receiver: Receiver<Vec<JSONValue>>,*/
 }
 impl LQInstance {
     pub fn new(table_name: String, filter: QueryFilter, initial_entries: Vec<RowData>) -> Self {
-        //let (s1, r1) = unbounded();
         Self {
             table_name,
             filter,
-            //watcher_count: 0,
             last_entries: RwLock::new(initial_entries),
             entry_watchers: RwLock::new(HashMap::new()),
-            /*new_entries_channel_sender: s1,
-            new_entries_channel_receiver: r1,*/
         }
     }
 
@@ -200,14 +191,10 @@ impl LQInstance {
         new_entries.sort_by_key(|a| a["id"].as_str().unwrap().to_owned()); // sort entries by id, so there is a consistent ordering
         
         mtx.section("3:get entry_watchers read-lock, then notify each watcher of new_entries");
-        //check_lock_chain!({Lock::LQInstance_last_entries}, {Lock::LQInstance_entry_watchers});
-        //check_lock_chain_impl(LockChain::<{Lock::LQInstance_last_entries}, {Lock::LQInstance_entry_watchers}> {});
-        //check_lock_chain2::<{Lock::LQInstance_last_entries}, {Lock::LQInstance_entry_watchers}>();
         let entry_watchers = self.entry_watchers.read().await;
         for (_watcher_stream_id, watcher) in entry_watchers.iter() {
             watcher.new_entries_channel_sender.send(new_entries.clone()).unwrap();
         }
-        //self.new_entries_channel_sender.send(new_entries.clone());
 
         mtx.section("4:update the last_entries list");
         self.set_last_entries::<{Lock::LQInstance_entry_watchers}>(new_entries.clone()).await;
@@ -216,13 +203,9 @@ impl LQInstance {
     }
 
     pub async fn set_last_entries<const PRIOR_LOCK: Lock>(&self, mut new_entries: Vec<RowData>)
-        //where [(); {T as usize < ({Lock::LQInstance_last_entries} as usize)}]:
-        //where Assert::<{T as usize < {Lock::LQInstance_last_entries} as usize}>: IsTrue
-        //where Assert::<{a_less_than_b(T1, T2)}>: IsTrue,
-        where Assert::<{(PRIOR_LOCK as usize) < (6 as usize)}>: IsTrue
+        where Assert::<{(PRIOR_LOCK as usize) < lock_as_usize_LQInstance_last_entries!()}>: IsTrue
     {
-        //check_lock_chain!(T, {Lock::LQInstance_last_entries});
-        //check_lock_chain3::<T, {Lock::LQInstance_last_entries as usize}>();
+        //check_lock_order_usize::<{PRIOR_LOCK as usize}, {Lock::LQInstance_last_entries as usize}>();
         let mut last_entries = self.last_entries.write().await;
         last_entries.drain(..);
         last_entries.append(&mut new_entries);
