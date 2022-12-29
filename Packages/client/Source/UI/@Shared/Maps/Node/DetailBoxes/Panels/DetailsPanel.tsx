@@ -6,7 +6,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {E, ToJSON, Clone, CE} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import _ from "lodash";
-import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions} from "dm_common";
+import {NodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map, HasModPermissions, HasAdminPermissions, AsNodeRevisionInput} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
@@ -55,7 +55,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 
 							const newRevision = this.detailsUI!.GetNewRevisionData();
 							//const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
-							const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: newRevision.ExcludeKeys("id", "creator", "createdAt")});
+							const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: AsNodeRevisionInput(newRevision)});
 							RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 
 							/*if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {

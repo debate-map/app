@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -113,7 +113,7 @@ export async function RunCommand_AddChildNode(inputFields: {
 /*type NodeRevisionInput =
 	Omit<Partial<NodeRevision>, "id" | "creator" | "createdAt">
 	& {id?: never, creator?: never, createdAt?: never};*/
-type NodeRevisionInput = Partial<NodeRevision> & {id?: never, creator?: never, createdAt?: never};
+//type NodeRevisionInput = Partial<NodeRevision> & {id?: never, creator?: never, createdAt?: never};
 export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string|n, revision: NodeRevisionInput}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: AddNodeRevisionInput!) { addNodeRevision(input: $input) { id } }`,

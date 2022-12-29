@@ -149,6 +149,12 @@ patroni:
         # maintenance_work_mem: 1GB # default: 64MB
         # effective_cache_size: 10GB # default: 4GB
         # #work_mem: 10MB # default: 4MB # not increasing this atm, as it's "per connection", and we have so many
+
+        # to try to reduce occurence of failures when committing serializable transactions (each is x10 default)
+        # max_locks_per_transaction: 640
+        # max_pred_locks_per_transaction: 640
+        # max_pred_locks_per_relation: -20
+        # max_pred_locks_per_page: 20
       pg_hba:
         - host all all 0.0.0.0/0 md5
 

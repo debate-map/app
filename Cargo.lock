@@ -78,7 +78,6 @@ dependencies = [
  "jsonschema",
  "lazy_static",
  "lexicon_fractional_index",
- "log",
  "metrics",
  "num_cpus",
  "oauth2",

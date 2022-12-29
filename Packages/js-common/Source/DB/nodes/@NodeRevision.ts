@@ -6,7 +6,7 @@ import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasin
 import {ChildGroup, NodeType_Info} from "./@NodeType.js";
 import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment, Attachment} from "../../DB.js";
 import {ChildOrdering} from "../nodeRatings.js";
-import {MarkerForNonScalarField} from "../../Utils/General/General.js";
+import {MarkerForNonScalarField, PickOnly} from "../../Utils/General/General.js";
 
 export enum PermissionInfoType {
 	creator = "creator",
@@ -199,6 +199,10 @@ AddSchema("NodeRevision_Partial", ["NodeRevision"], ()=>{
 	schema.required = [];
 	return schema;
 });
+
+export const NodeRevisionInput_keys = ["node", "phrasing", "note", "displayDetails", "attachments"] as const;
+export type NodeRevisionInput = PickOnly<NodeRevision, typeof NodeRevisionInput_keys[number]>;
+export const AsNodeRevisionInput = (node: NodeRevision)=>node.IncludeKeys(...NodeRevisionInput_keys) as NodeRevisionInput;
 
 // argument
 // ==========

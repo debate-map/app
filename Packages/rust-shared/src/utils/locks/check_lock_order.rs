@@ -1,16 +1,16 @@
 #[derive(PartialEq, Eq)]
 pub enum Lock {
     unknown_prior = 0,
-    LQGroup_batches_x = 1,
-    LQGroup_batches_meta = 2,
-    LQGroup_lqis_awaiting_population = 3,
-    LQGroup_lqis_committed = 4,
-    LQInstance_entry_watchers = 5,
-    LQInstance_last_entries = 6, // sync this value with macro below
+    LQGroup_batches_meta = 1,
+    //LQGroup_lqis_awaiting_population = 2,
+    LQGroup_batches_x = 2,
+    LQGroup_lqis_committed = 3,
+    LQInstance_entry_watchers = 4,
+    LQInstance_last_entries = 5, // sync this value with macro below
 }
 // these macros are needed for cases where comparisons are done in the "where" clause of a function (where Lock::X cannot be used)
 #[macro_export]
-macro_rules! lock_as_usize_LQInstance_last_entries { {} => { 6 } }
+macro_rules! lock_as_usize_LQInstance_last_entries { {} => { 5 } }
 
 pub enum Assert<const CHECK: bool> {}
 pub trait IsTrue {}
