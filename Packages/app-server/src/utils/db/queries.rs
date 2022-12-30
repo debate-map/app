@@ -1,8 +1,8 @@
 use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell};
-use rust_shared::{anyhow::{bail, Context, Error}, serde_json, async_graphql, to_anyhow};
+use rust_shared::{anyhow::{bail, Context, Error}, serde_json, async_graphql, to_anyhow, new_mtx, utils::{mtx::mtx::Mtx, type_aliases::RowData}};
 use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
-use flume::Sender;
+use rust_shared::flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt, TryStreamExt};
 use rust_shared::hyper::Body;
 use rust_shared::serde::{Serialize, Deserialize, de::DeserializeOwned};
@@ -12,8 +12,8 @@ use tracing::{info, trace, debug};
 use rust_shared::uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::{RowData}, db::{sql_fragment::{SQLFragment}, sql_ident::SQLIdent},}, db::commands::_command::ToSqlWrapper};
-use super::{super::{mtx::mtx::{new_mtx, Mtx}}, filter::QueryFilter};
+use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, storage::get_app_state_from_gql_ctx}, utils::{db::{sql_fragment::{SQLFragment}, sql_ident::SQLIdent},}, db::commands::_command::ToSqlWrapper};
+use super::{filter::QueryFilter};
 
 /*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
 type QueryFunc = Box<
@@ -73,8 +73,7 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
 }
 pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: String, filter: &QueryFilter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
     new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
-    //let client = ctx.data::<Client>().unwrap();
-    let pool = ctx.data::<Pool>().unwrap();
+    let pool = &get_app_state_from_gql_ctx(ctx).db_pool;
     let client = pool.get().await.unwrap();
 
     mtx.section("2:get entries");

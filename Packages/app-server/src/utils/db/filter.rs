@@ -1,10 +1,10 @@
 use std::{fmt::Display, iter::{once, empty}};
-use rust_shared::{anyhow::{anyhow, bail, Context, Error}, utils::{type_aliases::JSONValue, general_::extensions::IteratorV}, serde_json};
-use indexmap::IndexMap;
+use rust_shared::{anyhow::{anyhow, bail, Context, Error, ensure}, utils::{type_aliases::{JSONValue, RowData}, general_::extensions::IteratorV}, serde_json};
+use rust_shared::indexmap::IndexMap;
 use rust_shared::async_graphql;
 use rust_shared::rust_macros::{wrap_slow_macros, unchanged};
-use rust_shared::serde::Serialize;
-use crate::{utils::{general::{general::match_cond_to_iter}, type_aliases::RowData}, store::live_queries_::lq_param::{LQParam}};
+use rust_shared::serde::{Serialize, Deserialize};
+use crate::{utils::{general::{general::match_cond_to_iter}}, store::live_queries_::lq_param::{LQParam}};
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::serde_json::Map;
 use rust_shared::tokio_postgres::types::ToSql;
@@ -16,7 +16,7 @@ pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputT
 
 wrap_slow_macros!{
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct QueryFilter {
     pub field_filters: IndexMap<String, FieldFilter>,
 }
@@ -67,6 +67,19 @@ impl QueryFilter {
 
     pub fn is_empty(&self) -> bool {
         self.field_filters.len() == 0
+    }
+
+    pub fn ensure_shape_only(&self) -> Result<(), Error> {
+        for (_field_name, field_filter) in &self.field_filters {
+            for op in &field_filter.filter_ops {
+                match op {
+                    FilterOp::EqualsX(val) => ensure!(val.is_null()),
+                    FilterOp::IsWithinX(vals) => for val in vals { ensure!(val.is_null()); },
+                    FilterOp::ContainsAllOfX(vals) => for val in vals { ensure!(val.is_null()); },
+                };
+            }
+        }
+        Ok(())
     }
 
     /// This method does not use batching; if you want batching, use `LQBatch`.
@@ -124,12 +137,12 @@ impl Display for QueryFilter {
 
 wrap_slow_macros!{
 
-#[derive(Default, Clone, Debug, Serialize)]
+#[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct FieldFilter {
     pub filter_ops: Vec<FilterOp>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum FilterOp {
     EqualsX(JSONValue),
     IsWithinX(Vec<JSONValue>),

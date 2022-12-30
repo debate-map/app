@@ -39,7 +39,7 @@ use crate::db::general::sign_in_::google::{store_user_data_for_google_sign_in, G
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
-use crate::store::storage::{AppStateWrapper, SignInMsg};
+use crate::store::storage::{AppStateArc, SignInMsg, get_app_state_from_gql_ctx};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
@@ -47,7 +47,7 @@ use crate::utils::type_aliases::{ABSender};
 
 use rust_shared::utils::auth::jwt_utils_base::{UserInfoForJWT, get_or_create_jwt_key_hs256};
 
-async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req: Request<Body>) -> impl IntoResponse {
+async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Request<Body>) -> impl IntoResponse {
     let uri = req.uri();
     let params = get_uri_params(uri);
     let attempt_id = params.get("state").map(|a| a.clone()).unwrap_or("n/a".to_owned());
@@ -63,7 +63,7 @@ async fn auth_google_callback(Extension(state): Extension<AppStateWrapper>, req:
     </html>"#))
 }
 
-pub async fn extend_router(app: Router, storage_wrapper: AppStateWrapper) -> Router {
+pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router {
     let result = app
         .route("/auth/google/callback-new", get(auth_google_callback))
         .layer(AddExtensionLayer::new(storage_wrapper));
@@ -135,7 +135,7 @@ impl SubscriptionShard_SignIn {
             .set_pkce_challenge(pkce_code_challenge)
             .url();
 
-        let msg_sender = &gql_ctx.data::<AppStateWrapper>().unwrap().channel_for_sign_in_messages__sender_base;
+        let msg_sender = &get_app_state_from_gql_ctx(gql_ctx).channel_for_sign_in_messages__sender_base;
         let mut msg_receiver = msg_sender.new_receiver();
 
         let base_stream = async_stream::stream! {

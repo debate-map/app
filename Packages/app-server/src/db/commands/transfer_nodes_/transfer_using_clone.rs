@@ -1,6 +1,6 @@
 use std::fmt::{Formatter, Display};
 
-use indexmap::IndexSet;
+use rust_shared::indexmap::IndexSet;
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject, Enum};
 use rust_shared::itertools::Itertools;
 use rust_shared::rust_macros::wrap_slow_macros;

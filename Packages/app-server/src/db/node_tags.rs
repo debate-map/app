@@ -1,4 +1,4 @@
-use indexmap::IndexSet;
+use rust_shared::indexmap::IndexSet;
 use rust_shared::anyhow::Error;
 use rust_shared::itertools::Itertools;
 use rust_shared::utils::type_aliases::JSONValue;

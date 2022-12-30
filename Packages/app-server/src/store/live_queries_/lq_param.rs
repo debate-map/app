@@ -34,10 +34,10 @@ impl LQParam {
         match proto {
             LQParam::LQIndex(_) => Ok(LQParam::LQIndex(lq_index)),
             LQParam::FilterOpValue(field_name, op_i, _) => {
-                let field_filter_for_lq_instance = lq_instance.filter.field_filters.get(field_name)
+                let field_filter_for_lq_instance = lq_instance.lq_key.filter.field_filters.get(field_name)
                     .ok_or(anyhow!("LQ-instance had no filter-value for field \"{field_name}\"."))?;
                 let filter_op = field_filter_for_lq_instance.filter_ops.get(*op_i)
-                    .ok_or(anyhow!("Field-filter had no filter-op with index \"{op_i}\". @path:{}/{} @lq_instance_filter:{}", field_name, op_i, lq_instance.filter))?;
+                    .ok_or(anyhow!("Field-filter had no filter-op with index \"{op_i}\". @path:{}/{} @lq_instance_filter:{}", field_name, op_i, lq_instance.lq_key.filter))?;
                 Ok(LQParam::FilterOpValue(field_name.to_owned(), *op_i, filter_op.clone()))
             }
         }

@@ -22,6 +22,7 @@
 )]
 
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use rust_shared::links::app_server_to_monitor_backend::LogEntry;
 use rust_shared::utils::general::k8s_env;
 use rust_shared::{futures, axum, tower, tower_http, tokio};
 use axum::{
@@ -34,22 +35,21 @@ use axum::{
     headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
 use rust_shared::hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
-use links::app_server_types::LogEntry;
 use tower::ServiceExt;
 use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
 use tracing::{error, info, Level, Metadata};
 use tracing_subscriber::{Layer, filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
-use utils::{type_aliases::{FSender, FReceiver}};
+use rust_shared::{utils::type_aliases::{FSender, FReceiver}};
 use std::{
     collections::HashSet,
     net::{SocketAddr, IpAddr},
     sync::{Arc}, panic, backtrace::Backtrace, convert::Infallible, str::FromStr, time::Duration,
 };
 use rust_shared::tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
-use flume::{Sender, Receiver, unbounded};
+use rust_shared::flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::{store::storage::{AppState, AppStateWrapper}, links::app_server_link::connect_to_app_server, utils::type_aliases::{ABReceiver, ABSender}};
+use crate::{store::storage::{AppState, AppStateArc}, links::app_server_link::connect_to_app_server, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
 mod gql {
@@ -57,7 +57,6 @@ mod gql {
 }
 mod pgclient;
 mod links {
-    pub mod app_server_types;
     pub mod app_server_link;
 }
 mod utils {
@@ -138,7 +137,7 @@ async fn main() {
     set_up_globals();
     println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
     
-    let app_state = AppStateWrapper::new(AppState::default());
+    let app_state = AppStateArc::new(AppState::default());
 
     let app = Router::new()
         /*.route("/", get(|| async { Html(r#"

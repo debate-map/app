@@ -31,7 +31,6 @@ use crate::db::nodes_::_node::Node;
 use crate::db::terms::Term;
 use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::type_aliases::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::start_read_transaction;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};

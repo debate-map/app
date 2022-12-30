@@ -5,8 +5,8 @@ use rust_shared::futures::{future, StreamExt, Sink, ready};
 use rust_shared::tokio::join;
 use rust_shared::{tokio_postgres, tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection}};
 use tracing::info;
+use rust_shared::utils::type_aliases::JSONValue;
 
-use crate::{utils::type_aliases::JSONValue};
 
 pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
     // get connection info from env-vars
@@ -23,7 +23,7 @@ pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
 }
 
 /// Only use this if you need the for_replication option. (everything else should use clients taken from the shared pool)
-pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
+pub async fn create_client_advanced(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
     let mut pg_cfg = get_tokio_postgres_config();
     if for_replication {
         //db_config += " replication=database";

@@ -5,10 +5,11 @@ use rust_shared::{tokio_postgres, tokio_postgres::Row};
 use rust_shared::anyhow::{anyhow, Error};
 use deadpool_postgres::{Transaction, Pool};
 
+use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject};
 
 pub async fn get_client<'a>(ctx: &async_graphql::Context<'_>) -> Result<PGClientObject, Error> {
-    let pool = ctx.data::<Pool>().unwrap();
+    let pool = &get_app_state_from_gql_ctx(ctx).db_pool;
     Ok(pool.get().await.unwrap())
 }
 pub async fn start_read_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, ctx: &async_graphql::Context<'_>) -> Result<Transaction<'a>, Error> {

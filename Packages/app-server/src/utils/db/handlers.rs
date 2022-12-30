@@ -1,8 +1,8 @@
 use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell};
-use rust_shared::{anyhow::{bail, Context, Error}, async_graphql, serde_json, tokio, utils::type_aliases::JSONValue};
+use rust_shared::{anyhow::{bail, Context, Error}, async_graphql, serde_json, tokio, utils::{type_aliases::JSONValue, general_::extensions::ToOwnedV}, new_mtx, flume};
 use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
-use flume::{Sender, Receiver};
+use rust_shared::flume::{Sender, Receiver};
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use rust_shared::hyper::Body;
 use rust_shared::SubError;
@@ -12,8 +12,8 @@ use rust_shared::tokio_postgres::{Client, Row, types::ToSql};
 use rust_shared::uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::live_queries::{LQStorageWrapper, LQStorage, DropLQWatcherMsg}, utils::{type_aliases::{PGClientObject}}};
-use super::{super::{mtx::mtx::{new_mtx, Mtx}}, filter::{QueryFilter, FilterInput}};
+use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, live_queries_::lq_key::LQKey, storage::{AppStateArc, get_app_state_from_gql_ctx}}, utils::{type_aliases::{PGClientObject}}};
+use super::{filter::{QueryFilter, FilterInput}};
 
 /*pub struct GQLSet<T> { pub nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
@@ -44,13 +44,12 @@ pub async fn handle_generic_gql_collection_request<'a,
     T: 'static + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
-    let (client, storage, table_name) = {
+    let (lq_storage, table_name) = {
         let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
-        let pool = ctx2.data::<Pool>().unwrap();
-        let client = pool.get().await.unwrap();
-        let storage = ctx2.data::<LQStorageWrapper>().unwrap().clone();
+        let app_state = get_app_state_from_gql_ctx(ctx2).clone();
+        let lq_storage = app_state.live_queries.clone();
         let table_name = table_name.to_owned();
-        (client, storage, table_name)
+        (lq_storage, table_name)
     };
     
     let result = tokio::spawn(async move {
@@ -70,14 +69,13 @@ pub async fn handle_generic_gql_collection_request<'a,
         let filter = match QueryFilter::from_filter_input_opt(&filter_json) { Ok(a) => a, Err(err) => return stream_for_error(err) };
         //let filter = QueryFilter::from_filter_input_opt(&filter_json).unwrap();
         let (entries_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
-            //let storage = ctx.data::<LQStorageWrapper>().unwrap();
-
+            let lq_key = LQKey::new(table_name.o(), filter.o());
             /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
             let stream_id = stream.id.clone();*/
             let stream_id = Uuid::new_v4();
-            let (entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, &client, Some(&mtx)).await;
+            let (entries_as_type, watcher) = lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await;
 
-            (entries_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
+            (entries_as_type, stream_id, lq_storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
         };
 
         mtx.section("3");
@@ -103,13 +101,12 @@ pub async fn handle_generic_gql_doc_request<'a,
     T: 'static + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
     //let ctx: &'static async_graphql::Context<'_> = Box::leak(Box::new(ctx));
-    let (client, storage, table_name) = {
-        let ctx2 = ctx;
-        let pool = ctx2.data::<Pool>().unwrap();
-        let client = pool.get().await.unwrap();
-        let storage = ctx2.data::<LQStorageWrapper>().unwrap().clone();
+    let (lq_storage, table_name) = {
+        let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
+        let app_state = get_app_state_from_gql_ctx(ctx2).clone();
+        let lq_storage = app_state.live_queries.clone();
         let table_name = table_name.to_owned();
-        (client, storage, table_name)
+        (lq_storage, table_name)
     };
 
     let result = tokio::spawn(async move {
@@ -131,19 +128,16 @@ pub async fn handle_generic_gql_doc_request<'a,
         let filter = match QueryFilter::from_filter_input(&filter_json) { Ok(a) => a, Err(err) => return stream_for_error(err) };
         //let filter = QueryFilter::from_filter_input_opt(&Some(filter_json)).unwrap();
         let (entry_as_type, stream_id, sender_for_dropping_lq_watcher, lq_entry_receiver_clone) = {
-            //let storage = ctx.data::<LQStorageWrapper>().unwrap();
-
+            let lq_key = LQKey::new(table_name.o(), filter.o());
             /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), table_name, filter.clone(), GQLSetVariant::from(entries));
             let stream_id = stream.id.clone();*/
             let stream_id = Uuid::new_v4();
             //let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx)).await;
-            let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, &client, Some(&mtx)).await;
+            let (mut entries_as_type, watcher) = lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await;
             let entry_as_type = entries_as_type.pop();
 
-            (entry_as_type, stream_id, storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
+            (entry_as_type, stream_id, lq_storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
         };
-
-        // break point; fix that async-graphql just drops/cancels futures mid-execution (likely due to client unsubscribing), causing major issues!
 
         mtx.section("3");
         //let filter_clone = filter.clone();

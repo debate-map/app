@@ -83,10 +83,9 @@ use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
-use crate::store::storage::AppStateWrapper;
+use crate::store::storage::AppStateArc;
 use crate::utils::db::agql_ext::gql_general_extension::{CustomExtension, CustomExtensionCreator};
 use crate::utils::general::general::body_to_str;
-use crate::{get_cors_layer};
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
 use crate::db::command_runs::SubscriptionShard_CommandRun;
@@ -106,7 +105,7 @@ use crate::db::shares::SubscriptionShard_Share;
 use crate::db::terms::SubscriptionShard_Term;
 use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
 use crate::db::users::{SubscriptionShard_User};
-use crate::store::live_queries::LQStorageWrapper;
+use crate::store::live_queries::LQStorageArc;
 use rust_shared::{async_graphql_axum};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 
@@ -163,18 +162,13 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-pub async fn extend_router(app: Router, pool: Pool, storage_wrapper: AppStateWrapper, lq_storage_wrapper: LQStorageWrapper) -> Router {
+pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router {
     let schema =
         wrap_agql_schema_build!{
             Schema::build(QueryRoot::default(), MutationRoot::default(), SubscriptionRoot::default())
         }
-        //.data(client_for_graphql)
-        .data(pool)
         .data(storage_wrapper)
-        .data(lq_storage_wrapper)
-        //.extension(extensions::Logger)
         .extension(CustomExtensionCreator)
-        //.data(connection)
         .finish();
 
     let client_to_asjs = HyperClient::new();

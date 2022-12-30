@@ -3,7 +3,7 @@ use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::async_graphql::ID;
 use async_recursion::async_recursion;
 use futures_util::{Future, FutureExt, TryStreamExt, StreamExt, pin_mut};
-use indexmap::IndexMap;
+use rust_shared::indexmap::IndexMap;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::RwLock;

@@ -1,3 +1,25 @@
+use std::{sync::{Arc, RwLock, RwLockWriteGuard}, cell::RefCell, time::{Instant, Duration}, borrow::Cow, rc::Rc, collections::HashMap};
+
+use crate::utils::type_aliases::{JSONValue, FSender, FReceiver};
+use anyhow::Error;
+use async_graphql::SimpleObject;
+use once_cell::sync::{OnceCell, Lazy};
+use serde_json;
+use tokio;
+use flume::{Sender, Receiver};
+
+use crate::hyper::{Client, Method, Request, Body};
+use indexmap::IndexMap;
+use crate::rust_macros::wrap_slow_macros;
+use crate::utils::time::time_since_epoch_ms;
+use crate::serde::{Serialize, Deserialize};
+use crate::serde_json::{json, Map};
+use crate::tokio::{time};
+use tracing::{trace, error, info};
+use crate::uuid::Uuid;
+
+
+#[macro_export]
 macro_rules! fn_name {
     () => {{
         fn f() {}
@@ -18,12 +40,23 @@ macro_rules! fn_name {
         result
     }}
 }
-use std::{sync::{Arc, RwLock, RwLockWriteGuard}, cell::RefCell, time::{Instant, Duration}, borrow::Cow, rc::Rc};
+pub use fn_name;
 
-use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{anyhow::Error, serde_json, tokio};
-use flume::{Sender, Receiver};
-pub(crate) use fn_name;
+#[macro_export]
+macro_rules! new_mtx {
+    ($mtx:ident, $first_section_name:expr) => {
+        $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, None);
+    };
+    ($mtx:ident, $first_section_name:expr, $parent_mtx:expr) => {
+        $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, $parent_mtx, None);
+    };
+    ($mtx:ident, $first_section_name:expr, $parent_mtx:expr, $extra_info:expr) => {
+        let parent_mtx: Option<&$crate::utils::mtx::mtx::Mtx> = $parent_mtx;
+        #[allow(unused_mut)]
+        let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!(), $first_section_name, parent_mtx, $extra_info);
+    };
+}
+pub use new_mtx;
 
 /*pub fn new_mtx_impl<'a>(fn_name_final: &str, first_section_name: &str, parent_mtx: Option<&'a mut Mtx>) -> (Option<Mtx>, Option<&'a mut Mtx>) {
     let mut mtx = Mtx::new(fn_name_final);
@@ -48,32 +81,6 @@ pub(crate) use fn_name;
     mtx.section(first_section_name);
     mtx
 }*/
-
-macro_rules! new_mtx {
-    ($mtx:ident, $first_section_name:expr) => {
-        $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, None);
-    };
-    ($mtx:ident, $first_section_name:expr, $parent_mtx:expr) => {
-        $crate::utils::mtx::mtx::new_mtx!($mtx, $first_section_name, $parent_mtx, None);
-    };
-    ($mtx:ident, $first_section_name:expr, $parent_mtx:expr, $extra_info:expr) => {
-        let parent_mtx: Option<&$crate::utils::mtx::mtx::Mtx> = $parent_mtx;
-        #[allow(unused_mut)]
-        let mut $mtx = $crate::utils::mtx::mtx::Mtx::new($crate::utils::mtx::mtx::fn_name!(), $first_section_name, parent_mtx, $extra_info);
-    };
-}
-use rust_shared::hyper::{Client, Method, Request, Body};
-use indexmap::IndexMap;
-pub(crate) use new_mtx;
-use rust_shared::rust_macros::wrap_slow_macros;
-use rust_shared::utils::time::time_since_epoch_ms;
-use rust_shared::serde::{Serialize, Deserialize};
-use rust_shared::serde_json::{json, Map};
-use rust_shared::tokio::{time};
-use tracing::{trace, error, info};
-use rust_shared::uuid::Uuid;
-
-use crate::{utils::{general::general::{body_to_str, flurry_hashmap_into_hashmap, flurry_hashmap_into_json_map}}, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB}};
 
 pub enum MtxMessage {
     /// tuple.0 is the section's path and time (see section_lifetimes description); tuple.1 is the SectionLifetime struct, with times as ms-since-epoch
@@ -188,7 +195,8 @@ impl Mtx {
                     // process any messages that have buffered up
                     MtxMessage::apply_messages_to_mtx_data(&section_lifetimes_clone, msg_receiver_clone.drain());
 
-                    let data_as_str = try_send_mtx_data_to_monitor_backend(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str.clone()).await;
+                    // package data and send to channel (which user-project can decide what to do with)
+                    let data_as_str = package_up_mtx_data_and_send_to_channel(id_clone.clone(), section_lifetimes_clone.clone(), last_data_as_str).await;
                     
                     last_data_as_str = data_as_str;
                     //println!("Sent partial results for mtx entry..."); // temp
@@ -273,15 +281,44 @@ impl Drop for Mtx {
         if self.is_root_mtx() && !cfg!(test) {
             MtxMessage::apply_messages_to_mtx_data(&self.section_lifetimes, self.msg_receiver.drain());
 
-            //self.send_to_monitor_backend();
             let (id_clone, section_lifetimes_clone) = (self.id.clone(), self.section_lifetimes.clone());
-
             tokio::spawn(async move {
-                try_send_mtx_data_to_monitor_backend(id_clone, section_lifetimes_clone, None).await;
+                // sending `None` since we don't have an easy way to access the `last_data_as_str` here (it's in the tokio loop within `Mtx::new`)
+                package_up_mtx_data_and_send_to_channel(id_clone, section_lifetimes_clone, None).await;
             });
         }
     }
 }
+
+pub async fn package_up_mtx_data_and_send_to_channel(id: Arc<Uuid>, section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>, last_data_as_str: Option<String>) -> Option<String> {
+    let mtx_data = MtxData::from(id, section_lifetimes).await;
+
+    // we stringify the data an additional time here, as a convenience field for user-project (so it can check if action needs to be taken)
+    let data_as_str = serde_json::to_string(&mtx_data).unwrap();
+    
+    let (msg_sender, _msg_receiver) = MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER.get().expect("MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER not initialized!");
+
+    // ignore error; if channel is full, we don't care (user-project must just not care to be reading them all)
+    let _ = msg_sender.send_timeout(MtxGlobalMsg::NotifyMtxDataPossiblyChanged(MtxDataWithExtraInfo {
+        id: mtx_data.id,
+        section_lifetimes: mtx_data.section_lifetimes,
+        data_as_str: data_as_str.clone(),
+        last_data_as_str: last_data_as_str.clone(),
+    }), Duration::from_millis(500)); // we pick 500ms so it's certain to complete within the 1s interval of the tokio loop within `Mtx::new`
+
+    Some(data_as_str)
+}
+
+pub enum MtxGlobalMsg {
+    NotifyMtxDataPossiblyChanged(MtxDataWithExtraInfo),
+}
+/*pub static MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER: Lazy<(FSender<MtxGlobalMsg>, FReceiver<MtxGlobalMsg>)> = Lazy::new(|| {
+    // limit to 10k messages (eg. in case user-project is not reading them, we don't want the queue's memory-usage to just endlessly grow)
+    let (msg_sender, msg_receiver): (FSender<MtxGlobalMsg>, FReceiver<MtxGlobalMsg>) = flume::bounded(10000);
+    (msg_sender, msg_receiver)
+});*/
+/// It is up to the user-project to initialize this channel at program startup; until that is done, any data-updates from Mtx instances will just be lost/ignored.
+pub static MTX_GLOBAL_MESSAGE_SENDER_AND_RECEIVER: OnceCell<(FSender<MtxGlobalMsg>, FReceiver<MtxGlobalMsg>)> = OnceCell::new();
 
 /*//wrap_slow_macros!{
 
@@ -303,30 +340,34 @@ pub fn json_obj_1field<T: Serialize>(field_name: &str, field_value: T) -> Result
     format!("{service_name}.{namespace}.svc.cluster.local:{port}")
 }*/
 
-async fn try_send_mtx_data_to_monitor_backend(
-    id: Arc<Uuid>,
-    section_lifetimes: Arc<RwLock<IndexMap<String, MtxSection>>>,
-    //section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
-    last_data_as_str: Option<String>,
-) -> Option<String> {
-    let mtx_data = MtxData::from(id, section_lifetimes).await;
+pub const MTX_FINAL_SECTION_NAME: &'static str = "$end-marker$";
 
-    // we stringify the data an additional time here, so we can check if the new data actually needs to be sent
-    let data_as_str = serde_json::to_string(&mtx_data).unwrap();
-    let proceed = match last_data_as_str {
-        Some(last) => data_as_str != last,
-        None => true,
-    };
-
-    if proceed {
-        if let Err(err) = MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::MtxEntryDone { mtx: mtx_data }).await {
-            error!("Errored while broadcasting MtxEntryDone message. @error:{}", err);
-        }
+impl MtxSection {
+    pub fn get_key(&self) -> String {
+        // use "#" as the separator, so that it sorts earlier than "/" (such that children show up after the parent, when sorting by path-plus-time)
+        let new_section_path_plus_time = format!("{}#{}", self.path, self.start_time);
+        new_section_path_plus_time
     }
-
-    Some(data_as_str)
 }
 
+// this alias is needed, since `wrap_serde_macros.rs` inserts refs to, eg. `rust_shared::rust_macros::Serialize_Stub`
+use crate as rust_shared;
+
+wrap_slow_macros! {
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MtxSection {
+    pub path: String,
+    pub extra_info: Option<String>,
+    pub start_time: f64,
+    pub duration: Option<f64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MtxData {
+    pub id: String,
+    pub section_lifetimes: IndexMap<String, MtxSection>,
+}
 impl MtxData {
     async fn from(
         id: Arc<Uuid>,
@@ -342,38 +383,33 @@ impl MtxData {
     }
 }
 
-pub const MTX_FINAL_SECTION_NAME: &'static str = "$end-marker$";
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MtxDataWithExtraInfo {
+    pub id: String,
+    pub section_lifetimes: IndexMap<String, MtxSection>,
+    //pub section_lifetimes: Arc<flurry::HashMap<String, MtxSection>>,
+    
+    // extra info (eg. so user-project can know if action needs to be taken)
+    pub data_as_str: String,
+    pub last_data_as_str: Option<String>,
+}
 
-impl MtxSection {
-    pub fn get_key(&self) -> String {
-        // use "#" as the separator, so that it sorts earlier than "/" (such that children show up after the parent, when sorting by path-plus-time)
-        let new_section_path_plus_time = format!("{}#{}", self.path, self.start_time);
-        new_section_path_plus_time
+#[derive(SimpleObject)] // added for AGQL variant only
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MtxDataForAGQL {
+    pub id: String, // changed to String in MtxData structs, for more universality (eg. easier usage with gql in monitor-backend -- agql's OutputType isn't implemented for Uuid)
+
+    // use HashMap in this variant, since agql has OutputType implemented for it
+    // (but tell serde to serialize the HashMap using the ordered_map function, which collects the entries into a temporary BTreeMap -- which is sorted)
+    #[serde(serialize_with = "crate::utils::general_::serde::ordered_map")]
+    pub section_lifetimes: HashMap<String, MtxSection>,
+}
+impl MtxDataForAGQL {
+    pub fn from_base(mtx_data: &MtxData) -> MtxDataForAGQL {
+        let mtx_data_as_str = serde_json::to_string(&mtx_data).unwrap();
+        let mtx_data_for_agql: MtxDataForAGQL = serde_json::from_str(&mtx_data_as_str).unwrap();
+        mtx_data_for_agql
     }
 }
 
-// sync with "app_server_types.rs" in monitor-backend
-// ==========
-
-#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
-pub struct MtxSection {
-    pub path: String,
-    pub extra_info: Option<String>,
-    pub start_time: f64,
-    pub duration: Option<f64>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
-pub struct MtxData {
-    //pub id: Uuid,
-    pub id: String, // changed to String here, for easier usage with gql in monitor-backend (agql's OutputType isn't implemented for Uuid)
-
-    // use this in app-server codebase
-    pub section_lifetimes: IndexMap<String, MtxSection>,
-    
-    // use this in monitor-backend codebase
-    // use HashMap here, since agql has OutputType implemented for it
-    // (but tell serde to serialize the HashMap using the ordered_map function, which collects the entries into a temporary BTreeMap -- which is sorted)
-    /*#[serde(serialize_with = "crate::utils::general::ordered_map")]
-    pub section_lifetimes: HashMap<String, MtxSection>,*/
 }

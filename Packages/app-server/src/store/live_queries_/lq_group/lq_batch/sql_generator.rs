@@ -5,24 +5,23 @@ use rust_shared::anyhow::{Error};
 use rust_shared::async_graphql::{Result};
 use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
-use indexmap::IndexMap;
+use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
+use rust_shared::new_mtx;
 use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::Row;
 use rust_shared::utils::general_::extensions::IteratorV;
+use rust_shared::utils::mtx::mtx::Mtx;
+use crate::store::live_queries_::lq_instance::LQInstance;
+use crate::store::live_queries_::lq_param::LQParam;
 use crate::utils::db::filter::{QueryFilter};
 use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
 use crate::utils::db::sql_fragment::{SF};
-use crate::utils::type_aliases::RowData;
 use crate::utils::db::sql_ident::SQLIdent;
 use crate::utils::db::sql_param::{SQLParam, SQLParamBoxed};
 use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
-use crate::utils::mtx::mtx::{new_mtx, Mtx};
 use crate::utils::type_aliases::PGClientObject;
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}}};
-
-use super::super::lq_instance::LQInstance;
-use super::super::lq_param::LQParam;
 
 pub fn prepare_sql_query(table_name: &str, lq_param_protos: &Vec<LQParam>, query_instance_vals: &Vec<&Arc<LQInstance>>, mtx_p: Option<&Mtx>) -> Result<(String, Vec<SQLParamBoxed>), Error> {
     new_mtx!(mtx, "1:prep", mtx_p);
@@ -96,9 +95,13 @@ mod tests {
     use std::{sync::Arc, iter::once};
 
     use rust_shared::itertools::chain;
+    use rust_shared::utils::general_::extensions::ToOwnedV;
     use rust_shared::{utils::time::time_since_epoch_ms, utils::type_aliases::JSONValue};
     use rust_shared::serde_json::json;
-    use crate::{store::live_queries_::{lq_batch_::sql_generator, lq_instance::LQInstance, lq_param::LQParam}, utils::{db::filter::{FilterOp, QueryFilter}}};
+    use crate::store::live_queries_::lq_instance::LQInstance;
+    use crate::store::live_queries_::lq_key::LQKey;
+    use crate::store::live_queries_::lq_param::LQParam;
+    use crate::utils::db::filter::{FilterOp, QueryFilter};
 
     use super::prepare_sql_query;
 
@@ -117,7 +120,8 @@ mod tests {
             }
         });
         let filter = QueryFilter::from_filter_input(&filter_input).unwrap();
-        let instance1 = Arc::new(LQInstance::new(table_name.to_owned(), filter, vec![]));
+        let lq_key = LQKey::new(table_name.o(), filter.o());
+        let instance1 = Arc::new(LQInstance::new(lq_key, vec![]));
         let query_instance_vals: Vec<&Arc<LQInstance>> = vec![
             &instance1
         ];

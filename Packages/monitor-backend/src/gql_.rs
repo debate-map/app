@@ -14,6 +14,7 @@ use rust_shared::hyper::{Body, service};
 use rust_shared::hyper::client::HttpConnector;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::tokio_postgres::{Client};
+use rust_shared::utils::type_aliases::JSONValue;
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};
 use tower_http::cors::{CorsLayer, Origin};
@@ -40,11 +41,11 @@ use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
 use crate::{GeneralMessage};
 use crate::gql::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
-use crate::store::storage::AppStateWrapper;
+use crate::store::storage::AppStateArc;
 use crate::utils::general::body_to_str;
-use crate::utils::type_aliases::{JSONValue, ABSender, ABReceiver};
+use crate::utils::type_aliases::{ABSender, ABReceiver};
 use rust_shared::async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
-use flume::{Sender, Receiver, unbounded};
+use rust_shared::flume::{Sender, Receiver, unbounded};
 
 wrap_slow_macros!{
 
@@ -118,7 +119,7 @@ pub async fn extend_router(
     app: Router,
     msg_sender: ABSender<GeneralMessage>, msg_receiver: ABReceiver<GeneralMessage>,
     //msg_sender_test: Sender<GeneralMessage_Flume>, msg_receiver_test: Receiver<GeneralMessage_Flume>,
-    app_state: AppStateWrapper
+    app_state: AppStateArc
 ) -> Router {
     let schema =
         wrap_agql_schema_build!{

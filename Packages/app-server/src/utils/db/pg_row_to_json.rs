@@ -6,8 +6,7 @@ use rust_shared::serde_json::{json, Map, self};
 use rust_shared::tokio_postgres::{Column, types};
 use rust_shared::tokio_postgres::types::{Type, FromSql};
 use rust_shared::tokio_postgres::{Row};
-use rust_shared::utils::type_aliases::JSONValue;
-use crate::utils::type_aliases::RowData;
+use rust_shared::utils::type_aliases::{JSONValue, RowData};
 
 pub fn postgres_row_to_struct<'a, T: for<'de> Deserialize<'de>>(row: Row) -> Result<T, Error> {
     let as_json = postgres_row_to_json_value(row, 100)?;

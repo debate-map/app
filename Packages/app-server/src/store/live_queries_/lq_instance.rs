@@ -14,13 +14,16 @@ use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, AddExtensionLayer, Router};
-use flume::{Sender, Receiver, unbounded};
+use rust_shared::flume::{Sender, Receiver, unbounded, self};
+use rust_shared::links::app_server_to_monitor_backend::Message_ASToMB;
 use rust_shared::serde::de::DeserializeOwned;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, Map, self};
 use rust_shared::tokio::sync::{mpsc, Mutex, RwLock};
 use rust_shared::tokio_postgres::{Client, Row};
-use rust_shared::{futures, axum, tower, tower_http, Lock, check_lock_order, Assert, IsTrue, lock_as_usize_LQInstance_last_entries};
+use rust_shared::utils::mtx::mtx::Mtx;
+use rust_shared::utils::type_aliases::RowData;
+use rust_shared::{futures, axum, tower, tower_http, Lock, check_lock_order, Assert, IsTrue, lock_as_usize_LQInstance_last_entries, new_mtx};
 use tower::Service;
 use tower_http::cors::{CorsLayer, Origin};
 use rust_shared::async_graphql::futures_util::task::{Context, Poll};
@@ -36,14 +39,14 @@ use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use tracing::error;
 use rust_shared::uuid::Uuid;
 
-use crate::links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB};
+use crate::links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter};
 use crate::utils::db::handlers::json_maps_to_typed_entries;
 use crate::utils::db::pg_stream_parsing::{LDChange};
-use crate::utils::type_aliases::RowData;
 use crate::utils::db::queries::{get_entries_in_collection};
 use crate::utils::general::general::rw_locked_hashmap__get_entry_or_insert_with;
-use crate::utils::mtx::mtx::{Mtx, new_mtx};
+
+use super::lq_key::LQKey;
 
 #[derive(Clone)]
 pub struct LQEntryWatcher {
@@ -60,26 +63,16 @@ impl LQEntryWatcher {
     }
 }
 
-pub fn get_lq_instance_key(table_name: &str, filter: &QueryFilter) -> String {
-    //format!("@table:{} @filter:{:?}", table_name, filter)
-    json!({
-        "table": table_name,
-        "filter": filter,
-    }).to_string()
-}
-
 /// Holds the data related to a specific query (ie. collection-name + filter).
 pub struct LQInstance {
-    pub table_name: String,
-    pub filter: QueryFilter,
+    pub lq_key: LQKey,
     pub last_entries: RwLock<Vec<RowData>>,
     pub entry_watchers: RwLock<HashMap<Uuid, LQEntryWatcher>>,
 }
 impl LQInstance {
-    pub fn new(table_name: String, filter: QueryFilter, initial_entries: Vec<RowData>) -> Self {
+    pub fn new(lq_key: LQKey, initial_entries: Vec<RowData>) -> Self {
         Self {
-            table_name,
-            filter,
+            lq_key,
             last_entries: RwLock::new(initial_entries),
             entry_watchers: RwLock::new(HashMap::new()),
         }
@@ -94,8 +87,8 @@ impl LQInstance {
     }
     pub fn get_lq_instance_updated_message(&self, entries: Vec<RowData>, watcher_count: usize) -> Message_ASToMB {
         Message_ASToMB::LQInstanceUpdated {
-            table_name: self.table_name.clone(),
-            filter: serde_json::to_value(self.filter.clone()).unwrap(),
+            table_name: self.lq_key.table_name.clone(),
+            filter: serde_json::to_value(self.lq_key.filter.clone()).unwrap(),
             last_entries: entries,
             watchers_count: watcher_count as u32,
             deleting: false, // deletion event is sent from drop_lq_watcher func in lq_group.rs
@@ -132,8 +125,8 @@ impl LQInstance {
         match change.kind.as_str() {
             "insert" => {
                 let new_entry = change.new_data_as_map().unwrap();
-                let filter_check_result = entry_matches_filter(&new_entry, &self.filter)
-                    .expect(&format!("Failed to execute filter match-check on new database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
+                let filter_check_result = entry_matches_filter(&new_entry, &self.lq_key.filter)
+                    .expect(&format!("Failed to execute filter match-check on new database entry. @table:{} @filter:{:?}", self.lq_key.table_name, self.lq_key.filter));
                 if filter_check_result {
                     new_entries.push(new_entry);
                     our_data_changed = true;
@@ -152,8 +145,8 @@ impl LQInstance {
                             our_data_changed = true;
                         }
                         // check if the entry still matches the query's filter (if not, remove the entry from the query's results)
-                        let filter_check_result = entry_matches_filter(entry, &self.filter)
-                            .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
+                        let filter_check_result = entry_matches_filter(entry, &self.lq_key.filter)
+                            .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.lq_key.table_name, self.lq_key.filter));
                         if !filter_check_result {
                             new_entries.remove(entry_index);
                             our_data_changed = true;
@@ -161,8 +154,8 @@ impl LQInstance {
                     },
                     None => {
                         // if the modified entry wasn't part of the result-set, it must not have matched the filter before the update; but check if it matches now
-                        let filter_check_result = entry_matches_filter(&new_data, &self.filter)
-                            .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.table_name, self.filter));
+                        let filter_check_result = entry_matches_filter(&new_data, &self.lq_key.filter)
+                            .expect(&format!("Failed to execute filter match-check on updated database entry. @table:{} @filter:{:?}", self.lq_key.table_name, self.lq_key.filter));
                         if filter_check_result {
                             new_entries.push(new_data);
                             our_data_changed = true;

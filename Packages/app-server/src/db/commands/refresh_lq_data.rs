@@ -7,7 +7,8 @@ use lazy_static::lazy_static;
 use deadpool_postgres::Pool;
 use rust_shared::utils::type_aliases::JSONValue;
 
-use crate::{db::{_general::GenericMutation_Result, nodes::get_node}, store::live_queries::LQStorageWrapper};
+use crate::store::storage::{AppStateArc, get_app_state_from_gql_ctx};
+use crate::{db::{_general::GenericMutation_Result, nodes::get_node}, store::live_queries::LQStorageArc};
 
 #[derive(Serialize, Deserialize, Debug)] //#[serde(crate = "rust_shared::serde")]
 pub struct RefreshLQDataPayload {
@@ -36,15 +37,13 @@ pub async fn refresh_lq_data(ctx: &async_graphql::Context<'_>, payload_raw: JSON
         "id": {"equalTo": payload.entryID}
     });*/
 
-    let (client, storage) = {
+    let lq_storage = {
         let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
-        let pool = ctx2.data::<Pool>().unwrap();
-        let client = pool.get().await.unwrap();
-        let storage = ctx2.data::<LQStorageWrapper>().unwrap().clone();
-        (client, storage)
+        let app_state = get_app_state_from_gql_ctx(ctx2);
+        app_state.live_queries.clone()
     };
 
-    storage.refresh_lq_data(payload.collection, payload.entryID, &client).await?;
+    lq_storage.refresh_lq_data(payload.collection, payload.entryID).await?;
     
     Ok(GenericMutation_Result {
         message: "Command completed successfully.".to_owned(),

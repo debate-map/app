@@ -1,4 +1,4 @@
-use indexmap::IndexMap;
+use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::Itertools;
 use jsonschema::JSONSchema;
 use jsonschema::output::BasicOutput;
@@ -35,7 +35,7 @@ use crate::db::node_tags::{NodeTag, TagComp_CloneHistory};
 use crate::db::terms::Term;
 use crate::utils::db::accessors::AccessorContext;
 use crate::utils::db::filter::{QueryFilter, FilterInput};
-use crate::utils::type_aliases::RowData;
+use rust_shared::utils::type_aliases::RowData;
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::{start_read_transaction, start_write_transaction};
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;

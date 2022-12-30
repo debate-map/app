@@ -14,16 +14,16 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64, tokio_sleep, tokio_sleep
 use rust_shared::utils::type_aliases::JWTDuration;
 use rust_shared::{async_graphql, async_graphql::{SimpleObject, InputObject}};
 use rust_shared::db_constants::{SYSTEM_USER_ID};
-use flume::Sender;
+use rust_shared::flume::Sender;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::{self as rust_shared, serde_json, tokio, to_sub_err};
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde;
 use tracing::{error, info};
+use rust_shared::utils::type_aliases::{JSONValue, FSender, FReceiver};
 
 use crate::utils::general::body_to_str;
-use crate::utils::type_aliases::{FSender, FReceiver};
-use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::{JSONValue, ABSender}};
+use crate::{GeneralMessage, pgclient::create_client_advanced, utils::type_aliases::{ABSender}};
 
 wrap_slow_macros!{
 
@@ -224,15 +224,21 @@ async fn execute_test_step<'a>(flattened_index: i64, step: TestStep, err_sender:
             let generic_err = || anyhow!("[generic-error, never logged]");
             for err_obj in response.get("errors").ok_or_else(generic_err)?.as_array().ok_or_else(generic_err)? {
                 let err_message = err_obj.get("message").ok_or_else(generic_err)?.as_str().ok_or_else(generic_err)?;
-                err_sender.send((flattened_index, err_message.to_string())).unwrap();
                 error!("Got graphql error during awaited execution of test-step #{}:{:?}", flattened_index, err_message);
+
+                // If message fails to send, it means channel is closed; which means this is a late-response (ie. after `execute_test_sequence` function completion) operating within the tokio::spawn block below.
+                // Ignoring this failed message-send is not ideal, but haven't worked out a better solution atm. (better than panicking anyway)
+                let _ = err_sender.send((flattened_index, err_message.to_string()));
             }
             0
         };
     };
     let handle_rust_error = move |err: Error, err_sender: &FSender<TestStepErrorMessage>| {
-        err_sender.send((flattened_index, err.to_string())).unwrap();
         error!("Got rust error during awaited execution of test-step #{}:{:?}", flattened_index, err);
+
+        // If message fails to send, it means channel is closed; which means this is a late-response (ie. after `execute_test_sequence` function completion) operating within the tokio::spawn block below.
+        // Ignoring this failed message-send is not ideal, but haven't worked out a better solution atm. (better than panicking anyway)
+        let _ = err_sender.send((flattened_index, err.to_string()));
     };
 
     if step.waitTillComplete.unwrap_or(true) {

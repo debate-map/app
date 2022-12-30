@@ -39,7 +39,7 @@ use crate::db::commands::_command::set_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
-use crate::store::storage::{AppStateWrapper, SignInMsg};
+use crate::store::storage::{AppStateArc, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};

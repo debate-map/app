@@ -1,11 +1,12 @@
 use rust_shared::{anyhow::Error, tokio, tokio_postgres, serde_json};
-use flume::Sender;
+use rust_shared::flume::Sender;
 use tracing::{error, info};
+use rust_shared::utils::type_aliases::JSONValue;
 
-use crate::{GeneralMessage, pgclient::create_client, utils::type_aliases::{JSONValue, ABSender}};
+use crate::{GeneralMessage, pgclient::create_client_advanced, utils::type_aliases::{ABSender}};
 
 pub async fn migrate_db_to_v2(msg_sender: ABSender<GeneralMessage>) -> Result<String, Error> {
-    let (mut client, connection) = create_client(false).await;
+    let (mut client, connection) = create_client_advanced(false).await;
     // the connection object performs the actual communication with the database, so spawn it off to run on its own
     // (maybe switch to using a shared program-wide pool, to avoid the need for this)
     let _handle = tokio::spawn(async move {

@@ -8,7 +8,28 @@ use rust_shared::tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQuery
 use tracing::{info, debug, error, trace};
 use rust_shared::anyhow::{anyhow, Error};
 
-use crate::{store::live_queries::{LQStorageWrapper}, utils::{db::pg_stream_parsing::LDChange}};
+use crate::{store::{live_queries::{LQStorageArc}, storage::AppStateArc}, utils::{db::pg_stream_parsing::LDChange}};
+
+pub fn start_pgclient_with_restart(app_state: AppStateArc) {
+    let _handler = tokio::spawn(async move {
+        let mut errors_hit = 0;
+        while errors_hit < 1000 {
+            let (client_replication, connection_replication) = create_client_advanced(true).await;
+            let result = start_streaming_changes(client_replication, connection_replication, app_state.live_queries.clone()).await;
+            match result {
+                Ok(result) => {
+                    //println!("PGClient loop ended for some reason. Result:{:?}", result);
+                    error!("PGClient loop ended for some reason; restarting shortly. Result:{:?}", result);
+                },
+                Err(err) => {
+                    error!("PGClient loop had error; restarting shortly. @error:{:?}", err);
+                    errors_hit += 1;
+                }
+            };
+            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+        }
+    });
+}
 
 async fn q(client: &Client, query: &str) -> Vec<SimpleQueryRow> {
     let msgs = client.simple_query(query).await.unwrap();
@@ -35,7 +56,7 @@ pub fn get_tokio_postgres_config() -> tokio_postgres::Config {
 }
 
 /// Only use this if you need the for_replication option. (everything else should use clients taken from the shared pool)
-pub async fn create_client(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
+async fn create_client_advanced(for_replication: bool) -> (Client, Connection<Socket, NoTlsStream>) {
     let mut pg_cfg = get_tokio_postgres_config();
     if for_replication {
         //db_config += " replication=database";
@@ -72,7 +93,7 @@ pub fn create_db_pool() -> Pool {
 pub async fn start_streaming_changes(
     client: Client,
     connection: Connection<Socket, NoTlsStream>,
-    storage_wrapper: LQStorageWrapper
+    storage_wrapper: LQStorageArc
 ) -> Result<Client, Error> {
 //) -> Result<(Client, Connection<Socket, NoTlsStream>), tokio_postgres::Error> {
     info!("Starting pgclient::start_streaming_changes...");
@@ -128,7 +149,7 @@ pub async fn start_streaming_changes(
                 let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
                 for change_raw in data["change"].as_array().unwrap() {
                     let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
-                    storage_wrapper.notify_of_ld_change(&change).await;
+                    storage_wrapper.notify_of_ld_change(change).await;
                 }
             }
             // type: keepalive message

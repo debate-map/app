@@ -6,40 +6,39 @@ use rust_shared::anyhow::{Error};
 use rust_shared::async_graphql::{Result};
 use deadpool_postgres::Pool;
 use futures_util::{StreamExt, TryFutureExt, TryStreamExt};
-use indexmap::IndexMap;
+use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
-use rust_shared::{to_anyhow_with_extra, Lock};
+use rust_shared::utils::mtx::mtx::Mtx;
+use rust_shared::utils::type_aliases::RowData;
+use rust_shared::{to_anyhow_with_extra, Lock, new_mtx};
 use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::types::ToSql;
 use rust_shared::tokio_postgres::{Row, RowStream};
 use lazy_static::lazy_static;
 use tracing::{trace, error};
 use crate::db::commands::_command::ToSqlWrapper;
-use crate::store::live_queries_::lq_batch_::sql_generator::prepare_sql_query;
+use crate::store::live_queries_::lq_group::lq_batch::sql_generator::prepare_sql_query;
+use crate::store::live_queries_::lq_instance::LQInstance;
+use crate::store::live_queries_::lq_key::LQKey;
+use crate::store::live_queries_::lq_param::LQParam;
 use crate::utils::db::filter::{QueryFilter};
 use crate::utils::db::pg_row_to_json::postgres_row_to_row_data;
 use crate::utils::db::sql_fragment::{SF};
-use crate::utils::type_aliases::RowData;
 use crate::utils::db::sql_param::{SQLParam};
 use crate::utils::general::general::{match_cond_to_iter, AtomicF64};
-use crate::utils::mtx::mtx::{new_mtx, Mtx};
 use crate::utils::type_aliases::PGClientObject;
 use crate::{utils::{db::{sql_fragment::{SQLFragment}}}};
-
-use super::lq_instance::LQInstance;
-use super::lq_param::LQParam;
 
 /// Use this struct to collect multiple queries and execute them in one go as a "batched query".
 /// It can also be used as a convenience wrapper around executing a single query; but for most standalone queries, `get_entries_in_collection[_basic]` will be more appropriate.
 //#[derive(Default)]
 pub struct LQBatch {
     // from LQGroup
-    pub table_name: String,
-    pub filter_shape: QueryFilter,
+    pub lq_key: LQKey,
     //pub index_in_group: usize,
     
     /// Note that this map gets cleared as soon as its entries are committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
-    pub query_instances: IndexMap<String, Arc<LQInstance>>,
+    pub query_instances: IndexMap<LQKey, Arc<LQInstance>>,
     //pub execution_time: Option<f64>,
     //execution_time: AtomicF64, // a value of -1 means "not yet set", ie. execution hasn't happened yet
 
@@ -47,10 +46,9 @@ pub struct LQBatch {
     pub executions_completed: usize,
 }
 impl LQBatch {
-    pub fn new(table_name: String, filter_shape: QueryFilter) -> Self {
+    pub fn new(lq_key: LQKey) -> Self {
         Self {
-            table_name,
-            filter_shape,
+            lq_key,
             //index_in_group,
 
             query_instances: IndexMap::default(),
@@ -65,7 +63,7 @@ impl LQBatch {
     }
 
     /// Call this each cycle, after the batch's contents have been committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
-    pub fn mark_generation_end_and_reset(&mut self) -> Vec<(String, Arc<LQInstance>)> {
+    pub fn mark_generation_end_and_reset(&mut self) -> Vec<(LQKey, Arc<LQInstance>)> {
         self.executions_completed += 1;
         self.query_instances.drain(..).collect_vec()
     }
@@ -78,7 +76,7 @@ impl LQBatch {
 
         chain!(
             once(LQParam::LQIndex(lq_index_filler)),
-            self.filter_shape.field_filters.iter().flat_map(|(field_name, field_filter)| {
+            self.lq_key.filter.field_filters.iter().flat_map(|(field_name, field_filter)| {
                 field_filter.filter_ops.iter().enumerate().map(|(op_i, op)| {
                     //LQParam::FilterOpValue(field_name.to_owned(), op_i, filter_op_filler.clone())
                     LQParam::FilterOpValue(field_name.to_owned(), op_i, op.clone())
@@ -92,10 +90,6 @@ impl LQBatch {
         -> Result<(), Error>
     {
         new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
-        //let client = ctx.data::<Client>().unwrap();
-        /*let pool = ctx.data::<Pool>().unwrap();
-        let client = pool.get().await.unwrap();*/
-        //let client = ctx;
         //mtx.current_section_extra_info = Some(format!("@table_name:{} @filters_sql:{}", instance.table_name, filters_sql));
 
         let query_instance_vals: Vec<&Arc<LQInstance>> = self.query_instances.values().collect();
@@ -105,7 +99,7 @@ impl LQBatch {
 
         mtx.section("2:prepare the combined query");
         let lq_param_protos = self.lq_param_prototypes();
-        let (sql_text, params) = prepare_sql_query(&self.table_name, &lq_param_protos, &query_instance_vals, Some(&mtx))?;
+        let (sql_text, params) = prepare_sql_query(&self.lq_key.table_name, &lq_param_protos, &query_instance_vals, Some(&mtx))?;
 
         mtx.section("3:execute the combined query");
         let sql_info_str = format!("@sql_text:{sql_text} @params:{params:?}");

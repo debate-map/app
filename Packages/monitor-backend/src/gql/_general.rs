@@ -1,10 +1,13 @@
 use rust_shared::itertools::Itertools;
 use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
-use flume::{Receiver, Sender};
+use rust_shared::flume::{Receiver, Sender};
+use rust_shared::links::app_server_to_monitor_backend::LogEntry;
 use rust_shared::utils::_k8s::get_reqwest_client_with_k8s_certs;
 use rust_shared::utils::futures::make_reliable;
+use rust_shared::utils::mtx::mtx::{MtxData, MtxDataForAGQL};
 use rust_shared::{futures, axum, tower, tower_http, GQLError};
+use rust_shared::utils::type_aliases::JSONValue;
 use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
@@ -22,13 +25,12 @@ use std::path::Path;
 use std::str::FromStr;
 use std::{time::Duration, pin::Pin, task::Poll};
 
-use crate::links::app_server_types::{MtxData, LogEntry};
 use crate::testing::general::{execute_test_sequence, TestSequence};
 use crate::{GeneralMessage};
 use crate::migrations::v2::migrate_db_to_v2;
-use crate::store::storage::{AppStateWrapper, LQInstance_Partial};
+use crate::store::storage::{AppStateArc, LQInstance_Partial};
 use crate::utils::general::body_to_str;
-use crate::utils::type_aliases::{JSONValue, ABSender, ABReceiver};
+use crate::utils::type_aliases::{ABSender, ABReceiver};
 
 pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
     let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
@@ -56,12 +58,12 @@ impl QueryShard_General {
     /// async-graphql requires there to be at least one entry under the Query section
     async fn empty(&self) -> &str { "" }
     
-    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<MtxData>, GQLError> {
+    async fn mtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String, start_time: f64, end_time: f64) -> Result<Vec<MtxDataForAGQL>, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
-        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let app_state = ctx.data::<AppStateArc>().unwrap();
         let mtx_results = app_state.mtx_results.read().await.to_vec();
-        let mtx_results_filtered: Vec<MtxData> = mtx_results.into_iter().filter(|mtx| {
+        let mtx_results_filtered = mtx_results.into_iter().filter(|mtx| {
             for lifetime in mtx.section_lifetimes.values() {
                 let section_start = lifetime.start_time;
                 let section_end = match lifetime.duration {
@@ -73,14 +75,15 @@ impl QueryShard_General {
                 }
             }
             false
-        }).collect();
-        Ok(mtx_results_filtered)
+        }).collect_vec();
+        let mtx_results_filtered_transformed = mtx_results_filtered.into_iter().map(|mtx| MtxDataForAGQL::from_base(&mtx)).collect_vec();
+        Ok(mtx_results_filtered_transformed)
     }
     
     async fn lqInstances(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<Vec<LQInstance_Partial>, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
-        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let app_state = ctx.data::<AppStateArc>().unwrap();
         let lqis: Vec<LQInstance_Partial> = app_state.lqi_data.read().await.values().map(|a| a.clone()).collect();
         /*let lqis_filtered: Vec<LQInstance_Partial> = lqis.into_iter().filter(|mtx| {
             for lifetime in mtx.section_lifetimes.values() {
@@ -229,7 +232,7 @@ struct StartMigration_Result {
     async fn clearMtxResults(&self, ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<GenericMutation_Result, GQLError> {
         ensure_admin_key_is_correct(admin_key, true)?;
         
-        let app_state = ctx.data::<AppStateWrapper>().unwrap();
+        let app_state = ctx.data::<AppStateArc>().unwrap();
         let mut mtx_results = app_state.mtx_results.write().await;
         mtx_results.clear();
         

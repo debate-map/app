@@ -1,40 +1,17 @@
 use std::{fmt, collections::HashMap, ops::Sub};
 
-use flume::{Sender, Receiver, TrySendError};
+use rust_shared::flume::{Sender, Receiver, TrySendError};
 use rust_shared::futures::executor::block_on;
-use indexmap::IndexMap;
+use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::Itertools;
+use rust_shared::links::app_server_to_monitor_backend::{LogEntry, Message_ASToMB};
 use rust_shared::utils::time::time_since_epoch_ms;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use tracing::{Level, error, Subscriber, Metadata, subscriber::Interest, span, Event, metadata::LevelFilter, field::{Visit, Field}};
 use tracing_subscriber::{filter, Layer, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, layer::{Filter, Context}};
 
-use crate::{utils::type_aliases::ABSender, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND, Message_ASToMB}};
-
-/*
-Logging levels: (as interpreted in the debate-map codebase)
-* ERROR: Indicates some flaw in the codebase that should be fixed, or an issue in the user/externally supplied data serious enough that the given operation did not proceed.
-* WARN: Indicates some unexpected state that *might* be pointing toward an error/thing-to-fix, but could also just be something unusual.
-* INFO: Something significant enough that it should show in the process' standard output.
-* DEBUG: For low-level information that's fine to stream to the monitor-backend.
-* TRACE: For low-level information that's not fine to stream to the monitor-backend. (eg. due to the expected trigger-rate being too high, to where it might congest the local network, or other layer of processing)
-*/
-
-// keep fields synced with struct in app_server_link.rs (this one's the "source")
-#[derive(Clone, Debug, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
-pub struct LogEntry {
-    pub time: f64,
-    pub level: String,
-
-    //pub module_path: String,
-    pub target: String, // generally, this equals module_path (but not necessarily, as per docs)
-    /*pub kind: String,
-    pub line_number: usize,*/
-    pub span_name: String, // generally, this equals [kind + file-path + line-number] (but not necessarily, afaik)
-
-    pub message: String,
-}
+use crate::{utils::type_aliases::ABSender, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND}};
 
 /*pub fn does_event_match_conditions(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
     if levels_to_exclude.contains(metadata.level()) {

@@ -56,9 +56,14 @@ pub extern crate tower_http;
 pub extern crate tower_service;
 pub extern crate jwt_simple;
 pub extern crate chrono;
+pub extern crate flume;
+pub extern crate indexmap;
 
 // this crate's modules
 pub mod db_constants;
+pub mod links {
+    pub mod app_server_to_monitor_backend;
+}
 pub mod utils {
     pub mod auth {
         pub mod jwt_utils_base;
@@ -70,19 +75,23 @@ pub mod utils {
     pub mod errors_ {
         pub mod backtrace_simplifier;
     }
-    pub mod locks {
-        pub mod check_lock_order;
-        pub mod rwlock_tracked;
-    }
     pub mod futures;
-    pub mod _k8s;
-    pub mod k8s {
-        pub mod k8s_structs;
-    }
     pub mod general;
     pub mod general_ {
         pub mod extensions;
         pub mod func_types;
+        pub mod serde;
+    }
+    pub mod _k8s;
+    pub mod k8s {
+        pub mod k8s_structs;
+    }
+    pub mod locks {
+        pub mod check_lock_order;
+        pub mod rwlock_tracked;
+    }
+    pub mod mtx {
+        pub mod mtx;
     }
     pub mod time;
     pub mod type_aliases;

@@ -2,21 +2,23 @@
 use std::time::Duration;
 
 use rust_shared::async_graphql::{SimpleObject, Json};
-use flume::Sender;
+use rust_shared::flume::Sender;
 use futures_util::StreamExt;
-use indexmap::IndexMap;
+use rust_shared::indexmap::IndexMap;
+use rust_shared::links::app_server_to_monitor_backend::Message_ASToMB;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Deserialize, Serialize};
 use rust_shared::serde_json::{json, self};
 use rust_shared::tokio::{time, self};
+use rust_shared::utils::type_aliases::JSONValue;
 use tracing::{debug, error, info, trace};
 use rust_shared::url::Url;
 use tokio_tungstenite::{tungstenite::{connect, Message}, connect_async};
 use rust_shared::uuid::Uuid;
 
-use crate::{GeneralMessage, utils::type_aliases::{ABSender, JSONValue}, store::storage::{AppStateWrapper, LQInstance_Partial}, links::app_server_types::{Message_ASToMB, LogEntry}};
+use crate::{GeneralMessage, utils::type_aliases::{ABSender}, store::storage::{AppStateArc, LQInstance_Partial}};
 
-pub async fn connect_to_app_server(app_state: AppStateWrapper, sender: ABSender<GeneralMessage>) {
+pub async fn connect_to_app_server(app_state: AppStateArc, sender: ABSender<GeneralMessage>) {
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
 

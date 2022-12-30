@@ -24,9 +24,6 @@ pub mod general {
     pub mod order_key;
 }
 pub mod http;
-pub mod mtx {
-    pub mod mtx;
-}
 pub mod type_aliases;
 pub mod quick_tests {
     pub mod quick1;

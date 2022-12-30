@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env};
+use std::{env, collections::HashMap};
 use anyhow::{anyhow, Error};
 
 use async_graphql::{EnumType, resolver_utils::enum_value};
