@@ -4,13 +4,13 @@ pub enum Lock {
     LQGroup_batches_meta = 1,
     //LQGroup_lqis_awaiting_population = 2,
     LQGroup_batches_x = 2,
-    LQGroup_lqis_committed = 3,
-    LQInstance_entry_watchers = 4,
-    LQInstance_last_entries = 5, // sync this value with macro below
+    //LQGroup_lqis_committed = 3,
+    LQInstance_entry_watchers = 3,
+    LQInstance_last_entries = 4, // sync this value with macro below
 }
 // these macros are needed for cases where comparisons are done in the "where" clause of a function (where Lock::X cannot be used)
 #[macro_export]
-macro_rules! lock_as_usize_LQInstance_last_entries { {} => { 5 } }
+macro_rules! lock_as_usize_LQInstance_last_entries { {} => { 4  } }
 
 pub enum Assert<const CHECK: bool> {}
 pub trait IsTrue {}

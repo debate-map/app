@@ -99,6 +99,9 @@ pub struct LQGroup_BatchesMeta {
 
     /// Map of live-query instances that are awaiting population.
     pub lqis_awaiting_population: IndexMap<String, LQIAwaitingPopulationInfo>,
+    
+    /// Map of committed live-query instances.
+    pub lqis_committed: IndexMap<String, Arc<LQInstance>>,
 }
 impl LQGroup_BatchesMeta {
     pub fn new(/*batches_count: i64*/) -> Self {
@@ -108,6 +111,7 @@ impl LQGroup_BatchesMeta {
             //last_batch_executed_index: -1,
             last_batch_committed_index: -1,
             lqis_awaiting_population: IndexMap::new(),
+            lqis_committed: IndexMap::new(),
         }
     }
 
@@ -149,9 +153,6 @@ pub struct LQGroup {
     pub batches: Vec<RwLock<LQBatch>>,
     pub batches_meta: RwLock_Tracked<LQGroup_BatchesMeta>,
 
-    /// Map of committed live-query instances.
-    //pub query_instances: RwLock<IndexMap<String, Arc<LQInstance>>>,
-    pub lqis_committed: RwLock_Tracked<IndexMap<String, Arc<LQInstance>>>,
     //source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
 }
 impl LQGroup {
@@ -174,7 +175,6 @@ impl LQGroup {
             channel_for_batch_messages__sender_base: s1,
             channel_for_batch_messages__receiver_base: r1,
 
-            lqis_committed: RwLock_Tracked::new(IndexMap::new()),
             //source_sender_for_lq_watcher_drops: s1,
         };
 
@@ -246,8 +246,8 @@ impl LQGroup {
         Ok(lqi)
     }
     async fn get_lq_instance_if_committed(&self, lq_key: &str) -> Option<Arc<LQInstance>> {
-        let query_instances = self.lqis_committed.read("get_lq_instance_if_committed").await;
-        let instance = query_instances.get(lq_key);
+        let meta = self.batches_meta.read("get_lq_instance_if_committed").await;
+        let instance = meta.lqis_committed.get(lq_key);
         instance.map(|a| a.clone())
     }
 
@@ -376,7 +376,8 @@ impl LQGroup {
                 let mut meta = self.batches_meta.write("execute_batch_x_once_ready").await;
                 //meta.last_batch_executed_index = batch_i as i64;
                 
-                mtx2.section_2("5:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", self.lqis_committed.get_live_guards_str())));
+                mtx2.section("5:commit the lqi's in batch to overall group, and update batches-meta");
+                //mtx2.section_2("5:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", meta.lqis_committed.get_live_guards_str())));
                 {
                     // Acquire lock on lq_keys_awaiting_population first; this way, code in `get_or_create_lq_instance_in_progressing_batch` knows that as long as it holds a read-lock:
                     // 1) It is safe to create the receiver that is then used to wait for the batch's execution. (ie. we have not yet broadcast the `LQBatchMessage::NotifyExecutionDone` message)
@@ -384,10 +385,8 @@ impl LQGroup {
                     let mut lq_keys_awaiting_population = self.lqis_awaiting_population.write("execute_batch_x_once_ready").await;*/
                     
                     //let instances_in_batch = batch.query_instances.read().await;
-                    check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_lqis_committed}>();
-                    let mut query_instances = self.lqis_committed.write("execute_batch_x_once_ready").await;
                     for (key, value) in instances_in_batch.into_iter() {
-                        let old_lqi = query_instances.insert(key.to_owned(), value.clone());
+                        let old_lqi = meta.lqis_committed.insert(key.to_owned(), value.clone());
                         if let Some(old_lqi) = old_lqi {
                             // if an old-lqi was replaced, but in fact that "old lqi" was the same lqi...
                             if Arc::ptr_eq(&value.clone(), &old_lqi) {
@@ -399,11 +398,11 @@ impl LQGroup {
                                 let old_watchers: Vec<(Uuid, LQEntryWatcher)> = old_lqi.entry_watchers.write().await.drain().collect_vec();
                                 let old_watchers_count = old_watchers.len();
 
-                                check_lock_order::<{Lock::LQGroup_lqis_committed}, {Lock::LQInstance_last_entries}>();
+                                check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_last_entries}>();
                                 let latest_entries = value.last_entries.read().await.clone();
 
-                                let new_lqi = query_instances.get(&key).ok_or(anyhow!("New-lqi not found!"))?;
-                                check_lock_order::<{Lock::LQGroup_lqis_committed}, {Lock::LQInstance_entry_watchers}>();
+                                let new_lqi = meta.lqis_committed.get(&key).ok_or(anyhow!("New-lqi not found!"))?;
+                                check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
                                 let mut new_watchers = new_lqi.entry_watchers.write().await;
                                 for (old_stream_id, old_watcher) in old_watchers {
                                     // since lqi that old-watcher was attached to might have had a not-yet-updated entries-set, send each watcher the latest entries-set
@@ -420,7 +419,7 @@ impl LQGroup {
                             }
                         }
                     }
-                    mtx2.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", query_instances.len(), instances_in_batch_len));
+                    mtx2.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", meta.lqis_committed.len(), instances_in_batch_len));
 
                     // now that we've "committed" this batch's lqi's to the lq-group, remove their lq-keys from the `lq_keys_awaiting_population` list
                     for lq_key in instances_in_batch_lq_keys {
@@ -480,14 +479,14 @@ impl LQGroup {
         debug!("Got lq-watcher drop request. @table:{table_name} @filter:{filter} @stream_id:{stream_id}");
 
         let lq_key = get_lq_instance_key(table_name, filter);
-        let mut lq_instances = self.lqis_committed.write("drop_lq_watcher").await;
+        let mut meta = self.batches_meta.write("drop_lq_watcher").await;
         mtx.section("2:get lq_instance for key, then get lq_instance.entry_watcher write-lock");
         let new_watcher_count = {
-            let lq_instance = match lq_instances.get_mut(&lq_key) {
+            let lq_instance = match meta.lqis_committed.get_mut(&lq_key) {
                 Some(a) => a,
                 None => return, // if entry already deleted, just ignore for now [maybe fixed after change to get_or_create_lq_instance?]
             };
-            check_lock_order::<{Lock::LQGroup_lqis_committed}, {Lock::LQInstance_entry_watchers}>();
+            check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
             let mut entry_watchers = lq_instance.entry_watchers.write().await;
             
             mtx.section("3:update entry_watchers, then remove lq_instance (if no watchers), then complete");
@@ -506,7 +505,7 @@ impl LQGroup {
             entry_watchers.len()
         };
         if new_watcher_count == 0 {
-            lq_instances.remove(&lq_key);
+            meta.lqis_committed.remove(&lq_key);
             debug!("Watcher count for live-query entry dropped to 0, so removing.");
 
             //let lq_key = get_lq_instance_key(&self.table_name, &self.filter);
@@ -521,7 +520,7 @@ impl LQGroup {
             }
         }
 
-        debug!("LQ-watcher drop complete. @watcher_count_for_entry:{} @lq_entry_count:{}", new_watcher_count, lq_instances.len());
+        debug!("LQ-watcher drop complete. @watcher_count_for_entry:{} @lq_entry_count:{}", new_watcher_count, meta.lqis_committed.len());
     }
     
     pub async fn notify_of_ld_change(&self, change: &LDChange) {
@@ -530,9 +529,9 @@ impl LQGroup {
             return;
         }
         
-        let live_queries = self.lqis_committed.read("notify_of_ld_change").await;
+        let meta = self.batches_meta.read("notify_of_ld_change").await;
         mtx.section("2:loop through lq-instances, and call on_table_changed");
-        for (_lq_key, lq_instance) in live_queries.iter() {
+        for (_lq_key, lq_instance) in meta.lqis_committed.iter() {
             lq_instance.on_table_changed(&change, Some(&mtx)).await;
         }
     }
@@ -545,8 +544,8 @@ impl LQGroup {
 
         // get read-lock for self.query_instances, clone the collection, then drop the lock immediately (to avoid deadlock with function-trees we're about to call)
         let live_queries: IndexMap<String, Arc<LQInstance>> = {
-            let live_queries = self.lqis_committed.read("refresh_lq_data_for_x").await;
-            live_queries.clone() // in cloning the IndexMap, all the keys and value are cloned as well
+            let meta = self.batches_meta.read("refresh_lq_data_for_x").await;
+            meta.lqis_committed.clone() // in cloning the IndexMap, all the keys and value are cloned as well
         };
 
         for (lq_key, lqi) in live_queries.iter() {
