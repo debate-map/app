@@ -16,7 +16,8 @@ REMOTE = CONTEXT != "local"
 print("Context:", CONTEXT, "Remote:", REMOTE)
 
 # tilt config settings
-# for now, we're trying with complete-disabling of tilt's docker-prune behavior (to confirm if that's the cause of issue #169)
+# For now, we just completely disable tilt's docker-prune behavior (doing so fixes issue #169); there might be a better solution, but this is fine for now.
+# To keep tilt's image-generation from taking up too much space, you can manually do docker-prunes when docker's image-storage grows too large. (eg. from docker-desktop's ui)
 docker_prune_settings(disable=True)
 
 # other tilt extensions
