@@ -15,9 +15,8 @@ use crate::utils::time::time_since_epoch_ms;
 use crate::serde::{Serialize, Deserialize};
 use crate::serde_json::{json, Map};
 use crate::tokio::{time};
-use tracing::{trace, error, info};
+use tracing::{trace, error, info, warn};
 use crate::uuid::Uuid;
-
 
 #[macro_export]
 macro_rules! fn_name {
@@ -134,6 +133,9 @@ pub struct Mtx {
     //pub parent: Option<&'a RefCell<Self>>,
     //#[serde(skip)] pub parent_sender: Option<Sender<MtxMessage>>,
     pub root_mtx_sender: Sender<MtxMessage>,
+
+    // todo: probably clean up how this is implemented
+    pub root_mtx_id_arc_for_keepalive: Arc<Uuid>,
 }
 //pub static mtx_none: Arc<Mtx> = Arc::new(Mtx::new("n/a"));
 impl Mtx {
@@ -148,8 +150,10 @@ impl Mtx {
             None => func_name.to_owned(),
         };
 
+        let id_arc = Arc::new(Uuid::new_v4());
+        let id_arc_first_clone = id_arc.clone();
         let mut new_self = Self {
-            id: Arc::new(Uuid::new_v4()),
+            id: id_arc,
             func_name: func_name.to_owned(),
             path_from_root_mtx,
             //extra_info,
@@ -167,6 +171,12 @@ impl Mtx {
                 None => None,
             },*/
             root_mtx_sender,
+
+            // fix for issue of root-mtx update-receiving-loop (see tokio::spawn block below) being dropped while proxy was still sending more data to it
+            root_mtx_id_arc_for_keepalive: match parent {
+                Some(parent) => parent.root_mtx_id_arc_for_keepalive.clone(),
+                None => id_arc_first_clone,
+            }
         };
         new_self.start_new_section(&first_section_name.into(), extra_info, time_since_epoch_ms());
 
@@ -185,13 +195,6 @@ impl Mtx {
                         time::sleep(Duration::from_millis(1000)).await;
                     }
 
-                    // if we're the last place holding references to the id and section-lifetimes, the mtx object must have been destroyed;
-                    //     that means it has already sent its final results to the monitor-backend, so we can end this loop
-                    if Arc::strong_count(&id_clone) <= 1 && Arc::strong_count(&section_lifetimes_clone) <= 1 {
-                        //println!("Stopping mtx-data-sending timer, since mtx instance has been dropped."); // temp
-                        break;
-                    }
-
                     // process any messages that have buffered up
                     MtxMessage::apply_messages_to_mtx_data(&section_lifetimes_clone, msg_receiver_clone.drain());
 
@@ -200,12 +203,37 @@ impl Mtx {
                     
                     last_data_as_str = data_as_str;
                     //println!("Sent partial results for mtx entry..."); // temp
+                    
+                    // if we're the last place holding a reference to the root-mtx's id-arc, the entire tree of mtx-instances must have been dropped by now (since each mtx-instance holds a reference to its tree's root id-arc);
+                    //     that means it has already sent its final results to the monitor-backend (through the `Drop::drop` implementation), so we can end this loop
+                    if Arc::strong_count(&id_clone) <= 1 {
+                        if Arc::strong_count(&section_lifetimes_clone) > 1 {
+                            warn!("Despite all refs to root-mtx's id-arc (other than receiver loop) having dropped, the section-lifetimes-arc still has other refs! This is unexpected. Receiver loop is proceeding with shutdown anyway, but worth investigating.");
+                        }
+                        //println!("Stopping mtx-data-sending timer, since mtx instance has been dropped."); // temp
+                        break;
+                    }
                 }
             });
         }
 
         new_self
     }
+
+    /// Use this when you want to collect mtx data from some async function (or otherwise uncontrolled call-path). Basically, it's made for cases where you can neither:
+    /// 1) ..."move" the mtx to pass as an argument (due to there being local mtx-sections after the relevant call)
+    /// 2) ...nor can you "borrow" it to pass by reference (since the call-tree is uncontrolled/async, so rust's borrow-checker can't verify the lifetimes)
+    /// Usage example:
+    /// ```
+    /// new_mtx!(mtx, "1:section one", None);
+    /// uncontrolled_call_path(Some(mtx.proxy())).await;
+    /// mtx.section("2:section two");
+    /// something_else();
+    /// ```
+    pub fn proxy(&self) -> Mtx {
+        Mtx::new("<proxy>", "<only section>", Some(&self), None)
+    }
+
     pub fn is_root_mtx(&self) -> bool {
         !self.path_from_root_mtx.contains("/")
     }
@@ -230,7 +258,9 @@ impl Mtx {
             let section_lifetimes = self.section_lifetimes.with_guard(&guard);*/
             section_lifetimes.insert(old_section.get_key(), old_section.clone());
         }
-        self.root_mtx_sender.send(MtxMessage::UpdateSectionLifetime(old_section.get_key(), old_section.clone())).unwrap();
+        // ignore send-error; this just means we're within a "proxy subtree", and the root mtx has already been dropped
+        // todo: probably have caller decide what to do in this situation, as an argument to `proxy()` (since in some cases this might be unexpected)
+        let _ = self.root_mtx_sender.send(MtxMessage::UpdateSectionLifetime(old_section.get_key(), old_section.clone()));
         section_end_time
     }
     fn start_new_section(&mut self, name: &str, extra_info: Option<String>, old_section_end_time: f64) {
@@ -251,7 +281,9 @@ impl Mtx {
             /*if self.is_root_mtx() {
                 MtxMessage::apply_messages_to_mtx_data(&self.section_lifetimes, vec![msg].into_iter());
             } else {*/
-            self.root_mtx_sender.send(msg).unwrap();
+            // ignore send-error; this just means we're within a "proxy subtree", and the root mtx has already been dropped
+            // todo: probably have caller decide what to do in this situation, as an argument to `proxy()` (since in some cases this might be unexpected)
+            let _ = self.root_mtx_sender.send(msg);
         }
     }
 

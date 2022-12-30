@@ -157,8 +157,10 @@ export class SectionUI_Expanded extends BaseComponent<{section: MtxSection, inde
 					<Text>{section.Duration_Safe.toFixed(3)}ms</Text>
 					<Text ml={5}>SelfTime:</Text>
 					<Text style={ES(selfTime >= uiState.significantDurationThreshold && {color: "red"})}>{selfTime.toFixed(3)}ms</Text>
+					{section.duration == null &&
+						<Text ml={3} title="Section never terminated. (or mtx-termination message-sending failed)">(NT)</Text>}
 					{section.extraInfo != null &&
-					<Text ml={5} style={{fontWeight: "bold"}}>ExtraInfo:{section.extraInfo}</Text>}
+						<Text ml={5} style={{fontWeight: "bold"}}>ExtraInfo:{section.extraInfo}</Text>}
 				</Row>
 			</Row>
 		);

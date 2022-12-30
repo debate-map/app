@@ -117,7 +117,7 @@ export const RequestsUI = observer(()=>{
 					await refetch();
 					//forceUpdate(); // fsr, this is currently necessary
 				}}/>
-				<Button ml={5} text="Clear (on app-server)" onClick={async()=>{
+				<Button ml={5} text="Clear (on monitor-backend)" onClick={async()=>{
 					const {message} = (await clearMtxResults({
 						variables: {adminKey},
 					})).data.clearMtxResults;

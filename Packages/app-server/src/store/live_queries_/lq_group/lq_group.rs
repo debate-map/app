@@ -64,7 +64,7 @@ pub enum LQGroup_InMsg {
     //RemoveLQInstance(String),
     //NotifyBatchExecutionDone(usize),
     //NotifyBatchCommitted(usize),
-    GetInitializedLQInstanceForKey(LQKey),
+    GetInitializedLQInstanceForKey(LQKey, Option<Mtx>),
     DropLQWatcher(LQKey, Uuid),
     NotifyOfLDChange(LDChange),
     /// (entry_id [ie. row uuid])
@@ -79,7 +79,7 @@ pub enum LQGroup_OutMsg {
 }
 
 pub struct LQGroup {
-    inner: LQGroupImpl,
+    inner: Mutex<LQGroupImpl>,
 
     pub lq_key: LQKey,
     messages_in_sender: FSender<LQGroup_InMsg>,
@@ -90,11 +90,14 @@ pub struct LQGroup {
 impl LQGroup {
     fn new(lq_key: LQKey, db_pool: DBPoolArc) -> Self {
         let (s1, r1): (FSender<LQGroup_InMsg>, FReceiver<LQGroup_InMsg>) = flume::unbounded();
-        let (s2, r2): (ABSender<LQGroup_OutMsg>, ABReceiver<LQGroup_OutMsg>) = async_broadcast::broadcast(1000);
+        let (mut s2, r2): (ABSender<LQGroup_OutMsg>, ABReceiver<LQGroup_OutMsg>) = async_broadcast::broadcast(1000);
+
+        // nothing ever "consumes" the messages in the `messages_out` channel, so we must enable overflow (ie. deletion of old entries once queue-size cap is reached)
+        s2.set_overflow(true);
 
         //let lq_key = LQKey::new(table_name, filter);
         let new_self = Self {
-            inner: LQGroupImpl::new(lq_key.clone(), db_pool),
+            inner: Mutex::new(LQGroupImpl::new(lq_key.clone(), db_pool)),
 
             lq_key,
             messages_in_sender: s1,
@@ -124,20 +127,21 @@ impl LQGroup {
     async fn message_loop(self: Arc<Self>) {
         loop {
             let message = self.messages_in_receiver.recv_async().await.unwrap();
+            let mut inner = self.inner.lock().await;
             match message {
-                LQGroup_InMsg::GetInitializedLQInstanceForKey(lq_key) => {
-                    let (lqi, just_initialized) = self.inner.get_or_create_lq_instance(&lq_key, None).await;
+                LQGroup_InMsg::GetInitializedLQInstanceForKey(lq_key, parent_mtx) => {
+                    let (lqi, just_initialized) = inner.get_or_create_lq_instance(&lq_key, parent_mtx.as_ref()).await;
                     self.messages_out_sender.broadcast(LQGroup_OutMsg::LQInstanceIsInitialized(lq_key, lqi, just_initialized)).await.unwrap();
                 },
                 LQGroup_InMsg::DropLQWatcher(lq_key, uuid) => {
-                    self.inner.drop_lq_watcher(&lq_key, uuid).await;
+                    inner.drop_lq_watcher(&lq_key, uuid).await;
                 },
                 LQGroup_InMsg::NotifyOfLDChange(change) => {
-                    self.inner.notify_of_ld_change(&change).await;
+                    inner.notify_of_ld_change(&change).await;
                 },
                 LQGroup_InMsg::RefreshLQDataForX(entry_id) => {
                     // ignore error; if db-request fails, we leave it up to user to retry (it's a temporary workaround anyway)
-                    let _ = self.inner.refresh_lq_data_for_x(&entry_id).await;
+                    let _ = inner.refresh_lq_data_for_x(&entry_id).await;
                 },
             }
         }
@@ -146,9 +150,9 @@ impl LQGroup {
     // helper functions, for use by external callers/threads (ideally these "simply send a message, and return a value", but if they have processing, it should be kept fast and basic)
     // ==========
     
-    pub async fn get_initialized_lqi_for_key(&self, lq_key: &LQKey) -> Arc<LQInstance> {
+    pub async fn get_initialized_lqi_for_key(&self, lq_key: &LQKey, mtx_p: Option<Mtx>) -> Arc<LQInstance> {
         let mut new_receiver = self.messages_out_receiver.new_receiver();
-        self.send_message(LQGroup_InMsg::GetInitializedLQInstanceForKey(lq_key.clone()));
+        self.send_message(LQGroup_InMsg::GetInitializedLQInstanceForKey(lq_key.clone(), mtx_p));
         loop {
             #[allow(irrefutable_let_patterns)] // needed atm, since only one enum-option defined
             if let LQGroup_OutMsg::LQInstanceIsInitialized(lq_key2, lqi, _just_initialized) = new_receiver.recv().await.unwrap() && lq_key2 == *lq_key {
@@ -158,7 +162,9 @@ impl LQGroup {
     }
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, lq_key: &LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
         new_mtx!(mtx, "1:get or create lqi", mtx_p);
-        let lqi = self.get_initialized_lqi_for_key(&lq_key).await;
+        /*new_mtx!(mtx2, "<proxy>", Some(&mtx));
+        let lqi = self.get_initialized_lqi_for_key(&lq_key, Some(tx2)).await;*/
+        let lqi = self.get_initialized_lqi_for_key(&lq_key, Some(mtx.proxy())).await;
 
         mtx.section("2:get current result-set");
         let result_entries = lqi.last_entries.read().await.clone();
