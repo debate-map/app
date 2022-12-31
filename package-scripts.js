@@ -242,12 +242,9 @@ function GetPortForwardCommandsStr(context) {
 
 	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:5100`;
 	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}10:5110`;
-	const forAppServerJS = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} 5${d2}15:5115`;
-	const forAppServerJS_inspector = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServerJS(context)} 5${d2}16:5116`;
 	const forMonitor = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}30:5130`;
-	if (commandArgs.includes("onlyInspector")) return forAppServerJS_inspector;
 
-	return `concurrently --kill-others --names db,ws,asr,asj,asji,mo "${forDB}" "${forWebServer}" "${forAppServer}" "${forAppServerJS}" "${forAppServerJS_inspector}" "${forMonitor}"`;
+	return `concurrently --kill-others --names db,ws,asr,mo "${forDB}" "${forWebServer}" "${forAppServer}" "${forMonitor}"`;
 }
 
 // for scripts that are useful to multiple multiple backend packages (server, web-server, etc.)

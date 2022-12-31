@@ -59,21 +59,24 @@ use super::super::lq_instance::{LQInstance, LQEntryWatcher};
 
 type RwLock_Std<T> = std::sync::RwLock<T>;
 
+#[derive(Debug)]
 pub enum LQGroup_InMsg {
-    //AddLQInstance(Arc<LQInstance>),
-    //RemoveLQInstance(String),
-    //NotifyBatchExecutionDone(usize),
-    //NotifyBatchCommitted(usize),
-    GetInitializedLQInstanceForKey(LQKey, Option<Mtx>),
+    /// (lq_key, force_queue_lqi, mtx_parent)
+    ScheduleLQIReadOrInitThenBroadcast(LQKey, Option<Arc<LQInstance>>, Option<Mtx>),
     DropLQWatcher(LQKey, Uuid),
     NotifyOfLDChange(LDChange),
-    /// (entry_id [ie. row uuid])
-    RefreshLQDataForX(String),
+    // /// (entry_id [ie. row uuid])
+    //RefreshLQDataForX(String),
+
+    /// (batch_index, mtx_parent)
+    OnBatchReachedTimeToExecute(usize, Option<Mtx>),
+
+    // from LQBatch (or tokio::spawn block in LQGroupImpl for it)
+    /// (batch_index, lqis_in_batch)
+    OnBatchCompleted(usize, Vec<Arc<LQInstance>>),
 }
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum LQGroup_OutMsg {
-    //NotifyBatchExecutionDone(usize),
-    //NotifyBatchCommitted(usize),
     /// (lq_key, lqi, just_initialized)
     LQInstanceIsInitialized(LQKey, Arc<LQInstance>, bool)
 }
@@ -97,7 +100,7 @@ impl LQGroup {
 
         //let lq_key = LQKey::new(table_name, filter);
         let new_self = Self {
-            inner: Mutex::new(LQGroupImpl::new(lq_key.clone(), db_pool)),
+            inner: Mutex::new(LQGroupImpl::new(lq_key.clone(), db_pool, s1.clone(), s2.clone())),
 
             lq_key,
             messages_in_sender: s1,
@@ -128,10 +131,13 @@ impl LQGroup {
         loop {
             let message = self.messages_in_receiver.recv_async().await.unwrap();
             let mut inner = self.inner.lock().await;
+            let msg_as_str = format!("{:?}", message);
+            inner.notify_message_processed_or_sent(msg_as_str, false);
             match message {
-                LQGroup_InMsg::GetInitializedLQInstanceForKey(lq_key, parent_mtx) => {
-                    let (lqi, just_initialized) = inner.get_or_create_lq_instance(&lq_key, parent_mtx.as_ref()).await;
-                    self.messages_out_sender.broadcast(LQGroup_OutMsg::LQInstanceIsInitialized(lq_key, lqi, just_initialized)).await.unwrap();
+                LQGroup_InMsg::ScheduleLQIReadOrInitThenBroadcast(lq_key, force_queue_lqi, parent_mtx) => {
+                    inner.schedule_lqi_read_or_init_then_broadcast(&lq_key, force_queue_lqi, parent_mtx.as_ref()).await;
+                    // Once lq-instance is initialized, LQGroupImpl will send a LQGroup_OutMsg::LQInstanceIsInitialized message back out.
+                    // That message will be seen by the `get_initialized_lqi_for_key` func below, which will then return the lqi to the async caller.
                 },
                 LQGroup_InMsg::DropLQWatcher(lq_key, uuid) => {
                     inner.drop_lq_watcher(&lq_key, uuid).await;
@@ -139,20 +145,29 @@ impl LQGroup {
                 LQGroup_InMsg::NotifyOfLDChange(change) => {
                     inner.notify_of_ld_change(&change).await;
                 },
-                LQGroup_InMsg::RefreshLQDataForX(entry_id) => {
+                /*LQGroup_InMsg::RefreshLQDataForX(entry_id) => {
                     // ignore error; if db-request fails, we leave it up to user to retry (it's a temporary workaround anyway)
                     let _ = inner.refresh_lq_data_for_x(&entry_id).await;
+                },*/
+                // from LQBatch (or tokio::spawn block in LQGroupImpl for it)
+                LQGroup_InMsg::OnBatchReachedTimeToExecute(batch_i, mtx_parent) => {
+                    inner.execute_batch(batch_i, mtx_parent.as_ref()).await;
+                },
+                LQGroup_InMsg::OnBatchCompleted(batch_i, lqis_in_batch) => {
+                    inner.on_batch_completed(batch_i, lqis_in_batch).await;
                 },
             }
         }
     }
 
-    // helper functions, for use by external callers/threads (ideally these "simply send a message, and return a value", but if they have processing, it should be kept fast and basic)
+    // Helper functions, outside of LQGroupImpl. This is the appropriate location for functions where either:
+    // 1) The function is intended to be called by external callers/threads.
+    // 2) The function is async, and will be "waiting" for a substantial length of time (too long to await in message-loop)
     // ==========
     
-    pub async fn get_initialized_lqi_for_key(&self, lq_key: &LQKey, mtx_p: Option<Mtx>) -> Arc<LQInstance> {
+    pub async fn get_initialized_lqi_for_key(&self, lq_key: &LQKey, force_queue_lqi: Option<Arc<LQInstance>>, mtx_p: Option<Mtx>) -> Arc<LQInstance> {
         let mut new_receiver = self.messages_out_receiver.new_receiver();
-        self.send_message(LQGroup_InMsg::GetInitializedLQInstanceForKey(lq_key.clone(), mtx_p));
+        self.send_message(LQGroup_InMsg::ScheduleLQIReadOrInitThenBroadcast(lq_key.clone(), force_queue_lqi, mtx_p));
         loop {
             #[allow(irrefutable_let_patterns)] // needed atm, since only one enum-option defined
             if let LQGroup_OutMsg::LQInstanceIsInitialized(lq_key2, lqi, _just_initialized) = new_receiver.recv().await.unwrap() && lq_key2 == *lq_key {
@@ -164,7 +179,7 @@ impl LQGroup {
         new_mtx!(mtx, "1:get or create lqi", mtx_p);
         /*new_mtx!(mtx2, "<proxy>", Some(&mtx));
         let lqi = self.get_initialized_lqi_for_key(&lq_key, Some(tx2)).await;*/
-        let lqi = self.get_initialized_lqi_for_key(&lq_key, Some(mtx.proxy())).await;
+        let lqi = self.get_initialized_lqi_for_key(&lq_key, None, Some(mtx.proxy())).await;
 
         mtx.section("2:get current result-set");
         let result_entries = lqi.last_entries.read().await.clone();
@@ -174,7 +189,7 @@ impl LQGroup {
 
         mtx.section("4:get or create watcher, for the given stream");
         //let watcher = entry.get_or_create_watcher(stream_id);
-        let (watcher, _watcher_is_new, new_watcher_count) = lqi.get_or_create_watcher(stream_id, Some(&mtx), result_entries).await;
+        let (watcher, _watcher_is_new, new_watcher_count) = lqi.get_or_create_watcher(stream_id, result_entries).await;
         let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?}", new_watcher_count, lq_key.table_name, lq_key.filter);
         debug!("LQ-watcher started. {}", watcher_info_str);
 
@@ -187,7 +202,52 @@ impl LQGroup {
     pub fn notify_of_ld_change(&self, change: LDChange) {
         self.send_message(LQGroup_InMsg::NotifyOfLDChange(change));
     }
-    pub fn refresh_lq_data_for_x(&self, entry_id: String) {
+    /*pub fn refresh_lq_data_for_x(&self, entry_id: String) {
         self.send_message(LQGroup_InMsg::RefreshLQDataForX(entry_id));
+    }*/
+
+    /// Reacquires the data for a given doc/row from the database, and force-updates the live-query entry for it.
+    /// (temporary fix for bug where a `nodes/XXX` db-entry occasionally gets "stuck" -- ie. its live-query entry doesn't update, despite its db-data changing)
+    pub async fn refresh_lq_data_for_x(&self, entry_id: &str) -> Result<(), Error> {
+        /*new_mtx!(mtx, "1:get live_queries", None, Some(format!("@table_name:{} @entry_id:{}", self.table_name, entry_id)));
+        mtx.log_call(None);*/
+
+        // get read-lock for self.query_instances, clone the collection, then drop the lock immediately (to avoid deadlock with function-trees we're about to call)
+        let live_queries: IndexMap<LQKey, Arc<LQInstance>> = self.inner.lock().await.get_lqis_committed_cloned(); // in cloning the IndexMap, all the keys and value are cloned as well
+
+        for (lq_key, lqi) in live_queries.iter() {
+            let entry_for_id = lqi.get_last_entry_with_id(entry_id).await;
+            // if this lq-instance has no entries with the entry-id we want to refresh, then ignore it
+            if entry_for_id.is_none() { continue; }
+            
+            //self.get_or_create_lq_instance_in_progressing_batch(lq_key, Some(lqi.clone()), None).await?;
+            // first call retrieves the lqi (presumably from the commited-lqis list)
+            //let lqi = self.get_initialized_lqi_for_key(lq_key, None, None).await;
+            // this call forces the lqi to be re-queued in new/progressing batch
+            self.get_initialized_lqi_for_key(lq_key, Some(lqi.clone()), None).await;
+
+            let new_data = match lqi.get_last_entry_with_id(entry_id).await {
+                None => {
+                    warn!("While force-refreshing lq-data, the new batch completed, but no entry was found with the given id. This could mean the entry was just deleted, but more likely it's a bug.");
+                    continue;
+                },
+                Some(a) => a,
+            };
+            info!("While force-refreshing lq-data, got new-data. @table:{} @new_data:{:?}", self.lq_key.table_name, new_data);
+
+            let new_data_as_change = LDChange {
+                table: self.lq_key.table_name.clone(),
+                kind: "update".to_owned(),
+                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
+                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
+                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
+                oldkeys: None,
+                schema: "".to_owned(),
+            };
+
+            lqi.on_table_changed(&new_data_as_change, None).await;
+        }
+        Ok(())
     }
 }

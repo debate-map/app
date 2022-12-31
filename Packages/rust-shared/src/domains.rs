@@ -43,7 +43,7 @@ pub struct GetServerURL_Options {
 
 // sync:js (along with constants above)
 pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_str: Option<String>, opts: GetServerURL_Options) -> Result<String, Error> {
-    let DomainsConstants { prod_domain, recognized_web_server_hosts, on_server_and_dev, on_server_and_prod } = DomainsConstants::new();
+    let DomainsConstants { prod_domain, recognized_web_server_hosts, on_server_and_dev, on_server_and_prod: _ } = DomainsConstants::new();
     
 	//const opts = {...new GetServerURL_Options(), ...options};
 	assert!(subpath.starts_with("/"));
@@ -122,7 +122,7 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_s
     }*/
 
     if opts.force_https {
-        server_url.set_scheme("https");
+        server_url.set_scheme("https").unwrap();
     }
 
     Ok(server_url.to_string())

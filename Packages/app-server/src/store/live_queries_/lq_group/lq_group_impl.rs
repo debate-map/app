@@ -23,7 +23,7 @@ use axum::{extract, AddExtensionLayer, Router};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::Itertools;
-use rust_shared::utils::type_aliases::JSONValue;
+use rust_shared::utils::type_aliases::{JSONValue, FSender};
 use rust_shared::{utils::time::time_since_epoch_ms, RwLock_Tracked, tokio, serde_json};
 use rust_shared::serde::de::DeserializeOwned;
 use rust_shared::serde::{Deserialize, Serialize};
@@ -47,6 +47,7 @@ use rust_shared::anyhow::{anyhow, Error, bail, ensure};
 use rust_shared::uuid::Uuid;
 
 use crate::links::monitor_backend_link::MESSAGE_SENDER_TO_MONITOR_BACKEND;
+use crate::store::live_queries_::lq_group::lq_group::LQGroup_OutMsg;
 use crate::store::live_queries_::lq_key::LQKey;
 use crate::store::storage::AppStateArc;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter, FilterOp};
@@ -58,6 +59,7 @@ use crate::utils::type_aliases::{PGClientObject, ABReceiver, ABSender, DBPoolArc
 
 use super::super::lq_instance::{LQInstance, LQEntryWatcher};
 use super::lq_batch::lq_batch::LQBatch;
+use super::lq_group::LQGroup_InMsg;
 
 pub fn filter_shape_from_filter(filter: &QueryFilter) -> QueryFilter {
     let mut filter_shape = filter.clone();
@@ -130,13 +132,18 @@ pub(super) struct LQGroupImpl {
     channel_for_batch_messages__sender_base: ABSender<LQBatchMessage>,
     channel_for_batch_messages__receiver_base: ABReceiver<LQBatchMessage>,
     
-    batches: Vec<RwLock<LQBatch>>,
+    batches: Vec<Arc<RwLock<LQBatch>>>,
     meta: LQGroup_BatchesMeta,
 
     //source_sender_for_lq_watcher_drops: Sender<DropLQWatcherMsg>,
+
+    messages_in_sender: FSender<LQGroup_InMsg>,
+    messages_out_sender: ABSender<LQGroup_OutMsg>,
+    /// Stores a list of the debug-strings for messages that have been read/processed (through messages_in), as well as sent (through messages_out), in order of that processing/sending.
+    processed_or_sent_messages: Vec<String>,
 }
 impl LQGroupImpl {
-    pub(super) fn new(lq_key: LQKey, db_pool: DBPoolArc) -> Self {
+    pub(super) fn new(lq_key: LQKey, db_pool: DBPoolArc, messages_in_sender: FSender<LQGroup_InMsg>, messages_out_sender: ABSender<LQGroup_OutMsg>) -> Self {
         // the size of this broadcast buffer should be at least as large as the number of batches (preferably with some extra room, in case of timing issues)
         let (mut s1, r1): (ABSender<LQBatchMessage>, ABReceiver<LQBatchMessage>) = async_broadcast::broadcast(1000);
 
@@ -150,16 +157,40 @@ impl LQGroupImpl {
             db_pool,
 
             // for now, have the cycling-set contain 500 entries; this is enough to avoid lock-conflicts, while not hammering memory-usage
-            batches: (0..500).map(|_| RwLock::new(LQBatch::new(lq_key.clone()))).collect_vec(),
+            batches: (0..500).map(|_| Arc::new(RwLock::new(LQBatch::new(lq_key.clone())))).collect_vec(),
             meta: LQGroup_BatchesMeta::new(/*500*/),
 
             channel_for_batch_messages__sender_base: s1,
             channel_for_batch_messages__receiver_base: r1,
 
             //source_sender_for_lq_watcher_drops: s1,
+
+            messages_in_sender,
+            messages_out_sender,
+            processed_or_sent_messages: vec![],
         };
 
         new_self
+    }
+
+    async fn send_message_out(&mut self, msg: LQGroup_OutMsg) {
+        let msg_as_str = format!("{:?}", msg);
+        self.messages_out_sender.broadcast(msg).await.unwrap();
+        self.notify_message_processed_or_sent(msg_as_str, true);
+    }
+    pub(super) fn notify_message_processed_or_sent(&mut self, msg_as_str: String, sent: bool) {
+        self.processed_or_sent_messages.push(format!("{}{}", if sent { "Sent: " } else { "Processed: " }, msg_as_str));
+    }
+    pub(super) fn get_recent_messages_str(&self) -> String {
+        let mut recent_messages = self.processed_or_sent_messages.clone();
+        recent_messages.reverse();
+        let recent_messages = recent_messages.into_iter().take(10).collect_vec();
+        format!("[newest first...] \n\t{}", recent_messages.join("\n\t"))
+    }
+
+    // maybe temp; needed for refresh_lq_data... func in LQGroup
+    pub(super) fn get_lqis_committed_cloned(&self) -> IndexMap<LQKey, Arc<LQInstance>> {
+        self.meta.lqis_committed.clone()
     }
 
     pub(super) fn get_buffering_batch(&mut self) -> (usize, &RwLock<LQBatch>) {
@@ -198,7 +229,7 @@ impl LQGroupImpl {
     }*/
 
     /// Wrapper around `try_get_or_create_lq_instance`, which keeps "retrying" to get/create an lq-instance in loop, until it succeeds. (needed for certain callers, eg. graphql subscription requests)
-    pub(super) async fn get_or_create_lq_instance(&mut self, lq_key: &LQKey, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, bool) {
+    /*pub(super) async fn get_or_create_lq_instance(&mut self, lq_key: &LQKey, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, bool) {
         new_mtx!(mtx, "1:start loop to get/create the lq-instance", parent_mtx);
         let mut i = -1;
         loop {
@@ -233,26 +264,67 @@ impl LQGroupImpl {
     async fn get_lq_instance_if_committed(&mut self, lq_key: &LQKey) -> Option<Arc<LQInstance>> {
         let instance = self.meta.lqis_committed.get(lq_key);
         instance.map(|a| a.clone())
+    }*/
+
+    pub(super) async fn schedule_lqi_read_or_init_then_broadcast(&mut self, lq_key: &LQKey, force_queue_lqi: Option<Arc<LQInstance>>, parent_mtx: Option<&Mtx>) -> Option<Arc<LQInstance>> {
+        new_mtx!(mtx, "1:start loop to get/create the lq-instance", parent_mtx);
+        let mut i = -1;
+        loop {
+            i += 1;
+            mtx.section(format!("X:start loop with i={i}"));
+            match self.get_lq_instance_or_queue_it_in_progressing_batch(&lq_key, force_queue_lqi.clone(), Some(&mtx)).await {
+                Ok(result) => {
+                    match result {
+                        Some(lqi) => {
+                            // if instance was directly retrieved, just return it (well, after broadcasting an event so async caller knows about it)
+                            self.send_message_out(LQGroup_OutMsg::LQInstanceIsInitialized(lqi.lq_key.clone(), lqi.clone(), false)).await;
+                            mtx.section(format!("LQ-instance was retrieved. @lq_key:{}", lqi.lq_key));
+                            return Some(lqi);
+                        },
+                        None => {
+                            // if instance was scheduled for initialization in batch, return none (batch will automatically broadcast messages for the lqi's initialization once it happens)
+                            mtx.section(format!("LQ-instance was scheduled in progression-batch. @lq_key:{}", lq_key));
+                            return None;
+                        },
+                    }
+                },
+                // if we hit an error, retry in a bit
+                Err(err) => {
+                    error!("Hit error during attempt to get or create lqi, probably due to multi-threading contention. Retrying in a bit. Error: {}", err);
+                    mtx.section("X.1:waiting a bit, before retrying");
+                    time::sleep(Duration::from_millis(500)).await;
+                    continue;
+                }
+            };
+        }
     }
 
     /// Finds the lq-instance for the given lq-key in an executing or buffering batch, or if absent, creates an lq-instance for it in the buffering-batch;
     /// then waits for its data to be populated, and for it to be committed into `LQGroup.lqis_committed`.
-    async fn get_or_create_lq_instance_in_progressing_batch(&mut self, lq_key: &LQKey, force_add_lqi: Option<Arc<LQInstance>>, parent_mtx: Option<&Mtx>) -> Result<(Arc<LQInstance>, bool), Error> {
-        new_mtx!(mtx, "1:find lqi in an executing/buffering batch, or create new lqi in the buffering-batch", parent_mtx);
-        let (batch_index, batch_generation, prior_lqis_in_batch, lqi_in_batch, lqi_just_initialized, batch_msg_receiver) = 'getter_block: {
+    async fn get_lq_instance_or_queue_it_in_progressing_batch(&mut self, lq_key: &LQKey, force_queue_lqi: Option<Arc<LQInstance>>, mtx_p: Option<&Mtx>) -> Result<Option<Arc<LQInstance>>, Error> {
+        new_mtx!(mtx, "1:find lqi in an executing/buffering batch, or create new lqi in the buffering-batch", mtx_p);
+        let (batch_index, batch_generation, prior_lqis_in_batch, _lqi_in_batch, _lqi_just_initialized, _batch_msg_receiver) = 'getter_block: {
             mtx.section("2:get batches_meta write-lock");
 
             // create receiver now, so we start receiving all messages from this point
             let batch_msg_receiver = self.channel_for_batch_messages__sender_base.new_receiver();
 
-            mtx.section("3:find/create lqi in relevant batch");
+            mtx.section("3:try to find lqi in lq-group's committed lqi's");
+            if let Some(lqi) = self.meta.lqis_committed.get(lq_key) {
+                return Ok(Some(lqi.clone()));
+            }
+
             // if this lq_key is already added to a batch, and awaiting population, simply find the relevant lq-instance in that batch and return it
-            if let Some(entry) = self.meta.lqis_awaiting_population.get(lq_key) && force_add_lqi.is_none() {
-                (entry.batch_index, entry.batch_generation, entry.prior_lqis_in_batch, entry.lqi.clone(), false, batch_msg_receiver)
+            mtx.section("4:try to find lqi in relevant batch");
+            if let Some(entry) = self.meta.lqis_awaiting_population.get(lq_key) && force_queue_lqi.is_none() {
+                //(entry.batch_index, entry.batch_generation, entry.prior_lqis_in_batch, entry.lqi.clone(), false, batch_msg_receiver)
+                return Ok(Some(entry.lqi.clone()));
             }
             // else, create a new lq-instance for this lq-key, and add it to the buffering-batch
             else {
-                mtx.section("2:get batch write-lock, and insert");
+                mtx.section("5:lqi not found in either lqis_committed or in lqis_awaiting_population; will queue it in progressing batch");
+
+                mtx.section("6:get batch write-lock, and insert");
                 let (batch_index, batch_lock) = self.get_buffering_batch();
 
                 //drop(lqis_awaiting_population);
@@ -264,7 +336,7 @@ impl LQGroupImpl {
                 let lqis_in_batch = &mut batch.query_instances;
                 let prior_lqis_in_batch = lqis_in_batch.len();
 
-                let lqi = match force_add_lqi {
+                let lqi = match force_queue_lqi {
                     Some(passed_lqi_arc) => {
                         lqis_in_batch.insert(lq_key.to_owned(), passed_lqi_arc.clone());
                         passed_lqi_arc
@@ -288,9 +360,8 @@ impl LQGroupImpl {
                 let batch_gen = batch.get_generation();
                 drop(batch);
 
-                // note that this block may execute in-between the lines `drop(lqis_awaiting_population)` and `lqis_in_batch.insert(...)` above (hence need for the "buffering batch contains an entry for this lq-key" check/warning block above)
+                mtx.section("7:insert lqi and such into lqis_awaiting_population");
                 {
-                    mtx.section("4:insert lqi and such into lqis_awaiting_population");
                     /*check_lock_order::<{Lock::LQGroup_batches_x}, {Lock::LQGroup_lqis_awaiting_population}>();
                     let mut lqis_awaiting_population = self.lqis_awaiting_population.write("get_or_create_lq_instance_in_progressing_batch").await;*/
                     //let mut meta = self.batches_meta.write("get_or_create_lq_instance_in_progressing_batch").await;
@@ -306,125 +377,150 @@ impl LQGroupImpl {
             }
         };
 
-        mtx.section_2("3:wait for batch to execute", Some(format!("@prior_lqis_in_batch:{prior_lqis_in_batch}")));
-        self.execute_batch_x_once_ready(batch_index, batch_generation, batch_msg_receiver, Some(&mtx)).await?;
-        Ok((lqi_in_batch, lqi_just_initialized))
+        mtx.section_2("3:schedule batch for execution", Some(format!("@prior_lqis_in_batch:{prior_lqis_in_batch}")));
+        self.schedule_batch_for_execution(batch_index, batch_generation, Some(&mtx)).await?;
+        //Ok((lqi_in_batch, lqi_just_initialized))
+        Ok(None)
     }
 
-    async fn execute_batch_x_once_ready(&mut self, batch_i: usize, batch_generation: usize, batch_msg_receiver: ABReceiver<LQBatchMessage>, mtx_p: Option<&Mtx>) -> Result<(), Error> {
-        new_mtx!(mtx, "1:create receiver", mtx_p, Some(format!("@batch_i:{batch_i} @batch_generation:{batch_generation}")));
+    //async fn execute_batch_x_once_ready() {}
+    async fn schedule_batch_for_execution(&mut self, batch_i: usize, batch_generation: usize, mtx_p: Option<&Mtx>) -> Result<(), Error> {
+        new_mtx!(mtx, "1:prep", mtx_p, Some(format!("@batch_i:{batch_i} @batch_generation:{batch_generation}")));
+        let last_batch_execution_time = self.meta.last_batch_execution_started_time;
+
+        let batch_lock_arc_clone = self.batches.get(batch_i).unwrap().clone();
+        let messages_in_sender_clone = self.messages_in_sender.clone();
 
         mtx.section("2:wait for the correct time to execute");
-        // todo: fine-tune these settings, as well as scale-up algorithm
-        const LQ_BATCH_DURATION_MIN: f64 = 100f64;
-        //const LQ_BATCH_DURATION_MAX: f64 = 100f64;
-        let last_batch_execution_time = self.meta.last_batch_execution_started_time;
-        let batch_end_time = last_batch_execution_time + LQ_BATCH_DURATION_MIN;
-        let time_till_batch_end = batch_end_time - time_since_epoch_ms();
-        tokio::time::sleep(Duration::try_from_secs_f64(time_till_batch_end / 1000f64).unwrap_or(Duration::from_secs(0))).await;
+        let mtx_proxy = mtx.proxy();
+        tokio::spawn(async move {
+            // todo: fine-tune these settings, as well as scale-up algorithm
+            const LQ_BATCH_DURATION_MIN: f64 = 100f64;
+            //const LQ_BATCH_DURATION_MAX: f64 = 100f64;
+            let batch_end_time = last_batch_execution_time + LQ_BATCH_DURATION_MIN;
+            let time_till_batch_end = batch_end_time - time_since_epoch_ms();
+            tokio::time::sleep(Duration::try_from_secs_f64(time_till_batch_end / 1000f64).unwrap_or(Duration::from_secs(0))).await;
 
-        mtx.section("3:race to be the one to perform the execution (it doesn't matter which succeeds)");
-        {
-            new_mtx!(mtx2, "1:get batches-meta write-lock", Some(&mtx));
-            //check_lock_order::<{Lock::LQGroup_batches_x}, {Lock::LQGroup_batches_meta}>();
-
-            let batch_lock = self.batches.get(batch_i).unwrap();
-            check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_batches_x}>();
-            let mut batch = batch_lock.write().await;
-            if batch.get_generation() == batch_generation {
-                // upgrade to write lock; the first task that makes it here is the one that executes the batch
-                //let batch = batch_lock.write().await;
-
-                mtx2.section_2("2:execute the batch", Some(format!("@batch_lqi_count:{}", batch.query_instances.len())));
-                self.meta.last_batch_execution_started_index = batch_i as i64;
-                self.meta.last_batch_execution_started_time = time_since_epoch_ms();
-                //drop(meta); // drop lock on meta prior to executing batch
-
-                // execute the batch
-                {
-                    let client = self.db_pool.get().await?;
-                    batch.execute(&client, Some(&mtx2)).await.expect("Executing the lq-batch failed!");
-                    /*if let Err(err) = batch.execute(ctx, Some(&mtx)).await {
-                        // if a query fails, log the error, but continue execution (better than panicking the whole server)
-                        error!("{}", err);
-                    }*/
-                }
-
-                mtx2.section("3:reset batch, and drop batch write-lock");
-                let instances_in_batch = batch.mark_generation_end_and_reset();
-                let instances_in_batch_len = instances_in_batch.len();
-                let instances_in_batch_lq_keys = instances_in_batch.iter().map(|a| &a.0).cloned().collect_vec();
-                drop(batch); // drop write-lock on batch
-
-                mtx2.section("4:reacquire meta write-lock"); //, and update last_batch_executed_index
-                // reacquire meta-lock
-                //check_lock_order::<{Lock::LQGroup_batches_x}, {Lock::LQGroup_batches_meta}>();
-                //meta.last_batch_executed_index = batch_i as i64;
-                
-                mtx2.section("5:commit the lqi's in batch to overall group, and update batches-meta");
-                //mtx2.section_2("5:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", meta.lqis_committed.get_live_guards_str())));
-                {
-                    // Acquire lock on lq_keys_awaiting_population first; this way, code in `get_or_create_lq_instance_in_progressing_batch` knows that as long as it holds a read-lock:
-                    // 1) It is safe to create the receiver that is then used to wait for the batch's execution. (ie. we have not yet broadcast the `LQBatchMessage::NotifyExecutionDone` message)
-                    /*check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_lqis_awaiting_population}>();
-                    let mut lq_keys_awaiting_population = self.lqis_awaiting_population.write("execute_batch_x_once_ready").await;*/
-                    
-                    //let instances_in_batch = batch.query_instances.read().await;
-                    for (key, value) in instances_in_batch.into_iter() {
-                        let old_lqi = self.meta.lqis_committed.insert(key.to_owned(), value.clone());
-                        if let Some(old_lqi) = old_lqi {
-                            // if an old-lqi was replaced, but in fact that "old lqi" was the same lqi...
-                            if Arc::ptr_eq(&value.clone(), &old_lqi) {
-                                // ...then this "recommit" is just due to a `refresh_lq_data_for_x` call (see function below) and is fine; do nothing
-                            }
-                            // else, the new-lqi is in fact a new instance/allocation (which means we need to merge the old-lqi into the new-lqi, as smoother alternative to erroring/retrying)
-                            else {
-                                // drain the old-watchers vector; this way watchers will only be getting updates from the new-lqi
-                                let old_watchers: Vec<(Uuid, LQEntryWatcher)> = old_lqi.entry_watchers.write().await.drain().collect_vec();
-                                let old_watchers_count = old_watchers.len();
-
-                                check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_last_entries}>();
-                                let latest_entries = value.last_entries.read().await.clone();
-
-                                let new_lqi = self.meta.lqis_committed.get(&key).ok_or(anyhow!("New-lqi not found!"))?;
-                                check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
-                                let mut new_watchers = new_lqi.entry_watchers.write().await;
-                                for (old_stream_id, old_watcher) in old_watchers {
-                                    // since lqi that old-watcher was attached to might have had a not-yet-updated entries-set, send each watcher the latest entries-set
-                                    old_watcher.new_entries_channel_sender.send(latest_entries.clone()).unwrap();
-
-                                    new_watchers.insert(old_stream_id, old_watcher);
-                                }
-
-                                // commented; not needed, since a call to this will occur soon back up in the `start_lq_watcher` function (through its call to `get_or_create_watcher`)
-                                //new_lqi.send_self_to_monitor_backend(new_entries, entry_watchers.len()).await;
-
-                                error!("After batch completed, lq-instance was being committed, but an earlier entry was found; this should never happen. Nonetheless, as defensive programming, attempting to resolve by merging the watchers... {}",
-                                    format!("@batch_i:{} @batch_gen:{} @old_count:{} @new_count:{} @final_count:{}", batch_i, batch_generation, old_watchers_count, new_watchers.len() - old_watchers_count, new_watchers.len()));
-                            }
-                        }
-                    }
-                    mtx2.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", self.meta.lqis_committed.len(), instances_in_batch_len));
-
-                    // now that we've "committed" this batch's lqi's to the lq-group, remove their lq-keys from the `lq_keys_awaiting_population` list
-                    for lq_key in instances_in_batch_lq_keys {
-                        self.meta.lqis_awaiting_population.remove(&lq_key);
-                    }
-
-                    self.meta.last_batch_committed_index = batch_i as i64;
-                    //meta.last_batch_buffering_started_index = batch_i as i64;
-                }
-
-                mtx2.section("6:send message notifying of execution being done");
-                self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
+            // NOTE: Multiple instances of this call-path may be executing concurrently; they "race" to be the one that makes it to this upcoming line.
+            // The first one to make it, sets the batch's "execution_in_progress" to true, so that the other concurrent calls all fail the if-check, and do nothing.
+            let mut batch = batch_lock_arc_clone.write().await;
+            if batch.get_generation() == batch_generation && !batch.execution_in_progress {
+                batch.execution_in_progress = true;
+                let _ = messages_in_sender_clone.send(LQGroup_InMsg::OnBatchReachedTimeToExecute(batch_i, Some(mtx_proxy)));
             }
-        }
-
-        // this "wait for batch completion" loop might seem unnecessary, but it remains necessary, in case the call that "won the race" ended up erroring during the batch execution
-        mtx.section_2("4:loop through messages for confirmation that batch executed (performed by whoever won the race above)", Some(format!("@batch_i:{batch_i}")));
-        self.wait_for_batch_to_complete(batch_i, 3, batch_msg_receiver).await?;
+        });
 
         Ok(())
+    }
+
+    pub(super) async fn execute_batch(&mut self, batch_i: usize, mtx_p: Option<&Mtx>) {
+        //new_mtx!(mtx, "1:setup", mtx_p, Some(format!("@batch_i:{} @batch_generation:{} @batch_lqi_count:{}", batch_i, batch_generation, batch.query_instances.len()));
+        new_mtx!(mtx, "1:setup", mtx_p, Some(format!("@batch_i:{batch_i}")));
+        //mtx_proxy.section("1:setup"); //, Some(format!("", )));
+
+        self.meta.last_batch_execution_started_index = batch_i as i64;
+        self.meta.last_batch_execution_started_time = time_since_epoch_ms();
+        //drop(meta); // drop lock on meta prior to executing batch
+
+        let client = self.db_pool.get().await.unwrap();
+        //batch.execute(&client, Some(&mtx2)).await.expect("Executing the lq-batch failed!");
+
+        let batch_lock_arc_clone = self.batches.get(batch_i).unwrap().clone();
+        let messages_in_sender_clone = self.messages_in_sender.clone();
+
+        mtx.section("2:start async part");
+        let mut mtx_proxy = mtx.proxy();
+        // we can't block the message-loop, so receive results in new thread, then simply send data through message
+        tokio::spawn(async move {
+            mtx_proxy.section("1:get write-lock on batch");
+            //check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_batches_x}>();
+            let mut batch = batch_lock_arc_clone.write().await;
+            //if batch.get_generation() == batch_generation {
+
+            mtx_proxy.section("2:execute batch query");
+            batch.execute(&client, Some(&mtx_proxy)).await.expect("Executing the lq-batch failed!");
+
+            //mtx2.section("3:reset batch, and drop batch write-lock");
+            mtx_proxy.section("3:read batch results, and send-message about batch being completed");
+            let instances_in_batch = batch.mark_generation_end_and_reset().into_iter().map(|a| a.1).collect_vec();
+            // ignore send-error; if all receivers dropped, then result doesn't matter anyway
+            let _ = messages_in_sender_clone.send(LQGroup_InMsg::OnBatchCompleted(batch_i, instances_in_batch));
+
+            mtx_proxy.section("4:set execution_in_progress to false");
+            batch.execution_in_progress = false;
+            drop(batch); // drop write-lock on batch
+            drop(mtx_proxy); // drop mtx_proxy explicitly, so timing-data is correct (drop of tokio threads is often delayed)
+        });
+    }
+
+    pub(super) async fn on_batch_completed(&mut self, batch_i: usize, instances_in_batch: Vec<Arc<LQInstance>>) {
+        new_mtx!(mtx, "1:get length of instances_in_batch");
+        let instances_in_batch_len = instances_in_batch.len();
+        let instances_in_batch_lq_keys = instances_in_batch.iter().map(|a| a.lq_key.clone()).collect_vec();
+        
+        mtx.section("5:commit the lqi's in batch to overall group, and update batches-meta");
+        //mtx2.section_2("5:commit the lqi's in batch to overall group, and update batches-meta", Some(format!("@open-locks:{}", meta.lqis_committed.get_live_guards_str())));
+        {
+            // Acquire lock on lq_keys_awaiting_population first; this way, code in `get_or_create_lq_instance_in_progressing_batch` knows that as long as it holds a read-lock:
+            // 1) It is safe to create the receiver that is then used to wait for the batch's execution. (ie. we have not yet broadcast the `LQBatchMessage::NotifyExecutionDone` message)
+            /*check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_lqis_awaiting_population}>();
+            let mut lq_keys_awaiting_population = self.lqis_awaiting_population.write("execute_batch_x_once_ready").await;*/
+            
+            //let instances_in_batch = batch.query_instances.read().await;
+            for new_lqi in instances_in_batch.into_iter() {
+                let key = &new_lqi.lq_key;
+                let old_lqi = self.meta.lqis_committed.insert(key.to_owned(), new_lqi.clone());
+                if let Some(old_lqi) = old_lqi {
+                    // if an old-lqi was replaced, but in fact that "old lqi" was the same lqi...
+                    if Arc::ptr_eq(&new_lqi.clone(), &old_lqi) {
+                        // ...then this "recommit" is just due to a `refresh_lq_data_for_x` call (see function below) and is fine; do nothing
+                    }
+                    // else, the new-lqi is in fact a new instance/allocation (which means we need to merge the old-lqi into the new-lqi, as smoother alternative to erroring/retrying)
+                    else {
+                        // drain the old-watchers vector; this way watchers will only be getting updates from the new-lqi
+                        let old_watchers: Vec<(Uuid, LQEntryWatcher)> = old_lqi.entry_watchers.write().await.drain().collect_vec();
+                        let old_watchers_count = old_watchers.len();
+
+                        check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_last_entries}>();
+                        let latest_entries = new_lqi.last_entries.read().await.clone();
+
+                        let new_lqi = self.meta.lqis_committed.get(key).ok_or(anyhow!("New-lqi not found!")).unwrap();
+                        check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
+                        let mut new_watchers = new_lqi.entry_watchers.write().await;
+                        for (old_stream_id, old_watcher) in old_watchers {
+                            // since lqi that old-watcher was attached to might have had a not-yet-updated entries-set, send each watcher the latest entries-set
+                            old_watcher.new_entries_channel_sender.send(latest_entries.clone()).unwrap();
+
+                            new_watchers.insert(old_stream_id, old_watcher);
+                        }
+
+                        // commented; not needed, since a call to this will occur soon back up in the `start_lq_watcher` function (through its call to `get_or_create_watcher`)
+                        //new_lqi.send_self_to_monitor_backend(new_entries, entry_watchers.len()).await;
+
+                        error!("After batch completed, lq-instance was being committed, but an earlier entry was found; this should never happen. Nonetheless, as defensive programming, attempting to resolve by merging the watchers... {}",
+                            format!(
+                                "@batch_i:{} @old_count:{} @new_count:{} @final_count:{} @recent_messages:{}",
+                                batch_i, /*batch_generation,*/ old_watchers_count, new_watchers.len() - old_watchers_count, new_watchers.len(), self.get_recent_messages_str()
+                            )
+                        );
+                    }
+                }
+            }
+            mtx.current_section.extra_info = Some(format!("@group_lqi_count:{} @batch_lqi_count:{}", self.meta.lqis_committed.len(), instances_in_batch_len));
+
+            // now that we've "committed" this batch's lqi's to the lq-group, remove their lq-keys from the `lq_keys_awaiting_population` list
+            for lq_key in instances_in_batch_lq_keys {
+                if let Some(info) = self.meta.lqis_awaiting_population.remove(&lq_key) {
+                    self.send_message_out(LQGroup_OutMsg::LQInstanceIsInitialized(lq_key, info.lqi, true)).await;
+                }
+            }
+
+            self.meta.last_batch_committed_index = batch_i as i64;
+            //meta.last_batch_buffering_started_index = batch_i as i64;
+        }
+
+        mtx.section("6:send message notifying of execution being done");
+        self.channel_for_batch_messages__sender_base.broadcast(LQBatchMessage::NotifyExecutionDone(batch_i)).await.unwrap();
     }
 
     /// If the caller function itself is a potential "completer" of the batch, then the `receiver` it provides to this function must be
@@ -514,45 +610,5 @@ impl LQGroupImpl {
         for (_lq_key, lq_instance) in self.meta.lqis_committed.iter() {
             lq_instance.on_table_changed(&change, None).await;
         }
-    }
-
-    /// Reacquires the data for a given doc/row from the database, and force-updates the live-query entry for it.
-    /// (temporary fix for bug where a `nodes/XXX` db-entry occasionally gets "stuck" -- ie. its live-query entry doesn't update, despite its db-data changing)
-    pub(super) async fn refresh_lq_data_for_x(&mut self, entry_id: &str) -> Result<(), Error> {
-        /*new_mtx!(mtx, "1:get live_queries", None, Some(format!("@table_name:{} @entry_id:{}", self.table_name, entry_id)));
-        mtx.log_call(None);*/
-
-        // get read-lock for self.query_instances, clone the collection, then drop the lock immediately (to avoid deadlock with function-trees we're about to call)
-        let live_queries: IndexMap<LQKey, Arc<LQInstance>> = self.meta.lqis_committed.clone(); // in cloning the IndexMap, all the keys and value are cloned as well
-
-        for (lq_key, lqi) in live_queries.iter() {
-            let entry_for_id = lqi.get_last_entry_with_id(entry_id).await;
-            // if this lq-instance has no entries with the entry-id we want to refresh, then ignore it
-            if entry_for_id.is_none() { continue; }
-            
-            self.get_or_create_lq_instance_in_progressing_batch(lq_key, Some(lqi.clone()), None).await?;
-            let new_data = match lqi.get_last_entry_with_id(entry_id).await {
-                None => {
-                    warn!("While force-refreshing lq-data, the new batch completed, but no entry was found with the given id. This could mean the entry was just deleted, but more likely it's a bug.");
-                    continue;
-                },
-                Some(a) => a,
-            };
-            info!("While force-refreshing lq-data, got new-data. @table:{} @new_data:{:?}", self.lq_key.table_name, new_data);
-
-            let new_data_as_change = LDChange {
-                table: self.lq_key.table_name.clone(),
-                kind: "update".to_owned(),
-                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
-                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
-                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
-                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
-                oldkeys: None,
-                schema: "".to_owned(),
-            };
-
-            lqi.on_table_changed(&new_data_as_change, None).await;
-        }
-        Ok(())
     }
 }

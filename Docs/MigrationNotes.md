@@ -24,12 +24,19 @@
 * 1\) Renamed table: `nodeChildLinks` -> `nodeLinks`
 	* DB response:
 		* 1\) Directly update the table-name using DBeaver.
-		* 2\) To be comprehensive, you could update the names of the linked constraints and indexes (see `nodeLinks.sql`). (I wouldn't bother though, as their names themselves are unlikely to need referencing)
+		* 2\) Update the functions in `GraphTraversal.sql` to match the newer versions.
+		* 3\) To be comprehensive, you could update the names of the linked constraints and indexes (see `nodeLinks.sql`). (I wouldn't bother though, as their names themselves are unlikely to need referencing)
 	* GraphQL response:
 		* 1\) Update queries: `nodeChildLinks` -> `nodeLinks`, `addNodeChildLink` -> `addNodeLink`, etc.
 * 2\) Removed table (not in use): `visibilityDirectives`
 	* DB response:
 		* 1\) Directly remove the table using DBeaver.
+* 3\) Fixed that `NodePhrasing.terms` was being exposed in the graphql api as `JSON` scalars rather than full-fledged GraphQL types.
+	* GraphQL response:
+		* 1\) Update queries `nodePhrasings`, etc. to select the subfields of the entries in `terms` (ie. `terms { id }`), rather than just the `terms` field-name.
+* 4\) Fixed that `NodeRevision.phrasing` was being exposed in the graphql api as a `JSON` scalar rather than a full-fledged GraphQL type.
+	* GraphQL response:
+		* 1\) Update queries `nodeRevisions`, etc. to select the subfields of `NodeRevision.phrasing` (eg. `phrasing { text_base }`), rather than just the `phrasing` field-name.
 
 ### Pushed on 2022-11-22
 

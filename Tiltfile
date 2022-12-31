@@ -191,6 +191,9 @@ bucket_uniformPrivate_name = pulumiOutput["bucket_prod_uniformPrivate_name" if P
 # (fix for bug in Kubernetes 1.24.2 where in-container image-pulls that take longer than 2m get interrupted/timed-out: https://github.com/docker/for-mac/issues/6300#issuecomment-1324044788)
 #local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2")
 #local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0")
+# update: it appears the issue is still present in Kubernetes 1.25.2 (at least in some cases), so we'll keep using this workaround for now
+local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2")
+local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-13.9-2")
 
 k8s_yaml(helm('./Packages/deploy/PGO/install', namespace="postgres-operator"))
 
@@ -210,6 +213,15 @@ else:
 	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="omit")
 	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="reduceIndent")
 
+# enableRestoreForProd = True
+# enableRestore = enableRestoreForProd if PROD else False
+if DEV:
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="reduceIndent")
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="omit")
+elif PROD:
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="omit")
+	postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="reduceIndent")
+
 k8s_yaml(blob(postgresYaml))
 
 # now package up the postgres objects into the Tilt "database" section
@@ -227,7 +239,7 @@ NEXT_k8s_resource(new_name='pgo_crd-definition',
 	pod_readiness='ignore',
 	labels=["database_DO-NOT-RESTART-THESE"],
 	resource_deps_extra=[
-		#"pre-pull-large-image-1", "pre-pull-large-image-2",
+		"pre-pull-large-image-1", "pre-pull-large-image-2",
 		#"pre-pull-rust-base-image"
 	]
 )

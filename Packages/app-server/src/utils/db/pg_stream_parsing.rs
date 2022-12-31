@@ -126,7 +126,7 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
     result_as_strings
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LDChange {
     pub kind: String,
     /// Present in data from lds, but not used for anything atm (within app-server).
@@ -185,7 +185,7 @@ fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &str) -> JSONValu
     }
 }
 wrap_slow_macros!{
-#[derive(Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct OldKeys {
     pub keynames: Vec<String>,
     pub keytypes: Vec<String>,

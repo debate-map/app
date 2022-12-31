@@ -111,6 +111,7 @@ impl MtxMessage {
 }
 
 //#[derive(Serialize)]
+#[derive(Debug)]
 pub struct Mtx {
     pub id: Arc<Uuid>,
     pub func_name: String,
@@ -230,7 +231,7 @@ impl Mtx {
     /// mtx.section("2:section two");
     /// something_else();
     /// ```
-    pub fn proxy(&self) -> Mtx {
+    pub fn proxy(&self, /*keep_parent_alive: bool*/) -> Mtx {
         Mtx::new("<proxy>", "<only section>", Some(&self), None)
     }
 

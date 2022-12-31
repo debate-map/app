@@ -39,6 +39,8 @@ pub struct LQBatch {
     
     /// Note that this map gets cleared as soon as its entries are committed to the wider LQGroup. (necessary, since these LQBatch structs are recycled)
     pub query_instances: IndexMap<LQKey, Arc<LQInstance>>,
+    /// Despite being stored in LQBatch, this is currently managed outside of it, in LQGroupImpl.
+    pub execution_in_progress: bool,
     //pub execution_time: Option<f64>,
     //execution_time: AtomicF64, // a value of -1 means "not yet set", ie. execution hasn't happened yet
 
@@ -52,6 +54,7 @@ impl LQBatch {
             //index_in_group,
 
             query_instances: IndexMap::default(),
+            execution_in_progress: false,
             //query_instances: RwLock::default(),
             //execution_time: AtomicF64::new(-1f64),
             //execution_in_progress: Mutex::new(false),

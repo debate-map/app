@@ -48,7 +48,7 @@ use crate::utils::general::general::rw_locked_hashmap__get_entry_or_insert_with;
 
 use super::lq_key::LQKey;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LQEntryWatcher {
     pub new_entries_channel_sender: Sender<Vec<RowData>>,
     pub new_entries_channel_receiver: Receiver<Vec<RowData>>,
@@ -64,6 +64,7 @@ impl LQEntryWatcher {
 }
 
 /// Holds the data related to a specific query (ie. collection-name + filter).
+#[derive(Debug)]
 pub struct LQInstance {
     pub lq_key: LQKey,
     pub last_entries: RwLock<Vec<RowData>>,
@@ -95,12 +96,12 @@ impl LQInstance {
         }
     }
 
-    pub async fn get_or_create_watcher(&self, stream_id: Uuid, mtx_p: Option<&Mtx>, current_entries: Vec<RowData>) -> (LQEntryWatcher, bool, usize) {
+    pub async fn get_or_create_watcher(&self, stream_id: Uuid, current_entries: Vec<RowData>) -> (LQEntryWatcher, bool, usize) {
         /*let entry_watchers = self.entry_watchers.write().await;
         let create_new = !self.entry_watchers.contains_key(&stream_id);
         let watcher = self.entry_watchers.entry(stream_id).or_insert_with(LQEntryWatcher::new);
         (watcher, create_new)*/
-        let (watcher, just_created, new_count) = rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new, mtx_p).await;
+        let (watcher, just_created, new_count) = rw_locked_hashmap__get_entry_or_insert_with(&self.entry_watchers, stream_id, LQEntryWatcher::new).await;
         self.send_self_to_monitor_backend(current_entries, new_count).await;
         (watcher, just_created, new_count)
 

@@ -29,13 +29,13 @@ pub async fn body_to_str(body: Body) -> Result<String, Error> {
 /// * 0: The value that was found/created.
 /// * 1: `true` if the entry didn't exist and had to be created -- `false` otherwise.
 /// * 2: The new number of entries in the map.
-pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: Clone>(map: &RwLock<HashMap<K, V>>, key: K, insert_func: impl FnOnce() -> V, mtx_p: Option<&Mtx>) -> (V, bool, usize)
+pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: Clone>(map: &RwLock<HashMap<K, V>>, key: K, insert_func: impl FnOnce() -> V) -> (V, bool, usize)
     where K: Sized, K: Hash + Eq
 {
-    new_mtx!(mtx, "1", mtx_p);
+    //new_mtx!(mtx, "1", mtx_p);
     {
         let map_read = map.read().await;
-        mtx.section("1.1");
+        //mtx.section("1.1");
         //println!("1.1, key:{:?}", key);
         if let Some(val) = map_read.get(&key) {
             let val_clone = val.clone();
@@ -44,9 +44,9 @@ pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: 
         }
     }
     
-    mtx.section("2");
+    //mtx.section("2");
     let mut map_write = map.write().await;
-    mtx.section("2.1");
+    //mtx.section("2.1");
     //println!("2.1, key:{:?}", key);
     // use entry().or_insert_with() in case another thread inserted the same key while we were unlocked above
     let val_clone = map_write.entry(key).or_insert_with(insert_func).clone();

@@ -227,6 +227,7 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
                 data.referrer = Some(referrer.to_owned());
             }
         }
+        data
     };
     
     // read request's body (from frontend)

@@ -82,7 +82,7 @@ impl LQStorage {
                 match drop_msg {
                     DropLQWatcherMsg::Drop_ByCollectionAndFilterAndStreamID(table_name, filter, stream_id) => {
                         let lq_key_for_group = LQKey::new_for_lq_group(table_name.clone(), filter.clone());
-                        let query_group = wrapper_clone.get_or_create_query_group(&lq_key_for_group, None).await;
+                        let query_group = wrapper_clone.get_or_create_query_group(&lq_key_for_group).await;
 
                         let lq_key_for_instance = LQKey::new_for_lqi(table_name, filter);
                         query_group.drop_lq_watcher(lq_key_for_instance, stream_id);
@@ -94,11 +94,11 @@ impl LQStorage {
         wrapper
     }
 
-    pub async fn get_or_create_query_group(&self, lq_key: &LQKey, mtx_p: Option<&Mtx>) -> Arc<LQGroup> {
+    pub async fn get_or_create_query_group(&self, lq_key: &LQKey) -> Arc<LQGroup> {
         let lq_key_for_group = lq_key.as_shape_only();
         rw_locked_hashmap__get_entry_or_insert_with(&self.query_groups, lq_key_for_group.clone(), || {
             LQGroup::new_in_arc(lq_key_for_group, self.db_pool.clone())
-        }, mtx_p).await.0
+        }).await.0
     }
 
     /// Called from pgclient.rs
@@ -112,7 +112,7 @@ impl LQStorage {
     /// Called from handlers.rs
     pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, lq_key: &LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
         new_mtx!(mtx, "1:get or create query-group", mtx_p);
-        let group = self.get_or_create_query_group(lq_key, Some(&mtx)).await;
+        let group = self.get_or_create_query_group(lq_key).await;
         mtx.section("2:start lq-watcher");
         group.start_lq_watcher(lq_key, stream_id, Some(&mtx)).await
     }
@@ -125,7 +125,7 @@ impl LQStorage {
         let query_groups = self.query_groups.read().await;
         for group in query_groups.values() {
             if group.lq_key.table_name == table_name {
-                group.refresh_lq_data_for_x(entry_id.clone());
+                group.refresh_lq_data_for_x(&entry_id).await?;
             }
         }
         Ok(())
