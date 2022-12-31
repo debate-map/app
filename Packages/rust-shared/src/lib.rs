@@ -61,6 +61,7 @@ pub extern crate indexmap;
 
 // this crate's modules
 pub mod db_constants;
+pub mod domains;
 pub mod links {
     pub mod app_server_to_monitor_backend;
 }

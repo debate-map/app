@@ -15,7 +15,8 @@ name: debate-map
 # available as one of the "RELATED_IMAGE_POSTGRES_..." images as part of the PGO
 # installation if you want to deploy the image without setting the "postgres"
 # image variable. This value is required.
-postgresVersion: 14
+#postgresVersion: 14
+postgresVersion: 13 # temp-set to postgres-14, simply to restore backup (so can do a logical database dump)
 
 # postGISVersion if sets and coupled with a PostGIS enabled container, enables
 # PostGIS. This version number needs to be available as one of the
@@ -166,8 +167,20 @@ users:
       - debate-map
     options: "SUPERUSER"
 
-# dataSource specifies a data source for bootstrapping a Postgres cluster.
-# dataSource: {}
+# dataSource specifies a data source for bootstrapping a Postgres cluster. # venryx: ie. for restoring backups (recommended approach atm)
+dataSource:
+  postgresCluster:
+    clusterName: debate-map
+    repoName: repo2
+    options:
+    # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
+    # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+    - --set 20221218-030022F_20221220-031024D
+    - --type=immediate
+    #- --target-action=promote
+    # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
+    # - --type=time
+    # - --target="2021-09-01 07:42:06+00"
 
 # customTLSSecret references a Secret that contains the relevant information for
 # bringing external TLS artifacts to a PostgreSQL cluster. This provides the

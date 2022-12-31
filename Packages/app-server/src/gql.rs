@@ -209,16 +209,25 @@ pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperCli
     response
 }
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
-    // retrieve auth-data/JWT from http-headers
-    let mut jwt: Option<String> = None;
-    //info!("Headers2:{:?}", req.headers().keys());
-    if let Some(header) = req.headers().get("authorization") {
-        //info!("Found authorization header.");
-        if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
-            //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
-            jwt = Some(parts.1.to_owned());
+    // retrieve auth-data/JWT and such from http-headers
+    let gql_data_from_http_request = {
+        let mut data = GQLDataFromHTTPRequest { jwt: None, referrer: None };
+        if let Some(header) = req.headers().get("authorization") {
+            //info!("Found authorization header.");
+            if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
+                //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
+                data.jwt = Some(parts.1.to_owned());
+            }
         }
-    }
+
+        if let Some(header) = req.headers().get("referrer") {
+            //info!("Found referrer header.");
+            if let Ok(referrer) = header.to_str() {
+                //info!("Found referrer part2:{}", referrer);
+                data.referrer = Some(referrer.to_owned());
+            }
+        }
+    };
     
     // read request's body (from frontend)
     let req_as_str = body_to_str(req.into_body()).await?;
@@ -233,11 +242,8 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     };
     let gql_req = gql_req.variables(Variables::from_json(req_as_json["variables"].clone()));
 
-    // attach auth-data to async-graphql context-data
-    let gql_req = match jwt {
-        Some(jwt) => gql_req.data(jwt),
-        None => gql_req, // if no auth data in headers, leave request unmodified (ie. without jwt data-entry)
-    };
+    // attach auth-data/JWT and such to async-graphql context-data
+    let gql_req = gql_req.data(gql_data_from_http_request);
 
     // send request to graphql engine, and read response
     let gql_response = schema.execute(gql_req).await;
@@ -247,7 +253,7 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     Ok(response_str)
 }
 
-// todo: probably use a wrapper struct like this, rather than just storing the jwt as "the String entry" in the graphql context-data
-/*pub struct GQLDataFromHTTPRequest {
+pub struct GQLDataFromHTTPRequest {
     pub jwt: Option<String>,
-}*/
+    pub referrer: Option<String>,
+}

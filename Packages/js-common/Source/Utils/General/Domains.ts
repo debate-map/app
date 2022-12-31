@@ -22,6 +22,7 @@ const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
 	forceLocalhost = false;
 	forceHTTPS = false;
 }*/
+// sync:rs (along with constants above)
 export function GetServerURL(serverPod: "web-server" | "app-server", subpath: string, claimedClientURLStr: string|n, opts = {} as {forceLocalhost?: boolean, forceHTTPS?: boolean}) {
 	//const opts = {...new GetServerURL_Options(), ...options};
 	Assert(subpath.startsWith("/"));
@@ -77,11 +78,12 @@ export function GetServerURL(serverPod: "web-server" | "app-server", subpath: st
 	// ==========
 
 	// if this app-server is PROD, but we have a "localhost" host, user must be using the "?db=prod" flag
-	if (ON_SERVER_AND_PROD && (claimedClientURL?.host == "localhost:5100" || claimedClientURL?.host == "localhost:5101")) {
+	/*if (ON_SERVER_AND_PROD && (claimedClientURL?.host == "localhost:5100" || claimedClientURL?.host == "localhost:5101")) {
 		if (subpath == "/auth/google/callback") {
-			subpath = "/auth/google/callback_returnToLocalhost";
+			subpath = "/auth/google/callback-new_returnToLocalhost";
+			serverURL.pathname = subpath;
 		}
-	}
+	}*/
 
 	if (opts.forceHTTPS) {
 		serverURL.protocol = "https:";

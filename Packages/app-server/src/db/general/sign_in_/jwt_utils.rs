@@ -39,6 +39,7 @@ use crate::db::commands::_command::set_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
+use crate::gql::GQLDataFromHTTPRequest;
 use crate::store::storage::{AppStateArc, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::general::data_anchor::DataAnchorFor1;
@@ -58,13 +59,23 @@ pub async fn get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<
     }
 }
 pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<Option<User>, Error> {
-    let jwt = match gql_ctx.data::<String>() {
-        Ok(val) => val,
+    let jwt = match gql_ctx.data::<GQLDataFromHTTPRequest>() {
+        Ok(val) => match &val.jwt {
+            Some(jwt) => jwt,
+            None => return Ok(None),
+        },
         // if no data-entry found in gql-context, return None for "no user data"
         Err(_err) => return Ok(None),
     };
-    let user_info = resolve_jwt_to_user_info(ctx, jwt).await?;
+    let user_info = resolve_jwt_to_user_info(ctx, &jwt).await?;
     Ok(Some(user_info))
+}
+pub fn try_get_referrer_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Option<String> {
+    match gql_ctx.data::<GQLDataFromHTTPRequest>() {
+        Ok(val) => val.referrer.clone(),
+        // if no data-entry found in gql-context, return None for "no user data"
+        Err(_err) => None,
+    }
 }
 pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
     let key = get_or_create_jwt_key_hs256().await?;

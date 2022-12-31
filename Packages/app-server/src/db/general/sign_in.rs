@@ -3,6 +3,7 @@ use std::env;
 use std::time::Duration;
 
 use deadpool_postgres::tokio_postgres::Row;
+use rust_shared::domains::{get_server_url, ServerPod, GetServerURL_Options};
 use rust_shared::once_cell::sync::{Lazy, OnceCell};
 use rust_shared::hyper::{Request, Body, Method};
 use oauth2::basic::BasicClient;
@@ -47,6 +48,8 @@ use crate::utils::type_aliases::{ABSender};
 
 use rust_shared::utils::auth::jwt_utils_base::{UserInfoForJWT, get_or_create_jwt_key_hs256};
 
+use super::sign_in_::jwt_utils::try_get_referrer_from_gql_ctx;
+
 async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Request<Body>) -> impl IntoResponse {
     let uri = req.uri();
     let params = get_uri_params(uri);
@@ -65,7 +68,7 @@ async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Req
 
 pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router {
     let result = app
-        .route("/auth/google/callback-new", get(auth_google_callback))
+        .route("/auth/google/callback", get(auth_google_callback))
         .layer(AddExtensionLayer::new(storage_wrapper));
     result
 }
@@ -113,10 +116,13 @@ impl SubscriptionShard_SignIn {
         let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string()).expect("Invalid authorization endpoint URL");
         let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".to_string()).expect("Invalid token endpoint URL");
 
+        let referrer = try_get_referrer_from_gql_ctx(gql_ctx);
+        let callback_url = get_server_url(ServerPod::AppServer, "/auth/google/callback", referrer, GetServerURL_Options { force_localhost: false, force_https: false }).unwrap();
+
         // Set up the config for the Google OAuth2 process.
         let client = BasicClient::new(google_client_id, Some(google_client_secret), auth_url, Some(token_url))
             // This example will be running its own server at localhost:8080. (see below for the server implementation)
-            .set_redirect_uri(RedirectUrl::new(format!("http://localhost:5110/auth/google/callback-new")).expect("Invalid redirect URL"))
+            .set_redirect_uri(RedirectUrl::new(callback_url).expect("Invalid redirect URL"))
             // Google supports OAuth 2.0 Token Revocation (RFC-7009)
             .set_revocation_uri(RevocationUrl::new("https://oauth2.googleapis.com/revoke".to_string()).expect("Invalid revocation endpoint URL"));
     

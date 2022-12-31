@@ -56,9 +56,9 @@ def ModifyLineRange(string, startMarker, endMarker, action):
 
 def Base64Encode(strToEncode):
 	#return strToEncode.encode("utf-8").base64encode().decode("utf-8")
-	if '"' in strToEncode or "'" in strToEncode:
-		fail("Error: base64encode was called, but string contains quotes: " + strToEncode)
-	jsCode = "process.stdout.write(Buffer.from('" + strToEncode + "').toString('base64').slice(0, -2))"
+	if "'" in strToEncode:
+		fail("Error: base64encode was called, but string contains single-quotes: " + strToEncode)
+	jsCode = "process.stdout.write(Buffer.from(`" + strToEncode + "`).toString(`base64`).slice(0, -2))"
 	result_blob = local(["node", "-e", jsCode], echo_off=True, quiet=True)
 	return str(result_blob)
 
