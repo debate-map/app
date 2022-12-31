@@ -169,20 +169,20 @@ users:
 
 # dataSource specifies a data source for bootstrapping a Postgres cluster. # venryx: ie. for restoring backups (recommended approach atm)
 TILTFILE_MANAGED_BLOCK_Restore_1ForDev: {}
-TILTFILE_MANAGED_BLOCK_Restore_2ForProd:
-  dataSource:
-    postgresCluster:
-      clusterName: debate-map
-      repoName: repo2
-      options:
-      # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
-      # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
-      - --set 20221218-030022F_20221220-031024D
-      - --type=immediate
-      #- --target-action=promote
-      # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
-      # - --type=time
-      # - --target="2021-09-01 07:42:06+00"
+TILTFILE_MANAGED_BLOCK_Restore_2ForProd: {}
+  # dataSource:
+  #   postgresCluster:
+  #     clusterName: debate-map
+  #     repoName: repo2
+  #     options:
+  #     # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
+  #     # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+  #     - --set 20221218-030022F_20221220-031024D
+  #     - --type=immediate
+  #     #- --target-action=promote
+  #     # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
+  #     # - --type=time
+  #     # - --target="2021-09-01 07:42:06+00"
 TILTFILE_MANAGED_BLOCK_Restore_3End: {}
 
 # customTLSSecret references a Secret that contains the relevant information for
