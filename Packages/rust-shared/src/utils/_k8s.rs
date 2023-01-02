@@ -122,8 +122,8 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>) -> Result<String, Error> {
     info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
-    let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
-    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
+    /*let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
+    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;*/
 
     //let client = get_reqwest_client_with_k8s_certs()?;
 

@@ -82,7 +82,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 						const pgdumpSqlStr = response_structure.data.getDBDump.pgdumpSql;
 
 						const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
-						const fileName = `${CurrentTime_SafeStr()}.sql`;
+						const fileName = `DebateMap_DBDump_${CurrentTime_SafeStr()}.sql`;
 						StartDownload(pgdumpSqlStr, fileName);
 					}}/>
 				</Row>
