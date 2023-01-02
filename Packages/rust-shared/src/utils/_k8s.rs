@@ -119,12 +119,6 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
     Ok(new_secret)
 }
 
-/// This variant is often needed, as many commands require that they be run as part of a shell. (eg. pgdump)
-/*pub async fn exec_command_in_another_pod_in_shell(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>) -> Result<String, Error> {
-    let command_name_final = "sh";
-    let command_args_final = vec!["-c".to_owned(), format!("{} {}", command_name, command_args.join(" "))];
-    exec_command_in_another_pod(pod_namespace, pod_name, container, command_name_final, command_args_final).await
-}*/
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>) -> Result<String, Error> {
     info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
@@ -172,6 +166,7 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
         .body(vec![]).unwrap();
     //let res_as_str = process_exec_ws_messages(req).await?;
 
+    // this constructor automatically finds the k8s auth-data from environment (eg. token from "/var/run/secrets/kubernetes.io/serviceaccount/token", and k8s host/port from env-vars and/or default service uri)
     let client = Client::try_default().await?;
     let mut response = client.connect(req).await?;
     let mut res_as_str = String::new();
