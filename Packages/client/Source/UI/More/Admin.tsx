@@ -1,4 +1,4 @@
-import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions.js";
+import {Assert, AwaitTree, SleepAsync, E, IsObject, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, Column, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -6,8 +6,9 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {PageContainer, Observer, RunInAction_Set} from "web-vcore";
 import {HasAdminPermissions, MeID, GraphDBShape} from "dm_common";
 import {gql} from "web-vcore/nm/@apollo/client";
+import {GetUserInfoFromStoredJWT} from "Utils/AutoRuns/UserInfoCheck.js";
 import {store} from "../../Store/index.js";
-import {apolloClient} from "../../Utils/LibIntegrations/Apollo.js";
+import {apolloClient, GetAppServerURL} from "../../Utils/LibIntegrations/Apollo.js";
 
 @Observer
 export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes: [] as number[], dbUpgrade_entryCounts: [] as number[]}) {
@@ -52,6 +53,38 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 							},
 						});
 					}}/>*/}
+					<Button text={`Download database backup`} onClick={async()=>{
+						const jwtToken = localStorage.getItem("debate-map-user-jwt");
+						const graphqlEndpoint = GetAppServerURL("/graphql");
+						const pgdump_sql_response = await fetch(graphqlEndpoint, {
+							method: "POST",
+							body: JSON.stringify({
+								operationName: null,
+								query: `query { getDBDump { pgdumpSql } }`,
+								variables: {},
+							}),
+							credentials: "include",
+							headers: {
+								"Content-Type": "application/json",
+								authorization: `Bearer ${jwtToken}`,
+							},
+						});
+						const response_structure_str = await pgdump_sql_response.text();
+						let response_structure;
+						try {
+							response_structure = JSON.parse(response_structure_str);
+						} catch (ex) {
+							return void ShowMessageBox({title: "Error parsing", message: `Got error parsing response-structure as json. Response-structure-string:${response_structure_str}`});
+						}
+						if (response_structure.errors) {
+							return void ShowMessageBox({title: "Error in graphql/server", message: `Got graphql/server errors:${response_structure.errors.join("\n")}`});
+						}
+						const pgdumpSqlStr = response_structure.data.getDBDump.pgdumpSql;
+
+						const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
+						const fileName = `${CurrentTime_SafeStr()}.sql`;
+						StartDownload(pgdumpSqlStr, fileName);
+					}}/>
 				</Row>
 				<Row><h4>Testing</h4></Row>
 				<Row>

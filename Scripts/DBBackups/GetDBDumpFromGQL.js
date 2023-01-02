@@ -59,19 +59,19 @@ async function Start() {
 			console.error("Got graphql/server errors:", response_structure.errors);
 			return void WaitForEnterKeyThenExit(1);
 		}
-		const pgdump_sql_str = response_structure.data.getDBDump.pgdumpSql;
+		const pgdumpSqlStr = response_structure.data.getDBDump.pgdumpSql;
 
 		const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
-		const folder_path_absolute = paths.resolve(`${__dirname}/../../../Others/@Backups/DBDumps_${dev ? "local" : "ovh"}/`);
-		const filePath = paths.join(`${folder_path_absolute}/${CurrentTime_SafeStr()}.sql`); // normalize slashes
-		fs.writeFileSync(filePath, pgdump_sql_str);
+		const folderPathAbsolute = paths.resolve(`${__dirname}/../../../Others/@Backups/DBDumps_${dev ? "local" : "ovh"}/`);
+		const filePath = paths.join(`${folderPathAbsolute}/${CurrentTime_SafeStr()}.sql`); // normalize slashes
+		fs.writeFileSync(filePath, pgdumpSqlStr);
 		console.log(`Database backup saved to file:`, filePath);
 
 		// open file explorer (cross platform) to path above:
 		if (process.platform === "win32") {
-			child_process.exec(`start "" "${folder_path_absolute}"`);
+			child_process.exec(`start "" "${folderPathAbsolute}"`);
 		} else {
-			child_process.exec(`open "${folder_path_absolute}"`);
+			child_process.exec(`open "${folderPathAbsolute}"`);
 		}
 
 		return void WaitForEnterKeyThenExit(0);
