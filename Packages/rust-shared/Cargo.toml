@@ -42,20 +42,16 @@ tower-service = "0.3"
 # needed for tokio-postgres
 bytes = "1.0"
 
-# needed for some k8s api endpoints used by getDBDump
-tokio-tungstenite = {version = "0.18.0", features = ["rustls-tls-native-roots"]}
-rustls = "*"
-# want to use these, but can't atm (causes rust-analyzer to error, due to it apparently requiring openssl installed on host machine, even at compile/check time)
+# needed for using the k8s "exec" endpoint (which uses websockets)
 kube = { version = "0.77.0", default-features = false, features = [
 	"client", "rustls-tls",
-	"runtime", "derive",
+	#"runtime", "derive",
 	"ws",
 ] }
-k8s-openapi = { version = "0.16.0", features = [
-	"v1_25",
-	"api", # this provides functions for each actual endpoint (rather than just the generic get, post, etc. functions)
-] }
-tokio-util = "0.6.9" # probably temp (only used once in _k8s.rs, so would like to avoid another dep
+k8s-openapi = { version = "0.16.0", features = ["v1_25"] }
+tokio-tungstenite = {version = "0.18.0", features = ["rustls-tls-native-roots"]}
+#rustls = "*"
+#tokio-util = "0.6.9" # probably temp (only used once in _k8s.rs, so would like to avoid another dep)
 
 rust-macros = { path = "../rust-macros" }
 

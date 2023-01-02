@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use rust_shared::{axum::{self, response::{self, IntoResponse}, extract::Extension}, tower_http, utils::{general::k8s_env, _k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos, exec_command_in_another_pod_using_kube}, general_::extensions::ToOwnedV}, anyhow::{bail, ensure}};
+use rust_shared::{axum::{self, response::{self, IntoResponse}, extract::Extension}, tower_http, utils::{general::k8s_env, _k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos}, general_::extensions::ToOwnedV}, anyhow::{bail, ensure}};
 use rust_shared::hyper::{Request, Body, Method};
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -54,28 +54,10 @@ pub struct GetDBDumpResult {
 pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
     ensure!(actor.permissionGroups.admin, "Only admins can access this endpoint.");
     
-    /*let pgdump_output = Command::new("pg_dump")
-        .args(["-U", "postgres", "debate-map"])
-        .output()
-        .expect("Failed to execute pgdump process.");
-    let dump_as_vec_u8 = pgdump_output.stdout;
-    let dump_as_str = match std::str::from_utf8(&dump_as_vec_u8) {
-        Err(e) => bail!("Could not parse pg-dump's output as a valid UTF-8 sequence: {}", e),
-        Ok(v) => v.to_owned(),
-    };
-    Ok(dump_as_str)*/
-        
     let target_pod = get_k8s_pod_basic_infos("postgres-operator", true).await?.into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?;
-    //let target_pod = "dm-web-server-696c6cbb87-4hk88";
     let container = "database"; // pod's list of containers: postgres-startup nss-wrapper-init database replication-cert-copy pgbackrest pgbackrest-config
 
     // raw command string: pg_dump -U postgres debate-map
     let pgdump_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "pg_dump", vec!["-U".o(), "postgres".o(), "debate-map".o()]).await?;
-
-    //let pgdump_output = exec_command_in_another_pod_using_kube("postgres-operator", &target_pod, /*Some(container),*/ vec!["pg_dump".o(), "-U".o(), "postgres".o(), "debate-map".o()]).await?;
-    //let pgdump_output = exec_command_in_another_pod_using_kube("postgres-operator", &target_pod, /*Some(container),*/ vec!["ls".o()]).await?;
-
-    //let pgdump_output = exec_command_in_another_pod_using_kube("default", "dm-web-server-696c6cbb87-4hk88", vec!["ls".o(), "/dm_repo/Packages".o()]).await?;
-    
     Ok(pgdump_output)
 }

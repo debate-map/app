@@ -1,4 +1,4 @@
-use std::{env, fs::{self, File}, str::FromStr, sync::Arc, io::Read};
+use std::{env, fs::{self, File}, str::FromStr, sync::Arc, io::Read, time::SystemTime};
 
 use anyhow::{Context, anyhow, Error, bail, ensure};
 use axum::http;
@@ -8,9 +8,8 @@ use itertools::Itertools;
 use k8s_openapi::api::core::v1::Pod;
 use kube::{Api, Client, api::{AttachParams, AttachedProcess}};
 use reqwest::Url;
-use rustls::ClientConfig;
 use serde_json::{json, self};
-use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config};
+use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config, tungstenite};
 use tower::ServiceBuilder;
 use super::type_aliases::JSONValue;
 use tracing::{info, error, instrument::WithSubscriber};
@@ -122,10 +121,6 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>) -> Result<String, Error> {
     info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
-    /*let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
-    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;*/
-
-    //let client = get_reqwest_client_with_k8s_certs()?;
 
     let mut query_str = format!("?command={}", command_name);
     for arg in &command_args {
@@ -136,38 +131,19 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     }
     query_str.push_str("&stdin=true&stderr=true&stdout=true&tty=true");
 
-    /*let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-        .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {token}"))
-        .body(vec![]).build()?;
-    let res = client.execute(req).await?;
-    let res_as_str = res.text().await?;*/
-    
-    /*let req = http::Request::get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str)).body(vec![])?;
-    let stream = ws_connect(req).await?;
-    let res_as_str = "".to_owned();
-    for msg in stream {
-        res_as_str.push_str(msg);
-    }*/
-
-    /*let req_url_str = format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str);
-    let req_url = Url::parse(&req_url_str).unwrap();
-    let res_as_str = process_exec_ws_messages(req_url).await?;*/
-
-    //let req = tokio_tungstenite::tungstenite::http::Request::builder().uri(format!("wss://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-    // use domain-version to get around bug with ip-addresses listed in comment near top of file
-    //let req = tokio_tungstenite::tungstenite::http::Request::builder().uri(format!("wss://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-    let req = tokio_tungstenite::tungstenite::http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
+    let req = tungstenite::http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
-        //.method("POST")
-        //.header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
-        //.body(()).unwrap();
         .body(vec![]).unwrap();
-    //let res_as_str = process_exec_ws_messages(req).await?;
 
     // this constructor automatically finds the k8s auth-data from environment (eg. token from "/var/run/secrets/kubernetes.io/serviceaccount/token", and k8s host/port from env-vars and/or default service uri)
     let client = Client::try_default().await?;
+
+    // commented; this doesn't work for endpoints that require https->ws upgrade (eg. exec), so we just always use the semi-manual approach below instead
+    /*let pods: Api<Pod> = Api::namespaced(client, pod_namespace);
+    let attached = pods.exec(pod_name, command_name_and_args, &AttachParams::default().tty(false).stderr(true)).await?;
+    //Api::attach(&self, name, ap).await.unwrap().*/
+
     let mut response = client.connect(req).await?;
     let mut res_as_str = String::new();
     let mut item_index = -1;
@@ -181,15 +157,14 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
                 let item_as_str = item_into_text.as_str();
                 let item_as_chars = item_as_str.chars().collect_vec();
                 let pos_of_first_soh = item_as_chars.iter().position(|ch| *ch == char::from_u32(0x0001).unwrap());
-                //let pos_of_last_soh = item_as_chars.iter().rposition(|ch| *ch == char::from_u32(0x0001).unwrap());
-                //println!("Got item. @len:{} @sohChar1st:{:?} @sohCharLast:{:?}", item_as_str.len(), pos_of_first_soh, pos_of_last_soh);
+                //println!("Got item. @len:{} @sohChar1st:{:?} @sohCharLast:{:?}", item_as_str.len(), pos_of_first_soh);
 
                 // ignore first two items; these are just k8s metadata (though do assert to make sure)
                 if item_index == 0 || item_index == 1  {
                     ensure!(item_as_str.len() == 1, "First two items were not the empty headers expected!");
                     continue;
                 }
-                // ignore items without the `0x0001` char (SOH control character) at start; these are just k8s metadata chunks output at end (should only be 2 of these)
+                // ignore items without the `0x0001` char (SOH control character) at start; these are just the k8s metadata chunks output at end (should only be 2 of these)
                 if pos_of_first_soh != Some(0) {
                     continue;
                 }
@@ -198,162 +173,11 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
                 let item_as_str_cleaned = item_as_chars[1..].iter().cloned().collect::<String>();
                 res_as_str.push_str(&item_as_str_cleaned);
             }
-            Some(Err(e)) => {
-                return Err(e.into());
-            }
-            None => {
-                break;
-            }
+            Some(Err(e)) => return Err(e.into()),
+            None => break,
         }
     }
 
     info!("Got response from k8s server, on trying to run command using exec. @command:\"{} {}\" @response_len: {}", command_name, command_args.join(" "), res_as_str.len());
     Ok(res_as_str)
-}
-
-pub async fn process_exec_ws_messages(req: tokio_tungstenite::tungstenite::http::Request<()>) -> Result<String, Error> {
-    //let (mut socket, response) = connect_async(req).await?;
-    let (mut socket, response) = connect_async_tls_with_config(req, None, Some(tokio_tungstenite::Connector::Rustls(Arc::new(get_rustls_config_dangerous()?)))).await?;
-    info!("Connection made with k8s api's exec endpoint. @response:{response:?}");
-
-    let mut combined_result = String::new();
-    loop {
-        let msg = match socket.next().await {
-            None => {
-                // when None is returned, it means stream has ended, so break this loop
-                break;
-            },
-            Some(entry) => match entry {
-                Ok(msg) => msg,
-                Err(err) => {
-                    bail!("Error reading message from websocket connection:{}", err);
-                }
-            },
-        };
-        let msg_as_str = msg.into_text().unwrap();
-        info!("Got websocket message: {}", msg_as_str);
-        combined_result.push_str(&msg_as_str);
-    }
-    Ok(combined_result)
-}
-
-fn get_rustls_config_dangerous() -> Result<ClientConfig, Error> {
-    let mut store = rustls::RootCertStore::empty();
-
-    let mut buf = Vec::new();
-    File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?
-        .read_to_end(&mut buf)?;
-    //let cert = reqwest::Certificate::from_pem(&buf)?;
-    store.add_parsable_certificates(&[buf]);
-    
-    let mut config = ClientConfig::builder()
-        .with_safe_defaults()
-        .with_root_certificates(store)
-        .with_no_client_auth();
-
-    // temp: For now, completely disable cert-verification for connecting to the k8s service, to avoid "presented server name type wasn't supported" error.
-    // This step won't be necessary once the issue below is resolved:
-    // * issue in rustls (key comment): https://github.com/rustls/rustls/issues/184#issuecomment-1116235856
-    // * pull-request in webpki subdep: https://github.com/briansmith/webpki/pull/260
-    let mut dangerous_config = ClientConfig::dangerous(&mut config);
-    dangerous_config.set_certificate_verifier(Arc::new(NoCertificateVerification {}));
-
-    Ok(config)
-}
-struct NoCertificateVerification {}
-impl rustls::client::ServerCertVerifier for NoCertificateVerification {
-    fn verify_server_cert(
-        &self,
-        _end_entity: &rustls::Certificate,
-        _intermediates: &[rustls::Certificate],
-        _server_name: &rustls::ServerName,
-        _scts: &mut dyn Iterator<Item = &[u8]>,
-        _ocsp: &[u8],
-        _now: std::time::SystemTime,
-    ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
-        Ok(rustls::client::ServerCertVerified::assertion())
-    }
-}
-
-/*/// Make WebSocket connection.
-pub async fn ws_connect(request: hyper::Request<Vec<u8>>) -> Result<WebSocketStream<hyper::upgrade::Upgraded>, Error> {
-    use http::header::HeaderValue;
-    let (mut parts, body) = request.into_parts();
-    parts
-        .headers
-        .insert(http::header::CONNECTION, HeaderValue::from_static("Upgrade"));
-    parts
-        .headers
-        .insert(http::header::UPGRADE, HeaderValue::from_static("websocket"));
-    parts.headers.insert(
-        http::header::SEC_WEBSOCKET_VERSION,
-        HeaderValue::from_static("13"),
-    );
-    let key = upgrade::sec_websocket_key();
-    parts.headers.insert(
-        http::header::SEC_WEBSOCKET_KEY,
-        key.parse().expect("valid header value"),
-    );
-    // Use the binary subprotocol v4, to get JSON `Status` object in `error` channel (3).
-    // There's no official documentation about this protocol, but it's described in
-    // [`k8s.io/apiserver/pkg/util/wsstream/conn.go`](https://git.io/JLQED).
-    // There's a comment about v4 and `Status` object in
-    // [`kublet/cri/streaming/remotecommand/httpstream.go`](https://git.io/JLQEh).
-    parts.headers.insert(
-        http::header::SEC_WEBSOCKET_PROTOCOL,
-        HeaderValue::from_static(upgrade::WS_PROTOCOL),
-    );
-
-    let res = Request::from_parts(parts, Body::from(body)).await?;
-    upgrade::verify_response(&res, &key).map_err(Error::UpgradeConnection)?;
-    match hyper::upgrade::on(res).await {
-        Ok(upgraded) => {
-            Ok(WebSocketStream::from_raw_socket(upgraded, ws::protocol::Role::Client, None).await)
-        }
-
-        /*Err(e) => Err(Error::UpgradeConnection(
-            UpgradeConnectionError::GetPendingUpgrade(e),
-        )),*/
-        Err(e) => bail!("Hit error: {:?}", e)
-    }
-}*/
-
-// version using the "kube" crate to access the k8s api instead
-pub async fn exec_command_in_another_pod_using_kube(pod_namespace: &str, pod_name: &str, command_name_and_args: Vec<String>) -> Result<String, Error> {
-    info!("Beginning request to run command in another pod. @target_pod:{} @command_name_and_args:{:?}", pod_name, command_name_and_args);
-    // this part handled automatically by kube crate
-    /*let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
-    let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
-    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;*/
-
-    let client = Client::try_default().await?;
-    /*let config = Config::infer().await?;
-    let service = ServiceBuilder::new()
-        .layer(config.base_uri_layer())
-        .option_layer(config.auth_layer()?)
-        .service(hyper::Client::new());
-    let client = Client::new(service, config.default_namespace);*/
-
-    //let pods: Api<Pod> = Api::default_namespaced(client);
-    let pods: Api<Pod> = Api::namespaced(client, pod_namespace);
-    //let pods: Api<Pod> = Api::all(client);
-
-    //Api::attach(&self, name, ap).await.unwrap().
-
-    let attached = pods.exec(pod_name, command_name_and_args, &AttachParams::default().tty(false).stderr(true)).await?;
-    //let attached = pods.exec(&format!("{pod_namespace}/{pod_name}"), command_name_and_args, &AttachParams::default().tty(false).stderr(true)).await?;
-    let output = get_output(attached).await;
-    println!("{output}");
-
-    Ok(output)
-}
-async fn get_output(mut attached: AttachedProcess) -> String {
-    let stdout = tokio_util::io::ReaderStream::new(attached.stdout().unwrap());
-    let out = stdout
-        .filter_map(|r| async { r.ok().and_then(|v| String::from_utf8(v.to_vec()).ok()) })
-        .collect::<Vec<_>>()
-        .await
-        .join("");
-    attached.join().await.unwrap();
-    out
 }
