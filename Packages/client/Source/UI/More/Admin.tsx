@@ -1,44 +1,39 @@
 import {Assert, AwaitTree, SleepAsync, E, IsObject, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, Column, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Row, TextArea, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {PageContainer, Observer, RunInAction_Set} from "web-vcore";
-import {HasAdminPermissions, MeID, GraphDBShape} from "dm_common";
+import {PageContainer, Observer, RunInAction_Set, Link} from "web-vcore";
+import {HasAdminPermissions, MeID, GraphDBShape, GetServerURL} from "dm_common";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {GetUserInfoFromStoredJWT} from "Utils/AutoRuns/UserInfoCheck.js";
 import {store} from "../../Store/index.js";
-import {apolloClient, GetAppServerURL} from "../../Utils/LibIntegrations/Apollo.js";
+import {apolloClient, GetAppServerURL, GetMonitorURL} from "../../Utils/LibIntegrations/Apollo.js";
 
 @Observer
-export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes: [] as number[], dbUpgrade_entryCounts: [] as number[]}) {
-	/* constructor(props) {
-		super(props);
-		//this.state = {env: envSuffix};
-		this.SetEnvironment(envSuffix);
-	}
-	SetEnvironment(env: string) {
-		var {version, firebaseConfig} = require(env == "prod" ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
-		try {
-			Firebase.initializeApp(firebaseConfig);
-		} catch (err) {} // silence reinitialize warning (hot-reloading)
-      Firebase.database.enableLogging(true);
-		const rootRef = (Firebase as any).database().ref();
-		this.SetState({fb: rootRef, env});
-	} */
-
+export class AdminUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		const {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
 		const isAdmin = HasAdminPermissions(MeID());
-		// also check previous version for admin-rights (so we can increment db-version without losing our rights to complete the db-upgrade!)
-		/*if (!isAdmin && MeID() != null) {
-			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as GraphDBShape).users.get(MeID())?.permissionGroups.admin) ?? false;
-		}*/
 
 		if (!isAdmin) return <PageContainer>Please sign in.</PageContainer>;
 		return (
 			<PageContainer scrollable={true}>
-				<Row m="-10px 0"><h2>Database</h2></Row>
+				<Row>
+					<Text>{`Note: If an admin command you're looking for is not here, you may be looking for the `}</Text>
+					<Link text="monitoring portal/subdomain" to={GetMonitorURL("/")}/>
+					<Text>.</Text>
+				</Row>
+
+				<Row><h2>General</h2></Row>
+				<Row><h4>Testing</h4></Row>
+				<Row>
+					<Button text={"Throw async error"} onClick={async()=>{
+						await SleepAsync(1000);
+						throw new Error("Test async-error thrown...");
+					}}/>
+				</Row>
+
+				<Row mt={10}><h2>Database</h2></Row>
 				{/* <Row>
 					<Pre>Environment: </Pre><Select options={["dev", "prod"]} value={this.state.env} onChange={val=>this.SetEnvironment(val)}/>
 				</Row> */}
@@ -77,20 +72,13 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 							return void ShowMessageBox({title: "Error parsing", message: `Got error parsing response-structure as json. Response-structure-string:${response_structure_str}`});
 						}
 						if (response_structure.errors) {
-							return void ShowMessageBox({title: "Error in graphql/server", message: `Got graphql/server errors:${response_structure.errors.join("\n")}`});
+							return void ShowMessageBox({title: "Error in graphql/server", message: `Got graphql/server errors:${JSON.stringify(response_structure.errors)}`});
 						}
 						const pgdumpSqlStr = response_structure.data.getDBDump.pgdumpSql;
 
 						const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 						const fileName = `DebateMap_DBDump_${CurrentTime_SafeStr()}.sql`;
 						StartDownload(pgdumpSqlStr, fileName);
-					}}/>
-				</Row>
-				<Row><h4>Testing</h4></Row>
-				<Row>
-					<Button text={"Throw async error"} onClick={async()=>{
-						await SleepAsync(1000);
-						throw new Error("Oh no!");
 					}}/>
 				</Row>
 				<Row><h4>GraphQL test</h4></Row>
@@ -108,44 +96,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 						alert(`GraphQL result data: ${JSON.stringify(resultData)}`);
 					}}/>
 				</Row>
-
-				{/* <Row m="-10px 0"><h2>Storage</h2></Row>
-				<Row><h4>Backgound images</h4></Row>
-				<Row>
-					<Button text={'Create missing thumnails'} onClick={() => {
-						ShowMessageBox({
-							title: 'Create missing thumbnails?',
-							message: 'This could take some time.', cancelButton: true,
-							onOK: () => {
-								CreateMissingThumbnails();
-							},
-						});
-					}}/>
-				</Row> */}
 			</PageContainer>
 		);
 	}
-
-	async MarkProgress(depth: number, entryIndex: number, entryCount?: number) {
-		let {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
-		[dbUpgrade_entryIndexes, dbUpgrade_entryCounts] = [dbUpgrade_entryIndexes.slice(), dbUpgrade_entryCounts.slice()]; // use copies of arrays
-
-		dbUpgrade_entryIndexes[depth] = entryIndex;
-		if (entryCount != null) {
-			dbUpgrade_entryCounts[depth] = entryCount;
-		}
-		this.SetState({dbUpgrade_entryIndexes, dbUpgrade_entryCounts});
-
-		// every 100 entries, wait a bit, so UI can update
-		if (entryIndex % 100 == 0) {
-			await SleepAsync(10);
-		}
-	}
-}
-
-function AssertVersionRootPath(path: string) {
-	const parts = SplitStringBySlash_Cached(path);
-	Assert(parts.length == 2, "Version-root path must have exactly two segments.");
-	Assert(parts[0] == "versions", 'Version-root path\'s first segment must be "versions".');
-	Assert(parts[1].match("v[0-9]+-(dev|prod)"), 'Version-root path\'s second segment must match "v10-dev" pattern.');
 }

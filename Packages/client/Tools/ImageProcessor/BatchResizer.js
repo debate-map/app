@@ -15,7 +15,7 @@ program
 	.option("--targetFolder <>", "Folder where the resized images should be placed.")
 	.option("--targetWidth <>", "What width to resize the images to.")
 	.option("--recreateExisting", "Folder with full-size versions of the images.")
-	.action(asynccommand=>{
+	.action(async command=>{
 		const {sourceFolder, targetFolder, recreateExisting} = command;
 		// console.log(ToJSON_Safe(command));
 		const targetWidth = parseInt(command.targetWidth);

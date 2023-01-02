@@ -56,6 +56,9 @@ export function GetAppServerURL(subpath: string, preferredServerOrigin?: string)
 
 	return GetServerURL("app-server", subpath, preferredServerOrigin ?? window.location.origin);
 }
+export function GetMonitorURL(subpath: string, preferredServerOrigin?: string): string {
+	return GetServerURL("monitor", subpath, preferredServerOrigin ?? window.location.origin);
+}
 
 const GRAPHQL_URL = GetAppServerURL("/graphql");
 // for graphql/websocket connections, bypass cloudflare-cdn (ie. debates.app) and connect directly to the server cluster (ie. debating.app)

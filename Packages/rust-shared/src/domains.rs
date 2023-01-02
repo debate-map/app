@@ -19,6 +19,7 @@ impl DomainsConstants {
             prod_domain: "debates.app", // temp
             recognized_web_server_hosts: &[
                 "localhost:5100", "localhost:5101",
+                "localhost:5130", "localhost:5131",
                 "debatemap.app",
                 "debates.app",
                 "debating.app",
@@ -34,6 +35,7 @@ impl DomainsConstants {
 pub enum ServerPod {
     WebServer,
     AppServer,
+    Monitor,
 }
 
 pub struct GetServerURL_Options {
@@ -92,7 +94,7 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_s
             server_url.set_port(match claimed_client_url.as_ref().unwrap().port() {
                 Some(5100) => Some(5100),
                 Some(5101) => Some(5101),
-                _ => Some(5101),
+                _ => Some(5100),
             }).unwrap();
         } else {
             // no need to change; web-server is the base-url, in production (ie. no subdomain/port)
@@ -102,6 +104,16 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_s
             server_url.set_port(Some(5110)).unwrap();
         } else {
             server_url.set_host(Some(&format!("app-server.{}", server_url.host_str().unwrap())))?;
+        }
+    } else if server_pod == ServerPod::Monitor {
+        if server_url.host_str().unwrap() == "localhost" {
+            server_url.set_port(match claimed_client_url.as_ref().unwrap().port() {
+                Some(5130) => Some(5130),
+                Some(5131) => Some(5131),
+                _ => Some(5130),
+            }).unwrap();
+        } else {
+            server_url.set_host(Some(&format!("monitor.{}", server_url.host_str().unwrap())))?;
         }
     }
 

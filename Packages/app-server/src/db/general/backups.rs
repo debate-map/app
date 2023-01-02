@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use rust_shared::{axum::{self, response::{self, IntoResponse}, extract::Extension}, tower_http, utils::{general::k8s_env, _k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos}, general_::extensions::ToOwnedV}, anyhow::{bail, ensure}};
+use rust_shared::{axum::{self, response::{self, IntoResponse}, extract::Extension}, tower_http, utils::{general::k8s_env, _k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos}, general_::extensions::ToOwnedV}, anyhow::{bail, ensure}, itertools::Itertools};
 use rust_shared::hyper::{Request, Body, Method};
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -10,7 +10,7 @@ use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::anyhow::{anyhow, Error, Context};
 use rust_shared::serde::{Deserialize};
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::db::users::User;
 use crate::{utils::{general::data_anchor::DataAnchorFor1, db::accessors::AccessorContext}, gql::get_gql_data_from_http_request, db::general::sign_in_::jwt_utils::resolve_jwt_to_user_info, store::storage::AppStateArc};
@@ -58,6 +58,19 @@ pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
     let container = "database"; // pod's list of containers: postgres-startup nss-wrapper-init database replication-cert-copy pgbackrest pgbackrest-config
 
     // raw command string: pg_dump -U postgres debate-map
-    let pgdump_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "pg_dump", vec!["-U".o(), "postgres".o(), "debate-map".o()]).await?;
+    let pgdump_output = exec_command_in_another_pod("postgres-operator", &target_pod, Some(container), "pg_dump", vec![
+        "-E".o(), "UTF-8".o(),
+        "-U".o(), "postgres".o(),
+        "debate-map".o()
+    ], true).await?;
+
+    // Above, we request utf-8 encoding; however, some chars in prod-cluster's db-dump still fail to parse as utf-8!
+    // So, we pass `true` above to allow lossy utf-8 conversion, and then we log a warning if any chars failed to convert.
+    let chars = pgdump_output.chars().collect_vec();
+    let failed_conversion_chars = chars.iter().filter(|c| **c == char::REPLACEMENT_CHARACTER).count();
+    if failed_conversion_chars > 0 {
+        warn!("During retrieval of pg-dump, {} chars failed to convert to utf-8; they were replaced with \"{}\". @pgdump_output_len:{}", failed_conversion_chars, char::REPLACEMENT_CHARACTER, pgdump_output.len());
+    }
+
     Ok(pgdump_output)
 }

@@ -1,7 +1,8 @@
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 
 const recognizedWebServerHosts = [
-	"localhost:5100", "localhost:5101",
+	"localhost:5100", "localhost:5101", // web-server, dev/local
+	"localhost:5130", "localhost:5131", // monitor, dev/local
 	"debatemap.app",
 	"debates.app",
 	"debating.app",
@@ -23,7 +24,7 @@ const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
 	forceHTTPS = false;
 }*/
 // sync:rs (along with constants above)
-export function GetServerURL(serverPod: "web-server" | "app-server", subpath: string, claimedClientURLStr: string|n, opts = {} as {forceLocalhost?: boolean, forceHTTPS?: boolean}) {
+export function GetServerURL(serverPod: "web-server" | "app-server" | "monitor", subpath: string, claimedClientURLStr: string|n, opts = {} as {forceLocalhost?: boolean, forceHTTPS?: boolean}) {
 	//const opts = {...new GetServerURL_Options(), ...options};
 	Assert(subpath.startsWith("/"));
 
@@ -57,7 +58,7 @@ export function GetServerURL(serverPod: "web-server" | "app-server", subpath: st
 
 	if (serverPod == "web-server") {
 		if (serverURL.hostname == "localhost") {
-			serverURL.port = {5100: 5100, 5101: 5101}[claimedClientURL?.port as any] ?? "5101";
+			serverURL.port = {5100: 5100, 5101: 5101}[claimedClientURL?.port as any] ?? "5100";
 		} else {
 			// no need to change; web-server is the base-url, in production (ie. no subdomain/port)
 		}
@@ -66,6 +67,12 @@ export function GetServerURL(serverPod: "web-server" | "app-server", subpath: st
 			serverURL.port = "5110";
 		} else {
 			serverURL.host = `app-server.${serverURL.host}`;
+		}
+	} else if (serverPod == "monitor") {
+		if (serverURL.hostname == "localhost") {
+			serverURL.port = {5130: 5130, 5131: 5131}[claimedClientURL?.port as any] ?? "5130";
+		} else {
+			serverURL.host = `monitor.${serverURL.host}`;
 		}
 	}
 
@@ -80,7 +87,7 @@ export function GetServerURL(serverPod: "web-server" | "app-server", subpath: st
 	// if this app-server is PROD, but we have a "localhost" host, user must be using the "?db=prod" flag
 	/*if (ON_SERVER_AND_PROD && (claimedClientURL?.host == "localhost:5100" || claimedClientURL?.host == "localhost:5101")) {
 		if (subpath == "/auth/google/callback") {
-			subpath = "/auth/google/callback-new_returnToLocalhost";
+			subpath = "/auth/google/callback_returnToLocalhost";
 			serverURL.pathname = subpath;
 		}
 	}*/

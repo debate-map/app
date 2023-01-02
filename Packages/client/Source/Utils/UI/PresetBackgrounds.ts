@@ -1,5 +1,8 @@
 import {BackgroundConfig} from "Store/db_ext/users/$user";
 
+// The preset backgrounds below are all available under open licenses (Unsplash License, CC0, etc.), and are rehosted on Google Cloud Storage for stability.
+// The size-variants of the images are generated using the 
+
 // To test out backgrounds, run this in console: S = a=>document.querySelector(".background").style.backgroundImage = `url(${a.split("?")[0]})`;
 // Then run: S("IMAGE_URL")
 

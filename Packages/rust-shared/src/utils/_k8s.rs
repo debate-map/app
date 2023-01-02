@@ -9,10 +9,10 @@ use k8s_openapi::api::core::v1::Pod;
 use kube::{Api, Client, api::{AttachParams, AttachedProcess}};
 use reqwest::Url;
 use serde_json::{json, self};
-use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config, tungstenite};
+use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config, tungstenite::{self, Message}};
 use tower::ServiceBuilder;
 use super::type_aliases::JSONValue;
-use tracing::{info, error, instrument::WithSubscriber};
+use tracing::{info, error, instrument::WithSubscriber, warn};
 
 use crate::{utils::k8s::k8s_structs::K8sSecret, domains::{get_server_url, DomainsConstants}};
 
@@ -118,7 +118,7 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
     Ok(new_secret)
 }
 
-pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>) -> Result<String, Error> {
+pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>, allow_utf8_lossy: bool) -> Result<String, Error> {
     info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
 
@@ -146,24 +146,32 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
 
     let mut response = client.connect(req).await?;
     let mut res_as_str = String::new();
-    let mut item_index = -1;
     loop {
-        item_index += 1;
         let (next_item, rest_of_response) = response.into_future().await;
         response = rest_of_response;
         match next_item {
             Some(Ok(item)) => {
-                let item_into_text = item.into_text()?;
+                let item_into_text = match item {
+                    // so far anyway, all of the asked-for content has been returned within `Message::Binary` chunks
+                    Message::Binary(data) => match allow_utf8_lossy {
+                        true => String::from_utf8_lossy(&data).to_string(),
+                        false => String::from_utf8(data).map_err(|_| anyhow!("Got non-utf8 data from k8s exec endpoint, and allow_utf8_lossy was false."))?,
+                    },
+                    // but we'll keep processing text chunks as well, in case they are used in some cases
+                    Message::Text(string) => {
+                        warn!("Got unexpected text-chunk. @len:{} @string:{}", string.len(), string);
+                        string
+                    },
+                    msg => {
+                        println!("Ignoring web-socket message:{:?}", msg);
+                        continue;
+                    },
+                };
                 let item_as_str = item_into_text.as_str();
                 let item_as_chars = item_as_str.chars().collect_vec();
                 let pos_of_first_soh = item_as_chars.iter().position(|ch| *ch == char::from_u32(0x0001).unwrap());
                 //println!("Got item. @len:{} @sohChar1st:{:?} @sohCharLast:{:?}", item_as_str.len(), pos_of_first_soh);
 
-                // ignore first two items; these are just k8s metadata (though do assert to make sure)
-                if item_index == 0 || item_index == 1  {
-                    ensure!(item_as_str.len() == 1, "First two items were not the empty headers expected!");
-                    continue;
-                }
                 // ignore items without the `0x0001` char (SOH control character) at start; these are just the k8s metadata chunks output at end (should only be 2 of these)
                 if pos_of_first_soh != Some(0) {
                     continue;
