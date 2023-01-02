@@ -55,7 +55,7 @@ k8s-openapi = { version = "0.16.0", features = [
 	"v1_25",
 	"api", # this provides functions for each actual endpoint (rather than just the generic get, post, etc. functions)
 ] }
-tokio-util = "0.6.9" # probably temp (only used once in _k8s.rs, so would like to avoid another dep)
+tokio-util = "0.6.9" # probably temp (only used once in _k8s.rs, so would like to avoid another dep
 
 rust-macros = { path = "../rust-macros" }
 

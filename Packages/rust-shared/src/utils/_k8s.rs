@@ -15,7 +15,7 @@ use tower::ServiceBuilder;
 use super::type_aliases::JSONValue;
 use tracing::{info, error, instrument::WithSubscriber};
 
-use crate::utils::k8s::k8s_structs::K8sSecret;
+use crate::{utils::k8s::k8s_structs::K8sSecret, domains::{get_server_url, DomainsConstants}};
 
 pub fn get_reqwest_client_with_k8s_certs() -> Result<reqwest::Client, Error> {
     /*let mut buf = Vec::new();
@@ -87,7 +87,7 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
         .body(json!({}).to_string()).build()?;
     let res = client.execute(req).await?;
     let res_as_json = res.json::<JSONValue>().await?;
-    info!("Got response from k8s server, on trying to get secret \"{name}\": {}", res_as_json);
+    //if DomainsConstants::new().on_server_and_dev { info!("Got response from k8s server, on trying to get secret \"{name}\": {}", res_as_json); }
     // check for failure by checking for a "code" field in the response (if it succeeded, the response json will simply be the secret's json-data)
     if res_as_json["code"].is_null() {
         let secret: K8sSecret = serde_json::from_value(res_as_json)?;
@@ -134,7 +134,7 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     //let client = get_reqwest_client_with_k8s_certs()?;
 
     let mut query_str = format!("?command={}", command_name);
-    for arg in command_args {
+    for arg in &command_args {
         query_str.push_str(&format!("&command={}", arg));
     }
     if let Some(container) = container {
@@ -186,8 +186,8 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
                 let item_as_str = item_into_text.as_str();
                 let item_as_chars = item_as_str.chars().collect_vec();
                 let pos_of_first_soh = item_as_chars.iter().position(|ch| *ch == char::from_u32(0x0001).unwrap());
-                let pos_of_last_soh = item_as_chars.iter().rposition(|ch| *ch == char::from_u32(0x0001).unwrap());
-                println!("Got item. @len:{} @sohChar1st:{:?} @sohCharLast:{:?}", item_as_str.len(), pos_of_first_soh, pos_of_last_soh);
+                //let pos_of_last_soh = item_as_chars.iter().rposition(|ch| *ch == char::from_u32(0x0001).unwrap());
+                //println!("Got item. @len:{} @sohChar1st:{:?} @sohCharLast:{:?}", item_as_str.len(), pos_of_first_soh, pos_of_last_soh);
 
                 // ignore first two items; these are just k8s metadata (though do assert to make sure)
                 if item_index == 0 || item_index == 1  {
@@ -212,13 +212,7 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
         }
     }
 
-    // The k8s api returns some extra text at start [  `\u0001\u0001\u0001`  ] and end [  `\u0003{"metadata":{},"status":"Success"}`  ]; filter these sections out.
-    // commented; we do the filtering in the loop above now instead (needed for removal of SOH at start of each chunk, so makes processing more consistent that way)
-    /*let res_as_chars = res_as_str.chars().collect_vec();
-    let pos_of_end_section = res_as_chars.iter().rposition(|ch| *ch == char::from_u32(0x0003).unwrap()).ok_or(anyhow!("Response from k8s api was missing an expected metadata section at end."))?;
-    let res_as_str_cleaned = res_as_chars[3..pos_of_end_section].iter().cloned().collect::<String>();*/
-    
-    info!("Got response from k8s server, on trying to run command. @response: {}", res_as_str);
+    info!("Got response from k8s server, on trying to run command using exec. @command:\"{} {}\" @response_len: {}", command_name, command_args.join(" "), res_as_str.len());
     Ok(res_as_str)
 }
 

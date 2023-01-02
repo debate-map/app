@@ -1,7 +1,7 @@
 const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
-const {SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
+const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
 
 const scripts = {};
 module.exports.scripts = scripts;
@@ -157,7 +157,7 @@ Object.assign(scripts, {
 			execSync(`${KubeCTLCmd(commandArgs[0])} cp ${appNamespace}/${podName}:/dm_repo/Packages/app-server/kgetOutput_buildTime/. ${localPath}`);
 			console.log(`Files copied from "${podName}" to: ${paths.resolve(localPath)}`);
 
-			execSync(`start "" "${paths.resolve(localPath)}"`);
+			OpenFileExplorerToPath(paths.resolve(localPath));
 
 			// now you can do various things with the profiler data; see: https://fasterthanli.me/articles/why-is-my-rust-build-so-slow
 		}),
@@ -186,7 +186,7 @@ Object.assign(scripts, {
 					}
 					throw ex;
 				}
-				execSync(`start "" "${folder}"`);
+				OpenFileExplorerToPath(folder);
 			});
 		}),
 
@@ -309,7 +309,7 @@ Object.assign(scripts, {
 				fs.mkdirSync(folderPath_rel, {recursive: true});
 				fs.writeFileSync(filePath_rel, dbDumpStr);
 				console.log(`DB dump (of context: ${context}) created at: ${paths.resolve(filePath_rel)}`);
-				execSync(`start "" "${paths.dirname(paths.resolve(filePath_rel))}"`);
+				OpenFileExplorerToPath(filePath_rel);
 			});
 		}),
 
@@ -318,7 +318,8 @@ Object.assign(scripts, {
 			const devEnv = commandArgs[0] == "dev" || K8sContext_Current() == "local";
 			const {bucket_dev_uniformPrivate_name, bucket_prod_uniformPrivate_name} = require("./PulumiOutput_Public.json"); // eslint-disable-line
 			const bucket_uniformPrivate_name = devEnv ? bucket_dev_uniformPrivate_name : bucket_prod_uniformPrivate_name;
-			return `start "" "https://console.cloud.google.com/storage/browser/${bucket_uniformPrivate_name}/db-backups-pgbackrest/backup/db?project=debate-map-prod"`;
+			// this works for links as well on windows; not sure on linux/mac
+			OpenFileExplorerToPath(`https://console.cloud.google.com/storage/browser/${bucket_uniformPrivate_name}/db-backups-pgbackrest/backup/db?project=debate-map-prod`);
 		}),
 		makeDBBackup: Dynamic(()=>{
 			const backupID = new Date().toISOString();
