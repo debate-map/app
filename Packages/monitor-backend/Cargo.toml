@@ -17,7 +17,6 @@ deadpool-postgres = "0.10.1"
 indexmap = {version = "1.8.0", features = ["serde"]}
 async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
-tokio-tungstenite = "*"
 lazy_static = "1.4.0"
 #gql_client = "1.0.6"
 

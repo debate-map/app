@@ -6,15 +6,16 @@ use rust_shared::anyhow::{anyhow, Error};
 use deadpool_postgres::{Transaction, Pool};
 
 use crate::store::storage::get_app_state_from_gql_ctx;
+use crate::utils::type_aliases::DBPool;
 use crate::utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject};
 
-pub async fn get_client<'a>(ctx: &async_graphql::Context<'_>) -> Result<PGClientObject, Error> {
+pub async fn get_client_from_gql_ctx<'a>(ctx: &async_graphql::Context<'_>) -> Result<PGClientObject, Error> {
     let pool = &get_app_state_from_gql_ctx(ctx).db_pool;
     Ok(pool.get().await.unwrap())
 }
-pub async fn start_read_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, ctx: &async_graphql::Context<'_>) -> Result<Transaction<'a>, Error> {
+pub async fn start_read_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<Transaction<'a>, Error> {
     // get client, then store it in anchor object the caller gave us a mut-ref to
-    *anchor = DataAnchor::holding1(get_client(ctx).await?);
+    *anchor = DataAnchor::holding1(db_pool.get().await?);
     // now retrieve client from storage-slot we assigned to in the previous line
     let client = anchor.val1.as_mut().unwrap();
     
@@ -25,9 +26,9 @@ pub async fn start_read_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientO
         .start().await?;
     Ok(tx)
 }
-pub async fn start_write_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, ctx: &async_graphql::Context<'_>) -> Result<Transaction<'a>, Error> {
+pub async fn start_write_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<Transaction<'a>, Error> {
     // get client, then store it in anchor object the caller gave us a mut-ref to
-    *anchor = DataAnchor::holding1(get_client(ctx).await?);
+    *anchor = DataAnchor::holding1(db_pool.get().await?);
     // now retrieve client from storage-slot we assigned to in the previous line
     let client = anchor.val1.as_mut().unwrap();
     

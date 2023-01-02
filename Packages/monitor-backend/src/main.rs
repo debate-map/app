@@ -120,16 +120,26 @@ fn set_up_globals() {
 
     //tracing_subscriber::fmt::init(); // install global collector configured based on RUST_LOG env var
     let printing_layer = tracing_subscriber::fmt::layer().with_filter(filter::filter_fn(move |metadata| {
-        //should_event_be_kept(metadata, &[Level::TRACE, Level::DEBUG])
-        should_event_be_kept(metadata, &[Level::TRACE])
-        //should_event_be_kept(metadata, &[])
+        should_event_be_printed(metadata)
     }));
     tracing_subscriber::registry().with(printing_layer).init();
 }
-pub fn should_event_be_kept(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
-    if !metadata.target().starts_with("monitor_backend") { return false; }
-    if levels_to_exclude.contains(metadata.level()) { return false; }
+
+pub fn does_event_match_conditions(metadata: &Metadata, levels_to_include: &[Level]) -> bool {
+    if !levels_to_include.contains(metadata.level()) {
+        return false;
+    }
     true
+}
+pub fn should_event_be_printed(metadata: &Metadata) -> bool {
+    match metadata.target() {
+        a if a.starts_with("monitor_backend") || a.starts_with("rust_shared") => {
+            //does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO])
+            does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
+            //does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG, Level::TRACE])
+        },
+        _ => false
+    }
 }
 
 #[tokio::main]

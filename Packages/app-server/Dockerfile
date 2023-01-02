@@ -68,6 +68,13 @@ ENV ENV=$env_ENV
 # temp (for ssl connections; will look for cleaner way soon)
 #RUN apt-get update && apt-get install -y ca-certificates
 
+# add postgres-client; this is needed for app-server to run `db_dump`, for its `getDBDump` endpoint # edit: hit issues; going the k8s "pods/exec" route instead
+# RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >>  /etc/apt/sources.list.d/pgdg.list
+# RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+# RUN apt-get update && RUN apt-get install wget ca-certificates
+# RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+# RUN apt-get update && apt-get install postgresql-client
+
 COPY --from=cargo-build /dm_repo/Packages/app-server/app-server-binary .
 COPY --from=cargo-build /dm_repo/Packages/app-server/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 

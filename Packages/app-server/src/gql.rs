@@ -79,6 +79,7 @@ use crate::db::commands::update_share::MutationShard_UpdateShare;
 use crate::db::commands::update_term::MutationShard_UpdateTerm;
 use crate::db::commands::update_user::MutationShard_UpdateUser;
 use crate::db::commands::update_user_hidden::MutationShard_UpdateUserHidden;
+use crate::db::general::backups::QueryShard_General_Backups;
 use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
@@ -113,7 +114,7 @@ wrap_slow_macros!{
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
-    QueryShard_General, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search,
+    QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search,
 );
 
 #[derive(MergedObject, Default)]
@@ -210,25 +211,7 @@ pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperCli
 }
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
     // retrieve auth-data/JWT and such from http-headers
-    let gql_data_from_http_request = {
-        let mut data = GQLDataFromHTTPRequest { jwt: None, referrer: None };
-        if let Some(header) = req.headers().get("authorization") {
-            //info!("Found authorization header.");
-            if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
-                //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
-                data.jwt = Some(parts.1.to_owned());
-            }
-        }
-
-        if let Some(header) = req.headers().get("referrer") {
-            //info!("Found referrer header.");
-            if let Ok(referrer) = header.to_str() {
-                //info!("Found referrer part2:{}", referrer);
-                data.referrer = Some(referrer.to_owned());
-            }
-        }
-        data
-    };
+    let gql_data_from_http_request = get_gql_data_from_http_request(&req);
     
     // read request's body (from frontend)
     let req_as_str = body_to_str(req.into_body()).await?;
@@ -252,6 +235,26 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     let response_str: String = serde_json::to_string(&gql_response)?;
     
     Ok(response_str)
+}
+
+pub fn get_gql_data_from_http_request(req: &Request<Body>) -> GQLDataFromHTTPRequest {
+    let mut data = GQLDataFromHTTPRequest { jwt: None, referrer: None };
+    if let Some(header) = req.headers().get("authorization") {
+        //info!("Found authorization header.");
+        if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
+            //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
+            data.jwt = Some(parts.1.to_owned());
+        }
+    }
+
+    if let Some(header) = req.headers().get("referrer") {
+        //info!("Found referrer header.");
+        if let Ok(referrer) = header.to_str() {
+            //info!("Found referrer part2:{}", referrer);
+            data.referrer = Some(referrer.to_owned());
+        }
+    }
+    data
 }
 
 pub struct GQLDataFromHTTPRequest {

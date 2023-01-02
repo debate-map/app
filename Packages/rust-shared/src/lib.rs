@@ -58,6 +58,7 @@ pub extern crate jwt_simple;
 pub extern crate chrono;
 pub extern crate flume;
 pub extern crate indexmap;
+pub extern crate tokio_tungstenite;
 
 // this crate's modules
 pub mod db_constants;

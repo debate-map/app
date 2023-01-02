@@ -5,6 +5,8 @@ use rust_shared::tokio_postgres::{Row, types::ToSql};
 use rust_shared::anyhow::{anyhow, Error};
 use deadpool_postgres::{Transaction, Pool};
 
+use crate::store::storage::get_app_state_from_gql_ctx;
+use crate::utils::type_aliases::DBPool;
 use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
 
 use super::transactions::{start_read_transaction, start_write_transaction};
@@ -26,18 +28,21 @@ pub struct AccessorContext<'a> {
     pub only_validate: bool,
 }
 impl<'a> AccessorContext<'a> {
+    // base
     pub fn new_raw(tx: Transaction<'a>, only_validate: bool) -> Self {
         Self { tx, only_validate }
     }
-    pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
-        let tx = start_read_transaction(anchor, gql_ctx).await?;
+
+    // low-level
+    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<AccessorContext<'a>, Error> {
+        let tx = start_read_transaction(anchor, db_pool).await?;
         Ok(Self { tx, only_validate: false })
     }
-    pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
-        Self::new_write_advanced(anchor, gql_ctx, Some(false)).await
+    pub async fn new_write_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<AccessorContext<'a>, Error> {
+        Self::new_write_advanced_base(anchor, db_pool, Some(false)).await
     }
-    pub async fn new_write_advanced(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
-        let tx = start_write_transaction(anchor, gql_ctx).await?;
+    pub async fn new_write_advanced_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
+        let tx = start_write_transaction(anchor, db_pool).await?;
         let only_validate = only_validate.unwrap_or(false);
 
         // Some commands (eg. deleteNode) need foreign-key contraint-deferring till end of transaction, so just do so always.
@@ -46,6 +51,17 @@ impl<'a> AccessorContext<'a> {
 		defer_constraints(&tx).await?;
 
         Ok(Self { tx, only_validate })
+    }
+
+    // high-level
+    pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
+        Ok(Self::new_read_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool).await?)
+    }
+    pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
+        Ok(Self::new_write_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool).await?)
+    }
+    pub async fn new_write_advanced(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
+        Ok(Self::new_write_advanced_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, only_validate).await?)
     }
 }
 

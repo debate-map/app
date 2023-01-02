@@ -66,10 +66,9 @@ async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Req
     </html>"#))
 }
 
-pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router {
+pub async fn extend_router(app: Router) -> Router {
     let result = app
-        .route("/auth/google/callback", get(auth_google_callback))
-        .layer(AddExtensionLayer::new(storage_wrapper));
+        .route("/auth/google/callback", get(auth_google_callback));
     result
 }
 
@@ -104,7 +103,7 @@ impl SignInStart_Result {
 pub struct SubscriptionShard_SignIn;
 #[Subscription]
 impl SubscriptionShard_SignIn {
-    /// Begin sign-in flow, resulting in a JWT string being returned. (to then be used with `signInAttach`)
+    /// Begin sign-in flow, resulting in a JWT string being returned. (to then be passed in an "authorization" header)
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google", "dev"]
     /// * `jwtDuration` - How long until the generated JWT should expire, in seconds. [i64]
     /// * `preferredUsername` - Used by the "dev" provider as part of the constructed user-data. [string]

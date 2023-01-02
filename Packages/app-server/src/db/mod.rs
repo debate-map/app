@@ -61,6 +61,7 @@ pub mod commands {
 pub mod _general;
 pub mod general {
     pub mod permission_helpers;
+    pub mod backups;
     pub mod search;
     pub mod sign_in;
     pub mod sign_in_ {

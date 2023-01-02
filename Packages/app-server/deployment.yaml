@@ -96,3 +96,33 @@ roleRef:
   kind: Role
   name: role-for-dm-app-server-pod
   apiGroup: rbac.authorization.k8s.io
+
+# probably temp; give app-server the ability to run commands in other pods
+# (this is needed atm for the `getDBDump` endpoint, but is not ideal, as it "grants more power" than should be necessary for this need)
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole # note that we use "ClusterRole" instead of just "Role", so granted permissions can work across namespaces
+metadata:
+  name: cluster-role-for-dm-app-server-pod
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding # note: using ClusterRoleBinding (as matching above)
+metadata:
+  name: cluster-role-binding-for-dm-app-server
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default # this also becomes required
+roleRef:
+  kind: ClusterRole # note: using ClusterRole (as matching above)
+  name: cluster-role-for-dm-app-server-pod
+  apiGroup: rbac.authorization.k8s.io

@@ -3,7 +3,7 @@ use rust_shared::anyhow::{anyhow, Context, Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
-use rust_shared::utils::_k8s::get_reqwest_client_with_k8s_certs;
+use rust_shared::utils::_k8s::{get_reqwest_client_with_k8s_certs, get_k8s_pod_basic_infos};
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::mtx::mtx::{MtxData, MtxDataForAGQL};
 use rust_shared::{futures, axum, tower, tower_http, GQLError};
@@ -122,46 +122,6 @@ pub async fn get_basic_info_from_app_server() -> Result<JSONValue, Error> {
     //println!("Done! Response:{}", res_as_json);
 
     Ok(res_as_json)
-}
-
-#[derive(Debug)]
-pub struct K8sPodBasicInfo {
-    pub name: String,
-    //pub creation_time: i64,
-    pub creation_time_str: String,
-}
-pub async fn get_k8s_pod_basic_infos(namespace: &str, filter_to_running_pods: bool) -> Result<Vec<K8sPodBasicInfo>, Error> {
-    let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
-    let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
-    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;
-
-    let client = get_reqwest_client_with_k8s_certs()?;
-    let pod_filters_str = if filter_to_running_pods { "?fieldSelector=status.phase=Running" } else { "" };
-    let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods{pod_filters_str}"))
-        .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {token}"))
-        .body(json!({}).to_string()).build()?;
-    let res = client.execute(req).await?;
-
-    let res_as_json_str = res.text().await?;
-    //info!("Got list of k8s pods (in namespace \"{namespace}\"): {}", res_as_json_str);
-    let res_as_json = JSONValue::from_str(&res_as_json_str)?;
-
-    let pod_infos = (|| {
-        let mut pod_infos: Vec<K8sPodBasicInfo> = vec![];
-        for pod_info_json in res_as_json.as_object()?.get("items")?.as_array()? {
-            let metadata = pod_info_json.as_object()?.get("metadata")?.as_object()?;
-            let pod_name = metadata.get("name")?.as_str()?;
-            let creation_time_str = metadata.get("creationTimestamp")?.as_str()?;
-            //let creation_time = chrono::DateTime::parse_from_rfc3339(creation_time_str)?;
-            pod_infos.push({
-                K8sPodBasicInfo { name: pod_name.to_owned(), creation_time_str: creation_time_str.to_owned() }
-            });
-        }
-        Some(pod_infos)
-    })().ok_or_else(|| anyhow!("Response from kubernetes API is malformed:{res_as_json_str}"))?;
-
-    Ok(pod_infos)
 }
 
 pub async fn tell_k8s_to_restart_app_server() -> Result<JSONValue, Error> {

@@ -115,7 +115,6 @@ impl QueryShard_General_Subtree {
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 
         let subtree = get_node_subtree(&ctx, root_node_id, max_depth.unwrap_or(10000)).await?;
-
         Ok(subtree)
     }
 
@@ -125,7 +124,6 @@ impl QueryShard_General_Subtree {
         let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
 
         let subtree = get_node_subtree2(&ctx, root_node_id, max_depth.unwrap_or(10000)).await?;
-
         Ok(subtree)
     }
 
