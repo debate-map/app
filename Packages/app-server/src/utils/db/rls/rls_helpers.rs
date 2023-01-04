@@ -47,8 +47,8 @@ pub(super) fn try_does_policy_allow_access(jwt_data: &Option<UserJWTData>, polic
     Ok(false)
 }
 
-pub(super) fn do_policies_allow_access(jwt_data: &Option<UserJWTData>, policy_ids_and_fields: Vec<AccessPolicyTarget>) -> bool {
-    try_do_policies_allow_access(jwt_data, policy_ids_and_fields).unwrap_or_else(|err| {
+pub(super) fn do_policies_allow_access(jwt_data: &Option<UserJWTData>, policy_targets: Vec<AccessPolicyTarget>) -> bool {
+    try_do_policies_allow_access(jwt_data, policy_targets).unwrap_or_else(|err| {
         warn!("Got error in try_do_policies_allow_access (should only happen rarely): {:?}", err);
         false
     })

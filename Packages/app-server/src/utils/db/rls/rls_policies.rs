@@ -10,7 +10,7 @@ pub trait UsesRLS {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool;
 }
 
-// empty policies (ie. can always be viewed by anyone)
+// empty policies (ie. can always be viewed by anyone) [these functions are not needed in sql version]
 // ==========
 
 impl UsesRLS for AccessPolicy {

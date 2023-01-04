@@ -1,7 +1,15 @@
 -- sync:rs[rls_helpers.rs]
 
--- probably temp; to improve perf, should probably replace with an "app.current_user_admin" config-param, set by the server (which keeps a live-query of list of admin user-ids) 
-create or replace function IsUserAdmin(user_id varchar) returns boolean as $$ begin 
+create or replace function is_user_creator(user_id varchar, creator_id varchar) returns boolean as $$ begin 
+	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id') END IF;
+	return user_id = creator_id;
+end $$ language plpgsql;
+
+create or replace function is_user_admin(user_id varchar) returns boolean as $$ begin
+	-- probably todo: go back to an approach like this, once "app.current_user_admin" config-param can be efficiently set by app-server
+	--return current_setting('app.current_user_admin') = 'true';
+	
+	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id') END IF;
 	return exists(
 		select 1 from app_public."users" where id = user_id and (
 			"permissionGroups" -> 'admin' = 'true'
@@ -9,34 +17,31 @@ create or replace function IsUserAdmin(user_id varchar) returns boolean as $$ be
 	);
 end $$ language plpgsql;
 
-create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar, policyField varchar) returns boolean as $$ begin 
-	return (
-		current_setting('app.current_user_id') = entry_creator
-		--or current_setting('app.current_user_admin') = 'true'
-		or IsUserAdmin(current_setting('app.current_user_id'))
-		/*or (
-			policyFields[0] -> policyField -> 'access' = 'true'
-			or policyFields[1] -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
-		)*/
-		or exists (
-			select 1 from app_public."accessPolicies" where id = policyID and (
-				(
-					"permissions" -> policyField -> 'access' = 'true'
-					-- the coalesce is needed to handle the case where the deep-field at that path doesn't exist, apparently
-					and coalesce("permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access', 'null'::jsonb) != 'false'
-				)
-				or "permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'
+create or replace function does_policy_allow_access(user_id varchar, policy_id varchar, policy_field varchar) returns boolean as $$ begin 
+	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id') END IF;
+	return exists (
+		select 1 from app_public."accessPolicies" where id = policy_id and (
+			(
+				"permissions" -> policy_field -> 'access' = 'true'
+				-- the coalesce is needed to handle the case where the deep-field at that path doesn't exist, apparently
+				and coalesce("permissions_userExtends" -> user_id -> policy_field -> 'access', 'null'::jsonb) != 'false'
 			)
+			or "permissions_userExtends" -> user_id -> policy_field -> 'access' = 'true'
 		)
 	);
 end $$ language plpgsql;
 
-create or replace function CanCurrentUserAccessAllNodesInArray(nodes varchar[]) returns boolean as $$
+create or replace function do_policies_allow_access(user_id varchar, policy_targets varchar[]) returns boolean as $$ begin 
 declare
-	node varchar;
+	policy_target varchar,
+	policy_id varchar,
+	policy_subfield varchar;
 begin 
-	foreach node in array nodes loop
-		if not IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess('n/a', (select "accessPolicy" from app_public.nodes where id = node), 'nodes') then
+	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id') END IF;
+	foreach policy_target in array policy_targets loop
+		policy_id := SELECT split_part(policy_target, ':', 1);
+		policy_subfield := SELECT split_part(policy_target, ':', 2);
+		if not does_policy_allow_access(user_id, policy_id, policy_subfield) then
 			return false;
 		end if;
 	end loop;
