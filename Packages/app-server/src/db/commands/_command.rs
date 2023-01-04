@@ -96,6 +96,10 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
                         } else if table_name == "nodePhrasings" && key_and_val.0 == "terms" {
                             let as_array = key_and_val.1.as_array().unwrap().clone();
                             SF::value(CustomPGSerializer::new("::jsonb[]".to_owned(), as_array))
+                        } else if key_and_val.0 == "c_accessPolicyTargets" {
+                            let as_array = key_and_val.1.as_array().unwrap().clone();
+                            let as_array_of_strings = as_array.iter().map(|a| a.as_str().unwrap().to_owned()).collect_vec();
+                            SF::value(CustomPGSerializer::new("::text[]".to_owned(), as_array_of_strings))
                         } else {
                             json_value_to_guessed_sql_value_param_fragment(key_and_val.1)?
                         }

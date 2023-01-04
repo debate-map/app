@@ -1,3 +1,5 @@
+-- sync:rs[rls_helpers.rs]
+
 -- probably temp; to improve perf, should probably replace with an "app.current_user_admin" config-param, set by the server (which keeps a live-query of list of admin user-ids) 
 create or replace function IsUserAdmin(user_id varchar) returns boolean as $$ begin 
 	return exists(

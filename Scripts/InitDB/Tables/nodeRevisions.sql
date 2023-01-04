@@ -11,7 +11,8 @@ CREATE TABLE app_public."nodeRevisions" (
     attachments jsonb DEFAULT '[]'::json NOT NULL,
     "replacedBy" text,
     phrasing1_tsvector tsvector GENERATED ALWAYS AS (app_public.rev_phrasing_to_tsv(phrasing)) STORED NOT NULL,
-    attachments_tsvector tsvector GENERATED ALWAYS AS (app_public.attachments_to_tsv(attachments)) STORED NOT NULL
+    attachments_tsvector tsvector GENERATED ALWAYS AS (app_public.attachments_to_tsv(attachments)) STORED NOT NULL,
+    "c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app_public."nodeRevisions"
     ADD CONSTRAINT "v1_draft_nodeRevisions_pkey" PRIMARY KEY (id);

@@ -1,4 +1,5 @@
 pub mod _shared {
+    pub mod access_policy_target;
     pub mod attachments;
     pub mod common_errors;
     pub mod path_finder;

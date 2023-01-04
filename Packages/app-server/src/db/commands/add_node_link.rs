@@ -10,6 +10,7 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
+use crate::db::_shared::access_policy_target::AccessPolicyTarget;
 use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
@@ -70,7 +71,8 @@ pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, input: AddNo
 		seriesAnchor: link_.seriesAnchor,
 		seriesEnd: link_.seriesEnd,
 		polarity: link_.polarity,
-	};
+		c_accessPolicyTargets: vec![],
+	}.with_access_policy_targets(&ctx, Some(&parent), Some(&child)).await?;
 
 	// validations
 	{

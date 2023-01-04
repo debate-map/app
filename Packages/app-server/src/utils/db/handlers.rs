@@ -1,5 +1,5 @@
 use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell};
-use rust_shared::{anyhow::{bail, Context, Error}, async_graphql, serde_json, tokio, utils::{type_aliases::JSONValue, general_::extensions::ToOwnedV}, new_mtx, flume};
+use rust_shared::{anyhow::{bail, Context, Error}, async_graphql, serde_json, tokio, utils::{type_aliases::JSONValue, general_::extensions::ToOwnedV, auth::jwt_utils_base::UserJWTData}, new_mtx, flume};
 use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
 use rust_shared::flume::{Sender, Receiver};
@@ -12,8 +12,8 @@ use rust_shared::tokio_postgres::{Client, Row, types::ToSql};
 use rust_shared::uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, live_queries_::lq_key::LQKey, storage::{AppStateArc, get_app_state_from_gql_ctx}}, utils::{type_aliases::{PGClientObject}}};
-use super::{filter::{QueryFilter, FilterInput}};
+use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, live_queries_::lq_key::LQKey, storage::{AppStateArc, get_app_state_from_gql_ctx}}, utils::{type_aliases::{PGClientObject}, db::rls::rls_applier::{RLSApplier}}, db::general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx};
+use super::{filter::{QueryFilter, FilterInput}, rls::{rls_applier::{self}, rls_policies::UsesRLS}};
 
 /*pub struct GQLSet<T> { pub nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
@@ -41,15 +41,16 @@ pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(j
 }
 
 pub async fn handle_generic_gql_collection_request<'a,
-    T: 'static + From<Row> + Serialize + DeserializeOwned + Send + Clone,
+    T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
-    let (lq_storage, table_name) = {
+    let (lq_storage, jwt_data, table_name) = {
         let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
         let app_state = get_app_state_from_gql_ctx(ctx2).clone();
+        let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx2).await.unwrap_or_else(|_| None);
         let lq_storage = app_state.live_queries.clone();
         let table_name = table_name.to_owned();
-        (lq_storage, table_name)
+        (lq_storage, jwt_data, table_name)
     };
     
     let result = tokio::spawn(async move {
@@ -81,15 +82,22 @@ pub async fn handle_generic_gql_collection_request<'a,
         mtx.section("3");
         //let filter_clone = filter.clone();
         let base_stream = async_stream::stream! {
-            yield Ok(GQLSetVariant::from(entries_as_type));
+            let mut rls_applier = RLSApplier::new(jwt_data);
+            if let (next_result, _changed) = rls_applier.filter_next_result_for_collection(entries_as_type) {
+                yield Ok(GQLSetVariant::from(next_result));
+            }
+            
             loop {
                 let next_entries = match lq_entry_receiver_clone.recv_async().await {
                     Ok(a) => a,
                     Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
                 };
                 let next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
-                let next_result_set = GQLSetVariant::from(next_entries_as_type);
-                yield Ok(next_result_set);
+
+                // only yield next-result if it has changed after filtering (otherwise seeing an "unchanged update" leaks knowledge that a hidden, matching entry was changed)
+                if let (next_result, changed) = rls_applier.filter_next_result_for_collection(next_entries_as_type) && changed {
+                    yield Ok(GQLSetVariant::from(next_result));
+                }
             }
         };
         Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)
@@ -98,15 +106,16 @@ pub async fn handle_generic_gql_collection_request<'a,
     result
 }
 pub async fn handle_generic_gql_doc_request<'a,
-    T: 'static + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
+    T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
     //let ctx: &'static async_graphql::Context<'_> = Box::leak(Box::new(ctx));
-    let (lq_storage, table_name) = {
+    let (lq_storage, jwt_data, table_name) = {
         let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
         let app_state = get_app_state_from_gql_ctx(ctx2).clone();
+        let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx2).await.unwrap_or_else(|_| None);
         let lq_storage = app_state.live_queries.clone();
         let table_name = table_name.to_owned();
-        (lq_storage, table_name)
+        (lq_storage, jwt_data, table_name)
     };
 
     let result = tokio::spawn(async move {
@@ -142,15 +151,23 @@ pub async fn handle_generic_gql_doc_request<'a,
         mtx.section("3");
         //let filter_clone = filter.clone();
         let base_stream = async_stream::stream! {
-            yield Ok(entry_as_type);
+            let mut rls_applier = RLSApplier::new(jwt_data);
+            if let (next_result, _changed) = rls_applier.filter_next_result_for_doc(entry_as_type) {
+                yield Ok(next_result);
+            }
+
             loop {
                 let next_entries = match lq_entry_receiver_clone.recv_async().await {
                     Ok(a) => a,
                     Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
                 };
                 let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
-                let next_result: Option<T> = next_entries_as_type.pop();
-                yield Ok(next_result);
+                let next_entry_as_type: Option<T> = next_entries_as_type.pop();
+
+                // only yield next-result if it has changed after filtering (otherwise seeing an "unchanged update" leaks knowledge that a hidden, matching entry was changed)
+                if let (next_result, changed) = rls_applier.filter_next_result_for_doc(next_entry_as_type) && changed {
+                    yield Ok(next_result);
+                }
             }
         };
         Stream_WithDropListener::new(base_stream, table_name, filter, stream_id, sender_for_dropping_lq_watcher)

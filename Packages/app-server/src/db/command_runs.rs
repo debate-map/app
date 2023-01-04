@@ -5,7 +5,10 @@ use rust_shared::rust_macros::{wrap_slow_macros, wrap_serde_macros, Deserialize_
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 
+use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}};
+
+use super::_shared::access_policy_target::AccessPolicyTarget;
 
 // for testing wrap_serde_macros! on a single struct
 /*wrap_serde_macros!{
@@ -48,20 +51,11 @@ pub struct CommandRun {
     pub commandPayload: serde_json::Value,
     pub returnData: serde_json::Value,
     pub rlsTargets: serde_json::Value,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
 impl From<Row> for CommandRun {
-	fn from(row: Row) -> Self {
-		Self {
-            id: ID::from(&row.get::<_, String>("id")),
-            actor: row.get("actor"),
-            runTime: row.get("runTime"),
-            public_base: row.get("public_base"),
-            commandName: row.get("commandName"),
-            commandPayload: serde_json::from_value(row.get("commandPayload")).unwrap(),
-            returnData: serde_json::from_value(row.get("returnData")).unwrap(),
-            rlsTargets: serde_json::from_value(row.get("rlsTargets")).unwrap(),
-		}
-	}
+	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(Clone)] pub struct GQLSet_CommandRun { nodes: Vec<CommandRun> }

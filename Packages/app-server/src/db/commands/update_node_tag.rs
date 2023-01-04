@@ -64,7 +64,7 @@ pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: Upd
 		restrictMirroringOfX: update_field_nullable(updates.restrictMirroringOfX, old_data.restrictMirroringOfX),
 		cloneHistory: update_field_nullable(updates.cloneHistory, old_data.cloneHistory),
 		..old_data
-	};
+	}.with_access_policy_targets(ctx).await?;
 
 	set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), id.to_string(), new_data).await?;
 

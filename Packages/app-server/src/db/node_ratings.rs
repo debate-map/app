@@ -1,5 +1,6 @@
 use rust_shared::itertools::Itertools;
 use rust_shared::utils::general::{as_debug_str, as_json_str, enum_to_string};
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::anyhow::{anyhow, Error, ensure, bail};
@@ -20,6 +21,7 @@ use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
+use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::commands::_shared::rating_processor::get_argument_impact_pseudo_ratings;
 use super::node_ratings_::_node_rating_type::{NodeRatingType, get_rating_type_info};
 use super::nodes::get_node_children;
@@ -131,6 +133,20 @@ pub struct NodeRating {
     pub node: String,
     pub r#type: NodeRatingType,
 	pub value: f64,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl NodeRating {
+    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
+        let node = get_node(ctx, &self.node).await?;
+        Ok(Self {
+            c_accessPolicyTargets: vec![
+                AccessPolicyTarget::new(self.accessPolicy.o(), "nodeRatings"),
+                AccessPolicyTarget::new(node.accessPolicy, "nodes"),
+            ],
+            ..self
+        })
+    }
 }
 impl From<Row> for NodeRating {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

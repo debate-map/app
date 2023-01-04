@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use rust_shared::{anyhow::{anyhow, Error, bail}, db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME, utils::{time::time_since_epoch_ms_i64, db::uuid::new_uuid_v4_as_b64_id}, itertools::Itertools};
 
-use crate::{db::{node_ratings::{NodeRating, get_node_rating_by_user, get_rating_average, get_node_ratings, get_node_ratings_base, get_node_rating_by_user_base, get_rating_average_base}, nodes_::_node::{get_node_form, Node, ArgumentType}, node_links::ClaimForm, access_policies::get_system_access_policy, node_ratings_::_node_rating_type::NodeRatingType}, utils::db::accessors::AccessorContext};
+use crate::{db::{node_ratings::{NodeRating, get_node_rating_by_user, get_rating_average, get_node_ratings, get_node_ratings_base, get_node_rating_by_user_base, get_rating_average_base}, nodes_::_node::{get_node_form, Node, ArgumentType}, node_links::ClaimForm, access_policies::get_system_access_policy, node_ratings_::_node_rating_type::NodeRatingType, _shared::access_policy_target::AccessPolicyTarget}, utils::db::accessors::AccessorContext};
 
 // sync:js
 pub async fn get_argument_impact_pseudo_rating(ctx: &AccessorContext<'_>, argument: &Node, premises: &[Node], user_id: &str, use_average_for_missing: bool) -> Result<NodeRating, Error> {
@@ -60,15 +60,17 @@ pub async fn get_argument_impact_pseudo_rating(ctx: &AccessorContext<'_>, argume
 	// let strengthForType = adjustment.Distance(50) / 50;
 	let result: f64 = combined_truth_of_premises * (relevance / 100f64);
 
+    let access_policy = get_system_access_policy(ctx, SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?;
 	Ok(NodeRating {
         id: new_uuid_v4_as_b64_id(),
-        accessPolicy: get_system_access_policy(ctx, SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?.id.to_string(),
+        accessPolicy: access_policy.id.to_string(),
 		node: argument.id.to_string(),
 		r#type: NodeRatingType::impact,
 		creator: user_id.to_owned(),
 		createdAt: time_since_epoch_ms_i64(),
 		value: float_to_percent(result),
-	})
+        c_accessPolicyTargets: vec![],
+	}.with_access_policy_targets(&ctx).await?)
 }
 
 fn float_to_percent(f: f64) -> f64 {

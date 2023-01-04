@@ -16,7 +16,10 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::general::order_key::OrderKey;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
 
+use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::nodes::get_node;
+use super::nodes_::_node::Node;
 use super::nodes_::_node_type::NodeType;
 
 pub async fn get_node_link(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeLink, Error> {
@@ -96,6 +99,21 @@ pub struct NodeLink {
 	pub c_parentType: NodeType,
     #[graphql(name = "c_childType")]
 	pub c_childType: NodeType,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl NodeLink {
+    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>, parent: Option<&Node>, child: Option<&Node>) -> Result<Self, Error> {
+        let parent_policy = parent.map(|a| a.accessPolicy.o()).unwrap_or(get_node(ctx, &self.parent).await?.accessPolicy.o());
+        let child_policy = child.map(|a| a.accessPolicy.o()).unwrap_or(get_node(ctx, &self.child).await?.accessPolicy.o());
+        Ok(Self {
+            c_accessPolicyTargets: vec![
+                AccessPolicyTarget::new(parent_policy, "nodes"),
+                AccessPolicyTarget::new(child_policy, "nodes"),
+            ],
+            ..self
+        })
+    }
 }
 impl From<Row> for NodeLink {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

@@ -66,7 +66,7 @@ pub async fn get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<
     }
 }
 pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<Option<User>, Error> {
-    match try_get_user_jwt_info_from_gql_ctx(gql_ctx).await? {
+    match try_get_user_jwt_data_from_gql_ctx(gql_ctx).await? {
         None => Ok(None),
         Some(jwt_data) => {
             let user_info = resolve_jwt_to_user_info(ctx, &jwt_data).await?;
@@ -84,14 +84,14 @@ pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt_data: &
 // for user-jwt-data only (ie. static data stored within jwt itself, without need for new db queries)
 // ==========
 
-pub async fn get_user_jwt_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<UserJWTData, Error> {
-    let user_jwt_info = try_get_user_jwt_info_from_gql_ctx(gql_ctx).await?;
-    match user_jwt_info {
+pub async fn get_user_jwt_data_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<UserJWTData, Error> {
+    let jwt_data = try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?;
+    match jwt_data {
         None => Err(get_err_auth_data_required()),
         Some(user_info) => Ok(user_info),
     }
 }
-pub async fn try_get_user_jwt_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<Option<UserJWTData>, Error> {
+pub async fn try_get_user_jwt_data_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<Option<UserJWTData>, Error> {
     let jwt = match gql_ctx.data::<GQLDataFromHTTPRequest>() {
         Ok(val) => match &val.jwt {
             Some(jwt) => jwt,
@@ -100,8 +100,8 @@ pub async fn try_get_user_jwt_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::
         // if no data-entry found in gql-context, return None for "no user data"
         Err(_err) => return Ok(None),
     };
-    let user_info = resolve_and_verify_jwt_string(&jwt).await?;
-    Ok(Some(user_info))
+    let jwt_data = resolve_and_verify_jwt_string(&jwt).await?;
+    Ok(Some(jwt_data))
 }
 pub async fn resolve_and_verify_jwt_string<'a>(jwt_string: &str) -> Result<UserJWTData, Error> {
     let key = get_or_create_jwt_key_hs256().await?;

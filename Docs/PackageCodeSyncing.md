@@ -13,6 +13,9 @@ In those cases, there still needs to be some way for developers to "coordinate" 
 * The structs/classes/enums representing the information present in the database should all be synced.
 	* JavaScript path: https://github.com/debate-map/app/tree/master/Packages/js-common/Source/db
 	* Rust path: https://github.com/debate-map/app/tree/master/Packages/app-server/src/db
+* The functions by which RLS (row-level-security) policies are applied should be synced between the postgres and Rust versions.
+	* SQL/Postgres path: https://github.com/debate-map/app/tree/master/Scripts/InitDB (files: RLSPolicies.sql, RLSHelpers.sql)
+	* Rust path: https://github.com/debate-map/app/tree/master/Packages/app-server/src/utils/db/rls (files: rls_policies.sql, rls_helpers.sql)
 * For the logic determining whether a "command" is allowed, the situation is not quite as clear-cut. Basically though:
 	* For "basic checks" (eg. whether user has general permission for action X on object Y), the logic should be present on both the client and server (generally using a single call to a function like `IsUserCreatorOrMod` -- or soon, to some generic function that performs checks based on the relevant access policy/policies); generally the frontend should "apply" these basic checks at the visibility level, rather than "graying out" the option or the like. (eg. for a node that a non-mod user had no part in creating, they would not expect a "Delete" option to show up at all)
 	* For "complex checks", whether the logic is replicated on the client depends on whether the action already shows a dialog to the user when clicked.

@@ -1,3 +1,5 @@
+-- sync:rs[rls_policies.rs]
+
 -- simple RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access [without user-specific block], or entry's policy has user-specific grant)
 
 alter table app_public."terms" enable row level security;

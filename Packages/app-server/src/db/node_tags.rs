@@ -15,7 +15,9 @@ use rust_shared::serde;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, pg_row_to_json::{postgres_row_to_json_value, postgres_row_to_struct}}};
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
+use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
+use super::nodes::get_node;
 
 pub async fn get_node_tag(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeTag, Error> {
     get_db_entry(ctx, "nodeTags", &Some(json!({
@@ -42,6 +44,21 @@ pub struct NodeTag {
     pub mutuallyExclusiveGroup: Option<TagComp_MutuallyExclusiveGroup>,
     pub restrictMirroringOfX: Option<TagComp_RestrictMirroringOfX>,
     pub cloneHistory: Option<TagComp_CloneHistory>,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl NodeTag {
+    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
+        let mut targets = vec![];
+        for node_id in &self.nodes {
+            let node = get_node(ctx, &node_id).await?;
+            targets.push(AccessPolicyTarget::new(node.accessPolicy, "nodes"));
+        }
+        Ok(Self {
+            c_accessPolicyTargets: targets,
+            ..self
+        })
+    }
 }
 impl From<Row> for NodeTag {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

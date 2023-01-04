@@ -45,9 +45,28 @@ pub struct AccessPolicy {
 	pub creator: String,
 	pub createdAt: i64,
     pub name: String,
-    pub permissions: serde_json::Value,
+    pub permissions: JSONValue,
     #[graphql(name = "permissions_userExtends")]
-    pub permissions_userExtends: serde_json::Value,
+    pub permissions_userExtends: JSONValue,
+}
+impl AccessPolicy {
+    // todo: change field-type to struct rather than JSONValue, so this isn't necessary
+	pub fn permissions_for_type(&self, policy_field: &str) -> Result<PermissionSetForType, Error> {
+        let json_val_for_field = self.permissions.get(policy_field).ok_or(anyhow!("Could not find permissions field:{policy_field}"))?;
+		Ok(serde_json::from_value(json_val_for_field.clone())?)
+	}
+	pub fn permission_extends_for_user_and_type(&self, user_id: Option<String>, policy_field: &str) -> Result<Option<PermissionSetForType>, Error> {
+        let user_id = match user_id {
+            None => return Ok(None),
+            Some(user) => user,
+        };
+        let json_val_for_user_extends = match self.permissions_userExtends.get(user_id) {
+            Some(val) => val,
+            None => return Ok(None),
+        };
+        let json_val_for_field = json_val_for_user_extends.get(policy_field).ok_or(anyhow!("Could not find permissions field:{policy_field}"))?;
+		Ok(Some(serde_json::from_value(json_val_for_field.clone())?))
+	}
 }
 impl From<Row> for AccessPolicy {
 	fn from(row: Row) -> Self {
@@ -65,17 +84,46 @@ impl From<Row> for AccessPolicy {
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct AccessPolicyInput {
     pub name: String,
-    pub permissions: serde_json::Value,
+    pub permissions: JSONValue,
     #[graphql(name = "permissions_userExtends")]
-    pub permissions_userExtends: serde_json::Value,
+    pub permissions_userExtends: JSONValue,
 }
 
 #[derive(InputObject, Deserialize)]
 pub struct AccessPolicyUpdates {
     pub name: FieldUpdate<String>,
-    pub permissions: FieldUpdate<serde_json::Value>,
+    pub permissions: FieldUpdate<JSONValue>,
     #[graphql(name = "permissions_userExtends")]
-    pub permissions_userExtends: FieldUpdate<serde_json::Value>,
+    pub permissions_userExtends: FieldUpdate<JSONValue>,
+}
+
+#[derive(Deserialize)]
+pub struct PermissionSet {
+	pub terms: PermissionSetForType,
+	pub medias: PermissionSetForType,
+	pub maps: PermissionSetForType,
+	pub nodes: PermissionSetForType,
+	// most node-related rows use their node's access-policy as their own; node-ratings is an exception, because individual entries can be kept hidden without disrupting collaboration significantly
+	pub nodeRatings: PermissionSetForType,
+}
+#[derive(Deserialize)]
+pub struct PermissionSetForType {
+	pub access: bool, // true = anyone, false = no-one
+	pub modify: PermitCriteria,
+	pub delete: PermitCriteria,
+
+	// for nodes only
+	// ==========
+
+	pub vote: PermitCriteria,
+	pub addPhrasing: PermitCriteria,
+	// commented; users can always add "children" (however, governed maps can set a lens entry that hides unapproved children by default)
+	//pub addChild: PermitCriteria,
+}
+#[derive(Deserialize)]
+pub struct PermitCriteria {
+	pub minApprovals: i64, // 0 = anyone, -1 = no-one
+	pub minApprovalPercent: i64, // 0 = anyone, -1 = no-one
 }
 
 #[derive(Clone)] pub struct GQLSet_AccessPolicy { nodes: Vec<AccessPolicy> }

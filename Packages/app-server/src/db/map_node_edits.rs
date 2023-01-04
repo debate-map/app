@@ -3,13 +3,19 @@ use rust_shared::async_graphql;
 use rust_shared::async_graphql::Enum;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
 use futures_util::{Stream, stream, TryFutureExt};
+use rust_shared::anyhow::Error;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::tokio_postgres::{Row, Client};
 
+use crate::utils::db::accessors::AccessorContext;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+
+use super::_shared::access_policy_target::AccessPolicyTarget;
+use super::maps::get_map;
+use super::nodes::get_node;
 
 wrap_slow_macros!{
 
@@ -28,6 +34,21 @@ pub struct MapNodeEdit {
 	pub node: String,
 	pub time: i64,
 	pub r#type: ChangeType,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl MapNodeEdit {
+    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
+        let map = get_map(ctx, &self.map).await?;
+        let node = get_node(ctx, &self.node).await?;
+        Ok(Self {
+            c_accessPolicyTargets: vec![
+                AccessPolicyTarget::new(map.accessPolicy.clone(), "nodes"),
+                AccessPolicyTarget::new(node.accessPolicy.clone(), "nodes"),
+            ],
+            ..self
+        })
+    }
 }
 impl From<Row> for MapNodeEdit {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

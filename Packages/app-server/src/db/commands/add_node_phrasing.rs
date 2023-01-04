@@ -10,9 +10,11 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
 use tracing::info;
 
+use crate::db::_shared::access_policy_target::AccessPolicyTarget;
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_phrasings::{NodePhrasingInput, NodePhrasing};
+use crate::db::nodes::get_node;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -58,7 +60,8 @@ pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: A
 		note: phrasing_.note,
 		terms: phrasing_.terms,
 		references: phrasing_.references,
-	};
+		c_accessPolicyTargets: vec![],
+	}.with_access_policy_targets(&ctx).await?;
 
 	set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing.clone()).await?;
 

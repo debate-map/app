@@ -11,7 +11,8 @@ CREATE TABLE app_public."nodeLinks" (
     "c_parentType" text NOT NULL,
     "c_childType" text NOT NULL,
     "group" text DEFAULT 'generic'::text NOT NULL,
-    "orderKey" text DEFAULT '0|Vzzzzz:'::text NOT NULL COLLATE pg_catalog."C"
+    "orderKey" text DEFAULT '0|Vzzzzz:'::text NOT NULL COLLATE pg_catalog."C",
+	"c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app_public."nodeLinks"
     ADD CONSTRAINT "v1_draft_nodeLinks_pkey" PRIMARY KEY (id);

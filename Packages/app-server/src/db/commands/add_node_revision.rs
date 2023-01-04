@@ -17,7 +17,9 @@ use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
+use crate::db::maps::get_map;
 use crate::db::node_revisions::{NodeRevisionInput, NodeRevision};
+use crate::db::nodes::get_node;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -68,32 +70,34 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 		note: revision_.note,
 		displayDetails: revision_.displayDetails,
 		attachments: revision_.attachments,
-	};
-	set_db_entry_by_id_for_struct(&ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
+		c_accessPolicyTargets: vec![],
+	}.with_access_policy_targets(ctx).await?;
+	set_db_entry_by_id_for_struct(ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
 
 	// also update node's "c_currentRevision" field
 	ctx.tx.execute(r#"UPDATE "nodes" SET "c_currentRevision" = $1 WHERE id = $2"#, &[&revision.id.as_str(), &revision.node]).await?;
 
 	// if node-revision was added from within a map, then add a map-node-edit entry (while also doing cleanup of old map-node-edit entries)
-	if let Some(mapID) = mapID.clone() {
+	if let Some(map_id) = mapID.clone() {
 		// delete prior node-edit entries for this map+node (only need last entry for each)
 		// todo: maybe change this to only remove old entries of same map+node+type
-		ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE map = $1 AND node = $2"#, &[&mapID, &revision.node]).await?;
+		ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE map = $1 AND node = $2"#, &[&map_id, &revision.node]).await?;
 
 		// delete old node-edits (ie. older than last 100) for this map, in mapNodeEdits, to avoid table getting too large
 		// (we also limit the number of rows removed to 30, to avoid the possibility of hundreds of rows being removed all at once -- which caused a crash in the past)
 		ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE id IN (
 			SELECT id FROM "mapNodeEdits" WHERE map = $1 ORDER BY time DESC OFFSET 100 LIMIT 30
-		)"#, &[&mapID]).await?;
+		)"#, &[&map_id]).await?;
 
 		// add new node-edit entry
 		let edit = MapNodeEdit {
 			id: ID(new_uuid_v4_as_b64()),
-			map: mapID,
+			map: map_id.clone(),
 			node: revision.node.clone(),
 			time: time_since_epoch_ms_i64(),
 			r#type: ChangeType::edit,
-		};
+			c_accessPolicyTargets: vec![],
+		}.with_access_policy_targets(ctx).await?;
 		set_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 	}
 

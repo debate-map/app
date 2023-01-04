@@ -12,6 +12,11 @@ pub mod db {
     pub mod pg_stream_parsing;
     pub mod pg_row_to_json;
     pub mod queries;
+    pub mod rls {
+        pub mod rls_applier;
+        pub mod rls_helpers;
+        pub mod rls_policies;
+    }
     pub mod sql_ident;
     pub mod sql_param;
     pub mod transactions;

@@ -31,7 +31,9 @@ use crate::db::general::subtree_collector::get_node_subtree;
 use crate::db::medias::Media;
 use crate::db::node_links::{NodeLink, get_node_links};
 use crate::db::node_phrasings::NodePhrasing;
+use crate::db::node_revisions::NodeRevision;
 use crate::db::node_tags::{NodeTag, TagComp_CloneHistory};
+use crate::db::nodes_::_node::Node;
 use crate::db::terms::Term;
 use crate::utils::db::accessors::AccessorContext;
 use crate::utils::db::filter::{QueryFilter, FilterInput};
@@ -108,12 +110,14 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     // first, add a new link from the old-node's parent to the new-node (which we've generated an id for, and are about to construct)
     let old_root_links = get_node_links(&ctx, Some(payload.parentNodeID.as_str()), Some(payload.rootNodeID.as_str())).await?;
     let old_root_link = old_root_links.get(0).ok_or(anyhow!("No child-link found between provided root-node \"{}\" and parent \"{}\".", payload.rootNodeID, payload.parentNodeID))?;
-    let mut new_root_link = old_root_link.clone();
-    new_root_link.id = ID(new_uuid_v4_as_b64());
-    new_root_link.creator = actor_id();
-    new_root_link.createdAt = time_since_epoch_ms_i64();
-    //new_root_link.child = id_replacements.get(&payload.rootNodeID).ok_or(anyhow!("Generation of new id for clone of root-node failed somehow."))?.to_owned();
-    new_root_link.child = get_new_id_str(&payload.rootNodeID);
+    let new_root_link = NodeLink {
+        id: ID(new_uuid_v4_as_b64()),
+        creator: actor_id(),
+        createdAt: time_since_epoch_ms_i64(),
+        //child: id_replacements.get(&payload.rootNodeID).ok_or(anyhow!("Generation of new id for clone of root-node failed somehow."))?.to_owned(),
+        child: get_new_id_str(&payload.rootNodeID),
+        ..old_root_link.clone()
+    }.with_access_policy_targets(&ctx, None, None).await?;
     log("part 1.5");
     set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 
@@ -123,43 +127,51 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
     for node_old in subtree.nodes {
         //nodes_needing_clone_history_tag.insert(node_old.id.to_string());
         nodes_still_needing_clone_history_tag.push(node_old.id.to_string());
-        let mut node = node_old.clone();
-        node.id = get_new_id(&node.id);
-        node.creator = actor_id();
-        node.createdAt = time_since_epoch_ms_i64();
-        node.c_currentRevision = get_new_id_str(&node.c_currentRevision);
+        let node = Node {
+            id: get_new_id(&node_old.id),
+            creator: actor_id(),
+            createdAt: time_since_epoch_ms_i64(),
+            c_currentRevision: get_new_id_str(&node_old.c_currentRevision),
+            ..node_old.clone()
+        };
         set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node).await?;
     }
     log("part 3");
     for rev_old in subtree.nodeRevisions {
-        let mut rev = rev_old.clone();
-        rev.id = get_new_id(&rev.id);
-        rev.creator = actor_id();
-        rev.createdAt = time_since_epoch_ms_i64();
+        let rev = NodeRevision {
+            id: get_new_id(&rev_old.id),
+            creator: actor_id(),
+            createdAt: time_since_epoch_ms_i64(),
+            node: get_new_id_str(&rev_old.node),
+            ..rev_old.clone()
+        }.with_access_policy_targets(&ctx).await?;
         /*for attachment in &rev.attachments {
             if let Some(media) = attachment.media {
             }
         }*/
-        rev.node = get_new_id_str(&rev.node);
         set_db_entry_by_id_for_struct(&ctx, "nodeRevisions".to_owned(), rev.id.to_string(), rev).await?;
     }
     log("part 4");
     for phrasing_old in subtree.nodePhrasings {
-        let mut phrasing = phrasing_old.clone();
-        phrasing.id = get_new_id(&phrasing.id);
-        phrasing.creator = actor_id();
-        phrasing.createdAt = time_since_epoch_ms_i64();
-        phrasing.node = get_new_id_str(&phrasing.node);
+        let phrasing = NodePhrasing {
+            id: get_new_id(&phrasing_old.id),
+            creator: actor_id(),
+            createdAt: time_since_epoch_ms_i64(),
+            node: get_new_id_str(&phrasing_old.node),
+            ..phrasing_old.clone()
+        }.with_access_policy_targets(&ctx).await?;
         set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
     }
     log("part 5");
     for link_old in subtree.nodeLinks {
-        let mut link = link_old.clone();
-        link.id = get_new_id(&link.id);
-        link.creator = actor_id();
-        link.createdAt = time_since_epoch_ms_i64();
-        link.parent = get_new_id_str(&link.parent);
-        link.child = get_new_id_str(&link.child);
+        let link = NodeLink {
+            id: get_new_id(&link_old.id),
+            creator: actor_id(),
+            createdAt: time_since_epoch_ms_i64(),
+            parent: get_new_id_str(&link_old.parent),
+            child: get_new_id_str(&link_old.child),
+            ..link_old.clone()
+        }.with_access_policy_targets(&ctx, None, None).await?;
         set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link).await?;
     }
     log("part 6");
@@ -194,6 +206,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             }
         }
 
+        let tag = tag.with_access_policy_targets(&ctx).await?;
         set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
     }
     log("part 6.5");
@@ -211,7 +224,8 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             mutuallyExclusiveGroup: None,
             restrictMirroringOfX: None,
             xIsExtendedByY: None,
-        };
+            c_accessPolicyTargets: vec![],
+        }.with_access_policy_targets(&ctx).await?;
         set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
         //nodes_needing_clone_history_tag.retain(|a| *a != old_node_id);
     }

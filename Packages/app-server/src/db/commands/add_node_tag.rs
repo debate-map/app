@@ -56,7 +56,8 @@ pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: AddNod
 		mutuallyExclusiveGroup: tag_.mutuallyExclusiveGroup,
 		restrictMirroringOfX: tag_.restrictMirroringOfX,
 		cloneHistory: tag_.cloneHistory,
-	};
+		c_accessPolicyTargets: vec![],
+	}.with_access_policy_targets(ctx).await?;
 
 	set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag.clone()).await?;
 

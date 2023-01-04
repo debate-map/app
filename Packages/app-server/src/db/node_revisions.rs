@@ -14,8 +14,10 @@ use rust_shared::utils::type_aliases::JSONValue;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
+use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::node_phrasings::NodePhrasing;
 use super::node_phrasings::NodePhrasing_Embedded;
+use super::nodes::get_node;
 
 pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeRevision, Error> {
     get_db_entry(ctx, "nodeRevisions", &Some(json!({
@@ -49,6 +51,19 @@ pub struct NodeRevision {
     pub note: Option<String>,
     pub displayDetails: Option<JSONValue>,
     pub attachments: Vec<Attachment>,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl NodeRevision {
+    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
+        let node = get_node(ctx, &self.node).await?;
+        Ok(Self {
+            c_accessPolicyTargets: vec![
+                AccessPolicyTarget::new(node.accessPolicy, "nodes"),
+            ],
+            ..self
+        })
+    }
 }
 impl From<Row> for NodeRevision {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

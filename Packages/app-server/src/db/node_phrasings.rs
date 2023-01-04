@@ -15,8 +15,10 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
+use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::_shared::attachments::TermAttachment;
 use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::nodes::get_node;
 
 pub async fn get_node_phrasing(ctx: &AccessorContext<'_>, id: &str) -> Result<NodePhrasing, Error> {
     get_db_entry(ctx, "nodePhrasings", &Some(json!({
@@ -71,6 +73,19 @@ pub struct NodePhrasing {
 	pub note: Option<String>,
 	pub terms: Vec<TermAttachment>,
 	pub references: Vec<String>,
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl NodePhrasing {
+    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
+        let node = get_node(ctx, &self.node).await?;
+        Ok(Self {
+            c_accessPolicyTargets: vec![
+                AccessPolicyTarget::new(node.accessPolicy, "nodes"),
+            ],
+            ..self
+        })
+    }
 }
 impl From<Row> for NodePhrasing {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

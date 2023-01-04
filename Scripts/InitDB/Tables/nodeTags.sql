@@ -8,7 +8,8 @@ CREATE TABLE app_public."nodeTags" (
     "mutuallyExclusiveGroup" jsonb,
     "restrictMirroringOfX" jsonb,
     labels jsonb,
-    "cloneHistory" jsonb
+    "cloneHistory" jsonb,
+	"c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app_public."nodeTags"
     ADD CONSTRAINT "v1_draft_nodeTags_pkey" PRIMARY KEY (id);

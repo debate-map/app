@@ -79,7 +79,7 @@ impl<'de> Deserialize<'de> for OrderKey {
 impl ScalarType for OrderKey {
     fn parse(value: Value) -> InputValueResult<Self> {
         match value {
-            Value::String(s) => Ok(OrderKey::new(&s).map_err(|e| InputValueError::custom(e))?),
+            Value::String(str_val) => Ok(OrderKey::new(&str_val).map_err(|e| InputValueError::custom(e))?),
             _ => Err(InputValueError::custom("OrderKey must be a string")),
         }
     }

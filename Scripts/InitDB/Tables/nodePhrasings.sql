@@ -10,7 +10,8 @@ CREATE TABLE app_public."nodePhrasings" (
 	note text,
 	terms jsonb[] NOT NULL,
 	"references" text[] NOT NULL,
-	phrasing_tsvector tsvector GENERATED ALWAYS AS (app_public.phrasings_to_tsv(text_base, text_question)) STORED NOT NULL
+	phrasing_tsvector tsvector GENERATED ALWAYS AS (app_public.phrasings_to_tsv(text_base, text_question)) STORED NOT NULL,
+	"c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app_public."nodePhrasings"
 	ADD CONSTRAINT "v1_draft_nodePhrasings_pkey" PRIMARY KEY (id);
