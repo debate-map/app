@@ -117,7 +117,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
         //child: id_replacements.get(&payload.rootNodeID).ok_or(anyhow!("Generation of new id for clone of root-node failed somehow."))?.to_owned(),
         child: get_new_id_str(&payload.rootNodeID),
         ..old_root_link.clone()
-    }.with_access_policy_targets(&ctx, None, None).await?;
+    };
     log("part 1.5");
     set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 
@@ -144,7 +144,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             createdAt: time_since_epoch_ms_i64(),
             node: get_new_id_str(&rev_old.node),
             ..rev_old.clone()
-        }.with_access_policy_targets(&ctx).await?;
+        };
         /*for attachment in &rev.attachments {
             if let Some(media) = attachment.media {
             }
@@ -159,7 +159,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             createdAt: time_since_epoch_ms_i64(),
             node: get_new_id_str(&phrasing_old.node),
             ..phrasing_old.clone()
-        }.with_access_policy_targets(&ctx).await?;
+        };
         set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
     }
     log("part 5");
@@ -171,7 +171,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             parent: get_new_id_str(&link_old.parent),
             child: get_new_id_str(&link_old.child),
             ..link_old.clone()
-        }.with_access_policy_targets(&ctx, None, None).await?;
+        };
         set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link).await?;
     }
     log("part 6");
@@ -206,7 +206,6 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             }
         }
 
-        let tag = tag.with_access_policy_targets(&ctx).await?;
         set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
     }
     log("part 6.5");
@@ -224,8 +223,8 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             mutuallyExclusiveGroup: None,
             restrictMirroringOfX: None,
             xIsExtendedByY: None,
-            c_accessPolicyTargets: vec![],
-        }.with_access_policy_targets(&ctx).await?;
+            c_accessPolicyTargets: vec![], // auto-set by db
+        };
         set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
         //nodes_needing_clone_history_tag.retain(|a| *a != old_node_id);
     }

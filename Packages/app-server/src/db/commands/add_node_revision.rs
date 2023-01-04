@@ -62,16 +62,16 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 		id: ID(extras.id_override.unwrap_or(new_uuid_v4_as_b64())),
 		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
-		phrasing_tsvector: "<tbd>".to_owned(), // set by database
-		replacedBy: None,
+		phrasing_tsvector: "<tbd>".to_owned(), // auto-set by db
+		replacedBy: None, // auto-set by db
 		// pass-through
 		node: revision_.node.ok_or(err_should_be_populated("revision.node"))?,
 		phrasing: revision_.phrasing,
 		note: revision_.note,
 		displayDetails: revision_.displayDetails,
 		attachments: revision_.attachments,
-		c_accessPolicyTargets: vec![],
-	}.with_access_policy_targets(ctx).await?;
+		c_accessPolicyTargets: vec![], // auto-set by db
+	};
 	set_db_entry_by_id_for_struct(ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
 
 	// also update node's "c_currentRevision" field
@@ -96,8 +96,8 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 			node: revision.node.clone(),
 			time: time_since_epoch_ms_i64(),
 			r#type: ChangeType::edit,
-			c_accessPolicyTargets: vec![],
-		}.with_access_policy_targets(ctx).await?;
+			c_accessPolicyTargets: vec![], // auto-set by db
+		};
 		set_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 	}
 

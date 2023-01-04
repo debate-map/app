@@ -37,19 +37,6 @@ pub struct MapNodeEdit {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl MapNodeEdit {
-    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
-        let map = get_map(ctx, &self.map).await?;
-        let node = get_node(ctx, &self.node).await?;
-        Ok(Self {
-            c_accessPolicyTargets: vec![
-                AccessPolicyTarget::new(map.accessPolicy.clone(), "maps"),
-                AccessPolicyTarget::new(node.accessPolicy.clone(), "nodes"),
-            ],
-            ..self
-        })
-    }
-}
 impl From<Row> for MapNodeEdit {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

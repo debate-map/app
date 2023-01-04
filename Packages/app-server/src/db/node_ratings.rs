@@ -136,18 +136,6 @@ pub struct NodeRating {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl NodeRating {
-    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
-        let node = get_node(ctx, &self.node).await?;
-        Ok(Self {
-            c_accessPolicyTargets: vec![
-                AccessPolicyTarget::new(self.accessPolicy.o(), "nodeRatings"),
-                AccessPolicyTarget::new(node.accessPolicy, "nodes"),
-            ],
-            ..self
-        })
-    }
-}
 impl From<Row> for NodeRating {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

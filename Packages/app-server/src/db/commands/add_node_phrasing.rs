@@ -60,8 +60,8 @@ pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: A
 		note: phrasing_.note,
 		terms: phrasing_.terms,
 		references: phrasing_.references,
-		c_accessPolicyTargets: vec![],
-	}.with_access_policy_targets(&ctx).await?;
+		c_accessPolicyTargets: vec![], // auto-set by db
+	};
 
 	set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing.clone()).await?;
 

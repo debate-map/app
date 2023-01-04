@@ -102,19 +102,6 @@ pub struct NodeLink {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl NodeLink {
-    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>, parent: Option<&Node>, child: Option<&Node>) -> Result<Self, Error> {
-        let parent_policy = parent.map(|a| a.accessPolicy.o()).unwrap_or(get_node(ctx, &self.parent).await?.accessPolicy.o());
-        let child_policy = child.map(|a| a.accessPolicy.o()).unwrap_or(get_node(ctx, &self.child).await?.accessPolicy.o());
-        Ok(Self {
-            c_accessPolicyTargets: vec![
-                AccessPolicyTarget::new(parent_policy, "nodes"),
-                AccessPolicyTarget::new(child_policy, "nodes"),
-            ],
-            ..self
-        })
-    }
-}
 impl From<Row> for NodeLink {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

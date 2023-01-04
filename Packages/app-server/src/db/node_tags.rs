@@ -47,19 +47,6 @@ pub struct NodeTag {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl NodeTag {
-    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
-        let mut targets = vec![];
-        for node_id in &self.nodes {
-            let node = get_node(ctx, &node_id).await?;
-            targets.push(AccessPolicyTarget::new(node.accessPolicy, "nodes"));
-        }
-        Ok(Self {
-            c_accessPolicyTargets: targets,
-            ..self
-        })
-    }
-}
 impl From<Row> for NodeTag {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

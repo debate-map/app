@@ -71,8 +71,8 @@ pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, input: AddNo
 		seriesAnchor: link_.seriesAnchor,
 		seriesEnd: link_.seriesEnd,
 		polarity: link_.polarity,
-		c_accessPolicyTargets: vec![],
-	}.with_access_policy_targets(&ctx, Some(&parent), Some(&child)).await?;
+		c_accessPolicyTargets: vec![], // auto-set by db
+	};
 
 	// validations
 	{

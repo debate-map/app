@@ -64,8 +64,8 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: Set
 		node: rating_.node,
 		r#type: rating_.r#type,
 		value: rating_.value,
-		c_accessPolicyTargets: vec![],
-	}.with_access_policy_targets(ctx).await?;
+		c_accessPolicyTargets: vec![], // auto-set by db
+	};
 
 	set_db_entry_by_id_for_struct(&ctx, "nodeRatings".o(), rating.id.to_string(), rating.clone()).await?;
 

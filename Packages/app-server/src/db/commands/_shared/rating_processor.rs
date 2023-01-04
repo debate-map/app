@@ -69,8 +69,8 @@ pub async fn get_argument_impact_pseudo_rating(ctx: &AccessorContext<'_>, argume
 		creator: user_id.to_owned(),
 		createdAt: time_since_epoch_ms_i64(),
 		value: float_to_percent(result),
-        c_accessPolicyTargets: vec![],
-	}.with_access_policy_targets(&ctx).await?)
+        c_accessPolicyTargets: vec![], // auto-set by db
+	})
 }
 
 fn float_to_percent(f: f64) -> f64 {

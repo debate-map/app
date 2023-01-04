@@ -76,17 +76,6 @@ pub struct NodePhrasing {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
-impl NodePhrasing {
-    pub async fn with_access_policy_targets(self, ctx: &AccessorContext<'_>) -> Result<Self, Error> {
-        let node = get_node(ctx, &self.node).await?;
-        Ok(Self {
-            c_accessPolicyTargets: vec![
-                AccessPolicyTarget::new(node.accessPolicy, "nodes"),
-            ],
-            ..self
-        })
-    }
-}
 impl From<Row> for NodePhrasing {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
