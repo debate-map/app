@@ -11,9 +11,6 @@ do $$ begin
 	);
 end $$;
 
-DROP TRIGGER IF EXISTS yourtrigger_name on "yourschemaname"."yourtablename";
-alter table app_public."terms"
-
 alter table app_public."medias" enable row level security;
 do $$ begin
 	drop policy if exists "medias_rls" on app_public."medias";

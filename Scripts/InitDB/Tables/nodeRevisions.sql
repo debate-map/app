@@ -31,6 +31,6 @@ BEGIN
         UPDATE app_public."nodeRevisions" SET "replacedBy" = NEW.id WHERE id = rev_id;
     END IF;
     RETURN NEW;
-END$$;
-
+END $$;
+DROP TRIGGER IF EXISTS after_insert_node_revision on app_public."nodeRevisions";
 CREATE TRIGGER after_insert_node_revision AFTER INSERT ON app_public."nodeRevisions" FOR EACH ROW EXECUTE FUNCTION app_public.after_insert_node_revision();

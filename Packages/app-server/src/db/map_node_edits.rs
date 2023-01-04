@@ -43,7 +43,7 @@ impl MapNodeEdit {
         let node = get_node(ctx, &self.node).await?;
         Ok(Self {
             c_accessPolicyTargets: vec![
-                AccessPolicyTarget::new(map.accessPolicy.clone(), "nodes"),
+                AccessPolicyTarget::new(map.accessPolicy.clone(), "maps"),
                 AccessPolicyTarget::new(node.accessPolicy.clone(), "nodes"),
             ],
             ..self

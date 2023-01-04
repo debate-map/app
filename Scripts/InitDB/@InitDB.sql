@@ -37,5 +37,6 @@ begin;
 
 	\ir FKConstraints.sql
 	\ir RLSPolicies.sql
+	\ir AccessPolicyTriggers.sql
 	\ir General_End.sql
 commit;
