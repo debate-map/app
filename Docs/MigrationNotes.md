@@ -5,7 +5,13 @@
 * The "GraphQL response" instructions only need to be followed for those with a custom client or data-access scripts.
 	* When exploring the new graphql api/data-structures, one can augment the written instructions with exploration of the new api, using the `app-server.debatemap.app/gql-playground` endpoint. (temporarily located at `app-server.debates.app/gql-playground`)
 
-## Main series	
+## Main series
+
+### Pushed on 2023-01-03
+
+* 1\) Changed the "is user an admin" check in RLS policies to just call into the database, rather than relying on an app-server-supplied `current_user_admin` config-param. (note: this simplifies app-server code, but we'll probably revert to something similar eventually for perf reasons)
+	* DB response:
+		* 1\) Re-apply all of the sql code in `General_End.sql`, `RLSPolicies.sql`, and `RLSHelpers.sql`.
 
 ### Pushed on 2022-12-22
 

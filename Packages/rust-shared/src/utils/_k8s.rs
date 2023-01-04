@@ -144,6 +144,7 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     let attached = pods.exec(pod_name, command_name_and_args, &AttachParams::default().tty(false).stderr(true)).await?;
     //Api::attach(&self, name, ap).await.unwrap().*/
 
+    // if desired, the websocket connection code is probably not that hard to extract; for ref: https://github.com/kubernetes-client/python/issues/409#issuecomment-1241425302
     let mut response = client.connect(req).await?;
     let mut res_as_str = String::new();
     loop {

@@ -26,7 +26,7 @@ use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 /// Rather than baking the permissions and such into the jwt, we store only the id and email (which are unchanging fields).
 /// We later use that minimal info to retrieve the full user-data from the database. (this way it's up-to-date if the user's username, permissions, etc. change)
 #[derive(Serialize, Deserialize)]
-pub struct UserInfoForJWT {
+pub struct UserJWTData {
     pub id: String,
     pub email: String,
 }

@@ -46,7 +46,7 @@ use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender};
 
-use rust_shared::utils::auth::jwt_utils_base::{UserInfoForJWT, get_or_create_jwt_key_hs256};
+use rust_shared::utils::auth::jwt_utils_base::{UserJWTData, get_or_create_jwt_key_hs256};
 
 use super::sign_in_::jwt_utils::try_get_referrer_from_gql_ctx;
 
@@ -170,7 +170,7 @@ impl SubscriptionShard_SignIn {
                     };
 
                     let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-                    let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await.unwrap();
+                    let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, false).await.unwrap();
                     let user_data = store_user_data_for_google_sign_in(fake_user_as_g_profile, &ctx, true).await.map_err(to_sub_err)?;
                     info!("Committing transaction...");
                     ctx.tx.commit().await.map_err(to_sub_err)?;
@@ -230,7 +230,7 @@ impl SubscriptionShard_SignIn {
                                             info!("Got response user-info:{:?}", user_info);
         
                                             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-                                            let ctx = AccessorContext::new_write(&mut anchor, gql_ctx).await.unwrap();
+                                            let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, false).await.unwrap();
                                             let user_data = store_user_data_for_google_sign_in(user_info, &ctx, false).await.map_err(to_sub_err)?;
                                             info!("Committing transaction...");
                                             ctx.tx.commit().await.map_err(to_sub_err)?;

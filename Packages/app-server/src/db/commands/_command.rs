@@ -250,7 +250,7 @@ pub(crate) use command_boilerplate_post;*/
 macro_rules! command_boilerplate {
     ($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
-		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, $only_validate).await?;
+		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
 		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
 
 		let result = $command_impl_func(&ctx, &actor, $input, Default::default()).await?;

@@ -65,7 +65,7 @@ impl QueryShard_General_Search {
         alt_phrasing_rank_factor: Option<f64>, quote_rank_factor: Option<f64>,
     ) -> Result<Vec<SearchResult>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
         let search_limit_i32 = search_limit as i32;

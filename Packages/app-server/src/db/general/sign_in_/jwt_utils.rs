@@ -19,7 +19,7 @@ use rust_shared::axum::routing::get;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
-use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserInfoForJWT};
+use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserJWTData};
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
 use rust_shared::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
@@ -46,19 +46,52 @@ use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender};
 
+pub fn get_err_auth_data_required() -> Error {
+    anyhow!(indoc!{"
+        This endpoint requires auth-data to be supplied!
+        For website browsing, this means signing-in using the panel at the top-right.
+        For direct requests to the graphql api, this means obtaining auth-data manually (see the \"signInStart\" endpoint at \"http://debates.app/gql-playground\"), and attaching it to your commands/requests.
+        Specifically, your http requests should have an \"authorization\" header, with contents matching: \"Bearer <jwt string here>\"
+    "})
+}
+
+// for user-jwt-data + user-info retrieved from database
+// ==========
+
 pub async fn get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<User, Error> {
     let user_info = try_get_user_info_from_gql_ctx(gql_ctx, ctx).await?;
     match user_info {
-        None => Err(anyhow!(indoc!{"
-            This endpoint requires auth-data to be supplied!
-            For website browsing, this means signing-in using the panel at the top-right.
-            For direct requests to the graphql api, this means obtaining auth-data manually (see the \"signInStart\" endpoint at \"http://debates.app/gql-playground\"), and attaching it to your commands/requests.
-            Specifically, your http requests should have an \"authorization\" header, with contents matching: \"Bearer <jwt string here>\"
-        "})),
+        None => Err(get_err_auth_data_required()),
         Some(user_info) => Ok(user_info),
     }
 }
 pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>, ctx: &AccessorContext<'_>) -> Result<Option<User>, Error> {
+    match try_get_user_jwt_info_from_gql_ctx(gql_ctx).await? {
+        None => Ok(None),
+        Some(jwt_data) => {
+            let user_info = resolve_jwt_to_user_info(ctx, &jwt_data).await?;
+            Ok(Some(user_info))
+        }
+    }
+}
+pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt_data: &UserJWTData) -> Result<User, Error> {
+    /*let user_hidden = get_user_hidden(&ctx, jwt_data.id.as_str()).await?;
+    let user = get_user(&ctx, &user_hidden.id).await?;*/
+    let user = get_user(&ctx, jwt_data.id.as_str()).await?;
+    Ok(user)
+}
+
+// for user-jwt-data only (ie. static data stored within jwt itself, without need for new db queries)
+// ==========
+
+pub async fn get_user_jwt_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<UserJWTData, Error> {
+    let user_jwt_info = try_get_user_jwt_info_from_gql_ctx(gql_ctx).await?;
+    match user_jwt_info {
+        None => Err(get_err_auth_data_required()),
+        Some(user_info) => Ok(user_info),
+    }
+}
+pub async fn try_get_user_jwt_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<Option<UserJWTData>, Error> {
     let jwt = match gql_ctx.data::<GQLDataFromHTTPRequest>() {
         Ok(val) => match &val.jwt {
             Some(jwt) => jwt,
@@ -67,17 +100,10 @@ pub async fn try_get_user_info_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Cont
         // if no data-entry found in gql-context, return None for "no user data"
         Err(_err) => return Ok(None),
     };
-    let user_info = resolve_jwt_to_user_info(ctx, &jwt).await?;
+    let user_info = resolve_and_verify_jwt_string(&jwt).await?;
     Ok(Some(user_info))
 }
-pub fn try_get_referrer_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Option<String> {
-    match gql_ctx.data::<GQLDataFromHTTPRequest>() {
-        Ok(val) => val.referrer.clone(),
-        // if no data-entry found in gql-context, return None for "no user data"
-        Err(_err) => None,
-    }
-}
-pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) -> Result<User, Error> {
+pub async fn resolve_and_verify_jwt_string<'a>(jwt_string: &str) -> Result<UserJWTData, Error> {
     let key = get_or_create_jwt_key_hs256().await?;
 
     let verify_opts = VerificationOptions {
@@ -87,11 +113,18 @@ pub async fn resolve_jwt_to_user_info<'a>(ctx: &AccessorContext<'_>, jwt: &str) 
         //allowed_issuers: Some(HashSet::from_strings(&["example app"])), // reject tokens if they don't include an issuer from that set
         .. VerificationOptions::default()
     };
-    let claims = key.verify_token::<UserInfoForJWT>(jwt, Some(verify_opts))?;
-    let user_info: UserInfoForJWT = claims.custom;
+    let claims = key.verify_token::<UserJWTData>(jwt_string, Some(verify_opts))?;
+    let jwt_data: UserJWTData = claims.custom;
+    Ok(jwt_data)
+}
 
-    let user_hidden = get_user_hidden(&ctx, user_info.id.as_str()).await?;
-    let user = get_user(&ctx, &user_hidden.id).await?;
-    
-    Ok(user)
+// other gql-context data
+// ==========
+
+pub fn try_get_referrer_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Option<String> {
+    match gql_ctx.data::<GQLDataFromHTTPRequest>() {
+        Ok(val) => val.referrer.clone(),
+        // if no data-entry found in gql-context, return None for "no user data"
+        Err(_err) => None,
+    }
 }

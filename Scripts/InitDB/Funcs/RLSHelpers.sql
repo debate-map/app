@@ -1,7 +1,17 @@
+-- probably temp; to improve perf, should probably replace with an "app.current_user_admin" config-param, set by the server (which keeps a live-query of list of admin user-ids) 
+create or replace function IsUserAdmin(user_id varchar) returns boolean as $$ begin 
+	return exists(
+		select 1 from app_public."users" where id = user_id and (
+			"permissionGroups" -> 'admin' = 'true'
+		)
+	);
+end $$ language plpgsql;
+
 create or replace function IsCurrentUserCreatorOrAdminOrPolicyAllowsAccess(entry_creator varchar, policyID varchar, policyField varchar) returns boolean as $$ begin 
 	return (
 		current_setting('app.current_user_id') = entry_creator
-		or current_setting('app.current_user_admin') = 'true'
+		--or current_setting('app.current_user_admin') = 'true'
+		or IsUserAdmin(current_setting('app.current_user_id'))
 		/*or (
 			policyFields[0] -> policyField -> 'access' = 'true'
 			or policyFields[1] -> current_setting('app.current_user_id') -> policyField -> 'access' = 'true'

@@ -6,7 +6,7 @@ use rust_shared::hyper::Method;
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::jwt_simple::prelude::{Claims, MACLike};
 use rust_shared::serde_json::json;
-use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserInfoForJWT};
+use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserJWTData};
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64_id, new_uuid_v4_as_b64};
 use rust_shared::utils::general::{f64_to_str_rounded, f64_to_percent_str};
 use rust_shared::utils::general_::extensions::ToOwnedV;
@@ -259,7 +259,7 @@ async fn execute_test_step<'a>(flattened_index: i64, step: TestStep, err_sender:
 
 async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONValue, Error> {
     // maybe temp; on every request, create a new JWT, authenticating this request as the system-user (less complicated, albeit not terribly elegant)
-    let user_data = UserInfoForJWT { id: SYSTEM_USER_ID.o(), email: "debatemap@gmail.com".o() };
+    let user_data = UserJWTData { id: SYSTEM_USER_ID.o(), email: "debatemap@gmail.com".o() };
     let jwt_duration = 60 * 60 * 24 * 7; // = 604800 seconds = 1 week
     let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
     let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(jwt_duration.try_into().map_err(to_sub_err)?));

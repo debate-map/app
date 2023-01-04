@@ -4,7 +4,10 @@ use rust_shared::serde::Serialize;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
 use rust_shared::anyhow::{anyhow, Error};
 use deadpool_postgres::{Transaction, Pool};
+use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
+use rust_shared::utils::general_::extensions::ToOwnedV;
 
+use crate::db::general::sign_in_::jwt_utils::get_user_jwt_info_from_gql_ctx;
 use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::type_aliases::DBPool;
 use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
@@ -34,14 +37,23 @@ impl<'a> AccessorContext<'a> {
     }
 
     // low-level
-    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<AccessorContext<'a>, Error> {
+    pub async fn new_read_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
         let tx = start_read_transaction(anchor, db_pool).await?;
+
+        // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
+        if !bypass_rls {
+            tx.execute("SET ROLE rls_obeyer", &[]).await?;
+            tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
+            /*let user_is_admin = TODO;
+            tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
+        }
+        
         Ok(Self { tx, only_validate: false })
     }
-    pub async fn new_write_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<AccessorContext<'a>, Error> {
-        Self::new_write_advanced_base(anchor, db_pool, Some(false)).await
+    pub async fn new_write_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
+        Self::new_write_advanced_base(anchor, db_pool, user, bypass_rls, Some(false)).await
     }
-    pub async fn new_write_advanced_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
+    pub async fn new_write_advanced_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
         let tx = start_write_transaction(anchor, db_pool).await?;
         let only_validate = only_validate.unwrap_or(false);
 
@@ -50,18 +62,24 @@ impl<'a> AccessorContext<'a> {
         // (Deferring always is not much of a negative anyway; instant constraint-checking doesn't improve debugging much in this context, since fk-violations are generally easy to identify once triggered.)
 		defer_constraints(&tx).await?;
 
+        // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
+        if !bypass_rls {
+            tx.execute("SET ROLE rls_obeyer", &[]).await?;
+            tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
+        }
+
         Ok(Self { tx, only_validate })
     }
 
     // high-level
-    pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_read_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool).await?)
+    pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
+        Ok(Self::new_read_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, Some(get_user_jwt_info_from_gql_ctx(gql_ctx).await?), bypass_rls).await?)
     }
-    pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_write_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool).await?)
+    pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
+        Ok(Self::new_write_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, Some(get_user_jwt_info_from_gql_ctx(gql_ctx).await?), bypass_rls).await?)
     }
-    pub async fn new_write_advanced(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_write_advanced_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, only_validate).await?)
+    pub async fn new_write_advanced(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, bypass_rls: bool, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
+        Ok(Self::new_write_advanced_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, Some(get_user_jwt_info_from_gql_ctx(gql_ctx).await?), bypass_rls, only_validate).await?)
     }
 }
 

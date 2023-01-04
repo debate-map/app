@@ -89,7 +89,8 @@ alter table app_public."commandRuns" enable row level security;
 do $$ begin
 	drop policy if exists "commandRuns_rls" on app_public."commandRuns";
 	create policy "commandRuns_rls" on app_public."commandRuns" as permissive for all using (
-		current_setting('app.current_user_admin') = 'true'
+		--current_setting('app.current_user_admin') = 'true'
+		IsUserAdmin(current_setting('app.current_user_id'))
 		or (
 			-- public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
 			public_base = true

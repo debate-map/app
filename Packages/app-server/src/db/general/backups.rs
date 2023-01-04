@@ -26,7 +26,7 @@ wrap_slow_macros!{
 	async fn get_db_dump(&self, gql_ctx: &async_graphql::Context<'_>, /*input: GetDBDumpInput*/) -> Result<GetDBDumpResult, GQLError> {
         // query boilerplate (similar to start of output of `command_boilerplate!`, but no such macro exists for queries atm)
 		let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-		let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+		let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 		let actor = get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
 
 		let pgdump_sql = try_get_db_dump(&actor).await?;

@@ -112,7 +112,7 @@ pub struct QueryShard_General_Subtree;
 impl QueryShard_General_Subtree {
     async fn subtree(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 
         let subtree = get_node_subtree(&ctx, root_node_id, max_depth.unwrap_or(10000)).await?;
         Ok(subtree)
@@ -121,7 +121,7 @@ impl QueryShard_General_Subtree {
     // temp
     async fn subtree2(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Subtree, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 
         let subtree = get_node_subtree2(&ctx, root_node_id, max_depth.unwrap_or(10000)).await?;
         Ok(subtree)
@@ -130,7 +130,7 @@ impl QueryShard_General_Subtree {
     // lower-level functions
     async fn descendants(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
 
         let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from descendants($1, $2)"#, params(&[&root_node_id, &max_depth_i32])).await?.try_collect().await?;
@@ -139,7 +139,7 @@ impl QueryShard_General_Subtree {
     }
     async fn ancestors(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Ancestor>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
 
         let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from ancestors($1, $2)"#, params(&[&root_node_id, &max_depth_i32])).await?.try_collect().await?;
@@ -148,7 +148,7 @@ impl QueryShard_General_Subtree {
     }
     async fn shortestPath(&self, gql_ctx: &async_graphql::Context<'_>, start_node: String, end_node: String) -> Result<Vec<PathNodeFromDB>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 
         let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from shortest_path($1, $2)"#, params(&[&start_node, &end_node])).await?.try_collect().await?;
         let path_nodes: Vec<PathNodeFromDB> = rows.into_iter().map(|a| a.into()).collect();
@@ -157,7 +157,7 @@ impl QueryShard_General_Subtree {
 
     async fn descendants2(&self, gql_ctx: &async_graphql::Context<'_>, root_node_id: String, max_depth: Option<usize>) -> Result<Vec<Descendant>, GQLError> {
         let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await?;
+        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
         let max_depth_i32 = max_depth.unwrap_or(10000) as i32;
 
         let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from descendants2($1, $2)"#, params(&[&root_node_id, &max_depth_i32])).await?.try_collect().await?;
