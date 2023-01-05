@@ -9,7 +9,7 @@ import {apolloClient, GetAppServerURL} from "Utils/LibIntegrations/Apollo";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
 import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
-import {RefreshUserInfoFromStoredJWT} from "Utils/AutoRuns/UserInfoCheck";
+import {OnUserJWTChanged} from "Utils/AutoRuns/UserInfoCheck";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -48,7 +48,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 110}} onClick={()=>{
 						localStorage.removeItem("debate-map-user-jwt");
-						RefreshUserInfoFromStoredJWT();
+						OnUserJWTChanged();
 					}} />
 				</Row>
 			</Column>
@@ -151,7 +151,7 @@ async function DoSignInFlow(provider: "google" | "dev", username?: string) {
 
 	// store jwt in local-storage
 	localStorage.setItem("debate-map-user-jwt", resultJWT);
-	RefreshUserInfoFromStoredJWT();
+	OnUserJWTChanged();
 }
 
 function OpenSignInPopup(url: string) {

@@ -19,7 +19,7 @@ use axum::http::Method;
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router};
+use axum::{extract, Router};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::Itertools;
@@ -189,8 +189,9 @@ impl LQGroup {
 
         mtx.section("4:get or create watcher, for the given stream");
         //let watcher = entry.get_or_create_watcher(stream_id);
+        let entries_count = result_entries.len();
         let (watcher, _watcher_is_new, new_watcher_count) = lqi.get_or_create_watcher(stream_id, result_entries).await;
-        let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?}", new_watcher_count, lq_key.table_name, lq_key.filter);
+        let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?} @entries_count:{}", new_watcher_count, lq_key.table_name, lq_key.filter, entries_count);
         debug!("LQ-watcher started. {}", watcher_info_str);
 
         (result_entries_as_type, watcher.clone())

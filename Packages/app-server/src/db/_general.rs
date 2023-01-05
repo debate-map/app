@@ -1,10 +1,11 @@
 use rust_shared::anyhow::{Context, Error};
-use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
+use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::db_constants::SYSTEM_USER_ID;
-use rust_shared::{async_graphql, serde_json, GQLError};
+use rust_shared::utils::general_::extensions::ToOwnedV;
+use rust_shared::{async_graphql, serde_json, GQLError, SubError, to_sub_err};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
@@ -13,10 +14,12 @@ use tracing::{info, error};
 use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
+use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 use crate::utils::general::general::body_to_str;
 
 use super::commands::add_term::{AddTermResult};
 use super::commands::refresh_lq_data::refresh_lq_data;
+use super::general::sign_in_::jwt_utils::{get_user_jwt_data_from_gql_ctx, resolve_and_verify_jwt_string};
 
 //use super::commands::transfer_nodes::transfer_nodes;
 
@@ -120,6 +123,61 @@ impl SubscriptionShard_General {
             userID,
         } })
     }*/
+
+    async fn signInAttach<'a>(&self, ctx: &'a async_graphql::Context<'a>, input: SignInAttachInput) -> impl Stream<Item = Result<SignInAttachResult, SubError>> + 'a {
+        let jwt_storage_arc = {
+            let request_storage = ctx.data::<GQLRequestStorage>().unwrap();
+            let jwt_storage_arc = &request_storage.jwt;
+            jwt_storage_arc.clone()
+        };
+        
+        let SignInAttachInput { jwt } = input;
+
+        let base_stream = async_stream::stream! {
+            //let jwt_data = get_user_jwt_data_from_gql_ctx(ctx).await.map_err(to_sub_err)?;
+            let jwt_data = if let Some(jwt) = jwt {
+                Some(resolve_and_verify_jwt_string(&jwt).await.map_err(to_sub_err)?)
+            } else { None };
+            
+            // put in block, to ensure that lock is released quickly (not sure if block is necessary to achieve this)
+            {
+                let mut jwt_storage = jwt_storage_arc.write().await;
+                *jwt_storage = jwt_data;
+            }
+            yield Ok(SignInAttachResult { success: true });
+        };
+        base_stream
+    }
+
+    // meant only for debugging, so hide from gql api introspection
+    #[graphql(visible = false)]
+    async fn checkUser<'a>(&self, ctx: &'a async_graphql::Context<'a>) -> impl Stream<Item = Result<CheckUserResult, SubError>> + 'a {
+        let base_stream = async_stream::stream! {
+            let jwt_data = get_user_jwt_data_from_gql_ctx(ctx).await.map_err(to_sub_err)?;
+            yield Ok(CheckUserResult { userID: jwt_data.id });
+        };
+        base_stream
+    }
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct SignInAttachInput {
+    // this is settable to null/none, since caller may have cases where it wants to "sign out", yet keep the same websocket connection open
+	pub jwt: Option<String>,
+}
+
+/*#[derive(SimpleObject, Debug)]
+pub struct DeleteArgumentResult {
+	#[graphql(name = "_useTypenameFieldInstead")] __: String,
+}*/
+#[derive(SimpleObject, Debug)]
+struct SignInAttachResult {
+    success: bool,
+}
+
+#[derive(SimpleObject, Debug)]
+struct CheckUserResult {
+    userID: String,
 }
 
 }

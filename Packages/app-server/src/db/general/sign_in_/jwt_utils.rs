@@ -13,7 +13,7 @@ use rust_shared::anyhow::{Context, anyhow, Error};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, TryStreamExt};
 use rust_shared::axum::response::IntoResponse;
-use rust_shared::axum::{Router, AddExtensionLayer, response};
+use rust_shared::axum::{Router, response};
 use rust_shared::axum::extract::{Extension, Path};
 use rust_shared::axum::routing::get;
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -33,6 +33,7 @@ use tracing::{info, error, warn};
 use rust_shared::jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
 use crate::db::_general::GenericMutation_Result;
+use crate::db::general::sign_in::get_err_auth_data_required;
 use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
 use crate::db::commands::_command::set_db_entry_by_id_for_struct;
@@ -42,18 +43,10 @@ use crate::db::users::{get_user, User, PermissionGroups};
 use crate::gql::GQLDataFromHTTPRequest;
 use crate::store::storage::{AppStateArc, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
+use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender};
-
-pub fn get_err_auth_data_required() -> Error {
-    anyhow!(indoc!{"
-        This endpoint requires auth-data to be supplied!
-        For website browsing, this means signing-in using the panel at the top-right.
-        For direct requests to the graphql api, this means obtaining auth-data manually (see the \"signInStart\" endpoint at \"http://debates.app/gql-playground\"), and attaching it to your commands/requests.
-        Specifically, your http requests should have an \"authorization\" header, with contents matching: \"Bearer <jwt string here>\"
-    "})
-}
 
 // for user-jwt-data + user-info retrieved from database
 // ==========
@@ -92,16 +85,19 @@ pub async fn get_user_jwt_data_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Cont
     }
 }
 pub async fn try_get_user_jwt_data_from_gql_ctx<'a>(gql_ctx: &'a async_graphql::Context<'a>) -> Result<Option<UserJWTData>, Error> {
-    let jwt = match gql_ctx.data::<GQLDataFromHTTPRequest>() {
-        Ok(val) => match &val.jwt {
-            Some(jwt) => jwt,
-            None => return Ok(None),
-        },
-        // if no data-entry found in gql-context, return None for "no user data"
-        Err(_err) => return Ok(None),
-    };
-    let jwt_data = resolve_and_verify_jwt_string(&jwt).await?;
-    Ok(Some(jwt_data))
+    // this branch is used for GET/POST requests (ie. for queries and mutations; it's populated in `have_own_graphql_handle_request()`)
+    if let Ok(data) = gql_ctx.data::<GQLDataFromHTTPRequest>() && let Some(jwt) = &data.jwt {
+        let jwt_data = resolve_and_verify_jwt_string(&jwt).await?;
+        Ok(Some(jwt_data))
+    }
+    // this branch is used for websocket requests (ie. for subscriptions); it's inserted in `graphql_websocket_handler()` and populated in `signInAttach()`
+    else if let Ok(storage) = gql_ctx.data::<GQLRequestStorage>() && let Some(jwt_data) = storage.jwt.read().await.clone() {
+        Ok(Some(jwt_data))
+    }
+    // if no data-entry found in gql-context, return None for "no user data"
+    else {
+        Ok(None)
+    }
 }
 pub async fn resolve_and_verify_jwt_string<'a>(jwt_string: &str) -> Result<UserJWTData, Error> {
     let key = get_or_create_jwt_key_hs256().await?;

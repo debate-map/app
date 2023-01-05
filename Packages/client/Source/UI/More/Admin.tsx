@@ -5,8 +5,8 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {PageContainer, Observer, RunInAction_Set, Link} from "web-vcore";
 import {HasAdminPermissions, MeID, GraphDBShape, GetServerURL} from "dm_common";
-import {gql} from "web-vcore/nm/@apollo/client";
-import {GetUserInfoFromStoredJWT} from "Utils/AutoRuns/UserInfoCheck.js";
+import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
+import {GetUserInfoFromStoredJWT, GetUserInfoJWTString} from "Utils/AutoRuns/UserInfoCheck.js";
 import {store} from "../../Store/index.js";
 import {apolloClient, GetAppServerURL, GetMonitorURL} from "../../Utils/LibIntegrations/Apollo.js";
 
@@ -49,7 +49,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {}) {
 						});
 					}}/>*/}
 					<Button text={`Download database backup`} onClick={async()=>{
-						const jwtToken = localStorage.getItem("debate-map-user-jwt");
+						const jwtToken = GetUserInfoJWTString();
 						const graphqlEndpoint = GetAppServerURL("/graphql");
 						const pgdump_sql_response = await fetch(graphqlEndpoint, {
 							method: "POST",
@@ -86,7 +86,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {}) {
 					<TextArea autoSize={true} value={store.main.more.graphqlTestQuery} onChange={val=>RunInAction_Set(this, ()=>store.main.more.graphqlTestQuery = val)}/>
 				</Row>
 				<Row mt={5}>
-					<Button text="Execute" onClick={async()=>{
+					<Button text="Execute as query" onClick={async()=>{
 						const result = await apolloClient.query({
 							query: gql(store.main.more.graphqlTestQuery),
 							variables: {},
@@ -94,6 +94,20 @@ export class AdminUI extends BaseComponentPlus({} as {}, {}) {
 						console.log("GraphQL result:", result);
 						const resultData = result.data;
 						alert(`GraphQL result data: ${JSON.stringify(resultData)}`);
+					}}/>
+					<Button ml={10} text="Execute as subscription" onClick={async()=>{
+						const fetchResult_subscription = apolloClient.subscribe({
+							query: gql(store.main.more.graphqlTestQuery),
+							variables: {},
+						});
+						const fetchResult = await new Promise<FetchResult<any>>(resolve=>{
+							const subscription = fetchResult_subscription.subscribe(data=>{
+								subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+								resolve(data);
+							});
+						});
+						console.log(`GraphQL subscription, first result:`, fetchResult);
+						alert(`GraphQL subscription, first result: ${JSON.stringify(fetchResult)}`);
 					}}/>
 				</Row>
 			</PageContainer>

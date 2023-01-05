@@ -1,5 +1,5 @@
 use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
-use rust_shared::{tokio_postgres, bytes::{Bytes, self}, tokio, utils::type_aliases::JSONValue, serde_json};
+use rust_shared::{tokio_postgres, bytes::{Bytes, self}, tokio, utils::type_aliases::JSONValue, serde_json, indoc::formatdoc};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, PoolConfig};
 use rust_shared::{futures, axum, tower, tower_http};
 use futures::{future, StreamExt, Sink, ready};
@@ -72,8 +72,13 @@ async fn create_client_advanced(for_replication: bool) -> (Client, Connection<So
 pub fn create_db_pool() -> Pool {
     let pg_cfg = get_tokio_postgres_config();
     let mgr_cfg = ManagerConfig {
-        recycling_method: RecyclingMethod::Fast
-        //recycling_method: RecyclingMethod::Verified
+        recycling_method: RecyclingMethod::Fast,
+        // when using "SET ROLE rls_obeyer", this was needed; it's not needed anymore, now that we use "SET LOCAL ROLE rls_obeyer" (since that restricts the change to just the current transaction)
+        /*recycling_method: RecyclingMethod::Custom(formatdoc! {r#"
+            SELECT 1
+        "#}),*/
+        //recycling_method: RecyclingMethod::Verified,
+        //recycling_method: RecyclingMethod::Clean,
     };
     let mgr = Manager::from_config(pg_cfg, NoTls, mgr_cfg);
     //let pool_size = 1;

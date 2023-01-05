@@ -14,7 +14,7 @@ use rust_shared::anyhow::{Context, anyhow, Error};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject};
 use futures_util::{Stream, TryStreamExt};
 use rust_shared::axum::response::IntoResponse;
-use rust_shared::axum::{Router, AddExtensionLayer, response};
+use rust_shared::axum::{Router, response};
 use rust_shared::axum::extract::{Extension, Path};
 use rust_shared::axum::routing::get;
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -72,6 +72,18 @@ pub async fn extend_router(app: Router) -> Router {
     result
 }
 
+// Why is this placed here? So that it's nearby the other sign-in-related explanation-messages. (ie. in the `SignInStartResult.instructions` and `signInStart` funcs below)
+pub fn get_err_auth_data_required() -> Error {
+    anyhow!(indoc!{"
+        This endpoint requires auth-data to be supplied!
+        For website browsing, this means signing-in using the panel at the top-right.
+        For direct requests to the graphql api, this means obtaining your auth-data/jwt-string manually (see the \"signInStart\" endpoint at \"http://debates.app/gql-playground\"), and attaching it to your commands/requests.
+        Specifically:
+        * For queries/mutations, the http request should have an \"authorization\" header, with contents matching: \"Bearer <jwt string here>\"
+        * For subscriptions, the auth-requiring graphql call should be preceded by a call to `signInAttach`, with the `jwt` field in the passed input-param equaling the jwt string.
+    "})
+}
+
 wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
@@ -81,18 +93,19 @@ pub struct SignInStartInput {
     pub preferredUsername: Option<String>,
 }
 
-struct SignInStart_Result {
+struct SignInStartResult {
     auth_link: Option<String>,
     result_jwt: Option<String>,
 }
 #[Object]
-impl SignInStart_Result {
+impl SignInStartResult {
     async fn instructions(&self) -> Vec<String> {
         vec![
             "1) After initial call to this endpoint, you'll see these instructions, and an \"authLink\" url below. Open that link in your browser to launch google sign-in.".to_owned(),
-            "2) On completion of sign-in, the \"resultJWT\" field below will populate with your JWT token.".to_owned(),
-            "3) Add the JWT token string to the \"authorization\" header, eg. in gql-playground, paste this into \"HTTP HEADERS\" panel at bottom left: {\"authorization\": \"Bearer <jwt text here>\"}".to_owned(),
-            "4) Run the commands that required authentication. Now that the JWT token is included in the http headers, it should succeed. (assuming your user entry has the correct permissions)".to_owned(),
+            "2) On completion of sign-in, the \"resultJWT\" field below will populate with your JWT string.".to_owned(),
+            "3) For queries/mutations, add the JWT string to the \"authorization\" header, eg. in gql-playground, paste this into \"HTTP HEADERS\" panel at bottom left: {\"authorization\": \"Bearer <jwt text here>\"}".to_owned(),
+            "4) For subscriptions, call the \"signInAttach\" endpoint (at start of subscription block containing the auth-requiring endpoint), passing in the JWT string as the `input.jwt` field.".to_owned(),
+            "5) Call the endpoints that required authentication. Now that the JWT token is included in the http headers (or attached to the websocket connection), it should succeed. (assuming your account has the needed permissions)".to_owned(),
         ]
     }
     async fn authLink(&self) -> Option<String> { self.auth_link.clone() }
@@ -103,11 +116,11 @@ impl SignInStart_Result {
 pub struct SubscriptionShard_SignIn;
 #[Subscription]
 impl SubscriptionShard_SignIn {
-    /// Begin sign-in flow, resulting in a JWT string being returned. (to then be passed in an "authorization" header)
+    /// Begin sign-in flow, resulting in a JWT string being returned. (to then be passed in an `authorization` header for queries/mutations, or to the `signInAttach` endpoint for subscriptions)
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google", "dev"]
     /// * `jwtDuration` - How long until the generated JWT should expire, in seconds. [i64]
     /// * `preferredUsername` - Used by the "dev" provider as part of the constructed user-data. [string]
-    async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: SignInStartInput) -> impl Stream<Item = Result<SignInStart_Result, SubError>> + 'a {
+    async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: SignInStartInput) -> impl Stream<Item = Result<SignInStartResult, SubError>> + 'a {
         let SignInStartInput { provider, jwtDuration, preferredUsername } = input;
         
         let google_client_id = ClientId::new(env::var("CLIENT_ID").expect("Missing the CLIENT_ID environment variable."));
@@ -146,13 +159,10 @@ impl SubscriptionShard_SignIn {
         let base_stream = async_stream::stream! {
             match provider.as_str() {
                 "dev" => {
-                    if !k8s_dev() { yield Err(SubError::new(format!("Cannot use \"dev\" provider in non-dev k8s cluster."))); return; }
+                    if !k8s_dev() { Err(SubError::new(format!("Cannot use \"dev\" provider in non-dev k8s cluster.")))?; }
                     let preferredUsername = match preferredUsername {
                         Some(val) => val,
-                        None => {
-                            yield Err(SubError::new(format!("Must provide \"preferredUsername\" when using \"dev\" provider.")));
-                            return;
-                        },
+                        None => Err(SubError::new(format!("Must provide \"preferredUsername\" when using \"dev\" provider.")))?,
                     };
 
                     let fake_user = username_to_fake_user_data(preferredUsername);
@@ -180,13 +190,13 @@ impl SubscriptionShard_SignIn {
                     let jwt = key.authenticate(claims).map_err(to_sub_err)?;
                     info!("Generated dev JWT:{}", jwt);
 
-                    yield Ok(SignInStart_Result {
+                    yield Ok(SignInStartResult {
                         auth_link: None,
                         result_jwt: Some(jwt.to_string()),
                     });
                 }
                 "google" => {
-                    yield Ok(SignInStart_Result {
+                    yield Ok(SignInStartResult {
                         auth_link: Some(authorize_url.to_string()),
                         result_jwt: None,
                     });
@@ -241,7 +251,7 @@ impl SubscriptionShard_SignIn {
                                             let jwt = key.authenticate(claims).map_err(to_sub_err)?;
                                             info!("Generated JWT:{}", jwt);
         
-                                            yield Ok(SignInStart_Result {
+                                            yield Ok(SignInStartResult {
                                                 auth_link: Some(authorize_url.to_string()),
                                                 result_jwt: Some(jwt.to_string()),
                                             });
@@ -253,8 +263,7 @@ impl SubscriptionShard_SignIn {
                     }
                 },
                 _ => {
-                    yield Err(SubError::new(format!("Invalid provider. Valid options: google, dev")));
-                    return;
+                    Err(SubError::new(format!("Invalid provider. Valid options: google, dev")))?;
                 }
             }
         };

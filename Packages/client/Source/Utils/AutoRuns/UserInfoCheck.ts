@@ -1,3 +1,4 @@
+import {AttachUserJWTToWebSocketConnection} from "Utils/LibIntegrations/Apollo";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddNotificationMessage} from "web-vcore";
 import {Timer} from "web-vcore/nm/js-vextensions";
@@ -28,14 +29,24 @@ function ParseJWT(token: string) {
 	return JSON.parse(jsonPayload) as StandardJWTFields & CustomJWTFields;
 }
 
+export function GetUserInfoJWTString() {
+	return localStorage.getItem("debate-map-user-jwt");
+}
 export function GetUserInfoFromStoredJWT() {
 	// get the authentication token from local storage if it exists
-	const token = localStorage.getItem("debate-map-user-jwt");
+	const token = GetUserInfoJWTString();
 	if (token == null) return null;
 	return ParseJWT(token);
 }
 
-export function RefreshUserInfoFromStoredJWT() {
+export function OnUserJWTChanged() {
+	//SendUserJWTToMGL();
+	AttachUserJWTToWebSocketConnection();
+}
+
+// /** Call this once at startup (currently done at start of InitApollo()), and whenever the stored user-jwt changes. */
+/** Call this whenever the jwt-data attached to the websocket connection is has changed. (so that requests are re-made, with the new auth-data) */
+export function SendUserJWTToMGL() {
 	const userInfoFromToken = GetUserInfoFromStoredJWT();
 	if (userInfoFromToken != null) {
 		graph.SetUserInfo({id: userInfoFromToken.id});
@@ -65,7 +76,7 @@ function CheckIfUserInfoTokenExpired() {
 	// if token is expired, or it's in the brief period where it's valid but ignored/treated-as-expired by client, delete the token and request new sign-in (the 10min buffer is in case clocks are slightly off)
 	if (now >= timeOfTokenExpire || now >= timeOfTokenDestroy) {
 		localStorage.removeItem("debate-map-user-jwt");
-		RefreshUserInfoFromStoredJWT();
+		OnUserJWTChanged();
 		// we say it's "already expired" to be less confusing (even if token is merely "almost expired", users won't care to know that implementation detail)
 		AddNotificationMessage(`Your sign-in information has expired. Please sign-in again.`);
 	}

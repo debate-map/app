@@ -25,7 +25,7 @@ use axum::http::{Method, HeaderValue};
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router};
+use axum::{extract, Router};
 use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
 use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
@@ -138,7 +138,7 @@ pub async fn extend_router(
         //.route("/graphiql", get(graphiql))
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
-        .layer(AddExtensionLayer::new(schema));
+        .layer(Extension(schema));
 
     result
 }

@@ -15,7 +15,7 @@ use axum::http::Method;
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router};
+use axum::{extract, Router};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 use rust_shared::serde::de::DeserializeOwned;
 use rust_shared::serde::{Deserialize, Serialize};

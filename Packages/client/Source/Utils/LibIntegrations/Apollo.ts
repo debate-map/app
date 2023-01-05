@@ -7,7 +7,7 @@ import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/cl
 import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {setContext} from "@apollo/client/link/context";
-import {RefreshUserInfoFromStoredJWT} from "Utils/AutoRuns/UserInfoCheck.js";
+import {GetUserInfoJWTString, OnUserJWTChanged, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
 import {graph} from "./MobXGraphlink.js";
 
 /*export function GetWebServerURL(subpath: string) {
@@ -93,8 +93,6 @@ export function InitApollo() {
 		},
 	});
 
-	RefreshUserInfoFromStoredJWT();
-
 	wsClient = new SubscriptionClient(GRAPHQL_URL.replace(/^http/, "ws"), {
 		reconnect:
 			(startURL.GetQueryVar("ws_rc") == "0" ? false : null) ?? // for testing
@@ -107,7 +105,7 @@ export function InitApollo() {
 		RunInAction("wsClient.onConnected", ()=>store.wvc.webSocketConnected = true);
 
 		// right at start, we need to associate our user-id with our websocket-connection (so server can grant access to user-specific data)
-		AuthenticateWebSocketConnection();
+		AttachUserJWTToWebSocketConnection();
 	});
 	wsClient.onReconnected(()=>{
 		wsClient_connectCount++;
@@ -115,7 +113,7 @@ export function InitApollo() {
 		RunInAction("wsClient.onReconnected", ()=>store.wvc.webSocketConnected = true);
 
 		// whenever our web-socket reconnects, we have to authenticate the new websocket connection
-		AuthenticateWebSocketConnection();
+		AttachUserJWTToWebSocketConnection();
 	});
 	wsClient.onReconnecting(()=>{
 		console.log("WebSocket reconnecting.");
@@ -166,7 +164,7 @@ export function InitApollo() {
 		}),
 		setContext((_, {headers})=>{
 			// get the authentication token from local storage if it exists
-			const token = localStorage.getItem("debate-map-user-jwt");
+			const token = GetUserInfoJWTString();
 			// return the headers to the context so httpLink can read them
 			return {
 				headers: {
@@ -200,6 +198,11 @@ export function InitApollo() {
 			},
 		}),
 	});
+
+	// Websocket doesn't have auth-data attached quite yet (happens in onConnected/onReconnected), but send user-data to MGL immediately anyway.
+	// While this has some confusion potential (eg. "user panel shows my name, but commands say auth-data missing"), it's arguably still better than the alternative (causing user to start a redundant sign-in).
+	// Note also that, once the auth-data is attached, mobx-graphlink will clear its cache and redo its queries; in most cases this happens fast enough to not be annoying, but is worth noting.
+	SendUserJWTToMGL();
 }
 
 export async function SendPingOverWebSocket() {
@@ -231,68 +234,28 @@ export async function SendPingOverWebSocket() {
 	return fetchResult;
 }
 
-/*async function AuthenticateWebSocketConnection() {
-	const wsConnectCountAtStart = wsClient_connectCount;
-	// if ws-client reconnects during auth process, we must cancel this run of it (so server doesn't receive then reject a 2nd attempt per ws)
-	const WSReconnected = ()=>wsClient_connectCount != wsConnectCountAtStart;
-
-	const fetchResult = await apolloClient.mutate({
-		mutation: gql`
-			mutation _GetConnectionID {
-				_GetConnectionID {
-					id
-				}
-			}
-		`,
-		//variables: this.payload,
-	});
-	if (WSReconnected()) return;
-	const result = fetchResult.data["_GetConnectionID"];
-	const connectionID = result.id;
-	console.log("Got connection id:", connectionID);
-
-	// associate connection-id with websocket-connection
-	const fetchResult2_subscription = apolloClient.subscribe({
+// todo: ensure that this request gets sent before any others, on the websocket connection (else those ones will fail)
+export async function AttachUserJWTToWebSocketConnection() {
+	// associate user-info jwt to websocket-connection, by calling the `signInAttach` endpoint
+	const fetchResult_subscription = apolloClient.subscribe({
 		query: gql`
-			subscription _PassConnectionID($connectionID: String) {
-				_PassConnectionID(connectionID: $connectionID) {
-					userID
+			subscription($input: SignInAttachInput!) {
+				signInAttach(input: $input) {
+					success
 				}
 			}
 		`,
-		variables: {connectionID},
+		variables: {input: {
+			jwt: GetUserInfoJWTString(),
+		}},
 	});
-	const fetchResult2 = await new Promise<FetchResult<any>>(resolve=>{
-		const subscription = fetchResult2_subscription.subscribe(data=>{
+	const fetchResult = await new Promise<FetchResult<any>>(resolve=>{
+		const subscription = fetchResult_subscription.subscribe(data=>{
 			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
 			resolve(data);
 		});
 	});
-	if (WSReconnected()) return;
-	const result2 = fetchResult2.data["_PassConnectionID"];
-	const userID = result2.userID;
-	console.log("After passing connection id, got user id:", userID);
+	console.log("Tried attaching auth-data jwt to websocket connection. @success:", fetchResult.data.signInAttach.success);
 
-	//apolloSignInPromise_resolve({userID});
-	RunInAction("ApolloSignInDone", ()=>{
-		/*store.main.userID_apollo = userID;
-		store.main.userID_apollo_ready = true;*#/
-
-		// rather than getting user-id from cookie, get it from the server's websocket-helper response
-		// (and supply the user-data to mobx-graphlink every time, because this is needed to clear out any non-authenticated data/responses it had previously cached)
-		//if (graph.userInfo == null) {
-
-		graph.SetUserInfo({
-			//id: store.main.userID_apollo!,
-			id: userID,
-		});
-	});
-}*/
-function AuthenticateWebSocketConnection() {
-	// todo: implement, for new sign-in approach (not needed quite yet, since the websocket-based endpoints don't need auth atm)
+	SendUserJWTToMGL();
 }
-
-/*let apolloSignInPromise_resolve;
-export const apolloSignInPromise = new Promise<{userID: string}>(resolve=>{
-	apolloSignInPromise_resolve = resolve;
-});*/

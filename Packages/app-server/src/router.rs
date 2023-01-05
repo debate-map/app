@@ -3,7 +3,7 @@ use rust_shared::hyper::{Request, Body, Method};
 use axum::{
     response::{Html},
     routing::{get},
-    AddExtensionLayer, Router, http::{
+    Router, http::{
         header::{CONTENT_TYPE, AUTHORIZATION}
     }, middleware,
 };
@@ -70,13 +70,14 @@ pub async fn start_router(app_state: AppStateArc) {
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
-        .layer(AddExtensionLayer::new(app_state.clone()))
-        .layer(AddExtensionLayer::new(middleware::from_fn(print_request_response)))
+        .layer(Extension(app_state.clone()))
+        //.with_state(app_state.clone()) // for new version of axum apparently
+        .layer(Extension(middleware::from_fn(print_request_response)))
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
-    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
+    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr>());
     info!("App-server launched. @env:{:?} @logical_cpus:{} @physical_cpus:{}", k8s_env(), num_cpus::get(), num_cpus::get_physical());
     server_fut.await.unwrap();
 }

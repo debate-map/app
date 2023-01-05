@@ -23,10 +23,9 @@ pub async fn monitor_backend_link_handle_ws_upgrade(
 ) -> impl IntoResponse {
     if !is_addr_from_pod(&addr) {
         error!("/monitor-backend-link endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
-        let json = json!({"error": format!("This endpoint is only meant to be used for in-cluster callers (ie. pods) atm.")});
-        let temp = Body::from(json.to_string()).boxed_unsync();
-        return Response::builder().status(StatusCode::BAD_GATEWAY)
-            .body(temp).unwrap().into_response();
+        let body_json_val = json!({"error": format!("This endpoint is only meant to be used for in-cluster callers (ie. pods) atm.")});
+        let body = Body::from(body_json_val.to_string()).boxed_unsync();
+        return Response::builder().status(StatusCode::BAD_GATEWAY).body(body).unwrap().into_response();
     }
 
     //let r1 = s1.new_receiver();

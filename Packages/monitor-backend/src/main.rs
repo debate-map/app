@@ -22,13 +22,14 @@
 )]
 
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use rust_shared::axum::Extension;
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
 use rust_shared::utils::general::k8s_env;
 use rust_shared::{futures, axum, tower, tower_http, tokio};
 use axum::{
     response::{Html, self, IntoResponse},
     routing::{get, any_service, post, get_service},
-    AddExtensionLayer, Router, http::{
+    Router, http::{
         Method,
         header::{CONTENT_TYPE}
     },
@@ -169,13 +170,13 @@ async fn main() {
 
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
-        .layer(AddExtensionLayer::new(app_state))
+        .layer(Extension(app_state))
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5130)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
     //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info());
-    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr, _>());
+    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr>());
     info!("Monitor-backend launched. @env:{:?}", k8s_env());
     server_fut.await.unwrap();
 }

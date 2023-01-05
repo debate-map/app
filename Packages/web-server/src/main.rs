@@ -23,7 +23,7 @@ use rust_shared::{futures, axum::{self, response::{IntoResponse, Response}, body
 use axum::{
     response::{Html},
     routing::{get},
-    AddExtensionLayer, Router, http::{
+    Router, http::{
         Method,
         header::{CONTENT_TYPE}
     }, middleware,

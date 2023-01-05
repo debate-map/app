@@ -148,7 +148,7 @@ checksum = "135713bf3439ac3325f29281fd88725a71f95dc621fd49b7f064333d099a5b35"
 dependencies = [
  "async-graphql",
  "async-trait",
- "axum 0.5.4",
+ "axum",
  "bytes",
  "futures-util",
  "http-body",
@@ -261,47 +261,12 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "axum"
-version = "0.4.4"
-source = "git+https://github.com/tokio-rs/axum.git?rev=15914c4f15b375d5785b7f95be7685abba326c5e#15914c4f15b375d5785b7f95be7685abba326c5e"
-dependencies = [
- "async-trait",
- "axum-core 0.1.1",
- "base64",
- "bitflags",
- "bytes",
- "futures-util",
- "headers",
- "http",
- "http-body",
- "hyper",
- "itoa",
- "matchit 0.4.6",
- "memchr",
- "mime",
- "percent-encoding",
- "pin-project-lite",
- "serde",
- "serde_json",
- "serde_urlencoded",
- "sha-1 0.9.8",
- "sync_wrapper",
- "tokio",
- "tokio-tungstenite 0.16.1",
- "tokio-util 0.6.9",
- "tower",
- "tower-http 0.2.1",
- "tower-layer",
- "tower-service",
-]
-
-[[package]]
-name = "axum"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4af7447fc1214c1f3a1ace861d0216a6c8bb13965b64bbad9650f375b67689a"
 dependencies = [
  "async-trait",
- "axum-core 0.2.3",
+ "axum-core",
  "base64",
  "bitflags",
  "bytes",
@@ -311,7 +276,7 @@ dependencies = [
  "http-body",
  "hyper",
  "itoa",
- "matchit 0.5.0",
+ "matchit",
  "memchr",
  "mime",
  "percent-encoding",
@@ -327,19 +292,6 @@ dependencies = [
  "tower-http 0.3.3",
  "tower-layer",
  "tower-service",
-]
-
-[[package]]
-name = "axum-core"
-version = "0.1.1"
-source = "git+https://github.com/tokio-rs/axum.git?rev=15914c4f15b375d5785b7f95be7685abba326c5e#15914c4f15b375d5785b7f95be7685abba326c5e"
-dependencies = [
- "async-trait",
- "bytes",
- "futures-util",
- "http",
- "http-body",
- "mime",
 ]
 
 [[package]]
@@ -1664,12 +1616,6 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 
 [[package]]
 name = "matchit"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9376a4f0340565ad675d11fc1419227faf5f60cd7ac9cb2e7185a471f30af833"
-
-[[package]]
-name = "matchit"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73cbba799671b762df5a175adf59ce145165747bb891505c43d09aefbbf38beb"
@@ -2482,7 +2428,7 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-graphql-axum",
- "axum 0.4.4",
+ "axum",
  "base64",
  "bytes",
  "chrono",
@@ -3120,18 +3066,6 @@ dependencies = [
 
 [[package]]
 name = "tokio-tungstenite"
-version = "0.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e80b39df6afcc12cdf752398ade96a6b9e99c903dfdc36e53ad10b9c366bca72"
-dependencies = [
- "futures-util",
- "log",
- "tokio",
- "tungstenite 0.16.0",
-]
-
-[[package]]
-name = "tokio-tungstenite"
 version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f714dd15bead90401d77e04243611caec13726c2408afd5b31901dfcdcb3b181"
@@ -3233,7 +3167,6 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tokio-util 0.6.9",
- "tower",
  "tower-layer",
  "tower-service",
  "tracing",
@@ -3340,25 +3273,6 @@ name = "try-lock"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
-
-[[package]]
-name = "tungstenite"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ad3713a14ae247f22a728a0456a545df14acf3867f905adff84be99e23b3ad1"
-dependencies = [
- "base64",
- "byteorder",
- "bytes",
- "http",
- "httparse",
- "log",
- "rand",
- "sha-1 0.9.8",
- "thiserror",
- "url",
- "utf-8",
-]
 
 [[package]]
 name = "tungstenite"

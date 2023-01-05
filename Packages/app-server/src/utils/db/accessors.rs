@@ -42,7 +42,7 @@ impl<'a> AccessorContext<'a> {
 
         // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
         if !bypass_rls {
-            tx.execute("SET ROLE rls_obeyer", &[]).await?;
+            tx.execute("SET LOCAL ROLE rls_obeyer", &[]).await?;
             tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
             /*let user_is_admin = TODO;
             tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
@@ -64,7 +64,7 @@ impl<'a> AccessorContext<'a> {
 
         // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
         if !bypass_rls {
-            tx.execute("SET ROLE rls_obeyer", &[]).await?;
+            tx.execute("SET LOCAL ROLE rls_obeyer", &[]).await?;
             tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
         }
 

@@ -1,4 +1,5 @@
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}, anyhow::bail};
+use tracing::info;
 
 use crate::db::{terms::Term, access_policies::{get_access_policy, AccessPolicy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User};
 
@@ -83,6 +84,7 @@ impl UsesRLS for NodeRating {
 }
 impl UsesRLS for NodeRevision {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
+        //info!("Test1 @is_user_admin:{} @do_policies_allow_access:{}", is_user_admin(jwt_data), do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets));
         is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }

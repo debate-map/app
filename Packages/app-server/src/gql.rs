@@ -15,7 +15,9 @@ use rust_shared::hyper::{Body, service};
 use rust_shared::hyper::client::HttpConnector;
 use rust_shared::anyhow::Error;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
+use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client};
+use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{axum, tower, tower_http, serde_json};
 use tower::make::Shared;
@@ -27,7 +29,7 @@ use axum::http::{Method, HeaderValue};
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};
 use axum::routing::{get, post, MethodFilter, on_service};
-use axum::{extract, AddExtensionLayer, Router};
+use axum::{extract, Router};
 use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
 use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
@@ -35,7 +37,7 @@ use axum::http::{self, uri::Uri, Request, Response, StatusCode};
 use axum::{
     extract::Extension,
 };
-use tracing::info;
+use tracing::{info, error};
 use rust_shared::url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
@@ -86,6 +88,7 @@ use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_Gene
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::store::storage::AppStateArc;
 use crate::utils::db::agql_ext::gql_general_extension::{CustomExtension, CustomExtensionCreator};
+use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 use crate::utils::general::general::body_to_str;
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::db::access_policies::SubscriptionShard_AccessPolicy;
@@ -163,6 +166,69 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
+// version based on actix-web example (https://github.com/async-graphql/examples/blob/1492794f9001cfe7a37058ba7be3c6461b0cc70a/actix-web/token-from-header/src/main.rs#L37)
+/*async fn websocket_handler(ws: WebSocketUpgrade) -> impl IntoResponse {
+    GraphQLSubscription::new(Schema::clone(&*schema))
+        .with_data(data)
+        .on_connection_init(on_connection_init)
+        .start(&req, payload)
+}*/
+
+// version based on poem example (https://github.com/async-graphql/examples/blob/1492794f9001cfe7a37058ba7be3c6461b0cc70a/poem/token-from-header/src/main.rs#L44)
+async fn graphql_websocket_handler(/*Extension(state): Extension<AppStateArc>,*/ Extension(schema): Extension<RootSchema>, /*req: Request<Body>,*/ ws: WebSocketUpgrade, protocol: GraphQLProtocol) -> impl IntoResponse {
+    let mut data = async_graphql::Data::default();
+    let request_storage = GQLRequestStorage::new();
+    data.insert(request_storage);
+    /*if let Some(token) = get_token_from_headers(headers) {
+        data.insert(token);
+    }*/
+
+    // we cannot retrieve the raw "Request<Body>" using axum-extract while also retrieving the "WebSocketUpgrade", so just assume caller requested the "graphql-ws" protocol (it's what the main dm-client is using)
+    //let protocol = GraphQLProtocol(WebSocketProtocols::GraphQLWS);
+
+    /*info!("Handling ws request:{:?} @ws:{:?}", req, ws);
+    let mut req_agql_parts = RequestParts::new(req);
+    let protocol = match GraphQLProtocol::from_request(&mut req_agql_parts).await {
+        Ok(protocol) => protocol,
+        Err(err) => {
+            //return response::Html(format!("<div>Error parsing graphql-protocol from request headers:{:?}</div>", err))
+            //error!("/monitor-backend-link endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
+            let body_json_val = json!({"error": format!("Error parsing graphql-protocol from request headers:{:?}", err)});
+            let body = Body::from(body_json_val.to_string()).boxed_unsync();
+            return Response::builder().status(StatusCode::BAD_REQUEST).body(body).unwrap().into_response();
+        },
+    };*/
+
+    // NOTE: Don't be confused; the "protocol names" are confusingly misaligned with their "subprotocol header values". (https://github.com/async-graphql/async-graphql/issues/1196#issuecomment-1371985251)
+    //info!("Handling ws request:{:?} @protocol:{:?}", ws, protocol);
+
+    let schema_clone = schema.clone();
+    ws
+        .protocols(ALL_WEBSOCKET_PROTOCOLS)
+        .on_upgrade(move |stream| {
+            GraphQLWebSocket::new(stream, schema_clone, protocol)
+                .with_data(data)
+                //.on_connection_init(on_connection_init)
+                .serve()
+        })
+}
+/*pub async fn on_connection_init(value: serde_json::Value) -> Result<Data> {
+    #[derive(Deserialize)]
+    struct Payload {
+        token: String,
+    }
+
+    // Coerce the connection params into our `Payload` struct so we can
+    // validate the token exists in the headers.
+    if let Ok(payload) = serde_json::from_value::<Payload>(value) {
+        let mut data = Data::default();
+        data.insert(Token(payload.token));
+        Ok(data)
+    } else {
+        Err("Token is required".into())
+    }
+}*/
+
 pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router {
     let schema =
         wrap_agql_schema_build!{
@@ -173,21 +239,22 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
         .finish();
 
     let client_to_asjs = HyperClient::new();
-    let gql_subscription_service = GraphQLSubscription::new(schema.clone());
+    //let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
         .route("/graphiql", get(graphiql))
         .route("/gql-playground", get(graphql_playground))
         .route("/graphql",
             // approach 1 (using standard routing functions)
-            on_service(MethodFilter::GET, gql_subscription_service).post(handle_gql_query_or_mutation)
+            //on_service(MethodFilter::GET, gql_subscription_service).post(handle_gql_query_or_mutation)
+            get(graphql_websocket_handler).post(handle_gql_query_or_mutation)
 
             // approach 2 (custom first-layer service-function)
             // omitted for now; you can reference the "one-shot" pattern here: https://github.com/tokio-rs/axum/blob/422a883cb2a81fa6fbd2f2a1affa089304b7e47b/examples/http-proxy/src/main.rs#L40
         )
         //.fallback(get(handle_gql_query_or_mutation).merge(post(handle_gql_query_or_mutation)))
-        .layer(AddExtensionLayer::new(schema))
-        .layer(AddExtensionLayer::new(client_to_asjs));
+        .layer(Extension(schema))
+        .layer(Extension(client_to_asjs));
 
     info!("Playground: http://localhost:[view readme]");
     result

@@ -21,7 +21,7 @@ pub(super) fn try_is_user_admin(jwt_data: &Option<UserJWTData>) -> Result<bool, 
     match jwt_data {
         Some(jwt_data) => {
             let admin_user_ids: HashSet<String> = get_admin_user_ids_cached()?;
-            info!("admin_user_ids: {:?} @me_id:{}", admin_user_ids, jwt_data.id);
+            //info!("admin_user_ids: {:?} @me_id:{}", admin_user_ids, jwt_data.id);
             Ok(admin_user_ids.contains(&jwt_data.id.o()))
         },
         None => Ok(false),

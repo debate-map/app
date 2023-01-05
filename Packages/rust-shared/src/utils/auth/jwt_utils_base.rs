@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use anyhow::{anyhow, Error};
 use axum::response::IntoResponse;
-use axum::{Router, AddExtensionLayer, response};
+use axum::{Router, response};
 use axum::extract::{Extension, Path};
 use axum::routing::get;
 use once_cell::sync::OnceCell;
@@ -25,7 +25,7 @@ use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
 /// Rather than baking the permissions and such into the jwt, we store only the id and email (which are unchanging fields).
 /// We later use that minimal info to retrieve the full user-data from the database. (this way it's up-to-date if the user's username, permissions, etc. change)
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct UserJWTData {
     pub id: String,
     pub email: String,
