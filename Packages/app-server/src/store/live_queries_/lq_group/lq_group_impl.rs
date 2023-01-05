@@ -178,8 +178,13 @@ impl LQGroupImpl {
         self.messages_out_sender.broadcast(msg).await.unwrap();
         self.notify_message_processed_or_sent(msg_as_str, true);
     }
+    /// This function should receive a stringified version of all messages sent through the LQGroup "messages_in" and "messages_out" channels.
     pub(super) fn notify_message_processed_or_sent(&mut self, msg_as_str: String, sent: bool) {
         self.processed_or_sent_messages.push(format!("{}{}", if sent { "Sent: " } else { "Processed: " }, msg_as_str));
+
+        // for debugging
+        /*if !msg_as_str.contains("IGJDsdE-TKGx-K7T4etO5Q") { return; }
+        println!("\t{} message just sent: {}", if sent { "OUT" } else { "IN" }, msg_as_str);*/
     }
     pub(super) fn get_recent_messages_str(&self) -> String {
         let mut recent_messages = self.processed_or_sent_messages.clone();
@@ -276,14 +281,21 @@ impl LQGroupImpl {
                 Ok(result) => {
                     match result {
                         Some(lqi) => {
-                            // if instance was directly retrieved, just return it (well, after broadcasting an event so async caller knows about it)
-                            self.send_message_out(LQGroup_OutMsg::LQInstanceIsInitialized(lqi.lq_key.clone(), lqi.clone(), false)).await;
-                            mtx.section(format!("LQ-instance was retrieved. @lq_key:{}", lqi.lq_key));
-                            return Some(lqi);
+                            // if instance's initial contents are already populated, just return it (well, after broadcasting an event so async caller knows about it)
+                            if lqi.last_entries_set_count.load(Ordering::SeqCst) > 0 {
+                                self.send_message_out(LQGroup_OutMsg::LQInstanceIsInitialized(lqi.lq_key.clone(), lqi.clone(), false)).await;
+                                mtx.section(format!("LQ-instance was retrieved and returned, since already initialized. @lq_key:{}", lqi.lq_key));
+                                return Some(lqi);
+                            }
+                            // else, it must still be scheduled for population in a buffering/executing batch; so just return none (batch will automatically broadcast messages for the lqi's initialization once it happens)
+                            else {
+                                mtx.section(format!("LQ-instance is already scheduled in a progressing-batch. @lq_key:{}", lqi.lq_key));
+                                return None;
+                            }
                         },
                         None => {
                             // if instance was scheduled for initialization in batch, return none (batch will automatically broadcast messages for the lqi's initialization once it happens)
-                            mtx.section(format!("LQ-instance was scheduled in progression-batch. @lq_key:{}", lq_key));
+                            mtx.section(format!("LQ-instance was just now scheduled in the buffering-batch. @lq_key:{}", lq_key));
                             return None;
                         },
                     }
@@ -299,8 +311,9 @@ impl LQGroupImpl {
         }
     }
 
-    /// Finds the lq-instance for the given lq-key in an executing or buffering batch, or if absent, creates an lq-instance for it in the buffering-batch;
-    /// then waits for its data to be populated, and for it to be committed into `LQGroup.lqis_committed`.
+    /// Finds the lq-instance for the given lq-key in the committed-lqis list (if present), else...
+    /// finds it in the lqis-awaiting-population list (if present), else...
+    /// creates it in the buffering-batch (and adds it to the awaiting-population list), then waits for its data-population and committal into `LQGroup.lqis_committed`.
     async fn get_lq_instance_or_queue_it_in_progressing_batch(&mut self, lq_key: &LQKey, force_queue_lqi: Option<Arc<LQInstance>>, mtx_p: Option<&Mtx>) -> Result<Option<Arc<LQInstance>>, Error> {
         new_mtx!(mtx, "1:find lqi in an executing/buffering batch, or create new lqi in the buffering-batch", mtx_p);
         let (batch_index, batch_generation, prior_lqis_in_batch, _lqi_in_batch, _lqi_just_initialized, _batch_msg_receiver) = 'getter_block: {

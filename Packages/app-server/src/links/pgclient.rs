@@ -75,7 +75,8 @@ pub fn create_db_pool() -> Pool {
         recycling_method: RecyclingMethod::Fast,
         // when using "SET ROLE rls_obeyer", this was needed; it's not needed anymore, now that we use "SET LOCAL ROLE rls_obeyer" (since that restricts the change to just the current transaction)
         /*recycling_method: RecyclingMethod::Custom(formatdoc! {r#"
-            SELECT 1
+            SET SESSION AUTHORIZATION DEFAULT;
+            -- or: RESET ROLE;
         "#}),*/
         //recycling_method: RecyclingMethod::Verified,
         //recycling_method: RecyclingMethod::Clean,

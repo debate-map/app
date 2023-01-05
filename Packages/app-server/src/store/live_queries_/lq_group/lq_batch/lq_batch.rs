@@ -10,7 +10,7 @@ use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::{chain, Itertools};
 use rust_shared::utils::mtx::mtx::Mtx;
 use rust_shared::utils::type_aliases::RowData;
-use rust_shared::{to_anyhow_with_extra, Lock, new_mtx};
+use rust_shared::{to_anyhow_with_extra, Lock, new_mtx, serde_json};
 use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::types::ToSql;
 use rust_shared::tokio_postgres::{Row, RowStream};
@@ -130,9 +130,7 @@ impl LQBatch {
             let lq_index: i64 = row.get("lq_index");
             // convert to RowData structs (the behavior of RowData/JSONValue is simpler/more-standardized than tokio_postgres::Row)
             let columns_to_process = row.columns().len() - lq_param_protos.len();
-            //println!("Columns to process:{columns_to_process} @protos_len:{}", lq_param_protos.len());
             let row_data = postgres_row_to_row_data(row, columns_to_process)?;
-            //println!("Got row-data!:{:?}", row_data);
             lq_results[lq_index as usize].push(row_data);
         }
 
@@ -151,8 +149,13 @@ impl LQBatch {
 
         mtx.section("6:commit the new result-sets");
         for (i, lq_results) in lq_results_converted.into_iter().enumerate() {
-            let lq_instance = query_instance_vals.get(i).unwrap();
-            lq_instance.set_last_entries::<{Lock::unknown_prior}>(lq_results).await;
+            let lqi = query_instance_vals.get(i).unwrap();
+            
+            /*let target_filter = QueryFilter::from_filter_input(&serde_json::json!({"id": {"equalTo": "IGJDsdE-TKGx-K7T4etO5Q"}})).unwrap();
+            let is_target_doc = lqi.lq_key.table_name == "nodeRevisions" && serde_json::to_string(&lqi.lq_key.filter).unwrap() == serde_json::to_string(&target_filter).unwrap();
+		    if is_target_doc { println!("Got initial result-set for docT1:{:?}", serde_json::to_string(&lq_results)); }*/
+
+            lqi.set_last_entries::<{Lock::unknown_prior}>(lq_results).await;
         }
 
         //self.execution_time.store(time_since_epoch_ms(), Ordering::Relaxed);

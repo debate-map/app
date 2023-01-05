@@ -7,6 +7,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType};
 use axum::http::Method;
@@ -68,6 +69,7 @@ impl LQEntryWatcher {
 pub struct LQInstance {
     pub lq_key: LQKey,
     pub last_entries: RwLock<Vec<RowData>>,
+    pub last_entries_set_count: AtomicU64,
     pub entry_watchers: RwLock<HashMap<Uuid, LQEntryWatcher>>,
 }
 impl LQInstance {
@@ -75,6 +77,7 @@ impl LQInstance {
         Self {
             lq_key,
             last_entries: RwLock::new(initial_entries),
+            last_entries_set_count: AtomicU64::new(0),
             entry_watchers: RwLock::new(HashMap::new()),
         }
     }
@@ -203,6 +206,7 @@ impl LQInstance {
         let mut last_entries = self.last_entries.write().await;
         last_entries.drain(..);
         last_entries.append(&mut new_entries);
+        self.last_entries_set_count.fetch_add(1, Ordering::SeqCst);
     }
 
     pub async fn get_last_entry_with_id(&self, entry_id: &str) -> Option<RowData> {

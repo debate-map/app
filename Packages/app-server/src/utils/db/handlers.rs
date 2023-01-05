@@ -120,9 +120,11 @@ pub async fn handle_generic_gql_doc_request<'a,
 pub async fn handle_generic_gql_doc_request_base<'a,
     T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(lq_storage: LQStorageArc, jwt_data: Option<UserJWTData>, table_name: String, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
-
     let result = tokio::spawn(async move {
         let table_name = &table_name;
+
+        //let is_target_doc = table_name == "nodeRevisions" && id.as_str() == "IGJDsdE-TKGx-K7T4etO5Q";
+		//if is_target_doc { println!("Starting docT1 request."); }
 
         new_mtx!(mtx, "1", None, Some(format!("@table_name:{table_name} @id:{id}")));
         let stream_for_error = |err: Error| {
@@ -148,6 +150,8 @@ pub async fn handle_generic_gql_doc_request_base<'a,
             let (mut entries_as_type, watcher) = lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await;
             let entry_as_type = entries_as_type.pop();
 
+            //if is_target_doc { println!("Got docT1 entry:{:?}", serde_json::to_string(&entry_as_type)); }
+
             (entry_as_type, stream_id, lq_storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
         };
 
@@ -156,6 +160,7 @@ pub async fn handle_generic_gql_doc_request_base<'a,
         let base_stream = async_stream::stream! {
             let mut rls_applier = RLSApplier::new(jwt_data);
             if let (next_result, _changed) = rls_applier.filter_next_result_for_doc(entry_as_type) {
+                //if is_target_doc { println!("Yielding docT1 first result:{:?}", serde_json::to_string(&next_result)); }
                 yield Ok(next_result);
             }
 
@@ -169,6 +174,7 @@ pub async fn handle_generic_gql_doc_request_base<'a,
 
                 // only yield next-result if it has changed after filtering (otherwise seeing an "unchanged update" leaks knowledge that a hidden, matching entry was changed)
                 if let (next_result, changed) = rls_applier.filter_next_result_for_doc(next_entry_as_type) && changed {
+                    //if is_target_doc { println!("Yielding docT1 later result:{:?}", serde_json::to_string(&next_result)); }
                     yield Ok(next_result);
                 }
             }

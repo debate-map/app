@@ -46,12 +46,12 @@ export function OnUserJWTChanged() {
 
 // /** Call this once at startup (currently done at start of InitApollo()), and whenever the stored user-jwt changes. */
 /** Call this whenever the jwt-data attached to the websocket connection is has changed. (so that requests are re-made, with the new auth-data) */
-export function SendUserJWTToMGL() {
+export async function SendUserJWTToMGL() {
 	const userInfoFromToken = GetUserInfoFromStoredJWT();
 	if (userInfoFromToken != null) {
-		graph.SetUserInfo({id: userInfoFromToken.id});
+		await graph.SetUserInfo({id: userInfoFromToken.id});
 	} else {
-		graph.SetUserInfo(null);
+		await graph.SetUserInfo(null);
 	}
 }
 

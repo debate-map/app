@@ -180,7 +180,7 @@ impl SubscriptionShard_SignIn {
                     };
 
                     let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-                    let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, false).await.unwrap();
+                    let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, true).await.map_err(to_sub_err)?;
                     let user_data = store_user_data_for_google_sign_in(fake_user_as_g_profile, &ctx, true).await.map_err(to_sub_err)?;
                     info!("Committing transaction...");
                     ctx.tx.commit().await.map_err(to_sub_err)?;
@@ -200,7 +200,6 @@ impl SubscriptionShard_SignIn {
                         auth_link: Some(authorize_url.to_string()),
                         result_jwt: None,
                     });
-                    //println!("Open this URL in your browser:\n{}\n", authorize_url.to_string());
         
                     loop {
                         match make_reliable(msg_receiver.recv(), Duration::from_millis(10)).await {
@@ -240,7 +239,7 @@ impl SubscriptionShard_SignIn {
                                             info!("Got response user-info:{:?}", user_info);
         
                                             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-                                            let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, false).await.unwrap();
+                                            let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, true).await.map_err(to_sub_err)?;
                                             let user_data = store_user_data_for_google_sign_in(user_info, &ctx, false).await.map_err(to_sub_err)?;
                                             info!("Committing transaction...");
                                             ctx.tx.commit().await.map_err(to_sub_err)?;

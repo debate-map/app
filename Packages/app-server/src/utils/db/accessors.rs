@@ -7,7 +7,7 @@ use deadpool_postgres::{Transaction, Pool};
 use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 
-use crate::db::general::sign_in_::jwt_utils::get_user_jwt_data_from_gql_ctx;
+use crate::db::general::sign_in_::jwt_utils::{get_user_jwt_data_from_gql_ctx, try_get_user_jwt_data_from_gql_ctx};
 use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::type_aliases::DBPool;
 use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
@@ -73,13 +73,13 @@ impl<'a> AccessorContext<'a> {
 
     // high-level
     pub async fn new_read(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_read_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, Some(get_user_jwt_data_from_gql_ctx(gql_ctx).await?), bypass_rls).await?)
+        Ok(Self::new_read_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, bypass_rls).await?)
     }
     pub async fn new_write(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, bypass_rls: bool) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_write_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, Some(get_user_jwt_data_from_gql_ctx(gql_ctx).await?), bypass_rls).await?)
+        Ok(Self::new_write_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, bypass_rls).await?)
     }
     pub async fn new_write_advanced(anchor: &'a mut DataAnchorFor1<PGClientObject>, gql_ctx: &async_graphql::Context<'_>, bypass_rls: bool, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
-        Ok(Self::new_write_advanced_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, Some(get_user_jwt_data_from_gql_ctx(gql_ctx).await?), bypass_rls, only_validate).await?)
+        Ok(Self::new_write_advanced_base(anchor, &get_app_state_from_gql_ctx(gql_ctx).db_pool, try_get_user_jwt_data_from_gql_ctx(gql_ctx).await?, bypass_rls, only_validate).await?)
     }
 }
 

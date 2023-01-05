@@ -108,7 +108,6 @@ impl LQGroup {
             messages_out_sender: s2,
             messages_out_receiver: r2,
         };
-
         new_self
     }
     pub fn new_in_arc(lq_key: LQKey, db_pool: DBPoolArc) -> Arc<Self> {
