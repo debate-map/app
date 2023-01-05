@@ -109,7 +109,7 @@ pub struct NodePhrasingUpdates {
 	pub references: FieldUpdate<Vec<String>>,
 }
 
-#[derive(Clone)] pub struct GQLSet_NodePhrasing { nodes: Vec<NodePhrasing> }
+#[derive(Clone)] pub struct GQLSet_NodePhrasing { pub nodes: Vec<NodePhrasing> }
 #[Object] impl GQLSet_NodePhrasing { async fn nodes(&self) -> &Vec<NodePhrasing> { &self.nodes } }
 impl GQLSet<NodePhrasing> for GQLSet_NodePhrasing {
     fn from(entries: Vec<NodePhrasing>) -> GQLSet_NodePhrasing { Self { nodes: entries } }

@@ -59,10 +59,10 @@ pub struct UserUpdates {
 	pub permissionGroups: FieldUpdate<PermissionGroups>,
 }
 
-//#[derive(SimpleObject, Clone)] #[derive(Clone)] pub struct GQLSet_User<T> { nodes: Vec<T> }
-/*#[derive(Clone)] pub struct GQLSet_User<T> { nodes: Vec<T> }
-#[Object] impl<T: OutputType> GQLSet_User<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
-#[derive(Clone)] pub struct GQLSet_User { nodes: Vec<User> }
+//#[derive(SimpleObject, Clone)] #[derive(Clone)] pub struct GQLSet_User<T> { pub nodes: Vec<T> }
+/*#[derive(Clone)] pub struct GQLSet_User<T> { pub nodes: Vec<T> }
+#[Object] impl<T: OutputType> GQLSet_User<T> { pub async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/
+#[derive(Clone)] pub struct GQLSet_User { pub nodes: Vec<User> }
 #[Object] impl GQLSet_User { async fn nodes(&self) -> &Vec<User> { &self.nodes } }
 impl GQLSet<User> for GQLSet_User {
     fn from(entries: Vec<User>) -> GQLSet_User { Self { nodes: entries } }

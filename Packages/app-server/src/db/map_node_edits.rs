@@ -41,7 +41,7 @@ impl From<Row> for MapNodeEdit {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_MapNodeEdit { nodes: Vec<MapNodeEdit> }
+#[derive(Clone)] pub struct GQLSet_MapNodeEdit { pub nodes: Vec<MapNodeEdit> }
 #[Object] impl GQLSet_MapNodeEdit { async fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes } }
 impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
     fn from(entries: Vec<MapNodeEdit>) -> GQLSet_MapNodeEdit { Self { nodes: entries } }

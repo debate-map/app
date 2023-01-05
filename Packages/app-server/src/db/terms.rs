@@ -86,7 +86,7 @@ pub struct TermUpdates {
     pub attachments: FieldUpdate<Vec<Attachment>>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Term { nodes: Vec<Term> }
+#[derive(Clone)] pub struct GQLSet_Term { pub nodes: Vec<Term> }
 #[Object] impl GQLSet_Term { async fn nodes(&self) -> &Vec<Term> { &self.nodes } }
 //#[async_trait]
 impl GQLSet<Term> for GQLSet_Term {

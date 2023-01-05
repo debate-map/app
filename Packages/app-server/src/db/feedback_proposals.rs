@@ -24,7 +24,7 @@ impl From<Row> for Proposal {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_Proposal { nodes: Vec<Proposal> }
+#[derive(Clone)] pub struct GQLSet_Proposal { pub nodes: Vec<Proposal> }
 #[Object] impl GQLSet_Proposal { async fn nodes(&self) -> &Vec<Proposal> { &self.nodes } }
 impl GQLSet<Proposal> for GQLSet_Proposal {
     fn from(entries: Vec<Proposal>) -> GQLSet_Proposal { Self { nodes: entries } }

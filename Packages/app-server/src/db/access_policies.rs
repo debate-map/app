@@ -126,7 +126,7 @@ pub struct PermitCriteria {
 	pub minApprovalPercent: i64, // 0 = anyone, -1 = no-one
 }
 
-#[derive(Clone)] pub struct GQLSet_AccessPolicy { nodes: Vec<AccessPolicy> }
+#[derive(Clone)] pub struct GQLSet_AccessPolicy { pub nodes: Vec<AccessPolicy> }
 #[Object] impl GQLSet_AccessPolicy { async fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes } }
 impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
     fn from(entries: Vec<AccessPolicy>) -> GQLSet_AccessPolicy { Self { nodes: entries } }

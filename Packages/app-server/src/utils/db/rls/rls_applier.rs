@@ -31,7 +31,7 @@ impl RLSApplier {
     pub fn filter_next_result_for_collection<T: UsesRLS + Clone + Serialize>(&mut self, next_result: Vec<T>) -> (Vec<T>, bool) {
         let next_result_final = next_result.into_iter().filter(|a| a.does_entry_pass_rls(&self.jwt_data)).collect_vec();
         let next_result_final_json = serde_json::to_string(&next_result_final).unwrap();
-        if Some(next_result_final_json) == self.last_result_json {
+        if let Some(last_result_json) = &self.last_result_json && &next_result_final_json == last_result_json {
             return (next_result_final, false);
         }
 
@@ -41,7 +41,7 @@ impl RLSApplier {
     pub fn filter_next_result_for_doc<T: UsesRLS + Clone + Serialize>(&mut self, next_result: Option<T>) -> (Option<T>, bool) {
         let next_result_final = next_result.filter(|a| a.does_entry_pass_rls(&self.jwt_data));
         let next_result_final_json = serde_json::to_string(&next_result_final).unwrap();
-        if Some(next_result_final_json) == self.last_result_json {
+        if let Some(last_result_json) = &self.last_result_json && &next_result_final_json == last_result_json {
             return (next_result_final, false);
         }
 

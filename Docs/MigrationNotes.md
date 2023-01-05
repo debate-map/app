@@ -7,6 +7,50 @@
 
 ## Main series
 
+### Pushed on 2023-01-04
+
+* 1\) Added the field `c_accessPolicyTargets` to tables: `commandRuns, mapNodeEdits, nodeLinks, nodePhrasings, nodeRatings, nodeRevisions, nodeTags`
+	* DB response:
+		* 1\) Execute sql:
+			```sql
+			-- start with the columns able to be null (so other steps can be completed)
+			BEGIN;
+				ALTER TABLE app_public."commandRuns" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app_public."mapNodeEdits" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app_public."nodeLinks" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app_public."nodePhrasings" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app_public."nodeRatings" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app_public."nodeRevisions" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app_public."nodeTags" ADD COLUMN "c_accessPolicyTargets" text[];
+			COMMIT;
+			```
+		* 2\) You'll also need to trigger all the existing rows to have their `c_accessPolicyTargets` fields updated (and field constraints set); so **after doing the db-response for root bullet-points 2 and 3 below**, follow-up by executing this sql:
+			```sql
+			BEGIN;
+				UPDATE "commandRuns" SET "c_accessPolicyTargets" = array[]::text[];
+				UPDATE "mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[];
+				UPDATE "nodeLinks" SET "c_accessPolicyTargets" = array[]::text[];
+				UPDATE "nodePhrasings" SET "c_accessPolicyTargets" = array[]::text[];
+				UPDATE "nodeRatings" SET "c_accessPolicyTargets" = array[]::text[];
+				UPDATE "nodeRevisions" SET "c_accessPolicyTargets" = array[]::text[];
+				UPDATE "nodeTags" SET "c_accessPolicyTargets" = array[]::text[];
+
+				ALTER TABLE app_public."commandRuns" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app_public."mapNodeEdits" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app_public."nodeLinks" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app_public."nodePhrasings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app_public."nodeRatings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app_public."nodeRevisions" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app_public."nodeTags" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+			COMMIT;
+			```
+* 2\) Updated the postgres rls-helper functions and many of the rls policies.
+	* DB response:
+		* 1\) Re-apply the sql in `RLSHelpers.sql`, then in `RLSPolicies.sql`.
+* 3\) Added many triggers, for keeping the `c_accessPolicyTargets` fields up-to-date.
+	* DB response:
+		* 1\) Apply the sql in `AccessPolicyTriggers.sql`.
+
 ### Pushed on 2023-01-03
 
 * 1\) Changed the "is user an admin" check in RLS policies to just call into the database, rather than relying on an app-server-supplied `current_user_admin` config-param. (note: this simplifies app-server code, but we'll probably revert to something similar eventually for perf reasons)

@@ -39,22 +39,22 @@ impl UsesRLS for crate::db::feedback_user_infos::UserInfo {
 
 impl UsesRLS for Term {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || is_user_creator(jwt_data, self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "terms")
+        is_user_admin(jwt_data) || is_user_creator(jwt_data, &self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "terms")
     }
 }
 impl UsesRLS for Media {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || is_user_creator(jwt_data, self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "medias")
+        is_user_admin(jwt_data) || is_user_creator(jwt_data, &self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "medias")
     }
 }
 impl UsesRLS for Map {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || is_user_creator(jwt_data, self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "maps")
+        is_user_admin(jwt_data) || is_user_creator(jwt_data, &self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "maps")
     }
 }
 impl UsesRLS for Node {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || is_user_creator(jwt_data, self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "nodes")
+        is_user_admin(jwt_data) || is_user_creator(jwt_data, &self.creator) || does_policy_allow_access(jwt_data, &self.accessPolicy, "nodes")
     }
 }
 
@@ -63,32 +63,32 @@ impl UsesRLS for Node {
 
 impl UsesRLS for MapNodeEdit {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }
 impl UsesRLS for NodeLink {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }
 impl UsesRLS for NodePhrasing {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }
 impl UsesRLS for NodeRating {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || is_user_creator(jwt_data, self.creator) || do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+        is_user_admin(jwt_data) || is_user_creator(jwt_data, &self.creator) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }
 impl UsesRLS for NodeRevision {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }
 impl UsesRLS for NodeTag {
     fn does_entry_pass_rls(&self, jwt_data: &Option<UserJWTData>) -> bool {
-        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+        is_user_admin(jwt_data) || do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
     }
 }
 
@@ -105,7 +105,7 @@ impl UsesRLS for CommandRun {
         is_user_admin(jwt_data) || (
             // public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
             self.public_base
-            && do_policies_allow_access(jwt_data, self.c_accessPolicyTargets)
+            && do_policies_allow_access(jwt_data, &self.c_accessPolicyTargets)
         )
     }
 }

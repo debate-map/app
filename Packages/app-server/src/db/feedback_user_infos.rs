@@ -31,7 +31,7 @@ impl From<Row> for UserInfo {
 	}
 }
 
-#[derive(Clone)] pub struct GQLSet_UserInfo { nodes: Vec<UserInfo> }
+#[derive(Clone)] pub struct GQLSet_UserInfo { pub nodes: Vec<UserInfo> }
 #[Object] impl GQLSet_UserInfo { async fn nodes(&self) -> &Vec<UserInfo> { &self.nodes } }
 impl GQLSet<UserInfo> for GQLSet_UserInfo {
     fn from(entries: Vec<UserInfo>) -> GQLSet_UserInfo { Self { nodes: entries } }

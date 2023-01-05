@@ -23,7 +23,7 @@ use super::users::User;
 
 wrap_slow_macros!{
 
-#[derive(Clone)] pub struct GQLSet_Node { nodes: Vec<Node> }
+#[derive(Clone)] pub struct GQLSet_Node { pub nodes: Vec<Node> }
 #[Object] impl GQLSet_Node { async fn nodes(&self) -> &Vec<Node> { &self.nodes } }
 impl GQLSet<Node> for GQLSet_Node {
     fn from(entries: Vec<Node>) -> GQLSet_Node { Self { nodes: entries } }

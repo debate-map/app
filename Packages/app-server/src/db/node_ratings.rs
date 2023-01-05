@@ -148,7 +148,7 @@ pub struct NodeRatingInput {
 	pub value: f64,
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeRating { nodes: Vec<NodeRating> }
+#[derive(Clone)] pub struct GQLSet_NodeRating { pub nodes: Vec<NodeRating> }
 #[Object] impl GQLSet_NodeRating { async fn nodes(&self) -> &Vec<NodeRating> { &self.nodes } }
 impl GQLSet<NodeRating> for GQLSet_NodeRating {
     fn from(entries: Vec<NodeRating>) -> GQLSet_NodeRating { Self { nodes: entries } }

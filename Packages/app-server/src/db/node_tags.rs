@@ -173,7 +173,7 @@ impl TagComp for TagComp_CloneHistory {
     fn get_node_ids(&self) -> Vec<String> { self.cloneChain.clone() }
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeTag { nodes: Vec<NodeTag> }
+#[derive(Clone)] pub struct GQLSet_NodeTag { pub nodes: Vec<NodeTag> }
 #[Object] impl GQLSet_NodeTag { async fn nodes(&self) -> &Vec<NodeTag> { &self.nodes } }
 impl GQLSet<NodeTag> for GQLSet_NodeTag {
     fn from(entries: Vec<NodeTag>) -> GQLSet_NodeTag { Self { nodes: entries } }

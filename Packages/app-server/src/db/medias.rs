@@ -63,7 +63,7 @@ pub struct MediaUpdates {
     pub description: FieldUpdate<String>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Media { nodes: Vec<Media> }
+#[derive(Clone)] pub struct GQLSet_Media { pub nodes: Vec<Media> }
 #[Object] impl GQLSet_Media { async fn nodes(&self) -> &Vec<Media> { &self.nodes } }
 impl GQLSet<Media> for GQLSet_Media {
     fn from(entries: Vec<Media>) -> GQLSet_Media { Self { nodes: entries } }

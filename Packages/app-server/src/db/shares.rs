@@ -58,7 +58,7 @@ pub struct ShareUpdates {
     pub mapView: FieldUpdate<JSONValue>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Share { nodes: Vec<Share> }
+#[derive(Clone)] pub struct GQLSet_Share { pub nodes: Vec<Share> }
 #[Object] impl GQLSet_Share { async fn nodes(&self) -> &Vec<Share> { &self.nodes } }
 impl GQLSet<Share> for GQLSet_Share {
     fn from(entries: Vec<Share>) -> GQLSet_Share { Self { nodes: entries } }

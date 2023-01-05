@@ -80,7 +80,7 @@ pub struct UserFollow {
 	pub markRatings_size: f64,
 }
 
-#[derive(Clone)] pub struct GQLSet_UserHidden { nodes: Vec<UserHidden> }
+#[derive(Clone)] pub struct GQLSet_UserHidden { pub nodes: Vec<UserHidden> }
 #[Object] impl GQLSet_UserHidden { async fn nodes(&self) -> &Vec<UserHidden> { &self.nodes } }
 impl GQLSet<UserHidden> for GQLSet_UserHidden {
     fn from(entries: Vec<UserHidden>) -> GQLSet_UserHidden { Self { nodes: entries } }

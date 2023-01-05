@@ -44,15 +44,16 @@ pub async fn handle_generic_gql_collection_request<'a,
     T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Clone,
     GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
-    let (lq_storage, jwt_data, table_name) = {
-        let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
-        let app_state = get_app_state_from_gql_ctx(ctx2).clone();
-        let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx2).await.unwrap_or_else(|_| None);
-        let lq_storage = app_state.live_queries.clone();
-        let table_name = table_name.to_owned();
-        (lq_storage, jwt_data, table_name)
-    };
-    
+    let app_state = get_app_state_from_gql_ctx(ctx).clone();
+    let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx).await.unwrap_or_else(|_| None);
+    let lq_storage = app_state.live_queries.clone();
+    let table_name = table_name.to_owned();
+    handle_generic_gql_collection_request_base(lq_storage, jwt_data, table_name, filter_json).await
+}
+pub async fn handle_generic_gql_collection_request_base<'a,
+    T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Clone,
+    GQLSetVariant: 'static + GQLSet<T> + Send + Clone + Sync,
+>(lq_storage: LQStorageArc, jwt_data: Option<UserJWTData>, table_name: String, filter_json: Option<FilterInput>) -> impl Stream<Item = Result<GQLSetVariant, SubError>> + 'a {
     let result = tokio::spawn(async move {
         let table_name = &table_name; // is this actually needed?
 
@@ -105,18 +106,20 @@ pub async fn handle_generic_gql_collection_request<'a,
     }).await.unwrap();
     result
 }
+
 pub async fn handle_generic_gql_doc_request<'a,
     T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
 >(ctx: &'a async_graphql::Context<'a>, table_name: &'a str, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
     //let ctx: &'static async_graphql::Context<'_> = Box::leak(Box::new(ctx));
-    let (lq_storage, jwt_data, table_name) = {
-        let ctx2 = ctx; // move ctx, so we know this block is the last usage of it
-        let app_state = get_app_state_from_gql_ctx(ctx2).clone();
-        let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx2).await.unwrap_or_else(|_| None);
-        let lq_storage = app_state.live_queries.clone();
-        let table_name = table_name.to_owned();
-        (lq_storage, jwt_data, table_name)
-    };
+    let app_state = get_app_state_from_gql_ctx(ctx).clone();
+    let jwt_data = try_get_user_jwt_data_from_gql_ctx(ctx).await.unwrap_or_else(|_| None);
+    let lq_storage = app_state.live_queries.clone();
+    let table_name = table_name.to_owned();
+    handle_generic_gql_doc_request_base(lq_storage, jwt_data, table_name, id).await
+}
+pub async fn handle_generic_gql_doc_request_base<'a,
+    T: 'static + UsesRLS + From<Row> + Serialize + DeserializeOwned + Send + Sync + Clone
+>(lq_storage: LQStorageArc, jwt_data: Option<UserJWTData>, table_name: String, id: String) -> impl Stream<Item = Result<Option<T>, SubError>> + 'a {
 
     let result = tokio::spawn(async move {
         let table_name = &table_name;

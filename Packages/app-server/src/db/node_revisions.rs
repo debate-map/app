@@ -78,7 +78,7 @@ pub struct MediaAttachment {
 	pub sourceChains: SourceChain[],
 }*/
 
-#[derive(Clone)] pub struct GQLSet_NodeRevision { nodes: Vec<NodeRevision> }
+#[derive(Clone)] pub struct GQLSet_NodeRevision { pub nodes: Vec<NodeRevision> }
 #[Object] impl GQLSet_NodeRevision { async fn nodes(&self) -> &Vec<NodeRevision> { &self.nodes } }
 impl GQLSet<NodeRevision> for GQLSet_NodeRevision {
     fn from(entries: Vec<NodeRevision>) -> GQLSet_NodeRevision { Self { nodes: entries } }

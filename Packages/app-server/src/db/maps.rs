@@ -74,7 +74,7 @@ pub struct MapUpdates {
     pub extras: FieldUpdate<JSONValue>,
 }
 
-#[derive(Clone)] pub struct GQLSet_Map { nodes: Vec<Map> }
+#[derive(Clone)] pub struct GQLSet_Map { pub nodes: Vec<Map> }
 #[Object] impl GQLSet_Map { async fn nodes(&self) -> &Vec<Map> { &self.nodes } }
 impl GQLSet<Map> for GQLSet_Map {
     fn from(entries: Vec<Map>) -> GQLSet_Map { Self { nodes: entries } }

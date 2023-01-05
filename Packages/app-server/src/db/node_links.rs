@@ -127,7 +127,7 @@ pub struct NodeLinkUpdates {
 	pub polarity: FieldUpdate_Nullable<Polarity>,
 }
 
-#[derive(Clone)] pub struct GQLSet_NodeLink { nodes: Vec<NodeLink> }
+#[derive(Clone)] pub struct GQLSet_NodeLink { pub nodes: Vec<NodeLink> }
 #[Object] impl GQLSet_NodeLink { async fn nodes(&self) -> &Vec<NodeLink> { &self.nodes } }
 impl GQLSet<NodeLink> for GQLSet_NodeLink {
     fn from(entries: Vec<NodeLink>) -> GQLSet_NodeLink { Self { nodes: entries } }

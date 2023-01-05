@@ -1,14 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}, anyhow::Error};
-use tracing::warn;
+use tracing::{warn, info};
 
-use crate::db::{access_policies::AccessPolicy, _shared::access_policy_target::AccessPolicyTarget};
+use crate::{db::{access_policies::AccessPolicy, _shared::access_policy_target::AccessPolicyTarget}, links::db_live_cache::{get_admin_user_ids_cached, get_access_policy_cached}};
 
 // sync:sql[RLSHelpers.sql]
 
-pub(super) fn is_user_creator(jwt_data: &Option<UserJWTData>, creator_id: String) -> bool {
-    jwt_data.as_ref().map(|a| a.id.o()) == Some(creator_id)
+pub(super) fn is_user_creator(jwt_data: &Option<UserJWTData>, creator_id: &str) -> bool {
+    if let Some(jwt_data) = jwt_data && jwt_data.id == creator_id { true } else { false }
 }
 
 pub(super) fn is_user_admin(jwt_data: &Option<UserJWTData>) -> bool {
@@ -20,7 +20,8 @@ pub(super) fn is_user_admin(jwt_data: &Option<UserJWTData>) -> bool {
 pub(super) fn try_is_user_admin(jwt_data: &Option<UserJWTData>) -> Result<bool, Error> {
     match jwt_data {
         Some(jwt_data) => {
-            let admin_user_ids: HashSet<String> = get_admin_user_ids_cached(jwt_data.id.o())?;
+            let admin_user_ids: HashSet<String> = get_admin_user_ids_cached()?;
+            info!("admin_user_ids: {:?} @me_id:{}", admin_user_ids, jwt_data.id);
             Ok(admin_user_ids.contains(&jwt_data.id.o()))
         },
         None => Ok(false),
@@ -47,13 +48,13 @@ pub(super) fn try_does_policy_allow_access(jwt_data: &Option<UserJWTData>, polic
     Ok(false)
 }
 
-pub(super) fn do_policies_allow_access(jwt_data: &Option<UserJWTData>, policy_targets: Vec<AccessPolicyTarget>) -> bool {
+pub(super) fn do_policies_allow_access(jwt_data: &Option<UserJWTData>, policy_targets: &Vec<AccessPolicyTarget>) -> bool {
     try_do_policies_allow_access(jwt_data, policy_targets).unwrap_or_else(|err| {
         warn!("Got error in try_do_policies_allow_access (should only happen rarely): {:?}", err);
         false
     })
 }
-pub(super) fn try_do_policies_allow_access(jwt_data: &Option<UserJWTData>, policy_targets: Vec<AccessPolicyTarget>) -> Result<bool, Error> {
+pub(super) fn try_do_policies_allow_access(jwt_data: &Option<UserJWTData>, policy_targets: &Vec<AccessPolicyTarget>) -> Result<bool, Error> {
     for target in policy_targets {
         if !does_policy_allow_access(jwt_data, &target.policy_id, &target.policy_subfield) {
             return Ok(false);

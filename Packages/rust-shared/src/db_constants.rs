@@ -2,6 +2,7 @@
 
 pub const SYSTEM_USER_ID: &'static str = "DM_SYSTEM_000000000001";
 pub const SYSTEM_USER_NAME: &'static str = "[system]";
+pub const SYSTEM_USER_EMAIL: &'static str = "debatemap@gmail.com";
 
 pub const SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME: &'static str = "Public, ungoverned (standard)";
 pub const SYSTEM_POLICY_PUBLIC_GOVERNED_NAME: &'static str = "Public, governed (standard)";

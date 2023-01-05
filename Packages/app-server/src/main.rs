@@ -7,6 +7,7 @@
 // needed atm for GQLError (see TODO.rs)
 #![feature(auto_traits)]
 #![feature(negative_impls)]
+#![feature(try_blocks)]
 
 // for lock-chain checks
 #![allow(incomplete_features)]
@@ -38,7 +39,7 @@ use rust_shared::{tokio};
 use store::storage::AppStateArc;
 use tracing::{error};
 
-use crate::{links::{pgclient::{self, start_pgclient_with_restart}}, globals::{set_up_globals}, router::start_router, store::storage::AppState};
+use crate::{links::{pgclient::{self, start_pgclient_with_restart}, db_live_cache::start_db_live_cache}, globals::{set_up_globals}, router::start_router, store::storage::AppState};
 
 // folders (we only use "folder_x/mod.rs" files one-layer deep; keeps the mod-tree structure out of main.rs, while avoiding tons of mod.rs files littering the codebase)
 mod db;
@@ -60,6 +61,9 @@ async fn main() {
 
     // start pg-client; this monitors the database for changes, and pushes those change-events to live-query system
     start_pgclient_with_restart(app_state.clone());
+
+    // start db-live-cache; this launches some live-queries for certain data (eg. list of admin user-ids, and access-policies), and keeps those results in memory
+    start_db_live_cache(app_state.clone());
 
     // start router; this handles all "external web requests"
     start_router(app_state).await;

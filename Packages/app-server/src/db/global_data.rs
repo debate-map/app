@@ -31,7 +31,7 @@ impl From<Row> for GlobalData {
 	}
 }
 
-#[derive(Clone)] pub struct GQLSet_GlobalData { nodes: Vec<GlobalData> }
+#[derive(Clone)] pub struct GQLSet_GlobalData { pub nodes: Vec<GlobalData> }
 #[Object] impl GQLSet_GlobalData { async fn nodes(&self) -> &Vec<GlobalData> { &self.nodes } }
 impl GQLSet<GlobalData> for GQLSet_GlobalData {
     fn from(entries: Vec<GlobalData>) -> GQLSet_GlobalData { Self { nodes: entries } }

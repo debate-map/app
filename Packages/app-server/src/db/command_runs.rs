@@ -58,7 +58,7 @@ impl From<Row> for CommandRun {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(Clone)] pub struct GQLSet_CommandRun { nodes: Vec<CommandRun> }
+#[derive(Clone)] pub struct GQLSet_CommandRun { pub nodes: Vec<CommandRun> }
 #[Object] impl GQLSet_CommandRun { async fn nodes(&self) -> &Vec<CommandRun> { &self.nodes } }
 impl GQLSet<CommandRun> for GQLSet_CommandRun {
     fn from(entries: Vec<CommandRun>) -> GQLSet_CommandRun { Self { nodes: entries } }

@@ -282,7 +282,7 @@ pub struct MigrationLogEntry {
 pub struct TestingLogEntry {
     pub text: String,
 }
-//#[derive(Clone, SimpleObject)] pub struct GQLSet_LogEntry { nodes: Vec<LogEntry> }
+//#[derive(Clone, SimpleObject)] pub struct GQLSet_LogEntry { pub nodes: Vec<LogEntry> }
 
 #[Subscription]
 impl SubscriptionShard_General {
