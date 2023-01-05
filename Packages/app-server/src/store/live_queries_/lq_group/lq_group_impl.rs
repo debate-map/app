@@ -213,64 +213,6 @@ impl LQGroupImpl {
         (first_open_index, result)
     }
 
-    // commented; moved to lq_group.rs
-    /*pub(super) async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&mut self, lq_key: LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
-        new_mtx!(mtx, "0:start loop", mtx_p);
-        let instance = self.get_or_create_lq_instance(&lq_key, Some(&mtx)).await.0;
-
-        mtx.section("2:get current result-set");
-        let result_entries = instance.last_entries.read().await.clone();
-
-        mtx.section("3:convert result-set to rust types");
-        let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries.clone());
-
-        mtx.section("4:get or create watcher, for the given stream");
-        //let watcher = entry.get_or_create_watcher(stream_id);
-        let (watcher, _watcher_is_new, new_watcher_count) = instance.get_or_create_watcher(stream_id, Some(&mtx), result_entries).await;
-        let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?}", new_watcher_count, lq_key.table_name, lq_key.filter);
-        debug!("LQ-watcher started. {}", watcher_info_str);
-        
-        (result_entries_as_type, watcher.clone())
-    }*/
-
-    /// Wrapper around `try_get_or_create_lq_instance`, which keeps "retrying" to get/create an lq-instance in loop, until it succeeds. (needed for certain callers, eg. graphql subscription requests)
-    /*pub(super) async fn get_or_create_lq_instance(&mut self, lq_key: &LQKey, parent_mtx: Option<&Mtx>) -> (Arc<LQInstance>, bool) {
-        new_mtx!(mtx, "1:start loop to get/create the lq-instance", parent_mtx);
-        let mut i = -1;
-        loop {
-            i += 1;
-            mtx.section(format!("X:start loop with i={i}"));
-            match self.try_get_or_create_lq_instance(&lq_key, Some(&mtx)).await {
-                // if instance was successfully retrieved/created, just return it
-                Ok(result) => {
-                    mtx.section(format!("X:got result! @lq_key:{}", result.0.lq_key)); // test
-                    return result;
-                },
-                // if we hit an error, retry in a bit
-                Err(err) => {
-                    error!("Hit error during attempt to get or create lqi, probably due to multi-threading contention. Retrying in a bit. Error: {}", err);
-                    mtx.section("X.1:waiting a bit, before retrying");
-                    time::sleep(Duration::from_millis(500)).await;
-                    continue;
-                }
-            };
-        }
-    }
-    pub(super) async fn try_get_or_create_lq_instance(&mut self, lq_key: &LQKey, mtx_p: Option<&Mtx>) -> Result<(Arc<LQInstance>, bool), Error> {
-        new_mtx!(mtx, "1:try to find lqi in lq-group's committed lqi's", mtx_p);
-        if let Some(lqi) = self.get_lq_instance_if_committed(&lq_key).await {
-            return Ok((lqi, false));
-        }
-
-        mtx.section("2:find lqi in an executing/buffering batch, or create it in the buffering-batch; then wait for its population as part of the batch");
-        let (lqi, just_initialized) = self.get_or_create_lq_instance_in_progressing_batch(&lq_key, None, Some(&mtx)).await?;
-        Ok((lqi, just_initialized))
-    }
-    async fn get_lq_instance_if_committed(&mut self, lq_key: &LQKey) -> Option<Arc<LQInstance>> {
-        let instance = self.meta.lqis_committed.get(lq_key);
-        instance.map(|a| a.clone())
-    }*/
-
     pub(super) async fn schedule_lqi_read_or_init_then_broadcast(&mut self, lq_key: &LQKey, force_queue_lqi: Option<Arc<LQInstance>>, parent_mtx: Option<&Mtx>) -> Option<Arc<LQInstance>> {
         new_mtx!(mtx, "1:start loop to get/create the lq-instance", parent_mtx);
         let mut i = -1;
@@ -342,7 +284,7 @@ impl LQGroupImpl {
 
                 //drop(lqis_awaiting_population);
                 //drop(meta);
-                check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_batches_x}>();
+                //check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQGroup_batches_x}>();
                 let mut batch = batch_lock.write().await;
                 let batch_gen = batch.get_generation();
                 
@@ -494,11 +436,11 @@ impl LQGroupImpl {
                         let old_watchers: Vec<(Uuid, LQEntryWatcher)> = old_lqi.entry_watchers.write().await.drain().collect_vec();
                         let old_watchers_count = old_watchers.len();
 
-                        check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_last_entries}>();
+                        //check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_last_entries}>();
                         let latest_entries = new_lqi.last_entries.read().await.clone();
 
                         let new_lqi = self.meta.lqis_committed.get(key).ok_or(anyhow!("New-lqi not found!")).unwrap();
-                        check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
+                        //check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
                         let mut new_watchers = new_lqi.entry_watchers.write().await;
                         for (old_stream_id, old_watcher) in old_watchers {
                             // since lqi that old-watcher was attached to might have had a not-yet-updated entries-set, send each watcher the latest entries-set
@@ -578,7 +520,7 @@ impl LQGroupImpl {
                 Some(a) => a,
                 None => return, // if entry already deleted, just ignore for now [maybe fixed after change to get_or_create_lq_instance?]
             };
-            check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
+            //check_lock_order::<{Lock::LQGroup_batches_meta}, {Lock::LQInstance_entry_watchers}>();
             let mut entry_watchers = lq_instance.entry_watchers.write().await;
             
             mtx.section("3:update entry_watchers, then remove lq_instance (if no watchers), then complete");

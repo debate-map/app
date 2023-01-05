@@ -150,11 +150,6 @@ impl LQBatch {
         mtx.section("6:commit the new result-sets");
         for (i, lq_results) in lq_results_converted.into_iter().enumerate() {
             let lqi = query_instance_vals.get(i).unwrap();
-            
-            /*let target_filter = QueryFilter::from_filter_input(&serde_json::json!({"id": {"equalTo": "IGJDsdE-TKGx-K7T4etO5Q"}})).unwrap();
-            let is_target_doc = lqi.lq_key.table_name == "nodeRevisions" && serde_json::to_string(&lqi.lq_key.filter).unwrap() == serde_json::to_string(&target_filter).unwrap();
-		    if is_target_doc { println!("Got initial result-set for docT1:{:?}", serde_json::to_string(&lq_results)); }*/
-
             lqi.set_last_entries::<{Lock::unknown_prior}>(lq_results).await;
         }
 

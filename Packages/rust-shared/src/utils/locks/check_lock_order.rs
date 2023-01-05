@@ -1,12 +1,10 @@
 #[derive(PartialEq, Eq)]
 pub enum Lock {
     unknown_prior = 0,
-    LQGroup_batches_meta = 1,
-    //LQGroup_lqis_awaiting_population = 2,
-    LQGroup_batches_x = 2,
-    //LQGroup_lqis_committed = 3,
-    LQInstance_entry_watchers = 3,
-    LQInstance_last_entries = 4, // sync this value with macro below
+    //LQGroup_groups_x = 1,
+    LQGroup_batches_x = 1,
+    LQInstance_entry_watchers = 2,
+    LQInstance_last_entries = 3, // sync this value with macro below
 }
 // these macros are needed for cases where comparisons are done in the "where" clause of a function (where Lock::X cannot be used)
 #[macro_export]
