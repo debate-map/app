@@ -175,10 +175,10 @@ export class NodeRevision {
 	@Field({$ref: "NodePhrasing_Embedded", ...MarkerForNonScalarField()})
 	phrasing = NodePhrasing.Embedded({text_base: ""});
 
-	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable())
+	/*@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable())
 	//@Field({type: "null"}) // user should not pass this in themselves
 	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
-	phrasing_tsvector?: any;
+	phrasing_tsvector?: any;*/
 
 	// todo: probably remove this, since the UI currently gives no way to edit it! (it seems superseded by NodePhrasing.note, which can be edited atm, but isn't shown in TitlePanel)
 	@DB((t, n)=>t.text(n).nullable())

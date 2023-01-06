@@ -62,7 +62,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 		id: ID(extras.id_override.unwrap_or(new_uuid_v4_as_b64())),
 		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
-		phrasing_tsvector: "<tbd>".to_owned(), // auto-set by db
+		//phrasing_tsvector: "<tbd>".to_owned(), // auto-set by db
 		replacedBy: None, // auto-set by db
 		// pass-through
 		node: revision_.node.ok_or(err_should_be_populated("revision.node"))?,

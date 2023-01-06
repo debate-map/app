@@ -45,9 +45,9 @@ pub struct NodeRevision {
     pub node: String,
     pub replacedBy: Option<String>, 
     pub phrasing: NodePhrasing_Embedded,
-    #[graphql(name = "phrasing_tsvector")]
+    /*#[graphql(name = "phrasing_tsvector")]
     #[serde(skip_serializing)] // makes-so when serializing the struct for saving to the db, this field is excluded (as it must be, since it's auto-generated)
-    pub phrasing_tsvector: String,
+    pub phrasing_tsvector: String,*/
     pub note: Option<String>,
     pub displayDetails: Option<JSONValue>,
     pub attachments: Vec<Attachment>,

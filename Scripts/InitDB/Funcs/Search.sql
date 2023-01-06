@@ -10,8 +10,9 @@ CREATE OR REPLACE FUNCTION global_search(
 			'standard' AS type,
 			ts_headline('public.english_nostop'::regconfig, pick_rev_phrasing(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
 		FROM app_public."nodeRevisions" rev
-		WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev_phrasing_to_tsv(rev.phrasing)
-		LIMIT slimit
+		WHERE "replacedBy" IS NULL
+			AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev.phrasing_tsvector
+		LIMIT (soffset + slimit)
 	),
 	matches_2 AS (
 		SELECT DISTINCT ON(node_id)
@@ -19,9 +20,10 @@ CREATE OR REPLACE FUNCTION global_search(
 			'quote' AS type,
 			ts_headline('public.english_nostop'::regconfig, attachment_quotes(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
 		FROM app_public."nodeRevisions" rev
-		WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ attachments_to_tsv(rev.attachments)
+		WHERE "replacedBy" IS NULL
+			AND websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev.attachments_tsvector
 			AND NOT (rev.node IN (SELECT node_id from matches_1))
-		LIMIT slimit - (SELECT COUNT(*) FROM matches_1) OFFSET (SELECT COUNT(*) FROM matches_1)
+		LIMIT (soffset + slimit) - (SELECT COUNT(*) FROM matches_1)
 	),
 	matches_3 AS (
 		SELECT DISTINCT ON(node_id)
@@ -29,14 +31,15 @@ CREATE OR REPLACE FUNCTION global_search(
 			phrasing.type AS type,
 			ts_headline('public.english_nostop'::regconfig, pick_phrasing(text_base, text_question), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS found_text
 		FROM app_public."nodePhrasings" AS phrasing
-		WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing_row_to_tsv(phrasing)
+		WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing.phrasing_tsvector
 			AND NOT (phrasing.node IN (SELECT node_id from matches_1))
 			AND NOT (phrasing.node IN (SELECT node_id from matches_2))
-		LIMIT slimit - (SELECT COUNT(*) FROM matches_1) - (SELECT COUNT(*) FROM matches_2) OFFSET (SELECT COUNT(*) FROM matches_1) + (SELECT COUNT(*) FROM matches_2)
+		LIMIT (soffset + slimit) - (SELECT COUNT(*) FROM matches_1) - (SELECT COUNT(*) FROM matches_2)
 	)
 	SELECT * from matches_1
 	UNION ALL (SELECT * from matches_2)
-	UNION ALL (SELECT * from matches_3);
+	UNION ALL (SELECT * from matches_3)
+	LIMIT slimit OFFSET soffset;
 $$ LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION local_search(
@@ -48,30 +51,30 @@ CREATE OR REPLACE FUNCTION local_search(
 			lrev AS (SELECT DISTINCT ON (node) node, id FROM app_public."nodeRevisions" ORDER BY node, "createdAt" DESC),
 			p AS (
 				SELECT rev.node AS node_id,
-					ts_rank(rev_phrasing_to_tsv(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS rank,
+					ts_rank(rev.phrasing_tsvector, websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS rank,
 					'standard' AS type,
 					ts_headline('public.english_nostop'::regconfig, pick_rev_phrasing(rev.phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
 					FROM app_public."nodeRevisions" rev
 					JOIN lrev USING (id)
 					JOIN d ON rev.node = d.id
-					WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev_phrasing_to_tsv(rev.phrasing)
+					WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev.phrasing_tsvector
 				UNION (
 					SELECT rev.node AS node_id,
-						ts_rank(attachments_to_tsv(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * quote_rank_factor AS rank,
+						ts_rank(rev.attachments_tsvector, websearch_to_tsquery('public.english_nostop'::regconfig, query)) * quote_rank_factor AS rank,
 						'quote' AS type,
 						ts_headline('public.english_nostop'::regconfig, attachment_quotes(rev.attachments), websearch_to_tsquery('public.english_nostop'::regconfig, query)) as found_text
 						FROM app_public."nodeRevisions" rev
 						JOIN lrev USING (id)
 						JOIN d ON rev.node = d.id
-						WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ attachments_to_tsv(rev.attachments)
+						WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ rev.attachments_tsvector
 				) UNION (
 					SELECT phrasing.node AS node_id,
-						ts_rank(phrasing_row_to_tsv(phrasing), websearch_to_tsquery('public.english_nostop'::regconfig, query)) * alt_phrasing_rank_factor AS rank,
+						ts_rank(phrasing.phrasing_tsvector, websearch_to_tsquery('public.english_nostop'::regconfig, query)) * alt_phrasing_rank_factor AS rank,
 						phrasing.type AS type,
 						ts_headline('public.english_nostop'::regconfig, pick_phrasing(text_base, text_question), websearch_to_tsquery('public.english_nostop'::regconfig, query)) AS found_text
 						FROM app_public."nodePhrasings" AS phrasing
 						JOIN d ON phrasing.node = d.id
-						WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing_row_to_tsv(phrasing)
+						WHERE websearch_to_tsquery('public.english_nostop'::regconfig, query) @@ phrasing.phrasing_tsvector
 				)
 			),
 			op AS (SELECT DISTINCT ON (node_id) node_id, rank, type, found_text FROM p ORDER BY node_id, rank DESC),

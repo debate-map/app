@@ -200,7 +200,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const form = GetNodeForm(node, path);
 		const titleKey: TitleKey = {[ClaimForm.negation]: "text_negation", [ClaimForm.question]: "text_question"}[form] || "text_base";
-		const newRevision = (Clone(node.current) as NodeRevision).ExcludeKeys("phrasing_tsvector").OmitUndefined(true);
+		const newRevision = (Clone(node.current) as NodeRevision).OmitUndefined(true);
 		if (newRevision.phrasing[titleKey] != edit_newTitle) {
 			newRevision.phrasing[titleKey] = edit_newTitle;
 

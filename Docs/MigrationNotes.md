@@ -24,9 +24,19 @@
 * 2\) Fixed that some `nodeLinks.orderKey` cells still had characters (from old lexorank system) that are invalid for the new fractional-indexing lib.
 	* DB response:
 		* 1\) Run the following SQL command: `UPDATE "nodeLinks" SET "orderKey" = replace(replace("orderKey", '^', 'Zza'), '_', 'Zzb')`
-* 3\) Added a `searchGlobally` graphql endpoint.
+* 3\) Added a `searchGlobally` graphql endpoint. (and made the subtree-search postgres-func more efficient)
 	* DB response:
 		* 1\) Apply the sql in `Search.sql`.
+* 3\) Merged `nodeRevisions.phrasing1_tsvector` field into the `phrasing_tsvector` field.
+	* DB response:
+		* 1\) Execute sql:
+			```sql
+			DROP INDEX app_public."nodeRevisions_phrasing_tsvector_idx";
+			ALTER TABLE app_public."nodeRevisions" DROP COLUMN phrasing_tsvector;
+			ALTER TABLE app_public."nodeRevisions" RENAME COLUMN phrasing1_tsvector TO phrasing_tsvector;
+			DROP INDEX IF EXISTS node_revisions_phrasing_en_idx;
+			CREATE INDEX node_revisions_phrasing_tsvector_idx ON app_public."nodeRevisions" USING gin (phrasing_tsvector) WHERE ("replacedBy" IS NULL);
+			```
 
 ### Pushed on 2023-01-04
 

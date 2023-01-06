@@ -93,7 +93,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		let results_nodeL2s = searchResultIDs.map(id=>GetNodeL2(id)).filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
 
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
-		// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms)
+		// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms [edit: maybe not true, with changed postgres funcs])
 		if (searchResults_partialTerms.length) {
 			for (const term of searchResults_partialTerms) {
 				results_nodeL2s = results_nodeL2s.filter(a=>{
