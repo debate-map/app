@@ -20,6 +20,9 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
     })
 }*/
 
+// NOTE: The `lexicon_fractional_index` crate can panic for certain invalid/unexpected inputs. (eg. strings containing "^" or "_")
+// We avoid the panics by just ensuring that all order-keys are generated according to the spec. (eg. only using the 62 alphanumeric characters)
+
 //#[derive(SimpleObject, InputObject)]
 pub struct OrderKey {
     pub key: String,

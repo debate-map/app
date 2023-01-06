@@ -33,6 +33,7 @@ begin;
 
 	\ir Funcs/General.sql
 	\ir Funcs/GraphTraversal.sql
+	\ir Funcs/Search.sql
 	\ir Funcs/RLSHelpers.sql
 
 	\ir FKConstraints.sql
