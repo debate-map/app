@@ -23,7 +23,7 @@
 		* 3\) Preferably, regenerate all the `c_accessPolicyTargets` cells by running `UPDATE ___XXX___ SET "c_accessPolicyTargets" = array[]::text[];` for the relevant tables. (see block in 2023-01-04 set)
 * 2\) Fixed that some `nodeLinks.orderKey` cells still had characters (from old lexorank system) that are invalid for the new fractional-indexing lib.
 	* DB response:
-		* 1\) Run the following SQL command: `UPDATE "nodeLinks" SET "orderKey" = replace(replace("orderKey", '^', 'Zz0'), '_', 'Zz1')`
+		* 1\) Run the following SQL command: `UPDATE "nodeLinks" SET "orderKey" = replace(replace("orderKey", '^', 'Zza'), '_', 'Zzb')`
 
 ### Pushed on 2023-01-04
 
