@@ -2,7 +2,7 @@ use futures_util::TryStreamExt;
 use rust_shared::async_graphql;
 use rust_shared::serde::Serialize;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
-use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::anyhow::{anyhow, Error, ensure, bail};
 use deadpool_postgres::{Transaction, Pool};
 use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::general_::extensions::ToOwnedV;
@@ -54,6 +54,16 @@ impl<'a> AccessorContext<'a> {
         Self::new_write_advanced_base(anchor, db_pool, user, bypass_rls, Some(false)).await
     }
     pub async fn new_write_advanced_base(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool, user: Option<UserJWTData>, bypass_rls: bool, only_validate: Option<bool>) -> Result<AccessorContext<'a>, Error> {
+        if !bypass_rls {
+            match &user {
+                None => bail!("Cannot create write transaction without a user JWT (ie. auth-data) supplied."),
+                Some(jwt_data) => {
+                    let jwt_read_only = jwt_data.readOnly.unwrap_or(false);
+                    ensure!(!jwt_read_only, "Cannot create write transaction using a read-only JWT.");
+                },
+            }
+        }
+        
         let tx = start_write_transaction(anchor, db_pool).await?;
         let only_validate = only_validate.unwrap_or(false);
 

@@ -57,7 +57,7 @@ pub struct GoogleUserInfoResult {
     pub sub: String, 
 }
 
-pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>, force_as_admin: bool) -> Result<UserJWTData, Error> {
+pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>, read_only: bool, force_as_admin: bool) -> Result<UserJWTData, Error> {
     let user_hiddens_with_email = get_user_hiddens(ctx, Some(profile.email.clone())).await?;
     match user_hiddens_with_email.len() {
         0 => {},
@@ -67,7 +67,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
             let existing_user = get_user(ctx, &existing_user_hidden.id).await
                 .map_err(|_| anyhow!(r#"Could not find user with id matching that of the entry in userHiddens ({}), which was found based on your provided account's email ({})."#, existing_user_hidden.id.as_str(), existing_user_hidden.email))?;
             info!("Also found user-data:{:?}", existing_user);
-            return Ok(UserJWTData { id: existing_user.id.0, email: existing_user_hidden.email.to_owned() });
+            return Ok(UserJWTData { id: existing_user.id.0, email: existing_user_hidden.email.to_owned(), readOnly: Some(read_only) });
         },
         _ => return Err(anyhow!("More than one user found with same email! This shouldn't happen.")),
     }
@@ -118,5 +118,5 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
     let user = get_user(ctx, new_user_id.as_str()).await?;
 	info!("User data:{:?}", user);
 
-	Ok(UserJWTData { id: user.id.0, email: user_hidden.email.to_owned() })
+	Ok(UserJWTData { id: user.id.0, email: user_hidden.email.to_owned(), readOnly: Some(read_only) })
 }

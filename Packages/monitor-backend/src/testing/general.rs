@@ -13,7 +13,7 @@ use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::time::{time_since_epoch_ms_i64, tokio_sleep, tokio_sleep_until, time_since_epoch_ms};
 use rust_shared::utils::type_aliases::JWTDuration;
 use rust_shared::{async_graphql, async_graphql::{SimpleObject, InputObject}};
-use rust_shared::db_constants::{SYSTEM_USER_ID};
+use rust_shared::db_constants::{SYSTEM_USER_ID, SYSTEM_USER_EMAIL};
 use rust_shared::flume::Sender;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::{self as rust_shared, serde_json, tokio, to_sub_err};
@@ -259,7 +259,7 @@ async fn execute_test_step<'a>(flattened_index: i64, step: TestStep, err_sender:
 
 async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONValue, Error> {
     // maybe temp; on every request, create a new JWT, authenticating this request as the system-user (less complicated, albeit not terribly elegant)
-    let user_data = UserJWTData { id: SYSTEM_USER_ID.o(), email: "debatemap@gmail.com".o() };
+    let user_data = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(false) };
     let jwt_duration = 60 * 60 * 24 * 7; // = 604800 seconds = 1 week
     let key = get_or_create_jwt_key_hs256().await.map_err(to_sub_err)?;
     let claims = Claims::with_custom_claims(user_data, JWTDuration::from_secs(jwt_duration.try_into().map_err(to_sub_err)?));

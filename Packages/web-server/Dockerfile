@@ -30,10 +30,10 @@ COPY Packages/web-server/ /dm_repo/Packages/web-server/
 # copy "dummy content" for each other non-shared package (needed for Rust to build the dependencies, without having to rope in the changing own-code of each package)
 COPY Packages/monitor-backend/Cargo.toml Packages/monitor-backend/Cargo.toml
 RUN mkdir Packages/monitor-backend/src/
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/monitor-backend/src/main.rs
+RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/monitor-backend/src/main.rs
 COPY Packages/app-server/Cargo.toml Packages/app-server/Cargo.toml
 RUN mkdir Packages/app-server/src/
-RUN echo "fn main() { println!(\"if you see this, the build broke\"); }" > Packages/app-server/src/main.rs
+RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/app-server/src/main.rs
 
 # now build everything
 WORKDIR /dm_repo/Packages/web-server

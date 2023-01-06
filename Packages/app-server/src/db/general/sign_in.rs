@@ -90,6 +90,7 @@ wrap_slow_macros!{
 pub struct SignInStartInput {
 	pub provider: String,
     pub jwtDuration: i64,
+    pub jwtReadOnly: Option<bool>,
     pub preferredUsername: Option<String>,
 }
 
@@ -121,7 +122,8 @@ impl SubscriptionShard_SignIn {
     /// * `jwtDuration` - How long until the generated JWT should expire, in seconds. [i64]
     /// * `preferredUsername` - Used by the "dev" provider as part of the constructed user-data. [string]
     async fn signInStart<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: SignInStartInput) -> impl Stream<Item = Result<SignInStartResult, SubError>> + 'a {
-        let SignInStartInput { provider, jwtDuration, preferredUsername } = input;
+        let SignInStartInput { provider, jwtDuration, jwtReadOnly, preferredUsername } = input;
+        let jwtReadOnly = jwtReadOnly.unwrap_or(false);
         
         let google_client_id = ClientId::new(env::var("CLIENT_ID").expect("Missing the CLIENT_ID environment variable."));
         let google_client_secret = ClientSecret::new(env::var("CLIENT_SECRET").expect("Missing the CLIENT_SECRET environment variable."));
@@ -181,7 +183,7 @@ impl SubscriptionShard_SignIn {
 
                     let mut anchor = DataAnchorFor1::empty(); // holds pg-client
                     let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, true).await.map_err(to_sub_err)?;
-                    let user_data = store_user_data_for_google_sign_in(fake_user_as_g_profile, &ctx, true).await.map_err(to_sub_err)?;
+                    let user_data = store_user_data_for_google_sign_in(fake_user_as_g_profile, &ctx, jwtReadOnly, true).await.map_err(to_sub_err)?;
                     info!("Committing transaction...");
                     ctx.tx.commit().await.map_err(to_sub_err)?;
 
@@ -240,7 +242,7 @@ impl SubscriptionShard_SignIn {
         
                                             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
                                             let ctx = AccessorContext::new_write(&mut anchor, gql_ctx, true).await.map_err(to_sub_err)?;
-                                            let user_data = store_user_data_for_google_sign_in(user_info, &ctx, false).await.map_err(to_sub_err)?;
+                                            let user_data = store_user_data_for_google_sign_in(user_info, &ctx, jwtReadOnly, false).await.map_err(to_sub_err)?;
                                             info!("Committing transaction...");
                                             ctx.tx.commit().await.map_err(to_sub_err)?;
         

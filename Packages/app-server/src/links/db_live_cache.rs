@@ -11,7 +11,7 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
     // keep the ADMIN_USER_IDS_CACHE up to date
     tokio::spawn(async move {
         loop {
-            let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o() };
+            let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
             let mut stream = handle_generic_gql_collection_request_base::<User, GQLSet_User>(app_state_c1.live_queries.clone(), Some(system_user_jwt), "users".o(), Some(json!({
                 // todo: once live-query system supports matching on jsonb subfields, use that here
             }))).await;
@@ -38,7 +38,7 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
     // keep the ACCESS_POLICIES_CACHE up to date
     tokio::spawn(async move {
         loop {
-            let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o() };
+            let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
             let mut stream = handle_generic_gql_collection_request_base::<AccessPolicy, GQLSet_AccessPolicy>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "accessPolicies".o(), None).await;
             if let Result::<(), Error>::Err(err) = try {
                 loop {

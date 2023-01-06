@@ -23,12 +23,13 @@ use crate::{async_graphql, serde_json, SubError, to_sub_err, to_sub_err_in_strea
 use tracing::{info, error, warn};
 use jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOptions};
 
-/// Rather than baking the permissions and such into the jwt, we store only the id and email (which are unchanging fields).
+/// Rather than baking the permissions and such into the jwt, we store only the id and email, which are unchanging fields. (well that and the `readOnly` flag, letting the user restrict the JWT's capabilities)
 /// We later use that minimal info to retrieve the full user-data from the database. (this way it's up-to-date if the user's username, permissions, etc. change)
 #[derive(Clone, Serialize, Deserialize)]
 pub struct UserJWTData {
     pub id: String,
     pub email: String,
+    pub readOnly: Option<bool>,
 }
 
 pub async fn get_or_create_jwt_key_hs256() -> Result<HS256Key, Error> {
