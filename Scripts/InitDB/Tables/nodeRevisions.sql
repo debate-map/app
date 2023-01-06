@@ -18,7 +18,7 @@ CREATE TABLE app_public."nodeRevisions" (
 ALTER TABLE ONLY app_public."nodeRevisions" ADD CONSTRAINT "v1_draft_nodeRevisions_pkey" PRIMARY KEY (id);
 ALTER TABLE app_public."nodeRevisions" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 
--- old (probably not needed anymore)
+-- extra index for local_search func 
 DROP INDEX IF EXISTS node_revisions_node_idx;
 CREATE INDEX node_revisions_node_idx ON app_public."nodeRevisions" USING btree (node);
 
