@@ -8,17 +8,12 @@ CREATE TABLE app_public."nodeRevisions" (
     "displayDetails" jsonb,
     attachments jsonb DEFAULT '[]'::json NOT NULL,
     "replacedBy" text,
-
-    --phrasing_tsvector tsvector GENERATED ALWAYS AS (jsonb_to_tsvector('public.english_nostop'::regconfig, phrasing, '["string"]'::jsonb)) STORED NOT NULL,
-    --phrasing_tsvector tsvector GENERATED ALWAYS AS (phrasings_to_tsv(text_base, text_question)) STORED NOT NULL,
-    phrasing_tsvector tsvector GENERATED ALWAYS AS (app_public.rev_phrasing_to_tsv(phrasing)) STORED NOT NULL,
-    attachments_tsvector tsvector GENERATED ALWAYS AS (app_public.attachments_to_tsv(attachments)) STORED NOT NULL,
     "c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app_public."nodeRevisions" ADD CONSTRAINT "v1_draft_nodeRevisions_pkey" PRIMARY KEY (id);
 ALTER TABLE app_public."nodeRevisions" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 
--- extra index for local_search func 
+-- extra index for local_search func
 DROP INDEX IF EXISTS node_revisions_node_idx;
 CREATE INDEX node_revisions_node_idx ON app_public."nodeRevisions" USING btree (node);
 
@@ -26,9 +21,9 @@ CREATE INDEX node_revisions_node_idx ON app_public."nodeRevisions" USING btree (
 --DROP INDEX IF EXISTS node_revisions_phrasing_tsvector_idx;
 --CREATE INDEX node_revisions_phrasing_tsvector_idx ON app_public."nodeRevisions" USING gin (phrasing_tsvector);
 DROP INDEX IF EXISTS node_revisions_phrasing_en_idx;
-CREATE INDEX node_revisions_phrasing_en_idx ON app_public."nodeRevisions" USING gin (phrasing_tsvector) WHERE ("replacedBy" IS NULL);
+CREATE INDEX node_revisions_phrasing_en_idx ON app_public."nodeRevisions" USING gin (app_public.rev_phrasing_to_tsv(phrasing)) WHERE ("replacedBy" IS NULL);
 DROP INDEX IF EXISTS node_revisions_quotes_en_idx;
-CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" USING gin (attachments_tsvector) WHERE ("replacedBy" IS NULL);
+CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" USING gin (app_public.attachments_to_tsv(attachments)) WHERE ("replacedBy" IS NULL);
 
 CREATE OR REPLACE FUNCTION app_public.after_insert_node_revision() RETURNS TRIGGER LANGUAGE plpgsql AS $$
 DECLARE rev_id text;

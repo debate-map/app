@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION descendants(root text, max_depth INTEGER DEFAULT 5)
+CREATE OR REPLACE FUNCTION app_public.descendants(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 	SELECT root as id, null as link_id, 0 as depth
 	UNION ALL (
@@ -23,7 +23,7 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		ORDER BY min(depth), min(order_key), link_id)
 $$;
 -- todo: update this
-CREATE OR REPLACE FUNCTION ancestors(root text, max_depth INTEGER DEFAULT 5)
+CREATE OR REPLACE FUNCTION app_public.ancestors(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 	SELECT root as id, 0 as depth
 	UNION ALL (
@@ -48,7 +48,7 @@ RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		ORDER BY depth, id
 	)
 $$;
-CREATE OR REPLACE FUNCTION shortest_path(source text, dest text)
+CREATE OR REPLACE FUNCTION app_public.shortest_path(source text, dest text)
 RETURNS TABLE(node_id text, link_id text) LANGUAGE plpgsql STABLE AS $$
 DECLARE
 	node_ids text[];
@@ -80,7 +80,7 @@ END
 $$;
 
 -- variant of descendants that tries to order the results in a way that mimics the render-order in debate-map (ie. traverse down at each step doing: stable-sort by link-id, then stable-sort by order-key)
-CREATE OR REPLACE FUNCTION descendants2(root text, max_depth INTEGER DEFAULT 5)
+CREATE OR REPLACE FUNCTION app_public.descendants2(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 	WITH sub AS (
 	SELECT null as parent_id, root as child_id, 0 as depth, null as order_key, null as link_id
