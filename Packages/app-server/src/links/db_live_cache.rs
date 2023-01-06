@@ -73,6 +73,6 @@ pub fn get_admin_user_ids_cached() -> Result<HashSet<String>, Error> {
 static ACCESS_POLICIES_CACHE: Lazy<Mutex<HashMap<String, AccessPolicy>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 pub fn get_access_policy_cached(policy_id: &str) -> Result<AccessPolicy, Error> {
     let cache = ACCESS_POLICIES_CACHE.lock().map_err(to_anyhow)?;
-    let result = cache.get(policy_id).cloned().ok_or_else(|| anyhow!("Policy not found in cache"))?;
+    let result = cache.get(policy_id).cloned().ok_or_else(|| anyhow!("Policy \"{}\" not found in cache. @policies_in_cache_count:{}", policy_id, cache.len()))?;
     Ok(result)
 }

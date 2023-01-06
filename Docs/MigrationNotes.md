@@ -7,11 +7,26 @@
 
 ## Main series
 
+### Pushed on 2023-01-06
+
+* 1\) Changed the access-policy-triggers to omit duplicate access-policy-ids in its generated arrays and to exclude "empty targets" (eg. due to node-tags with refs to nodes that no longer exist); also, updated the `do_policies_allow_access` postgres function to reflect the fact that `nodeTags` can be "left without any policy-targets".
+	* DB response:
+		* 1\) Added helper function, by executing sql:
+			```sql
+			create or replace function distinct_array(a text[]) returns text[] as $$
+				select array (
+					select distinct v from unnest(a) as b(v)
+				)
+			$$ language sql;
+			```
+		* 2\) Re-apply the sql in `AccessPolicyTriggers.sql` and `RLSHelpers.sql`.
+		* 3\) Preferably, regenerate all the `c_accessPolicyTargets` cells by running `UPDATE ___XXX___ SET "c_accessPolicyTargets" = array[]::text[];` for the relevant tables. (see block in 2023-01-04 set)
+
 ### Pushed on 2023-01-04
 
-* 1\) Added the field `c_accessPolicyTargets` to tables: `commandRuns, mapNodeEdits, nodeLinks, nodePhrasings, nodeRatings, nodeRevisions, nodeTags`
+* 1\) Added the field `c_accessPolicyTargets` (and added non-null and non-empty constraints for it) to tables: `commandRuns, mapNodeEdits, nodeLinks, nodePhrasings, nodeRatings, nodeRevisions, nodeTags`
 	* DB response:
-		* 1\) Execute sql:
+		* 1\) Execute sql: (if this block takes forever to execute, first disable the RLS policies of the tables-to-modify, and retry)
 			```sql
 			-- start with the columns able to be null (so other steps can be completed)
 			BEGIN;
@@ -41,7 +56,7 @@
 				ALTER TABLE app_public."nodePhrasings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 				ALTER TABLE app_public."nodeRatings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 				ALTER TABLE app_public."nodeRevisions" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				ALTER TABLE app_public."nodeTags" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				--ALTER TABLE app_public."nodeTags" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 			COMMIT;
 			```
 * 2\) Updated the postgres rls-helper functions and many of the rls policies.

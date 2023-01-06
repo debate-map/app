@@ -39,8 +39,10 @@ declare
 begin 
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
 
-	-- the `c_accessPolicyTargets` fields should always have at least one entry in them; if not, something is wrong, so play it safe and reject access (edit: now ensured by constraint)
-	--IF cardinality(policy_targets) = 0 THEN return false; END IF;
+	-- The `c_accessPolicyTargets` fields should always have at least one entry in them; if not, something is wrong, so play it safe and reject access.
+	-- (Most tables enforce non-emptiness of this field with a row constraint, but nodeTags is an exception; its associated nodes may be deleted, leaving it without any targets.)
+	-- (This line thus serves to prevent "orphaned node-tags" from being visible by non-admins, as well as a general-purpose "second instance" of the non-emptiness check.)
+	IF cardinality(policy_targets) = 0 THEN return false; END IF;
 
 	foreach policy_target in array policy_targets loop
 		policy_id := (SELECT split_part(policy_target, ':', 1));

@@ -13,8 +13,8 @@ CREATE TABLE app_public."nodePhrasings" (
 	phrasing_tsvector tsvector GENERATED ALWAYS AS (app_public.phrasings_to_tsv(text_base, text_question)) STORED NOT NULL,
 	"c_accessPolicyTargets" text[] NOT NULL
 );
-ALTER TABLE ONLY app_public."nodePhrasings"
-	ADD CONSTRAINT "v1_draft_nodePhrasings_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY app_public."nodePhrasings" ADD CONSTRAINT "v1_draft_nodePhrasings_pkey" PRIMARY KEY (id);
+ALTER TABLE app_public."nodePhrasings" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 
 CREATE INDEX node_phrasings_text_en_idx ON app_public."nodePhrasings" USING gin (phrasing_tsvector);
 -- old (probably not needed anymore)

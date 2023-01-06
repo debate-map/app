@@ -69,6 +69,8 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteN
 	ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE node = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "nodeRevisions" WHERE node = $1"#, &[&nodeID]).await?;
+
+	// todo: for any tag where this node is a member, update it to remove this node's id from the `nodes` array (and possibly other fields too)
 	// todo: delete any tags for which this node is the only associated node
 
 	delete_db_entry_by_id(&ctx, "nodes".to_owned(), nodeID.to_string()).await?;

@@ -1,5 +1,5 @@
 use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell};
-use rust_shared::{anyhow::{bail, Context, Error}, async_graphql, serde_json, tokio, utils::{type_aliases::JSONValue, general_::extensions::ToOwnedV, auth::jwt_utils_base::UserJWTData}, new_mtx, flume};
+use rust_shared::{anyhow::{bail, Context, Error}, async_graphql, serde_json, tokio, utils::{type_aliases::JSONValue, general_::extensions::ToOwnedV, auth::jwt_utils_base::UserJWTData}, new_mtx, flume, to_sub_err, domains::DomainsConstants};
 use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
 use rust_shared::flume::{Sender, Receiver};
@@ -11,6 +11,7 @@ use rust_shared::serde_json::{json, Map};
 use rust_shared::tokio_postgres::{Client, Row, types::ToSql};
 use rust_shared::uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
+use tracing::error;
 
 use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, live_queries_::lq_key::LQKey, storage::{AppStateArc, get_app_state_from_gql_ctx}}, utils::{type_aliases::{PGClientObject}, db::rls::rls_applier::{RLSApplier}}, db::general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx};
 use super::{filter::{QueryFilter, FilterInput}, rls::{rls_applier::{self}, rls_policies::UsesRLS}};
@@ -25,19 +26,22 @@ pub trait GQLSet<T> {
     fn nodes(&self) -> &Vec<T>;
 }
 
-pub fn json_values_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<JSONValue>) -> Vec<T> {
-    json_entries.into_iter().map(|a|
-        //serde_json::from_value(a).unwrap()
-        serde_json::from_value(a.clone())
-            .with_context(|| serde_json::to_string(&a).unwrap_or("[cannot stringify]".to_owned())).unwrap()
-    ).collect()
+pub fn json_values_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<JSONValue>) -> Result<Vec<T>, Error> {
+    let mut result = Vec::new();
+    for entry in json_entries {
+        let entry = serde_json::from_value(entry.clone()).with_context(|| format!("JSON structure failed to deserialize:{}", entry.to_string()))?;
+        result.push(entry);
+    }
+    Ok(result)
 }
-pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<Map<String, JSONValue>>) -> Vec<T> {
-    json_entries.into_iter().map(|a|
-        //serde_json::from_value(serde_json::Value::Object(a)).unwrap()
-        serde_json::from_value(serde_json::Value::Object(a.clone()))
-            .with_context(|| serde_json::to_string(&a).unwrap_or("[cannot stringify]".to_owned())).unwrap()
-    ).collect()
+pub fn json_maps_to_typed_entries<T: From<Row> + Serialize + DeserializeOwned>(json_entries: Vec<Map<String, JSONValue>>) -> Result<Vec<T>, Error> {
+    let mut result = Vec::new();
+    for entry in json_entries {
+        let entry = serde_json::Value::Object(entry);
+        let entry = serde_json::from_value(entry.clone()).with_context(|| format!("JSON structure failed to deserialize:{}", entry.to_string()))?;
+        result.push(entry);
+    }
+    Ok(result)
 }
 
 pub async fn handle_generic_gql_collection_request<'a,
@@ -61,7 +65,8 @@ pub async fn handle_generic_gql_collection_request_base<'a,
         let stream_for_error = |err: Error| {
             //return stream::once(async { Err(err) });
             let base_stream = async_stream::stream! {
-                yield Err(SubError::new(err.to_string()));
+                //yield Err(SubError::new(err.to_string()));
+                yield Err(to_sub_err(err));
             };
             let (s1, _r1): (Sender<DropLQWatcherMsg>, Receiver<DropLQWatcherMsg>) = flume::unbounded();
             Stream_WithDropListener::new(base_stream, table_name, QueryFilter::empty(), Uuid::new_v4(), s1)
@@ -75,7 +80,17 @@ pub async fn handle_generic_gql_collection_request_base<'a,
             /*let mut stream = GQLResultStream::new(storage_wrapper.clone(), collection_name, filter.clone(), GQLSetVariant::from(entries));
             let stream_id = stream.id.clone();*/
             let stream_id = Uuid::new_v4();
-            let (entries_as_type, watcher) = lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await;
+            let (entries_as_type, watcher) = match lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await {
+                Ok(a) => a,
+                Err(err) => {
+                    // an error in start_lq_watcher is likely from failed data-deserialization; since user may not have permission to access all entries (since this is before filtering), only return a generic error in production
+                    if DomainsConstants::new().on_server_and_prod {
+                        error!("{:?}", err);
+                        return stream_for_error(Error::msg("Failed to start live query watcher. The full error has been logged on the app-server."));
+                    }
+                    return stream_for_error(err);
+                },
+            };
 
             (entries_as_type, stream_id, lq_storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
         };
@@ -93,7 +108,7 @@ pub async fn handle_generic_gql_collection_request_base<'a,
                     Ok(a) => a,
                     Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
                 };
-                let next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
+                let next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries).map_err(to_sub_err)?;
 
                 // only yield next-result if it has changed after filtering (otherwise seeing an "unchanged update" leaks knowledge that a hidden, matching entry was changed)
                 if let (next_result, changed) = rls_applier.filter_next_result_for_collection(next_entries_as_type) && changed {
@@ -127,7 +142,8 @@ pub async fn handle_generic_gql_doc_request_base<'a,
         let stream_for_error = |err: Error| {
             //return stream::once(async { Err(err) });
             let base_stream = async_stream::stream! {
-                yield Err(SubError::new(err.to_string()));
+                //yield Err(SubError::new(err.to_string()));
+                yield Err(to_sub_err(err));
             };
             let (s1, _r1): (Sender<DropLQWatcherMsg>, Receiver<DropLQWatcherMsg>) = flume::unbounded();
             Stream_WithDropListener::<'static, Result<Option<T>, SubError>>::new(base_stream, table_name, QueryFilter::empty(), Uuid::new_v4(), s1)
@@ -144,7 +160,17 @@ pub async fn handle_generic_gql_doc_request_base<'a,
             let stream_id = stream.id.clone();*/
             let stream_id = Uuid::new_v4();
             //let (mut entries_as_type, watcher) = storage.start_lq_watcher::<T>(table_name, &filter, stream_id, ctx, Some(&mtx)).await;
-            let (mut entries_as_type, watcher) = lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await;
+            let (mut entries_as_type, watcher) = match lq_storage.start_lq_watcher::<T>(&lq_key, stream_id, Some(&mtx)).await {
+                Ok(a) => a,
+                Err(err) => {
+                    // an error in start_lq_watcher is likely from failed data-deserialization; since user may not have permission to access all entries (since this is before filtering), only return a generic error in production
+                    if DomainsConstants::new().on_server_and_prod {
+                        error!("{:?}", err);
+                        return stream_for_error(Error::msg("Failed to start live query watcher. The full error has been logged to the app-server."));
+                    }
+                    return stream_for_error(err);
+                },
+            };
             let entry_as_type = entries_as_type.pop();
 
             (entry_as_type, stream_id, lq_storage.channel_for_lq_watcher_drops__sender_base.clone(), watcher.new_entries_channel_receiver.clone())
@@ -163,7 +189,7 @@ pub async fn handle_generic_gql_doc_request_base<'a,
                     Ok(a) => a,
                     Err(_) => break, // if unwrap fails, break loop (since senders are dead anyway)
                 };
-                let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries);
+                let mut next_entries_as_type: Vec<T> = json_maps_to_typed_entries(next_entries).map_err(to_sub_err)?;
                 let next_entry_as_type: Option<T> = next_entries_as_type.pop();
 
                 // only yield next-result if it has changed after filtering (otherwise seeing an "unchanged update" leaks knowledge that a hidden, matching entry was changed)

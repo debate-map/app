@@ -14,8 +14,8 @@ CREATE TABLE app_public."nodeRevisions" (
     attachments_tsvector tsvector GENERATED ALWAYS AS (app_public.attachments_to_tsv(attachments)) STORED NOT NULL,
     "c_accessPolicyTargets" text[] NOT NULL
 );
-ALTER TABLE ONLY app_public."nodeRevisions"
-    ADD CONSTRAINT "v1_draft_nodeRevisions_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY app_public."nodeRevisions" ADD CONSTRAINT "v1_draft_nodeRevisions_pkey" PRIMARY KEY (id);
+ALTER TABLE app_public."nodeRevisions" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 
 CREATE INDEX node_revisions_phrasing_en_idx ON app_public."nodeRevisions" USING gin (phrasing1_tsvector) WHERE ("replacedBy" IS NULL);
 CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" USING gin (attachments_tsvector) WHERE ("replacedBy" IS NULL);

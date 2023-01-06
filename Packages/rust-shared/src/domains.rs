@@ -3,7 +3,6 @@ use std::env;
 use anyhow::Error;
 use reqwest::Url;
 
-
 pub struct DomainsConstants {
     pub prod_domain: &'static str,
     pub recognized_web_server_hosts: &'static [&'static str],

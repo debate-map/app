@@ -14,8 +14,8 @@ CREATE TABLE app_public."nodeLinks" (
     "orderKey" text DEFAULT '0|Vzzzzz:'::text NOT NULL COLLATE pg_catalog."C",
 	"c_accessPolicyTargets" text[] NOT NULL
 );
-ALTER TABLE ONLY app_public."nodeLinks"
-    ADD CONSTRAINT "v1_draft_nodeLinks_pkey" PRIMARY KEY (id);
+ALTER TABLE ONLY app_public."nodeLinks" ADD CONSTRAINT "v1_draft_nodeLinks_pkey" PRIMARY KEY (id);
+ALTER TABLE app_public."nodeLinks" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 
 CREATE INDEX nodelinks_parent_child ON app_public."nodeLinks" USING btree (parent, child);
 

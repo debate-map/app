@@ -27,6 +27,13 @@ impl<'de> Deserialize<'de> for AccessPolicyTarget {
     fn deserialize<D>(deserializer: D) -> Result<AccessPolicyTarget, D::Error> where D: Deserializer<'de> {
         let str_val = String::deserialize(deserializer)?;
         let (policy_id, policy_field) = str_val.split_once(":").ok_or_else(|| serde::de::Error::custom("AccessPolicyTarget must be in the format `access_policy_id:policy_subfield`"))?;
+
+        // ensure that policy_id substring is a valid UUID/slugid
+        // todo: probably change `policy_id` field to custom type that enforces this for itself
+        if policy_id.len() != 22 {
+            return Err(serde::de::Error::custom(format!("The policy-id within the access-policy-target must be a valid slugid; for example, its length must be 22 characters. Actual length:{}", policy_id.len())));
+        }
+        
         Ok(AccessPolicyTarget::new(policy_id.o(), policy_field))
     }
 }

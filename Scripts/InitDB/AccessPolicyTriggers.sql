@@ -8,10 +8,10 @@ CREATE OR REPLACE FUNCTION app_public.map_node_edits_refresh_targets_for_self() 
 		OR OLD."map" IS DISTINCT FROM NEW."map"
 		OR OLD."node" IS DISTINCT FROM NEW."node"
 	) THEN
-		NEW."c_accessPolicyTargets" = array[
+		NEW."c_accessPolicyTargets" = distinct_array(array[
 			(SELECT concat((SELECT "accessPolicy" FROM "maps" WHERE id = NEW."map"), ':maps')),
 			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW."node"), ':nodes'))
-		];
+		]);
 	END IF;
 	RETURN NEW;
 END $$;
@@ -24,10 +24,10 @@ CREATE OR REPLACE FUNCTION app_public.node_links_refresh_targets_for_self() RETU
 		OR OLD."parent" IS DISTINCT FROM NEW."parent"
 		OR OLD."child" IS DISTINCT FROM NEW."child"
 	) THEN
-		NEW."c_accessPolicyTargets" = array[
+		NEW."c_accessPolicyTargets" = distinct_array(array[
 			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW."parent"), ':nodes')),
 			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW."child"), ':nodes'))
-		];
+		]);
 	END IF;
 	RETURN NEW;
 END $$;
@@ -39,9 +39,9 @@ CREATE OR REPLACE FUNCTION app_public.node_phrasings_refresh_targets_for_self() 
 		TG_OP = 'INSERT' OR cardinality(NEW."c_accessPolicyTargets") = 0
 		OR OLD."node" IS DISTINCT FROM NEW."node"
 	) THEN
-		NEW."c_accessPolicyTargets" = array[
+		NEW."c_accessPolicyTargets" = distinct_array(array[
 			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW."node"), ':nodes'))
-		];
+		]);
 	END IF;
 	RETURN NEW;
 END $$;
@@ -54,10 +54,10 @@ CREATE OR REPLACE FUNCTION app_public.node_ratings_refresh_targets_for_self() RE
 		OR OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy"
 		OR OLD."node" IS DISTINCT FROM NEW."node"
 	) THEN
-		NEW."c_accessPolicyTargets" = array[
+		NEW."c_accessPolicyTargets" = distinct_array(array[
 			(SELECT concat(NEW."accessPolicy", ':nodeRatings')),
 			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW."node"), ':nodes'))
-		];
+		]);
 	END IF;
 	RETURN NEW;
 END $$;
@@ -69,9 +69,9 @@ CREATE OR REPLACE FUNCTION app_public.node_revisions_refresh_targets_for_self() 
 		TG_OP = 'INSERT' OR cardinality(NEW."c_accessPolicyTargets") = 0
 		OR OLD."node" IS DISTINCT FROM NEW."node"
 	) THEN
-		NEW."c_accessPolicyTargets" = array[
+		NEW."c_accessPolicyTargets" = distinct_array(array[
 			(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = NEW."node"), ':nodes'))
-		];
+		]);
 	END IF;
 	RETURN NEW;
 END $$;
@@ -83,11 +83,13 @@ CREATE OR REPLACE FUNCTION app_public.node_tags_refresh_targets_for_self() RETUR
 		TG_OP = 'INSERT' OR cardinality(NEW."c_accessPolicyTargets") = 0
 		OR OLD."nodes" IS DISTINCT FROM NEW."nodes"
 	) THEN
-		NEW."c_accessPolicyTargets" = (
-			SELECT array_agg(
+		NEW."c_accessPolicyTargets" = distinct_array(
+			(SELECT array_agg(
 				(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = node_id), ':nodes'))
-			) FROM unnest(NEW."nodes") AS node_id
+			) FROM unnest(NEW."nodes") AS node_id)
 		);
+		-- the delete_node command currently does not update/delete associated node-tags, so we have to filter out "empty targets", due to refs to nodes that no longer exist
+		NEW."c_accessPolicyTargets" = array_remove(NEW."c_accessPolicyTargets", ':nodes');
 	END IF;
 	RETURN NEW;
 END $$;

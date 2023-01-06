@@ -36,6 +36,7 @@ use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, Stream, StreamExt, FutureExt};
 use rust_shared::uuid::Uuid;
+use tracing::error;
 
 use crate::store::live_queries_::lq_key::LQKey;
 use crate::utils::db::filter::{entry_matches_filter, QueryFilter};
@@ -110,7 +111,7 @@ impl LQStorage {
     }
 
     /// Called from handlers.rs
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, lq_key: &LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, lq_key: &LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> Result<(Vec<T>, LQEntryWatcher), Error> {
         new_mtx!(mtx, "1:get or create query-group", mtx_p);
         let group = self.get_or_create_query_group(lq_key).await;
         mtx.section("2:start lq-watcher");

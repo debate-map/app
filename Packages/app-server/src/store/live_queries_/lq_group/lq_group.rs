@@ -174,7 +174,7 @@ impl LQGroup {
             }
         }
     }
-    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, lq_key: &LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> (Vec<T>, LQEntryWatcher) {
+    pub async fn start_lq_watcher<'a, T: From<Row> + Serialize + DeserializeOwned>(&self, lq_key: &LQKey, stream_id: Uuid, mtx_p: Option<&Mtx>) -> Result<(Vec<T>, LQEntryWatcher), Error> {
         new_mtx!(mtx, "1:get or create lqi", mtx_p);
         /*new_mtx!(mtx2, "<proxy>", Some(&mtx));
         let lqi = self.get_initialized_lqi_for_key(&lq_key, Some(tx2)).await;*/
@@ -184,7 +184,11 @@ impl LQGroup {
         let result_entries = lqi.last_entries.read().await.clone();
 
         mtx.section("3:convert result-set to rust types");
-        let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries.clone());
+        let result_entries_as_type: Vec<T> = json_maps_to_typed_entries(result_entries.clone()).map_err(|err| {
+            let err_new = err.context("Got an error within start_lq_watcher -> json_maps_to_typed_entries, implying invalid/corrupted field data in database.");
+            error!("{:?}", err_new);
+            err_new
+        })?;
 
         mtx.section("4:get or create watcher, for the given stream");
         //let watcher = entry.get_or_create_watcher(stream_id);
@@ -193,7 +197,7 @@ impl LQGroup {
         let watcher_info_str = format!("@watcher_count_for_entry:{} @collection:{} @filter:{:?} @entries_count:{}", new_watcher_count, lq_key.table_name, lq_key.filter, entries_count);
         debug!("LQ-watcher started. {}", watcher_info_str);
 
-        (result_entries_as_type, watcher.clone())
+        Ok((result_entries_as_type, watcher.clone()))
     }
 
     pub fn drop_lq_watcher(&self, lq_key: LQKey, stream_id: Uuid) {

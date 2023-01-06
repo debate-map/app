@@ -1,4 +1,4 @@
--- helper functions
+-- functions for uuid encode/decode
 --CREATE OR REPLACE FUNCTION encode_uuid(id UUID) RETURNS varchar(22) LANGUAGE SQL IMMUTABLE AS $$1
 CREATE OR REPLACE FUNCTION encode_uuid(id UUID) RETURNS varchar(22) LANGUAGE SQL IMMUTABLE AS $$
 	SELECT replace(replace(
@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION decode_uuid(id text) RETURNS UUID LANGUAGE SQL IMMUTA
 		replace(replace(id, '_', '/'), '-', '+') || substr('==', 1, (33-length(id)) % 3), 'base64'), 'hex')::uuid;
 $$;
 
--- search-related indexes/functions
+-- search-related functions
 CREATE OR REPLACE FUNCTION rev_row_quote_to_tsv(r app_public."nodeRevisions") RETURNS tsvector AS $$
 	SELECT attachments_to_tsv(r.attachments);
 $$ LANGUAGE SQL STABLE;
@@ -20,3 +20,10 @@ $$ LANGUAGE SQL STABLE;
 CREATE OR REPLACE FUNCTION rev_row_phrasing_to_tsv(p app_public."nodeRevisions") RETURNS tsvector AS $$
 	SELECT rev_phrasing_to_tsv(p.phrasing)
 $$ LANGUAGE SQL STABLE;
+
+-- array-related functions
+create or replace function distinct_array(a text[]) returns text[] as $$
+	select array (
+		select distinct v from unnest(a) as b(v)
+	)
+$$ language sql;
