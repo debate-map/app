@@ -104,7 +104,7 @@ CREATE TRIGGER node_tags_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app
 CREATE OR REPLACE FUNCTION app_public.maps_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
 	IF (OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy") THEN
 		-- simply cause the associated rows in the other tables to have their triggers run again
-		UPDATE app_public."mapNodeEdits" SET "c_accessPolicyTargets" = array[] WHERE "map" = NEW.id;
+		UPDATE app_public."mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[] WHERE "map" = NEW.id;
 	END IF;
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
 END $$;
@@ -114,12 +114,12 @@ CREATE TRIGGER maps_refresh_targets_for_others AFTER UPDATE ON app_public."maps"
 CREATE OR REPLACE FUNCTION app_public.nodes_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
 	IF (OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy") THEN
 		-- simply cause the associated rows in the other tables to have their triggers run again
-		UPDATE app_public."mapNodeEdits" SET "c_accessPolicyTargets" = array[] WHERE "node" = NEW.id;
-		UPDATE app_public."nodeLinks" SET "c_accessPolicyTargets" = array[] WHERE "node" = NEW.id;
-		UPDATE app_public."nodePhrasings" SET "c_accessPolicyTargets" = array[] WHERE "node" = NEW.id;
-		UPDATE app_public."nodeRatings" SET "c_accessPolicyTargets" = array[] WHERE "node" = NEW.id;
-		UPDATE app_public."nodeRevisions" SET "c_accessPolicyTargets" = array[] WHERE "node" = NEW.id;
-		UPDATE app_public."nodeTags" SET "c_accessPolicyTargets" = array[] WHERE "node" = NEW.id;
+		UPDATE app_public."mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
+		UPDATE app_public."nodeLinks" SET "c_accessPolicyTargets" = array[]::text[] WHERE "parent" = NEW.id OR "child" = NEW.id;
+		UPDATE app_public."nodePhrasings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
+		UPDATE app_public."nodeRatings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
+		UPDATE app_public."nodeRevisions" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
+		UPDATE app_public."nodeTags" SET "c_accessPolicyTargets" = array[]::text[] WHERE NEW.id = ANY("nodes");
 		-- todo: handle commandRuns table (delayed until the command-run insertion system is set up)
 	END IF;
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
