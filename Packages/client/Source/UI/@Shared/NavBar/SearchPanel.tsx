@@ -69,13 +69,19 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 				query($input: SearchGloballyInput!) {
 					searchGlobally(input: $input) {
 						nodeId
+						rank
 						type
 						foundText
+						nodeText
 					}
 				}
 			`,
-			// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
-			variables: {input: {query: queryStr, searchLimit: 100}},
+			variables: {input: {
+				//query: queryStr,
+				query: queryStr_withoutPartialTerms,
+				// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
+				searchLimit: 100,
+			}},
 		});
 		const docIDs = result.data.searchGlobally.map(a=>a.nodeId);
 
