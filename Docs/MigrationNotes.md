@@ -24,6 +24,9 @@
 * 2\) Fixed that some `nodeLinks.orderKey` cells still had characters (from old lexorank system) that are invalid for the new fractional-indexing lib.
 	* DB response:
 		* 1\) Run the following SQL command: `UPDATE "nodeLinks" SET "orderKey" = replace(replace("orderKey", '^', 'Zza'), '_', 'Zzb')`
+* 3\) Added a `searchGlobally` graphql endpoint.
+	* DB response:
+		* 1\) Apply the sql in `Search.sql`.
 
 ### Pushed on 2023-01-04
 

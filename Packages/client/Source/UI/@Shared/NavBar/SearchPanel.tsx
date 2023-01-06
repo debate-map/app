@@ -10,7 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, NodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeLinks, GetNodeRevisions, NodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced} from "dm_common";
+import {GetNodeRevision, MapView, NodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, NodeType_Info, GetMap, GetNodeLinks, GetNodeRevisions, NodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced, NodeL2} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
@@ -25,7 +25,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 	ClearResults() {
 		RunInAction("SearchPanel.ClearResults", ()=>{
 			store.main.search.searchResults_partialTerms = ea;
-			store.main.search.searchResults_nodeRevisionIDs = ea;
+			store.main.search.searchResults_nodeIDs = ea;
 		});
 	}
 	async PerformSearch() {
@@ -42,7 +42,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
 			if (nodeRevisionMatch) {
 				RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
-					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
+					store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.id];
 				});
 				return;
 			}
@@ -53,7 +53,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 				const visibleNodeRevision = node.current;
 				RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
 					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
-					store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
+					store.main.search.searchResults_nodeIDs = [visibleNodeRevision.id];
 				});
 				return;
 			}
@@ -66,39 +66,44 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 
 		const result = await apolloClient.query({
 			query: gql`
-				query SearchQuery($queryStr: String!) {
-					nodeRevisions(filter: {phrasing_tsvector: {matches: $queryStr}}) {
-						nodes { id }
+				query($input: SearchGloballyInput!) {
+					searchGlobally(input: $input) {
+						nodeId
+						type
+						foundText
 					}
 				}
 			`,
-			variables: {queryStr},
+			// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
+			variables: {input: {query: queryStr, searchLimit: 100}},
 		});
-		const docIDs = result.data.nodeRevisions.nodes.map(a=>a.id);
+		const docIDs = result.data.searchGlobally.map(a=>a.nodeId);
 
 		RunInAction("SearchPanel.PerformSearch_part2", ()=>{
 			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
-			store.main.search.searchResults_nodeRevisionIDs = docIDs;
+			store.main.search.searchResults_nodeIDs = docIDs;
 		});
 	}
 
 	render() {
 		const {searchResults_partialTerms} = store.main.search;
 		// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
-		const searchResultIDs = store.main.search.searchResults_nodeRevisionIDs.Take(100);
+		const searchResultIDs = store.main.search.searchResults_nodeIDs.Take(100);
 
-		let results_nodeRevisions = searchResultIDs.map(id=>GetNodeRevision(id)).filter(a=>a != null) as NodeRevision[]; // filter, cause search-results may be old (before an entry's deletion)
+		let results_nodeL2s = searchResultIDs.map(id=>GetNodeL2(id)).filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
+
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
+		// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms)
 		if (searchResults_partialTerms.length) {
 			for (const term of searchResults_partialTerms) {
-				results_nodeRevisions = results_nodeRevisions.filter(a=>{
-					const titles = GetAllNodeRevisionTitles(a);
+				results_nodeL2s = results_nodeL2s.filter(a=>{
+					const titles = GetAllNodeRevisionTitles(a.current);
 					return titles.every(b=>b.toLowerCase().includes(term));
 				});
 			}
 		}
 
-		const results_nodeIDs = results_nodeRevisions?.filter(a=>a).map(a=>a.node).Distinct();
+		const results_nodeIDs = results_nodeL2s?.filter(a=>a).map(a=>a.id).Distinct();
 		const {queryStr} = store.main.search;
 
 		this.Stash({queryStr});
