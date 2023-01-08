@@ -6,10 +6,11 @@ use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream,
 use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
 use rust_shared::hyper::{Body, Method};
+use rust_shared::once_cell::sync::Lazy;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
-use rust_shared::tokio::sync::RwLock;
+use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::Row;
 use rust_shared::{serde, GQLError};
 use std::collections::HashSet;
@@ -85,13 +86,19 @@ impl QueryShard_General_Search {
         let search_offset_i32 = search_offset.unwrap_or(0) as i32;
         let alt_phrasing_rank_factor_f64 = alt_phrasing_rank_factor.unwrap_or(0.95) as f64;
         let quote_rank_factor_f64 = quote_rank_factor.unwrap_or(0.9) as f64;
-        
-        let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
 
-        let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from global_search($1, $2, $3, $4, $5)"#, params(&[
-            &query, &search_limit_i32, &search_offset_i32, &alt_phrasing_rank_factor_f64, &quote_rank_factor_f64,
-        ])).await?.try_collect().await?;
+        let permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
+        let rows = { // use block so db-client is dropped before semaphore-release (for lower contention)
+            let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+            let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from global_search($1, $2, $3, $4, $5)"#, params(&[
+                &query, &search_limit_i32, &search_offset_i32, &alt_phrasing_rank_factor_f64, &quote_rank_factor_f64,
+            ])).await?.try_collect().await?;
+            rows
+        };
+        // drop semaphore permit (ie. if there's another thread waiting to enter the query-execution block of `search_globally` or `saerch_subtree`, allow them now)
+        drop(permit);
+
         let search_results: Vec<SearchGloballyResult> = rows.into_iter().map(|a| a.into()).collect();
         Ok(search_results)
     }
@@ -108,15 +115,28 @@ impl QueryShard_General_Search {
         let alt_phrasing_rank_factor_f64 = alt_phrasing_rank_factor.unwrap_or(0.95) as f64;
         let quote_rank_factor_f64 = quote_rank_factor.unwrap_or(0.9) as f64;
 
-        let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-        let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+        let permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
+        let rows = { // use block so db-client is dropped before semaphore-release (for lower contention)
+            let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+            let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from local_search($1, $2, $3, $4, $5, $6, $7)"#, params(&[
+                &root_node_id, &query, &search_limit_i32, &search_offset_i32, &max_depth_i32, &quote_rank_factor_f64, &alt_phrasing_rank_factor_f64
+            ])).await?.try_collect().await?;
+            rows
+        };
+        // drop semaphore permit (ie. if there's another thread waiting to enter query-execution block of `search_globally` or `saerch_subtree`, allow them now)
+        drop(permit);
 
-        let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from local_search($1, $2, $3, $4, $5, $6, $7)"#, params(&[
-            &root_node_id, &query, &search_limit_i32, &search_offset_i32, &max_depth_i32, &quote_rank_factor_f64, &alt_phrasing_rank_factor_f64
-        ])).await?.try_collect().await?;
         let search_results: Vec<SearchSubtreeResult> = rows.into_iter().map(|a| a.into()).collect();
         Ok(search_results)
     }
 }
 
+}
+
+// limit the number of searches that are being executed at the same time (we don't want expensive searches to drown out other requests, such as live-query execution)
+pub static SEMAPHORE__SEARCH_EXECUTION: Lazy<Semaphore> = Lazy::new(|| Semaphore::new(get_search_execution_concurrency_limit()));
+fn get_search_execution_concurrency_limit() -> usize {
+    //let logical_cpus = num_cpus::get();
+    2
 }
