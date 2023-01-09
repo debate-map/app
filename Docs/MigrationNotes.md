@@ -18,8 +18,12 @@
 			SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
 			```
 		* 2\) Execute the sql to drop the `public` schema, if desired. (not really necessary, it's just for cleanup; if choosing to do so, make sure you don't have other data there)
-		* 3\) Re-apply the sql in `@PreTables.sql`. `GraphTraversal.sql`, `RLSHelpers.sql`, and `Search.sql`.
+		* 3\) Re-apply the sql in `@PreTables.sql`. `GraphTraversal.sql`, `RLSHelpers.sql`, `Search.sql`, and `AccessPolicyTriggers.sql`.
 		* 4\) Re-apply the `after_insert_node_revision` func+trigger in `nodeRevisions.sql`.
+		* 5\) Re-apply the "search/text-match config" section in `General_Start.sql`. (may need to drop old objects with those names, if present)
+* 2\) Deleted the `app_user` role. (nowadays `admin` is used for rls-bypassing, and `rls_obeyer` is used for rls-respecting)
+	* DB response:
+		* 1\) Drop all permissions, and the db-connect ability, then drop the role.
 
 ### Pushed on 2023-01-06
 

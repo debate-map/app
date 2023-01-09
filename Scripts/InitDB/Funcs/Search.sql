@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION app.global_search(
 	quote_rank_factor FLOAT DEFAULT 0.9, alt_phrasing_rank_factor FLOAT default 0.95
 ) RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text TEXT) AS $$
 	WITH d AS (SELECT id FROM app.nodes),
-		 q AS (SELECT websearch_to_tsquery('public.english_nostop'::regconfig, query) AS q),
+		 q AS (SELECT websearch_to_tsquery('app.english_nostop'::regconfig, query) AS q),
 		 p AS (
 				SELECT rev.node AS node_id,
 					NULL AS phrasing_id,
@@ -43,9 +43,9 @@ CREATE OR REPLACE FUNCTION app.global_search(
 		 op2 AS (SELECT * FROM op ORDER BY rank DESC LIMIT slimit OFFSET soffset)
 	SELECT op2.node_id, op2.rank, op2.type,
 			(CASE
-				WHEN op2.type = 'quote' THEN ts_headline('public.english_nostop'::regconfig, app.attachment_quotes(rev.attachments), q.q)
-				WHEN op2.type = 'standard' AND phrasing_id IS NULL THEN ts_headline('public.english_nostop'::regconfig, app.pick_rev_phrasing(rev.phrasing), q.q)
-				ELSE ts_headline('public.english_nostop'::regconfig, app.pick_phrasing(phrasing.text_base, phrasing.text_question), q.q)
+				WHEN op2.type = 'quote' THEN ts_headline('app.english_nostop'::regconfig, app.attachment_quotes(rev.attachments), q.q)
+				WHEN op2.type = 'standard' AND phrasing_id IS NULL THEN ts_headline('app.english_nostop'::regconfig, app.pick_rev_phrasing(rev.phrasing), q.q)
+				ELSE ts_headline('app.english_nostop'::regconfig, app.pick_phrasing(phrasing.text_base, phrasing.text_question), q.q)
 				END
 			) AS found_text,
 			app.pick_rev_phrasing(rev.phrasing) AS node_text
@@ -62,7 +62,7 @@ CREATE OR REPLACE FUNCTION app.local_search(
 	depth INTEGER DEFAULT 10, quote_rank_factor FLOAT DEFAULT 0.9, alt_phrasing_rank_factor FLOAT default 0.95)
 RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text TEXT) AS $$
   WITH d AS (SELECT id FROM app.descendants2(root, depth)),
-		 q AS (SELECT websearch_to_tsquery('public.english_nostop'::regconfig, query) AS q),
+		 q AS (SELECT websearch_to_tsquery('app.english_nostop'::regconfig, query) AS q),
 		 p AS (
 				SELECT rev.node AS node_id,
 					NULL AS phrasing_id,
@@ -99,9 +99,9 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 		 op2 AS (SELECT * FROM op ORDER BY rank DESC LIMIT slimit OFFSET soffset)
 	SELECT op2.node_id, op2.rank, op2.type,
 			(CASE
-				WHEN op2.type = 'quote' THEN ts_headline('public.english_nostop'::regconfig, app.attachment_quotes(rev.attachments), q.q)
-				WHEN op2.type = 'standard' AND phrasing_id IS NULL THEN ts_headline('public.english_nostop'::regconfig, app.pick_rev_phrasing(rev.phrasing), q.q)
-				ELSE ts_headline('public.english_nostop'::regconfig, app.pick_phrasing(phrasing.text_base, phrasing.text_question), q.q)
+				WHEN op2.type = 'quote' THEN ts_headline('app.english_nostop'::regconfig, app.attachment_quotes(rev.attachments), q.q)
+				WHEN op2.type = 'standard' AND phrasing_id IS NULL THEN ts_headline('app.english_nostop'::regconfig, app.pick_rev_phrasing(rev.phrasing), q.q)
+				ELSE ts_headline('app.english_nostop'::regconfig, app.pick_phrasing(phrasing.text_base, phrasing.text_question), q.q)
 				END
 			) AS found_text,
 			app.pick_rev_phrasing(rev.phrasing) AS node_text

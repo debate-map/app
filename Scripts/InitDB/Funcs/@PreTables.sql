@@ -13,7 +13,7 @@ $$ LANGUAGE SQL IMMUTABLE;
 
 
 CREATE OR REPLACE FUNCTION app.phrasings_to_tsv(base TEXT, question TEXT) RETURNS tsvector AS $$
-	SELECT to_tsvector('public.english_nostop'::regconfig, app.pick_phrasing(base, question));
+	SELECT to_tsvector('app.english_nostop'::regconfig, app.pick_phrasing(base, question));
 $$ LANGUAGE SQL IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION app.pick_rev_phrasing(phrasing JSONB) RETURNS TEXT AS $$
@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION app.pick_rev_phrasing(phrasing JSONB) RETURNS TEXT AS
 $$ LANGUAGE SQL IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION app.rev_phrasing_to_tsv(phrasing JSONB) RETURNS tsvector AS $$
-	SELECT to_tsvector('public.english_nostop'::regconfig, app.pick_rev_phrasing(phrasing));
+	SELECT to_tsvector('app.english_nostop'::regconfig, app.pick_rev_phrasing(phrasing));
 $$ LANGUAGE SQL IMMUTABLE;
 
 
@@ -35,5 +35,5 @@ $$ LANGUAGE SQL IMMUTABLE;
 
 
 CREATE OR REPLACE FUNCTION app.attachments_to_tsv(attachments JSONB) RETURNS tsvector AS $$
-	SELECT jsonb_to_tsvector('public.english_nostop'::regconfig, jsonb_path_query_array(attachments,'$[*].quote.content'), '["string"]');
+	SELECT jsonb_to_tsvector('app.english_nostop'::regconfig, jsonb_path_query_array(attachments,'$[*].quote.content'), '["string"]');
 $$ LANGUAGE SQL IMMUTABLE;

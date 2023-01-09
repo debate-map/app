@@ -1,4 +1,4 @@
--- create role "app_user", and grant it permissions
+-- create role "rls_obeyer", and grant it permissions
 -- ==========
 
 do $$ begin

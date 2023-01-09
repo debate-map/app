@@ -25,10 +25,10 @@ CREATE SCHEMA IF NOT EXISTS app;
 -- search/text-match config
 -- ==========
 
-create text search dictionary english_stem_nostop (
+CREATE TEXT search dictionary english_stem_nostop (
 	Template = snowball,
 	Language = english
 );
-create text search configuration public.english_nostop (COPY = pg_catalog.english);
-alter text search configuration public.english_nostop
-	alter mapping for asciiword, asciihword, hword_asciipart, hword, hword_part, word with english_stem_nostop;
+CREATE TEXT search CONFIGURATION app.english_nostop (COPY = pg_catalog.english);
+ALTER TEXT search CONFIGURATION app.english_nostop
+	ALTER mapping for asciiword, asciihword, hword_asciipart, hword, hword_part, word WITH english_stem_nostop;
