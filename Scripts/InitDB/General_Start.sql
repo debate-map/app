@@ -1,8 +1,7 @@
--- alter debate-map database so that commands are able to locate tables in the correct schema, by default (ie. in "app") 
-ALTER DATABASE "debate-map" SET search_path TO app, public;
--- the above applies for future sessions, but not the current one; this next line will apply it to the current session
---SET SCHEMA PATH app, public
-SELECT pg_catalog.set_config('search_path', 'app, public', false);
+-- alter the default search-path, so that queries on non-namespaced targets are found in the correct schema (ie. in "app") 
+ALTER DATABASE "debate-map" SET search_path TO app; -- for future pg-sessions
+--SET SCHEMA PATH app; -- for current pg-session
+SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
 
 -- options for this session/connection
 -- ===========

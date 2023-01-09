@@ -9,15 +9,17 @@
 
 ### Pushed on 2023-01-09
 
-* 1\) Changed schema name from `app_public` to just `app`.
+* 1\) Changed schema name from `app_public` to just `app`, and removed the unused `public` schema.
 	* DB response:
 		* 1\) Execute sql:
 			```sql
 			ALTER SCHEMA app_public RENAME TO app;
-			ALTER DATABASE "debate-map" SET search_path TO app, public;
+			ALTER DATABASE "debate-map" SET search_path TO app; -- for future pg-sessions
+			SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
 			```
-		* 2\) Re-apply the sql in `@PreTables.sql`. `GraphTraversal.sql`, `RLSHelpers.sql`, and `Search.sql`.
-		* 3\) Re-apply the `after_insert_node_revision` func+trigger in `nodeRevisions.sql`.
+		* 2\) Execute the sql to drop the `public` schema, if desired. (not really necessary, it's just for cleanup; if choosing to do so, make sure you don't have other data there)
+		* 3\) Re-apply the sql in `@PreTables.sql`. `GraphTraversal.sql`, `RLSHelpers.sql`, and `Search.sql`.
+		* 4\) Re-apply the `after_insert_node_revision` func+trigger in `nodeRevisions.sql`.
 
 ### Pushed on 2023-01-06
 
