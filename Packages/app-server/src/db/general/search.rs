@@ -87,8 +87,9 @@ impl QueryShard_General_Search {
         let alt_phrasing_rank_factor_f64 = alt_phrasing_rank_factor.unwrap_or(0.95) as f64;
         let quote_rank_factor_f64 = quote_rank_factor.unwrap_or(0.9) as f64;
 
-        let permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
-        let rows = { // use block so db-client is dropped before semaphore-release (for lower contention)
+        let rows = {
+            // use semaphore, so that only X threads can be executing search queries (in `search_globally` or `saerch_subtree`) at the same time
+            let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
             let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from global_search($1, $2, $3, $4, $5)"#, params(&[
@@ -96,9 +97,7 @@ impl QueryShard_General_Search {
             ])).await?.try_collect().await?;
             rows
         };
-        // drop semaphore permit (ie. if there's another thread waiting to enter the query-execution block of `search_globally` or `saerch_subtree`, allow them now)
-        drop(permit);
-
+        
         let search_results: Vec<SearchGloballyResult> = rows.into_iter().map(|a| a.into()).collect();
         Ok(search_results)
     }
@@ -115,8 +114,9 @@ impl QueryShard_General_Search {
         let alt_phrasing_rank_factor_f64 = alt_phrasing_rank_factor.unwrap_or(0.95) as f64;
         let quote_rank_factor_f64 = quote_rank_factor.unwrap_or(0.9) as f64;
 
-        let permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
-        let rows = { // use block so db-client is dropped before semaphore-release (for lower contention)
+        let rows = {
+            // use semaphore, so that only X threads can be executing search queries (in `search_globally` or `saerch_subtree`) at the same time
+            let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
             let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from local_search($1, $2, $3, $4, $5, $6, $7)"#, params(&[
@@ -124,8 +124,6 @@ impl QueryShard_General_Search {
             ])).await?.try_collect().await?;
             rows
         };
-        // drop semaphore permit (ie. if there's another thread waiting to enter query-execution block of `search_globally` or `saerch_subtree`, allow them now)
-        drop(permit);
 
         let search_results: Vec<SearchSubtreeResult> = rows.into_iter().map(|a| a.into()).collect();
         Ok(search_results)

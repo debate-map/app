@@ -1,3 +1,5 @@
+-- Note: This is using materialized tsvectors, but the calculated version is left in comments.
+
 CREATE OR REPLACE FUNCTION app_public.global_search(
 	query text,
 	slimit INTEGER DEFAULT 20, soffset INTEGER DEFAULT 0,
@@ -8,30 +10,33 @@ CREATE OR REPLACE FUNCTION app_public.global_search(
 		 p AS (
 				SELECT rev.node AS node_id,
 					NULL AS phrasing_id,
-					ts_rank(app_public.rev_phrasing_to_tsv(rev.phrasing), q.q) AS rank,
+					ts_rank(rev.phrasing_tsvector, q.q) AS rank,
+					-- app_public.rev_phrasing_to_tsv(rev.phrasing)
 					'standard' AS type
 					FROM app_public."nodeRevisions" rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
-					WHERE rev."replacedBy" IS NULL AND q.q @@ app_public.rev_phrasing_to_tsv(rev.phrasing)
+					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.phrasing_tsvector
  			UNION (
 				SELECT rev.node AS node_id,
 					NULL AS phrasing_id,
-					ts_rank(app_public.attachments_to_tsv(rev.attachments), q.q) * quote_rank_factor AS rank,
+					ts_rank(rev.attachments_tsvector, q.q) * quote_rank_factor AS rank,
+					-- app_public.attachments_to_tsv(rev.attachments)
 					'quote' AS type
 					FROM app_public."nodeRevisions" rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
-					WHERE rev."replacedBy" IS NULL AND q.q @@ app_public.attachments_to_tsv(rev.attachments)
+					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.attachments_tsvector
 			) UNION (
 				SELECT phrasing.node AS node_id,
 				  phrasing.id AS phrasing_id,
-					ts_rank(app_public.phrasings_to_tsv(phrasing.text_base, phrasing.text_question), q.q) * alt_phrasing_rank_factor AS rank,
+					ts_rank(phrasing.phrasing_tsvector, q.q) * alt_phrasing_rank_factor AS rank,
+					-- app_public.phrasings_to_tsv(phrasing.text_base, phrasing.text_question)
 					phrasing.type AS type
 					FROM app_public."nodePhrasings" AS phrasing
 					JOIN d ON phrasing.node = d.id
 					JOIN q ON (true)
-					WHERE q.q @@ app_public.phrasings_to_tsv(phrasing.text_base, phrasing.text_question)
+					WHERE q.q @@ phrasing.phrasing_tsvector
 			)
 		 ),
 		 op AS (SELECT DISTINCT ON (node_id) node_id, phrasing_id, rank, type FROM p ORDER BY node_id, rank DESC),
@@ -61,30 +66,33 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 		 p AS (
 				SELECT rev.node AS node_id,
 					NULL AS phrasing_id,
-					ts_rank(app_public.rev_phrasing_to_tsv(rev.phrasing), q.q) AS rank,
+					ts_rank(rev.phrasing_tsvector, q.q) AS rank,
+					-- app_public.rev_phrasing_to_tsv(rev.phrasing)
 					'standard' AS type
 					FROM app_public."nodeRevisions" rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
-					WHERE rev."replacedBy" IS NULL AND q.q @@ app_public.rev_phrasing_to_tsv(rev.phrasing)
+					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.phrasing_tsvector
  			UNION (
 				SELECT rev.node AS node_id,
 					NULL AS phrasing_id,
-					ts_rank(app_public.attachments_to_tsv(rev.attachments), q.q) * quote_rank_factor AS rank,
+					ts_rank(rev.attachments_tsvector, q.q) * quote_rank_factor AS rank,
+					-- app_public.attachments_to_tsv(rev.attachments)
 					'quote' AS type
 					FROM app_public."nodeRevisions" rev
 					JOIN d ON rev.node = d.id
 					JOIN q ON (true)
-					WHERE rev."replacedBy" IS NULL AND q.q @@ app_public.attachments_to_tsv(rev.attachments)
+					WHERE rev."replacedBy" IS NULL AND q.q @@ rev.attachments_tsvector
 			) UNION (
 				SELECT phrasing.node AS node_id,
 				  phrasing.id AS phrasing_id,
-					ts_rank(app_public.phrasings_to_tsv(phrasing.text_base, phrasing.text_question), q.q) * alt_phrasing_rank_factor AS rank,
+					ts_rank(phrasing.phrasing_tsvector, q.q) * alt_phrasing_rank_factor AS rank,
+					-- app_public.phrasings_to_tsv(phrasing.text_base, phrasing.text_question)
 					phrasing.type AS type
 					FROM app_public."nodePhrasings" AS phrasing
 					JOIN d ON phrasing.node = d.id
 					JOIN q ON (true)
-					WHERE q.q @@ app_public.phrasings_to_tsv(phrasing.text_base, phrasing.text_question)
+					WHERE q.q @@ phrasing.phrasing_tsvector
 			)
 		 ),
 		 op AS (SELECT DISTINCT ON (node_id) node_id, phrasing_id, rank, type FROM p ORDER BY node_id, rank DESC),

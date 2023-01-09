@@ -8,6 +8,9 @@ CREATE TABLE app_public."nodeRevisions" (
     "displayDetails" jsonb,
     attachments jsonb DEFAULT '[]'::json NOT NULL,
     "replacedBy" text,
+
+    phrasing_tsvector tsvector GENERATED ALWAYS AS (app_public.rev_phrasing_to_tsv(phrasing)) STORED NOT NULL,
+    attachments_tsvector tsvector GENERATED ALWAYS AS (app_public.attachments_to_tsv(attachments)) STORED NOT NULL,
     "c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app_public."nodeRevisions" ADD CONSTRAINT "v1_draft_nodeRevisions_pkey" PRIMARY KEY (id);
@@ -18,12 +21,14 @@ DROP INDEX IF EXISTS node_revisions_node_idx;
 CREATE INDEX node_revisions_node_idx ON app_public."nodeRevisions" USING btree (node);
 
 -- indexes for tsvectors
---DROP INDEX IF EXISTS node_revisions_phrasing_tsvector_idx;
---CREATE INDEX node_revisions_phrasing_tsvector_idx ON app_public."nodeRevisions" USING gin (phrasing_tsvector);
+-- We could just use computed index (in comments) and not materialize the ts_vectors in the table,
+-- but the size cost is small and the speed difference notable (factor of 2-3), at least at current DB scale.
 DROP INDEX IF EXISTS node_revisions_phrasing_en_idx;
-CREATE INDEX node_revisions_phrasing_en_idx ON app_public."nodeRevisions" USING gin (app_public.rev_phrasing_to_tsv(phrasing)) WHERE ("replacedBy" IS NULL);
+CREATE INDEX node_revisions_phrasing_en_idx ON app_public."nodeRevisions" USING gin (phrasing_tsvector) WHERE ("replacedBy" IS NULL);
+-- CREATE INDEX node_revisions_phrasing_en_idx ON app_public."nodeRevisions" USING gin (app_public.rev_phrasing_to_tsv(phrasing)) WHERE ("replacedBy" IS NULL);
 DROP INDEX IF EXISTS node_revisions_quotes_en_idx;
-CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" USING gin (app_public.attachments_to_tsv(attachments)) WHERE ("replacedBy" IS NULL);
+CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" USING gin (attachments_tsvector) WHERE ("replacedBy" IS NULL);
+-- CREATE INDEX node_revisions_quotes_en_idx ON app_public."nodeRevisions" USING gin (app_public.attachments_to_tsv(attachments)) WHERE ("replacedBy" IS NULL);
 
 CREATE OR REPLACE FUNCTION app_public.after_insert_node_revision() RETURNS TRIGGER LANGUAGE plpgsql AS $$
 DECLARE rev_id text;
