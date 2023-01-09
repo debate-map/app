@@ -44,7 +44,7 @@ pub struct UpdateMediaResult {
 
 }
 
-pub async fn update_media(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMediaInput, _extras: NoExtras) -> Result<UpdateMediaResult, Error> {
+pub async fn update_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateMediaInput, _extras: NoExtras) -> Result<UpdateMediaResult, Error> {
 	let UpdateMediaInput { id, updates } = input;
 	
 	let old_data = get_media(&ctx, &id).await?;

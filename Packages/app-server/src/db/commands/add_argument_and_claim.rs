@@ -62,10 +62,10 @@ pub struct AddArgumentAndClaimResult {
 
 }
 
-pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, input: AddArgumentAndClaimInput, _extras: NoExtras) -> Result<AddArgumentAndClaimResult, Error> {
+pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddArgumentAndClaimInput, _extras: NoExtras) -> Result<AddArgumentAndClaimResult, Error> {
 	let AddArgumentAndClaimInput { mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink } = input;
 	
-	let add_argument_result = add_child_node(ctx, actor, AddChildNodeInput {
+	let add_argument_result = add_child_node(ctx, actor, false, AddChildNodeInput {
 		mapID: None,
 		parentID: argumentParentID.clone(),
 		node: argumentNode.clone(),
@@ -73,7 +73,7 @@ pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, inp
 		link: argumentLink.clone(),
 	}, Default::default()).await?;
 
-	let add_claim_result = add_child_node(ctx, actor, AddChildNodeInput {
+	let add_claim_result = add_child_node(ctx, actor, false, AddChildNodeInput {
 		mapID: None,
 		parentID: add_argument_result.nodeID.clone(),
 		node: claimNode,
@@ -81,7 +81,7 @@ pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, inp
 		link: claimLink,
 	}, Default::default()).await?;
 
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
 	Ok(AddArgumentAndClaimResult {
 		argumentNodeID: add_argument_result.nodeID,

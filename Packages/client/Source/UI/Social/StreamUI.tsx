@@ -1,11 +1,11 @@
-import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun, GetUser, AddChildNode, NodeType, GetNode, GetNodeL2, GetNodeL3, AddNodeRevision, GetNodeRevision, AsNodeL3, AsNodeL2, GetAccessPolicy} from "dm_common";
+import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun, GetUser, AddChildNode, NodeType, GetNode, GetNodeL2, GetNodeL3, AddNodeRevision, GetNodeRevision, AsNodeL3, AsNodeL2, GetAccessPolicy, CommandRun_commandNameValues} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {NodeUI_Inner} from "UI/@Shared/Maps/Node/NodeUI_Inner";
 import useResizeObserver from "use-resize-observer";
 import {RunCommand_UpdateUserHidden} from "Utils/DB/Command";
 import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus} from "web-vcore";
-import {Assert} from "web-vcore/nm/js-vextensions";
+import {Assert, ModifyString} from "web-vcore/nm/js-vextensions";
 import {Command} from "web-vcore/nm/mobx-graphlink";
 import moment from "web-vcore/nm/moment";
 import {Button, CheckBox, Column, Pre, Row, Text} from "web-vcore/nm/react-vcomponents";
@@ -18,7 +18,7 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 	render() {
 		const {panel} = this.props;
 		const userHidden = GetUserHidden(MeID());
-		const commandRuns = GetCommandRuns(commandTypesToShow.map(a=>a.name), undefined, store.main.social.showAll).OrderByDescending(a=>a.runTime);
+		const commandRuns = GetCommandRuns(CommandRun_commandNameValues.map(a=>a), undefined, store.main.social.showAll).OrderByDescending(a=>a.runTime);
 
 		const entryLimit = 30; // for now, only show the last 30 command-runs (need a paging system or the like)
 		return (
@@ -45,10 +45,10 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 	}
 }
 
-const commandTypesToShow = [
+/*const commandTypesToShow = [
 	AddChildNode,
 	AddNodeRevision,
-] as Array<new(..._)=>Command<any>>;
+] as Array<new(..._)=>Command<any>>;*/
 
 @Observer
 class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: number, last: boolean, panel: boolean}, {}) {
@@ -69,9 +69,9 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 
 		let messageUI: JSX.Element;
 		let messageUI_row2: JSX.Element|n;
-		if (run.commandName == AddChildNode.name) {
-			const payload = run.commandPayload as (typeof AddChildNode)["prototype"]["payload"];
-			const returnData = run.returnData as (typeof AddChildNode)["prototype"]["returnData"];
+		if (run.commandName == "addChildNode") {
+			const payload = run.commandInput as (typeof AddChildNode)["prototype"]["payload"];
+			const returnData = run.commandResult as (typeof AddChildNode)["prototype"]["returnData"];
 			const parent = GetNode(payload.parentID);
 
 			//const node = GetNodeL2(returnData.nodeID);
@@ -96,9 +96,9 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
-		} else if (run.commandName == AddNodeRevision.name) {
-			const payload = run.commandPayload as (typeof AddNodeRevision)["prototype"]["payload"];
-			const returnData = run.returnData as (typeof AddNodeRevision)["prototype"]["returnData"];
+		} else if (run.commandName == "addNodeRevision") {
+			const payload = run.commandInput as (typeof AddNodeRevision)["prototype"]["payload"];
+			const returnData = run.commandResult as (typeof AddNodeRevision)["prototype"]["returnData"];
 			const revision = GetNodeRevision(returnData.id);
 			const node = GetNode(payload.revision.node);
 			const accessPolicy = GetAccessPolicy(node?.accessPolicy);

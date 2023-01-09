@@ -40,7 +40,12 @@ id = "command_runs"
 excludeLinesWith = "#[graphql(name"
 "##;*/
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
+/*#[derive(SimpleObject, Deserialize)]
+pub struct RLSTargets {
+    pub nodes: Vec<String>,
+}*/
+
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct CommandRun {
     pub id: ID,
     pub actor: String,
@@ -48,9 +53,10 @@ pub struct CommandRun {
     #[graphql(name = "public_base")]
     pub public_base: bool,
     pub commandName: String,
-    pub commandPayload: serde_json::Value,
-    pub returnData: serde_json::Value,
-    pub rlsTargets: serde_json::Value,
+    pub commandInput: serde_json::Value,
+    pub commandResult: serde_json::Value,
+    #[graphql(name = "c_involvedNodes")]
+    pub c_involvedNodes: Vec<String>,
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }

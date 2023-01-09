@@ -43,7 +43,7 @@ pub struct DeleteMediaResult {
 
 }
 
-pub async fn delete_media(ctx: &AccessorContext<'_>, actor: &User, input: DeleteMediaInput, _extras: NoExtras) -> Result<DeleteMediaResult, Error> {
+pub async fn delete_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteMediaInput, _extras: NoExtras) -> Result<DeleteMediaResult, Error> {
 	let DeleteMediaInput { id } = input;
 	
 	let old_data = get_media(&ctx, &id).await?;

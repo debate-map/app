@@ -10,6 +10,7 @@ pub mod commands {
         pub mod increment_map_edits;
         pub mod jsonb_utils;
         pub mod rating_processor;
+        pub mod record_command_run;
         pub mod update_node_rating_summaries;
     }
     pub mod transfer_nodes_ {

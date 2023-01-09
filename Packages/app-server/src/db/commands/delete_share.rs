@@ -43,7 +43,7 @@ pub struct DeleteShareResult {
 
 }
 
-pub async fn delete_share(ctx: &AccessorContext<'_>, actor: &User, input: DeleteShareInput, _extras: NoExtras) -> Result<DeleteShareResult, Error> {
+pub async fn delete_share(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteShareInput, _extras: NoExtras) -> Result<DeleteShareResult, Error> {
 	let DeleteShareInput { id } = input;
 	
 	let old_data = get_share(&ctx, &id).await?;

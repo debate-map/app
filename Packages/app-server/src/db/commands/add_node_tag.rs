@@ -40,7 +40,7 @@ pub struct AddNodeTagResult {
 
 }
 
-pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeTagInput, _extras: NoExtras) -> Result<AddNodeTagResult, Error> {
+pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodeTagInput, _extras: NoExtras) -> Result<AddNodeTagResult, Error> {
 	let AddNodeTagInput { tag: tag_ } = input;
 	
 	let tag = NodeTag {

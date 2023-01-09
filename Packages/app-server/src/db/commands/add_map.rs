@@ -51,7 +51,7 @@ pub struct AddMapResult {
 
 }
 
-pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, input: AddMapInput, _extras: NoExtras) -> Result<AddMapResult, Error> {
+pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddMapInput, _extras: NoExtras) -> Result<AddMapResult, Error> {
 	let AddMapInput { map: map_ } = input;
 	
 	let root_node_id = new_uuid_v4_as_b64();

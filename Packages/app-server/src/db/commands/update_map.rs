@@ -44,7 +44,7 @@ pub struct UpdateMapResult {
 
 }
 
-pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, input: UpdateMapInput, _extras: NoExtras) -> Result<UpdateMapResult, Error> {
+pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateMapInput, _extras: NoExtras) -> Result<UpdateMapResult, Error> {
 	let UpdateMapInput { id, updates } = input;
 	
 	let old_data = get_map(&ctx, &id).await?;

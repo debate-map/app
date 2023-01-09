@@ -46,7 +46,7 @@ pub struct SetUserFollowDataResult {
 
 }
 
-pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, actor: &User, input: SetUserFollowDataInput, _extras: NoExtras) -> Result<SetUserFollowDataResult, Error> {
+pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetUserFollowDataInput, _extras: NoExtras) -> Result<SetUserFollowDataResult, Error> {
 	let SetUserFollowDataInput { targetUser, userFollow } = input;
 	
 	let user_follow_as_json_value = if let Some(userFollow) = userFollow { Some(serde_json::to_value(userFollow)?) } else { None };

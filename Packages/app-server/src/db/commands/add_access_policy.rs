@@ -41,7 +41,7 @@ pub struct AddAccessPolicyResult {
 
 }
 
-pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
+pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
 	let AddAccessPolicyInput { policy: policy_ } = input;
 	
 	let policy = AccessPolicy {

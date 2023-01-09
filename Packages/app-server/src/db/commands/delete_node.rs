@@ -54,7 +54,7 @@ pub struct DeleteNodeExtras {
 	//pub child_node_ids: Vec<String>,
 }
 
-pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
+pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: DeleteNodeInput, extras: DeleteNodeExtras) -> Result<DeleteNodeResult, Error> {
 	let DeleteNodeInput { mapID, nodeID } = input;
 	
 	let old_data = get_node(&ctx, &nodeID).await?;
@@ -69,13 +69,15 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, input: DeleteN
 	ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE node = $1"#, &[&nodeID]).await?;
 	ctx.tx.execute(r#"DELETE FROM "nodeRevisions" WHERE node = $1"#, &[&nodeID]).await?;
+	// todo: maybe change approach: rather than deleting associated command-runs, we leave them up, but just restrict access to admins only from this point forward
+	ctx.tx.execute(r#"DELETE FROM "commandRuns" WHERE $1 = ANY("c_involvedNodes")"#, &[&nodeID]).await?;
 
 	// todo: for any tag where this node is a member, update it to remove this node's id from the `nodes` array (and possibly other fields too)
 	// todo: delete any tags for which this node is the only associated node
 
 	delete_db_entry_by_id(&ctx, "nodes".to_owned(), nodeID.to_string()).await?;
 
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
 	Ok(DeleteNodeResult { __: gql_placeholder() })
 }

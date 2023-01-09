@@ -24,6 +24,12 @@
 * 2\) Deleted the `app_user` role. (nowadays `admin` is used for rls-bypassing, and `rls_obeyer` is used for rls-respecting)
 	* DB response:
 		* 1\) Drop all permissions, and the db-connect ability, then drop the role.
+* 3\) Changed structure of `commandRuns` table, and added triggers for it.
+	* DB response:
+		* 1\) Drop the `commandRuns` table (its data is temporary/droppable), and recreate it, by executing the sql in `commandRuns.sql`.
+		* 2\) Re-apply the sql in `AccessPolicyTriggers.sql` and `General_End.sql`.
+		* 3\) Re-apply the foreign-key constraint for `commandRuns` table, as seen in `FKConstraints.sql`.
+		* 4\) Re-apply the rls-policy for `commandRuns` table, as seen in `RLSPolicies.sql`.
 
 ### Pushed on 2023-01-06
 

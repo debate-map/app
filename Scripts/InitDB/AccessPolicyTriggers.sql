@@ -96,7 +96,21 @@ END $$;
 DROP TRIGGER IF EXISTS node_tags_refresh_targets_for_self on app."nodeTags";
 CREATE TRIGGER node_tags_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."nodeTags" FOR EACH ROW EXECUTE FUNCTION app.node_tags_refresh_targets_for_self();
 
--- todo: handle commandRuns table (delayed until the command-run insertion system is set up)
+CREATE OR REPLACE FUNCTION app.command_runs_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR cardinality(NEW."c_accessPolicyTargets") = 0
+		OR OLD."c_involvedNodes" IS DISTINCT FROM NEW."c_involvedNodes"
+	) THEN
+		NEW."c_accessPolicyTargets" = distinct_array(
+			(SELECT array_agg(
+				(SELECT concat((SELECT "accessPolicy" FROM "nodes" WHERE id = node_id), ':nodes'))
+			) FROM unnest(NEW."c_involvedNodes") AS node_id)
+		);
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS command_runs_refresh_targets_for_self on app."commandRuns";
+CREATE TRIGGER command_runs_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."commandRuns" FOR EACH ROW EXECUTE FUNCTION app.command_runs_refresh_targets_for_self();
 
 -- "push" triggers, ie. responsive changes to other tables' "c_accessPolicyTargets" fields, based on source changes in our row (ie. to our "accessPolicy" field)
 -- ==========
@@ -120,7 +134,7 @@ CREATE OR REPLACE FUNCTION app.nodes_refresh_targets_for_others() RETURNS TRIGGE
 		UPDATE app."nodeRatings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
 		UPDATE app."nodeRevisions" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
 		UPDATE app."nodeTags" SET "c_accessPolicyTargets" = array[]::text[] WHERE NEW.id = ANY("nodes");
-		-- todo: handle commandRuns table (delayed until the command-run insertion system is set up)
+		UPDATE app."commandRuns" SET "c_accessPolicyTargets" = array[]::text[] WHERE NEW.id = ANY("c_involvedNodes");
 	END IF;
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
 END $$;

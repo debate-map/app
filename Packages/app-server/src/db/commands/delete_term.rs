@@ -43,7 +43,7 @@ pub struct DeleteTermResult {
 
 }
 
-pub async fn delete_term(ctx: &AccessorContext<'_>, actor: &User, input: DeleteTermInput, _extras: NoExtras) -> Result<DeleteTermResult, Error> {
+pub async fn delete_term(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteTermInput, _extras: NoExtras) -> Result<DeleteTermResult, Error> {
 	let DeleteTermInput { id } = input;
 	
 	let old_data = get_term(&ctx, &id).await?;

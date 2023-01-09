@@ -52,7 +52,7 @@ pub struct DeleteNodeLinkExtras {
 	pub allow_orphaning: bool,
 }*/
 
-pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeLinkInput, _extras: NoExtras) -> Result<DeleteNodeLinkResult, Error> {
+pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: DeleteNodeLinkInput, _extras: NoExtras) -> Result<DeleteNodeLinkResult, Error> {
 	let DeleteNodeLinkInput { mapID, id } = input;
 	
 	/*let child_number_of_parents = get_node_links(ctx, None, Some(&childID)).await?.len();
@@ -80,7 +80,7 @@ pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, input: De
 	}*/
 	delete_db_entry_by_id(ctx, "nodeLinks".to_owned(), link.id.to_string()).await?;
 
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
 	Ok(DeleteNodeLinkResult { __: gql_placeholder() })
 }

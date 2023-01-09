@@ -72,7 +72,7 @@ pub struct LinkNodeExtras {
 	pub order_key_for_outer_node: Option<OrderKey>,
 }
 
-pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeInput, extras: LinkNodeExtras) -> Result<LinkNodeResult, Error> {
+pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: LinkNodeInput, extras: LinkNodeExtras) -> Result<LinkNodeResult, Error> {
 	let LinkNodeInput { mapID, oldParentID, newParentID, nodeID, childGroup, newForm, newPolarity, unlinkFromOldParent, deleteEmptyArgumentWrapper } = input;
 	let unlink_from_old_parent = unlinkFromOldParent.unwrap_or(false);
 	let delete_empty_argument_wrapper = deleteEmptyArgumentWrapper.unwrap_or(false);
@@ -131,13 +131,13 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeI
 				seriesEnd: None,
 			};
 
-			let result = add_child_node(ctx, actor, AddChildNodeInput { mapID: None, parentID: newParentID.o(), node: argument_wrapper, revision: argument_wrapper_revision, link: argument_wrapper_link }, Default::default()).await?;
+			let result = add_child_node(ctx, actor, false, AddChildNodeInput { mapID: None, parentID: newParentID.o(), node: argument_wrapper, revision: argument_wrapper_revision, link: argument_wrapper_link }, Default::default()).await?;
 			new_parent_id_for_claim = result.nodeID.clone();
 			Some(result)
 		},
 	};
 
-	add_node_link(ctx, actor, AddNodeLinkInput {
+	add_node_link(ctx, actor, false, AddNodeLinkInput {
 		//mapID,
 		link: NodeLinkInput {
 			parent: Some(new_parent_id_for_claim),
@@ -154,17 +154,17 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, input: LinkNodeI
 	if unlink_from_old_parent && let Some(old_parent) = old_parent {
 		//let link = get_first_link_under_parent(ctx, &nodeID, old_parent.id.as_str()).await?;
 		for link in get_node_links(ctx, Some(old_parent.id.as_str()), Some(nodeID.as_str())).await? {
-			delete_node_link(ctx, actor, DeleteNodeLinkInput { mapID: None, id: link.id.to_string() }, Default::default()).await?;
+			delete_node_link(ctx, actor, false, DeleteNodeLinkInput { mapID: None, id: link.id.to_string() }, Default::default()).await?;
 		}
 
 		// if parent was argument, and it now has no children left, and the actor allows it (ie. their view has node as single-premise arg), then also delete the argument parent
 		let new_child_count = get_node_links(ctx, Some(old_parent.id.as_str()), None).await?.len();
 		if old_parent.r#type == NodeType::argument && new_child_count == 0 && delete_empty_argument_wrapper {
-			delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: old_parent.id.to_string() }, Default::default()).await?;
+			delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_parent.id.to_string() }, Default::default()).await?;
 		}
 	}
 	
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
 	Ok(LinkNodeResult {
 		argumentWrapperID: add_arg_wrapper_result.map(|a| a.nodeID),

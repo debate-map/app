@@ -43,7 +43,7 @@ pub struct AddNodePhrasingResult {
 
 }
 
-pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
+pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
 	let AddNodePhrasingInput { phrasing: phrasing_ } = input;
 	
 	let phrasing = NodePhrasing {

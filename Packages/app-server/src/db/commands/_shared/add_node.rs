@@ -33,10 +33,10 @@ pub struct AddNodeResult {
 	pub revisionID: String,
 }
 
-#[derive(Default)]
+/*#[derive(Default)]
 pub struct AddNodeExtras {
 	pub id_override: Option<bool>,
-}
+}*/
 
 // in the future, this will very likely be a command present in the graphql api; until the use-case comes up though, we'll keep it as just a function
 pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput, node_id_override: Option<String>, mut revision: NodeRevisionInput) -> Result<AddNodeResult, Error> {
@@ -65,7 +65,7 @@ pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput,
     ensure!(revision.node.is_none(), err_should_be_null("revision.node").to_string());
     revision.node = Some(node.id.to_string());
     let add_rev_result = add_node_revision(
-        ctx, actor,
+        ctx, actor, false,
         AddNodeRevisionInput { mapID: None, revision },
         AddNodeRevisionExtras { id_override: Some(revision_id.clone()) }
     ).await?;

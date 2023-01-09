@@ -45,7 +45,7 @@ pub struct UpdateNodeResult {
 
 }
 
-pub async fn update_node(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeInput, _extras: NoExtras) -> Result<UpdateNodeResult, Error> {
+pub async fn update_node(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateNodeInput, _extras: NoExtras) -> Result<UpdateNodeResult, Error> {
 	let UpdateNodeInput { id, updates } = input;
 	
 	let old_data = get_node(&ctx, &id).await?;

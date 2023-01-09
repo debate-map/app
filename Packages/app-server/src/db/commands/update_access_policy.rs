@@ -43,7 +43,7 @@ pub struct UpdateAccessPolicyResult {
 
 }
 
-pub async fn update_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: UpdateAccessPolicyInput, _extras: NoExtras) -> Result<UpdateAccessPolicyResult, Error> {
+pub async fn update_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateAccessPolicyInput, _extras: NoExtras) -> Result<UpdateAccessPolicyResult, Error> {
 	let UpdateAccessPolicyInput { id, updates } = input;
 	
 	let old_data = get_access_policy(&ctx, &id).await?;

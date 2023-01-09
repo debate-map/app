@@ -4,9 +4,9 @@ CREATE TABLE app."commandRuns" (
     "runTime" bigint NOT NULL,
     public_base boolean NOT NULL,
     "commandName" text NOT NULL,
-    "commandPayload" jsonb NOT NULL,
-    "returnData" jsonb NOT NULL,
-    "rlsTargets" jsonb DEFAULT '{}'::jsonb NOT NULL,
+    "commandInput" jsonb NOT NULL,
+    "commandResult" jsonb NOT NULL,
+    "c_involvedNodes" text[] NOT NULL,
     "c_accessPolicyTargets" text[] NOT NULL
 );
 ALTER TABLE ONLY app."commandRuns" ADD CONSTRAINT "v1_draft_commandRuns_pkey" PRIMARY KEY (id);

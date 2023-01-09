@@ -7,6 +7,9 @@ import {DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 3) The array of access-policies must all allow access. (through the cached "c_groupAccess" and "c_userAccess" fields) [this part is outdated atm]
 */
 
+export const CommandRun_commandNameValues = ["addChildNode", "addNodeRevision"] as const;
+export type CommandRun_CommandName = typeof CommandRun_commandNameValues[number];
+
 @MGLClass({table: "commandRuns"})
 export class CommandRun {
 	constructor(initialData: CommandRun) {
@@ -31,32 +34,17 @@ export class CommandRun {
 
 	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
-	commandName: string;
+	commandName: CommandRun_CommandName;
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$gqlType: "JSON"})
-	commandPayload: any;
+	commandInput: any;
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$gqlType: "JSON"})
-	returnData: any;
+	commandResult: any;
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: "RLSTargetSet"})
-	rlsTargets: RLSTargetSet;
-}
-
-// the target keys in this class are stored as simple strings (rather than db foreign-keys), because we want these CommandRun entries to exist even if the target objects are deleted
-@MGLClass()
-export class RLSTargetSet {
-	constructor(data?: Partial<RLSTargetSet>) {
-		Object.assign(this, data);
-	}
-
-	@Field({
-		//$gqlType: "string[]", // todo: make this line unnecessary at some point
-		$gqlType: "JSON", // todo: make this line unnecessary at some point
-		items: {$ref: "UUID"},
-	}, {opt: true})
-	nodes? = [] as string[];
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	c_involvedNodes: string[];
 }

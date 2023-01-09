@@ -47,7 +47,7 @@ pub struct AddNodeLinkResult {
 
 }
 
-pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeLinkInput, _extras: NoExtras) -> Result<AddNodeLinkResult, Error> {
+pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodeLinkInput, _extras: NoExtras) -> Result<AddNodeLinkResult, Error> {
 	let AddNodeLinkInput { link: link_ } = input;
 	
 	let parent_id = link_.parent.ok_or(err_should_be_populated("link.parent"))?;

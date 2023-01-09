@@ -4,12 +4,14 @@ use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::utils::general_::serde::to_json_value_for_borrowed_obj;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error, Context};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
+use serde::Serialize;
 use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_populated;
@@ -26,6 +28,7 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_shared::record_command_run::{record_command_run, record_command_run_if_root};
 
 wrap_slow_macros!{
 
@@ -36,13 +39,13 @@ wrap_slow_macros!{
     }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Deserialize, Serialize, Clone)]
 pub struct AddNodeRevisionInput {
 	pub mapID: Option<String>,
 	pub revision: NodeRevisionInput,
 }
 
-#[derive(SimpleObject, Debug)]
+#[derive(SimpleObject, Debug, Serialize)]
 pub struct AddNodeRevisionResult {
 	pub id: String,
 }
@@ -51,11 +54,12 @@ pub struct AddNodeRevisionResult {
 
 #[derive(Default)]
 pub struct AddNodeRevisionExtras {
+	//pub is_child_command: Option<bool>,
 	pub id_override: Option<String>,
 }
 
-pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: AddNodeRevisionInput, extras: AddNodeRevisionExtras) -> Result<AddNodeRevisionResult, Error> {
-	let AddNodeRevisionInput { mapID, revision: revision_ } = input;
+pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddNodeRevisionInput, extras: AddNodeRevisionExtras) -> Result<AddNodeRevisionResult, Error> {
+	let AddNodeRevisionInput { mapID, revision: revision_ } = input.clone();
 	
 	let revision = NodeRevision {
 		// set by server
@@ -101,7 +105,14 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, input: A
 		set_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 	}
 
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
-	Ok(AddNodeRevisionResult { id: revision.id.to_string() })
+	let result = AddNodeRevisionResult { id: revision.id.to_string() };
+	//if extras.is_child_command != Some(true) {
+	record_command_run_if_root(
+		ctx, actor, is_root,
+		"addNodeRevision".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
+		vec![input.revision.node.ok_or(err_should_be_populated("input.revision.node"))?],
+	).await?;
+	Ok(result)
 }

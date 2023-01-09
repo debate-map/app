@@ -103,7 +103,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
         revision: new_rev,
         link: new_link,
     };
-    let add_child_node_result = add_child_node(ctx, actor, add_child_node_input, Default::default()).await?;
+    let add_child_node_result = add_child_node(ctx, actor, false, add_child_node_input, Default::default()).await?;
     let new_node_id = add_child_node_result.nodeID;
 
     if transfer.clone_keepChildren {
@@ -111,7 +111,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
         for link in &old_child_links {
             // hard-coded exception here: if old-node-type is category (with claim children), and new-node-type is claim, then have children claims be wrapped into argument nodes
             if node.r#type == NodeType::category && new_node.r#type == NodeType::claim && link.c_childType == NodeType::claim {
-                link_node(&ctx, actor, LinkNodeInput {
+                link_node(&ctx, actor, false, LinkNodeInput {
                     mapID: None,
                     oldParentID: Some(link.parent.clone()),
                     newParentID: new_node_id.clone(),
@@ -144,7 +144,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
                 seriesEnd: link.seriesEnd,
                 polarity: link.polarity,
             };
-            add_node_link(&ctx, actor, AddNodeLinkInput { link: new_link }, Default::default()).await?;
+            add_node_link(&ctx, actor, false, AddNodeLinkInput { link: new_link }, Default::default()).await?;
         }
     }
 
@@ -152,7 +152,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
     for tag in &tags {
         let new_tag = maybe_clone_and_retarget_node_tag(tag, transfer.clone_keepTags, node_id, &new_node_id);
         if let Some(new_tag) = new_tag {
-            add_node_tag(&ctx, actor, AddNodeTagInput { tag: new_tag.to_input() }, Default::default()).await?;
+            add_node_tag(&ctx, actor, false, AddNodeTagInput { tag: new_tag.to_input() }, Default::default()).await?;
         }
     }
 
@@ -167,7 +167,7 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
     if tags_showing_clone_history_for_old_node.len() == 0 {
         let new_nodes = vec![node_id.o(), new_node_id.o()];
         let new_clone_history = TagComp_CloneHistory { cloneChain: new_nodes.clone() };
-        add_node_tag(&ctx, actor, AddNodeTagInput {
+        add_node_tag(&ctx, actor, false, AddNodeTagInput {
             tag: NodeTagInput {
                 nodes: new_nodes,
                 cloneHistory: Some(new_clone_history),

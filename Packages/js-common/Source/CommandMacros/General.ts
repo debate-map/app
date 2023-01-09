@@ -1,7 +1,7 @@
 import {Assert, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Command, DBHelper, dbp, GenerateUUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetCommandRuns} from "../DB/commandRuns.js";
-import {CommandRun, RLSTargetSet} from "../DB/commandRuns/@CommandRun.js";
+import {CommandRun} from "../DB/commandRuns/@CommandRun.js";
 import {GetDBReadOnlyMessage, IsDBReadOnly} from "../DB/globalData.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
 import {DMCommon_InServer} from "../Utils/General/General.js";
@@ -46,10 +46,10 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 	// some commands (eg. DeleteNode) need contraint-deferring till end of transaction, so just do that always (instant-checking doesn't really improve debugging in this context anyway)
 	db.DeferConstraints = true;
 
-	const commandClass = command.constructor as typeof Command;
+	/*const commandClass = command.constructor as typeof Command;
 	//if (commandsToNotEvenRecord.includes(commandClass)) return;
 	const commandRunMeta = GetCommandRunMetaForClass(commandClass);
-
+	
 	//const ancestorCommandInStream = CommandXOrAncestorCanShowInStream(command.parentCommand) && command["user_addToStream"];
 	const ancestorCommandCanBeInStream = CommandXOrAncestorCanShowInStream(command.parentCommand);
 	console.log("@Class:", commandClass.name,
@@ -105,9 +105,9 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 			commandName: commandClass.name,
 			// Use "command.payload_orig" to be on the safe side, since "command.payload" is often modified during Validate();
 			// 	normally that's fine, but this way's safer, to prevent private data leakage. (return-data should be/be-made sufficient for info-display needs)
-			commandPayload: command.payload_orig,
-			returnData: command.returnData,
+			commandInput: command.payload_orig,
+			commandResult: command.returnData,
 			rlsTargets,
 		}));
-	}
+	}*/
 };

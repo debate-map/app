@@ -44,7 +44,7 @@ pub struct UpdateTermResult {
 
 }
 
-pub async fn update_term(ctx: &AccessorContext<'_>, actor: &User, input: UpdateTermInput, _extras: NoExtras) -> Result<UpdateTermResult, Error> {
+pub async fn update_term(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateTermInput, _extras: NoExtras) -> Result<UpdateTermResult, Error> {
 	let UpdateTermInput { id, updates } = input;
 	
 	let old_data = get_term(&ctx, &id).await?;

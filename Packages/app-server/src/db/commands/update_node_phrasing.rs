@@ -44,7 +44,7 @@ pub struct UpdateNodePhrasingResult {
 
 }
 
-pub async fn update_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodePhrasingInput, _extras: NoExtras) -> Result<UpdateNodePhrasingResult, Error> {
+pub async fn update_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateNodePhrasingInput, _extras: NoExtras) -> Result<UpdateNodePhrasingResult, Error> {
 	let UpdateNodePhrasingInput { id, updates } = input;
 	
 	let old_data = get_node_phrasing(&ctx, &id).await?;

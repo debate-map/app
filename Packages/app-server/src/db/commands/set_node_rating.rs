@@ -44,14 +44,14 @@ pub struct SetNodeRatingResult {
 
 }
 
-pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: SetNodeRatingInput, _extras: NoExtras) -> Result<SetNodeRatingResult, Error> {
+pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetNodeRatingInput, _extras: NoExtras) -> Result<SetNodeRatingResult, Error> {
 	let SetNodeRatingInput { rating: rating_ } = input;
 	
 	ensure!(rating_.r#type != NodeRatingType::impact, "Cannot set impact rating directly.");
 
 	let old_ratings = get_node_ratings(ctx, &rating_.node, Some(rating_.r#type), Some(&vec![actor.id.to_string()])).await?;
 	for old_rating in old_ratings {
-		delete_node_rating(ctx, actor, DeleteNodeRatingInput { id: old_rating.id.to_string() }, Default::default()).await?;
+		delete_node_rating(ctx, actor, false, DeleteNodeRatingInput { id: old_rating.id.to_string() }, Default::default()).await?;
 	}
 
 	let rating = NodeRating {

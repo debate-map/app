@@ -45,7 +45,7 @@ pub struct DeleteAccessPolicyResult {
 
 }
 
-pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, input: DeleteAccessPolicyInput, _extras: NoExtras) -> Result<DeleteAccessPolicyResult, Error> {
+pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteAccessPolicyInput, _extras: NoExtras) -> Result<DeleteAccessPolicyResult, Error> {
 	let DeleteAccessPolicyInput { id } = input;
 	
 	let old_data = get_access_policy(&ctx, &id).await?;

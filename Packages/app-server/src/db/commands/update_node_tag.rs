@@ -45,7 +45,7 @@ pub struct UpdateNodeTagResult {
 
 }
 
-pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: UpdateNodeTagInput, _extras: NoExtras) -> Result<UpdateNodeTagResult, Error> {
+pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateNodeTagInput, _extras: NoExtras) -> Result<UpdateNodeTagResult, Error> {
 	let UpdateNodeTagInput { id, updates } = input;
 	
 	let old_data = get_node_tag(&ctx, &id).await?;

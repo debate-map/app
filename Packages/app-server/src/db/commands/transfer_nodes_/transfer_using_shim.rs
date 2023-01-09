@@ -73,7 +73,7 @@ pub async fn transfer_using_shim(ctx: &AccessorContext<'_>, actor: &User, transf
             parent: None, child: None, form: None, seriesAnchor: None, seriesEnd: None,
         },
     };
-    let result = add_child_node(&ctx, actor, add_child_node_input, Default::default()).await?;
+    let result = add_child_node(&ctx, actor, false, add_child_node_input, Default::default()).await?;
 
     Ok(TransferResult::Shim(TransferResult_Shim {
         new_argument_wrapper_id: result.nodeID,

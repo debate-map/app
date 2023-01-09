@@ -40,7 +40,7 @@ pub struct AddShareResult {
 
 }
 
-pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, input: AddShareInput, _extras: NoExtras) -> Result<AddShareResult, Error> {
+pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddShareInput, _extras: NoExtras) -> Result<AddShareResult, Error> {
 	let AddShareInput { share: share_ } = input;
 	
 	let share = Share {

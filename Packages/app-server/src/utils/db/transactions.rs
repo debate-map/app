@@ -7,7 +7,7 @@ use deadpool_postgres::{Transaction, Pool};
 
 use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::type_aliases::DBPool;
-use crate::utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_basic}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject};
+use crate::utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_base}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject};
 
 pub async fn get_client_from_gql_ctx<'a>(ctx: &async_graphql::Context<'_>) -> Result<PGClientObject, Error> {
     let pool = &get_app_state_from_gql_ctx(ctx).db_pool;

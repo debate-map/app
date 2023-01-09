@@ -44,7 +44,7 @@ pub struct DeleteNodeRatingResult {
 
 }
 
-pub async fn delete_node_rating(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeRatingInput, _extras: NoExtras) -> Result<DeleteNodeRatingResult, Error> {
+pub async fn delete_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodeRatingInput, _extras: NoExtras) -> Result<DeleteNodeRatingResult, Error> {
 	let DeleteNodeRatingInput { id } = input;
 	
 	let old_data = get_node_rating(&ctx, &id).await?;

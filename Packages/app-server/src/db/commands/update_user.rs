@@ -43,7 +43,7 @@ pub struct UpdateUserResult {
 
 }
 
-pub async fn update_user(ctx: &AccessorContext<'_>, actor: &User, input: UpdateUserInput, _extras: NoExtras) -> Result<UpdateUserResult, Error> {
+pub async fn update_user(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateUserInput, _extras: NoExtras) -> Result<UpdateUserResult, Error> {
 	let UpdateUserInput { id, updates } = input;
 	
 	let old_data = get_user(&ctx, &id).await?;

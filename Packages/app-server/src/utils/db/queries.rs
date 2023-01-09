@@ -1,7 +1,7 @@
 use std::{any::TypeId, pin::Pin, task::{Poll, Waker}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}, cell::RefCell};
 use rust_shared::{anyhow::{bail, Context, Error}, serde_json, async_graphql, to_anyhow, new_mtx, utils::{mtx::mtx::Mtx, type_aliases::RowData}};
 use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
-use deadpool_postgres::Pool;
+use deadpool_postgres::{Pool, Transaction};
 use rust_shared::flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt, TryStreamExt};
 use rust_shared::hyper::Body;
@@ -12,8 +12,8 @@ use tracing::{info, trace, debug};
 use rust_shared::uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 
-use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, storage::get_app_state_from_gql_ctx}, utils::{db::{sql_fragment::{SQLFragment}, sql_ident::SQLIdent},}, db::commands::_command::ToSqlWrapper};
-use super::{filter::QueryFilter};
+use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, storage::get_app_state_from_gql_ctx}, utils::{db::{sql_fragment::{SQLFragment}, sql_ident::SQLIdent}, type_aliases::PGClientObject,}, db::commands::_command::ToSqlWrapper};
+use super::{filter::QueryFilter, accessors::AccessorContext};
 
 /*type QueryFunc_ResultType = Result<Vec<Row>, tokio_postgres::Error>;
 type QueryFunc = Box<
@@ -34,7 +34,7 @@ where
 /*pub type QueryFunc = dyn FnOnce(SQLFragment) -> QueryFuncReturn;
 pub type QueryFuncReturn = dyn Future<Output = Result<Vec<Row>, tokio_postgres::Error>>;*/
 
-pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, QueryFunc, QueryFuncReturn>(
+pub async fn get_entries_in_collection_base</*'a,*/ T: From<Row> + Serialize, QueryFunc, QueryFuncReturn>(
     query_func: QueryFunc, table_name: String, filter: &QueryFilter, parent_mtx: Option<&Mtx>,
 ) -> Result<(Vec<RowData>, Vec<T>), Error>
     where
@@ -71,12 +71,13 @@ pub async fn get_entries_in_collection_basic</*'a,*/ T: From<Row> + Serialize, Q
 
     Ok((entries, entries_as_type))
 }
-pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &async_graphql::Context<'_>, table_name: String, filter: &QueryFilter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
-    new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
+pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &AccessorContext<'_>, table_name: String, filter: &QueryFilter, parent_mtx: Option<&Mtx>) -> Result<(Vec<RowData>, Vec<T>), Error> {
+    /*new_mtx!(mtx, "1:wait for pg-client", parent_mtx);
     let pool = &get_app_state_from_gql_ctx(ctx).db_pool;
-    let client = pool.get().await.unwrap();
+    let client = pool.get().await.unwrap();*/
 
-    mtx.section("2:get entries");
+    //mtx.section("2:get entries");
+    new_mtx!(mtx, "1:get entries", parent_mtx);
     let query_func = |mut sql: SQLFragment| async move {
         let (sql_text, params) = sql.into_query_args()?;
         info!("Running sql fragment. @sql_text:{sql_text} @params:{params:?}");
@@ -88,13 +89,9 @@ pub async fn get_entries_in_collection</*'a,*/ T: From<Row> + Serialize>(ctx: &a
         let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
         let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
 
-        client.query_raw(&sql_text, params_as_refs).await.map_err(to_anyhow)?
+        ctx.tx.query_raw(&sql_text, params_as_refs).await.map_err(to_anyhow)?
             .try_collect().await.map_err(to_anyhow)
     };
-    let (entries, entries_as_type) = get_entries_in_collection_basic(query_func, table_name, filter, Some(&mtx)).await?;
+    let (entries, entries_as_type) = get_entries_in_collection_base(query_func, table_name, filter, Some(&mtx)).await?;
     Ok((entries, entries_as_type))
 }
-
-/*pub fn strip_send_from_tosql_sync_send(x: Box<dyn ToSql + Sync + Send>) -> Box<dyn ToSql + Sync> {
-    x
-}*/

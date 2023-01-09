@@ -41,7 +41,7 @@ pub struct AddMediaResult {
 
 }
 
-pub async fn add_media(ctx: &AccessorContext<'_>, actor: &User, input: AddMediaInput, _extras: NoExtras) -> Result<AddMediaResult, Error> {
+pub async fn add_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddMediaInput, _extras: NoExtras) -> Result<AddMediaResult, Error> {
 	let AddMediaInput { media: media_ } = input;
 	
 	let media = Media {

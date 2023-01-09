@@ -41,7 +41,7 @@ pub struct AddTermResult {
 
 }
 
-pub async fn add_term(ctx: &AccessorContext<'_>, actor: &User, input: AddTermInput, _extras: NoExtras) -> Result<AddTermResult, Error> {
+pub async fn add_term(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddTermInput, _extras: NoExtras) -> Result<AddTermResult, Error> {
 	let AddTermInput { term: term_ } = input;
 	
 	let term = Term {

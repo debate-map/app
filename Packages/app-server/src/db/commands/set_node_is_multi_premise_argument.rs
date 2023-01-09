@@ -46,7 +46,7 @@ pub struct SetNodeIsMultiPremiseArgumentResult {
 
 }
 
-pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor: &User, input: SetNodeIsMultiPremiseArgumentInput, _extras: NoExtras) -> Result<SetNodeIsMultiPremiseArgumentResult, Error> {
+pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetNodeIsMultiPremiseArgumentInput, _extras: NoExtras) -> Result<SetNodeIsMultiPremiseArgumentResult, Error> {
 	let SetNodeIsMultiPremiseArgumentInput { id, multiPremiseArgument } = input;
 	
 	let old_data = get_node(&ctx, &id).await?;

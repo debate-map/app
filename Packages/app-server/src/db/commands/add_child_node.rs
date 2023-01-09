@@ -5,16 +5,19 @@ use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::utils::general_::extensions::ToOwnedV;
+use rust_shared::utils::general_::serde::to_json_value_for_borrowed_obj;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error, Context, ensure};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
+use serde::Serialize;
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
+use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, NodeLink};
@@ -39,7 +42,7 @@ wrap_slow_macros!{
     }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Deserialize, Serialize, Clone)]
 pub struct AddChildNodeInput {
     pub mapID: Option<String>,
 	pub parentID: String,
@@ -48,7 +51,7 @@ pub struct AddChildNodeInput {
     pub link: NodeLinkInput,
 }
 
-#[derive(SimpleObject, Debug)]
+#[derive(SimpleObject, Debug, Serialize)]
 pub struct AddChildNodeResult {
     pub nodeID: String,
     pub revisionID: String,
@@ -58,8 +61,8 @@ pub struct AddChildNodeResult {
 
 }
 
-pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, input: AddChildNodeInput, _extras: NoExtras) -> Result<AddChildNodeResult, Error> {
-	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input;
+pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, _extras: NoExtras) -> Result<AddChildNodeResult, Error> {
+	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input.clone();
 	
     let node_id = new_uuid_v4_as_b64();
     let link = NodeLinkInput {
@@ -73,14 +76,20 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, input: AddC
 	let add_node_result = add_node(ctx, actor, node_, Some(node_id.clone()), revision_).await?;
     ensure!(add_node_result.nodeID == node_id, "The node-id returned by add_node didn't match the node-id-override supplied to it!");
 
-	let add_node_link_result = add_node_link(ctx, actor, AddNodeLinkInput { link }, Default::default()).await?;
+	let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
     
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
-	Ok(AddChildNodeResult {
+    let result = AddChildNodeResult {
         nodeID: add_node_result.nodeID,
         revisionID: add_node_result.revisionID,
         linkID: add_node_link_result.id,
         doneAt: time_since_epoch_ms_i64(),
-    })
+    };
+    record_command_run(
+		ctx, actor,
+		"addChildNode".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
+		vec![input.parentID, result.nodeID.clone()],
+	).await?;
+	Ok(result)
 }

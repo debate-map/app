@@ -43,7 +43,7 @@ pub struct DeleteNodeTagResult {
 
 }
 
-pub async fn delete_node_tag(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodeTagInput, _extras: NoExtras) -> Result<DeleteNodeTagResult, Error> {
+pub async fn delete_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodeTagInput, _extras: NoExtras) -> Result<DeleteNodeTagResult, Error> {
 	let DeleteNodeTagInput { id } = input;
 	
 	let old_data = get_node_tag(&ctx, &id).await?;

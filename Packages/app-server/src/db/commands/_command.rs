@@ -227,37 +227,15 @@ pub fn update_field_of_extras(val_in_updates: FieldUpdate<JSONValue>, old_val: J
     Ok(result)
 }
 
-/* Usage example:
-```
-command_boilerplate_pre!(gql_ctx, input, ctx, user_info);
-let result = delete_map(&ctx, input, &user_info).await?;
-command_boilerplate_post!(ctx, result);
-```*/
-/*macro_rules! command_boilerplate_pre {
-    ($gql_ctx:ident, $input:ident, $ctx:ident, $user_info:ident) => {
-        let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
-		let $ctx = $crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, $gql_ctx).await?;
-		let $user_info = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &$ctx).await?;
-    }
-}
-pub(crate) use command_boilerplate_pre;
-macro_rules! command_boilerplate_post {
-    ($ctx:ident, $result:ident) => {
-		$ctx.tx.commit().await?;
-		tracing::info!("Command completed! Result:{:?}", $result);
-		return Ok($result);
-    }
-}
-pub(crate) use command_boilerplate_post;*/
-
 // Usage example: `command_boilerplate!(gql_ctx, input, only_validate, delete_map);`
+// Note: I've tried creating two variants of this (a pair of pre and post macros, and a regular function); if wanted for reference, view git history.
 macro_rules! command_boilerplate {
     ($gql_ctx:ident, $input:ident, $only_validate:ident, $command_impl_func:ident) => {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
 		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
-		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&$gql_ctx, &ctx).await?;
+		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx($gql_ctx, &ctx).await?;
 
-		let result = $command_impl_func(&ctx, &actor, $input, Default::default()).await?;
+		let result = $command_impl_func(&ctx, &actor, true, $input, Default::default()).await?;
 
 		if $only_validate.unwrap_or(false) {
             // before rolling back, ensure that none of the constraints are violated at this point (we must check manually, since commit is never called)
@@ -277,24 +255,16 @@ pub(crate) use command_boilerplate;
 
 pub type NoExtras = bool;
 
-// I couldn't quite get this working (error relating to lifetimes)
-// Usage example: `Ok(standard_command(gql_ctx, input, delete_map).await?)`
-/*pub async fn standard_command<InputT, ResultT, Fut>(
-    gql_ctx: &async_graphql::Context<'_>,
-    input: InputT,
-    command_impl_func: impl Fn(&AccessorContext, InputT, User) -> Fut
-) -> Result<ResultT, Error>
-    where
-        ResultT: std::fmt::Debug,
-        Fut: Future<Output = Result<ResultT, Error>>
-{
-    let mut anchor = crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
-    let ctx = crate::utils::db::accessors::AccessorContext::new_write(&mut anchor, gql_ctx).await?;
-    let user_info = crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx(&gql_ctx, &ctx).await?;
-
-    let result = command_impl_func(&ctx, input, user_info).await?;
-
-    ctx.tx.commit().await?;
-    tracing::info!("Command completed! Result:{:?}", result);
-    return Ok(result);
+// todo: probably change command-params from having `actor: &User, is_root: bool` to having `cmd_ctx: CommandContext<'_>`
+/*pub struct CommandContext<'a> {
+    actor: &'a User,
+    is_root: bool,
+}
+impl<'a> CommandContext<'a> {
+    pub fn child(&self) -> Self {
+        Self {
+            actor: self.actor,
+            is_root: false,
+        }
+    }
 }*/

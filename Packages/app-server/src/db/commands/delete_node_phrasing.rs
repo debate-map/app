@@ -43,7 +43,7 @@ pub struct DeleteNodePhrasingResult {
 
 }
 
-pub async fn delete_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, input: DeleteNodePhrasingInput, _extras: NoExtras) -> Result<DeleteNodePhrasingResult, Error> {
+pub async fn delete_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodePhrasingInput, _extras: NoExtras) -> Result<DeleteNodePhrasingResult, Error> {
 	let DeleteNodePhrasingInput { id } = input;
 	
 	let old_data = get_node_phrasing(&ctx, &id).await?;

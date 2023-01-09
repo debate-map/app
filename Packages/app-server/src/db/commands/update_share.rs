@@ -44,7 +44,7 @@ pub struct UpdateShareResult {
 
 }
 
-pub async fn update_share(ctx: &AccessorContext<'_>, actor: &User, input: UpdateShareInput, _extras: NoExtras) -> Result<UpdateShareResult, Error> {
+pub async fn update_share(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateShareInput, _extras: NoExtras) -> Result<UpdateShareResult, Error> {
 	let UpdateShareInput { id, updates } = input;
 	
 	let old_data = get_share(&ctx, &id).await?;

@@ -42,7 +42,7 @@ pub struct UpdateUserHiddenResult {
 
 }
 
-pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, input: UpdateUserHiddenInput, _extras: NoExtras) -> Result<UpdateUserHiddenResult, Error> {
+pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateUserHiddenInput, _extras: NoExtras) -> Result<UpdateUserHiddenResult, Error> {
 	let UpdateUserHiddenInput { id, updates } = input;
 	
 	let old_data = get_user_hidden(&ctx, &id).await?;

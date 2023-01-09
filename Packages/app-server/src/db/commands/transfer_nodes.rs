@@ -104,7 +104,7 @@ pub enum TransferResult {
     Shim(TransferResult_Shim),
 }
 
-pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, input: TransferNodesInput, _extras: NoExtras) -> Result<TransferNodesResult, Error> {
+pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: TransferNodesInput, _extras: NoExtras) -> Result<TransferNodesResult, Error> {
 	let TransferNodesInput { mapID, nodes } = input;
 
     let mut transfer_results: Vec<TransferResult> = vec![];
@@ -126,7 +126,7 @@ pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, input: Tran
         transfer_results.push(result);
     }
 	
-	increment_map_edits_if_valid(&ctx, mapID).await?;
+	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
 
 	Ok(TransferNodesResult { __: gql_placeholder() })
 }
