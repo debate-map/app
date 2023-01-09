@@ -1,4 +1,4 @@
-CREATE TABLE app_public.maps (
+CREATE TABLE app.maps (
     id text NOT NULL,
     "accessPolicy" text NOT NULL,
     name text NOT NULL,
@@ -15,5 +15,5 @@ CREATE TABLE app_public.maps (
     "editedAt" bigint,
     extras jsonb DEFAULT '{}'::jsonb NOT NULL
 );
-ALTER TABLE ONLY app_public.maps
+ALTER TABLE ONLY app.maps
     ADD CONSTRAINT v1_draft_maps_pkey PRIMARY KEY (id);

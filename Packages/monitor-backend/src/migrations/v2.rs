@@ -40,10 +40,10 @@ pub async fn migrate_db_to_v2(msg_sender: ABSender<GeneralMessage>) -> Result<St
     let tx = client.build_transaction().isolation_level(tokio_postgres::IsolationLevel::Serializable).start().await?;
 
     log("Adding new column...".to_owned()).await;
-    tx.execute(r#"ALTER TABLE app_public."nodeRevisions" ADD attachments jsonb NOT NULL DEFAULT '[]'::json;"#, &[]).await?;
+    tx.execute(r#"ALTER TABLE app."nodeRevisions" ADD attachments jsonb NOT NULL DEFAULT '[]'::json;"#, &[]).await?;
 
     log("Updating rows...".to_owned()).await;
-    let rows = tx.query(r#"SELECT * from app_public."nodeRevisions""#, &[]).await?;
+    let rows = tx.query(r#"SELECT * from app."nodeRevisions""#, &[]).await?;
     for row in rows {
         let id: String = row.get("id");
         let equation_val: JSONValue = row.try_get("equation").unwrap_or(JSONValue::Null);
@@ -52,7 +52,7 @@ pub async fn migrate_db_to_v2(msg_sender: ABSender<GeneralMessage>) -> Result<St
         let media_val: JSONValue = row.try_get("media").unwrap_or(JSONValue::Null);
         
         tx.execute(r#"
-            UPDATE app_public."nodeRevisions"
+            UPDATE app."nodeRevisions"
             SET "attachments"='[]'::jsonb
             WHERE id=$1;
         "#, &[&id]).await?;
@@ -68,7 +68,7 @@ pub async fn migrate_db_to_v2(msg_sender: ABSender<GeneralMessage>) -> Result<St
             let attachments_array = JSONValue::Array(vec![attachment]);
 
             tx.execute(r#"
-                UPDATE app_public."nodeRevisions"
+                UPDATE app."nodeRevisions"
                 SET "attachments"=$1
                 WHERE id=$2;
             "#, &[&attachments_array, &id]).await?;
@@ -76,10 +76,10 @@ pub async fn migrate_db_to_v2(msg_sender: ABSender<GeneralMessage>) -> Result<St
     }
 
     log("Deleting old columns...".to_owned()).await;
-    tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN equation;"#, &[]).await?;
-    tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN media;"#, &[]).await?;
-    tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN "references";"#, &[]).await?;
-    tx.execute(r#"ALTER TABLE app_public."nodeRevisions" DROP COLUMN "quote";"#, &[]).await?;
+    tx.execute(r#"ALTER TABLE app."nodeRevisions" DROP COLUMN equation;"#, &[]).await?;
+    tx.execute(r#"ALTER TABLE app."nodeRevisions" DROP COLUMN media;"#, &[]).await?;
+    tx.execute(r#"ALTER TABLE app."nodeRevisions" DROP COLUMN "references";"#, &[]).await?;
+    tx.execute(r#"ALTER TABLE app."nodeRevisions" DROP COLUMN "quote";"#, &[]).await?;
 
     log("Committing transaction...".to_owned()).await;
     tx.commit().await?;

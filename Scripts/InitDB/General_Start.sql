@@ -1,8 +1,8 @@
--- alter debate-map database so that commands are able to locate tables in the correct schema, by default (ie. in "app_public") 
-ALTER DATABASE "debate-map" SET search_path TO app_public, public;
+-- alter debate-map database so that commands are able to locate tables in the correct schema, by default (ie. in "app") 
+ALTER DATABASE "debate-map" SET search_path TO app, public;
 -- the above applies for future sessions, but not the current one; this next line will apply it to the current session
---SET SCHEMA PATH app_public, public
-SELECT pg_catalog.set_config('search_path', 'app_public, public', false);
+--SET SCHEMA PATH app, public
+SELECT pg_catalog.set_config('search_path', 'app, public', false);
 
 -- options for this session/connection
 -- ===========
@@ -20,8 +20,8 @@ SELECT pg_catalog.set_config('search_path', 'app_public, public', false);
 -- scheme creation
 -- ==========
 
-CREATE SCHEMA IF NOT EXISTS app_public;
---ALTER SCHEMA app_public OWNER TO admin;
+CREATE SCHEMA IF NOT EXISTS app;
+--ALTER SCHEMA app OWNER TO admin;
 
 -- search/text-match config
 -- ==========

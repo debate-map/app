@@ -1,4 +1,4 @@
-CREATE TABLE app_public.feedback_proposals (
+CREATE TABLE app.feedback_proposals (
     id text NOT NULL,
     type text NOT NULL,
     title text NOT NULL,
@@ -8,5 +8,5 @@ CREATE TABLE app_public.feedback_proposals (
     "editedAt" bigint,
     "completedAt" bigint
 );
-ALTER TABLE ONLY app_public.feedback_proposals
+ALTER TABLE ONLY app.feedback_proposals
     ADD CONSTRAINT v1_draft_feedback_proposals_pkey PRIMARY KEY (id);

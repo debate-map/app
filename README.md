@@ -746,7 +746,7 @@ To create a backup:
 	* 1.2\) A backup dump will be created at: `../Others/@Backups/DBDumps_[local/ovh]/XXX.sql`
 * 2\) Option 2, using DBeaver:
 	* 2.1\) Right-click DB in list. (this assumes you already are connected)
-	* 2.2\) Press Tools->Backup, select "app_public", press Next, set format to "Tar", and press Start.
+	* 2.2\) Press Tools->Backup, select "app", press Next, set format to "Tar", and press Start.
 
 To restore a backup:
 * 1\) TODO

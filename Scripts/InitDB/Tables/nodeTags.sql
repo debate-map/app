@@ -1,4 +1,4 @@
-CREATE TABLE app_public."nodeTags" (
+CREATE TABLE app."nodeTags" (
     id text NOT NULL,
     creator text NOT NULL,
     "createdAt" bigint NOT NULL,
@@ -11,5 +11,5 @@ CREATE TABLE app_public."nodeTags" (
     "cloneHistory" jsonb,
 	"c_accessPolicyTargets" text[] NOT NULL
 );
-ALTER TABLE ONLY app_public."nodeTags" ADD CONSTRAINT "v1_draft_nodeTags_pkey" PRIMARY KEY (id);
-ALTER TABLE app_public."nodeTags" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+ALTER TABLE ONLY app."nodeTags" ADD CONSTRAINT "v1_draft_nodeTags_pkey" PRIMARY KEY (id);
+ALTER TABLE app."nodeTags" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);

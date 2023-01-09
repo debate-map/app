@@ -212,7 +212,7 @@ row addition
 {"change":[
     {
         "kind":"insert",
-        "schema":"app_public",
+        "schema":"app",
         "table":"globalData",
         "columnnames":["extras","id"],
         "columntypes":["jsonb","text"],
@@ -228,7 +228,7 @@ row change
 {"change": [
     {
         "kind":"update",
-        "schema":"app_public",
+        "schema":"app",
         "table":"globalData",
         "columnnames":["extras","id"],
         "columntypes":["jsonb","text"],
@@ -249,7 +249,7 @@ row deletion (regular mode)
 {"change":[
     {
         "kind":"delete",
-        "schema":"app_public",
+        "schema":"app",
         "table":"globalData",
         "oldkeys":{
             "keynames":["id"],

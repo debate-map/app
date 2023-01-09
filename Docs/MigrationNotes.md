@@ -7,6 +7,16 @@
 
 ## Main series
 
+### Pushed on 2023-01-09
+
+* 1\) Changed schema name from `app_public` to just `app`.
+	* DB response:
+		* 1\) Execute sql:
+			```sql
+			ALTER SCHEMA app_public RENAME TO app;
+			ALTER DATABASE "debate-map" SET search_path TO app, public;
+			```
+
 ### Pushed on 2023-01-06
 
 * 1\) Changed the access-policy-triggers to omit duplicate access-policy-ids in its generated arrays and to exclude "empty targets" (eg. due to node-tags with refs to nodes that no longer exist); also, updated the `do_policies_allow_access` postgres function to reflect the fact that `nodeTags` can be "left without any policy-targets".
@@ -31,11 +41,11 @@
 	* DB response:
 		* 1\) Execute sql:
 			```sql
-			DROP INDEX app_public."nodeRevisions_phrasing_tsvector_idx";
-			ALTER TABLE app_public."nodeRevisions" DROP COLUMN phrasing_tsvector;
-			ALTER TABLE app_public."nodeRevisions" RENAME COLUMN phrasing1_tsvector TO phrasing_tsvector;
+			DROP INDEX app."nodeRevisions_phrasing_tsvector_idx";
+			ALTER TABLE app."nodeRevisions" DROP COLUMN phrasing_tsvector;
+			ALTER TABLE app."nodeRevisions" RENAME COLUMN phrasing1_tsvector TO phrasing_tsvector;
 			DROP INDEX IF EXISTS node_revisions_phrasing_en_idx;
-			CREATE INDEX node_revisions_phrasing_tsvector_idx ON app_public."nodeRevisions" USING gin (phrasing_tsvector) WHERE ("replacedBy" IS NULL);
+			CREATE INDEX node_revisions_phrasing_tsvector_idx ON app."nodeRevisions" USING gin (phrasing_tsvector) WHERE ("replacedBy" IS NULL);
 			```
 
 ### Pushed on 2023-01-04
@@ -46,13 +56,13 @@
 			```sql
 			-- start with the columns able to be null (so other steps can be completed)
 			BEGIN;
-				ALTER TABLE app_public."commandRuns" ADD COLUMN "c_accessPolicyTargets" text[];
-				ALTER TABLE app_public."mapNodeEdits" ADD COLUMN "c_accessPolicyTargets" text[];
-				ALTER TABLE app_public."nodeLinks" ADD COLUMN "c_accessPolicyTargets" text[];
-				ALTER TABLE app_public."nodePhrasings" ADD COLUMN "c_accessPolicyTargets" text[];
-				ALTER TABLE app_public."nodeRatings" ADD COLUMN "c_accessPolicyTargets" text[];
-				ALTER TABLE app_public."nodeRevisions" ADD COLUMN "c_accessPolicyTargets" text[];
-				ALTER TABLE app_public."nodeTags" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."commandRuns" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."mapNodeEdits" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."nodeLinks" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."nodePhrasings" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."nodeRatings" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."nodeRevisions" ADD COLUMN "c_accessPolicyTargets" text[];
+				ALTER TABLE app."nodeTags" ADD COLUMN "c_accessPolicyTargets" text[];
 			COMMIT;
 			```
 		* 2\) You'll also need to trigger all the existing rows to have their `c_accessPolicyTargets` fields updated (and field constraints set); so **after doing the db-response for root bullet-points 2 and 3 below**, follow-up by executing this sql:
@@ -66,13 +76,13 @@
 				UPDATE "nodeRevisions" SET "c_accessPolicyTargets" = array[]::text[];
 				UPDATE "nodeTags" SET "c_accessPolicyTargets" = array[]::text[];
 
-				ALTER TABLE app_public."commandRuns" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				ALTER TABLE app_public."mapNodeEdits" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				ALTER TABLE app_public."nodeLinks" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				ALTER TABLE app_public."nodePhrasings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				ALTER TABLE app_public."nodeRatings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				ALTER TABLE app_public."nodeRevisions" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
-				--ALTER TABLE app_public."nodeTags" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app."commandRuns" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app."mapNodeEdits" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app."nodeLinks" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app."nodePhrasings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app."nodeRatings" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				ALTER TABLE app."nodeRevisions" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
+				--ALTER TABLE app."nodeTags" ALTER COLUMN "c_accessPolicyTargets" SET NOT NULL, DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check", ADD CONSTRAINT "c_accessPolicyTargets_check" CHECK (cardinality("c_accessPolicyTargets") > 0);
 			COMMIT;
 			```
 * 2\) Updated the postgres rls-helper functions and many of the rls policies.
@@ -124,6 +134,6 @@
 * 1\) Renamed field (to make consistent with the rest): `nodeRevisions.replaced_by` -> `nodeRevisions.replacedBy`
 	* DB response:
 		* 1\) Directly update the column-name using DBeaver.
-		* 2\) Update the `app_public.after_insert_node_revision()` function using DBeaver. (see `nodeRevisions.sql` for new version)
+		* 2\) Update the `app.after_insert_node_revision()` function using DBeaver. (see `nodeRevisions.sql` for new version)
 	* GraphQL response:
-		* 1\) Update queries `nodeRevisions`, etc. to select the field `replaceBy` rather than `replaced_by`.
+		* 1\) Update queries `nodeRevisions`, etc. to select the field `replacedBy` rather than `replaced_by`.

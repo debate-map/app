@@ -1,4 +1,4 @@
-CREATE TABLE app_public.users (
+CREATE TABLE app.users (
     id text NOT NULL,
     "displayName" text NOT NULL,
     "photoURL" text,
@@ -7,5 +7,5 @@ CREATE TABLE app_public.users (
     edits integer NOT NULL,
     "lastEditAt" bigint
 );
-ALTER TABLE ONLY app_public.users
+ALTER TABLE ONLY app.users
     ADD CONSTRAINT v1_draft_users_pkey PRIMARY KEY (id);

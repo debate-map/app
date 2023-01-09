@@ -1,4 +1,4 @@
-CREATE TABLE app_public.medias (
+CREATE TABLE app.medias (
     id text NOT NULL,
     "accessPolicy" text NOT NULL,
     creator text NOT NULL,
@@ -8,5 +8,5 @@ CREATE TABLE app_public.medias (
     url text NOT NULL,
     description text NOT NULL
 );
-ALTER TABLE ONLY app_public.medias
+ALTER TABLE ONLY app.medias
     ADD CONSTRAINT v1_draft_medias_pkey PRIMARY KEY (id);

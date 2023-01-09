@@ -1,4 +1,4 @@
-/*CREATE TABLE app_public."visibilityDirectives" (
+/*CREATE TABLE app."visibilityDirectives" (
     id text NOT NULL,
     actor text NOT NULL,
     priority real NOT NULL,
@@ -9,5 +9,5 @@
     visibility_self text,
     visibility_nodes text
 );
-ALTER TABLE ONLY app_public."visibilityDirectives"
+ALTER TABLE ONLY app."visibilityDirectives"
     ADD CONSTRAINT "v1_draft_visibilityDirectives_pkey" PRIMARY KEY (id);*/

@@ -11,7 +11,7 @@ create or replace function is_user_admin(user_id varchar) returns boolean as $$ 
 	
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
 	return exists(
-		select 1 from app_public."users" where id = user_id and (
+		select 1 from app."users" where id = user_id and (
 			"permissionGroups" -> 'admin' = 'true'
 		)
 	);
@@ -20,7 +20,7 @@ end $$ language plpgsql;
 create or replace function does_policy_allow_access(user_id varchar, policy_id varchar, policy_field varchar) returns boolean as $$ begin 
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
 	return exists (
-		select 1 from app_public."accessPolicies" where id = policy_id and (
+		select 1 from app."accessPolicies" where id = policy_id and (
 			(
 				"permissions" -> policy_field -> 'access' = 'true'
 				-- the coalesce is needed to handle the case where the deep-field at that path doesn't exist, apparently

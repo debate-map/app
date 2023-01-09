@@ -2,7 +2,7 @@
 
 
 -- search-related indexes/functions
-CREATE OR REPLACE FUNCTION app_public.pick_phrasing(base TEXT, question TEXT) RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION app.pick_phrasing(base TEXT, question TEXT) RETURNS TEXT AS $$
 	SELECT (CASE
 		WHEN base IS NOT NULL AND length(base) > 0 AND regexp_match(base, '\[Paragraph [0-9]\]') IS NULL THEN base
 		WHEN question IS NOT NULL AND length(question) > 0 AND regexp_match(question, '\[Paragraph [0-9]\]') IS NULL THEN question
@@ -11,28 +11,28 @@ CREATE OR REPLACE FUNCTION app_public.pick_phrasing(base TEXT, question TEXT) RE
 $$ LANGUAGE SQL IMMUTABLE;
 
 
-CREATE OR REPLACE FUNCTION app_public.phrasings_to_tsv(base TEXT, question TEXT) RETURNS tsvector AS $$
-	SELECT to_tsvector('public.english_nostop'::regconfig, app_public.pick_phrasing(base, question));
+CREATE OR REPLACE FUNCTION app.phrasings_to_tsv(base TEXT, question TEXT) RETURNS tsvector AS $$
+	SELECT to_tsvector('public.english_nostop'::regconfig, app.pick_phrasing(base, question));
 $$ LANGUAGE SQL IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION app_public.pick_rev_phrasing(phrasing JSONB) RETURNS TEXT AS $$
-	SELECT app_public.pick_phrasing((phrasing #> '{text_base}')::text, (phrasing #> '{text_question}')::text);
+CREATE OR REPLACE FUNCTION app.pick_rev_phrasing(phrasing JSONB) RETURNS TEXT AS $$
+	SELECT app.pick_phrasing((phrasing #> '{text_base}')::text, (phrasing #> '{text_question}')::text);
 $$ LANGUAGE SQL IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION app_public.rev_phrasing_to_tsv(phrasing JSONB) RETURNS tsvector AS $$
-	SELECT to_tsvector('public.english_nostop'::regconfig, app_public.pick_rev_phrasing(phrasing));
+CREATE OR REPLACE FUNCTION app.rev_phrasing_to_tsv(phrasing JSONB) RETURNS tsvector AS $$
+	SELECT to_tsvector('public.english_nostop'::regconfig, app.pick_rev_phrasing(phrasing));
 $$ LANGUAGE SQL IMMUTABLE;
 
 
-CREATE OR REPLACE FUNCTION app_public.attachment_quotes_table(attachments JSONB) RETURNS TABLE (quote TEXT) AS $$
+CREATE OR REPLACE FUNCTION app.attachment_quotes_table(attachments JSONB) RETURNS TABLE (quote TEXT) AS $$
 	SELECT jsonb_array_elements_text(jsonb_path_query_array(attachments,'$[*].quote.content')) AS quote;
 $$ LANGUAGE SQL IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION app_public.attachment_quotes(attachments JSONB) RETURNS TEXT AS $$
-	SELECT string_agg(t, '\n\n') FROM app_public.attachment_quotes_table(attachments) AS t;
+CREATE OR REPLACE FUNCTION app.attachment_quotes(attachments JSONB) RETURNS TEXT AS $$
+	SELECT string_agg(t, '\n\n') FROM app.attachment_quotes_table(attachments) AS t;
 $$ LANGUAGE SQL IMMUTABLE;
 
 
-CREATE OR REPLACE FUNCTION app_public.attachments_to_tsv(attachments JSONB) RETURNS tsvector AS $$
+CREATE OR REPLACE FUNCTION app.attachments_to_tsv(attachments JSONB) RETURNS tsvector AS $$
 	SELECT jsonb_to_tsvector('public.english_nostop'::regconfig, jsonb_path_query_array(attachments,'$[*].quote.content'), '["string"]');
 $$ LANGUAGE SQL IMMUTABLE;

@@ -1,4 +1,4 @@
-CREATE TABLE app_public.terms (
+CREATE TABLE app.terms (
     id text NOT NULL,
     "accessPolicy" text NOT NULL,
     creator text NOT NULL,
@@ -11,5 +11,5 @@ CREATE TABLE app_public.terms (
     note text,
     attachments jsonb DEFAULT '[]'::jsonb NOT NULL
 );
-ALTER TABLE ONLY app_public.terms
+ALTER TABLE ONLY app.terms
     ADD CONSTRAINT v1_draft_terms_pkey PRIMARY KEY (id);

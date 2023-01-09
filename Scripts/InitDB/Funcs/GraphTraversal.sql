@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION app_public.descendants(root text, max_depth INTEGER DEFAULT 5)
+CREATE OR REPLACE FUNCTION app.descendants(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 	SELECT root as id, null as link_id, 0 as depth
 	UNION ALL (
@@ -6,14 +6,14 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		SELECT
 			p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
 		FROM
-			app_public."nodeLinks" AS p
+			app."nodeLinks" AS p
 		WHERE
 			p.parent=root
 		UNION
 			SELECT
 				c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
 			FROM
-				app_public."nodeLinks" AS c, children
+				app."nodeLinks" AS c, children
 			WHERE c.parent = children.id AND NOT is_cycle AND children.depth < max_depth
 	) SELECT
 		min(id) as id, link_id, min(depth) as depth
@@ -23,7 +23,7 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		ORDER BY min(depth), min(order_key), link_id)
 $$;
 -- todo: update this
-CREATE OR REPLACE FUNCTION app_public.ancestors(root text, max_depth INTEGER DEFAULT 5)
+CREATE OR REPLACE FUNCTION app.ancestors(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 	SELECT root as id, 0 as depth
 	UNION ALL (
@@ -31,14 +31,14 @@ RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 			SELECT
 				p.parent, 1, false, ARRAY[p.child]
 			FROM
-				app_public."nodeLinks" AS p
+				app."nodeLinks" AS p
 			WHERE
 				p.child=root
 			UNION
 				SELECT
 					c.parent, parents.depth+1, c.parent = ANY(parents.nodes_path), nodes_path || c.child
 				FROM
-					app_public."nodeLinks" AS c, parents
+					app."nodeLinks" AS c, parents
 				WHERE c.child = parents.id AND NOT is_cycle AND parents.depth < max_depth
 		) SELECT
 			id, min(depth) as depth
@@ -48,7 +48,7 @@ RETURNS TABLE(id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		ORDER BY depth, id
 	)
 $$;
-CREATE OR REPLACE FUNCTION app_public.shortest_path(source text, dest text)
+CREATE OR REPLACE FUNCTION app.shortest_path(source text, dest text)
 RETURNS TABLE(node_id text, link_id text) LANGUAGE plpgsql STABLE AS $$
 DECLARE
 	node_ids text[];
@@ -59,14 +59,14 @@ BEGIN
 		SELECT
 			p.id, p.parent, p.child, 0, false, ARRAY[p.child], ARRAY[p.id]
 		FROM
-			app_public."nodeLinks" AS p
+			app."nodeLinks" AS p
 		WHERE
 			p.child=dest
 		UNION
 			SELECT
 				c.id, c.parent, c.child, parents.depth+1, c.parent = ANY(nodes_path), nodes_path || c.child, links_path || c.id
 			FROM
-				app_public."nodeLinks" AS c, parents
+				app."nodeLinks" AS c, parents
 			WHERE c.child = parents.parent AND NOT is_cycle
 	) SELECT
 		parents.nodes_path, parents.links_path INTO STRICT node_ids, link_ids
@@ -80,7 +80,7 @@ END
 $$;
 
 -- variant of descendants that tries to order the results in a way that mimics the render-order in debate-map (ie. traverse down at each step doing: stable-sort by link-id, then stable-sort by order-key)
-CREATE OR REPLACE FUNCTION app_public.descendants2(root text, max_depth INTEGER DEFAULT 5)
+CREATE OR REPLACE FUNCTION app.descendants2(root text, max_depth INTEGER DEFAULT 5)
 RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 	WITH sub AS (
 	SELECT null as parent_id, root as child_id, 0 as depth, null as order_key, null as link_id
@@ -89,14 +89,14 @@ RETURNS TABLE(id text, link_id text, distance INTEGER) LANGUAGE SQL STABLE AS $$
 		SELECT
 			p.parent, p.child, 1, false, ARRAY[p.parent], p."orderKey", p.id
 		FROM
-			app_public."nodeLinks" AS p
+			app."nodeLinks" AS p
 		WHERE
 			p.parent=root
 		UNION
 			SELECT
 				c.parent, c.child, children.depth+1, c.child = ANY(children.nodes_path), nodes_path || c.parent, c."orderKey", c.id
 			FROM
-				app_public."nodeLinks" AS c, children
+				app."nodeLinks" AS c, children
 			WHERE c.parent = children.child_id AND NOT is_cycle AND children.depth < max_depth
 	) SELECT DISTINCT ON (link_id) parent_id, child_id, depth, order_key, link_id
 	FROM

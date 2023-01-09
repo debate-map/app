@@ -1,4 +1,4 @@
-CREATE TABLE app_public.nodes (
+CREATE TABLE app.nodes (
     id text NOT NULL,
     creator text NOT NULL,
     "createdAt" bigint NOT NULL,
@@ -10,5 +10,5 @@ CREATE TABLE app_public.nodes (
     "argumentType" text,
     extras jsonb DEFAULT '{}'::jsonb NOT NULL
 );
-ALTER TABLE ONLY app_public.nodes
+ALTER TABLE ONLY app.nodes
     ADD CONSTRAINT v1_draft_nodes_pkey PRIMARY KEY (id);

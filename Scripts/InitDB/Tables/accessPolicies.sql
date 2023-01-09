@@ -1,4 +1,4 @@
-CREATE TABLE app_public."accessPolicies" (
+CREATE TABLE app."accessPolicies" (
     id text NOT NULL,
     name text NOT NULL,
     creator text NOT NULL,
@@ -6,5 +6,5 @@ CREATE TABLE app_public."accessPolicies" (
     permissions jsonb NOT NULL,
     "permissions_userExtends" jsonb NOT NULL
 );
-ALTER TABLE ONLY app_public."accessPolicies"
+ALTER TABLE ONLY app."accessPolicies"
     ADD CONSTRAINT "v1_draft_accessPolicies_pkey" PRIMARY KEY (id);

@@ -1,4 +1,4 @@
-CREATE TABLE app_public."userHiddens" (
+CREATE TABLE app."userHiddens" (
     id text NOT NULL,
     email text NOT NULL,
     "providerData" jsonb NOT NULL,
@@ -11,5 +11,5 @@ CREATE TABLE app_public."userHiddens" (
     "lastAccessPolicy" character varying(255),
     extras jsonb DEFAULT '{}'::jsonb NOT NULL
 );
-ALTER TABLE ONLY app_public."userHiddens"
+ALTER TABLE ONLY app."userHiddens"
     ADD CONSTRAINT "v1_draft_userHiddens_pkey" PRIMARY KEY (id);

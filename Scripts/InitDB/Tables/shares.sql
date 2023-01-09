@@ -1,4 +1,4 @@
-CREATE TABLE app_public.shares (
+CREATE TABLE app.shares (
     id text NOT NULL,
     creator text NOT NULL,
     "createdAt" bigint NOT NULL,
@@ -7,5 +7,5 @@ CREATE TABLE app_public.shares (
     "mapID" text,
     "mapView" jsonb
 );
-ALTER TABLE ONLY app_public.shares
+ALTER TABLE ONLY app.shares
     ADD CONSTRAINT v1_draft_shares_pkey PRIMARY KEY (id);

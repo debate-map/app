@@ -29,7 +29,7 @@ export const GetMapEditors = CreateAccessor((mapID: string)=>{
 current_setting('app.current_user_id') = entry_creator
 or current_setting('app.current_user_admin') = 'true'
 or exists (
-	select 1 from app_public."accessPolicies" where id = policyID and (
+	select 1 from app."accessPolicies" where id = policyID and (
 		(
 			"permissions" -> policyField -> 'access' = 'true'
 			and coalesce("permissions_userExtends" -> current_setting('app.current_user_id') -> policyField -> 'access', 'null'::jsonb) != 'false'
