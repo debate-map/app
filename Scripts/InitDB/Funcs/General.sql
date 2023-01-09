@@ -22,8 +22,8 @@ CREATE OR REPLACE FUNCTION app.rev_row_phrasing_to_tsv(p app."nodeRevisions") RE
 $$ LANGUAGE SQL STABLE;
 
 -- array-related functions
-create or replace function app.distinct_array(a text[]) returns text[] as $$
-	select array (
-		select distinct v from unnest(a) as b(v)
+CREATE OR REPLACE FUNCTION app.distinct_array(a text[]) RETURNS text[] AS $$
+	SELECT ARRAY (
+		SELECT DISTINCT v FROM unnest(a) AS b(v)
 	)
-$$ language sql;
+$$ LANGUAGE SQL;

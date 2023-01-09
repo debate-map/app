@@ -16,6 +16,8 @@
 			ALTER SCHEMA app_public RENAME TO app;
 			ALTER DATABASE "debate-map" SET search_path TO app, public;
 			```
+		* 2\) Re-apply the sql in `@PreTables.sql`. `GraphTraversal.sql`, `RLSHelpers.sql`, and `Search.sql`.
+		* 3\) Re-apply the `after_insert_node_revision` func+trigger in `nodeRevisions.sql`.
 
 ### Pushed on 2023-01-06
 

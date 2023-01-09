@@ -1,7 +1,8 @@
 -- this file is for functions that are used within the table creation commands (eg. "field_x GENERATED ALWAYS AS func_y()"), and thus need to be created beforehand (or for simple)
 
-
 -- search-related indexes/functions
+-- ==========
+
 CREATE OR REPLACE FUNCTION app.pick_phrasing(base TEXT, question TEXT) RETURNS TEXT AS $$
 	SELECT (CASE
 		WHEN base IS NOT NULL AND length(base) > 0 AND regexp_match(base, '\[Paragraph [0-9]\]') IS NULL THEN base

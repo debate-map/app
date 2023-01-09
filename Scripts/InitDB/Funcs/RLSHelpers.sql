@@ -1,55 +1,55 @@
 -- sync:rs[rls_helpers.rs]
 
-create or replace function is_user_creator(user_id varchar, creator_id varchar) returns boolean as $$ begin 
+CREATE OR REPLACE FUNCTION is_user_creator(user_id varchar, creator_id varchar) RETURNS boolean AS $$ BEGIN 
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
-	return user_id = creator_id;
-end $$ language plpgsql;
+	RETURN user_id = creator_id;
+END $$ LANGUAGE plpgsql;
 
-create or replace function is_user_admin(user_id varchar) returns boolean as $$ begin
+CREATE OR REPLACE FUNCTION is_user_admin(user_id varchar) RETURNS boolean AS $$ BEGIN
 	-- probably todo: go back to an approach like this, once "app.current_user_admin" config-param can be efficiently set by app-server
-	--return current_setting('app.current_user_admin') = 'true';
+	--RETURN current_setting('app.current_user_admin') = 'true';
 	
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
-	return exists(
-		select 1 from app."users" where id = user_id and (
+	RETURN EXISTS(
+		SELECT 1 FROM app."users" WHERE id = user_id AND (
 			"permissionGroups" -> 'admin' = 'true'
 		)
 	);
-end $$ language plpgsql;
+END $$ LANGUAGE plpgsql;
 
-create or replace function does_policy_allow_access(user_id varchar, policy_id varchar, policy_field varchar) returns boolean as $$ begin 
+CREATE OR REPLACE FUNCTION does_policy_allow_access(user_id varchar, policy_id varchar, policy_field varchar) RETURNS boolean AS $$ BEGIN
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
-	return exists (
-		select 1 from app."accessPolicies" where id = policy_id and (
+	RETURN EXISTS(
+		SELECT 1 FROM app."accessPolicies" WHERE id = policy_id AND (
 			(
 				"permissions" -> policy_field -> 'access' = 'true'
 				-- the coalesce is needed to handle the case where the deep-field at that path doesn't exist, apparently
-				and coalesce("permissions_userExtends" -> user_id -> policy_field -> 'access', 'null'::jsonb) != 'false'
+				AND coalesce("permissions_userExtends" -> user_id -> policy_field -> 'access', 'null'::jsonb) != 'false'
 			)
-			or "permissions_userExtends" -> user_id -> policy_field -> 'access' = 'true'
+			OR "permissions_userExtends" -> user_id -> policy_field -> 'access' = 'true'
 		)
 	);
-end $$ language plpgsql;
+END $$ LANGUAGE plpgsql;
 
-create or replace function do_policies_allow_access(user_id varchar, policy_targets varchar[]) returns boolean as $$
-declare
+CREATE OR REPLACE FUNCTION do_policies_allow_access(user_id varchar, policy_targets varchar[]) RETURNS boolean AS $$
+DECLARE
 	policy_target varchar;
 	policy_id varchar;
 	policy_subfield varchar;
-begin 
+BEGIN 
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
 
 	-- The `c_accessPolicyTargets` fields should always have at least one entry in them; if not, something is wrong, so play it safe and reject access.
 	-- (Most tables enforce non-emptiness of this field with a row constraint, but nodeTags is an exception; its associated nodes may be deleted, leaving it without any targets.)
 	-- (This line thus serves to prevent "orphaned node-tags" from being visible by non-admins, as well as a general-purpose "second instance" of the non-emptiness check.)
-	IF cardinality(policy_targets) = 0 THEN return false; END IF;
+	IF cardinality(policy_targets) = 0 THEN RETURN false; END IF;
 
-	foreach policy_target in array policy_targets loop
+	foreach policy_target in array policy_targets LOOP
 		policy_id := (SELECT split_part(policy_target, ':', 1));
 		policy_subfield := (SELECT split_part(policy_target, ':', 2));
-		if not does_policy_allow_access(user_id, policy_id, policy_subfield) then
-			return false;
-		end if;
-	end loop;
-	return true;
-end $$ language plpgsql;
+		IF NOT does_policy_allow_access(user_id, policy_id, policy_subfield) THEN
+			RETURN false;
+		END IF;
+	END LOOP;
+	RETURN true;
+END $$ LANGUAGE plpgsql;
