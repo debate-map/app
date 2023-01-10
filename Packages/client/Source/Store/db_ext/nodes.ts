@@ -5,9 +5,10 @@ import {GADDemo} from "UI/@GAD/GAD";
 import {Chroma_Safe, HSLA} from "web-vcore";
 import {Assert} from "js-vextensions";
 import {store} from "Store";
-import {NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
+import {NodeStyleRule, NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
+import {CE} from "web-vcore/nm/js-vextensions";
 
-export function GetNodeColor(node: {type: NodeType, displayPolarity?: Polarity, current?: NodeRevision}, type: "raw" | "background" = "background", allowOverrides = true): chroma.Color {
+export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "raw" | "background" = "background", allowOverrides = true): chroma.Color {
 	let result: chroma.Color;
 	/*if (node.type == NodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
 	else if (node.type == NodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
@@ -68,10 +69,10 @@ export function GetNodeColor(node: {type: NodeType, displayPolarity?: Polarity, 
 			const styleRules = store.main.maps.nodeStyleRules;
 			for (const rule of styleRules) {
 				if (!rule.enabled) continue;
-				if (rule.ifType == NodeStyleRule_IfType.lastEditorIs && node.current.creator == rule.if_user1) {
-					if (rule.thenType == NodeStyleRule_ThenType.setBackgroundColor) {
-						result = Chroma_Safe(rule.then_color1);
-					}
+				if (rule.thenType != NodeStyleRule_ThenType.setBackgroundColor) continue;
+
+				if (CE(rule).Cast(NodeStyleRule).DoesIfCheckPass(node)) {
+					result = Chroma_Safe(rule.then_setBackgroundColor.color);
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-import {GetUsers} from "dm_common";
+import {GetUser, GetUsers} from "dm_common";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -14,7 +14,15 @@ export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChan
 		const users = GetUsers().OrderBy(a=>a.displayName);
 		return (
 			<DropDown ref={c=>this.dropDown = c} style={E({flex: 1}, containerStyle)}>
-				<DropDownTrigger>{children}</DropDownTrigger>
+				<DropDownTrigger>{
+					children instanceof Function
+						? (()=>{
+							const user = GetUser(value);
+							const text = value != null ? `${user?.displayName ?? "n/a"} (id: ${value})` : "(click to select user)";
+							return children(text);
+						})()
+						: children
+				}</DropDownTrigger>
 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: 5, zIndex: 1}}>
 					<Row style={{alignItems: "flex-start"}}>
 						<Column style={{width: 600}}>

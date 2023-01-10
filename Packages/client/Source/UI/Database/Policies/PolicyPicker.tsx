@@ -1,4 +1,4 @@
-import {GetAccessPolicies, GetUsers} from "dm_common";
+import {GetAccessPolicies, GetAccessPolicy, GetUsers} from "dm_common";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -14,7 +14,15 @@ export class PolicyPicker extends BaseComponentPlus({} as {value: string|n, onCh
 		const policies = GetAccessPolicies().OrderBy(a=>a.name);
 		return (
 			<DropDown ref={c=>this.dropDown = c} style={E({flex: 1}, containerStyle)}>
-				<DropDownTrigger>{children}</DropDownTrigger>
+				<DropDownTrigger>{
+					children instanceof Function
+						? (()=>{
+							const policy = GetAccessPolicy(value);
+							const text = value != null ? `${policy?.name ?? "n/a"} (id: ${value})` : "(click to select policy)";
+							return children(text);
+						})()
+						: children
+				}</DropDownTrigger>
 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: 5, zIndex: 1}}>
 					<Row style={{alignItems: "flex-start"}}>
 						<Column style={{width: 600}}>

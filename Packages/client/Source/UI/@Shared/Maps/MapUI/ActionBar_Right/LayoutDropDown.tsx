@@ -3,12 +3,13 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {store} from "Store";
-import {Chroma, Chroma_Safe, Observer, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
-import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
+import {BuildErrorWrapperComp, Chroma, Chroma_Safe, defaultErrorUI, EB_StoreError, Observer, ReactError, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
+import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRuleComp_AccessPolicyDoesNotMatch, NodeStyleRuleComp_LastEditorIs, NodeStyleRuleComp_SetBackgroundColor, NodeStyleRule_IfType, NodeStyleRule_IfType_displayTexts, NodeStyleRule_ThenType, NodeStyleRule_ThenType_displayTexts} from "Store/main/maps";
 import {GetUser, Map, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React, {Fragment} from "react";
 import {GetEntries} from "js-vextensions";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
+import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 
 const ratingPreviewOptions = [
 	{name: "None", value: "none"},
@@ -69,13 +70,14 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						<Button ml={5} text="+" onClick={()=>{
 							RunInAction_Set(this, ()=>uiState.nodeStyleRules.push(new NodeStyleRule({
 								ifType: NodeStyleRule_IfType.lastEditorIs,
+								if_lastEditorIs: new NodeStyleRuleComp_LastEditorIs(),
 								thenType: NodeStyleRule_ThenType.setBackgroundColor,
-								then_color1: "rgba(0,0,0,1)",
+								then_setBackgroundColor: new NodeStyleRuleComp_SetBackgroundColor().VSet({color: "rgba(0,0,0,1)"}),
 							})));
 						}}/>
 					</Row>
 					{uiState.nodeStyleRules.map((rule, index)=>{
-						return <StyleRuleUI key={index} rule={rule} index={index}/>;
+						return <StyleRuleUI_ErrorWrapper key={index} rule={rule} index={index}/>;
 					})}
 				</Column></DropDownContent>
 			</DropDown>
@@ -83,12 +85,39 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	}
 }
 
+const StyleRuleUI_ErrorWrapper = BuildErrorWrapperComp<StyleRuleUI_Props>(()=>StyleRuleUI, (info, comp)=>{
+	const uiState = store.main.maps;
+	return <Column>
+		<Button text="Remove this invalid entry" onClick={()=>RunInAction("StyleRuleUI_ErrorWrapper", ()=>uiState.nodeStyleRules.Remove(comp.props.rule))}/>
+		{info.defaultUI(info, comp)}
+	</Column>;
+});
+
+type StyleRuleUI_Props = {rule: NodeStyleRule, index: number};
 @Observer
-class StyleRuleUI extends BaseComponent<{rule: NodeStyleRule, index: number}, {}> {
+class StyleRuleUI extends BaseComponent<StyleRuleUI_Props, {}> {
 	render() {
 		const {rule, index} = this.props;
-		const if_user1 = GetUser(rule.if_user1);
+		const if_lastEditorIs_user = GetUser(rule.if_lastEditorIs?.user);
 		const uiState = store.main.maps;
+		const ChangeIfBlock = (setter: ()=>any)=>{
+			RunInAction("StyleRuleUI.ChangeIfBlock", ()=>{
+				setter();
+				// re-set if-fields, so mobx detects change
+				for (const key of Object.keys(rule)) {
+					if (key.startsWith("if_")) rule[key] = {...rule[key]};
+				}
+			});
+		};
+		const ChangeThenBlock = (setter: ()=>any)=>{
+			RunInAction("StyleRuleUI.ChangeThenBlock", ()=>{
+				setter();
+				// re-set then-fields, so mobx detects change
+				for (const key of Object.keys(rule)) {
+					if (key.startsWith("then_")) rule[key] = {...rule[key]};
+				}
+			});
+		};
 
 		return (
 			<Fragment key={index}>
@@ -102,28 +131,48 @@ class StyleRuleUI extends BaseComponent<{rule: NodeStyleRule, index: number}, {}
 					<Row center>
 						<Text ml={5} mr={5}>If...</Text>
 
-						<Select options={GetEntries(NodeStyleRule_IfType)} value={rule.ifType} onChange={val=>{
+						<Select options={GetEntries(NodeStyleRule_IfType, name=>NodeStyleRule_IfType_displayTexts[name])} value={rule.ifType} onChange={val=>{
 							RunInAction_Set(this, ()=>{
 								rule.ifType = val;
-								// todo: when there are multiple types, add code here to reset the type-specific fields
+								if (rule.ifType == NodeStyleRule_IfType.lastEditorIs) {
+									rule.if_lastEditorIs ??= new NodeStyleRuleComp_LastEditorIs();
+								} else if (rule.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch) {
+									rule.if_accessPolicyDoesNotMatch ??= new NodeStyleRuleComp_AccessPolicyDoesNotMatch();
+								}
 							});
 						}}/>
 						{rule.ifType == NodeStyleRule_IfType.lastEditorIs &&
-						<UserPicker value={rule.if_user1} onChange={val=>RunInAction_Set(this, ()=>rule.if_user1 = val)}>
-							<Button ml={5} text={rule.if_user1 != null ? `${if_user1?.displayName ?? "n/a"} (id: ${rule.if_user1})` : "(click to select user)"} style={{width: "100%"}}/>
+						<UserPicker value={rule.if_lastEditorIs.user} onChange={val=>ChangeIfBlock(()=>rule.if_lastEditorIs.user = val)}>
+							{text=><Button ml={5} text={text} style={{width: "100%"}}/>}
 						</UserPicker>}
+						{rule.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch &&
+							<Text ml={5}>any policy in the following list...</Text>}
 					</Row>
+					{rule.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch &&
+					<Column ml={30}>
+						{rule.if_accessPolicyDoesNotMatch.policyIDs.map((policyID, index)=>{
+							return <Row mt={5} key={index}>
+								<PolicyPicker value={policyID} onChange={val=>ChangeIfBlock(()=>rule.if_accessPolicyDoesNotMatch.policyIDs[index] = val)}>
+									{text=><Button text={text} style={{width: "100%"}}/>}
+								</PolicyPicker>
+								<Button ml={5} text="X" onClick={()=>rule.if_accessPolicyDoesNotMatch.policyIDs.RemoveAt(index)}/>
+							</Row>;
+						})}
+						<Button mt={5} text="Add policy to list" onClick={()=>rule.if_accessPolicyDoesNotMatch.policyIDs.push(null)}/>
+					</Column>}
 
 					<Row center>
 						<Text ml={5} mr={5}>Then...</Text>
-						<Select options={GetEntries(NodeStyleRule_ThenType)} value={rule.thenType} onChange={val=>{
+						<Select options={GetEntries(NodeStyleRule_ThenType, name=>NodeStyleRule_ThenType_displayTexts[name])} value={rule.thenType} onChange={val=>{
 							RunInAction_Set(this, ()=>{
 								rule.thenType = val;
-								// todo: when there are multiple types, add code here to reset the type-specific fields
+								if (rule.thenType == NodeStyleRule_ThenType.setBackgroundColor) {
+									rule.then_setBackgroundColor ??= new NodeStyleRuleComp_SetBackgroundColor();
+								}
 							});
 						}}/>
 						{rule.thenType == NodeStyleRule_ThenType.setBackgroundColor &&
-						<ColorPickerBox ml={5} popupStyle={{right: 0}} color={Chroma_Safe(rule.then_color1).rgba()} onChange={val=>RunInAction_Set(this, ()=>rule.then_color1 = Chroma(val).css())}/>}
+						<ColorPickerBox ml={5} popupStyle={{right: 0}} color={Chroma_Safe(rule.then_setBackgroundColor.color).rgba()} onChange={val=>ChangeThenBlock(()=>rule.then_setBackgroundColor.color = Chroma(val).css())}/>}
 					</Row>
 				</Column>
 			</Fragment>

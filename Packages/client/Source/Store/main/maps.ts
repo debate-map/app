@@ -1,10 +1,10 @@
-import {GetNodeL3, ChildOrdering, MapView} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
-import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
@@ -45,7 +45,7 @@ export class MapsState {
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
 	//@O nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
-	@O nodeStyleRules = [] as NodeStyleRule[];
+	@O @version(2) nodeStyleRules = [] as NodeStyleRule[];
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
@@ -64,16 +64,47 @@ export class NodeStyleRule {
 	@O enabled = true;
 
 	@O ifType: NodeStyleRule_IfType;
-	@O if_user1: string;
+	@O.ref if_lastEditorIs: NodeStyleRuleComp_LastEditorIs;
+	@O.ref if_accessPolicyDoesNotMatch: NodeStyleRuleComp_AccessPolicyDoesNotMatch;
 
 	@O thenType: NodeStyleRule_ThenType;
-	@O then_color1: string;
+	@O then_setBackgroundColor: NodeStyleRuleComp_SetBackgroundColor;
+
+	// need Partial<NodeL3>, since can be called from GetNodeColor
+	DoesIfCheckPass(node: Partial<NodeL3>) {
+		if (this.ifType == NodeStyleRule_IfType.lastEditorIs) {
+			return node.current?.creator != null && node.current?.creator == this.if_lastEditorIs.user;
+		}
+		if (this.ifType == NodeStyleRule_IfType.accessPolicyDoesNotMatch) {
+			return node.accessPolicy && !this.if_accessPolicyDoesNotMatch.policyIDs.includes(node.accessPolicy);
+		}
+		Assert(false, `Invalid if-type for style-rule:${this.ifType}`);
+	}
 }
+
 export enum NodeStyleRule_IfType {
 	"lastEditorIs" = "lastEditorIs",
+	"accessPolicyDoesNotMatch" = "accessPolicyDoesNotMatch",
 }
+export const NodeStyleRule_IfType_displayTexts = {
+	[NodeStyleRule_IfType.lastEditorIs]: "node's last editor is",
+	[NodeStyleRule_IfType.accessPolicyDoesNotMatch]: "node's access-policy does not match",
+};
+export class NodeStyleRuleComp_LastEditorIs {
+	user: string;
+}
+export class NodeStyleRuleComp_AccessPolicyDoesNotMatch {
+	policyIDs: (string|null)[] = [];
+}
+
 export enum NodeStyleRule_ThenType {
 	"setBackgroundColor" = "setBackgroundColor",
+}
+export const NodeStyleRule_ThenType_displayTexts = {
+	[NodeStyleRule_ThenType.setBackgroundColor]: "set node's background color to",
+};
+export class NodeStyleRuleComp_SetBackgroundColor {
+	color: string;
 }
 
 export enum DetailsPanel_Subpanel {
