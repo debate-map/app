@@ -88,38 +88,41 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 					<Text ml={5}>Changes: {currentShare == null ? "n/a" : (newShare_updatesFromCurrent.VKeys().length ? newShare_updatesFromCurrent.VKeys().join(", ") : "none")}</Text>
 				</Row>
 
-				<Row mt={15}>
-					<Text>Current share ID: {currentShare?.id ?? "none"}</Text>
-				</Row>
-				<RowLR mt={5} splitAt={80}>
-					<Text>Name:</Text>
-					<TextInput enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={async val=>{
-						//new UpdateShare({id: currentShare.id, updates: {name: val}}).RunOnServer();
-						await RunCommand_UpdateShare({id: currentShare.id, updates: {name: val}});
-					}}/>
-				</RowLR>
-				<RowLR mt={5} splitAt={80}>
-					<Pre>Short URL: </Pre>
-					<Row style={{width: "100%"}}>
-						<TextInput value={currentShare_shortURL.toString({domain: true})} editable={false} style={{flex: 1}}/>
-						<Button text={justCopied_type == "short" ? "Copied!" : "Copy"} ml={5} enabled={currentShare != null} onClick={()=>{
-							CopyText(currentShare_shortURL.toString({domain: true}));
-							this.SetState({justCopied_type: "short"});
-							WaitXThenRun(1000, ()=>this.SetState({justCopied_type: null}));
-						}}/>
+				{currentShare &&
+				<>
+					<Row mt={15}>
+						<Text>Current share ID: {currentShare?.id ?? "none"}</Text>
 					</Row>
-				</RowLR>
-				<RowLR mt={5} splitAt={80}>
-					<Pre>Long URL: </Pre>
-					<Row style={{width: "100%"}}>
-						<TextInput value={currentShare_longURL.toString({domain: true})} editable={false} style={{flex: 1}}/>
-						<Button text={justCopied_type == "long" ? "Copied!" : "Copy"} ml={5} enabled={currentShare != null} onClick={()=>{
-							CopyText(currentShare_longURL.toString({domain: true}));
-							this.SetState({justCopied_type: "long"});
-							WaitXThenRun(1000, ()=>this.SetState({justCopied_type: null}));
+					<RowLR mt={5} splitAt={80}>
+						<Text>Name:</Text>
+						<TextInput enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={async val=>{
+							//new UpdateShare({id: currentShare.id, updates: {name: val}}).RunOnServer();
+							await RunCommand_UpdateShare({id: currentShare.id, updates: {name: val}});
 						}}/>
-					</Row>
-				</RowLR>
+					</RowLR>
+					<RowLR mt={5} splitAt={80}>
+						<Pre>Short URL: </Pre>
+						<Row style={{width: "100%"}}>
+							<TextInput value={currentShare_shortURL.toString({domain: true})} editable={false} style={{flex: 1}}/>
+							<Button text={justCopied_type == "short" ? "Copied!" : "Copy"} ml={5} enabled={currentShare != null} onClick={()=>{
+								CopyText(currentShare_shortURL.toString({domain: true}));
+								this.SetState({justCopied_type: "short"});
+								WaitXThenRun(1000, ()=>this.SetState({justCopied_type: null}));
+							}}/>
+						</Row>
+					</RowLR>
+					<RowLR mt={5} splitAt={80}>
+						<Pre>Long URL: </Pre>
+						<Row style={{width: "100%"}}>
+							<TextInput value={currentShare_longURL.toString({domain: true})} editable={false} style={{flex: 1}}/>
+							<Button text={justCopied_type == "long" ? "Copied!" : "Copy"} ml={5} enabled={currentShare != null} onClick={()=>{
+								CopyText(currentShare_longURL.toString({domain: true}));
+								this.SetState({justCopied_type: "long"});
+								WaitXThenRun(1000, ()=>this.SetState({justCopied_type: null}));
+							}}/>
+						</Row>
+					</RowLR>
+				</>}
 			</Column>
 		);
 	}
