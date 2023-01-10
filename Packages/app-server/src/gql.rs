@@ -5,7 +5,7 @@ use std::env;
 use std::future::Future;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use rust_shared::anyhow::anyhow;
+use rust_shared::anyhow::{anyhow, bail};
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig, graphiql_source};
 use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables, extensions};
 use rust_shared::bytes::Bytes;
@@ -278,7 +278,7 @@ pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperCli
 }
 pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
     // retrieve auth-data/JWT and such from http-headers
-    let gql_data_from_http_request = get_gql_data_from_http_request(&req);
+    let gql_data_from_http_request = get_gql_data_from_http_request(&req)?;
     
     // read request's body (from frontend)
     let req_as_str = body_to_str(req.into_body()).await?;
@@ -304,13 +304,15 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     Ok(response_str)
 }
 
-pub fn get_gql_data_from_http_request(req: &Request<Body>) -> GQLDataFromHTTPRequest {
+pub fn get_gql_data_from_http_request(req: &Request<Body>) -> Result<GQLDataFromHTTPRequest, Error> {
     let mut data = GQLDataFromHTTPRequest { jwt: None, referrer: None };
     if let Some(header) = req.headers().get("authorization") {
-        //info!("Found authorization header.");
-        if let Some(parts) = header.to_str().unwrap().split_once("Bearer ") {
+        //info!("Found authorization header:{}", header.to_str()?);
+        if let Some(parts) = header.to_str()?.split_once("Bearer ") {
             //info!("Found bearer part2/jwt-string:{}", parts.1.to_owned());
             data.jwt = Some(parts.1.to_owned());
+        } else {
+            bail!("An \"authorization\" header was present, but its value was unable to be parsed. @header_value:\"{}\"", header.to_str()?);
         }
     }
 
@@ -321,7 +323,7 @@ pub fn get_gql_data_from_http_request(req: &Request<Body>) -> GQLDataFromHTTPReq
             data.referrer = Some(referrer.to_owned());
         }
     }
-    data
+    Ok(data)
 }
 
 pub struct GQLDataFromHTTPRequest {
