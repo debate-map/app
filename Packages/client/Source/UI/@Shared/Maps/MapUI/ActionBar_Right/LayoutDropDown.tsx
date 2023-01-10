@@ -3,14 +3,12 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx.js";
 import {Chroma, Chroma_Safe, Observer, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
 import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
 import {GetUser, Map, ChildOrdering, ChildOrdering_infoText} from "dm_common";
-import React from "react";
+import React, {Fragment} from "react";
 import {GetEntries} from "js-vextensions";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
-import {userIDPlaceholder} from "../ActionBar_Left/PeopleDropDown";
 
 const ratingPreviewOptions = [
 	{name: "None", value: "none"},
@@ -93,35 +91,42 @@ class StyleRuleUI extends BaseComponent<{rule: NodeStyleRule, index: number}, {}
 		const uiState = store.main.maps;
 
 		return (
-			<Row key={index} center>
-				<CheckBox value={rule.enabled} onChange={val=>RunInAction_Set(this, ()=>rule.enabled = val)}/>
+			<Fragment key={index}>
+				<Row mt={5} style={{alignSelf: "flex-start", background: "rgba(0,0,0,.1)", borderRadius: "10px 10px 0 0", border: "solid black", borderWidth: "1px 1px 0 1px"}}>
+					<CheckBox ml={5} text="Enabled" value={rule.enabled} onChange={val=>RunInAction_Set(this, ()=>rule.enabled = val)}/>
+					<Button ml={5} text="X" style={{padding: "0 5px"}} onClick={()=>{
+						RunInAction_Set(this, ()=>uiState.nodeStyleRules.Remove(rule));
+					}}/>
+				</Row>
+				<Column style={{alignItems: "flex-start", border: "1px solid black", borderRadius: "0 5px 5px 5px", padding: 5}}>
+					<Row center>
+						<Text ml={5} mr={5}>If...</Text>
 
-				{/* if portion */}
-				<Select options={GetEntries(NodeStyleRule_IfType)} value={rule.ifType} onChange={val=>{
-					RunInAction_Set(this, ()=>{
-						rule.ifType = val;
-						// todo: when there are multiple types, add code here to reset the type-specific fields
-					});
-				}}/>
-				{rule.ifType == NodeStyleRule_IfType.lastEditorIs &&
-				<UserPicker value={rule.if_user1} onChange={val=>RunInAction_Set(this, ()=>rule.if_user1 = val)}>
-					<Button text={rule.if_user1 != null ? `${if_user1?.displayName ?? "n/a"} (id: ${rule.if_user1})` : "(click to select user)"} style={{width: "100%"}}/>
-				</UserPicker>}
+						<Select options={GetEntries(NodeStyleRule_IfType)} value={rule.ifType} onChange={val=>{
+							RunInAction_Set(this, ()=>{
+								rule.ifType = val;
+								// todo: when there are multiple types, add code here to reset the type-specific fields
+							});
+						}}/>
+						{rule.ifType == NodeStyleRule_IfType.lastEditorIs &&
+						<UserPicker value={rule.if_user1} onChange={val=>RunInAction_Set(this, ()=>rule.if_user1 = val)}>
+							<Button ml={5} text={rule.if_user1 != null ? `${if_user1?.displayName ?? "n/a"} (id: ${rule.if_user1})` : "(click to select user)"} style={{width: "100%"}}/>
+						</UserPicker>}
+					</Row>
 
-				{/* then portion */}
-				<Select options={GetEntries(NodeStyleRule_ThenType)} value={rule.thenType} onChange={val=>{
-					RunInAction_Set(this, ()=>{
-						rule.thenType = val;
-						// todo: when there are multiple types, add code here to reset the type-specific fields
-					});
-				}}/>
-				{rule.thenType == NodeStyleRule_ThenType.setBackgroundColor &&
-				<ColorPickerBox popupStyle={{right: 0}} color={Chroma_Safe(rule.then_color1).rgba()} onChange={val=>RunInAction_Set(this, ()=>rule.then_color1 = Chroma(val).css())}/>}
-
-				<Button ml={5} text="X" onClick={()=>{
-					RunInAction_Set(this, ()=>uiState.nodeStyleRules.Remove(rule));
-				}}/>
-			</Row>
+					<Row center>
+						<Text ml={5} mr={5}>Then...</Text>
+						<Select options={GetEntries(NodeStyleRule_ThenType)} value={rule.thenType} onChange={val=>{
+							RunInAction_Set(this, ()=>{
+								rule.thenType = val;
+								// todo: when there are multiple types, add code here to reset the type-specific fields
+							});
+						}}/>
+						{rule.thenType == NodeStyleRule_ThenType.setBackgroundColor &&
+						<ColorPickerBox ml={5} popupStyle={{right: 0}} color={Chroma_Safe(rule.then_color1).rgba()} onChange={val=>RunInAction_Set(this, ()=>rule.then_color1 = Chroma(val).css())}/>}
+					</Row>
+				</Column>
+			</Fragment>
 		);
 	}
 }
