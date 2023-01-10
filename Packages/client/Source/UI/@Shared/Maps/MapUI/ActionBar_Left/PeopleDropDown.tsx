@@ -25,9 +25,15 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="People"/></DropDownTrigger>
 				<DropDownContent style={{position: "fixed", left: 0, width: 500, borderRadius: "0 0 5px 0"}}><Column>
-					<Row center>
+					<Row center style={{justifyContent: "center"}}>
+						<Text style={{color: "red", fontSize: 13}}>{`Note: Actual access/edit permissions are set by nodes' access-policies.`}</Text>
+						<InfoButton ml={5} text={`
+							The map's "list of editors" is a legacy feature that has no "actual function" atm (other than for reference), though functionality will be added here in the future.
+							Note: You can set the "default access-policy" for new nodes in the map's Details panel.
+						`.AsMultiline(0)}/>
+					</Row>
+					<Row mt={5} center>
 						<Text>Editors:</Text>
-						<InfoButton ml={5} text="Editors have extended permissions, like being able to contribute anywhere in the map. (use node permissions to restrict other users)"/>
 						{creatorOrMod &&
 						<Button ml="auto" text="Add editor" onClick={async()=>{
 							const newEditors = CloneWithPrototypes(map.editors || []);
