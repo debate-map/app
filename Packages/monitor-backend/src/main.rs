@@ -94,7 +94,10 @@ pub fn get_cors_layer() -> CorsLayer {
             Method::PATCH,
             Method::TRACE,
         ])
-        .allow_headers(vec![CONTENT_TYPE]) // needed, because the POST requests include a content-type header (which is not on the approved-by-default list)
+        .allow_headers(vec![
+            CONTENT_TYPE, // needed, because the POST requests include a content-type header (which is not on the approved-by-default list)
+            HeaderName::from_str("admin-key").unwrap(),
+        ])
         .allow_credentials(true)
 }
 
@@ -159,12 +162,9 @@ async fn main() {
         "#) }))*/
         //.route("/send-mtx-results", post(send_mtx_results))
         // .route("/proxy/prometheus/:admin_key_base64", get(maybe_proxy_to_prometheus))
-        // .route("/proxy/prometheus/:admin_key_base64/:p1", get(maybe_proxy_to_prometheus))
-        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2", get(maybe_proxy_to_prometheus))
-        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2/:p3", get(maybe_proxy_to_prometheus))
-        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2/:p3/:p4", get(maybe_proxy_to_prometheus))
-        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2/:p3/:p4/:p5", get(maybe_proxy_to_prometheus))
         // .route("/proxy/alertmanager/:admin_key_base64", get(maybe_proxy_to_alertmanager))
+        .route("/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
+        .route("/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
         .fallback(get(handler));
 
     //let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
@@ -193,7 +193,7 @@ async fn main() {
 }
 
 //async fn handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
-async fn handler(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, String)> {
+async fn handler(/*Extension(client): Extension<HyperClient>,*/ req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, String)> {
     // see here for meaning of the parts: https://docs.rs/hyper/latest/hyper/struct.Uri.html
     /*let axum::http::uri::Parts { scheme, authority, path_and_query, .. } = uri.clone().into_parts();
     let path = path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string());
@@ -210,12 +210,12 @@ async fn handler(Extension(client): Extension<HyperClient>, req: Request<Body>) 
         )
     };
 
-    if path.starts_with("/proxy/prometheus") {
+    /*if path.starts_with("/proxy/prometheus") {
         return Ok(maybe_proxy_to_prometheus(Extension(client), req).await.into_response());
     }
     if path.starts_with("/proxy/alertmanager") {
         return Ok(maybe_proxy_to_alertmanager(Extension(client), req).await.into_response());
-    }
+    }*/
     
     // try resolving path from "/Dist" folder
     if let Ok(uri_variant) = Uri::from_str(&format!("{scheme}://{authority}/Dist/{path}")) {

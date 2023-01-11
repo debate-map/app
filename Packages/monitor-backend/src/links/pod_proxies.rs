@@ -1,7 +1,7 @@
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr};
 use std::str::FromStr;
-use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::anyhow::{anyhow, Error, bail};
 use rust_shared::axum::extract::Path;
 use rust_shared::itertools::Itertools;
 use rust_shared::{futures, axum, tower, tower_http, async_graphql_axum, base64};
@@ -35,10 +35,25 @@ pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
 pub const PROMETHEUS_URL: &str = "http://loki-stack-prometheus-server.monitoring.svc.cluster.local:80"; //:9090";
 pub const ALERTMANAGER_URL: &str = "http://loki-stack-prometheus-alertmanager.monitoring.svc.cluster.local:80"; //:9093";
 
+pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, Error> {
+    /*match req.headers().get("authorization") {
+        None => bail!("An \"authorization\" header must be provided."),
+        Some(header) => match header.to_str()?.split_once("Bearer ") {
+            None => bail!("An \"authorization\" header was present, but its value was unable to be parsed. @header_value:\"{}\"", header.to_str()?),
+            Some(parts) => Ok(parts.1.to_owned()),
+        }
+    }*/
+    match req.headers().get("admin-key") {
+        None => bail!("An \"admin-key\" header must be provided."),
+        Some(header) => Ok(header.to_str()?.to_owned()),
+    }
+}
+
 pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>, req: Request<Body>, /*Path(admin_key_base64): Path<String>*/) -> Response<Body> {
     let response_result: Result<_, Error> = try {
-        let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
-        let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;
+        /*let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
+        let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;*/
+        let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
         
         //proxy_to_service_at_port(client, req, 9090).await?
@@ -52,8 +67,10 @@ pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>
             });
             let response = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .header(CONTENT_TYPE, "application/json")
+                //.header(CONTENT_TYPE, "application/json")
+                .header(CONTENT_TYPE, "text/html; charset=utf-8")
                 .body(Body::from(response_json.to_string()))
+                //.body(Body::from("<html><body>Test1</body></html>".to_string()))
                 .unwrap();
             response
         }
@@ -61,8 +78,9 @@ pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>
 }
 pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClient>, req: Request<Body>, /*Path(admin_key_base64): Path<String>*/) -> Response<Body> {
     let response_result: Result<_, Error> = try {
-        let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
-        let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;
+        /*let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
+        let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;*/
+        let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
         
         //proxy_to_service_at_port(client, req, 9093).await?
@@ -76,7 +94,7 @@ pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClien
             });
             let response = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .header(CONTENT_TYPE, "application/json")
+                //.header(CONTENT_TYPE, "application/json")
                 .body(Body::from(response_json.to_string()))
                 .unwrap();
             response
