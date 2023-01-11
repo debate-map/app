@@ -112,21 +112,3 @@ spec:
                 port:
                   number: 3000
             pathType: ImplementationSpecific
-    - host: prometheus.debates.app
-      http:
-        paths:
-          - backend:
-              service:
-                name: loki-stack-prometheus-server
-                port:
-                  number: 9090
-            pathType: ImplementationSpecific
-    - host: alertmanager.debates.app
-      http:
-        paths:
-          - backend:
-              service:
-                name: loki-stack-prometheus-alertmanager
-                port:
-                  number: 9093
-            pathType: ImplementationSpecific

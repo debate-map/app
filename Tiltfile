@@ -722,9 +722,9 @@ NEXT_k8s_resource_batch([
 	{"labels": ["monitoring"], "workload": 'loki-stack-kube-state-metrics'},
 	{"labels": ["monitoring"], "workload": 'loki-stack-promtail'},
 	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-node-exporter'},
-	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-alertmanager', "port_forwards": '9293:9093' if REMOTE else '9093'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-alertmanager'},
 	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-pushgateway'},
-	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-server', "port_forwards": '9290:9090' if REMOTE else '9090'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-server'},
 ])
 
 # extras

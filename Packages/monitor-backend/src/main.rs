@@ -50,6 +50,7 @@ use rust_shared::tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
+use crate::links::pod_proxies::{maybe_proxy_to_prometheus, maybe_proxy_to_alertmanager, HyperClient};
 use crate::{store::storage::{AppState, AppStateArc}, links::app_server_link::connect_to_app_server, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
@@ -59,6 +60,7 @@ mod gql {
 mod pgclient;
 mod links {
     pub mod app_server_link;
+    pub mod pod_proxies;
 }
 mod utils {
     pub mod general;
@@ -156,6 +158,13 @@ async fn main() {
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/
         //.route("/send-mtx-results", post(send_mtx_results))
+        // .route("/proxy/prometheus/:admin_key_base64", get(maybe_proxy_to_prometheus))
+        // .route("/proxy/prometheus/:admin_key_base64/:p1", get(maybe_proxy_to_prometheus))
+        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2", get(maybe_proxy_to_prometheus))
+        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2/:p3", get(maybe_proxy_to_prometheus))
+        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2/:p3/:p4", get(maybe_proxy_to_prometheus))
+        // .route("/proxy/prometheus/:admin_key_base64/:p1/:p2/:p3/:p4/:p5", get(maybe_proxy_to_prometheus))
+        // .route("/proxy/alertmanager/:admin_key_base64", get(maybe_proxy_to_alertmanager))
         .fallback(get(handler));
 
     //let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
@@ -168,9 +177,11 @@ async fn main() {
 
     let app = gql_::extend_router(app, msg_sender, msg_receiver, /*msg_sender_test, msg_receiver_test,*/ app_state.clone()).await;
 
+    let client_for_proxying = HyperClient::new();
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
         .layer(Extension(app_state))
+        .layer(Extension(client_for_proxying))
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5130)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
@@ -181,12 +192,14 @@ async fn main() {
     server_fut.await.unwrap();
 }
 
-async fn handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
+//async fn handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
+async fn handler(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, String)> {
     // see here for meaning of the parts: https://docs.rs/hyper/latest/hyper/struct.Uri.html
     /*let axum::http::uri::Parts { scheme, authority, path_and_query, .. } = uri.clone().into_parts();
     let path = path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string());
     let query = path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned());*/
     //println!("BaseURI:{}", uri);
+    let uri = req.uri();
     let (scheme, authority, path, _query) = {
         let temp = uri.clone().into_parts();
         (
@@ -196,6 +209,13 @@ async fn handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
             temp.path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned()),
         )
     };
+
+    if path.starts_with("/proxy/prometheus") {
+        return Ok(maybe_proxy_to_prometheus(Extension(client), req).await.into_response());
+    }
+    if path.starts_with("/proxy/alertmanager") {
+        return Ok(maybe_proxy_to_alertmanager(Extension(client), req).await.into_response());
+    }
     
     // try resolving path from "/Dist" folder
     if let Ok(uri_variant) = Uri::from_str(&format!("{scheme}://{authority}/Dist/{path}")) {

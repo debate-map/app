@@ -36,8 +36,6 @@ pub enum ServerPod {
     AppServer,
     Monitor,
     Grafana,
-    Prometheus,
-    AlertManager,
 }
 
 pub struct GetServerURL_Options {
@@ -112,11 +110,12 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_s
         },
         ServerPod::Monitor => {
             if server_url.host_str().unwrap() == "localhost" {
-                server_url.set_port(match claimed_client_url.as_ref().unwrap().port() {
+                /*server_url.set_port(match claimed_client_url.as_ref().unwrap().port() {
                     Some(5130) => Some(5130),
                     Some(5131) => Some(5131),
                     _ => Some(5130),
-                }).unwrap();
+                }).unwrap();*/
+                server_url.set_port(Some(5130)).unwrap(); // always return the actual k8s pod (since caller may be intending a backend call)
             } else {
                 server_url.set_host(Some(&format!("monitor.{}", server_url.host_str().unwrap())))?;
             }
@@ -126,20 +125,6 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_s
                 server_url.set_port(Some(3000)).unwrap();
             } else {
                 server_url.set_host(Some(&format!("grafana.{}", server_url.host_str().unwrap())))?;
-            }
-        },
-        ServerPod::Prometheus => {
-            if server_url.host_str().unwrap() == "localhost" {
-                server_url.set_port(Some(9090)).unwrap();
-            } else {
-                server_url.set_host(Some(&format!("prometheus.{}", server_url.host_str().unwrap())))?;
-            }
-        },
-        ServerPod::AlertManager => {
-            if server_url.host_str().unwrap() == "localhost" {
-                server_url.set_port(Some(9093)).unwrap();
-            } else {
-                server_url.set_host(Some(&format!("alertmanager.{}", server_url.host_str().unwrap())))?;
             }
         },
     }

@@ -19,7 +19,7 @@ const ON_SERVER = globalThis.process?.env?.ENV != null;
 const ON_SERVER_AND_DEV = ON_SERVER && process.env.ENV == "dev";
 const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
 
-export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana" | "prometheus" | "alertmanager";
+export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana";
 
 /*export class GetServerURL_Options {
 	forceLocalhost = false;
@@ -72,7 +72,8 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClien
 		}
 	} else if (serverPod == "monitor") {
 		if (serverURL.hostname == "localhost") {
-			serverURL.port = {5130: 5130, 5131: 5131}[claimedClientURL?.port as any] ?? "5130";
+			//serverURL.port = {5130: 5130, 5131: 5131}[claimedClientURL?.port as any] ?? "5130";
+			serverURL.port = "5130"; // always return the actual k8s pod (since caller may be intending a backend call)
 		} else {
 			serverURL.host = `monitor.${serverURL.host}`;
 		}
@@ -81,18 +82,6 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClien
 			serverURL.port = "3000";
 		} else {
 			serverURL.host = `grafana.${serverURL.host}`;
-		}
-	} else if (serverPod == "prometheus") {
-		if (serverURL.hostname == "localhost") {
-			serverURL.port = "9090";
-		} else {
-			serverURL.host = `prometheus.${serverURL.host}`;
-		}
-	} else if (serverPod == "alertmanager") {
-		if (serverURL.hostname == "localhost") {
-			serverURL.port = "9093";
-		} else {
-			serverURL.host = `alertmanager.${serverURL.host}`;
 		}
 	}
 
