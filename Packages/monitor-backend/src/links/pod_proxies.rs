@@ -4,6 +4,7 @@ use std::str::FromStr;
 use rust_shared::anyhow::{anyhow, Error, bail};
 use rust_shared::axum::extract::Path;
 use rust_shared::itertools::Itertools;
+use rust_shared::reqwest::header::SET_COOKIE;
 use rust_shared::{futures, axum, tower, tower_http, async_graphql_axum, base64};
 use axum::body::HttpBody;
 use rust_shared::hyper::server::conn::AddrStream;
@@ -35,6 +36,50 @@ pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
 pub const PROMETHEUS_URL: &str = "http://loki-stack-prometheus-server.monitoring.svc.cluster.local:80"; //:9090";
 pub const ALERTMANAGER_URL: &str = "http://loki-stack-prometheus-alertmanager.monitoring.svc.cluster.local:80"; //:9093";
 
+/// Endpoint needed to workaround cross-domain cookie restrictions, for when monitor-client is served by webpack.
+/// See CookieTransferHelper.tsx for the client-side handling of the exchange.
+pub async fn store_admin_key_cookie(req: Request<Body>) -> Response<Body> {
+    let response_result: Result<_, Error> = try {
+        /*let admin_key = req.headers().get("admin-key").ok_or(anyhow!("No admin-key header!"))?.to_str()?.to_owned();
+        ensure_admin_key_is_correct(admin_key.clone(), true)?;*/
+        
+        let response = Response::builder()
+            //.header(CONTENT_TYPE, "application/json")
+            .header(CONTENT_TYPE, "text/html; charset=utf-8")
+            /*.header(SET_COOKIE, format!("adminKey={}; SameSite=None; Secure", base64::encode(admin_key)))
+            .body(Body::from(""))*/
+            //.body(Body::from(format!(r#"<html><head><script>document.cookie = "adminKey={}";console.log("Cookie set:", document.cookie);</script></head></html>"#, base64::encode(admin_key))))
+            .body(Body::from(r#"<html><head><script>
+                window.addEventListener('message', e=>{
+                    if (e.origin !== 'http://localhost:5131') return;
+                    if (e.data.adminKey != null) {
+                        document.cookie = "adminKey=" + window.btoa(e.data.adminKey);
+                        top.postMessage({adminKeyStored: true}, 'http://localhost:5131');
+                    }
+                }, false);
+                top.postMessage({readyForAdminKey: true}, 'http://localhost:5131');
+            </script></head></html>"#))
+            .unwrap();
+        response
+    };
+    match response_result {
+        Ok(response) => response,
+        Err(err) => {
+            let response_json = json!({
+                "error": format!("Error occurred. @error:{}", err),
+            });
+            let response = Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                //.header(CONTENT_TYPE, "application/json")
+                .header(CONTENT_TYPE, "text/html; charset=utf-8")
+                .body(Body::from(response_json.to_string()))
+                //.body(Body::from("<html><body>Test1</body></html>".to_string()))
+                .unwrap();
+            response
+        }
+    }
+}
+
 pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, Error> {
     /*match req.headers().get("authorization") {
         None => bail!("An \"authorization\" header must be provided."),
@@ -61,7 +106,7 @@ pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, E
     bail!("An \"admin-key\" header must be provided, or a \"cookie\" header with an \"adminKey\" cookie.");
 }
 
-pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>, req: Request<Body>, /*Path(admin_key_base64): Path<String>*/) -> Response<Body> {
+pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Response<Body> {
     let response_result: Result<_, Error> = try {
         /*let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
         let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;*/
@@ -88,10 +133,8 @@ pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>
         }
     }
 }
-pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClient>, req: Request<Body>, /*Path(admin_key_base64): Path<String>*/) -> Response<Body> {
+pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Response<Body> {
     let response_result: Result<_, Error> = try {
-        /*let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
-        let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;*/
         let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
         
@@ -121,16 +164,6 @@ pub async fn proxy_to_service_at_port(client: HyperClient, mut req: Request<Body
         .path_and_query()
         .map_or(path, |v| v.as_str());
     let path_and_query_fixed = format!("/{}", path_and_query.split("/").skip(3).join("/"));
-
-    // if start-doc for iframe
-    if path_and_query_fixed.replace("/", "").len() == 0 {
-        let response = Response::builder()
-            .header(CONTENT_TYPE, "text/html; charset=utf-8")
-            .body(Body::from(""))
-            //.body(Body::from("<html><body>Initial content</body></html>"))
-            .unwrap();
-        return Ok(response);
-    }
 
     //let uri = format!("http://127.0.0.1:{}{}", port, path_query);
     //let uri = format!("{}{}", APP_SERVER_JS_URL, path_query);

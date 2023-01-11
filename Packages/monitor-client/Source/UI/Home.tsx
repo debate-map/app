@@ -65,7 +65,7 @@ const SettingsUI = observer(()=>{
 	return (
 		<Column>
 			<Row>
-				<Text>Admin key</Text>
+				<Text>Admin key:</Text>
 				<TextInput ml={5} type={showKey ? undefined : "password"} style={{width: 300}} value={store.main.adminKey} onChange={val=>RunInAction_Set(/*this,*/ ()=>store.main.adminKey = val)}/>
 				<CheckBox ml={5} text="Show" value={showKey} onChange={val=>setShowKey(val)}/>
 			</Row>

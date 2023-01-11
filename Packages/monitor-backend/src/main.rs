@@ -50,7 +50,7 @@ use rust_shared::tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::links::pod_proxies::{maybe_proxy_to_prometheus, maybe_proxy_to_alertmanager, HyperClient};
+use crate::links::pod_proxies::{maybe_proxy_to_prometheus, maybe_proxy_to_alertmanager, HyperClient, store_admin_key_cookie};
 use crate::{store::storage::{AppState, AppStateArc}, links::app_server_link::connect_to_app_server, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
@@ -163,6 +163,7 @@ async fn main() {
         //.route("/send-mtx-results", post(send_mtx_results))
         // .route("/proxy/prometheus/:admin_key_base64", get(maybe_proxy_to_prometheus))
         // .route("/proxy/alertmanager/:admin_key_base64", get(maybe_proxy_to_alertmanager))
+        .route("/storeAdminKeyCookie", get(store_admin_key_cookie))
         .route("/proxy/prometheus", get(maybe_proxy_to_prometheus))
         .route("/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
         .route("/proxy/alertmanager", get(maybe_proxy_to_alertmanager))

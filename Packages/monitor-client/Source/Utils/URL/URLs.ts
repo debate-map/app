@@ -18,6 +18,7 @@ export const pageTree = new Page({}, {
 	netdata: new Page(),
 	grafana: new Page(),
 	prometheus: new Page(),
+	"alert-manager": new Page(),
 	pixie: new Page(),
 });
 export const rootPages = Object.keys(pageTree.children);
