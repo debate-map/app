@@ -163,7 +163,9 @@ async fn main() {
         //.route("/send-mtx-results", post(send_mtx_results))
         // .route("/proxy/prometheus/:admin_key_base64", get(maybe_proxy_to_prometheus))
         // .route("/proxy/alertmanager/:admin_key_base64", get(maybe_proxy_to_alertmanager))
+        .route("/proxy/prometheus", get(maybe_proxy_to_prometheus))
         .route("/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
+        .route("/proxy/alertmanager", get(maybe_proxy_to_alertmanager))
         .route("/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
         .fallback(get(handler));
 
