@@ -53,7 +53,7 @@ pub async fn get_or_create_jwt_key_hs256_str() -> Result<String, Error> {
     let new_secret_data_if_missing = json!({
         "key": base64::encode(HS256Key::generate().to_bytes()),
     });
-    let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), new_secret_data_if_missing).await?;
+    let secret = get_or_create_k8s_secret("dm-jwt-secret-hs256".to_owned(), "default", Some(new_secret_data_if_missing)).await?;
     let key_as_base64_str = secret.data["key"].as_str().ok_or(anyhow!("The \"key\" field is missing!"))?;
     //info!("Read/created secret key through k8s api:{:?}", key_as_base64_str);
 

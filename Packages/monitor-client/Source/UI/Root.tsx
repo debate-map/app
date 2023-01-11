@@ -16,6 +16,7 @@ import {VMenuLayer} from "web-vcore/nm/react-vmenu.js";
 import {MessageBoxLayer} from "web-vcore/nm/react-vmessagebox.js";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
 import {SideBar} from "./@Shared/SideBar";
+import {AlertManagerUI} from "./AlertManager";
 import {DBUI} from "./DB";
 import {GrafanaUI} from "./Grafana";
 import {HomeUI} from "./Home";
@@ -114,6 +115,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "netdata" && <NetDataUI/>}
 						{page == "grafana" && <GrafanaUI/>}
 						{page == "prometheus" && <PrometheusUI/>}
+						{page == "alert-manager" && <AlertManagerUI/>}
 						{page == "pixie" && <PixieUI/>}
 					</main>
 				</ErrorBoundary>

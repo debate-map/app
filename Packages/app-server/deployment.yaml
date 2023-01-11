@@ -69,12 +69,12 @@ spec:
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
 
-# give app-server various kubernetes-api permissions
+# give app-server various kubernetes-api permissions, within its own namespace "default"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: role-for-dm-app-server-pod
+  name: role-for-dm-app-server
   namespace: default
 rules:
 - apiGroups: [""]
@@ -94,18 +94,19 @@ subjects:
     name: default
 roleRef:
   kind: Role
-  name: role-for-dm-app-server-pod
+  name: role-for-dm-app-server
   apiGroup: rbac.authorization.k8s.io
 
-# probably temp; give app-server the ability to run commands in other pods
-# (this is needed atm for the `getDBDump` endpoint, but is not ideal, as it "grants more power" than should be necessary for this need)
+# give app-server various kubernetes-api permissions, *across namespaces*
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole # note that we use "ClusterRole" instead of just "Role", so granted permissions can work across namespaces
 metadata:
-  name: cluster-role-for-dm-app-server-pod
+  name: cluster-role-for-dm-app-server
   namespace: default
 rules:
+# probably temp; give app-server the ability to run commands in other pods
+# (this is needed atm for the `getDBDump` endpoint, but is not ideal, as it "grants more power" than should be necessary for this need)
 - apiGroups: [""]
   resources: ["pods", "pods/log"]
   verbs: ["get", "list"]
@@ -124,5 +125,5 @@ subjects:
     namespace: default # this also becomes required
 roleRef:
   kind: ClusterRole # note: using ClusterRole (as matching above)
-  name: cluster-role-for-dm-app-server-pod
+  name: cluster-role-for-dm-app-server
   apiGroup: rbac.authorization.k8s.io

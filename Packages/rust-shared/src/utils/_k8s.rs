@@ -72,7 +72,19 @@ pub async fn get_k8s_pod_basic_infos(namespace: &str, filter_to_running_pods: bo
     Ok(pod_infos)
 }
 
-pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONValue) -> Result<K8sSecret, Error> {
+pub async fn try_get_k8s_secret(name: String, namespace: &str) -> Result<Option<K8sSecret>, Error> {
+    match get_or_create_k8s_secret(name, namespace, None).await {
+        Ok(secret) => Ok(Some(secret)),
+        Err(err) => {
+            if err.to_string().contains("No k8s secret found named ") {
+                Ok(None)
+            } else {
+                Err(err)
+            }
+        }
+    }
+}
+pub async fn get_or_create_k8s_secret(name: String, namespace: &str, new_data_if_missing: Option<JSONValue>) -> Result<K8sSecret, Error> {
     info!("Beginning request to get/create the k8s-secret named \"{name}\".");
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
     let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
@@ -80,7 +92,7 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
 
     let client = get_reqwest_client_with_k8s_certs()?;
 
-    let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/secrets/{name}"))
+    let req = client.get(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets/{name}"))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
         .body(json!({}).to_string()).build()?;
@@ -93,29 +105,33 @@ pub async fn get_or_create_k8s_secret(name: String, new_data_if_missing: JSONVal
         return Ok(secret);
     }
 
-    let new_secret = K8sSecret {
-        apiVersion: "v1".to_owned(),
-        data: new_data_if_missing,
-        metadata: json!({
-            "name": name,
-            "namespace": "default",
-        }),
-        kind: "Secret".to_owned(),
-        r#type: "Opaque".to_owned()
-    };
-    let new_secret_json = serde_json::to_string(&new_secret)?;
-
-    let req = client.post(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/secrets"))
-    //let req = client.put(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/default/secrets/{name}"))
-        .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {token}"))
-        .body(new_secret_json).build()?;
-    let res = client.execute(req).await?;
-
-    let res_as_str = res.text().await?;
-    info!("Got response from k8s server, on trying to create secret \"{name}\": {}", res_as_str);
-
-    Ok(new_secret)
+    if let Some(new_data_if_missing) = new_data_if_missing {
+        let new_secret = K8sSecret {
+            apiVersion: "v1".to_owned(),
+            data: new_data_if_missing,
+            metadata: json!({
+                "name": name,
+                "namespace": namespace,
+            }),
+            kind: "Secret".to_owned(),
+            r#type: "Opaque".to_owned()
+        };
+        let new_secret_json = serde_json::to_string(&new_secret)?;
+    
+        let req = client.post(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"))
+        //let req = client.put(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets/{name}"))
+            .header("Content-Type", "application/json")
+            .header("Authorization", format!("Bearer {token}"))
+            .body(new_secret_json).build()?;
+        let res = client.execute(req).await?;
+    
+        let res_as_str = res.text().await?;
+        info!("Got response from k8s server, on trying to create secret \"{name}\": {}", res_as_str);
+    
+        Ok(new_secret)
+    } else {
+        bail!("No k8s secret found named \"{}\". Since new_data_if_missing was None, returning this error to indicate no matching secret found. @retrieval_attempt_response:{}", name, res_as_json);
+    }
 }
 
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>, allow_utf8_lossy: bool) -> Result<String, Error> {

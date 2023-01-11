@@ -142,6 +142,9 @@ Port-assignment scheme: (ie. meaning of each digit in `ABCD`)
 * C) pod [0: web-server, 1: app-server, 2: postgres instance, 3: monitor]
 * D) variant [0: main, 1: served from webpack, etc.]
 
+> Note: Not all web-accessible k8s services are shown in the list above. Specifically:
+> * Mere "subcomponents" of the monitoring service: grafana, prometheus, alertmanager (Reason: They're accessible through the monitor tool's subpages/iframes. See [Domains.ts](https://github.com/debate-map/app/blob/master/Packages/js-common/Source/Utils/General/Domains.ts) or [domains.rs](https://github.com/debate-map/app/blob/master/Packages/rust-shared/src/domains.rs) for more details.)
+
 </details>
 
 

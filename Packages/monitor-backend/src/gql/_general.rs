@@ -1,12 +1,13 @@
 use rust_shared::itertools::Itertools;
-use rust_shared::anyhow::{anyhow, Context, Error};
+use rust_shared::anyhow::{anyhow, Context, Error, bail};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
-use rust_shared::utils::_k8s::{get_reqwest_client_with_k8s_certs, get_k8s_pod_basic_infos};
+use rust_shared::utils::_k8s::{get_reqwest_client_with_k8s_certs, get_k8s_pod_basic_infos, get_or_create_k8s_secret, try_get_k8s_secret};
 use rust_shared::utils::futures::make_reliable;
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::mtx::mtx::{MtxData, MtxDataForAGQL};
-use rust_shared::{futures, axum, tower, tower_http, GQLError};
+use rust_shared::{futures, axum, tower, tower_http, GQLError, base64};
 use rust_shared::utils::type_aliases::JSONValue;
 use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
@@ -106,6 +107,24 @@ impl QueryShard_General {
         
         let basic_info = get_basic_info_from_app_server().await?;
         Ok(basic_info)
+    }
+    
+    async fn getGrafanaPassword(&self, _ctx: &async_graphql::Context<'_>, admin_key: String) -> Result<String, GQLError> {
+        ensure_admin_key_is_correct(admin_key, true)?;
+        
+        /*match try_get_k8s_secret("loki-stack-grafana".o(), "monitoring").await? {
+            Some(secret) => {
+                let password = secret.data.get("admin-password").ok_or(anyhow!("Field \"admin-password\" missing!"))?.as_str().ok_or(anyhow!("Field \"admin-password\" not a string!"))?;
+                Ok(password.to_owned())
+            },
+            None => Err(anyhow!("Could not find the \"loki-stack-grafana\" secret in kubernetes."))?,
+        }*/
+        let secret = get_or_create_k8s_secret("loki-stack-grafana".o(), "monitoring", None).await?;
+        let password_encoded = secret.data.get("admin-password").ok_or(anyhow!("Field \"admin-password\" missing!"))?.as_str().ok_or(anyhow!("Field \"admin-password\" not a string!"))?;
+        let password_bytes = base64::decode(password_encoded)?;
+        //let password_bytes = base64::decode_config(password_encoded, URL_SAFE_NO_PAD)?;
+        let password = String::from_utf8(password_bytes)?;
+        Ok(password.to_owned())
     }
 }
 

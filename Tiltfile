@@ -628,9 +628,7 @@ NEXT_k8s_resource_batch([
 	{
 		"workload": 'dm-monitor-backend',
 		"trigger_mode": TRIGGER_MODE_MANUAL,
-		"port_forwards": [
-			'5230:5130' if REMOTE else '5130',
-		],
+		"port_forwards": '5230:5130' if REMOTE else '5130',
 		"labels": ["app"],
 	},
 	{
@@ -643,9 +641,7 @@ NEXT_k8s_resource_batch([
 		"workload": 'dm-app-server',
 		# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
 		"trigger_mode": TRIGGER_MODE_MANUAL,
-		"port_forwards": [
-			'5210:5110' if REMOTE else '5110',
-		],
+		"port_forwards": '5210:5110' if REMOTE else '5110',
 		"labels": ["app"],
 	},
 ])
@@ -683,6 +679,53 @@ NEXT_k8s_resource_batch([
 # 			],
 # 		},
 # 	])
+
+# log collection
+# ==========
+
+# helm_repo('vector', 'https://helm.vector.dev')
+# helm_resource(
+#   'vector',
+#   'vector/vector',
+#   labels=['monitoring'],
+#   #resource_deps=['dm-app-server']
+# )
+
+helm_remote('vector',
+	repo_url='https://helm.vector.dev',
+	version='0.18.0', # helm-chart version may differ from vector version
+	namespace='monitoring',
+	# set=[],
+	values=["./Packages/deploy/Vector/values.yaml"],
+)
+NEXT_k8s_resource_batch([
+	{
+		"workload": 'vector',
+		"labels": ["monitoring"],
+	},
+])
+
+# loki + prometheus + grafana
+# ==========
+
+helm_remote('loki-stack',
+	repo_url='https://grafana.github.io/helm-charts',
+	version='2.8.9', # helm-chart version may differ from vector version
+	namespace='monitoring',
+	create_namespace=True,
+	# set=[],
+	values=["./Packages/deploy/LokiStack/values.yaml"],
+)
+NEXT_k8s_resource_batch([
+	{"labels": ["monitoring"], "workload": 'loki-stack'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-grafana', "port_forwards": '3200:3000' if REMOTE else '3000'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-kube-state-metrics'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-promtail'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-node-exporter'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-alertmanager', "port_forwards": '9293:9093' if REMOTE else '9093'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-pushgateway'},
+	{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-server', "port_forwards": '9290:9090' if REMOTE else '9090'},
+])
 
 # extras
 # ==========

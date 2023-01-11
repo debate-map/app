@@ -1,0 +1,25 @@
+# note: loki-stack installs loki + prometheus + grafana
+
+# Values for configuring the deployment of Grafana.
+# * For deployment options, see: https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
+# * For grafana.ini options, see: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana
+grafana:
+  enabled: true
+  grafana.ini:
+    security:
+      allow_embedding: true
+
+prometheus:
+  enabled: true
+  alertmanager:
+    persistentVolume:
+      enabled: false
+  server:
+    persistentVolume:
+      enabled: false
+
+loki:
+  persistence:
+    enabled: true
+    #storageClassName: nfs-client
+    size: 5Gi

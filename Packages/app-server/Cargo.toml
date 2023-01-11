@@ -26,7 +26,6 @@ jsonschema = "0.16"
 dyn-clone = "1.0.4"
 oauth2 = "4.3.0"
 dotenv = "0.15.0"
-base64 = "0.13.1"
 lexicon_fractional_index = "0.0.3"
 
 # needed for async-graphql examples-base, for now

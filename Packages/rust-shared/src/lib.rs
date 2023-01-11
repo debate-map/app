@@ -59,6 +59,7 @@ pub extern crate chrono;
 pub extern crate flume;
 pub extern crate indexmap;
 pub extern crate tokio_tungstenite;
+pub extern crate base64;
 
 // this crate's modules
 pub mod db_constants;

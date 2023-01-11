@@ -19,12 +19,14 @@ const ON_SERVER = globalThis.process?.env?.ENV != null;
 const ON_SERVER_AND_DEV = ON_SERVER && process.env.ENV == "dev";
 const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
 
+export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana" | "prometheus" | "alertmanager";
+
 /*export class GetServerURL_Options {
 	forceLocalhost = false;
 	forceHTTPS = false;
 }*/
 // sync:rs (along with constants above)
-export function GetServerURL(serverPod: "web-server" | "app-server" | "monitor", subpath: string, claimedClientURLStr: string|n, opts = {} as {forceLocalhost?: boolean, forceHTTPS?: boolean}) {
+export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClientURLStr: string|n, opts = {} as {forceLocalhost?: boolean, forceHTTPS?: boolean}) {
 	//const opts = {...new GetServerURL_Options(), ...options};
 	Assert(subpath.startsWith("/"));
 
@@ -73,6 +75,24 @@ export function GetServerURL(serverPod: "web-server" | "app-server" | "monitor",
 			serverURL.port = {5130: 5130, 5131: 5131}[claimedClientURL?.port as any] ?? "5130";
 		} else {
 			serverURL.host = `monitor.${serverURL.host}`;
+		}
+	} else if (serverPod == "grafana") {
+		if (serverURL.hostname == "localhost") {
+			serverURL.port = "3000";
+		} else {
+			serverURL.host = `grafana.${serverURL.host}`;
+		}
+	} else if (serverPod == "prometheus") {
+		if (serverURL.hostname == "localhost") {
+			serverURL.port = "9090";
+		} else {
+			serverURL.host = `prometheus.${serverURL.host}`;
+		}
+	} else if (serverPod == "alertmanager") {
+		if (serverURL.hostname == "localhost") {
+			serverURL.port = "9093";
+		} else {
+			serverURL.host = `alertmanager.${serverURL.host}`;
 		}
 	}
 

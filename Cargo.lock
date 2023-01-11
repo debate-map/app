@@ -64,7 +64,6 @@ dependencies = [
  "async-broadcast",
  "async-recursion",
  "async-trait",
- "base64",
  "deadpool",
  "deadpool-postgres",
  "dotenv",
