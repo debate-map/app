@@ -9,11 +9,16 @@ pub struct DomainsConstants {
     pub on_server_and_dev: bool,
     pub on_server_and_prod: bool,
 }
+pub fn get_env() -> String {
+    env::var("ENV").unwrap_or("<unknown>".to_string())
+}
+pub fn is_dev() -> bool { get_env() == "dev" }
+pub fn is_prod() -> bool { get_env() == "prod" }
 impl DomainsConstants {
     pub fn new() -> Self {
         //let ON_SERVER = env::var("ENV").is_some();
         let ON_SERVER = true;
-        let ENV = env::var("ENV").unwrap_or("<unknown>".to_string());
+        let ENV = get_env();
         Self {
             prod_domain: "debates.app", // temp
             recognized_web_server_hosts: &[

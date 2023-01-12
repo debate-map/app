@@ -20,6 +20,16 @@ chrono = "0.4.23"
 flume = "0.10.10"
 indexmap = {version = "1.8.0", features = ["serde"]}
 async-trait = "0.1.52"
+sentry = {version = "0.29.1", default-features = false, features = [
+	# default
+	"backtrace", "contexts", "panic",
+	#"transport", # commented, since pulls in native-tls (as part of reqwest+native-tls)
+
+	# added
+	"reqwest", "rustls",
+	#"log",
+	"tracing",
+]}
 
 url = "2"
 hyper = {version = "0.14.16", features = ["client"] }

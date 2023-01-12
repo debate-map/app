@@ -10,7 +10,7 @@ use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Client};
-use tracing::{info, error};
+use tracing::{info, error, warn};
 use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
@@ -35,6 +35,8 @@ impl QueryShard_General {
     // useful for testing monitor-tool's logs page
     async fn print_empty_log(&self) -> &str {
         info!("print_empty_log called");
+        warn!("Test2");
+        error!("Test3");
         ""
     }
 }

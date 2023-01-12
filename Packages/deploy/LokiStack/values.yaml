@@ -23,3 +23,20 @@ loki:
     enabled: true
     #storageClassName: nfs-client
     size: 5Gi
+  # set up retention policy (else will just keep filling up)
+  # based on: https://github.com/grafana/loki/issues/7068#issuecomment-1250682559
+  limits_config:
+    retention_period: 7d
+    reject_old_samples: true
+    reject_old_samples_max_age: 168h # not sure what this is for...
+    #enforce_metric_name: false
+    #max_cache_freshness_per_query: 10m
+    #split_queries_by_interval: 15m
+  compactor:
+    retention_enabled: true
+    retention_delete_delay: 2h
+    #retention_delete_worker_count: 150
+    #compaction_interval: 10m
+  table_manager:
+    retention_deletes_enabled: true
+    retention_period: 7d

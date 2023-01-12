@@ -35,11 +35,11 @@
     dead_code,
 )]
 
-use rust_shared::{tokio};
+use rust_shared::{tokio, sentry, domains::{DomainsConstants, get_env}};
 use store::storage::AppStateArc;
 use tracing::{error};
 
-use crate::{links::{pgclient::{self, start_pgclient_with_restart}, db_live_cache::start_db_live_cache}, globals::{set_up_globals}, router::start_router, store::storage::AppState};
+use crate::{links::{pgclient::{self, start_pgclient_with_restart}, db_live_cache::start_db_live_cache}, globals::{set_up_globals}, router::start_router, store::storage::AppState, utils::general::data_anchor::DataAnchorFor1};
 
 // folders (we only use "folder_x/mod.rs" files one-layer deep; keeps the mod-tree structure out of main.rs, while avoiding tons of mod.rs files littering the codebase)
 mod db;
@@ -54,7 +54,7 @@ mod router;
 //#[tokio::main(flavor = "multi_thread", worker_threads = 7)]
 #[tokio::main]
 async fn main() {
-    set_up_globals();
+    let _sentry_guard = set_up_globals();
     println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
 
     let app_state = AppState::new_in_arc();

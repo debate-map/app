@@ -5,6 +5,7 @@ use rust_shared::futures::executor::block_on;
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::Itertools;
 use rust_shared::links::app_server_to_monitor_backend::{LogEntry, Message_ASToMB};
+use rust_shared::sentry;
 use rust_shared::utils::time::time_since_epoch_ms;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
@@ -77,6 +78,7 @@ pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {
     tracing_subscriber::registry()
         .with(sending_layer)
         .with(printing_layer)
+        .with(sentry::integrations::tracing::layer())
         .init();
 
     //r1
