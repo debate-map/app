@@ -680,31 +680,6 @@ NEXT_k8s_resource_batch([
 # 		},
 # 	])
 
-# log collection
-# ==========
-
-# helm_repo('vector', 'https://helm.vector.dev')
-# helm_resource(
-#   'vector',
-#   'vector/vector',
-#   labels=['monitoring'],
-#   #resource_deps=['dm-app-server']
-# )
-
-helm_remote('vector',
-	repo_url='https://helm.vector.dev',
-	version='0.18.0', # helm-chart version may differ from vector version
-	namespace='monitoring',
-	# set=[],
-	values=["./Packages/deploy/Vector/values.yaml"],
-)
-NEXT_k8s_resource_batch([
-	{
-		"workload": 'vector',
-		"labels": ["monitoring"],
-	},
-])
-
 # loki + prometheus + grafana
 # ==========
 

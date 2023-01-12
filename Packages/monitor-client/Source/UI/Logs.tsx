@@ -4,9 +4,9 @@ import {Observer, RunInAction_Set} from "web-vcore";
 import {GetEntries, ModifyString} from "web-vcore/nm/js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {LogGroupsUI} from "./Logs/LogGroupsUI";
-import {LogsUI_Realtime} from "./Logs/Realtime";
-import {LogsUI_Stored} from "./Logs/Stored";
+import {LogGroupsUI} from "./Logs/LogGroupsUI.js";
+import {LogsUI_Realtime} from "./Logs/Realtime.js";
+import {LogsUI_Stored} from "./Logs/Stored.js";
 
 @Observer
 export class LogsUI extends BaseComponent<{}, {}> {
@@ -26,16 +26,6 @@ export class LogsUI extends BaseComponent<{}, {}> {
 									<LogGroupsUI/>
 								</DropDownContent>
 							</DropDown>}
-							{/*<DropDown style={{marginLeft: 5}}>
-								<DropDownTrigger><Button style={{height: "100%"}} text="Others"/></DropDownTrigger>
-								<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
-									<Row center>
-										<Text>Significant duration threshold:</Text>
-										<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>
-										<Text>ms</Text>
-									</Row>
-								</Column></DropDownContent>
-							</DropDown>*/}
 						</Row>
 					</Row>
 					{uiState.panel == "stored" && <LogsUI_Stored/>}

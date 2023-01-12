@@ -1,6 +1,6 @@
 import {O} from "web-vcore";
 import {makeObservable} from "web-vcore/nm/mobx";
-import {LogGroup} from "./logs/LogGroup";
+import {LogGroup} from "./logs/LogGroup.js";
 
 export enum LogsPanel {
 	stored = "stored",
@@ -9,9 +9,6 @@ export enum LogsPanel {
 
 export class LogsState {
 	constructor() { makeObservable(this); }
-	/*@O showRange_duration = 60000;
-	@O showRange_end = Date.now();
-	@O significantDurationThreshold = 1;*/
 
 	@O panel = LogsPanel.stored;
 

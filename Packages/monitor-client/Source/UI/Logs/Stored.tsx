@@ -1,17 +1,12 @@
 import {GetServerURL} from "dm_common";
-import gql from "graphql-tag";
 import React, {useState} from "react";
 import {store} from "Store";
-import {LogGroup} from "Store/main/logs/LogGroup";
-import {DateToDateTimeInputStr, TimeInMSToTimeInputStr, TimeInputStrToTimeInMS} from "UI/DB/Requests.js";
+import {DateToDateTimeInputStr} from "UI/DB/Requests.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
-import {useSubscription} from "web-vcore/nm/@apollo/client.js";
-import {observer} from "web-vcore/nm/mobx-react.js";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {LogEntryUI} from "./LogEntryUI.js";
-import {LogGroupsUI} from "./LogGroupsUI.js";
 import {LogEntry} from "./Realtime.js";
 
 export class LogEntry_Stored {

@@ -164,9 +164,8 @@ pub async fn query_loki(query: String, startTime: i64, endTime: i64, limit: i64)
         //.append_pair("step", &30.to_string())
         .finish();
     //info!("Querying loki with params-string:{}", params_str);
-    let response_as_str = // weird, but internal-port is 3100, and it's exposed as "port" "http-metrics" (didn't realize k8s "ports" could be non-numbers)
-        //reqwest::get(format!("http://loki-stack.monitoring.svc.cluster.local:3100/api/v1/query_range?{params_str}", query, startTime, endTime, limit)).await?
-        //reqwest::get(format!("http://loki-stack.monitoring.svc.cluster.local:http-metrics/api/v1/query_range?{params_str}", query, startTime, endTime, limit)).await?
+    let response_as_str =
+        //reqwest::get(format!("http://loki-stack.monitoring.svc.cluster.local:3100/loki/api/v1/query_range?{params_str}")).await?
         reqwest::get(format!("http://http-metrics.tcp.loki-stack.monitoring.svc.cluster.local:3100/loki/api/v1/query_range?{params_str}")).await?
         .text().await?;
     let res_as_json = JSONValue::from_str(&response_as_str).with_context(|| format!("Response text:{}", response_as_str))?;
@@ -313,33 +312,6 @@ struct StartMigration_Result {
     }
 }
 
-/*#[derive(Serialize)]
-pub struct ExecuteTestSequence_Vars {
-   adminKey: String,
-   sequence: JSONValue,
-}
-
-pub async fn execute_test_sequence_on_app_server(admin_key: String, sequence: JSONValue) -> Result<String, Error> {
-    let endpoint = "http://dm-app-server.default.svc.cluster.local:5110/graphql";
-    let query = r#"
-        mutation($adminKey: String!, $sequence: JSON!) {
-            executeTestSequence(adminKey: $adminKey, sequence: $sequence) {
-                message
-            }
-        }
-    "#;
-
-    let client = gql_client::Client::new(endpoint);
-    let vars = ExecuteTestSequence_Vars { adminKey: admin_key, sequence };
-    let data_opt = client.query_with_vars::<GenericMutation_Result, ExecuteTestSequence_Vars>(query, vars).await
-        .map_err(|a| anyhow!("GraphQL error:{}", a.message()))?; // todo: probably have this include all the error information
-    let data = data_opt.ok_or(anyhow!("Data was none/empty."))?;
-
-    //println!("Id: {}, Name: {}", data.user.id, data.user.name);
-
-    Ok(data.message)
-}*/
-
 // subscriptions
 // ==========
 
@@ -375,12 +347,8 @@ impl SubscriptionShard_General {
         } })
     }
 
-    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<Vec<LogEntry>, SubError>> + 'a {        
-        //let msg_receiver = ctx.data::<Receiver<GeneralMessage_Flume>>().unwrap();
-
+    async fn logEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<Vec<LogEntry>, SubError>> + 'a {
         let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
-        //let mut msg_receiver = msg_sender.subscribe();
-        //let mut temp = msg_sender.subscribe().peekable();
         let mut msg_receiver = msg_sender.new_receiver();
         // msg_receiver.len() includes entries from before its creation, so set the messages_processed variable appropriately
         let mut messages_processed = msg_receiver.len();
@@ -442,11 +410,8 @@ impl SubscriptionShard_General {
 
     async fn migrateLogEntries<'a>(&self, ctx: &'a async_graphql::Context<'_>, admin_key: String) -> impl Stream<Item = Result<MigrationLogEntry, SubError>> + 'a {
         let msg_sender = ctx.data::<ABSender<GeneralMessage>>().unwrap();
-        //let mut msg_receiver = msg_sender.subscribe();
         let mut msg_receiver = msg_sender.new_receiver();
         
-        //let mut msg_receiver = ctx.data::<PBReceiver<GeneralMessage>>().unwrap().clone();
-
         let base_stream = async_stream::stream! {
             if !admin_key_is_correct(admin_key, true) { yield Err(SubError::new(format!("Admin-key is incorrect!"))); return; }
 
