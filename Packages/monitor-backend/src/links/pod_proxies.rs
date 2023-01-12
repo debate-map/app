@@ -1,8 +1,9 @@
 use std::convert::Infallible;
 use std::net::{IpAddr, Ipv4Addr};
 use std::str::FromStr;
-use rust_shared::anyhow::{anyhow, Error, bail};
+use rust_shared::anyhow::{anyhow, Error, bail, ensure};
 use rust_shared::axum::extract::Path;
+use rust_shared::domains::DomainsConstants;
 use rust_shared::itertools::Itertools;
 use rust_shared::reqwest::header::SET_COOKIE;
 use rust_shared::{futures, axum, tower, tower_http, async_graphql_axum, base64};
@@ -38,17 +39,12 @@ pub const ALERTMANAGER_URL: &str = "http://loki-stack-prometheus-alertmanager.mo
 
 /// Endpoint needed to workaround cross-domain cookie restrictions, for when monitor-client is served by webpack.
 /// See CookieTransferHelper.tsx for the client-side handling of the exchange.
-pub async fn store_admin_key_cookie(req: Request<Body>) -> Response<Body> {
+pub async fn store_admin_key_cookie(_req: Request<Body>) -> Response<Body> {
     let response_result: Result<_, Error> = try {
-        /*let admin_key = req.headers().get("admin-key").ok_or(anyhow!("No admin-key header!"))?.to_str()?.to_owned();
-        ensure_admin_key_is_correct(admin_key.clone(), true)?;*/
-        
+        if !DomainsConstants::new().on_server_and_dev { Err(anyhow!("Can only use this helper in a dev cluster."))?; }
+
         let response = Response::builder()
-            //.header(CONTENT_TYPE, "application/json")
             .header(CONTENT_TYPE, "text/html; charset=utf-8")
-            /*.header(SET_COOKIE, format!("adminKey={}; SameSite=None; Secure", base64::encode(admin_key)))
-            .body(Body::from(""))*/
-            //.body(Body::from(format!(r#"<html><head><script>document.cookie = "adminKey={}";console.log("Cookie set:", document.cookie);</script></head></html>"#, base64::encode(admin_key))))
             .body(Body::from(r#"<html><head><script>
                 window.addEventListener('message', e=>{
                     if (e.origin !== 'http://localhost:5131') return;
@@ -65,15 +61,12 @@ pub async fn store_admin_key_cookie(req: Request<Body>) -> Response<Body> {
     match response_result {
         Ok(response) => response,
         Err(err) => {
-            let response_json = json!({
-                "error": format!("Error occurred. @error:{}", err),
-            });
+            let response_json = json!({ "error": format!("Error occurred. @error:{}", err) });
             let response = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
-                //.header(CONTENT_TYPE, "application/json")
-                .header(CONTENT_TYPE, "text/html; charset=utf-8")
+                //.header(CONTENT_TYPE, "text/html; charset=utf-8")
+                .header(CONTENT_TYPE, "application/json; charset=utf-8")
                 .body(Body::from(response_json.to_string()))
-                //.body(Body::from("<html><body>Test1</body></html>".to_string()))
                 .unwrap();
             response
         }
@@ -81,17 +74,7 @@ pub async fn store_admin_key_cookie(req: Request<Body>) -> Response<Body> {
 }
 
 pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, Error> {
-    /*match req.headers().get("authorization") {
-        None => bail!("An \"authorization\" header must be provided."),
-        Some(header) => match header.to_str()?.split_once("Bearer ") {
-            None => bail!("An \"authorization\" header was present, but its value was unable to be parsed. @header_value:\"{}\"", header.to_str()?),
-            Some(parts) => Ok(parts.1.to_owned()),
-        }
-    }*/
-    if let Some(header) = req.headers().get("admin-key") {
-        return Ok(header.to_str()?.to_owned());
-    }
-    //bail!("An \"admin-key\" header must be provided.")
+    // use cookies (instead of eg. an "admin-key" header) so the key gets sent with every proxy-request (ie. from the proxied page loading its subresources)
     if let Some(cookie_str) = req.headers().get("cookie") {
         let cookie_entries = cookie_str.to_str()?.split("; ").collect_vec();
         for cookie_entry in cookie_entries {
@@ -103,53 +86,34 @@ pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, E
             }
         }
     }
-    bail!("An \"admin-key\" header must be provided, or a \"cookie\" header with an \"adminKey\" cookie.");
+    bail!("A \"cookie\" header must be provided, with an \"adminKey\" cookie.");
 }
 
 pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Response<Body> {
     let response_result: Result<_, Error> = try {
-        /*let admin_key_base64 = req.uri().path().split("/").nth(3).ok_or(anyhow!("Could not find admin-key segment in uri path."))?;
-        let admin_key = String::from_utf8(base64::decode(admin_key_base64)?)?;*/
         let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
-        
-        //proxy_to_service_at_port(client, req, 9090).await?
         proxy_to_service_at_port(client, req, PROMETHEUS_URL.to_owned()).await?
     };
-    match response_result {
-        Ok(response) => response,
-        Err(err) => {
-            let response_json = json!({
-                "error": format!("Error occurred during setup of proxy to prometheus service. @error:{}", err),
-            });
-            let response = Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                //.header(CONTENT_TYPE, "application/json")
-                .header(CONTENT_TYPE, "text/html; charset=utf-8")
-                .body(Body::from(response_json.to_string()))
-                //.body(Body::from("<html><body>Test1</body></html>".to_string()))
-                .unwrap();
-            response
-        }
-    }
+    finalize_proxy_response(response_result, "prometheus").await
 }
 pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Response<Body> {
     let response_result: Result<_, Error> = try {
         let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
-        
-        //proxy_to_service_at_port(client, req, 9093).await?
         proxy_to_service_at_port(client, req, ALERTMANAGER_URL.to_owned()).await?
     };
+    finalize_proxy_response(response_result, "alertmanager").await
+}
+
+async fn finalize_proxy_response(response_result: Result<Response<Body>, Error>, service_name: &str) -> Response<Body> {
     match response_result {
         Ok(response) => response,
         Err(err) => {
-            let response_json = json!({
-                "error": format!("Error occurred during setup of proxy to alertmanager service. @error:{}", err),
-            });
+            let response_json = json!({ "error": format!("Error occurred during setup of proxy to {} service. @error:{}", service_name, err) });
             let response = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
-                //.header(CONTENT_TYPE, "application/json")
+                .header(CONTENT_TYPE, "application/json; charset=utf-8")
                 .body(Body::from(response_json.to_string()))
                 .unwrap();
             response
@@ -168,7 +132,7 @@ pub async fn proxy_to_service_at_port(client: HyperClient, mut req: Request<Body
     //let uri = format!("http://127.0.0.1:{}{}", port, path_query);
     //let uri = format!("{}{}", APP_SERVER_JS_URL, path_query);
     let uri = format!("{}{}", uri_base, path_and_query_fixed);
-    println!("Sending proxy request to:{}", uri);
+    //println!("Sending proxy request to:{}", uri);
 
     *req.uri_mut() = Uri::try_from(uri.clone())?;
 
@@ -176,11 +140,9 @@ pub async fn proxy_to_service_at_port(client: HyperClient, mut req: Request<Body
         Ok(response) => Ok(response),
         // one example of why this can fail: if the target pod crashed
         Err(err) => {
-            // todo: maybe change this to return an html response rather than json (matches better with caller's expectations)
-            let json = json!({
-                "error": format!("Error occurred while trying to send get command to pod at uri \"{}\":{}", uri, err),
-            });
+            let json = json!({ "error": format!("Error occurred while trying to send get command to pod at uri \"{}\":{}", uri, err) });
             Ok(Response::builder().status(StatusCode::BAD_GATEWAY)
+                .header(CONTENT_TYPE, "application/json; charset=utf-8")
                 .body(Body::from(json.to_string()))?)
         },
     }

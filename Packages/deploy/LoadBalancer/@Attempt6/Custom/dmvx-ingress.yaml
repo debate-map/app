@@ -103,6 +103,7 @@ spec:
                 port:
                   number: 5130
             pathType: ImplementationSpecific
+    # Grafana is made directly accessible (unlike prometheus, etc.) because it has its own authentication barrier. (also helpful for direct-linking to subpages)
     - host: grafana.debates.app
       http:
         paths:

@@ -30,7 +30,7 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClien
 	//const opts = {...new GetServerURL_Options(), ...options};
 	Assert(subpath.startsWith("/"));
 
-	console.log("GetServerURL_claimedClientURLStr:", claimedClientURLStr);
+	//console.log("GetServerURL_claimedClientURLStr:", claimedClientURLStr);
 	const claimedClientURL = claimedClientURLStr ? new URL(claimedClientURLStr) : null;
 	//const origin = referrerURL?.origin;
 

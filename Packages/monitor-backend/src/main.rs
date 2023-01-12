@@ -161,8 +161,6 @@ async fn main() {
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/
         //.route("/send-mtx-results", post(send_mtx_results))
-        // .route("/proxy/prometheus/:admin_key_base64", get(maybe_proxy_to_prometheus))
-        // .route("/proxy/alertmanager/:admin_key_base64", get(maybe_proxy_to_alertmanager))
         .route("/storeAdminKeyCookie", get(store_admin_key_cookie))
         .route("/proxy/prometheus", get(maybe_proxy_to_prometheus))
         .route("/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
@@ -170,12 +168,8 @@ async fn main() {
         .route("/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
         .fallback(get(handler));
 
-    //let (msg_sender_test, msg_receiver_test): (Sender<GeneralMessage_Flume>, Receiver<GeneralMessage_Flume>) = flume::unbounded();
-    //let (msg_sender, msg_receiver): (broadcast::Sender<GeneralMessage>, broadcast::Receiver<GeneralMessage>) = broadcast::channel(10000);
-    //let (msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = postage::broadcast::channel(10000);
     let (mut msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = async_broadcast::broadcast(10000);
     msg_sender.set_overflow(true);
-    //tokio::spawn(connect_to_app_server(msg_sender_test.clone()));
     tokio::spawn(connect_to_app_server(app_state.clone(), msg_sender.clone()));
 
     let app = gql_::extend_router(app, msg_sender, msg_receiver, /*msg_sender_test, msg_receiver_test,*/ app_state.clone()).await;
@@ -188,19 +182,12 @@ async fn main() {
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5130)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
-    //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service());
-    //let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info());
     let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr>());
     info!("Monitor-backend launched. @env:{:?}", k8s_env());
     server_fut.await.unwrap();
 }
 
-//async fn handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
-async fn handler(/*Extension(client): Extension<HyperClient>,*/ req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, String)> {
-    // see here for meaning of the parts: https://docs.rs/hyper/latest/hyper/struct.Uri.html
-    /*let axum::http::uri::Parts { scheme, authority, path_and_query, .. } = uri.clone().into_parts();
-    let path = path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string());
-    let query = path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned());*/
+async fn handler(req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, String)> {
     //println!("BaseURI:{}", uri);
     let uri = req.uri();
     let (scheme, authority, path, _query) = {
@@ -212,13 +199,6 @@ async fn handler(/*Extension(client): Extension<HyperClient>,*/ req: Request<Bod
             temp.path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned()),
         )
     };
-
-    /*if path.starts_with("/proxy/prometheus") {
-        return Ok(maybe_proxy_to_prometheus(Extension(client), req).await.into_response());
-    }
-    if path.starts_with("/proxy/alertmanager") {
-        return Ok(maybe_proxy_to_alertmanager(Extension(client), req).await.into_response());
-    }*/
     
     // try resolving path from "/Dist" folder
     if let Ok(uri_variant) = Uri::from_str(&format!("{scheme}://{authority}/Dist/{path}")) {
