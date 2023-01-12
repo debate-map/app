@@ -73,6 +73,9 @@ pub mod utils {
     }
     pub mod db {
         pub mod uuid;
+        pub mod agql_ext {
+            pub mod gql_general_extension;
+        }
     }
     pub mod errors;
     pub mod errors_ {

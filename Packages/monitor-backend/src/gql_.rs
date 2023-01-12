@@ -14,6 +14,7 @@ use rust_shared::hyper::{Body, service};
 use rust_shared::hyper::client::HttpConnector;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::tokio_postgres::{Client};
+use rust_shared::utils::db::agql_ext::gql_general_extension::CustomExtensionCreator;
 use rust_shared::utils::type_aliases::JSONValue;
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};
@@ -130,6 +131,7 @@ pub async fn extend_router(
         /*.data(msg_sender_test)
         .data(msg_receiver_test)*/
         .data(app_state)
+        .extension(CustomExtensionCreator)
         .finish();
 
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());

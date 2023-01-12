@@ -1,15 +1,15 @@
 use std::fmt::Write;
 use std::sync::Arc;
 
-use rust_shared::async_graphql::extensions::{
+use async_graphql::extensions::{
     Extension, ExtensionContext, ExtensionFactory, NextExecute, NextParseQuery, NextSubscribe, NextPrepareRequest, NextRequest,
 };
-use rust_shared::async_graphql::parser::types::{ExecutableDocument, OperationType, Selection};
-use rust_shared::async_graphql::{PathSegment, Response, ServerResult, Variables, ServerError, Request};
-use futures_util::stream::BoxStream;
-use rust_shared::indoc::{indoc, formatdoc};
-use rust_shared::utils::errors_::backtrace_simplifier::simplify_backtrace_str;
-use rust_shared::utils::general_::extensions::{indent_all_lines, ToOwnedV};
+use async_graphql::parser::types::{ExecutableDocument, OperationType, Selection};
+use async_graphql::{PathSegment, Response, ServerResult, Variables, ServerError, Request};
+use async_graphql::futures_util::stream::BoxStream;
+use indoc::{indoc, formatdoc};
+use crate::utils::errors_::backtrace_simplifier::simplify_backtrace_str;
+use crate::utils::general_::extensions::{indent_all_lines, ToOwnedV};
 use tracing::{warn, info};
 
 /// Logger extension

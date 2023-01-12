@@ -178,18 +178,18 @@ class TimeMarker extends BaseComponent<{time: number, rangeStart: number, rangeE
 	}
 }
 
-function DateToDateTimeInputStr(date: Date) {
+export function DateToDateTimeInputStr(date: Date) {
 	date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
 	//return date.toISOString().slice(0, 16);
 	return date.toISOString().replace(/\.\d\d\dZ/, "");
 }
-function TimeInMSToTimeInputStr(timeInMS: number) {
+export function TimeInMSToTimeInputStr(timeInMS: number) {
 	const hours = Math.floor(timeInMS / hourInMS).toString().padStart(2, "0");
 	const minutes = Math.floor((timeInMS % hourInMS) / minuteInMS).toString().padStart(2, "0");
 	const seconds = Math.floor((timeInMS % minuteInMS) / secondInMS).toString().padStart(2, "0");
 	return `${hours}:${minutes}:${seconds}`;
 }
-function TimeInputStrToTimeInMS(timeStr: string) {
+export function TimeInputStrToTimeInMS(timeStr: string) {
 	const parts = timeStr.split(":").map(a=>Number(a));
 	return (parts[0] * hourInMS) + (parts[1] * minuteInMS) + (parts[2] * secondInMS);
 }

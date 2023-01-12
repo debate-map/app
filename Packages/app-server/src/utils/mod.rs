@@ -2,7 +2,6 @@ pub mod axum_logging_layer;
 pub mod db {
     pub mod accessors;
     pub mod agql_ext {
-        pub mod gql_general_extension;
         pub mod gql_request_storage;
         pub mod gql_result_stream;
         pub mod gql_utils;

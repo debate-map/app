@@ -1,17 +1,18 @@
 use rust_shared::itertools::Itertools;
 use rust_shared::anyhow::{anyhow, Context, Error, bail};
-use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, self};
+use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject, self};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
 use rust_shared::utils::_k8s::{get_reqwest_client_with_k8s_certs, get_k8s_pod_basic_infos, get_or_create_k8s_secret, try_get_k8s_secret};
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::mtx::mtx::{MtxData, MtxDataForAGQL};
-use rust_shared::{futures, axum, tower, tower_http, GQLError, base64};
+use rust_shared::utils::time::time_since_epoch_ms_i64;
+use rust_shared::{futures, axum, tower, tower_http, GQLError, base64, reqwest};
 use rust_shared::utils::type_aliases::JSONValue;
 use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use rust_shared::hyper::{Body, Method};
+use rust_shared::hyper::{Body, Method, Request};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::SubError;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -126,6 +127,63 @@ impl QueryShard_General {
         let password = String::from_utf8(password_bytes)?;
         Ok(password.to_owned())
     }
+
+    async fn queryLoki(&self, _ctx: &async_graphql::Context<'_>, input: QueryLokiInput) -> Result<QueryLokiResult, GQLError> {
+        let QueryLokiInput { adminKey, query, startTime, endTime, limit } = input;
+        ensure_admin_key_is_correct(adminKey, true)?;
+
+        let endTime = endTime.unwrap_or((time_since_epoch_ms_i64() + 10000) * 1_000_000); // add 10s, in case of clock drift
+        let limit = limit.unwrap_or(10000);
+        
+        let log_entries = query_loki(query, startTime, endTime, limit).await?;
+        Ok(QueryLokiResult { logEntries: log_entries })
+    }
+}
+
+#[derive(InputObject, Deserialize)]
+pub struct QueryLokiInput {
+    adminKey: String,
+    query: String,
+    startTime: i64,
+    endTime: Option<i64>,
+    limit: Option<i64>
+}
+#[derive(SimpleObject, Debug)]
+struct QueryLokiResult {
+    logEntries: Vec<JSONValue>,
+}
+
+pub async fn query_loki(query: String, startTime: i64, endTime: i64, limit: i64) -> Result<Vec<JSONValue>, Error> {
+    let params_str = rust_shared::url::form_urlencoded::Serializer::new(String::new())
+        .append_pair("direction", "BACKWARD")
+        //.append_pair("direction", "FORWARD") // commented, since makes behavior confusing (seems neither exactly limit-from-start nor limit-from-end)
+        .append_pair("query", &query)
+        .append_pair("start", &startTime.to_string())
+        .append_pair("end", &endTime.to_string())
+        .append_pair("limit", &limit.to_string())
+        //.append_pair("step", &30.to_string())
+        .finish();
+    //info!("Querying loki with params-string:{}", params_str);
+    let response_as_str = // weird, but internal-port is 3100, and it's exposed as "port" "http-metrics" (didn't realize k8s "ports" could be non-numbers)
+        //reqwest::get(format!("http://loki-stack.monitoring.svc.cluster.local:3100/api/v1/query_range?{params_str}", query, startTime, endTime, limit)).await?
+        //reqwest::get(format!("http://loki-stack.monitoring.svc.cluster.local:http-metrics/api/v1/query_range?{params_str}", query, startTime, endTime, limit)).await?
+        reqwest::get(format!("http://http-metrics.tcp.loki-stack.monitoring.svc.cluster.local:3100/loki/api/v1/query_range?{params_str}")).await?
+        .text().await?;
+    let res_as_json = JSONValue::from_str(&response_as_str).with_context(|| format!("Response text:{}", response_as_str))?;
+    //println!("Done! Response:{}", res_as_json);
+
+    let result: Result<_, Error> = try {
+        let e = || anyhow!("Response json didn't match expected structure. @response_str:{}", response_as_str);
+        let results = res_as_json.get("data").ok_or(e())?.get("result").ok_or(e())?.as_array().ok_or(e())?;
+        if results.len() > 0 {
+            let log_entries = results.get(0).ok_or(e())?.get("values").ok_or(e())?.as_array().ok_or(e())?;
+            log_entries.to_owned()
+        } else {
+            vec![]
+        }
+    };
+    let log_entries = result?;
+    Ok(log_entries)
 }
 
 pub async fn get_basic_info_from_app_server() -> Result<JSONValue, Error> {

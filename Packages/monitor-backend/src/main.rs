@@ -144,6 +144,9 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
             //does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG, Level::TRACE])
         },
+        "async-graphql" => {
+            does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN])
+        },
         _ => false
     }
 }

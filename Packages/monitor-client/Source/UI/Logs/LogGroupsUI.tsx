@@ -1,7 +1,7 @@
 import React from "react";
 import {store} from "Store";
 import {LogConstraint, LogGroup} from "Store/main/logs/LogGroup";
-import {Level_values} from "UI/Logs";
+import {Level_values} from "UI/Logs/Realtime.js";
 import {Chroma, Chroma_Safe, InfoButton, Observer, RunInAction} from "web-vcore";
 import {Clone} from "web-vcore/nm/js-vextensions";
 import {Button, CheckBox, ColorPickerBox, Column, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";

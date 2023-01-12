@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import React from "react";
 import {store} from "Store/index.js";
 import {LogGroup} from "Store/main/logs/LogGroup";
-import {LogEntry} from "UI/Logs.js";
+import {LogEntry} from "UI/Logs/Realtime.js";
 import {Chroma, ES, InfoButton, Observer} from "web-vcore";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";

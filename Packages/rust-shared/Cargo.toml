@@ -19,6 +19,7 @@ jwt-simple = "0.11.2"
 chrono = "0.4.23"
 flume = "0.10.10"
 indexmap = {version = "1.8.0", features = ["serde"]}
+async-trait = "0.1.52"
 
 url = "2"
 hyper = {version = "0.14.16", features = ["client"] }

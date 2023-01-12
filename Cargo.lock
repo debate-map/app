@@ -63,7 +63,6 @@ version = "0.1.0"
 dependencies = [
  "async-broadcast",
  "async-recursion",
- "async-trait",
  "deadpool",
  "deadpool-postgres",
  "dotenv",
@@ -2427,6 +2426,7 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-graphql-axum",
+ "async-trait",
  "axum",
  "base64",
  "bytes",

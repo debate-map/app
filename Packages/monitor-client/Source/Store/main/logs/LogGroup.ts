@@ -1,4 +1,4 @@
-import {LogEntry} from "UI/Logs";
+import {LogEntry} from "UI/Logs/Realtime";
 import {FieldMatchesStr, FieldMatchesValInList} from "../database/MtxGroup";
 
 export class LogGroup {

@@ -7,7 +7,6 @@ use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::type_aliases::{JSONValue, RowData};
 use rust_shared::{bytes, serde_json};
 use rust_shared::serde::Serialize;
-use async_trait::async_trait;
 use futures_util::{TryStreamExt, Future};
 use rust_shared::serde_json::json;
 use rust_shared::{tokio_postgres, tokio_postgres::{Row, types::ToSql}};

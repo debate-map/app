@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
     "file-syncer": "^0.0.8",
     "nps": "^5.10.0",
     "ts-loader": "9.2.3",
@@ -55,7 +56,7 @@
     "sync-directory": "^2.2.22",
     "tree-grapher": "0.0.5",
     "ui-debug-kit": "0.0.6",
-    "web-vcore": "0.0.64"
+    "web-vcore": "0.0.65"
   },
   "packageManager": "yarn@3.3.0"
 }
