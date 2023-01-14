@@ -1,6 +1,5 @@
-import {Assert} from "web-vcore/.yalc/js-vextensions";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AddSchema, MGLClass, DB, Field, UUID_regex, DeriveJSONSchema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {MGLClass, Field} from "web-vcore/nm/mobx-graphlink.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
 @MGLClass()

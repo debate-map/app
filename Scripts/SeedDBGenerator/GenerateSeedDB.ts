@@ -1,4 +1,4 @@
-import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
+import {NodeL1, NodeRevision, Map, NodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria, systemPolicy_publicUngoverned_name, systemPolicy_publicGoverned_name, systemPolicy_privateGoverned_name} from "dm_common";
 import {GlobalData} from "dm_common/Dist/DB/globalData/@GlobalData";
 import KnexFunc, {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
@@ -52,7 +52,10 @@ const Pop = <T>()=>temp.pop() as T;
 const rand = ()=>Math.random();
 // example: [rand()]: {...},
 
-function TypeCheck<T, T2 extends {[key: string]: T}>(__: new(..._)=>T, collection: T2) {
+function TypeCheckRaw<T, T2 extends {[key: string]: T} = {[key: string]: T}>(collection: T2) {
+	return collection;
+}
+function TypeCheck<T, T2 extends {[key: string]: T} = {[key: string]: T}>(__: new(..._)=>T, collection: T2) {
 	return collection;
 }
 
@@ -66,7 +69,7 @@ const globalDatas = TypeCheck(GlobalData, {
 	},
 });
 
-const users = TypeCheck(User as new()=>(User & {hidden: UserHidden}), {
+const users = TypeCheckRaw<User & {hidden: UserHidden}>({
 	system: {
 		id: systemUserID,
 		displayName: systemUserName,
@@ -98,7 +101,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			terms:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 			medias:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 			maps:				new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
-			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), vote: PC_Anyone(), addPhrasing: PC_Anyone()}),
+			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), addChild: PC_Anyone(), addPhrasing: PC_Anyone(), vote: PC_Anyone()}),
 			nodeRatings:	new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 		})),
 		permissions_userExtends: {},
@@ -112,7 +115,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			terms:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 			medias:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 			maps:				new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
-			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), vote: PC_Anyone(), addPhrasing: PC_NoOne()}),
+			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), addChild: PC_NoOne(), addPhrasing: PC_NoOne(), vote: PC_Anyone()}),
 			nodeRatings:	new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 		})),
 		permissions_userExtends: {},
@@ -126,7 +129,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			terms:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
 			medias:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
 			maps:				new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
-			nodes:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne(), vote: PC_NoOne(), addPhrasing: PC_NoOne()}),
+			nodes:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne(), addChild: PC_NoOne(), vote: PC_NoOne(), addPhrasing: PC_NoOne()}),
 			nodeRatings:	new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
 		})),
 		permissions_userExtends: {},
@@ -152,14 +155,14 @@ const maps = TypeCheck(Map, {
 	},
 });
 
-const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}), {
+const nodes = TypeCheckRaw<NodeL1 & {revision: NodeRevision}>({
 	globalRoot: {
 		//id: GenerateUUID(),
 		id: globalRootNodeID,
 		accessPolicy: accessPolicies.public_governed.id,
 		creator: systemUserID,
 		createdAt: Date.now(),
-		type: MapNodeType.category,
+		type: NodeType.category,
 		rootNodeForMap: globalMapID,
 		revision: {
 			id: GenerateUUID(),

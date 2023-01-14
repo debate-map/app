@@ -109,14 +109,6 @@
 			"group": "build"
 		},
 		{
-			"label": "#2 db.buildInitDBScript_watch",
-			"type": "shell",
-			"command": "npm start db.buildInitDBScript_watch",
-			"problemMatcher": [],
-			"isBackground": true,
-			"group": "build"
-		},
-		{
 			"label": "#3 app-server.run",
 			"type": "shell",
 			"command": "npm start app-server.run",
@@ -125,9 +117,9 @@
 			"group": "build"
 		},
 		{
-			"label": "## db.initDB_freshScript_k8s local",
+			"label": "## db.buildSeedDBScript",
 			"type": "shell",
-			"command": "npm start 'db.initDB_freshScript_k8s local'",
+			"command": "npm start db.buildSeedDBScript",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
