@@ -4,6 +4,7 @@ use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};
 use rust_shared::db_constants::SYSTEM_USER_ID;
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::general_::serde::to_json_value_for_borrowed_obj;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
@@ -15,8 +16,11 @@ use serde::Serialize;
 use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_populated;
+use crate::db::_shared::table_permissions::UsesRLS;
+use crate::db::access_policies_::_permission_set::{APTable, APAction};
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
+use crate::db::general::permission_helpers::assert_user_can_modify;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::maps::get_map;
@@ -61,6 +65,11 @@ pub struct AddNodeRevisionExtras {
 pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddNodeRevisionInput, extras: AddNodeRevisionExtras) -> Result<AddNodeRevisionResult, Error> {
 	let AddNodeRevisionInput { mapID, revision: revision_ } = input.clone();
 	
+	let node_id = revision_.node.ok_or(err_should_be_populated("revision.node"))?;
+	let node = get_node(ctx, &node_id).await?;
+	//assert_user_can_do_x_for_commands(ctx, actor, APAction::Modify, ActionTarget::for_node(APTable::Nodes, node.accessPolicy.o())).await?;
+	assert_user_can_modify(ctx, actor, &node).await?;
+
 	let revision = NodeRevision {
 		// set by server
 		id: ID(extras.id_override.unwrap_or(new_uuid_v4_as_b64())),
@@ -69,7 +78,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 		//phrasing_tsvector: "<tbd>".to_owned(), // auto-set by db
 		replacedBy: None, // auto-set by db
 		// pass-through
-		node: revision_.node.ok_or(err_should_be_populated("revision.node"))?,
+		node: node_id,
 		phrasing: revision_.phrasing,
 		note: revision_.note,
 		displayDetails: revision_.displayDetails,

@@ -1,10 +1,7 @@
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, type_aliases::JSONValue}, async_graphql, itertools::Itertools, serde_json};
 use serde::Serialize;
 
-use crate::db::{general::sign_in_::jwt_utils::get_user_jwt_data_from_gql_ctx, terms::Term};
-
-use super::rls_policies::UsesRLS;
-
+use crate::db::{general::sign_in_::jwt_utils::get_user_jwt_data_from_gql_ctx, terms::Term, _shared::table_permissions::UsesRLS};
 
 pub struct RLSApplier {
     pub jwt_data: Option<UserJWTData>,
@@ -29,7 +26,8 @@ impl RLSApplier {
     }*/
 
     pub fn filter_next_result_for_collection<T: UsesRLS + Clone + Serialize>(&mut self, next_result: Vec<T>) -> (Vec<T>, bool) {
-        let next_result_final = next_result.into_iter().filter(|a| a.does_entry_pass_rls(&self.jwt_data)).collect_vec();
+        let user_id = self.jwt_data.as_ref().map(|a| a.id.as_str());
+        let next_result_final = next_result.into_iter().filter(|a| a.can_access_cached(user_id)).collect_vec();
         let next_result_final_json = serde_json::to_string(&next_result_final).unwrap();
         if let Some(last_result_json) = &self.last_result_json && &next_result_final_json == last_result_json {
             return (next_result_final, false);
@@ -39,7 +37,8 @@ impl RLSApplier {
         (next_result_final, true)
     }
     pub fn filter_next_result_for_doc<T: UsesRLS + Clone + Serialize>(&mut self, next_result: Option<T>) -> (Option<T>, bool) {
-        let next_result_final = next_result.filter(|a| a.does_entry_pass_rls(&self.jwt_data));
+        let user_id = self.jwt_data.as_ref().map(|a| a.id.as_str());
+        let next_result_final = next_result.filter(|a| a.can_access_cached(user_id));
         let next_result_final_json = serde_json::to_string(&next_result_final).unwrap();
         if let Some(last_result_json) = &self.last_result_json && &next_result_final_json == last_result_json {
             return (next_result_final, false);

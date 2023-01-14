@@ -2,7 +2,7 @@ import {GetServerURL} from "dm_common";
 import {store} from "Store";
 import {SubscriptionClient} from "subscriptions-transport-ws";
 import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
+import {ApolloClient, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
 import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
@@ -197,6 +197,17 @@ export function InitApollo() {
 				},
 			},
 		}),
+		// default to not using the cache (it does nothing for subscriptions, and often does *opposite* of what we want for queries [eg. search]; and even when wanted, it's better to explicitly set it)
+		defaultOptions: {
+			watchQuery: {
+				fetchPolicy: "no-cache",
+				errorPolicy: "ignore",
+			},
+			query: {
+				fetchPolicy: "no-cache",
+				errorPolicy: "all",
+			},
+		} as DefaultOptions,
 	});
 
 	// Websocket doesn't have auth-data attached quite yet (happens in onConnected/onReconnected), but send user-data to MGL immediately anyway.

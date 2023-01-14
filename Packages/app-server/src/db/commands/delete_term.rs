@@ -47,7 +47,7 @@ pub async fn delete_term(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool
 	let DeleteTermInput { id } = input;
 	
 	let old_data = get_term(&ctx, &id).await?;
-	assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_delete(&ctx, &actor, &old_data).await?;
 
 	delete_db_entry_by_id(&ctx, "terms".to_owned(), id.to_string()).await?;
 

@@ -7,6 +7,12 @@
 
 ## Main series
 
+### Pushed on 2023-01-13
+
+* 1\) Changed RLS policies slightly.
+	* DB response:
+		* 1\) Re-apply the sql in `RLSHelpers.sql` and `RLSPolicies.sql`.
+
 ### Pushed on 2023-01-09
 
 * 1\) Changed schema name from `app_public` to just `app`, and removed the unused `public` schema.

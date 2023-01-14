@@ -13,9 +13,11 @@ use tracing::info;
 
 use crate::db::commands::_shared::update_node_rating_summaries::update_node_rating_summaries;
 use crate::db::commands::delete_node_rating::{delete_node_rating, DeleteNodeRatingInput};
+use crate::db::general::permission_helpers::assert_user_can_vote;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_ratings::{NodeRating, NodeRatingInput, get_node_ratings};
 use crate::db::node_ratings_::_node_rating_type::NodeRatingType;
+use crate::db::nodes::get_node;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -48,6 +50,8 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: 
 	let SetNodeRatingInput { rating: rating_ } = input;
 	
 	ensure!(rating_.r#type != NodeRatingType::impact, "Cannot set impact rating directly.");
+	let node = get_node(ctx, &rating_.node).await?;
+	assert_user_can_vote(ctx, actor, &node).await?;
 
 	let old_ratings = get_node_ratings(ctx, &rating_.node, Some(rating_.r#type), Some(&vec![actor.id.to_string()])).await?;
 	for old_rating in old_ratings {

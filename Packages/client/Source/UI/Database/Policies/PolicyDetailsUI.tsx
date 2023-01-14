@@ -46,7 +46,7 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 						These are the permissions that are granted to all visitors. (for mere viewing/access, this includes those not signed in)
 						
 						Note that there are a few additional permission-grants:
-						* The creator of an entry can always access an entry (and currently, modify it), so long as they still have basic permissions.
+						* The creator of an entry can always access an entry (and currently, modify it).
 						* Admins can always access and modify any entry.
 						* Moderators can modify any entry *that they have access to*. (ie. if something is made accessible/visible to the general public, then mods can modify it)
 					`.AsMultiline(0)}/>

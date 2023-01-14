@@ -47,7 +47,7 @@ pub async fn delete_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: boo
 	let DeleteMediaInput { id } = input;
 	
 	let old_data = get_media(&ctx, &id).await?;
-	assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_delete(&ctx, &actor, &old_data).await?;
 
 	delete_db_entry_by_id(&ctx, "medias".to_owned(), id.to_string()).await?;
 

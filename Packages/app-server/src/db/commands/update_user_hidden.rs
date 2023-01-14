@@ -12,6 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
+use crate::db::general::permission_helpers::assert_user_can_modify;
 use crate::db::user_hiddens::{UserHidden, get_user_hidden, UserHiddenUpdates};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
@@ -46,7 +47,7 @@ pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_roo
 	let UpdateUserHiddenInput { id, updates } = input;
 	
 	let old_data = get_user_hidden(&ctx, &id).await?;
-	ensure!(id == actor.id.to_string(), "Cannot change the user-hidden-data of another user!");
+	assert_user_can_modify(ctx, actor, &old_data).await?;
 
 	let new_data = UserHidden {
 		backgroundID: update_field_nullable(updates.backgroundID, old_data.backgroundID),

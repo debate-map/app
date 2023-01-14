@@ -1,5 +1,9 @@
 -- sync:rs[rls_helpers.rs]
 
+CREATE OR REPLACE FUNCTION is_user_admin_or_creator(user_id varchar, creator_id varchar) RETURNS boolean AS $$ BEGIN 
+	RETURN is_user_admin(user_id) OR is_user_creator(user_id, creator_id);
+END $$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION is_user_creator(user_id varchar, creator_id varchar) RETURNS boolean AS $$ BEGIN 
 	IF user_id = '@me' THEN user_id := current_setting('app.current_user_id'); END IF;
 	RETURN user_id = creator_id;

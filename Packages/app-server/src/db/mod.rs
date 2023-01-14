@@ -3,6 +3,11 @@ pub mod _shared {
     pub mod attachments;
     pub mod common_errors;
     pub mod path_finder;
+    pub mod table_permissions;
+}
+pub mod access_policies_ {
+    pub mod _access_policy;
+    pub mod _permission_set;
 }
 pub mod commands {
     pub mod _shared {

@@ -432,8 +432,7 @@ pub struct MtxDataWithExtraInfo {
 pub struct MtxDataForAGQL {
     pub id: String, // changed to String in MtxData structs, for more universality (eg. easier usage with gql in monitor-backend -- agql's OutputType isn't implemented for Uuid)
 
-    // use HashMap in this variant, since agql has OutputType implemented for it
-    // (but tell serde to serialize the HashMap using the ordered_map function, which collects the entries into a temporary BTreeMap -- which is sorted)
+    // use HashMap (since agql has OutputType implemented for it), but have serde use the ordered_map function (which enforced a consistent order, of alphabetical, through use of a temporary BTreeMap)
     #[serde(serialize_with = "crate::utils::general_::serde::ordered_map")]
     pub section_lifetimes: HashMap<String, MtxSection>,
 }

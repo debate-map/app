@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, command_boilerplate};
-use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_delete_simple};
+use crate::db::general::permission_helpers::{assert_user_can_delete};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_tags::{NodeTag, NodeTagInput, get_node_tag};
 use crate::db::users::User;
@@ -47,8 +47,7 @@ pub async fn delete_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: 
 	let DeleteNodeTagInput { id } = input;
 	
 	let old_data = get_node_tag(&ctx, &id).await?;
-	//assert_user_can_delete(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
-	assert_user_can_delete_simple(&actor, &old_data.creator)?;
+	assert_user_can_delete(&ctx, &actor, &old_data).await?;
 
 	delete_db_entry_by_id(&ctx, "nodeTags".to_owned(), id.to_string()).await?;
 

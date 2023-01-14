@@ -4,7 +4,7 @@ use futures_util::StreamExt;
 use rust_shared::{once_cell::sync::Lazy, anyhow::{anyhow, Error, bail}, itertools::Itertools, tokio, to_anyhow, db_constants::{SYSTEM_USER_ID, SYSTEM_USER_EMAIL}, utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV, time::tokio_sleep}, serde_json::{json, self}};
 use tracing::error;
 
-use crate::{db::{access_policies::{AccessPolicy, GQLSet_AccessPolicy}, users::{User, GQLSet_User}}, store::storage::AppStateArc, utils::db::handlers::handle_generic_gql_collection_request_base};
+use crate::{db::{access_policies::{GQLSet_AccessPolicy}, users::{User, GQLSet_User}, access_policies_::_access_policy::AccessPolicy}, store::storage::AppStateArc, utils::db::handlers::handle_generic_gql_collection_request_base};
 
 pub fn start_db_live_cache(app_state: AppStateArc) {
     let app_state_c1 = app_state.clone();
@@ -76,3 +76,5 @@ pub fn get_access_policy_cached(policy_id: &str) -> Result<AccessPolicy, Error> 
     let result = cache.get(policy_id).cloned().ok_or_else(|| anyhow!("Policy \"{}\" not found in cache. @policies_in_cache_count:{}", policy_id, cache.len()))?;
     Ok(result)
 }
+
+// todo: maybe add listener on `globalData` table's `dbReadOnly` field, and use it to block new write-transactions (eg. during migrations)

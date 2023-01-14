@@ -1,5 +1,6 @@
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field, UUID_regex, DeriveJSONSchema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {MarkerForNonScalarField} from "../../Utils/General/General.js";
 
 @MGLClass()
 export class PermitCriteria {
@@ -23,23 +24,23 @@ export class PermissionSetForType {
 	@Field({type: "boolean"})
 	access = false; // true = anyone, false = no-one
 
-	@Field({$ref: "PermitCriteria"})
+	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
 	modify = new PermitCriteria();
 
-	@Field({$ref: "PermitCriteria"})
+	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
 	delete = new PermitCriteria();
 
 	// for nodes only
 	// ==========
 
-	@Field({$ref: "PermitCriteria"})
+	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
 	vote = new PermitCriteria();
 
-	@Field({$ref: "PermitCriteria"})
+	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
 	addPhrasing = new PermitCriteria();
 
 	// commented; users can always add "children" (however, governed maps can set a lens entry that hides unapproved children by default)
-	/*@Field({$ref: "PermitCriteria"}, {opt: true})
+	/*@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()}, {opt: true})
 	addChild = new PermitCriteria();*/
 }
 
@@ -49,20 +50,20 @@ export class PermissionSet {
 		Object.assign(this, data);
 	}
 
-	@Field({$ref: "PermissionSetForType"})
+	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
 	terms = new PermissionSetForType();
 
-	@Field({$ref: "PermissionSetForType"})
+	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
 	medias = new PermissionSetForType();
 
-	@Field({$ref: "PermissionSetForType"})
+	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
 	maps = new PermissionSetForType();
 
-	@Field({$ref: "PermissionSetForType"})
+	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
 	nodes = new PermissionSetForType();
 
 	// most node-related rows use their node's access-policy as their own; node-ratings is an exception, because individual entries can be kept hidden without disrupting collaboration significantly
-	@Field({$ref: "PermissionSetForType"})
+	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
 	nodeRatings = new PermissionSetForType();
 }
 
@@ -94,7 +95,7 @@ export class AccessPolicy {
 	base?: string|n;*/
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: PermissionSet.name})
+	@Field({$ref: PermissionSet.name, ...MarkerForNonScalarField()})
 	permissions = new PermissionSet({
 		terms:			new PermissionSetForType({access: false, modify: new PermitCriteria(), delete: new PermitCriteria()}),
 		medias:			new PermissionSetForType({access: false, modify: new PermitCriteria(), delete: new PermitCriteria()}),
@@ -112,6 +113,7 @@ export class AccessPolicy {
 	@Field({
 		$gqlType: "JSON", // graphql doesn't support key-value-pair structures, so just mark as JSON
 		patternProperties: {[UUID_regex]: {$ref: PermissionSet.name}},
+		//...MarkerForNonScalarField(),
 	})
 	permissions_userExtends: {[key: string]: PermissionSet} = {};
 

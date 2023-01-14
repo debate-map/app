@@ -12,6 +12,7 @@ use tracing::info;
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
 use crate::db::commands::_command::command_boilerplate;
+use crate::db::general::permission_helpers::assert_user_can_add_phrasing;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_phrasings::{NodePhrasingInput, NodePhrasing};
 use crate::db::nodes::get_node;
@@ -45,6 +46,9 @@ pub struct AddNodePhrasingResult {
 
 pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
 	let AddNodePhrasingInput { phrasing: phrasing_ } = input;
+
+	let node = get_node(&ctx, &phrasing_.node).await?;
+	assert_user_can_add_phrasing(ctx, actor, &node).await?;
 	
 	let phrasing = NodePhrasing {
 		// set by server

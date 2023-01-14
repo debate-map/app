@@ -13,7 +13,7 @@ use tracing::info;
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, command_boilerplate};
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
-use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod, assert_user_can_delete_simple};
+use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{get_node_links, get_node_link};
 use crate::db::nodes::{get_node, is_root_node};
@@ -64,8 +64,7 @@ pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, is_root: 
 	let base_text = format!("Cannot unlink node #{}, since ", child_id);
 
 	// checks on link
-	//assert_user_can_delete(ctx, actor, link.creator, access_policy_id).await?;
-	assert_user_can_delete_simple(actor, &link.creator)?;
+	assert_user_can_delete(ctx, actor, &link).await?;
 
 	// checks on parent/child nodes
 	let child_node = get_node(ctx, child_id).await?;

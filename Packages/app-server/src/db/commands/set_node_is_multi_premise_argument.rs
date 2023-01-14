@@ -13,7 +13,7 @@ use tracing::info;
 
 use crate::db::commands::_shared::update_node_rating_summaries::update_node_rating_summaries;
 use crate::db::commands::delete_node_rating::{delete_node_rating, DeleteNodeRatingInput};
-use crate::db::general::permission_helpers::assert_user_can_update;
+use crate::db::general::permission_helpers::assert_user_can_modify;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::nodes::get_node;
 use crate::db::nodes_::_node::Node;
@@ -50,7 +50,7 @@ pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor
 	let SetNodeIsMultiPremiseArgumentInput { id, multiPremiseArgument } = input;
 	
 	let old_data = get_node(&ctx, &id).await?;
-	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_modify(&ctx, &actor, &old_data).await?;
 	let new_data = Node {
 		multiPremiseArgument,
 		..old_data

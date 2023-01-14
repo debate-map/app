@@ -1,4 +1,7 @@
-use rust_shared::async_graphql::{self, parser::types::ExecutableDocument};
+use std::collections::BTreeMap;
+
+use rust_shared::{async_graphql::{self, parser::types::ExecutableDocument, SimpleObject, InputObject, OutputType, InputValueError, Value, ScalarType, Scalar, InputType, InputValueResult, Name}, rust_macros::wrap_slow_macros, indexmap::IndexMap};
+use serde::{Serialize, Deserialize};
 
 pub fn get_root_fields_in_doc(doc: ExecutableDocument) -> Vec<String> {
     let mut query_fields: Vec<String> = vec![];
@@ -12,6 +15,63 @@ pub fn get_root_fields_in_doc(doc: ExecutableDocument) -> Vec<String> {
     };
     query_fields
 }
+
+//wrap_slow_macros!{
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct IndexMapAGQL<K: std::hash::Hash + Eq, V>(IndexMap<K, V>);
+
+// makes-so you can call functions on IndexMapAGQL as though it were an IndexMap (ie. without having to do .0)
+impl<K: std::hash::Hash + Eq, V> std::ops::Deref for IndexMapAGQL<K, V> {
+    type Target = IndexMap<K, V>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl<K: std::hash::Hash + Eq, V> std::ops::DerefMut for IndexMapAGQL<K, V> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+// makes it a bit easier to go from IndexMap -> IndexMapAGQL
+/*impl From<IndexMapAGQL<String, PermissionSet>> for IndexMap<String, PermissionSet> {
+    fn from(val: IndexMapAGQL<String, PermissionSet>) -> Self {
+        val.0
+    }
+}*/
+// makes it a bit easier to go from IndexMap -> IndexMapAGQL
+/*impl Into<IndexMapAGQL<String, PermissionSet>> for IndexMap<String, PermissionSet> {
+    fn into(self) -> IndexMapAGQL<String, PermissionSet> {
+        IndexMapAGQL(self)
+    }
+}*/
+
+/// A scalar that can represent any JSON Object value.
+#[Scalar(name = "JSONObject")]
+impl<T> ScalarType for IndexMapAGQL<String, T> where T: OutputType + InputType {
+    fn parse(value: Value) -> InputValueResult<Self> {
+        match value {
+            Value::Object(map) => {
+                let mut result = IndexMapAGQL(IndexMap::new());
+                for (key, value) in map.into_iter() {
+                    result.insert(key.to_string(), T::parse(Some(value)).map_err(InputValueError::propagate)?);
+                }
+                Ok(result)
+            },
+            _ => Err(InputValueError::expected_type(value)),
+        }
+    }
+
+    fn to_value(&self) -> Value {
+        let mut map = IndexMap::new();
+        for (name, value) in self.iter() {
+            map.insert(Name::new(name), value.to_value());
+        }
+        Value::Object(map)
+    }
+}
+
+//}
 
 #[cfg(test)]
 mod tests {

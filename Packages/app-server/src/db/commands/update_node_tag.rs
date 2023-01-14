@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable};
-use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_update, assert_user_can_update_simple};
+use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_modify};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_tags::{NodeTag, NodeTagInput, get_node_tag, NodeTagUpdates};
 use crate::db::nodes::get_node;
@@ -49,12 +49,11 @@ pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: 
 	let UpdateNodeTagInput { id, updates } = input;
 	
 	let old_data = get_node_tag(&ctx, &id).await?;
-	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_modify(&ctx, &actor, &old_data).await?; // this maybe checks less than is ideal, but it's okay for now
 	/*for node_id in old_data.nodes {
 		let node = get_node(&ctx, &node_id).await?;
-		assert_user_can_update(&ctx, &actor, node.creator, node.access_policy).await?;
+		assert_user_can_modify(&ctx, &actor, node.creator, node.access_policy).await?;
 	}*/
-	assert_user_can_update_simple(&actor, &old_data.creator)?; // this maybe is insufficient, but it's fine for now
 	let new_data = NodeTag {
 		nodes: update_field(updates.nodes, old_data.nodes),
 		labels: update_field_nullable(updates.labels, old_data.labels),

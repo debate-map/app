@@ -8,6 +8,7 @@
 #![feature(auto_traits)]
 #![feature(negative_impls)]
 #![feature(try_blocks)]
+#![feature(async_fn_in_trait)]
 
 // for lock-chain checks
 #![allow(incomplete_features)]

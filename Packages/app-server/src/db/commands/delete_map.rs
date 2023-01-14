@@ -49,7 +49,7 @@ pub async fn delete_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool,
 	let DeleteMapInput { id } = input;
 	
 	let old_data = get_map(ctx, &id).await?;
-	assert_user_can_delete(ctx, actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_delete(ctx, actor, &old_data).await?;
 
 	// first delete the root-node
 	delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: old_data.rootNode }, DeleteNodeExtras { as_part_of_map_delete: true }).await?;

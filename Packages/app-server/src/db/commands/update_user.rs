@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
-use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_update, assert_user_can_update_simple, is_user_admin};
+use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_modify, is_user_admin};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::users::{User, get_user, UserUpdates};
 use crate::utils::db::accessors::AccessorContext;
@@ -47,8 +47,9 @@ pub async fn update_user(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool
 	let UpdateUserInput { id, updates } = input;
 	
 	let old_data = get_user(&ctx, &id).await?;
+	assert_user_can_modify(ctx, actor, &old_data).await?;
 
-	// permission-checks differ per field, so check each field individually
+	// in addition to general check above, do some additional checks on individual field-changes (some permission-checks apply only to certain fields)
 	if let Some(_new_display_name) = updates.displayName.clone() {
 		ensure!(id == actor.id.to_string() || is_user_admin(actor), "Only admins can change the display-name of another user!");
 	}

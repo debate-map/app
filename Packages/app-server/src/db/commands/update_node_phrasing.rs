@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
-use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_update, assert_user_can_update_simple};
+use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_modify};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_phrasings::{NodePhrasing, NodePhrasingInput, get_node_phrasing, NodePhrasingUpdates};
 use crate::db::users::User;
@@ -48,8 +48,7 @@ pub async fn update_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_r
 	let UpdateNodePhrasingInput { id, updates } = input;
 	
 	let old_data = get_node_phrasing(&ctx, &id).await?;
-	//assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
-	assert_user_can_update_simple(&actor, &old_data.creator)?;
+	assert_user_can_modify(&ctx, &actor, &old_data).await?;
 	let new_data = NodePhrasing {
 		r#type: update_field(updates.r#type, old_data.r#type),
 		text_base: update_field(updates.text_base, old_data.text_base),

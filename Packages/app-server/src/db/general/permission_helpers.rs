@@ -1,6 +1,8 @@
-use rust_shared::anyhow::{anyhow, bail};
+use std::collections::HashMap;
 
-use crate::{utils::db::accessors::AccessorContext, db::{users::User, access_policies::{AccessPolicy, get_access_policy}}};
+use rust_shared::{anyhow::{anyhow, bail}, utils::auth::jwt_utils_base::UserJWTData};
+
+use crate::{utils::db::{accessors::AccessorContext, rls::rls_policies::{check_access_for_user, check_access_for_media, check_access_for_node, check_access_for_node_rating, check_access_for_term, check_access_for_map, check_access_for_node_link, check_access_for_node_phrasing, check_access_for_node_revision, check_access_for_node_tag, check_access_for_map_node_edit, check_access_for_user_hidden, check_access_for_command_run, check_access_for_access_policy, check_access_for_global_data, check_access_for_feedback_proposal, check_access_for_feedback_user_info}}, db::{users::{User, get_user}, access_policies::{get_access_policy}, access_policies_::{_permission_set::{APTable, APAction}, _access_policy::AccessPolicy}, _shared::{access_policy_target::AccessPolicyTarget, table_permissions::UsesRLS}, nodes_::_node::Node}, links::db_live_cache::{get_admin_user_ids_cached, get_access_policy_cached}};
 use rust_shared::anyhow::Error;
 
 pub fn is_user_mod(user: &User) -> bool { user.permissionGroups.r#mod }
@@ -18,34 +20,27 @@ pub fn is_user_creator_or_mod(user: &User, target_creator: &str) -> bool {
     Err(anyhow!("This action requires moderator permissions."))
 }*/
 
-pub async fn assert_user_can_update(_ctx: &AccessorContext<'_>, user: &User, target_creator: &str, _access_policy_id: &str) -> Result<(), Error> {
-    //let policy = get_access_policy(ctx, access_policy_id).await?;
-    Ok(assert_user_can_update_simple(user, target_creator)?)
+pub async fn assert_user_can_modify(ctx: &AccessorContext<'_>, actor: &User, target: &impl UsesRLS) -> Result<(), Error> {
+    match target.can_modify(ctx, actor).await? {
+        true => Ok(()),
+        false => Err(anyhow!("You do not have permission to modify this entry.")),
+    }
 }
-pub fn assert_user_can_update_simple(user: &User, target_creator: &str) -> Result<(), Error> {
-    if user.id == target_creator && user.permissionGroups.basic { return Ok(()); }
-    if user.permissionGroups.r#mod { return Ok(()); }
-    bail!("You do not have permission to update this entry.")
+pub async fn assert_user_can_delete(ctx: &AccessorContext<'_>, actor: &User, target: &impl UsesRLS) -> Result<(), Error> {
+    match target.can_modify(ctx, actor).await? {
+        true => Ok(()),
+        false => Err(anyhow!("You do not have permission to delete this entry.")),
+    }
 }
-
-pub async fn assert_user_can_delete(_ctx: &AccessorContext<'_>, user: &User, target_creator: &str, _access_policy_id: &str) -> Result<(), Error> {
-    //let policy = get_access_policy(ctx, access_policy_id).await?;
-    Ok(assert_user_can_delete_simple(user, target_creator)?)
+pub async fn assert_user_can_vote(ctx: &AccessorContext<'_>, actor: &User, target: &Node) -> Result<(), Error> {
+    match target.can_vote(ctx, actor).await? {
+        true => Ok(()),
+        false => Err(anyhow!("You do not have permission to vote on this entry.")),
+    }
 }
-pub fn assert_user_can_delete_simple(user: &User, target_creator: &str) -> Result<(), Error> {
-    if user.id == target_creator && user.permissionGroups.basic { return Ok(()); }
-    if user.permissionGroups.r#mod { return Ok(()); }
-    bail!("You do not have permission to delete this entry.")
+pub async fn assert_user_can_add_phrasing(ctx: &AccessorContext<'_>, actor: &User, target: &Node) -> Result<(), Error> {
+    match target.can_add_phrasing(ctx, actor).await? {
+        true => Ok(()),
+        false => Err(anyhow!("You do not have permission to add a phrasing to this entry.")),
+    }
 }
-
-// todo: finish implementing these (and related functions) during completion of permission-system implementation
-/*pub fn assert_user_can_delete_sync(actor: &User, creator: &str, _access_policy: &AccessPolicy) -> Result<(), Error> {
-    if actor.id == creator && actor.permissionGroups.basic { return Ok(()); }
-    if actor.permissionGroups.r#mod { return Ok(()); }
-    Err(anyhow!("You do not have permission to delete this entry."))
-}
-pub fn assert_user_can_access(ctx: &AccessorContext<'_>, actor: &User, creator: &str, access_policy: &AccessPolicy) -> Result<(), Error> {
-    if actor.id == creator && actor.permissionGroups.basic { return Ok(()); }
-    if access_policy.permissions. { return Ok(()); }
-    Err(anyhow!("You do not have permission to access this entry."))
-}*/

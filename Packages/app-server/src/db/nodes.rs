@@ -15,7 +15,7 @@ use rust_shared::serde;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
-use super::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
+use super::general::permission_helpers::{is_user_creator_or_mod, assert_user_can_delete};
 use super::node_links::get_node_links;
 use super::nodes_::_node::{Node};
 use super::nodes_::_node_type::NodeType;
@@ -83,7 +83,7 @@ pub async fn is_root_node(ctx: &AccessorContext<'_>, node: &Node) -> Result<bool
 // sync:js[CheckUserCanDeleteNode]
 pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User, node: &Node, as_part_of_map_delete: bool, parents_to_ignore: Vec<String>, children_to_ignore: Vec<String>) -> Result<(), Error> {
 	// first check generic delete permissions
-	//assert_user_can_delete(&ctx, &actor, &node.creator, &node.accessPolicy).await?;
+	assert_user_can_delete(&ctx, &actor, node).await?;
 	
 	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
 	if !is_user_creator_or_mod(actor, &node.creator) {

@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
-use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_update, is_user_creator_or_mod, is_user_mod};
+use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_modify, is_user_creator_or_mod, is_user_mod};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::maps::{Map, MapInput, get_map, MapUpdates};
 use crate::db::users::User;
@@ -48,7 +48,7 @@ pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool,
 	let UpdateMapInput { id, updates } = input;
 	
 	let old_data = get_map(&ctx, &id).await?;
-	assert_user_can_update(&ctx, &actor, &old_data.creator, &old_data.accessPolicy).await?;
+	assert_user_can_modify(&ctx, &actor, &old_data).await?;
 
 	// when trying to modify certain fields, extra permissions are required
 	if !updates.featured.is_undefined() { ensure!(is_user_mod(actor), "Only mods can set whether a map is featured.") }
