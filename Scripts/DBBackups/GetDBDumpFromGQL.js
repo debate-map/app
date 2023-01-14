@@ -1,5 +1,5 @@
 const fs = require("fs");
-const fetch = require("node-fetch");
+//const fetch = require("node-fetch");
 const child_process = require("child_process");
 const paths = require("path");
 
@@ -14,6 +14,7 @@ function WaitForEnterKeyThenExit(code) {
 
 Start();
 async function Start() {
+	const fetch = (await import("node-fetch")).default;
 	try {
 		const extraArgsStr = process.argv[2];
 		const dev = extraArgsStr == "dev";
