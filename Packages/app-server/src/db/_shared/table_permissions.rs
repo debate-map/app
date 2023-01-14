@@ -8,98 +8,100 @@ use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edi
 
 /*impl CanModify for AccessPolicy {
     async fn can_modify(&self, _ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
-        Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator))
+        is_user_mod_or_creator(actor, &self.creator))
     }
 }
 impl CanDelete for AccessPolicy {
     async fn can_delete(&self, _ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
-        Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator))
+        is_user_mod_or_creator(actor, &self.creator))
     }
 }*/
-can_modify!(AccessPolicy, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
-can_delete!(AccessPolicy, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
+can_modify!(AccessPolicy, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+can_delete!(AccessPolicy, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
-can_modify!(Share, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
-can_delete!(Share, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
+can_modify!(Share, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+can_delete!(Share, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
-/*can_modify!(GlobalData, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
-can_delete!(GlobalData, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });*/
+/*can_modify!(GlobalData, self, actor, { is_user_mod_or_creator(actor, &self.creator });
+can_delete!(GlobalData, self, actor, { is_user_mod_or_creator(actor, &self.creator });*/
 
-can_modify!(User, self, actor, { Ok(can_access(actor, self) && (is_user_admin(actor) || actor.id == self.id)) });
-//can_delete!(User, self, actor, { Ok(false) }); // account deletion will be possible eventually, but too many complications for now
+can_modify!(User, self, actor, { is_user_admin(actor) || actor.id == self.id });
+//can_delete!(User, self, actor, { Ok(false }); // account deletion will be possible eventually, but too many complications for now
 
 // likely to be removed at some point
 // ----------
 
-can_modify!(Proposal, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
-can_delete!(Proposal, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
+can_modify!(Proposal, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+can_delete!(Proposal, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
-can_modify!(UserInfo, self, actor, { Ok(can_access(actor, self) && (is_user_admin(actor) || actor.id == self.id)) });
-can_delete!(UserInfo, self, actor, { Ok(can_access(actor, self) && (is_user_admin(actor) || actor.id == self.id)) });
+can_modify!(UserInfo, self, actor, { is_user_admin(actor) || actor.id == self.id });
+can_delete!(UserInfo, self, actor, { is_user_admin(actor) || actor.id == self.id });
 
 // simple RLS policies (where to access, it must be that: user is admin, user is creator, or entry's RLS policy allows access)
 // ==========
 
-can_modify!(Map, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::maps, APAction::modify).await?)) });
-can_delete!(Map, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::maps, APAction::delete).await?)) });
+can_modify!(Map, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::maps, APAction::modify).await? });
+can_delete!(Map, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::maps, APAction::delete).await? });
 
-can_modify!(Media, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::medias, APAction::modify).await?)) });
-can_delete!(Media, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::medias, APAction::delete).await?)) });
+can_modify!(Media, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::medias, APAction::modify).await? });
+can_delete!(Media, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::medias, APAction::delete).await? });
 
-can_modify!(Node, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::modify).await?)) });
-can_delete!(Node, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::delete).await?)) });
+can_modify!(Node, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::modify).await? });
+can_delete!(Node, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::delete).await? });
 impl CanVote for Node {
     async fn can_vote(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
-        Ok(can_access(actor, self) && (is_user_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::vote).await?))
+        if !can_access(actor, self) { return Ok(false); }
+        Ok(is_user_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::vote).await?)
     }
 }
 impl CanAddPhrasing for Node {
     async fn can_add_phrasing(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
-        Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::addPhrasing).await?))
+        if !can_access(actor, self) { return Ok(false); }
+        Ok(is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::addPhrasing).await?)
     }
 }
 
-can_modify!(Term, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::terms, APAction::modify).await?)) });
-can_delete!(Term, self, ctx, actor, { Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::terms, APAction::delete).await?)) });
+can_modify!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::terms, APAction::modify).await? });
+can_delete!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::terms, APAction::delete).await? });
 
 // derivative RLS policies (where to access, it must be that: user is admin, user is creator, or all of the associated RLS policies must pass)
 // ==========
 
 can_modify!(NodeLink, self, ctx, actor, {
     let child = get_node(ctx, &self.child).await?;
-    Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || child.can_modify(ctx, actor).await?))
+    is_user_mod_or_creator(actor, &self.creator) || child.can_modify(ctx, actor).await?
 });
 can_delete!(NodeLink, self, ctx, actor, {
     let child = get_node(ctx, &self.child).await?;
-    Ok(can_access(actor, self) && (is_user_mod_or_creator(actor, &self.creator) || child.can_delete(ctx, actor).await?))
+    is_user_mod_or_creator(actor, &self.creator) || child.can_delete(ctx, actor).await?
 });
 
-can_modify!(NodePhrasing, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
-can_delete!(NodePhrasing, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
+can_modify!(NodePhrasing, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+can_delete!(NodePhrasing, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
 // only the creator of a rating can edit/delete it
-can_modify!(NodeRating, self, actor, { Ok(can_access(actor, self) && is_user_creator(actor, &self.creator)) });
-can_delete!(NodeRating, self, actor, { Ok(can_access(actor, self) && is_user_creator(actor, &self.creator)) });
+can_modify!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
+can_delete!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
 
 // only the creator of a revision can edit it (though mods can delete)
-can_modify!(NodeRevision, self, actor, { Ok(can_access(actor, self) && is_user_creator(actor, &self.creator)) });
-can_delete!(NodeRevision, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
+can_modify!(NodeRevision, self, actor, { is_user_creator(actor, &self.creator) });
+can_delete!(NodeRevision, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
-can_modify!(NodeTag, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
-can_delete!(NodeTag, self, actor, { Ok(can_access(actor, self) && is_user_mod_or_creator(actor, &self.creator)) });
+can_modify!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+can_delete!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
 // unique RLS policies
 // ==========
 
-/*can_modify!(MapNodeEdit, self, actor, { Ok(false) });
-can_delete!(MapNodeEdit, self, actor, { Ok(false) });*/
+/*can_modify!(MapNodeEdit, self, actor, { Ok(false });
+can_delete!(MapNodeEdit, self, actor, { Ok(false });*/
 
 // only the given user can edit their own hidden-data
-can_modify!(UserHidden, self, actor, { Ok(can_access(actor, self) && actor.id == self.id) });
-//can_delete!(UserHidden, self, actor, { Ok(false) }); // account deletion will be possible eventually, but too many complications for now
+can_modify!(UserHidden, self, actor, { actor.id == self.id });
+//can_delete!(UserHidden, self, actor, { Ok(false }); // account deletion will be possible eventually, but too many complications for now
 
-/*can_modify!(CommandRun, self, actor, { Ok(false) });
-can_delete!(CommandRun, self, actor, { Ok(false) });*/
+/*can_modify!(CommandRun, self, actor, { Ok(false });
+can_delete!(CommandRun, self, actor, { Ok(false });*/
 
 // local helper macros
 // ==========
@@ -119,33 +121,31 @@ pub trait CanAddPhrasing {
 }
 
 macro_rules! can_modify {
-    ($type:ident, $sel:ident, $actor:ident, $body:block) => {
-        can_modify!($type, $sel, _ctx, $actor, $body);
-    };
+    ($type:ident, $sel:ident, $actor:ident, $body:block) => { can_modify!($type, $sel, _ctx, $actor, $body); };
     ($type:ident, $sel:ident, $ctx:ident, $actor:ident, $body:block) => {
         impl CanModify for $type {
             async fn can_modify(&$sel, $ctx: &AccessorContext<'_>, $actor: &User) -> Result<bool, Error> {
-                $body
+                if !can_access($actor, $sel) { return Ok(false); }
+                Ok($body)
             }
         }
     };
 }
 use can_modify;
 macro_rules! can_delete {
-    ($type:ident, $sel:ident, $actor:ident, $body:block) => {
-        can_delete!($type, $sel, _ctx, $actor, $body);
-    };
+    ($type:ident, $sel:ident, $actor:ident, $body:block) => { can_delete!($type, $sel, _ctx, $actor, $body); };
     ($type:ident, $sel:ident, $ctx:ident, $actor:ident, $body:block) => {
         impl CanDelete for $type {
             async fn can_delete(&$sel, $ctx: &AccessorContext<'_>, $actor: &User) -> Result<bool, Error> {
-                $body
+                if !can_access($actor, $sel) { return Ok(false); }
+                Ok($body)
             }
         }
     }
 }
 use can_delete;
 
-// local helpers (to match format of rls_policies.rs as much as possible)
+// local helpers functions (to match format of rls_policies.rs as much as possible)
 // ==========
 
 fn can_access(actor: &User, target: &impl UsesRLS) -> bool {
