@@ -1,7 +1,9 @@
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, type_aliases::JSONValue}, async_graphql, itertools::Itertools, serde_json};
 use serde::Serialize;
 
-use crate::db::{general::sign_in_::jwt_utils::get_user_jwt_data_from_gql_ctx, terms::Term, _shared::table_permissions::UsesRLS};
+use crate::db::{general::sign_in_::jwt_utils::get_user_jwt_data_from_gql_ctx, terms::Term};
+
+use super::rls_policies::UsesRLS;
 
 pub struct RLSApplier {
     pub jwt_data: Option<UserJWTData>,

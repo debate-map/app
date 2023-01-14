@@ -16,7 +16,6 @@ use serde::Serialize;
 use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_populated;
-use crate::db::_shared::table_permissions::UsesRLS;
 use crate::db::access_policies_::_permission_set::{APTable, APAction};
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;

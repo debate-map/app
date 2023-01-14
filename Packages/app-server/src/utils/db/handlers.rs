@@ -13,8 +13,8 @@ use rust_shared::uuid::Uuid;
 use metrics::{counter, histogram, increment_counter};
 use tracing::error;
 
-use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, live_queries_::lq_key::LQKey, storage::{AppStateArc, get_app_state_from_gql_ctx}}, utils::{type_aliases::{PGClientObject}, db::rls::rls_applier::{RLSApplier}}, db::{general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx, _shared::table_permissions::UsesRLS}};
-use super::{filter::{QueryFilter, FilterInput}, rls::{rls_applier::{self}}};
+use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, live_queries_::lq_key::LQKey, storage::{AppStateArc, get_app_state_from_gql_ctx}}, utils::{type_aliases::{PGClientObject}, db::rls::rls_applier::{RLSApplier}}, db::{general::sign_in_::jwt_utils::try_get_user_jwt_data_from_gql_ctx}};
+use super::{filter::{QueryFilter, FilterInput}, rls::{rls_applier::{self}, rls_policies::UsesRLS}};
 
 /*pub struct GQLSet<T> { pub nodes: Vec<T> }
 #[Object] impl<T: OutputType> GQLSet<T> { async fn nodes(&self) -> &Vec<T> { &self.nodes } }*/

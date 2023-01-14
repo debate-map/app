@@ -7,71 +7,108 @@ use super::rls_helpers::{is_user_creator, does_policy_allow_access, do_policies_
 
 // sync:sql[RLSPolicies.sql]
 
+pub trait UsesRLS {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool;
+}
+
 // empty policies (ie. can always be viewed by anyone) [these functions are not needed in sql version]
 // ==========
 
-pub fn check_access_for_access_policy() -> bool { true }
-pub fn check_access_for_share() -> bool { true }
-pub fn check_access_for_global_data() -> bool { true }
-pub fn check_access_for_user() -> bool { true }
+impl UsesRLS for AccessPolicy {
+    fn can_access_cached(&self, _user_id: Option<&str>) -> bool { true }
+}
+impl UsesRLS for Share {
+    fn can_access_cached(&self, _user_id: Option<&str>) -> bool { true }
+}
+impl UsesRLS for GlobalData {
+    fn can_access_cached(&self, _user_id: Option<&str>) -> bool { true }
+}
+impl UsesRLS for User {
+    fn can_access_cached(&self, _user_id: Option<&str>) -> bool { true }
+}
 
 // likely to be removed at some point
-// ----------
+impl UsesRLS for Proposal {
+    fn can_access_cached(&self, _user_id: Option<&str>) -> bool { true }
+}
+impl UsesRLS for crate::db::feedback_user_infos::UserInfo {
+    fn can_access_cached(&self, _user_id: Option<&str>) -> bool { true }
+}
 
-pub fn check_access_for_feedback_proposal() -> bool { true }
-pub fn check_access_for_feedback_user_info() -> bool { true }
-
-// simple RLS policies (where to access, it must be that: user is admin, user is creator, or entry's RLS policy allows access)
+// simple RLS policies (where to access, it must be that: user is creator, user is admin, entry's policy allows general access [without user-specific block], or entry's policy has user-specific grant)
 // ==========
 
-pub fn check_access_for_map(user_id: Option<&str>, creator: &str, access_policy: &str) -> bool {
-    is_user_admin_or_creator(user_id, creator) || does_policy_allow_access(user_id, access_policy, APTable::maps)
+impl UsesRLS for Term {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || does_policy_allow_access(user_id, &self.accessPolicy, APTable::terms)
+    }
 }
-pub fn check_access_for_media(user_id: Option<&str>, creator: &str, access_policy: &str) -> bool {
-    is_user_admin_or_creator(user_id, creator) || does_policy_allow_access(user_id, access_policy, APTable::medias)
+impl UsesRLS for Media {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || does_policy_allow_access(user_id, &self.accessPolicy, APTable::medias)
+    }
 }
-pub fn check_access_for_node(user_id: Option<&str>, creator: &str, access_policy: &str) -> bool {
-    is_user_admin_or_creator(user_id, creator) || does_policy_allow_access(user_id, access_policy, APTable::nodes)
+impl UsesRLS for Map {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || does_policy_allow_access(user_id, &self.accessPolicy, APTable::maps)
+    }
 }
-pub fn check_access_for_term(user_id: Option<&str>, creator: &str, access_policy: &str) -> bool {
-    is_user_admin_or_creator(user_id, creator) || does_policy_allow_access(user_id, access_policy, APTable::terms)
+impl UsesRLS for Node {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || does_policy_allow_access(user_id, &self.accessPolicy, APTable::nodes)
+    }
 }
 
-// derivative RLS policies (where to access, it must be that: user is admin, user is creator, or all of the associated RLS policies must pass)
+// derivative RLS policies (where to access an entry, the RLS policies of its associated objects must all pass)
 // ==========
 
-pub fn check_access_for_node_link(user_id: Option<&str>, creator: &str, accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
+impl UsesRLS for NodeLink {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
 }
-pub fn check_access_for_node_phrasing(user_id: Option<&str>, creator: &str, accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
+impl UsesRLS for NodePhrasing {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
 }
-pub fn check_access_for_node_rating(user_id: Option<&str>, creator: &str, accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
+impl UsesRLS for NodeRating {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || is_user_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
 }
-pub fn check_access_for_node_revision(user_id: Option<&str>, creator: &str, accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
+impl UsesRLS for NodeRevision {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        //info!("Test1 @is_user_admin:{} @do_policies_allow_access:{}", is_user_admin(user_id), do_policies_allow_access(user_id, &self.c_accessPolicyTargets));
+        is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
 }
-pub fn check_access_for_node_tag(user_id: Option<&str>, creator: &str, accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
+impl UsesRLS for NodeTag {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
 }
 
 // unique RLS policies
 // ==========
 
-pub fn check_access_for_map_node_edit(user_id: Option<&str>, /*creator: &str,*/ accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    //is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
-    is_user_admin(user_id) || do_policies_allow_access(user_id, accessPolicyTargets)
+impl UsesRLS for MapNodeEdit {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        //is_user_admin_or_creator(user_id, creator) || do_policies_allow_access(user_id, accessPolicyTargets)
+        is_user_admin(user_id) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
 }
-
-pub fn check_access_for_user_hidden(user_id: Option<&str>, user_hidden_id: &str) -> bool {
-    is_user_admin(user_id) || user_id == Some(user_hidden_id)
+impl UsesRLS for UserHidden {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin(user_id) || user_id == Some(self.id.as_str())
+    }
 }
-
-pub fn check_access_for_command_run(user_id: Option<&str>, public_base: bool, accessPolicyTargets: &Vec<AccessPolicyTarget>) -> bool {
-    is_user_admin(user_id) || (
-        // public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
-        public_base
-        && do_policies_allow_access(user_id, accessPolicyTargets)
-    )
+impl UsesRLS for CommandRun {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin(user_id) || (
+            // public_base = true, iff the Command class has "canShowInStream" enabled, and the user has "addToStream" enabled (see CommandMacros/General.ts)
+            self.public_base
+            && do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+        )
+    }
 }
