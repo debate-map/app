@@ -6,7 +6,6 @@ use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edi
 use super::rls_helpers::{is_user_creator, does_policy_allow_access, do_policies_allow_access, is_user_admin, is_user_admin_or_creator};
 
 // sync:sql[RLSPolicies.sql]
-
 pub trait UsesRLS {
     fn can_access_cached(&self, user_id: Option<&str>) -> bool;
 }

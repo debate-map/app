@@ -1,7 +1,9 @@
 import {Assert, CE, emptyArray_forLoading, GetValues, IsString} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, BailError, CreateAccessor, GetDoc, MapWithBailHandling, SlicePath, SplitStringBySlash_Cached, UUID, Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {NodeL3} from "../DB.js";
+import {GetAccessPolicy, NodeL3} from "../DB.js";
 import {globalRootNodeID} from "../DB_Constants.js";
+import {DoesPolicyAllowX} from "./@Shared/TablePermissions.js";
+import {APAction, APTable} from "./accessPolicies/@PermissionSet.js";
 import {GetNodeLinks} from "./nodeLinks.js";
 import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
@@ -9,8 +11,8 @@ import {NodeL1, NodeL2, Polarity} from "./nodes/@Node.js";
 import {ChildGroup, NodeType, NodeType_Info} from "./nodes/@NodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@NodeTag.js";
-import {CanGetBasicPermissions, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
-import {PermissionGroupSet} from "./users/@User.js";
+import {CanGetBasicPermissions, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
+import {PermissionGroupSet, User} from "./users/@User.js";
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);
@@ -270,11 +272,19 @@ export const CheckLinkIsValid = CreateAccessor((parentType: NodeType, childGroup
  * * Blocks if node is being linked as child of itself.
  * * Blocks if adding child to global-root, without user being an admin.
  * */
-// sync: rs[assert_link_is_valid]
-export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<NodeL1, "id" | "type">, permissions: PermissionGroupSet)=>{
+// sync: rs[assert_new_link_is_valid]
+export const CheckNewLinkIsValid = CreateAccessor((parentID: string, newChildGroup: ChildGroup, newChild: Pick<NodeL1, "id" | "type">, actor: User|n)=>{
+	const permissions = GetUserPermissionGroups(actor?.id);
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
+
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
+	//if (!) { return "Parent node's permission policy does not grant you the ability to add children."; }
+	const guessedCanAddChild = actor
+		? NodeL1.canAddChild(parent, actor) // if can add child
+		: DoesPolicyAllowX(null, parent.accessPolicy, APTable.nodes, APAction.addChild); // or probably can
+	if (!guessedCanAddChild) { return "Parent node's permission policy does not grant you the ability to add children."; }
+
 	// const parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a => a.ToInt());
 	// if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
 	if (parent.id == globalRootNodeID && !HasAdminPermissions(permissions)) return "Only admins can add children to the global-root.";

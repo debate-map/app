@@ -44,7 +44,7 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 		}.OmitNull()), [childGroup, contributeInfo_polarity?.hostNodeID, contributeInfo_polarity?.reversePolarities, copiedNode.id, copiedNode.type, copiedNodePath, copiedNode_asCut, formForClaimChildren, map?.id, newPolarity, node.id]);
 		const error = linkCommand.Validate_Safe();*/
 		const newParentID = contributeInfo_polarity?.hostNodeID ?? node.id;
-		const error = CheckNewLinkIsValid(newParentID, childGroup, copiedNode, Me()?.permissionGroups ?? new PermissionGroupSet());
+		const error = CheckNewLinkIsValid(newParentID, childGroup, copiedNode, Me());
 
 		return (
 			<VMenuItem text={`Paste (${copiedNode_asCut ? "move" : "link"}) as ${childGroup == "freeform" ? "freeform" : "structured"} child${{truth: " (re. truth)", relevance: " (re. relevance)"}[childGroup] ?? ""}`}

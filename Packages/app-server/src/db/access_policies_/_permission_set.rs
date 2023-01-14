@@ -52,10 +52,10 @@ pub struct PermissionSetForType {
     // for nodes only
     // ==========
 
-    pub vote: PermitCriteria,
-    pub addPhrasing: PermitCriteria,
-    // commented; users can always add "children" (however, governed maps can set a lens entry that hides unapproved children by default)
-    //pub addChild: PermitCriteria,
+    // todo: probably replace with more fluid system (eg. where users can always "add children", but where governed maps can easily set a lens entry that hides unapproved children by default)
+    pub addChild: Option<PermitCriteria>,
+    pub addPhrasing: Option<PermitCriteria>,
+    pub vote: Option<PermitCriteria>,
 }
 impl PermissionSetForType {
     pub fn as_bool(&self, action: APAction) -> bool {
@@ -63,9 +63,9 @@ impl PermissionSetForType {
             APAction::access => self.access,
             APAction::modify => self.modify.minApprovals != -1,
             APAction::delete => self.delete.minApprovals != -1,
-            APAction::vote => self.vote.minApprovals != -1,
-            APAction::addPhrasing => self.addPhrasing.minApprovals != -1,
-            //APAction::AddChild => self.addChild.minApprovals != -1,
+            APAction::addChild => self.addChild.as_ref().map(|a| a.minApprovals).unwrap_or(-1) != -1,
+            APAction::addPhrasing => self.addPhrasing.as_ref().map(|a| a.minApprovals).unwrap_or(-1) != -1,
+            APAction::vote => self.vote.as_ref().map(|a| a.minApprovals).unwrap_or(-1) != -1,
         }
     }
     /*pub fn as_criteria(&self, action: APAction) -> Result<PermitCriteria, Error> {
@@ -128,9 +128,9 @@ pub enum APAction {
     access,
     modify,
     delete,
-    vote,
+    addChild,
     addPhrasing,
-    //AddChild,
+    vote,
 }
 
 }

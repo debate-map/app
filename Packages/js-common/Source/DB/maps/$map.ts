@@ -1,8 +1,9 @@
 import {emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {globalMapID} from "../../DB_Constants.js";
+import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
 import {GetAccessPolicy} from "../accessPolicies.js";
-import {PermissionSet} from "../accessPolicies/@AccessPolicy.js";
+import {APAction, APTable, PermissionSet} from "../accessPolicies/@PermissionSet.js";
 import {GetMap} from "../maps.js";
 import {GetUser, MeID} from "../users.js";
 import {IsUserCreatorOrAdmin} from "../users/$user.js";
@@ -46,8 +47,5 @@ export const DoesMapPolicyGiveMeAccess_ExtraCheck = CreateAccessor((mapID: strin
 	if (accessPolicy == null) return false;
 
 	if (IsUserCreatorOrAdmin(MeID(), map)) return true;
-	const accessPolicy_userExtend = accessPolicy.permissions_userExtends[MeID()!] as PermissionSet|null;
-	if (accessPolicy.permissions.maps.access && accessPolicy_userExtend?.maps.access != false) return true;
-	if (accessPolicy_userExtend?.maps.access) return true;
-	return false;
+	return DoesPolicyAllowX(MeID(), map.accessPolicy, APTable.maps, APAction.access);
 });

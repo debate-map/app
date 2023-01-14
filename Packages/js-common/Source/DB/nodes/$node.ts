@@ -9,7 +9,7 @@ import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode, GetNodeChildrenL2, GetNo
 import {ClaimForm, NodeL1, NodeL2, NodeL3, Polarity} from "./@Node.js";
 import {NodeRevision} from "./@NodeRevision.js";
 import {ChildGroup, NodeType} from "./@NodeType.js";
-import {PermissionGroupSet} from "../users/@User.js";
+import {PermissionGroupSet, User} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@NodeTag.js";
 import {SourceType, Source} from "../@Shared/Attachments/@SourceChain.js";
@@ -409,9 +409,9 @@ export function GetValidChildTypes(nodeType: NodeType, path: string, group: Chil
 	const validChildTypes = nodeTypes.filter(type=>CheckLinkIsValid(nodeType, group, type) == null);
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, actor: User|n) {
 	const nodeTypes = GetValues(NodeType);
-	const validChildTypes = nodeTypes.filter(type=>CheckNewLinkIsValid(parent.id, childGroup, {type} as any, permissions) == null);
+	const validChildTypes = nodeTypes.filter(type=>CheckNewLinkIsValid(parent.id, childGroup, {type} as any, actor) == null);
 
 	// if in relevance or truth group, claims cannot be direct children (must be within argument)
 	/*if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {

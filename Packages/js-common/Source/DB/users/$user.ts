@@ -46,13 +46,17 @@ export const HasAdminPermissions = CreateAccessor((userIDOrPermissions: string |
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.admin : false;
 });
-/** If user is the creator, also requires that they (still) have basic permissions. */
-export const IsUserCreatorOrMod = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
-	return (entity?.creator === userID && HasBasicPermissions(userID)) || HasModPermissions(userID);
+// /** If user is the creator, also requires that they (still) have basic permissions. */
+export const IsUserCreator = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
+	return (entity?.creator === userID /*&& HasBasicPermissions(userID)*/);
 });
-/** If user is the creator, also requires that they (still) have basic permissions. */
+// /** If user is the creator, also requires that they (still) have basic permissions. */
+export const IsUserCreatorOrMod = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
+	return (entity?.creator === userID /*&& HasBasicPermissions(userID)*/) || HasModPermissions(userID);
+});
+// /** If user is the creator, also requires that they (still) have basic permissions. */
 export const IsUserCreatorOrAdmin = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
-	return (entity?.creator === userID && HasBasicPermissions(userID)) || HasAdminPermissions(userID);
+	return (entity?.creator === userID /*&& HasBasicPermissions(userID)*/) || HasAdminPermissions(userID);
 });
 
 /*export const CanSubmitRevisions = CreateAccessor((userID: string, nodeID: string): boolean=>{

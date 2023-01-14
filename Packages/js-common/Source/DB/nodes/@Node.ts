@@ -1,8 +1,13 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON_Cloned, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
 import {PickOnly} from "../../Utils/General/General.js";
+import {DoesPolicyAllowX} from "../@Shared/TablePermissions.js";
+import {GetAccessPolicy} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
+import {APAction, APTable} from "../accessPolicies/@PermissionSet.js";
 import {NodeLink} from "../nodeLinks/@NodeLink.js";
+import {IsUserCreator, IsUserCreatorOrMod} from "../users/$user.js";
+import {User} from "../users/@User.js";
 import {ArgumentType, NodeRevision} from "./@NodeRevision.js";
 import {NodeType} from "./@NodeType.js";
 
@@ -86,6 +91,11 @@ export class NodeL1 {
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "Node_Extras"})
 	extras = new Node_Extras();
+
+	static canAddChild(self: NodeL1, actor: User) {
+		//if (!can_access(actor, self)) { return false; }
+		return IsUserCreatorOrMod(actor.id, self) || DoesPolicyAllowX(actor.id, self.accessPolicy, APTable.nodes, APAction.addChild);
+	}
 }
 AddSchema("Node_Partial", ["NodeL1"], ()=>{
 	const schema = GetSchemaJSON_Cloned("NodeL1");

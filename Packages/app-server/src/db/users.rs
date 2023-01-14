@@ -24,6 +24,11 @@ pub struct PermissionGroups {
     pub admin: bool,
 }
 scalar!(PermissionGroups);
+impl PermissionGroups {
+    pub fn all_false() -> Self {
+        Self { basic: false, verified: false, r#mod: false, admin: false }
+    }
+}
 
 pub async fn get_user(ctx: &AccessorContext<'_>, id: &str) -> Result<User, Error> {
     get_db_entry(ctx, "users", &Some(json!({

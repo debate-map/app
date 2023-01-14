@@ -1,71 +1,7 @@
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field, UUID_regex, DeriveJSONSchema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
 import {MarkerForNonScalarField} from "../../Utils/General/General.js";
-
-@MGLClass()
-export class PermitCriteria {
-	constructor(data?: Partial<PermitCriteria>) {
-		Object.assign(this, data);
-	}
-
-	@Field({type: "number"})
-	minApprovals = -1; // 0 = anyone, -1 = no-one
-
-	@Field({type: "number"})
-	minApprovalPercent = -1; // 0 = anyone, -1 = no-one
-}
-
-@MGLClass()
-export class PermissionSetForType {
-	constructor(data?: Partial<PermissionSetForType>) {
-		Object.assign(this, data);
-	}
-
-	@Field({type: "boolean"})
-	access = false; // true = anyone, false = no-one
-
-	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
-	modify = new PermitCriteria();
-
-	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
-	delete = new PermitCriteria();
-
-	// for nodes only
-	// ==========
-
-	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
-	vote = new PermitCriteria();
-
-	@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()})
-	addPhrasing = new PermitCriteria();
-
-	// commented; users can always add "children" (however, governed maps can set a lens entry that hides unapproved children by default)
-	/*@Field({$ref: "PermitCriteria", ...MarkerForNonScalarField()}, {opt: true})
-	addChild = new PermitCriteria();*/
-}
-
-@MGLClass()
-export class PermissionSet {
-	constructor(data?: Partial<PermissionSet>) {
-		Object.assign(this, data);
-	}
-
-	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
-	terms = new PermissionSetForType();
-
-	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
-	medias = new PermissionSetForType();
-
-	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
-	maps = new PermissionSetForType();
-
-	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
-	nodes = new PermissionSetForType();
-
-	// most node-related rows use their node's access-policy as their own; node-ratings is an exception, because individual entries can be kept hidden without disrupting collaboration significantly
-	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
-	nodeRatings = new PermissionSetForType();
-}
+import {APTable, PermissionSet, PermissionSetForType, PermitCriteria} from "./@PermissionSet.js";
 
 /** See "Docs/AccessPolicies.md" for more info. */
 @MGLClass({table: "accessPolicies"})
@@ -124,4 +60,12 @@ export class AccessPolicy {
 		patternProperties: {[UUID_regex]: {$ref: "PermissionSet_Resolved"}},
 	}, {opt: true})
 	c_permissions_userExtends_final: {[key: string]: PermissionSet_Resolved};*/
+
+	static PermissionExtendsForUserAndTable(self: AccessPolicy, userID: string|n, table: APTable) {
+		if (userID == null) return null;
+		const permission_set_for_user = self.permissions_userExtends[userID];
+		if (permission_set_for_user == null) return null;
+		const permission_set_for_type = permission_set_for_user[table];
+		return permission_set_for_type;
+	}
 }

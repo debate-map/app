@@ -1,4 +1,4 @@
-import {AccessPolicy, AddAccessPolicy, GetAccessPolicy, GetUser, PermissionSet, PermissionSetForType, PermitCriteria, UpdateAccessPolicy} from "dm_common";
+import {AccessPolicy, AddAccessPolicy, GetAccessPolicy, GetUser, PermissionSet, PermissionSetForType, PermitCriteria} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
@@ -47,8 +47,8 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 						
 						Note that there are a few additional permission-grants:
 						* The creator of an entry can always access an entry (and currently, modify it).
-						* Admins can always access and modify any entry.
-						* Moderators can modify any entry *that they have access to*. (ie. if something is made accessible/visible to the general public, then mods can modify it)
+						* Admins can access any entry, and can modify (almost) any entry.
+						* Moderators can modify (almost) any entry *that they have access to*. (ie. if something is made accessible/visible to the general public, then mods can modify it)
 					`.AsMultiline(0)}/>
 				</Row>
 				<PermissionSetEditor enabled={enabled} value={newData.permissions} onChange={val=>Change(newData.permissions = val)}/>
@@ -146,7 +146,7 @@ class PermissionSetForTypeEditor extends BaseComponent<{enabled: boolean, collec
 				val == false ? {minApprovals: -1, minApprovalPercent: -1} :
 				undefined;
 		}*/
-		const PermitCriteriaToCheckBoxVal = (criteria: PermitCriteria)=>criteria.minApprovals == 0;
+		const PermitCriteriaToCheckBoxVal = (criteria: PermitCriteria|n)=>criteria?.minApprovals == 0;
 		const CheckBoxValToPermitCriteria = (val: boolean)=>new PermitCriteria({minApprovals: val ? 0 : -1, minApprovalPercent: val ? 0 : -1});
 
 		// todo: make this UI support the full set of PermitCriteria values (once there is reputation data for it to actually be compared against)
@@ -158,9 +158,11 @@ class PermissionSetForTypeEditor extends BaseComponent<{enabled: boolean, collec
 				{collection != "nodeRatings" &&
 				<CheckBox ml={10} enabled={enabled} text="delete" value={PermitCriteriaToCheckBoxVal(value.delete)} onChange={val=>Change(a=>a.delete = CheckBoxValToPermitCriteria(val))}/>}
 				{collection == "nodes" &&
-				<CheckBox ml={10} enabled={enabled} text="vote" value={PermitCriteriaToCheckBoxVal(value.vote)} onChange={val=>Change(a=>a.vote = CheckBoxValToPermitCriteria(val))}/>}
+				<CheckBox ml={10} enabled={enabled} text="addChild" value={PermitCriteriaToCheckBoxVal(value.addChild)} onChange={val=>Change(a=>a.addChild = CheckBoxValToPermitCriteria(val))}/>}
 				{collection == "nodes" &&
 				<CheckBox ml={10} enabled={enabled} text="addPhrasing" value={PermitCriteriaToCheckBoxVal(value.addPhrasing)} onChange={val=>Change(a=>a.addPhrasing = CheckBoxValToPermitCriteria(val))}/>}
+				{collection == "nodes" &&
+				<CheckBox ml={10} enabled={enabled} text="vote" value={PermitCriteriaToCheckBoxVal(value.vote)} onChange={val=>Change(a=>a.vote = CheckBoxValToPermitCriteria(val))}/>}
 			</Row>
 		);
 	}

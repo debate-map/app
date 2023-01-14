@@ -40,29 +40,35 @@ can_delete!(UserInfo, self, actor, { is_user_admin(actor) || actor.id == self.id
 // simple RLS policies (where to access, it must be that: user is admin, user is creator, or entry's RLS policy allows access)
 // ==========
 
-can_modify!(Map, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::maps, APAction::modify).await? });
-can_delete!(Map, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::maps, APAction::delete).await? });
+can_modify!(Map, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::maps, APAction::modify).await? });
+can_delete!(Map, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::maps, APAction::delete).await? });
 
-can_modify!(Media, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::medias, APAction::modify).await? });
-can_delete!(Media, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::medias, APAction::delete).await? });
+can_modify!(Media, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::medias, APAction::modify).await? });
+can_delete!(Media, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::medias, APAction::delete).await? });
 
-can_modify!(Node, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::modify).await? });
-can_delete!(Node, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::delete).await? });
-impl CanVote for Node {
-    async fn can_vote(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
+can_modify!(Node, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::nodes, APAction::modify).await? });
+can_delete!(Node, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::nodes, APAction::delete).await? });
+impl CanAddChild for Node {
+    async fn can_add_child(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
         if !can_access(actor, self) { return Ok(false); }
-        Ok(is_user_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::vote).await?)
+        Ok(is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::nodes, APAction::addChild).await?)
     }
 }
 impl CanAddPhrasing for Node {
     async fn can_add_phrasing(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
         if !can_access(actor, self) { return Ok(false); }
-        Ok(is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::nodes, APAction::addPhrasing).await?)
+        Ok(is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::nodes, APAction::addPhrasing).await?)
+    }
+}
+impl CanVote for Node {
+    async fn can_vote(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error> {
+        if !can_access(actor, self) { return Ok(false); }
+        Ok(is_user_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::nodes, APAction::vote).await?)
     }
 }
 
-can_modify!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::terms, APAction::modify).await? });
-can_delete!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor, &self.accessPolicy, APTable::terms, APAction::delete).await? });
+can_modify!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::terms, APAction::modify).await? });
+can_delete!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::terms, APAction::delete).await? });
 
 // derivative RLS policies (where to access, it must be that: user is admin, user is creator, or all of the associated RLS policies must pass)
 // ==========
@@ -84,8 +90,8 @@ can_modify!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
 can_delete!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
 
 // only the creator of a revision can edit it (though mods can delete)
-can_modify!(NodeRevision, self, actor, { is_user_creator(actor, &self.creator) });
-can_delete!(NodeRevision, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+//can_modify!(NodeRevision, self, actor, { is_user_creator(actor, &self.creator) });
+//can_delete!(NodeRevision, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
 can_modify!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 can_delete!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
@@ -115,6 +121,9 @@ pub trait CanDelete {
 }
 pub trait CanVote {
     async fn can_vote(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error>;
+}
+pub trait CanAddChild {
+    async fn can_add_child(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error>;
 }
 pub trait CanAddPhrasing {
     async fn can_add_phrasing(&self, ctx: &AccessorContext<'_>, actor: &User) -> Result<bool, Error>;
@@ -151,6 +160,9 @@ use can_delete;
 fn can_access(actor: &User, target: &impl UsesRLS) -> bool {
     target.can_access_cached(Some(actor.id.as_str()))
 }
+fn actor_id(actor: &User) -> Option<&str> {
+    Some(actor.id.as_str())
+}
 
 fn is_user_creator(actor: &User, target_creator: &str) -> bool {
     actor.id == target_creator
@@ -166,7 +178,8 @@ fn is_user_admin_or_creator(actor: &User, target_creator: &str) -> bool {
     return false;
 }
 
-async fn do_policies_allow_x(ctx: &AccessorContext<'_>, actor: &User, policy_targets: &Vec<AccessPolicyTarget>, action: APAction) -> Result<bool, Error> {
+// sync:js
+pub async fn do_policies_allow_x(ctx: &AccessorContext<'_>, actor_id: Option<&str>, policy_targets: &Vec<AccessPolicyTarget>, action: APAction) -> Result<bool, Error> {
     // The `c_accessPolicyTargets` fields should always have at least one entry in them; if not, something is wrong, so play it safe and reject access.
 	// (Most tables enforce non-emptiness of this field with a row constraint, but nodeTags is an exception; its associated nodes may be deleted, leaving it without any targets.)
 	// (This line thus serves to prevent "orphaned node-tags" from being visible by non-admins, as well as a general-purpose "second instance" of the non-emptiness check.)
@@ -175,21 +188,22 @@ async fn do_policies_allow_x(ctx: &AccessorContext<'_>, actor: &User, policy_tar
     }
     
     for target in policy_targets {
-        if !does_policy_allow_x(ctx, actor, &target.policy_id, target.ap_table, action).await? {
+        if !does_policy_allow_x(ctx, actor_id, &target.policy_id, target.ap_table, action).await? {
             return Ok(false);
         }
     }
 
     Ok(true)
 }
-async fn does_policy_allow_x(ctx: &AccessorContext<'_>, actor: &User, policy_id: &str, table: APTable, action: APAction) -> Result<bool, Error> {
+// sync:js
+pub async fn does_policy_allow_x(ctx: &AccessorContext<'_>, actor_id: Option<&str>, policy_id: &str, table: APTable, action: APAction) -> Result<bool, Error> {
     let policy = get_access_policy(ctx, policy_id).await?;
     if policy.permissions.for_table(table).as_bool(action)
-        && policy.permission_extends_for_user_and_table(Some(actor.id.as_str()), table).map(|a| a.as_bool(action).clone()) != Some(false) {
+        && policy.permission_extends_for_user_and_table(actor_id, table).map(|a| a.as_bool(action).clone()) != Some(false) {
         return Ok(true);
     }
 
-    if policy.permission_extends_for_user_and_table(Some(actor.id.as_str()), table).map(|a| a.as_bool(action)) == Some(true) {
+    if policy.permission_extends_for_user_and_table(actor_id, table).map(|a| a.as_bool(action)) == Some(true) {
         return Ok(true);
     }
 

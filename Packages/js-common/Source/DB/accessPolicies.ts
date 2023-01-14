@@ -1,7 +1,7 @@
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {systemUserID} from "../DB_Constants.js";
-import {PermissionSet, PermissionSetForType, PermitCriteria} from "./accessPolicies/@AccessPolicy.js";
+import {PermitCriteria} from "./accessPolicies/@PermissionSet.js";
 import {GetUserReputation_ApprovalPercent, GetUserReputation_Approvals} from "./users.js";
 
 export const GetAccessPolicies = CreateAccessor((creatorID?: string)=>{
@@ -43,7 +43,8 @@ export const GetDefaultAccessPolicyID_ForMedia = CreateAccessor(()=>{
 	return GetSystemAccessPolicyID("Public, ungoverned (standard)");
 });*/
 
-export function UserFulfillsPermitCriteria(userID: string|n, criteria: PermitCriteria) {
+export function UserFulfillsPermitCriteria(userID: string|n, criteria: PermitCriteria|n) {
+	if (criteria == null) return false;
 	const approvals = GetUserReputation_Approvals(userID);
 	if (criteria.minApprovals == -1 || approvals < criteria.minApprovals) return false;
 	const approvalPercent = GetUserReputation_ApprovalPercent(userID);
@@ -58,6 +59,6 @@ export function UserFulfillsPermitCriteria(userID: string|n, criteria: PermitCri
 	Assert(permitCriteriaOrBoolean != null, "Access-policy inheritance not yet implemented.");
 	return PermitCriteriaPermitsNoOne(permitCriteriaOrBoolean);
 }*/
-export function PermitCriteriaPermitsNoOne(criteria: PermitCriteria) {
-	return criteria.minApprovals == -1 || criteria.minApprovalPercent == -1;
+export function PermitCriteriaPermitsNoOne(criteria: PermitCriteria|n) {
+	return criteria == null || criteria.minApprovals == -1 || criteria.minApprovalPercent == -1;
 }

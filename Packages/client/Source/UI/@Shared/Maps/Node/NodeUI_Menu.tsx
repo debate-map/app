@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, NodeL3, Polarity, GetNodeTypeDisplayName, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, NodeL3, Polarity, GetNodeTypeDisplayName, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText, Me} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
@@ -55,8 +55,9 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const copiedNodePath = GetCopiedNodePath();
 
 		CheckUserCanDeleteNode(MeID(), node); // for mobx watching
+		const user = Me();
 		const userID = MeID();
-		const permissions = GetUserPermissionGroups(userID);
+		//const permissions = GetUserPermissionGroups(userID);
 		// nodeChildren: GetNodeChildrenL3(node, path),
 		const nodeChildren = GetNodeChildrenL3(node.id, path);
 		const combinedWithParentArg = IsPremiseOfSinglePremiseArgument(node, parent);
@@ -73,7 +74,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const headerStyle = ES(liveSkin.Style_VMenuItem(), {opacity: 1});
 
 		const GetAddChildItems = (node2: NodeL3, path2: string, childGroup2: ChildGroup)=>{
-			const validChildTypes = GetValidNewChildTypes(node2, childGroup2, permissions);
+			const validChildTypes = GetValidNewChildTypes(node2, childGroup2, user);
 			if (validChildTypes.length == 0) return null;
 
 			//if (!CanContributeToNode(userID, node.id)) return null;

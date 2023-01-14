@@ -19,6 +19,7 @@ use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
+use crate::db::general::permission_helpers::{assert_user_can_add_phrasing, assert_user_can_add_child};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{NodeLinkInput, NodeLink};
 use crate::db::node_phrasings::NodePhrasing_Embedded;
@@ -64,6 +65,9 @@ pub struct AddChildNodeResult {
 pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, _extras: NoExtras) -> Result<AddChildNodeResult, Error> {
 	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input.clone();
 	
+    let parent = get_node(ctx, &parentID).await?;
+    assert_user_can_add_child(ctx, actor, &parent).await?; // defensive
+
     let node_id = new_uuid_v4_as_b64();
     let link = NodeLinkInput {
         // set by server
