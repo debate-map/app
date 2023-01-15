@@ -35,9 +35,9 @@ pub async fn get_user(ctx: &AccessorContext<'_>, id: &str) -> Result<User, Error
         "id": {"equalTo": id}
     }))).await
 }
-/*pub async fn get_users(ctx: &AccessorContext<'_>) -> Result<Vec<User>, Error> {
+pub async fn get_users(ctx: &AccessorContext<'_>) -> Result<Vec<User>, Error> {
     get_db_entries(ctx, "users", &None).await
-}*/
+}
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 

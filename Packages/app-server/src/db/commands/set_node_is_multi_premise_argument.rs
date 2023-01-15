@@ -22,7 +22,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, command_boilerplate, NoExtras, update_field_nullable, gql_placeholder};
+use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras, update_field_nullable, gql_placeholder};
 
 wrap_slow_macros!{
 
@@ -56,7 +56,7 @@ pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor
 		..old_data
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), id.to_string(), new_data).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), id.to_string(), new_data).await?;
 
 	Ok(SetNodeIsMultiPremiseArgumentResult { __: gql_placeholder() })
 }

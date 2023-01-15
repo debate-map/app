@@ -22,7 +22,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::delete_node::{delete_node, DeleteNodeInput};
 
 wrap_slow_macros!{

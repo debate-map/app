@@ -22,7 +22,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras, update_field_of_extras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, update_field_of_extras};
 
 wrap_slow_macros!{
 
@@ -60,7 +60,7 @@ pub async fn update_node(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool
 		..old_data
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), id.to_string(), new_data).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), id.to_string(), new_data).await?;
 
 	Ok(UpdateNodeResult { __: gql_placeholder() })
 }

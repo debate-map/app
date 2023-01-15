@@ -18,7 +18,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
 wrap_slow_macros!{
 
@@ -59,7 +59,7 @@ pub async fn add_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, 
 
 	//assert_user_is_mod(&user_info)?;
 	if !actor.permissionGroups.r#mod { Err(anyhow!("Only moderators can add media currently. (till review/approval system is implemented)"))? }
-	set_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), media.id.to_string(), media.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "medias".to_owned(), media.id.to_string(), media.clone()).await?;
 
 	Ok(AddMediaResult { id: media.id.to_string() })
 }

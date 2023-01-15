@@ -23,7 +23,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
 
 wrap_slow_macros!{
 
@@ -71,7 +71,7 @@ pub async fn set_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: 
 		c_accessPolicyTargets: vec![], // auto-set by db
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "nodeRatings".o(), rating.id.to_string(), rating.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "nodeRatings".o(), rating.id.to_string(), rating.clone()).await?;
 
 	update_node_rating_summaries(ctx, actor, rating.node, rating.r#type).await?;
 

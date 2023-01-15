@@ -36,7 +36,7 @@ use crate::db::_general::GenericMutation_Result;
 use crate::db::general::sign_in::get_err_auth_data_required;
 use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
-use crate::db::commands::_command::set_db_entry_by_id_for_struct;
+use crate::db::commands::_command::upsert_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};

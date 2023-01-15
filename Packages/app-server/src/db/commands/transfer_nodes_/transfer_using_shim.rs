@@ -32,7 +32,7 @@ use crate::utils::general::order_key::OrderKey;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::super::_command::{set_db_entry_by_id_for_struct, NoExtras, tbd, gql_placeholder};
+use super::super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, gql_placeholder};
 use super::super::_shared::add_node::add_node;
 use super::super::_shared::increment_map_edits::increment_map_edits_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};

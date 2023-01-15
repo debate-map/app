@@ -1,7 +1,7 @@
 use rust_shared::{anyhow::{Error, anyhow}, utils::{general_::extensions::ToOwnedV, type_aliases::JSONValue, time::time_since_epoch_ms_i64, db::uuid::new_uuid_v4_as_b64}, itertools::Itertools, async_graphql::ID};
 use tracing::error;
 
-use crate::{utils::{db::{accessors::AccessorContext, queries::get_entries_in_collection, filter::QueryFilter}, general::data_anchor::DataAnchorFor1}, db::{maps::{get_map, Map}, commands::_command::set_db_entry_by_id_for_struct, user_hiddens::get_user_hidden, users::User, command_runs::CommandRun}};
+use crate::{utils::{db::{accessors::AccessorContext, queries::get_entries_in_collection, filter::QueryFilter}, general::data_anchor::DataAnchorFor1}, db::{maps::{get_map, Map}, commands::_command::upsert_db_entry_by_id_for_struct, user_hiddens::get_user_hidden, users::User, command_runs::CommandRun}};
 
 pub async fn record_command_run_if_root(
     ctx: &AccessorContext<'_>, actor: &User, is_root: bool,
@@ -38,7 +38,7 @@ pub async fn record_command_run(
         c_involvedNodes: involved_nodes,
         c_accessPolicyTargets: vec![], // auto-set by db
     };
-    set_db_entry_by_id_for_struct(&ctx, "commandRuns".to_owned(), command_run.id.to_string(), command_run).await?;
+    upsert_db_entry_by_id_for_struct(&ctx, "commandRuns".to_owned(), command_run.id.to_string(), command_run).await?;
 
     Ok(())
 }

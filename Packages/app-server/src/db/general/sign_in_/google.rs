@@ -35,7 +35,7 @@ use rust_shared::jwt_simple::prelude::{HS256Key, Claims, MACLike, VerificationOp
 use crate::db::_general::GenericMutation_Result;
 use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
-use crate::db::commands::_command::set_db_entry_by_id_for_struct;
+use crate::db::commands::_command::upsert_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
 use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
@@ -111,8 +111,8 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
         extras: serde_json::Value::Object(serde_json::Map::new()),
 	};
 
-    set_db_entry_by_id_for_struct(&ctx, "users".to_owned(), user.id.to_string(), user).await?;
-    set_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), user_hidden.id.to_string(), user_hidden.clone()).await?;
+    upsert_db_entry_by_id_for_struct(&ctx, "users".to_owned(), user.id.to_string(), user).await?;
+    upsert_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), user_hidden.id.to_string(), user_hidden.clone()).await?;
 	info!("Creation of new user semi-complete! NewID:{}", new_user_id); // "semi" complete, because transaction hasn't been committed yet
 
     let user = get_user(ctx, new_user_id.as_str()).await?;

@@ -17,7 +17,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras, command_boilerplate};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, command_boilerplate};
 
 wrap_slow_macros!{
 
@@ -55,7 +55,7 @@ pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, 
 		mapView: share_.mapView,
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "shares".to_owned(), share.id.to_string(), share.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "shares".to_owned(), share.id.to_string(), share.clone()).await?;
 
 	Ok(AddShareResult { id: share.id.to_string() })
 }

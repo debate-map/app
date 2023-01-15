@@ -14,7 +14,7 @@ use rust_shared::serde::{Deserialize};
 use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_null;
-use crate::db::commands::_command::{command_boilerplate, set_db_entry_by_id_for_struct, tbd};
+use crate::db::commands::_command::{command_boilerplate, upsert_db_entry_by_id_for_struct, tbd};
 use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
 use crate::db::commands::add_node_revision::{add_node_revision, AddNodeRevisionResult, self, AddNodeRevisionInput, AddNodeRevisionExtras};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
@@ -59,7 +59,7 @@ pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput,
 
     // validate the node, then add it to db
     validate_node(&node)?;
-	set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node.clone()).await?;
 
     // add node-revision to db
     ensure!(revision.node.is_none(), err_should_be_null("revision.node").to_string());

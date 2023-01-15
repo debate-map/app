@@ -46,6 +46,7 @@ pub mod commands {
     pub mod delete_node_tag;
     pub mod delete_share;
     pub mod delete_term;
+    pub mod import_firestore_dump;
     pub mod link_node;
     pub mod set_node_is_multi_premise_argument;
     pub mod set_node_rating;

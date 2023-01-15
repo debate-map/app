@@ -30,7 +30,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::record_command_run::{record_command_run, record_command_run_if_root};
 
 wrap_slow_macros!{
@@ -84,7 +84,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 		attachments: revision_.attachments,
 		c_accessPolicyTargets: vec![], // auto-set by db
 	};
-	set_db_entry_by_id_for_struct(ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
+	upsert_db_entry_by_id_for_struct(ctx, "nodeRevisions".to_owned(), revision.id.to_string(), revision.clone()).await?;
 
 	// also update node's "c_currentRevision" field
 	ctx.tx.execute(r#"UPDATE "nodes" SET "c_currentRevision" = $1 WHERE id = $2"#, &[&revision.id.as_str(), &revision.node]).await?;
@@ -110,7 +110,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 			r#type: ChangeType::edit,
 			c_accessPolicyTargets: vec![], // auto-set by db
 		};
-		set_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
+		upsert_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 	}
 
 	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;

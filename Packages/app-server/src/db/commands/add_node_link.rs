@@ -27,7 +27,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
 wrap_slow_macros!{
 
@@ -94,7 +94,7 @@ pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, _is_root: bo
 		}
 	}
 	
-	set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link.clone()).await?;
 
 	Ok(AddNodeLinkResult { id: link.id.to_string() })
 }

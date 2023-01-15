@@ -19,7 +19,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
 wrap_slow_macros!{
 
@@ -59,7 +59,7 @@ pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_roo
 		..old_data
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), id.to_string(), new_data).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "userHiddens".to_owned(), id.to_string(), new_data).await?;
 
 	Ok(UpdateUserHiddenResult { __: gql_placeholder() })
 }

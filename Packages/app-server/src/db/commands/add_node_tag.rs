@@ -17,7 +17,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
 
 wrap_slow_macros!{
 
@@ -59,7 +59,7 @@ pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: boo
 		c_accessPolicyTargets: vec![], // auto-set by db
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag.clone()).await?;
 
 	Ok(AddNodeTagResult { id: tag.id.to_string() })
 }

@@ -29,3 +29,6 @@
 # secrets
 Others/Secrets/*
 !Others/Secrets/README.md
+
+# temp
+@Temp_FirestoreImport.json

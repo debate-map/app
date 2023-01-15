@@ -53,11 +53,17 @@ pub fn to_row_data(data: impl Serialize) -> Result<RowData, Error> {
     let as_map = as_json.as_object().ok_or(anyhow!("The passed data did not serialize to a json object/map!"))?;
     Ok(as_map.to_owned())
 }
-pub async fn set_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row_struct: T) -> Result<Vec<Row>, Error> {
+
+pub async fn insert_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row_struct: T) -> Result<Vec<Row>, Error> {
     let struct_as_row_data = to_row_data(new_row_struct)?;
-    set_db_entry_by_id(ctx, table_name, id, struct_as_row_data).await
+    set_db_entry_by_id(ctx, table_name, id, struct_as_row_data, false).await
 }
-pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row: RowData) -> Result<Vec<Row>, Error> {
+pub async fn upsert_db_entry_by_id_for_struct<T: Serialize>(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row_struct: T) -> Result<Vec<Row>, Error> {
+    let struct_as_row_data = to_row_data(new_row_struct)?;
+    set_db_entry_by_id(ctx, table_name, id, struct_as_row_data, true).await
+}
+
+pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, id: String, new_row: RowData, allow_update: bool) -> Result<Vec<Row>, Error> {
     // todo: maybe remove this (it's not really necessary to pass the id in separately from the row-data)
     let id_from_row_data = new_row.get("id").ok_or(anyhow!("No \"id\" field in entry!"))?
         .as_str().ok_or(anyhow!("The \"id\" field in entry was not a string!"))?;
@@ -107,15 +113,17 @@ pub async fn set_db_entry_by_id(ctx: &AccessorContext<'_>, table_name: String, i
             }).try_collect2::<Vec<_>>()?,
             SF::lit(")").once(),
         ),
-        SF::lit("ON CONFLICT (id) DO UPDATE SET").once(),
-        new_row.iter().filter(|key_and_val| key_and_val.0 != "id").enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
-            Ok(SF::merge(chain!(
-                match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
-                Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
-                SF::lit(" = EXCLUDED.").once(),
-                Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
-            ).collect_vec()))
-        }).try_collect2::<Vec<_>>()?,
+        match_cond_to_iter(allow_update, chain!(
+            SF::lit("ON CONFLICT (id) DO UPDATE SET").once(),
+            new_row.iter().filter(|key_and_val| key_and_val.0 != "id").enumerate().map(|(i, key_and_val)| -> Result<SQLFragment, Error> {
+                Ok(SF::merge(chain!(
+                    match_cond_to_iter(i > 0, SF::lit(", ").once(), empty()),
+                    Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
+                    SF::lit(" = EXCLUDED.").once(),
+                    Some(SF::ident(SQLIdent::new(key_and_val.0.to_owned())?)),
+                ).collect_vec()))
+            }).try_collect2::<Vec<_>>()?,
+        ), empty()),
     ).collect_vec());
     let (sql_text, params) = final_query.into_query_args()?;
 

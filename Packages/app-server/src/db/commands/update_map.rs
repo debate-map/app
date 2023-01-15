@@ -20,7 +20,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
 wrap_slow_macros!{
 
@@ -69,7 +69,7 @@ pub async fn update_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool,
 		..old_data
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "maps".to_owned(), id.to_string(), new_data).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "maps".to_owned(), id.to_string(), new_data).await?;
 
 	Ok(UpdateMapResult { __: gql_placeholder() })
 }

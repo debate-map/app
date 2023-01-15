@@ -45,7 +45,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
 use crate::utils::type_aliases::{PGClientObject};
 
-use super::_command::{set_db_entry_by_id, set_db_entry_by_id_for_struct};
+use super::_command::{set_db_entry_by_id, upsert_db_entry_by_id_for_struct};
 
 //wrap_slow_macros!{}
 
@@ -119,7 +119,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
         ..old_root_link.clone()
     };
     log("part 1.5");
-    set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
+    upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), new_root_link.id.to_string(), new_root_link).await?;
 
     log("part 2");
     //let mut nodes_needing_clone_history_tag: HashSet<String> = HashSet::new();
@@ -134,7 +134,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             c_currentRevision: get_new_id_str(&node_old.c_currentRevision),
             ..node_old.clone()
         };
-        set_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node).await?;
     }
     log("part 3");
     for rev_old in subtree.nodeRevisions {
@@ -149,7 +149,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             if let Some(media) = attachment.media {
             }
         }*/
-        set_db_entry_by_id_for_struct(&ctx, "nodeRevisions".to_owned(), rev.id.to_string(), rev).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "nodeRevisions".to_owned(), rev.id.to_string(), rev).await?;
     }
     log("part 4");
     for phrasing_old in subtree.nodePhrasings {
@@ -160,7 +160,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             node: get_new_id_str(&phrasing_old.node),
             ..phrasing_old.clone()
         };
-        set_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "nodePhrasings".to_owned(), phrasing.id.to_string(), phrasing).await?;
     }
     log("part 5");
     for link_old in subtree.nodeLinks {
@@ -172,7 +172,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             child: get_new_id_str(&link_old.child),
             ..link_old.clone()
         };
-        set_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "nodeLinks".to_owned(), link.id.to_string(), link).await?;
     }
     log("part 6");
     for tag_old in subtree.nodeTags {
@@ -206,7 +206,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             }
         }
 
-        set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
     }
     log("part 6.5");
     for old_node_id in nodes_still_needing_clone_history_tag {
@@ -225,7 +225,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
             xIsExtendedByY: None,
             c_accessPolicyTargets: vec![], // auto-set by db
         };
-        set_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
+        upsert_db_entry_by_id_for_struct(&ctx, "nodeTags".to_owned(), tag.id.to_string(), tag).await?;
         //nodes_needing_clone_history_tag.retain(|a| *a != old_node_id);
     }
     //nodes_still_needing_clone_history_tag.clear(); // commented; not needed, since contents already moved out of vector

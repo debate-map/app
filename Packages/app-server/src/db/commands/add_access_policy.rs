@@ -19,7 +19,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{set_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
 
 wrap_slow_macros!{
 
@@ -56,7 +56,7 @@ pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		permissions_userExtends: policy_.permissions_userExtends,
 	};
 
-	set_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy.clone()).await?;
+	upsert_db_entry_by_id_for_struct(&ctx, "accessPolicies".to_owned(), policy.id.to_string(), policy.clone()).await?;
 
 	Ok(AddAccessPolicyResult { id: policy.id.to_string() })
 }
