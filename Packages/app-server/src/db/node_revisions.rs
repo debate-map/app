@@ -2,6 +2,7 @@ use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::anyhow::Error;
 use rust_shared::SubError;
 use rust_shared::async_graphql;
+use rust_shared::async_graphql::Enum;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -15,6 +16,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
+use super::_shared::attachments::Attachment;
 use super::node_phrasings::NodePhrasing;
 use super::node_phrasings::NodePhrasing_Embedded;
 use super::nodes::get_node;
@@ -26,16 +28,6 @@ pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<No
 }
 
 wrap_slow_macros!{
-
-#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
-#[graphql(input_name = "AttachmentInput")]
-pub struct Attachment {
-    pub equation: Option<JSONValue>,
-    pub references: Option<JSONValue>,
-    pub quote: Option<JSONValue>,
-    pub media: Option<JSONValue>,
-    //pub media: Option<MediaAttachment>,
-}
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 pub struct NodeRevision {
@@ -54,6 +46,15 @@ pub struct NodeRevision {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
+impl NodeRevision {
+    // todo: make-so the field has this as its actual type (delayed since it means a change in the graphql api)
+	pub fn display_details_known(&self) -> Result<Option<NodeRevisionDisplayDetails>, Error> {
+        Ok(match &self.displayDetails {
+            None => None,
+            Some(raw_data) => Some(serde_json::from_value(raw_data.clone())?),
+        })
+	}
+}
 impl From<Row> for NodeRevision {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
@@ -68,15 +69,28 @@ pub struct NodeRevisionInput {
     pub attachments: Vec<Attachment>,
 }
 
-/*#[derive(SimpleObject, Clone, Serialize, Deserialize)]
-pub struct MediaAttachment {
-    pub id: string,
-    /// whether the image/video is claimed to be a capturing of real-world footage
-	pub captured: boolean,
-    /// used to limit the display-width, eg. to keep a tall-but-skinny image from extending multiple screens down
-	pub previewWidth: Option<f64>,
-	pub sourceChains: SourceChain[],
-}*/
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+pub struct NodeRevisionDisplayDetails {
+	fontSizeOverride: Option<f64>,
+	widthOverride: Option<f64>,
+	childLayout: Option<ChildLayout>,
+	childOrdering: Option<ChildOrdering>,
+}
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
+pub enum ChildLayout {
+    #[graphql(name = "grouped")] grouped,
+    #[graphql(name = "dmStandard")] dmStandard,
+    #[graphql(name = "slStandard")] slStandard,
+    #[graphql(name = "flat")] flat,
+}
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
+pub enum ChildOrdering {
+    //#[graphql(name = "unchanged")] unchanged,
+    #[graphql(name = "manual")] manual,
+    #[graphql(name = "date")] date,
+    #[graphql(name = "votes")] votes,
+    #[graphql(name = "reasonScore")] reasonScore,
+}
 
 #[derive(Clone)] pub struct GQLSet_NodeRevision { pub nodes: Vec<NodeRevision> }
 #[Object] impl GQLSet_NodeRevision { async fn nodes(&self) -> &Vec<NodeRevision> { &self.nodes } }

@@ -12,8 +12,8 @@ use rust_shared::serde;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
+use super::_shared::attachments::Attachment;
 use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
-use super::node_revisions::Attachment;
 use super::{node_revisions::{get_node_revision}};
 
 pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
