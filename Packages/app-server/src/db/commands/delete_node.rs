@@ -8,7 +8,7 @@ use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
-use tracing::info;
+use tracing::{info, error};
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder};
@@ -60,20 +60,24 @@ pub async fn delete_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool,
 	let old_data = get_node(&ctx, &nodeID).await?;
 	assert_user_can_delete_node(&ctx, &actor, &old_data, extras.as_part_of_map_delete, vec![], vec![]).await?;
 
-	// first delete the rows in other tables that reference this node
-	// (will likely need to update this later, when completing permission system; have to decide how to handle deletion of node, when other users created linked phrasings, ratings, etc.)
-	// (first step will probably be adding a "soft delete" system, in place-of/addition-to the hard-delete behavior that currently occurs)
-	ctx.tx.execute(r#"DELETE FROM "nodePhrasings" WHERE node = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "nodeRatings" WHERE node = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE node = $1"#, &[&nodeID]).await?;
-	ctx.tx.execute(r#"DELETE FROM "nodeRevisions" WHERE node = $1"#, &[&nodeID]).await?;
-	// todo: maybe change approach: rather than deleting associated command-runs, we leave them up, but just restrict access to admins only from this point forward
-	ctx.tx.execute(r#"DELETE FROM "commandRuns" WHERE $1 = ANY("c_involvedNodes")"#, &[&nodeID]).await?;
+	ctx.with_rls_disabled(|| async {
+		// first delete the rows in other tables that reference this node
+		// (will likely need to update this later, when completing permission system; have to decide how to handle deletion of node, when other users created linked phrasings, ratings, etc.)
+		// (first step will probably be adding a "soft delete" system, in place-of/addition-to the hard-delete behavior that currently occurs)
+		ctx.tx.execute(r#"DELETE FROM "nodePhrasings" WHERE node = $1"#, &[&nodeID]).await?;
+		ctx.tx.execute(r#"DELETE FROM "nodeRatings" WHERE node = $1"#, &[&nodeID]).await?;
+		ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
+		ctx.tx.execute(r#"DELETE FROM "nodeLinks" WHERE parent = $1 OR child = $1"#, &[&nodeID]).await?;
+		ctx.tx.execute(r#"DELETE FROM "mapNodeEdits" WHERE node = $1"#, &[&nodeID]).await?;
+		ctx.tx.execute(r#"DELETE FROM "nodeRevisions" WHERE node = $1"#, &[&nodeID]).await?;
+		// todo: maybe change approach: rather than deleting associated command-runs, we leave them up, but just restrict access to admins only from this point forward
+		ctx.tx.execute(r#"DELETE FROM "commandRuns" WHERE $1 = ANY("c_involvedNodes")"#, &[&nodeID]).await?;
 
-	// todo: for any tag where this node is a member, update it to remove this node's id from the `nodes` array (and possibly other fields too)
-	// todo: delete any tags for which this node is the only associated node
+		// todo: for any tag where this node is a member, update it to remove this node's id from the `nodes` array (and possibly other fields too)
+		// todo: delete any tags for which this node is the only associated node
+
+		Ok(())
+	}, Some("Failed to delete data associated with node.")).await?;
 
 	delete_db_entry_by_id(&ctx, "nodes".to_owned(), nodeID.to_string()).await?;
 

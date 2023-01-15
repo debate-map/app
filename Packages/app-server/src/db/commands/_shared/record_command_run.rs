@@ -20,15 +20,9 @@ pub async fn record_command_run(
     let actor_hidden = get_user_hidden(ctx, actor.id.as_str()).await?;
     let make_public_base = actor_hidden.addToStream;
 
-    // temporarily bypass RLS (needed for trimming to access full list); not ideal, but fine for now (this trimming approach is temporary anyway)
-    ctx.disable_rls().await?;
-    let trim_result = trim_old_command_runs(ctx).await;
-    ctx.enable_rls().await?; // do this before processing error, to ensure it always runs
-    trim_result.map_err(|err| {
-        // log full error to app-server log, but return a generic error to client (we don't want data from rls-disabled block to be leaked to client)
-        error!("Failed to perform trimming of old command-runs: {:?}", err);
-        anyhow!("Failed to perform trimming of old command-runs.")
-    })?;
+    ctx.with_rls_disabled(|| async {
+        trim_old_command_runs(ctx).await
+    }, Some("Failed to perform trimming of old command-runs.")).await?;
 
     let id = new_uuid_v4_as_b64();
     let command_run = CommandRun {

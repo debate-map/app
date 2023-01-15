@@ -1,4 +1,6 @@
-use futures_util::TryStreamExt;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+use futures_util::{TryStreamExt, Future};
 use rust_shared::async_graphql;
 use rust_shared::serde::Serialize;
 use rust_shared::tokio_postgres::{Row, types::ToSql};
@@ -6,6 +8,7 @@ use rust_shared::anyhow::{anyhow, Error, ensure, bail};
 use deadpool_postgres::{Transaction, Pool};
 use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::general_::extensions::ToOwnedV;
+use tracing::error;
 
 use crate::db::general::sign_in_::jwt_utils::{get_user_jwt_data_from_gql_ctx, try_get_user_jwt_data_from_gql_ctx};
 use crate::store::storage::get_app_state_from_gql_ctx;
@@ -30,11 +33,12 @@ pub struct AccessorContext<'a> {
     pub gql_ctx: Option<&'a async_graphql::Context<'a>>,
     pub tx: Transaction<'a>,
     pub only_validate: bool,
+    rls_enabled: AtomicBool,
 }
 impl<'a> AccessorContext<'a> {
     // base constructor
-    pub fn new_raw(gql_ctx: Option<&'a async_graphql::Context<'a>>, tx: Transaction<'a>, only_validate: bool) -> Self {
-        Self { gql_ctx, tx, only_validate }
+    pub fn new_raw(gql_ctx: Option<&'a async_graphql::Context<'a>>, tx: Transaction<'a>, only_validate: bool, rls_enabled: bool) -> Self {
+        Self { gql_ctx, tx, only_validate, rls_enabled: AtomicBool::new(rls_enabled) }
     }
 
     // low-level constructors
@@ -43,7 +47,7 @@ impl<'a> AccessorContext<'a> {
         tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
         /*let user_is_admin = TODO;
         tx.execute("SELECT set_config('app.current_user_admin', $1, true)", &[&user_is_admin]).await?;*/
-        let new_self = Self { gql_ctx, tx, only_validate: false };
+        let new_self = Self { gql_ctx, tx, only_validate: false, rls_enabled: AtomicBool::new(false) }; // rls not enabled quite yet; we'll do that in a moment
 
         // if bypass_rls is false, then enforce rls-policies (for this transaction) by switching to the "rls_obeyer" role
         if !bypass_rls {
@@ -69,7 +73,7 @@ impl<'a> AccessorContext<'a> {
         let tx = start_write_transaction(anchor, db_pool).await?;
         tx.execute("SELECT set_config('app.current_user_id', $1, true)", &[&user.map(|a| a.id).unwrap_or("<none>".o())]).await?;
         let only_validate = only_validate.unwrap_or(false);
-        let new_self = Self { gql_ctx, tx, only_validate };
+        let new_self = Self { gql_ctx, tx, only_validate, rls_enabled: AtomicBool::new(false) }; // rls not enabled quite yet; we'll do that in a moment
 
         // Some commands (eg. deleteNode) need foreign-key contraint-deferring till end of transaction, so just do so always.
         // This is safer, since it protects against "forgotten deferral" in commands where an fk-constraint is *temporarily violated* -- but only in an "uncommon conditional branch".
@@ -97,6 +101,9 @@ impl<'a> AccessorContext<'a> {
 
     // other methods
     pub async fn enable_rls(&self) -> Result<(), Error> {
+        ensure!(!self.rls_enabled.load(Ordering::SeqCst), "RLS is already enabled. Since our current usages are simple, this is unexpected, and thus considered an error.");
+        self.rls_enabled.store(true, Ordering::SeqCst);
+
         self.tx.execute("SET LOCAL ROLE rls_obeyer", &[]).await?;
         /*self.tx.execute("SET LOCAL ROLE rls_obeyer", &[]).await?.map_err(|err| {
             // if we hit an error while trying to re-enable RLS, then just kill the pg-pool connection (defensive programming vs tricks/exploits)
@@ -106,8 +113,24 @@ impl<'a> AccessorContext<'a> {
         Ok(())
     }
     pub async fn disable_rls(&self) -> Result<(), Error> {
+        ensure!(self.rls_enabled.load(Ordering::SeqCst), "RLS is already disabled. Since our current usages are simple, this is unexpected, and thus considered an error.");
+        self.rls_enabled.store(false, Ordering::SeqCst);
+
         self.tx.execute("RESET ROLE", &[]).await?;
         Ok(())
+    }
+    pub async fn with_rls_disabled<Fut: Future<Output = Result<(), Error>>>(&self, f: impl FnOnce() -> Fut, simple_err_for_client: Option<&str>) -> Result<(), Error> {
+        self.disable_rls().await?;
+        let result = f().await;
+        self.enable_rls().await?;
+        match simple_err_for_client {
+            None => result,
+            Some(simple_err_for_client) => result.map_err(|err| {
+                // log full error to app-server log, but return a generic error to client (we generallydon't want data from rls-disabled block to be leaked to client)
+                error!("{} @fullError:{:?}", simple_err_for_client, err);
+                anyhow!("{}", simple_err_for_client)
+            }),
+        }
     }
 }
 /*pub struct TxTempAdminUpgradeWrapper<'a> {
