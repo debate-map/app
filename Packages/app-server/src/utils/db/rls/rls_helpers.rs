@@ -63,8 +63,8 @@ pub(super) fn do_policies_allow_access(user_id: Option<&str>, policy_targets: &V
     })
 }
 pub(super) fn try_do_policies_allow_access(user_id: Option<&str>, policy_targets: &Vec<AccessPolicyTarget>) -> Result<bool, Error> {
-    // The `c_accessPolicyTargets` fields should always have at least one entry in them; if not, something is wrong, so play it safe and reject access.
-	// (Most tables enforce non-emptiness of this field with a row constraint, but nodeTags is an exception; its associated nodes may be deleted, leaving it without any targets.)
+    // The `c_accessPolicyTargets` fields should always[*] have at least one entry in them; if not, something is wrong, so play it safe and reject access.
+	// (Most tables enforce non-emptiness of this field with a row constraint, [*]but nodeTags is an exception; its associated nodes may be deleted, leaving it without any targets.)
 	// (This line thus serves to prevent "orphaned node-tags" from being visible by non-admins, as well as a general-purpose "second instance" of the non-emptiness check.)
     if policy_targets.is_empty() {
         return Ok(false);

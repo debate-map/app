@@ -116,9 +116,12 @@ CREATE TRIGGER command_runs_refresh_targets_for_self BEFORE INSERT OR UPDATE ON 
 -- ==========
 
 CREATE OR REPLACE FUNCTION app.maps_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
-	IF (OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy") THEN
+	IF (
+		TG_OP = 'DELETE' -- also trigger on deletes, as this helps catch errors
+		OR OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy"
+	) THEN
 		-- simply cause the associated rows in the other tables to have their triggers run again
-		UPDATE app."mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[] WHERE "map" = NEW.id;
+		UPDATE app."mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[] WHERE "map" = OLD.id;
 	END IF;
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
 END $$;
@@ -126,17 +129,20 @@ DROP TRIGGER IF EXISTS maps_refresh_targets_for_others on app."maps";
 CREATE TRIGGER maps_refresh_targets_for_others AFTER UPDATE ON app."maps" FOR EACH ROW EXECUTE FUNCTION app.maps_refresh_targets_for_others();
 
 CREATE OR REPLACE FUNCTION app.nodes_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
-	IF (OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy") THEN
+	IF (
+		TG_OP = 'DELETE' -- also trigger on deletes, as this helps catch errors (also needed atm for about-to-be-orphaned node-tags)
+		OR OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy"
+	) THEN
 		-- simply cause the associated rows in the other tables to have their triggers run again
-		UPDATE app."mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
-		UPDATE app."nodeLinks" SET "c_accessPolicyTargets" = array[]::text[] WHERE "parent" = NEW.id OR "child" = NEW.id;
-		UPDATE app."nodePhrasings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
-		UPDATE app."nodeRatings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
-		UPDATE app."nodeRevisions" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = NEW.id;
-		UPDATE app."nodeTags" SET "c_accessPolicyTargets" = array[]::text[] WHERE NEW.id = ANY("nodes");
-		UPDATE app."commandRuns" SET "c_accessPolicyTargets" = array[]::text[] WHERE NEW.id = ANY("c_involvedNodes");
+		UPDATE app."mapNodeEdits" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = OLD.id;
+		UPDATE app."nodeLinks" SET "c_accessPolicyTargets" = array[]::text[] WHERE "parent" = OLD.id OR "child" = OLD.id;
+		UPDATE app."nodePhrasings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = OLD.id;
+		UPDATE app."nodeRatings" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = OLD.id;
+		UPDATE app."nodeRevisions" SET "c_accessPolicyTargets" = array[]::text[] WHERE "node" = OLD.id;
+		UPDATE app."nodeTags" SET "c_accessPolicyTargets" = array[]::text[] WHERE OLD.id = ANY("nodes");
+		UPDATE app."commandRuns" SET "c_accessPolicyTargets" = array[]::text[] WHERE OLD.id = ANY("c_involvedNodes");
 	END IF;
 	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
 END $$;
 DROP TRIGGER IF EXISTS nodes_refresh_targets_for_others on app."nodes";
-CREATE TRIGGER nodes_refresh_targets_for_others AFTER UPDATE ON app."nodes" FOR EACH ROW EXECUTE FUNCTION app.nodes_refresh_targets_for_others();
+CREATE TRIGGER nodes_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."nodes" FOR EACH ROW EXECUTE FUNCTION app.nodes_refresh_targets_for_others();

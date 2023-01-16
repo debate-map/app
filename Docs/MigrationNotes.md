@@ -7,11 +7,14 @@
 
 ## Main series
 
-### Pushed on 2023-01-13
+### Pushed on 2023-01-13 [+01-15]
 
-* 1\) Changed RLS policies slightly.
+* 1\) Changed RLS policies slightly. [+fixed that "push" triggers weren't executing on row-deletion]
 	* DB response:
 		* 1\) Re-apply the sql in `RLSHelpers.sql` and `RLSPolicies.sql`.
+* 2\) Disabled the `c_accessPolicyTargets_check` constraint for `nodeTags` table. (since it is valid for node-tag entry to have no rls-targets; not ideal, since leaves it orphaned [will add UI for that for admins later], but better than erroring)
+	* DB response:
+		* 1\) Execute sql: `ALTER TABLE app."nodeTags" DROP CONSTRAINT IF EXISTS "c_accessPolicyTargets_check"`
 
 ### Pushed on 2023-01-09
 
