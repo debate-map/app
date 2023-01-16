@@ -3,7 +3,7 @@
 * This document catalogs changes to the database structure and/or graphql api.
 * The "DB response" instructions only need to be followed for those with their own server instance.
 * The "GraphQL response" instructions only need to be followed for those with a custom client or data-access scripts.
-	* When exploring the new graphql api/data-structures, one can augment the written instructions with exploration of the new api, using the `app-server.debatemap.app/gql-playground` endpoint. (temporarily located at `app-server.debates.app/gql-playground`)
+	* When exploring the new graphql api/data-structures, one can augment the written instructions with exploration of the new api, using the `app-server.debatemap.app/gql-playground` endpoint. (or, currently, at `app-server.debates.app/gql-playground`)
 
 ## Main series
 

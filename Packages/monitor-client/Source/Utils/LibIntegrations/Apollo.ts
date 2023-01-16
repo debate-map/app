@@ -12,7 +12,7 @@ export function GetAppServerURL(subpath: string): string {
 		return `http://localhost:5130/${subpath.slice(1)}`;
 	}
 	if (ENV == "prod") {
-		return `https://monitor.debates.app/${subpath.slice(1)}`;
+		return `https://monitor.debatemap.app/${subpath.slice(1)}`;
 	}
 	Assert(false, `Invalid env specified:${ENV}`);
 }

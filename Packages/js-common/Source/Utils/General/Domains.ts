@@ -8,8 +8,8 @@ const recognizedWebServerHosts = [
 	"debating.app",
 	"9m2x1z.nodes.c1.or1.k8s.ovh.us",
 ];
-//const prodDomain = "debatemap.app";
-const prodDomain = "debates.app"; // temp
+const prodDomain = "debatemap.app";
+//const prodDomain = "debates.app"; // temp
 
 /*function AsPartial<T>(defaultOpts: T): Partial<T> {
 	return defaultOpts;

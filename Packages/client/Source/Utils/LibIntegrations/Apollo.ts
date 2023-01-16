@@ -51,7 +51,7 @@ export function GetWebServerURL(subpath: string, preferredServerOrigin?: string)
 export function GetAppServerURL(subpath: string, preferredServerOrigin?: string): string {
 	// if on localhost, but user has set the db/server override to "prod", do so
 	if (window.location.hostname == "localhost" && DB == "prod") {
-		return `https://app-server.debates.app/${subpath.slice(1)}`;
+		return `https://app-server.debatemap.app/${subpath.slice(1)}`;
 	}
 
 	return GetServerURL("app-server", subpath, preferredServerOrigin ?? window.location.origin);

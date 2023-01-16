@@ -20,7 +20,8 @@ impl DomainsConstants {
         let ON_SERVER = true;
         let ENV = get_env();
         Self {
-            prod_domain: "debates.app", // temp
+            prod_domain: "debatemap.app",
+            //prod_domain: "debates.app", // temp
             recognized_web_server_hosts: &[
                 "localhost:5100", "localhost:5101",
                 "localhost:5130", "localhost:5131",

@@ -46,45 +46,46 @@ spec:
                   number: 5130
             pathType: ImplementationSpecific
     # these are the domains end-users should be accessing the site from
-    - host: debates.app
+    # debatemap.app
+    - host: debatemap.app
       http:
-        # middlewares:
-        #   test-stripprefix:
-        #     stripPrefix:
-        #       prefixes:
-        #         - "/app-server"
-        #         - "/app-server/"
-        #   testHeader:
-        #     headers:
-        #       accessControlAllowMethods:
-        #         - CONNECT
-        #         - DELETE
-        #         - GET
-        #         - HEAD
-        #         - OPTIONS
-        #         - PATCH
-        #         - POST
-        #         - PUT
         paths:
           -
-            # path: "/"
-            # pathType: "Prefix"
-            # priority: 1
             backend:
               service:
-                #name: dmvx-service
                 name: dm-web-server
-                #port: 8765
-                #port: 8080
                 port:
                   number: 5100
             pathType: ImplementationSpecific
-          # - path: "/app-server/"
-          #   pathType: "Prefix"
-          #   priority: 2
-          #   backend:
-          #     serviceName: dm-app-server
-          #     servicePort: 5110
+    - host: app-server.debatemap.app
+      http:
+        paths:
+          - backend:
+              service:
+                name: dm-app-server
+                port:
+                  number: 5110
+            pathType: ImplementationSpecific
+    - host: monitor.debatemap.app
+      http:
+        paths:
+          - backend:
+              service:
+                name: dm-monitor-backend
+                port:
+                  number: 5130
+            pathType: ImplementationSpecific
+    # debates.app
+    - host: debates.app
+      http:
+        paths:
+          -
+            backend:
+              service:
+                name: dm-web-server
+                port:
+                  number: 5100
+            pathType: ImplementationSpecific
     - host: app-server.debates.app
       http:
         paths:

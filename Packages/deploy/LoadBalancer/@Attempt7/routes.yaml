@@ -11,6 +11,7 @@ spec:
   hostnames:
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "debating.app"
+  - "debatemap.app"
   - "debates.app"
   rules:
     -
@@ -42,6 +43,7 @@ spec:
   hostnames:
   - "app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "app-server.debating.app"
+  - "app-server.debatemap.app"
   - "app-server.debates.app"
   rules:
     - backendRefs:
@@ -61,6 +63,7 @@ spec:
   hostnames:
   - "monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "monitor.debating.app"
+  - "monitor.debatemap.app"
   - "monitor.debates.app"
   rules:
     - backendRefs:

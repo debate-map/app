@@ -18,7 +18,7 @@ async function Start() {
 	try {
 		const extraArgsStr = process.argv[2];
 		const dev = extraArgsStr == "dev";
-		const origin = dev ? "http://localhost:5110" : "https://app-server.debates.app";
+		const origin = dev ? "http://localhost:5110" : "https://app-server.debatemap.app";
 		//console.log("Origin:", origin);
 
 		const jwtTokenEnvVarName = `DM_USER_JWT${dev ? `_DEV` : "_PROD"}`;
@@ -27,8 +27,8 @@ async function Start() {
 			console.error(`
 		No environment-variable named "${jwtTokenEnvVarName}" found! The recommended way to provide it is through a ".env" file in repo-root; see ".env.template" file for expected format.
 		As for retrieving the jwt-token in the first place, you can either:
-		1) Go to https://app-server.debates.app/gql-playground (or dev/localhost equivalent), and use the "signInStart" endpoint.
-		2) Sign in on "debates.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
+		1) Go to https://app-server.debatemap.app/gql-playground (or dev/localhost equivalent), and use the "signInStart" endpoint.
+		2) Sign in on "debatemap.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
 			`.trim());
 			return void WaitForEnterKeyThenExit(1);
 		}
