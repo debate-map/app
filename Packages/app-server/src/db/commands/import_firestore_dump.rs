@@ -8,7 +8,7 @@ use rust_shared::itertools::Itertools;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::value::Index;
 use rust_shared::serde_json::{json, Value};
-use rust_shared::db_constants::{SYSTEM_USER_ID, GLOBAL_ROOT_NODE_ID, SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME};
+use rust_shared::db_constants::{SYSTEM_USER_ID, GLOBAL_ROOT_NODE_ID, SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME, SYSTEM_USER_EMAIL};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::general_::serde::JSONValueV;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
@@ -17,7 +17,7 @@ use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error, ensure, bail, Context};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Deserialize};
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
 use crate::db::_shared::attachments::{TermAttachment, Attachment};
@@ -145,13 +145,22 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			},
 		}
 	};
-    let final_user_id = |importing_user_id: &String| -> String {
-		let email = importing_user_hiddens.get(importing_user_id).unwrap().email.as_str();
+    let final_user_id = |importing_user_id: &String| -> Result<String, Error> {
+		//let email = importing_user_hiddens.get(importing_user_id).ok_or(anyhow!("Could not find importing-user-hidden for id:{}", importing_user_id))?.email.as_str();
+		let importing_user_hidden = match importing_user_hiddens.get(importing_user_id) {
+			// there are some users where the user-hiddens entry is missing, so matching with existing users by email is impossible
+			// in these cases, replace the given user with the system-user (it's not ideal, but it's better than having a user-entry with an incorrect email attached)
+			//None => return Ok(importing_user_id.to_owned()),
+			None => return Ok(SYSTEM_USER_EMAIL.o()),
+			Some(a) => a,
+		};
+		
+		let email = importing_user_hidden.email.as_str();
 		let existing_user_structs_for_email = get_existing_user_structs_for_email(email);
 		match existing_user_structs_for_email {
-			None => return importing_user_id.to_owned(),
+			None => return Ok(importing_user_id.to_owned()),
 			Some((existing_user, _existing_user_hidden)) => {
-				return existing_user.id.to_string();
+				return Ok(existing_user.id.to_string());
 			},
 		}
 	};
@@ -168,7 +177,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 	for (old_id, val) in collections.try_get("maps")?.try_as_object()? {
 		let entry = Map {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			accessPolicy: default_policy_id.o(),
 			name: val.try_get("name")?.try_as_string()?,
@@ -179,7 +188,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			nodeAccessPolicy: Some(default_policy_id.o()),
 			featured: Some(false),
 			editors: vec![],
-			edits: val.try_get("edits")?.try_as_i64()? as i32,
+			edits: val.get("edits").and_then(|a| a.as_i64().map(|b| b as i32)).unwrap_or(0),
 			editedAt: val.get("editedAt").map(|a| a.as_i64()).unwrap_or(None),
 			extras: JSONValue::Object(serde_json::Map::new()),
 		};
@@ -189,7 +198,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 	for (old_id, val) in collections.try_get("medias")?.try_as_object()? {
 		let entry = Media {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			accessPolicy: default_policy_id.o(),
 			name: val.try_get("name")?.try_as_string()?,
@@ -203,7 +212,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 	for (old_id, val) in collections.try_get("nodePhrasings")?.try_as_object()? {
 		let entry = NodePhrasing {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			node: val.try_get("node")?.try_as_string()?,
 			r#type: match val.try_get("type")?.try_as_i64()? { 10 => NodePhrasingType::technical, 20 => NodePhrasingType::standard, _ => bail!("Invalid phrasing type") },
@@ -221,7 +230,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 	for (old_id, val) in collections.try_get("nodeRatings")?.try_as_object()? {
 		let entry = NodeRating {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			accessPolicy: default_policy_id.o(),
 			node: val.try_get("node")?.try_as_string()?,
@@ -242,7 +251,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 	for (old_id, val) in collections.try_get("nodeTags")?.try_as_object()? {
 		let entry = NodeTag {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			nodes: serde_json::from_value::<Vec<String>>(val.try_get("nodes")?.clone())?,
 			//nodes: serde_json::from_value::<Vec<String>>(val.try_get("nodes")?.clone())?.into_iter().map(|a| final_node_id(a)).collect_vec(),
@@ -265,7 +274,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 
 		let entry = Node {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			accessPolicy: default_policy_id.o(),
 			r#type: match val.try_get("type")?.try_as_i64()? { 10 => NodeType::category, 20 => NodeType::package, 30 => NodeType::multiChoiceQuestion, 40 => NodeType::claim, 50 => NodeType::argument, _ => bail!("Invalid node type") },
@@ -358,7 +367,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 
 		let entry = NodeRevision {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			node: node_id,
 			replacedBy: None,
@@ -396,7 +405,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 	for (old_id, val) in collections.try_get("terms")?.try_as_object()? {
 		let entry = Term {
 			id: ID(old_id.o()),
-			creator: final_user_id(&val.try_get("creator")?.try_as_string()?),
+			creator: final_user_id(&val.try_get("creator")?.try_as_string()?)?,
 			createdAt: val.try_get("createdAt")?.try_as_i64()?,
 			accessPolicy: default_policy_id.o(),
 			name: val.try_get("name")?.try_as_string()?,
@@ -412,7 +421,13 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 
 	for (old_id, _importing_user_json) in collections.try_get("users")?.try_as_object()? {
 		let importing_user = importing_users.get(old_id).unwrap();
-		let importing_user_hidden = importing_user_hiddens.get(old_id).unwrap();
+		let importing_user_hidden = match importing_user_hiddens.get(old_id) {
+			Some(a) => a,
+			None => {
+				warn!("Importing-user-hidden data not found for user: {} (references replaced with refs to system-user-id)", old_id);
+				continue;
+			}
+		};
 		let email = importing_user_hidden.email.as_str();
 
 		let existing_user_structs = get_existing_user_structs_for_email(email);

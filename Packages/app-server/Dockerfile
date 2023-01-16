@@ -78,6 +78,10 @@ ENV ENV=$env_ENV
 COPY --from=cargo-build /dm_repo/Packages/app-server/app-server-binary .
 COPY --from=cargo-build /dm_repo/Packages/app-server/kgetOutput_buildTime/ ./kgetOutput_buildTime/
 
+# temp
+#COPY --from=cargo-build /dm_repo/Packages/app-server/app-server-binary .
+COPY Packages/app-server/@Temp_FirestoreImport.json /dm_repo/Packages/app-server/
+
 # other files needed
 COPY .env .
 
