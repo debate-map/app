@@ -1,4 +1,4 @@
-use rust_shared::anyhow::Error;
+use rust_shared::{anyhow::Error, utils::time::time_since_epoch_ms_i64};
 
 use crate::{utils::db::accessors::AccessorContext, db::{maps::{get_map, Map}, commands::_command::upsert_db_entry_by_id_for_struct, users::{User, get_user}}};
 
@@ -18,6 +18,7 @@ pub async fn increment_user_edits(ctx: &AccessorContext<'_>, user_id: &str) -> R
     let old_data = get_user(ctx, &user_id).await?;
     let new_data = User {
         edits: old_data.edits + 1,
+        lastEditAt: Some(time_since_epoch_ms_i64()),
         ..old_data
     };
 
@@ -29,6 +30,7 @@ pub async fn increment_map_edits(ctx: &AccessorContext<'_>, map_id: &str) -> Res
     let old_data = get_map(ctx, &map_id).await?;
     let new_data = Map {
         edits: old_data.edits + 1,
+        editedAt: Some(time_since_epoch_ms_i64()),
         ..old_data
     };
 

@@ -25,7 +25,7 @@ use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::_shared::table_permissions::{does_policy_allow_x, CanVote, CanAddChild};
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
 use crate::db::access_policies_::_permission_set::{APAction, APTable};
-use crate::db::commands::_command::command_boilerplate;
+use crate::db::commands::_command::{command_boilerplate, upsert_db_entry_by_id_for_struct};
 use crate::db::general::permission_helpers::{assert_user_can_add_child, is_user_admin};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::maps::Map;
@@ -511,10 +511,10 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 				let mut merged_user = existing_user.clone();
 				merged_user.edits += importing_user.edits;
 				merged_user.joinDate = merged_user.joinDate.min(importing_user.joinDate);
-				insert_db_entry_by_id_for_struct(ctx, "users".o(), merged_user.id.to_string(), merged_user).await?;
+				upsert_db_entry_by_id_for_struct(ctx, "users".o(), merged_user.id.to_string(), merged_user).await?;
 
 				/*let new_user_hidden = existing_user_hidden.clone();
-				insert_db_entry_by_id_for_struct(ctx, "userHiddens".o(), importing_user_hidden.id.to_string(), importing_user_hidden).await?;*/
+				upsert_db_entry_by_id_for_struct(ctx, "userHiddens".o(), new_user_hidden.id.to_string(), new_user_hidden).await?;*/
 			},
 		}
 	}
