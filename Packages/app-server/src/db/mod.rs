@@ -1,6 +1,9 @@
 pub mod _shared {
     pub mod access_policy_target;
     pub mod attachments;
+    pub mod attachments_ {
+        pub mod source_chain;
+    }
     pub mod common_errors;
     pub mod path_finder;
     pub mod table_permissions;

@@ -8,7 +8,7 @@ use rust_shared::hyper::{StatusCode, Response};
 use rust_shared::once_cell::sync::Lazy;
 use rust_shared::{serde::{Serialize, Deserialize}, serde_json, tokio, utils::type_aliases::JSONValue};
 use rust_shared::serde_json::json;
-use tracing::error;
+use tracing::{error, warn};
 
 use crate::utils::{type_aliases::{ABReceiver, ABSender}};
 
@@ -78,7 +78,8 @@ async fn write(mut sender: SplitSink<WebSocket, Message>) {
         match sender.send(Message::Text(next_entry_as_str)).await {
             Ok(_res) => {},
             Err(err) => {
-                error!("Websocket write-connection to monitor-backend errored:{err}");
+                // only warn, since this is likely to just be a case where the app-server is being re-deployed
+                warn!("Websocket write-connection to monitor-backend errored:{err}");
                 break;
             },
         };

@@ -17,8 +17,16 @@ print("Context:", CONTEXT, "Remote:", REMOTE)
 
 # tilt config settings
 # For now, we just completely disable tilt's docker-prune behavior (doing so fixes issue #169); there might be a better solution, but this is fine for now.
-# To keep tilt's image-generation from taking up too much space, you can manually do docker-prunes when docker's image-storage grows too large. (eg. from docker-desktop's ui)
+# To keep tilt's image-generation from taking up too much space, you can manually do docker-prunes when docker's image-storage grows too large, eg:
+# 1) Prune all: `docker builder prune`
+# 2) Prune build-cache (largest single layer, but also useful to keep): `docker builder prune --filter type=exec.cachemount`
+# 3) Prune non-build-cache (recommended; though should be modified to exclude rust-base image; also not yet tested): `docker builder prune --filter type!=exec.cachemount`
 docker_prune_settings(disable=True)
+
+# Trying with docker-prune enabled, but with no max-age -- relying only on `keep_recent` count. (to be seen if this preserves what's needed for fast recompiles)
+# [Update: Didn't work; still cleared basically all build-cache, from 185gb to <1gb, when should have left at least ~4.5gb for cargo build-cache.]
+# For reference, here is the source-code of tilt's docker-prune function: https://github.com/tilt-dev/tilt/blob/4c8b561077f95316fe2a2a3ee27db8b0edba057d/internal/engine/dockerprune/docker_pruner.go#L137
+#docker_prune_settings(max_age_mins = 999888777666555, keep_recent = 2)
 
 # other tilt extensions
 load('ext://helm_remote', 'helm_remote')

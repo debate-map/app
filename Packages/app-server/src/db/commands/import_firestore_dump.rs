@@ -20,7 +20,8 @@ use rust_shared::serde::{Deserialize};
 use tracing::{info, warn};
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
-use crate::db::_shared::attachments::{TermAttachment, Attachment};
+use crate::db::_shared::attachments::{TermAttachment, Attachment, EquationAttachment, MediaAttachment, QuoteAttachment, ReferencesAttachment};
+use crate::db::_shared::attachments_::source_chain::{source_chain_from_old_json_data, source_chains_from_old_json_data};
 use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::_shared::table_permissions::{does_policy_allow_x, CanVote, CanAddChild};
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
@@ -459,10 +460,37 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 				},
 			})),
 			attachments: vec![
-				val.get("equation").map(|a| Attachment { equation: Some(a.o()), media: None, quote: None, references: None }),
-				val.get("references").map(|a| Attachment { equation: None, media: Some(a.o()), quote: None, references: None }),
-				val.get("quote").map(|a| Attachment { equation: None, media: None, quote: Some(a.o()), references: None }),
-				val.get("media").map(|a| Attachment { equation: None, media: None, quote: None, references: Some(a.o()) }),
+				val.get("equation").filter(|a| !a.is_null()).map(|data| {
+					let equation = EquationAttachment {
+						latex: data.get("latex").map(|a| a.as_bool()).unwrap_or(None).o(),
+						text: data.try_get("text").unwrap().try_as_string().unwrap(),
+						isStep: data.get("isStep").map(|a| a.as_bool()).unwrap_or(None).o(),
+						explanation: data.get("explanation").map(|a| a.as_string()).unwrap_or(None).o(),
+					};
+					Attachment { equation: Some(serde_json::to_value(equation).unwrap()), media: None, quote: None, references: None }
+				}),
+				val.get("media").filter(|a| !a.is_null()).map(|data| {
+					let media = MediaAttachment {
+						id: data.try_get("id").unwrap().try_as_string().unwrap(),
+						captured: data.get("captured").and_then(|a| a.as_bool()).unwrap_or(false),
+						previewWidth: data.get("previewWidth").map(|a| a.as_f64()).unwrap_or(None).o(),
+						sourceChains: source_chains_from_old_json_data(data.get("sourceChains")).unwrap(),
+					};
+					Attachment { equation: None, media: Some(serde_json::to_value(media).unwrap()), quote: None, references: None }
+				}),
+				val.get("quote").filter(|a| !a.is_null()).map(|data| {
+					let quote = QuoteAttachment {
+						content: data.try_get("content").unwrap().try_as_string().unwrap(),
+						sourceChains: source_chains_from_old_json_data(data.get("sourceChains")).unwrap(),
+					};
+					Attachment { equation: None, media: None, quote: Some(serde_json::to_value(quote).unwrap()), references: None }
+				}),
+				val.get("references").filter(|a| !a.is_null()).map(|data| {
+					let references = ReferencesAttachment {
+						sourceChains: source_chains_from_old_json_data(data.get("sourceChains")).unwrap(),
+					};
+					Attachment { equation: None, media: None, quote: None, references: Some(serde_json::to_value(references).unwrap()) }
+				}),
 			].into_iter().filter_map(|a| a).collect_vec(),
 			c_accessPolicyTargets: vec![],
 		};

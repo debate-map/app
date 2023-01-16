@@ -266,7 +266,9 @@ pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
 pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
     let response_str = match have_own_graphql_handle_request(req, schema).await {
         Ok(a) => a,
-        Err(err) => format!("Got error during passing/execution of graphql request to/in app-server's gql engine:{err:?}"),
+        Err(err) => json!({
+            "error": format!("Got error during passing/execution of graphql request to/in app-server's gql engine:{:?}", err),
+        }).to_string(),
     };
 
     // send response (to frontend)
