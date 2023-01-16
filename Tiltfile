@@ -236,6 +236,9 @@ k8s_yaml(blob(postgresYaml))
 # ----------
 
 # todo: probably move the "DO NOT RESTART" marker from the category to just the resources that need it (probably only the first one needs it)
+# List of pods that I've confirmed are fine to kill/restart:
+# * debate-map-instance1-XXX (the pod for the database itself)
+
 pgo_crdName = "postgresclusters.postgres-operator.crunchydata.com:customresourcedefinition"
 pgo_upgrades_crdName = "pgupgrades.postgres-operator.crunchydata.com"
 NEXT_k8s_resource(new_name='pgo_crd-definition',

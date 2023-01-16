@@ -755,15 +755,15 @@ To create a backup:
 To restore a backup:
 * 1\) It's recommended to rename the existing `app` schema to `app_old` or the like, before restoring a backup file.
 * 2\) Do some cleanup of the backup file: (`pgdump` is not perfect, and can output some lines that fail to restore as-is)
-	* 2.1\) Comment out the following line near the end of the file (`pg_stat_statements` table may not be created/populated yet): `GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE app_new.pg_stat_statements TO rls_obeyer;`
+	* 2.1\) If present, comment out the following line near the end of the file (`pg_stat_statements` table may not be created/populated yet): `GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE app.pg_stat_statements TO rls_obeyer;`
 * 3\) Execute the SQL dump/backup-file using psql or DBeaver.
 	* 3.1\) TODO
 * 4\) Execute the SQL:
 	```sql
-	ALTER DATABASE "debate-map" SET search_path TO app; -- for future pg-sessions
+	ALTER DATABASE "debate-map" SET search_path TO 'app'; -- for future pg-sessions
 	SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
 	```
-	* Note: Why is this necessary? Because SQL dumps/backups do not record the "search-path" of the database. This is by design apparently (https://postgrespro.com/list/thread-id/2448092), but means that the search-path must be set manually, if restoring to a fresh database. If you get errors during restore relating to search-paths (eg. due to forgetting of schema qualifier in one of the functions), try adding the sql code above to the start of the sql file (replacing the emptying search-path line already there).
+	* Note: Why is this necessary? Because SQL dumps/backups do not record the "search-path" of the database. This is by design apparently (https://postgrespro.com/list/thread-id/2448092), but means that the search-path must be set manually, if restoring to a fresh database. If you get errors during restore relating to search-paths (eg. due to a dev forgetting to add the schema qualifier to a recently-added function), try adding the sql code above to the start of the sql file (replacing the emptying search-path line already there).
 
 </details>
 

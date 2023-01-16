@@ -1,7 +1,9 @@
 -- alter the default search-path, so that queries on non-namespaced targets are found in the correct schema (ie. in "app") 
-ALTER DATABASE "debate-map" SET search_path TO app; -- for future pg-sessions
---SET SCHEMA PATH app; -- for current pg-session
+ALTER DATABASE "debate-map" SET search_path TO 'app'; -- for future pg-sessions
 SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session
+-- other search-path-set options
+--ALTER ROLE ALL SET search_path = 'app'; -- for future pg-sessions [not needed, so long as each role never had a search_path set]
+--SET SCHEMA PATH app; -- for current pg-session [seems not working]
 
 -- options for this session/connection
 -- ===========
