@@ -12,7 +12,7 @@ use tracing::info;
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, command_boilerplate};
-use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
+use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::general::permission_helpers::{assert_user_can_delete, is_user_creator_or_mod};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::node_links::{get_node_links, get_node_link};
@@ -79,7 +79,7 @@ pub async fn delete_node_link(ctx: &AccessorContext<'_>, actor: &User, is_root: 
 	}*/
 	delete_db_entry_by_id(ctx, "nodeLinks".to_owned(), link.id.to_string()).await?;
 
-	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
+	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
 	Ok(DeleteNodeLinkResult { __: gql_placeholder() })
 }

@@ -16,7 +16,7 @@ use serde::Serialize;
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
+use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
 use crate::db::commands::add_node_link::{add_node_link, AddNodeLinkInput};
 use crate::db::general::permission_helpers::{assert_user_can_add_phrasing, assert_user_can_add_child};
@@ -82,7 +82,7 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
 
 	let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
     
-	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
+	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
     let result = AddChildNodeResult {
         nodeID: add_node_result.nodeID,

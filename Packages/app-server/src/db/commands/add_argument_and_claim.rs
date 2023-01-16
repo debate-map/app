@@ -27,7 +27,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
 use super::_shared::add_node::add_node;
-use super::_shared::increment_map_edits::increment_map_edits_if_valid;
+use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 
 wrap_slow_macros!{
@@ -81,7 +81,7 @@ pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, is_
 		link: claimLink,
 	}, Default::default()).await?;
 
-	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
+	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
 	Ok(AddArgumentAndClaimResult {
 		argumentNodeID: add_argument_result.nodeID,

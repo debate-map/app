@@ -508,10 +508,10 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			},
 			// a user already exists with this email, so merge the importing-data into the existing database entry
 			Some((existing_user, _existing_user_hidden)) => {
-				let mut new_user = existing_user.clone();
-				new_user.edits += importing_user.edits;
-				new_user.joinDate = new_user.joinDate.min(importing_user.joinDate);
-				insert_db_entry_by_id_for_struct(ctx, "users".o(), importing_user.id.to_string(), importing_user).await?;
+				let mut merged_user = existing_user.clone();
+				merged_user.edits += importing_user.edits;
+				merged_user.joinDate = merged_user.joinDate.min(importing_user.joinDate);
+				insert_db_entry_by_id_for_struct(ctx, "users".o(), merged_user.id.to_string(), merged_user).await?;
 
 				/*let new_user_hidden = existing_user_hidden.clone();
 				insert_db_entry_by_id_for_struct(ctx, "userHiddens".o(), importing_user_hidden.id.to_string(), importing_user_hidden).await?;*/

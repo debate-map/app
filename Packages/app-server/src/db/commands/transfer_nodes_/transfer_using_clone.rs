@@ -39,7 +39,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, gql_placeholder};
 use super::super::_shared::add_node::add_node;
-use super::super::_shared::increment_map_edits::increment_map_edits_if_valid;
+use super::super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::super::add_child_node::{add_child_node, AddChildNodeInput};
 use super::super::add_node_link::assert_link_is_valid;
 use super::transfer_using_shim::TransferResult_Shim;

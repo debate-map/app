@@ -18,7 +18,7 @@ use tracing::info;
 use crate::db::_shared::common_errors::err_should_be_populated;
 use crate::db::access_policies_::_permission_set::{APTable, APAction};
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
+use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::general::permission_helpers::assert_user_can_modify;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
@@ -113,7 +113,7 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 		upsert_db_entry_by_id_for_struct(&ctx, "mapNodeEdits".to_owned(), edit.id.to_string(), edit).await?;
 	}
 
-	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
+	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
 	let result = AddNodeRevisionResult { id: revision.id.to_string() };
 	//if extras.is_child_command != Some(true) {

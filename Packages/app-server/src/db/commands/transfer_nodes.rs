@@ -33,7 +33,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, gql_placeholder};
 use super::_shared::add_node::add_node;
-use super::_shared::increment_map_edits::increment_map_edits_if_valid;
+use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 use super::add_node_link::assert_link_is_valid;
 use super::transfer_nodes_::transfer_using_clone::TransferResult_Clone;
@@ -126,7 +126,7 @@ pub async fn transfer_nodes(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
         transfer_results.push(result);
     }
 	
-	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
+	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
 	Ok(TransferNodesResult { __: gql_placeholder() })
 }

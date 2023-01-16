@@ -14,7 +14,7 @@ use rust_shared::serde::{Deserialize};
 use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
-use crate::db::commands::_shared::increment_map_edits::increment_map_edits_if_valid;
+use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::maps::{MapInput, Map};

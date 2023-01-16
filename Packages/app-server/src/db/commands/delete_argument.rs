@@ -21,7 +21,7 @@ use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
-use super::_shared::increment_map_edits::increment_map_edits_if_valid;
+use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::delete_node::{delete_node, DeleteNodeInput};
 use super::delete_node_link::{DeleteNodeLinkInput, delete_node_link};
 
@@ -64,7 +64,7 @@ pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, is_root: b
 	//delete_node(ctx, actor, DeleteNodeInput { mapID: None, nodeID: argumentID }, DeleteNodeExtras { childrenToIgnore: vec![claimID] }).await?;
 	delete_node(ctx, actor, false, DeleteNodeInput { mapID: None, nodeID: argumentID }, Default::default()).await?;
 
-	increment_map_edits_if_valid(&ctx, mapID, is_root).await?;
+	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
 
 	Ok(DeleteArgumentResult { __: gql_placeholder() })
 }
