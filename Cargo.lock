@@ -2250,7 +2250,7 @@ dependencies = [
 [[package]]
 name = "postgres-protocol"
 version = "0.6.2"
-source = "git+https://github.com/petrosagg/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
+source = "git+https://github.com/Venryx/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
 dependencies = [
  "base64",
  "byteorder",
@@ -2267,7 +2267,7 @@ dependencies = [
 [[package]]
 name = "postgres-types"
 version = "0.2.2"
-source = "git+https://github.com/petrosagg/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
+source = "git+https://github.com/Venryx/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
 dependencies = [
  "array-init",
  "bytes",
@@ -3250,7 +3250,7 @@ dependencies = [
 [[package]]
 name = "tokio-postgres"
 version = "0.7.5"
-source = "git+https://github.com/petrosagg/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
+source = "git+https://github.com/Venryx/rust-postgres.git?branch=copy-both#df8b5986088d29f29a3afb71eec5877171278387"
 dependencies = [
  "async-trait",
  "byteorder",
