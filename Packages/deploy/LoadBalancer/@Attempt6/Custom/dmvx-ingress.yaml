@@ -17,7 +17,9 @@ metadata:
     #traefik.ingress.kubernetes.io/custom-response-headers: "Server:||X-Application-Context:||X-Powered-By:||exception:||Access-Control-Allow-Headers:CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
 spec:
   rules:
-    # these allow you to open the site directly, using the ovh cluster domain-name
+    # the direct, ovh-cluster domain-name (for some dev use-cases, eg. long-running requests that the cloudflare-proxy would drop)
+    # ==========
+
     - host: 9m2x1z.nodes.c1.or1.k8s.ovh.us
       http:
         paths:
@@ -45,8 +47,10 @@ spec:
                 port:
                   number: 5130
             pathType: ImplementationSpecific
-    # these are the domains end-users should be accessing the site from
-    # debatemap.app
+
+    # debatemap.app (for end-users)
+    # ==========
+
     - host: debatemap.app
       http:
         paths:
@@ -75,7 +79,21 @@ spec:
                 port:
                   number: 5130
             pathType: ImplementationSpecific
-    # debates.app
+    # grafana is made directly accessible (unlike prometheus, etc.) because it has its own authentication barrier (also helpful for direct-linking to subpages)
+    - host: grafana.debatemap.app
+      http:
+        paths:
+          - backend:
+              service:
+                name: loki-stack-grafana-proxy
+                namespace: monitoring # this doesn't work
+                port:
+                  number: 3000
+            pathType: ImplementationSpecific
+
+    # debates.app (for end-users)
+    # ==========
+
     - host: debates.app
       http:
         paths:
@@ -104,13 +122,69 @@ spec:
                 port:
                   number: 5130
             pathType: ImplementationSpecific
-    # Grafana is made directly accessible (unlike prometheus, etc.) because it has its own authentication barrier. (also helpful for direct-linking to subpages)
+    # grafana is made directly accessible (unlike prometheus, etc.) because it has its own authentication barrier (also helpful for direct-linking to subpages)
     - host: grafana.debates.app
       http:
         paths:
           - backend:
               service:
-                name: loki-stack-grafana
+                name: loki-stack-grafana-proxy
+                namespace: monitoring # this doesn't work
                 port:
                   number: 3000
             pathType: ImplementationSpecific
+
+# set up proxy-service in default-namespace that routes to the actual grafana service
+# todo: confirm whether this is correct/working
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-stack-grafana-proxy
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: loki-stack-grafana.monitoring.svc.cluster.local
+  ports:
+  - name: http
+    port: 3000
+    protocol: TCP
+
+# test
+# ---
+# kind: Ingress
+# apiVersion: networking.k8s.io/v1
+# metadata:
+#   name: dmvx-ingress-for-monitoring-namespace
+#   namespace: monitoring
+#   annotations:
+#     kubernetes.io/ingress.class: traefik
+# spec:
+#   rules:
+#     # debatemap.app (for end-users)
+#     # ==========
+
+#     # grafana is made directly accessible (unlike prometheus, etc.) because it has its own authentication barrier (also helpful for direct-linking to subpages)
+#     - host: grafana.debatemap.app
+#       http:
+#         paths:
+#           - backend:
+#               service:
+#                 name: loki-stack-grafana.monitoring
+#                 port:
+#                   number: 3000
+#             pathType: ImplementationSpecific
+
+#     # debates.app (for end-users)
+#     # ==========
+
+#     # grafana is made directly accessible (unlike prometheus, etc.) because it has its own authentication barrier (also helpful for direct-linking to subpages)
+#     - host: grafana.debates.app
+#       http:
+#         paths:
+#           - backend:
+#               service:
+#                 name: loki-stack-grafana.monitoring
+#                 port:
+#                   number: 3000
+#             pathType: ImplementationSpecific

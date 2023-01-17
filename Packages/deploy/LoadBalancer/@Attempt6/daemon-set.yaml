@@ -3,6 +3,9 @@ apiVersion: apps/v1
 metadata:
   name: traefik-daemon-set
 spec:
+  selector:
+    matchLabels:
+      app: traefik
   template:
     spec:
       serviceAccountName: traefik-ingress-controller
@@ -33,6 +36,9 @@ spec:
 
         # Specify that we want to use Traefik as an Ingress Controller.
         - --providers.kubernetesingress
+        # needed for the grafana.debatemap.app ingress-route to work
+        - --providers.kubernetescrd.allowCrossNamespace=true
+        - --providers.kubernetescrd.allowExternalNameServices=true
 
         # Define two entrypoint ports, and setup a redirect from HTTP to HTTPS.
         - --entryPoints.web.address=:80
