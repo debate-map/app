@@ -3,7 +3,7 @@ const fs = require("fs");
 //console.log("Argv:", process.argv);
 const env = process.argv[2];
 
-const historyFileName = `./Temp/TiltfileRunHistory_${env}.json`;
+const historyFileName = `../Temp/TiltfileRunHistory_${env}.json`;
 /** @type {{runs: any[]}} */
 const historyObj = JSON.parse(fs.existsSync(historyFileName) ? fs.readFileSync(historyFileName) : "{}");
 historyObj.runs = historyObj.runs ?? [];
@@ -14,5 +14,5 @@ historyObj.runs.unshift({
 });
 if (historyObj.runs.length > 100) historyObj.runs.length = 100;
 
-fs.mkdirSync("./Temp", {recursive: true});
+fs.mkdirSync("../Temp", {recursive: true});
 fs.writeFileSync(historyFileName, JSON.stringify(historyObj, null, "\t"));

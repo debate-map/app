@@ -271,13 +271,13 @@ Object.assign(scripts, {
 		}),*/
 
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt up --context local`,
-		tiltDown_local:	`${PrepDockerCmd()}		${SetTileEnvCmd(false, "local")}					tilt down --context local`,
-		tiltUp_docker:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "docker-desktop")}		tilt up --context docker-desktop`,
-		tiltUp_k3d:			`${PrepDockerCmd()}		${SetTileEnvCmd(false, "k3d-main-1")}			tilt up --context k3d-main-1`,
-		tiltUp_kind:		`${PrepDockerCmd()}		${SetTileEnvCmd(false, "kind-main-1")}			tilt up --context kind-main-1`,
-		tiltUp_ovh:			`${PrepDockerCmd()}		${SetTileEnvCmd(true, "ovh")}						tilt up --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
-		tiltDown_ovh:		`${PrepDockerCmd()}		${SetTileEnvCmd(true, "ovh")}						tilt down --context ovh`,
+		tiltUp_local:     `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "local")}             tilt up   -f ./Tilt/Main.star --context local`,
+		tiltDown_local:   `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "local")}             tilt down -f ./Tilt/Main.star --context local`,
+		tiltUp_docker:    `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "docker-desktop")}    tilt up   -f ./Tilt/Main.star --context docker-desktop`,
+		tiltUp_k3d:       `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "k3d-main-1")}        tilt up   -f ./Tilt/Main.star --context k3d-main-1`,
+		tiltUp_kind:      `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "kind-main-1")}       tilt up   -f ./Tilt/Main.star --context kind-main-1`,
+		tiltUp_ovh:       `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up   -f ./Tilt/Main.star --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltDown_ovh:     `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt down -f ./Tilt/Main.star --context ovh`,
 
 		forceKillNS: Dynamic(()=>{
 			const pathToKillScript = paths.resolve("./Scripts/KillKubeNS.sh");

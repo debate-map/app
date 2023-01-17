@@ -1,8 +1,10 @@
 resources:
+
 # gateway templates
 - gateway-crds
 - gateway-webhooks/admission_webhook.yaml
 - gateway-webhooks/certificate_config.yaml
+
 # gateway customizations
 - gateways.yaml
 - routes.yaml

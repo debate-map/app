@@ -237,7 +237,7 @@ Required:
 	* 1.1\) If using VSCode, it's highly recommended to install the [Rust Analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension.
 * 2\) Install Tilt: https://github.com/tilt-dev/tilt (I'm currently on version 0.30.13)
 	* 2.1\) If the `tilt` binary was not already added to your `Path` environment variable (depends on install path), do so.
-* 3\) Install Helm (eg. for some Tilt extensions): https://helm.sh/docs/intro/install
+* 3\) Install Helm (used during k8s deployment), v3.10.3+: https://helm.sh/docs/intro/install
 	* 3.1\) On Windows, recommended install steps:
 		* 3.1.1\) Install [Chocolatey](https://chocolatey.org/install). (if `choco` command not already present)
 		* 3.1.2\) Run: `choco install kubernetes-helm`

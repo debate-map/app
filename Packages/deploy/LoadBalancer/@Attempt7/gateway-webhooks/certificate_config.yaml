@@ -1,11 +1,4 @@
-# v-removed
-# apiVersion: v1
-# kind: Namespace
-# metadata:
-#   name: gateway-api
-#   labels:
-#     name: gateway-api
-# ---
+# from: https://github.com/kubernetes-sigs/gateway-api/blob/69e4d8b69b8ec936bc1ed3ca8af807cd45dca09d/config/webhook/certificate_config.yaml
 
 apiVersion: v1
 kind: ServiceAccount
@@ -13,7 +6,7 @@ metadata:
   name: gateway-api-admission
   labels:
     name: gateway-api-webhook
-  namespace: gateway-api
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -37,7 +30,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-api
+  namespace: gateway-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -45,7 +38,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: gateway-api-admission
-    namespace: gateway-api
+    namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -54,7 +47,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-api
+  namespace: gateway-system
 rules:
   - apiGroups:
       - ''
@@ -71,7 +64,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-api
+  namespace: gateway-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -79,7 +72,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: gateway-api-admission
-    namespace: gateway-api
+    namespace: gateway-system
 ---
 apiVersion: batch/v1
 kind: Job
@@ -88,7 +81,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-api
+  namespace: gateway-system
 spec:
   template:
     metadata:
@@ -102,8 +95,8 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - create
-            - --host=gateway-api-admission-server,gateway-api-admission-server.gateway-api.svc
-            - --namespace=gateway-api
+            - --host=gateway-api-admission-server,gateway-api-admission-server.gateway-system.svc
+            - --namespace=gateway-system
             - --secret-name=gateway-api-admission
           env:
             - name: POD_NAMESPACE
@@ -122,7 +115,7 @@ metadata:
   name: gateway-api-admission-patch
   labels:
     name: gateway-api-webhook
-  namespace: gateway-api
+  namespace: gateway-system
 spec:
   template:
     metadata:
@@ -137,7 +130,7 @@ spec:
           args:
             - patch
             - --webhook-name=gateway-api-admission
-            - --namespace=gateway-api
+            - --namespace=gateway-system
             - --patch-mutating=false
             - --patch-validating=true
             - --secret-name=gateway-api-admission

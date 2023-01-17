@@ -8,7 +8,7 @@
 # STAGE 2 (base-image: dm-rust-base)
 # ==================================================
 # ----------
-	# see: ./Tiltfile (or source: Packages/deploy/@RustBase/Dockerfile)
+	# see: ./Tilt/Main.star (or source: Packages/deploy/@RustBase/Dockerfile)
 	FROM $RUST_BASE_URL as cargo-build
 	ARG env_ENV
 	ARG debug_vs_release

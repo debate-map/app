@@ -1,1 +1,0 @@
-This `overlay` folder is not currently used; patches are applied by `tilt_modules/coreos_prometheus/Tiltfile`, based on the `patches` folder.

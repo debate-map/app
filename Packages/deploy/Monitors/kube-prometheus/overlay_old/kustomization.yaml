@@ -1,6 +1,0 @@
-bases:
-  - ../base
-
-patchesStrategicMerge:
-#  - prometheus-service.yaml # disabled for now, since isn't working; and disabling may help it work as a data-source for grafana
-  - grafana-service.yaml
