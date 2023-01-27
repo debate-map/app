@@ -2430,7 +2430,7 @@ __metadata:
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.6
-    web-vcore: 0.0.65
+    web-vcore: 0.0.66
   languageName: unknown
   linkType: soft
 
@@ -5751,7 +5751,7 @@ __metadata:
     stream-browserify: ^3.0.0
     ts-node: ^10.0.0
     ts-node-dev: 1.1.6
-    ua-parser-js: ^0.7.12
+    ua-parser-js: ^0.7.33
     updeep: ^1.0.0
     use-resize-observer: ^8.0.0
   languageName: unknown
@@ -5795,7 +5795,7 @@ __metadata:
     stream-browserify: ^3.0.0
     ts-node: ^10.0.0
     ts-node-dev: 1.1.6
-    ua-parser-js: ^0.7.12
+    ua-parser-js: ^0.7.33
     updeep: ^1.0.0
     use-resize-observer: ^8.0.0
   languageName: unknown
@@ -7428,32 +7428,6 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback":
-  version: 0.0.0-use.local
-  resolution: "graphql-feedback@workspace:.yalc/web-vcore/.yalc/graphql-feedback"
-  dependencies:
-    classnames: ^2.3.1
-    codemirror: ^5.62.2
-    mobx-sync: ^3.0.0
-    react-vmarkdown: ^1.0.3
-    slugid: ^2.0.0
-  peerDependencies:
-    "@apollo/client": ^3.3.20
-    js-vextensions: ^0.0.1
-    mobx: ^6.3.2
-    mobx-graphlink: ^0.0.6
-    mobx-react: ^7.2.0
-    postgraphile: ^4.12.3
-    react: ^17.0.2
-    react-beautiful-dnd: ^10.0.4
-    react-dom: ^17.0.2
-    react-vcomponents: ^1.0.39
-    react-vextensions: ^1.0.15
-    react-vmessagebox: 0.0.1
-    react-vscrollview: 0.0.2
-  languageName: unknown
-  linkType: soft
-
 "graphql-tag@npm:2.12.5":
   version: 2.12.5
   resolution: "graphql-tag@npm:2.12.5"
@@ -8618,13 +8592,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"js-vextensions@^1.0.65, js-vextensions@^1.0.69, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
-  version: 0.0.0-use.local
-  resolution: "js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions"
-  languageName: unknown
-  linkType: soft
-
-"js-vextensions@npm:1.0.70":
+"js-vextensions@npm:1.0.70, js-vextensions@npm:^1.0.65, js-vextensions@npm:^1.0.69":
   version: 1.0.70
   resolution: "js-vextensions@npm:1.0.70"
   checksum: dbcec1865114bc628dcc429823aae461669d583061e1a1f0d408461551492a13f99686a17cdedc6ca58c4a2d6a3e0e255d79fd449272b3700dab2efb08fc46ac
@@ -9617,9 +9585,9 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.36, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
-  version: 0.0.0-use.local
-  resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
+"mobx-graphlink@npm:0.0.37":
+  version: 0.0.37
+  resolution: "mobx-graphlink@npm:0.0.37"
   dependencies:
     "@types/json-schema": ^7.0.8
     "@types/node": ^15.12.4
@@ -9642,8 +9610,9 @@ fsevents@~2.3.2:
     mobx: ^6.3.2
     mobx-react: ^7.2.0
     react: ^17.0.2
-  languageName: unknown
-  linkType: soft
+  checksum: 149ab5d516a95368a0b5500fe9fc57bfd2f9fd20c90d55822f26301da76ca54e3f9c4b4889dda799697a35aa8985a57481bb52b1a7c4f4d0ac334ecb5b4106e3
+  languageName: node
+  linkType: hard
 
 "mobx-react-lite@npm:^3.2.0":
   version: 3.2.2
@@ -11663,19 +11632,20 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-uplot@0.0.8, react-uplot@workspace:.yalc/web-vcore/.yalc/react-uplot":
-  version: 0.0.0-use.local
-  resolution: "react-uplot@workspace:.yalc/web-vcore/.yalc/react-uplot"
+"react-uplot@npm:0.0.8":
+  version: 0.0.8
+  resolution: "react-uplot@npm:0.0.8"
   peerDependencies:
     react: ^16.0.0
     react-dom: ^16.0.0
     uplot: ^1.0.0
-  languageName: unknown
-  linkType: soft
+  checksum: 5a3ff35116de5021929d2f0ba5273d8068fbfb261f4bd2134d63c5ae7a0e1b5441f8f2b285ddb8af7bd09225065f01857335f35a33dccfc874b8b44ae5cbb16a
+  languageName: node
+  linkType: hard
 
-"react-vcomponents@1.0.41, react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents":
-  version: 0.0.0-use.local
-  resolution: "react-vcomponents@workspace:.yalc/web-vcore/.yalc/react-vcomponents"
+"react-vcomponents@npm:1.0.41":
+  version: 1.0.41
+  resolution: "react-vcomponents@npm:1.0.41"
   dependencies:
     classnames: ^2.2.5
     keycode: ^2.2.0
@@ -11684,19 +11654,21 @@ fsevents@~2.3.2:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-vextensions: ^1.0.14
-  languageName: unknown
-  linkType: soft
+  checksum: ef1ca22ce827bf2ae1aa617db89c335b6c54995f9c7fecb073e7881a791eba3339a50bfe8ac3800a180470f4391ac5b2a4465e549b74c07c0068211c2e2a9299
+  languageName: node
+  linkType: hard
 
-"react-vextensions@1.0.15, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
-  version: 0.0.0-use.local
-  resolution: "react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions"
+"react-vextensions@npm:1.0.15":
+  version: 1.0.15
+  resolution: "react-vextensions@npm:1.0.15"
   dependencies:
     classnames: ^2.2.5
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-  languageName: unknown
-  linkType: soft
+  checksum: c50927dc7d7bd23eb47cca5b3577f0857781bd775e7b6d53d75951adc90cb1037d58b1aac4ef5ab67bdb7156abafae6f59ba72627a5c0cd89852c7d487057579
+  languageName: node
+  linkType: hard
 
 "react-vmarkdown@npm:1.0.3, react-vmarkdown@npm:^1.0.3":
   version: 1.0.3
@@ -11713,9 +11685,9 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-vmenu@1.0.14, react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu":
-  version: 0.0.0-use.local
-  resolution: "react-vmenu@workspace:.yalc/web-vcore/.yalc/react-vmenu"
+"react-vmenu@npm:1.0.14":
+  version: 1.0.14
+  resolution: "react-vmenu@npm:1.0.14"
   dependencies:
     classnames: ^2.2.5
   peerDependencies:
@@ -11723,8 +11695,9 @@ fsevents@~2.3.2:
     mobx-react: ^7.2.0
     react: ^17.0.2
     react-dom: ^17.0.2
-  languageName: unknown
-  linkType: soft
+  checksum: 5c7ac9865d3d1883670b30fe0f37bd1b413d1ab35fbf92e7dc65c2cce619fbc9ee749880f322b9b71402ea0e9284dc1939fb8794c124c4980324ea37c7baaa64
+  languageName: node
+  linkType: hard
 
 "react-vmessagebox@npm:1.0.14":
   version: 1.0.14
@@ -11743,31 +11716,16 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox":
-  version: 0.0.0-use.local
-  resolution: "react-vmessagebox@workspace:.yalc/web-vcore/.yalc/react-vmessagebox"
-  dependencies:
-    classnames: ^2.2.5
-    mobx-react: ^7.2.0
-    react-modal: ^3.11.1
-  peerDependencies:
-    mobx: ^5.0.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-vcomponents: ^1.0.33
-    react-vextensions: ^1.0.10
-  languageName: unknown
-  linkType: soft
-
-"react-vscrollview@1.0.4, react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview":
-  version: 0.0.0-use.local
-  resolution: "react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview"
+"react-vscrollview@npm:1.0.4":
+  version: 1.0.4
+  resolution: "react-vscrollview@npm:1.0.4"
   peerDependencies:
     react: ^15.3.0
     react-dom: ^15.3.0
     react-vextensions: ^0.0.1
-  languageName: unknown
-  linkType: soft
+  checksum: bcf15291a85f22a7e5789b7b7f57205abef4b685c4c8fe742b782c5c0724bcf19b48c5fa9b6e6905da750894c49d75d33b224d8f556d7e394042095162650433
+  languageName: node
+  linkType: hard
 
 "react@npm:17.0.2":
   version: 17.0.2
@@ -13636,26 +13594,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-grapher@workspace:.yalc/tree-grapher":
-  version: 0.0.0-use.local
-  resolution: "tree-grapher@workspace:.yalc/tree-grapher"
-  dependencies:
-    "@types/d3-hierarchy": ^3.0.2
-    d3-hierarchy: ^3.1.1
-    js-vextensions: ^1.0.69
-    mobx: ^6.3.13
-    mobx-react: ^7.2.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    use-callback-ref: ^1.2.5
-    use-resize-observer: ^8.0.0
-    use-state-with-deps: ^1.1.1
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  languageName: unknown
-  linkType: soft
-
 "tree-kill@npm:^1.2.2":
   version: 1.2.2
   resolution: "tree-kill@npm:1.2.2"
@@ -14016,10 +13954,10 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"ua-parser-js@npm:^0.7.12":
-  version: 0.7.28
-  resolution: "ua-parser-js@npm:0.7.28"
-  checksum: a7da4ad54527211e878ee016c2ef64efad5c2f5a31277d36c9da93b4c89ecaa64f391ad4cf158ada76a9ad8e53004a950705ff1c2f27a52ca8bfb3f1381c39ff
+"ua-parser-js@npm:^0.7.33":
+  version: 0.7.33
+  resolution: "ua-parser-js@npm:0.7.33"
+  checksum: 1510e9ec26fcaf0d8c6ae8f1078a8230e8816f083e1b5f453ea19d06b8ef2b8a596601c92148fd41899e8b3e5f83fa69c42332bd5729b931a721040339831696
   languageName: node
   linkType: hard
 
@@ -14032,15 +13970,6 @@ typescript@~3.7.3:
   checksum: 79ab0ada0d90f26c959ac29f790447658644a5c46c259b4367c475f1f9dd0fc86b578cd94d6d761261dd0a286c2e526a5fcf5cf6b9eb254198bd966657992348
   languageName: node
   linkType: hard
-
-"ui-debug-kit@workspace:.yalc/ui-debug-kit":
-  version: 0.0.0-use.local
-  resolution: "ui-debug-kit@workspace:.yalc/ui-debug-kit"
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  languageName: unknown
-  linkType: soft
 
 "unbox-primitive@npm:^1.0.1":
   version: 1.0.1
@@ -14540,9 +14469,9 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.65, web-vcore@workspace:.yalc/web-vcore":
-  version: 0.0.0-use.local
-  resolution: "web-vcore@workspace:.yalc/web-vcore"
+"web-vcore@npm:0.0.66":
+  version: 0.0.66
+  resolution: "web-vcore@npm:0.0.66"
   dependencies:
     "@apollo/client": 3.5.0-beta.4
     "@babel/core": ^7.14.6
@@ -14593,7 +14522,7 @@ typescript@~3.7.3:
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.36
+    mobx-graphlink: 0.0.37
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0
@@ -14650,8 +14579,9 @@ typescript@~3.7.3:
       optional: true
     mobx-firelink:
       optional: true
-  languageName: unknown
-  linkType: soft
+  checksum: 205643f906ca09981bb6fc3864050bd1de8986864c975c448190d0e2f44b92452771d18fc1ff36e9e73473ab56bcf73547eb89651fe373c3a641e9ef09fc194f
+  languageName: node
+  linkType: hard
 
 "webpack-cli@npm:^4.7.2":
   version: 4.9.1
