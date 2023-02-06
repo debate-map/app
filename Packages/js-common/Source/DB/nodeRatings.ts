@@ -127,6 +127,7 @@ export function AssertBetween0And100OrNull(val: number|n) {
 }
 
 const rsCompatibleNodeTypes = [NodeType.argument, NodeType.claim];
+/** Returns a number based on the ordering-type for the given node, which will result in proper ordering when calling `nodes.OrderBy(node=>GetOrderingValue_AtPath(node, ...))`. (this means eg. vote-values are reversed)  */
 export const GetOrderingValue_AtPath = CreateAccessor((node: NodeL3, path: string, orderingType: ChildOrdering, boxType?: ChildGroup|n, ratingType?: NodeRatingType): number | string=>{
 	if (orderingType == ChildOrdering.manual && node.link) {
 		return node.link.orderKey;
@@ -136,6 +137,10 @@ export const GetOrderingValue_AtPath = CreateAccessor((node: NodeL3, path: strin
 		return node.createdAt;
 	}
 
+	const AsVoteResult = (voteValue: number)=>{
+		return -voteValue; // reverse, so that the highest-rated nodes show up first (the NodeChildHolder comp calls the OrderBy() method, which sorts ascendingly)
+	};
+
 	const useReasonScoreValues = orderingType == ChildOrdering.reasonScore && rsCompatibleNodeTypes?.includes(node.type);
 	if (useReasonScoreValues) {
 		const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node.id, path);
@@ -143,25 +148,25 @@ export const GetOrderingValue_AtPath = CreateAccessor((node: NodeL3, path: strin
 		// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
 		const ratingScore = (()=>{
 			if (node.type == NodeType.claim) {
-				return claimTruthScore * 100;
+				return AsVoteResult(claimTruthScore * 100);
 			}
 			if (node.type == NodeType.argument) {
 				if (boxType == ChildGroup.relevance) {
 					// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
-					return Lerp(0, 100, argWeightMultiplier);
+					return AsVoteResult(Lerp(0, 100, argWeightMultiplier));
 				}
-				return argTruthScoreComposite * 100;
+				return AsVoteResult(argTruthScoreComposite * 100);
 			}
 			Assert(false);
 		})();
 		AssertBetween0And100OrNull(ratingScore);
-		return -ratingScore; // reverse, so that the highest-rated nodes show up first (the NodeChildHolder comp calls the OrderBy() method, which sorts ascendingly)
+		return AsVoteResult(ratingScore);
 	}
 
 	const ratingType_final = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	const result = GetRatingAverage_AtPath(node, ratingType_final, null, 0);
 	AssertBetween0And100OrNull(result);
-	return result;
+	return AsVoteResult(result);
 });
 
 export const GetMarkerPercent_AtPath = CreateAccessor((node: NodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = ChildOrdering.votes)=>{
