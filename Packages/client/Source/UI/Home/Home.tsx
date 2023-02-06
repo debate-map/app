@@ -21,6 +21,7 @@ const ProblemCard = (props: {title: string, problem: string, solution: string})=
 	);
 };
 
+/* eslint-disable react/no-unescaped-entities */
 export class HomeUI2 extends BaseComponent<{}, {}> {
 	render() {
 		return (
@@ -38,7 +39,10 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 
 					<P>Here are some demo maps:
 					<List items={[
-						<Link text="What shape is the earth?" to="/private/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/>,
+						/* eslint-disable react/jsx-key*/
+						<Link text="What shape is the earth?" to="/debates/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/>,
+						<Link text="What should happen to the Diablo Canyon Nuclear Power Plant?" to="/debates/1xSIqiEQR7u4Xn88Q9_t_g"/>,
+						/* eslint-enable react/jsx-key*/
 					]}/></P>
 
 					<P>The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
