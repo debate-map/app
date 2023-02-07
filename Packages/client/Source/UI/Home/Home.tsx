@@ -41,7 +41,7 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 					<List items={[
 						/* eslint-disable react/jsx-key*/
 						<Link text="What shape is the earth?" to="/debates/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/>,
-						<Link text="What should happen to the Diablo Canyon Nuclear Power Plant?" to="/debates/1xSIqiEQR7u4Xn88Q9_t_g"/>,
+						<Link text="What should happen to the Diablo Canyon Nuclear Power Plant?" to="/debates/what-should-happen-to-the-diablo-canyon-nuclear-power-plant.nK0fOfzOROOINf_Uwgp5Bw"/>,
 						/* eslint-enable react/jsx-key*/
 					]}/></P>
 

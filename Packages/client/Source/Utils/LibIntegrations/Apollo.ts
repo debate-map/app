@@ -1,9 +1,9 @@
 import {GetServerURL} from "dm_common";
 import {store} from "Store";
 import {SubscriptionClient} from "subscriptions-transport-ws";
-import {RunInAction} from "web-vcore";
-import {ApolloClient, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
-import {getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
+import {HandleError, RunInAction, SendErrorToSentry} from "web-vcore";
+import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
+import {ErrorResponse, getMainDefinition, onError, WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
 import {Assert, Timer} from "web-vcore/nm/js-vextensions";
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {setContext} from "@apollo/client/link/context";
@@ -153,14 +153,21 @@ export function InitApollo() {
 	);
 	link_withErrorHandling = from([
 		onError(info=>{
-			const {graphQLErrors, networkError, response, operation, forward} = info;
-			if (graphQLErrors) {
-				graphQLErrors.forEach(({message, locations, path})=>{
-					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", operation);
-				});
-			}
+			// wait a moment before processing, so that call-specific error-handling can be done first (and so it can set the "ignoreInGlobalGQLErrorHandler" field if desired)
+			setTimeout(()=>{
+				const {graphQLErrors, networkError, response, operation, forward} = info;
 
-			if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", operation);
+				if (graphQLErrors) {
+					if (graphQLErrors[0]?.["ignoreInGlobalGQLErrorHandler"]) return;
+
+					for (const err of graphQLErrors) {
+						const {message, locations, path} = err;
+						console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", operation);
+					}
+				}
+
+				if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", operation);
+			});
 		}),
 		setContext((_, {headers})=>{
 			// get the authentication token from local storage if it exists
@@ -259,12 +266,25 @@ export async function AttachUserJWTToWebSocketConnection() {
 		variables: {input: {
 			jwt: GetUserInfoJWTString(),
 		}},
+		//errorPolicy: "ignore",
 	});
 	const fetchResult = await new Promise<FetchResult<any>>(resolve=>{
-		const subscription = fetchResult_subscription.subscribe(data=>{
-			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
-			resolve(data);
-		});
+		const subscription = fetchResult_subscription.subscribe(
+			data=>{
+				subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+				resolve(data);
+			},
+			// By providing an error-handler function, we prevent apollo from turning the gql-error into a "full-fledged error" -- which would trigger an on-screen error-message.
+			// In this case, we don't want it to trigger an on-screen error-message, because the verification failure is likely benign. For example, it can happen when changing the "?db=[dev/prod]" url-flag.
+			(err: ApolloError)=>{
+				// tell global gql-error-handler (seen above) to not handle this error; that way we can provide a more helpful error-message here, without two errors being logged
+				const innerError = err.graphQLErrors[0];
+				if (innerError) innerError["ignoreInGlobalGQLErrorHandler"] = true;
+
+				console.error(`Error attaching auth-data jwt to websocket connection; you'll likely need to sign-in again. This is likely benign, eg. when changing the "?db=[dev/prod]" url-flag. @error:`, err);
+				//if (innerError) SendErrorToSentry(innerError);
+			},
+		);
 	});
 	console.log("Tried attaching auth-data jwt to websocket connection. @success:", fetchResult.data.signInAttach.success);
 

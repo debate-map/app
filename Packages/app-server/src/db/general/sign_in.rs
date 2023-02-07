@@ -42,13 +42,14 @@ use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
 use crate::db::users::{get_user, User, PermissionGroups};
 use crate::store::storage::{AppStateArc, SignInMsg, get_app_state_from_gql_ctx};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
+use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender};
 
 use rust_shared::utils::auth::jwt_utils_base::{UserJWTData, get_or_create_jwt_key_hs256};
 
-use super::sign_in_::jwt_utils::try_get_referrer_from_gql_ctx;
+use super::sign_in_::jwt_utils::{try_get_referrer_from_gql_ctx, resolve_and_verify_jwt_string};
 
 async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Request<Body>) -> impl IntoResponse {
     let uri = req.uri();
@@ -271,21 +272,42 @@ impl SubscriptionShard_SignIn {
         base_stream
     }
 
-    // todo: implement this, once authentication is required for some of the "read" operations (assuming we want an existing websocket-connection to be able to authenticate "later on") 
-    // Attaches the provided sign-in data (`jwt`) to the current websocket connection, authenticating subsequent requests sent over it.
-    /*async fn signInAttach<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, jwt: String) -> impl Stream<Item = Result<GenericMutation_Result, SubError>> + 'a {
-        async_stream::stream! {
-            let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx).await.unwrap();
-            let user_info = resolve_jwt_to_user_info(&ctx, jwt).await?;
+    /// Attaches the provided sign-in data (`jwt`) to the current websocket connection, authenticating subsequent requests sent over it.
+    async fn signInAttach<'a>(&self, ctx: &'a async_graphql::Context<'a>, input: SignInAttachInput) -> impl Stream<Item = Result<SignInAttachResult, SubError>> + 'a {
+        let jwt_storage_arc = {
+            let request_storage = ctx.data::<GQLRequestStorage>().unwrap();
+            let jwt_storage_arc = &request_storage.jwt;
+            jwt_storage_arc.clone()
+        };
+        
+        let SignInAttachInput { jwt } = input;
 
-            // todo: store user-data in some place where commands and such will be able to access it (for requests/commands made on this same websocket connection, of course)
+        let base_stream = async_stream::stream! {
+            //let jwt_data = get_user_jwt_data_from_gql_ctx(ctx).await.map_err(to_sub_err)?;
+            let jwt_data = if let Some(jwt) = jwt {
+                Some(resolve_and_verify_jwt_string(&jwt).await.map_err(to_sub_err)?)
+            } else { None };
+            
+            // put in block, to ensure that lock is released quickly (not sure if block is necessary to achieve this)
+            {
+                let mut jwt_storage = jwt_storage_arc.write().await;
+                *jwt_storage = jwt_data;
+            }
+            yield Ok(SignInAttachResult { success: true });
+        };
+        base_stream
+    }
+}
 
-            yield Ok(GenericMutation_Result {
-                message: "Command completed successfully.".to_owned(),
-            });
-        }
-    }*/
+#[derive(InputObject, Deserialize)]
+pub struct SignInAttachInput {
+    // this is settable to null/none, since caller may have cases where it wants to "sign out", yet keep the same websocket connection open
+	pub jwt: Option<String>,
+}
+
+#[derive(SimpleObject, Debug)]
+struct SignInAttachResult {
+    success: bool,
 }
 
 }

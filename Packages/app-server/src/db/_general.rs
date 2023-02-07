@@ -21,8 +21,6 @@ use super::commands::add_term::{AddTermResult};
 use super::commands::refresh_lq_data::refresh_lq_data;
 use super::general::sign_in_::jwt_utils::{get_user_jwt_data_from_gql_ctx, resolve_and_verify_jwt_string};
 
-//use super::commands::transfer_nodes::transfer_nodes;
-
 wrap_slow_macros!{
 
 // queries
@@ -44,21 +42,8 @@ impl QueryShard_General {
 // mutations
 // ==========
 
-/*struct GetConnectionID_Result { id: String }
-#[Object]
-impl GetConnectionID_Result {
-    async fn id(&self) -> &str { &self.id }
-}*/
-
 #[derive(Default)] pub struct MutationShard_General;
 #[Object] impl MutationShard_General {
-    /*#[graphql(name = "_GetConnectionID")]
-    async fn _GetConnectionID(&self, _ctx: &async_graphql::Context<'_>) -> Result<GetConnectionID_Result, GQLError> {
-        Ok(GetConnectionID_Result {
-            id: "todo".to_owned()
-        })
-    }*/
-
     async fn refreshLQData(&self, ctx: &async_graphql::Context<'_>, payload: JSONValue) -> Result<GenericMutation_Result, GQLError> {
         let result = refresh_lq_data(ctx, payload).await?;
         Ok(result)
@@ -71,12 +56,6 @@ pub struct GenericMutation_Result {
 
 // subscriptions
 // ==========
-
-/*struct PassConnectionID_Result { userID: Option<String> }
-#[Object]
-impl PassConnectionID_Result {
-    async fn userID(&self) -> &Option<String> { &self.userID }
-}*/
 
 struct Ping_Result {
     pong: String,
@@ -92,11 +71,6 @@ impl Ping_Result {
 pub struct SubscriptionShard_General;
 #[Subscription]
 impl SubscriptionShard_General {
-    // tests
-    /*async fn test(&self, /*mutation_type: Option<MutationType>*/) -> impl Stream<Item = i32> {
-        stream::iter(0..100)
-    }*/
-    
     #[graphql(name = "_ping")]
     async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();
@@ -109,48 +83,6 @@ impl SubscriptionShard_General {
         } })
     }
 
-    /*#[graphql(name = "_PassConnectionID")]
-    async fn _PassConnectionID(&self, _ctx: &async_graphql::Context<'_>, #[graphql(name = "connectionID")] connectionID: String) -> impl Stream<Item = PassConnectionID_Result> {
-        info!("Connection-id was passed from client:{}", connectionID);
-        //let userID = "DM_SYSTEM_000000000001".to_owned();
-        let userID = match get_user_id_from_connection_id(connectionID).await {
-            Ok(userID) => userID,
-            Err(err) => {
-                error!("Failed to retrieve user-id from connection id. @error:{}", err);
-                None
-            }
-        };
-
-        stream::once(async { PassConnectionID_Result {
-            userID,
-        } })
-    }*/
-
-    async fn signInAttach<'a>(&self, ctx: &'a async_graphql::Context<'a>, input: SignInAttachInput) -> impl Stream<Item = Result<SignInAttachResult, SubError>> + 'a {
-        let jwt_storage_arc = {
-            let request_storage = ctx.data::<GQLRequestStorage>().unwrap();
-            let jwt_storage_arc = &request_storage.jwt;
-            jwt_storage_arc.clone()
-        };
-        
-        let SignInAttachInput { jwt } = input;
-
-        let base_stream = async_stream::stream! {
-            //let jwt_data = get_user_jwt_data_from_gql_ctx(ctx).await.map_err(to_sub_err)?;
-            let jwt_data = if let Some(jwt) = jwt {
-                Some(resolve_and_verify_jwt_string(&jwt).await.map_err(to_sub_err)?)
-            } else { None };
-            
-            // put in block, to ensure that lock is released quickly (not sure if block is necessary to achieve this)
-            {
-                let mut jwt_storage = jwt_storage_arc.write().await;
-                *jwt_storage = jwt_data;
-            }
-            yield Ok(SignInAttachResult { success: true });
-        };
-        base_stream
-    }
-
     // meant only for debugging, so hide from gql api introspection
     #[graphql(visible = false)]
     async fn checkUser<'a>(&self, ctx: &'a async_graphql::Context<'a>) -> impl Stream<Item = Result<CheckUserResult, SubError>> + 'a {
@@ -160,21 +92,6 @@ impl SubscriptionShard_General {
         };
         base_stream
     }
-}
-
-#[derive(InputObject, Deserialize)]
-pub struct SignInAttachInput {
-    // this is settable to null/none, since caller may have cases where it wants to "sign out", yet keep the same websocket connection open
-	pub jwt: Option<String>,
-}
-
-/*#[derive(SimpleObject, Debug)]
-pub struct DeleteArgumentResult {
-	#[graphql(name = "_useTypenameFieldInstead")] __: String,
-}*/
-#[derive(SimpleObject, Debug)]
-struct SignInAttachResult {
-    success: bool,
 }
 
 #[derive(SimpleObject, Debug)]
