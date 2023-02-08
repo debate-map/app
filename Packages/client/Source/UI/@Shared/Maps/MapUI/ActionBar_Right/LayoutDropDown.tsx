@@ -56,6 +56,22 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						<Select options={ratingPreviewOptions}
 							value={uiState.toolbarRatingPreviews} onChange={val=>RunInAction_Set(this, ()=>uiState.toolbarRatingPreviews = val)}/>
 					</RowLR>
+					<RowLR mt={3} splitAt={splitAt}>
+						<TextPlus sel info={`
+							When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with reduced visual artifacts at the edges of each section/sub-screenshot.
+							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
+						`.AsMultiline(0)}>Screenshot mode:</TextPlus>
+						<CheckBox value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
+						{uiState.screenshotMode &&
+						<style>{`
+							.scrollTrack {
+								display: none !important;
+							}
+							nav, nav > div {
+								box-shadow: none !important;
+							}
+						`}</style>}
+					</RowLR>
 					<Row mt={3}>
 						<Button text="Clear map-view state" onClick={()=>{
 							RunInAction_Set(this, ()=>{

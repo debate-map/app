@@ -43,6 +43,7 @@ export class MapsState {
 	@O showReasonScoreValues = false;
 	@O showCloneHistoryButtons = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
+	@O @ignore screenshotMode = false;
 	//@O nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
 	@O @version(2) nodeStyleRules = [] as NodeStyleRule[];
