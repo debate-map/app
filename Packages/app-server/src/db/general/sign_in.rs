@@ -172,14 +172,14 @@ impl SubscriptionShard_SignIn {
 
                     // note: the `store_user_data_for_google_sign_in` func currently only uses these fields: email, name, picture
                     let fake_user_as_g_profile = GoogleUserInfoResult {
-                        email: format!("{}@fake.com", fake_user.displayName.clone()),
-                        email_verified: true,
-                        family_name: fake_user.displayName.clone(),
-                        given_name: fake_user.displayName.clone(),
-                        locale: "en".to_owned(),
-                        name: fake_user.displayName.clone(),
-                        picture: "".to_owned(),
                         sub: "".to_owned(),
+                        email: Some(format!("{}@fake.com", fake_user.displayName.clone())),
+                        email_verified: Some(true),
+                        name: Some(fake_user.displayName.clone()),
+                        given_name: Some(fake_user.displayName.clone()),
+                        family_name: Some(fake_user.displayName.clone()),
+                        locale: Some("en".to_owned()),
+                        picture: None,
                     };
 
                     let mut anchor = DataAnchorFor1::empty(); // holds pg-client

@@ -9,7 +9,7 @@ use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use oauth2::{PkceCodeChallenge, RevocationUrl, RedirectUrl, TokenUrl, AuthUrl, Scope, CsrfToken, ClientSecret, ClientId, AuthorizationCode, StandardRevocableToken};
 use oauth2::TokenResponse;
-use rust_shared::anyhow::{Context, anyhow, Error};
+use rust_shared::anyhow::{Context, anyhow, Error, bail};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject};
 use futures_util::{Stream, TryStreamExt};
 use rust_shared::axum::response::IntoResponse;
@@ -45,25 +45,36 @@ use crate::utils::general::data_anchor::DataAnchorFor1;
 use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender};
 
+/// See list of available fields here: https://developers.google.com/identity/openid-connect/openid-connect
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GoogleUserInfoResult {
-    pub email: String,
-    pub email_verified: bool,
-    pub family_name: String,
-    pub given_name: String,
-    pub locale: String,
-    pub name: String,
-    pub picture: String,
-    pub sub: String, 
+    /// Identifier for the user that is unique/unchanging, and always provided in the oauth response.
+    pub sub: String,
+    pub email: Option<String>,
+    pub email_verified: Option<bool>,
+    pub name: Option<String>,
+    pub given_name: Option<String>,
+    pub family_name: Option<String>,
+    pub locale: Option<String>,
+    pub picture: Option<String>,
 }
 
 pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, ctx: &AccessorContext<'_>, read_only: bool, force_as_admin: bool) -> Result<UserJWTData, Error> {
-    let user_hiddens_with_email = get_user_hiddens(ctx, Some(profile.email.clone())).await?;
+    let email = match &profile.email {
+        Some(email) => email.clone(),
+        None => bail!("Cannot sign-in using a Google account with no email address."),
+    };
+    let name = match &profile.name {
+        Some(name) => name.clone(),
+        None => bail!("Cannot sign-in using a Google account with no name."),
+    };
+    
+    let user_hiddens_with_email = get_user_hiddens(ctx, Some(email.clone())).await?;
     match user_hiddens_with_email.len() {
         0 => {},
         1 => {
             let existing_user_hidden = user_hiddens_with_email.get(0).ok_or(anyhow!("Row missing somehow?"))?;
-            info!("Found existing user for email:{}", profile.email);
+            info!("Found existing user for email:{}", email);
             let existing_user = get_user(ctx, &existing_user_hidden.id).await
                 .map_err(|_| anyhow!(r#"Could not find user with id matching that of the entry in userHiddens ({}), which was found based on your provided account's email ({})."#, existing_user_hidden.id.as_str(), existing_user_hidden.email))?;
             info!("Also found user-data:{:?}", existing_user);
@@ -72,7 +83,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
         _ => return Err(anyhow!("More than one user found with same email! This shouldn't happen.")),
     }
 
-	info!(r#"User not found for email "{}". Creating new."#, profile.email);
+	info!(r#"User not found for email "{}". Creating new."#, email);
 
 	let mut permissionGroups = PermissionGroups {basic: true, verified: true, r#mod: false, admin: false};
 
@@ -88,9 +99,9 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
     let profile_clone = profile.clone();
 	let user = User {
         id: new_uuid_v4_as_b64_id(),
-		displayName: profile.name,
+		displayName: name,
 		permissionGroups,
-		photoURL: Some(profile.picture),
+		photoURL: profile.picture,
         joinDate: time_since_epoch_ms_i64(),
         edits: 0,
         lastEditAt: None,
@@ -99,7 +110,7 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
 	let default_policy = get_system_access_policy(ctx, &SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?;
 	let user_hidden = UserHidden {
         id: user.id.clone(),
-		email: profile.email,
+		email: email,
 		providerData: serde_json::to_value(vec![profile_clone])?,
 		lastAccessPolicy: Some(default_policy.id.as_str().to_owned()),
         backgroundID: None,
