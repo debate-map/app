@@ -1,4 +1,4 @@
-import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, Map_namePattern, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem} from "dm_common";
+import {AddMap, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr, GetAccessPolicy, GetUserHidden, IsUserCreatorOrMod, Map, MeID, ChildOrdering, ChildOrdering_infoText, ToolbarItem} from "dm_common";
 import React from "react";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {RunCommand_AddMap} from "Utils/DB/Command.js";
@@ -29,9 +29,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name:</Pre>
-					<TextInput
-						pattern={Map_namePattern} required
-						enabled={enabled} style={{width: "100%"}}
+					<TextInput required enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>

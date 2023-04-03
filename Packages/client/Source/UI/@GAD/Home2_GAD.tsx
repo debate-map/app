@@ -2,8 +2,9 @@ import {E} from "web-vcore/nm/js-vextensions.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown, PageContainer} from "web-vcore";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
-import {useEffect} from "react";
-import {GADDemo_2020, GADDemo_COVID, GADDemo_Main} from "./GAD.js";
+import React, {useEffect} from "react";
+import {MapListUI} from "UI/Debates.js";
+import {GADDemo_2020, GADDemo_AI, GADDemo_COVID, GADDemo_Main} from "./GAD.js";
 
 const pageText = `
 The Society Library is committed to scaling up societal communications, so we can debate nation-wide, and literally see all available positions to take on a given issue.
@@ -22,6 +23,7 @@ export class HomeUI2_GAD extends BaseComponent<{}, {}> {
 		if (GADDemo_Main) return <HomeUI2_GADMain/>;
 		if (GADDemo_COVID) return <HomeUI2_GADCovid/>;
 		if (GADDemo_2020) return <HomeUI2_GAD2020/>;
+		if (GADDemo_AI) return <HomeUI2_GADAI/>;
 		return null;
 	}
 }
@@ -126,6 +128,20 @@ export class HomeUI2_GAD2020 extends BaseComponent<{}, {}> {
 				<Row style={{margin: "50px 10px 20px 10px", boxSizing: "border-box"}}>
 					<div style={{width: 960, height: 700, backgroundImage: "url(/Images/@GAD/2020ElectionDemo_HomePage.png)", backgroundPosition: "center center", backgroundSize: "100%", backgroundRepeat: "no-repeat"}}/>
 				</Row>
+			</PageContainer>
+		);
+	}
+}
+
+// 2023+ ai-related version
+export class HomeUI2_GADAI extends BaseComponent<{}, {}> {
+	render() {
+		return (
+			<PageContainer style={{margin: "20px auto 20px auto", padding: 0, background: null}}>
+				<Row style={{marginTop: 30, marginBottom: 20, padding: 10, background: "rgba(0,0,0,.2)", borderRadius: 10}}>
+					In an effort to better understand the complex AI/AGI discussion, this joint intelligence project aims to systematically map out the ongoing debates. Our objective is to improve understanding and awareness of these multi-layered conversations, encouraging active risk evaluation and collaborative problem-solving. By gathering arguments, claims, and supporting evidence from various online and global sources, we create visual debate graphs. To explore these detailed diagrams, click on the title and expand each node by clicking the "+" symbol. If you'd like to join this intellectual endeavor, please contact Contact@SocietyLibrary.com. We pursue this work with a genuine interest in truth and employ several de-biasing techniques to minimize our blindspots as much as possible. Thank you for reading.
+				</Row>
+				<MapListUI/>
 			</PageContainer>
 		);
 	}

@@ -2,7 +2,7 @@ import {VURL, E} from "web-vcore/nm/js-vextensions.js";
 import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {GADDemo, GADDemo_AI, GetAIPrefixDataFromMapName} from "UI/@GAD/GAD.js";
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -16,6 +16,14 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 	render() {
 		const {index, last, map} = this.props;
 		const creator = map && GetUser(map.creator);
+
+		let mapNameToDisplay = map.name;
+		if (GADDemo_AI) {
+			const [match, orderingNumber] = GetAIPrefixDataFromMapName(map.name);
+			if (match) {
+				mapNameToDisplay = mapNameToDisplay.slice(match.length);
+			}
+		}
 
 		const toURL = new VURL(undefined, ["debates", `${map.id}`]);
 		return (
@@ -38,9 +46,10 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 						<Row style={{fontSize: 13}}>{map.note}</Row>
 					</Column> */}
 					<Div style={{position: "relative", flex: columnWidths[0]}}>
-						<Link text={map.name} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: HSLA(222, 0.33, 0.5, 0.8)})} onClick={e=>{
+						<Link text={mapNameToDisplay} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: HSLA(222, 0.33, 0.5, 0.8)})} onClick={e=>{
 							e.preventDefault();
 							RunInAction("MapEntryUI.onClick", ()=>{
+								store.main.page = "debates";
 								store.main.debates.selectedMapID = map.id;
 							});
 						}}/>

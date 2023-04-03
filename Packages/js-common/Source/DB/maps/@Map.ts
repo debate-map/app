@@ -9,8 +9,6 @@ import {ChildLayout} from "../nodes/@NodeRevision.js";
 	global = "global",
 }*/
 
-//export const Map_namePattern = '^\\S.*$'; // must start with non-whitespace // todo: probably switch to a more lax pattern like this, eg. so works for other languages
-export const Map_namePattern = '^[a-zA-Z0-9 ,\'"%:.?\\-()\\/]+$';
 @MGLClass({table: "maps", schemaDeps: ["NodeRevision"]})
 export class Map {
 	constructor(initialData: {name: string} & Partial<Map>) {
@@ -33,7 +31,7 @@ export class Map {
 	accessPolicy: string;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Map_namePattern})
+	@Field({type: "string"})
 	name: string;
 
 	@DB((t, n)=>t.text(n).nullable())

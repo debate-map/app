@@ -27,7 +27,7 @@ use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, insert_db_entry_by_id_for_struct};
 use super::_shared::add_node::add_node;
 
 wrap_slow_macros!{
@@ -74,7 +74,7 @@ pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, in
 		editors: map_.editors,
 		extras: map_.extras,
 	};
-	upsert_db_entry_by_id_for_struct(&ctx, "maps".o(), map.id.to_string(), map.clone()).await?;
+	insert_db_entry_by_id_for_struct(&ctx, "maps".o(), map.id.to_string(), map.clone()).await?;
 
 	let new_root_node = NodeInput {
 		accessPolicy: map.accessPolicy.clone(), // add-map dialog doesn't let user choose node-access-policy yet, so use the map's accessor policy for the root-node

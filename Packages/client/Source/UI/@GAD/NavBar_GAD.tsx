@@ -14,7 +14,7 @@ import React from "react";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {Me} from "dm_common";
-import {GADDemo_2020, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear, GetGADExternalSiteURL} from "./GAD.js";
+import {GADDemo_2020, GADDemo_AI, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear, GetGADExternalSiteURL} from "./GAD.js";
 
 // main
 // ==========
@@ -137,6 +137,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 				GADDemo_Nuclear && {width: 400, height: 150, backgroundImage: "url(/Images/@GAD/Nuclear/Title_Cropped.png)"},
 				GADDemo_COVID && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/COVID/Title.png)"},
 				GADDemo_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/2020ElectionDemo.png)"},
+				GADDemo_AI && {width: 300, height: 150, backgroundImage: "url(/Images/@GAD/AI/Title_Cropped.png)", backgroundSize: "90%"},
 				//GADDemo_Nuclear && {pointerEvents: "none"},
 			);
 			text = null as any;
