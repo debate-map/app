@@ -33,8 +33,11 @@ export function PreProcessLatex(text: string) {
 }
 
 export const GetMainAttachment = CreateAccessor((rev: NodeRevision)=>{
-	if (rev == null) return null;
+	if (rev == null) return null; // seems not needed?
 	return rev.attachments[0] as Attachment|n;
+});
+export const GetSubPanelAttachments = CreateAccessor((rev: NodeRevision)=>{
+	return rev.attachments.filter(a=>a.equation == null);
 });
 
 export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {

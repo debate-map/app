@@ -1,8 +1,6 @@
 import {QuoteAttachment} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
-import {CloneWithPrototypes, GetErrorMessagesUnderElement} from "web-vcore/nm/js-vextensions.js";
 import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown.js";
 import {CleanUpdatedSourceChains, SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
 
@@ -29,7 +27,7 @@ export class QuoteInfoEditorUI extends DetailsUI_Base<QuoteAttachment, QuoteInfo
 					<Pre>Quote text: </Pre>
 					{/* <TextInput style={ES({flex: 1})}
 						value={info.text} onChange={val=>Change(info.text = val)}/> */}
-					{enabled && <MarkdownToolbar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
+					{enabled && <MarkdownToolbar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "quote"]}/>}
 					<MarkdownEditor ref="editor" toolbar={false} value={newData.content} onChange={val=>Change(newData.content = val)} options={{
 						scrollbarStyle: "overlay",
 						lineWrapping: true,

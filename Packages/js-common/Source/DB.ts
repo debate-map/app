@@ -1,4 +1,5 @@
 export * from "./DB/@Shared/Attachments/@Attachment.js";
+export * from "./DB/@Shared/Attachments/@DescriptionAttachment.js";
 export * from "./DB/@Shared/Attachments/@EquationAttachment.js";
 export * from "./DB/@Shared/Attachments/@MediaAttachment.js";
 export * from "./DB/@Shared/Attachments/@QuoteAttachment.js";

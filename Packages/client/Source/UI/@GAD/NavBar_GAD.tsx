@@ -108,29 +108,6 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 			</Link>;
 		}
 		if (page == "home") {
-			/*const onHomePage = currentPage == "home";
-			finalStyle = E(finalStyle, {
-				margin: "0 50px", width: 150, height: 150,
-				backgroundImage: "url(/Images/@GAD/Logo.png)", backgroundPosition: "center top", backgroundSize: onHomePage ? "100%" : "75%", backgroundRepeat: "no-repeat",
-			});
-			if (onHomePage) {
-				text = null;
-			} else {
-				text = <div style={{
-					position: "absolute", bottom: 10, pointerEvents: "none", left: "-50%", right: "-50%", width: "200%", height: 30,
-					backgroundImage: "url(/Images/@GAD/GADTitle.png)", backgroundSize: "100%", backgroundRepeat: "no-repeat",
-				}}/> as any;
-			}*/
-
-			/*finalStyle = E(finalStyle, {
-				margin: "0 50px", width: 150, height: 150,
-				backgroundImage: "url(/Images/@GAD/Logo.png)", backgroundPosition: "center top", backgroundSize: onHomePage ? "100%" : "75%", backgroundRepeat: "no-repeat",
-			});
-			text = <div style={{
-				position: "absolute", bottom: 10, pointerEvents: "none", left: "-50%", right: "-50%", width: "200%", height: 30,
-				backgroundImage: "url(/Images/@GAD/COVID/Title.png)", backgroundSize: "100%", backgroundRepeat: "no-repeat",
-			}}/> as any;*/
-
 			finalStyle = E(
 				finalStyle,
 				{margin: "0 30px", backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat"},

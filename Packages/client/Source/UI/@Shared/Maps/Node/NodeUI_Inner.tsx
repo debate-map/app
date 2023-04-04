@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetMainAttachment} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetMainAttachment, GetSubPanelAttachments} from "dm_common";
 import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -231,8 +231,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
 		//const subPanelShow = node.type == NodeType.claim && (node.current.references || node.current.quote || node.current.media);
-		const mainAttachment = GetMainAttachment(node.current);
-		const subPanelShow = mainAttachment?.references || mainAttachment?.quote || mainAttachment?.media;
+		//const mainAttachment = GetMainAttachment(node.current);
+		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
+		const subPanelShow = attachments_forSubPanel.length > 0;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
 		const expanded = nodeView?.expanded ?? false;
 

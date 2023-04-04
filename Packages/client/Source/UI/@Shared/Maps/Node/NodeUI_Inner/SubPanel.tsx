@@ -1,6 +1,6 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed, Chroma} from "web-vcore";
-import {NodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment, GetAttachmentType} from "dm_common";
+import {NodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment, GetAttachmentType, DescriptionAttachment, GetSubPanelAttachments} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React, {Fragment, useState} from "react";
 import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
@@ -12,17 +12,16 @@ import {SourcesUI} from "./SourcesUI.js";
 export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boolean} & HTMLProps_Fixed<"div">, {}> {
 	render() {
 		const {node, toolbarShowing, ...rest} = this.props;
-		const attachments_all = node.current.attachments;
-		const attachments_showable = attachments_all.filter(a=>a.equation == null);
+		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 		const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
-		const currentAttachment = attachments_showable[selectedAttachmentIndex];
+		const currentAttachment = attachments_forSubPanel[selectedAttachmentIndex];
 
 		return (
 			<>
-				{attachments_showable.length > 1 &&
+				{attachments_forSubPanel.length > 1 &&
 				<Row mb={5} p="0 5px" style={{position: "relative", flexWrap: "wrap", gap: 5}}>
 					{/*<Text>Attachments:</Text>*/}
-					{attachments_showable.map((attachment, index)=>{
+					{attachments_forSubPanel.map((attachment, index)=>{
 						const attachmentType = GetAttachmentType(attachment);
 						const thisAttachmentSelected = selectedAttachmentIndex == index;
 						return (
@@ -37,16 +36,20 @@ export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boole
 						);
 					})}
 				</Row>}
-				<div {...rest} style={{position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,
-					// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
+				<div {...rest} style={{
+					position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,
+					//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 					background: liveSkin.NodeSubPanelBackgroundColor().css(), borderRadius: "0 0 0 5px",
+					fontSize: 12, // text within attachments can get really long; make font smaller to avoid visual space being dominated by attachment text
 				}}>
 					{currentAttachment?.references &&
-						<SubPanel_References attachment={currentAttachment?.references} fontSize={GetFontSizeForNode(node)}/>}
+						<SubPanel_References attachment={currentAttachment?.references}/>}
 					{currentAttachment?.quote &&
-						<SubPanel_Quote attachment={currentAttachment?.quote} fontSize={GetFontSizeForNode(node)}/>}
+						<SubPanel_Quote attachment={currentAttachment?.quote}/>}
 					{currentAttachment?.media &&
 						<SubPanel_Media mediaAttachment={currentAttachment?.media}/>}
+					{currentAttachment?.description &&
+						<SubPanel_Description attachment={currentAttachment?.description}/>}
 				</div>
 			</>
 		);
@@ -54,11 +57,11 @@ export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boole
 }
 
 @Observer
-export class SubPanel_References extends BaseComponent<{attachment: ReferencesAttachment, fontSize: number}, {}> {
+export class SubPanel_References extends BaseComponent<{attachment: ReferencesAttachment}, {}> {
 	render() {
-		const {attachment, fontSize} = this.props;
+		const {attachment} = this.props;
 		return (
-			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
+			<div style={{position: "relative", whiteSpace: "initial"}}>
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
 				<SourcesUI sourceChains={attachment.sourceChains} headerText="References"/>
 			</div>
@@ -67,11 +70,11 @@ export class SubPanel_References extends BaseComponent<{attachment: ReferencesAt
 }
 
 @Observer
-export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment, fontSize: number}, {}> {
+export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment}, {}> {
 	render() {
-		const {attachment, fontSize} = this.props;
+		const {attachment} = this.props;
 		return (
-			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
+			<div style={{position: "relative", whiteSpace: "initial"}}>
 				{/* <div>{`"${node.quote.text}"`}</div> */}
 				{/* <VReactMarkdown className="selectable Markdown" source={`"${quoteAttachment.content}"`}
 					containerProps={{style: E()}}
@@ -115,6 +118,18 @@ export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: Me
 				</>}
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
 				<SourcesUI sourceChains={mediaAttachment.sourceChains}/>
+			</div>
+		);
+	}
+}
+
+@Observer
+export class SubPanel_Description extends BaseComponent<{attachment: DescriptionAttachment}, {}> {
+	render() {
+		const {attachment} = this.props;
+		return (
+			<div style={{position: "relative", whiteSpace: "initial"}}>
+				<VReactMarkdown_Remarkable source={attachment.text}/>
 			</div>
 		);
 	}

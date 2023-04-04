@@ -7,16 +7,17 @@ import {NodeL2} from "../../nodes/@Node.js";
 import {NodeType} from "../../nodes/@NodeType.js";
 import {EquationAttachment} from "./@EquationAttachment.js";
 import {ReferencesAttachment} from "./@ReferencesAttachment.js";
+import {DescriptionAttachment} from "./@DescriptionAttachment.js";
 
 export type AttachmentTarget = "node" | "term";
 
 export enum AttachmentType {
 	none = "none",
-	//ImpactPremise: 1,
+	equation = "equation",
 	references = "references",
 	quote = "quote",
 	media = "media",
-	equation = "equation",
+	description = "description",
 }
 
 export function GetAttachmentType_Node(node: NodeL2) {
@@ -30,12 +31,13 @@ export function GetAttachmentType(attachment: Attachment) {
 		attachment.references ? AttachmentType.references :
 		attachment.quote ? AttachmentType.quote :
 		attachment.media ? AttachmentType.media :
+		attachment.description ? AttachmentType.description :
 		AttachmentType.none
 	);
 }
 
 export function ResetAttachment(attachment: Attachment, attachmentType: AttachmentType) {
-	CE(attachment).Extend({equation: null, references: null, quote: null, media: null});
+	CE(attachment).Extend({equation: null, references: null, quote: null, media: null, description: null});
 	if (attachmentType == AttachmentType.equation) {
 		attachment.equation = new EquationAttachment();
 	} else if (attachmentType == AttachmentType.references) {
@@ -44,6 +46,8 @@ export function ResetAttachment(attachment: Attachment, attachmentType: Attachme
 		attachment.quote = new QuoteAttachment();
 	} else if (attachmentType == AttachmentType.media) {
 		attachment.media = new MediaAttachment();
+	} else if (attachmentType == AttachmentType.description) {
+		attachment.description = new DescriptionAttachment();
 	}
 }
 
@@ -67,4 +71,7 @@ export class Attachment {
 
 	@Field({$ref: MediaAttachment.name}, {opt: true})
 	media?: MediaAttachment;
+
+	@Field({$ref: DescriptionAttachment.name}, {opt: true})
+	description?: DescriptionAttachment;
 }

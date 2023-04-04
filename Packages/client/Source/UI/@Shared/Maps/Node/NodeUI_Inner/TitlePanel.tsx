@@ -153,7 +153,7 @@ export class TitlePanel extends BaseComponentPlus(
 						{!latex && RenderNodeDisplayText(displayText, termsToSearchFor, this)}
 						{noteText &&
 							<span style={{
-								fontSize: 11, color: "rgba(255,255,255,.5)",
+								fontSize: 11, color: liveSkin.NodeTextColor().alpha(liveSkin.NodeTextColor().alpha() * .7).toString(),
 								// marginLeft: "auto",
 								marginLeft: 15,
 								marginTop: GetSegmentsForTerms(noteText, termsToSearchFor).length > 1 ? -1 : 3, float: "right", // if has terms in note, bump up a bit (to offset bump-down from <sup> elements)

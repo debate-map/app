@@ -8,6 +8,7 @@ import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
 import {NodeDetailsUI_SharedProps} from "../Maps/Node/NodeDetailsUI.js";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
+import {DescriptionAttachmentEditorUI} from "./AttachmentPanel/DescriptionAttachmentEditorUI.js";
 
 /*export function CanNodeHaveAttachments(node: NodeL1) {
 	//return node.type == NodeType.claim;
@@ -43,6 +44,9 @@ export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: 
 						baseData={NN(newData.references)} onChange={val=>Change(newData.references = val)}/>}
 				{attachmentType == AttachmentType.media &&
 					<MediaAttachmentEditorUI phase={phase} baseData={NN(newData.media)} onChange={val=>Change(newData.media = val)} target={target}/>}
+				{attachmentType == AttachmentType.description &&
+					<DescriptionAttachmentEditorUI phase={phase}
+						baseData={NN(newData.description)} onChange={val=>Change(newData.description = val)}/>}
 			</>
 		);
 	}

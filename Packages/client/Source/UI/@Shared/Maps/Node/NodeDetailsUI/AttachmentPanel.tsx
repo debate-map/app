@@ -24,6 +24,6 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 		//const canHaveAttachments = CanNodeHaveAttachments(newData);
 		return <AttachmentsEditorUI phase={GetPhaseFromNodeDetailsUIProps({forNew, enabled: enabled!})} target="node"
 			baseData={newRevisionData.attachments} onChange={val=>Change(newRevisionData.attachments = val)}
-			allowedAttachmentTypes={[AttachmentType.references, AttachmentType.quote, AttachmentType.media, AttachmentType.equation]}/>;
+			allowedAttachmentTypes={[AttachmentType.references, AttachmentType.quote, AttachmentType.media, AttachmentType.equation, AttachmentType.description]}/>;
 	}
 }

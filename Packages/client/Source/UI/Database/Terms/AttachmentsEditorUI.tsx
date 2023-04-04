@@ -1,4 +1,4 @@
-import {Attachment, AttachmentTarget, AttachmentType, GetAttachmentType, MediaAttachment} from "dm_common";
+import {Attachment, AttachmentTarget, AttachmentType, GetAttachmentType, MediaAttachment, DescriptionAttachment} from "dm_common";
 import React, {useState} from "react";
 import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
@@ -73,7 +73,8 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 					})}
 					{enabled && <Button text="+" onClick={()=>{
 						const attachment = new Attachment({
-							media: new MediaAttachment(),
+							// have new attachments start as type "description", since it's the simplest attachment type (so easier to try out)
+							description: new DescriptionAttachment(),
 						});
 						newData.push(attachment);
 						Change();

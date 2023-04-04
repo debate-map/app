@@ -59,7 +59,7 @@
     "tree-grapher": "0.0.5",
     "ui-debug-kit": "0.0.6",
     "commander": "2.19.0",
-    "web-vcore": "0.0.68"
+    "web-vcore": "0.0.69"
   },
   "packageManager": "yarn@3.3.0"
 }

@@ -21,9 +21,6 @@ export function GetAIPrefixDataFromMapName(mapName: string) {
 }
 
 if (GADDemo) {
-	/* document.addEventListener('load', () => {
-		(document.getElementById('logo') as HTMLLinkElement).href = '/Images/@GAD/Logo.png';
-	}); */
 	const timer = new Timer(10, ()=>{
 		try {
 			const titleEl = document.getElementById("title") as HTMLTitleElement;
@@ -32,7 +29,7 @@ if (GADDemo) {
 
 			if (GADDemo_Main) {
 				titleEl.innerText = "Society Library's Diablo Canyon Debate";
-				logoEl.href = "/Images/@GAD/Nuclear/Logo.png";
+				logoEl.href = "/Images/@GAD/Logo.png";
 			} else if (GADDemo_COVID) {
 				titleEl.innerText = "COVID Convo: Combining Your Conversations About COVID-19";
 				logoEl.href = "/Images/@GAD/COVID/Logo.png";
@@ -41,7 +38,7 @@ if (GADDemo) {
 				logoEl.href = "/Images/@GAD/2020ElectionDemo.png";
 			} else if (GADDemo_AI) {
 				titleEl.innerText = "AI / AGI Debates";
-				logoEl.href = "/Images/@GAD/COVID/Logo.png";
+				logoEl.href = "/Images/@GAD/Logo.png";
 			}
 			timer.Stop();
 		} catch {}

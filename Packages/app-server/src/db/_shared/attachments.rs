@@ -22,6 +22,7 @@ pub struct Attachment {
     pub quote: Option<JSONValue>,
     pub media: Option<JSONValue>,
     //pub media: Option<MediaAttachment>,
+    pub description: Option<JSONValue>,
 }
 
 // todo: have Attachment struct use these directly (delayed, since means a change in the graphql api)
@@ -51,6 +52,11 @@ pub struct MediaAttachment {
 #[graphql(input_name = "ReferencesAttachmentInput")]
 pub struct ReferencesAttachment {
 	pub sourceChains: Vec<SourceChain>,
+}
+#[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+#[graphql(input_name = "DescriptionAttachmentInput")]
+pub struct DescriptionAttachment {
+	pub text: String,
 }
 
 }
