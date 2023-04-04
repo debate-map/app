@@ -304,6 +304,10 @@ Object.assign(scripts, {
 				console.log("DB dump process failed. Error:", e);
 			});
 			dumpProcess.on("exit", ()=>{
+				if (!dbDumpStr.includes("PostgreSQL database dump complete")) {
+					console.warn(`WARNING: The DB dump contents appear to have been cut-off before being fully received! (no "database dump complete" message found in file-contents) [consider using GQLBackupHelper.js script instead]`);
+				}
+
 				const filePath_rel = `../Others/@Backups/DBDumps_${context}/${CurrentTime_SafeStr()}.sql`;
 				const folderPath_rel = paths.dirname(filePath_rel);
 				fs.mkdirSync(folderPath_rel, {recursive: true});

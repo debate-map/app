@@ -9,6 +9,12 @@ exports.OpenFileExplorerToPath = path=>{
 		child_process.exec(`open "${path}"`);
 	}
 };
+exports.WaitForEnterKeyThenExit = code=>{
+	console.log("Press any key to exit...");
+	process.stdin.setRawMode(true);
+	process.stdin.resume();
+	process.stdin.on("data", ()=>process.exit(code));
+};
 
 exports.SetEnvVarsCmd = vars=>{
 	const win32 = process.platform === "win32";
