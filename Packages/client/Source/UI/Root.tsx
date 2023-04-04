@@ -45,6 +45,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 	async ComponentWillMount() {
 		const trunk = new AsyncTrunk(store, {storage: localStorage});
 		if (startURL.GetQueryVar("clearState") == "true") {
+			console.log("Clearing state. State before clear:", Clone(store));
 			await trunk.clear();
 		}
 

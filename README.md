@@ -377,31 +377,52 @@ The cluster's database is an instance of the [CrunchyData Postgres Operator, v5]
 
 To update only the "postgres" image/component within the pgo package (this is usually all that's needed):
 * 1\) Take a look at the file `Packages/deploy/PGO/install/values.yaml` to see what postgres version-images are available; if there is a new major-version you can jump to (that's not dropped yet), targeting that should solve the issue. (of the postgres image the cluster had been using being dropped from the crunchydata registry)
-* 2\) Ensure a copy of the target postgres image is stored in your private registry, by pasting the target version's image-url into the `MirrorTransientImages.js` file, then running it: `node ./Scripts/Docker/MirrorTransientImages.js`
-* 3\) Now open the `Packages/deploy/PGO/install/values.yaml` file again, and update the `relatedImages.postgres_XX.image` field to match the url of the private-registory mirror of the image. (so it's getting dropped from the main registry does not cause problems for us later)
-* 4\) If we're still needing to use the "large postgres images" fix, update the docker-pull command in `Postgres.star` to match the private-registry image-url.
-* 5\) Now we need to update the postgres-cluster's data-folder to work with the new version of postgres:
-	* 5.1\) Option 1: Run the postgres major-version update process that CrunchyData outlines here (recommended): https://access.crunchydata.com/documentation/postgres-operator/v5/guides/major-postgres-version-upgrade
-		* 5.1.1\) Notes for its step 1:
+* 2\) If doable, create a copy of the new postgres-version image in a private-registry (to avoid it being dropped in the future), and use that as the target rather than the url noted above:
+	* IMPORTANT NOTE: Using a private-registry mirror of the postgres image is not *yet* fully figured out, because I don't yet know how to provide the authentication data to the production cluster for it to be able to read from the private registry. There is a CrunchyData guide [here](https://access.crunchydata.com/documentation/postgres-operator/5.3.1/guides/private-registries/) which presumably can make this work. But for now, I'll just use the official image -- but now using the postgres v15 image (since that one is not dropped from the crunchydata registry, and should not be dropped for another year or so).
+	* 2.1\) Ensure a copy of the target postgres image is stored in your private registry, by pasting the target version's image-url into the `MirrorTransientImages.js` file, then running it: `node ./Scripts/Docker/MirrorTransientImages.js`
+	* 2.2\) Now open the `Packages/deploy/PGO/install/values.yaml` file again, and update the `relatedImages.postgres_XX.image` field to match the url of the private-registory mirror of the image. (so it's getting dropped from the main registry does not cause problems for us later)
+	* 2.3\) If we're still needing to use the "large postgres images" fix, update the docker-pull command in `Postgres.star` to match the private-registry image-url.
+* 3\) Now we need to update the postgres-cluster's data-folder to work with the new version of postgres:
+	* 3.1\) Option 1: Run the postgres major-version update process that CrunchyData outlines here (recommended [ideally anyway; it failed last attempt in the production cluster, forcing Option 2]): https://access.crunchydata.com/documentation/postgres-operator/v5/guides/major-postgres-version-upgrade
+		* 3.1.1\) Notes for its step 1:
 			* It's recommended to at least make a logical backup at this point. (see: [pg-dump](#pg-dump))
-		* 5.1.2\) Notes for its step 2:
-			* 5.1.2.1\) In the first code-block (the yaml for the `PGUpgrade`), make sure you set:
+		* 3.1.2\) Notes for its step 2:
+			* 3.1.2.1\) In the first code-block (the yaml for the `PGUpgrade`), make sure you set:
 				* `meta.namespace: postgres-operator` (alternately, you could do this as part of the `kubectl apply` command, but better to have it in the git-tracked file itself imo)
 				* `meta.name: <name matching the pattern pg-upgrade-13-to-15>`
-			* 5.1.2.2\) The contents of that first code-block should be saved to a file in the `Packages/deploy/PGO/@Operations` folder, with the filename matching the `meta.name` field. (eg. `pg-upgrade-13-to-15.yaml`)
-			* 5.1.2.3\) It doesn't say how to deploy the listed yaml to the cluster; you could add it to the tilt scripts, or run `kubectl apply` directly. For the latter, run (from repo root): `kubectl apply -f Packages/deploy/PGO/@Operations/<file name from prior step>` (make sure you have Docker Desktop targeting the correct cluster first, ie. local or remote)
-			* 5.1.2.4\) It is now expected that, when viewing/"editing" the newly-added `pg-upgrade-XXX` object in Lens (under the "Custom Resources" category), you'll see the text (near the bottom): `message: PostgresCluster instances still running`
-		* 5.1.3\) Notes for its step 3:
+			* 3.1.2.2\) The contents of that first code-block should be saved to a file in the `Packages/deploy/PGO/@Operations` folder, with the filename matching the `meta.name` field. (eg. `pg-upgrade-13-to-15.yaml`)
+			* 3.1.2.3\) It doesn't say how to deploy the listed yaml to the cluster; you could add it to the tilt scripts, or run `kubectl apply` directly. For the latter, run (from repo root): `kubectl apply -f Packages/deploy/PGO/@Operations/<file name from prior step>` (make sure you have Docker Desktop targeting the correct cluster first, ie. local or remote)
+			* 3.1.2.4\) It is now expected that, when viewing/"editing" the newly-added `pg-upgrade-XXX` object in Lens (under the "Custom Resources" category), you'll see the text (near the bottom): `message: PostgresCluster instances still running`
+		* 3.1.3\) Notes for its step 3:
 			* In our case, the cluster-annotating command to run is: `kubectl -n postgres-operator annotate postgrescluster debate-map postgres-operator.crunchydata.com/allow-upgrade="pg-upgrade-13-to-15"`
-			* When it says to shut down the cluster, in our case it means modifying the `Packages/deploy/PGO/postgres/values.yaml` file to have `shutdown: true`, then applying it (ie. by saving the file, with Tilt running).
-		* 5.1.4\) Notes for its step 4:
-			* If you hit an error about the `pg15` (or whatever your target/new-pg-version is) directory already existing, this may be due to a prior (presumably failed) upgrade attempt. To fix this, delete the pg-upgrade object (pod will be dropped with it), comment out the `shutdown: true` line again, wait for the pgo `X-instance1-X` pod to start up again, then SSH into that pod, and delete/rename the given directory; then you can redo the relevant steps to get to step 5.1.4 again.
-		* 5.1.5\) Notes for its step 5:
+			* When it says to shut down the cluster, in our case it means modifying the `Packages/deploy/PGO/postgres/values.yaml` file to have `shutdown: true`, then applying it (ie. by saving the file, with Tilt running; you could also use Lens to change the field directly, which is faster but requires more care with field-placement).
+		* 3.1.4\) Notes for its step 4:
+			* If you hit an error about the `pg15` (or whatever your target/new-pg-version is) directory already existing, this may be due to a prior (presumably failed) upgrade attempt. To fix this, delete the pg-upgrade object (pod will be dropped with it), comment out the `shutdown: true` line again, wait for the pgo `X-instance1-X` pod to start up again, then SSH into that pod, and delete/rename the given directory; then you can redo the relevant steps to get to step 3.1.4 again.
+		* 3.1.5\) Notes for its step 5:
 			* Once you've confirmed the upgrade has completed successfully, it's recommended to remove the `PGUpgrade` object (I prefer to do this using Lens, with it shown under the "Custom Resources" category).
-		* 5.1.6\) Notes for its step 6:
+		* 3.1.6\) Notes for its step 6:
 			* For its vacuumdb command, I went with the first option (`vacuumdb --all --analyze-in-stages`), and ran it in the shell for the `debate-map-instance1-XXX` pod.
 			* You could also do cleanup/removal of the old data-folder (eg. `pg13`) by following the given information (in the same `instance1` pod above), but I wouldn't bother unless disk-space is running low. (I don't believe those old folders become part of either the physical or logical automated backups, so the impact is minimal)
-	* 5.2\) Option 2: Reset the database storage directory and restore a logical backup of the database. (instructions for this option not yet written)
+	* 3.2\) Option 2: Reset the database storage directory and restore a logical backup of the database.
+		* 3.2.1\) Shut down the postgres cluster: modify `Packages/deploy/PGO/postgres/values.yaml` to have `shutdown: true`, or use Lens to apply this change directly. (this step is maybe not necessary, but better safe than sorry for now)
+		* 3.2.2\) Change the `postgresVersion` field of `Packages/deploy/PGO/postgres/values.yaml` to the target/new version.
+		* 3.2.3\) Reset the database data-folder, as well as the pgbackrest data and repo folders:
+			* 3.2.3.1\) Option 1: By nuking the persistent-volume-claims (recommended atm).
+				* WARNING: This will destroy your in-cluster copy of the database contents. Only do this if you're sure you have external backups, and you want to fully reset the pgo data/storage.
+				* 3.2.3.1.1\) Use Lens to destroy the persistent-volume-claims named `debate-map-instance1-XXXX-pgdata` and `debate-map-repo1`.
+				* 3.2.3.1.2\) That's it for now... (proceed to step 3.2.4, then in step 3.2.5, we do an additional step to complete the resetting, followed by the restore of the logical-backup)
+			* 3.2.3.2\) Option 2: By modifying the persistent-volume-claims to rename the relevant folders.
+				* 3.2.3.2.1\) Rename the folders within `pgdata`:
+					* 3.2.3.2.1.1\) We need a way to modify the persistent-volume-claim used by postgres, from a stable pod that will not keep restarting. To do this, deploy the `Packages/deploy/PGO/@Operations/@explore-pvc_debate-map-instance1-XXX-pgdata.yaml` file to the cluster. This will create a `busybox` pod that we can SSH into.
+					* 3.2.3.2.1.2\) In the explore-pvc/busybox pod, run `cd /mnt/volume1`, then:
+						* 3.2.3.2.1.2.1\) Run: `mv pgXX pgXX_vdisabled1` (do this for all `XX`/versions present, both old and new)
+						* 3.2.3.2.1.2.2\) Run: `mv pgXX_wal pgXX_wal_vdisabled1`. (do this for all `XX`/versions present, both old and new)
+						* 3.2.3.2.1.2.3\) Run: `mv pgbackrest pgbackrest_vdisabled1`
+				* 3.2.3.2.2\) Rename the folders within the pg repo folder (forget exact name, but used by `repo1` pod):
+					* Similar steps to the above, except for the `repo1` persistent-volume-claim.
+		* 3.2.4\) Start up the postgres cluster again (do the opposite of step 3.2.1). Also, if you haven't already, close and start/restart the tilt-up process.
+		* 3.2.5\) You'll also need to get pgo to fully forget about its old repo-data (not sure how it is still accessing it, but this step was found necessary; tbh step 3.2.3 is probably not necessary if this step is done): With tilt running again, press the "Trigger update" button on the `pgo` and `pgo_crd-definition` resources; keep doing this (alternating between them every several seconds, eg. 3+ times), until the log-messages do not show errors, and the pgo resource shows in its logs messages like `trying to bootstrap a new cluster`, `initialized a new cluster`, and finally the "success" message of `INFO: no action. I am (debate-map-instance1-XXXX-0), the leader with the lock`. At this point, it should be a new pgo cluster that no longer tries to restore data from old/now-invalid physical backups.
+		* 3.2.6\) Restore the logical-backup, by following the "To restore a backup" section in guide-module: [pg-dump](#pg-dump)
 
 If you are doing an update of the entire postgres-operator package, here are some notes on it:
 * We are using the helm-based installation approach rather than kustomize-based one, since this way updates are less complicated/painful.
@@ -783,11 +804,15 @@ To create a backup:
 
 To restore a backup:
 * 1\) It's recommended to rename the existing `app` schema to `app_old` or the like, before restoring a backup file.
-* 2\) Do some cleanup of the backup file: (`pgdump` is not perfect, and can output some lines that fail to restore as-is)
-	* 2.1\) If present, comment out the following line near the end of the file (`pg_stat_statements` table may not be created/populated yet): `GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE app.pg_stat_statements TO rls_obeyer;`
-* 3\) Execute the SQL dump/backup-file using psql or DBeaver.
-	* 3.1\) TODO
-* 4\) Execute the SQL:
+* 2\) Before restoring the backup file, make sure the `rls_obeyer` role is created, by executing the `create role "rls_obeyer"...` section in `General_End.sql`.
+* 3\) Do some cleanup of the backup file: (`pgdump` is not perfect, and can output some lines that fail to restore as-is)
+	* 3.1\) If present, comment out the following line near the end of the file (`pg_stat_statements` table may not be created/populated yet): `GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE app.pg_stat_statements TO rls_obeyer;`
+* 4\) Execute the SQL dump/backup-file using psql or DBeaver.
+	* 4.1\) Option 1: Using psql:
+		* 4.1.1\) TODO
+	* 4.2\) Option 2: Using DBeaver:
+		* 4.2.1\) After connecting to the debate-map database, right-click it and press Tools->"Execute script", then supply the path to the backup file.
+* 5\) Execute the SQL:
 	```sql
 	ALTER DATABASE "debate-map" SET search_path TO 'app'; -- for future pg-sessions
 	SELECT pg_catalog.set_config('search_path', 'app', false); -- for current pg-session

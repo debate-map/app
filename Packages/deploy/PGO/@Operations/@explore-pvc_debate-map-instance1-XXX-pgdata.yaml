@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: postgres-operator
+spec:
+  containers:
+    - name: busybox
+      image: k8s.gcr.io/busybox
+      command: [ "/bin/sh", "-c", "tail -f /dev/null" ]
+      volumeMounts:
+      - name: volume1
+        mountPath: "/mnt/volume1"
+  volumes:
+  - name: volume1
+    persistentVolumeClaim:
+      claimName: debate-map-instance1-84f4-pgdata
+  restartPolicy: Never

@@ -7,9 +7,9 @@ controllerImages:
 # relatedImages are used when an image is omitted from PostgresCluster or PGUpgrade specs.
 relatedImages:
   postgres_15:
-    #image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0
-    # using the mirror in the private-registry
-    image: gcr.io/debate-map-prod/crunchy-postgres:ubi8-15.1-0
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0
+    # using the mirror in the private-registry (not yet working in prod, since need to provide auth-data to the pg-operator, eg.: https://access.crunchydata.com/documentation/postgres-operator/5.3.1/guides/private-registries)
+    #image: gcr.io/debate-map-prod/crunchy-postgres:ubi8-15.1-0
   postgres_15_gis_3.3:
     image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-15.1-3.3-0
   postgres_14:
