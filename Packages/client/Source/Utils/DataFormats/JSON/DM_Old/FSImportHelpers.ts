@@ -52,7 +52,6 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_NodeL3, id?:
 			})},
 		].filter(a=>a),
 		node: node.id,
-		note: revData.note,
 		phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
 			id: GenerateUUID(),
 			type: NodePhrasingType.standard,

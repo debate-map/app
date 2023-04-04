@@ -2,6 +2,7 @@ use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::anyhow::Error;
 use rust_shared::SubError;
 use rust_shared::async_graphql;
+use rust_shared::async_graphql::ComplexObject;
 use rust_shared::async_graphql::Enum;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -30,6 +31,7 @@ pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<No
 wrap_slow_macros!{
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
+#[graphql(complex)]
 pub struct NodeRevision {
     pub id: ID,
     pub creator: String,
@@ -40,20 +42,27 @@ pub struct NodeRevision {
     /*#[graphql(name = "phrasing_tsvector")]
     #[serde(skip_serializing)] // makes-so when serializing the struct for saving to the db, this field is excluded (as it must be, since it's auto-generated)
     pub phrasing_tsvector: String,*/
-    pub note: Option<String>,
     pub displayDetails: Option<JSONValue>,
     pub attachments: Vec<Attachment>,
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
+#[ComplexObject]
 impl NodeRevision {
+    /*#[graphql(visible = false)]
     // todo: make-so the field has this as its actual type (delayed since it means a change in the graphql api)
 	pub fn display_details_known(&self) -> Result<Option<NodeRevisionDisplayDetails>, Error> {
         Ok(match &self.displayDetails {
             None => None,
             Some(raw_data) => Some(serde_json::from_value(raw_data.clone())?),
         })
-	}
+	}*/
+
+    #[graphql(visible = false)]
+    // field kept around only for backwards compatibility (refs: papers-app)
+    async fn note(&self) -> Option<String> {
+        self.phrasing.note.clone()
+    }
 }
 impl From<Row> for NodeRevision {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
@@ -64,7 +73,6 @@ pub struct NodeRevisionInput {
     /// Marked as optional, since in some contexts it's not needed. (eg. for add_node, add_child_node, etc.)
     pub node: Option<String>,
     pub phrasing: NodePhrasing_Embedded,
-    pub note: Option<String>,
     pub displayDetails: Option<JSONValue>,
     pub attachments: Vec<Attachment>,
 }

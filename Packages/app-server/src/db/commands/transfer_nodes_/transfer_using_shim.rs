@@ -57,7 +57,7 @@ pub async fn transfer_using_shim(ctx: &AccessorContext<'_>, actor: &User, transf
     let argument_wrapper_revision = NodeRevisionInput {
         phrasing: NodePhrasing_Embedded { text_base: "".o(), ..Default::default() },
         // defaults
-        node: None, note: None, displayDetails: None, attachments: vec![],
+        node: None, displayDetails: None, attachments: vec![],
     };
 
     let add_child_node_input = AddChildNodeInput {

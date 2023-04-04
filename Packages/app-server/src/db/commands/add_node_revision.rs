@@ -79,7 +79,6 @@ pub async fn add_node_revision(ctx: &AccessorContext<'_>, actor: &User, is_root:
 		// pass-through
 		node: node_id,
 		phrasing: revision_.phrasing,
-		note: revision_.note,
 		displayDetails: revision_.displayDetails,
 		attachments: revision_.attachments,
 		c_accessPolicyTargets: vec![], // auto-set by db

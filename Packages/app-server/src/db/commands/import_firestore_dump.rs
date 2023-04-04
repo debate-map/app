@@ -440,14 +440,13 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			node: node_id,
 			replacedBy: None,
 			phrasing: NodePhrasing_Embedded {
-				note: None,
+				note: val.get("note").map(|a| a.as_string()).unwrap_or(None),
 				terms: val.try_get("termAttachments").unwrap_or(&JSONValue::Array(vec![])).try_as_array()?.into_iter()
 					.map(|attachment| TermAttachment { id: attachment.try_get("id").unwrap().try_as_string().unwrap() }).collect_vec(),
 				text_base: val.try_get("titles")?.get("base").and_then(|a| a.as_string()).unwrap_or("".o()),
 				text_negation: val.try_get("titles")?.get("negation").and_then(|a| a.as_string()),
 				text_question: val.try_get("titles")?.get("yesNoQuestion").and_then(|a| a.as_string()),
 			},
-			note: val.get("note").map(|a| a.as_string()).unwrap_or(None),
 			displayDetails: Some(json!({
 				"fontSizeOverride": val.get("fontSizeOverride").map(|a| a.as_f64()).unwrap_or(None),
 				"widthOverride": val.get("widthOverride").map(|a| a.as_f64()).unwrap_or(None),

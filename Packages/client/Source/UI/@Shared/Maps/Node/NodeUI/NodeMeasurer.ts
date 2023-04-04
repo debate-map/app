@@ -24,9 +24,9 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 	let expectedTextWidth = expectedTextWidth_tester.offsetWidth;
 
 	let noteWidth = 0;
-	if (node.current.note) {
+	if (node.current.phrasing.note) {
 		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
-		noteWidth_tester.innerHTML = node.current.note;
+		noteWidth_tester.innerHTML = node.current.phrasing.note;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	const mainAttachment = GetMainAttachment(node.current);

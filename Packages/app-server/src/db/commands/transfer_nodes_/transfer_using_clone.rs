@@ -74,7 +74,6 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
     let new_rev = NodeRevisionInput {
         node: None,
         phrasing: rev.phrasing,
-        note: rev.note,
         displayDetails: rev.displayDetails,
         attachments: rev.attachments,
     };

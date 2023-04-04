@@ -92,7 +92,6 @@ pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, in
 			terms: vec![],
 		},
 		node: None,
-		note: None,
 		displayDetails: None,
 		attachments: vec![],
 	};

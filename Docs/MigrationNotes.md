@@ -7,6 +7,12 @@
 
 ## Main series
 
+### Pushed on 2023-04-03
+
+* 1\) Removed the `nodeRevisions.note` column from the database. (kept that field in the graphql api though, as a proxy of `nodeRevisions.phrasing.note`)
+	* DB response:
+		* 1\) Execute sql: `UPDATE "nodeRevisions" SET phrasing = jsonb_set(phrasing, '{note}', to_jsonb(note)) WHERE note IS NOT NULL;`
+
 ### Pushed on 2023-01-13 [+01-15]
 
 * 1\) Changed RLS policies slightly. [+fixed that "push" triggers weren't executing on row-deletion]

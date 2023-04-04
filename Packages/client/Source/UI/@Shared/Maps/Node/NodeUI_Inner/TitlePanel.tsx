@@ -117,13 +117,13 @@ export class TitlePanel extends BaseComponentPlus(
 		}
 
 		const equationNumber = mainAttachment?.equation ? GetEquationStepNumber(path) : null;
-		const noteText = (mainAttachment?.equation && mainAttachment?.equation.explanation) || node.current.note;
+		const noteText = (mainAttachment?.equation && mainAttachment?.equation.explanation) || node.current.phrasing.note;
 		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
 		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
 
 		return (
 			// <Row style={{position: "relative"}}>
-			<div {...FilterOutUnrecognizedProps(rest, "div")}
+			<Row {...FilterOutUnrecognizedProps(rest, "div")}
 				style={E(
 					{
 						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node/*, isSubnode*/),
@@ -142,7 +142,7 @@ export class TitlePanel extends BaseComponentPlus(
 					<Pre>{equationNumber}) </Pre>}
 				{!editing &&
 					<span style={ES(
-						{position: "relative", whiteSpace: "initial"},
+						{flex: 1, position: "relative", whiteSpace: "initial"},
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
@@ -151,10 +151,20 @@ export class TitlePanel extends BaseComponentPlus(
 							onTermClick={id=>this.OnTermClick([id])}
 							termsToSearchFor={termsToSearchFor}/>}
 						{!latex && RenderNodeDisplayText(displayText, termsToSearchFor, this)}
+						{noteText &&
+							<span style={{
+								fontSize: 11, color: "rgba(255,255,255,.5)",
+								// marginLeft: "auto",
+								marginLeft: 15,
+								marginTop: GetSegmentsForTerms(noteText, termsToSearchFor).length > 1 ? -1 : 3, float: "right", // if has terms in note, bump up a bit (to offset bump-down from <sup> elements)
+							}}>
+								{/*noteText*/}
+								{RenderNodeDisplayText(noteText, termsToSearchFor, this)}
+							</span>}
 					</span>}
 				{editing &&
 					<Row style={E(
-						{position: "relative", whiteSpace: "initial", alignItems: "stretch"},
+						{flex: 1, position: "relative", whiteSpace: "initial", alignItems: "stretch"},
 						//isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{!applyingEdit &&
@@ -174,19 +184,9 @@ export class TitlePanel extends BaseComponentPlus(
 								onClick={()=>this.ApplyEdit()}/>}
 						{applyingEdit && <Row>Applying edit...</Row>}
 					</Row>}
-				{noteText &&
-					<Pre style={{
-						fontSize: 11, color: "rgba(255,255,255,.5)",
-						// marginLeft: "auto",
-						marginLeft: 15,
-						marginTop: GetSegmentsForTerms(noteText, termsToSearchFor).length > 1 ? -1 : 3, float: "right", // if has terms in note, bump up a bit (to offset bump-down from <sup> elements)
-					}}>
-						{/*noteText*/}
-						{RenderNodeDisplayText(noteText, termsToSearchFor, this)}
-					</Pre>}
 				{node.type == NodeType.claim && mainAttachment?.quote &&
 					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
-			</div>
+			</Row>
 		);
 	}
 

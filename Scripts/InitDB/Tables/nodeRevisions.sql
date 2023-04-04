@@ -4,7 +4,6 @@ CREATE TABLE app."nodeRevisions" (
     creator text NOT NULL,
     "createdAt" bigint NOT NULL,
     phrasing jsonb NOT NULL,
-    note text,
     "displayDetails" jsonb,
     attachments jsonb DEFAULT '[]'::json NOT NULL,
     "replacedBy" text,

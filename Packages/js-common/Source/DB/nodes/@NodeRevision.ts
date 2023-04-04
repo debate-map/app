@@ -180,11 +180,6 @@ export class NodeRevision {
 	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
 	phrasing_tsvector?: any;*/
 
-	// todo: probably remove this, since the UI currently gives no way to edit it! (it seems superseded by NodePhrasing.note, which can be edited atm, but isn't shown in TitlePanel)
-	@DB((t, n)=>t.text(n).nullable())
-	@Field({type: ["null", "string"]}, {opt: true}) // add null-type, for later when the payload-validation schema is derived from the main schema
-	note?: string;
-
 	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: NodeRevisionDisplayDetails.name}, {opt: true})
 	displayDetails?: NodeRevisionDisplayDetails;
@@ -200,7 +195,7 @@ AddSchema("NodeRevision_Partial", ["NodeRevision"], ()=>{
 	return schema;
 });
 
-export const NodeRevisionInput_keys = ["node", "phrasing", "note", "displayDetails", "attachments"] as const;
+export const NodeRevisionInput_keys = ["node", "phrasing", "displayDetails", "attachments"] as const;
 export type NodeRevisionInput = PickOnly<NodeRevision, typeof NodeRevisionInput_keys[number]>;
 export const AsNodeRevisionInput = (node: NodeRevision)=>node.IncludeKeys(...NodeRevisionInput_keys) as NodeRevisionInput;
 
