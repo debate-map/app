@@ -1,5 +1,6 @@
 const fs = require("fs");
 const paths = require("path");
+const child_process = require("child_process");
 
 exports.OpenFileExplorerToPath = path=>{
 	if (process.platform === "win32") {

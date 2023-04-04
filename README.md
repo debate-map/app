@@ -375,15 +375,44 @@ We used to use NewRelic to try to do this, but that was cancelled. Tooling to us
 
 The cluster's database is an instance of the [CrunchyData Postgres Operator, v5](https://access.crunchydata.com/documentation/postgres-operator/v5); we use various docker images that they provide, under the `registry.developers.crunchydata.com/crunchydata/` path. However, they apparently do not keep those images up forever, meaning that at some point, updating to a new version is required (eg. since new devs/environments would then be unable to pull the images themselves).
 
-Here are some notes on doing that update process:
+To update only the "postgres" image/component within the pgo package (this is usually all that's needed):
+* 1\) Take a look at the file `Packages/deploy/PGO/install/values.yaml` to see what postgres version-images are available; if there is a new major-version you can jump to (that's not dropped yet), targeting that should solve the issue. (of the postgres image the cluster had been using being dropped from the crunchydata registry)
+* 2\) Ensure a copy of the target postgres image is stored in your private registry, by pasting the target version's image-url into the `MirrorTransientImages.js` file, then running it: `node ./Scripts/Docker/MirrorTransientImages.js`
+* 3\) Now open the `Packages/deploy/PGO/install/values.yaml` file again, and update the `relatedImages.postgres_XX.image` field to match the url of the private-registory mirror of the image. (so it's getting dropped from the main registry does not cause problems for us later)
+* 4\) If we're still needing to use the "large postgres images" fix, update the docker-pull command in `Postgres.star` to match the private-registry image-url.
+* 5\) Now we need to update the postgres-cluster's data-folder to work with the new version of postgres:
+	* 5.1\) Option 1: Run the postgres major-version update process that CrunchyData outlines here (recommended): https://access.crunchydata.com/documentation/postgres-operator/v5/guides/major-postgres-version-upgrade
+		* 5.1.1\) Notes for its step 1:
+			* It's recommended to at least make a logical backup at this point. (see: [pg-dump](#pg-dump))
+		* 5.1.2\) Notes for its step 2:
+			* 5.1.2.1\) In the first code-block (the yaml for the `PGUpgrade`), make sure you set:
+				* `meta.namespace: postgres-operator` (alternately, you could do this as part of the `kubectl apply` command, but better to have it in the git-tracked file itself imo)
+				* `meta.name: <name matching the pattern pg-upgrade-13-to-15>`
+			* 5.1.2.2\) The contents of that first code-block should be saved to a file in the `Packages/deploy/PGO/@Operations` folder, with the filename matching the `meta.name` field. (eg. `pg-upgrade-13-to-15.yaml`)
+			* 5.1.2.3\) It doesn't say how to deploy the listed yaml to the cluster; you could add it to the tilt scripts, or run `kubectl apply` directly. For the latter, run (from repo root): `kubectl apply -f Packages/deploy/PGO/@Operations/<file name from prior step>` (make sure you have Docker Desktop targeting the correct cluster first, ie. local or remote)
+			* 5.1.2.4\) It is now expected that, when viewing/"editing" the newly-added `pg-upgrade-XXX` object in Lens (under the "Custom Resources" category), you'll see the text (near the bottom): `message: PostgresCluster instances still running`
+		* 5.1.3\) Notes for its step 3:
+			* In our case, the cluster-annotating command to run is: `kubectl -n postgres-operator annotate postgrescluster debate-map postgres-operator.crunchydata.com/allow-upgrade="pg-upgrade-13-to-15"`
+			* When it says to shut down the cluster, in our case it means modifying the `Packages/deploy/PGO/postgres/values.yaml` file to have `shutdown: true`, then applying it (ie. by saving the file, with Tilt running).
+		* 5.1.4\) Notes for its step 4:
+			* If you hit an error about the `pg15` (or whatever your target/new-pg-version is) directory already existing, this may be due to a prior (presumably failed) upgrade attempt. To fix this, delete the pg-upgrade object (pod will be dropped with it), comment out the `shutdown: true` line again, wait for the pgo `X-instance1-X` pod to start up again, then SSH into that pod, and delete/rename the given directory; then you can redo the relevant steps to get to step 5.1.4 again.
+		* 5.1.5\) Notes for its step 5:
+			* Once you've confirmed the upgrade has completed successfully, it's recommended to remove the `PGUpgrade` object (I prefer to do this using Lens, with it shown under the "Custom Resources" category).
+		* 5.1.6\) Notes for its step 6:
+			* For its vacuumdb command, I went with the first option (`vacuumdb --all --analyze-in-stages`), and ran it in the shell for the `debate-map-instance1-XXX` pod.
+			* You could also do cleanup/removal of the old data-folder (eg. `pg13`) by following the given information (in the same `instance1` pod above), but I wouldn't bother unless disk-space is running low. (I don't believe those old folders become part of either the physical or logical automated backups, so the impact is minimal)
+	* 5.2\) Option 2: Reset the database storage directory and restore a logical backup of the database. (instructions for this option not yet written)
+
+If you are doing an update of the entire postgres-operator package, here are some notes on it:
 * We are using the helm-based installation approach rather than kustomize-based one, since this way updates are less complicated/painful.
 * The official instructions for an initial install are [here](https://access.crunchydata.com/documentation/postgres-operator/v5/installation/helm).
-* To do an update of the postgres-operator, we:
-	* 1\) Do a fresh clone of the examples repo (referenced in the helm-based install instructions above).
-	* 2\) Make a temporary copy (placed somewhere outside dm's git repo) of the files under `Packages/deploy/PGO` that were "customized" from their initial contents. Currently, this means:
-		* 2.1\) File: `Packages/deploy/PGO/postgres/values.yaml`
-	* 3\) Replace the contents of the `Packages/deploy/PGO` folder with the contents of the `helm` folder, in the examples repo from step 1.
-	* 4\) For each non-commented key in your backup of `postgres/values.yaml`, paste it into the appropriate location in the new `PGO/postgres/values.yaml` file.
+* To do an update of the postgres-operator:
+	* 1\) If the update process will involve a major-version upgrade of postgres, you'll need to decide if you want to reset the cluster then restore a logical-backup, or instead use the CrunchyData cluster-upgrade tool. The latter is recommended if there is a postgres-version that is supported by both the old and new pgo packages. If doing the latter (the cluster-upgrade tool), then the first step is updating just the postgres data-folder, by following the steps in the section above (through path of step 4.1). If doing the former (cluster reset followed by logical-backup), then instead use the path through step 4.2, and do that data-restore *after* the steps below.
+	* 2\) Do a fresh clone of the examples repo (referenced in the helm-based install instructions above).
+	* 3\) Make a temporary copy (placed somewhere outside dm's git repo) of the files under `Packages/deploy/PGO` that were "customized" from their initial contents. Currently, this means:
+		* 3.1\) File: `Packages/deploy/PGO/postgres/values.yaml`
+	* 4\) Replace the contents of the `Packages/deploy/PGO` folder with the contents of the `helm` folder, in the examples repo from step 1.
+	* 5\) For each non-commented key in your backup of `postgres/values.yaml` (all keys except `postgresVersion` started commented), paste it into the appropriate location in the new `PGO/postgres/values.yaml` file.
 
 </details>
 

@@ -20,12 +20,16 @@ def Start_Postgres(g):
 	#print("bucket_uniformPrivate_url:", bucket_uniformPrivate_url)
 
 	# temp: before deploying the postgres-resources, run "docker pull X" for the large postgres images
+	# ----------
 	# (fix for bug in Kubernetes 1.24.2 where in-container image-pulls that take longer than 2m get interrupted/timed-out: https://github.com/docker/for-mac/issues/6300#issuecomment-1324044788)
 	#local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2")
 	#local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0")
+
 	# update: it appears the issue is still present in Kubernetes 1.25.2 (at least in some cases), so we'll keep using this workaround for now
 	local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2")
-	local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-13.9-2")
+	#local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-13.9-2")
+	local_resource("pre-pull-large-image-2", "docker pull gcr.io/debate-map-prod/crunchy-postgres:ubi8-15.1-0")
+	# ----------
 
 	k8s_yaml(helm('../Packages/deploy/PGO/install', namespace="postgres-operator"))
 

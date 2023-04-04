@@ -16,7 +16,8 @@ name: debate-map
 # installation if you want to deploy the image without setting the "postgres"
 # image variable. This value is required.
 #postgresVersion: 14
-postgresVersion: 13 # temp-set to postgres-14, simply to restore backup (so can do a logical database dump)
+#postgresVersion: 13
+postgresVersion: 15
 
 # postGISVersion if sets and coupled with a PostGIS enabled container, enables
 # PostGIS. This version number needs to be available as one of the

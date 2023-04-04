@@ -1,0 +1,10 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PGUpgrade
+metadata:
+  name: pg-upgrade-13-to-15
+  namespace: postgres-operator
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-upgrade:ubi8-5.3.0-0
+  postgresClusterName: debate-map
+  fromPostgresVersion: 13
+  toPostgresVersion: 15
