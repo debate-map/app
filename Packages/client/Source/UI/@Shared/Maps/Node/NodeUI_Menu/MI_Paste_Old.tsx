@@ -5,7 +5,7 @@ import {Observer, RunInAction} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID, Polarity, NodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup, CheckNewLinkIsValid, Me, PermissionGroupSet} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID, Polarity, NodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, ChildGroup, CheckNewLinkIsValid, Me, PermissionGroupSet, IsWrapperArgNeededForTransfer, GetNode} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_LinkNode} from "Utils/DB/Command.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
@@ -44,7 +44,13 @@ export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 		}.OmitNull()), [childGroup, contributeInfo_polarity?.hostNodeID, contributeInfo_polarity?.reversePolarities, copiedNode.id, copiedNode.type, copiedNodePath, copiedNode_asCut, formForClaimChildren, map?.id, newPolarity, node.id]);
 		const error = linkCommand.Validate_Safe();*/
 		const newParentID = contributeInfo_polarity?.hostNodeID ?? node.id;
-		const error = CheckNewLinkIsValid(newParentID, childGroup, copiedNode, Me());
+		const newParent = GetNode.NN(newParentID);
+
+		let error = CheckNewLinkIsValid(newParentID, childGroup, copiedNode, Me());
+		const wrapperArgNeeded = IsWrapperArgNeededForTransfer(newParent.type, childGroup, copiedNode.type);
+		if (wrapperArgNeeded) {
+			error = CheckNewLinkIsValid(newParentID, childGroup, {id: "<some new node id>", type: NodeType.argument}, Me());
+		}
 
 		return (
 			<VMenuItem text={`Paste (${copiedNode_asCut ? "move" : "link"}) as ${childGroup == "freeform" ? "freeform" : "structured"} child${{truth: " (re. truth)", relevance: " (re. relevance)"}[childGroup] ?? ""}`}
