@@ -17,6 +17,9 @@ pub struct TermAttachment {
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "AttachmentInput")]
 pub struct Attachment {
+	pub expandedByDefault: Option<bool>,
+	
+	// components
     pub equation: Option<JSONValue>,
     pub references: Option<JSONValue>,
     pub quote: Option<JSONValue>,

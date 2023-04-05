@@ -32,12 +32,17 @@ export function PreProcessLatex(text: string) {
 	return text;
 }
 
-export const GetMainAttachment = CreateAccessor((rev: NodeRevision)=>{
+export const GetTitleIntegratedAttachment = CreateAccessor((rev: NodeRevision)=>{
 	if (rev == null) return null; // seems not needed?
-	return rev.attachments[0] as Attachment|n;
+	return rev.attachments.find(a=>a.equation);
 });
 export const GetSubPanelAttachments = CreateAccessor((rev: NodeRevision)=>{
 	return rev.attachments.filter(a=>a.equation == null);
+});
+/** Note: "Expanded by default" is something specific to sub-panel attachments. */
+export const GetExpandedByDefaultAttachment = CreateAccessor((rev: NodeRevision)=>{
+	if (rev == null) return null; // seems not needed?
+	return rev.attachments.find(a=>a.expandedByDefault);
 });
 
 export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
@@ -341,7 +346,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 		if (baseClaim) return GetNodeDisplayText(baseClaim);
 	}
 	//const mainAttachment = node.current.attachments[0] as Attachment|n;
-	const mainAttachment = GetMainAttachment(node.current);
+	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
 	if (node.type == NodeType.claim) {
 		if (mainAttachment?.equation) {
 			let result = mainAttachment.equation.text;

@@ -36,8 +36,12 @@ export function GetAttachmentType(attachment: Attachment) {
 	);
 }
 
-export function ResetAttachment(attachment: Attachment, attachmentType: AttachmentType) {
+export function ResetAttachment(attachment: Attachment, attachmentType: AttachmentType, resetExpandedByDefaultForAllTypes = false) {
 	CE(attachment).Extend({equation: null, references: null, quote: null, media: null, description: null});
+	if (attachmentType == AttachmentType.equation || resetExpandedByDefaultForAllTypes) {
+		attachment.expandedByDefault = false;
+	}
+
 	if (attachmentType == AttachmentType.equation) {
 		attachment.equation = new EquationAttachment();
 	} else if (attachmentType == AttachmentType.references) {
@@ -59,6 +63,12 @@ export class Attachment {
 	constructor(data?: Partial<Attachment>) {
 		Object.assign(this, data);
 	}
+
+	@Field({$ref: EquationAttachment.name}, {opt: true})
+	expandedByDefault?: boolean;
+
+	// components
+	// ==========
 
 	@Field({$ref: EquationAttachment.name}, {opt: true})
 	equation?: EquationAttachment;

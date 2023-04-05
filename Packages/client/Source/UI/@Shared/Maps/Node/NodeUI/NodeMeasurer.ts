@@ -1,4 +1,4 @@
-import {GetFontSizeForNode, GetMainAttachment, GetNodeDisplayText, NodeL3, NodeType_Info} from "dm_common";
+import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
@@ -29,21 +29,22 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 		noteWidth_tester.innerHTML = node.current.phrasing.note;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
-	const mainAttachment = GetMainAttachment(node.current);
-	if (mainAttachment?.equation && mainAttachment?.equation.explanation) {
+	const titleAttachment = GetTitleIntegratedAttachment(node.current);
+	if (titleAttachment?.equation && titleAttachment?.equation.explanation) {
 		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
-		noteWidth_tester.innerHTML = mainAttachment?.equation.explanation;
+		noteWidth_tester.innerHTML = titleAttachment?.equation.explanation;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	expectedTextWidth += noteWidth;
 
+	const subPanelAttachments = GetSubPanelAttachments(node.current);
 	// let expectedOtherStuffWidth = 26;
 	let expectedOtherStuffWidth = 28;
-	if (mainAttachment?.quote) {
+	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
 		expectedOtherStuffWidth += 14;
 	}
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (mainAttachment?.quote) { // quotes are often long, so just always do full-width
+	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) { // quotes are often long, so just always do full-width
 		expectedBoxWidth = maxWidth_final;
 	}
 

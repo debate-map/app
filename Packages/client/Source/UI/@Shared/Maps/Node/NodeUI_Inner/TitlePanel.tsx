@@ -6,7 +6,7 @@ import {Button, Pre, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetMainAttachment, AsNodeRevisionInput} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -69,13 +69,13 @@ export class TitlePanel extends BaseComponentPlus(
 		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
-		const {mainAttachment, displayText} = await GetAsync(()=>{
+		const titleAttachment = GetTitleIntegratedAttachment(node.current);
+		const {displayText} = await GetAsync(()=>{
 			return {
-				mainAttachment: GetMainAttachment(node.current),
 				displayText: GetNodeDisplayText(node, path),
 			};
 		});
-		if (IsUserCreatorOrMod(MeID(), node) && mainAttachment?.equation == null) {
+		if (IsUserCreatorOrMod(MeID(), node) && titleAttachment?.equation == null) {
 			this.SetState({editing: true, edit_newTitle: displayText});
 		}
 	};
@@ -104,8 +104,8 @@ export class TitlePanel extends BaseComponentPlus(
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
 		const nodeView = GetNodeView(map?.id, path);
-		const mainAttachment = GetMainAttachment(node.current);
-		const latex = mainAttachment?.equation?.latex;
+		const titleAttachment = GetTitleIntegratedAttachment(node.current);
+		const latex = titleAttachment?.equation?.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
 		let displayText = GetNodeDisplayText(node, path);
@@ -116,8 +116,8 @@ export class TitlePanel extends BaseComponentPlus(
 			displayText = displayText.replace(/^([^[ ]+\s)?\[.+?\]\s*/, "$1");
 		}
 
-		const equationNumber = mainAttachment?.equation ? GetEquationStepNumber(path) : null;
-		const noteText = (mainAttachment?.equation && mainAttachment?.equation.explanation) || node.current.phrasing.note;
+		const equationNumber = titleAttachment?.equation ? GetEquationStepNumber(path) : null;
+		const noteText = (titleAttachment?.equation && titleAttachment?.equation.explanation) || node.current.phrasing.note;
 		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
 		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
 
@@ -146,7 +146,7 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
-						{mainAttachment?.equation && latex && <NodeMathUI text={mainAttachment.equation.text}
+						{titleAttachment?.equation && latex && <NodeMathUI text={titleAttachment.equation.text}
 							onTermHover={(id, hovered)=>this.OnTermHover([id], hovered)}
 							onTermClick={id=>this.OnTermClick([id])}
 							termsToSearchFor={termsToSearchFor}/>}
@@ -184,8 +184,8 @@ export class TitlePanel extends BaseComponentPlus(
 								onClick={()=>this.ApplyEdit()}/>}
 						{applyingEdit && <Row>Applying edit...</Row>}
 					</Row>}
-				{node.type == NodeType.claim && mainAttachment?.quote &&
-					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
+				{/*node.type == NodeType.claim && titleAttachment?.quote &&
+					<InfoButton ml={5} text="Allowed modifications: bold, and collapsed segments [...]"/>*/}
 			</Row>
 		);
 	}

@@ -1,5 +1,5 @@
-import {A, GetEntries, GetValues, NN} from "web-vcore/nm/js-vextensions.js";
-import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {A, DEL, GetEntries, GetValues, NN} from "web-vcore/nm/js-vextensions.js";
+import {CheckBox, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, NodeL1, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
@@ -16,9 +16,9 @@ import {DescriptionAttachmentEditorUI} from "./AttachmentPanel/DescriptionAttach
 	return node.type != NodeType.argument;
 }*/
 
-export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: AttachmentTarget, allowedAttachmentTypes?: AttachmentType[]}> {
+export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: AttachmentTarget, allowedAttachmentTypes?: AttachmentType[], setExpandedByDefault: (val: boolean)=>any}> {
 	render() {
-		const {phase, target, allowedAttachmentTypes} = this.props;
+		const {phase, target, allowedAttachmentTypes, setExpandedByDefault} = this.props;
 		const {newData} = this.state;
 		const {enabled, Change} = this.helpers;
 		const attachmentType = GetAttachmentType(newData);
@@ -33,6 +33,7 @@ export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: 
 						ResetAttachment(newData, val);
 						Change();
 					}}/>
+					<CheckBox ml={5} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
 				</Row>
 				{attachmentType == AttachmentType.equation &&
 					<EquationEditorUI phase={phase} baseData={NN(newData.equation)} onChange={val=>Change(newData.equation = val)}/>}

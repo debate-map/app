@@ -4,7 +4,7 @@ import {AttachmentEditorUI} from "UI/@Shared/Attachments/AttachmentEditorUI";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {ButtonChain} from "Utils/ReactComponents/ButtonChain";
 import {ES, Observer} from "web-vcore";
-import {E, ModifyString} from "web-vcore/nm/js-vextensions.js";
+import {DEL, E, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
@@ -82,7 +82,19 @@ export class AttachmentsEditorUI extends DetailsUI_Base<Attachment[], Attachment
 				</Row>
 				{selectedAttachment &&
 					<AttachmentEditorUI phase={phase} baseData={selectedAttachment} onChange={val=>Change(newData[selectedAttachmentIndex] = val)}
-						target={target} allowedAttachmentTypes={allowedAttachmentTypes_forSelected}/>}
+						target={target} allowedAttachmentTypes={allowedAttachmentTypes_forSelected}
+						setExpandedByDefault={val=>{
+							if (val) {
+								for (const [i, attachment] of newData.entries()) {
+									newData[i] = {...attachment, expandedByDefault: false};
+								}
+								newData[selectedAttachmentIndex] = {...newData[selectedAttachmentIndex], expandedByDefault: true};
+							} else {
+								newData[selectedAttachmentIndex] = {...newData[selectedAttachmentIndex]};
+								delete newData[selectedAttachmentIndex].expandedByDefault;
+							}
+							Change();
+						}}/>}
 			</Column>
 		);
 	}

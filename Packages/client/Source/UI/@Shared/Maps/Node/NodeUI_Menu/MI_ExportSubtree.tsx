@@ -1,4 +1,4 @@
-import {GetMainAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeLink, Term} from "dm_common";
+import {GetExpandedByDefaultAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeLink, Term} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -243,7 +243,7 @@ const PopulateSearchInfoUsingSubtree = CreateAccessor((currentPath: string, sear
 		if (!searchInfo.terms.has(term.id)) searchInfo.terms.set(term.id, term);
 	}
 
-	const mainAttachment = GetMainAttachment(node.current);
+	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
 	if (mainAttachment?.media && !searchInfo.terms.has(mainAttachment?.media.id)) {
 		const media = GetMedia(mainAttachment?.media.id)!;
 		searchInfo.medias.set(media.id, media);

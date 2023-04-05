@@ -1,6 +1,6 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID, HTMLProps_Fixed, Chroma} from "web-vcore";
-import {NodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetMainAttachment, GetAttachmentType, DescriptionAttachment, GetSubPanelAttachments} from "dm_common";
+import {NodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType, GetExpandedByDefaultAttachment, GetAttachmentType, DescriptionAttachment, GetSubPanelAttachments} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React, {Fragment, useState} from "react";
 import {Button, Row, Text} from "web-vcore/nm/react-vcomponents";
@@ -13,12 +13,13 @@ export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boole
 	render() {
 		const {node, toolbarShowing, ...rest} = this.props;
 		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
-		const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
+		const indexOfExpandedByDefaultAttachment = attachments_forSubPanel.findIndex(a=>a == GetExpandedByDefaultAttachment(node.current));
+		const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(indexOfExpandedByDefaultAttachment);
 		const currentAttachment = attachments_forSubPanel[selectedAttachmentIndex];
 
 		return (
 			<>
-				{attachments_forSubPanel.length > 1 &&
+				{(attachments_forSubPanel.length > 1 || (attachments_forSubPanel.length == 1 && indexOfExpandedByDefaultAttachment == -1)) &&
 				<Row mb={5} p="0 5px" style={{position: "relative", flexWrap: "wrap", gap: 5}}>
 					{/*<Text>Attachments:</Text>*/}
 					{attachments_forSubPanel.map((attachment, index)=>{
@@ -31,11 +32,14 @@ export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boole
 										{padding: "3px 7px"},
 										//ButtonChain_Button_CSSOverrides(thisAttachmentSelected),
 									)}
-									onClick={()=>setSelectedAttachmentIndex(index)}/>
+									onClick={()=>{
+										setSelectedAttachmentIndex(selectedAttachmentIndex != index ? index : -1);
+									}}/>
 							</ButtonChain>
 						);
 					})}
 				</Row>}
+				{currentAttachment != null &&
 				<div {...rest} style={{
 					position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,
 					//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
@@ -50,7 +54,7 @@ export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boole
 						<SubPanel_Media mediaAttachment={currentAttachment?.media}/>}
 					{currentAttachment?.description &&
 						<SubPanel_Description attachment={currentAttachment?.description}/>}
-				</div>
+				</div>}
 			</>
 		);
 	}
