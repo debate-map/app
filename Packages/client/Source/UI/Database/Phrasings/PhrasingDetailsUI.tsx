@@ -118,7 +118,7 @@ class Title_Base extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 							* Quote: Socrates
 
 							The detailed version of the argument will be embodied in its premises/child-claims.
-						`.AsMultiline()}
+						`.AsMultiline(0)}
 						</Pre>
 					</Row>}
 			</>
