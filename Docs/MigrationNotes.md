@@ -7,6 +7,20 @@
 
 ## Main series
 
+### Pushed on 2023-04-04
+
+* 1\) Added a new node attachment-type, at: `nodeRevisions.attachments.X.description`
+* 2\) Changed attachments to only show up in the node sub-panel if they have a (new) `expandedByDefault` field set to true.
+	* DB response:
+		* 1\) If you want existing nodes with quote or media attachments to have them expanded by default, execute sql:
+		```
+		UPDATE "nodeRevisions" SET attachments = jsonb_set(attachments, '{0,expandedByDefault}', 'true')
+		WHERE (attachments -> 0 -> 'quote' != 'null' OR attachments -> 0 -> 'media' != 'null')
+			AND (phrasing -> 'text_base' = 'null' OR phrasing -> 'text_base' = '""')
+			AND (phrasing -> 'text_negation' = 'null' OR phrasing -> 'text_negation' = '""')
+			AND (phrasing -> 'text_question' = 'null' OR phrasing -> 'question' = '""');
+		```
+
 ### Pushed on 2023-04-03
 
 * 1\) Removed the `nodeRevisions.note` column from the database. (kept that field in the graphql api though, as a proxy of `nodeRevisions.phrasing.note`)
