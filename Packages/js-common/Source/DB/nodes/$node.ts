@@ -358,6 +358,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 			//if (parentNode?.type == NodeType.claim) return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
 			if (nodeL3.link.group == ChildGroup.truth) return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
 			if (nodeL3.link.group == ChildGroup.relevance) return nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
+			return nodeL3.link.polarity == Polarity.supporting ? "Argument (supporting)" : "Argument (opposing)";
 		}
 		return "Argument (unknown polarity)";
 	}
