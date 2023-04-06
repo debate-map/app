@@ -137,7 +137,6 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		const graphInfo = useMemo(()=>{
 			const graph = new Graph({
-				//columnWidth: 100,
 				//uiDebugKit: {FlashComp},
 				layoutOpts: {
 					nodeSpacing: (nodeA, nodeB)=>{
@@ -145,7 +144,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 						const nodeBParentPath = nodeB.data.path_parts.slice(0, -1).join("/");
 						const nodeANodeType = nodeA.data.leftColumn_userData["nodeType"];
 						const nodeBNodeType = nodeB.data.leftColumn_userData["nodeType"];
-						const nodeAHasToolbar = nodeANodeType != null && nodeANodeType != NodeType.category && nodeANodeType != NodeType.argument;
+						//const nodeAHasToolbar = nodeANodeType != null && nodeANodeType != NodeType.category && nodeANodeType != NodeType.argument;
 						const nodeBHasToolbar = nodeBNodeType != null && nodeBNodeType != NodeType.category && nodeBNodeType != NodeType.argument;
 
 						// do special spacing between some tree-nodes that are in the same column/sequence
@@ -153,7 +152,6 @@ export class MapUI extends BaseComponent<Props, {}> {
 						if (inSameSequence) {
 							const nodeAIsPremiseInArg = nodeA.data.leftColumn_connectorOpts.parentIsAbove;
 							const nodeBIsPremiseInArg = nodeB.data.leftColumn_connectorOpts.parentIsAbove;
-							//if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 15;
 							if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 5;
 						}
 
@@ -178,7 +176,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 					},
 				},
 			});
-			globalThis.graph = graph; // temp
+			//globalThis.graph = graph; // temp
 			return graph;
 		}, []);
 		const [containerElResolved, setContainerElResolved] = useState(false);

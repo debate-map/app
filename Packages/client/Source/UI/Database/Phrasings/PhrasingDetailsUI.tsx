@@ -165,7 +165,8 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 			const hasOtherTitlesEntered = newData.text_negation || newData.text_question;
 			const willPreferYesNoTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
 			extraProps = {
-				required: !hasOtherTitlesEntered && !willPreferYesNoTitleHere,
+				// commented; node may have an attachment, in which case having a base-title may be unwanted (since it overrides the auto-text)
+				//required: !hasOtherTitlesEntered && !willPreferYesNoTitleHere,
 				ref: this.props.innerRef, // if supplied
 			};
 		}

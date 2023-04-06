@@ -138,7 +138,7 @@ export function NodeRevision_Defaultable_DefaultsForMap(): NodeRevision_Defaulta
 }*/
 
 //export const NodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
-export const NodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace
+export const NodeRevision_titlePattern = "^(\\S.*|.{0})$"; // must start with non-whitespace, or be empty
 @MGLClass({table: "nodeRevisions"}, {
 	allOf: [
 		// if not an argument or content-node, require "phrasing" prop
