@@ -20,6 +20,7 @@ import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
+import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -226,10 +227,11 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
-		const toolbarShow = map?.extras.defaultNodeToolbarEnabled ?? true;
+		const toolbarShow = (map?.extras.defaultNodeToolbarEnabled ?? true) && node.rootNodeForMap == null; // disabled for root, since looks bad (and less useful there)
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
-			|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
+			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
+			|| nodeView?.selected || hovered;
 		//const subPanelShow = node.type == NodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		//const mainAttachment = GetMainAttachment(node.current);
 		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
@@ -331,6 +333,51 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			//if (IsNumber(width_final))
 			width_final = width_final.KeepAtLeast(NodeType_Info.for[node.type].minWidth);
 
+			const titlePanel = (
+				<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
+					ref={c=>this.titlePanel = c}
+					//onClick={onTextHolderClick} // not needed; TitlePanel already handles double-clicks
+					style={{padding: GetPaddingForNode(node/*, isSubnode*/)}}/>
+			);
+			const toolbarElement = toolbarShow
+				&& <NodeToolbar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
+				nodeUI_width_final={width_final}
+				leftPanelShow={leftPanelShow}
+				onMoreClick={()=>{
+					//onClick();
+					//RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
+					//setLeftPanelPinned(!leftPanelPinned);
+					RunInAction_Set(this, ()=>{
+						if (nodeView == null) return;
+						nodeView.leftPanelPinned = !nodeView.leftPanelPinned;
+					});
+				}}
+				onMoreHoverChange={hovered=>{
+					//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
+					this.SetState({moreButtonHovered: hovered});
+				}}/>;
+			const toolbarAndTitleElements = <>
+				{/*toolbarShow && node.type != NodeType.argument &&
+					<div style={{
+						zIndex: -1,
+						display: "flex",
+						height: 28,
+						//background: "rgba(0,0,0,1)",
+						background: "rgba(0,0,0,.3)",
+						borderRadius: "5px 5px 0px 0px",
+						position: "absolute",
+						bottom: "100%",
+						right: -17,
+						left: 0,
+						marginTop: 1,
+					}}/>*/}
+				{!toolbarShow && titlePanel}
+				{toolbarShow && node.type == NodeType.argument &&
+					<Row>{titlePanel}{toolbarElement}</Row>}
+				{toolbarShow && node.type != NodeType.argument &&
+					<>{toolbarElement}{titlePanel}</>}
+			</>;
+
 			return (
 				<ExpandableBox
 					ref={useCallback(c=>{
@@ -386,6 +433,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
 					</>}
 					//onTextHolderClick={onTextHolderClick}
+					//textHolderStyle={E(isMultiPremiseArg && {width: null})}
 					text={<>
 						{!GADDemo && (()=>{
 							// include this in "text" prop, because that makes the sizing exclude the +/- button
@@ -401,32 +449,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								{ratingsPanel}
 							</div>;
 						})()}
-						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
-							ref={c=>this.titlePanel = c}
-							//onClick={onTextHolderClick} // not needed; TitlePanel already handles double-clicks
-							style={{padding: GetPaddingForNode(node/*, isSubnode*/)}}/>
+						{toolbarAndTitleElements}
 						{subPanelShow &&
 						<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
-						{toolbarShow &&
-						<NodeToolbar {...this.props} backgroundColor={backgroundColor} panelToShow={panelToShow} onPanelButtonClick={panel=>onPanelButtonClick(panel, "toolbar")}
-							nodeUI_width_final={width_final}
-							leftPanelShow={leftPanelShow}
-							onMoreClick={()=>{
-								//onClick();
-								//RunInAction_Set(this, ()=>store.main.maps.nodeLeftBoxEnabled = !store.main.maps.nodeLeftBoxEnabled);
-								//setLeftPanelPinned(!leftPanelPinned);
-								RunInAction_Set(this, ()=>{
-									if (nodeView == null) return;
-									nodeView.leftPanelPinned = !nodeView.leftPanelPinned;
-								});
-							}}
-							onMoreHoverChange={hovered=>{
-								//if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
-								this.SetState({moreButtonHovered: hovered});
-							}}/>}
 						<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
 					</>}
 					toggleExpanded={toggleExpanded}
+					expandButtonStyle={E(toolbarShow && {borderRadius: "0 0 5px 0"})}
 					afterChildren={<>
 						{bottomPanelShow
 							&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: widthOverride, hovered, backgroundColor}}

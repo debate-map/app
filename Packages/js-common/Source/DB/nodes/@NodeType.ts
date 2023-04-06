@@ -59,7 +59,8 @@ export class NodeType_Info {
 				[ChildGroup.truth, [NodeType.argument]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
-			minWidth: 350, maxWidth: 600,
+			//minWidth: 350, maxWidth: 600,
+			minWidth: 600, maxWidth: 600, // probably temp
 			// mainRatingTypes: ["probability", "intensity"],
 			// mainRatingTypes: ["probability", "support"],
 			/* mainRatingTypes: ["probability", "truth"],
@@ -71,7 +72,8 @@ export class NodeType_Info {
 				[ChildGroup.relevance, [NodeType.argument]],
 				[ChildGroup.freeform, freeformTypes],
 			]),
-			minWidth: 150, maxWidth: 600,
+			//minWidth: 150, maxWidth: 600,
+			minWidth: 80, maxWidth: 300, // maybe temp
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
 		}),

@@ -33,7 +33,9 @@ class ObservedValues {
 
 //export const GUTTER_WIDTH = 30;
 export const GUTTER_WIDTH = 40;
-export const GUTTER_WIDTH_SMALL = 20;
+//export const GUTTER_WIDTH_SMALL = 20;
+export const GUTTER_WIDTH_SMALL = 12;
+//export const GUTTER_WIDTH_SMALL = 0;
 
 // Warn if functions passed to NodeUI are transient (ie. change each render).
 // We don't need to do this for every component, but we need at least one component-type in the tree to do so, in order to "stop propagation" of transient props.
@@ -150,6 +152,7 @@ export class NodeUI extends BaseComponentPlus(
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: GetNodeColor(hereArg ?? node, "raw", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
+			//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			parentIsAbove: inBelowGroup,
 		});
 
@@ -394,12 +397,16 @@ export class NodeUI extends BaseComponentPlus(
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, leftMarginForLines);
 		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
 
-		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
+		/*const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		if (isMultiPremiseArgument) {
 			// expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
 			width = width.KeepAtLeast(350);
 			// expectedBoxWidth += 20;
 			//width += 20; // give extra space for left-margin
+		}*/
+
+		if (node.type == NodeType.argument && map.extras.defaultNodeToolbarEnabled) {
+			width += 110; // add space for the "Relevance" toolbar-item
 		}
 
 		this.measurementInfo_cache = {expectedBoxWidth, width/* , expectedHeight */};

@@ -2,11 +2,11 @@ import {Assert, Clone, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import _ from "lodash";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {Button, Pre, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Pre, Row, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, IsPremiseOfSinglePremiseArgument, GetParentNodeL3, Polarity, NodeL3, IsMultiPremiseArgument} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -61,7 +61,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @WarnOfTransientObjectProps
 @Observer
 export class TitlePanel extends BaseComponentPlus(
-	{} as {parent: NodeUI_Inner, map: Map|n, node: NodeL2, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
+	{} as {parent: NodeUI_Inner, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
 	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{
@@ -102,6 +102,10 @@ export class TitlePanel extends BaseComponentPlus(
 		const {map, parent, node, path, style, onClick, ...rest} = this.props;
 		const {editing, edit_newTitle, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
+		/*const parentNode = GetParentNodeL3(path);
+		const isPremiseOfSPA = IsPremiseOfSinglePremiseArgument(node, parentNode);
+		const argNode = isPremiseOfSPA ? parentNode : node.type == NodeType.argument ? node : null;
+		const isMultiPremiseArg = IsMultiPremiseArgument(node);*/
 
 		const nodeView = GetNodeView(map?.id, path);
 		const titleAttachment = GetTitleIntegratedAttachment(node.current);
@@ -130,6 +134,10 @@ export class TitlePanel extends BaseComponentPlus(
 						marginTop: !latex && GetSegmentsForTerms(displayText, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
 						color: liveSkin.NodeTextColor(),
 					},
+					node.type == NodeType.argument && {
+						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .3).toString(), // for arguments, make text mostly transparent, since text is repetitive and can be distracting
+						flex: 1, // maybe temp; since width is locked apparently, have title-panel fill gap (so toolbar-button goes all the way to right)
+					},
 					style,
 					//GADDemo && {fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 				)}
@@ -143,9 +151,14 @@ export class TitlePanel extends BaseComponentPlus(
 				{!editing &&
 					<span style={ES(
 						{flex: 1, position: "relative", whiteSpace: "initial"},
+						node.type == NodeType.argument && {whiteSpace: "pre"}, // for arguments, never wrap text
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
+						{/*argNode != null &&
+						<Row style={{float: "left", whiteSpace: "pre", background: "black", borderRadius: "5px 0 0 0", marginLeft: -5, marginRight: 5, marginTop: -5, marginBottom: -5, height: 28, padding: "0 5px"}}>
+							<Text>{argNode?.link?.polarity == Polarity.supporting ? "Pro:" : "Con:"}</Text>
+						</Row>*/}
 						{titleAttachment?.equation && latex && <NodeMathUI text={titleAttachment.equation.text}
 							onTermHover={(id, hovered)=>this.OnTermHover([id], hovered)}
 							onTermClick={id=>this.OnTermClick([id])}

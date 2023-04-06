@@ -41,7 +41,9 @@ export class SubPanel extends BaseComponent<{node: NodeL2, toolbarShowing: boole
 				</Row>}
 				{currentAttachment != null &&
 				<div {...rest} style={{
-					position: "relative", margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`, padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,
+					position: "relative",
+					//margin: `5px 0 ${toolbarShowing ? "-5px" : "0"} 0`,
+					padding: `${currentAttachment?.references ? 0 : 6}px 5px 5px 5px`,
 					//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 					background: liveSkin.NodeSubPanelBackgroundColor().css(), borderRadius: "0 0 0 5px",
 					fontSize: 12, // text within attachments can get really long; make font smaller to avoid visual space being dominated by attachment text

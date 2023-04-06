@@ -2,8 +2,6 @@
 
 Monorepo for the client, server, etc. of the Debate Map website ([debatemap.app](https://debatemap.app)).
 
-> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, where the backend is written in Rust, rather than using Firestore. It is still in development, so the <https://debatemap.app> website will have some discrepancies until this new version is ready and published.
-
 # Overview
 
 The [Debate Map](https://debatemap.app) project is a web platform aimed at improving the efficiency of discussion and debate. It's crowd-sourced and open-source, and welcomes reader contributions.

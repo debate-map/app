@@ -140,7 +140,15 @@ export class MapUI extends BaseComponent<Props, {}> {
 				//columnWidth: 100,
 				//uiDebugKit: {FlashComp},
 				layoutOpts: {
-					nodeSpacing: ()=>10,
+					nodeSpacing: (nodeA, nodeB)=>{
+						const nodeAIsPremiseInArg = nodeA.data.leftColumn_connectorOpts.parentIsAbove;
+						const nodeBIsPremiseInArg = nodeB.data.leftColumn_connectorOpts.parentIsAbove;
+						//if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 10;
+						if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 15;
+						//if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 1;
+						if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 5;
+						return 33;
+					},
 					styleSetter_layoutPending: style=>{
 						//style.right = "100%"; // not ideal, since can cause some issues (eg. during map load, the center-on-loading-nodes system can jump to empty left-area of map) 
 						style.opacity = "0";

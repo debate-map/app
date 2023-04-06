@@ -85,8 +85,8 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 					<Row style={{height: 40, padding: 10}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>
 						{!GADDemo && <span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Edits</span>}
-						<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Last edit</span>
-						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Creator</span>
+						{!GADDemo_AI && <span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Last edit</span>}
+						{!GADDemo_AI && <span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Creator</span>}
 					</Row>
 				</Column>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({

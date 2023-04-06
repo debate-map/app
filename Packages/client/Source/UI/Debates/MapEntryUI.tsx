@@ -26,11 +26,12 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		}
 
 		const toURL = new VURL(undefined, ["debates", `${map.id}`]);
+		const gadTextColor = HSLA(222, .33, .25, 1);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
 				GADDemo && {
-					color: HSLA(222, 0.33, 0.5, 0.8),
+					color: gadTextColor,
 					fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17,
 				},
 				GADDemo && GetCinzelStyleForBold(),
@@ -46,7 +47,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 						<Row style={{fontSize: 13}}>{map.note}</Row>
 					</Column> */}
 					<Div style={{position: "relative", flex: columnWidths[0]}}>
-						<Link text={mapNameToDisplay} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: HSLA(222, 0.33, 0.5, 0.8)})} onClick={e=>{
+						<Link text={mapNameToDisplay} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: gadTextColor})} onClick={e=>{
 							e.preventDefault();
 							RunInAction("MapEntryUI.onClick", ()=>{
 								store.main.page = "debates";
@@ -62,8 +63,8 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 							</Div>}
 					</Div>
 					{!GADDemo && <span style={{flex: columnWidths[1]}}>{map.edits || 0}</span>}
-					<span style={{flex: columnWidths[2]}}>{Moment(map.editedAt).format("YYYY-MM-DD")}</span>
-					<span style={{flex: columnWidths[3]}}>{creator ? creator.displayName : "..."}</span>
+					{!GADDemo_AI && <span style={{flex: columnWidths[2]}}>{Moment(map.editedAt).format("YYYY-MM-DD")}</span>}
+					{!GADDemo_AI && <span style={{flex: columnWidths[3]}}>{creator ? creator.displayName : "..."}</span>}
 				</Row>
 			</Column>
 		);

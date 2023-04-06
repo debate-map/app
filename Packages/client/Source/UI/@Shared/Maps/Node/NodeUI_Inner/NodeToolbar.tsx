@@ -48,13 +48,14 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
 		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;
 		const getToolbarItemUIs = ()=>{
+			let indexAmongEnabled = 0;
 			return toolbarItems.map((item, index)=>{
-				if (item.panel == "truth" && (node.type == NodeType.claim || node.type == NodeType.argument)) {
-					return <ToolBarButton key={index} {...sharedProps} text="Agreement" panel="truth"
+				if (item.panel == "truth" && node.type == NodeType.claim) {
+					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Agreement" panel="truth"
 						enabled={node.type == NodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
 				}
-				if (item.panel == "relevance" && (node.type == NodeType.argument || isPremiseOfArg)) {
-					return <ToolBarButton key={index} {...sharedProps} text="Relevance" panel="relevance"
+				if (item.panel == "relevance" && node.type == NodeType.argument) {
+					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Relevance" panel="relevance"
 						enabled={node.type == NodeType.argument || isPremiseOfSinglePremiseArg}
 						disabledInfo={
 							isPremiseOfMultiPremiseArg
@@ -77,7 +78,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 						const fontSize = allLabelsText.length >= 30 ? 9 :
 							allLabelsText.length >= 15 ? 10 :
 							11;
-						return <ToolBarButton key={index} {...sharedProps} panel="tags" style={{overflow: "hidden"}}
+						return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} panel="tags" style={{overflow: "hidden"}}
 							text={allLabelsText} // used for estimating width-required for button
 							textComp={
 								<Row style={{
@@ -101,10 +102,10 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 							}/>;
 					}
 
-					return <ToolBarButton key={index} {...sharedProps} text={labelsAndOtherTags > 0 ? `Tags: ${labelsAndOtherTags}` : "Tags"} panel="tags"/>;
+					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text={labelsAndOtherTags > 0 ? `Tags: ${labelsAndOtherTags}` : "Tags"} panel="tags"/>;
 				}
-				if (item.panel == "phrasings") {
-					return <ToolBarButton key={index} {...sharedProps} text="Phrasings" panel="phrasings"/>;
+				if (item.panel == "phrasings" && node.type != NodeType.argument) {
+					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Phrasings" panel="phrasings"/>;
 				}
 				return null;
 			});
@@ -117,21 +118,31 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));*/
 
 		return (
-			<Row mt={1} className={key("NodeToolbar")} style={css({
-				position: "relative", height: 25, background: backgroundColor.css(), borderRadius: "0 0 5px 5px",
-				//color: liveSkin.NodeTextColor().css(),
-			})}>
-				<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>
+			<Row mt={1} className={key("NodeToolbar")} style={css(
+				{
+					height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+					//color: liveSkin.NodeTextColor().css(),
+					//minWidth: 250, // temp
+				},
+				node.type == NodeType.argument && {
+					position: "relative", // needed to show above
+				},
+				node.type != NodeType.argument && {
+					position: "absolute", bottom: "100%", right: -17, // extend 17px past right edge, to account for +/- button below
+				},
+			)}>
+				{/*<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>*/}
 				{getToolbarItemUIs()}
-				<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
+				{/*<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
 					/*processedMouseEvents.add(e.nativeEvent);
-					setContextMenuOpen(!contextMenuOpen);*/
+					setContextMenuOpen(!contextMenuOpen);*#/
 
 					const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
 					ShowVMenu({
 						pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height),
 					}, <NodeUI_Menu map={map} node={node} path={path} childGroup={ChildGroup.generic}/>);
-				}}/>
+				}}/>*/}
+				{/*<ToolBarButton {...sharedProps} text=">>" last={true}/>*/}
 				{/*contextMenuOpen &&
 				<div style={{position: "relative"}}>
 					<VMenuUI style={{left: -30, top: "100%"}} onOtherVMenuOpen={()=>setContextMenuOpen(false)}>
@@ -169,7 +180,11 @@ class ToolBarButton extends BaseComponent<{
 			icon = "transfer-left";
 			text = "";
 			highlight = highlight || leftPanelShow;
-		} else if (text == "...") {
+		} /*else if (text == ">>") {
+			icon = "transfer-right";
+			text = "";
+			//highlight = highlight || TODO; // todo
+		}*/ else if (text == "...") {
 			icon = "dots-vertical";
 			text = "";
 			//highlight = highlight || leftPanelShow;
@@ -185,6 +200,8 @@ class ToolBarButton extends BaseComponent<{
 				: <InfoButton text={disabledInfo!}/>;
 		}
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
+
+		const showLeftBorder = !first || node.type == NodeType.argument;
 
 		const {key, css} = cssHelper(this);
 		return (
@@ -207,12 +224,14 @@ class ToolBarButton extends BaseComponent<{
 						border: "solid rgba(0,0,0,1)",
 					},
 					highlightOrHovered && {background: "rgba(255,255,255,.2)"},
-					first && {borderWidth: "1px 0 0 0", borderRadius: "0px 0px 0 5px"},
-					!first && {borderWidth: "1px 0 0 1px"},
+					!showLeftBorder && {borderWidth: "0 0 1px 0" /*borderRadius: "5px 0 0 0"*/},
+					showLeftBorder && {borderWidth: "0 0 1px 1px"},
+					//node.type == NodeType.argument && {marginRight: -5},
+					//last && {borderRadius: "0 5px 0 0"},
 					icon == null && {
 						// normally we try to keep all toolbar-buttons the same width, but with limited space, use flexible width based on text-length
 						flex: [50, 50, text.length, text.length][sizeIndex],
-						borderWidth: "1px 0 0 1px",
+						minWidth: 110, // probably temp
 					},
 					icon && {
 						//width: icon == "transfer-left" ? 40 : 25,

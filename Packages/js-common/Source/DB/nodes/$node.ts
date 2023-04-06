@@ -49,6 +49,10 @@ export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
 	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
 	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
 	//if (isSubnode) return 11;
+
+	const isMultiPremiseArg = IsMultiPremiseArgument(node);
+	if (isMultiPremiseArg) return 12;
+
 	return 14;
 }
 export function GetPaddingForNode(node: NodeL2/*, isSubnode = false*/) {
@@ -339,11 +343,19 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
-	if (node.type == NodeType.argument && !node.multiPremiseArgument && !phrasing.text_base) {
-		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
-		// const baseClaim = GetArgumentPremises(node)[0];
-		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == NodeType.claim)[0];
-		if (baseClaim) return GetNodeDisplayText(baseClaim);
+	if (node.type == NodeType.argument) {
+		/*if (!node.multiPremiseArgument && !phrasing.text_base) {
+			// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
+			// const baseClaim = GetArgumentPremises(node)[0];
+			const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == NodeType.claim)[0];
+			if (baseClaim) return GetNodeDisplayText(baseClaim);
+		}*/
+
+		const nodeL3 = GetNodeL3(path);
+		if (nodeL3 != null && nodeL3.link?.polarity != null) {
+			return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
+		}
+		return "Argument (unknown polarity)";
 	}
 	//const mainAttachment = node.current.attachments[0] as Attachment|n;
 	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
@@ -435,12 +447,14 @@ export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, ac
 /** Returns whether the node provided is an argument, and marked as single-premise. */
 export const IsSinglePremiseArgument = CreateAccessor((node: NodeL1|n)=>{
 	if (node == null) return false;
-	return node.type == NodeType.argument && !node.multiPremiseArgument;
+	//return node.type == NodeType.argument && !node.multiPremiseArgument;
+	return node.type == NodeType.argument && false; // temp
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
 export const IsMultiPremiseArgument = CreateAccessor((node: NodeL1|n)=>{
 	if (node == null) return false;
-	return node.type == NodeType.argument && node.multiPremiseArgument;
+	//return node.type == NodeType.argument && node.multiPremiseArgument;
+	return node.type == NodeType.argument && true; // temp
 });
 
 /*export function IsPrivateNode(node: NodeL1) {

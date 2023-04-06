@@ -4,6 +4,7 @@ import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import React from "react";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {ES} from "web-vcore";
 
 type Props = {
 	parent?,
@@ -11,8 +12,9 @@ type Props = {
 	widthOverride?: number|n, // is this still needed?
 	innerWidth?: number, outlineColor?: chroma.Color|n, outlineThickness?: number|n, padding: number | string, style?, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
 	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number|n,
-	text, onTextHolderClick?, beforeChildren?, afterChildren?,
-	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any,
+	text, onTextHolderClick?, textHolderStyle?,
+	beforeChildren?, afterChildren?,
+	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?,
 };
 export class ExpandableBox extends BaseComponent<Props, {}> {
 	static defaultProps = {outlineThickness: 1};
@@ -28,8 +30,8 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 		const {parent,
 			className, width, widthOverride, innerWidth, outlineColor, outlineThickness, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
 			backgroundFillPercent, backgroundColor, markerPercent,
-			text, onTextHolderClick, beforeChildren, afterChildren,
-			expanded, toggleExpanded, ...rest} = this.props;
+			text, onTextHolderClick, textHolderStyle, beforeChildren, afterChildren,
+			expanded, toggleExpanded, expandButtonStyle, ...rest} = this.props;
 		this.parent = parent; // probably temp; used to access NodeUI_Inner comp's props, from MapUI.FindNodeBox
 
 		const {key, css} = cssHelper(this);
@@ -47,9 +49,13 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					style={css({alignItems: "stretch", width: innerWidth || "100%", borderRadius: 5, cursor: "pointer"})}
 					onClick={onDirectClick}
 				>
-					<div ref={c=>this.textHolder = c} style={{position: "relative", width: "calc(100% - 17px)", padding,
-						// overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
-					}} onClick={onTextHolderClick}>
+					<div ref={c=>this.textHolder = c} onClick={onTextHolderClick} style={ES(
+						{
+							position: "relative", width: "calc(100% - 17px)", padding,
+							// overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
+						},
+						textHolderStyle,
+					)}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
 							width: `${backgroundFillPercent}%`, borderRadius: "5px 0 0 5px",
@@ -69,17 +75,20 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					</div>
 					<Button ref={c=>this.expandButton = c}
 						text={expanded ? "-" : "+"} // size={28}
-						style={css({
-							display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-							width: 17, // minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
-							padding: 0,
-							fontSize: expanded ? 23 : 17,
-							lineHeight: "1px", // keeps text from making meta-theses too tall
-							backgroundColor: Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
-							border: "none",
-							color: liveSkin.NodeTextColor().css(),
-							":hover": {backgroundColor: Chroma_Mix(backgroundColor, "black", 0.1).alpha(0.9).css()},
-						})}
+						style={css(
+							{
+								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
+								width: 17, // minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
+								padding: 0,
+								fontSize: expanded ? 23 : 17,
+								lineHeight: "1px", // keeps text from making meta-theses too tall
+								backgroundColor: Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
+								border: "none",
+								color: liveSkin.NodeTextColor().css(),
+								":hover": {backgroundColor: Chroma_Mix(backgroundColor, "black", 0.1).alpha(0.9).css()},
+							},
+							expandButtonStyle,
+						)}
 						onClick={toggleExpanded}/>
 				</Row>
 				{afterChildren}

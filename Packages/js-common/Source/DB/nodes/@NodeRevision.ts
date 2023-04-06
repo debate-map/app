@@ -106,7 +106,8 @@ const ChildGroupLayout_mapping = new globalThis.Map<ChildLayout, globalThis.Map<
 	[ChildLayout.flat, new globalThis.Map([
 		[ChildGroup.truth, ChildGroupLayout.flat],
 		// even in flat mode, we show relevance-args in separate box, else it messes up the path extend/concat logic (could be fixed, but not high priority, since relevance-args are rare in flat-layout mode; just use box)
-		[ChildGroup.relevance, ChildGroupLayout.group_whenNonEmpty],
+		//[ChildGroup.relevance, ChildGroupLayout.group_whenNonEmpty],
+		[ChildGroup.relevance, ChildGroupLayout.flat], // maybe temp
 		[ChildGroup.freeform, ChildGroupLayout.flat],
 	])],
 ]);
