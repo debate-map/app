@@ -141,24 +141,30 @@ export class MapUI extends BaseComponent<Props, {}> {
 				//uiDebugKit: {FlashComp},
 				layoutOpts: {
 					nodeSpacing: (nodeA, nodeB)=>{
-						// do special spacing between tree-nodes that are in the same column/sequence
 						const nodeAParentPath = nodeA.data.path_parts.slice(0, -1).join("/");
 						const nodeBParentPath = nodeB.data.path_parts.slice(0, -1).join("/");
-						if (nodeAParentPath == nodeBParentPath || (nodeA.data.path == nodeBParentPath && nodeB.data.leftColumn_connectorOpts.parentIsAbove)) {
+						const nodeANodeType = nodeA.data.leftColumn_userData["nodeType"];
+						const nodeBNodeType = nodeB.data.leftColumn_userData["nodeType"];
+						const nodeAHasToolbar = nodeANodeType != null && nodeANodeType != NodeType.category && nodeANodeType != NodeType.argument;
+						const nodeBHasToolbar = nodeBNodeType != null && nodeBNodeType != NodeType.category && nodeBNodeType != NodeType.argument;
+
+						// do special spacing between some tree-nodes that are in the same column/sequence
+						const inSameSequence = nodeB.data.leftColumn_connectorOpts.parentIsAbove ? nodeA.data.path == nodeBParentPath : nodeAParentPath == nodeBParentPath;
+						if (inSameSequence) {
 							const nodeAIsPremiseInArg = nodeA.data.leftColumn_connectorOpts.parentIsAbove;
 							const nodeBIsPremiseInArg = nodeB.data.leftColumn_connectorOpts.parentIsAbove;
-							//if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 10;
-							if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 15;
-							//if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 1;
+							//if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 15;
 							if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 5;
 						}
 
-						const nodeBNodeType = nodeB.data.leftColumn_userData["nodeType"];
-						// if tree-node is for a category node (or a non-node), it has no toolbar showing, so give it less spacing
-						if (nodeBNodeType == NodeType.category || nodeBNodeType == null) return 15;
+						// if we have parent-argument's arg-control-bar above, and premise of that arg below, use regular spacing
+						if (nodeAParentPath == nodeBParentPath && nodeANodeType == null && nodeBNodeType == NodeType.claim) return 8;
 
-						// for the rest, assume it's a node with a toolbar showing at the top, so give generous spacing
-						return 33;
+						// if node-b has toolbar above it, give it enough spacing for toolbar + small-gap
+						if (nodeBHasToolbar) return 33;
+
+						// standard spacing: if both are nodes, use 12; else use 8
+						return nodeANodeType != null && nodeBNodeType != null ? 12 : 8;
 					},
 					styleSetter_layoutPending: style=>{
 						//style.right = "100%"; // not ideal, since can cause some issues (eg. during map load, the center-on-loading-nodes system can jump to empty left-area of map) 
