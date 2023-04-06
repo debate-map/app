@@ -238,7 +238,7 @@ const PopulateSearchInfoUsingSubtree = CreateAccessor((currentPath: string, sear
 		searchInfo.nodePhrasings.set(phrasing.id, phrasing);
 	}
 
-	const terms = GetTermsAttached(node.current.id);
+	const terms = GetTermsAttached(node.current.id).filter(a=>a) as Term[];
 	for (const term of terms) {
 		if (!searchInfo.terms.has(term.id)) searchInfo.terms.set(term.id, term);
 	}

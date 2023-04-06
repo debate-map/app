@@ -23,7 +23,7 @@ export class DefinitionsPanel extends BaseComponentPlus(
 			{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
 		]);*/
 		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
-		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a) as Term[];
 		const segments = GetSegmentsForTerms(displayText, termsToSearchFor);
 
 		//let terms = segments.filter(a=>a.patternMatched?.name == "term").map(a=>GetTerm(a.textParts[2]));

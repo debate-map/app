@@ -123,7 +123,7 @@ export class TitlePanel extends BaseComponentPlus(
 		const equationNumber = titleAttachment?.equation ? GetEquationStepNumber(path) : null;
 		const noteText = (titleAttachment?.equation && titleAttachment?.equation.explanation) || node.current.phrasing.note;
 		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
-		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a) as Term[];
 
 		return (
 			// <Row style={{position: "relative"}}>

@@ -32,13 +32,14 @@ export const GetTermsByForm = CreateAccessor((form: string): Term[]=>{
 	}, a=>a.terms);
 });
 // sync:rs
-export const GetTermsAttached = CreateAccessor((nodeRevisionID: string): Term[]=>{
+export const GetTermsAttached = CreateAccessor((nodeRevisionID: string): (Term|n)[]=>{
 	const revision = GetNodeRevision(nodeRevisionID);
 	if (revision == null) return emptyArray;
 	//const terms = revision.termAttachments?.map(a=>GetTerm(a.id)) ?? emptyArray;
 	const terms = revision.phrasing.terms?.map(attachment=>{
 		//if (Validate("UUID", attachment.id) != null) return null; // if invalid term-id, don't try to retrieve entry
-		return BailIfNull(GetDoc({}, a=>a.terms.get(attachment.id)));
+		//return BailIfNull(GetDoc({}, a=>a.terms.get(attachment.id)));
+		return GetTerm(attachment.id);
 	}) ?? emptyArray;
 	return terms;
 });
