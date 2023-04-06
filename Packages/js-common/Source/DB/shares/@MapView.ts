@@ -37,11 +37,11 @@ export const GetDefaultExpansionFieldsForNodeView = CreateAccessor((path: string
 	//console.log("Checking. @nodeID:", nodeID, "@parentID:", parentID, "@node:", node, "@parentNode:", parentNode);
 
 	const result = {expanded: false, expanded_truth: false, expanded_relevance: false};
-	if (node?.type == NodeType.argument && !node.multiPremiseArgument) {
+	/*if (node?.type == NodeType.argument && !node.multiPremiseArgument) {
 		result.expanded = true;
 	} else if (node?.type == NodeType.claim && parentNode?.multiPremiseArgument) {
 		result.expanded = true;
-	}
+	}*/
 	return result;
 });
 

@@ -259,6 +259,9 @@ export class NodeUI extends BaseComponentPlus(
 			treeChildrenAddedSoFar += ncToShow_generic.length + 1; // + 1 is for the one possible limit-bar (it's ok to over-reserve slots)
 		}
 
+		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
+		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? hereArgChildrenToShow_relevance : nodeChildrenToShow;
+
 		performance.mark("NodeUI_3");
 		performance.measure("NodeUI_Part1", "NodeUI_1", "NodeUI_2");
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
@@ -311,7 +314,7 @@ export class NodeUI extends BaseComponentPlus(
 						{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) &&
 							<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 						{!boxExpanded &&
-							<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
+							<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length}/>}
 					</>}
 				</Column>
 				{boxExpanded && nodeChildHolder_truth}

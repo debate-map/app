@@ -152,8 +152,11 @@ export class MapUI extends BaseComponent<Props, {}> {
 							//if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 1;
 							if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 5;
 						}
-						// if node is a category, it has no toolbar showing, so give it less spacing
-						if (nodeB.data.leftColumn_userData["nodeType"] == NodeType.category) return 15;
+
+						const nodeBNodeType = nodeB.data.leftColumn_userData["nodeType"];
+						// if tree-node is for a category node (or a non-node), it has no toolbar showing, so give it less spacing
+						if (nodeBNodeType == NodeType.category || nodeBNodeType == null) return 15;
+
 						// for the rest, assume it's a node with a toolbar showing at the top, so give generous spacing
 						return 33;
 					},
