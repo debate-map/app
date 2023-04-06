@@ -18,7 +18,7 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: GetNodeColor({type: NodeType.claim}, "raw", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
-		}, true);
+		}, {}, true);
 
 		return (
 			<Row className="ArgumentsControlBar clickThrough"

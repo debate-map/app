@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, NodeL3, NodeType, NodeType_Info, ShouldChildGroupBoxBeVisible, TagComp_CloneHistory} from "dm_common";
+import {ChangeType, ChildGroup, ChildGroupLayout, GetChildGroupLayout, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, NodeL3, NodeType, NodeType_Info, ShouldChildGroupBoxBeVisible, TagComp_CloneHistory} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -72,7 +72,7 @@ export class NodeUI extends BaseComponentPlus(
 	innerUI: NodeUI_Inner|n;
 	rightColumn: Column|n;
 	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
-	nodeChildHolder_direct: NodeChildHolder|n;
+	nodeChildHolder_generic: NodeChildHolder|n;
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
@@ -112,22 +112,16 @@ export class NodeUI extends BaseComponentPlus(
 		const childLayout = GetChildLayout_Final(node.current, map);
 		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
 		//const directChildrenArePolarized = childGroupsShowingDirect.length == 1 && && node.type == NodeType.claim;
-		const truthBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.truth, childLayout, nodeChildrenToShow);
+		/*const truthBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.truth, childLayout, nodeChildrenToShow);
 		const relevanceBoxVisible = ShouldChildGroupBoxBeVisible(hereArg, ChildGroup.relevance, childLayout, hereArgChildrenToShow);
 		const freeformBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.freeform, childLayout, nodeChildrenToShow);
 		const groupsUsingBoxes = (truthBoxVisible ? 1 : 0) + (relevanceBoxVisible ? 1 : 0) + (freeformBoxVisible ? 1 : 0);
+		const directChildrenArePolarized = (node.type == NodeType.argument && !relevanceBoxVisible) || (node.type == NodeType.claim && !truthBoxVisible);*/
 
 		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
 		const hereArgChildrenToShow_relevance = hereArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea as NodeL3[];
 		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
-		const ncToShow_direct: NodeL3[] = [
-			...ncToShow_generic,
-			...(truthBoxVisible ? [] : ncToShow_truth),
-			//...(relevanceBoxVisible ? [] : hereArgChildrenToShow_relevance),
-			...(freeformBoxVisible ? [] : ncToShow_freeform),
-		];
-		const usingDirect = ncToShow_direct.length;
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
@@ -154,7 +148,7 @@ export class NodeUI extends BaseComponentPlus(
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			parentIsAbove: inBelowGroup,
-		});
+		}, {nodeType: node.type});
 
 		const proxyNodeUI_ref = UseCallback(c=>this.proxyDisplayedNodeUI = c, []);
 		let innerUIOverride_baseClaimMissing: JSX.Element|n;
@@ -211,59 +205,58 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {width} = this.GetMeasurementInfo();
 
-		let nextChildFullIndex = 0;
-		const GetTreePathForNextTreeChild = ()=>`${treePath}/${nextChildFullIndex++}`;
+		// commented; this is only needed when we're inserting new tree-nodes (eg. node-child-holder-boxes)
+		/*let nextChildFullIndex = 0;
+		const GetTreePathForNextTreeChild = ()=>`${treePath}/${nextChildFullIndex++}`;*/
+
+		let treeChildrenAddedSoFar = 0;
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
-		const nodeChildHolderBox_truth = //truthBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
-				treePath={truthBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
-				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
-				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_truth}
-				/*onSizesChange={UseCallback((aboveSize, belowSize)=>{
-					this.SetState({aboveSize_truth: aboveSize, belowSize_truth: belowSize});
-					this.CheckForChanges();
-				}, [])}*//>;
-		const nodeChildHolderBox_relevance = //relevanceBoxVisible &&
-			<NodeChildHolderBox {...{map}} group={ChildGroup.relevance}
-				node={isPremiseOfSinglePremiseArg ? parent! : node} path={isPremiseOfSinglePremiseArg ? parentPath! : path}
-				treePath={relevanceBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
-				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
-				nodeChildren={hereArgChildren ?? ea} nodeChildrenToShow={hereArgChildrenToShow_relevance}
-				/*onSizesChange={UseCallback((aboveSize, belowSize)=>{
-					this.SetState({aboveSize_relevance: aboveSize, belowSize_relevance: belowSize});
-					this.CheckForChanges();
-				}, [])}*//>;
-		const nodeChildHolderBox_freeform = //freeformBoxVisible &&
-			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.freeform}
-				treePath={freeformBoxVisible ? GetTreePathForNextTreeChild() : "n/a"} inBelowGroup={false}
-				widthOfNode={widthOverride || width} heightOfNode={obs.innerUIHeight}
-				nodeChildren={nodeChildren} nodeChildrenToShow={ncToShow_freeform}
-				/*onSizesChange={UseCallback((aboveSize, belowSize)=>{
-					this.SetState({aboveSize_freeform: aboveSize, belowSize_freeform: belowSize});
-					this.CheckForChanges();
-				}, [])}*//>;
-		let nodeChildHolder_direct: JSX.Element|n;
-		const nodeChildHolder_direct_ref = UseCallback(c=>this.nodeChildHolder_direct = c, []);
-		/*const nodeChildHolder_direct_onSizesChange = UseCallback((aboveSize, belowSize)=>{
-			this.SetState({aboveSize_direct: aboveSize, belowSize_direct: belowSize});
-			this.CheckForChanges();
-		}, []);*/
-		if (usingDirect && boxExpanded) {
-			//const showArgumentsControlBar = directChildrenArePolarized && (node.type == NodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
-			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, separateChildren: false, showArgumentsControlBar: false}}
-				treePath={treePath}
-				treePath_priorChildCount={nextChildFullIndex} // because we use this, this group must go last
-				ref={nodeChildHolder_direct_ref}
-				// type={node.type == NodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
+		const nodeChildHolder_truth = IsChildGroupValidForNode(node, ChildGroup.truth) &&
+			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true}}
+				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
+				group={ChildGroup.truth}
+				usesGenericExpandedField={false}
+				belowNodeUI={false}
+				minWidth={0}
+				nodeChildrenToShow={ncToShow_truth}
+			/>;
+		treeChildrenAddedSoFar += ncToShow_truth.length + 3; // + 3 is for the arguments-control-bar, and the two possible limit-bars (it's ok to over-reserve slots)
+		const nodeChildHolder_relevance = IsChildGroupValidForNode(node, ChildGroup.relevance) &&
+			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true}}
+				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
+				group={ChildGroup.relevance}
+				usesGenericExpandedField={false}
+				belowNodeUI={false}
+				minWidth={0}
+				nodeChildrenToShow={hereArgChildrenToShow_relevance}
+			/>;
+		treeChildrenAddedSoFar += hereArgChildrenToShow_relevance.length + 3; // + 3 is for the arguments-control-bar, and the two possible limit-bars (it's ok to over-reserve slots)
+		const nodeChildHolder_freeform = IsChildGroupValidForNode(node, ChildGroup.freeform) &&
+			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false}}
+				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
+				group={ChildGroup.freeform}
+				usesGenericExpandedField={false}
+				belowNodeUI={false}
+				minWidth={0}
+				nodeChildrenToShow={ncToShow_freeform}
+			/>;
+		treeChildrenAddedSoFar += ncToShow_freeform.length + 1; // + 1 is for the one possible limit-bar (it's ok to over-reserve slots)
+
+		let nodeChildHolder_generic: JSX.Element|n;
+		const nodeChildHolder_generic_ref = UseCallback(c=>this.nodeChildHolder_generic = c, []);
+		const showGenericBelow = node.type == NodeType.argument;
+		if (showGenericBelow || boxExpanded) {
+			nodeChildHolder_generic = <NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false}}
+				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
+				ref={nodeChildHolder_generic_ref}
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
-				belowNodeUI={isMultiPremiseArgument}
-				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
-				//childrenWidthOverride={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : null}
-				/*nodeChildren={nodeChildren}*/ nodeChildrenToShow={ncToShow_direct}
-				//onSizesChange={nodeChildHolder_direct_onSizesChange}
+				belowNodeUI={showGenericBelow}
+				minWidth={showGenericBelow && widthOverride ? widthOverride - 20 : 0}
+				nodeChildrenToShow={ncToShow_generic}
 			/>;
+			treeChildrenAddedSoFar += ncToShow_generic.length + 1; // + 1 is for the one possible limit-bar (it's ok to over-reserve slots)
 		}
 
 		performance.mark("NodeUI_3");
@@ -321,18 +314,10 @@ export class NodeUI extends BaseComponentPlus(
 							<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0)}/>}
 					</>}
 				</Column>
-				{boxExpanded &&
-				<>
-					{truthBoxVisible && nodeChildHolderBox_truth}
-					{relevanceBoxVisible && nodeChildHolderBox_relevance}
-					{/*<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.neutrality}
-						ref={UseCallback(c=>this.childBoxes["neutrality"] = c, [])}
-						ref_expandableBox={UseCallback(c=>WaitXThenRun_Deduped(this, "UpdateChildBoxOffsets", 0, ()=>this.UpdateChildBoxOffsets()), [])}
-						widthOfNode={widthOverride || width} heightOfNode={innerUIHeight}
-						nodeChildren={ea} nodeChildrenToShow={ea}/>*/}
-					{freeformBoxVisible && nodeChildHolderBox_freeform}
-					{nodeChildHolder_direct}
-				</>}
+				{boxExpanded && nodeChildHolder_truth}
+				{boxExpanded && nodeChildHolder_relevance}
+				{boxExpanded && nodeChildHolder_freeform}
+				{(boxExpanded || showGenericBelow) && nodeChildHolder_generic}
 			</>
 		);
 	}
@@ -361,7 +346,7 @@ export class NodeUI extends BaseComponentPlus(
 			// see UseSize_Method for difference between offsetHeight and the alternatives
 			height: this.DOM_HTML.offsetHeight
 				// if multi-premise-arg, the nodeChildHolder_direct element is not "within" this.DOM_HTML; so add its height manually
-				+ (isMultiPremiseArgument && this.nodeChildHolder_direct != null ? this.nodeChildHolder_direct.DOM_HTML.offsetHeight : 0),
+				+ (isMultiPremiseArgument && this.nodeChildHolder_generic != null ? this.nodeChildHolder_generic.DOM_HTML.offsetHeight : 0),
 		});
 		if (ShallowEquals(obs, this.lastObservedValues)) return;
 

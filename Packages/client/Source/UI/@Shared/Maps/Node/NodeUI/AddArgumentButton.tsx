@@ -75,9 +75,16 @@ export class AddArgumentButton extends BaseComponent<Props> {
 		// (the sign-in dialog is too confusing there atm: small container, signs into different website [possibly with CORS complications], and most linked maps would have 3rd-party node-adding disabled anyway)
 		const enabled = contributeInfo_polarity.canAdd && ShowHeader;
 
+		const text =
+			group == ChildGroup.truth ? (polarity == Polarity.supporting ? "Add: True..." : "Add: False...") :
+			group == ChildGroup.relevance ? (polarity == Polarity.supporting ? "Add: Relevant..." : "Add: Irrelevant...") :
+			"<invalid>";
+		//text = polarity == Polarity.supporting ? "Add pro" : "Add con";
+		//text = `Add ${polarity_short}`;
+
 		return (
 			<Button
-				text={`Add ${polarity_short}`} title={`Add ${Polarity[polarity].toLowerCase()} argument`}
+				text={text} title={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				enabled={enabled}
 				// text={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				style={E(
@@ -85,12 +92,12 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						alignSelf: "flex-end", backgroundColor: backgroundColor.css(),
 						border: "none", boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 						// width: 150, padding: "2px 12px",
-						width: 60, padding: "2px 12px",
+						width: group == ChildGroup.truth ? 70 : 90, padding: "2px 12px",
 						":hover": {backgroundColor: Chroma_Mix(backgroundColor, "white", 0.05).alpha(0.9).css()},
 					},
 					/* polarity == Polarity.supporting && {marginBottom: 5},
 					polarity == Polarity.opposing && {marginTop: 5}, */
-					{height: 17, fontSize: 11, padding: "0 12px"}, // vertical
+					{height: 17, fontSize: 10, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
 					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 12, letterSpacing: 1*/},

@@ -1,4 +1,4 @@
-import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, NodeL3, NodeType_Info} from "dm_common";
+import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, NodeL3, NodeType, NodeType_Info} from "dm_common";
 import React, {useCallback, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -141,12 +141,20 @@ export class MapUI extends BaseComponent<Props, {}> {
 				//uiDebugKit: {FlashComp},
 				layoutOpts: {
 					nodeSpacing: (nodeA, nodeB)=>{
-						const nodeAIsPremiseInArg = nodeA.data.leftColumn_connectorOpts.parentIsAbove;
-						const nodeBIsPremiseInArg = nodeB.data.leftColumn_connectorOpts.parentIsAbove;
-						//if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 10;
-						if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 15;
-						//if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 1;
-						if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 5;
+						// do special spacing between tree-nodes that are in the same column/sequence
+						const nodeAParentPath = nodeA.data.path_parts.slice(0, -1).join("/");
+						const nodeBParentPath = nodeB.data.path_parts.slice(0, -1).join("/");
+						if (nodeAParentPath == nodeBParentPath || (nodeA.data.path == nodeBParentPath && nodeB.data.leftColumn_connectorOpts.parentIsAbove)) {
+							const nodeAIsPremiseInArg = nodeA.data.leftColumn_connectorOpts.parentIsAbove;
+							const nodeBIsPremiseInArg = nodeB.data.leftColumn_connectorOpts.parentIsAbove;
+							//if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 10;
+							if (nodeAIsPremiseInArg && !nodeBIsPremiseInArg) return 15;
+							//if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 1;
+							if (!nodeAIsPremiseInArg && nodeBIsPremiseInArg) return 5;
+						}
+						// if node is a category, it has no toolbar showing, so give it less spacing
+						if (nodeB.data.leftColumn_userData["nodeType"] == NodeType.category) return 15;
+						// for the rest, assume it's a node with a toolbar showing at the top, so give generous spacing
 						return 33;
 					},
 					styleSetter_layoutPending: style=>{

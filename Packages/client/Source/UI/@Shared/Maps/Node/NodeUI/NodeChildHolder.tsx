@@ -16,7 +16,7 @@ import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {ChildLimitBar} from "./ChildLimitBar.js";
 
 type Props = {
-	map: Map, node: NodeL3, path: string, treePath: string, treePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
+	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
 	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 };
@@ -37,14 +37,14 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	childBoxes: {[key: number]: NodeUI} = {};
 	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
 	render() {
-		const {map, node, path, treePath, treePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
+		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
 		let {childrenWidthOverride, placeholderRect} = this.state;
 		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
 
-		const nodeView = GetNodeView(map.id, path);
-		const orderingType = GetChildOrdering_Final(node.current, map, store.main.maps.childOrdering);
+		const nodeView = GetNodeView(map.id, parentPath);
+		const orderingType = GetChildOrdering_Final(parentNode.current, map, store.main.maps.childOrdering);
 		const nodeChildren_orderingValues = nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
-			return GetOrderingValue_AtPath(child, `${path}/${child.id}`, orderingType);
+			return GetOrderingValue_AtPath(child, `${parentPath}/${child.id}`, orderingType);
 		}); //.SimplifyEmpty();
 		this.Stash({nodeChildren_orderingValues});
 
@@ -58,7 +58,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == NodeType.argument);
 		}*/
 		// always apply an initial sorting by manual-ordering data, so that if main ordering values are the same for a set (eg. no vote data), the set still has sub-sorting
-		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(node.current, map, store.main.maps.childOrdering));
+		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(parentNode.current, map, store.main.maps.childOrdering));
 		// then apply the sorting for the main ordering-type (latest OrderBy() operation has higher priority, naturally)
 		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>nodeChildren_orderingValues[child.id]);
 
@@ -68,7 +68,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		let childLimit_up = (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
-		const showAll = node.id == map.rootNode || node.type == NodeType.argument;
+		const showAll = parentNode.id == map.rootNode || parentNode.type == NodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
 
 		// helper
@@ -80,7 +80,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			}
 		}, 0);*/
 
-		let nextChildFullIndex = treePath_priorChildCount ?? 0;
+		let nextChildFullIndex = parentTreePath_priorChildCount ?? 0;
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
 			const childLimit = direction == "up" ? childLimit_up : childLimit_down; // polarity-groups "all" and "down" both use a "down" child-limit
@@ -110,7 +110,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				// wrap these in funcs, so the execution-orders always match the display-orders (so that tree-path is correct)
 				const getLimitBar = ()=>{
 					return <ChildLimitBar {...{
-						map, path, treePath: `${treePath}/${nextChildFullIndex++}`,
+						map, path: parentPath, treePath: `${parentTreePath}/${nextChildFullIndex++}`,
 						inBelowGroup: belowNodeUI ?? false,
 						childrenWidthOverride: widthOverride, direction, childLimit,
 						childCount: collection_untrimmed.length,
@@ -121,8 +121,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						ref={UseCallback(c=>parent.childBoxes[child.id] = c, [child.id, parent.childBoxes])} // eslint-disable-line
 						//ref_innerUI={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 						indexInNodeList={index} map={map} node={child}
-						path={`${path}/${child.id}`}
-						treePath={`${treePath}/${nextChildFullIndex++}`}
+						path={`${parentPath}/${child.id}`}
+						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
 						inBelowGroup={belowNodeUI}
 						widthOverride={widthOverride}
 						onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;
@@ -181,7 +181,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			);
 		};
 
-		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
+		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath, childGroup: group});
 		return (
 			<>
 				<Column ref={useCallback(c=>{
@@ -194,7 +194,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						paddingLeft: belowNodeUI ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH,
 						// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					},
-					TreeGraphDebug() && {background: StripesCSS({angle: (treePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
+					TreeGraphDebug() && {background: StripesCSS({angle: (parentTreePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
 					//belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
 					//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 					// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
@@ -213,9 +213,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					RenderPolarityGroup("up")}
 				{showArgumentsControlBar &&
 					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c}
-						map={map} node={node} path={path} treePath={`${treePath}/${nextChildFullIndex++}`}
+						map={map} node={parentNode} path={parentPath} treePath={`${parentTreePath}/${nextChildFullIndex++}`}
 						inBelowGroup={belowNodeUI ?? false}
-						group={group} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
+						group={group} childBeingAdded={currentNodeBeingAdded_path == `${parentPath}/?`}/>}
 				{separateChildren &&
 					RenderPolarityGroup("down")}
 			</>
@@ -272,7 +272,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	get Expanded() {
-		const {map, path, group, usesGenericExpandedField} = this.props;
+		const {map, parentPath: path, group, usesGenericExpandedField} = this.props;
 		const expandKey = usesGenericExpandedField ? "expanded" : `expanded_${ChildGroup[group].toLowerCase()}`;
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
@@ -295,14 +295,14 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	CheckForLocalChanges() {
 		//FlashComp(this, {text: "NodeChildHolder.CheckForLocalChanges"});
 		// if (this.lastRender_source == RenderSource.SetState) return;
-		const {node, onSizesChange} = this.props;
+		const {parentNode: node, onSizesChange} = this.props;
 
 		//const height = GetDOM(this)!.getBoundingClientRect().height;
 		const height = this.DOM_HTML.offsetHeight;
 		const dividePoint = this.GetDividePoint();
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}dividePoint:${dividePoint}`);
+				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}${nl}dividePoint:${dividePoint}`);
 
 			// this.UpdateState(true);
 			this.UpdateChildrenWidthOverride();
@@ -322,9 +322,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	OnChildHeightOrPosChange = ()=>{
 		//FlashComp(this, {text: "NodeChildHolder.OnChildHeightOrPosChange"});
-		const {node} = this.props;
+		const {parentNode: node} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}\ncenterY:${this.GetDividePoint()}`);
+			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}\ncenterY:${this.GetDividePoint()}`);
 
 		// this.OnHeightOrPosChange();
 		WaitXThenRun_Deduped(this, "OnChildHeightOrPosChange_lastPart", 0, ()=>{

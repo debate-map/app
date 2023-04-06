@@ -114,10 +114,14 @@ const ChildGroupLayout_mapping = new globalThis.Map<ChildLayout, globalThis.Map<
 export function GetChildGroupLayout(group: ChildGroup, overallLayout: ChildLayout) {
 	return ChildGroupLayout_mapping.get(overallLayout)?.get(group);
 }
-export function ShouldChildGroupBoxBeVisible(node: NodeL3|n, group: ChildGroup, overallLayout: ChildLayout, nodeChildren: NodeL3[]|null) {
+export function IsChildGroupValidForNode(node: NodeL3|n, group: ChildGroup) {
 	if (node == null) return false;
 	const groupValidForNode = NodeType_Info.for[node.type].childGroup_childTypes.has(group);
-	if (!groupValidForNode) return false;
+	return groupValidForNode;
+}
+export function ShouldChildGroupBoxBeVisible(node: NodeL3|n, group: ChildGroup, overallLayout: ChildLayout, nodeChildren: NodeL3[]|null) {
+	if (node == null) return false;
+	if (!IsChildGroupValidForNode(node, group)) return false;
 
 	const groupLayout = GetChildGroupLayout(group, overallLayout);
 	if (groupLayout == ChildGroupLayout.group_always) return true;

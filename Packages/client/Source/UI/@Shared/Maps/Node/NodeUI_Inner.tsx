@@ -227,7 +227,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
-		const toolbarShow = (map?.extras.defaultNodeToolbarEnabled ?? true) && node.rootNodeForMap == null; // disabled for root, since looks bad (and less useful there)
+		const toolbarShow = (map?.extras.defaultNodeToolbarEnabled ?? true) && node.type != NodeType.category; // disabled for category-nodes, since looks bad (and less useful there)
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");

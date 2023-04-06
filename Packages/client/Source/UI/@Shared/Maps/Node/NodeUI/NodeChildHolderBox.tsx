@@ -23,7 +23,7 @@ import {NodeChildHolder} from "./NodeChildHolder.js";
 import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "../NodeUI.js";
 
 type Props = {
-	map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, nodeChildren: NodeL3[], nodeChildrenToShow: NodeL3[],
+	map: Map, parentNode: NodeL3, parentPath: string, groupTreePath: string, inBelowGroup: boolean, nodeChildren: NodeL3[], nodeChildrenToShow: NodeL3[],
 	group: ChildGroup, widthOfNode: number, heightOfNode: number, widthOverride?: number, onSizesChange?: (aboveHeight: number, belowHeight: number)=>void,
 	ref_expandableBox?: (c: ExpandableBox|n)=>any,
 };
@@ -32,29 +32,29 @@ type Props = {
 @Observer
 export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHolderHeight: 0, hovered: false, hovered_button: false}) {
 	static ValidateProps(props: Props) {
-		const {node, nodeChildren} = props;
+		const {parentNode, nodeChildren} = props;
 		// ms only asserts in dev for now (and only as warning); causes error sometimes when cut+pasting otherwise (firebase doesn`t send DB updates atomically?)
 		/*if (DEV) {
-			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[node.id] != null), "Supplied node is not a parent of all the supplied node-children!");
+			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[parentNode.id] != null), "Supplied node is not a parent of all the supplied node-children!");
 		}*/
 	}
 	//lineHolder: HTMLDivElement|n;
 	render() {
-		const {map, node, path, treePath, inBelowGroup, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
+		const {map, parentNode, parentPath, groupTreePath, inBelowGroup, nodeChildren, nodeChildrenToShow, group, widthOfNode, heightOfNode, widthOverride, ref_expandableBox} = this.props;
 		const {lineHolderHeight, hovered, hovered_button} = this.state;
 
 		// const nodeView = GetNodeView(map.id, path) ?? new NodeView();
 		// const nodeView = GetNodeView(map.id, path, true);
-		const nodeView = GetNodeView(map.id, path);
-		const parent = GetParentNodeL3(path);
-		const combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
+		const nodeView = GetNodeView(map.id, parentPath);
+		const parent = GetParentNodeL3(parentPath);
+		const combineWithParentArgument = IsPremiseOfSinglePremiseArgument(parentNode, parent);
 
 		//const backgroundFillPercent = GetFillPercent_AtPath(node, path, group);
 		const backgroundFillPercent = 100;
 		//const markerPercent = GetMarkerPercent_AtPath(node, path, group);
 		const markerPercent = null;
 
-		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
+		const isMultiPremiseArgument = IsMultiPremiseArgument(parentNode);
 		const text =
 			group == ChildGroup.truth ? (GADDemo ? "Reasons" : "True?") :
 			group == ChildGroup.relevance ? "Relevant?" :
@@ -99,7 +99,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 			this.expandableBox!.expandButton!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
 		});
 
-		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
+		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(groupTreePath, {
 			color: group == ChildGroup.truth || group == ChildGroup.relevance
 				? GetNodeColor({type: "claim"} as any, "raw", false).css()
 				: GetNodeColor({type: NodeType.category} as any, "raw", false).css(),
@@ -164,18 +164,18 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 						RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
 							if (group == ChildGroup.truth) {
 								ACTNodeExpandedSet({
-									mapID: map.id, path, resetSubtree: recursivelyCollapsing,
+									mapID: map.id, path: parentPath, resetSubtree: recursivelyCollapsing,
 									[expandKey]: newExpanded,
 								});
 							} else {
 								ACTNodeExpandedSet({
-									mapID: map.id, path, resetSubtree: false,
+									mapID: map.id, path: parentPath, resetSubtree: false,
 									[expandKey]: newExpanded,
 								});
 								if (recursivelyCollapsing) {
 									for (const child of nodeChildrenToShow) {
 										ACTNodeExpandedSet({
-											mapID: map.id, path: `${path}/${child.id}`, resetSubtree: true,
+											mapID: map.id, path: `${parentPath}/${child.id}`, resetSubtree: true,
 											[expandKey]: newExpanded,
 										});
 									}
@@ -187,7 +187,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 						if (nodeView[expandKey]) {
 							this.CheckForChanges();
 						}
-					}, [expandKey, map.id, nodeChildrenToShow, nodeView, path, group])}
+					}, [expandKey, map.id, nodeChildrenToShow, nodeView, parentPath, group])}
 					afterChildren={<>
 						{ratingPanelShow &&
 							<div ref={c=>this.ratingPanelHolder = c} style={{
@@ -195,17 +195,17 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 								width, minWidth: (widthOverride ?? 0).KeepAtLeast(nodeBottomPanel_minWidth), zIndex: hovered_main ? 6 : 5,
 								padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 							}}>
-								<RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType}/>
+								<RatingsPanel node={parentNode} path={parentPath} ratingType={childGroupStr as NodeRatingType}/>
 							</div>}
-						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={group}/>
+						<NodeUI_Menu_Stub {...{map, node: parentNode, path: parentPath}} childGroup={group}/>
 					</>}
 				/>
 				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
-					<NodeChildCountMarker {...{map, path}} childCount={nodeChildrenToShow.length}/>}
+					<NodeChildCountMarker {...{map, path: parentPath}} childCount={nodeChildrenToShow.length}/>}
 			</Row>
 			{nodeView[expandKey] &&
 			<NodeChildHolder ref={c=>this.childHolder = c}
-				{...{map, node, path, treePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
+				{...{map, parentNode, parentPath, parentTreePath: groupTreePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
 				usesGenericExpandedField={false}
 				onSizesChange={this.CheckForChanges}/>}
 			</>
@@ -213,7 +213,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 	}
 
 	get Expanded() {
-		const {map, path, group} = this.props;
+		const {map, parentPath: path, group} = this.props;
 		const expandKey = `expanded_${ChildGroup[group].toLowerCase()}`;
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
