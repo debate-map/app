@@ -6,7 +6,7 @@ import {DoesPolicyAllowX} from "./@Shared/TablePermissions.js";
 import {APAction, APTable} from "./accessPolicies/@PermissionSet.js";
 import {GetNodeLinks} from "./nodeLinks.js";
 import {TitleKey} from "./nodePhrasings/@NodePhrasing.js";
-import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
+import {AsNodeL1, GetNodeL2, GetNodeL3} from "./nodes/$node.js";
 import {NodeL1, NodeL2, Polarity} from "./nodes/@Node.js";
 import {ChildGroup, NodeType, NodeType_Info} from "./nodes/@NodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
@@ -185,7 +185,7 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 		});
 		if (extensionOfAnotherMirrorChild) return false;
 
-		if (IsSinglePremiseArgument(child)) {
+		/*if (IsSinglePremiseArgument(child)) {
 			const childPremise = GetPremiseOfSinglePremiseArgument(child.id);
 			if (childPremise) {
 				const childPremiseTagComps = GetNodeTagComps(childPremise.id, true, tagsToIgnore);
@@ -202,7 +202,7 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 				});
 				if (premiseIsExtensionOfAnotherMirrorChildPremise) return false;
 			}
-		}
+		}*/
 
 		return true;
 	});
@@ -226,13 +226,6 @@ export const GetNodeChildrenL3 = CreateAccessor((nodeID: string, path?: string, 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
 	const nodeChildrenL3 = MapWithBailHandling(nodeChildrenL2, child=>GetNodeL3.BIN(`${path}/${child.id}`, tagsToIgnore)); // BIN: we know node exists, so l3-data should as well (so null must mean change loading)
 	return nodeChildrenL3;
-});
-
-export const GetPremiseOfSinglePremiseArgument = CreateAccessor((argumentNodeID: string)=>{
-	const argument = GetNode.BIN(argumentNodeID);
-	const children = GetNodeChildren(argumentNodeID, false);
-	const childPremise = children.find(child=>child && IsPremiseOfSinglePremiseArgument(child, argument));
-	return childPremise;
 });
 
 export function GetChildGroup(childType: NodeType, parentType: NodeType|n) {

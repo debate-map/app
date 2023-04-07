@@ -7,19 +7,16 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, NodeL3, Polarity, GetNodeTypeDisplayName, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText, Me} from "dm_common";
+import {ForCopy_GetError, ForCut_GetError, CheckUserCanDeleteNode, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, ClaimForm, NodeL3, Polarity, GetNodeTypeDisplayName, NodeType, NodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map, GetChildLayout_Final, GetNodeDisplayText, Me} from "dm_common";
 import {ES, Observer, RunInAction} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import React from "react";
-import {RunCommand_SetNodeIsMultiPremiseArgument} from "Utils/DB/Command.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
-import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument.js";
 import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode.js";
 import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree.js";
 import {MI_Paste} from "./NodeUI_Menu/MI_Paste.js";
 import {MI_CloneNode} from "./NodeUI_Menu/MI_CloneNode.js";
-import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument.js";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree.js";
 import {MI_MoveUpOrDown} from "./NodeUI_Menu/MI_MoveUpOrDown.js";
@@ -38,7 +35,7 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?:
 }
 
 type Props = {map?: Map, node: NodeL3, path: string, inList?: boolean, childGroup: ChildGroup};
-export type MI_SharedProps = Props & {mapID: string|n, combinedWithParentArg: boolean, copiedNode: NodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
+export type MI_SharedProps = Props & {mapID: string|n, copiedNode: NodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
@@ -47,9 +44,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const {map, node, path, inList, childGroup} = this.props;
 
 		const parent = GetParentNodeL3(path);
-		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-		const outerNode = isPremiseOfSinglePremiseArg ? parent : node;
-		const outerPath = isPremiseOfSinglePremiseArg ? SlicePath(path, 1) : path;
 
 		const copiedNode = GetCopiedNode();
 		const copiedNodePath = GetCopiedNodePath();
@@ -60,7 +54,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		//const permissions = GetUserPermissionGroups(userID);
 		// nodeChildren: GetNodeChildrenL3(node, path),
 		const nodeChildren = GetNodeChildrenL3(node.id, path);
-		const combinedWithParentArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const copiedNode_asCut = store.main.maps.copiedNodePath_asCut;
 
 		const mapID = map ? map.id : null;
@@ -68,7 +61,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
-		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
+		const sharedProps: MI_SharedProps = E(this.props, {mapID, copiedNode, copiedNodePath, copiedNode_asCut});
 		//const childLayout_forStructuredHeaders = addChildGroups_structured.length <= 1 ? "below" : "right";
 		const childLayout_forStructuredHeaders = "right";
 		const headerStyle = ES(liveSkin.Style_VMenuItem(), {opacity: 1});
@@ -107,8 +100,8 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const addChildItems_structured_generic = childGroup.IsOneOf("generic") && GetAddChildItems(node, path, ChildGroup.generic);
 		const addChildItems_structured_truth = childGroup.IsOneOf("generic", "truth") && GetAddChildItems(node, path, ChildGroup.truth);
 		const addChildItems_structured_relevance =
-			(childGroup.IsOneOf("generic", "relevance") && GetAddChildItems(node, path, ChildGroup.relevance)) ||
-			(childGroup == "generic" && isPremiseOfSinglePremiseArg && GetAddChildItems(outerNode!, outerPath!, ChildGroup.relevance));
+			(childGroup.IsOneOf("generic", "relevance") && GetAddChildItems(node, path, ChildGroup.relevance));
+			//|| (childGroup == "generic" && isPremiseOfSinglePremiseArg && GetAddChildItems(outerNode!, outerPath!, ChildGroup.relevance));
 		const addChildItems_freeform = childGroup.IsOneOf("generic", "freeform") && GetAddChildItems(node, path, ChildGroup.freeform);
 		const addChildGroups_structured = [addChildItems_structured_generic, addChildItems_structured_truth, addChildItems_structured_relevance].filter(a=>a);
 		const addChildGroups = [...addChildGroups_structured, addChildItems_freeform].filter(a=>a);
@@ -172,21 +165,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 					</VMenuItem>}
 				{/*<MI_Paste {...sharedProps} node={node} path={path} childGroup={childGroup}/>*/}
 				<MI_CloneNode {...sharedProps} node={node} path={path} childGroup={childGroup}/>
-				{IsUserCreatorOrMod(userID, parent) && node.type == NodeType.claim && IsSinglePremiseArgument(parent) && !forChildHolderBox &&
-					<VMenuItem text="Convert to multi-premise" style={liveSkin.Style_VMenuItem()}
-						onClick={async e=>{
-							if (e.button != 0) return;
-
-							await RunCommand_SetNodeIsMultiPremiseArgument({id: parent!.id, multiPremiseArgument: true});
-						}}/>}
-				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
-					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == NodeType.claim).length == 1 && !forChildHolderBox &&
-					<VMenuItem text="Convert to single-premise" style={liveSkin.Style_VMenuItem()}
-						onClick={async e=>{
-							if (e.button !== 0) return;
-
-							await RunCommand_SetNodeIsMultiPremiseArgument({id: node.id, multiPremiseArgument: false});
-						}}/>}
 				{// this is too slow, checking the paths merely when right-clicking; instead, just always have the option visible, and delay the path-finding till when clicking it
 				/*pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !forChildHolderBox &&
 					<VMenuItem text="Mark subtree as viewed" style={liveSkin.Style_VMenuItem()}
@@ -203,7 +181,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 						const sinceTime = 0;
 						const pathsToChangedNodes = await GetAsync(()=>GetPathsToNodesChangedSinceX(map.id, sinceTime), {maxIterations: 1000}); // this can take a lot of iterations...
-						const pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
+						const pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(`${path}/`)); // also include self, for this
 						for (const path2 of pathsToChangedInSubtree) {
 							RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path2), Date.now()));
 						}
@@ -232,9 +210,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 					<MI_ImportSubtree {...sharedProps}/>
 					<MI_ExportSubtree {...sharedProps}/>
 				</VMenuItem>
-				<MI_UnlinkContainerArgument {...sharedProps}/>
 				<MI_UnlinkNode {...sharedProps}/>
-				<MI_DeleteContainerArgument {...sharedProps}/>
 				<MI_DeleteNode {...sharedProps}/>
 			</>
 		);

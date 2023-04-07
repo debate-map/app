@@ -46,6 +46,7 @@ pub struct SetNodeIsMultiPremiseArgumentResult {
 
 }
 
+// todo: eventually remove this command, since unused
 pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetNodeIsMultiPremiseArgumentInput, _extras: NoExtras) -> Result<SetNodeIsMultiPremiseArgumentResult, Error> {
 	let SetNodeIsMultiPremiseArgumentInput { id, multiPremiseArgument } = input;
 	

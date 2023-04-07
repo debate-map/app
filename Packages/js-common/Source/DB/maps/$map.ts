@@ -26,6 +26,10 @@ export const GetMapEditors = CreateAccessor((mapID: string)=>{
 	return GetMapEditorIDs.BIN(mapID).map(id=>GetUser(id));
 });
 
+export function ShowNodeToolbars(map: Map|n) {
+	return map?.extras.defaultNodeToolbarEnabled ?? true;
+}
+
 /*
 current_setting('app.current_user_id') = entry_creator
 or current_setting('app.current_user_admin') = 'true'

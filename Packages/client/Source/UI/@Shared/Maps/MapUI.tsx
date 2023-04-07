@@ -1,4 +1,4 @@
-import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, NodeL3, NodeType, NodeType_Info} from "dm_common";
+import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, Map, NodeL3, NodeType, NodeType_Info} from "dm_common";
 import React, {useCallback, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -321,7 +321,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 								<ConnectorLinesUI/>
 								{/*playingTimeline != null &&
 								<TimelineIntroBox timeline={playingTimeline}/>*/}
-								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" widthOverride={NodeType_Info.for[rootNode.type].minWidth}/>
+								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth}/>
 								{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
 								{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 									this.LoadScroll();
@@ -438,8 +438,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 				const {node, path} = nodeUI.props;
 				const parentPath = GetParentPath(path);
 				const parent = GetParentNodeL3(path);
-				const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-				return path == nextPathTry || (isPremiseOfSinglePremiseArg && parentPath == nextPathTry);
+				return path == nextPathTry;
 			});
 			// if finding ancestors is disabled, or there are no ancestors left, stop up-search
 			if (!ifMissingFindAncestor || !nextPathTry.Contains("/")) break;

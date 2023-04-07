@@ -13,7 +13,7 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 @Observer
 export class MI_Paste_Old extends BaseComponent<MI_SharedProps, {}> {
 	render() {
-		const {map, node, path, childGroup, copiedNode, copiedNodePath, copiedNode_asCut, combinedWithParentArg, inList} = this.props;
+		const {map, node, path, childGroup, copiedNode, copiedNodePath, copiedNode_asCut, inList} = this.props;
 		if (copiedNode == null) return null;
 		if (inList) return null;
 		const copiedNode_parent = GetParentNodeL3(copiedNodePath);

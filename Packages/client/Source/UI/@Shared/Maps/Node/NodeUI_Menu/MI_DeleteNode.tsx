@@ -11,7 +11,7 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 @Observer
 export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
-		const {map, mapID, node, path, childGroup, combinedWithParentArg} = this.props;
+		const {map, mapID, node, path, childGroup} = this.props;
 		const componentBox = childGroup != ChildGroup.generic;
 		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
 		const nodeText = GetNodeDisplayText(node, path);
@@ -19,7 +19,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		//const command = new DeleteNode(E({mapID, nodeID: node.id}));
 		const error = CheckUserCanDeleteNode(MeID(), node);
 		return (
-			<VMenuItem text={`Delete${combinedWithParentArg ? " claim" : ""}`}
+			<VMenuItem text="Delete"
 				//enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
 				enabled={error == null} title={error}
 				style={liveSkin.Style_VMenuItem()} onClick={e=>{

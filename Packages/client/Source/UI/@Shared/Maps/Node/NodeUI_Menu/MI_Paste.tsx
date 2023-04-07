@@ -14,7 +14,7 @@ import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/Transfer
 @Observer
 export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 	render() {
-		const {map, node, path, childGroup, copiedNode, copiedNodePath, copiedNode_asCut, combinedWithParentArg, inList} = this.props;
+		const {map, node, path, childGroup, copiedNode, copiedNodePath, copiedNode_asCut, inList} = this.props;
 		if (copiedNode == null || copiedNodePath == null) return null;
 		if (inList) return null;
 

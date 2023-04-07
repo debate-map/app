@@ -32,7 +32,6 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 
 		const userHidden = GetUserHidden.NN(this.userInfo.id);
 		const newRootNode = new NodeL1({
-			//EV({ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID)}),
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			//accessPolicy: map.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 			accessPolicy: map.accessPolicy, // add-map dialog doesn't let user choose node-access-policy yet, so use the map's accessor policy for the root-node

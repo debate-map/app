@@ -10,7 +10,7 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 @Observer
 export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
-		const {map, mapID, node, path, childGroup, combinedWithParentArg, inList} = this.props;
+		const {map, mapID, node, path, childGroup, inList} = this.props;
 		if (!IsUserCreatorOrMod(MeID(), node)) return null;
 		if (inList) return null;
 		const componentBox = childGroup != ChildGroup.generic;
@@ -21,7 +21,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 
 		//const command = new UnlinkNode({mapID, parentID: parent.id, childID: node.id});
 		return (
-			<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
+			<VMenuItem text="Unlink"
 				//enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
 				style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 					if (e.button != 0) return;

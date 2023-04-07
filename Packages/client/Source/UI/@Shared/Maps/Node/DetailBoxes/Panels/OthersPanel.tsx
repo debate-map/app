@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -37,30 +37,9 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const convertToTypes = GetEntries(AttachmentType).filter(pair=>CanConvertFromClaimTypeXToY(GetAttachmentType_Node(node), pair.value as any));
 		convertToType = convertToType ?? convertToTypes.map(a=>a.value as any as AttachmentType).FirstOrX();
 
-		const isArgument_any = node.argumentType === ArgumentType.any;
-		/* const parents = GetNodesByIDs(node.parents?.VKeys() ?? []);
-		const parentsArePrivateInSameMap = !IsSpecialEmptyArray(parents) && mapID && parents.All((a) => a.ownerMapID == mapID);
-		const canChangeOwnershipType = creatorOrMod && (
-			node.ownerMapID == null
-				// if making private, node must be in a private map, and all its parents must be private nodes within that map (to ensure we don't leave links in other maps, which would make the owner-map-id invalid)
-				? (mapID && map.type == MapType.private && parentsArePrivateInSameMap)
-				// if making public, can't be root node, and the owner map must allow public nodes (at some point, may remove this restriction, by having action cause node to be auto-replaced with in-map private-copy)
-				: (node.parents?.VKeys().length > 0) // && map.allowPublicNodes)
-		); */
-
-		const argumentWrapper = IsSinglePremiseArgument(parent) ? parent : null;
-
-		/*const changeControlType_currentType = node.ownerMapID != null ? "Private" : "Public";
-		// const changeControlType_newType = changeControlType_currentType == 'Private' ? 'Public' : 'Private';
-		const changeControlTypeCommand = new ChangeNodeOwnerMap(EV({nodeID: node.id, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?.id)}));
-		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node.id, newOrderType: node.childrenOrderType == ChildOrderType.manual ? ChildOrderType.byRating : ChildOrderType.manual}));*/
-
 		const parentLinks = GetNodeLinks(null, node.id);
 		const childLinks = GetNodeLinks(node.id);
 		const mirrorChildren = GetNodeMirrorChildren(node.id);
-		/*const childOrderTypeChangeable = node.ownerMapID != null // if private node
-			|| HasAdminPermissions(MeID()) // or has admin permissions
-			|| (node.type === NodeType.argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
 				<GenericEntryInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt} accessPolicyID={node.accessPolicy}
@@ -156,17 +135,6 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 							new ChangeClaimType({mapID, nodeID: node.id, newType: convertToType!}).RunOnServer();
 						}}/>
 					</Row>*/}
-				{/*childOrderTypeChangeable &&
-					<Row center>
-						<Text>Children order type:</Text>
-						<Select ml={5} options={GetEntries(ChildOrderType)} value={node.childrenOrderType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.ValidateErrorStr} onChange={val=>{
-							changeControlTypeCommand.RunOnServer();
-						}}/>
-						<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
-					</Row>*/}
-				{/*node.childrenOrderType == ChildOrderType.manual &&
-					<ChildrenOrder mapID={mapID} node={node}/>*/}
-				{/*<ChildrenOrder mapID={mapID} node={node}/>*/}
 				<AtThisLocation node={node} path={path}/>
 			</Column>
 		);
@@ -233,68 +201,3 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 		);
 	}
 }
-
-/*@Observer
-class ChildrenOrder extends BaseComponent<{mapID: string, node: NodeL3}, {}> {
-	render() {
-		const {mapID, node} = this.props;
-		const oldChildrenOrder = node.childrenOrder || [];
-		//const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys().length && oldChildrenOrder.every(id=>node.children[id] != null);
-
-		const childOrderType = node.childrenOrder ? ChildOrderType.manual : ChildOrderType.byRating;
-		const updateChildrenOrderCommand = new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: null});
-		return (
-			<Column mt={5}>
-				<Row style={E(childOrderType == ChildOrderType.manual && {fontWeight: "bold"})}>
-					<Text>Children order:</Text>
-					<Select ml={5} options={GetEntries(ChildOrderType)} value={childOrderType} enabled={updateChildrenOrderCommand.Validate_Safe() == null} title={updateChildrenOrderCommand.ValidateErrorStr} onChange={val=>{
-						if (val == ChildOrderType.manual) {
-							const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
-							const missingChildIDs = (node.children || {}).Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
-							updateChildrenOrderCommand.payload.childrenOrder = existingValidIDs.concat(missingChildIDs);
-							updateChildrenOrderCommand.RunOnServer();
-						} else {
-							updateChildrenOrderCommand.RunOnServer();
-						}
-					}}/>
-				</Row>
-				{node.childrenOrder && oldChildrenOrder.map((childID, index)=>{
-					const childPath = (node.id ? `${node.id}/` : "") + childID;
-					const child = GetNodeL3(childPath);
-					const childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, node)) : "...";
-					return (
-						<Row key={index} style={{alignItems: "center"}}>
-							<Row mr={7} sel style={{opacity: 0.5}}>
-								<Text>#</Text>
-								<UUIDStub id={childID}/>
-							</Row>
-							<Div sel style={ES({flex: 1, whiteSpace: "normal"})}>{childTitle}</Div>
-							{/* <TextInput enabled={false} style={ES({flex: 1})} required pattern={NodeL1_id}
-								value={`#${childID.toString()}: ${childTitle}`}
-								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
-							/> *#/}
-							<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 0}
-								onClick={()=>{
-									const newOrder = oldChildrenOrder.slice(0);
-									newOrder.RemoveAt(index);
-									newOrder.Insert(index - 1, childID);
-									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).RunOnServer();
-								}}/>
-							<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < oldChildrenOrder.length - 1}
-								onClick={()=>{
-									const newOrder = oldChildrenOrder.slice(0);
-									newOrder.RemoveAt(index);
-									newOrder.Insert(index + 1, childID);
-									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).RunOnServer();
-								}}/>
-						</Row>
-					);
-				})}
-				{/*node.childrenOrder && !oldChildrenOrderValid && updateChildrenOrderCommand.Validate_Safe() == null &&
-					<Button mr="auto" text="Fix children-order" onClick={()=>{
-						InitializeChildrenOrder();
-					}}/>*#/}
-			</Column>
-		);
-	}
-}*/

@@ -50,9 +50,6 @@ export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
 	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
 	//if (isSubnode) return 11;
 
-	const isMultiPremiseArg = IsMultiPremiseArgument(node);
-	if (isMultiPremiseArg) return 12;
-
 	return 14;
 }
 export function GetPaddingForNode(node: NodeL2/*, isSubnode = false*/) {
@@ -404,7 +401,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 				if (firstSource.name) text += `, as part of ${firstSource.name},`;
 				text += ` was ${mainAttachment.media.captured ? "captured" : "produced"}`;
 			} else {
-				throw "[can't happen]";
+				Assert(false, "[can't happen]");
 			}
 
 			if (firstSource.location) text += ` at ${firstSource.location}`;
@@ -449,40 +446,7 @@ export function GetValidNewChildTypes(parent: NodeL2, childGroup: ChildGroup, ac
 	return validChildTypes;
 }
 
-/** Returns whether the node provided is an argument, and marked as single-premise. */
-export const IsSinglePremiseArgument = CreateAccessor((node: NodeL1|n)=>{
-	if (node == null) return false;
-	//return node.type == NodeType.argument && !node.multiPremiseArgument;
-	return node.type == NodeType.argument && false; // temp
-});
-/** Returns whether the node provided is an argument, and marked as multi-premise. */
-export const IsMultiPremiseArgument = CreateAccessor((node: NodeL1|n)=>{
-	if (node == null) return false;
-	//return node.type == NodeType.argument && node.multiPremiseArgument;
-	return node.type == NodeType.argument && true; // temp
-});
-
-/*export function IsPrivateNode(node: NodeL1) {
-	return node.ownerMapID != null;
-}
-export function IsPublicNode(node: NodeL1) {
-	return node.ownerMapID == null;
-}*/
-
-export const IsPremiseOfSinglePremiseArgument = CreateAccessor((node: NodeL1, parent: NodeL1|n)=>{
+export const IsPremiseOfArgument = CreateAccessor((node: NodeL1, parent: NodeL1|n)=>{
 	if (parent == null) return false;
-	return node.type == NodeType.claim && IsSinglePremiseArgument(parent);
+	return node.type == NodeType.claim && parent.type == NodeType.argument;
 });
-export const IsPremiseOfMultiPremiseArgument = CreateAccessor((node: NodeL1, parent: NodeL1|n)=>{
-	if (parent == null) return false;
-	return node.type == NodeType.claim && IsMultiPremiseArgument(parent);
-});
-
-export function GetArgumentNode(node: NodeL1, parent: NodeL1|n) {
-	const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-	const argumentNode =
-		node.type == NodeType.argument ? node :
-		isPremiseOfSinglePremiseArg ? parent :
-		null;
-	return argumentNode;
-}

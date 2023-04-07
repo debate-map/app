@@ -49,6 +49,7 @@ pub struct DeleteArgumentResult {
 
 }
 
+// todo: eventually remove (or rework) this command, since unused
 pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: DeleteArgumentInput, _extras: NoExtras) -> Result<DeleteArgumentResult, Error> {
 	let DeleteArgumentInput { mapID, argumentID, claimID, deleteClaim } = input;
 	

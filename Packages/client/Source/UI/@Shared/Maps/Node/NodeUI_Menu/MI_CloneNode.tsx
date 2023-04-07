@@ -13,15 +13,12 @@ import {GetTransferNodesInitialData} from "./Dialogs/TransferNodeDialog/Transfer
 @Observer
 export class MI_CloneNode extends BaseComponent<MI_SharedProps, {}> {
 	render() {
-		const {map, node, path, childGroup, combinedWithParentArg, inList} = this.props;
+		const {map, node, path, childGroup, inList} = this.props;
 		if (inList) return null;
 		//const formForClaimChildren = node.type == NodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		// we "initiate a clone" for the "outer" argument node, if there's a box combining an argument and claim (this is how the dialog expects such a case)
-		let pathToClone = path;
-		if (node.type == NodeType.claim && combinedWithParentArg) {
-			pathToClone = SlicePath(path, 1)!;
-		}
+		const pathToClone = path;
 		const nodeToClone = GetNodeL3(pathToClone);
 		if (nodeToClone == null) return null; // node just deleted?
 

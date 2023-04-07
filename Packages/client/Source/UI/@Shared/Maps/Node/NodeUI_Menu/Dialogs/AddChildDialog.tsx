@@ -38,7 +38,6 @@ export class AddChildHelper {
 			accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 			//parents: {[this.Node_ParentID]: {_: true}},
 			type: childType,
-			//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 		});
 		this.node_revision = new NodeRevision();
 		this.node_link = E(
@@ -53,7 +52,6 @@ export class AddChildHelper {
 		if (childType == NodeType.argument) {
 			this.node.argumentType = ArgumentType.all;
 			this.subNode = new NodeL1({
-				//EV({ownerMapID: OmitIfFalsy(parentNode.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
 				type: NodeType.claim, creator: userID,
@@ -91,10 +89,6 @@ export class AddChildHelper {
 			return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 		} */
 		RunInAction("AddChildDialog.Apply_start", ()=>store.main.maps.currentNodeBeingAdded_path = `${this.node_parentPath}/?`);
-
-		/*if (opt.uiType == AddChildDialogTab.MultiPremise) {
-			this.node.multiPremiseArgument = true;
-		}*/
 
 		//const command = this.GetCommand();
 		let runResult_copy;

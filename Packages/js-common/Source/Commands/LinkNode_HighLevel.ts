@@ -142,7 +142,6 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			// Assert(newPolarity, 'Since this command has to create a wrapper-argument, you must supply the newPolarity property.');
 			newPolarity = newPolarity || Polarity.supporting; // if new-polarity isn't supplied, just default to Supporting (this can happen if a claim is copied from search-results)
 			const argumentWrapper = new NodeL1({
-				//EV({ownerMapID: OmitIfFalsy(this.newParent_data.ownerMapID)}),
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				accessPolicy: this.node_data.accessPolicy,
 				type: NodeType.argument,

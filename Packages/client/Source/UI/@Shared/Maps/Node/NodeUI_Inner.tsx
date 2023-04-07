@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbars} from "dm_common";
 import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -51,7 +51,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 export type NodeUI_Inner_Props = {
 	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map,
-	width?: number/*|string*/|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
+	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	usePortalForDetailBoxes?: boolean,
 } & {dragInfo?: DragInfo};
@@ -108,7 +108,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, treePath, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
+		const {indexInNodeList, map, node, path, treePath, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
@@ -131,18 +131,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
-		const combinedWithParentArgument = parent ? IsPremiseOfSinglePremiseArgument(node, parent)! : false; // nn, else would bail
 		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 		//const outerNode = IsPremiseOfSinglePremiseArgument(node, parent) ? parent : node;
 
-		let mainRatingType = GetMainRatingType(node);
-		let ratingNode = node;
-		let ratingNodePath = path;
-		if (combinedWithParentArgument) {
-			mainRatingType = NodeRatingType.impact;
-			ratingNode = parent!;
-			ratingNodePath = parentPath!;
-		}
+		const mainRatingType = GetMainRatingType(node);
+		const ratingNode = node;
+		const ratingNodePath = path;
 		/* const mainRating_average = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType));
 		// let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, MeID());
 		const mainRating_mine = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({ includeUser: MeID() }))); */
@@ -188,7 +182,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		});
 
 		const nodeTypeInfo = NodeType_Info.for[node.type];
-		let backgroundColor = GetNodeColor(node);
+		const backgroundColor = GetNodeColor(node);
 		/* const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		// const offsetByAnotherDrag = dragInfo && dragInfo.provided.draggableProps.style.transform;
 		if (asDragPreview) {
@@ -197,10 +191,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		} */
 
 		// Log(`${node.id} -- ${dragInfo && dragInfo.snapshot.isDragging}; ${dragInfo && dragInfo.snapshot.draggingOver}`);
-
-		if (combinedWithParentArgument) {
-			backgroundColor = GetNodeColor(parent!);
-		}
 
 		const outlineColor = GetChangeTypeOutlineColor(changeType);
 		let outlineThickness = 1;
@@ -213,9 +203,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const barSize = 5;
 		const pathNodeIDs = GetPathNodeIDs(path);
 		//const isSubnode = IsNodeSubnode(node);
-		const isSinglePremiseArg = IsSinglePremiseArgument(node);
-		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-		const isMultiPremiseArg = IsMultiPremiseArgument(node);
 
 		const nodeReversed = nodeForm == ClaimForm.negation;
 
@@ -227,7 +214,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
-		const toolbarShow = (map?.extras.defaultNodeToolbarEnabled ?? true) && node.type != NodeType.category; // disabled for category-nodes, since looks bad (and less useful there)
+		const toolbarShow = ShowNodeToolbars(map) && node.type != NodeType.category; // disabled for category-nodes, since looks bad (and less useful there)
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
@@ -271,26 +258,18 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}
 		const onDirectClick = UseCallback(e=>{
 			RunInAction("NodeUI_Inner.onDirectClick", ()=>{
-				if (combinedWithParentArgument && parent) {
-					store.main.maps.nodeLastAcknowledgementTimes.set(parent.id, Date.now());
-				}
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
-		}, [combinedWithParentArgument, node.id, parent]);
+		}, [node.id, parent]);
 		const onTextCompClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
 			const newExpanded = !expanded;
 			const recursivelyCollapsing = newExpanded == false && e.altKey;
 			ACTNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 
-			// if this node is premise of single-premise arg, change the expansion state of the parent-node (the wrapper argument) as well
-			if (combinedWithParentArgument) {
-				ACTNodeExpandedSet({mapID: map?.id, path: parentPath!, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
-			}
-
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
 			//return false;
-		}, [combinedWithParentArgument, expanded, map?.id, parentPath, path]);
+		}, [expanded, map?.id, parentPath, path]);
 
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;
@@ -329,7 +308,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 			//const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath);
 
-			let width_final = widthOverride ?? width ?? NodeType_Info.for[node.type].minWidth;
+			let width_final =
+				(node.type != NodeType.argument ? standardWidthInGroup : null) // if argument, we don't care about matching width with peers (since its box is bumped up against that of its first premise)
+				?? width
+				?? NodeType_Info.for[node.type].minWidth;
 			//if (IsNumber(width_final))
 			width_final = width_final.KeepAtLeast(NodeType_Info.for[node.type].minWidth);
 
@@ -435,7 +417,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					//onTextHolderClick={onTextHolderClick}
 					//textHolderStyle={E(isMultiPremiseArg && {width: null})}
 					text={<>
-						{!GADDemo && (()=>{
+						{/*!GADDemo && (()=>{
 							// include this in "text" prop, because that makes the sizing exclude the +/- button
 							let ratingsPanel: JSX.Element;
 							if (node.type == NodeType.claim && combinedWithParentArgument) {
@@ -448,7 +430,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							return <div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
 								{ratingsPanel}
 							</div>;
-						})()}
+						})()*/}
 						{toolbarAndTitleElements}
 						{subPanelShow &&
 						<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
@@ -458,13 +440,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					expandButtonStyle={E(toolbarShow && {borderRadius: "0 0 5px 0"})}
 					afterChildren={<>
 						{bottomPanelShow
-							&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: widthOverride, hovered, backgroundColor}}
+							&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}
 								ref={c=>this.bottomPanel = c}
 								usePortal={usePortalForDetailBoxes} nodeUI={this}
 								panelsPosition={panelsPosition!} panelToShow={panelToShow!}
 								hoverTermIDs={hoverTermIDs} onTermHover={termIDs=>this.SetState({hoverTermIDs: termIDs})}/>}
 						{reasonScoreValues && showReasonScoreValues
-							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
+							&& <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
 					</>}
 				/>
 			);
@@ -516,9 +498,9 @@ WaitXThenRun(0, ()=>{
 	document.body.appendChild(portal);
 });
 
-class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
+class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix}, {}> {
 	render() {
-		const {node, reasonScoreValues, combinedWithParentArgument} = this.props;
+		const {node, reasonScoreValues} = this.props;
 		const mainScore = node.type == NodeType.argument ? RS_CalculateTruthScoreComposite(node.id) : RS_CalculateTruthScore(node.id);
 		const {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
 		return (
@@ -526,11 +508,7 @@ class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreVa
 				{node.type == NodeType.argument && `Truth score: ${mainScore.ToPercentStr()}${
 					` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(0.01)} = ${rs_argWeight.RoundTo_Str(0.01)}`
 				}`}
-				{node.type == NodeType.claim && `Truth score: ${mainScore.ToPercentStr()}${
-					combinedWithParentArgument
-						? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(0.01)}x${rs_argWeightMultiplier.RoundTo_Str(0.01)} = ${rs_argWeight.RoundTo_Str(0.01)}`
-						: ""
-				}`}
+				{node.type == NodeType.claim && `Truth score: ${mainScore.ToPercentStr()}`}
 			</div>
 		);
 	}

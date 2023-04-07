@@ -1,4 +1,4 @@
-import {ArgumentType, ChangeType, ChildGroup, GetParentNodeL3, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, Map, NodeL3, NodeType, NodeRatingType} from "dm_common";
+import {ArgumentType, ChangeType, ChildGroup, GetParentNodeL3, Map, NodeL3, NodeType, NodeRatingType} from "dm_common";
 import React, {useCallback} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ACTNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
@@ -47,14 +47,12 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		// const nodeView = GetNodeView(map.id, path, true);
 		const nodeView = GetNodeView(map.id, parentPath);
 		const parent = GetParentNodeL3(parentPath);
-		const combineWithParentArgument = IsPremiseOfSinglePremiseArgument(parentNode, parent);
 
 		//const backgroundFillPercent = GetFillPercent_AtPath(node, path, group);
 		const backgroundFillPercent = 100;
 		//const markerPercent = GetMarkerPercent_AtPath(node, path, group);
 		const markerPercent = null;
 
-		const isMultiPremiseArgument = IsMultiPremiseArgument(parentNode);
 		const text =
 			group == ChildGroup.truth ? (GADDemo ? "Reasons" : "True?") :
 			group == ChildGroup.relevance ? "Relevant?" :

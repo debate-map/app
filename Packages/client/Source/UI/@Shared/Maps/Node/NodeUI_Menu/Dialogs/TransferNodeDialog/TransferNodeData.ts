@@ -1,4 +1,4 @@
-import {NodeType, ChildGroup, ClaimForm, Polarity, NodeL3, GetParentNodeID, GetNodeChildrenL3, IsSinglePremiseArgument, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
+import {NodeType, ChildGroup, ClaimForm, Polarity, NodeL3, GetParentNodeID, GetNodeChildrenL3, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 
@@ -35,7 +35,8 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, tr
 	const sourcePath = `${oldParentID}/${transferNode.id}`;
 	const sourceNode = transferNode;
 	const sourceNodeChildren = sourceNode && GetNodeChildrenL3(sourceNode.id, sourcePath);
-	if (IsSinglePremiseArgument(transferNode) && sourceNodeChildren && sourceNodeChildren.length > 0) {
+	// should this be added back, by just treating an argument with 1-claim as being a "single premise argument"?
+	/*if (IsSinglePremiseArgument(transferNode) && sourceNodeChildren && sourceNodeChildren.length > 0) {
 		const premise = sourceNodeChildren.find(a=>a.type == NodeType.claim);
 		if (premise) {
 			payload_initial.nodes.push({
@@ -53,7 +54,7 @@ export function GetTransferNodesInitialData(map: Map|n, transferNode: NodeL3, tr
 				argumentPolarity: premise.link!.polarity,
 			});
 		}
-	}
+	}*/
 
 	const uiState_initial: TransferNodesUIState = {destinationParent: newParent, destinationChildGroup: outerChildGroup};
 

@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, ChildGroupLayout, GetChildGroupLayout, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, NodeL3, NodeType, NodeType_Info, ShouldChildGroupBoxBeVisible, TagComp_CloneHistory} from "dm_common";
+import {ChangeType, ChildGroup, ChildGroupLayout, GetChildGroupLayout, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShouldChildGroupBoxBeVisible, ShowNodeToolbars, TagComp_CloneHistory} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -47,7 +47,7 @@ export class NodeUI extends BaseComponentPlus(
 	{} as {
 		indexInNodeList: number, map: Map, node: NodeL3, path: string, treePath: string, style?,
 		inBelowGroup?: boolean,
-		widthOverride?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
+		standardWidthInGroup?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
 		ref_innerUI?: (c: NodeUI_Inner|n)=>any,
 	},
@@ -76,7 +76,7 @@ export class NodeUI extends BaseComponentPlus(
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, ref_innerUI, treePath, inBelowGroup, children} = this.props;
+		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_innerUI, treePath, inBelowGroup, children} = this.props;
 		const {obs} = this.state;
 
 		performance.mark("NodeUI_1");
@@ -100,13 +100,6 @@ export class NodeUI extends BaseComponentPlus(
 		//const parentNodeView = GetNodeView(map.id, parentPath);
 		//const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<NodeL3>();
 
-		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
-		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		const hereArg = node.type == NodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
-		const hereArgNodePath = hereArg == node ? path : hereArg == parent ? parentPath : null;
-		const hereArgChildren = hereArg ? GetNodeChildren(hereArg, hereArgNodePath) : null;
-		const hereArgChildrenToShow = hereArg ? GetNodeChildrenToShow(hereArg, hereArgNodePath).filter(a=>a.id != node.id) : null;
 		const boxExpanded = nodeView?.expanded ?? false;
 
 		const childLayout = GetChildLayout_Final(node.current, map);
@@ -120,7 +113,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
-		const hereArgChildrenToShow_relevance = hereArgChildrenToShow?.filter(a=>a.link?.group == ChildGroup.relevance) ?? ea as NodeL3[];
+		const ncToShow_relevance = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.relevance);
 		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
 
 		/*const playingTimeline = GetPlayingTimeline(map.id);
@@ -144,7 +137,7 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.lastRenderTime = Date.now();
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: GetNodeColor(hereArg ?? node, "raw", false).css(),
+			color: GetNodeColor(node, "raw", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			parentIsAbove: inBelowGroup,
@@ -152,49 +145,6 @@ export class NodeUI extends BaseComponentPlus(
 
 		const proxyNodeUI_ref = UseCallback(c=>this.proxyDisplayedNodeUI = c, []);
 		let innerUIOverride_baseClaimMissing: JSX.Element|n;
-		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
-		if (isSinglePremiseArgument) {
-			const premises = nodeChildren.filter(a=>a && a.type == NodeType.claim);
-			if (premises.length) {
-				AssertWarn(premises.length == 1, `Single-premise argument #${node.id} has more than one premise! (${premises.map(a=>a.id).join(",")})`);
-				const premise = premises[0];
-
-				// if has child-limit bar, correct its path
-				const firstChildComp = this.FlattenedChildren[0] as any;
-				if (firstChildComp && firstChildComp.props.path == path) {
-					firstChildComp.props.path = `${firstChildComp.props.path}/${premise.id}`;
-				}
-
-				return (
-					<NodeUI ref={proxyNodeUI_ref} {...this.props} key={premise.id} map={map} node={premise} path={`${path}/${premise.id}`}>
-						{children}
-					</NodeUI>
-				);
-			}
-
-			// if there are not-yet-loaded children that *might* be the premise, wait for them to finish loading before showing the "no premise" message
-			if (nodeChildren.Any(a=>a == null)) {
-				//return <div title={`Loading premise "${node.children.VKeys()[0]}"...`}>...</div>;
-				return <div/>;
-			}
-
-			// placeholder, so user can add the base-claim
-			// const backgroundColor = GetNodeColor(node).desaturate(0.5).alpha(0.8);
-			innerUIOverride_baseClaimMissing = (
-				<Row /* mt={indexInNodeList === 0 ? 0 : 5} */ className="cursorSet"
-					style={{
-						padding: 5, borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",
-						background: /* backgroundColor.css() */ "rgba(0, 0, 0, 0.7)",
-						margin: "5px 0", // emulate usual internal NodeUI
-						fontSize: 14, // emulate usual internal NodeUI_Inner
-					}}
-				>
-					<span style={{opacity: 0.5, color: liveSkin.NodeTextColor().css()}}>(single-premise arg lacks base-claim; right-click to add)</span>
-					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
-				</Row>
-			);
-		}
 
 		// Assert(!relevanceArguments.Any(a=>a.type == NodeType.claim), "Single-premise argument has more than one premise!");
 		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
@@ -229,9 +179,9 @@ export class NodeUI extends BaseComponentPlus(
 				usesGenericExpandedField={false}
 				belowNodeUI={false}
 				minWidth={0}
-				nodeChildrenToShow={hereArgChildrenToShow_relevance}
+				nodeChildrenToShow={ncToShow_relevance}
 			/>;
-		treeChildrenAddedSoFar += hereArgChildrenToShow_relevance.length + 3; // + 3 is for the arguments-control-bar, and the two possible limit-bars (it's ok to over-reserve slots)
+		treeChildrenAddedSoFar += ncToShow_relevance.length + 3; // + 3 is for the arguments-control-bar, and the two possible limit-bars (it's ok to over-reserve slots)
 		const nodeChildHolder_freeform = IsChildGroupValidForNode(node, ChildGroup.freeform) &&
 			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
@@ -253,14 +203,14 @@ export class NodeUI extends BaseComponentPlus(
 				group={ChildGroup.generic}
 				usesGenericExpandedField={true}
 				belowNodeUI={showGenericBelow}
-				minWidth={showGenericBelow && widthOverride ? widthOverride - 20 : 0}
+				minWidth={showGenericBelow && standardWidthInGroup ? standardWidthInGroup - GUTTER_WIDTH_SMALL : 0}
 				nodeChildrenToShow={ncToShow_generic}
 			/>;
 			treeChildrenAddedSoFar += ncToShow_generic.length + 1; // + 1 is for the one possible limit-bar (it's ok to over-reserve slots)
 		}
 
 		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
-		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? hereArgChildrenToShow_relevance : nodeChildrenToShow;
+		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow;
 
 		performance.mark("NodeUI_3");
 		performance.measure("NodeUI_Part1", "NodeUI_1", "NodeUI_2");
@@ -288,7 +238,7 @@ export class NodeUI extends BaseComponentPlus(
 							/*paddingTop: gapBeforeInnerUI,
 							paddingBottom: gapAfterInnerUI,*/
 							//width: "100%",
-							opacity: widthOverride != 0 ? 1 : 0,
+							opacity: standardWidthInGroup != 0 ? 1 : 0,
 							//paddingLeft: inBelowGroup ? 20 : 30,
 							boxSizing: "content-box",
 							paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
@@ -296,26 +246,22 @@ export class NodeUI extends BaseComponentPlus(
 						style,
 					)}
 				>
-					{innerUIOverride_baseClaimMissing}
-					{innerUIOverride_baseClaimMissing == null &&
-					<>
-						{/*node.current.accessLevel != AccessLevel.basic &&
-						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
-							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
-						</div>*/}
-						<CloneHistoryButton node={node}/>
-						<NodeUI_Inner ref={UseCallback(c=>{
-							this.innerUI = GetInnerComp(c);
-							if (ref_innerUI) ref_innerUI(c);
-						}, [ref_innerUI])} {...{indexInNodeList, map, node, path, treePath, width, widthOverride}}/>
-						{/* these are for components shown just to the right of the NodeUI_Inner box */}
-						{nodeChildrenToShow == emptyArray_forLoading &&
-							<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-						{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) &&
-							<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
-						{!boxExpanded &&
-							<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length}/>}
-					</>}
+					{/*node.current.accessLevel != AccessLevel.basic &&
+					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
+						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
+					</div>*/}
+					<CloneHistoryButton node={node}/>
+					<NodeUI_Inner ref={UseCallback(c=>{
+						this.innerUI = GetInnerComp(c);
+						if (ref_innerUI) ref_innerUI(c);
+					}, [ref_innerUI])} {...{indexInNodeList, map, node, path, treePath, width, standardWidthInGroup}}/>
+					{/* these are for components shown just to the right of the NodeUI_Inner box */}
+					{nodeChildrenToShow == emptyArray_forLoading &&
+						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
+					{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) &&
+						<div style={{margin: "auto 0 auto 10px", background: liveSkin.OverlayPanelBackgroundColor().css(), padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
+					{!boxExpanded &&
+						<NodeChildCountMarker {...{map, path}} childCount={childrenShownByNodeExpandButton.length}/>}
 				</Column>
 				{boxExpanded && nodeChildHolder_truth}
 				{boxExpanded && nodeChildHolder_relevance}
@@ -341,15 +287,14 @@ export class NodeUI extends BaseComponentPlus(
 		//FlashComp(this, {text: "NodeUI.CheckForChanges"});
 		const {node, onHeightOrPosChange} = this.PropsState;
 		if (this.DOM_HTML == null) return;
-		const isMultiPremiseArgument = IsMultiPremiseArgument.CatchBail(false, node);
 
 		const obs = new ObservedValues({
 			innerUIHeight: this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0),
 			childrensHeight: this.rightColumn?.DOM_HTML.offsetHeight ?? 0,
 			// see UseSize_Method for difference between offsetHeight and the alternatives
 			height: this.DOM_HTML.offsetHeight
-				// if multi-premise-arg, the nodeChildHolder_direct element is not "within" this.DOM_HTML; so add its height manually
-				+ (isMultiPremiseArgument && this.nodeChildHolder_generic != null ? this.nodeChildHolder_generic.DOM_HTML.offsetHeight : 0),
+				// if argument, the nodeChildHolder_generic element is not "within" this.DOM_HTML; so add its height manually
+				+ (node.type == NodeType.argument && this.nodeChildHolder_generic != null ? this.nodeChildHolder_generic.DOM_HTML.offsetHeight : 0),
 		});
 		if (ShallowEquals(obs, this.lastObservedValues)) return;
 
@@ -393,7 +338,7 @@ export class NodeUI extends BaseComponentPlus(
 			//width += 20; // give extra space for left-margin
 		}*/
 
-		if (node.type == NodeType.argument && map.extras.defaultNodeToolbarEnabled) {
+		if (node.type == NodeType.argument && ShowNodeToolbars(map)) {
 			width += 110; // add space for the "Relevance" toolbar-item
 		}
 

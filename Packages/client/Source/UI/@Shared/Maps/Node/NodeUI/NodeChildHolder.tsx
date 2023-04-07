@@ -1,4 +1,4 @@
-import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, IsMultiPremiseArgument, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -124,7 +124,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						path={`${parentPath}/${child.id}`}
 						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
 						inBelowGroup={belowNodeUI}
-						widthOverride={widthOverride}
+						standardWidthInGroup={widthOverride}
 						onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;
 				};
 

@@ -6,7 +6,6 @@ import {GetRatingTypeInfo, NodeRatingType, RatingValueIsInRange} from "../DB/nod
 import {GetArgumentImpactPseudoRating, GetArgumentImpactPseudoRatings, RatingListAfterRemovesAndAdds} from "../Utils/DB/RatingProcessor.js";
 import {NodeType} from "../DB/nodes/@NodeType.js";
 import {GetNode, GetNodeChildren, GetNodeChildrenL2, GetNodeParents} from "../DB/nodes.js";
-import {GetArgumentNode} from "../DB/nodes/$node.js";
 
 @CommandMeta({
 	exposeToGraphQL: false, // server-internal

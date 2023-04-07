@@ -44,8 +44,10 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 		expectedOtherStuffWidth += 14;
 	}
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) { // quotes are often long, so just always do full-width
-		expectedBoxWidth = maxWidth_final;
+	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
+		//expectedBoxWidth = maxWidth_final;
+		// these attachments are often long, so keep width at least 250 (just small enough so that, with relevance-button, argument-box fits in gap prior to toolbar of premise)
+		expectedBoxWidth = expectedBoxWidth.KeepAtLeast(250);
 	}
 
 	const width = node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, maxWidth_final);

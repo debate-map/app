@@ -1,4 +1,4 @@
-import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingSummary, GetRatingTypeInfo, GetRatingTypesForNode, IsUserCreatorOrMod, Map, NodeL3, NodeType_Info, NodeView, MeID, NodeRatingType} from "dm_common";
 import React from "react";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -51,18 +51,7 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 		const nodeReversed = form == ClaimForm.negation;
 		const nodeTypeInfo = NodeType_Info.for[node.type];
 
-		const combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
-		let argumentNode: NodeL3|n, argumentPath: string|n;
-		if (combinedWithParent) {
-			argumentNode = parentNode;
-			argumentPath = SlicePath(path, 1);
-		}
-
-		let ratingTypes = GetRatingTypesForNode(node);
-		if (argumentNode) {
-			//ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
-			ratingTypes = ratingTypes.concat([{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}]);
-		}
+		const ratingTypes = GetRatingTypesForNode(node);
 
 		if (usePortal) {
 			/*UseEffect(()=>{
@@ -137,22 +126,18 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
 				}}>
 					{ratingTypes.map((ratingInfo, index)=>{
-						const nodeForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentNode! : node;
-						const pathForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentPath! : path;
-						const parentNodeForRatingType = GetParentNodeL3(pathForRatingType)!; // nn: bail
-
-						const ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, nodeForRatingType, parentNodeForRatingType, pathForRatingType);
+						const ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, node, parentNode, path);
 						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
 						/*const ratings = GetRatings(nodeForRatingType.id, ratingInfo.type);
 						const average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);*/
-						const ratingSummary = GetRatingSummary(nodeForRatingType.id, ratingInfo.type);
+						const ratingSummary = GetRatingSummary(node.id, ratingInfo.type);
 						if (ratingSummary.average != null) {
 							percentStr = `${ratingSummary.average.RoundTo(1)}%`;
 						}
 						return (
-							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path: pathForRatingType, openPanel}}
+							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}}
 									panel={ratingInfo.type} text={ratingTypeInfo.displayText}
 									style={E(
 										{fontSize: 13},

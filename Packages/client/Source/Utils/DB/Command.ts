@@ -122,13 +122,14 @@ export async function RunCommand_AddNodeRevision(inputFields: {mapID?: string|n,
 	return result.data.addNodeRevision as {id: string};
 }
 
-export async function RunCommand_DeleteArgument(inputFields: {mapID?: string|n, argumentID: string, claimID: string, deleteClaim: boolean}) {
+// todo: eventually remove (or rework) this command, since unused
+/*export async function RunCommand_DeleteArgument(inputFields: {mapID?: string|n, argumentID: string, claimID: string, deleteClaim: boolean}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: DeleteArgumentInput!) { deleteArgument(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
 	return result.data.deleteArgument as {};
-}
+}*/
 
 export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, nodeID: string}) {
 	const result = await apolloClient.mutate({
@@ -164,13 +165,14 @@ export async function RunCommand_SetNodeRating(inputFields: {rating: NodeRating}
 	return result.data.setNodeRating as {id: string};
 }
 
-export async function RunCommand_SetNodeIsMultiPremiseArgument(inputFields: {id: string, multiPremiseArgument: boolean|n}) {
+// todo: eventually remove this command, since unused
+/*export async function RunCommand_SetNodeIsMultiPremiseArgument(inputFields: {id: string, multiPremiseArgument: boolean|n}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: SetNodeIsMultiPremiseArgumentInput!) { setNodeIsMultiPremiseArgument(input: $input) { __typename } }`,
 		variables: {input: inputFields},
 	});
 	return result.data.setNodeIsMultiPremiseArgument as {};
-}
+}*/
 
 export async function RunCommand_SetUserFollowData(inputFields: {targetUser: string, userFollow: UserFollow|n}) {
 	const result = await apolloClient.mutate({

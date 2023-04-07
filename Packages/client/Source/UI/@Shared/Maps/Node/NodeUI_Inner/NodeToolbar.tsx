@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetArgumentNode, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, IsPremiseOfMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, NodeL3, NodeType, NodeRatingType, Polarity} from "dm_common";
+import {ChildGroup, ClaimForm, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, NodeL3, NodeType, NodeRatingType, Polarity} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {Vector2} from "react-vmenu/Dist/Utils/FromJSVE";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -34,9 +34,6 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const nodeForm = GetNodeForm(node, path);
-		const isPremiseOfMultiPremiseArg = IsPremiseOfMultiPremiseArgument(node, parent);
-		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
-		const isPremiseOfArg = isPremiseOfSinglePremiseArg || isPremiseOfMultiPremiseArg;
 
 		//const sharedProps = {node, panelToShow, onPanelButtonClick, leftPanelShow};
 		const sharedProps = E(this.props, {buttonCount: 1}); // button-count is updated shortly
@@ -52,16 +49,10 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			return toolbarItems.map((item, index)=>{
 				if (item.panel == "truth" && node.type == NodeType.claim) {
 					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Agreement" panel="truth"
-						enabled={node.type == NodeType.claim} disabledInfo="This is a multi-premise argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
+						enabled={node.type == NodeType.claim} disabledInfo="This is an argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
 				}
 				if (item.panel == "relevance" && node.type == NodeType.argument) {
-					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Relevance" panel="relevance"
-						enabled={node.type == NodeType.argument || isPremiseOfSinglePremiseArg}
-						disabledInfo={
-							isPremiseOfMultiPremiseArg
-								? "This is a premise for a multi-premise argument; relevance ratings should be given for the argument overall, rather than its individual premises."
-								: undefined
-						}/>;
+					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Relevance" panel="relevance" enabled={node.type == NodeType.argument}/>;
 				}
 				if (item.panel == "tags") {
 					// if there are labels, display them directly within the toolbar-button
@@ -269,20 +260,12 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 		const {path, node, ratingType, backgroundColor} = this.props;
 		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.none) return null;
 
-		const parentNode = GetParentNode(path);
-		const argumentNode = GetArgumentNode(node, parentNode);
-		const argumentPath = argumentNode == null ? null : (argumentNode == node ? path : GetParentPath(path));
-
-		const ratingNodePath = ratingType == "relevance" ? argumentPath! : path;
-		const ratingNode = GetNodeL3(ratingNodePath);
-		if (ratingNode == null) return null; // why does this happen sometimes?
-
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
 		/*const ratings = GetRatings(ratingNode.id, ratingType);
 		const ratingsInEachRange = ratingTypeInfo.valueRanges.map(range=>{
 			return ratings.filter(a=>RatingValueIsInRange(a.value, range));
 		});*/
-		const ratingSummary = GetRatingSummary(ratingNode.id, ratingType);
+		const ratingSummary = GetRatingSummary(node.id, ratingType);
 
 		/*ratingsPreview = (
 			<Row style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
@@ -307,7 +290,7 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 			//const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
 			const baselineValue = (ratingSummary.countsByRange.Max() / 10).KeepAtLeast(.1);
 			return (
-				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
+				<RatingsPanel_Old node={node} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
 						// for splines style
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
@@ -326,13 +309,13 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 			);
 		}
 
-		//const backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
-		const backgroundFillPercent = GetRatingAverage(ratingNode.id, ratingType, null) ?? 0;
+		//const backgroundFillPercent = GetFillPercent_AtPath(node, path, null);
+		const backgroundFillPercent = GetRatingAverage(node.id, ratingType, null) ?? 0;
 		return (
 			<>
 				<div style={{position: "absolute", top: 0, bottom: 0, right: 0, width: `${100 - backgroundFillPercent}%`, background: "black"}}/>
 				{/* chart just for the my-rating bars */}
-				<RatingsPanel_Old node={ratingNode} path={path} ratingType={ratingType} asNodeUIOverlay={true}
+				<RatingsPanel_Old node={node} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
 						//[0, ...ratingsInEachRange.map(a=>0), 0],

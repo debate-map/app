@@ -7,7 +7,7 @@ import {useCallback} from "react";
 import {Observer} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "./NodeUI";
+import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "./NodeUI.js";
 
 @Observer
 export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, group: ChildGroup, childBeingAdded: boolean}, {premiseTitle: ""}) {

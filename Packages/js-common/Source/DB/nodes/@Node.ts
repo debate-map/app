@@ -80,6 +80,7 @@ export class NodeL1 {
 	@Field({type: "string"})
 	accessPolicy: string;
 
+	// todo: remove this field eventually, since no longer in use (in rust code as well, along with the set_node_is_multi_premise command)
 	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})
 	multiPremiseArgument?: boolean;
