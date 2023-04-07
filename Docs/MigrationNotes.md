@@ -13,19 +13,26 @@
 * 2\) Changed attachments to only show up in the node sub-panel if they have a (new) `expandedByDefault` field set to true.
 	* DB response:
 		* 1\) If you want existing nodes with quote or media attachments to have them expanded by default, execute sql:
-		```
-		UPDATE "nodeRevisions" SET attachments = jsonb_set(attachments, '{0,expandedByDefault}', 'true')
-		WHERE (attachments -> 0 -> 'quote' != 'null' OR attachments -> 0 -> 'media' != 'null')
-			AND (phrasing -> 'text_base' = 'null' OR phrasing -> 'text_base' = '""')
-			AND (phrasing -> 'text_negation' = 'null' OR phrasing -> 'text_negation' = '""')
-			AND (phrasing -> 'text_question' = 'null' OR phrasing -> 'question' = '""');
-		```
+			```sql
+			UPDATE "nodeRevisions" SET attachments = jsonb_set(attachments, '{0,expandedByDefault}', 'true')
+			WHERE (attachments -> 0 -> 'quote' != 'null' OR attachments -> 0 -> 'media' != 'null')
+				AND (phrasing -> 'text_base' = 'null' OR phrasing -> 'text_base' = '""')
+				AND (phrasing -> 'text_negation' = 'null' OR phrasing -> 'text_negation' = '""')
+				AND (phrasing -> 'text_question' = 'null' OR phrasing -> 'question' = '""');
+			```
 
 ### Pushed on 2023-04-03
 
 * 1\) Removed the `nodeRevisions.note` column from the database. (kept that field in the graphql api though, as a proxy of `nodeRevisions.phrasing.note`)
 	* DB response:
 		* 1\) Execute sql: `UPDATE "nodeRevisions" SET phrasing = jsonb_set(phrasing, '{note}', to_jsonb(note)) WHERE note IS NOT NULL;`
+		* 2\) [added later] The command above should have excluded notes that are empty-strings... To fix this mistake from earlier, execute the follow sql: (repeated with the `0` texts changed to `1`, `2`, `3`, etc. up to whatever the max number of attachments are present on node-revisions in the database -- if you think there could be multiple empty-description attachments in the same node-revision, do sequence in descending order, so nothing is missed [shouldn't be necessary in this case])
+			```sql
+			UPDATE "nodeRevisions"
+			SET attachments = attachments #- '{0}'
+			WHERE attachments -> 0 -> 'description' != 'null'
+				AND attachments -> 0 -> 'description' -> 'text' = ANY(array['""'::jsonb, 'null']);
+			```
 
 ### Pushed on 2023-01-13 [+01-15]
 
