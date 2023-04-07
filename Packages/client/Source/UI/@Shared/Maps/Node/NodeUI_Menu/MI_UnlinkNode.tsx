@@ -17,7 +17,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		if (componentBox) return null;
 		const parent = GetParentNodeL3(path);
 		if (parent == null) return null;
-		const nodeText = GetNodeDisplayText(node, path);
+		const nodeText = GetNodeDisplayText(node, path, map);
 
 		//const command = new UnlinkNode({mapID, parentID: parent.id, childID: node.id});
 		return (
@@ -25,7 +25,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 				//enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
 				style={liveSkin.Style_VMenuItem()} onClick={async e=>{
 					if (e.button != 0) return;
-					const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")));
+					const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")), map);
 					ShowMessageBox({
 						title: `Unlink child "${nodeText}"`, cancelButton: true,
 						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,

@@ -3,11 +3,12 @@ import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfN
 import Moment from "web-vcore/nm/moment";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
+import {Map} from "../maps/@Map.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
 import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
 import {ClaimForm, NodeL1, NodeL2, NodeL3, Polarity} from "./@Node.js";
-import {NodeRevision} from "./@NodeRevision.js";
+import {ChildLayout, GetChildLayout_Final, NodeRevision} from "./@NodeRevision.js";
 import {ChildGroup, NodeType} from "./@NodeType.js";
 import {PermissionGroupSet, User} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
@@ -218,7 +219,7 @@ export function GetClaimFormUnderParent(node: NodeL1, parent: NodeL1): ClaimForm
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 }*/
-export const GetNodeForm = CreateAccessor((node: NodeL1, pathOrParent?: string | NodeL1): ClaimForm=>{
+export const GetNodeForm = CreateAccessor((node: NodeL1, pathOrParent?: string | NodeL1 | n): ClaimForm=>{
 	if (IsNodeL3(node) && node.link) {
 		return node.link.form ?? ClaimForm.base;
 	}
@@ -320,9 +321,16 @@ export function GetAllNodeRevisionTitles(nodeRevision: NodeRevision): string[] {
 	return TitleKey_values.map(key=>nodeRevision.phrasing[key]).filter(a=>a != null) as string[];
 }
 
+export function GetBracketedPrefixInfo(title: string) {
+	const match = title.match(/^([➸ ]*)\[([^\]]*)\]( *)/);
+	if (match == null) return null;
+	const [matchStr, specialCharsAtStart, prefixText] = match;
+	return {matchStr, specialCharsAtStart, prefixText};
+}
+
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, form?: ClaimForm): string=>{
+export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixRemoval = true): string=>{
 	form = form || GetNodeForm(node, path);
 	const phrasing = node.current.phrasing || {} as NodePhrasing_Embedded;
 
@@ -347,6 +355,17 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 			const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == NodeType.claim)[0];
 			if (baseClaim) return GetNodeDisplayText(baseClaim);
 		}*/
+
+		const childLayout = GetChildLayout_Final(node.current, map);
+		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:claim branch)
+		if (childLayout == ChildLayout.slStandard) {
+			const premises = GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
+			if (premises.length == 1) {
+				const premiseText = GetNodeDisplayText(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined, false);
+				const prefixText = GetBracketedPrefixInfo(premiseText)?.prefixText;
+				if (prefixText) return prefixText;
+			}
+		}
 
 		const nodeL3 = GetNodeL3(path);
 		//const parentNode = GetParentNode(path);
@@ -420,6 +439,21 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string, f
 
 			if (firstSource.link) text += ` at ${VURL.Parse(firstSource.link, false).toString({domain_protocol: false})}`; // maybe temp
 			return text;
+		}
+
+		const childLayout = GetChildLayout_Final(node.current, map);
+		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:argument branch)
+		if (childLayout == ChildLayout.slStandard && simpleTitle != null && path != null && allowPrefixRemoval) {
+			const prefixInfo = GetBracketedPrefixInfo(simpleTitle);
+			if (prefixInfo != null) {
+				const parentNode = GetParentNode(path);
+				if (parentNode?.type == NodeType.argument) {
+					const premises = GetNodeChildrenL3(parentNode.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
+					if (premises.length == 1) {
+						return simpleTitle.slice(prefixInfo.matchStr.length);
+					}
+				}
+			}
 		}
 	}
 

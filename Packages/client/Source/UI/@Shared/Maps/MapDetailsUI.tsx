@@ -69,38 +69,22 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 							value={ToNumber(newData.defaultExpandDepth, 0)} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
 					</RowLR>}
 
-					{// disabled for now, till layout-options for new approach are decided on
-					/*!creating &&
+					{!creating &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<TextPlus>Child layout:</TextPlus>
-						<TextPlus info="Whether nodes are allowed to be displayed with the flat (or otherwise non-standard) layout rather than the default layout.">Allow special:</TextPlus>
+						<TextPlus info={`Whether nodes are allowed to be displayed with layouts other than "Debate Map standard".`}>Allow special:</TextPlus>
 						<CheckBox ml={5} enabled={enabled} value={newData.extras.allowSpecialChildLayouts ?? false} onChange={val=>Change(newData.extras.allowSpecialChildLayouts = val)}/>
-						{/*<Text ml={5}>Set to preset:</Text>
-						<Select options={[{name: "", value: null}, "Society Library standard"]} value={null} onChange={val=>{}}/>*#/}
 						{newData.extras.allowSpecialChildLayouts &&
 						<>
 							<TextPlus ml={10} info={`
-								The child-layout used for nodes that do not have an override value set.
+								Presets tweaking the way nodes are displayed in this map. (for nodes that do not have an override value set)
 
 								${ChildLayout_optionsStr}
 							`.AsMultiline(0)}>Default:</TextPlus>
 							<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
 								value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-
-							{/*<Row>
-								<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Truth:</TextPlus>
-								<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-							</Row>
-							<Row>
-								<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Relevance:</TextPlus>
-								<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-							</Row>
-							<Row>
-								<TextPlus ml={10} info="The child-layout used for nodes that do not have an override value set.">Freeform:</TextPlus>
-								<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, "ui")]} value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
-							</Row>*#/}
 						</>}
-					</RowLR>*/}
+					</RowLR>}
 
 					{!creating &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>

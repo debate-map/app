@@ -38,7 +38,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 							<span key={index}>
 								{index > 0 ? ", " : ""}
 								<Link actionFunc={s=>mapView.bot_currentNodeID = parent.id}>
-									{GetNodeDisplayText(parent)} ({parent.id})
+									{GetNodeDisplayText(parent, null, map)} ({parent.id})
 								</Link>
 							</span>
 						);
@@ -50,7 +50,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 							<span key={index}>
 								{index > 0 ? ", " : ""}
 								<Link actionFunc={s=>mapView.bot_currentNodeID = child.id}>
-									{GetNodeDisplayText(child)} ({child.id})
+									{GetNodeDisplayText(child, null, map)} ({child.id})
 								</Link>
 							</span>
 						);

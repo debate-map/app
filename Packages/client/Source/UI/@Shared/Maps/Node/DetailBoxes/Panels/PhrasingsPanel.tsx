@@ -22,7 +22,7 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 
 		// add one fake "precise" phrasing, matching the node's current text (temp)
 		phrasings = phrasings.slice();
-		phrasings.push(new NodePhrasing({id: Phrasing_FakeID, node: node.id, type: NodePhrasingType.standard, text_base: GetNodeDisplayText(node)}));
+		phrasings.push(new NodePhrasing({id: Phrasing_FakeID, node: node.id, type: NodePhrasingType.standard, text_base: GetNodeDisplayText(node, null, map)}));
 
 		//const mapAccessPolicy = GetAccessPolicy.NN(map.accessPolicy);
 		const accessPolicy = GetAccessPolicy.NN(node.accessPolicy);

@@ -1,4 +1,4 @@
-import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment} from "dm_common";
+import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
@@ -12,12 +12,12 @@ import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 }); */
 
-export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: string, leftMarginForLines?: number|n)=>{
+export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: string, map: Map, leftMarginForLines?: number|n)=>{
 	const nodeTypeInfo = NodeType_Info.for[node.type];
 	const maxWidth_normal = nodeTypeInfo.maxWidth;
 	const maxWidth_final = maxWidth_normal - (leftMarginForLines != null ? leftMarginForLines : 0);
 
-	const displayText = GetNodeDisplayText(node, path);
+	const displayText = GetNodeDisplayText(node, path, map);
 	const fontSize = GetFontSizeForNode(node);
 	const expectedTextWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({fontSize, whiteSpace: "nowrap"})}'>`) as HTMLElement;
 	expectedTextWidth_tester.innerHTML = displayText;

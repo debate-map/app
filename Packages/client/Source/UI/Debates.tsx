@@ -11,7 +11,7 @@ import React from "react";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 import {MapUI} from "./@Shared/Maps/MapUI";
-import {GADDemo, GADDemo_AI, GetAIPrefixDataFromMapName} from "./@GAD/GAD";
+import {GADDemo, GADDemo_AI, GetAIPrefixInfoFromMapName} from "./@GAD/GAD";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {MapEntryUI} from "./Debates/MapEntryUI";
 import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
@@ -54,7 +54,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 					return true;
 				})
 				.OrderBy(a=>{
-					const [match, orderingNumber] = GetAIPrefixDataFromMapName(a.name);
+					const [matchStr, orderingNumber] = GetAIPrefixInfoFromMapName(a.name);
 					return orderingNumber != null ? Number(orderingNumber) : 0;
 				});
 		}

@@ -24,7 +24,7 @@ export class MI_Paste extends BaseComponent<MI_SharedProps, {}> {
 		if (commandData_initial == null || uiState_initial == null) return;
 
 		return (
-			<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`}
+			<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, null, map, formForClaimChildren).KeepAtMost(50)}"`}
 				style={liveSkin.Style_VMenuItem()} onClick={e=>{
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();

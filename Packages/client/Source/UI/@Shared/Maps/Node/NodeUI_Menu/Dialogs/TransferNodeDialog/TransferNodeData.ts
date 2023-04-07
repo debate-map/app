@@ -1,4 +1,4 @@
-import {NodeType, ChildGroup, ClaimForm, Polarity, NodeL3, GetParentNodeID, GetNodeChildrenL3, ChildGroupLayout, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
+import {NodeType, ChildGroup, ClaimForm, Polarity, NodeL3, GetParentNodeID, GetNodeChildrenL3, TransferNodesPayload, TransferType, Map, GetSystemAccessPolicyID, NodeTagCloneType} from "dm_common";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {TransferNodeNeedsWrapper} from "../TransferNodeDialog.js";
 

@@ -1,4 +1,4 @@
-import {CreateLinkCommand, GetNodeDisplayText, GetNodeL3, GetPathNodeIDs, Polarity} from "dm_common";
+import {CreateLinkCommand, GetMap, GetNodeDisplayText, GetNodeL3, GetPathNodeIDs, Polarity} from "dm_common";
 import {store} from "Store";
 import {RootUIWrapper} from "UI/Root";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
@@ -25,6 +25,7 @@ export async function OnDragEnd(self: RootUIWrapper, result: any) {
 		const polarity = targetDroppableInfo.subtype == "up" ? Polarity.supporting : Polarity.opposing;
 
 		const {mapID, nodePath: draggedNodePath} = draggableInfo;
+		const map = GetMap(mapID);
 		Assert(draggedNodePath);
 		const draggedNodeID = NN(GetPathNodeIDs(draggedNodePath!).Last());
 		const draggedNode = GetNodeL3.NN(draggedNodeID);
@@ -44,8 +45,8 @@ export async function OnDragEnd(self: RootUIWrapper, result: any) {
 			message: `
 				Are you sure you want to copy/move the dragged node?
 
-				Destination (new parent): ${GetNodeDisplayText(newParent)}
-				Dragged claim/argument: ${GetNodeDisplayText(draggedNode)}
+				Destination (new parent): ${GetNodeDisplayText(newParent, null, map)}
+				Dragged claim/argument: ${GetNodeDisplayText(draggedNode, null, map)}
 			`.AsMultiline(0),
 			extraButtons: ()=><>
 				<Button text="Copy" onClick={async()=>{

@@ -45,32 +45,26 @@ export class NodeRevisionDisplayDetails {
 }
 
 export enum ChildLayout {
-	grouped = "grouped",
 	dmStandard = "dmStandard",
 	slStandard = "slStandard",
-	flat = "flat",
 }
 export const ChildLayout_niceNames = {
-	grouped: "Grouped",
 	dmStandard: "Debate Map standard",
 	slStandard: "Society Library standard",
-	flat: "Flat",
 };
 AddSchema("ChildLayout", {enum: GetValues(ChildLayout)});
 export const ChildLayout_optionsStr = `
 Options:
 * Unchanged: Don't change the child-layout from the contextual default. (see below)
-* Grouped: truth:group_always, relevance:group_always freeform:group_always
-* Debate Map standard: truth:group_always, relevance:group_always, freeform:group_whenNonEmpty
-* Society Library standard: truth:group_always, relevance:group_whenNonEmpty, freeform:flat
-* Flat: truth:flat, relevance:group_whenNonEmpty, freeform:flat
+* Debate Map standard
+* Society Library standard (adds some extra functionality, eg. extracting bracketed prefix-text from titles)
 
 The final ordering-type is determined by the first provided value (ie. not set to "Unchanged") in this list:
 1) Node setting, in node's Details->Others panel (if map has "Allow special" for child-layouts enabled)
 2) Map setting, in map's Details dropdown (if map has "Allow special" for child-layouts enabled)
 3) Fallback value of "Debate Map standard"
 `.AsMultiline(0);
-export function GetChildLayout_Final(revision: NodeRevision, map?: Map): ChildLayout {
+export function GetChildLayout_Final(revision: NodeRevision, map?: Map|n): ChildLayout {
 	let result = ChildLayout.dmStandard;
 	if (map?.extras.allowSpecialChildLayouts) {
 		if (map.extras.defaultChildLayout) result = map.extras.defaultChildLayout;
@@ -82,7 +76,13 @@ export function GetChildLayout_Final(revision: NodeRevision, map?: Map): ChildLa
 	return layout == ChildLayout.grouped ? ChildLayout.flat : ChildLayout.grouped;
 }*/
 
-export enum ChildGroupLayout {
+export function IsChildGroupValidForNode(node: NodeL3|n, group: ChildGroup) {
+	if (node == null) return false;
+	const groupValidForNode = NodeType_Info.for[node.type].childGroup_childTypes.has(group);
+	return groupValidForNode;
+}
+
+/*export enum ChildGroupLayout {
 	group_always = "group_always",
 	group_whenNonEmpty = "group_whenNonEmpty",
 	flat = "flat",
@@ -114,11 +114,6 @@ const ChildGroupLayout_mapping = new globalThis.Map<ChildLayout, globalThis.Map<
 export function GetChildGroupLayout(group: ChildGroup, overallLayout: ChildLayout) {
 	return ChildGroupLayout_mapping.get(overallLayout)?.get(group);
 }
-export function IsChildGroupValidForNode(node: NodeL3|n, group: ChildGroup) {
-	if (node == null) return false;
-	const groupValidForNode = NodeType_Info.for[node.type].childGroup_childTypes.has(group);
-	return groupValidForNode;
-}
 export function ShouldChildGroupBoxBeVisible(node: NodeL3|n, group: ChildGroup, overallLayout: ChildLayout, nodeChildren: NodeL3[]|null) {
 	if (node == null) return false;
 	if (!IsChildGroupValidForNode(node, group)) return false;
@@ -127,7 +122,7 @@ export function ShouldChildGroupBoxBeVisible(node: NodeL3|n, group: ChildGroup, 
 	if (groupLayout == ChildGroupLayout.group_always) return true;
 	if (groupLayout == ChildGroupLayout.group_whenNonEmpty) return nodeChildren?.Any(a=>a.link?.group == group) ?? false;
 	return false;
-}
+}*/
 
 /*export const NodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
 export type NodeRevision_Defaultable = Pick<NodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/

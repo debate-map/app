@@ -116,7 +116,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 							ShowMessageBox({
 								title: "Reverse argument polarity?", cancelButton: true,
 								// message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?\n\nAll relevance ratings will be deleted.`,
-								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_info!.node)}"?`,
+								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_info!.node, null, map)}"?`,
 								onOK: ()=>{
 									//new ReverseArgumentPolarity({mapID, nodeID: nodeArgOrParentSPArg_info!.node.id, path: nodeArgOrParentSPArg_info!.path}).RunOnServer();
 									const link = nodeArgOrParentSPArg_linkUnderParent!;

@@ -1,6 +1,16 @@
 import {SLSkin} from "Utils/Styles/Skins/SLSkin";
 import {Timer} from "web-vcore/nm/js-vextensions.js";
 
+/*
+Notes:
+* "GAD mode" is an alternate display mode for the site, which is activated by adding "?extra=gad" to the URL.
+* It activates many changes to the Debate Map interface, to make it work better for the SL's (Society Library's) use-case of the site.
+* There is also a "Node child-layout" setting that can be set to "Society Library standard".
+* When should SL-related changes be activated by "GAD mode" vs that child-layout setting? Rule of thumb:
+1) Styling changes, and hiding of unnecessary elements, should be done via "GAD mode".
+2) Changes that affect the data-structure of nodes, or otherwise "change what people enter into the map" (eg. bracketed prefix-text), should be done via the child-layout setting.
+*/
+
 const GAD_extraFlags = ["gad", "cov", "2020", "ai"]; // if entry is changed/added, do the same for line in index.html
 export const GADDemo = startURL.domain == "demo.greatamericandebate.org" || GAD_extraFlags.includes(startURL.GetQueryVar("extra") ?? "");
 export const GADDemo_Main = startURL.GetQueryVar("extra") == "gad";
@@ -15,9 +25,9 @@ export function GetGADExternalSiteURL() {
 	return "https://societylibrary.com";
 }
 
-export function GetAIPrefixDataFromMapName(mapName: string) {
-	const [match, orderingNumber] = mapName.match(/\[ai(?:-([0-9.]+))?\] ?/i) ?? [];
-	return [match, orderingNumber];
+export function GetAIPrefixInfoFromMapName(mapName: string) {
+	const [matchStr, orderingNumber] = mapName.match(/\[ai(?:-([0-9.]+))?\]( *)/i) ?? [];
+	return [matchStr, orderingNumber];
 }
 
 if (GADDemo) {

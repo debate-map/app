@@ -517,7 +517,7 @@ class ImportResourceUI extends BaseComponent<
 											cancelButton: true,
 											title: "Create this category node?",
 											message: `
-												Parent:${prevResolvedNode ? GetNodeDisplayText(prevResolvedNode) : "n/a"} (id: ${prevResolvedNodeID})
+												Parent:${prevResolvedNode ? GetNodeDisplayText(prevResolvedNode, null, map) : "n/a"} (id: ${prevResolvedNodeID})
 												NewNode:${segment}
 											`.AsMultiline(0),
 											onOK: async()=>{

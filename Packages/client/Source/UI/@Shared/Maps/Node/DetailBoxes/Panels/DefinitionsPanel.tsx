@@ -16,7 +16,7 @@ export class DefinitionsPanel extends BaseComponentPlus(
 	render() {
 		const {map, show, node, path, hoverTermIDs, openTermIDs, onHoverTerm, onClickTerm} = this.props;
 
-		const displayText = GetNodeDisplayText(node, path);
+		const displayText = GetNodeDisplayText(node, path, map);
 
 		// let segments = ParseSegmentsFromNodeDisplayText(displayText);
 		/*const segments = ParseSegmentsForPatterns(displayText, [

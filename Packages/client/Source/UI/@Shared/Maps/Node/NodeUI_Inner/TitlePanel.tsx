@@ -65,14 +65,17 @@ export class TitlePanel extends BaseComponentPlus(
 	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{
-		const {node, path} = this.props;
+		const {node, path, map} = this.props;
+		// ignore double-clicks on arguments (their text is determined automatically, so setting a custom value for the text field is just confusing)
+		if (node.type == NodeType.argument) return;
+
 		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
 		const titleAttachment = GetTitleIntegratedAttachment(node.current);
 		const {displayText} = await GetAsync(()=>{
 			return {
-				displayText: GetNodeDisplayText(node, path),
+				displayText: GetNodeDisplayText(node, path, map),
 			};
 		});
 		if (IsUserCreatorOrMod(MeID(), node) && titleAttachment?.equation == null) {
@@ -112,7 +115,7 @@ export class TitlePanel extends BaseComponentPlus(
 		const latex = titleAttachment?.equation?.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
-		let displayText = GetNodeDisplayText(node, path);
+		let displayText = GetNodeDisplayText(node, path, map);
 		// in SL+NoHeader mode, hide the bracket-text at the start of the node's text, as that's just a helper flag for the special frontend (temp)
 		if (GADDemo && !ShowHeader) {
 			// three parts: word/emoji + space [at start; optional], bracketed-text, space(s) after bracket-text [optional]
@@ -151,7 +154,12 @@ export class TitlePanel extends BaseComponentPlus(
 				{!editing &&
 					<span style={ES(
 						{flex: 1, position: "relative", whiteSpace: "initial"},
-						node.type == NodeType.argument && {whiteSpace: "pre"}, // for arguments, never wrap text
+						node.type == NodeType.argument && {
+							whiteSpace: "pre", // for arguments, never wrap text
+							alignSelf: "center",
+							marginTop: -1, // "center" is actually below the center, so bump it up a bit
+							fontSize: 12,
+						},
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>

@@ -35,16 +35,15 @@ export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<Spinner ml={5} step={10} max={1000} enabled={enabled} value={ToNumber(newRevisionData.displayDetails?.widthOverride, 0)} onChange={val=>SetDisplayDetail("widthOverride", val != 0 ? val : null)}/>
 					<Pre> px (0 for auto)</Pre>
 				</Row>
-				{// disabled for now, till layout-options for new approach are decided on
-				/*<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<TextPlus info={`
-						How to display children groups (re. truth, relevance, etc.). Note that this setting only applies in maps that allow special child-layouts.
+						Presets tweaking the way nodes are displayed. Note that this setting only applies in maps that allow special child-layouts.
 						
 						${ChildLayout_optionsStr}
 					`.AsMultiline(0)}>Child layout:</TextPlus>
 					<Select ml={5} enabled={enabled} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
 						value={newRevisionData.displayDetails?.childLayout} onChange={val=>SetDisplayDetail("childLayout", val)}/>
-				</Row>*/}
+				</Row>
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<TextPlus info={ChildOrdering_infoText}>Child ordering:</TextPlus>
 					<Select ml={5} enabled={enabled} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildOrdering, "ui")]}

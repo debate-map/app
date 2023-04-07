@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, ChildGroupLayout, GetChildGroupLayout, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShouldChildGroupBoxBeVisible, ShowNodeToolbars, TagComp_CloneHistory} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars, TagComp_CloneHistory} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -327,7 +327,7 @@ export class NodeUI extends BaseComponentPlus(
 		const {map, node, path, inBelowGroup} = props_used;
 		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
 		const leftMarginForLines = inBelowGroup ? 20 : 0;
-		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, leftMarginForLines);
+		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, map, leftMarginForLines);
 		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
 
 		/*const isMultiPremiseArgument = IsMultiPremiseArgument(node);

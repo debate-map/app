@@ -2,7 +2,7 @@ import {VURL, E} from "web-vcore/nm/js-vextensions.js";
 import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo, GADDemo_AI, GetAIPrefixDataFromMapName} from "UI/@GAD/GAD.js";
+import {GADDemo, GADDemo_AI, GetAIPrefixInfoFromMapName} from "UI/@GAD/GAD.js";
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -19,9 +19,9 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 
 		let mapNameToDisplay = map.name;
 		if (GADDemo_AI) {
-			const [match, orderingNumber] = GetAIPrefixDataFromMapName(map.name);
-			if (match) {
-				mapNameToDisplay = mapNameToDisplay.slice(match.length);
+			const [matchStr, orderingNumber] = GetAIPrefixInfoFromMapName(map.name);
+			if (matchStr) {
+				mapNameToDisplay = mapNameToDisplay.slice(matchStr.length);
 			}
 		}
 

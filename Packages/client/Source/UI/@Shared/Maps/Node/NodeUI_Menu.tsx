@@ -157,7 +157,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							ACTCopyNode(pathToCopy, false);
 						}}/>}
 				{copiedNode &&
-					<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
+					<VMenuItem text={`Paste: "${GetNodeDisplayText(copiedNode, null, map, formForClaimChildren).KeepAtMost(50)}"`} childLayout={childLayout_forStructuredHeaders} enabled={false} style={headerStyle}>
 						{multipleAddChildGroups && addChildItems_structured_generic && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.generic}/>}
 						{multipleAddChildGroups && addChildItems_structured_truth && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.truth}/>}
 						{multipleAddChildGroups && addChildItems_structured_relevance && <MI_Paste_Old {...sharedProps} node={node} path={path} childGroup={ChildGroup.relevance}/>}

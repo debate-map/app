@@ -14,7 +14,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		const {map, mapID, node, path, childGroup} = this.props;
 		const componentBox = childGroup != ChildGroup.generic;
 		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
-		const nodeText = GetNodeDisplayText(node, path);
+		const nodeText = GetNodeDisplayText(node, path, map);
 
 		//const command = new DeleteNode(E({mapID, nodeID: node.id}));
 		const error = CheckUserCanDeleteNode(MeID(), node);

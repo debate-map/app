@@ -108,8 +108,11 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
 		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));*/
 
+		const showBottomBorder =
+			node.type == NodeType.argument ? (node.current.phrasing.note || node.current.attachments.length > 0) :
+			true;
 		return (
-			<Row mt={1} className={key("NodeToolbar")} style={css(
+			<Row className={key("NodeToolbar")} style={css(
 				{
 					height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
 					//color: liveSkin.NodeTextColor().css(),
@@ -121,6 +124,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				node.type != NodeType.argument && {
 					position: "absolute", bottom: "100%", right: -17, // extend 17px past right edge, to account for +/- button below
 				},
+				showBottomBorder && {borderBottom: "1px solid black"},
 			)}>
 				{/*<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>*/}
 				{getToolbarItemUIs()}
@@ -193,6 +197,8 @@ class ToolBarButton extends BaseComponent<{
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
 		const showLeftBorder = !first || node.type == NodeType.argument;
+		//const showBottomBorder = node.type != NodeType.argument || node.current.phrasing.note || node.current.attachments.length > 0;
+		const showBottomBorder = false;
 
 		const {key, css} = cssHelper(this);
 		return (
@@ -213,10 +219,10 @@ class ToolBarButton extends BaseComponent<{
 						position: "relative", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12,
 						//border: "solid rgba(0,0,0,.5)",
 						border: "solid rgba(0,0,0,1)",
+						borderWidth: `0 0 ${showBottomBorder ? "1px" : "0"} ${showLeftBorder ? "1px" : "0"}`,
 					},
 					highlightOrHovered && {background: "rgba(255,255,255,.2)"},
-					!showLeftBorder && {borderWidth: "0 0 1px 0" /*borderRadius: "5px 0 0 0"*/},
-					showLeftBorder && {borderWidth: "0 0 1px 1px"},
+					//!showLeftBorder && {borderRadius: "5px 0 0 0"},
 					//node.type == NodeType.argument && {marginRight: -5},
 					//last && {borderRadius: "0 5px 0 0"},
 					icon == null && {

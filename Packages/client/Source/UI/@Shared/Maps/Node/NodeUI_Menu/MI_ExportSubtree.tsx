@@ -15,7 +15,7 @@ import {MI_SharedProps} from "../NodeUI_Menu.js";
 @Observer
 export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
-		const {node, path} = this.props;
+		const {node, path, map} = this.props;
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasModPermissions(MeID())) return null; // for now, require mod permissions (since no quotas and such are in place)
 		return (
@@ -23,7 +23,7 @@ export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 				if (e.button != 0) return;
 				let ui: ExportSubtreeUI|n;
 				const controller = ShowMessageBox({
-					title: `Export subtree under "${GetNodeDisplayText(node, path)}"`,
+					title: `Export subtree under "${GetNodeDisplayText(node, path, map)}"`,
 					okButton: false, buttonBarStyle: {display: "none"},
 					message: ()=><ExportSubtreeUI ref={c=>ui = c} {...sharedProps} controller={controller}/>,
 				});
