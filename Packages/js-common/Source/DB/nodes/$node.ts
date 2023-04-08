@@ -330,24 +330,29 @@ export function GetBracketedPrefixInfo(title: string) {
 }
 
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
-/** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixRemoval = true): string=>{
+/** Subfunction of GetNodeDisplayText, that only uses a node's raw title-texts to give its rawTitle result. (useful, eg. for double-click editing of a node's text) */
+export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
 	form = form || GetNodeForm(node, path);
 	const phrasing = node.current.phrasing || {} as NodePhrasing_Embedded;
 
-	const [simpleTitle, simpleTitleFallback] = ((): [string | undefined, string]=>{
+	const [rawTitle, desiredField, usedField, missingMessage] = ((): [string | undefined, string, string, string]=>{
 		if (form) {
-			if (form == ClaimForm.negation) return [phrasing.text_negation, missingTitleStrings[1]];
+			if (form == ClaimForm.negation) return [phrasing.text_negation, "text_negation", "text_negation", missingTitleStrings[1]];
 			if (form == ClaimForm.question) {
 				//return phrasing.text_question || missingTitleStrings[2];
 				// for now at least, allow fallback to the base title
-				return [phrasing.text_question || phrasing.text_base, missingTitleStrings[2]];
+				if (phrasing.text_question != null && phrasing.text_question.trim().length) return [phrasing.text_question, "text_question", "text_question", missingTitleStrings[2]];
+				return [phrasing.text_base, "text_question", "text_base", missingTitleStrings[2]];
 			}
 		}
-		return [phrasing.text_base, missingTitleStrings[0]];
+		return [phrasing.text_base, "text_base", "text_base", missingTitleStrings[0]];
 	})();
+	return {rawTitle: (rawTitle?.trim().length ?? 0) > 0 ? rawTitle : undefined, desiredField, usedField, missingMessage};
+});
 
-	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
+/** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
+export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixRemoval = true): string=>{
+	const {rawTitle, missingMessage} = GetNodeRawTitleAndSuch(node, path, form);
 
 	if (node.type == NodeType.argument) {
 		/*if (!node.multiPremiseArgument && !phrasing.text_base) {
@@ -403,7 +408,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 
 		// for now, only use the "statements below were made" title if there is no simple-title set (needed for SL use-case)
 		// (in the future, I will probably make-so this can only be done in private maps or something, as it's contrary to the "keep components separate/debatable" concept)
-		if ((mainAttachment?.quote || mainAttachment?.media) && (simpleTitle?.trim() ?? "").length == 0) {
+		if ((mainAttachment?.quote || mainAttachment?.media) && (rawTitle?.trim() ?? "").length == 0) {
 			let text: string;
 			let firstSource: Source;
 			if (mainAttachment.quote) {
@@ -444,21 +449,21 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:argument branch)
-		if (childLayout == ChildLayout.slStandard && simpleTitle != null && path != null && allowPrefixRemoval) {
-			const prefixInfo = GetBracketedPrefixInfo(simpleTitle);
+		if (childLayout == ChildLayout.slStandard && rawTitle != null && path != null && allowPrefixRemoval) {
+			const prefixInfo = GetBracketedPrefixInfo(rawTitle);
 			if (prefixInfo != null) {
 				const parentNode = GetParentNode(path);
 				if (parentNode?.type == NodeType.argument) {
 					const premises = GetNodeChildrenL3(parentNode.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
 					if (premises.length == 1) {
-						return simpleTitle.slice(prefixInfo.matchStr.length);
+						return rawTitle.slice(prefixInfo.matchStr.length);
 					}
 				}
 			}
 		}
 	}
 
-	return simpleTitle || simpleTitleFallback;
+	return rawTitle || missingMessage;
 });
 
 export function GetValidChildTypes(nodeType: NodeType, path: string, group: ChildGroup) {

@@ -6,7 +6,7 @@ import {Button, Pre, Row, Text, TextArea} from "web-vcore/nm/react-vcomponents.j
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -73,13 +73,14 @@ export class TitlePanel extends BaseComponentPlus(
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
 		const titleAttachment = GetTitleIntegratedAttachment(node.current);
-		const {displayText} = await GetAsync(()=>{
+		const {rawTitle} = await GetAsync(()=>{
 			return {
-				displayText: GetNodeDisplayText(node, path, map),
+				//displayText: GetNodeDisplayText(node, path, map),
+				rawTitle: GetNodeRawTitleAndSuch(node, path).rawTitle,
 			};
 		});
 		if (IsUserCreatorOrMod(MeID(), node) && titleAttachment?.equation == null) {
-			this.SetState({editing: true, edit_newTitle: displayText});
+			this.SetState({editing: true, edit_newTitle: rawTitle});
 		}
 	};
 

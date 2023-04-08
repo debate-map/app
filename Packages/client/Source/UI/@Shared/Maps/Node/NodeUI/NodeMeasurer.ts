@@ -3,6 +3,7 @@ import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
+import {GetToolbarItemsToShow} from "../NodeUI_Inner/NodeToolbar";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;
@@ -48,7 +49,7 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 		expectedOtherStuffWidth += 14;
 	}
 	if (node.type == NodeType.argument && ShowNodeToolbars(map)) {
-		expectedOtherStuffWidth += TOOLBAR_BUTTON_WIDTH; // add space for the "Relevance" toolbar-item
+		expectedOtherStuffWidth += (GetToolbarItemsToShow(node, map).length * TOOLBAR_BUTTON_WIDTH); // add space for the "Relevance" toolbar-item (if visible)
 	}
 
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;

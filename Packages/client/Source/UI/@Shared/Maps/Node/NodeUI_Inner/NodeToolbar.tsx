@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, NodeL3, NodeType, NodeRatingType, Polarity} from "dm_common";
+import {ChildGroup, ClaimForm, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, NodeL3, NodeType, NodeRatingType, Polarity, Map, ShowNodeToolbars} from "dm_common";
 import React, {useMemo, useState} from "react";
 import {Vector2} from "react-vmenu/Dist/Utils/FromJSVE";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -28,6 +28,21 @@ export type NodeToolbar_Props = {
 } & NodeUI_Inner_Props;
 export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
+export function GetToolbarItemsToTryToShow(map?: Map|n) {
+	return (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
+}
+export function GetToolbarItemsToShow(node: NodeL3, map?: Map|n) {
+	if (!ShowNodeToolbars(map)) return [];
+	const itemsToTryToShow = GetToolbarItemsToTryToShow(map);
+	return itemsToTryToShow.filter((item, index)=>{
+		if (item.panel == "truth" && node.type == NodeType.claim) return true;
+		if (item.panel == "relevance" && node.type == NodeType.argument) return true;
+		if (item.panel == "tags" && node.type != NodeType.argument) return true;
+		if (item.panel == "phrasings" && node.type != NodeType.argument) return true;
+		return false;
+	});
+}
+
 @Observer
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
@@ -40,19 +55,19 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const sharedProps = E(this.props, {buttonCount: 1}); // button-count is updated shortly
 		const {key, css} = cssHelper(this);
 
-		const toolbarItems = (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
+		const toolbarItemsToShow = GetToolbarItemsToShow(node, map);
 		const tags = GetNodeTags(node.id);
 		const labels = tags.filter(a=>a.labels != null).SelectMany(a=>a.labels!.labels).Distinct();
 		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
 		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;
 		const getToolbarItemUIs = ()=>{
 			let indexAmongEnabled = 0;
-			return toolbarItems.map((item, index)=>{
-				if (item.panel == "truth" && node.type == NodeType.claim) {
+			return toolbarItemsToShow.map((item, index)=>{
+				if (item.panel == "truth") {
 					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Agreement" panel="truth"
 						enabled={node.type == NodeType.claim} disabledInfo="This is an argument; after expanding it, you can give your truth/agreement ratings for its individual premises."/>;
 				}
-				if (item.panel == "relevance" && node.type == NodeType.argument) {
+				if (item.panel == "relevance") {
 					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Relevance" panel="relevance" enabled={node.type == NodeType.argument}/>;
 				}
 				if (item.panel == "tags") {
@@ -96,10 +111,9 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 
 					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text={labelsAndOtherTags > 0 ? `Tags: ${labelsAndOtherTags}` : "Tags"} panel="tags"/>;
 				}
-				if (item.panel == "phrasings" && node.type != NodeType.argument) {
+				if (item.panel == "phrasings") {
 					return <ToolBarButton key={index} {...sharedProps} first={indexAmongEnabled++ == 0} text="Phrasings" panel="phrasings"/>;
 				}
-				return null;
 			});
 		};
 		// for this call, we are just getting the number of toolbar-buttons (fine to discard result)
