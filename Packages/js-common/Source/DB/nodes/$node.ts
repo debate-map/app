@@ -49,6 +49,7 @@ export const GetExpandedByDefaultAttachment = CreateAccessor((rev: NodeRevision)
 export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
 	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
 	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
+	if (node.type == NodeType.argument) return 12;
 	//if (isSubnode) return 11;
 
 	return 14;

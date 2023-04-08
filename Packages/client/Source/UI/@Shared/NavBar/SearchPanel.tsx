@@ -372,10 +372,6 @@ export function JumpToNode(mapID: string, path: string) {
 			// for now, just make all children in the set visible (we don't yet have an easy to locate the node in the target path)
 			currentParentView.childLimit_down = 500;
 			currentParentView.childLimit_up = 500;
-			// for now, just expand all child-groups (we don't yet have an easy way to know which child-group the target-descendant's path is in)
-			currentParentView.expanded_truth = true;
-			currentParentView.expanded_relevance = true;
-			currentParentView.expanded_freeform = true;
 
 			//const childView = new NodeView(descendantPath);
 			const childView = {children: {}} as NodeView;

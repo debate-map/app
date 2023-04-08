@@ -83,8 +83,8 @@ export class AddChildHelper {
 	subNode_revision?: NodeRevision;
 	subNode_link: NodeLink;
 
-	async Apply(opt?: {expandSelf?: boolean, expandTruthAndRelevance?: boolean}) {
-		opt = E({expandSelf: true, expandTruthAndRelevance: true}, opt);
+	async Apply(opt?: {expandSelf?: boolean}) {
+		opt = E({expandSelf: true}, opt);
 		/* if (validationError) {
 			return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 		} */
@@ -108,8 +108,7 @@ export class AddChildHelper {
 
 			if (opt.expandSelf) {
 				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}`, expanded: true, resetSubtree: false});
-				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}/${runResult.claimNodeID}`, expanded: true,
-					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
+				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}/${runResult.claimNodeID}`, expanded: true, resetSubtree: false});
 			}
 		} else {
 			//if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
@@ -119,8 +118,7 @@ export class AddChildHelper {
 			RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, runResult.doneAt));
 
 			if (opt.expandSelf) {
-				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,
-					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
+				ACTNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true, resetSubtree: false});
 			}
 		}
 

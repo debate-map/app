@@ -20,7 +20,7 @@ import {ExpandableBox} from "../ExpandableBox.js";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
 import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
-import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "../NodeUI.js";
+import {GUTTER_WIDTH_SMALL, GUTTER_WIDTH} from "../NodeLayoutConstants.js";
 
 type Props = {
 	map: Map, parentNode: NodeL3, parentPath: string, groupTreePath: string, inBelowGroup: boolean, nodeChildren: NodeL3[], nodeChildrenToShow: NodeL3[],
@@ -71,10 +71,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		const lineColor = GetNodeColor({type: NodeType.claim} as any as NodeL3, "raw");
 
 		//const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
-		// let expandKey = type == ChildGroup.truth ? "expanded_truth" : "expanded_relevance";
 		const childGroupStr = ChildGroup[group].toLowerCase();
-		const expandKey = `expanded_${childGroupStr}`;
-		const expanded = nodeView[expandKey]; // this.Expanded
+		const expanded = nodeView.expanded ?? false;
 
 		//const separateChildren = (node.type == NodeType.claim || node.type == NodeType.argument) && group != ChildGroup.freeform;
 		const separateChildren = group == ChildGroup.truth || group == ChildGroup.relevance;
@@ -157,24 +155,24 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 						GADDemo && {backgroundFillPercent: 100, backgroundColor: Chroma(HSLA(0, 0, 1)) as chroma.Color},
 					)}
 					toggleExpanded={UseCallback(e=>{
-						const newExpanded = !nodeView[expandKey];
+						const newExpanded = !nodeView.expanded;
 						const recursivelyCollapsing = !newExpanded && e.altKey;
 						RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
 							if (group == ChildGroup.truth) {
 								ACTNodeExpandedSet({
 									mapID: map.id, path: parentPath, resetSubtree: recursivelyCollapsing,
-									[expandKey]: newExpanded,
+									expanded: newExpanded,
 								});
 							} else {
 								ACTNodeExpandedSet({
 									mapID: map.id, path: parentPath, resetSubtree: false,
-									[expandKey]: newExpanded,
+									expanded: newExpanded,
 								});
 								if (recursivelyCollapsing) {
 									for (const child of nodeChildrenToShow) {
 										ACTNodeExpandedSet({
 											mapID: map.id, path: `${parentPath}/${child.id}`, resetSubtree: true,
-											[expandKey]: newExpanded,
+											expanded: newExpanded,
 										});
 									}
 								}
@@ -182,10 +180,10 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 						});
 						e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
 						// return false;
-						if (nodeView[expandKey]) {
+						if (nodeView.expanded) {
 							this.CheckForChanges();
 						}
-					}, [expandKey, map.id, nodeChildrenToShow, nodeView, parentPath, group])}
+					}, [map.id, nodeChildrenToShow, nodeView, parentPath, group])}
 					afterChildren={<>
 						{ratingPanelShow &&
 							<div ref={c=>this.ratingPanelHolder = c} style={{
@@ -201,20 +199,19 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
 					<NodeChildCountMarker {...{map, path: parentPath}} childCount={nodeChildrenToShow.length}/>}
 			</Row>
-			{nodeView[expandKey] &&
+			{nodeView.expanded &&
 			<NodeChildHolder ref={c=>this.childHolder = c}
 				{...{map, parentNode, parentPath, parentTreePath: groupTreePath, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
-				usesGenericExpandedField={false}
+				showEvenIfParentNotExpanded={false}
 				onSizesChange={this.CheckForChanges}/>}
 			</>
 		);
 	}
 
 	get Expanded() {
-		const {map, parentPath: path, group} = this.props;
-		const expandKey = `expanded_${ChildGroup[group].toLowerCase()}`;
+		const {map, parentPath: path} = this.props;
 		const nodeView = GetNodeView(map.id, path);
-		return nodeView[expandKey];
+		return nodeView.expanded;
 	}
 
 	expandableBox: ExpandableBox|n;

@@ -202,7 +202,7 @@ export const GetNodeViewsBelowPath = CreateAccessor((mapID: string|n, pathOrPath
 
 export function ACTNodeExpandedSet(opt: {
 	mapID: string|n, path: string,
-	expanded?: boolean, expanded_truth?: boolean, expanded_relevance?: boolean, expanded_freeform?: boolean,
+	expanded?: boolean,
 	expandAncestors?: boolean, resetSubtree?: boolean,
 }) {
 	//CreateMapViewIfMissing(opt.mapID);
@@ -215,8 +215,7 @@ export function ACTNodeExpandedSet(opt: {
 			nodeViews.slice(0, -1).forEach(a=>a && (a.expanded = true));
 		}
 		const nodeView = nodeViews.Last();
-		const expandKeysPresent = (["expanded", "expanded_truth", "expanded_relevance", "expanded_freeform"] as const).filter(key=>opt[key] != null);
-		if (nodeView) nodeView.Extend(opt.IncludeKeys(...expandKeysPresent));
+		if (nodeView && opt.expanded != null) nodeView.expanded = opt.expanded;
 	});
 
 	// then, if "resetting" subtree, traverse descendent node-views and reset their expansion-fields to their defaults
@@ -226,7 +225,7 @@ export function ACTNodeExpandedSet(opt: {
 			let defaultExpansionStatesStillLoading = 0;
 			const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
 			for (const [descendantPath, descendantNodeView] of descendantNodeViews.entries()) {
-				//descendantNodeView.Extend({expanded: false, expanded_truth: true, expanded_relevance: true, expanded_freeform: true});
+				//descendantNodeView.Extend({expanded: false});
 
 				// catch bail for retriving node's expansion state, so it doesn't stop our other expansion-state retrievals from starting (ie. parallel rather than sequential)
 				const defaultExpansionState = GetDefaultExpansionFieldsForNodeView.CatchBail(undefined, descendantPath);

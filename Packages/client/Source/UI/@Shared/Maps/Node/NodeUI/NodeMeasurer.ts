@@ -1,7 +1,8 @@
-import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map} from "dm_common";
+import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbars, NodeType} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
+import {TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;
@@ -43,6 +44,10 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
 		expectedOtherStuffWidth += 14;
 	}
+	if (node.type == NodeType.argument && ShowNodeToolbars(map)) {
+		expectedOtherStuffWidth += TOOLBAR_BUTTON_WIDTH; // add space for the "Relevance" toolbar-item
+	}
+
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
 		//expectedBoxWidth = maxWidth_final;

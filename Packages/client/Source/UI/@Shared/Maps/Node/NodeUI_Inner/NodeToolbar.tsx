@@ -15,6 +15,7 @@ import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {VMenuUI, ShowVMenu} from "web-vcore/nm/react-vmenu";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
+import {TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
 import {NodeUI_Menu} from "../NodeUI_Menu.js";
 
@@ -228,7 +229,7 @@ class ToolBarButton extends BaseComponent<{
 					icon == null && {
 						// normally we try to keep all toolbar-buttons the same width, but with limited space, use flexible width based on text-length
 						flex: [50, 50, text.length, text.length][sizeIndex],
-						minWidth: 110, // probably temp
+						minWidth: TOOLBAR_BUTTON_WIDTH, // probably temp
 					},
 					icon && {
 						//width: icon == "transfer-left" ? 40 : 25,

@@ -158,7 +158,6 @@ export class TitlePanel extends BaseComponentPlus(
 							whiteSpace: "pre", // for arguments, never wrap text
 							alignSelf: "center",
 							marginTop: -1, // "center" is actually below the center, so bump it up a bit
-							fontSize: 12,
 						},
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},

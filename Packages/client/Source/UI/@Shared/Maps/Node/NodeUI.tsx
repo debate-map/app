@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars, TagComp_CloneHistory} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars, TagComp_CloneHistory} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -11,9 +11,11 @@ import {logTypes} from "Utils/General/Logging.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
+import {BailError} from "web-vcore/.yalc/mobx-graphlink";
 import {Assert, AssertWarn, E, EA, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
@@ -30,12 +32,6 @@ class ObservedValues {
 	childrensHeight = 0;
 	height = 0;
 }
-
-//export const GUTTER_WIDTH = 30;
-export const GUTTER_WIDTH = 40;
-//export const GUTTER_WIDTH_SMALL = 20;
-export const GUTTER_WIDTH_SMALL = 12;
-//export const GUTTER_WIDTH_SMALL = 0;
 
 // Warn if functions passed to NodeUI are transient (ie. change each render).
 // We don't need to do this for every component, but we need at least one component-type in the tree to do so, in order to "stop propagation" of transient props.
@@ -73,7 +69,10 @@ export class NodeUI extends BaseComponentPlus(
 	rightColumn: Column|n;
 	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
 	nodeChildHolder_generic: NodeChildHolder|n;
-	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
+	componentDidCatch(message, info) {
+		if (message instanceof BailError) return;
+		EB_StoreError(this as any, message, info);
+	}
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_innerUI, treePath, inBelowGroup, children} = this.props;
@@ -136,15 +135,15 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.renderCount++;
 		//NodeUI.lastRenderTime = Date.now();
 
+		const displayText = GetNodeDisplayText(node, path, map); // don't remove this; it's needed, since it's a dependency of GetMeasurementInfo, but within a "CatchBail" suppressor
+		const {width} = this.GetMeasurementInfo(false);
+
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: GetNodeColor(node, "raw", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			parentIsAbove: inBelowGroup,
-		}, {nodeType: node.type});
-
-		const proxyNodeUI_ref = UseCallback(c=>this.proxyDisplayedNodeUI = c, []);
-		let innerUIOverride_baseClaimMissing: JSX.Element|n;
+		}, {nodeType: node.type, width, expanded: boxExpanded});
 
 		// Assert(!relevanceArguments.Any(a=>a.type == NodeType.claim), "Single-premise argument has more than one premise!");
 		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
@@ -153,12 +152,6 @@ export class NodeUI extends BaseComponentPlus(
 			relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child.id}`)));
 		}*/
 
-		const {width} = this.GetMeasurementInfo();
-
-		// commented; this is only needed when we're inserting new tree-nodes (eg. node-child-holder-boxes)
-		/*let nextChildFullIndex = 0;
-		const GetTreePathForNextTreeChild = ()=>`${treePath}/${nextChildFullIndex++}`;*/
-
 		let treeChildrenAddedSoFar = 0;
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
@@ -166,7 +159,7 @@ export class NodeUI extends BaseComponentPlus(
 			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				group={ChildGroup.truth}
-				usesGenericExpandedField={false}
+				showEvenIfParentNotExpanded={false}
 				belowNodeUI={false}
 				minWidth={0}
 				nodeChildrenToShow={ncToShow_truth}
@@ -176,7 +169,7 @@ export class NodeUI extends BaseComponentPlus(
 			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				group={ChildGroup.relevance}
-				usesGenericExpandedField={false}
+				showEvenIfParentNotExpanded={false}
 				belowNodeUI={false}
 				minWidth={0}
 				nodeChildrenToShow={ncToShow_relevance}
@@ -186,7 +179,7 @@ export class NodeUI extends BaseComponentPlus(
 			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				group={ChildGroup.freeform}
-				usesGenericExpandedField={false}
+				showEvenIfParentNotExpanded={false}
 				belowNodeUI={false}
 				minWidth={0}
 				nodeChildrenToShow={ncToShow_freeform}
@@ -201,7 +194,7 @@ export class NodeUI extends BaseComponentPlus(
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				ref={nodeChildHolder_generic_ref}
 				group={ChildGroup.generic}
-				usesGenericExpandedField={true}
+				showEvenIfParentNotExpanded={node.type == NodeType.argument}
 				belowNodeUI={showGenericBelow}
 				minWidth={showGenericBelow && standardWidthInGroup ? standardWidthInGroup - GUTTER_WIDTH_SMALL : 0}
 				nodeChildrenToShow={ncToShow_generic}
@@ -270,10 +263,10 @@ export class NodeUI extends BaseComponentPlus(
 			</>
 		);
 	}
-	proxyDisplayedNodeUI: NodeUI|n;
+	/*proxyDisplayedNodeUI: NodeUI|n;
 	get NodeUIForDisplayedNode() {
 		return this.proxyDisplayedNodeUI || this;
-	}
+	}*/
 
 	// this is needed to handle certain cases (eg. where this node-view's expansion state is set to collapsed) not caught by downstream-events + ref-callback (well, when wrapped in UseCallback(...))
 	PostRender() {
@@ -316,9 +309,7 @@ export class NodeUI extends BaseComponentPlus(
 
 	measurementInfo_cache: MeasurementInfo;
 	measurementInfo_cache_lastUsedProps;
-	GetMeasurementInfo(): MeasurementInfo {
-		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
-
+	GetMeasurementInfo(catchBailInMeasurement = true): MeasurementInfo {
 		const {props} = this;
 		const props_used = this.props.IncludeKeys("map", "node", "path", "inBelowGroup") as typeof props;
 		// Log("Checking whether should remeasure info for: " + props_used.node._id);
@@ -326,20 +317,13 @@ export class NodeUI extends BaseComponentPlus(
 
 		const {map, node, path, inBelowGroup} = props_used;
 		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
-		const leftMarginForLines = inBelowGroup ? 20 : 0;
-		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, map, leftMarginForLines);
-		if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
-
-		/*const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		if (isMultiPremiseArgument) {
-			// expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
-			width = width.KeepAtLeast(350);
-			// expectedBoxWidth += 20;
-			//width += 20; // give extra space for left-margin
-		}*/
-
-		if (node.type == NodeType.argument && ShowNodeToolbars(map)) {
-			width += 110; // add space for the "Relevance" toolbar-item
+		const leftMarginForLines = inBelowGroup ? GUTTER_WIDTH_SMALL : 0;
+		// catching bail in measurement is useful when NodeChildHolder.UpdateChildrenWidthOverride is calling GetMeasurementInfo on the children, but the data needed to calc that isn't finished loading yet
+		if (catchBailInMeasurement) {
+			var {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, map, leftMarginForLines);
+			if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
+		} else {
+			var {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path, map, leftMarginForLines);
 		}
 
 		this.measurementInfo_cache = {expectedBoxWidth, width/* , expectedHeight */};

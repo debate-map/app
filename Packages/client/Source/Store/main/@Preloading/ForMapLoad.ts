@@ -8,7 +8,6 @@ export const GetNodeIDsVisibleInNodeViewExpansionState = CreateAccessor((nodeVie
 	result.add(nodeID);
 	const descendantsToAdd =
 		nodeView.expanded
-		//(nodeView.expanded_truth || nodeView.expanded_relevance || nodeView.expanded_freeform)
 			? Object.entries(nodeView.children ?? {}).SelectMany(([childID, childView])=>GetNodeIDsVisibleInNodeViewExpansionState(childView, childID, includeOneLevelInCollapsed)) :
 			includeOneLevelInCollapsed ? Object.keys(nodeView.children ?? {}) :
 			[];

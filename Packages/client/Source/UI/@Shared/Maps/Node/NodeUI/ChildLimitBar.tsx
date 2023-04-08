@@ -9,7 +9,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, Icon, Observer, RunInAction} from "web-vcore";
 import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeUI";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 
 @Observer
 export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, direction: "up" | "down", childCount: number, childLimit: number}, {}> {

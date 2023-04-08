@@ -4,7 +4,7 @@ import {useCallback} from "react";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
-import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL, NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
+import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
@@ -13,10 +13,11 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 import {ChildLimitBar} from "./ChildLimitBar.js";
 
 type Props = {
-	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, usesGenericExpandedField: boolean,
+	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, showEvenIfParentNotExpanded: boolean,
 	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
 };
@@ -271,11 +272,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		this.SetState({placeholderRect});
 	}
 
-	get Expanded() {
-		const {map, parentPath: path, group, usesGenericExpandedField} = this.props;
-		const expandKey = usesGenericExpandedField ? "expanded" : `expanded_${ChildGroup[group].toLowerCase()}`;
+	get ShouldChildrenShow() {
+		const {map, parentPath: path, group, showEvenIfParentNotExpanded} = this.props;
 		const nodeView = GetNodeView(map.id, path);
-		return nodeView[expandKey];
+		return nodeView.expanded || showEvenIfParentNotExpanded;
 	}
 
 	get ChildOrderStr() {
@@ -346,7 +346,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	UpdateChildrenWidthOverride(forceUpdate = false) {
-		if (!this.Expanded) return;
+		if (!this.ShouldChildrenShow) return;
 
 		const childBoxes = this.childBoxes.VValues().filter(a=>a != null);
 

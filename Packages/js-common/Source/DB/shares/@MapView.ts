@@ -29,19 +29,12 @@ export class MapView {
 }
 
 export const GetDefaultExpansionFieldsForNodeView = CreateAccessor((path: string)=>{
-	//const pathNodes = ToPathNodes(path);
-	const nodeID = GetNodeID(path);
+	/*const nodeID = GetNodeID(path);
 	const parentID = GetParentNodeID(path);
 	const node = GetNode(nodeID);
-	const parentNode = GetNode(parentID);
-	//console.log("Checking. @nodeID:", nodeID, "@parentID:", parentID, "@node:", node, "@parentNode:", parentNode);
+	const parentNode = GetNode(parentID);*/
 
-	const result = {expanded: false, expanded_truth: false, expanded_relevance: false};
-	/*if (node?.type == NodeType.argument && !node.multiPremiseArgument) {
-		result.expanded = true;
-	} else if (node?.type == NodeType.claim && parentNode?.multiPremiseArgument) {
-		result.expanded = true;
-	}*/
+	const result = {expanded: false};
 	return result;
 });
 
@@ -76,15 +69,6 @@ export class NodeView {
 
 	@Field({type: "boolean"}, {opt: true})
 	@O expanded? = false;
-
-	@Field({type: "boolean"}, {opt: true})
-	@O expanded_truth? = false;
-
-	@Field({type: "boolean"}, {opt: true})
-	@O expanded_relevance? = false;
-
-	@Field({type: "boolean"}, {opt: true})
-	@O expanded_freeform? = false;
 
 	/** True for node which is selected (ie. has its hover-panel locked open). */
 	@Field({type: "boolean"}, {opt: true})
@@ -133,7 +117,7 @@ export const emptyNodeView = new NodeView(null, false);
 //RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("NodeView")));
 
 // export type NodeView_SelfOnly = Omit<NodeView, 'children'>;
-// export const NodeView_SelfOnly_props = ['expanded', 'expanded_truth', 'expanded_relevance', 'selected', 'focused', 'viewOffset', 'openPanel', 'openTermID', 'childLimit_up', 'childLimit_down'];
+// export const NodeView_SelfOnly_props = ['expanded', 'selected', 'focused', 'viewOffset', 'openPanel', 'openTermID', 'childLimit_up', 'childLimit_down'];
 
 /*export function NormalizedMapView(mapView: MapView) {
 	const result = Clone(mapView);
