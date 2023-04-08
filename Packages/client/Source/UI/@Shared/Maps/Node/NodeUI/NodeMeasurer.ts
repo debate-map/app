@@ -1,8 +1,8 @@
-import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbars, NodeType} from "dm_common";
+import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbars, NodeType, ChildGroup} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
-import {TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
+import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;
@@ -13,7 +13,10 @@ import {TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 }); */
 
-export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: string, map: Map, leftMarginForLines?: number|n)=>{
+export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: string, map: Map)=>{
+	const inBelowGroup = node.link?.c_parentType == NodeType.argument && node.link?.c_childType == NodeType.claim && node.link?.group == ChildGroup.generic;
+	const leftMarginForLines = inBelowGroup ? GUTTER_WIDTH_SMALL : 0;
+
 	const nodeTypeInfo = NodeType_Info.for[node.type];
 	const maxWidth_normal = nodeTypeInfo.maxWidth;
 	const maxWidth_final = maxWidth_normal - (leftMarginForLines != null ? leftMarginForLines : 0);
@@ -62,7 +65,7 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 	expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
 	expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
 	expectedTextHeight_tester.innerHTML = displayText;
-	const expectedTextHeight = GetContentSize(expectedTextHeight_tester).height;
+	const expectedTextHeight = GetContentSize(expectedTextHeight_tester).height as number;
 	const expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 	// this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 

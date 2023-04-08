@@ -15,6 +15,7 @@ import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObj
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 import {ChildLimitBar} from "./ChildLimitBar.js";
+import {GetMeasurementInfoForNode} from "./NodeMeasurer.js";
 
 type Props = {
 	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, showEvenIfParentNotExpanded: boolean,
@@ -39,8 +40,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
 	render() {
 		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
-		let {childrenWidthOverride, placeholderRect} = this.state;
-		childrenWidthOverride = childrenWidthOverride ? childrenWidthOverride.KeepAtLeast(minWidth ?? 0) : null;
+		const {placeholderRect} = this.state;
 
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode.current, map, store.main.maps.childOrdering);
@@ -72,29 +72,42 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const showAll = parentNode.id == map.rootNode || parentNode.type == NodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
 
-		// helper
-		/*const renderedChildrenOrder = [] as string[];
-		// once we're done rendering, store the rendered-children-order in the node-view, eg. so child NodeUIs can know whether they have any expanded siblings
-		setTimeout(()=>{
-			if (nodeView.renderedChildrenOrder?.join(";") != renderedChildrenOrder.join(";")) {
-				RunInAction("NodeChildHolder.render.updateRenderedChildrenOrder", ()=>nodeView.renderedChildrenOrder = renderedChildrenOrder);
-			}
-		}, 0);*/
-
-		let nextChildFullIndex = parentTreePath_priorChildCount ?? 0;
-		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
+		const PrepPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
 			const childLimit = direction == "up" ? childLimit_up : childLimit_down; // polarity-groups "all" and "down" both use a "down" child-limit
-			const refName = `${polarityGroup}ChildHolder`;
 
 			const childrenHere_untrimmed = polarityGroup == "all" ? nodeChildrenToShowHere : polarityGroup == "up" ? upChildren : downChildren;
 			const childrenHere = childrenHere_untrimmed.slice(0, childLimit); // trim to the X most significant children (ie. strongest arguments)
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-here array
 			if (direction == "up") childrenHere.reverse();
 
+			return {direction: direction as "up" | "down", childLimit, children_untrimmed: childrenHere_untrimmed, children_trimmed: childrenHere};
+		};
+		const ncToShowHere_groupAll = PrepPolarityGroup("all");
+		const ncToShowHere_groupUp = PrepPolarityGroup("up");
+		const ncToShowHere_groupDown = PrepPolarityGroup("down");
+
+		const ncToShowHere_all_trimmed = [...ncToShowHere_groupAll.children_trimmed, ...ncToShowHere_groupUp.children_trimmed, ...ncToShowHere_groupDown.children_trimmed];
+		const ncToShowHere_all_trimmed_measurements = ncToShowHere_all_trimmed.map(child=>{
+			// catch bails during measurement, so child node-uis can start loading even before their measurements are done loading
+			const measurementInfo = GetMeasurementInfoForNode.CatchBail(null, child, `${parentPath}/${child.id}`, map);
+			// if measurement is still processing, return a default width (child node-uis needs some width in the meantime)
+			if (measurementInfo == null) return {expectedBoxWidth: 100, width: 100, expectedHeight: null};
+			return measurementInfo;
+		});
+		const childrenWidthOverride_prep = ncToShowHere_all_trimmed_measurements.map(a=>a.width).concat(0).Max(undefined, true);
+		const childrenWidthOverride = childrenWidthOverride_prep ? childrenWidthOverride_prep.KeepAtLeast(minWidth ?? 0) : null;
+
+		let nextChildFullIndex = parentTreePath_priorChildCount ?? 0;
+		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
+			const ncToShowHere_thisGroup =
+				polarityGroup == "all" ? ncToShowHere_groupAll :
+				polarityGroup == "up" ? ncToShowHere_groupUp :
+				ncToShowHere_groupDown;
+			const childrenHere = ncToShowHere_thisGroup.children_trimmed;
 			const childrenHereUIs = childrenHere.map((child, index)=>{
 				const parent = this;
-				const collection_untrimmed = childrenHere_untrimmed;
+				const collection_untrimmed = ncToShowHere_thisGroup.children_untrimmed;
 				const widthOverride = childrenWidthOverride;
 
 				/*if (pack.node.premiseAddHelper) {
@@ -102,10 +115,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				}*/
 
 				const indexOfLastVisibleChild = childrenHere.length - 1; // the childrenHere array is already trimmed to the child-limit, so its last entry is the last visible
-				const isFarthestChildFromDivider = index == (direction == "down" ? indexOfLastVisibleChild : 0);
+				const isFarthestChildFromDivider = index == (ncToShowHere_thisGroup.direction == "down" ? indexOfLastVisibleChild : 0);
 				const childLimit_minShowableNow = initialChildLimit;
 				const childLimit_maxShowableNow = collection_untrimmed.length;
-				const childrenVisible = collection_untrimmed.length.KeepAtMost(childLimit);
+				const childrenVisible = collection_untrimmed.length.KeepAtMost(ncToShowHere_thisGroup.childLimit);
 				const showLimitBar = isFarthestChildFromDivider && !showAll && (childrenVisible > childLimit_minShowableNow || childrenVisible < childLimit_maxShowableNow);
 
 				// wrap these in funcs, so the execution-orders always match the display-orders (so that tree-path is correct)
@@ -113,7 +126,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					return <ChildLimitBar {...{
 						map, path: parentPath, treePath: `${parentTreePath}/${nextChildFullIndex++}`,
 						inBelowGroup: belowNodeUI ?? false,
-						childrenWidthOverride: widthOverride, direction, childLimit,
+						childrenWidthOverride: widthOverride, direction: ncToShowHere_thisGroup.direction, childLimit: ncToShowHere_thisGroup.childLimit,
 						childCount: collection_untrimmed.length,
 					}}/>;
 				};
@@ -132,9 +145,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				if (showLimitBar) {
 					return (
 						<React.Fragment key={child.id}>
-							{direction == "up" && getLimitBar()}
+							{ncToShowHere_thisGroup.direction == "up" && getLimitBar()}
 							{getNodeUI()}
-							{direction == "down" && getLimitBar()}
+							{ncToShowHere_thisGroup.direction == "down" && getLimitBar()}
 						</React.Fragment>
 					);
 				}
@@ -159,6 +172,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 							WaitXThenRun(0, ()=>this.StartGeneratingPositionedPlaceholder(polarityGroup));
 						}
 
+						const refName = `${polarityGroup}ChildHolder`;
 						return (
 							<>
 								<Column ref={c=>{ this[`${polarityGroup}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
@@ -305,7 +319,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}${nl}dividePoint:${dividePoint}`);
 
 			// this.UpdateState(true);
-			this.UpdateChildrenWidthOverride();
 			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
 		}
 		this.lastHeight = height;
@@ -314,7 +327,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const orderStr = this.ChildOrderStr;
 		if (orderStr != this.lastOrderStr) {
 			// this.OnChildHeightOrPosOrOrderChange();
-			// this.UpdateChildrenWidthOverride();
 			// this.ReportDividePointChange();
 		}
 		this.lastOrderStr = orderStr;
@@ -329,7 +341,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		// this.OnHeightOrPosChange();
 		WaitXThenRun_Deduped(this, "OnChildHeightOrPosChange_lastPart", 0, ()=>{
 			if (!this.mounted) return;
-			this.UpdateChildrenWidthOverride();
 			this.CheckForLocalChanges();
 		});
 	};
@@ -343,17 +354,5 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
 		return this.childHolder?.DOM && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM!).height / 2 : 0;
-	}
-
-	UpdateChildrenWidthOverride(forceUpdate = false) {
-		if (!this.ShouldChildrenShow) return;
-
-		const childBoxes = this.childBoxes.VValues().filter(a=>a != null);
-
-		const cancelIfStateSame = !forceUpdate;
-		const changedState = this.SetState({
-			childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(undefined, true),
-		}, undefined, cancelIfStateSame, true);
-		// Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 }

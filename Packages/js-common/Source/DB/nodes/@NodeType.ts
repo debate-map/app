@@ -73,7 +73,8 @@ export class NodeType_Info {
 				[ChildGroup.freeform, freeformTypes],
 			]),
 			//minWidth: 150, maxWidth: 600,
-			minWidth: 80, maxWidth: 380, // keep width small enough that it fits within gap before premise's node-toolbar
+			//minWidth: 80, maxWidth: 380, // keep width small enough that it fits within gap before premise's node-toolbar
+			minWidth: 80, maxWidth: 600,
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
 		}),

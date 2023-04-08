@@ -136,7 +136,7 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.lastRenderTime = Date.now();
 
 		const displayText = GetNodeDisplayText(node, path, map); // don't remove this; it's needed, since it's a dependency of GetMeasurementInfo, but within a "CatchBail" suppressor
-		const {width} = this.GetMeasurementInfo(false);
+		const {width} = GetMeasurementInfoForNode(node, path, map);
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			color: GetNodeColor(node, "raw", false).css(),
@@ -263,10 +263,6 @@ export class NodeUI extends BaseComponentPlus(
 			</>
 		);
 	}
-	/*proxyDisplayedNodeUI: NodeUI|n;
-	get NodeUIForDisplayedNode() {
-		return this.proxyDisplayedNodeUI || this;
-	}*/
 
 	// this is needed to handle certain cases (eg. where this node-view's expansion state is set to collapsed) not caught by downstream-events + ref-callback (well, when wrapped in UseCallback(...))
 	PostRender() {
@@ -306,32 +302,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		this.lastObservedValues = obs;
 	};
-
-	measurementInfo_cache: MeasurementInfo;
-	measurementInfo_cache_lastUsedProps;
-	GetMeasurementInfo(catchBailInMeasurement = true): MeasurementInfo {
-		const {props} = this;
-		const props_used = this.props.IncludeKeys("map", "node", "path", "inBelowGroup") as typeof props;
-		// Log("Checking whether should remeasure info for: " + props_used.node._id);
-		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
-
-		const {map, node, path, inBelowGroup} = props_used;
-		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
-		const leftMarginForLines = inBelowGroup ? GUTTER_WIDTH_SMALL : 0;
-		// catching bail in measurement is useful when NodeChildHolder.UpdateChildrenWidthOverride is calling GetMeasurementInfo on the children, but the data needed to calc that isn't finished loading yet
-		if (catchBailInMeasurement) {
-			var {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode.CatchBail({} as ReturnType<typeof GetMeasurementInfoForNode>, node, path, map, leftMarginForLines);
-			if (expectedBoxWidth == null) return {expectedBoxWidth: 100, width: 100}; // till data is loaded, just return this
-		} else {
-			var {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path, map, leftMarginForLines);
-		}
-
-		this.measurementInfo_cache = {expectedBoxWidth, width/* , expectedHeight */};
-		this.measurementInfo_cache_lastUsedProps = props_used;
-		return this.measurementInfo_cache;
-	}
 }
-type MeasurementInfo = {expectedBoxWidth: number, width: number};
 
 export enum LimitBarPos {
 	above = "above",
