@@ -220,8 +220,6 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 								<Row style={{display: "flex", alignItems: "center"}}>
 									<Pre>Main claim (ie. premise) that your argument will be based on: </Pre>
 									<Link to="https://en.wikipedia.org/wiki/Premise" style={{marginLeft: "auto", fontSize: 12, opacity: 0.7}}>What is a premise?</Link>
-									{/* <InfoButton text={`
-									`.trim()}/> */}
 								</Row>
 								<Row style={{display: "flex", alignItems: "center"}}>
 									<TextArea required={true} pattern={NodeRevision_titlePattern}
@@ -229,7 +227,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 										value={helper.subNode_revision!.phrasing["text_base"]}
 										onChange={val=>Change(helper.subNode_revision!.phrasing["text_base"] = val)}/>
 								</Row>
-								<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
+								<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Add structured child" -> "New claim".`}</Row>
 							</Column>}
 							{advanced &&
 							<NodeDetailsUI style={{padding: "5px 0 0 0"}} parent={newNodeAsL3}
