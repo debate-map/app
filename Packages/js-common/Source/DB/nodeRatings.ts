@@ -6,7 +6,7 @@ import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, GetNode} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
-import {ClaimForm, NodeL3, RatingSummary} from "./nodes/@Node.js";
+import {ClaimForm, NodeL2, NodeL3, RatingSummary} from "./nodes/@Node.js";
 import {ChildGroup, NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
@@ -103,14 +103,14 @@ The final ordering-type is determined by the first provided value (ie. not set t
 1) User setting, in the Layout dropdown (at top-right when map is open)
 2) Node setting, in node Details->Others panel
 3) Map setting, in map's Details dropdown
-4) Fallback value of "votes"
+4) Fallback value based on context ("manual" for an argument's premises, and "votes" for everything else)
 
 Note: If children have identical ordering values (eg. by votes, but neither has votes), then they're sub-sorted by manual-ordering data.
 `.AsMultiline(0);
-export function GetChildOrdering_Final(parentNodeRev: NodeRevision, map?: Map, userOverride?: ChildOrdering) {
-	let result = ChildOrdering.votes;
+export function GetChildOrdering_Final(parentNode: NodeL2, childGroup: ChildGroup, map?: Map, userOverride?: ChildOrdering) {
+	let result = parentNode.type == NodeType.argument && childGroup == ChildGroup.generic ? ChildOrdering.manual : ChildOrdering.votes;
 	if (map?.extras.defaultChildOrdering) result = map.extras.defaultChildOrdering;
-	if (parentNodeRev.displayDetails?.childOrdering) result = parentNodeRev.displayDetails.childOrdering;
+	if (parentNode.current.displayDetails?.childOrdering) result = parentNode.current.displayDetails.childOrdering;
 	if (userOverride) result = userOverride;
 	return result;
 }

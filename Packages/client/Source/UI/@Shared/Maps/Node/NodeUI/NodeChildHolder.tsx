@@ -43,7 +43,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {placeholderRect} = this.state;
 
 		const nodeView = GetNodeView(map.id, parentPath);
-		const orderingType = GetChildOrdering_Final(parentNode.current, map, store.main.maps.childOrdering);
+		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
 		const nodeChildren_orderingValues = nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
 			return GetOrderingValue_AtPath(child, `${parentPath}/${child.id}`, orderingType);
 		}); //.SimplifyEmpty();
@@ -59,7 +59,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == NodeType.argument);
 		}*/
 		// always apply an initial sorting by manual-ordering data, so that if main ordering values are the same for a set (eg. no vote data), the set still has sub-sorting
-		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(parentNode.current, map, store.main.maps.childOrdering));
+		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering));
 		// then apply the sorting for the main ordering-type (latest OrderBy() operation has higher priority, naturally)
 		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>nodeChildren_orderingValues[child.id]);
 

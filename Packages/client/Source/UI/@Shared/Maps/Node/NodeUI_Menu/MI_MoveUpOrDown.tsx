@@ -17,7 +17,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 
 		const orderingParentID = GetParentNodeID(path);
 		const orderingParent = GetNodeL2(orderingParentID);
-		const orderingParent_childOrdering = orderingParent?.current ? GetChildOrdering_Final(orderingParent?.current, map, store.main.maps.childOrdering) : null;
+		const orderingParent_childOrdering = orderingParent?.current ? GetChildOrdering_Final(orderingParent, childGroup, map, store.main.maps.childOrdering) : null;
 		const orderingParent_childLinks_ordered = GetNodeLinks(orderingParentID);
 		const ownIndexAmongPeers = orderingParent_childLinks_ordered.findIndex(a=>a.child == node.id);
 		if (ownIndexAmongPeers == -1) return null; // defensive; this shouldn't happen, but if it does, cancel rendering until data resolves properly
