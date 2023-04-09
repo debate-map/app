@@ -1,3 +1,4 @@
+import {nodeLightBackground} from "Store/db_ext/nodes";
 import {Chroma, chroma_maxDarken, DefaultSkin, PageContainer, Skin, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {ProposalsColumn, ProposalEntryUI, ProposalsUserRankingColumn, ProposalUI_Inner, ProposalUI, ProposalsUI} from "web-vcore/nm/graphql-feedback.js";
@@ -30,7 +31,10 @@ export class DMSkin extends Skin {
 
 	// dm-specific
 	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
-	NodeTextColor = ()=>Chroma("rgba(255,255,255,.7)");
+	NodeTextColor = ()=>{
+		if (nodeLightBackground) return Chroma("rgba(0,0,0,.8)");
+		return Chroma("rgba(255,255,255,.8)");
+	};
 	NodeSubPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.5)");
 
 	// styles
@@ -62,6 +66,9 @@ export class DMSkin extends Skin {
 			}
 			table td {
 				color: ${this.TextColor().css()};
+			}
+			.MapUI table td {
+				color: ${this.NodeTextColor().css()};
 			}
 			/*.NodeUI_LeftBox, .NodeToolbar, .NodeUI_BottomPanel {
 				color: ${this.NodeTextColor().css()} !important;

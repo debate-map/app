@@ -8,55 +8,68 @@ import {store} from "Store";
 import {NodeStyleRule, NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
 import {CE} from "web-vcore/nm/js-vextensions";
 
-export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "raw" | "background" = "background", allowOverrides = true): chroma.Color {
+export const nodeLightBackground = false;
+//export const nodeLightBackground = true; // experimental; toggle on for testing
+
+export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "background" | "connector" = "background", allowOverrides = true): chroma.Color {
 	let result: chroma.Color;
-	/*if (node.type == NodeType.category) result = chroma("rgb(40,60,80)"); //chroma("hsl(210,33%,24%)");
-	else if (node.type == NodeType.package) result = chroma("rgb(30,120,150)"); //chroma("hsl(195,67%,35%)");
-	else if (node.type == NodeType.multiChoiceQuestion) result = chroma("rgb(90,50,180)"); //chroma("hsl(258,57%,45%)");
-	else if (node.type == NodeType.claim) result = chroma("rgb(0,80,150)"); //chroma("hsl(208,100%,29%)");
-	else if (node.type == NodeType.argument) {
-		if (node.displayPolarity == Polarity.supporting) result = chroma("rgb(30,100,30)"); //chroma("hsl(120,54%,25%)");
-		else result = chroma("rgb(100,30,30)");
-	} else {
-		Assert(false);
-	}*/
 
-	/*if (node.type == NodeType.category) result = chroma("hsl(210,33%,24%)");
-	else if (node.type == NodeType.package) result = chroma("hsl(195,67%,35%)");
-	else if (node.type == NodeType.multiChoiceQuestion) result = chroma("hsl(258,57%,45%)");
-	else if (node.type == NodeType.claim) result = chroma("hsl(208,100%,29%)");
-	else if (node.type == NodeType.argument) {
-		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,54%,25%)");
-		else result = chroma("hsl(0,54%,25%)");
-	} else {
-		Assert(false);
-	}*/
-
-	if (node.type == NodeType.category) result = Chroma_Safe("hsl(210,15%,24%)");
+	/*if (node.type == NodeType.category) result = Chroma_Safe("hsl(210,15%,24%)");
 	else if (node.type == NodeType.package) result = Chroma_Safe("hsl(195,35%,35%)");
 	else if (node.type == NodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
-	else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
+	else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(210,10%,50%)");
 	else if (node.type == NodeType.argument) {
 		if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,25%,25%)");
 		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,40%,25%)");
 		else result = Chroma_Safe("hsl(210,15%,24%)");
 	} else {
 		Assert(false);
-	}
-
-	/*if (node.type == NodeType.category) result = chroma("hsl(210,30%,70%)");
-	else if (node.type == NodeType.package) result = chroma("hsl(195,40%,70%)");
-	else if (node.type == NodeType.multiChoiceQuestion) result = chroma("hsl(258,15%,70%)");
-	else if (node.type == NodeType.claim) result = chroma("hsl(208,40%,70%)");
-	else if (node.type == NodeType.argument) {
-		if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,20%,70%)");
-		else result = chroma("hsl(0,25%,70%)");
-	} else {
-		Assert(false);
 	}*/
 
-	if (type == "background") {
+	if (node.type == NodeType.category) result = Chroma_Safe("hsl(210,10%,24%)");
+	else if (node.type == NodeType.package) result = Chroma_Safe("hsl(195,30%,35%)");
+	else if (node.type == NodeType.multiChoiceQuestion) result = Chroma_Safe("hsl(258,20%,45%)");
+	//else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(208,55%,29%)");
+	else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(210,7%,45%)");
+	else if (node.type == NodeType.argument) {
+		//if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,20%,25%)");
+		if (node.displayPolarity == Polarity.supporting) result = Chroma_Safe("hsl(120,18%,32%)");
+		//else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,35%,25%)");
+		else if (node.displayPolarity == Polarity.opposing) result = Chroma_Safe("hsl(0,27%,32%)");
+		else result = Chroma_Safe("hsl(210,10%,24%)");
+	} else {
+		Assert(false);
+	}
+
+	/*if (nodeLightBackground) {
+		if (node.type == NodeType.category) result = chroma("hsl(210,30%,70%)");
+		else if (node.type == NodeType.package) result = chroma("hsl(195,40%,70%)");
+		else if (node.type == NodeType.multiChoiceQuestion) result = chroma("hsl(258,15%,70%)");
+		//else if (node.type == NodeType.claim) result = chroma("hsl(208,40%,70%)");
+		else if (node.type == NodeType.claim) result = Chroma_Safe("hsl(210,10%,60%)");
+		else if (node.type == NodeType.argument) {
+			if (node.displayPolarity == Polarity.supporting) result = chroma("hsl(120,20%,70%)");
+			else result = chroma("hsl(0,25%,70%)");
+		} else {
+			Assert(false);
+		}
+	}*/
+
+	/*if (type == "background") {
 		result = GetNodeBackgroundColorFromRawColor(result);
+	}*/
+	if (type == "connector") {
+		// we must set an alpha on the color, if not set already (workaround for bug in chroma-js: calling "darken" or "brighten" on color without alpha, returns "1" rather than a modified color)
+		if (result.alpha() == undefined) result = result.alpha(1);
+
+		// special case for claim nodes (color is too light; connector-lines actually have to be darkened)
+		if (node.type == NodeType.claim) {
+			//result = Chroma_Safe("hsla(210,7%,40%,1)");
+			//result = result.darken(.3);
+		} else {
+			//result = GetNodeConnectorColorFromMainColor(result);
+			result = result.brighten(.5);
+		}
 	}
 
 	if (allowOverrides) {
@@ -80,11 +93,11 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "r
 
 	return result;
 }
-export function GetNodeBackgroundColorFromRawColor(color: Color) {
+/*function GetNodeBackgroundColorFromRawColor(color: Color) {
 	let result = chroma.mix(color, "black", 0.3); // mix background-color with black some
 	result = result.alpha(0.9);
 	return result;
-}
+}*/
 
 export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false): NodeL3[]=>{
 	path = path || nodeID;

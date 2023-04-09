@@ -45,7 +45,7 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 						/* eslint-enable react/jsx-key*/
 					]}/></P>
 
-					<P>The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
+					<P>The maps are constructed from "claims" (gray), and "arguments" (green and red) which support/oppose those claims.
 					This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.</P>
 
 					<h2>Advantages</h2>

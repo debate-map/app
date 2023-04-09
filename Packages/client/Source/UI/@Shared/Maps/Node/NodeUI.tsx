@@ -1,27 +1,24 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetNodeTagComps, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars, TagComp_CloneHistory} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {ConnectorLinesUI, StripesCSS, useRef_nodeLeftColumn} from "tree-grapher";
+import {useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {TreeGraphDebug} from "Utils/UI/General.js";
-import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog, WaitXThenRun_Deduped} from "web-vcore";
+import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
 import {BailError} from "web-vcore/.yalc/mobx-graphlink";
-import {Assert, AssertWarn, E, EA, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
+import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "./NodeLayoutConstants.js";
+import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
-import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
 import {NodeUI_Inner} from "./NodeUI_Inner.js";
-import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 // class holding values that are derived entirely within CheckForChanges()
 class ObservedValues {
@@ -139,7 +136,7 @@ export class NodeUI extends BaseComponentPlus(
 		const {width} = GetMeasurementInfoForNode(node, path, map);
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: GetNodeColor(node, "raw", false).css(),
+			color: GetNodeColor(node, "connector", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 			parentIsAbove: inBelowGroup,

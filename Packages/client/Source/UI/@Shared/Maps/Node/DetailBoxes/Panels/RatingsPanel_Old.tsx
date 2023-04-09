@@ -81,8 +81,16 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			{
 				label: "Rating count",
 				//stroke: chroma(0, 1, .5, "hsl").css(),
-				stroke: Chroma("#ff7300").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
-				fill: Chroma("#ff7300").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+
+				/*stroke: Chroma("hsla(27,100%,50%,1)").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: Chroma("hsla(27,100%,50%,1)").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),*/
+				/*stroke: Chroma("hsla(210,50%,30%,1)").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: Chroma("hsla(210,50%,50%,1)").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),*/
+				/*stroke: Chroma("hsla(210,0%,10%,1)").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: Chroma("hsla(210,0%,10%,1)").alpha(.7 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),*/
+				stroke: Chroma("hsla(210,30%,90%,1)").alpha(.4 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: Chroma("hsla(210,30%,90%,1)").alpha(.3 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+
 				//fill: "#ff7300FF",
 				points: {show: false},
 				//paths: uPlot.paths.spline2,

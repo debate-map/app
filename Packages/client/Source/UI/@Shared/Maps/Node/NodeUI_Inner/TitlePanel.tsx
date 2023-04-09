@@ -139,7 +139,7 @@ export class TitlePanel extends BaseComponentPlus(
 						color: liveSkin.NodeTextColor(),
 					},
 					node.type == NodeType.argument && {
-						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .3).toString(), // for arguments, make text mostly transparent, since text is repetitive and can be distracting
+						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).toString(), // for arguments, make text mostly transparent, since text is repetitive and can be distracting
 						flex: 1, // maybe temp; since width is locked apparently, have title-panel fill gap (so toolbar-button goes all the way to right)
 					},
 					style,
@@ -161,7 +161,7 @@ export class TitlePanel extends BaseComponentPlus(
 							marginTop: -1, // "center" is actually below the center, so bump it up a bit
 						},
 						//isSubnode && {margin: "4px 0 1px 0"},
-						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
+						titleAttachment == null && missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
 						{/*argNode != null &&
 						<Row style={{float: "left", whiteSpace: "pre", background: "black", borderRadius: "5px 0 0 0", marginLeft: -5, marginRight: 5, marginTop: -5, marginBottom: -5, height: 28, padding: "0 5px"}}>

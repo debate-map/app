@@ -41,7 +41,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 					//width, minWidth: widthOverride,
 					width: widthOverride ?? width,
-					boxShadow: `rgba(0,0,0,1) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`,
+					boxShadow: `rgba(0,0,0,.5) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`,
 				}, style)}
 				onClick={onClick} onMouseEnter={onMouseEnter as any} onMouseLeave={onMouseLeave as any} {...rest}>
 				{beforeChildren}

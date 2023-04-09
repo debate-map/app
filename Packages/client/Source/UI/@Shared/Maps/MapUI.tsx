@@ -89,7 +89,7 @@ class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
 }
 
 export function GetMapUICSSFilter() {
-	return GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)";
+	return GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,.75) 0px 0px 10px)";
 }
 
 type Props = {

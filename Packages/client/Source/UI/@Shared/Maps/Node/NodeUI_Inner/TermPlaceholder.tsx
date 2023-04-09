@@ -3,6 +3,7 @@ import {HSLA, Observer} from "web-vcore";
 import {GetTerm} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
+import {liveSkin} from "Utils/Styles/SkinManager";
 
 @Observer
 export class TermPlaceholder extends BaseComponentPlus(
@@ -33,15 +34,7 @@ export class TermPlaceholder extends BaseComponentPlus(
 					`.AsMultiline(0);
 				}).filter(a=>a).join("\n")}
 				style={E(
-					{
-						//color: HSLA(120, 1, .7, 1),
-						//color: HSLA(120, .5, .7, 1),
-						color: "rgba(255,255,255,.7)",
-						//fontWeight: 500,
-						//textDecoration: "underline rgba(255,255,255,.3) solid !important",
-						//textDecoration: "underline rgba(255,255,255,.3) solid",
-					},
-					GADDemo && {color: "black"},
+					{color: liveSkin.NodeTextColor().toString()},
 				)}
 				onMouseEnter={e=>onHover(true)}
 				onMouseLeave={e=>onHover(false)}

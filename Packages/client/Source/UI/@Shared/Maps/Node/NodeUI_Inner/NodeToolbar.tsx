@@ -130,7 +130,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			<Row className={key("NodeToolbar")} style={css(
 				{
 					height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
-					//color: liveSkin.NodeTextColor().css(),
+					color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
 					//minWidth: 250, // temp
 				},
 				node.type == NodeType.argument && {
@@ -252,7 +252,7 @@ class ToolBarButton extends BaseComponent<{
 					},
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
 					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
-						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .1})`,
+						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .15})`,
 					},
 					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},
@@ -323,9 +323,9 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 						/*ratingTypeInfo.valueRanges.map(a=>a.center),
 						ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)),*/
 					]}
-					// if background is red, decrease alpha of our orange fill-color (else it shows up too prominently, relative to when the background is green, blue, etc.)
+					// if background is red, decrease alpha of our orange fill-color (else it shows up too prominently, relative to when the background is green, etc.)
 					//customAlphaMultiplier={nodeColor.css() == redNodeColor.css() ? .5 : 1}
-					customAlphaMultiplier={backgroundColor.css() == redNodeBackgroundColor.css() ? .7 : 1}
+					//customAlphaMultiplier={backgroundColor.css() == redNodeBackgroundColor.css() ? .7 : 1}
 				/>
 			);
 		}

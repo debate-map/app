@@ -68,7 +68,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 		// let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
 		const backgroundColor = GetNodeColor({type: group == ChildGroup.freeform ? NodeType.category : NodeType.claim} as any as NodeL3);
 		// let lineColor = GetNodeColor(node, "raw");
-		const lineColor = GetNodeColor({type: NodeType.claim} as any as NodeL3, "raw");
+		const lineColor = GetNodeColor({type: NodeType.claim} as any as NodeL3, "connector");
 
 		//const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
 		const childGroupStr = ChildGroup[group].toLowerCase();
@@ -97,8 +97,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {lineHold
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(groupTreePath, {
 			color: group == ChildGroup.truth || group == ChildGroup.relevance
-				? GetNodeColor({type: "claim"} as any, "raw", false).css()
-				: GetNodeColor({type: NodeType.category} as any, "raw", false).css(),
+				? GetNodeColor({type: "claim"} as any, "connector", false).css()
+				: GetNodeColor({type: NodeType.category} as any, "connector", false).css(),
 				gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		});
 

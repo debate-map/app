@@ -16,7 +16,7 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 		// const backgroundColor = GetNodeColor({ type: NodeType.category } as NodeL3);
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: GetNodeColor({type: NodeType.claim}, "raw", false).css(),
+			color: GetNodeColor({type: NodeType.claim}, "connector", false).css(),
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 		}, {}, true);
 
