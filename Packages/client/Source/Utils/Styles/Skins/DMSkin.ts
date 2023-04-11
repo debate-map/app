@@ -56,11 +56,18 @@ export class DMSkin extends Skin {
 			${styleFixesFromWVC}
 			
 			a:not(.noMatch) {
-				color: rgba(0,130,0,1);
+				color: hsla(120,100%,25%,1)
 			}
 			a:not(.noMatch):hover {
-				color: rgba(0,160,0,1);
+				color: hsla(120,100%,30%,1)
 			}
+			.useLightText a:not(.noMatch) {
+				color: hsla(120,100%,35%,1)
+			}
+			.useLightText a:not(.noMatch):hover {
+				color: hsla(120,100%,40%,1)
+			}
+
 			table th {
 				background-color: ${this.HeaderColor().css()};
 			}

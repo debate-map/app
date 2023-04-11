@@ -378,7 +378,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					}}
 					className={
 						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
-						["NodeUI_Inner", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
+						["NodeUI_Inner", "useLightText", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
 					}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}

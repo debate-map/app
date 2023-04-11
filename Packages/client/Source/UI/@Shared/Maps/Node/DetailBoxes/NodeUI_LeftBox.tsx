@@ -208,6 +208,7 @@ class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 		const {css} = cssHelper(this);
 		return (
 			<Button text={text}
+				className="useLightText"
 				style={css(
 					{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"},
 					{

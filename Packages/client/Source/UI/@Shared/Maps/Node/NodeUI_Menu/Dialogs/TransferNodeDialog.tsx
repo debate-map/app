@@ -330,7 +330,7 @@ class NodePreviewUI extends BaseComponent<{panel: "source" | "destination", node
 		return (
 			<Column style={{flex: 1}}>
 				{node &&
-				<Row className="cursorSet"
+				<Row className="useLightText cursorSet"
 					style={ES(
 						{
 							/*flex: 1,*/ padding: 5,

@@ -285,7 +285,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 
 		return (
 			<Column>
-				<Row mt={index === 0 ? 0 : 5} className="cursorSet"
+				<Row mt={index === 0 ? 0 : 5} className="useLightText cursorSet"
 					style={E(
 						{
 							padding: 5, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)",

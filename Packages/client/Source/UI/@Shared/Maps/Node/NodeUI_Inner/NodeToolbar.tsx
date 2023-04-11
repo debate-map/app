@@ -127,7 +127,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			node.type == NodeType.argument ? (node.current.phrasing.note || node.current.attachments.length > 0) :
 			true;
 		return (
-			<Row className={key("NodeToolbar")} style={css(
+			<Row className={key("NodeToolbar useLightText")} style={css(
 				{
 					height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
 					color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),

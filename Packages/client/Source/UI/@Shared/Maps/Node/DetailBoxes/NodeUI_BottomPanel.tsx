@@ -105,7 +105,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		let uiRoot: HTMLDivElement;
 		return MaybeCreatePortal(
 			// <ErrorBoundary>
-			<div ref={c=>uiRoot = c!} className="NodeUI_BottomPanel" style={ES(
+			<div ref={c=>uiRoot = c!} className="NodeUI_BottomPanel useLightText" style={ES(
 				{
 					position: "absolute",
 					zIndex: hovered ? 6 : 5,
