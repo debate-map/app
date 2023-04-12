@@ -350,6 +350,10 @@ export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: strin
 	return {rawTitle: (rawTitle?.trim().length ?? 0) > 0 ? rawTitle : undefined, desiredField, usedField, missingMessage};
 });
 
+export function ShouldExtractPrefixText(childLayout: ChildLayout) {
+	return childLayout == ChildLayout.slStandard || globalThis.GADDemo_forJSCommon; // see GAD.ts for definition
+}
+
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
 export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixRemoval = true): string=>{
 	const {rawTitle, missingMessage} = GetNodeRawTitleAndSuch(node, path, form);
@@ -364,7 +368,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:claim branch)
-		if (childLayout == ChildLayout.slStandard) {
+		if (ShouldExtractPrefixText(childLayout)) {
 			const premises = GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
 			if (premises.length == 1) {
 				const premiseText = GetNodeDisplayText(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined, false);
@@ -449,7 +453,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 
 		const childLayout = GetChildLayout_Final(node.current, map);
 		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:argument branch)
-		if (childLayout == ChildLayout.slStandard && rawTitle != null && path != null && allowPrefixRemoval) {
+		if (ShouldExtractPrefixText(childLayout) && rawTitle != null && path != null && allowPrefixRemoval) {
 			const prefixInfo = GetBracketedPrefixInfo(rawTitle);
 			if (prefixInfo != null) {
 				const parentNode = GetParentNode(path);

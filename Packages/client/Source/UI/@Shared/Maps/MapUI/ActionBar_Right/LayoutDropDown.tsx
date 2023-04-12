@@ -45,6 +45,10 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						<CheckBox value={uiState.showReasonScoreValues} onChange={val=>RunInAction_Set(this, ()=>uiState.showReasonScoreValues = val)}/>
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
+						<TextPlus info="If enabled, then when you create a new node, it will start out as expanded.">Auto-expand new nodes:</TextPlus>
+						<CheckBox value={uiState.autoExpandNewNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.autoExpandNewNodes = val)}/>
+					</RowLR>
+					<RowLR mt={3} splitAt={splitAt}>
 						<TextPlus info={`
 							When enabled, a small button is shown to the left of nodes that were the source or result of node-cloning operations.
 							Clicking that button shows the full cloning history, and lets you jump to each of the nodes in those chains.

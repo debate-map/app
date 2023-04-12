@@ -255,7 +255,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 			);
 		}),
 		onOK: ()=>{
-			helper.Apply();
+			helper.Apply({expandSelf: store.main.maps.autoExpandNewNodes});
 		},
 	});
 }

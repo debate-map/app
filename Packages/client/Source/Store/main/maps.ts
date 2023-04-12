@@ -41,6 +41,7 @@ export class MapsState {
 	@O initialChildLimit = 5;
 	@O childOrdering?: ChildOrdering;
 	@O showReasonScoreValues = false;
+	@O autoExpandNewNodes = true;
 	@O showCloneHistoryButtons = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
 	@O @ignore screenshotMode = false;
