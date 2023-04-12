@@ -38,7 +38,7 @@ Links:
 ### Collaborative debating 
 
 Hopefully, of course, you'll find this site the best option for debate-mapping -- and that through feedback we can resolve its remaining deficiencies.
-For those wanting to see other options, however, the below is a listing of the best alternatives we're aware of. (most sites don't do this!)
+For those wanting to see other options, however, the below is a listing of the best alternatives we're aware of.
 
 Criteria:
 * Layout format: how efficiently you can parse arguments and premises from the presented data.
@@ -65,6 +65,13 @@ The numbers indicate how well the sites rank on each factor, segmented into leve
 | [ConvinceMe](http://www.convinceme.net)						| 4	| 3	| 7	| 9	| ...	|
 | [TruthMapping](https://www.truthmapping.com)				| 3	| 5	| 7	| 9	| no	|
 | [YourView](http://yourview-production.herokuapp.com)	| 5	| 4	| 4	| 9	| ...	|
+
+### To evaluate
+
+The following sites have not yet been evaluated for the criteria in the table above:
+* https://www.whysaurus.com
+* https://socratrees.azurewebsites.net
+* https://ameliorate.app
 
 ### Others
 

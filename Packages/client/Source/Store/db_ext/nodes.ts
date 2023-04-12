@@ -11,6 +11,12 @@ import {CE} from "web-vcore/nm/js-vextensions";
 export const nodeLightBackground = false;
 //export const nodeLightBackground = true; // experimental; toggle on for testing
 
+export function FixColor(color: chroma.Color) {
+	// we must set an alpha on the color, if not set already (workaround for bug in chroma-js: calling darken/brighten/desaturate/etc. on color without alpha, returns "1" rather than a modified color)
+	if (color.alpha() == undefined) color = color.alpha(1);
+	return color;
+}
+
 export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "background" | "connector" = "background", allowOverrides = true): chroma.Color {
 	let result: chroma.Color;
 
@@ -40,6 +46,7 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 	} else {
 		Assert(false);
 	}
+	result = FixColor(result);
 
 	/*if (nodeLightBackground) {
 		if (node.type == NodeType.category) result = chroma("hsl(210,30%,70%)");
@@ -59,9 +66,6 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 		result = GetNodeBackgroundColorFromRawColor(result);
 	}*/
 	if (type == "connector") {
-		// we must set an alpha on the color, if not set already (workaround for bug in chroma-js: calling "darken" or "brighten" on color without alpha, returns "1" rather than a modified color)
-		if (result.alpha() == undefined) result = result.alpha(1);
-
 		// special case for claim nodes (color is too light; connector-lines actually have to be darkened)
 		if (node.type == NodeType.claim) {
 			//result = Chroma_Safe("hsla(210,7%,40%,1)");
@@ -91,6 +95,7 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 		}
 	}
 
+	result = FixColor(result);
 	return result;
 }
 /*function GetNodeBackgroundColorFromRawColor(color: Color) {

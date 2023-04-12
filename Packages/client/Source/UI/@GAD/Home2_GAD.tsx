@@ -138,7 +138,7 @@ export class HomeUI2_GADAI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<PageContainer style={{margin: "20px auto 20px auto", padding: 0, background: null}}>
-				<Row style={{marginTop: 30, marginBottom: 20, padding: 10, background: "rgba(0,0,0,.2)", borderRadius: 10}}>
+				<Row sel style={{marginTop: 30, marginBottom: 20, padding: 10, background: "rgba(0,0,0,.2)", borderRadius: 10}}>
 					In an effort to better understand the complex AI/AGI discussion, this joint intelligence project aims to systematically map out the ongoing debates. Our objective is to improve understanding and awareness of these multi-layered conversations, encouraging active risk evaluation and collaborative problem-solving. By gathering arguments, claims, and supporting evidence from various online and global sources, we create visual debate graphs. To explore these detailed diagrams, click on the title and expand each node by clicking the "+" symbol. If you'd like to join this intellectual endeavor, please contact Contact@SocietyLibrary.com. We pursue this work with a genuine interest in truth and employ several de-biasing techniques to minimize our blindspots as much as possible. Thank you for reading.
 				</Row>
 				<MapListUI/>
