@@ -322,11 +322,38 @@ export function GetAllNodeRevisionTitles(nodeRevision: NodeRevision): string[] {
 	return TitleKey_values.map(key=>nodeRevision.phrasing[key]).filter(a=>a != null) as string[];
 }
 
-export function GetBracketedPrefixInfo(title: string) {
+export function ShouldExtractPrefixText(childLayout: ChildLayout) {
+	return childLayout == ChildLayout.slStandard || globalThis.GADDemo_forJSCommon; // see GAD.ts for definition
+}
+export type PrefixTextExtractLocation = "toolbar" | "parentArgument";
+export const WhereShouldNodePrefixTextBeShown = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): PrefixTextExtractLocation=>{
+	if (node.type == NodeType.claim && path != null) {
+		const parentNode = GetParentNode(path);
+		if (parentNode?.type == NodeType.argument) {
+			const premises = GetNodeChildrenL3(parentNode.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
+			if (premises.length == 1 && premises[0].id == node.id) {
+				return "parentArgument";
+			}
+		}
+	}
+	return "toolbar";
+});
+export function GetExtractedPrefixTextInfo_Base(title: string) {
 	const match = title.match(/^([➸ ]*)\[([^\]]*)\]( *)/);
 	if (match == null) return null;
 	const [matchStr, specialCharsAtStart, prefixText] = match;
-	return {matchStr, specialCharsAtStart, prefixText};
+	return {matchStr, specialCharsAtStart, prefixText, titleWithoutPrefix: specialCharsAtStart + title.slice(matchStr.length)};
+}
+export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm) {
+	const childLayout = GetChildLayout_Final(node.current, map);
+	const shouldExtract = ShouldExtractPrefixText(childLayout);
+	if (!shouldExtract) return null;
+
+	const title = GetNodeDisplayText(node, path, map, form, false);
+	const info_base = GetExtractedPrefixTextInfo_Base(title);
+	if (info_base == null) return null;
+	const extractLocation = WhereShouldNodePrefixTextBeShown(node, path, form);
+	return {...info_base, extractLocation};
 }
 
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
@@ -350,13 +377,10 @@ export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: strin
 	return {rawTitle: (rawTitle?.trim().length ?? 0) > 0 ? rawTitle : undefined, desiredField, usedField, missingMessage};
 });
 
-export function ShouldExtractPrefixText(childLayout: ChildLayout) {
-	return childLayout == ChildLayout.slStandard || globalThis.GADDemo_forJSCommon; // see GAD.ts for definition
-}
-
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixRemoval = true): string=>{
+export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixTextHandling = true): string=>{
 	const {rawTitle, missingMessage} = GetNodeRawTitleAndSuch(node, path, form);
+	let resultTitle = rawTitle || missingMessage;
 
 	if (node.type == NodeType.argument) {
 		/*if (!node.multiPremiseArgument && !phrasing.text_base) {
@@ -366,108 +390,118 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 			if (baseClaim) return GetNodeDisplayText(baseClaim);
 		}*/
 
-		const childLayout = GetChildLayout_Final(node.current, map);
-		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:claim branch)
-		if (ShouldExtractPrefixText(childLayout)) {
-			const premises = GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
-			if (premises.length == 1) {
-				const premiseText = GetNodeDisplayText(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined, false);
-				const prefixText = GetBracketedPrefixInfo(premiseText)?.prefixText;
-				if (prefixText) return prefixText;
-			}
-		}
-
 		const nodeL3 = GetNodeL3(path);
 		//const parentNode = GetParentNode(path);
 		if (nodeL3 != null && nodeL3.link?.polarity != null) {
 			//if (parentNode?.type == NodeType.argument) return nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
 			//if (parentNode?.type == NodeType.claim) return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
-			if (nodeL3.link.group == ChildGroup.truth) return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
-			if (nodeL3.link.group == ChildGroup.relevance) return nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
-			return nodeL3.link.polarity == Polarity.supporting ? "Argument (supporting)" : "Argument (opposing)";
-		}
-		return "Argument (unknown polarity)";
-	}
-	//const mainAttachment = node.current.attachments[0] as Attachment|n;
-	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
-	if (node.type == NodeType.claim) {
-		if (mainAttachment?.equation) {
-			let result = mainAttachment.equation.text;
-			//if (node.current.equation.latex && !isBot) {
-			if (mainAttachment.equation.latex && typeof window != "undefined" && window["katex"] && window["$"]) {
-				// result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
-				const latex = PreProcessLatex(result);
-				try {
-					const html = window["katex"].renderToString(latex) as string;
-					const dom = window["$"](html).children(".katex-html");
-					result = dom.text();
-				} catch (ex) {
-					if (ex.message.startsWith("KaTeX parse error: ")) {
-						return ex.message.replace(/^KaTeX/, "LaTeX");
-					}
-				}
-			}
-			return result;
-		}
-
-		// for now, only use the "statements below were made" title if there is no simple-title set (needed for SL use-case)
-		// (in the future, I will probably make-so this can only be done in private maps or something, as it's contrary to the "keep components separate/debatable" concept)
-		if ((mainAttachment?.quote || mainAttachment?.media) && (rawTitle?.trim() ?? "").length == 0) {
-			let text: string;
-			let firstSource: Source;
-			if (mainAttachment.quote) {
-				text = `The statements below were made`;
-				firstSource = mainAttachment.quote.sourceChains[0].sources[0];
-
-				if (firstSource.name) text += ` as part of ${firstSource.name}`;
-			} else if (mainAttachment.media) {
-				const media = GetMedia(mainAttachment.media.id);
-				if (media == null) return "...";
-				// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
-				text = `The ${GetNiceNameForMediaType(media.type)} below`;
-				firstSource = mainAttachment.media.sourceChains[0].sources[0];
-
-				if (firstSource.name) text += `, as part of ${firstSource.name},`;
-				text += ` was ${mainAttachment.media.captured ? "captured" : "produced"}`;
+			if (nodeL3.link.group == ChildGroup.truth) {
+				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
+			} else if (nodeL3.link.group == ChildGroup.relevance) {
+				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
 			} else {
-				Assert(false, "[can't happen]");
+				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Argument (supporting)" : "Argument (opposing)";
 			}
-
-			if (firstSource.location) text += ` at ${firstSource.location}`;
-			if (firstSource.author) text += ` by ${firstSource.author}`;
-
-			function TimeToStr(time: number) {
-				//return Moment(time).format("YYYY-MM-DD HH:mm:ss");
-				return Moment(time).format("YYYY-MM-DD HH:mm");
-			}
-			if (firstSource.time_min != null && firstSource.time_max == null) text += `, after ${TimeToStr(firstSource.time_min)}`;
-			if (firstSource.time_min == null && firstSource.time_max != null) text += `, before ${TimeToStr(firstSource.time_max)}`;
-			if (firstSource.time_min != null && firstSource.time_max != null) {
-				if (firstSource.time_min == firstSource.time_max) text += `, at ${TimeToStr(firstSource.time_min)}`;
-				else text += `, between ${TimeToStr(firstSource.time_min)} and ${TimeToStr(firstSource.time_max)}`;
-			}
-
-			if (firstSource.link) text += ` at ${VURL.Parse(firstSource.link, false).toString({domain_protocol: false})}`; // maybe temp
-			return text;
+		} else {
+			resultTitle = "Argument (unknown polarity)";
 		}
+	}
 
-		const childLayout = GetChildLayout_Final(node.current, map);
-		// in sl-layout, extract bracketed-prefix-text into argument parent (if applicable; see corresponding code-block in type:argument branch)
-		if (ShouldExtractPrefixText(childLayout) && rawTitle != null && path != null && allowPrefixRemoval) {
-			const prefixInfo = GetBracketedPrefixInfo(rawTitle);
-			if (prefixInfo != null) {
-				const parentNode = GetParentNode(path);
-				if (parentNode?.type == NodeType.argument) {
-					const premises = GetNodeChildrenL3(parentNode.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
-					if (premises.length == 1) {
-						return rawTitle.slice(prefixInfo.matchStr.length);
-					}
+	const titleFromAttachment = GetNodeDisplayTextFromAttachment(node, rawTitle);
+	if (titleFromAttachment) resultTitle = titleFromAttachment;
+
+	const childLayout = GetChildLayout_Final(node.current, map);
+	// special prefix-text handling; in sl mode/layout, extract bracketed-prefix-text into parent argument (if premise of arg), else into left-positioned toolbar "button"
+	if (allowPrefixTextHandling && ShouldExtractPrefixText(childLayout)) {
+		if (node.type == NodeType.argument) {
+			const premises = GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
+			if (premises.length == 1) {
+				const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined);
+				if (extractedPrefixTextInfo != null && extractedPrefixTextInfo.extractLocation == "parentArgument") {
+					resultTitle = extractedPrefixTextInfo.prefixText;
 				}
+			}
+		} else {
+			const ownPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map, form);
+			if (ownPrefixTextInfo != null) {
+				resultTitle = ownPrefixTextInfo.titleWithoutPrefix;
 			}
 		}
 	}
 
-	return rawTitle || missingMessage;
+	// in SL+NoHeader mode: if there are special sl-related chars at start of text, remove those chars
+	if (globalThis.GADDemo_forJSCommon && !globalThis.ShowHeader_forJSCommon) { // see GAD.ts for definition
+		// three parts: word/emoji + space [at start; optional], bracketed-text, space(s) after bracket-text [optional]
+		// this regex strips out parts 2 and 3, but leaves in part 1
+		resultTitle = resultTitle.replace(/^([➸ ]*)/, "");
+	}
+
+	return resultTitle;
+});
+
+export const GetNodeDisplayTextFromAttachment = CreateAccessor((node: NodeL2, rawTitle: string|n)=>{
+	if (node.type != NodeType.claim) return null;
+
+	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
+	if (mainAttachment?.equation) {
+		let result = mainAttachment.equation.text;
+		//if (node.current.equation.latex && !isBot) {
+		if (mainAttachment.equation.latex && typeof window != "undefined" && window["katex"] && window["$"]) {
+			// result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
+			const latex = PreProcessLatex(result);
+			try {
+				const html = window["katex"].renderToString(latex) as string;
+				const dom = window["$"](html).children(".katex-html");
+				result = dom.text();
+			} catch (ex) {
+				if (ex.message.startsWith("KaTeX parse error: ")) {
+					return ex.message.replace(/^KaTeX/, "LaTeX");
+				}
+			}
+		}
+		return result;
+	}
+
+	// for now, only use the "statements below were made" title if there is no simple-title set (needed for SL use-case)
+	// (in the future, I will probably make-so this can only be done in private maps or something, as it's contrary to the "keep components separate/debatable" concept)
+	if ((mainAttachment?.quote || mainAttachment?.media) && (rawTitle?.trim() ?? "").length == 0) {
+		let text: string;
+		let firstSource: Source;
+		if (mainAttachment.quote) {
+			text = `The statements below were made`;
+			firstSource = mainAttachment.quote.sourceChains[0].sources[0];
+
+			if (firstSource.name) text += ` as part of ${firstSource.name}`;
+		} else if (mainAttachment.media) {
+			const media = GetMedia(mainAttachment.media.id);
+			if (media == null) return "...";
+			// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
+			text = `The ${GetNiceNameForMediaType(media.type)} below`;
+			firstSource = mainAttachment.media.sourceChains[0].sources[0];
+
+			if (firstSource.name) text += `, as part of ${firstSource.name},`;
+			text += ` was ${mainAttachment.media.captured ? "captured" : "produced"}`;
+		} else {
+			Assert(false, "[can't happen]");
+		}
+
+		if (firstSource.location) text += ` at ${firstSource.location}`;
+		if (firstSource.author) text += ` by ${firstSource.author}`;
+
+		function TimeToStr(time: number) {
+			//return Moment(time).format("YYYY-MM-DD HH:mm:ss");
+			return Moment(time).format("YYYY-MM-DD HH:mm");
+		}
+		if (firstSource.time_min != null && firstSource.time_max == null) text += `, after ${TimeToStr(firstSource.time_min)}`;
+		if (firstSource.time_min == null && firstSource.time_max != null) text += `, before ${TimeToStr(firstSource.time_max)}`;
+		if (firstSource.time_min != null && firstSource.time_max != null) {
+			if (firstSource.time_min == firstSource.time_max) text += `, at ${TimeToStr(firstSource.time_min)}`;
+			else text += `, between ${TimeToStr(firstSource.time_min)} and ${TimeToStr(firstSource.time_max)}`;
+		}
+
+		if (firstSource.link) text += ` at ${VURL.Parse(firstSource.link, false).toString({domain_protocol: false})}`; // maybe temp
+		return text;
+	}
 });
 
 export function GetValidChildTypes(nodeType: NodeType, path: string, group: ChildGroup) {

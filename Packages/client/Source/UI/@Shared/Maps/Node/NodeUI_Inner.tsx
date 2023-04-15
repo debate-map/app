@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbars} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbars, GetExtractedPrefixTextInfo} from "dm_common";
 import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -214,7 +214,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
-		const toolbarShow = ShowNodeToolbars(map) && node.type != NodeType.category; // disabled for category-nodes, since looks bad (and less useful there)
+		const toolbarShow = ShowNodeToolbars(map);
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
@@ -360,6 +360,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					<>{toolbarElement}{titlePanel}</>}
 			</>;
 
+			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 			return (
 				<ExpandableBox
 					ref={useCallback(c=>{
@@ -397,6 +398,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					)}
 					//padding={GetPaddingForNode(node/*, isSubnode*/)}
 					padding={0}
+					roundedTopLeftCorner={extractedPrefixTextInfo?.extractLocation != "toolbar"}
 					onClick={onClick}
 					onDirectClick={onDirectClick}
 					beforeChildren={<>

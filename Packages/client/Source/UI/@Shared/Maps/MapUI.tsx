@@ -1,4 +1,4 @@
-import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, Map, NodeL3, NodeType, NodeType_Info} from "dm_common";
+import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, Map, NodeL3, NodeType, NodeType_Info, PrefixTextExtractLocation, ShowNodeToolbars} from "dm_common";
 import React, {useCallback, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
@@ -92,6 +92,16 @@ export function GetMapUICSSFilter() {
 	return GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,.75) 0px 0px 10px)";
 }
 
+export class NodeDataForTreeGrapher {
+	constructor(data?: Partial<NodeDataForTreeGrapher>) {
+		Object.assign(this, data);
+	}
+	nodeType?: NodeType;
+	width?: number;
+	expanded?: boolean;
+	hasToolbarAbove?: boolean;
+}
+
 type Props = {
 	mapID: string, rootNode?: NodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
@@ -143,29 +153,27 @@ export class MapUI extends BaseComponent<Props, {}> {
 					nodeSpacing: (nodeA, nodeB)=>{
 						const nodeAParentPath = nodeA.data.path_parts.slice(0, -1).join("/");
 						const nodeBParentPath = nodeB.data.path_parts.slice(0, -1).join("/");
-						const nodeANodeType = nodeA.data.leftColumn_userData["nodeType"];
-						const nodeBNodeType = nodeB.data.leftColumn_userData["nodeType"];
-						//const nodeAHasToolbar = nodeANodeType != null && nodeANodeType != NodeType.category && nodeANodeType != NodeType.argument;
-						const nodeBHasToolbar = nodeBNodeType != null && nodeBNodeType != NodeType.category && nodeBNodeType != NodeType.argument;
+						const nodeAData = nodeA.data.leftColumn_userData as NodeDataForTreeGrapher;
+						const nodeBData = nodeB.data.leftColumn_userData as NodeDataForTreeGrapher;
 
 						// do special spacing between argument and its first premise
-						if (nodeBHasToolbar) {
-							const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeANodeType == NodeType.argument && nodeBNodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
+						if (nodeBData.hasToolbarAbove) {
+							const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeAData.nodeType == NodeType.argument && nodeBData.nodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
 							if (nodeAIsArgOfNodeB) {
-								if (nodeAIsArgOfNodeB && nodeA.data.leftColumn_userData["width"] > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return 33;
-								if (nodeAIsArgOfNodeB && nodeA.data.leftColumn_userData["expanded"] && nodeA.data.leftColumn_userData["width"] > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return 33;
+								if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return 33;
+								if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return 33;
 								return 5;
 							}
 						}
 
 						// if we have parent-argument's arg-control-bar above, and premise of that arg below, use regular spacing
-						if (nodeAParentPath == nodeBParentPath && nodeANodeType == null && nodeBNodeType == NodeType.claim) return 8;
+						if (nodeAParentPath == nodeBParentPath && nodeAData.nodeType == null && nodeBData.nodeType == NodeType.claim) return 8;
 
 						// if node-b has toolbar above it, give it enough spacing for toolbar + small-gap
-						if (nodeBHasToolbar) return 33;
+						if (nodeBData.hasToolbarAbove) return 33;
 
 						// standard spacing: if both are nodes, use 12; else use 8
-						return nodeANodeType != null && nodeBNodeType != null ? 12 : 8;
+						return nodeAData.nodeType != null && nodeBData.nodeType != null ? 12 : 8;
 					},
 					styleSetter_layoutPending: style=>{
 						//style.right = "100%"; // not ideal, since can cause some issues (eg. during map load, the center-on-loading-nodes system can jump to empty left-area of map) 

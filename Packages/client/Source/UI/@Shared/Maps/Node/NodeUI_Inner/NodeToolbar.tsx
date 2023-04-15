@@ -1,23 +1,20 @@
-import {ChildGroup, ClaimForm, GetNodeForm, GetNodeL3, GetNodeTags, GetParentNode, GetParentPath, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, NodeL3, NodeType, NodeRatingType, Polarity, Map, ShowNodeToolbars} from "dm_common";
-import React, {useMemo, useState} from "react";
-import {Vector2} from "react-vmenu/Dist/Utils/FromJSVE";
+import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, Map, NodeL3, NodeRatingType, NodeType, Polarity, ShowNodeToolbars} from "dm_common";
+import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
-import {ES, HSLA, InfoButton, Observer, UseDocumentEventListener} from "web-vcore";
+import {ES, HSLA, InfoButton, Observer} from "web-vcore";
 import {Color} from "web-vcore/nm/chroma-js.js";
 import {E} from "web-vcore/nm/js-vextensions";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
-import {VMenuUI, ShowVMenu} from "web-vcore/nm/react-vmenu";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
 import {TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
-import {NodeUI_Menu} from "../NodeUI_Menu.js";
 
 //export type NodeToolbar_SharedProps = NodeUI_Inner_Props & {backgroundColor: Color};
 export type NodeToolbar_Props = {
@@ -60,7 +57,10 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const labels = tags.filter(a=>a.labels != null).SelectMany(a=>a.labels!.labels).Distinct();
 		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
 		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;
-		const getToolbarItemUIs = ()=>{
+		const getStandardToolbarItemUIs = ()=>{
+			// don't show any of the standard toolbar-items for category-nodes, since looks bad (and less useful there) [NodeToolbar comp still rendered, since may be needed to show prefix-text "button"]
+			if (node.type == NodeType.category) return [];
+
 			let indexAmongEnabled = 0;
 			return toolbarItemsToShow.map((item, index)=>{
 				if (item.panel == "truth") {
@@ -117,49 +117,46 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			});
 		};
 		// for this call, we are just getting the number of toolbar-buttons (fine to discard result)
-		sharedProps.buttonCount = getToolbarItemUIs().filter(a=>a != null).length;
+		sharedProps.buttonCount = getStandardToolbarItemUIs().filter(a=>a != null).length;
 
 		/*const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
 		UseDocumentEventListener("click", e=>!processedMouseEvents.has(e) && setContextMenuOpen(false));*/
 
+		const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 		const showBottomBorder =
 			node.type == NodeType.argument ? (node.current.phrasing.note || node.current.attachments.length > 0) :
 			true;
 		return (
-			<Row className={key("NodeToolbar useLightText")} style={css(
-				{
-					height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
-					color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
-					//minWidth: 250, // temp
-				},
-				node.type == NodeType.argument && {
-					position: "relative", // needed to show above
-				},
-				node.type != NodeType.argument && {
-					position: "absolute", bottom: "100%", right: -17, // extend 17px past right edge, to account for +/- button below
-				},
-				showBottomBorder && {borderBottom: "1px solid black"},
-			)}>
-				{/*<ToolBarButton {...sharedProps} text="<<" first={true} onClick={onMoreClick} onHoverChange={onMoreHoverChange}/>*/}
-				{getToolbarItemUIs()}
-				{/*<ToolBarButton {...sharedProps} text="..." last={true} onClick={e=>{
-					/*processedMouseEvents.add(e.nativeEvent);
-					setContextMenuOpen(!contextMenuOpen);*#/
-
-					const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
-					ShowVMenu({
-						pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height),
-					}, <NodeUI_Menu map={map} node={node} path={path} childGroup={ChildGroup.generic}/>);
-				}}/>*/}
-				{/*<ToolBarButton {...sharedProps} text=">>" last={true}/>*/}
-				{/*contextMenuOpen &&
-				<div style={{position: "relative"}}>
-					<VMenuUI style={{left: -30, top: "100%"}} onOtherVMenuOpen={()=>setContextMenuOpen(false)}>
-						<NodeUI_Menu map={map} node={node} path={path} childGroup={ChildGroup.generic}/>
-					</VMenuUI>
-				</div>*/}
-			</Row>
+			<>
+				{extractedPrefixTextInfo?.extractLocation == "toolbar" &&
+				<Row className={key("NodeToolbar useLightText")} style={css(
+					{
+						height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
+						position: "absolute", bottom: "100%", left: 0,
+					},
+					showBottomBorder && {borderBottom: "1px solid black"},
+				)}>
+					<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo.prefixText} panel="extractedPrefixText" enabled={false}/>
+				</Row>}
+				<Row className={key("NodeToolbar useLightText")} style={css(
+					{
+						height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
+						//minWidth: 250, // temp
+					},
+					node.type == NodeType.argument && {
+						position: "relative", // needed to show above
+					},
+					node.type != NodeType.argument && {
+						position: "absolute", bottom: "100%", right: -17, // extend 17px past right edge, to account for +/- button below
+					},
+					showBottomBorder && {borderBottom: "1px solid black"},
+				)}>
+					{getStandardToolbarItemUIs()}
+				</Row>
+			</>
 		);
 	}
 }
@@ -202,12 +199,15 @@ class ToolBarButton extends BaseComponent<{
 		const highlightOrHovered = highlight || hovered;
 
 		if (textComp == null) {
-			textComp = enabled
-				? <Text style={E(
+			textComp = (
+				<Text style={E(
 					{position: "relative", overflow: "hidden", textOverflow: "ellipsis"},
 					{fontSize: [null, 10, 10, 8][sizeIndex]},
 				)}>{text}</Text>
-				: <InfoButton text={disabledInfo!}/>;
+			);
+			if (!enabled && disabledInfo != null) {
+				textComp = <InfoButton text={disabledInfo!}/>;
+			}
 		}
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
@@ -253,6 +253,10 @@ class ToolBarButton extends BaseComponent<{
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
 					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
 						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .15})`,
+					},
+					panel == "extractedPrefixText" && {
+						//position: "absolute", left: 0,
+						padding: "0 10px",
 					},
 					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},

@@ -35,3 +35,8 @@ export function IsMouseLeaveReal(event: React.MouseEvent<MouseEvent>, dom: HTMLE
 export function TreeGraphDebug() {
 	return !!globalThis.treeGraphDebug || startURL.GetQueryVar("extra")?.includes("treeGraphDebug");
 }
+
+export function BorderRadiusCSS(value: number|string, {tl = true, tr = true, bl = true, br = true} = {}) {
+	const radiusAsStr = typeof value == "number" ? `${value}px` : value;
+	return `${tl ? radiusAsStr : 0} ${tr ? radiusAsStr : 0} ${br ? radiusAsStr : 0} ${bl ? radiusAsStr : 0}`;
+}

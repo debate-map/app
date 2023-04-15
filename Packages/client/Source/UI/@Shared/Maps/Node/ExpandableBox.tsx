@@ -5,19 +5,20 @@ import React from "react";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES} from "web-vcore";
+import {BorderRadiusCSS as CSSForCorners} from "Utils/UI/General";
 
 type Props = {
 	parent?,
 	className?: string, width: number|string|n,
 	widthOverride?: number|n, // is this still needed?
-	innerWidth?: number, outlineColor?: chroma.Color|n, outlineThickness?: number|n, padding: number | string, style?, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
+	innerWidth?: number, outlineColor?: chroma.Color|n, outlineThickness?: number|n, roundedTopLeftCorner?: boolean, padding: number | string, style?, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
 	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number|n,
 	text, onTextHolderClick?, textHolderStyle?,
 	beforeChildren?, afterChildren?,
 	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?,
 };
 export class ExpandableBox extends BaseComponent<Props, {}> {
-	static defaultProps = {outlineThickness: 1};
+	static defaultProps = {outlineThickness: 1, roundedTopLeftCorner: true};
 	static ValidateProps(props: Props) {
 		const {backgroundFillPercent} = props;
 		Assert(backgroundFillPercent >= 0 && backgroundFillPercent <= 100, "Background fill-percent must be between 0 and 100.");
@@ -28,7 +29,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 	expandButton: Button|n;
 	render() {
 		const {parent,
-			className, width, widthOverride, innerWidth, outlineColor, outlineThickness, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
+			className, width, widthOverride, innerWidth, outlineColor, outlineThickness, roundedTopLeftCorner, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
 			backgroundFillPercent, backgroundColor, markerPercent,
 			text, onTextHolderClick, textHolderStyle, beforeChildren, afterChildren,
 			expanded, toggleExpanded, expandButtonStyle, ...rest} = this.props;
@@ -38,7 +39,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 		return (
 			<div className={key("ExpandableBox", className)}
 				style={css({
-					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
+					display: "flex", position: "relative", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}), cursor: "default",
 					//width, minWidth: widthOverride,
 					width: widthOverride ?? width,
 					boxShadow: `rgba(0,0,0,.5) 0px 0px 2px${(outlineColor ? `, ${outlineColor.css()} 0px 0px ${outlineThickness}px` : "").repeat(6)}`,
@@ -46,7 +47,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 				onClick={onClick} onMouseEnter={onMouseEnter as any} onMouseLeave={onMouseLeave as any} {...rest}>
 				{beforeChildren}
 				<Row className={key("ExpandableBox_mainContent")}
-					style={css({alignItems: "stretch", width: innerWidth || "100%", borderRadius: 5, cursor: "pointer"})}
+					style={css({alignItems: "stretch", width: innerWidth || "100%", borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner}), cursor: "pointer"})}
 					onClick={onDirectClick}
 				>
 					<div ref={c=>this.textHolder = c} onClick={onTextHolderClick} style={ES(
@@ -58,7 +59,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					)}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: `${backgroundFillPercent}%`, borderRadius: "5px 0 0 5px",
+							width: `${backgroundFillPercent}%`, borderRadius: CSSForCorners(5, {tl: roundedTopLeftCorner, tr: false, br: false, bl: true}),
 							background: backgroundColor.css("hsl"), // outputting as hsl makes it easier to test variants in dev-tools
 						}}/>
 						<div style={{

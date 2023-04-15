@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -14,6 +14,7 @@ import {BailError} from "web-vcore/.yalc/mobx-graphlink";
 import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {NodeDataForTreeGrapher} from "../MapUI.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
@@ -133,14 +134,21 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.lastRenderTime = Date.now();
 
 		const displayText = GetNodeDisplayText(node, path, map); // don't remove this; it's needed, since it's a dependency of GetMeasurementInfo, but within a "CatchBail" suppressor
+		const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 		const {width} = GetMeasurementInfoForNode(node, path, map);
+		const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
+		const hasToolbarAbove = ShowNodeToolbars(map) && node.type != NodeType.argument && (node.type != NodeType.category || usesToolbarForPrefixText);
 
-		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: GetNodeColor(node, "connector", false).css(),
-			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
-			//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
-			parentIsAbove: inBelowGroup,
-		}, {nodeType: node.type, width, expanded: boxExpanded});
+		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(
+			treePath,
+			{
+				color: GetNodeColor(node, "connector", false).css(),
+				gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
+				//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
+				parentIsAbove: inBelowGroup,
+			},
+			new NodeDataForTreeGrapher({nodeType: node.type, width, expanded: boxExpanded, hasToolbarAbove}),
+		);
 
 		// Assert(!relevanceArguments.Any(a=>a.type == NodeType.claim), "Single-premise argument has more than one premise!");
 		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {

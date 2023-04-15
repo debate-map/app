@@ -19,6 +19,7 @@ export const GADDemo_COVID = startURL.GetQueryVar("extra") == "cov";
 export const GADDemo_2020 = startURL.GetQueryVar("extra") == "2020";
 export const GADDemo_AI = startURL.GetQueryVar("extra") == "ai";
 export const ShowHeader = startURL.GetQueryVar("header") != "0";
+globalThis.ShowHeader_forJSCommon = ShowHeader;
 
 export function GetGADExternalSiteURL() {
 	if (GADDemo_COVID) return "https://www.covidconvo.org";

@@ -69,9 +69,9 @@ The numbers indicate how well the sites rank on each factor, segmented into leve
 ### To evaluate
 
 The following sites have not yet been evaluated for the criteria in the table above:
-* https://www.whysaurus.com
-* https://socratrees.azurewebsites.net
-* https://ameliorate.app
+* [Whysaurus](https://www.whysaurus.com)
+* [Socratrees](https://socratrees.azurewebsites.net)
+* [Ameliorate](https://ameliorate.app)
 
 ### Others
 
