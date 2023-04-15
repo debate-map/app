@@ -20,6 +20,7 @@ import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js"
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
 import {Attachment} from "../@Shared/Attachments/@Attachment.js";
+import {GADDemo_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -322,40 +323,6 @@ export function GetAllNodeRevisionTitles(nodeRevision: NodeRevision): string[] {
 	return TitleKey_values.map(key=>nodeRevision.phrasing[key]).filter(a=>a != null) as string[];
 }
 
-export function ShouldExtractPrefixText(childLayout: ChildLayout) {
-	return childLayout == ChildLayout.slStandard || globalThis.GADDemo_forJSCommon; // see GAD.ts for definition
-}
-export type PrefixTextExtractLocation = "toolbar" | "parentArgument";
-export const WhereShouldNodePrefixTextBeShown = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): PrefixTextExtractLocation=>{
-	if (node.type == NodeType.claim && path != null) {
-		const parentNode = GetParentNode(path);
-		if (parentNode?.type == NodeType.argument) {
-			const premises = GetNodeChildrenL3(parentNode.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
-			if (premises.length == 1 && premises[0].id == node.id) {
-				return "parentArgument";
-			}
-		}
-	}
-	return "toolbar";
-});
-export function GetExtractedPrefixTextInfo_Base(title: string) {
-	const match = title.match(/^([➸ ]*)\[([^\]]*)\]( *)/);
-	if (match == null) return null;
-	const [matchStr, specialCharsAtStart, prefixText] = match;
-	return {matchStr, specialCharsAtStart, prefixText, titleWithoutPrefix: specialCharsAtStart + title.slice(matchStr.length)};
-}
-export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm) {
-	const childLayout = GetChildLayout_Final(node.current, map);
-	const shouldExtract = ShouldExtractPrefixText(childLayout);
-	if (!shouldExtract) return null;
-
-	const title = GetNodeDisplayText(node, path, map, form, false);
-	const info_base = GetExtractedPrefixTextInfo_Base(title);
-	if (info_base == null) return null;
-	const extractLocation = WhereShouldNodePrefixTextBeShown(node, path, form);
-	return {...info_base, extractLocation};
-}
-
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 /** Subfunction of GetNodeDisplayText, that only uses a node's raw title-texts to give its rawTitle result. (useful, eg. for double-click editing of a node's text) */
 export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
@@ -430,7 +397,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 	}
 
 	// in SL+NoHeader mode: if there are special sl-related chars at start of text, remove those chars
-	if (globalThis.GADDemo_forJSCommon && !globalThis.ShowHeader_forJSCommon) { // see GAD.ts for definition
+	if (GADDemo_ForJSCommon() && !ShowHeader_ForJSCommon()) {
 		// three parts: word/emoji + space [at start; optional], bracketed-text, space(s) after bracket-text [optional]
 		// this regex strips out parts 2 and 3, but leaves in part 1
 		resultTitle = resultTitle.replace(/^([➸ ]*)/, "");

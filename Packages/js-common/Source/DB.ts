@@ -35,6 +35,7 @@ export * from "./DB/nodeTags/@NodeTag.js";
 export * from "./DB/nodes.js";
 export * from "./DB/nodes/$node.js";
 //export * from "./DB/nodes/$node/$impactPremise.js";
+export * from "./DB/nodes/$node/$node_sl.js";
 export * from "./DB/nodes/$node/equation.js";
 export * from "./DB/nodes/@Node.js";
 export * from "./DB/nodes/@NodeRevision.js";

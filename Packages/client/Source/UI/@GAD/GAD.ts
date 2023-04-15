@@ -13,12 +13,13 @@ Notes:
 
 const GAD_extraFlags = ["gad", "cov", "2020", "ai"]; // if entry is changed/added, do the same for line in index.html
 export const GADDemo = startURL.domain == "demo.greatamericandebate.org" || GAD_extraFlags.includes(startURL.GetQueryVar("extra") ?? "");
-globalThis.GADDemo_forJSCommon = GADDemo;
 export const GADDemo_Main = startURL.GetQueryVar("extra") == "gad";
 export const GADDemo_COVID = startURL.GetQueryVar("extra") == "cov";
 export const GADDemo_2020 = startURL.GetQueryVar("extra") == "2020";
 export const GADDemo_AI = startURL.GetQueryVar("extra") == "ai";
 export const ShowHeader = startURL.GetQueryVar("header") != "0";
+// These are utilized by the helper functions in $node_sl.ts.
+globalThis.GADDemo_forJSCommon = GADDemo;
 globalThis.ShowHeader_forJSCommon = ShowHeader;
 
 export function GetGADExternalSiteURL() {
