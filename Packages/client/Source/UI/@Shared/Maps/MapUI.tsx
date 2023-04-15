@@ -21,7 +21,7 @@ import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
 import {NodeUI_Inner} from "./Node/NodeUI_Inner.js";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
-import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR} from "./Node/NodeLayoutConstants.js";
+import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
 
 export function GetNodeBoxForPath(path: string) {
 	const nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);
@@ -99,7 +99,8 @@ export class NodeDataForTreeGrapher {
 	nodeType?: NodeType;
 	width?: number;
 	expanded?: boolean;
-	hasToolbarAbove?: boolean;
+	aboveToolbar_visible?: boolean;
+	aboveToolbar_hasLeftButton?: boolean;
 }
 
 type Props = {
@@ -156,21 +157,20 @@ export class MapUI extends BaseComponent<Props, {}> {
 						const nodeAData = nodeA.data.leftColumn_userData as NodeDataForTreeGrapher;
 						const nodeBData = nodeB.data.leftColumn_userData as NodeDataForTreeGrapher;
 
-						// do special spacing between argument and its first premise
-						if (nodeBData.hasToolbarAbove) {
-							const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeAData.nodeType == NodeType.argument && nodeBData.nodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
-							if (nodeAIsArgOfNodeB) {
-								if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return 33;
-								if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return 33;
-								return 5;
-							}
-						}
-
 						// if we have parent-argument's arg-control-bar above, and premise of that arg below, use regular spacing
 						if (nodeAParentPath == nodeBParentPath && nodeAData.nodeType == null && nodeBData.nodeType == NodeType.claim) return 8;
 
-						// if node-b has toolbar above it, give it enough spacing for toolbar + small-gap
-						if (nodeBData.hasToolbarAbove) return 33;
+						// if node-b has toolbar above it, we may need to add extra spacing between the two nodes (since a node's toolbar isn't part of its "main rect" used for generic layout)
+						if (nodeBData.aboveToolbar_visible) {
+							// do special spacing between argument and its first premise (unless it has a left-aligned toolbar-button)
+							const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeAData.nodeType == NodeType.argument && nodeBData.nodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
+							if (nodeAIsArgOfNodeB && !nodeBData.aboveToolbar_hasLeftButton) {
+								if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
+								if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
+								return 5;
+							}
+							return TOOLBAR_HEIGHT + 8;
+						}
 
 						// standard spacing: if both are nodes, use 12; else use 8
 						return nodeAData.nodeType != null && nodeBData.nodeType != null ? 12 : 8;

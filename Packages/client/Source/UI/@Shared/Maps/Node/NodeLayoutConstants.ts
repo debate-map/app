@@ -6,6 +6,7 @@ export const GUTTER_WIDTH = 40;
 export const GUTTER_WIDTH_SMALL = 12;
 //export const GUTTER_WIDTH_SMALL = 0;
 
+export const TOOLBAR_HEIGHT = 25;
 export const TOOLBAR_BUTTON_WIDTH = 110;
 export const ARGUMENTS_BAR_WIDTH = 90;
 export const ARGUMENTS_BAR_WIDTH_WITH_ITS_GUTTER = ARGUMENTS_BAR_WIDTH + GUTTER_WIDTH;

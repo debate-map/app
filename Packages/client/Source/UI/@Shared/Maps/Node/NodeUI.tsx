@@ -137,7 +137,7 @@ export class NodeUI extends BaseComponentPlus(
 		const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 		const {width} = GetMeasurementInfoForNode(node, path, map);
 		const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
-		const hasToolbarAbove = ShowNodeToolbars(map) && node.type != NodeType.argument && (node.type != NodeType.category || usesToolbarForPrefixText);
+		const aboveToolbar_visible = ShowNodeToolbars(map) && node.type != NodeType.argument && (node.type != NodeType.category || usesToolbarForPrefixText);
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(
 			treePath,
@@ -147,7 +147,11 @@ export class NodeUI extends BaseComponentPlus(
 				//gutterWidth: inBelowGroup ? (GUTTER_WIDTH_SMALL + 40) : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
 				parentIsAbove: inBelowGroup,
 			},
-			new NodeDataForTreeGrapher({nodeType: node.type, width, expanded: boxExpanded, hasToolbarAbove}),
+			new NodeDataForTreeGrapher({
+				nodeType: node.type, width, expanded: boxExpanded,
+				aboveToolbar_visible,
+				aboveToolbar_hasLeftButton: aboveToolbar_visible && usesToolbarForPrefixText,
+			}),
 		);
 
 		// Assert(!relevanceArguments.Any(a=>a.type == NodeType.claim), "Single-premise argument has more than one premise!");

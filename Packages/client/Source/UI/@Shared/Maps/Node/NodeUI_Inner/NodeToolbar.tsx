@@ -13,7 +13,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
-import {TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants.js";
+import {TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT} from "../NodeLayoutConstants.js";
 import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
 
 //export type NodeToolbar_SharedProps = NodeUI_Inner_Props & {backgroundColor: Color};
@@ -132,7 +132,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				{extractedPrefixTextInfo?.extractLocation == "toolbar" &&
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
-						height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
 						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
 						position: "absolute", bottom: "100%", left: 0,
 					},
@@ -142,7 +142,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				</Row>}
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
-						height: 25, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
 						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
 						//minWidth: 250, // temp
 					},
