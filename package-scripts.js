@@ -279,6 +279,11 @@ Object.assign(scripts, {
 		tiltUp_ovh:       `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up   -f ./Tilt/Main.star --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
 		tiltDown_ovh:     `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt down -f ./Tilt/Main.star --context ovh`,
 
+		// Using tilt to deploy is convenient, but does have some negatives -- biggest one being that pressing "Trigger update" delete the pod, builds, then deploy the pod, leaving a gap/downtime.
+		// So provide a way to do a "traditional" `kubectl apply` for the main debate-map pods, which avoids that pod downtime.
+		// commented; this does not currently work, because the image needs to be rebuilt for the new code to take effect (maybe just need to find a way to tell Tilt to not delete the pod before the update)
+		//k8sApply_dmWebServer_remote: `kubectl --context Packages/web-server/deployment.yaml`
+
 		forceKillNS: Dynamic(()=>{
 			const pathToKillScript = paths.resolve("./Scripts/KillKubeNS.sh");
 			const pathToKillScript_wsl = pathToKillScript.replace(/\\/g, "/").replace("C:/", "/mnt/c/");

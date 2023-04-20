@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -164,13 +164,15 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 				{node.link &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Order key: </Pre>
-						<TextInput value={node.link.orderKey} onChange={async val=>{
-							/*new UpdateLink({
-								linkID: node.link!.id,
-								linkUpdates: {orderKey: val},
-							}).RunOnServer();*/
-							await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {orderKey: val}});
-						}}/>
+						<TextInput
+							//enabled={CanUserModify(MeID(), node)} // can't use this until we have replicated the access-policy-based permission-check logic from rust to typescript (eg. see assert_user_can_modify function)
+							value={node.link.orderKey} onChange={async val=>{
+								/*new UpdateLink({
+									linkID: node.link!.id,
+									linkUpdates: {orderKey: val},
+								}).RunOnServer();*/
+								await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {orderKey: val}});
+							}}/>
 					</Row>}
 				{node.link && canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>

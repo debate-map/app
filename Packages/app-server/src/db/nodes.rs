@@ -86,6 +86,7 @@ pub async fn assert_user_can_delete_node(ctx: &AccessorContext<'_>, actor: &User
 	assert_user_can_delete(&ctx, &actor, node).await?;
 	
 	let base_text = format!("Cannot delete node #{}, since ", node.id.as_str());
+	// todo: I think this should be removed now, since permissions are handled by generic access-policy check above
 	if !is_user_creator_or_mod(actor, &node.creator) {
 		bail!("{base_text}you are not the owner of this node. (or a mod)");
 	}

@@ -29,6 +29,29 @@ g.webpackData = __webpack_require__;*/
 const startURL = VURL.Parse(window.location.href);
 declare global { export const startURL: VURL; } G({startURL});
 
+// When running in iframe, and 3rd-party cookies are blocked (ie. chrome incognito default), at least allow page to load by polyfilling "localStorage" with transient/in-memory storage.
+// For more info, see: "https://stackoverflow.com/a/69004255" (as well as: https://bugs.chromium.org/p/chromium/issues/detail?id=357625)
+function HasLocalStorage() {
+	try {
+		localStorage.setItem("test", "test");
+		localStorage.removeItem("test");
+		return true;
+	} catch (e) {
+		return false;
+	}
+}
+if (!HasLocalStorage()) {
+	Object.defineProperty(window, "localStorage", {
+		value: {
+			_data: {},
+			setItem(id, val) { return this._data[id] = String(val); },
+			getItem(id) { return this._data.hasOwnProperty(id) ? this._data[id] : undefined; },
+			removeItem(id) { return delete this._data[id]; },
+			clear() { return this._data = {}; },
+		},
+	});
+}
+
 let storeTemp = {} as RootState;
 try {
 	const storeTemp_json = localStorage.__mobx_sync__;
@@ -37,9 +60,11 @@ try {
 			storeTemp = JSON.parse(storeTemp_json);
 		} catch (ex) {}
 	}
-} catch (ex) {
+}
+// if "localStorage" is blocked, and something went wrong with our polyfill of it above, show an error message to user
+catch (ex) {
 	if (prompt(
-		"Debate Map failed to load map-data from local-storage; site cannot function until local-storage is re-enabled.\n\n"
+		"Debate Map failed to load map-data from local-storage; site cannot function without local-storage enabled.\n\n"
 		+ "If Debate Map is loaded in an iframe, you can most likely solve this by disabling the \"Block third-party cookies\" option in Chrome's incognito-mode new-tab, then refreshing.\n\n"
 		+ "For more info, you can copy and visit the link below.",
 		"https://stackoverflow.com/a/69004255",
