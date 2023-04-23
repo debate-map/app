@@ -34,60 +34,60 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddArgumentAndClaim;
 #[Object] impl MutationShard_AddArgumentAndClaim {
-	async fn add_argument_and_claim(&self, gql_ctx: &async_graphql::Context<'_>, input: AddArgumentAndClaimInput, only_validate: Option<bool>) -> Result<AddArgumentAndClaimResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, only_validate, add_argument_and_claim);
+    async fn add_argument_and_claim(&self, gql_ctx: &async_graphql::Context<'_>, input: AddArgumentAndClaimInput, only_validate: Option<bool>) -> Result<AddArgumentAndClaimResult, GQLError> {
+        command_boilerplate!(gql_ctx, input, only_validate, add_argument_and_claim);
     }
 }
 
 #[derive(InputObject, Deserialize)]
 pub struct AddArgumentAndClaimInput {
-	pub mapID: Option<String>,
-	pub argumentParentID: String,
-	pub argumentNode: NodeInput,
-	pub argumentRevision: NodeRevisionInput,
-	pub argumentLink: NodeLinkInput,
-	pub claimNode: NodeInput,
-	pub claimRevision: NodeRevisionInput,
-	pub claimLink: NodeLinkInput,
+    pub mapID: Option<String>,
+    pub argumentParentID: String,
+    pub argumentNode: NodeInput,
+    pub argumentRevision: NodeRevisionInput,
+    pub argumentLink: NodeLinkInput,
+    pub claimNode: NodeInput,
+    pub claimRevision: NodeRevisionInput,
+    pub claimLink: NodeLinkInput,
 }
 
 #[derive(SimpleObject, Debug)]
 pub struct AddArgumentAndClaimResult {
-	pub argumentNodeID: String,
-	pub argumentRevisionID: String,
-	pub claimNodeID: String,
-	pub claimRevisionID: String,
-	pub doneAt: i64,
+    pub argumentNodeID: String,
+    pub argumentRevisionID: String,
+    pub claimNodeID: String,
+    pub claimRevisionID: String,
+    pub doneAt: i64,
 }
 
 }
 
 pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddArgumentAndClaimInput, _extras: NoExtras) -> Result<AddArgumentAndClaimResult, Error> {
-	let AddArgumentAndClaimInput { mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink } = input;
-	
-	let add_argument_result = add_child_node(ctx, actor, false, AddChildNodeInput {
-		mapID: None,
-		parentID: argumentParentID.clone(),
-		node: argumentNode.clone(),
-		revision: argumentRevision.clone(),
-		link: argumentLink.clone(),
-	}, Default::default()).await?;
+    let AddArgumentAndClaimInput { mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink } = input;
 
-	let add_claim_result = add_child_node(ctx, actor, false, AddChildNodeInput {
-		mapID: None,
-		parentID: add_argument_result.nodeID.clone(),
-		node: claimNode,
-		revision: claimRevision,
-		link: claimLink,
-	}, Default::default()).await?;
+    let add_argument_result = add_child_node(ctx, actor, false, AddChildNodeInput {
+        mapID: None,
+        parentID: argumentParentID.clone(),
+        node: argumentNode.clone(),
+        revision: argumentRevision.clone(),
+        link: argumentLink.clone(),
+    }, Default::default()).await?;
 
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+    let add_claim_result = add_child_node(ctx, actor, false, AddChildNodeInput {
+        mapID: None,
+        parentID: add_argument_result.nodeID.clone(),
+        node: claimNode,
+        revision: claimRevision,
+        link: claimLink,
+    }, Default::default()).await?;
 
-	Ok(AddArgumentAndClaimResult {
-		argumentNodeID: add_argument_result.nodeID,
-		argumentRevisionID: add_argument_result.revisionID,
-		claimNodeID: add_claim_result.nodeID,
-		claimRevisionID: add_claim_result.revisionID,
-		doneAt: time_since_epoch_ms_i64(),
-	})
+    increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+
+    Ok(AddArgumentAndClaimResult {
+        argumentNodeID: add_argument_result.nodeID,
+        argumentRevisionID: add_argument_result.revisionID,
+        claimNodeID: add_claim_result.nodeID,
+        claimRevisionID: add_claim_result.revisionID,
+        doneAt: time_since_epoch_ms_i64(),
+    })
 }

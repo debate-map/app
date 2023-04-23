@@ -38,16 +38,16 @@ wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddChildNode;
 #[Object] impl MutationShard_AddChildNode {
-	async fn add_child_node(&self, gql_ctx: &async_graphql::Context<'_>, input: AddChildNodeInput, only_validate: Option<bool>) -> Result<AddChildNodeResult, GQLError> {
-		command_boilerplate!(gql_ctx, input, only_validate, add_child_node);
+    async fn add_child_node(&self, gql_ctx: &async_graphql::Context<'_>, input: AddChildNodeInput, only_validate: Option<bool>) -> Result<AddChildNodeResult, GQLError> {
+        command_boilerplate!(gql_ctx, input, only_validate, add_child_node);
     }
 }
 
 #[derive(InputObject, Deserialize, Serialize, Clone)]
 pub struct AddChildNodeInput {
     pub mapID: Option<String>,
-	pub parentID: String,
-	pub node: NodeInput,
+    pub parentID: String,
+    pub node: NodeInput,
     pub revision: NodeRevisionInput,
     pub link: NodeLinkInput,
 }
@@ -63,11 +63,11 @@ pub struct AddChildNodeResult {
 }
 
 pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, _extras: NoExtras) -> Result<AddChildNodeResult, Error> {
-	let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input.clone();
-	
+    let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input.clone();
+    
     let parent = get_node(ctx, &parentID).await?;
     assert_user_can_add_child(ctx, actor, &parent).await?; // defensive
-
+    
     let node_id = new_uuid_v4_as_b64();
     let link = NodeLinkInput {
         // set by server
@@ -76,14 +76,14 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
         // pass-through
         ..link_
     };
-
-	let add_node_result = add_node(ctx, actor, node_, Some(node_id.clone()), revision_).await?;
-    ensure!(add_node_result.nodeID == node_id, "The node-id returned by add_node didn't match the node-id-override supplied to it!");
-
-	let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
     
-	increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
-
+    let add_node_result = add_node(ctx, actor, node_, Some(node_id.clone()), revision_).await?;
+    ensure!(add_node_result.nodeID == node_id, "The node-id returned by add_node didn't match the node-id-override supplied to it!");
+    
+    let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
+    
+    increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+    
     let result = AddChildNodeResult {
         nodeID: add_node_result.nodeID,
         revisionID: add_node_result.revisionID,
@@ -91,9 +91,9 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
         doneAt: time_since_epoch_ms_i64(),
     };
     record_command_run(
-		ctx, actor,
-		"addChildNode".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
-		vec![input.parentID, result.nodeID.clone()],
-	).await?;
-	Ok(result)
+        ctx, actor,
+        "addChildNode".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
+        vec![input.parentID, result.nodeID.clone()],
+    ).await?;
+    Ok(result)
 }

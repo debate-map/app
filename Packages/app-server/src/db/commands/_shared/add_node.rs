@@ -16,12 +16,8 @@ use tracing::info;
 use crate::db::_shared::common_errors::err_should_be_null;
 use crate::db::commands::_command::{command_boilerplate, tbd, upsert_db_entry_by_id_for_struct};
 use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
-use crate::db::commands::add_node_revision::{
-    self, add_node_revision, AddNodeRevisionExtras, AddNodeRevisionInput, AddNodeRevisionResult,
-};
-use crate::db::general::sign_in_::jwt_utils::{
-    get_user_info_from_gql_ctx, resolve_jwt_to_user_info,
-};
+use crate::db::commands::add_node_revision::{self, add_node_revision, AddNodeRevisionExtras, AddNodeRevisionInput, AddNodeRevisionResult};
+use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
 use crate::db::nodes_::_node::{Node, NodeInput};
@@ -69,28 +65,16 @@ pub async fn add_node(
 
     // validate the node, then add it to db
     validate_node(&node)?;
-    upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node.clone())
-        .await?;
+    upsert_db_entry_by_id_for_struct(&ctx, "nodes".to_owned(), node.id.to_string(), node.clone()).await?;
 
     // add node-revision to db
-    ensure!(
-        revision.node.is_none(),
-        err_should_be_null("revision.node").to_string()
-    );
+    ensure!(revision.node.is_none(), err_should_be_null("revision.node").to_string());
     revision.node = Some(node.id.to_string());
     let add_rev_result = add_node_revision(
-        ctx,
-        actor,
-        false,
-        AddNodeRevisionInput {
-            mapID: None,
-            revision,
-        },
-        AddNodeRevisionExtras {
-            id_override: Some(revision_id.clone()),
-        },
-    )
-    .await?;
+        ctx, actor, false,
+        AddNodeRevisionInput { mapID: None, revision },
+        AddNodeRevisionExtras { id_override: Some(revision_id.clone()) }
+    ).await?;
     ensure!(add_rev_result.id == revision_id, "The revision-id returned by add_node_revision didn't match the revision-id-override supplied to it!");
 
     Ok(AddNodeResult {
@@ -100,9 +84,7 @@ pub async fn add_node(
 }
 
 pub fn validate_node(node: &Node) -> Result<(), Error> {
-    if node.multiPremiseArgument.is_some() {
-        ensure!(node.r#type == NodeType::argument);
-    }
+    if node.multiPremiseArgument.is_some() { ensure!(node.r#type == NodeType::argument); }
 
     Ok(())
 }
