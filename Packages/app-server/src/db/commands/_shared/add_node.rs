@@ -39,13 +39,7 @@ pub struct AddNodeExtras {
 }*/
 
 // in the future, this will very likely be a command present in the graphql api; until the use-case comes up though, we'll keep it as just a function
-pub async fn add_node(
-    ctx: &AccessorContext<'_>,
-    actor: &User,
-    node_: NodeInput,
-    node_id_override: Option<String>,
-    mut revision: NodeRevisionInput,
-) -> Result<AddNodeResult, Error> {
+pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput, node_id_override: Option<String>, mut revision: NodeRevisionInput) -> Result<AddNodeResult, Error> {
     let revision_id = new_uuid_v4_as_b64();
     let node = Node {
         // set by server
