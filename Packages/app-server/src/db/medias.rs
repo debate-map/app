@@ -33,9 +33,9 @@ pub enum MediaType {
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Media {
     pub id: ID,
-    pub accessPolicy: String,
 	pub creator: String,
 	pub createdAt: i64,
+    pub accessPolicy: String,
     pub name: String,
     pub r#type: MediaType,
     pub url: String,

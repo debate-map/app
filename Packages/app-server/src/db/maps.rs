@@ -27,9 +27,9 @@ wrap_slow_macros!{
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Map {
     pub id: ID,
+    pub accessPolicy: String,
 	pub creator: String,
 	pub createdAt: i64,
-    pub accessPolicy: String,
     pub name: String,
     pub note: Option<String>,
     pub noteInline: Option<bool>,

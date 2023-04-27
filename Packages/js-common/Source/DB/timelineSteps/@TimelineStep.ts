@@ -1,36 +1,39 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 
+@MGLClass({table: "timelineSteps"})
 export class TimelineStep {
 	constructor(initialData: Partial<TimelineStep>) {
 		CE(this).VSet(initialData);
 	}
 
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
-	timelineID: string;
-	title: string;
-	groupID: number;
-	// if timeline has video
-	videoTime: number;
 
+	@Field({type: "string"})
+	timelineID: string;
+
+	@Field({type: "string"}) // should "{opt: true}" be added?
+	orderKey: string;
+
+	/*@Field({type: "string"})
+	title: string;*/
+
+	@Field({type: "string"})
+	groupID: string;
+
+	@Field({type: "number"}, {opt: true})
+	timeFromStart?: number|n;
+
+	@Field({type: "number"}, {opt: true})
+	timeFromLastStep?: number|n;
+
+	@Field({type: "string"})
 	message: string;
 
+	@Field({items: {$ref: "NodeReveal"}})
 	nodeReveals: NodeReveal[];
 }
-AddSchema("TimelineStep", {
-	properties: {
-		id: {$ref: "UUID"},
-		timelineID: {type: "string"},
-		title: {type: "string"},
-		groupID: {type: ["number", "null"]},
-		videoTime: {type: ["number", "null"]},
-
-		message: {type: "string"},
-
-		nodeReveals: {$ref: "NodeReveal"},
-	},
-	required: ["timelineID"],
-});
 
 export class NodeReveal {
 	path: string;

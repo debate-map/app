@@ -1,7 +1,7 @@
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}, anyhow::{bail, anyhow}, anyhow::Error};
 use tracing::info;
 
-use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User, access_policies_::{_permission_set::{APAction, APTable}, _access_policy::AccessPolicy}, _shared::access_policy_target::AccessPolicyTarget, nodes::get_node, general::permission_helpers::is_user_admin, feedback_user_infos::UserInfo}, links::db_live_cache::get_access_policy_cached, utils::db::{accessors::AccessorContext, rls::rls_policies::UsesRLS}};
+use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User, access_policies_::{_permission_set::{APAction, APTable}, _access_policy::AccessPolicy}, _shared::access_policy_target::AccessPolicyTarget, nodes::get_node, general::permission_helpers::is_user_admin, feedback_user_infos::UserInfo, timelines::{Timeline, get_timeline}, timeline_steps::TimelineStep}, links::db_live_cache::get_access_policy_cached, utils::db::{accessors::AccessorContext, rls::rls_policies::UsesRLS}};
 
 // empty policies (ie. can always be viewed by anyone) [these functions are not needed in sql version]
 // ==========
@@ -70,6 +70,9 @@ impl CanVote for Node {
 can_modify!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::terms, APAction::modify).await? });
 can_delete!(Term, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::terms, APAction::delete).await? });
 
+can_modify!(Timeline, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::others, APAction::modify).await? });
+can_delete!(Timeline, self, ctx, actor, { is_user_mod_or_creator(actor, &self.creator) || does_policy_allow_x(ctx, actor_id(actor), &self.accessPolicy, APTable::others, APAction::delete).await? });
+
 // derivative RLS policies (where to access, it must be that: user is admin, user is creator, or all of the associated RLS policies must pass)
 // ==========
 
@@ -93,8 +96,23 @@ can_delete!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
 //can_modify!(NodeRevision, self, actor, { is_user_creator(actor, &self.creator) });
 //can_delete!(NodeRevision, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 
+// only the creator of a node-tag can edit/delete it
 can_modify!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
 can_delete!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+
+// modify/delete permissions for each timeline-step is the same as that of the timeline it is part of
+can_modify!(TimelineStep, self, ctx, actor, {
+    is_user_mod_or_creator(actor, &self.creator) || {
+        let timeline = get_timeline(ctx, &self.timelineID).await?;
+        does_policy_allow_x(ctx, actor_id(actor), &timeline.accessPolicy, APTable::others, APAction::modify).await?
+    }
+});
+can_delete!(TimelineStep, self, ctx, actor, {
+    is_user_mod_or_creator(actor, &self.creator) || {
+        let timeline = get_timeline(ctx, &self.timelineID).await?;
+        does_policy_allow_x(ctx, actor_id(actor), &timeline.accessPolicy, APTable::others, APAction::delete).await?
+    }
+});
 
 // unique RLS policies
 // ==========

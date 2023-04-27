@@ -2,14 +2,14 @@ import {Column, Div} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Timeline, GetTimelineStep} from "dm_common";
+import {Timeline, GetTimelineStep, TimelineStep} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
 
 @Observer
-export class TimelineIntroBox extends BaseComponentPlus({} as {timeline: Timeline}) {
+export class TimelineIntroBox extends BaseComponentPlus({} as {timeline: Timeline, steps: TimelineStep[]}) {
 	render() {
-		const {timeline} = this.props;
-		const firstStep = GetTimelineStep(timeline.steps[0]);
+		const {timeline, steps} = this.props;
+		const firstStep = steps[0];
 		if (firstStep == null) return null;
 
 		return (

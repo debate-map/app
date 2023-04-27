@@ -1,9 +1,9 @@
 CREATE TABLE app.shares (
-    id text NOT NULL,
-    creator text NOT NULL,
+    "id" text NOT NULL,
+    "creator" text NOT NULL,
     "createdAt" bigint NOT NULL,
-    name text NOT NULL,
-    type text NOT NULL,
+    "name" text NOT NULL,
+    "type" text NOT NULL,
     "mapID" text,
     "mapView" jsonb
 );

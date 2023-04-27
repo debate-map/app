@@ -1,38 +1,36 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 
+@MGLClass({table: "timelines"})
 export class Timeline {
-	constructor(initialData: {name: string, creator: string} & Partial<Timeline>) {
+	constructor(initialData: {name: string, mapID: string} & Partial<Timeline>) {
 		CE(this).VSet(initialData);
 	}
 
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
-	creator: string; // probably todo: rename to creatorID
+
+	@Field({type: "string"}, {opt: true})
+	creator: string;
+
+	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
+	@Field({type: "string"})
+	accessPolicy: string;
+
+	@Field({type: "string"})
 	mapID: string;
+
+	@Field({type: "string"})
 	name: string;
 
-	videoID: string;
-	videoStartTime: number;
-	videoHeightVSWidthPercent: number;
+	@Field({type: "string"}, {opt: true})
+	videoID?: string|n;
 
-	steps: string[];
+	@Field({type: "number"}, {opt: true})
+	videoStartTime?: number|n;
+
+	@Field({type: "number"}, {opt: true})
+	videoHeightVSWidthPercent?: number|n;
 }
-AddSchema("Timeline", {
-	properties: {
-		id: {type: "string"},
-		creator: {type: "string"},
-		createdAt: {type: "number"},
-
-		mapID: {type: "string"},
-		name: {type: "string"},
-
-		videoID: {type: ["string", "null"]},
-		videoStartTime: {type: ["number", "null"]},
-		videoHeightVSWidthPercent: {type: "number"},
-
-		steps: {items: {type: "string"}},
-	},
-	required: ["mapID", "name", "creator", "createdAt"],
-});

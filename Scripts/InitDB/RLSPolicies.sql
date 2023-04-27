@@ -35,6 +35,14 @@ DO $$ BEGIN
 	);
 END $$;
 
+ALTER TABLE app."timelines" ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+	DROP POLICY IF EXISTS "timelines_rls" ON app."timelines";
+	CREATE POLICY "timelines_rls" ON app."timelines" AS PERMISSIVE FOR ALL USING (
+		is_user_admin_or_creator('@me', creator) OR does_policy_allow_access('@me', "accessPolicy", 'others')
+	);
+END $$;
+
 -- derivative RLS policies (where to access, it must be that: user is admin, user is creator, or all of the associated RLS policies must pass)
 -- ==========
 
@@ -74,6 +82,14 @@ ALTER TABLE app."nodeTags" ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
 	DROP POLICY IF EXISTS "nodeTags_rls" ON app."nodeTags";
 	CREATE POLICY "nodeTags_rls" ON app."nodeTags" AS PERMISSIVE FOR ALL USING (
+		is_user_admin_or_creator('@me', creator) OR do_policies_allow_access('@me', "c_accessPolicyTargets")
+	);
+END $$;
+
+ALTER TABLE app."timelineSteps" ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+	DROP POLICY IF EXISTS "timelineSteps_rls" ON app."timelineSteps";
+	CREATE POLICY "timelineSteps_rls" ON app."timelineSteps" AS PERMISSIVE FOR ALL USING (
 		is_user_admin_or_creator('@me', creator) OR do_policies_allow_access('@me', "c_accessPolicyTargets")
 	);
 END $$;

@@ -1,7 +1,7 @@
 use rust_shared::{utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV}, anyhow::{bail, anyhow}, anyhow::Error};
 use tracing::info;
 
-use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User, access_policies_::{_permission_set::{APAction, APTable}, _access_policy::AccessPolicy}, _shared::access_policy_target::AccessPolicyTarget}, links::db_live_cache::get_access_policy_cached};
+use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User, access_policies_::{_permission_set::{APAction, APTable}, _access_policy::AccessPolicy}, _shared::access_policy_target::AccessPolicyTarget, timelines::Timeline, timeline_steps::TimelineStep}, links::db_live_cache::get_access_policy_cached};
 
 use super::rls_helpers::{is_user_creator, does_policy_allow_access, do_policies_allow_access, is_user_admin, is_user_admin_or_creator};
 
@@ -57,6 +57,11 @@ impl UsesRLS for Node {
         is_user_admin_or_creator(user_id, &self.creator) || does_policy_allow_access(user_id, &self.accessPolicy, APTable::nodes)
     }
 }
+impl UsesRLS for Timeline {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || does_policy_allow_access(user_id, &self.accessPolicy, APTable::others)
+    }
+}
 
 // derivative RLS policies (where to access an entry, the RLS policies of its associated objects must all pass)
 // ==========
@@ -83,6 +88,11 @@ impl UsesRLS for NodeRevision {
     }
 }
 impl UsesRLS for NodeTag {
+    fn can_access_cached(&self, user_id: Option<&str>) -> bool {
+        is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
+    }
+}
+impl UsesRLS for TimelineStep {
     fn can_access_cached(&self, user_id: Option<&str>) -> bool {
         is_user_admin_or_creator(user_id, &self.creator) || do_policies_allow_access(user_id, &self.c_accessPolicyTargets)
     }

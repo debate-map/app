@@ -22,6 +22,7 @@ import {NodeUI_Inner} from "./Node/NodeUI_Inner.js";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
+import {TimelinePanel} from "../Timelines/TimelinePanel.js";
 
 export function GetNodeBoxForPath(path: string) {
 	const nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);
@@ -72,7 +73,7 @@ export const ACTSetFocusNodeAndViewOffset = StoreAction((mapID: string, focusNod
 	}
 });
 
-class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
+export class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
 	render() {
 		const {message} = this.props;
 		return (
@@ -263,8 +264,8 @@ export class MapUI extends BaseComponent<Props, {}> {
 				{/*! withinPage &&
 					<TimelineOverlayUI map={map}/> */}
 				<Row style={{marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start"}}>
-					{/*!withinPage && timelinePanelOpen &&
-						<TimelinePanel map={map}/>*/}
+					{!withinPage && timelinePanelOpen &&
+						<TimelinePanel map={map}/>}
 					<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.mapUIEl}
 						style={ES({height: "100%"}, withinPage && {overflow: "visible"})}

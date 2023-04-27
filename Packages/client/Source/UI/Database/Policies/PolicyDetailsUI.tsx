@@ -112,16 +112,20 @@ class PermissionSetEditor extends BaseComponent<{enabled: boolean, value: Permis
 					<PermissionSetForTypeEditor enabled={enabled} collection="medias" value={value.medias} onChange={val=>Change(a=>a.medias = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
-					<Text>Maps:</Text>
+					<TextPlus info="Also affects the partially or fully derivative permissions for entries in tables:\n* mapNodeEdits\n* timelines\n* timelineSteps">Maps:</TextPlus>
 					<PermissionSetForTypeEditor enabled={enabled} collection="maps" value={value.maps} onChange={val=>Change(a=>a.maps = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
-					<Text>Nodes:</Text>
+					<TextPlus info="Also affects the partially or fully derivative permissions for entries in tables:\n* mapNodeEdits\n* nodeLinks\n* nodePhrasings\n* nodeRatings\n* nodeRevisions\n* nodeTags\n* commandRuns">Nodes:</TextPlus>
 					<PermissionSetForTypeEditor enabled={enabled} collection="nodes" value={value.nodes} onChange={val=>Change(a=>a.nodes = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Text>Node ratings:</Text>
 					<PermissionSetForTypeEditor enabled={enabled} collection="nodeRatings" value={value.nodeRatings} onChange={val=>Change(a=>a.nodeRatings = val)}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}>
+					<TextPlus info="Currently controls permissions for entries in tables:\n* timelines\n* timelineSteps (derived from timelines)">Maps:</TextPlus>
+					<PermissionSetForTypeEditor enabled={enabled} collection="others" value={value.others} onChange={val=>Change(a=>a.others = val)}/>
 				</RowLR>
 			</Column>
 		);

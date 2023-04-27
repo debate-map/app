@@ -112,6 +112,20 @@ END $$;
 DROP TRIGGER IF EXISTS command_runs_refresh_targets_for_self on app."commandRuns";
 CREATE TRIGGER command_runs_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."commandRuns" FOR EACH ROW EXECUTE FUNCTION app.command_runs_refresh_targets_for_self();
 
+CREATE OR REPLACE FUNCTION app.timeline_steps_refresh_targets_for_self() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'INSERT' OR cardinality(NEW."c_accessPolicyTargets") = 0
+		OR OLD."timelineID" IS DISTINCT FROM NEW."timelineID"
+	) THEN
+		NEW."c_accessPolicyTargets" = distinct_array(array[
+			(SELECT concat((SELECT "accessPolicy" FROM "timelines" WHERE id = NEW."timelineID"), ':others'))
+		]);
+	END IF;
+	RETURN NEW;
+END $$;
+DROP TRIGGER IF EXISTS timeline_steps_refresh_targets_for_self on app."timelineSteps";
+CREATE TRIGGER timeline_steps_refresh_targets_for_self BEFORE INSERT OR UPDATE ON app."timelineSteps" FOR EACH ROW EXECUTE FUNCTION app.timeline_steps_refresh_targets_for_self();
+
 -- "push" triggers, ie. responsive changes to other tables' "c_accessPolicyTargets" fields, based on source changes in our row (ie. to our "accessPolicy" field)
 -- ==========
 
@@ -146,3 +160,16 @@ CREATE OR REPLACE FUNCTION app.nodes_refresh_targets_for_others() RETURNS TRIGGE
 END $$;
 DROP TRIGGER IF EXISTS nodes_refresh_targets_for_others on app."nodes";
 CREATE TRIGGER nodes_refresh_targets_for_others AFTER UPDATE OR DELETE ON app."nodes" FOR EACH ROW EXECUTE FUNCTION app.nodes_refresh_targets_for_others();
+
+CREATE OR REPLACE FUNCTION app.timelines_refresh_targets_for_others() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN
+	IF (
+		TG_OP = 'DELETE' -- also trigger on deletes, as this helps catch errors
+		OR OLD."accessPolicy" IS DISTINCT FROM NEW."accessPolicy"
+	) THEN
+		-- simply cause the associated rows in the other tables to have their triggers run again
+		UPDATE app."timelineSteps" SET "c_accessPolicyTargets" = array[]::text[] WHERE "timelineID" = OLD.id;
+	END IF;
+	RETURN NULL; -- result-value is ignored (since in an AFTER trigger), but must still return something
+END $$;
+DROP TRIGGER IF EXISTS timelines_refresh_targets_for_others on app."timelines";
+CREATE TRIGGER timelines_refresh_targets_for_others AFTER UPDATE ON app."timelines" FOR EACH ROW EXECUTE FUNCTION app.timelines_refresh_targets_for_others();

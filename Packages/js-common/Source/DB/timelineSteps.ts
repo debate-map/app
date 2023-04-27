@@ -1,16 +1,45 @@
 import {emptyArray, ToNumber, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 import {GetNode, GetNodeChildren} from "./nodes.js";
 
-export const GetTimelineStep = CreateAccessor((id: string): TimelineStep|n=>{
-	if (id == null) return null;
-	//return GetDoc({}, a=>a.timelineSteps.get(id));
-	return null;
+export const GetTimelineStep = CreateAccessor((id: string|n): TimelineStep|n=>{
+	return GetDoc({}, a=>a.timelineSteps.get(id!));
 });
-export const GetTimelineSteps = CreateAccessor((timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
-	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "Normal" : "BIN"](id)) ?? [];
+export const GetTimelineSteps = CreateAccessor((timelineID: string, orderByOrderKeys = true): TimelineStep[]=>{
+	let result = GetDocs({
+		params: {filter: {
+			timelineID: {equalTo: timelineID},
+		}},
+	}, a=>a.timelineSteps);
+	if (orderByOrderKeys) result = result.OrderBy(a=>a.orderKey);
+	return result;
+});
+
+export const GetTimelineStepTimeFromStart = CreateAccessor((stepID: string|n): number|null=>{
+	const step = GetTimelineStep(stepID);
+	if (step == null) return null;
+	if (step.timeFromStart != null) return step.timeFromStart;
+
+	const steps = GetTimelineSteps(step.timelineID);
+	const index = steps.findIndex(a=>a.id == stepID);
+	if (index == -1) return null;
+	let totalTimeSoFar = 0;
+	for (const step2 of steps) {
+		if (step2.timeFromStart != null) {
+			totalTimeSoFar = step2.timeFromStart;
+		} else if (step2.timeFromLastStep != null) {
+			totalTimeSoFar += step2.timeFromLastStep;
+		}
+		if (step2.id == step.id) break;
+	}
+	return totalTimeSoFar;
+});
+export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((stepID: string, timeX: number)=>{
+	const timeFromStart = GetTimelineStepTimeFromStart(stepID);
+	if (timeFromStart == null) return false;
+	return timeFromStart <= timeX;
 });
 
 export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
@@ -18,7 +47,8 @@ export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], 
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
 			if (reveal.show) {
-				const stepTime_safe = (step.videoTime != null ? step.videoTime : CE(steps.slice(0, index).map(a=>a.videoTime)).LastOrX(a=>a != null)) ?? 0;
+				const stepTime = GetTimelineStepTimeFromStart(step.id);
+				const stepTime_safe = stepTime ?? CE(steps.slice(0, index).map(a=>GetTimelineStepTimeFromStart(a.id))).LastOrX(a=>a != null) ?? 0;
 				if (baseOnLastReveal) {
 					nodeRevealTimes[reveal.path] = Math.max(stepTime_safe, ToNumber(nodeRevealTimes[reveal.path], 0));
 				} else {

@@ -27,6 +27,8 @@ begin;
 	\ir Tables/nodeTags.sql
 	\ir Tables/shares.sql
 	\ir Tables/terms.sql
+	\ir Tables/timelines.sql
+	\ir Tables/timelineSteps.sql
 	\ir Tables/userHiddens.sql
 	\ir Tables/users.sql
 	--\ir Tables/visibilityDirectives.sql

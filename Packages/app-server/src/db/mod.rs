@@ -37,6 +37,8 @@ pub mod commands {
     pub mod add_node_tag;
     pub mod add_share;
     pub mod add_term;
+    pub mod add_timeline;
+    pub mod add_timeline_step;
     pub mod clone_subtree;
     pub mod delete_access_policy;
     pub mod delete_argument;
@@ -49,6 +51,8 @@ pub mod commands {
     pub mod delete_node_tag;
     pub mod delete_share;
     pub mod delete_term;
+    pub mod delete_timeline;
+    pub mod delete_timeline_step;
     pub mod import_firestore_dump;
     pub mod link_node;
     pub mod set_node_is_multi_premise_argument;
@@ -64,6 +68,8 @@ pub mod commands {
     pub mod update_node_tag;
     pub mod update_share;
     pub mod update_term;
+    pub mod update_timeline;
+    pub mod update_timeline_step;
     pub mod update_user;
     pub mod update_user_hidden;
     pub mod refresh_lq_data;
@@ -110,3 +116,5 @@ pub mod node_revisions;
 pub mod node_tags;
 pub mod nodes;
 pub mod shares;
+pub mod timelines;
+pub mod timeline_steps;

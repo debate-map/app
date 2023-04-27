@@ -23,6 +23,9 @@ export class PermissionSet {
 	// most node-related rows use their node's access-policy as their own; node-ratings is an exception, because individual entries can be kept hidden without disrupting collaboration significantly
 	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
 	nodeRatings = new PermissionSetForType();
+
+	@Field({$ref: "PermissionSetForType", ...MarkerForNonScalarField()})
+	others = new PermissionSetForType();
 }
 
 @MGLClass()
@@ -84,6 +87,7 @@ export enum APTable {
 	terms = "terms",
 	nodes = "nodes",
 	nodeRatings = "nodeRatings",
+	others = "others",
 }
 export enum APAction {
 	access = "access",

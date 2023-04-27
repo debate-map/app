@@ -1,13 +1,13 @@
 CREATE TABLE app."nodeTags" (
-    id text NOT NULL,
-    creator text NOT NULL,
+    "id" text NOT NULL,
+    "creator" text NOT NULL,
     "createdAt" bigint NOT NULL,
-    nodes text[] NOT NULL,
+    "nodes" text[] NOT NULL,
     "mirrorChildrenFromXToY" jsonb,
     "xIsExtendedByY" jsonb,
     "mutuallyExclusiveGroup" jsonb,
     "restrictMirroringOfX" jsonb,
-    labels jsonb,
+    "labels" jsonb,
     "cloneHistory" jsonb,
 	"c_accessPolicyTargets" text[] NOT NULL
 );

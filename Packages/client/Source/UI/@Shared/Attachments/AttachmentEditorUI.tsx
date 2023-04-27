@@ -33,7 +33,7 @@ export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: 
 						ResetAttachment(newData, val);
 						Change();
 					}}/>
-					<CheckBox ml={5} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
+					<CheckBox ml={5} enabled={enabled} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
 				</Row>
 				{attachmentType == AttachmentType.equation &&
 					<EquationEditorUI phase={phase} baseData={NN(newData.equation)} onChange={val=>Change(newData.equation = val)}/>}

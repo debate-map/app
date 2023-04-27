@@ -29,6 +29,7 @@ pub struct PermissionSet {
     pub nodes: PermissionSetForType,
     // most node-related rows use their node's access-policy as their own; node-ratings is an exception, because individual entries can be kept hidden without disrupting collaboration significantly
     pub nodeRatings: PermissionSetForType,
+    pub others: PermissionSetForType,
 }
 impl PermissionSet {
     pub fn for_table(&self, table: APTable) -> PermissionSetForType {
@@ -38,6 +39,7 @@ impl PermissionSet {
             APTable::maps => self.maps.clone(),
             APTable::nodes => self.nodes.clone(),
             APTable::nodeRatings => self.nodeRatings.clone(),
+            APTable::others => self.others.clone(),
         }
     }
 }
@@ -122,6 +124,7 @@ pub enum APTable {
     terms,
     nodes,
     nodeRatings,
+    others,
 }
 #[derive(Debug, Clone, Copy)]
 pub enum APAction {

@@ -1,4 +1,4 @@
-import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput} from "dm_common";
+import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
 import {gql} from "web-vcore/nm/@apollo/client";
 
@@ -57,6 +57,8 @@ export const RunCommand_AddNodePhrasing = CreateFunc_RunCommand_AddX(NodePhrasin
 export const RunCommand_AddNodeTag = CreateFunc_RunCommand_AddX(NodeTag, "tag");
 export const RunCommand_AddShare = CreateFunc_RunCommand_AddX(Share, "share");
 export const RunCommand_AddTerm = CreateFunc_RunCommand_AddX(Term, "term");
+export const RunCommand_AddTimeline = CreateFunc_RunCommand_AddX(Timeline, "timeline");
+export const RunCommand_AddTimelineStep = CreateFunc_RunCommand_AddX(TimelineStep, "step");
 
 export const RunCommand_DeleteAccessPolicy = CreateFunc_RunCommand_DeleteX(AccessPolicy);
 export const RunCommand_DeleteMap = CreateFunc_RunCommand_DeleteX(Map);
@@ -66,6 +68,8 @@ export const RunCommand_DeleteNodePhrasing = CreateFunc_RunCommand_DeleteX(NodeP
 export const RunCommand_DeleteNodeTag = CreateFunc_RunCommand_DeleteX(NodeTag);
 export const RunCommand_DeleteShare = CreateFunc_RunCommand_DeleteX(Share);
 export const RunCommand_DeleteTerm = CreateFunc_RunCommand_DeleteX(Term);
+export const RunCommand_DeleteTimeline = CreateFunc_RunCommand_DeleteX(Timeline);
+export const RunCommand_DeleteTimelineStep = CreateFunc_RunCommand_DeleteX(TimelineStep);
 
 export const RunCommand_UpdateAccessPolicy = CreateFunc_RunCommand_UpdateX(AccessPolicy);
 export const RunCommand_UpdateMap = CreateFunc_RunCommand_UpdateX(Map);
@@ -75,6 +79,8 @@ export const RunCommand_UpdateNodePhrasing = CreateFunc_RunCommand_UpdateX(NodeP
 export const RunCommand_UpdateNodeTag = CreateFunc_RunCommand_UpdateX(NodeTag);
 export const RunCommand_UpdateShare = CreateFunc_RunCommand_UpdateX(Share);
 export const RunCommand_UpdateTerm = CreateFunc_RunCommand_UpdateX(Term);
+export const RunCommand_UpdateTimeline = CreateFunc_RunCommand_UpdateX(Timeline);
+export const RunCommand_UpdateTimelineStep = CreateFunc_RunCommand_UpdateX(TimelineStep);
 
 // other commands
 // ==========
