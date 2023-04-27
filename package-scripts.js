@@ -93,10 +93,11 @@ const GetPodInfos = (context = "", namespace = "", requiredLabels = [], filterOu
 		...(requiredLabels.length ? ["-l", requiredLabels.join(",")] : []),
 	];
 	const entryStrings = execSync(cmdArgs.join(" ")).toString().trim().split("\n").slice(1);
-	//console.log("Statuses:\n", entryStrings.join("\n"));
+	console.log("Statuses:\n", entryStrings.join("\n"));
 	let result = entryStrings.map(str=>{
-		// example source string: "dm-app-server-69b55c8dfc-k5zrq   1/1     Running   0          2d"
-		const [sourceStr, name, ready, status, restarts, age] = /^(\S+)\s{3,}(\S+)\s{3,}(\S+)\s{3,}(\S+)\s{3,}(\S+)$/.exec(str);
+		// example source string: "dm-app-server-69b55c8dfc-k5zrq   1/1     Running   0 (6h5m ago)   2d"
+		console.log(`Str1:[${str}]`);
+		const [sourceStr, name, ready, status, restarts, age] = /^(.+?)\s{3,}(.+?)\s{3,}(.+?)\s{3,}(.+?)\s{3,}(.+?)$/.exec(str);
 		return {sourceStr, name, ready, status, restarts, age};
 	});
 	//if (filterOutEvicted) result = result.filter(a=>a.status != "Evicted");
