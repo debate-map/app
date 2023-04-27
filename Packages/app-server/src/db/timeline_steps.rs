@@ -26,6 +26,15 @@ pub async fn get_timeline_step(ctx: &AccessorContext<'_>, id: &str) -> Result<Ti
 
 wrap_slow_macros!{
 
+// commented; these are the only options for now, but later we want the "group" to be a freeform field, eg. for marking which person is speaking for a given step
+/*#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
+pub enum TimelineStepGroup {
+    #[graphql(name = "full")] full,
+    #[graphql(name = "left")] left,
+    #[graphql(name = "right")] right,
+    #[graphql(name = "center")] center,
+}*/
+
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct TimelineStep {
     pub id: ID,

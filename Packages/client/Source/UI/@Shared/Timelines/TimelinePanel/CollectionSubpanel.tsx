@@ -19,8 +19,7 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 		const {map} = this.props;
 		const timelines = GetTimelines(map.id);
 		const timeline = GetSelectedTimeline(map.id);
-		if (timeline == null) return <MapUIWaitMessage message="Timeline is private/deleted."/>;
-		const steps = GetTimelineSteps(timeline.id);
+		const steps = timeline ? GetTimelineSteps(timeline.id) : null;
 
 		return (
 			<Row style={{height: 40, padding: 10}}>
@@ -54,7 +53,8 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 						</Row>
 					</DropDownContent>
 				</DropDown>
-				<Button ml={5} text="X" title="Delete timeline" enabled={timeline != null && steps.length == 0} onClick={async()=>{
+				<Button ml={5} text="X" title="Delete timeline" enabled={timeline != null && steps != null && steps.length == 0} onClick={async()=>{
+					if (timeline == null) return;
 					await RunCommand_DeleteTimeline({id: timeline.id});
 				}} />
 				<Button ml={5} text="+" title="Add new timeline" onClick={()=>{

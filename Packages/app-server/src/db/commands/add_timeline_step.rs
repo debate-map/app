@@ -31,7 +31,7 @@ wrap_slow_macros!{
 
 #[derive(InputObject, Deserialize)]
 pub struct AddTimelineStepInput {
-	pub timeline_step: TimelineStepInput,
+	pub step: TimelineStepInput,
 }
 
 #[derive(SimpleObject, Debug)]
@@ -42,7 +42,7 @@ pub struct AddTimelineStepResult {
 }
 
 pub async fn add_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddTimelineStepInput, _extras: NoExtras) -> Result<AddTimelineStepResult, Error> {
-	let AddTimelineStepInput { timeline_step: timeline_step_ } = input;
+	let AddTimelineStepInput { step: step_ } = input;
 	
 	let timeline_step = TimelineStep {
 		// set by server
@@ -50,13 +50,13 @@ pub async fn add_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		creator: actor.id.to_string(),
 		createdAt: time_since_epoch_ms_i64(),
 		// pass-through
-		timelineID: timeline_step_.timelineID,
-		orderKey: timeline_step_.orderKey,
-		groupID: timeline_step_.groupID,
-		timeFromStart: timeline_step_.timeFromStart,
-		timeFromLastStep: timeline_step_.timeFromLastStep,
-		message: timeline_step_.message,
-		nodeReveals: timeline_step_.nodeReveals,
+		timelineID: step_.timelineID,
+		orderKey: step_.orderKey,
+		groupID: step_.groupID,
+		timeFromStart: step_.timeFromStart,
+		timeFromLastStep: step_.timeFromLastStep,
+		message: step_.message,
+		nodeReveals: step_.nodeReveals,
 		c_accessPolicyTargets: vec![], // auto-set by db
 	};
 

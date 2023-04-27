@@ -3,7 +3,7 @@ import {CE} from "web-vcore/nm/js-vextensions.js";
 
 @MGLClass({table: "timelines"})
 export class Timeline {
-	constructor(initialData: {name: string, mapID: string} & Partial<Timeline>) {
+	constructor(initialData: RequiredBy<Partial<Timeline>, "name" | "mapID" | "accessPolicy">) {
 		CE(this).VSet(initialData);
 	}
 

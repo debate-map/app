@@ -1,7 +1,8 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {Timeline, MeID, TimelineStep} from "dm_common";
+import {Timeline, MeID, TimelineStep, GetUserHidden, GetSystemAccessPolicyID, OrderKey} from "dm_common";
 import {RunCommand_AddTimeline, RunCommand_AddTimelineStep} from "Utils/DB/Command.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {TimelineDetailsUI} from "./TimelineDetailsUI.js";
 
 const defaultIntroMessage = `
@@ -14,10 +15,17 @@ One of these maps has been created for an existing conversation, which took plac
 Continue to the next step to begin displaying the comments made by those involved, and examining their logical connections with each other.
 `.trim();
 
-export function ShowAddTimelineDialog(userID: string, mapID: string) {
+export async function ShowAddTimelineDialog(userID: string, mapID: string) {
+	const prep = await GetAsync(()=>{
+		return {
+			accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy ?? GetSystemAccessPolicyID("Public, ungoverned (standard)"),
+		};
+	});
+
 	let newTimeline = new Timeline({
 		mapID,
 		name: "",
+		accessPolicy: prep.accessPolicy,
 	});
 
 	let error = null;
@@ -38,6 +46,9 @@ export function ShowAddTimelineDialog(userID: string, mapID: string) {
 			const step = new TimelineStep({
 				timelineID,
 				message: defaultIntroMessage.trim(),
+				orderKey: OrderKey.mid().toString(),
+				groupID: "full",
+				nodeReveals: [],
 			});
 			RunCommand_AddTimelineStep(step);
 		},

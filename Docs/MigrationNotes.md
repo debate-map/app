@@ -12,17 +12,20 @@
 * 1\) Added `PermissionSet.others` field/group.
 	* DB response:
 		* 1\) Execute sql:
-		```sql
-		UPDATE "accessPolicies" SET
-			"permissions" = jsonb_set(permissions, '{others}', '{"access": false, "modify": {"minApprovals": -1, "minApprovalPercent": -1}, "delete": {"minApprovals": -1, "minApprovalPercent": -1}}'::jsonb),
-			"permissions_userExtends" = coalesce(
-				(
-					select jsonb_object_agg(j.k, '{"others": {"access": false, "modify": {"minApprovals": -1, "minApprovalPercent": -1}, "delete": {"minApprovals": -1, "minApprovalPercent": -1}}}'::jsonb || j.v)
-					from jsonb_each("permissions_userExtends") as j(k, v)
-				),
-				'{}'::jsonb
-			);
-		```
+			```sql
+			UPDATE "accessPolicies" SET
+				"permissions" = jsonb_set(permissions, '{others}', '{"access": false, "modify": {"minApprovals": -1, "minApprovalPercent": -1}, "delete": {"minApprovals": -1, "minApprovalPercent": -1}}'::jsonb),
+				"permissions_userExtends" = coalesce(
+					(
+						select jsonb_object_agg(j.k, '{"others": {"access": false, "modify": {"minApprovals": -1, "minApprovalPercent": -1}, "delete": {"minApprovals": -1, "minApprovalPercent": -1}}}'::jsonb || j.v)
+						from jsonb_each("permissions_userExtends") as j(k, v)
+					),
+					'{}'::jsonb
+				);
+			```
+* 2\) Added `timelines` and `timelineSteps` tables.
+	* DB response:
+		* 1\) Execute sql in files `timelines.sql` and `timelineSteps.sql`.
 
 ### Pushed on 2023-04-04
 

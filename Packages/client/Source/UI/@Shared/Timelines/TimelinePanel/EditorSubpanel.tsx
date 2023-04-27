@@ -63,6 +63,9 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 							const newStep = new TimelineStep({
 								timelineID: timeline.id,
 								orderKey: timelineSteps.length ? new OrderKey(timelineSteps.Last().orderKey).next().toString() : OrderKey.mid().toString(),
+								groupID: "full",
+								message: "",
+								nodeReveals: [],
 							});
 							RunCommand_AddTimelineStep(newStep);
 						}}/>
