@@ -70,6 +70,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		if (step == null) {
 			return <div style={{height: 100}}><div {...(dragInfo && dragInfo.provided.draggableProps)} {...(dragInfo && dragInfo.provided.dragHandleProps)}/></div>;
 		}
+		const timeType = step?.timeFromLastStep != null ? "last step" : "start";
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
@@ -89,26 +90,27 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						<Row center ml="auto">
 							{timeline.videoID != null &&
 							<>
-								<CheckBox text="Time from start: " value={step.timeFromStart != null} enabled={creatorOrMod} onChange={val=>{
-									if (val) {
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: 0}});
+								<Text>Time from </Text>
+								<Select options={["start", "last step"]} value={timeType} onChange={typeStr=>{
+									const val = (step.timeFromStart ?? step.timeFromLastStep) ?? 0;
+									if (typeStr == "start") {
+										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val, timeFromLastStep: null}});
 									} else {
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null}});
+										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: val}});
 									}
 								}}/>
-								<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
-									enabled={creatorOrMod && step.timeFromStart != null}
-									value={step.timeFromStart ?? 0} onChange={val=>RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val}})}/>
-								<CheckBox text="Time from last step: " value={step.timeFromLastStep != null} enabled={creatorOrMod} onChange={val=>{
-									if (val) {
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: 0}});
-									} else {
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: null}});
-									}
-								}}/>
-								<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
-									enabled={creatorOrMod && step.timeFromLastStep != null}
-									value={step.timeFromLastStep ?? 0} onChange={val=>RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}})}/>
+								<Text> : </Text>
+								{timeType == "start" &&
+								<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}} enabled={creatorOrMod} value={step.timeFromStart ?? 0} onChange={val=>{
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val}});
+								}}/>}
+								{timeType == "last step" &&
+								<>
+									<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeFromLastStep ?? 0} onChange={val=>{
+										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}});
+									}}/>
+									<Text mr={5} title="seconds">s</Text>
+								</>}
 							</>}
 							{/* <Pre>Speaker: </Pre>
 							<Select value={} onChange={val=> {}}/> */}
@@ -142,7 +144,11 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						</VMenuStub>}
 					</Row>
 					{/* <Row ml={5} style={{ minHeight: 20 }}>{step.message}</Row> */}
-					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true} style={{background: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)", padding: 5, outline: "none"}}
+					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true}
+						style={{
+							//background: "rgba(255,255,255,.2)",
+							padding: 5, outline: "none",
+						}}
 						value={step.message} enabled={creatorOrMod}
 						onChange={val=>{
 							RunCommand_UpdateTimelineStep({id: step.id, updates: {message: val}});

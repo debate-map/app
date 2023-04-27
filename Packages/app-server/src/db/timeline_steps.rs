@@ -9,6 +9,7 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::accessors::get_db_entries;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::general::order_key::OrderKey;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
@@ -21,6 +22,11 @@ use super::{node_revisions::{get_node_revision}};
 pub async fn get_timeline_step(ctx: &AccessorContext<'_>, id: &str) -> Result<TimelineStep, Error> {
     get_db_entry(ctx, "timelineSteps", &Some(json!({
         "id": {"equalTo": id}
+    }))).await
+}
+pub async fn get_timeline_steps(ctx: &AccessorContext<'_>, timeline_id: &str) -> Result<Vec<TimelineStep>, Error> {
+    get_db_entries(ctx, "timelineSteps", &Some(json!({
+        "timelineID": {"equalTo": timeline_id}
     }))).await
 }
 
