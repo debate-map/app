@@ -9,7 +9,7 @@ import {store} from "Store";
 import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES} from "web-vcore";
 // import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map} from "dm_common";
+import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map, TimelineStep} from "dm_common";
 import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StepUI} from "./PlayingSubpanel/StepUI.js";
@@ -65,10 +65,10 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 			if (targetStep) {
 				targetStepIndex = steps.indexOf(targetStep);
 				const postTargetStepIndex = targetStepIndex + 1 < steps.length ? targetStepIndex + 1 : -1;
-				const postTargetStep = steps[postTargetStepIndex];
+				const postTargetStep: TimelineStep|n = steps[postTargetStepIndex];
 
 				const targetStepTimeFromStart = GetTimelineStepTimeFromStart(targetStep.id);
-				const postTargetStepTimeFromStart = GetTimelineStepTimeFromStart(postTargetStep.id);
+				const postTargetStepTimeFromStart = GetTimelineStepTimeFromStart(postTargetStep?.id);
 
 				// const targetStep_rect = this.stepRects[targetStepIndex];
 				/* const targetStep_comp = this.stepComps[targetStepIndex];

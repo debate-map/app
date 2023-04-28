@@ -83,6 +83,7 @@ pub struct TimelineStepInput {
 
 #[derive(InputObject, Deserialize)]
 pub struct TimelineStepUpdates {
+    pub orderKey: FieldUpdate<OrderKey>,
     pub groupID: FieldUpdate<String>,
 	pub timeFromStart: FieldUpdate_Nullable<f64>,
 	pub timeFromLastStep: FieldUpdate_Nullable<f64>,

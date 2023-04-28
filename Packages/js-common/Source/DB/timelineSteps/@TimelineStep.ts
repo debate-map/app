@@ -38,6 +38,10 @@ export class TimelineStep {
 
 @MGLClass()
 export class NodeReveal {
+	constructor(data?: RequiredBy<Partial<NodeReveal>, "path" | "show" | "show_revealDepth" | "hide">) {
+		Object.assign(this, data);
+	}
+
 	@Field({type: "string"})
 	path: string;
 

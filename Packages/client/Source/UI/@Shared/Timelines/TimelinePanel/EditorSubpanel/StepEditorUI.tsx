@@ -88,33 +88,30 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							ShowEditTimelineStepDialog(MeID(), step);
 						}}/> */}
 						<Row center ml="auto">
-							{timeline.videoID != null &&
+							<Text>Time from </Text>
+							<Select options={["start", "last step"]} value={timeType} onChange={typeStr=>{
+								const val = (step.timeFromStart ?? step.timeFromLastStep) ?? 0;
+								if (typeStr == "start") {
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val, timeFromLastStep: null}});
+								} else {
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: val}});
+								}
+							}}/>
+							<Text> : </Text>
+							{timeType == "start" &&
+							<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} enabled={creatorOrMod} value={step.timeFromStart ?? 0} onChange={val=>{
+								RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val}});
+							}}/>}
+							{timeType == "last step" &&
 							<>
-								<Text>Time from </Text>
-								<Select options={["start", "last step"]} value={timeType} onChange={typeStr=>{
-									const val = (step.timeFromStart ?? step.timeFromLastStep) ?? 0;
-									if (typeStr == "start") {
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val, timeFromLastStep: null}});
-									} else {
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: val}});
-									}
+								<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeFromLastStep ?? 0} onChange={val=>{
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}});
 								}}/>
-								<Text> : </Text>
-								{timeType == "start" &&
-								<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}} enabled={creatorOrMod} value={step.timeFromStart ?? 0} onChange={val=>{
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val}});
-								}}/>}
-								{timeType == "last step" &&
-								<>
-									<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeFromLastStep ?? 0} onChange={val=>{
-										RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}});
-									}}/>
-									<Text mr={5} title="seconds">s</Text>
-								</>}
+								<Text title="seconds">s</Text>
 							</>}
 							{/* <Pre>Speaker: </Pre>
 							<Select value={} onChange={val=> {}}/> */}
-							<Pre>Position: </Pre>
+							<Pre ml={5}>Position: </Pre>
 							<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {groupID: val}});
 							}}/>
@@ -153,7 +150,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						onChange={val=>{
 							RunCommand_UpdateTimelineStep({id: step.id, updates: {message: val}});
 						}}/>
-					<Droppable type="NodeL1" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", stepID: step.id}))} isDropDisabled={!creatorOrMod}>
+					<Droppable type="NodeL1" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", timelineID: timeline.id, stepID: step.id}))} isDropDisabled={!creatorOrMod}>
 						{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
 							const dragIsOverDropArea = provided.placeholder?.props["on"] != null;
 							if (dragIsOverDropArea) {

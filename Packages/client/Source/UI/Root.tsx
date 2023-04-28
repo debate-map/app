@@ -23,6 +23,7 @@ import {MoreUI} from "../UI/More.js";
 import {GADDemo, ShowHeader} from "./@GAD/GAD.js";
 import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
+import {OnDragEnd} from "./@Root/RootDragHandler";
 import {RootStyles} from "./@Root/RootStyles.js";
 import {NodeDetailBoxesLayer} from "./@Shared/Maps/Node/DetailBoxes/NodeDetailBoxesLayer.js";
 import {DatabaseUI} from "./Database.js";
@@ -89,15 +90,11 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		//const userIDReady = store.main.userID_apollo_ready; // access mobx field; this way, once user-id is retrieved, RootUI reloads (may need something like this in lower levels too)
 
 		return (
-			<DragDropContext_Beautiful onDragEnd={this.OnDragEnd}>
+			<DragDropContext_Beautiful onDragEnd={OnDragEnd}>
 				<RootUI/>
 			</DragDropContext_Beautiful>
 		);
 	}
-
-	OnDragEnd = async result=>{
-
-	};
 
 	ComponentDidMount() {
 		/* if (DEV) {

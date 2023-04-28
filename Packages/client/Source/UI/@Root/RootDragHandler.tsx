@@ -1,17 +1,22 @@
-import {CreateLinkCommand, GetMap, GetNodeDisplayText, GetNodeL3, GetPathNodeIDs, Polarity} from "dm_common";
+import {CreateLinkCommand, GetMap, GetNode, GetNodeDisplayText, GetNodeID, GetNodeL3, GetParentNode, GetPathNodeIDs, GetTimeline, GetTimelineStep, GetTimelineSteps, NodeReveal, OrderKey, Polarity, TimelineStep} from "dm_common";
 import {store} from "Store";
 import {RootUIWrapper} from "UI/Root";
+import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {RunInAction} from "web-vcore";
+import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
 import {Assert, FromJSON, NN} from "web-vcore/nm/js-vextensions.js";
+import {DropResult, ResponderProvided} from "web-vcore/nm/react-beautiful-dnd";
 import {Button} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
-export async function OnDragEnd(self: RootUIWrapper, result: any) {
+export async function OnDragEnd(result: DropResult, provided: ResponderProvided) {
+	if (result.destination == null) return;
+
 	const sourceDroppableInfo = FromJSON(result.source.droppableId) as DroppableInfo;
 	const sourceIndex = result.source.index as number;
-	const targetDroppableInfo: DroppableInfo = result.destination && FromJSON(result.destination.droppableId);
-	const targetIndex = result.destination && result.destination.index as number;
+	const targetDroppableInfo: DroppableInfo = FromJSON(result.destination.droppableId);
+	let targetIndex = result.destination.index as number;
 	const draggableInfo = FromJSON(result.draggableId) as DraggableInfo;
 
 	if (targetDroppableInfo == null) {
@@ -66,27 +71,36 @@ export async function OnDragEnd(self: RootUIWrapper, result: any) {
 				<Button ml={5} text="Cancel" onClick={()=>controller.Close()} />
 			</>,
 		});
-	} /*else if (targetDroppableInfo.type == "TimelineStepList") {
+	} else if (targetDroppableInfo.type == "TimelineStepList") {
 		// if we're moving an item to later in the same list, increment the target-index again (since react-beautiful-dnd pre-applies target-index adjustment, unlike the rest of our code that uses UpdateTimelineStepsOrder/Array.Move())
 		if (sourceDroppableInfo.type == targetDroppableInfo.type && sourceIndex < targetIndex) {
 			targetIndex++;
 		}
 
-		new UpdateTimelineStepOrder({timelineID: sourceDroppableInfo.timelineID, stepID: draggableInfo.stepID, newIndex: targetIndex}).RunOnServer();
+		const {newBefore, newAfter} = await GetAsync(()=>{
+			const timeline = GetTimeline(targetDroppableInfo.timelineID!);
+			const steps = GetTimelineSteps(targetDroppableInfo.timelineID!);
+			return {
+				newBefore: targetIndex == 0 ? null : steps[targetIndex - 1],
+				newAfter: steps[targetIndex] as TimelineStep|null,
+			};
+		});
+
+		const newOrderKey = OrderKey.between(newBefore?.orderKey, newAfter?.orderKey);
+		RunCommand_UpdateTimelineStep({id: draggableInfo.stepID!, updates: {orderKey: newOrderKey.toString()}});
 	} else if (targetDroppableInfo.type == "TimelineStepNodeRevealList") {
-		let path = draggableInfo.nodePath;
+		const path = draggableInfo.nodePath!;
 		const draggedNode = GetNode(GetNodeID(path));
-		const parentNode = GetParentNode(path);
+		/*const parentNode = GetParentNode(path);
 		// if dragged-node is the premise of a single-premise argument, use the argument-node instead (the UI for the argument and claim are combined, but user probably wanted the whole argument dragged)
 		if (IsPremiseOfSinglePremiseArgument(draggedNode, parentNode)) {
 			path = GetParentPath(path);
-		}
+		}*/
 
 		const step = GetTimelineStep(targetDroppableInfo.stepID);
-		const newNodeReveal = new NodeReveal();
-		newNodeReveal.path = path;
-		newNodeReveal.show = true;
+		if (step == null) return;
+		const newNodeReveal = new NodeReveal({path, show: true, show_revealDepth: 1, hide: false});
 		const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
-		new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
-	}*/
+		RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
+	}
 }

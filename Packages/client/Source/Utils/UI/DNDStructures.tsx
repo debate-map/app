@@ -14,7 +14,7 @@ export class DroppableInfo {
 	subtype?: "up" | "down";
 	childIDs?: UUID[];
 
-	// if TimelineStepList
+	// if TimelineStepList or TimelineStepNodeRevealList
 	timelineID?: string|n;
 
 	// if TimelineStepNodeRevealList

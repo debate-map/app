@@ -50,6 +50,7 @@ pub async fn update_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_r
 	let old_data = get_timeline_step(&ctx, &id).await?;
 	assert_user_can_modify(&ctx, &actor, &old_data).await?;
 	let new_data = TimelineStep {
+		orderKey: update_field(updates.orderKey, old_data.orderKey),
 		groupID: update_field(updates.groupID, old_data.groupID),
 		timeFromStart: update_field_nullable(updates.timeFromStart, old_data.timeFromStart),
 		timeFromLastStep: update_field_nullable(updates.timeFromLastStep, old_data.timeFromLastStep),
