@@ -11,6 +11,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map, TimelineStep} from "dm_common";
 import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
 import {StepUI} from "./PlayingSubpanel/StepUI.js";
 
 @Observer
@@ -135,7 +136,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		return this.SharedInfo.targetTimeDirection || "down";
 	}
 
-	timer = new Timer(100, ()=>RunWithRenderingBatched.Go = ()=>{
+	timer = new Timer(100, ()=>RunWithRenderingBatchedAndBailsCaught(()=>{
 		const {map} = this.props;
 		if (this.listRootEl == null) return; // if something goes wrong with rendering, we don't want to keep spewing new errors
 
@@ -175,7 +176,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 				}
 			}
 		}
-	});
+	}));
 
 	OnScroll = (e: React.UIEvent<HTMLDivElement>, source: ScrollSource, pos: Vector2)=>{
 		// we only change auto-scroll status if the user initiated the scroll
@@ -243,7 +244,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		useEffect(()=>{
 			this.timer.Start();
 			return ()=>this.timer.Stop();
-		}, []);
+		}, ["depToEnsureEffectRunsOnFirstNonBailedRender"]); // eslint-disable-line
 
 		// todo: make-so the UseCallbacks below can't break from this early-return changing the hook-count (atm, not triggering since timeline is always ready when this comp renders)
 		if (timeline == null) return null;
@@ -270,7 +271,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						<Button text="-60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-60)}/>
 						<Button text="-30" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-30)}/>
 						<Button text="-10" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-10)}/>
-						<Button text="-5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-1)}/>
+						<Button text="-5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-5)}/>
 						<Button text="-1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-1)}/>
 						<Button text="+1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(1)}/>
 						<Button text="+5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)}/>
