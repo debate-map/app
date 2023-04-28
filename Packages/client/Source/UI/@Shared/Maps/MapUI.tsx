@@ -161,20 +161,24 @@ export class MapUI extends BaseComponent<Props, {}> {
 						// if we have parent-argument's arg-control-bar above, and premise of that arg below, use regular spacing
 						if (nodeAParentPath == nodeBParentPath && nodeAData.nodeType == null && nodeBData.nodeType == NodeType.claim) return 8;
 
+						// standard spacing: if both are nodes, use 12; else use 8
+						let standardSpacing = nodeAData.nodeType != null && nodeBData.nodeType != null ? 12 : 8;
+
+						const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeAData.nodeType == NodeType.argument && nodeBData.nodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
+						if (nodeAIsArgOfNodeB) standardSpacing = 5;
+
 						// if node-b has toolbar above it, we may need to add extra spacing between the two nodes (since a node's toolbar isn't part of its "main rect" used for generic layout)
 						if (nodeBData.aboveToolbar_visible) {
 							// do special spacing between argument and its first premise (unless it has a left-aligned toolbar-button)
-							const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeAData.nodeType == NodeType.argument && nodeBData.nodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
 							if (nodeAIsArgOfNodeB && !nodeBData.aboveToolbar_hasLeftButton) {
 								if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
 								if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
-								return 5;
+							} else {
+								return TOOLBAR_HEIGHT + 8;
 							}
-							return TOOLBAR_HEIGHT + 8;
 						}
 
-						// standard spacing: if both are nodes, use 12; else use 8
-						return nodeAData.nodeType != null && nodeBData.nodeType != null ? 12 : 8;
+						return standardSpacing;
 					},
 					styleSetter_layoutPending: style=>{
 						//style.right = "100%"; // not ideal, since can cause some issues (eg. during map load, the center-on-loading-nodes system can jump to empty left-area of map) 

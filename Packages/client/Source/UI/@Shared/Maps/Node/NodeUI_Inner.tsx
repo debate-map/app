@@ -390,6 +390,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						{
 							color: liveSkin.NodeTextColor().css(),
 							//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
+							//minHeight: 25, // so that argument nodes remain 25px high, even when toolbar is hidden
 						},
 						style,
 						dragInfo?.provided.draggableProps.style,
