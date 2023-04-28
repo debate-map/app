@@ -1,30 +1,26 @@
 import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "web-vcore/nm/js-vextensions.js";
-import {computed, observable, runInAction} from "web-vcore/nm/mobx.js";
+import {computed, makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES} from "web-vcore";
-// import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map, TimelineStep} from "dm_common";
 import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StepUI} from "./PlayingSubpanel/StepUI.js";
 
-/* export class PlayingSubpanel extends BaseComponentPlus(
-	{} as {map: Map},
-	{},
-	{ messageAreaHeight: 0 },
-) { */
-
 @Observer
-// @ClassHooks
 export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageAreaHeight: number }> {
-// export class PlayingSubpanel extends React.Component<{map: Map}, {}, { messageAreaHeight: number }> {
-	// initialStash = { messageAreaHeight: 0 };
+	constructor(props) {
+		super(props);
+		makeObservable(this);
+	}
+
+	//initialStash = { messageAreaHeight: 0 };
 
 	player: YoutubePlayer;
 	listRootEl: HTMLDivElement;
@@ -34,8 +30,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 	stepElements = [] as HTMLDivElement[];
 	stepElements_updateTimes = {};
 
-	// there are three "target time" fields: reduxState.main.maps.$mapID.playingTimeline_time, this.state.targetTime, this.newTargetTime
-	// #1 is for persistence between sessions and sharing with node-uis (updates once per second), #2 is for this comp's arrow (frequent updates), #3 is just a helper for updating #1 and #2
+	// there are two "target time" fields: store.main.maps.$mapID.playingTimeline_time, this.targetTime
+	// #1 is for persistence between sessions and sharing with node-uis (updates about once per second), #2 is for this comp's arrow (frequent updates)
 
 	@observable listY: number;
 	@observable messageAreaHeight = 0;
@@ -43,6 +39,23 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 	@observable targetTime: number;
 	// targetStepIndex = null as number;
 	lastPosChangeSource: PosChangeSource;
+
+	AdjustTargetTimeByFrames(frameDelta: number) {
+		const newTargetTime = (this.targetTime ?? 0) + (frameDelta * (1 / 60));
+		this.SetTargetTime(newTargetTime.KeepAtLeast(0), "setPosition");
+	}
+	SetTargetTime(newTargetTime: number, source: PosChangeSource) {
+		const {map} = this.props;
+		const mapState = GetMapState(map.id);
+		if (mapState == null) return;
+		RunInAction("PlayingSubpanel.SetTargetTime", ()=>{
+			this.targetTime = newTargetTime;
+			if (newTargetTime.FloorTo(1) != mapState.playingTimeline_time) {
+				mapState.playingTimeline_time = newTargetTime.FloorTo(1);
+			}
+			this.lastPosChangeSource = source;
+		});
+	}
 
 	@computed get SharedInfo() {
 		const {map} = this.props;
@@ -124,45 +137,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 
 	timer = new Timer(100, ()=>RunWithRenderingBatched.Go = ()=>{
 		const {map} = this.props;
-		// const { targetTime, autoScroll } = this.state;
-		const oldTargetTime = this.targetTime;
-
-		// if (this.listRootEl == null && PROD) return; // defensive
 		if (this.listRootEl == null) return; // if something goes wrong with rendering, we don't want to keep spewing new errors
 
-		// Log('Checking');
-		// const targetTime_fromRedux = GetPlayingTimelineTime(map.id); // from redux store
-		/* const targetTime_fromStore = mapInfo.playingTimeline_time;
-		if (this.newTargetTime != null) {
-			// Log('Applying this.newTargetTime:', this.newTargetTime, '@targetTime_fromRedux:', targetTime_fromRedux);
-			this.SetState({ targetTime: this.newTargetTime });
-			targetTime = this.newTargetTime; // maybe temp
-			const newTargetTime_floored = this.newTargetTime.FloorTo(1);
-			if (newTargetTime_floored != targetTime_fromStore) {
-				// store.dispatch(new ACTMap_PlayingTimelineTimeSet({ mapID: map.id, time: newTargetTime_floored }));
-				// storeM.main.maps.get(map.id).playingTimeline_time = newTargetTime_floored;
-				// ACTSetPlayingTimelineTime(map.id, newTargetTime_floored);
-				// storeM.ACTSetPlayingTimelineTime(map.id, newTargetTime_floored);
-				// storeM.main.maps.get(map.id).playingTimeline_time_set(newTargetTime_floored);
-				mapInfo.playingTimeline_time_set(newTargetTime_floored);
-			}
-		} */
-
-		/* if (this.listRootEl != null) {
-			// this.SetState({ listY: GetViewportRect(this.listRootEl).y });
-			// Log(`Setting...${GetViewportRect(this.listRootEl).y}`);
-			const listY = GetViewportRect(this.listRootEl).y;
-			if (listY != this.lastListY) {
-				this.UpdateTargetInfo();
-				this.lastListY = listY;
-			}
-		} */
-
-		/* const listY = this.listRootEl ? GetViewportRect(this.listRootEl).y : null;
-		if (this.targetTime != oldTargetTime || listY != this.lastListY) {
-			this.UpdateTargetInfo();
-			this.lastListY = listY;
-		} */
 		const newListY = GetViewportRect(this.listRootEl).y;
 		if (this.listY != newListY) {
 			RunInAction("PlayingSubpanel_timer.setListY", ()=>this.listY = newListY);
@@ -175,7 +151,6 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		const targetStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
 		// const maxTargetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
 		if (timeline && this.targetTime != null) {
-			// const steps = timeline ? GetTimelineSteps(timeline, true) : null;
 			const steps = GetTimelineSteps(timeline.id);
 			const firstStep = steps[0];
 
@@ -185,10 +160,6 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 				const newMaxTargetStepIndex = newTargetStepIndex.KeepAtLeast(targetStepIndex);
 				if (newTargetStepIndex != targetStepIndex) {
 					console.log("Target-step changing @Old:", targetStepIndex, "@New:", newTargetStepIndex, "@Time:", this.targetTime);
-					/* store.dispatch(new ActionSet(
-						new ACTMap_PlayingTimelineStepSet({ mapID: map.id, stepIndex: newTargetStepIndex }),
-						new ACTMap_PlayingTimelineAppliedStepSet({ mapID: map.id, stepIndex: newMaxTargetStepIndex }),
-					)); */
 					RunInAction("PlayingSubpanel_timer.setStepAndAppliedStep", ()=>{
 						mapState.playingTimeline_step = newTargetStepIndex;
 						mapState.playingTimeline_appliedStep = newMaxTargetStepIndex;
@@ -206,81 +177,24 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		}
 	});
 
-	/* PostSelfOrTargetStepRender() {
-		this.UpdateTargetInfo();
-	}
-	PostRender() {
-		this.PostSelfOrTargetStepRender();
-	} */
-	/* PostRender() {
-		this.UpdateTargetInfo();
-	} */
-
-	/* ComponentDidMount() {
-		const { map } = this.props;
-		const { targetTime, autoScroll } = this.state;
-		const targetTime_fromRedux = GetPlayingTimelineTime(map.id); // from redux store
-
-		// on component mount, load timeline-time from redux-store
-		if (this.newTargetTime == null && targetTime == null) {
-			this.newTargetTime = targetTime_fromRedux;
-			if (autoScroll) {
-				new Timer()
-				// jump one further down, so that the target point *within* the target step is visible (and with enough space for the arrow button itself)
-				// this.list.scrollAround(newTargetStepIndex + 1);
-				// jump X further down, so that we see some of the upcoming text (also for if video-time data is off some)
-				this.list.scrollAround(targetStepIndex + 3);
-				WaitXThenRun(0, () => this.list.scrollAround(targetStepIndex)); // make sure target box itself is still visible, however
-			}
-		}
-	} */
-
-	ComponentDidMount() {
-		const {map} = this.props;
-		// const mapInfo = storeM.main.maps.get(map.id);
-
-		// on component mount, load timeline-time from redux-store
-		/* const targetTime_fromRedux = GetPlayingTimelineTime(map.id);
-		// this.SetState({ targetTime: targetTime_fromRedux });
-		this.newTargetTime = targetTime_fromRedux; // actually gets applied to state by timer */
-		// this.newTargetTime = mapInfo.playingTimeline_time;
-	}
-
-	// autoScrollDisabling = true;
-	// ignoreNextScrollEvent = false;
 	OnScroll = (e: React.UIEvent<HTMLDivElement>, source: ScrollSource, pos: Vector2)=>{
-		// if (!this.autoScrollDisabling) return;
-		/* if (this.ignoreNextScrollEvent) {
-			this.ignoreNextScrollEvent = false;
-			return;
-		} */
-
 		// we only change auto-scroll status if the user initiated the scroll
 		if (source == ScrollSource.Code) return;
 
 		// this processing is here rather than in timer, because only this OnScroll function is told whether the scroll was user-initiated
 		const {map} = this.props;
-		//const timeline = GetSelectedTimeline(map.id);
-		//const firstNormalStep = GetTimelineStep(timeline ? timeline.steps[1] : null);
-		// const { targetTimeDirection } = this.GetTargetInfo(timeline, firstNormalStep);
-		// const { targetTimeDirection } = this.state;
 		if (this.targetTimeDirection != "right") {
-			// this.SetState({ autoScroll: false });
 			RunInAction("PlayingSubpanel.OnScroll", ()=>store.main.timelines.autoScroll = false);
 		}
-
-		// this.UpdateTargetInfo_Throttled();
 	};
 
 	list: ReactList;
 	render() {
 		const {map} = this.props;
-		// const { targetTime, autoScroll, targetTime_yInMessageArea, targetTimeDirection } = this.state;
 		const mapState = GetMapState(map.id);
 		if (mapState == null) return null;
 		const timeline = GetSelectedTimeline(map.id);
 		const steps = timeline ? GetTimelineSteps(timeline.id) : null;
-		// timelineSteps: timeline && GetTimelineSteps(timeline);
 		const targetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
 
 		/* const [ref, { width, height }] = UseSize();
@@ -296,8 +210,6 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		// const targetTime_floored = GetPlayingTimelineTime(map.id); // no need to watch, since only used as start-pos for video, if in initial mount
 		const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
 		//const firstNormalStep = GetTimelineStep(timeline ? timeline.steps[1] : null); // just watch for PostRender->UpdateTargetInfo code
-
-		// Log('Rendering...');
 
 		/* (useEffect as any)(() => {
 			const targetTime_fromRedux = GetPlayingTimelineTime(map.id); // from redux store
@@ -347,38 +259,25 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 					}}
 					onPosChanged={(pos, source)=>{
 						if (pos == 0) return; // ignore "pos 0" event; this just happens when the video first loads (even if seek-to time set otherwise)
-						RunInAction("VideoPlayer.onPosChanged", ()=>{
-							// this.SetState({ targetTime: pos });
-							// just set state directly, because the timer above will handle the refreshing
-							// this.state['targetTime'] = pos;
-							// if (pos == timeline.videoStartTime && this.newTargetTime == null) return; // don't set newTargetTime
-							// this.newTargetTime = pos;
-							// this.SetState({ targetTime: pos });
-							this.targetTime = pos;
-							// runInAction('PlayingSubpanel_targetTime_set', () => this.targetTime = pos);
-							// Log(`Setting:${this.targetTime}`);
-							if (pos.FloorTo(1) != mapState.playingTimeline_time) {
-								// mapInfo.playingTimeline_time_set(pos.FloorTo(1));
-								mapState.playingTimeline_time = pos.FloorTo(1);
-							}
-
-							this.lastPosChangeSource = source;
-						});
+						this.SetTargetTime(pos, source);
 					}}/>}
-				{/* <ScrollView style={ES({ flex: 1 })} contentStyle={ES({ flex: 1, position: 'relative', padding: 7, filter: 'drop-shadow(rgb(0, 0, 0) 0px 0px 10px)' })}>
-					{/* timelineSteps && timelineSteps.map((step, index) => <StepUI key={index} index={index} last={index == timeline.steps.length - 1} map={map} timeline={timeline} step={step}/>) *#/}
-					<ReactList type='variable' length={timeline.steps.length}
-						// pageSize={20} threshold={300}
-						itemsRenderer={(items, ref) => {
-							return <div ref={ref}>
-								<Column style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 20, background: HSLA(0, 0, 0, 1) }}>
-								</Column>
-								{items}
-							</div>;
-						}}
-						itemSizeEstimator={this.EstimateStepHeight} itemRenderer={this.RenderStep}/>
-				</ScrollView> */}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
+					<Row>
+						<Text>Time: </Text>
+						<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} value={this.targetTime ?? 0} onChange={val=>{
+							this.SetTargetTime(val, "setPosition");
+						}}/>
+						<Button text="-60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-60)}/>
+						<Button text="-30" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-30)}/>
+						<Button text="-10" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-10)}/>
+						<Button text="-5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-1)}/>
+						<Button text="-1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-1)}/>
+						<Button text="+1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(1)}/>
+						<Button text="+5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)}/>
+						<Button text="+10" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(10)}/>
+						<Button text="+30" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(30)}/>
+						<Button text="+60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)}/>
+					</Row>
 					<Row ml="auto" style={{position: "relative"}}>
 						<DropDown>
 							<DropDownTrigger><Button text="Options" style={{height: "100%"}}/></DropDownTrigger>
@@ -411,11 +310,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 									}
 								}
 
-								// const newAutoScroll = targetOffScreen;
 								const newAutoScroll = !store.main.timelines.autoScroll;
-								/* this.autoScrollDisabling = false;
-								this.SetState({ autoScroll: newAutoScroll }, () => WaitXThenRun(0, () => this.autoScrollDisabling = true)); */
-								// this.SetState({ autoScroll: newAutoScroll });
 								RunInAction("PlayingSubpanel.targetArrow.onClick", ()=>store.main.timelines.autoScroll = newAutoScroll);
 							}, [targetStepIndex])}/>
 					</Column>
@@ -424,11 +319,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						<ReactList type='variable' length={steps?.length ?? 0}
 							ref={UseCallback(c=>{
 								this.list = c;
-								// Log('Test1', c);
 								if (c) {
 									this.listRootEl = GetDOM(c) as any;
-									// this.UpdateTargetInfo();
-									// requestAnimationFrame(() => this.UpdateTargetInfo());
 								}
 							}, [])}
 							initialIndex={targetStepIndex ?? 0}
@@ -443,41 +335,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 								return <StepUI key={step.id} index={index} last={index == steps.length - 1} map={map} timeline={timeline} steps={steps} stepID={step.id} player={this.player}
 									ref={c=>{
 										if (c == null || c.DOM_HTML == null) return;
-										/* const listRoot = c.DOM_HTML.parentElement.parentElement.parentElement;
-										const listRect = GetViewportRect(listRoot);
-
-										const el = c.DOM_HTML;
-										const rect = GetViewportRect(el);
-										rect.Position = rect.Position.Minus(listRect.Position);
-										// this.SetState({ [`step${index}_rect`]: rect }, null, null, true);
-										this.stepRects[index] = rect; */
-										// this.stepComps[index] = c;
 										this.stepElements[index] = c.DOM_HTML as any;
 										this.stepElements_updateTimes[index] = Date.now();
-
-										// if within a second of the target-step having rendered, check if its rect needs updating
-										/* if (index == targetStepIndex || Date.now() - ToNumber(this.stepElements_updateTimes[targetStepIndex], 0) < 1000) {
-											this.PostSelfOrTargetStepRender();
-											WaitXThenRun(10, () => this.PostSelfOrTargetStepRender());
-											requestAnimationFrame(() => this.PostSelfOrTargetStepRender());
-										} */
-
-										/* if (index == targetStepIndex) {
-											this.PostSelfOrTargetStepRender();
-											WaitXThenRun(500, () => this.PostSelfOrTargetStepRender());
-										} */
-
-										// for the next X seconds, check if we are the target-step; if so, check if our rect needs updating (no need to do this if video playing though, as that triggers UpdateTargetInfo on its own)
-										// if (this.player.state == YoutubePlayerState.CUED) {
-										/* if (this.player && this.player.state != YoutubePlayerState.PLAYING) {
-											new Timer(200, () => {
-												if (!document.body.contains(c.DOM_HTML)) return;
-												if (index == targetStepIndex) {
-													// this.PostSelfOrTargetStepRender();
-													this.UpdateTargetInfo();
-												}
-											}, 5).Start();
-										} */
 									}}/>;
 							}}/>
 					</ScrollView>
@@ -486,26 +345,3 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		);
 	}
 }
-
-// example of how to copy mobx administration object, to prevent leak/persistence of comp's MobX reaction
-/* @observer
-class Test1 extends Component<{}, {}> {
-	render() {
-		return <div/>;
-	}
-	componentDidMount() {
-		setTimeout(()=>this.swapRenderFunction(), 1000); // simulate delay
-	}
-	swapRenderFunction() {
-		const oldRender = this.render;
-		this.render = function () {
-			// <<< add wrapper code here
-			return oldRender.apply(this, arguments);
-		};
-
-		// copy over mobx administration object
-		for (const symbol of Object.getOwnPropertySymbols(oldRender)) {
-			this.render[symbol] = oldRender[symbol];
-		}
-	}
-} */
