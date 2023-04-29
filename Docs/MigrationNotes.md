@@ -7,7 +7,7 @@
 
 ## Main series
 
-### Pushed on 2023-04-27
+### Pushed on 2023-04-28
 
 * 1\) Added `PermissionSet.others` field/group.
 	* DB response:
@@ -25,7 +25,8 @@
 			```
 * 2\) Added `timelines` and `timelineSteps` tables.
 	* DB response:
-		* 1\) Execute sql in files `timelines.sql` and `timelineSteps.sql`.
+		* 1\) Execute the sql in files `timelines.sql` and `timelineSteps.sql`.
+		* 2\) Execute the sql to add the new functions for those tables, in `RLSPolicies.sql` and `AccessPolicyTriggers.sql`
 
 ### Pushed on 2023-04-04
 
