@@ -33,7 +33,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 			backgroundFillPercent, backgroundColor, markerPercent,
 			text, onTextHolderClick, textHolderStyle, beforeChildren, afterChildren,
 			expanded, toggleExpanded, expandButtonStyle, ...rest} = this.props;
-		this.parent = parent; // probably temp; used to access NodeUI_Inner comp's props, from MapUI.FindNodeBox
+		this.parent = parent; // probably temp; used to access NodeBox comp's props, from MapUI.FindNodeBox
 
 		const {key, css} = cssHelper(this);
 		return (

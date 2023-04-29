@@ -8,7 +8,7 @@
 // import {TimelineStep} from "dm_common";
 // import {GetNodeL2, AsNodeL3} from "dm_common";
 // import {Map} from "dm_common";
-// import {NodeUI_Inner} from "../Maps/Node/NodeUI_Inner.js";
+// import {NodeBox} from "../Maps/Node/NodeBox.js";
 
 // function GetPropsFromPropsStr(propsStr: string) {
 // 	const propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);
@@ -79,7 +79,7 @@
 
 // 		const path = `${nodeID}`;
 // 		return (
-// 			<NodeUI_Inner indexInNodeList={0} map={map} node={node} path={path} width={null} widthOverride={null}
+// 			<NodeBox indexInNodeList={0} map={map} node={node} path={path} width={null} widthOverride={null}
 // 				panelPosition="below" useLocalPanelState={true}
 // 				style={{
 // 					// zIndex: 1, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"
@@ -109,8 +109,8 @@
 // 			<Column ref={c=>this.root = c}
 // 				style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: liveSkin.MainBackgroundColor().css(), borderRadius: 5}}
 // 				onClick={e=>{
-// 					if ((e.target as HTMLElement).GetSelfAndParents().Any(a=>a.classList && a.classList.contains("NodeUI_Inner"))) return;
-// 					for (const nodeUI of this.root.DOM.$(".NodeUI_Inner").map(a=>FindReact(a) as NodeUI_Inner)) {
+// 					if ((e.target as HTMLElement).GetSelfAndParents().Any(a=>a.classList && a.classList.contains("NodeBox"))) return;
+// 					for (const nodeUI of this.root.DOM.$(".NodeBox").map(a=>FindReact(a) as NodeBox)) {
 // 						nodeUI.SetState({local_openPanel: null});
 // 					}
 // 				}}>

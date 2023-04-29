@@ -15,10 +15,10 @@ import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
 import {NodeMathUI} from "../NodeMathUI.js";
-import {NodeUI_Inner} from "../NodeUI_Inner.js";
+import {NodeBox} from "../NodeBox.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
 
-/* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: NodeL2, nodeView: NodeView, path: string, indexInNodeList: number, style};
+/* type TitlePanelProps = {parent: NodeBox, map: Map, node: NodeL2, nodeView: NodeView, path: string, indexInNodeList: number, style};
 const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
 	displayText: GetNodeDisplayText(node, path),
 	$1: node.current.image && GetMedia(node.current.image.id),
@@ -29,7 +29,7 @@ const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
 
 /* export type TitlePanelInternals = {OnDoubleClick};
 export function TitlePanel(props: VProps<TitlePanelInternals, {
-	parent: NodeUI_Inner, map: Map, node: NodeL2, nodeView: NodeView, path: string, indexInNodeList: number, style,
+	parent: NodeBox, map: Map, node: NodeL2, nodeView: NodeView, path: string, indexInNodeList: number, style,
 }>) { */
 
 export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
@@ -61,7 +61,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @WarnOfTransientObjectProps
 @Observer
 export class TitlePanel extends BaseComponentPlus(
-	{} as {parent: NodeUI_Inner, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
+	{} as {parent: NodeBox, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
 	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{

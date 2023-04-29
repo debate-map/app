@@ -18,19 +18,19 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ExpandableBox} from "./Node/ExpandableBox.js";
 import {NodeUI} from "./Node/NodeUI.js";
 import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
-import {NodeUI_Inner} from "./Node/NodeUI_Inner.js";
+import {NodeBox} from "./Node/NodeBox.js";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
 
 export function GetNodeBoxForPath(path: string) {
-	const nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);
+	const nodeInnerBoxes = FindDOMAll(".NodeBox").map(a=>DeepGet(FindReact(a), "props/parent") as NodeBox);
 	return nodeInnerBoxes.FirstOrX(a=>a.props.path == path);
 }
 export function GetNodeBoxClosestToViewCenter() {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint(GetViewportRect(nodeBox), viewCenter_onScreen));
+	return FindDOMAll(".NodeBox").Min(nodeBox=>GetDistanceBetweenRectAndPoint(GetViewportRect(nodeBox), viewCenter_onScreen));
 }
 export function GetViewOffsetForNodeBox(nodeBox: Element) {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
@@ -55,7 +55,7 @@ export const ACTUpdateFocusNodeAndViewOffset = StoreAction((mapID: string)=>{
 	const focusNodeBox = GetNodeBoxClosestToViewCenter();
 	if (focusNodeBox == null) return; // can happen if node was just deleted
 
-	const focusNodeBoxComp = FindReact(focusNodeBox).props.parent as NodeUI_Inner;
+	const focusNodeBoxComp = FindReact(focusNodeBox).props.parent as NodeBox;
 	const focusNodePath = focusNodeBoxComp.props.path;
 	if (focusNodePath == null) return; // can happen sometimes; not sure what causes
 	const viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
@@ -433,14 +433,14 @@ export class MapUI extends BaseComponent<Props, {}> {
 	}
 
 	FindNodeBox(nodePath: string, ifMissingFindAncestor = false) {
-		const nodeUIs = Array.from(document.querySelectorAll(".NodeUI_Inner")).map(nodeUI_boxEl=>{
+		const nodeUIs = Array.from(document.querySelectorAll(".NodeBox")).map(nodeUI_boxEl=>{
 			const boxEl = FindReact(nodeUI_boxEl) as ExpandableBox;
-			const result = boxEl.props.parent as NodeUI_Inner;
-			Assert(result instanceof NodeUI_Inner);
+			const result = boxEl.props.parent as NodeBox;
+			Assert(result instanceof NodeBox);
 			return result;
 		});
 
-		let targetNodeUI: NodeUI_Inner|n;
+		let targetNodeUI: NodeBox|n;
 		let nextPathTry = nodePath;
 		while (targetNodeUI == null) {
 			targetNodeUI = nodeUIs.FirstOrX(nodeUI=>{ // eslint-disable-line

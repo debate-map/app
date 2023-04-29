@@ -14,15 +14,15 @@ import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
 import {TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT} from "../NodeLayoutConstants.js";
-import {NodeUI_Inner_Props} from "../NodeUI_Inner.js";
+import {NodeBox_Props} from "../NodeBox.js";
 
-//export type NodeToolbar_SharedProps = NodeUI_Inner_Props & {backgroundColor: Color};
+//export type NodeToolbar_SharedProps = NodeBox_Props & {backgroundColor: Color};
 export type NodeToolbar_Props = {
 	backgroundColor: Color, panelToShow?: string, onPanelButtonClick: (panel: string)=>any,
 	onMoreClick?: (e: any)=>any, onMoreHoverChange?: (hovered: boolean)=>any,
 	nodeUI_width_final: number,
 	leftPanelShow: boolean,
-} & NodeUI_Inner_Props;
+} & NodeBox_Props;
 export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
 export function GetToolbarItemsToTryToShow(map?: Map|n) {

@@ -11,7 +11,7 @@ Its primary improvements are (in short):
 * Breaking down lines of reasoning into single-sentence "nodes".
 * Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.
 
-The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims. This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.
+The maps are constructed from "claims" (gray), and "arguments" (green and red) which support/oppose those claims. This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.
 
 For more information, visit the website at: <https://debatemap.app>
 

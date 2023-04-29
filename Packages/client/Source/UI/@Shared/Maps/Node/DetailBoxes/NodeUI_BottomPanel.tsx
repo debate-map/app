@@ -11,7 +11,7 @@ import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {GetMapUICSSFilter} from "../../MapUI.js";
-import {NodeUI_Inner} from "../NodeUI_Inner.js";
+import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 import {NodeUI_LeftBox_width} from "./NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./Panels/DefinitionsPanel.js";
@@ -35,7 +35,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		minWidth: number|n, // is this still needed?
 		panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermIDs: string[]|n, onTermHover: (ids: string[])=>void,
 		backgroundColor: chroma.Color,
-		usePortal?: boolean, nodeUI?: NodeUI_Inner,
+		usePortal?: boolean, nodeUI?: NodeBox,
 	},
 	{hoverTermID: null as string|n},
 ) {
@@ -142,7 +142,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 						onHoverTerm={termIDs=>onTermHover(termIDs)}
 						onClickTerm={termIDs=>{
 							if (nodeView == null) return;
-							RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermIDs = termIDs);
+							RunInAction("NodeBox_onClickTerm", ()=>nodeView.openTermIDs = termIDs);
 						}}/>)}
 				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}

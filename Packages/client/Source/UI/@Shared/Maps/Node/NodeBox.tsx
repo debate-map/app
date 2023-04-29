@@ -26,9 +26,9 @@ import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "./ExpandableBox.js";
-import {NodeToolbar} from "./NodeUI_Inner/NodeToolbar.js";
-import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
-import {TitlePanel} from "./NodeUI_Inner/TitlePanel.js";
+import {NodeToolbar} from "./NodeBox/NodeToolbar.js";
+import {SubPanel} from "./NodeBox/SubPanel.js";
+import {TitlePanel} from "./NodeBox/TitlePanel.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 // drag and drop
@@ -49,7 +49,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
-export type NodeUI_Inner_Props = {
+export type NodeBox_Props = {
 	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map,
 	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
@@ -68,8 +68,8 @@ export type NodeUI_Inner_Props = {
 
 // @ExpensiveComponent
 @Observer
-export class NodeUI_Inner extends BaseComponentPlus(
-	{panelsPosition: "left"} as NodeUI_Inner_Props,
+export class NodeBox extends BaseComponentPlus(
+	{panelsPosition: "left"} as NodeBox_Props,
 	{
 		hovered: false, moreButtonHovered: false, leftPanelHovered: false, //openPanelSource: null as PanelOpenSource|n,
 		hoverPanel: null as string|n, hoverTermIDs: null as string[]|n, lastWidthWhenNotPreview: 0,
@@ -257,7 +257,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			});
 		}
 		const onDirectClick = UseCallback(e=>{
-			RunInAction("NodeUI_Inner.onDirectClick", ()=>{
+			RunInAction("NodeBox.onDirectClick", ()=>{
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
 		}, [node.id, parent]);
@@ -287,7 +287,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					return;
 				}*/
 
-				RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
+				RunInAction("NodeBox.onPanelButtonClick", ()=>{
 					const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
 
 					// if clicking on a not-currently open panel, set panel to that; else, must be clicking on currently-open panel, so clear
@@ -378,8 +378,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						width: width_final,
 					}}
 					className={
-						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
-						["NodeUI_Inner", "useLightText", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
+						//classNames("NodeBox", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
+						["NodeBox", "useLightText", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
 					}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}

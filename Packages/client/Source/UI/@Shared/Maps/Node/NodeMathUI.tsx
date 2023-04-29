@@ -4,7 +4,7 @@ import ReactDOM from "web-vcore/nm/react-dom";
 import {IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {store} from "Store";
 import {Term, PreProcessLatex} from "dm_common";
-import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder.js";
+import {TermPlaceholder} from "./NodeBox/TermPlaceholder.js";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors
 const oldGenerateHtml = InlineMath.prototype.generateHtml;

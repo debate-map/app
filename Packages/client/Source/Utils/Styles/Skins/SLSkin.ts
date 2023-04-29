@@ -37,7 +37,7 @@ export class SLSkin extends DMSkin {
 			${DMSkin.prototype.StyleBlock_Freeform.call(this)}
 			
 			/* overrides */
-			.NodeUI_Inner > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
+			.NodeBox > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
 				color: ${this.NodeTextColor().css()} !important;
 			}
 			/* new */

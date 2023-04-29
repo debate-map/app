@@ -5,7 +5,7 @@
 // import {store} from "Store";
 // import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
 // import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions.js";
-// import {NodeUI_Inner} from "UI/@Shared/Maps/Node/NodeUI_Inner.js";
+// import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 // import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 // import {GetViewportRect} from "web-vcore";
 // import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
@@ -93,7 +93,7 @@
 // 		return;
 // 	}
 
-// 	let nodeBoxes: NodeUI_Inner[] = [];
+// 	let nodeBoxes: NodeBox[] = [];
 // 	for (let i = 0; i < 30 && nodeBoxes.length < paths.length; i++) {
 // 		if (i > 0) await SleepAsync(100);
 // 		nodeBoxes = paths.map(path=>mapUI.FindNodeBox(path)).filter(a=>a != null && GetDOM(a));

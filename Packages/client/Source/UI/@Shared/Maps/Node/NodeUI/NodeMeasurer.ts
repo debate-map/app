@@ -3,7 +3,7 @@ import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
-import {GetToolbarItemsToShow} from "../NodeUI_Inner/NodeToolbar";
+import {GetToolbarItemsToShow} from "../NodeBox/NodeToolbar";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;

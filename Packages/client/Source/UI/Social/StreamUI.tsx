@@ -1,7 +1,7 @@
 import {GetUserHidden, Me, MeID, SetUserData_Hidden, GetCommandRuns, CommandRun, GetUser, AddChildNode, NodeType, GetNode, GetNodeL2, GetNodeL3, AddNodeRevision, GetNodeRevision, AsNodeL3, AsNodeL2, GetAccessPolicy, CommandRun_commandNameValues} from "dm_common";
 import React from "react";
 import {store} from "Store";
-import {NodeUI_Inner} from "UI/@Shared/Maps/Node/NodeUI_Inner";
+import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox";
 import useResizeObserver from "use-resize-observer";
 import {RunCommand_UpdateUserHidden} from "Utils/DB/Command";
 import {HSLA, InfoButton, Link, Observer, RunInAction_Set, TextPlus} from "web-vcore";
@@ -91,7 +91,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				</>;
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
-						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id} treePath="0"
+						<NodeBox indexInNodeList={0} node={node_final} path={node.id} treePath="0"
 							backgroundFillPercentOverride={100} width={width}
 							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
@@ -113,7 +113,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				</>;
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
-						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id} treePath="0"
+						<NodeBox indexInNodeList={0} node={node_final} path={node.id} treePath="0"
 							backgroundFillPercentOverride={100} width={width}
 							useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;

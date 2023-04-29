@@ -37,7 +37,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	} */
 
 	childBoxes: {[key: number]: NodeUI} = {};
-	//childInnerUIs: {[key: number]: NodeUI_Inner} = {};
+	//childInnerUIs: {[key: number]: NodeBox} = {};
 	render() {
 		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
 		const {placeholderRect} = this.state;
@@ -133,7 +133,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				const getNodeUI = ()=>{
 					return <NodeUI key={child.id}
 						ref={UseCallback(c=>parent.childBoxes[child.id] = c, [child.id, parent.childBoxes])} // eslint-disable-line
-						//ref_innerUI={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
+						//ref_nodeBox={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 						indexInNodeList={index} map={map} node={child}
 						path={`${parentPath}/${child.id}`}
 						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
@@ -156,7 +156,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-uis array
 			// if (direction == 'up') childrenHereUIs.reverse();
 
-			const dragBox = document.querySelector(".NodeUI_Inner.DragPreview");
+			const dragBox = document.querySelector(".NodeBox.DragPreview");
 			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());
 
 			//renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
@@ -255,12 +255,12 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		/* const match = firstOffsetInner.style.transform.match(/([0-9]+).+?([0-9]+)/);
 		const dragBoxSize = new Vector2(match[1].ToInt(), match[2].ToInt());
 		// delete dragInfo.provided.draggableProps.style.transform; */
-		const dragBox = document.querySelector(".NodeUI_Inner.DragPreview");
+		const dragBox = document.querySelector(".NodeBox.DragPreview");
 		if (dragBox == null) return; // this can happen at end of drag
 		const dragBoxRect = VRect.FromLTWH(dragBox.getBoundingClientRect());
 
 		const siblingNodeUIs = (Array.from(childHolder.DOM!.childNodes) as HTMLElement[]).filter(a=>a.classList.contains("NodeUI"));
-		const siblingNodeUIInnerDOMs = siblingNodeUIs.map(nodeUI=>nodeUI.QuerySelector_BreadthFirst(".NodeUI_Inner")).filter(a=>a != null) as HTMLElement[]; // entry can be null if inner-ui still loading
+		const siblingNodeUIInnerDOMs = siblingNodeUIs.map(nodeUI=>nodeUI.QuerySelector_BreadthFirst(".NodeBox")).filter(a=>a != null) as HTMLElement[]; // entry can be null if inner-ui still loading
 		const firstOffsetInner = siblingNodeUIInnerDOMs.find(a=>a && a.style.transform && a.style.transform.includes("translate("));
 
 		let placeholderRect: VRect;

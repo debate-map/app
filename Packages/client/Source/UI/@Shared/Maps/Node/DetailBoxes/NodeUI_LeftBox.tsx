@@ -11,7 +11,7 @@ import ReactDOM from "web-vcore/nm/react-dom.js";
 import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, cssHelper, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {GetMapUICSSFilter} from "../../MapUI.js";
-import {NodeUI_Inner} from "../NodeUI_Inner.js";
+import {NodeBox} from "../NodeBox.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 
 export const NodeUI_LeftBox_width = 130;
@@ -21,7 +21,7 @@ type Props = {
 	panelsPosition?: "left" | "below", local_nodeView?: NodeView|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
-	usePortal?: boolean, nodeUI?: NodeUI_Inner,
+	usePortal?: boolean, nodeUI?: NodeBox,
 	onHoverChange?: (hovered: boolean)=>any,
 };
 @Observer

@@ -86,7 +86,7 @@ export class DMSkin extends Skin {
 			.NodeUI_LeftBox .Button {
 				color: ${this.NodeTextColor().css()} !important;
 			}
-			.NodeUI_Inner > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
+			.NodeBox > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
 				color: ${this.NodeTextColor().alpha(.5).css()} !important;
 			}
 

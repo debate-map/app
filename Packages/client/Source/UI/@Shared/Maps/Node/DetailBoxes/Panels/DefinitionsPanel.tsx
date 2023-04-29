@@ -4,7 +4,7 @@ import {Link, Observer, RunInAction} from "web-vcore";
 import {NodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import React, {Fragment} from "react";
-import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel.js";
+import {GetSegmentsForTerms} from "../../NodeBox/TitlePanel.js";
 
 const termsPlaceholder = [];
 

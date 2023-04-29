@@ -19,7 +19,7 @@ import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
-import {NodeUI_Inner} from "./NodeUI_Inner.js";
+import {NodeBox} from "./NodeBox.js";
 
 // class holding values that are derived entirely within CheckForChanges()
 class ObservedValues {
@@ -43,7 +43,7 @@ export class NodeUI extends BaseComponentPlus(
 		inBelowGroup?: boolean,
 		standardWidthInGroup?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
-		ref_innerUI?: (c: NodeUI_Inner|n)=>any,
+		ref_nodeBox?: (c: NodeBox|n)=>any,
 	},
 	{
 		//expectedBoxWidth: 0, expectedBoxHeight: 0,
@@ -63,7 +63,7 @@ export class NodeUI extends BaseComponentPlus(
 	}
 
 	nodeUI: HTMLDivElement|n;
-	innerUI: NodeUI_Inner|n;
+	nodeBox: NodeBox|n;
 	rightColumn: Column|n;
 	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
 	nodeChildHolder_generic: NodeChildHolder|n;
@@ -73,7 +73,7 @@ export class NodeUI extends BaseComponentPlus(
 	}
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_innerUI, treePath, inBelowGroup, children} = this.props;
+		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, inBelowGroup, children} = this.props;
 		const {obs} = this.state;
 
 		performance.mark("NodeUI_1");
@@ -220,11 +220,11 @@ export class NodeUI extends BaseComponentPlus(
 					)}
 				>
 					<CloneHistoryButton node={node}/>
-					<NodeUI_Inner ref={UseCallback(c=>{
-						this.innerUI = GetInnerComp(c);
-						if (ref_innerUI) ref_innerUI(c);
-					}, [ref_innerUI])} {...{indexInNodeList, map, node, path, treePath, width, standardWidthInGroup}}/>
-					{/* these are for components shown just to the right of the NodeUI_Inner box */}
+					<NodeBox ref={UseCallback(c=>{
+						this.nodeBox = GetInnerComp(c);
+						if (ref_nodeBox) ref_nodeBox(c);
+					}, [ref_nodeBox])} {...{indexInNodeList, map, node, path, treePath, width, standardWidthInGroup}}/>
+					{/* these are for components shown just to the right of the NodeBox box */}
 					{nodeChildrenToShow == emptyArray_forLoading &&
 						<div style={{margin: "auto 0 auto 10px"}}>...</div>}
 					{!path.includes("/") && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/ IsRootNode.CatchBail(false, node) &&
@@ -254,7 +254,7 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.DOM_HTML == null) return;
 
 		const obs = new ObservedValues({
-			innerUIHeight: this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0),
+			innerUIHeight: this.SafeGet(a=>a.nodeBox!.DOM_HTML.offsetHeight, 0),
 			childrensHeight: this.rightColumn?.DOM_HTML.offsetHeight ?? 0,
 			// see UseSize_Method for difference between offsetHeight and the alternatives
 			height: this.DOM_HTML.offsetHeight

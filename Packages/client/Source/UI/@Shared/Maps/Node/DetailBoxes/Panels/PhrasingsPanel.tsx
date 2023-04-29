@@ -9,7 +9,7 @@ import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {BailIfNull, GetDoc} from "web-vcore/nm/mobx-graphlink";
 import {ShowAddPhrasingDialog} from "../../../../../Database/Phrasings/PhrasingDetailsUI.js";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel.js";
-import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeUI_Inner/TitlePanel.js";
+import {GetSegmentsForTerms, RenderNodeDisplayText} from "../../NodeBox/TitlePanel.js";
 
 const Phrasing_FakeID = "FAKE";
 

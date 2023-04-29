@@ -12,11 +12,11 @@ import {OthersPanel} from "./DetailBoxes/Panels/OthersPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {SocialPanel} from "./DetailBoxes/Panels/SocialPanel.js";
 import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
-import {NodeUI_Inner} from "./NodeUI_Inner.js";
+import {NodeBox} from "./NodeBox.js";
 
 type Props = {map: Map, node: NodeL2};
 export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
-	innerUI: NodeUI_Inner;
+	innerUI: NodeBox;
 	render() {
 		const {map, node} = this.props;
 		const mapView = GetMapView(GetOpenMapID()!);
@@ -60,7 +60,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 					{/* <Row>ID: {node._id}</Row>
 					<Row>Title: {GetNodeDisplayText(node)}</Row> */}
 					Main box:
-					<NodeUI_Inner
+					<NodeBox
 						ref={c=>this.innerUI = GetInnerComp(c)}
 						// ref={c => this.innerUI = c ? c['getDecoratedComponentInstance']() : null}
 						indexInNodeList={0} map={map} node={nodeL3} path={path} treePath="0" width={null} standardWidthInGroup={null}/>

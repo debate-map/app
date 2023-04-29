@@ -4,7 +4,7 @@ import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ReferencesAttachment, GetNodeDisplayText, NodeType, ClaimForm} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../Maps/Node/SourceChainsEditorUI.js";
-import {SubPanel_Quote, SubPanel_References} from "../../Maps/Node/NodeUI_Inner/SubPanel.js";
+import {SubPanel_Quote, SubPanel_References} from "../../Maps/Node/NodeBox/SubPanel.js";
 
 export class ReferencesAttachmentEditorUI extends DetailsUI_Base<ReferencesAttachment, ReferencesAttachmentEditorUI> {
 	render() {
