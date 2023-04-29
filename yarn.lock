@@ -2424,14 +2424,14 @@ __metadata:
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0
     sync-directory: ^2.2.22
-    tree-grapher: 0.0.5
+    tree-grapher: 0.0.6
     ts-loader: 9.2.3
     ts-node: ^10.8.0
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.6
-    web-vcore: 0.0.69
+    web-vcore: 0.0.71
   languageName: unknown
   linkType: soft
 
@@ -8619,18 +8619,11 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"js-vextensions@^1.0.65, js-vextensions@^1.0.69, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
+"js-vextensions@1.0.72, js-vextensions@^1.0.65, js-vextensions@^1.0.69, js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions":
   version: 0.0.0-use.local
   resolution: "js-vextensions@workspace:.yalc/web-vcore/.yalc/js-vextensions"
   languageName: unknown
   linkType: soft
-
-"js-vextensions@npm:1.0.70":
-  version: 1.0.70
-  resolution: "js-vextensions@npm:1.0.70"
-  checksum: dbcec1865114bc628dcc429823aae461669d583061e1a1f0d408461551492a13f99686a17cdedc6ca58c4a2d6a3e0e255d79fd449272b3700dab2efb08fc46ac
-  languageName: node
-  linkType: hard
 
 "js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.0, js-yaml@npm:^3.9.0":
   version: 3.14.1
@@ -9618,7 +9611,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.37, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
+"mobx-graphlink@0.0.38, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
   version: 0.0.0-use.local
   resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
   dependencies:
@@ -13616,7 +13609,28 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-grapher@0.0.5, tree-grapher@workspace:.yalc/tree-grapher":
+"tree-grapher@npm:0.0.6":
+  version: 0.0.6
+  resolution: "tree-grapher@npm:0.0.6"
+  dependencies:
+    "@types/d3-hierarchy": ^3.0.2
+    d3-hierarchy: ^3.1.1
+    js-vextensions: ^1.0.69
+    mobx: ^6.3.13
+    mobx-react: ^7.2.1
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    use-callback-ref: ^1.2.5
+    use-resize-observer: ^8.0.0
+    use-state-with-deps: ^1.1.1
+  peerDependencies:
+    react: ^17.0.2
+    react-dom: ^17.0.2
+  checksum: 2f9a92d65b584cc3a27bdf22715384ab43f30f6e80f5612ff53fbca802c88165f6d7f32215722237df7cb6ad09db0c531d90bffd1179b2a615d05c5ea8c3e392
+  languageName: node
+  linkType: hard
+
+"tree-grapher@workspace:.yalc/tree-grapher":
   version: 0.0.0-use.local
   resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:
@@ -14520,7 +14534,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.69, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.71, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -14569,11 +14583,11 @@ typescript@~3.7.3:
     html-webpack-plugin: ^5.3.1
     immer: ^7.0.7
     ip: ^1.1.5
-    js-vextensions: 1.0.70
+    js-vextensions: 1.0.72
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.37
+    mobx-graphlink: 0.0.38
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0

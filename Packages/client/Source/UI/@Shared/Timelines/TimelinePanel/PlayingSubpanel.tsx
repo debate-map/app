@@ -78,7 +78,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 			const targetStep = steps.Skip(1).LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a.id, this.targetTime)) ?? firstNormalStep!;
 			if (targetStep) {
 				targetStepIndex = steps.indexOf(targetStep);
-				const postTargetStepIndex = targetStepIndex + 1 < steps.length ? targetStepIndex + 1 : -1;
+				//const postTargetStepIndex = targetStepIndex + 1 < steps.length ? targetStepIndex + 1 : -1;
+				const postTargetStepIndex = (targetStepIndex + 1).KeepAtMost(steps.length - 1); // if on last step, we want arrow to stop there, so consider last-step both the current-step and next-step (for arrow positioning)
 				const postTargetStep: TimelineStep|n = steps[postTargetStepIndex];
 
 				const targetStepTimeFromStart = GetTimelineStepTimeFromStart(targetStep.id);
@@ -106,7 +107,12 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 					const messageAreaY = GetViewportRect(this.sideBarEl).y;
 					const messageAreaYDiffFromListY = messageAreaY - this.listY;
 					targetTime_yInMessageArea = targetTime_yInList - messageAreaYDiffFromListY;
-					AssertWarn(!IsNaN(targetTime_yInMessageArea));
+					//AssertWarn(!IsNaN(targetTime_yInMessageArea));
+
+					// this can happen if executing during first render() call
+					if (isNaN(targetTime_yInMessageArea)) {
+						targetTime_yInMessageArea = 0;
+					}
 				}
 			}
 		}
@@ -149,29 +155,30 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		if (mapState == null) return void console.warn("Map-state not found for map:", map.id);
 
 		const timeline = GetSelectedTimeline(map.id);
-		const targetStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
-		// const maxTargetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
+		const oldCurrentStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
+		const oldAppliedStepIndex = GetPlayingTimelineAppliedStepIndex(map.id) ?? 0;
 		if (timeline && this.targetTime != null) {
 			const steps = GetTimelineSteps(timeline.id);
 			const firstStep = steps[0];
 
 			const targetStep = steps.LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a.id, this.targetTime)) ?? firstStep;
 			if (targetStep) {
-				const newTargetStepIndex = steps.indexOf(targetStep);
-				const newMaxTargetStepIndex = newTargetStepIndex.KeepAtLeast(targetStepIndex);
-				if (newTargetStepIndex != targetStepIndex) {
-					console.log("Target-step changing @Old:", targetStepIndex, "@New:", newTargetStepIndex, "@Time:", this.targetTime);
+				const newCurrentStepIndex = steps.indexOf(targetStep);
+				//const newAppliedStepIndex = newCurrentStepIndex.KeepAtLeast(oldAppliedStepIndex);
+				const newAppliedStepIndex = newCurrentStepIndex; // for now, have applied-step always match the current-step
+				if (newCurrentStepIndex != oldCurrentStepIndex) {
+					//console.log("Target-step changing @Old:", oldCurrentStepIndex, "@New:", newCurrentStepIndex, "@Time:", this.targetTime);
 					RunInAction("PlayingSubpanel_timer.setStepAndAppliedStep", ()=>{
-						mapState.playingTimeline_step = newTargetStepIndex;
-						mapState.playingTimeline_appliedStep = newMaxTargetStepIndex;
+						mapState.playingTimeline_step = newCurrentStepIndex;
+						mapState.playingTimeline_appliedStep = newAppliedStepIndex;
 					});
 
 					if (store.main.timelines.autoScroll && this.lastPosChangeSource == "playback") {
 						// jump one further down, so that the target point *within* the target step is visible (and with enough space for the arrow button itself)
 						// this.list.scrollAround(newTargetStepIndex + 1);
 						// jump X further down, so that we see some of the upcoming text (also for if video-time data is off some)
-						this.list.scrollAround(newTargetStepIndex + 3);
-						WaitXThenRun(0, ()=>this.list.scrollAround(newTargetStepIndex)); // make sure target box itself is still visible, however
+						this.list.scrollAround(newCurrentStepIndex + 3);
+						WaitXThenRun(0, ()=>this.list.scrollAround(newCurrentStepIndex)); // make sure target box itself is still visible, however
 					}
 				}
 			}
@@ -243,13 +250,23 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		// update some stuff based on timer (since user may have scrolled)
 		useEffect(()=>{
 			this.timer.Start();
-			return ()=>this.timer.Stop();
+			return ()=>{
+				this.timer.Stop();
+				// when component is being unmounted, store the exact timeline playing-time (so it can be restored exactly to PlayingSubpanel.targetTime when component is re-mounted)
+				RunInAction("PlayingSubpanel.onUnmount", ()=>mapState.playingTimeline_time = this.targetTime);
+			};
 		}, ["depToEnsureEffectRunsOnFirstNonBailedRender"]); // eslint-disable-line
 
 		// todo: make-so the UseCallbacks below can't break from this early-return changing the hook-count (atm, not triggering since timeline is always ready when this comp renders)
 		if (timeline == null) return null;
 		return (
 			<Column style={{flex: 1, minHeight: 0}}>
+				{timeline.videoID == null && <div ref={c=>{
+					// if no video is attached, use this empty div as an alternative route to setting the targetTime field
+					if (c && this.targetTime == null) {
+						RunInAction("PlayingSubpanel.targetTimeInitializer.onAttach", ()=>this.targetTime = mapState.playingTimeline_time ?? 0);
+					}
+				}}/>}
 				{timeline.videoID &&
 				<YoutubePlayerUI /* ref={videoRef} */ videoID={timeline.videoID} startTime={mapState.playingTimeline_time || (timeline.videoStartTime ?? undefined)} heightVSWidthPercent={timeline.videoHeightVSWidthPercent ?? .56}
 					onPlayerInitialized={player=>{

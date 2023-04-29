@@ -11,14 +11,6 @@ import {User} from "../users/@User.js";
 import {ArgumentType, NodeRevision} from "./@NodeRevision.js";
 import {NodeType} from "./@NodeType.js";
 
-export enum AccessLevel {
-	basic = "basic",
-	verified = "verified",
-	mod = "mod",
-	admin = "admin",
-}
-AddSchema("AccessLevel", {enum: GetValues(AccessLevel)});
-
 export enum ClaimForm {
 	base = "base",
 	negation = "negation",

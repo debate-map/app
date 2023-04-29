@@ -234,13 +234,6 @@ export class MapUI extends BaseComponent<Props, {}> {
 		})();
 		if (rootNode == null) return <MapUIWaitMessage message="Map's content is private/deleted."/>;
 		// if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
-		/*if (rootNode.current.accessLevel > GetUserAccessLevel(MeID())) {
-			return <Column style={ES({flex: 1})}>
-				{!withinPage &&
-					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth} backOnly={true}/>}
-				<MapUIWaitMessage message="Insufficient permissions."/>
-			</Column>;
-		}*/
 
 		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;

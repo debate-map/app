@@ -314,7 +314,8 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 							<Text ml={10}>Reveal depth:</Text>
 							<Spinner ml={5} min={0} max={50} value={nodeReveal.show_revealDepth} onChange={val=>{
 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-								newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
+								//newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
+								newNodeReveals[index].show_revealDepth = val;
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
 							}}/>
 						</>}

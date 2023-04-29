@@ -2,7 +2,7 @@ import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
-import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
+import {GetPlayingTimeline, GetPlayingTimelineRevealPaths_UpToAppliedStep, GetPlayingTimelineStepIndex, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolder.js";
@@ -79,46 +79,24 @@ export class NodeUI extends BaseComponentPlus(
 		performance.mark("NodeUI_1");
 
 		const GetNodeChildren = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3(node2.id, path2) : ea);
-		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true, true) : ea);
+		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true) : ea);
 
-		const nodeChildren = GetNodeChildren(node, path);
+		//const nodeChildren = GetNodeChildren(node, path);
 		const nodeChildrenToShow = GetNodeChildrenToShow(node, path);
-		const nodeForm = GetNodeForm(node, path);
 		const nodeView = GetNodeView(map.id, path);
-		const nodeTypeInfo = NodeType_Info.for[node.type];
-
-		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
-		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes.CatchBail(emptyArray, map.id, sinceTime, path); // catch bail, to lazy-load path-changes
-		const addedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.add).length;
-		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.edit).length;
-
-		const parent = GetParentNodeL3(path);
-		const parentPath = GetParentPath(path);
-		//const parentNodeView = GetNodeView(map.id, parentPath);
-		//const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<NodeL3>();
-
 		const boxExpanded = nodeView?.expanded ?? false;
-
-		const childLayout = GetChildLayout_Final(node.current, map);
-		//const childGroupsShowingDirect = [GetChildGroupLayout(ChildGroup.truth, childLayout)...];
-		//const directChildrenArePolarized = childGroupsShowingDirect.length == 1 && && node.type == NodeType.claim;
-		/*const truthBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.truth, childLayout, nodeChildrenToShow);
-		const relevanceBoxVisible = ShouldChildGroupBoxBeVisible(hereArg, ChildGroup.relevance, childLayout, hereArgChildrenToShow);
-		const freeformBoxVisible = ShouldChildGroupBoxBeVisible(node, ChildGroup.freeform, childLayout, nodeChildrenToShow);
-		const groupsUsingBoxes = (truthBoxVisible ? 1 : 0) + (relevanceBoxVisible ? 1 : 0) + (freeformBoxVisible ? 1 : 0);
-		const directChildrenArePolarized = (node.type == NodeType.argument && !relevanceBoxVisible) || (node.type == NodeType.claim && !truthBoxVisible);*/
 
 		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
 		const ncToShow_relevance = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.relevance);
 		const ncToShow_freeform = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.freeform);
 
+		// this filtering is applied in the GetNodeChildrenL3_Advanced function instead for now (eg. so that child-limit-bar doesn't need special handling)
 		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
-		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
-		// const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id, true);
-		// if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
-		const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id);*/
+		//const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
+		const playingTimelineVisibleNodes = GetPlayingTimelineRevealPaths_UpToAppliedStep(map.id, false); // false, so that if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
+		if (playingTimeline != null && !playingTimelineVisibleNodes.Any(a=>a.startsWith(path))) return null;*/
 
 		performance.mark("NodeUI_2");
 		if (ShouldLog(a=>a.nodeRenders)) {
@@ -153,13 +131,6 @@ export class NodeUI extends BaseComponentPlus(
 				aboveToolbar_hasLeftButton: aboveToolbar_visible && usesToolbarForPrefixText,
 			}),
 		);
-
-		// Assert(!relevanceArguments.Any(a=>a.type == NodeType.claim), "Single-premise argument has more than one premise!");
-		/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-			// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
-			// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
-			relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child.id}`)));
-		}*/
 
 		let treeChildrenAddedSoFar = 0;
 
@@ -248,10 +219,6 @@ export class NodeUI extends BaseComponentPlus(
 						style,
 					)}
 				>
-					{/*node.current.accessLevel != AccessLevel.basic &&
-					<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
-						<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
-					</div>*/}
 					<CloneHistoryButton node={node}/>
 					<NodeUI_Inner ref={UseCallback(c=>{
 						this.innerUI = GetInnerComp(c);

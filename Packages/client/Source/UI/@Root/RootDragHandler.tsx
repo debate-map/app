@@ -99,7 +99,7 @@ export async function OnDragEnd(result: DropResult, provided: ResponderProvided)
 
 		const step = GetTimelineStep(targetDroppableInfo.stepID);
 		if (step == null) return;
-		const newNodeReveal = new NodeReveal({path, show: true, show_revealDepth: 1, hide: false});
+		const newNodeReveal = new NodeReveal({path, show: true, show_revealDepth: 0, hide: false});
 		const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
 		RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
 	}

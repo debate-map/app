@@ -1,7 +1,6 @@
 import {Assert, Clone, IsString} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAccessPolicy, UserFulfillsPermitCriteria} from "../../DB/accessPolicies.js";
-import {AccessLevel} from "../nodes/@Node.js";
 import {GetUser} from "../users.js";
 import {PermissionGroupSet} from "./@User.js";
 

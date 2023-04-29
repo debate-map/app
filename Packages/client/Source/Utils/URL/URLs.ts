@@ -1,4 +1,4 @@
-import {Assert, VURL, ModifyString, ATS} from "web-vcore/nm/js-vextensions.js";
+import {Assert, VURL, ModifyString, ATS, ToInt} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
@@ -186,16 +186,6 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			} */
 		}
 
-		/* if (url.GetQueryVar('timeline')) {
-			result.push(new ACTMap_PlayingTimelineSet({ mapID, timelineID: url.GetQueryVar('timeline') }));
-		}
-		if (url.GetQueryVar('step')) {
-			result.push(new ACTMap_PlayingTimelineStepSet({ mapID, stepIndex: ToInt(url.GetQueryVar('step')) - 1 }));
-		}
-		if (url.GetQueryVar('appliedStep')) {
-			result.push(new ACTMap_PlayingTimelineAppliedStepSet({ mapID, stepIndex: ToInt(url.GetQueryVar('appliedStep')) - 1 }));
-		} */
-
 		// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
 		// Search for the shortest path from the map's root to this node, and update the view and url to that path.
 		// if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
@@ -247,6 +237,8 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			// actual loading handled by LoadShare.ts
 		}
 
+		const mapState = GetMapState(mapID);
+
 		// load query-vars
 		store.main.urlOtherFlags = [];
 		for (const param of url.queryVars) {
@@ -262,6 +254,12 @@ export function GetLoadActionFuncForURL(url: VURL) {
 					const nodePathToSelect = param.value;
 					store.main.selectNode_fragmentPath = `${openMapID}/${nodePathToSelect}`;
 				}
+			} else if (param.name == "timeline") {
+				if (mapState) mapState.selectedTimeline = param.value;
+			} else if (param.name == "step") {
+				if (mapState) mapState.playingTimeline_step = ToInt(param.value) - 1;
+			} else if (param.name == "appliedStep") {
+				if (mapState) mapState.playingTimeline_appliedStep = ToInt(param.value) - 1;
 			} else {
 				store.main.urlOtherFlags.push({name: param.name, value: param.value});
 			}

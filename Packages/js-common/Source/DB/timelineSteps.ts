@@ -42,17 +42,17 @@ export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((stepID: s
 	return timeFromStart <= timeX;
 });
 
-export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
-	const nodeRevealTimes = {} as {[key: string]: number};
+export const GetPathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
+	const pathRevealTimes = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
 			if (reveal.show) {
 				const stepTime = GetTimelineStepTimeFromStart(step.id);
 				const stepTime_safe = stepTime ?? CE(steps.slice(0, index).map(a=>GetTimelineStepTimeFromStart(a.id))).LastOrX(a=>a != null) ?? 0;
 				if (baseOnLastReveal) {
-					nodeRevealTimes[reveal.path] = Math.max(stepTime_safe, ToNumber(nodeRevealTimes[reveal.path], 0));
+					pathRevealTimes[reveal.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[reveal.path], 0));
 				} else {
-					nodeRevealTimes[reveal.path] = Math.min(stepTime_safe, ToNumber(nodeRevealTimes[reveal.path], Number.MAX_SAFE_INTEGER));
+					pathRevealTimes[reveal.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[reveal.path], Number.MAX_SAFE_INTEGER));
 				}
 
 				const revealDepth = ToNumber(reveal.show_revealDepth, 0);
@@ -70,9 +70,9 @@ export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], 
 						const nextChildren = [];
 						for (const child of currentChildren) {
 							if (baseOnLastReveal) {
-								nodeRevealTimes[child.path] = Math.max(stepTime_safe, ToNumber(nodeRevealTimes[child.path], 0));
+								pathRevealTimes[child.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[child.path], 0));
 							} else {
-								nodeRevealTimes[child.path] = Math.min(stepTime_safe, ToNumber(nodeRevealTimes[child.path], Number.MAX_SAFE_INTEGER));
+								pathRevealTimes[child.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[child.path], Number.MAX_SAFE_INTEGER));
 							}
 							// if there's another loop/depth after this one
 							if (childrenDepth < revealDepth) {
@@ -88,16 +88,16 @@ export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], 
 					}
 				}
 			} else if (reveal.hide) {
-				for (const path of CE(nodeRevealTimes).VKeys()) {
+				for (const path of CE(pathRevealTimes).VKeys()) {
 					if (path.startsWith(reveal.path)) {
-						delete nodeRevealTimes[path];
+						delete pathRevealTimes[path];
 					}
 				}
 			}
 		}
 	}
-	return nodeRevealTimes;
+	return pathRevealTimes;
 });
-export const GetNodesRevealedInSteps = CreateAccessor((steps: TimelineStep[])=>{
-	return CE(GetNodeRevealTimesInSteps(steps)).VKeys();
+export const GetPathsRevealedInSteps = CreateAccessor((steps: TimelineStep[])=>{
+	return CE(GetPathRevealTimesInSteps(steps)).VKeys();
 });

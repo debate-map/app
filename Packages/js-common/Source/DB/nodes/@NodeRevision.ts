@@ -1,7 +1,7 @@
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field, GetSchemaJSON_Cloned} from "web-vcore/nm/mobx-graphlink.js";
 import {Map} from "../maps/@Map.js";
-import {AccessLevel, NodeL3} from "./@Node.js";
+import {NodeL3} from "./@Node.js";
 import {NodePhrasing, NodePhrasing_Embedded} from "../nodePhrasings/@NodePhrasing.js";
 import {ChildGroup, NodeType_Info} from "./@NodeType.js";
 import {EquationAttachment, ReferencesAttachment, QuoteAttachment, MediaAttachment, Attachment} from "../../DB.js";

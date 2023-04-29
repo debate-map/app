@@ -57,22 +57,6 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							//const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: AsNodeRevisionInput(newRevision)});
 							RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
-
-							/*if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {
-								const argumentNode = await GetAsync(()=>GetParentNodeL3(path));
-								if (IsUserCreatorOrMod(MeID(), argumentNode)) {
-									const permissionKeys = ["accessLevel", "votingDisabled", /* "permission_edit", *#/ "permission_contribute"] as const;
-									const nodePermissions = newRevision.IncludeKeys(...permissionKeys);
-									const argumentNodePermissions = argumentNode.current.IncludeKeys(...permissionKeys);
-									// if argument permissions do not match premise, update argument's permissions to match
-									if (!_.isEqual(argumentNodePermissions, nodePermissions)) {
-										const newArgumentRevision = Clone(argumentNode.current);
-										newArgumentRevision.VSet(nodePermissions);
-										const newArgumentRevisionID = await new AddNodeRevision({mapID: map.id, revision: newArgumentRevision}).RunOnServer();
-										RunInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode.id, Date.now()));
-									}
-								}
-							}*/
 						}}/>
 						{/* error && <Pre>{error.message}</Pre> */}
 						{HasModPermissions(MeID()) &&

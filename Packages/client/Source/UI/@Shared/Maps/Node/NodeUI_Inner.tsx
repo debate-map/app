@@ -3,7 +3,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
+import {GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -153,16 +153,16 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		//const phrasings = GetNodePhrasings(node.id);
 		const {showReasonScoreValues} = store.main.maps;
 
-		/*/*const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
+		/*const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
 		let revealedByCurrentTimelineStep = playingTimeline_currentStepRevealNodes.Contains(path);
 		if (combinedWithParentArgument) {
 			revealedByCurrentTimelineStep = revealedByCurrentTimelineStep || playingTimeline_currentStepRevealNodes.Contains(parentPath);
-		}*#/
+		}*/
 		const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
-		const timeSinceRevealedByTimeline_self = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true);
-		const timeSinceRevealedByTimeline_parent = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, parentPath, true, true);
-		let timeSinceRevealedByTimeline = timeSinceRevealedByTimeline_self;
-		if (combinedWithParentArgument && timeSinceRevealedByTimeline_parent != null) {
+		const timeSinceRevealedByTimeline_self = map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true) : null;
+		//const timeSinceRevealedByTimeline_parent = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, parentPath, true, true);
+		const timeSinceRevealedByTimeline = timeSinceRevealedByTimeline_self;
+		/*if (combinedWithParentArgument && timeSinceRevealedByTimeline_parent != null) {
 			timeSinceRevealedByTimeline = timeSinceRevealedByTimeline != null ? Math.min(timeSinceRevealedByTimeline, timeSinceRevealedByTimeline_parent) : timeSinceRevealedByTimeline_parent;
 		}*/
 
@@ -385,8 +385,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					onMouseLeave={onMouseLeave}
 					{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, below
 					style={E(
-						/*timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime &&
-							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},*/
+						timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime && {
+							boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`,
+						},
 						{
 							color: liveSkin.NodeTextColor().css(),
 							//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
