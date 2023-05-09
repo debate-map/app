@@ -55,8 +55,10 @@ pub struct AddArgumentAndClaimInput {
 pub struct AddArgumentAndClaimResult {
     pub argumentNodeID: String,
     pub argumentRevisionID: String,
+    pub argumentLinkID: String,
     pub claimNodeID: String,
     pub claimRevisionID: String,
+    pub claimLinkID: String,
     pub doneAt: i64,
 }
 
@@ -86,8 +88,10 @@ pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, is_
     Ok(AddArgumentAndClaimResult {
         argumentNodeID: add_argument_result.nodeID,
         argumentRevisionID: add_argument_result.revisionID,
+        argumentLinkID: add_argument_result.linkID,
         claimNodeID: add_claim_result.nodeID,
         claimRevisionID: add_claim_result.revisionID,
+        claimLinkID: add_claim_result.linkID,
         doneAt: time_since_epoch_ms_i64(),
     })
 }
