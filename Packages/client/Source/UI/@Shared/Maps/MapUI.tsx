@@ -5,7 +5,7 @@ import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
-import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI} from "tree-grapher";
+import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI, SpaceTakerUI} from "tree-grapher";
 import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
@@ -104,9 +104,11 @@ export class NodeDataForTreeGrapher {
 	aboveToolbar_hasLeftButton?: boolean;
 }
 
+type Padding = {left: number, right: number, top: number, bottom: number};
+
 type Props = {
 	mapID: string, rootNode?: NodeL3, withinPage?: boolean,
-	padding?: {left: number, right: number, top: number, bottom: number},
+	padding?: Padding,
 	//subNavBarWidth?: number,
 } & HTMLProps<"div">;
 @Observer
@@ -129,7 +131,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		const {mapID, rootNode: rootNode_passed, withinPage, ...rest} = this.props;
 		//Assert(padding && subNavBarWidth != null); // nn: default-values set
 
-		const GetMapUIPadding = ()=>{
+		const GetMapUIPadding = (): Padding=>{
 			if (this.props.padding) return padding;
 
 			/*const winWidth = screen.availWidth;
@@ -192,7 +194,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 					},
 				},
 			});
-			//globalThis.graph = graph; // temp
+			globalThis.mainGraph = graph; // for debugging
 			return graph;
 		}, []);
 		const [containerElResolved, setContainerElResolved] = useState(false);
@@ -213,6 +215,12 @@ export class MapUI extends BaseComponent<Props, {}> {
 		}*/
 		const mapState = GetMapState(mapID);
 		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
+
+		// update some graph info
+		graphInfo.containerPadding = padding;
+		const zoomLevel = mapState && mapState.zoomLevel != 1 ? mapState.zoomLevel : 1;
+		//graphInfo.contentScaling = zoomLevel;
+		//graphInfo.SetContentScaling(zoomLevel);
 
 		const mapView = GetMapView(mapID);
 		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
@@ -264,14 +272,25 @@ export class MapUI extends BaseComponent<Props, {}> {
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
 					<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
-						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.mapUIEl}
-						style={ES({height: "100%"}, withinPage && {overflow: "visible"})}
+						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.scrollView!.contentSizeWatcher || a == this.mapUIEl}
+						style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 						contentStyle={E(
 							{willChange: "transform"},
+							// when zoomed, disable the willChange:transform optimization, since it can disrupt text-rendering (eg. blurry when zoomed-in, until user hovers over node-box)
+							//mapState && mapState.zoomLevel != 1 && {willChange: null},
 							withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
 							withinPage && inFirefox && {overflow: "hidden"},
 						)}
+						// the ResizeObserver that react-vscrollview uses to detect content-size ignores transform:scale, so we need to provide that information for final content-size calculation
+						//contentScaling={zoomLevel}
+						/*contentSizeWatcherStyle={E(
+							// apply the zoom to the content-size-watcher instead of MapUI, because we want the scrollbar system to "see" the scaled size(the watcher's width:fit-content and height:fit-content can't "see" it for children)
+							mapState.zoomLevel != 1 && {
+								transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
+								transformOrigin: "0% 0%",
+							},
+						)}*/
 						// contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
 						// bufferScrollEventsBy={10000}
 						onScrollEnd={pos=>{
@@ -279,21 +298,32 @@ export class MapUI extends BaseComponent<Props, {}> {
 							ACTUpdateFocusNodeAndViewOffset(map.id);
 						}}
 					>
+						<SpaceTakerUI graph={graphInfo} scaling={zoomLevel}/>
 						<style>{`
 						.MapUI {
 							display: inline-flex;
-							//flex-wrap: wrap;
+							/*flex-wrap: wrap;*/
 						}
 						.MapUI.scrolling > * { pointer-events: none; }
 						`}</style>
 						<div className="MapUI"
 							ref={mapUI_ref}
-							style={{
-								position: "relative", /* display: "flex", */ whiteSpace: "nowrap",
-								padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
-								alignItems: "center",
-								filter: GetMapUICSSFilter(),
-							}}
+							style={ES(
+								{
+									//position: "relative",
+									position: "absolute", left: 0, top: 0,
+									width: (1 / zoomLevel).ToPercentStr(), height: (1 / zoomLevel).ToPercentStr(),
+									/* display: "flex", */ whiteSpace: "nowrap",
+									//padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
+									alignItems: "center",
+									filter: GetMapUICSSFilter(),
+								},
+								//mapState.zoomLevel != 1 && {zoom: mapState.zoomLevel.ToPercentStr()},
+								mapState.zoomLevel != 1 && {
+									transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
+									transformOrigin: "0% 0%",
+								},
+							)}
 							onMouseDown={e=>{
 								this.downPos = new Vector2(e.clientX, e.clientY);
 								if (e.button == 2) { this.mapUIEl!.classList.add("scrolling"); }
@@ -406,6 +436,33 @@ export class MapUI extends BaseComponent<Props, {}> {
 		// UpdateURL(false);
 	}
 
+	// funcs to keep view-center while zooming
+	GetMapCenter_AsUnzoomed(zoomLevel: number) {
+		const scrollContainer = this.mapUIEl?.parentElement?.parentElement;
+		if (this.mapUIEl == null || scrollContainer == null) return null;
+		const scrollContainerRect = GetViewportRect(scrollContainer);
+		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLevel);
+		const mapCenter = new Vector2(
+			(scrollContainer.scrollLeft / zoomLevel) + (scrollContainerSize_unzoomed.x / 2),
+			(scrollContainer.scrollTop / zoomLevel) + (scrollContainerSize_unzoomed.y / 2),
+		);
+		return mapCenter;
+	}
+	AdjustMapScrollToPreserveCenterPoint(mapCenter: Vector2, zoomLevel: number) {
+		const scrollContainer = this.mapUIEl?.parentElement?.parentElement;
+		if (this.mapUIEl == null || scrollContainer == null) return;
+		const scrollContainerRect = GetViewportRect(scrollContainer);
+		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLevel);
+		this.scrollView!.SetScroll(new Vector2(
+			(mapCenter.x - (scrollContainerSize_unzoomed.x / 2)) * zoomLevel,
+			(mapCenter.y - (scrollContainerSize_unzoomed.y / 2)) * zoomLevel,
+		));
+	}
+
+	funcsToRunAfterNextRender = [] as (()=>void)[];
+	ScheduleAfterNextRender(func: ()=>void) {
+		this.funcsToRunAfterNextRender.push(func);
+	}
 	PostRender() {
 		const {withinPage} = this.props;
 		const map = this.Map;
@@ -415,6 +472,8 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (map) {
 			SetMapVisitTimeForThisSession(map.id, Date.now());
 		}
+		this.funcsToRunAfterNextRender.forEach(a=>a());
+		this.funcsToRunAfterNextRender.length = 0;
 	}
 
 	// load scroll from store

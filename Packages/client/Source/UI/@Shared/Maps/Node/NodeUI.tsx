@@ -9,8 +9,8 @@ import {NodeChildHolder} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
-import {BailError} from "web-vcore/.yalc/mobx-graphlink";
+import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
+import {BailError, BailInfo} from "web-vcore/.yalc/mobx-graphlink";
 import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
@@ -67,6 +67,13 @@ export class NodeUI extends BaseComponentPlus(
 	rightColumn: Column|n;
 	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
 	nodeChildHolder_generic: NodeChildHolder|n;
+
+	// we don't have an easy way to position loading-uis within the new node-layout system, so don't show them at all for now (well, we render it for debugging purposes, but have it visually hidden)
+	// todo: find a way to position the loading-uis within new node-layout system
+	loadingUI = (info: BailInfo)=>{
+		return <DefaultLoadingUI comp={info.comp} bailMessage={info.bailMessage} style={{display: "none"}}/>;
+	};
+
 	componentDidCatch(message, info) {
 		if (message instanceof BailError) return;
 		EB_StoreError(this as any, message, info);

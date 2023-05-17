@@ -13609,28 +13609,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-grapher@npm:0.0.6":
-  version: 0.0.6
-  resolution: "tree-grapher@npm:0.0.6"
-  dependencies:
-    "@types/d3-hierarchy": ^3.0.2
-    d3-hierarchy: ^3.1.1
-    js-vextensions: ^1.0.69
-    mobx: ^6.3.13
-    mobx-react: ^7.2.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    use-callback-ref: ^1.2.5
-    use-resize-observer: ^8.0.0
-    use-state-with-deps: ^1.1.1
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  checksum: 2f9a92d65b584cc3a27bdf22715384ab43f30f6e80f5612ff53fbca802c88165f6d7f32215722237df7cb6ad09db0c531d90bffd1179b2a615d05c5ea8c3e392
-  languageName: node
-  linkType: hard
-
-"tree-grapher@workspace:.yalc/tree-grapher":
+"tree-grapher@0.0.6, tree-grapher@workspace:.yalc/tree-grapher":
   version: 0.0.0-use.local
   resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:

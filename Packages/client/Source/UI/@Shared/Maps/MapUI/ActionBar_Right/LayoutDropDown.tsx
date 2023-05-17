@@ -10,6 +10,16 @@ import React, {Fragment} from "react";
 import {GetEntries} from "js-vextensions";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
+
+const changesSince_options = [] as {name: string, value: string}[];
+changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
+for (let offset = 1; offset <= 5; offset++) {
+	const offsetStr = [null, "", "2nd ", "3rd ", "4th ", "5th "][offset];
+	changesSince_options.push({name: `Your ${offsetStr}last visit`, value: `${ShowChangesSinceType.sinceVisitX}_${offset}`});
+}
+changesSince_options.push({name: "All unclicked changes", value: `${ShowChangesSinceType.allUnseenChanges}_null`});
 
 const ratingPreviewOptions = [
 	{name: "None", value: "none"},
@@ -22,6 +32,10 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.maps;
+		const mapState = GetMapState.NN(map.id);
+		const {showChangesSince_type} = mapState;
+		const {showChangesSince_visitOffset} = mapState;
+		const {childOrdering: weighting} = store.main.maps;
 
 		const Button_Final = GADDemo ? Button_GAD : Button;
 		const splitAt = 210;
@@ -43,6 +57,16 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 					<RowLR mt={3} splitAt={splitAt}>
 						<Pre>Show Reason Score values:</Pre>
 						<CheckBox value={uiState.showReasonScoreValues} onChange={val=>RunInAction_Set(this, ()=>uiState.showReasonScoreValues = val)}/>
+					</RowLR>
+					<RowLR mt={3} splitAt={splitAt}>
+						<Pre>Show changes since: </Pre>
+						<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
+							RunInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
+								const parts = val.split("_");
+								mapState.showChangesSince_type = parts[0];
+								mapState.showChangesSince_visitOffset = JSON.parse(parts[1]);
+							});
+						}}/>
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
 						<TextPlus info="If enabled, then when you create a new node, it will start out as expanded.">Auto-expand new nodes:</TextPlus>

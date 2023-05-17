@@ -3,7 +3,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -166,6 +166,8 @@ export class NodeBox extends BaseComponentPlus(
 			timeSinceRevealedByTimeline = timeSinceRevealedByTimeline != null ? Math.min(timeSinceRevealedByTimeline, timeSinceRevealedByTimeline_parent) : timeSinceRevealedByTimeline_parent;
 		}*/
 
+		const mapState = GetMapState(map?.id);
+
 		// the rest
 		// ==========
 
@@ -175,8 +177,12 @@ export class NodeBox extends BaseComponentPlus(
 			if (!asDragPreview && this.draggableDiv) { */
 			// setDragActive(this.root.DOM.getBoundingClientRect().width);
 			if (this.root?.DOM) {
-				if (this.root.DOM.getBoundingClientRect().width != lastWidthWhenNotPreview) {
-					this.SetState({lastWidthWhenNotPreview: this.root.DOM.getBoundingClientRect().width});
+				let renderedWidth = this.root.DOM.getBoundingClientRect().width;
+				if (mapState != null && mapState?.zoomLevel != 1) {
+					renderedWidth /= mapState.zoomLevel;
+				}
+				if (renderedWidth != lastWidthWhenNotPreview) {
+					this.SetState({lastWidthWhenNotPreview: renderedWidth});
 				}
 			}
 		});

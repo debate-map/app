@@ -57,9 +57,9 @@
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
-    "tree-grapher": "0.0.6",
+    "tree-grapher": "0.0.7",
     "ui-debug-kit": "0.0.6",
-    "web-vcore": "0.0.71"
+    "web-vcore": "0.0.72"
   },
   "packageManager": "yarn@3.3.0"
 }

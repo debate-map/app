@@ -177,8 +177,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 							<>
 								<Column ref={c=>{ this[`${polarityGroup}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
 									style={E(
-										{position: "relative"},
-										childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: NodeType_Info.for[NodeType.claim].minWidth, height: 100},
+										/*{position: "relative"},
+										childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: NodeType_Info.for[NodeType.claim].minWidth, height: 100},*/
+
+										// for now, just use an absolutely-positioned, empty rect; doesn't allow actual dropping, but allows dragging *from* map onto timeline-steps -- proper fix required rework, for new layout system
+										{position: "absolute", left: 0, top: 0, width: 0, height: 0},
 									)}>
 									{/* childrenHere.length == 0 && <div style={{ position: 'absolute', top: '100%', width: '100%', height: 200 }}/> */}
 									{provided.placeholder}
@@ -199,7 +202,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath, childGroup: group});
 		return (
 			<>
-				<Column ref={useCallback(c=>{
+				{/*<Column ref={useCallback(c=>{
 					this.childHolder = c;
 				}, [])} className="NodeChildHolder clickThrough" style={E(
 					{
@@ -220,8 +223,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
 							widthOfNode={childrenWidthOverride}
 							nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
-							onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>*/}
-				</Column>
+							onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>*#/}
+				</Column>*/}
 				{!separateChildren &&
 					RenderPolarityGroup("all")}
 				{separateChildren &&
@@ -236,14 +239,18 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			</>
 		);
 	}
-	childHolder: Column|n;
+	/*childHolder: Column|n;
 	allChildHolder: Column|n;
 	upChildHolder: Column|n;
-	downChildHolder: Column|n;
+	downChildHolder: Column|n;*/
 	argumentsControlBar: ArgumentsControlBar|n;
 
 	StartGeneratingPositionedPlaceholder(group: "all" | "up" | "down") {
-		const groups = {all: this.allChildHolder, up: this.upChildHolder, down: this.downChildHolder};
+		// commented; requires having a child-holder element, which we don't have atm (and commenting is fine, since drag-and-drop is accepted as not being implemented in the new layout system yet)
+		// (the child-holder component is merely a construct to facilitate rendering of node-ui components)
+		// (we would need to use a new approach for showing a placeholder, that is compatible with the layout being handled by the tree-grapher module)
+
+		/*const groups = {all: this.allChildHolder, up: this.upChildHolder, down: this.downChildHolder};
 		const childHolder = groups[group];
 		if (childHolder == null || !childHolder.mounted) {
 			// call again in a second, once child-holder is initialized
@@ -254,7 +261,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const childHolderRect = VRect.FromLTWH(childHolder.DOM!.getBoundingClientRect());
 		/* const match = firstOffsetInner.style.transform.match(/([0-9]+).+?([0-9]+)/);
 		const dragBoxSize = new Vector2(match[1].ToInt(), match[2].ToInt());
-		// delete dragInfo.provided.draggableProps.style.transform; */
+		// delete dragInfo.provided.draggableProps.style.transform; *#/
 		const dragBox = document.querySelector(".NodeBox.DragPreview");
 		if (dragBox == null) return; // this can happen at end of drag
 		const dragBoxRect = VRect.FromLTWH(dragBox.getBoundingClientRect());
@@ -283,7 +290,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			}
 		}
 
-		this.SetState({placeholderRect});
+		this.SetState({placeholderRect});*/
 	}
 
 	get ShouldChildrenShow() {
@@ -346,13 +353,15 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	};
 
 	GetDividePoint() {
-		if (this.argumentsControlBar) {
+		return 0;
+		// commented; needs re-implementing to work with tree-grapher layout system
+		/*if (this.argumentsControlBar) {
 			// return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
 			return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden"
 				? GetViewportRect(this.argumentsControlBar.DOM!).Center.y + 1 - GetViewportRect(this.childHolder.DOM!).y
 				: 0;
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder?.DOM && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM!).height / 2 : 0;
+		return this.childHolder?.DOM && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM!).height / 2 : 0;*/
 	}
 }

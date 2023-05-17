@@ -22,7 +22,7 @@ export class MapsState {
 	// @ref(MapState_) maps = {} as {[key: string]: MapState};
 	// @map(MapState_) maps = observable.map<string, MapState>();
 	// @O maps = {} as ObservableMap<string, MapState>;
-	@O mapStates = observable.map<string, MapState>();
+	@O @version(2) mapStates = observable.map<string, MapState>();
 	/* ACTEnsureMapStateInit(mapID: string) {
 		if (this.maps.get(mapID)) return;
 		this.maps.set(mapID, new MapState());

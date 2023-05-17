@@ -37,6 +37,8 @@ export class MapState {
 	@O showTimelineDetails = false;
 	@O selectedTimeline: string|n;
 
+	@O zoomLevel = 1;
+
 	@O showChangesSince_type = ShowChangesSinceType.sinceVisitX;
 	@O showChangesSince_visitOffset = 1;
 

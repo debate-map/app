@@ -1,33 +1,52 @@
 import {FromJSON, GetEntries, ToNumber, E} from "web-vcore/nm/js-vextensions.js";
-import {Pre, Row, Select} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Pre, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {Observer, HSLA, RunInAction} from "web-vcore";
+import {Observer, HSLA, RunInAction, RunInAction_Set} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, ChildOrdering} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
-
-const changesSince_options = [] as {name: string, value: string}[];
-changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
-for (let offset = 1; offset <= 5; offset++) {
-	const offsetStr = [null, "", "2nd ", "3rd ", "4th ", "5th "][offset];
-	changesSince_options.push({name: `Your ${offsetStr}last visit`, value: `${ShowChangesSinceType.sinceVisitX}_${offset}`});
-}
-changesSince_options.push({name: "All unclicked changes", value: `${ShowChangesSinceType.allUnseenChanges}_null`});
+import {MapUI} from "../MapUI.js";
 
 @Observer
 export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
 	render() {
 		const {map, subNavBarWidth} = this.props;
 		const mapState = GetMapState.NN(map.id);
-		const {showChangesSince_type} = mapState;
-		const {showChangesSince_visitOffset} = mapState;
-		const {childOrdering: weighting} = store.main.maps;
+		const mapView = GetMapView.NN(map.id);
+
+		const ChangeZoom = (newZoom: number)=>{
+			const oldZoom = mapState.zoomLevel;
+			const mapUI = MapUI.CurrentMapUI;
+			const mapCenter_unzoomed = mapUI?.GetMapCenter_AsUnzoomed(oldZoom);
+			if (mapUI == null || mapCenter_unzoomed == null) return;
+
+			RunInAction_Set(this, ()=>{
+				mapState.zoomLevel = newZoom;
+				mapUI.AdjustMapScrollToPreserveCenterPoint(mapCenter_unzoomed, newZoom);
+
+				// There is a bug in Chrome where if you change the transform-scaling of an element, it doesn't update the "valid scrollbar range" for the scroll-container until something triggers a recalc.
+				// This causes the map's scrolling to be "forced to the left" at some point, which we don't want. (we want the map-center to stay centered)
+				// To fix this, we force a recalc of the "valid scrollbar range", by using the procedure below (see: https://stackoverflow.com/a/41426352), followed by a re-attempt of the center-point restoration.
+				// UPDATE: This procedure *also* causes the node-uis to be "rerasterized" after a zoom-change, which is needed to fix the issue of node-uis being blurry after zooming-in.
+				//         (thus I've removed the workaround in MapUI.tsx, which wasn't great since it reduced scroll performance when many nodes were open)
+				mapUI.ScheduleAfterNextRender(()=>{
+					const mapEl = mapUI.mapUIEl;
+					if (mapEl == null) return;
+					const oldDisplay = mapEl.style.display;
+					mapEl.style.display = "none"; // hides the element
+					mapEl.offsetHeight; // let's the browser "catch up" on the code so it gets redrawn
+					mapEl.style.display = oldDisplay; // shows the element again
+					mapUI.AdjustMapScrollToPreserveCenterPoint(mapCenter_unzoomed, newZoom);
+				});
+			});
+		};
 
 		const tabBarWidth = 104;
 		return (
@@ -48,14 +67,10 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 					},
 				)}>
 						<Row center mr={5}>
-							<Pre>Show changes since: </Pre>
-							<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
-								RunInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
-									const parts = val.split("_");
-									mapState.showChangesSince_type = parts[0];
-									mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
-								});
-							}}/>
+							<Text>Zoom:</Text>
+							<Spinner ml={3} style={{width: 45}} instant={true} min={.1} max={10} step={.1} value={mapState.zoomLevel} onChange={val=>ChangeZoom(val)}/>
+							<Button ml={3} p="3px 10px" text="-" enabled={mapState.zoomLevel > .1} onClick={()=>ChangeZoom((mapState.zoomLevel - .1).RoundTo(.1))}/>
+							<Button ml={3} p="3px 10px" text="+" enabled={mapState.zoomLevel < 10} onClick={()=>ChangeZoom((mapState.zoomLevel + .1).RoundTo(.1))}/>
 						</Row>
 						{!GADDemo &&
 							<ShareDropDown map={map}/>}
