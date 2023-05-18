@@ -23,6 +23,7 @@ import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
+import {TimelinePlayerUI} from "../Timelines/TimelinePlayerUI.js";
 
 export function GetNodeBoxForPath(path: string) {
 	const nodeInnerBoxes = FindDOMAll(".NodeBox").map(a=>DeepGet(FindReact(a), "props/parent") as NodeBox);
@@ -264,10 +265,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 					</SubNavBar>*/}
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>
 				</>}
-				{/* !withinPage &&
-					<TimelinePlayerUI map={map}/> */}
-				{/*! withinPage &&
-					<TimelineOverlayUI map={map}/> */}
+				{/*!withinPage &&
+					<TimelinePlayerUI map={map}/>*/}
+				{/*!withinPage &&
+					<TimelineOverlayUI map={map}/>*/}
 				<Row style={{marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start"}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}

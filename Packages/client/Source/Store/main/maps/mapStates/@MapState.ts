@@ -42,7 +42,7 @@ export class MapState {
 	@O showChangesSince_type = ShowChangesSinceType.sinceVisitX;
 	@O showChangesSince_visitOffset = 1;
 
-	@O playingTimeline_time: number;
-	@O playingTimeline_step: number; // step currently scrolled to
-	@O playingTimeline_appliedStep: number; // max step scrolled to
+	@O playingTimeline_time: number|n;
+	@O playingTimeline_step: number|n; // step currently scrolled to
+	@O playingTimeline_appliedStep: number|n; // max step scrolled to
 }

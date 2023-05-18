@@ -113,7 +113,7 @@ export const GetTimeSinceNodeRevealedByPlayingTimeline = CreateAccessor((mapID: 
 	// const timelineTime = GetPlayingTimelineTime(mapID);
 	const mapState = GetMapState(mapID);
 	if (mapState == null) return null;
-	const timelineTime = mapState.playingTimeline_time;
+	const timelineTime = mapState.playingTimeline_time ?? 0;
 	let result = timelineTime - nodeRevealTime;
 	if (limitToJustPastHighlightRange) {
 		result = result.RoundTo(1); // round, to prevent unnecessary re-renders
