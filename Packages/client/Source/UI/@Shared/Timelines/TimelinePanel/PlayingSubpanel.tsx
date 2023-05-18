@@ -12,6 +12,7 @@ import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSte
 import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
+import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {StepUI} from "./PlayingSubpanel/StepUI.js";
 
 @Observer
@@ -171,6 +172,16 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 					RunInAction("PlayingSubpanel_timer.setStepAndAppliedStep", ()=>{
 						mapState.playingTimeline_step = newCurrentStepIndex;
 						mapState.playingTimeline_appliedStep = newAppliedStepIndex;
+
+						// commented; see TimelineNodeFocuser.ts instead
+						/*if (newAppliedStepIndex > oldAppliedStepIndex) {
+							for (let i = oldAppliedStepIndex + 1; i <= newAppliedStepIndex; i++) {
+								const step = steps[i];
+								for (const nodeReveal of step.nodeReveals) {
+									ACTNodeExpandedSet({mapID: map.id, path: nodeReveal.path, expanded: nodeReveal.show, expandAncestors: true}});
+								}
+							}
+						}*/
 					});
 
 					if (store.main.timelines.autoScroll && this.lastPosChangeSource == "playback") {
