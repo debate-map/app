@@ -6,7 +6,7 @@ import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/ma
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {MaybeLog, Page} from "web-vcore";
 import {GetMap, NodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
-import {ACTNodeSelect, GetFocusedNodeID, GetSelectedNodePathNodes} from "Store/main/maps/mapViews/$mapView";
+import {ACTNodeSelect, GetAnchorNodeID, GetSelectedNodePathNodes} from "Store/main/maps/mapViews/$mapView";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
@@ -99,7 +99,7 @@ export function GetCurrentURL_SimplifiedForPageViewTracking() {
 	/* const mapID = GetOpenMapID();
 	const onMapPage = NormalizeURL(result).toString({ domain: false }).startsWith('/global/map');
 	if (mapID && onMapPage) {
-		const nodeID = GetFocusedNodeID(mapID);
+		const nodeID = GetAnchorNodeID(mapID);
 		const node = nodeID ? GetNodeL2(nodeID) : null;
 		// if (result.pathNodes.length == 1) {
 		/* if (NormalizeURL(result).toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {

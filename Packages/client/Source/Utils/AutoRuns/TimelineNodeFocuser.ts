@@ -3,7 +3,7 @@ import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapSta
 import {GetOpenMapID} from "Store/main";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
-import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
+import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
 import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions.js";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
@@ -80,7 +80,7 @@ async function StartExpandingToAndFocusingOnNodesForStep(mapID: string, stepInde
 }
 
 async function ExpandToAndFocusOnNodes(mapID: string, paths: string[]) {
-	// const { UpdateFocusNodeAndViewOffset } = require('../../UI/@Shared/Maps/MapUI'); // eslint-disable-line
+	// const { UpdateAnchorNodeAndViewOffset } = require('../../UI/@Shared/Maps/MapUI'); // eslint-disable-line
 
 	for (const path of paths) {
 		const parentPath = SlicePath(path, 1);
@@ -128,5 +128,5 @@ async function ExpandToAndFocusOnNodes(mapID: string, paths: string[]) {
 	// mapUI.ScrollToPosition(new Vector2((nodeBoxPositionAverage.x - 100).KeepAtLeast(0), nodeBoxPositionAverage.y));
 	mapUI.ScrollToPosition_Center(nodeBoxPositionAverage.Plus(-250, 0)); */
 	mapUI.ScrollToMakeRectVisible(nodeBoxesMerged, 100);
-	ACTUpdateFocusNodeAndViewOffset(mapID);
+	ACTUpdateAnchorNodeAndViewOffset(mapID);
 }

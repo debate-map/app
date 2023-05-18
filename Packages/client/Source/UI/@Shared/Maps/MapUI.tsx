@@ -4,7 +4,7 @@ import {store} from "Store/index.js";
 import {GetOpenMapID} from "Store/main.js";
 import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
 import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
-import {ACTNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI, SpaceTakerUI} from "tree-grapher";
 import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -38,38 +38,38 @@ export function GetViewOffsetForNodeBox(nodeBox: Element) {
 	return viewCenter_onScreen.Minus(GetViewportRect(nodeBox).Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 }
 
-export const ACTUpdateFocusNodeAndViewOffset = StoreAction((mapID: string)=>{
-	// unfocus the old focused node
+export const ACTUpdateAnchorNodeAndViewOffset = StoreAction((mapID: string)=>{
+	// unmark-as-anchor the old anchor node
 	const mapView = GetMapView(mapID);
 	if (mapView) {
 		const nodes = GetTreeNodesInObjTree(mapView.rootNodeViews, true);
-		const oldFocusNode = nodes.FirstOrX(a=>a.Value && a.Value.focused);
-		if (oldFocusNode) {
-			oldFocusNode.Value.focused = false;
-			oldFocusNode.Value.viewOffset = null;
+		const oldAnchorNode = nodes.FirstOrX(a=>a.Value && a.Value.viewAnchor);
+		if (oldAnchorNode) {
+			oldAnchorNode.Value.viewAnchor = false;
+			oldAnchorNode.Value.viewOffset = null;
 		}
 	}
 
 	// CreateMapViewIfMissing(mapID);
 	/* let selectedNodePath = GetSelectedNodePath(mapID);
-	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter(); */
-	const focusNodeBox = GetNodeBoxClosestToViewCenter();
-	if (focusNodeBox == null) return; // can happen if node was just deleted
+	let anchorNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter(); */
+	const anchorNodeBox = GetNodeBoxClosestToViewCenter();
+	if (anchorNodeBox == null) return; // can happen if node was just deleted
 
-	const focusNodeBoxComp = FindReact(focusNodeBox).props.parent as NodeBox;
-	const focusNodePath = focusNodeBoxComp.props.path;
-	if (focusNodePath == null) return; // can happen sometimes; not sure what causes
-	const viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
+	const anchorNodeBoxComp = FindReact(anchorNodeBox).props.parent as NodeBox;
+	const anchorNodePath = anchorNodeBoxComp.props.path;
+	if (anchorNodePath == null) return; // can happen sometimes; not sure what causes
+	const viewOffset = GetViewOffsetForNodeBox(anchorNodeBox);
 
-	ACTSetFocusNodeAndViewOffset(mapID, focusNodePath, viewOffset);
+	ACTSetAnchorNodeAndViewOffset(mapID, anchorNodePath, viewOffset);
 });
-export const ACTSetFocusNodeAndViewOffset = StoreAction((mapID: string, focusNodePath: string | string[], viewOffset: Vector2)=>{
-	let nodeView = GetNodeView(mapID, focusNodePath);
-	if (nodeView == null || !nodeView.focused || !viewOffset.Equals(nodeView.viewOffset)) {
+export const ACTSetAnchorNodeAndViewOffset = StoreAction((mapID: string, anchorNodePath: string | string[], viewOffset: Vector2)=>{
+	let nodeView = GetNodeView(mapID, anchorNodePath);
+	if (nodeView == null || !nodeView.viewAnchor || !viewOffset.Equals(nodeView.viewOffset)) {
 		if (nodeView == null) {
-			nodeView = GetNodeViewsAlongPath(mapID, focusNodePath, true).Last();
+			nodeView = GetNodeViewsAlongPath(mapID, anchorNodePath, true).Last();
 		}
-		nodeView.focused = true;
+		nodeView.viewAnchor = true;
 		nodeView.viewOffset = viewOffset;
 	}
 });
@@ -296,7 +296,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 						// bufferScrollEventsBy={10000}
 						onScrollEnd={pos=>{
 							// if (withinPage) return;
-							ACTUpdateFocusNodeAndViewOffset(map.id);
+							ACTUpdateAnchorNodeAndViewOffset(map.id);
 						}}
 					>
 						<SpaceTakerUI graph={graphInfo} scaling={zoomLevel}/>
@@ -338,7 +338,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 								const mapView = GetMapView(GetOpenMapID());
 								if (GetSelectedNodePath(map.id)) {
 									ACTNodeSelect(map.id, null);
-									// UpdateFocusNodeAndViewOffset(map._id);
+									//UpdateAnchorNodeAndViewOffset(map._id);
 								}
 							}}
 							onContextMenu={e=>{
@@ -399,16 +399,16 @@ export class MapUI extends BaseComponent<Props, {}> {
 	}
 
 	lastScrolledToPath: string;
-	loadFocusedNodeTimer = new Timer(100, ()=>{
-		if (!this.mounted) return this.loadFocusedNodeTimer.Stop();
+	loadAnchorNodeTimer = new Timer(100, ()=>{
+		if (!this.mounted) return this.loadAnchorNodeTimer.Stop();
 
 		const map = this.Map;
-		if (map == null) return this.loadFocusedNodeTimer.Stop();
-		const focusNodePath = GetFocusedNodePath(map.id);
-		if (focusNodePath == null) return this.loadFocusedNodeTimer.Stop();
+		if (map == null) return this.loadAnchorNodeTimer.Stop();
+		const anchorNodePath = GetAnchorNodePath(map.id);
+		if (anchorNodePath == null) return this.loadAnchorNodeTimer.Stop();
 
 		// if more nodes have been rendered, along the path to the focus-node
-		const foundBox = this.FindNodeBox(focusNodePath, true);
+		const foundBox = this.FindNodeBox(anchorNodePath, true);
 		const foundPath = foundBox ? foundBox.props.path : "";
 		if (foundPath.length > this.lastScrolledToPath.length) {
 			if (this.LoadStoredScroll()) {
@@ -416,17 +416,17 @@ export class MapUI extends BaseComponent<Props, {}> {
 			}
 		}
 
-		// if (foundPath == focusNodePath && this.scrollView) {
-		if (this.lastScrolledToPath == focusNodePath && this.scrollView) {
+		// if (foundPath == anchorNodePath && this.scrollView) {
+		if (this.lastScrolledToPath == anchorNodePath && this.scrollView) {
 			this.OnLoadComplete();
-			return this.loadFocusedNodeTimer.Stop();
+			return this.loadAnchorNodeTimer.Stop();
 		}
 	});
 	StartLoadingScroll() {
 		/* let playingTimeline = await GetAsync(()=>GetPlayingTimeline(map._id));
 		if (!playingTimeline) { */ // only load-scroll if not playing timeline; timeline gets priority, to focus on its latest-revealed nodes
 		this.lastScrolledToPath = "";
-		this.loadFocusedNodeTimer.Start();
+		this.loadAnchorNodeTimer.Start();
 	}
 	OnLoadComplete() {
 		console.log(`
@@ -486,10 +486,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (this.scrollView.state.scrollOp_bar) return true;
 		// if (this.scrollView.state.scrollOp_bar) return false;
 
-		const focusNode_target = GetFocusedNodePath(GetMapView(map.id)); // || map.rootNode.toString();
-		if (focusNode_target == null) return false;
-		// Log(`FocusNode_target:${focusNode_target}`);
-		return this.ScrollToNode(focusNode_target);
+		const anchorNode_target = GetAnchorNodePath(GetMapView(map.id)); // || map.rootNode.toString();
+		if (anchorNode_target == null) return false;
+		// Log(`AnchorNode_target:${anchorNode_target}`);
+		return this.ScrollToNode(anchorNode_target);
 	}
 
 	FindNodeBox(nodePath: string, ifMissingFindAncestor = false) {
@@ -524,10 +524,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 		// Log(`LoadingScroll:${nodePath};${ToJSON(viewOffset_target)}`);
 		if (nodePath == null || viewOffset_target == null) return true; // if invalid entry, count as success?
 
-		const focusNodeBox = this.FindNodeBox(nodePath, true);
-		if (focusNodeBox == null) return false;
-		const focusNodeBoxCenter = GetViewportRect(NN(GetDOM(focusNodeBox))).Center.Minus(GetViewportRect(NN(this.mapUIEl)).Position);
-		this.ScrollToPosition_Center(focusNodeBoxCenter.Plus(viewOffset_target));
+		const anchorNodeBox = this.FindNodeBox(nodePath, true);
+		if (anchorNodeBox == null) return false;
+		const anchorNodeBoxCenter = GetViewportRect(NN(GetDOM(anchorNodeBox))).Center.Minus(GetViewportRect(NN(this.mapUIEl)).Position);
+		this.ScrollToPosition_Center(anchorNodeBoxCenter.Plus(viewOffset_target));
 		return true;
 	}
 	ScrollToPosition_Center(posInContainer: Vector2) {
@@ -573,10 +573,10 @@ export class MapUI extends BaseComponent<Props, {}> {
 		console.log("Loading scroll:", newScroll, "@TargetRect", targetRect);
 		this.scrollView.SetScroll(newScroll);
 
-		// the loadFocusedNodeTimer keeps running until it scrolls to the stored "focused node"
-		// if timeline is playing, focused-node is concealed, so timer keeps running
-		// this conflicts with the timeline's scrolling, so cancel the load-stored-focused-node timer
-		if (stopLoadingStoredScroll) this.loadFocusedNodeTimer.Stop();
+		// the loadAnchorNodeTimer keeps running until it scrolls to the stored "anchor node"
+		// if timeline is playing, anchor-node is concealed, so timer keeps running
+		// this conflicts with the timeline's scrolling, so cancel the load-stored-anchor-node timer
+		if (stopLoadingStoredScroll) this.loadAnchorNodeTimer.Stop();
 	}
 }
 

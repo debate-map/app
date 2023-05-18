@@ -171,9 +171,3 @@ export enum Polarity {
 }
 //export type Polarity = typeof Polarity_values[number];
 AddSchema("Polarity", {enum: GetValues(Polarity)});
-
-// layer+anchor parents (for if subnode)
-// ==========
-
-/*export type LayerPlusAnchorParentSet = { [key: string]: boolean; };
-AddSchema("LayerPlusAnchorParentSet", {patternProperties: {[`${UUID_regex_partial}\\+${UUID_regex_partial}`]: {type: "boolean"}}});*/

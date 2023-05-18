@@ -76,7 +76,7 @@ export class NodeView {
 
 	/** True for node whose box is closest to the view center. */
 	@Field({type: "boolean"}, {opt: true})
-	@O focused?: boolean;
+	@O viewAnchor?: boolean;
 
 	/** Offset of view-center from self (since we're the focus-node). */
 	@Field({$ref: "Vector2"}, {opt: true})

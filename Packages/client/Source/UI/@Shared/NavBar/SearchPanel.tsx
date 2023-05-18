@@ -379,7 +379,7 @@ export function JumpToNode(mapID: string, path: string) {
 			currentParentView.children[descendantID] = childView;
 			currentParentView = childView;
 		}
-		currentParentView.focused = true;
+		currentParentView.viewAnchor = true;
 		currentParentView.viewOffset = new Vector2(0, 0);
 
 		ACTMapViewMerge(mapID, mapView);

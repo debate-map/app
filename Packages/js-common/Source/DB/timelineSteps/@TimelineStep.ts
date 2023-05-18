@@ -46,11 +46,17 @@ export class NodeReveal {
 	path: string;
 
 	@Field({type: "boolean"}, {opt: true})
-	show: boolean;
+	show?: boolean|n;
 
 	@Field({type: "number"}, {opt: true})
-	show_revealDepth: number;
+	show_revealDepth?: number|n;
 
 	@Field({type: "boolean"}, {opt: true})
-	hide: boolean;
+	hide?: boolean|n;
+
+	/*@Field({type: "number"}, {opt: true})
+	hide_delay?: number|n;*/
+
+	/*@Field({type: "boolean"}, {opt: true})
+	addToFocusNodes?: boolean|n;*/
 }

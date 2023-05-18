@@ -303,7 +303,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					</Row>
 					{editing &&
 					<Row>
-						<CheckBox ml={5} text="Show" value={nodeReveal.show} onChange={val=>{
+						<CheckBox ml={5} text="Show" value={nodeReveal.show ?? false} onChange={val=>{
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].show = val;
 							if (val) newNodeReveals[index].hide = false;
@@ -312,7 +312,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						{nodeReveal.show &&
 						<>
 							<Text ml={10}>Reveal depth:</Text>
-							<Spinner ml={5} min={0} max={50} value={nodeReveal.show_revealDepth} onChange={val=>{
+							<Spinner ml={5} min={0} max={50} value={nodeReveal.show_revealDepth ?? 0} onChange={val=>{
 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 								//newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
 								newNodeReveals[index].show_revealDepth = val;
@@ -322,7 +322,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					</Row>}
 					{editing &&
 					<Row>
-						<CheckBox ml={5} text="Hide" value={nodeReveal.hide} onChange={val=>{
+						<CheckBox ml={5} text="Hide" value={nodeReveal.hide ?? false} onChange={val=>{
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].hide = val;
 							if (val) newNodeReveals[index].show = false;

@@ -2,8 +2,8 @@ import {GetMap, GetNodeLinks, GetNodeL2, MapView, Me} from "dm_common";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {ACTNodeExpandedSet, GetFocusedNodePath, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
+import {ACTNodeExpandedSet, GetAnchorNodePath, GetMapView, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTSetAnchorNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {RunInAction} from "web-vcore";
 import {Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
@@ -60,11 +60,11 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 		pathsToExpand = newPathsToExpand;
 	}
 
-	const focusedNodePath = GetFocusedNodePath(mapID);
-	// focus on the root-node, if no node is focused yet (a node to focus on may already have been specified through a URL param)
-	if (focusedNodePath == null) {
+	const anchorNodePath = GetAnchorNodePath(mapID);
+	// mark root-node as view-anchor, if no node is marked as the anchor yet (a node to anchor-to may already have been specified through a URL param)
+	if (anchorNodePath == null) {
 		// have view start a bit to the right of the root node
-		ACTSetFocusNodeAndViewOffset(mapID, map.rootNode, new Vector2(300, 0));
+		ACTSetAnchorNodeAndViewOffset(mapID, map.rootNode, new Vector2(300, 0));
 	}
 
 	RunInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>NN(mapState).initDone = true);

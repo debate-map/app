@@ -89,14 +89,6 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string}, {}> 
 			db.set(dbp`mapNodeEdits/${edit.id}`, null);
 		}
 
-		// delete placement in layer
-		/*if (this.oldData.layerPlusAnchorParents) {
-			for (const layerPlusAnchorStr of CE(this.oldData.layerPlusAnchorParents).VKeys()) {
-				const [layerID, anchorNodeID] = layerPlusAnchorStr.split("+");
-				db.set(dbp`layers/${layerID}/.nodeSubnodes/.${anchorNodeID}/.${nodeID}`, null);
-			}
-		}*/
-
 		// delete revisions
 		for (const revision of this.oldRevisions) {
 			db.set(dbp`nodeRevisions/${revision.id}`, null);

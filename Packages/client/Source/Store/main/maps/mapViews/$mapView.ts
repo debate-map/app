@@ -41,9 +41,9 @@ export class FoundNodeViewInfo {
 }
 export function InMapView_FindNodeViewWhere(mapView: MapView, condition: (node: NodeView)=>boolean): FoundNodeViewInfo|undefined {
 	for (const [rootID, rootView] of Object.entries(mapView.rootNodeViews)) {
-		const focusedNodeInfo = FindNodeViewWhere(rootView, condition, rootID);
-		if (focusedNodeInfo != null) {
-			return focusedNodeInfo;
+		const foundNodeInfo = FindNodeViewWhere(rootView, condition, rootID);
+		if (foundNodeInfo != null) {
+			return foundNodeInfo;
 		}
 	}
 }
@@ -59,25 +59,25 @@ export function FindNodeViewWhere(nodeView: NodeView, condition: (node: NodeView
 	}
 }
 
-export const GetFocusedNodeInfo = CreateAccessor((mapViewOrMapID: string | MapView | n): FoundNodeViewInfo|undefined=>{
+export const GetAnchorNodeInfo = CreateAccessor((mapViewOrMapID: string | MapView | n): FoundNodeViewInfo|undefined=>{
 	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return undefined;
 
-	/*const focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
-	if (focusedTreeNode == null) return [];
+	/*const anchorTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "anchor" && a.Value);
+	if (anchorTreeNode == null) return [];
 
-	const focusedNodeView = focusedTreeNode.ancestorNodes.Last();
-	// return focusedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
-	return GetPathFromDataPath(focusedNodeView.PathNodes);*/
+	const anchorNodeStr = anchorTreeNode.ancestorNodes.Last();
+	// return anchorNodeStr.PathNodes.filter(a=>a != "children").map(ToInt);
+	return GetPathFromDataPath(anchorNodeStr.PathNodes);*/
 
-	return InMapView_FindNodeViewWhere(mapView, view=>view.focused == true);
+	return InMapView_FindNodeViewWhere(mapView, view=>view.viewAnchor == true);
 });
-export const GetFocusedNodePath = CreateAccessor((mapViewOrMapID: string | MapView | n)=>{
-	return GetFocusedNodeInfo(mapViewOrMapID)?.pathInMap;
+export const GetAnchorNodePath = CreateAccessor((mapViewOrMapID: string | MapView | n)=>{
+	return GetAnchorNodeInfo(mapViewOrMapID)?.pathInMap;
 });
-export const GetFocusedNodeID = CreateAccessor((mapID: string)=>{
-	const focusedNodeStr = GetFocusedNodePath(mapID)?.split("/").LastOrX();
-	return focusedNodeStr ? PathSegmentToNodeID(focusedNodeStr) : null;
+export const GetAnchorNodeID = CreateAccessor((mapID: string)=>{
+	const anchorNodeStr = GetAnchorNodePath(mapID)?.split("/").LastOrX();
+	return anchorNodeStr ? PathSegmentToNodeID(anchorNodeStr) : null;
 });
 
 export const GetMapView = CreateAccessor(function(mapID: string|n) {
@@ -260,12 +260,12 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 		oldSelectedNode_treeNode.Value.openPanel = undefined;
 	}
 
-	// defocus old focused-node, if a new one's being set
-	const oldFocusedNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.focused);
-	const newFocusedNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.focused);
-	if (oldFocusedNode_treeNode && newFocusedNode_treeNode) {
-		oldFocusedNode_treeNode.Value.focused = undefined;
-		oldFocusedNode_treeNode.Value.viewOffset = undefined;
+	// defocus old anchor-node, if a new one's being set
+	const oldAnchorNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.viewAnchor);
+	const newAnchorNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.viewAnchor);
+	if (oldAnchorNode_treeNode && newAnchorNode_treeNode) {
+		oldAnchorNode_treeNode.Value.viewAnchor = undefined;
+		oldAnchorNode_treeNode.Value.viewOffset = undefined;
 	}
 
 	const updatePrimitiveTreeNodes = GetTreeNodesInObjTree(toMergeMapView).filter(a=>{
