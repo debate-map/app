@@ -101,7 +101,13 @@ async function ExpandToAndFocusOnNodes(mapID: string, paths: string[]) {
 	let nodeBoxes: NodeBox[] = [];
 	for (let i = 0; i < 30 && nodeBoxes.length < paths.length; i++) {
 		if (i > 0) await SleepAsync(100);
-		nodeBoxes = paths.map(path=>mapUI!.FindNodeBox(path)).filter(a=>a != null && GetDOM(a)) as NodeBox[];
+		nodeBoxes = paths.map(path=>mapUI!.FindNodeBox(path)).filter(nodeBox=>{
+			if (nodeBox == null) return false;
+			const dom = GetDOM(nodeBox);
+			if (dom == null) return false;
+			if (dom.parentElement!.style.opacity == "0" || dom.parentElement!.style.left == "") return false;
+			return true;
+		}) as NodeBox[];
 	}
 	if (nodeBoxes.length == 0) {
 		console.log("Failed to find any of the NodeBoxes to apply scroll to. Paths:", paths);
