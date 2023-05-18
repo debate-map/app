@@ -3,7 +3,7 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm
 import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {DragInfo, MakeDraggable, Observer} from "web-vcore";
+import {DragInfo, InfoButton, MakeDraggable, Observer} from "web-vcore";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
@@ -316,6 +316,28 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 								//newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
 								newNodeReveals[index].show_revealDepth = val;
+								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
+							}}/>
+						</>}
+					</Row>}
+					{editing &&
+					<Row>
+						<CheckBox ml={5} text="Change focus level to:" value={nodeReveal.changeFocusLevelTo != null} onChange={val=>{
+							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
+							if (val) {
+								// when manually checking this box, setting to 0 is more common (since setting to 1 is auto-set for newly-dragged reveal-nodes)
+								newNodeReveals[index].changeFocusLevelTo = 0;
+							} else {
+								delete newNodeReveals[index].changeFocusLevelTo;
+							}
+							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
+						}}/>
+						<InfoButton text="While a node has a focus-level of 1+, the timeline will keep it in view while progressing through its steps (ie. during automatic scrolling and zooming)."/>
+						{nodeReveal.show &&
+						<>
+							<Spinner ml={5} value={nodeReveal.changeFocusLevelTo ?? 0} onChange={val=>{
+								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
+								newNodeReveals[index].changeFocusLevelTo = val;
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
 							}}/>
 						</>}

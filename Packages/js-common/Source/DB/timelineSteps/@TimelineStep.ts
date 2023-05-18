@@ -38,7 +38,7 @@ export class TimelineStep {
 
 @MGLClass()
 export class NodeReveal {
-	constructor(data?: RequiredBy<Partial<NodeReveal>, "path" | "show" | "show_revealDepth" | "hide">) {
+	constructor(data?: RequiredBy<Partial<NodeReveal>, "path">) {
 		Object.assign(this, data);
 	}
 
@@ -57,6 +57,6 @@ export class NodeReveal {
 	/*@Field({type: "number"}, {opt: true})
 	hide_delay?: number|n;*/
 
-	/*@Field({type: "boolean"}, {opt: true})
-	addToFocusNodes?: boolean|n;*/
+	@Field({type: "number"}, {opt: true})
+	changeFocusLevelTo?: number|n;
 }

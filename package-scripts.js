@@ -272,13 +272,17 @@ Object.assign(scripts, {
 		}),*/
 
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local:     `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "local")}             tilt up   -f ./Tilt/Main.star --context local`,
-		tiltDown_local:   `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "local")}             tilt down -f ./Tilt/Main.star --context local`,
-		tiltUp_docker:    `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "docker-desktop")}    tilt up   -f ./Tilt/Main.star --context docker-desktop`,
-		tiltUp_k3d:       `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "k3d-main-1")}        tilt up   -f ./Tilt/Main.star --context k3d-main-1`,
-		tiltUp_kind:      `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "kind-main-1")}       tilt up   -f ./Tilt/Main.star --context kind-main-1`,
-		tiltUp_ovh:       `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up   -f ./Tilt/Main.star --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
-		tiltDown_ovh:     `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt down -f ./Tilt/Main.star --context ovh`,
+		tiltUp_local:              `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "local")}             tilt up                    -f ./Tilt/Main.star --context local`,
+		tiltDown_local:            `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "local")}             tilt down                  -f ./Tilt/Main.star --context local`,
+		tiltUp_docker:             `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "docker-desktop")}    tilt up                    -f ./Tilt/Main.star --context docker-desktop`,
+		tiltUp_k3d:                `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "k3d-main-1")}        tilt up                    -f ./Tilt/Main.star --context k3d-main-1`,
+		tiltUp_kind:               `${PrepDockerCmd()}    ${SetTileEnvCmd(false, "kind-main-1")}       tilt up                    -f ./Tilt/Main.star --context kind-main-1`,
+		tiltUp_ovh:                `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up                    -f ./Tilt/Main.star --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltDown_ovh:              `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt down                  -f ./Tilt/Main.star --context ovh`,
+		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
+		tiltUp_ovh_webServer:      `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up dm-web-server      -f ./Tilt/Main.star --context ovh --port 10361`, // tilt-port +(10+1), as targeted tilt-up #1
+		tiltUp_ovh_appServer:      `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up dm-app-server      -f ./Tilt/Main.star --context ovh --port 10362`, // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_monitorBackend: `${PrepDockerCmd()}    ${SetTileEnvCmd(true, "ovh")}                tilt up dm-monitor-backend -f ./Tilt/Main.star --context ovh --port 10363`, // tilt-port +(10+3), as targeted tilt-up #3
 
 		// Using tilt to deploy is convenient, but does have some negatives -- biggest one being that pressing "Trigger update" delete the pod, builds, then deploy the pod, leaving a gap/downtime.
 		// So provide a way to do a "traditional" `kubectl apply` for the main debate-map pods, which avoids that pod downtime.

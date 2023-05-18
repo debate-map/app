@@ -64,10 +64,11 @@ impl From<Row> for TimelineStep {
 #[graphql(input_name = "NodeRevealInput")]
 pub struct NodeReveal {
 	path: String,
-    show: bool,
+    show: Option<bool>,
     #[graphql(name = "show_revealDepth")]
-    show_revealDepth: f64,
-    hide: bool,
+    show_revealDepth: Option<f64>,
+    hide: Option<bool>,
+    changeFocusLevelTo: Option<i32>,
 }
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]
