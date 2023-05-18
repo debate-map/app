@@ -1,7 +1,7 @@
 import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {O} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNode, GetPathsRevealedInSteps, GetMap, Timeline, GetPathRevealTimesInSteps, GetTimelineStep, GetTimelineSteps, GetTimeline, TimelineStep} from "dm_common";
+import {GetNode, GetVisiblePathsAfterSteps, GetMap, Timeline, GetVisiblePathRevealTimesInSteps, GetTimelineStep, GetTimelineSteps, GetTimeline, TimelineStep} from "dm_common";
 import {store} from "Store/index.js";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
 
@@ -66,7 +66,7 @@ export const GetPlayingTimelineStep = CreateAccessor((mapID: string)=>{
 export const GetPlayingTimelineCurrentStepRevealNodes = CreateAccessor((mapID: string): string[]=>{
 	const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
 	if (playingTimeline_currentStep == null) return emptyArray;
-	return GetPathsRevealedInSteps([playingTimeline_currentStep]);
+	return GetVisiblePathsAfterSteps([playingTimeline_currentStep]);
 });
 
 export const GetPlayingTimelineRevealNodes_All = CreateAccessor((mapID: string): string[]=>{
@@ -75,7 +75,7 @@ export const GetPlayingTimelineRevealNodes_All = CreateAccessor((mapID: string):
 
 	const playingTimeline = GetPlayingTimeline(mapID);
 	const steps = playingTimeline ? GetTimelineSteps(playingTimeline.id) : emptyArray;
-	return [`${map.rootNode}`].concat(GetPathsRevealedInSteps(steps));
+	return [`${map.rootNode}`].concat(GetVisiblePathsAfterSteps(steps));
 });
 
 export const GetPlayingTimelineAppliedStepIndex = CreateAccessor((mapID: string): number|n=>{
@@ -98,7 +98,7 @@ export const GetPlayingTimelineRevealPaths_UpToAppliedStep = CreateAccessor((map
 	if (!map) return emptyArray;
 
 	const appliedSteps = GetPlayingTimelineAppliedSteps(mapID, excludeAfterCurrentStep);
-	return [`${map.rootNode}`].concat(GetPathsRevealedInSteps(appliedSteps));
+	return [`${map.rootNode}`].concat(GetVisiblePathsAfterSteps(appliedSteps));
 });
 
 export const GetNodeRevealHighlightTime = CreateAccessor(function() {
@@ -106,7 +106,7 @@ export const GetNodeRevealHighlightTime = CreateAccessor(function() {
 });
 export const GetTimeSinceNodeRevealedByPlayingTimeline = CreateAccessor((mapID: string, nodePath: string, timeSinceLastReveal = false, limitToJustPastHighlightRange = false): number|n=>{
 	const appliedSteps = GetPlayingTimelineAppliedSteps(mapID, true);
-	const nodeRevealTimes = GetPathRevealTimesInSteps(appliedSteps, timeSinceLastReveal);
+	const nodeRevealTimes = GetVisiblePathRevealTimesInSteps(appliedSteps, timeSinceLastReveal);
 	const nodeRevealTime = nodeRevealTimes[nodePath];
 	if (nodeRevealTime == null) return null;
 

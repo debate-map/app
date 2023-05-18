@@ -42,7 +42,7 @@ export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((stepID: s
 	return timeFromStart <= timeX;
 });
 
-export const GetPathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
+export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
 	const pathRevealTimes = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
@@ -98,6 +98,21 @@ export const GetPathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], 
 	}
 	return pathRevealTimes;
 });
-export const GetPathsRevealedInSteps = CreateAccessor((steps: TimelineStep[])=>{
-	return CE(GetPathRevealTimesInSteps(steps)).VKeys();
+export const GetVisiblePathsAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
+	return CE(GetVisiblePathRevealTimesInSteps(steps)).VKeys();
+});
+
+export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
+	const pathFocusLevels = {} as {[key: string]: number};
+	for (const [index, step] of steps.entries()) {
+		for (const reveal of step.nodeReveals || []) {
+			if (reveal.changeFocusLevelTo != null) {
+				pathFocusLevels[reveal.path] = reveal.changeFocusLevelTo;
+			}
+		}
+	}
+	return pathFocusLevels;
+});
+export const GetPathsWith1PlusFocusLevelAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
+	return Object.entries(GetPathFocusLevelsAfterSteps(steps)).filter(a=>a[1] >= 1).map(a=>a[0]);
 });
