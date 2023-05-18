@@ -2,11 +2,11 @@ import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitX
 import {computed, makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES} from "web-vcore";
+import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES, RunInAction_Set} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map, TimelineStep} from "dm_common";
 import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
@@ -227,7 +227,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		});
 
 		// const targetTime_floored = GetPlayingTimelineTime(map.id); // no need to watch, since only used as start-pos for video, if in initial mount
-		const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
+		const uiState = store.main.timelines;
+		//const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
 		//const firstNormalStep = GetTimelineStep(timeline ? timeline.steps[1] : null); // just watch for PostRender->UpdateTargetInfo code
 
 		/* (useEffect as any)(() => {
@@ -313,7 +314,11 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 							<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
 								<Row>
 									<Text>Node-reveal highlight time:</Text>
-									<Spinner ml={5} min={0} value={nodeRevealHighlightTime} onChange={val=>RunInAction("PlayingSubpanel.nodeRevealHighlightTime.onChange", ()=>store.main.timelines.nodeRevealHighlightTime = val)}/>
+									<Spinner ml={5} min={0} value={uiState.nodeRevealHighlightTime} onChange={val=>RunInAction_Set(this, ()=>uiState.nodeRevealHighlightTime = val)}/>
+								</Row>
+								<Row>
+									<Text>Hide editing controls:</Text>
+									<CheckBox ml={5} value={uiState.hideEditingControls} onChange={val=>RunInAction_Set(this, ()=>uiState.hideEditingControls = val)}/>
 								</Row>
 							</Column></DropDownContent>
 						</DropDown>

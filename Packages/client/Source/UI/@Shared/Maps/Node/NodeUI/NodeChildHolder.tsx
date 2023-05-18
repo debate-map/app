@@ -2,6 +2,7 @@ import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, Map, NodeL3
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
+import {GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
 import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
@@ -41,6 +42,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	render() {
 		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
 		const {placeholderRect} = this.state;
+
+		const playingTimeline = GetPlayingTimeline(map.id);
+		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls);
 
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
@@ -229,7 +233,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					RenderPolarityGroup("all")}
 				{separateChildren &&
 					RenderPolarityGroup("up")}
-				{showArgumentsControlBar &&
+				{showArgumentsControlBar_final &&
 					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c}
 						map={map} node={parentNode} path={parentPath} treePath={`${parentTreePath}/${nextChildFullIndex++}`}
 						inBelowGroup={belowNodeUI ?? false}

@@ -5,5 +5,6 @@ import {ignore} from "web-vcore/nm/mobx-sync.js";
 export class TimelinesState {
 	constructor() { makeObservable(this); }
 	@O nodeRevealHighlightTime = 20;
+	@O hideEditingControls = false;
 	@O @ignore autoScroll = true;
 }
