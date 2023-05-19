@@ -77,7 +77,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 
 		const text =
 			group == ChildGroup.truth ? (polarity == Polarity.supporting ? "Add: True..." : "Add: False...") :
-			group == ChildGroup.relevance ? (polarity == Polarity.supporting ? "Add: Relevant..." : "Add: Irrelevant...") :
+			group == ChildGroup.relevance ? (polarity == Polarity.supporting ? "Add: Relevance +" : "Add: Relevance -") :
 			"<invalid>";
 		//text = polarity == Polarity.supporting ? "Add pro" : "Add con";
 		//text = `Add ${polarity_short}`;
@@ -97,7 +97,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					},
 					/* polarity == Polarity.supporting && {marginBottom: 5},
 					polarity == Polarity.opposing && {marginTop: 5}, */
-					{height: 17, fontSize: 10, padding: "0 12px"}, // vertical
+					{height: 17, fontSize: group == ChildGroup.truth ? 10 : 9, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
 					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 12, letterSpacing: 1*/},

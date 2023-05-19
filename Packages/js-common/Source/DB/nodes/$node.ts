@@ -50,7 +50,7 @@ export const GetExpandedByDefaultAttachment = CreateAccessor((rev: NodeRevision)
 export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
 	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
 	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
-	if (node.type == NodeType.argument) return 12;
+	if (node.type == NodeType.argument) return 11;
 	//if (isSubnode) return 11;
 
 	return 14;
@@ -363,9 +363,10 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 			//if (parentNode?.type == NodeType.argument) return nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
 			//if (parentNode?.type == NodeType.claim) return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
 			if (nodeL3.link.group == ChildGroup.truth) {
-				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
+				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "True, because 🡫" : "False, because 🡫";
 			} else if (nodeL3.link.group == ChildGroup.relevance) {
-				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
+				//resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Relevance increaser 🡫" : "Relevance decreaser 🡫";
+				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Relevance increaser 🡫" : "Relevance reducer 🡫";
 			} else {
 				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Argument (supporting)" : "Argument (opposing)";
 			}

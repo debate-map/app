@@ -5,6 +5,7 @@ import {store} from "Store";
 import {GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
+import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {NodeUI} from "UI/@Shared/Maps/Node/NodeUI.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
@@ -44,7 +45,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {placeholderRect} = this.state;
 
 		const playingTimeline = GetPlayingTimeline(map.id);
-		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls);
+		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls) && (!GADDemo || ShowHeader);
 
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);

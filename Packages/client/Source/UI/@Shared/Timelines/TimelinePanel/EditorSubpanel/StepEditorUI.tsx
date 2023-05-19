@@ -256,10 +256,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 			return index == 0 || (nodeID && parentID && parentLink != null);
 		});
 
-		let displayText = node && nodeL3 ? GetNodeDisplayText(node, nodeReveal.path) : `(Node no longer exists: ${GetNodeID(nodeReveal.path)})`;
-		if (!pathValid) {
-			displayText = `[path invalid] ${displayText}`;
-		}
+		const displayText = node && nodeL3 ? GetNodeDisplayText(node, nodeReveal.path) : `(Node no longer exists: ${GetNodeID(nodeReveal.path)})`;
 
 		const backgroundColor = GetNodeColor(nodeL3 || {type: NodeType.category} as any).desaturate(0.5).alpha(0.8);
 		// if (node == null || nodeL3 == null) return null;
@@ -280,13 +277,16 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						<span style={{
 							position: "absolute", left: -5, top: -10, color: "yellow", fontSize: 10,
 							background: "rgba(50,50,50,1)", borderRadius: 5, padding: "0 3px",
-						}}>{[
-							nodeReveal.show && "show",
-							nodeReveal.changeFocusLevelTo != null && `focus:${nodeReveal.changeFocusLevelTo}`,
-							nodeReveal.setExpandedTo == true && `expand`,
-							nodeReveal.setExpandedTo == false && `collapse`,
-							nodeReveal.hide && "hide",
-						].filter(a=>a).join(", ")}</span>
+						}}>
+							{[
+								nodeReveal.show && "show",
+								nodeReveal.changeFocusLevelTo != null && `focus:${nodeReveal.changeFocusLevelTo}`,
+								nodeReveal.setExpandedTo == true && `expand`,
+								nodeReveal.setExpandedTo == false && `collapse`,
+								nodeReveal.hide && "hide",
+							].filter(a=>a).join(", ")}
+							{!pathValid && <span style={{marginLeft: 5, color: "red"}}>[path invalid]</span>}
+						</span>
 						{displayText}
 					</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}

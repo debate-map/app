@@ -133,7 +133,7 @@ export class TitlePanel extends BaseComponentPlus(
 						color: liveSkin.NodeTextColor(),
 					},
 					node.type == NodeType.argument && {
-						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).toString(), // for arguments, make text mostly transparent, since text is repetitive and can be distracting
+						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .5).toString(), // for arguments, make text more transparent, since text is repetitive and can be distracting
 						flex: 1, // maybe temp; since width is locked apparently, have title-panel fill gap (so toolbar-button goes all the way to right)
 					},
 					style,
