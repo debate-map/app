@@ -32,22 +32,17 @@ autorun(()=>{
 }, {name: "TimelineNodeFocuser"});
 
 async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: number) {
-	// since this GetAsync call may take a while to complete, we need to make sure it returns the same data regardless of if the "current step" changes in the meantime
+	// since this GetAsync call may take a moment to complete, we need to make sure it returns the same data regardless of if the "current step" changes in the meantime
 	// (todo: make this a non-issue by finding a way to have such a delayed GetAsync call simply "canceled" if another call to ApplyNodeEffectsForTimelineStepsUpToX happens during that time)
 	const {stepsUpToTarget, step, newlyRevealedNodePaths, focusNodes} = await GetAsync(()=>{
 		//const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
-		console.log("Test1");
 		const timeline = GetPlayingTimeline(mapID);
 		if (timeline == null) return {stepsUpToTarget: null, step: null, newlyRevealedNodePaths: [], focusNodes: []};
-		console.log("Test2");
 		const steps = GetTimelineSteps(timeline.id);
 		const stepsUpToTarget_ = steps.slice(0, stepIndex + 1);
 		const step_ = steps[stepIndex];
-		console.log("Test3");
 		const newlyRevealedNodePaths_ = GetVisiblePathsAfterSteps([step_]);
-		console.log("Test4");
 		const focusNodes_ = GetPathsWith1PlusFocusLevelAfterSteps(stepsUpToTarget_);
-		console.log("Test5");
 		return {stepsUpToTarget: stepsUpToTarget_, step: step_, newlyRevealedNodePaths: newlyRevealedNodePaths_, focusNodes: focusNodes_};
 	});
 	if (stepsUpToTarget == null || step == null) return;

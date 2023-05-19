@@ -181,8 +181,14 @@ async function AddOrUpdateFocusLevelRange(data: {
 	const newEndStep = newRange.endStep != null ? steps[newRange.endStep] : null;
 	if (newEndStep != null) {
 		const focusLevelToUseAfterThisRange =
+			// if there was a range just after our old-range, use its focus-level after our new range (since our new range is just a moved/resized version of it)
 			(oldRange != null ? baseRanges.find(a=>a.firstStep == oldRange.endStep)?.focusLevel : null) ??
-			(newRange.endStep != null ? baseRanges.find(a=>newRange.endStep! >= a.firstStep && (a.lastStep == null || newRange.endStep! <= a.lastStep))?.focusLevel : null) ??
+			// else, infer what the focus-level should be afterward, based on any base-ranges that cover our new end-step (and have a different focus-level than our new range, to avoid sampling its own old-range)
+			(newRange.endStep != null ? baseRanges.find(a=>{
+				const targetIndex = newRange.endStep!;
+				const rangeCoversTargetIndex = targetIndex >= a.firstStep && (a.lastStep == null || targetIndex <= a.lastStep);
+				return rangeCoversTargetIndex && a.focusLevel != newRange.focusLevel;
+			})?.focusLevel : null) ??
 			0;
 
 		const matchingRevealToModify = newEndStep.nodeReveals.find(a=>a.path == newRange.path); //&& a.changeFocusLevelTo == null);
