@@ -1,4 +1,4 @@
-import {GetNode, GetNodeTagComps, GetNodeTags, NodeL3, TagComp_CloneHistory, Map, GetPathsWith1PlusFocusLevelAfterSteps, GetTimelineStep, GetTimelineSteps, GetNodeID, GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange, NodeReveal, IsNodeRevealEmpty} from "dm_common";
+import {GetNode, GetNodeTagComps, GetNodeTags, NodeL3, TagComp_CloneHistory, Map, GetPathsWith1PlusFocusLevelAfterSteps, GetTimelineStep, GetTimelineSteps, GetNodeID, GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange, NodeReveal, IsNodeRevealEmpty, TimelineStep} from "dm_common";
 import {Clone, E, Vector2} from "js-vextensions";
 import React from "react";
 import {store} from "Store";
@@ -88,71 +88,8 @@ export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3
 													}}/>
 												</Row>
 											</Column>,
-											onOK: async()=>{
-												if (newFirstStepIndex != oldFirstStepIndex) {
-													// first add new "NodeReveal" structure
-													const newFirstStep = steps[newFirstStepIndex];
-													const newFirstStep_newNodeReveals = Clone(newFirstStep.nodeReveals) as NodeReveal[];
-													const matchingRevealToModify = newFirstStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == null);
-													if (matchingRevealToModify) {
-														matchingRevealToModify.changeFocusLevelTo = range.focusLevel;
-													} else {
-														newFirstStep_newNodeReveals.push(new NodeReveal({path: range.path, changeFocusLevelTo: range.focusLevel}));
-													}
-													await RunCommand_UpdateTimelineStep({id: newFirstStep.id, updates: {nodeReveals: newFirstStep_newNodeReveals}});
-
-													// then remove the old "NodeReveal" structure
-													const oldFirstStep = steps[oldFirstStepIndex];
-													const oldFirstStep_newNodeReveals = Clone(oldFirstStep.nodeReveals) as NodeReveal[];
-													const nodeRevealToChangeOrRemove = oldFirstStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == range.focusLevel);
-													if (nodeRevealToChangeOrRemove) {
-														// modify node-reveal to no longer change the focus-level
-														nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
-
-														// if the modified node-reveal now "does nothing", also remove it
-														if (IsNodeRevealEmpty(nodeRevealToChangeOrRemove)) {
-															oldFirstStep_newNodeReveals.Remove(nodeRevealToChangeOrRemove);
-														}
-
-														await RunCommand_UpdateTimelineStep({id: oldFirstStep.id, updates: {nodeReveals: oldFirstStep_newNodeReveals}});
-													}
-												}
-
-												// convert to "end step index" briefly, since easier to work with for change-applier code
-												const oldEndStepIndex = oldLastStepIndex != null ? oldLastStepIndex + 1 : null;
-												const newEndStepIndex = newLastStepIndex != null ? newLastStepIndex + 1 : null;
-												if (newEndStepIndex != oldEndStepIndex) {
-													// first add new "NodeReveal" structure
-													const newEndStep = newEndStepIndex != null ? steps[newEndStepIndex] : null;
-													if (newEndStep != null) {
-														const newEndStep_newNodeReveals = Clone(newEndStep.nodeReveals) as NodeReveal[];
-														const matchingRevealToModify = newEndStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == null);
-														if (matchingRevealToModify) {
-															matchingRevealToModify.changeFocusLevelTo = nextRange?.focusLevel ?? 0;
-														} else {
-															newEndStep_newNodeReveals.push(new NodeReveal({path: range.path, changeFocusLevelTo: nextRange?.focusLevel ?? 0}));
-														}
-														await RunCommand_UpdateTimelineStep({id: newEndStep.id, updates: {nodeReveals: newEndStep_newNodeReveals}});
-													}
-
-													// then remove the old "NodeReveal" structure
-													const oldEndStep = oldEndStepIndex != null ? steps[oldEndStepIndex] : null;
-													if (oldEndStep != null && nextRange != null) {
-														const oldEndStep_newNodeReveals = Clone(oldEndStep.nodeReveals) as NodeReveal[];
-														const nodeRevealToChangeOrRemove = oldEndStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == nextRange.focusLevel);
-														if (nodeRevealToChangeOrRemove) {
-															// modify node-reveal to no longer change the focus-level
-															nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
-
-															// if the modified node-reveal now "does nothing", also remove it
-															if (IsNodeRevealEmpty(nodeRevealToChangeOrRemove)) {
-																oldEndStep_newNodeReveals.Remove(nodeRevealToChangeOrRemove);
-															}
-
-															await RunCommand_UpdateTimelineStep({id: oldEndStep.id, updates: {nodeReveals: oldEndStep_newNodeReveals}});
-														}
-													}
-												}
+											onOK: ()=>{
+												ChangeStepsForFocusLevelRange({steps, range, nextRange, oldFirstStepIndex, oldLastStepIndex, newFirstStepIndex, newLastStepIndex});
 											},
 										});
 									}}/>;
@@ -162,5 +99,77 @@ export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3
 					}}/>
 			</div>
 		);
+	}
+}
+
+async function ChangeStepsForFocusLevelRange(data: {
+	steps: TimelineStep[], range: PathFocusLevelRange, nextRange: PathFocusLevelRange|n,
+	oldFirstStepIndex: number, oldLastStepIndex: number|n,
+	newFirstStepIndex: number, newLastStepIndex: number|n,
+}) {
+	const {steps, range, nextRange, oldFirstStepIndex, oldLastStepIndex, newFirstStepIndex, newLastStepIndex} = data;
+	if (newFirstStepIndex != oldFirstStepIndex) {
+		// first add new "NodeReveal" structure
+		const newFirstStep = steps[newFirstStepIndex];
+		const newFirstStep_newNodeReveals = Clone(newFirstStep.nodeReveals) as NodeReveal[];
+		const matchingRevealToModify = newFirstStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == null);
+		if (matchingRevealToModify) {
+			matchingRevealToModify.changeFocusLevelTo = range.focusLevel;
+		} else {
+			newFirstStep_newNodeReveals.push(new NodeReveal({path: range.path, changeFocusLevelTo: range.focusLevel}));
+		}
+		await RunCommand_UpdateTimelineStep({id: newFirstStep.id, updates: {nodeReveals: newFirstStep_newNodeReveals}});
+
+		// then remove the old "NodeReveal" structure
+		const oldFirstStep = steps[oldFirstStepIndex];
+		const oldFirstStep_newNodeReveals = Clone(oldFirstStep.nodeReveals) as NodeReveal[];
+		const nodeRevealToChangeOrRemove = oldFirstStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == range.focusLevel);
+		if (nodeRevealToChangeOrRemove) {
+			// modify node-reveal to no longer change the focus-level
+			nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
+
+			// if the modified node-reveal now "does nothing", also remove it
+			if (IsNodeRevealEmpty(nodeRevealToChangeOrRemove)) {
+				oldFirstStep_newNodeReveals.Remove(nodeRevealToChangeOrRemove);
+			}
+
+			await RunCommand_UpdateTimelineStep({id: oldFirstStep.id, updates: {nodeReveals: oldFirstStep_newNodeReveals}});
+		}
+	}
+
+	// convert to "end step index" briefly, since easier to work with for change-applier code
+	const oldEndStepIndex = oldLastStepIndex != null ? oldLastStepIndex + 1 : null;
+	const newEndStepIndex = newLastStepIndex != null ? newLastStepIndex + 1 : null;
+	if (newEndStepIndex != oldEndStepIndex) {
+		// first add new "NodeReveal" structure
+		const newEndStep = newEndStepIndex != null ? steps[newEndStepIndex] : null;
+		if (newEndStep != null) {
+			const newEndStep_newNodeReveals = Clone(newEndStep.nodeReveals) as NodeReveal[];
+			const matchingRevealToModify = newEndStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == null);
+			if (matchingRevealToModify) {
+				matchingRevealToModify.changeFocusLevelTo = nextRange?.focusLevel ?? 0;
+			} else {
+				newEndStep_newNodeReveals.push(new NodeReveal({path: range.path, changeFocusLevelTo: nextRange?.focusLevel ?? 0}));
+			}
+			await RunCommand_UpdateTimelineStep({id: newEndStep.id, updates: {nodeReveals: newEndStep_newNodeReveals}});
+		}
+
+		// then remove the old "NodeReveal" structure
+		const oldEndStep = oldEndStepIndex != null ? steps[oldEndStepIndex] : null;
+		if (oldEndStep != null && nextRange != null) {
+			const oldEndStep_newNodeReveals = Clone(oldEndStep.nodeReveals) as NodeReveal[];
+			const nodeRevealToChangeOrRemove = oldEndStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == nextRange.focusLevel);
+			if (nodeRevealToChangeOrRemove) {
+				// modify node-reveal to no longer change the focus-level
+				nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
+
+				// if the modified node-reveal now "does nothing", also remove it
+				if (IsNodeRevealEmpty(nodeRevealToChangeOrRemove)) {
+					oldEndStep_newNodeReveals.Remove(nodeRevealToChangeOrRemove);
+				}
+
+				await RunCommand_UpdateTimelineStep({id: oldEndStep.id, updates: {nodeReveals: oldEndStep_newNodeReveals}});
+			}
+		}
 	}
 }
