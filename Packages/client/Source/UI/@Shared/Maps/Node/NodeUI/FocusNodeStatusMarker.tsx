@@ -65,11 +65,7 @@ export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3
 								{focusRanges.map((range, index)=>{
 									if (range.focusLevel == 0) return null;
 									return <VMenuItem key={index} text={`Change range #${iToNum(index)} (focus: ${range.focusLevel}): steps ${rangeToStr(range)}`} style={liveSkin.Style_VMenuItem()} onClick={()=>{
-										const oldFirstStepIndex = range.firstStep;
-										const oldLastStepIndex = range.lastStep;
-										let newFirstStepIndex = range.firstStep;
-										let newLastStepIndex = range.lastStep;
-										const nextRange = focusRanges[index + 1] as PathFocusLevelRange|n;
+										const newRange: PathFocusLevelRange = {...range};
 
 										const Change = (..._)=>controller.UpdateUI();
 										var controller = ShowMessageBox({
@@ -77,23 +73,56 @@ export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3
 											message: ()=><Column>
 												<Row>
 													<Text>First step:</Text>
-													<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length - 1)} value={iToNum(newFirstStepIndex)} onChange={stepNumber=>Change(newFirstStepIndex = numToI(stepNumber))}/>
+													<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length - 1)} value={iToNum(newRange.firstStep)} onChange={stepNumber=>Change(newRange.firstStep = numToI(stepNumber))}/>
 												</Row>
 												<Row>
 													<Text>Last step:</Text>
 													{/*<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length)} value={iToNum(newEndStepIndex != null ? newEndStepIndex - 1 : steps.length)} onChange={stepNumber=>Change(newEndStepIndex = numToI(stepNumber) + 1)}/>*/}
-													<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length)} value={iToNum(newLastStepIndex ?? steps.length)} onChange={stepNumber=>{
+													<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length)} value={iToNum(newRange.lastStep ?? steps.length)} onChange={stepNumber=>{
 														const newVal = numToI(stepNumber);
-														Change(newLastStepIndex = newVal <= steps.length - 1 ? newVal : null);
+														newRange.lastStep = newVal <= steps.length - 1 ? newVal : null;
+														newRange.endStep = newRange.lastStep ? newRange.lastStep + 1 : null;
+														Change();
 													}}/>
 												</Row>
 											</Column>,
 											onOK: ()=>{
-												ChangeStepsForFocusLevelRange({steps, range, nextRange, oldFirstStepIndex, oldLastStepIndex, newFirstStepIndex, newLastStepIndex});
+												AddOrUpdateFocusLevelRange({baseSteps: steps, baseRanges: focusRanges, oldRange: range, newRange});
 											},
 										});
 									}}/>;
 								})}
+								<VMenuItem text={`Add range`} style={liveSkin.Style_VMenuItem()} onClick={()=>{
+									const newRange: PathFocusLevelRange = {path, focusLevel: 1, firstStep: currentStepIndex, lastStep: null, endStep: null};
+
+									const Change = (..._)=>controller.UpdateUI();
+									var controller = ShowMessageBox({
+										title: `Add range (focus level: ${newRange.focusLevel})`, cancelButton: true,
+										message: ()=><Column>
+											<Row>
+												<Text>Focus level:</Text>
+												<Spinner ml={5} min={0} max={1} value={newRange.focusLevel} onChange={val=>Change(newRange.focusLevel = val)}/>
+											</Row>
+											<Row>
+												<Text>First step:</Text>
+												<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length - 1)} value={iToNum(newRange.firstStep)} onChange={stepNumber=>Change(newRange.firstStep = numToI(stepNumber))}/>
+											</Row>
+											<Row>
+												<Text>Last step:</Text>
+												{/*<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length)} value={iToNum(newEndStepIndex != null ? newEndStepIndex - 1 : steps.length)} onChange={stepNumber=>Change(newEndStepIndex = numToI(stepNumber) + 1)}/>*/}
+												<Spinner ml={5} min={iToNum(0)} max={iToNum(steps.length)} value={iToNum(newRange.lastStep ?? steps.length)} onChange={stepNumber=>{
+													const newVal = numToI(stepNumber);
+													newRange.lastStep = newVal <= steps.length - 1 ? newVal : null;
+													newRange.endStep = newRange.lastStep ? newRange.lastStep + 1 : null;
+													Change();
+												}}/>
+											</Row>
+										</Column>,
+										onOK: ()=>{
+											AddOrUpdateFocusLevelRange({baseSteps: steps, baseRanges: focusRanges, oldRange: null, newRange});
+										},
+									});
+								}}/>
 							</>,
 						);
 					}}/>
@@ -102,73 +131,85 @@ export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3
 	}
 }
 
-async function ChangeStepsForFocusLevelRange(data: {
-	steps: TimelineStep[], range: PathFocusLevelRange, nextRange: PathFocusLevelRange|n,
-	oldFirstStepIndex: number, oldLastStepIndex: number|n,
-	newFirstStepIndex: number, newLastStepIndex: number|n,
+async function AddOrUpdateFocusLevelRange(data: {
+	baseSteps: TimelineStep[],
+	baseRanges: PathFocusLevelRange[],
+	oldRange: PathFocusLevelRange|n,
+	newRange: PathFocusLevelRange,
 }) {
-	const {steps, range, nextRange, oldFirstStepIndex, oldLastStepIndex, newFirstStepIndex, newLastStepIndex} = data;
-	if (newFirstStepIndex != oldFirstStepIndex) {
-		// first add new "NodeReveal" structure
-		const newFirstStep = steps[newFirstStepIndex];
-		const newFirstStep_newNodeReveals = Clone(newFirstStep.nodeReveals) as NodeReveal[];
-		const matchingRevealToModify = newFirstStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == null);
-		if (matchingRevealToModify) {
-			matchingRevealToModify.changeFocusLevelTo = range.focusLevel;
-		} else {
-			newFirstStep_newNodeReveals.push(new NodeReveal({path: range.path, changeFocusLevelTo: range.focusLevel}));
-		}
-		await RunCommand_UpdateTimelineStep({id: newFirstStep.id, updates: {nodeReveals: newFirstStep_newNodeReveals}});
+	const {baseSteps, baseRanges, oldRange, newRange} = data;
+	const nodePath = newRange.path;
+	const steps = Clone(baseSteps);
+	const updatedStepIndexes_forRemovingEffects = new Set<number>();
+	const updatedStepIndexes_forAddingEffects = new Set<number>();
 
-		// then remove the old "NodeReveal" structure
-		const oldFirstStep = steps[oldFirstStepIndex];
-		const oldFirstStep_newNodeReveals = Clone(oldFirstStep.nodeReveals) as NodeReveal[];
-		const nodeRevealToChangeOrRemove = oldFirstStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == range.focusLevel);
+	// clear focus-level-setting at the old first-step (if any)
+	if (oldRange != null) {
+		const oldFirstStep = steps[oldRange.firstStep];
+		const nodeRevealToChangeOrRemove = oldFirstStep.nodeReveals.find(a=>a.path == oldRange.path && a.changeFocusLevelTo == oldRange.focusLevel);
 		if (nodeRevealToChangeOrRemove) {
 			// modify node-reveal to no longer change the focus-level
 			nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
-
-			// if the modified node-reveal now "does nothing", also remove it
-			if (IsNodeRevealEmpty(nodeRevealToChangeOrRemove)) {
-				oldFirstStep_newNodeReveals.Remove(nodeRevealToChangeOrRemove);
-			}
-
-			await RunCommand_UpdateTimelineStep({id: oldFirstStep.id, updates: {nodeReveals: oldFirstStep_newNodeReveals}});
+			updatedStepIndexes_forRemovingEffects.add(oldRange.firstStep);
 		}
 	}
 
-	// convert to "end step index" briefly, since easier to work with for change-applier code
-	const oldEndStepIndex = oldLastStepIndex != null ? oldLastStepIndex + 1 : null;
-	const newEndStepIndex = newLastStepIndex != null ? newLastStepIndex + 1 : null;
-	if (newEndStepIndex != oldEndStepIndex) {
-		// first add new "NodeReveal" structure
-		const newEndStep = newEndStepIndex != null ? steps[newEndStepIndex] : null;
-		if (newEndStep != null) {
-			const newEndStep_newNodeReveals = Clone(newEndStep.nodeReveals) as NodeReveal[];
-			const matchingRevealToModify = newEndStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == null);
-			if (matchingRevealToModify) {
-				matchingRevealToModify.changeFocusLevelTo = nextRange?.focusLevel ?? 0;
-			} else {
-				newEndStep_newNodeReveals.push(new NodeReveal({path: range.path, changeFocusLevelTo: nextRange?.focusLevel ?? 0}));
-			}
-			await RunCommand_UpdateTimelineStep({id: newEndStep.id, updates: {nodeReveals: newEndStep_newNodeReveals}});
+	// set focus-level at new first-step
+	{
+		const newFirstStep = steps[newRange.firstStep];
+		const matchingRevealToModify = newFirstStep.nodeReveals.find(a=>a.path == newRange.path); // && a.changeFocusLevelTo == null);
+		if (matchingRevealToModify) {
+			matchingRevealToModify.changeFocusLevelTo = newRange.focusLevel;
+		} else {
+			newFirstStep.nodeReveals.push(new NodeReveal({path: newRange.path, changeFocusLevelTo: newRange.focusLevel}));
 		}
+		updatedStepIndexes_forAddingEffects.add(newRange.firstStep);
+	}
 
-		// then remove the old "NodeReveal" structure
-		const oldEndStep = oldEndStepIndex != null ? steps[oldEndStepIndex] : null;
-		if (oldEndStep != null && nextRange != null) {
-			const oldEndStep_newNodeReveals = Clone(oldEndStep.nodeReveals) as NodeReveal[];
-			const nodeRevealToChangeOrRemove = oldEndStep_newNodeReveals.find(a=>a.path == range.path && a.changeFocusLevelTo == nextRange.focusLevel);
-			if (nodeRevealToChangeOrRemove) {
-				// modify node-reveal to no longer change the focus-level
-				nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
+	// clear focus-level-setting at the old end-step (if any)
+	const oldEndStep = oldRange?.endStep != null ? steps[oldRange.endStep] : null;
+	if (oldRange != null && oldEndStep != null) {
+		for (const nodeReveal of oldEndStep.nodeReveals) {
+			if (nodeReveal.path == oldRange.path) {
+				nodeReveal.changeFocusLevelTo = null;
+				updatedStepIndexes_forRemovingEffects.add(oldRange.endStep!);
+			}
+		}
+	}
 
-				// if the modified node-reveal now "does nothing", also remove it
-				if (IsNodeRevealEmpty(nodeRevealToChangeOrRemove)) {
-					oldEndStep_newNodeReveals.Remove(nodeRevealToChangeOrRemove);
-				}
+	// set focus-level at new end-step
+	const newEndStep = newRange.endStep != null ? steps[newRange.endStep] : null;
+	if (newEndStep != null) {
+		const focusLevelToUseAfterThisRange =
+			(oldRange != null ? baseRanges.find(a=>a.firstStep == oldRange.endStep)?.focusLevel : null) ??
+			(newRange.endStep != null ? baseRanges.find(a=>newRange.endStep! >= a.firstStep && (a.lastStep == null || newRange.endStep! <= a.lastStep))?.focusLevel : null) ??
+			0;
 
-				await RunCommand_UpdateTimelineStep({id: oldEndStep.id, updates: {nodeReveals: oldEndStep_newNodeReveals}});
+		const matchingRevealToModify = newEndStep.nodeReveals.find(a=>a.path == newRange.path); //&& a.changeFocusLevelTo == null);
+		if (matchingRevealToModify) {
+			matchingRevealToModify.changeFocusLevelTo = focusLevelToUseAfterThisRange;
+		} else {
+			newEndStep.nodeReveals.push(new NodeReveal({path: newRange.path, changeFocusLevelTo: focusLevelToUseAfterThisRange}));
+		}
+		updatedStepIndexes_forAddingEffects.add(newRange.endStep!);
+	}
+
+	// first, update steps that are only having effects added to them (so that if commands are interrupted, entries are merely duplicated rather than lost)
+	await UpdateStepsAtIndexes([...updatedStepIndexes_forAddingEffects].Exclude(...updatedStepIndexes_forRemovingEffects));
+	// then, update the remaining steps, that have effects removed from them
+	await UpdateStepsAtIndexes([...updatedStepIndexes_forRemovingEffects]);
+
+	async function UpdateStepsAtIndexes(updatedStepIndexes: number[]) {
+		for (const stepIndex of updatedStepIndexes) {
+			const oldNodeRevealsJSON = JSON.stringify(baseSteps[stepIndex].nodeReveals);
+			const newNodeRevealsJSON = JSON.stringify(steps[stepIndex].nodeReveals);
+			if (newNodeRevealsJSON != oldNodeRevealsJSON) {
+				// if there are any node-reveals (with this node's path) that are empty, exclude them
+				const finalNodeReveals = steps[stepIndex].nodeReveals.filter(a=>{
+					if (a.path == nodePath && IsNodeRevealEmpty(a)) return false;
+					return true;
+				});
+				await RunCommand_UpdateTimelineStep({id: steps[stepIndex].id, updates: {nodeReveals: finalNodeReveals}});
 			}
 		}
 	}

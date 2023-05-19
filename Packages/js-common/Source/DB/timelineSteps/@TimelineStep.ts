@@ -65,5 +65,5 @@ export class NodeReveal {
 }
 
 export function IsNodeRevealEmpty(nodeReveal: NodeReveal) {
-	return nodeReveal.show == null && nodeReveal.changeFocusLevelTo == null && nodeReveal.hide == null;
+	return nodeReveal.show == null && nodeReveal.changeFocusLevelTo == null && nodeReveal.setExpandedTo == null && nodeReveal.hide == null;
 }
