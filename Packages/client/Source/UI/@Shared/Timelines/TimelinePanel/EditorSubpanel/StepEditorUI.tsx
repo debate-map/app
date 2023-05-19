@@ -34,15 +34,15 @@ WaitXThenRun(0, () => {
 	document.body.appendChild(portal);
 }); */
 
-export type StepEditorUIProps = {index: number, last: boolean, map: Map, timeline: Timeline, stepID: string, draggable?: boolean} & {dragInfo?: DragInfo};
+export type StepEditorUIProps = {index: number, last: boolean, map: Map, timeline: Timeline, step: TimelineStep, draggable?: boolean} & {dragInfo?: DragInfo};
 
-@MakeDraggable(({index, stepID, draggable}: StepEditorUIProps)=>{
+@MakeDraggable(({index, step, draggable}: StepEditorUIProps)=>{
 	if (draggable == false) return null as any; // todo: is this "as any" valid?
 	// upgrade note: make sure dnd isn't broken from having to comment the next line out
 	// if (step == null) return null; // if step is not yet loaded, don't actually apply the draggable-wrapping
 	return {
 		type: "TimelineStep",
-		draggableInfo: new DraggableInfo({stepID}),
+		draggableInfo: new DraggableInfo({stepID: step.id}),
 		index,
 		// enabled: step != null, // if step is not yet loaded, don't actually apply the draggable-wrapping
 	};
@@ -62,9 +62,9 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 	} */
 
 	render() {
-		const {index, last, map, timeline, stepID, dragInfo} = this.props;
+		const {index, last, map, timeline, step, dragInfo} = this.props;
 		const {placeholderRect} = this.state;
-		const step = GetTimelineStep(stepID);
+		//const step = GetTimelineStep(stepID);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
 
 		if (step == null) {

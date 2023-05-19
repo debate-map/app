@@ -370,7 +370,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 								if (index == 0) return <div key={key}/>; // atm, hide first step, since just intro message
 								if (steps == null) return <div key={key}/>;
 								const step = steps[index];
-								return <StepUI key={step.id} index={index} last={index == steps.length - 1} map={map} timeline={timeline} steps={steps} stepID={step.id} player={this.player}
+								return <StepUI key={step.id} index={index} last={index == steps.length - 1} map={map} timeline={timeline} steps={steps} step={step} player={this.player}
 									ref={c=>{
 										if (c == null || c.DOM_HTML == null) return;
 										this.stepElements[index] = c.DOM_HTML as any;

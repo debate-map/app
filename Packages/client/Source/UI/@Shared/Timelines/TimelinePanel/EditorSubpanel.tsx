@@ -146,6 +146,6 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 	RenderStep = (index: number, key: any)=>{
 		const {map, timeline, timelineSteps, creatorOrMod} = this.PropsStash;
 		const step = timelineSteps[index];
-		return <StepEditorUI key={step.id} index={index} last={index == timelineSteps.length - 1} map={map} timeline={timeline!} stepID={step.id} draggable={creatorOrMod}/>;
+		return <StepEditorUI key={step.id} index={index} last={index == timelineSteps.length - 1} map={map} timeline={timeline!} step={step} draggable={creatorOrMod}/>;
 	};
 }

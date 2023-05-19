@@ -11,14 +11,22 @@ import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel
 
 @Observer
 export class StepUI extends BaseComponentPlus(
-	{} as {index: number, last: boolean, map: Map, timeline: Timeline, steps: TimelineStep[], stepID: string, player: YoutubePlayer},
+	{} as {index: number, last: boolean, map: Map, timeline: Timeline, steps: TimelineStep[], step: TimelineStep, player: YoutubePlayer},
 	{showNodeReveals: false, editorOpen: false},
 ) {
+	constructor(props) {
+		super(props);
+		const {step} = this.props;
+		// if a timeline-step has no message, then start the step out with node-reveals shown (some timelines are used only for the node-reveals, and this makes the UI work better for that case)
+		if (step.message.trim().length == 0) {
+			//this.SetState({showNodeReveals: true});
+			this.state = {...this.state, showNodeReveals: true};
+		}
+	}
+
 	render() {
-		const {index, last, map, timeline, steps, stepID, player} = this.props;
+		const {index, last, map, timeline, steps, step, player} = this.props;
 		const {showNodeReveals, editorOpen} = this.state;
-		const step = GetTimelineStep(stepID);
-		if (step == null) return <div style={{height: 50}}/>;
 		const timeFromStart = GetTimelineStepTimeFromStart(step?.id);
 
 		let margin: string|undefined;
@@ -94,7 +102,7 @@ export class StepUI extends BaseComponentPlus(
 					</VMenuStub>}
 				</Column>
 				{editorOpen &&
-					<StepEditorUI index={index} last={index == steps.length - 1} map={map} timeline={timeline} stepID={stepID} draggable={false}/>}
+					<StepEditorUI index={index} last={index == steps.length - 1} map={map} timeline={timeline} step={step} draggable={false}/>}
 			</div>
 		);
 	}
