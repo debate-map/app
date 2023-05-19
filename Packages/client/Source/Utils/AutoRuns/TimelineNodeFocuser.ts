@@ -75,6 +75,8 @@ async function StartExpandingToAndFocusingOnNodesForStep(mapID: string, stepInde
 	//console.log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
 	if (newlyRevealedNodePaths.length) {
 		ExpandToNodes(mapID, newlyRevealedNodePaths);
+		// commented; for first project, we want the full-fledged automatic scroll-and-zoom system working, but...
+		// todo: make this configurable for the timeline creator and/or visitor (options: manual expand + zoom + scroll, auto expand + scroll-to-new, or auto expand + zoom + scroll to all focus-nodes)
 		//FocusOnNodes(mapID, newlyRevealedNodePaths);
 	}
 
@@ -139,7 +141,7 @@ async function FocusOnNodes(mapID: string, paths: string[]) {
 	const newZoom = (zoomRequired * .9).FloorTo(.1).KeepBetween(.1, 1);
 	if (newZoom.Distance(mapState.zoomLevel) > .01) {
 		RunInAction("FocusOnNodes.zoomOut", ()=>mapState.zoomLevel = newZoom);
-		// re-call this function, since we need to recalc
+		// re-call this function, since we need to recalc // edit: Actually, is this even necessary? I don't think it should be...
 		setTimeout(()=>FocusOnNodes(mapID, paths), 100);
 		return;
 	}

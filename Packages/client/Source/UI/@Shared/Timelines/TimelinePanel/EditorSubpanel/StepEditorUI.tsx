@@ -276,7 +276,17 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					}}
 					onClick={()=>this.SetState({detailsOpen: !detailsOpen})}
 				>
-					<span>{!nodeReveal.show && !nodeReveal.hide ? "[disabled] " : ""}{nodeReveal.hide ? "[hide] " : ""}{displayText}</span>
+					<span style={{position: "relative", paddingTop: 2}}>
+						<span style={{
+							position: "absolute", left: -5, top: -10, color: "yellow", fontSize: 10,
+							background: "rgba(50,50,50,1)", borderRadius: 5, padding: "0 3px",
+						}}>{[
+							nodeReveal.show && "show",
+							nodeReveal.changeFocusLevelTo != null && `focus:${nodeReveal.changeFocusLevelTo}`,
+							nodeReveal.hide && "hide",
+						].filter(a=>a).join(", ")}</span>
+						{displayText}
+					</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
 					{/* <NodeUI_Menu_Stub {...{ node: nodeL3, path: `${node.id}`, inList: true }}/> */}
 					{editing &&
@@ -333,7 +343,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
 						}}/>
 						<InfoButton text="While a node has a focus-level of 1+, the timeline will keep it in view while progressing through its steps (ie. during automatic scrolling and zooming)."/>
-						{nodeReveal.show &&
+						{nodeReveal.changeFocusLevelTo != null &&
 						<>
 							<Spinner ml={5} value={nodeReveal.changeFocusLevelTo ?? 0} onChange={val=>{
 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];

@@ -6,5 +6,6 @@ export class TimelinesState {
 	constructor() { makeObservable(this); }
 	@O nodeRevealHighlightTime = 20;
 	@O hideEditingControls = false;
+	@O showFocusNodes = false;
 	@O @ignore autoScroll = true;
 }

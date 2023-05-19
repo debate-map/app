@@ -51,12 +51,16 @@ export class NodeReveal {
 	@Field({type: "number"}, {opt: true})
 	show_revealDepth?: number|n;
 
+	@Field({type: "number"}, {opt: true})
+	changeFocusLevelTo?: number|n;
+
 	@Field({type: "boolean"}, {opt: true})
 	hide?: boolean|n;
 
 	/*@Field({type: "number"}, {opt: true})
 	hide_delay?: number|n;*/
+}
 
-	@Field({type: "number"}, {opt: true})
-	changeFocusLevelTo?: number|n;
+export function IsNodeRevealEmpty(nodeReveal: NodeReveal) {
+	return nodeReveal.show == null && nodeReveal.changeFocusLevelTo == null && nodeReveal.hide == null;
 }

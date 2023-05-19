@@ -75,7 +75,7 @@ export class StepUI extends BaseComponentPlus(
 						<div style={{fontSize: 11, opacity: 0.7, textAlign: "center", padding: "3px 5px"}} onClick={()=>{
 							this.SetState({showNodeReveals: !showNodeReveals});
 						}}>
-							Message adds {step.nodeReveals.length} node{step.nodeReveals.length > 1 ? "s" : ""} to the map. (click to {showNodeReveals ? "hide" : "view"})
+							Message affects display of {step.nodeReveals.length} node{step.nodeReveals.length > 1 ? "s" : ""}. (click to {showNodeReveals ? "hide" : "view"})
 						</div>
 						{showNodeReveals && step.nodeReveals &&
 						<Column p="0 5px 5px 5px">

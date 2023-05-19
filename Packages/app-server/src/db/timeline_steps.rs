@@ -67,8 +67,8 @@ pub struct NodeReveal {
     show: Option<bool>,
     #[graphql(name = "show_revealDepth")]
     show_revealDepth: Option<f64>,
-    hide: Option<bool>,
     changeFocusLevelTo: Option<i32>,
+    hide: Option<bool>,
 }
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]

@@ -14,12 +14,14 @@ import {BailError, BailInfo} from "web-vcore/.yalc/mobx-graphlink";
 import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {store} from "Store/index.js";
 import {NodeDataForTreeGrapher} from "../MapUI.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
 import {NodeBox} from "./NodeBox.js";
+import {FocusNodeStatusMarker} from "./NodeUI/FocusNodeStatusMarker.js";
 
 // class holding values that are derived entirely within CheckForChanges()
 class ObservedValues {
@@ -192,6 +194,9 @@ export class NodeUI extends BaseComponentPlus(
 		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
 		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow;
 
+		const playingTimeline = GetPlayingTimeline(map.id);
+		const showFocusNodeStatusMarker = playingTimeline != null && store.main.timelines.showFocusNodes;
+
 		performance.mark("NodeUI_3");
 		performance.measure("NodeUI_Part1", "NodeUI_1", "NodeUI_2");
 		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
@@ -226,7 +231,10 @@ export class NodeUI extends BaseComponentPlus(
 						style,
 					)}
 				>
-					<CloneHistoryButton node={node}/>
+					{showFocusNodeStatusMarker &&
+						<FocusNodeStatusMarker map={map} node={node} path={path}/>}
+					{!showFocusNodeStatusMarker &&
+						<CloneHistoryButton node={node}/>}
 					<NodeBox ref={UseCallback(c=>{
 						this.nodeBox = GetInnerComp(c);
 						if (ref_nodeBox) ref_nodeBox(c);

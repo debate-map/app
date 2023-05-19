@@ -102,7 +102,7 @@ export const GetVisiblePathsAfterSteps = CreateAccessor((steps: TimelineStep[])=
 	return CE(GetVisiblePathRevealTimesInSteps(steps)).VKeys();
 });
 
-export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
+export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	const pathFocusLevels = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
@@ -116,3 +116,50 @@ export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[
 export const GetPathsWith1PlusFocusLevelAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	return Object.entries(GetPathFocusLevelsAfterSteps(steps)).filter(a=>a[1] >= 1).map(a=>a[0]);
 });
+
+export const GetPathFocusLevelRangesWithinSteps = CreateAccessor((steps: TimelineStep[])=>{
+	const ranges = [] as PathFocusLevelRange[];
+	for (const [index, step] of steps.entries()) {
+		for (const reveal of step.nodeReveals || []) {
+			if (reveal.changeFocusLevelTo != null) {
+				// if there is no focus-level-range added for this path yet, add one "synthetic" one with level-0, that starts at index 0 (this simplifies handling logic, to have all steps covered by a range)
+				if (ranges.filter(a=>a.path == reveal.path).length == 0) {
+					ranges.push(new PathFocusLevelRange({
+						path: reveal.path,
+						focusLevel: 0,
+						firstStep: 0,
+						//lastStep: index - 1, // have this filled in by regular logic below
+						//endStep: index, // have this filled in by regular logic below
+					}));
+				}
+
+				const currentRange = ranges.filter(a=>a.path == reveal.path && a.lastStep == null).LastOrX();
+				const currentFocusLevel = currentRange?.focusLevel ?? 0;
+
+				// if this step changes the focus-level for the node, add a new range for the new focus-level
+				if (reveal.changeFocusLevelTo != currentFocusLevel) {
+					if (currentRange != null) {
+						currentRange.lastStep = index - 1;
+						currentRange.endStep = index;
+					}
+					ranges.push(new PathFocusLevelRange({
+						path: reveal.path,
+						focusLevel: reveal.changeFocusLevelTo,
+						firstStep: index,
+					}));
+				}
+			}
+		}
+	}
+	return ranges;
+});
+export class PathFocusLevelRange {
+	constructor(data?: Partial<PathFocusLevelRange>) {
+		Object.assign(this, data);
+	}
+	path: string;
+	focusLevel: number;
+	firstStep: number;
+	lastStep: number|n; // the last step within the range (inclusive)
+	endStep: number|n; // the step that ends the range (exclusive)
+}

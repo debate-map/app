@@ -320,6 +320,10 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 									<Text>Hide editing controls:</Text>
 									<CheckBox ml={5} value={uiState.hideEditingControls} onChange={val=>RunInAction_Set(this, ()=>uiState.hideEditingControls = val)}/>
 								</Row>
+								<Row>
+									<Text>Show focus-nodes:</Text>
+									<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
+								</Row>
 							</Column></DropDownContent>
 						</DropDown>
 					</Row>
