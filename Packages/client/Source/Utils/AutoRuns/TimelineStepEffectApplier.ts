@@ -1,7 +1,7 @@
 import {autorun, action} from "web-vcore/nm/mobx.js";
 import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "Store/main";
-import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
 import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
 import {SleepAsync, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
@@ -9,7 +9,7 @@ import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps} from "dm_common";
+import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps, ToPathNodes} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 
 /*function AreSetsEqual(setA, setB) {
@@ -32,42 +32,61 @@ autorun(()=>{
 }, {name: "TimelineNodeFocuser"});
 
 async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: number) {
-	//const newlyRevealedNodes = await GetAsync(() => GetPlayingTimelineCurrentStepRevealNodes(action.payload.mapID));
-	// we have to break it into parts, otherwise the current-step might change while we're doing the processing, short-circuiting the expansion
-	const [stepsUpToTarget, step] = await GetAsync(()=>{
+	// since this GetAsync call may take a while to complete, we need to make sure it returns the same data regardless of if the "current step" changes in the meantime
+	// (todo: make this a non-issue by finding a way to have such a delayed GetAsync call simply "canceled" if another call to ApplyNodeEffectsForTimelineStepsUpToX happens during that time)
+	const {stepsUpToTarget, step, newlyRevealedNodePaths, focusNodes} = await GetAsync(()=>{
 		//const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
+		console.log("Test1");
 		const timeline = GetPlayingTimeline(mapID);
-		if (timeline == null) return [null, null];
+		if (timeline == null) return {stepsUpToTarget: null, step: null, newlyRevealedNodePaths: [], focusNodes: []};
+		console.log("Test2");
 		const steps = GetTimelineSteps(timeline.id);
-		return [steps.slice(0, stepIndex + 1), steps[stepIndex]];
+		const stepsUpToTarget_ = steps.slice(0, stepIndex + 1);
+		const step_ = steps[stepIndex];
+		console.log("Test3");
+		const newlyRevealedNodePaths_ = GetVisiblePathsAfterSteps([step_]);
+		console.log("Test4");
+		const focusNodes_ = GetPathsWith1PlusFocusLevelAfterSteps(stepsUpToTarget_);
+		console.log("Test5");
+		return {stepsUpToTarget: stepsUpToTarget_, step: step_, newlyRevealedNodePaths: newlyRevealedNodePaths_, focusNodes: focusNodes_};
 	});
 	if (stepsUpToTarget == null || step == null) return;
 
-	// for the just-reached step, apply the expansion part required its node "show" effects (the actual showing/hiding of node-ui is handled within NodeUI.tsx)
-	const newlyRevealedNodePaths = await GetAsync(()=>GetVisiblePathsAfterSteps([step]));
-	//console.log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
-	if (newlyRevealedNodePaths.length) {
-		ExpandToNodes(mapID, newlyRevealedNodePaths);
-		// commented; for first project, we want the full-fledged automatic scroll-and-zoom system working, but...
-		// todo: make this configurable for the timeline creator and/or visitor (options: manual expand + zoom + scroll, auto expand + scroll-to-new, or auto expand + zoom + scroll to all focus-nodes)
-		//FocusOnNodes(mapID, newlyRevealedNodePaths);
-	}
+	// apply the store changes all in one batch (so that any dependent UI components only have to re-render once)
+	RunWithRenderingBatched(()=>{
+		RunInAction(`ApplyNodeEffectsForTimelineStepsUpToX.forStepIndex:${stepIndex}`, ()=>{
+			// for the just-reached step, apply the expansion part required its node "show" effects (the actual showing/hiding of node-ui is handled within NodeUI.tsx)
+			//console.log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
+			if (newlyRevealedNodePaths.length) {
+				ExpandToNodes(mapID, newlyRevealedNodePaths);
+				// commented; for first project, we want the full-fledged automatic scroll-and-zoom system working, but...
+				// todo: make this configurable for the timeline creator and/or visitor (options: manual expand + zoom + scroll, auto expand + scroll-to-new, or auto expand + zoom + scroll to all focus-nodes)
+				//FocusOnNodes(mapID, newlyRevealedNodePaths);
+			}
 
-	// for the just-reached step, apply node expand/collapse effects
-	for (const nodeReveal of step.nodeReveals) {
-		if (nodeReveal.setExpandedTo != null) {
-			ACTNodeExpandedSet({mapID, path: nodeReveal.path, expanded: nodeReveal.setExpandedTo});
-		}
-	}
+			// for the just-reached step, apply node expand/collapse effects
+			for (const nodeReveal of step.nodeReveals) {
+				if (nodeReveal.setExpandedTo != null) {
+					ACTNodeExpandedSet({mapID, path: nodeReveal.path, expanded: nodeReveal.setExpandedTo});
+				}
+			}
+		});
+	});
+
+	// filter out focus-nodes that aren't actually valid atm (else FocusOnNodes func will wait for ~3s for them to become visible, which is not what we want)
+	// commented for now; since arg-nodes still show their premises even if "not expanded", for this to work, we'd need to check node-types along way -- which is overly complex/fragile atm
+	/*const focusNodes_valid = focusNodes.filter(path=>{
+		const pathNodes = ToPathNodes(path);
+		const nodeViews = GetNodeViewsAlongPath(mapID, path);
+		if (nodeViews.length < pathNodes.length || nodeViews.Any(a=>a?.expanded == false)) return false;
+		return true;
+	});*/
 
 	// for all steps reached so far, apply scrolling and zooming such that the current list of focus-nodes are all visible (just sufficiently so)
-	const focusNodes = await GetAsync(()=>GetPathsWith1PlusFocusLevelAfterSteps(stepsUpToTarget));
 	FocusOnNodes(mapID, focusNodes);
 }
 
-async function ExpandToNodes(mapID: string, paths: string[]) {
-	// const { UpdateAnchorNodeAndViewOffset } = require('../../UI/@Shared/Maps/MapUI'); // eslint-disable-line
-
+function ExpandToNodes(mapID: string, paths: string[]) {
 	for (const path of paths) {
 		const parentPath = SlicePath(path, 1);
 		if (parentPath == null) continue;
@@ -122,7 +141,7 @@ async function FocusOnNodes(mapID: string, paths: string[]) {
 	const newZoom = (zoomRequired * .9).FloorTo(.1).KeepBetween(.1, 1);
 	if (newZoom.Distance(mapState.zoomLevel) > .01) {
 		RunInAction("FocusOnNodes.zoomOut", ()=>mapState.zoomLevel = newZoom);
-		// re-call this function, since we need to recalc // edit: Actually, is this even necessary? I don't think it should be...
+		// re-call this function, since we need to recalc // edit: Actually, is this even necessary? I don't think it should be... (well, the ACTUpdateAnchorNodeAndViewOffset call might need the delay)
 		setTimeout(()=>FocusOnNodes(mapID, paths), 100);
 		return;
 	}
