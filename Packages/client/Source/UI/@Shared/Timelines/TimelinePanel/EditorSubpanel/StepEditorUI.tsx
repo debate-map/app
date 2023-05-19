@@ -283,6 +283,8 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						}}>{[
 							nodeReveal.show && "show",
 							nodeReveal.changeFocusLevelTo != null && `focus:${nodeReveal.changeFocusLevelTo}`,
+							nodeReveal.setExpandedTo == true && `expand`,
+							nodeReveal.setExpandedTo == false && `collapse`,
 							nodeReveal.hide && "hide",
 						].filter(a=>a).join(", ")}</span>
 						{displayText}
@@ -345,9 +347,29 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						<InfoButton text="While a node has a focus-level of 1+, the timeline will keep it in view while progressing through its steps (ie. during automatic scrolling and zooming)."/>
 						{nodeReveal.changeFocusLevelTo != null &&
 						<>
-							<Spinner ml={5} value={nodeReveal.changeFocusLevelTo ?? 0} onChange={val=>{
+							<Spinner ml={5} value={nodeReveal.changeFocusLevelTo} onChange={val=>{
 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 								newNodeReveals[index].changeFocusLevelTo = val;
+								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
+							}}/>
+						</>}
+					</Row>}
+					{editing &&
+					<Row>
+						<CheckBox ml={5} text="Set expanded to:" value={nodeReveal.setExpandedTo != null} onChange={val=>{
+							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
+							if (val) {
+								newNodeReveals[index].setExpandedTo = true;
+							} else {
+								delete newNodeReveals[index].setExpandedTo;
+							}
+							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
+						}}/>
+						{nodeReveal.setExpandedTo != null &&
+						<>
+							<Select ml={5} options={{expanded: true, collapsed: false}} value={nodeReveal.setExpandedTo} onChange={(val: boolean)=>{
+								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
+								newNodeReveals[index].setExpandedTo = val;
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
 							}}/>
 						</>}

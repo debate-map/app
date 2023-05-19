@@ -7,59 +7,31 @@ import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js"
 import {SleepAsync, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {GetViewportRect} from "web-vcore";
+import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps} from "dm_common";
+import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 
-/* function AreSetsEqual(setA, setB) {
+/*function AreSetsEqual(setA, setB) {
 	return setA.size === setB.size && [...setA].every((value) => setB.has(value));
-} */
+}*/
 
-// let nodesThatShouldBeRevealed_last = new Set();
-// let lastPlayingTimelineStep: TimelineStep:
-// let lastPlayingTimelineStep_nodeRevealIDs: Set<string>;
-let lastPlayingTimeline_step: number|n;
+let playingTimeline_lastStep: number|n;
 autorun(()=>{
-	// const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
-	/* const timeline = GetPlayingTimeline(GetOpenMapID());
-	const nodesThatShouldBeRevealed = GetNodesRevealedInSteps(GetPlayingTimelineCurrentStepRevealNodes eSteps([step]));
-	// Log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
-	if (newlyRevealedNodes.length) {
-		// stats=>Log("Requested paths:\n==========\n" + stats.requestedPaths.VKeys().join("\n") + "\n\n"));
-		ExpandToAndFocusOnNodes(action.payload.mapID, newlyRevealedNodes);
-	} */
-
-	/* const timeline = GetPlayingTimeline(mapID);
-	if (timeline == null) return;
-	const stepID = timeline.steps[];
-	const playingTimelineStep = GetTimelineStep(stepID);
-	const playingTimelineStep_nodeRevealIDs = new Set(GetNodesRevealedInSteps([playingTimelineStep]));
-
-	// todo: fix issue hit earlier
-
-	if (!AreSetsEqual(playingTimelineStep_nodeRevealIDs, lastPlayingTimelineStep_nodeRevealIDs)) {
-		const newlyRevealedNodes = playingTimelineStep_nodeRevealIDs;
-		if (newlyRevealedNodes.size) {
-			// stats=>Log("Requested paths:\n==========\n" + stats.requestedPaths.VKeys().join("\n") + "\n\n"));
-			ExpandToAndFocusOnNodes(mapID, Array.from(newlyRevealedNodes));
-		}
-	}
-	lastPlayingTimelineStep_nodeRevealIDs = playingTimelineStep_nodeRevealIDs; */
-
 	// const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
 	const mapID = GetOpenMapID();
 	const mapState = GetMapState(mapID);
 	if (mapID == null || mapState == null) return;
 	const {playingTimeline_step} = mapState;
-	if (playingTimeline_step != lastPlayingTimeline_step) {
-		lastPlayingTimeline_step = playingTimeline_step;
+	if (playingTimeline_step != playingTimeline_lastStep) {
+		playingTimeline_lastStep = playingTimeline_step;
 		if (playingTimeline_step != null) {
-			StartExpandingToAndFocusingOnNodesForStep(mapID, playingTimeline_step);
+			ApplyNodeEffectsForTimelineStepsUpToX(mapID, playingTimeline_step);
 		}
 	}
 }, {name: "TimelineNodeFocuser"});
 
-async function StartExpandingToAndFocusingOnNodesForStep(mapID: string, stepIndex: number) {
+async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: number) {
 	//const newlyRevealedNodes = await GetAsync(() => GetPlayingTimelineCurrentStepRevealNodes(action.payload.mapID));
 	// we have to break it into parts, otherwise the current-step might change while we're doing the processing, short-circuiting the expansion
 	const [stepsUpToTarget, step] = await GetAsync(()=>{
@@ -71,6 +43,7 @@ async function StartExpandingToAndFocusingOnNodesForStep(mapID: string, stepInde
 	});
 	if (stepsUpToTarget == null || step == null) return;
 
+	// for the just-reached step, apply the expansion part required its node "show" effects (the actual showing/hiding of node-ui is handled within NodeUI.tsx)
 	const newlyRevealedNodePaths = await GetAsync(()=>GetVisiblePathsAfterSteps([step]));
 	//console.log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
 	if (newlyRevealedNodePaths.length) {
@@ -80,6 +53,14 @@ async function StartExpandingToAndFocusingOnNodesForStep(mapID: string, stepInde
 		//FocusOnNodes(mapID, newlyRevealedNodePaths);
 	}
 
+	// for the just-reached step, apply node expand/collapse effects
+	for (const nodeReveal of step.nodeReveals) {
+		if (nodeReveal.setExpandedTo != null) {
+			ACTNodeExpandedSet({mapID, path: nodeReveal.path, expanded: nodeReveal.setExpandedTo});
+		}
+	}
+
+	// for all steps reached so far, apply scrolling and zooming such that the current list of focus-nodes are all visible (just sufficiently so)
 	const focusNodes = await GetAsync(()=>GetPathsWith1PlusFocusLevelAfterSteps(stepsUpToTarget));
 	FocusOnNodes(mapID, focusNodes);
 }

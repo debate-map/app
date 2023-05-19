@@ -55,6 +55,9 @@ export class NodeReveal {
 	changeFocusLevelTo?: number|n;
 
 	@Field({type: "boolean"}, {opt: true})
+	setExpandedTo?: boolean|n;
+
+	@Field({type: "boolean"}, {opt: true})
 	hide?: boolean|n;
 
 	/*@Field({type: "number"}, {opt: true})

@@ -68,6 +68,7 @@ pub struct NodeReveal {
     #[graphql(name = "show_revealDepth")]
     show_revealDepth: Option<f64>,
     changeFocusLevelTo: Option<i32>,
+    setExpandedTo: Option<bool>,
     hide: Option<bool>,
 }
 

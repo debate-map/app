@@ -7,5 +7,5 @@ import "./LoadDefaultsFromDB.js";
 import "./LoadShare.js";
 import "./PageViewRecorder.js";
 import "./SelectNodeByFragmentPath.js";
-import "./TimelineNodeFocuser.js";
+import "./TimelineStepEffectApplier.js";
 import "./UserInfoCheck.js";
