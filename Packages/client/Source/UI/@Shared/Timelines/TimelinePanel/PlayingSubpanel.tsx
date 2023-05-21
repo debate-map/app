@@ -6,7 +6,7 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES, RunInAction_Set} from "web-vcore";
+import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES, RunInAction_Set, TextPlus, O} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map, TimelineStep} from "dm_common";
 import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
@@ -14,6 +14,24 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {StepUI} from "./PlayingSubpanel/StepUI.js";
+
+class NoVideoPlayer {
+	constructor(comp: PlayingSubpanel) {
+		makeObservable(this);
+		this.comp = comp;
+	}
+
+	comp: PlayingSubpanel;
+
+	@O playing = false;
+	SetPlaying(playing: boolean) {
+		RunInAction("NoVideoPlayer.SetPlaying", ()=>this.playing = playing);
+		this.timer.Enabled = playing;
+	}
+	timer = new Timer(1 / 30, ()=>{
+		this.comp.AdjustTargetTimeByFrames(2);
+	});
+}
 
 @Observer
 export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageAreaHeight: number }> {
@@ -25,6 +43,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 	//initialStash = { messageAreaHeight: 0 };
 
 	player: YoutubePlayer;
+	noVideoPlayer = new NoVideoPlayer(this);
 	listRootEl: HTMLDivElement;
 	sideBarEl: HTMLDivElement;
 	// stepRects = [] as VRect[];
@@ -293,20 +312,15 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 					}}/>}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
 					<Row>
-						<Text>Time: </Text>
+						<Button text={this.noVideoPlayer.playing ? "⏸" : "▶"} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>
 						<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} value={this.targetTime ?? 0} onChange={val=>{
 							this.SetTargetTime(val, "setPosition");
 						}}/>
-						<Button text="-60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-60)}/>
-						<Button text="-30" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-30)}/>
-						<Button text="-10" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-10)}/>
-						<Button text="-5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-5)}/>
-						<Button text="-1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(-1)}/>
-						<Button text="+1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(1)}/>
-						<Button text="+5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)}/>
-						<Button text="+10" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(10)}/>
-						<Button text="+30" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(30)}/>
-						<Button text="+60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)}/>
+						<TextPlus ml={3} info="With mouse over button, mouse scroll-wheel moves forward/backward by X frames.">Seek:</TextPlus>
+						<Button text="±1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(1)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 1)}/>
+						<Button text="±5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 5)}/>
+						<Button text="±20" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(20)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 20)}/>
+						<Button text="±60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 60)}/>
 					</Row>
 					<Row ml="auto" style={{position: "relative"}}>
 						<DropDown>
