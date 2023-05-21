@@ -1,9 +1,9 @@
 import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
 import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {ReferencesAttachment, GetNodeDisplayText, NodeType, ClaimForm} from "dm_common";
+import {ReferencesAttachment, GetNodeDisplayText, NodeType, ClaimForm, CleanUpdatedSourceChains} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
-import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../Maps/Node/SourceChainsEditorUI.js";
+import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
 import {SubPanel_Quote, SubPanel_References} from "../../Maps/Node/NodeBox/SubPanel.js";
 
 export class ReferencesAttachmentEditorUI extends DetailsUI_Base<ReferencesAttachment, ReferencesAttachmentEditorUI> {

@@ -16,6 +16,8 @@ pub enum SourceType {
 	#[graphql(name = "image")] image,
 	#[graphql(name = "video")] video,
 	#[graphql(name = "webpage")] webpage,
+	#[graphql(name = "claimMiner")] claimMiner,
+	#[graphql(name = "hypothesisAnnotation")] hypothesisAnnotation,
 }
 
 //export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";
@@ -26,13 +28,15 @@ pub struct Source {
 	pub r#type: SourceType,
 
 	// uses with * means shown in the main row (rather than in dropdown)
-	// todo: either MS the time fields are only for type:video, or clarify their purpose in code and UI (eg. date-range of occurrence?)
-	pub name: Option<String>, // used by: Speech, Text*
-	pub author: Option<String>, // used by: Speech*, Text*, Image*, Video*
-	pub location: Option<String>, // used by: Speech*, Image*, Video*
-	pub time_min: Option<f64>, // used by: Speech, Text, Image, Video, Webpage
-	pub time_max: Option<f64>, // used by: Speech, Text, Image, Video, Webpage
-	pub link: Option<String>, // used by: Webpage*
+	pub name: Option<String>,
+	pub author: Option<String>,
+	pub location: Option<String>,
+	pub time_min: Option<f64>,
+	pub time_max: Option<f64>,
+	pub link: Option<String>,
+    
+	pub claimMinerID: Option<String>,
+	pub hypothesisAnnotationID: Option<String>,
 }
 
 }
@@ -67,6 +71,8 @@ pub fn source_chain_from_old_json_data(data: &JSONValue) -> Result<SourceChain, 
             time_min: source.get("time_min").map(|a| a.as_f64()).unwrap_or(None),
             time_max: source.get("time_max").map(|a| a.as_f64()).unwrap_or(None),
             link: source.get("link").map(|a| a.as_string()).unwrap_or(None),
+            claimMinerID: None,
+            hypothesisAnnotationID: None,
         }
     }).collect();
     Ok(SourceChain {

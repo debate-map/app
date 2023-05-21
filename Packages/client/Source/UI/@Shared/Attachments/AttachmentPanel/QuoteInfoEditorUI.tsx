@@ -1,8 +1,8 @@
-import {QuoteAttachment} from "dm_common";
+import {CleanUpdatedSourceChains, QuoteAttachment} from "dm_common";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
 import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown.js";
-import {CleanUpdatedSourceChains, SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
+import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
 
 //@ApplyBasicStyles
 export class QuoteInfoEditorUI extends DetailsUI_Base<QuoteAttachment, QuoteInfoEditorUI> {

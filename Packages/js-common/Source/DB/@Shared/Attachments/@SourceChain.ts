@@ -28,6 +28,9 @@ export enum SourceType {
 	image = "image",
 	video = "video",
 	webpage = "webpage",
+	// system-specific sources
+	claimMiner = "claimMiner",
+	hypothesisAnnotation = "hypothesisAnnotation",
 }
 AddSchema("SourceType", {enum: GetValues(SourceType)});
 
@@ -39,14 +42,17 @@ export class Source {
 
 	type = SourceType.webpage;
 
-	// uses with * means shown in the main row (rather than in dropdown)
+	name?: string;
+	author?: string;
+	location?: string;
 	// todo: either MS the time fields are only for type:video, or clarify their purpose in code and UI (eg. date-range of occurrence?)
-	name?: string; // used by: Speech, Text*
-	author?: string; // used by: Speech*, Text*, Image*, Video*
-	location?: string; // used by: Speech*, Image*, Video*
-	time_min?: number; // used by: Speech, Text, Image, Video, Webpage
-	time_max?: number; // used by: Speech, Text, Image, Video, Webpage
-	link?: string; // used by: Webpage*
+	time_min?: number;
+	time_max?: number;
+	link?: string;
+
+	// for system-specific sources
+	claimMinerID?: string; // used by: claimMiner*
+	hypothesisAnnotationID?: string; // used by: hypothesisAnnotation*
 }
 AddSchema("Source", {
 	properties: {
@@ -59,51 +65,35 @@ AddSchema("Source", {
 		// link: { format: 'uri' },
 		// link: { pattern: Source_linkURLPattern },
 		link: {type: "string"}, // allow overriding url pattern; it just highlights possible mistakes
+		claimMinerID: {type: "string"},
+		hypothesisAnnotationID: {type: "string"},
 	},
-	// required: ["name", "author", "link"],
-	/* anyOf: [
-		{required: ["name"], prohibited: ["link"]},
-		{required: ["author"], prohibited: ["link"]},
-		{required: ["link"], prohibited: ["name", "author"]}
-	], */
-	/*allOf: [
-		{
-			if: {properties: {type: {enum: [SourceType.Speech]}}},
-			then: {
-				anyOf: [{required: ["name"]}, {required: ["author"]}],
-				prohibited: ["link"],
-			},
-		},
-		{
-			if: {properties: {type: {enum: [SourceType.Text]}}},
-			then: {
-				anyOf: [{required: ["name"]}, {required: ["author"]}],
-				prohibited: ["link"],
-			},
-		},
-		{
-			if: {properties: {type: {enum: [SourceType.Image]}}},
-			then: {
-				anyOf: [{required: ["location"]}, {required: ["author"]}],
-				prohibited: ["link"],
-			},
-		},
-		{
-			if: {properties: {type: {enum: [SourceType.Video]}}},
-			then: {
-				anyOf: [{required: ["location"]}, {required: ["author"]}],
-				prohibited: ["link"],
-			},
-		},
-		{
-			if: {properties: {type: {const: SourceType.Webpage}}},
-			then: {
-				required: ["link"],
-				prohibited: ["name"],
-			},
-		},
-	],*/
 });
+
+type SourceTypeFieldSet = {main: Array<keyof Source>, extra: Array<keyof Source>};
+export const sourceType_allFields: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", "claimMinerID", "hypothesisAnnotationID"];
+export const sourceType_fieldSets = new Map<SourceType, SourceTypeFieldSet>([
+	[SourceType.speech, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
+	[SourceType.text, {main: ["name", "author"], extra: ["time_min", "time_max"]}],
+	[SourceType.image, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
+	[SourceType.video, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
+	[SourceType.webpage, {main: ["link"], extra: ["author", "time_min", "time_max"]}],
+	[SourceType.claimMiner, {main: ["claimMinerID"], extra: []}],
+	[SourceType.hypothesisAnnotation, {main: ["hypothesisAnnotationID"], extra: []}],
+]);
+
+export function CleanUpdatedSourceChains(sourceChains: SourceChain[]) {
+	// clean data (according to rules defined in field-sets map above)
+	for (const chain of sourceChains) {
+		for (const source of chain.sources) {
+			const fieldsNotForThisType = sourceType_allFields.Exclude(...sourceType_fieldSets.get(source.type)!.main, ...sourceType_fieldSets.get(source.type)!.extra);
+			for (const field of fieldsNotForThisType) {
+				delete source[field];
+			}
+		}
+	}
+	return sourceChains;
+}
 
 export function GetSourceNamePlaceholderText(sourceType: SourceType) {
 	if (sourceType == SourceType.speech) return "speech name";

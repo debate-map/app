@@ -68,18 +68,23 @@ data:
     set -e
 
     # change the file-watcher max-count on each node to 524288 (needed for "watch:**" to work in the ecosystem.config.cjs files)
-
-    # insert the new value into the system config
     #echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
     sysctl -w fs.inotify.max_user_watches=524288
 
+    # also set this (fixes error: "failed to create fsnotify watcher: too many open files")
+    sysctl -w fs.inotify.max_user_instances=100000
+
     # this increases the max # of mmap()'ed ranges (as per https://stackoverflow.com/a/59923848), in an attempt to fix...
-    # ... thedreadful issue where trying to create a memory-snapshot using remote Chrome devtools would virtually always cause the pod to crash (or at least for the port-forward to dc)
+    # ... the dreadful issue where trying to create a memory-snapshot using remote Chrome devtools would virtually always cause the pod to crash (or at least for the port-forward to dc)
     sysctl -w vm.max_map_count=65530999
 
-    # check that the new value was applied
+    # check that the new values were applied
     echo "New value for max_user_watches:"
     cat /proc/sys/fs/inotify/max_user_watches
+    echo "New value for max_user_instances:"
+    cat /proc/sys/fs/inotify/max_user_instances
+    echo "New value for max_map_count:"
+    cat /proc/sys/vm/max_map_count
 
     echo "Now sleeping forever... (so k8s doesn't think this pod died, and thus restart it)"
     sleep infinity

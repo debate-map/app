@@ -3,7 +3,7 @@ import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/re
 import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
 import {Fragment} from "react";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "dm_common";
+import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern, sourceType_fieldSets, CleanUpdatedSourceChains} from "dm_common";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {ES, VDateTime} from "web-vcore";
 import Moment from "web-vcore/nm/moment";
@@ -160,50 +160,45 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 				source.VSet("link", val);
 				Change();
 			}}/>;
+		const claimMinerUI = ()=><TextInput enabled={enabled} style={{width: "90%"}} placeholder="claim-miner id"
+			value={source.claimMinerID} onChange={val=>Change(source.VSet("claimMinerID", val || DEL))}/>;
+		const hypothesisAnnotationUI = ()=><TextInput enabled={enabled} style={{width: "90%"}} placeholder="hypothesis annotation id"
+			value={source.hypothesisAnnotationID} onChange={val=>Change(source.VSet("hypothesisAnnotationID", val || DEL))}/>;
+
+		const fieldsToShow = sourceType_fieldSets.get(source.type)!;
+		const uisForSourceTypeFields = new Map<(keyof Source), ()=>JSX.Element>([
+			["name", nameUI], ["author", authorUI], ["location", locationUI], ["time_min", timeMinUI], ["time_max", timeMaxUI],
+			["link", linkUI], ["claimMinerID", claimMinerUI], ["hypothesisAnnotationID", hypothesisAnnotationUI],
+		]);
 
 		return (
 			<>
 				<Row center>
-					<Select enabled={enabled} options={GetEntries(SourceType)}
+					<Select enabled={enabled}
+						options={
+							GetEntries(SourceType, "ui").VAct(a=>{
+								// shorten "Hypothesis annotation" to "Hyp. annotation" in dropdown (too long, and term "Hypothesis" could confuse people)
+								a.find(b=>b.name == "Hypothesis annotation")!.name = "Hyp. annotation";
+							})
+						}
 						value={source.type} onChange={val=>Change(source.type = val)}/>
-					{source.type == SourceType.speech && <>{locationUI()}{authorUI()}</>}
-					{source.type == SourceType.text && <>{nameUI()}{authorUI()}</>}
-					{source.type == SourceType.image && <>{locationUI()}{authorUI()}</>}
-					{source.type == SourceType.video && <>{locationUI()}{authorUI()}</>}
-					{source.type == SourceType.webpage && <>{linkUI()}</>}
-					{<Button text="..." ml={3} style={{padding: "1px 7px"}} onClick={()=>this.SetState({expanded: !expanded})}/>}
+					{fieldsToShow.main.map((field, i)=>{
+						const ui = uisForSourceTypeFields.get(field)!;
+						return <Fragment key={i}>{ui()}</Fragment>;
+					})}
+					{fieldsToShow.extra.length > 0 &&
+						<Button text="..." ml={3} style={{padding: "1px 7px"}} onClick={()=>this.SetState({expanded: !expanded})}/>}
 					{chain.sources.length > 1 && enabled &&
 						<Button text="X" ml={3} style={{padding: "1px 7px"}} onClick={()=>Change(chain.sources.RemoveAt(index))}/>}
 				</Row>
-				{expanded &&
+				{expanded && fieldsToShow.extra.length > 0 &&
 				<Row center>
-					{source.type == SourceType.speech && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.text && <>{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.image && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.video && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.webpage && <>{authorUI()}{timeMinUI()}{timeMaxUI()}</>}
+					{fieldsToShow.extra.map((field, i)=>{
+						const ui = uisForSourceTypeFields.get(field)!;
+						return <Fragment key={i}>{ui()}</Fragment>;
+					})}
 				</Row>}
 			</>
 		);
 	}
-}
-
-export function CleanUpdatedSourceChains(sourceChains: SourceChain[]) {
-	// clean data (according to rules defined in Source schema, in @SourceChain.ts)
-	for (const chain of sourceChains) {
-		for (const source of chain.sources) {
-			if (source.type == SourceType.speech) {
-				delete source.link;
-			} else if (source.type == SourceType.text) {
-				delete source.link;
-			} else if (source.type == SourceType.image) {
-				delete source.link;
-			} else if (source.type == SourceType.video) {
-				delete source.link;
-			} else if (source.type == SourceType.webpage) {
-				delete source.name;
-			}
-		}
-	}
-	return sourceChains;
 }
