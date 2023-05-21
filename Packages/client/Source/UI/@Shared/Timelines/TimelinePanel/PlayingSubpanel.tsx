@@ -23,12 +23,22 @@ class NoVideoPlayer {
 
 	comp: PlayingSubpanel;
 
+	@O speed = 1;
+	SetSpeed(speed: number) {
+		this.speed = speed;
+		this.timer.intervalInMS = (1000 / 30) / speed;
+		if (this.playing) {
+			this.timer.Start();
+		}
+	}
+
 	@O playing = false;
 	SetPlaying(playing: boolean) {
 		RunInAction("NoVideoPlayer.SetPlaying", ()=>this.playing = playing);
 		this.timer.Enabled = playing;
 	}
-	timer = new Timer(1 / 30, ()=>{
+
+	timer = new Timer(1000 / 30, ()=>{
 		this.comp.AdjustTargetTimeByFrames(2);
 	});
 }
@@ -313,6 +323,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
 					<Row>
 						<Button text={this.noVideoPlayer.playing ? "⏸" : "▶"} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>
+						<Spinner style={{width: 45}} instant={true} min={0} max={10} step={.1} value={this.noVideoPlayer.speed} onChange={val=>this.noVideoPlayer.SetSpeed(val)}/>
 						<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} value={this.targetTime ?? 0} onChange={val=>{
 							this.SetTargetTime(val, "setPosition");
 						}}/>
