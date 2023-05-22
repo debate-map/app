@@ -7,11 +7,13 @@ use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::once_cell::sync::Lazy;
+use rust_shared::regex::Regex;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::Row;
+use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde, GQLError};
 use std::collections::HashSet;
@@ -145,21 +147,26 @@ impl QueryShard_General_Search {
 
     // Commented; Henceforth, I plan to consider acronyms/abbreviations as "normal" words, ie. only its first letter is capitalized, because:
     // 1 [abstract]) This is arguably more consistent/unambigious. Some examples:
-    // * Example1) Does the snake-cased "some_xyz_field" convert to camel-case as "someXyzField" or "someXYZField"? With new casing system, this is algorithmicly clear -- versus the old approach, which requires human input.
+    // * Example1) Does the snake-cased "some_xyz_field" convert to camel-case as "someXyzField" or "someXYZField"? With new casing system, this is algorithmically clear -- versus the old approach, which requires human input.
     // * Example2) Does the pascal-case "APDFFile" convert to camel-case as "aPDFFile" or "apdfFile"? (admittedly an extreme edge-case of the first "word" being a single letter)
     // 2 [practical]) This removes the need to do these casing-overrides for async-graphql.
-    // For now, we'll say it only applies to Rust code (since the JS code is filled with the other casing choice), but the JS code may switch at some point as well.
+    // For now, we'll say it only necessarily applies to Rust code (since the JS code is filled with the other casing choice), but the JS code may ultimately switch fully as well.
     //#[graphql(name = "searchForExternalIDs")]
     async fn search_for_external_ids(&self, gql_ctx: &async_graphql::Context<'_>, input: SearchForExternalIdsInput) -> Result<SearchForExternalIdsResult, GQLError> {
-        let SearchForExternalIdsInput { id_type, ids } = input;
+        let SearchForExternalIdsInput { id_type, ids: ids_unsafe } = input;
         let id_field = match id_type {
             ExternalIdType::claimMiner => "claimMinerId",
             ExternalIdType::hypothesisAnnotation => "hypothesisAnnotationId",
         };
+        static REGEX_FOR_VALID_ID_CHARS: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[\w\-_\+/=:@\|%]+$").unwrap());
+        // throw error if any ids don't match the regex (can be important, since "search_for_external_ids" sql-function currently uses the ids for a concat->jsonb operation)
+        let ids = ids_unsafe.into_iter().map(|id| match REGEX_FOR_VALID_ID_CHARS.is_match(&id) {
+            true => Ok(id),
+            false => Err(anyhow!("Invalid id: {}", id)),
+        }).try_collect2::<Vec<_>>()?;
 
         let rows = {
-            // semaphore presumably shouldn't be needed, once the query is optimized
-            //let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
+            //let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap(); // semaphore not needed, since query fast enough
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
             let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from search_for_external_ids($1, $2)"#, params(&[
@@ -169,12 +176,6 @@ impl QueryShard_General_Search {
         };
         
         let result = SearchForExternalIdsResult {
-            /*found_ids: rows.into_iter().map(|a| {
-                /*let as_json_str: JSONValue = a.get(0);
-                let as_simple_str = as_json_str.as_str().ok_or(anyhow!("Found-id is somehow not a jsonb string:{}", as_json_str.to_string()))?;
-                as_simple_str*/
-                a.get(0)
-            }).try_collect()?,*/
             found_ids: rows.into_iter().map(|a| a.get(0)).collect(),
         };
         Ok(result)

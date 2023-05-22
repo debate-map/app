@@ -112,8 +112,8 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 			WHERE rev."replacedBy" IS NULL;
 $$ LANGUAGE SQL STABLE;
 
--- todo: make this more efficient (takes ~400ms atm!)
-CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_find text[]) RETURNS TABLE (external_id TEXT) AS $$
+-- old version (takes ~380ms as of 2023-05-22, according to "time" column of EXPLAIN ANALYZE)
+/*CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_find text[]) RETURNS TABLE (external_id TEXT) AS $$
 	SELECT DISTINCT all_sources->>id_field AS external_id FROM (
 		SELECT jsonb_array_elements(all_source_chains->'sources') AS all_sources FROM (
 			SELECT jsonb_array_elements(COALESCE(
@@ -126,5 +126,12 @@ CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_fin
 			) AS _
 		) AS _
 	) AS _
-	WHERE all_sources->>id_field = ANY(SELECT ids_to_find);
+	WHERE all_sources->>id_field = ANY(ids_to_find);
+$$ LANGUAGE SQL STABLE;*/
+-- new version (takes ~1ms as of 2023-05-22, according to "time" column of EXPLAIN ANALYZE)
+CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_find text[]) RETURNS TABLE (external_id TEXT) AS $$
+	WITH candidates AS (SELECT unnest(ids_to_find) AS eid)
+	SELECT DISTINCT eid FROM candidates JOIN "nodeRevisions" ON (
+		attachments @> concat('[{"references":{"sourceChains":[{"sources":[{"',id_field,'":"',eid,'"}]}]}}]')::jsonb
+	OR attachments @> concat('[{"quote":{"sourceChains":[{"sources":[{"',id_field,'":"',eid,'"}]}]}}]')::jsonb);
 $$ LANGUAGE SQL STABLE;
