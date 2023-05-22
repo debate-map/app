@@ -114,7 +114,7 @@ $$ LANGUAGE SQL STABLE;
 
 -- todo: make this more efficient (takes ~400ms atm!)
 CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_find text[]) RETURNS TABLE (external_id TEXT) AS $$
-	SELECT DISTINCT all_sources->id_field AS external_id FROM (
+	SELECT DISTINCT all_sources->>id_field AS external_id FROM (
 		SELECT jsonb_array_elements(all_source_chains->'sources') AS all_sources FROM (
 			SELECT jsonb_array_elements(COALESCE(
 				all_attachments->'references'->'sourceChains',
@@ -126,5 +126,5 @@ CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_fin
 			) AS _
 		) AS _
 	) AS _
-	WHERE all_sources->id_field = ANY(SELECT jsonb_array_elements(array_to_json(ids_to_find)::jsonb) FROM (SELECT ids_to_find) AS _);
+	WHERE all_sources->>id_field = ANY(SELECT ids_to_find);
 $$ LANGUAGE SQL STABLE;

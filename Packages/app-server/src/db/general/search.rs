@@ -12,6 +12,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::tokio::sync::{RwLock, Semaphore};
 use rust_shared::tokio_postgres::Row;
+use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{serde, GQLError};
 use std::collections::HashSet;
 use std::path::Path;
@@ -168,6 +169,12 @@ impl QueryShard_General_Search {
         };
         
         let result = SearchForExternalIdsResult {
+            /*found_ids: rows.into_iter().map(|a| {
+                /*let as_json_str: JSONValue = a.get(0);
+                let as_simple_str = as_json_str.as_str().ok_or(anyhow!("Found-id is somehow not a jsonb string:{}", as_json_str.to_string()))?;
+                as_simple_str*/
+                a.get(0)
+            }).try_collect()?,*/
             found_ids: rows.into_iter().map(|a| a.get(0)).collect(),
         };
         Ok(result)
