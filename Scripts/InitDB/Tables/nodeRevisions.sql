@@ -29,7 +29,7 @@ DROP INDEX IF EXISTS node_revisions_quotes_en_idx;
 CREATE INDEX node_revisions_quotes_en_idx ON app."nodeRevisions" USING gin (attachments_tsvector) WHERE ("replacedBy" IS NULL);
 -- CREATE INDEX node_revisions_quotes_en_idx ON app."nodeRevisions" USING gin (app.attachments_to_tsv(attachments)) WHERE ("replacedBy" IS NULL);
 
--- index to speed up the queries for the graphql `searchForExternalIds` endpoint (doesn't seem to be helping as-is: search is still ~400ms atm)
+-- index to speed up the queries for the graphql `searchForExternalIds` endpoint
 CREATE INDEX attachments_gin ON "nodeRevisions" USING gin ("attachments");
 
 CREATE OR REPLACE FUNCTION app.after_insert_node_revision() RETURNS TRIGGER LANGUAGE plpgsql AS $$

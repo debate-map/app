@@ -76,10 +76,23 @@ export class LogsUI_Stored extends BaseComponent<{}, {}> {
 							}
 
 							const logEntries_new_raw = response_as_json.data.queryLoki.logEntries as any[];
+							let lastLogTime: number|n;
 							const logEntries_new = logEntries_new_raw.map(raw=>{
-								const subdata = JSON.parse(raw[1]);
+								const time = Number(raw[0]) / 1_000_000;
+								try {
+									var subdata = JSON.parse(raw[1]);
+								} catch (ex) {
+									// if log-entry was not json... (apparently [can?] happen for simple println calls like: println!("GetServerURL_claimedClientURLStr: {:?}", claimed_client_url_str);)
+									return new LogEntry_Stored({
+										time,
+										message: raw[1],
+										stream: undefined,
+										time_display: time.toString(),
+									});
+								}
+								//lastLogTime = time;
 								return new LogEntry_Stored({
-									time: Number(raw[0]) / 1_000_000,
+									time,
 									message: subdata.log,
 									stream: subdata.stream,
 									time_display: subdata.time,

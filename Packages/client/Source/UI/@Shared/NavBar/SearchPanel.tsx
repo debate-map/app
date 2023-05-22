@@ -42,18 +42,18 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
 			if (nodeRevisionMatch) {
 				RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
-					store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.id];
+					//store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
+					store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.node];
 				});
 				return;
 			}
 			const node = await GetAsync(()=>GetNodeL2(queryStr));
 			if (node) {
-				//const visibleNodeRevision = await GetAsync(()=>GetCurrentRevision(node.id, node.id+"", null));
-				//const visibleNodeRevision = await GetAsync(()=>GetNodeRevision(node.c_currentRevision));
-				const visibleNodeRevision = node.current;
+				//const visibleNodeRevision = node.current;
 				RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
 					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
-					store.main.search.searchResults_nodeIDs = [visibleNodeRevision.id];
+					//store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
+					store.main.search.searchResults_nodeIDs = [node.id];
 				});
 				return;
 			}
@@ -83,11 +83,11 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 				searchLimit: 100,
 			}},
 		});
-		const docIDs = result.data.searchGlobally.map(a=>a.nodeId);
+		const foundNodeIDs = result.data.searchGlobally.map(a=>a.nodeId);
 
 		RunInAction("SearchPanel.PerformSearch_part2", ()=>{
 			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
-			store.main.search.searchResults_nodeIDs = docIDs;
+			store.main.search.searchResults_nodeIDs = foundNodeIDs;
 		});
 	}
 
