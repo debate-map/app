@@ -75,17 +75,17 @@ impl From<Row> for SearchSubtreeResult {
 }
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub enum ExternalIDType {
+pub enum ExternalIdType {
 	#[graphql(name = "claimMiner")] claimMiner,
 	#[graphql(name = "hypothesisAnnotation")] hypothesisAnnotation,
 }
 #[derive(InputObject, Deserialize)]
-pub struct SearchForExternalIDsInput {
-    id_type: ExternalIDType,
+pub struct SearchForExternalIdsInput {
+    id_type: ExternalIdType,
     ids: Vec<String>
 }
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
-pub struct SearchForExternalIDsResult {
+pub struct SearchForExternalIdsResult {
     found_ids: Vec<String>,
 }
 
@@ -143,15 +143,17 @@ impl QueryShard_General_Search {
     }
 
     // Commented; Henceforth, I plan to consider acronyms/abbreviations as "normal" words, ie. only its first letter is capitalized, because:
-    // 1 [abstract]) This is arguably more consistent/unambigious. For example, does the pascal-case "APDFFile" convert to camel-case as "aPDFFile" or "apdfFile"?
+    // 1 [abstract]) This is arguably more consistent/unambigious. Some examples:
+    // * Example1) Does the snake-cased "some_xyz_field" convert to camel-case as "someXyzField" or "someXYZField"? With new casing system, this is algorithmicly clear -- versus the old approach, which requires human input.
+    // * Example2) Does the pascal-case "APDFFile" convert to camel-case as "aPDFFile" or "apdfFile"? (admittedly an extreme edge-case of the first "word" being a single letter)
     // 2 [practical]) This removes the need to do these casing-overrides for async-graphql.
     // For now, we'll say it only applies to Rust code (since the JS code is filled with the other casing choice), but the JS code may switch at some point as well.
     //#[graphql(name = "searchForExternalIDs")]
-    async fn search_for_external_ids(&self, gql_ctx: &async_graphql::Context<'_>, input: SearchForExternalIDsInput) -> Result<SearchForExternalIDsResult, GQLError> {
-        let SearchForExternalIDsInput { id_type, ids } = input;
+    async fn search_for_external_ids(&self, gql_ctx: &async_graphql::Context<'_>, input: SearchForExternalIdsInput) -> Result<SearchForExternalIdsResult, GQLError> {
+        let SearchForExternalIdsInput { id_type, ids } = input;
         let id_field = match id_type {
-            ExternalIDType::claimMiner => "claimMinerID",
-            ExternalIDType::hypothesisAnnotation => "hypothesisAnnotationID",
+            ExternalIdType::claimMiner => "claimMinerID",
+            ExternalIdType::hypothesisAnnotation => "hypothesisAnnotationID",
         };
 
         let rows = {
@@ -165,7 +167,7 @@ impl QueryShard_General_Search {
             rows
         };
         
-        let result = SearchForExternalIDsResult {
+        let result = SearchForExternalIdsResult {
             found_ids: rows.into_iter().map(|a| a.get(0)).collect(),
         };
         Ok(result)
