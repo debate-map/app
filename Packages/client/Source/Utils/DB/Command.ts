@@ -146,6 +146,7 @@ export async function RunCommand_DeleteNode(inputFields: {mapID?: string|n, node
 }
 
 export const RunCommand_DeleteNodeRating = CreateFunc_RunCommand_DeleteX(NodeRating);
+export const RunCommand_DeleteNodeRevision = CreateFunc_RunCommand_DeleteX(NodeRevision);
 
 type LinkNodeInputFields = {
 	mapID?: string|n, oldParentID?: string|n, newParentID: string, nodeID: string,

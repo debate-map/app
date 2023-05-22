@@ -6,9 +6,10 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {ES, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Map, NodeL3, GetUser, NodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "dm_common";
+import {Map, NodeL3, GetUser, NodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions, IsUserCreatorOrAdmin, HasAdminPermissions, MeID} from "dm_common";
 
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {RunCommand_DeleteNodePhrasing, RunCommand_DeleteNodeRevision} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
@@ -86,6 +87,15 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 											forNew={false} forOldRevision={true} enabled={false}/>
 									</div>
 								);
+							},
+						});
+					}}/>
+					<Button text="D" enabled={HasAdminPermissions(MeID()) && node.c_currentRevision != revision.id} title="Delete node-revision" style={{margin: "-2px 0", padding: "1px 3px"}} onClick={()=>{
+						const boxController = ShowMessageBox({
+							title: `Delete revision #${revision.id}?`, cancelButton: true,
+							message: `Delete revision #${revision.id} for node #${node.id}?`,
+							onOK: async()=>{
+								await RunCommand_DeleteNodeRevision({id: revision.id});
 							},
 						});
 					}}/>

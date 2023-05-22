@@ -153,8 +153,8 @@ impl QueryShard_General_Search {
     async fn search_for_external_ids(&self, gql_ctx: &async_graphql::Context<'_>, input: SearchForExternalIdsInput) -> Result<SearchForExternalIdsResult, GQLError> {
         let SearchForExternalIdsInput { id_type, ids } = input;
         let id_field = match id_type {
-            ExternalIdType::claimMiner => "claimMinerID",
-            ExternalIdType::hypothesisAnnotation => "hypothesisAnnotationID",
+            ExternalIdType::claimMiner => "claimMinerId",
+            ExternalIdType::hypothesisAnnotation => "hypothesisAnnotationId",
         };
 
         let rows = {

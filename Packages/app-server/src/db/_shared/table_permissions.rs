@@ -3,6 +3,10 @@ use tracing::info;
 
 use crate::{db::{terms::Term, access_policies::{get_access_policy}, map_node_edits::MapNodeEdit, user_hiddens::UserHidden, command_runs::CommandRun, node_tags::NodeTag, node_revisions::NodeRevision, node_ratings::NodeRating, node_phrasings::NodePhrasing, node_links::NodeLink, nodes_::_node::Node, maps::Map, medias::Media, feedback_proposals::Proposal, shares::Share, global_data::GlobalData, users::User, access_policies_::{_permission_set::{APAction, APTable}, _access_policy::AccessPolicy}, _shared::access_policy_target::AccessPolicyTarget, nodes::get_node, general::permission_helpers::is_user_admin, feedback_user_infos::UserInfo, timelines::{Timeline, get_timeline}, timeline_steps::TimelineStep}, links::db_live_cache::get_access_policy_cached, utils::db::{accessors::AccessorContext, rls::rls_policies::UsesRLS}};
 
+// Why are the permission-checks for modifying/deleting defined here, rather than in the updateX and deleteX command endpoints?
+// Because we want all such logic to use the `can_modify` and `can_delete` macros, so that we can be sure that they always start by checking...
+// ...for basic rls-access to the entry, before doing table-specific permission-check logic (since the error-message could easily leak data otherwise).
+
 // empty policies (ie. can always be viewed by anyone) [these functions are not needed in sql version]
 // ==========
 
@@ -92,9 +96,20 @@ can_delete!(NodePhrasing, self, actor, { is_user_mod_or_creator(actor, &self.cre
 can_modify!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
 can_delete!(NodeRating, self, actor, { is_user_creator(actor, &self.creator) });
 
-// only the creator of a revision can edit it (though mods can delete)
-//can_modify!(NodeRevision, self, actor, { is_user_creator(actor, &self.creator) });
-//can_delete!(NodeRevision, self, actor, { is_user_mod_or_creator(actor, &self.creator) });
+//can_modify!(NodeRevision, self, actor, { is_user_creator(actor, &self.creator) }); // commented; revisions should never be editable, to preserve history
+// deletion of non-current node-revisions is allowed -- for dev purposes, or in case sensitive data is accidentally added (in future, will add better handling for this case)
+can_delete!(NodeRevision, self, ctx, actor, {
+	let node = get_node(&ctx, &self.node).await?;
+
+	let base_text = format!("Cannot delete node-revision #{}, since ", self.id.as_str());
+	if node.c_currentRevision == self.id.as_str() {
+		bail!("{base_text}it's the current-revision for the node.");
+	}
+    
+    //is_user_admin_or_creator(actor, &self.creator)
+    // for now at least, only allow admins to delete node-revisions, to keep history more comprehensive/trustable (if someone accidentally adds sensitive data, they can ask an admin to delete it)
+    actor.permissionGroups.admin
+});
 
 // only the creator of a node-tag can edit/delete it
 can_modify!(NodeTag, self, actor, { is_user_mod_or_creator(actor, &self.creator) });

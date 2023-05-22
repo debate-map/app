@@ -51,8 +51,8 @@ export class Source {
 	link?: string;
 
 	// for system-specific sources
-	claimMinerID?: string; // used by: claimMiner*
-	hypothesisAnnotationID?: string; // used by: hypothesisAnnotation*
+	claimMinerId?: string;
+	hypothesisAnnotationId?: string;
 }
 AddSchema("Source", {
 	properties: {
@@ -62,24 +62,24 @@ AddSchema("Source", {
 		location: {type: "string"},
 		time_min: {type: "number"},
 		time_max: {type: "number"},
-		// link: { format: 'uri' },
-		// link: { pattern: Source_linkURLPattern },
+		//link: { format: 'uri' },
+		//link: { pattern: Source_linkURLPattern },
 		link: {type: "string"}, // allow overriding url pattern; it just highlights possible mistakes
-		claimMinerID: {type: "string"},
-		hypothesisAnnotationID: {type: "string"},
+		claimMinerId: {type: "string"},
+		hypothesisAnnotationId: {type: "string"},
 	},
 });
 
 type SourceTypeFieldSet = {main: Array<keyof Source>, extra: Array<keyof Source>};
-export const sourceType_allFields: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", "claimMinerID", "hypothesisAnnotationID"];
+export const sourceType_allFields: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", "claimMinerId", "hypothesisAnnotationId"];
 export const sourceType_fieldSets = new Map<SourceType, SourceTypeFieldSet>([
 	[SourceType.speech, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.text, {main: ["name", "author"], extra: ["time_min", "time_max"]}],
 	[SourceType.image, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.video, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.webpage, {main: ["link"], extra: ["author", "time_min", "time_max"]}],
-	[SourceType.claimMiner, {main: ["claimMinerID"], extra: []}],
-	[SourceType.hypothesisAnnotation, {main: ["hypothesisAnnotationID"], extra: []}],
+	[SourceType.claimMiner, {main: ["claimMinerId"], extra: []}],
+	[SourceType.hypothesisAnnotation, {main: ["hypothesisAnnotationId"], extra: []}],
 ]);
 
 export function CleanUpdatedSourceChains(sourceChains: SourceChain[]) {

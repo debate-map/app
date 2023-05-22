@@ -35,8 +35,8 @@ pub struct Source {
 	pub time_max: Option<f64>,
 	pub link: Option<String>,
     
-	pub claimMinerID: Option<String>,
-	pub hypothesisAnnotationID: Option<String>,
+	pub claimMinerId: Option<String>,
+	pub hypothesisAnnotationId: Option<String>,
 }
 
 }
@@ -71,8 +71,8 @@ pub fn source_chain_from_old_json_data(data: &JSONValue) -> Result<SourceChain, 
             time_min: source.get("time_min").map(|a| a.as_f64()).unwrap_or(None),
             time_max: source.get("time_max").map(|a| a.as_f64()).unwrap_or(None),
             link: source.get("link").map(|a| a.as_string()).unwrap_or(None),
-            claimMinerID: None,
-            hypothesisAnnotationID: None,
+            claimMinerId: None,
+            hypothesisAnnotationId: None,
         }
     }).collect();
     Ok(SourceChain {

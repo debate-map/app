@@ -65,6 +65,7 @@ use crate::db::commands::delete_node::MutationShard_DeleteNode;
 use crate::db::commands::delete_node_link::MutationShard_DeleteNodeLink;
 use crate::db::commands::delete_node_phrasing::MutationShard_DeleteNodePhrasing;
 use crate::db::commands::delete_node_rating::MutationShard_DeleteNodeRating;
+use crate::db::commands::delete_node_revision::MutationShard_DeleteNodeRevision;
 use crate::db::commands::delete_node_tag::MutationShard_DeleteNodeTag;
 use crate::db::commands::delete_share::MutationShard_DeleteShare;
 use crate::db::commands::delete_term::MutationShard_DeleteTerm;
@@ -141,7 +142,7 @@ pub struct MutationRoot(
         MutationShard_UpdateShare, MutationShard_UpdateTerm, MutationShard_UpdateTimeline, MutationShard_UpdateTimelineStep,
     // commands, others
     MutationShard_AddArgumentAndClaim, MutationShard_AddChildNode, MutationShard_AddNodeRevision,
-    MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating,
+    MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating, MutationShard_DeleteNodeRevision,
     MutationShard_ImportFirestoreDump,
     MutationShard_LinkNode,
     MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,

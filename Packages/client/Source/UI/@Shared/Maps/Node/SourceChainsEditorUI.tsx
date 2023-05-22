@@ -161,14 +161,14 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 				Change();
 			}}/>;
 		const claimMinerUI = ()=><TextInput enabled={enabled} style={{width: "90%"}} placeholder="claim-miner id"
-			value={source.claimMinerID} onChange={val=>Change(source.VSet("claimMinerID", val || DEL))}/>;
+			value={source.claimMinerId} onChange={val=>Change(source.VSet("claimMinerId", val || DEL))}/>;
 		const hypothesisAnnotationUI = ()=><TextInput enabled={enabled} style={{width: "90%"}} placeholder="hypothesis annotation id"
-			value={source.hypothesisAnnotationID} onChange={val=>Change(source.VSet("hypothesisAnnotationID", val || DEL))}/>;
+			value={source.hypothesisAnnotationId} onChange={val=>Change(source.VSet("hypothesisAnnotationId", val || DEL))}/>;
 
 		const fieldsToShow = sourceType_fieldSets.get(source.type)!;
 		const uisForSourceTypeFields = new Map<(keyof Source), ()=>JSX.Element>([
 			["name", nameUI], ["author", authorUI], ["location", locationUI], ["time_min", timeMinUI], ["time_max", timeMaxUI],
-			["link", linkUI], ["claimMinerID", claimMinerUI], ["hypothesisAnnotationID", hypothesisAnnotationUI],
+			["link", linkUI], ["claimMinerId", claimMinerUI], ["hypothesisAnnotationId", hypothesisAnnotationUI],
 		]);
 
 		return (
