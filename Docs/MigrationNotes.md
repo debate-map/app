@@ -7,6 +7,13 @@
 
 ## Main series
 
+### Pushed on 2023-05-21
+
+* 1\) Added a `searchForExternalIds` graphql endpoint, and a sql function to back it.
+	* DB response:
+		* 1\) Execute the sql for the function `search_for_external_ids`, seen in `Search.sql`.
+		* 2\) Execute the sql to set up the `attachments_gin` index, as seen in `nodeRevisions.sql`.
+
 ### Pushed on 2023-04-28
 
 * 1\) Added `PermissionSet.others` field/group.

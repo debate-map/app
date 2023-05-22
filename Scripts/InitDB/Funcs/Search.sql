@@ -111,3 +111,20 @@ RETURNS TABLE (node_id TEXT, rank FLOAT, type TEXT, found_text TEXT, node_text T
 			LEFT JOIN app."nodePhrasings" AS phrasing ON phrasing.id = op2.phrasing_id
 			WHERE rev."replacedBy" IS NULL;
 $$ LANGUAGE SQL STABLE;
+
+-- todo: make this more efficient (takes ~400ms atm!)
+CREATE OR REPLACE FUNCTION app.search_for_external_ids(id_field text, ids_to_find text[]) RETURNS TABLE (external_id TEXT) AS $$
+	SELECT DISTINCT all_sources->id_field AS external_id FROM (
+		SELECT jsonb_array_elements(all_source_chains->'sources') AS all_sources FROM (
+			SELECT jsonb_array_elements(COALESCE(
+				all_attachments->'references'->'sourceChains',
+				all_attachments->'quote'->'sourceChains'
+			)) AS all_source_chains
+			FROM (
+				SELECT jsonb_array_elements(nr.attachments) AS all_attachments
+				FROM "nodeRevisions" AS nr
+			) AS _
+		) AS _
+	) AS _
+	WHERE all_sources->id_field = ANY(SELECT jsonb_array_elements(array_to_json(ids_to_find)::jsonb) FROM (SELECT ids_to_find) AS _);
+$$ LANGUAGE SQL STABLE;

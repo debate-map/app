@@ -2,7 +2,7 @@ use jsonschema::JSONSchema;
 use jsonschema::output::BasicOutput;
 use lazy_static::lazy_static;
 use rust_shared::anyhow::{anyhow, Context, Error};
-use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject, self};
+use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject, self, Enum};
 use deadpool_postgres::{Pool, Client, Transaction};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future, TryStreamExt};
 use rust_shared::hyper::{Body, Method};
@@ -50,7 +50,6 @@ pub struct SearchGloballyInput {
     alt_phrasing_rank_factor: Option<f64>,
     quote_rank_factor: Option<f64>,
 }
-
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct SearchGloballyResult {
     node_id: String,
@@ -75,6 +74,21 @@ impl From<Row> for SearchSubtreeResult {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum ExternalIDType {
+	#[graphql(name = "claimMiner")] claimMiner,
+	#[graphql(name = "hypothesisAnnotation")] hypothesisAnnotation,
+}
+#[derive(InputObject, Deserialize)]
+pub struct SearchForExternalIDsInput {
+    id_type: ExternalIDType,
+    ids: Vec<String>
+}
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+pub struct SearchForExternalIDsResult {
+    found_ids: Vec<String>,
+}
+
 #[derive(Default)]
 pub struct QueryShard_General_Search;
 #[Object]
@@ -87,7 +101,7 @@ impl QueryShard_General_Search {
         let quote_rank_factor_f64 = quote_rank_factor.unwrap_or(0.9) as f64;
 
         let rows = {
-            // use semaphore, so that only X threads can be executing search queries (in `search_globally` or `saerch_subtree`) at the same time
+            // use semaphore, so that only X threads can be executing search queries (in `search_globally` or `search_subtree`) at the same time
             let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
@@ -114,7 +128,7 @@ impl QueryShard_General_Search {
         let quote_rank_factor_f64 = quote_rank_factor.unwrap_or(0.9) as f64;
 
         let rows = {
-            // use semaphore, so that only X threads can be executing search queries (in `search_globally` or `saerch_subtree`) at the same time
+            // use semaphore, so that only X threads can be executing search queries (in `search_globally` or `search_subtree`) at the same time
             let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
             let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
@@ -126,6 +140,35 @@ impl QueryShard_General_Search {
 
         let search_results: Vec<SearchSubtreeResult> = rows.into_iter().map(|a| a.into()).collect();
         Ok(search_results)
+    }
+
+    // Commented; Henceforth, I plan to consider acronyms/abbreviations as "normal" words, ie. only its first letter is capitalized, because:
+    // 1 [abstract]) This is arguably more consistent/unambigious. For example, does the pascal-case "APDFFile" convert to camel-case as "aPDFFile" or "apdfFile"?
+    // 2 [practical]) This removes the need to do these casing-overrides for async-graphql.
+    // For now, we'll say it only applies to Rust code (since the JS code is filled with the other casing choice), but the JS code may switch at some point as well.
+    //#[graphql(name = "searchForExternalIDs")]
+    async fn search_for_external_ids(&self, gql_ctx: &async_graphql::Context<'_>, input: SearchForExternalIDsInput) -> Result<SearchForExternalIDsResult, GQLError> {
+        let SearchForExternalIDsInput { id_type, ids } = input;
+        let id_field = match id_type {
+            ExternalIDType::claimMiner => "claimMinerID",
+            ExternalIDType::hypothesisAnnotation => "hypothesisAnnotationID",
+        };
+
+        let rows = {
+            // semaphore presumably shouldn't be needed, once the query is optimized
+            //let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap();
+            let mut anchor = DataAnchorFor1::empty(); // holds pg-client
+            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+            let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from search_for_external_ids($1, $2)"#, params(&[
+                &id_field, &ids,
+            ])).await?.try_collect().await?;
+            rows
+        };
+        
+        let result = SearchForExternalIDsResult {
+            found_ids: rows.into_iter().map(|a| a.get(0)).collect(),
+        };
+        Ok(result)
     }
 }
 
