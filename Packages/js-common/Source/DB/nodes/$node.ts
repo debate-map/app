@@ -47,11 +47,16 @@ export const GetExpandedByDefaultAttachment = CreateAccessor((rev: NodeRevision)
 	return rev.attachments.find(a=>a.expandedByDefault);
 });
 
-export function GetFontSizeForNode(node: NodeL2/*, isSubnode = false*/) {
+export function GetFontSizeForNode(node: NodeL2, path: string) {
 	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
-	if (node.current.attachments[0]?.equation) return node.current.attachments[0].equation.latex ? 14 : 13;
-	if (node.type == NodeType.argument) return 11;
-	//if (isSubnode) return 11;
+	const titleAttachment = GetTitleIntegratedAttachment(node.current);
+	if (titleAttachment?.equation) return titleAttachment.equation.latex ? 14 : 13;
+	if (node.type == NodeType.argument) {
+		const {rawTitle} = GetNodeRawTitleAndSuch(node, path);
+		const useStandardTitle = UseStandardArgTitleOverCustom(rawTitle);
+		// if using standard-title, make text smaller (since it's easy to read/understand, and repetitive)
+		if (useStandardTitle) return 11;
+	}
 
 	return 14;
 }
@@ -344,24 +349,21 @@ export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: strin
 	return {rawTitle: (rawTitle?.trim().length ?? 0) > 0 ? rawTitle : undefined, desiredField, usedField, missingMessage};
 });
 
+export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|undefined)=>{
+	// in sl-mode, allow custom titles for arguments to actually display in-place of the standard "True, because..." etc. texts
+	// (normally, we enforce those standard-texts for arguments, to avoid rhetorical advantage from overriding the "generic container text" -- but sl mostly avoids this concern with a consistent editor team)
+	if (GADDemo_ForJSCommon() && rawTitle != null) return false;
+	return true;
+});
+
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
 export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixTextHandling = true): string=>{
 	const {rawTitle, missingMessage} = GetNodeRawTitleAndSuch(node, path, form);
 	let resultTitle = rawTitle || missingMessage;
 
-	if (node.type == NodeType.argument) {
-		/*if (!node.multiPremiseArgument && !phrasing.text_base) {
-			// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
-			// const baseClaim = GetArgumentPremises(node)[0];
-			const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == NodeType.claim)[0];
-			if (baseClaim) return GetNodeDisplayText(baseClaim);
-		}*/
-
+	if (node.type == NodeType.argument && UseStandardArgTitleOverCustom(rawTitle)) {
 		const nodeL3 = GetNodeL3(path);
-		//const parentNode = GetParentNode(path);
 		if (nodeL3 != null && nodeL3.link?.polarity != null) {
-			//if (parentNode?.type == NodeType.argument) return nodeL3.link.polarity == Polarity.supporting ? "Relevant, because..." : "Irrelevant, because...";
-			//if (parentNode?.type == NodeType.claim) return nodeL3.link.polarity == Polarity.supporting ? "True, because..." : "False, because...";
 			if (nodeL3.link.group == ChildGroup.truth) {
 				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "True, because 🡫" : "False, because 🡫";
 			} else if (nodeL3.link.group == ChildGroup.relevance) {
@@ -379,15 +381,13 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 	if (titleFromAttachment) resultTitle = titleFromAttachment;
 
 	const childLayout = GetChildLayout_Final(node.current, map);
-	// special prefix-text handling; in sl mode/layout, extract bracketed-prefix-text into parent argument (if premise of arg), else into left-positioned toolbar "button"
+	// special bracketed-prefix-text handling; in sl mode/layout, extract prefix-text of single-premise into/as its parent argument's main-text, and put other cases above the node into a left-positioned "toolbar button"
 	if (allowPrefixTextHandling && ShouldExtractPrefixText(childLayout)) {
-		if (node.type == NodeType.argument) {
-			const premises = GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim);
-			if (premises.length == 1) {
-				const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined);
-				if (extractedPrefixTextInfo != null && extractedPrefixTextInfo.extractLocation == "parentArgument") {
-					resultTitle = extractedPrefixTextInfo.prefixText;
-				}
+		const premises = node.type == NodeType.argument ? GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim) : [];
+		if (node.type == NodeType.argument && premises.length == 1) {
+			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined);
+			if (extractedPrefixTextInfo != null && extractedPrefixTextInfo.extractLocation == "parentArgument") {
+				resultTitle = extractedPrefixTextInfo.prefixText;
 			}
 		} else {
 			const ownPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map, form);

@@ -211,7 +211,7 @@ class ToolBarButton extends BaseComponent<{
 		}
 		const textAfter = toolbarRatingPreviews != RatingPreviewType.chart || highlightOrHovered;
 
-		const showLeftBorder = !first || node.type == NodeType.argument;
+		const showLeftBorder = !first || (node.type == NodeType.argument && panel != "extractedPrefixText"); // extracted-prefix-text button is always left-most, so has no left-border
 		//const showBottomBorder = node.type != NodeType.argument || node.current.phrasing.note || node.current.attachments.length > 0;
 		const showBottomBorder = false;
 

@@ -162,6 +162,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 						const nodeBData = nodeB.data.leftColumn_userData as NodeDataForTreeGrapher;
 
 						// if we have parent-argument's arg-control-bar above, and premise of that arg below, use regular spacing
+						// (this logic breaks/causes-overlap if arg+premise1 have 4+ toolbar-buttons among them, but this is rare/unlikely enough to ignore for now)
 						if (nodeAParentPath == nodeBParentPath && nodeAData.nodeType == null && nodeBData.nodeType == NodeType.claim) return 8;
 
 						// standard spacing: if both are nodes, use 12; else use 8

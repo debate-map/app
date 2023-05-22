@@ -128,7 +128,7 @@ export class TitlePanel extends BaseComponentPlus(
 			<Row {...FilterOutUnrecognizedProps(rest, "div")}
 				style={E(
 					{
-						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node/*, isSubnode*/),
+						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, path),
 						marginTop: !latex && GetSegmentsForTerms(displayText, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
 						color: liveSkin.NodeTextColor(),
 					},
@@ -150,7 +150,7 @@ export class TitlePanel extends BaseComponentPlus(
 					<span style={ES(
 						{flex: 1, position: "relative", whiteSpace: "initial"},
 						node.type == NodeType.argument && {
-							whiteSpace: "pre", // for arguments, never wrap text
+							//whiteSpace: "pre", // for arguments, never wrap text // commented, since conflicts with sl arg-with-custom-text case; what case was this line needed for earlier?
 							alignSelf: "center",
 							marginTop: -1, // "center" is actually below the center, so bump it up a bit
 						},

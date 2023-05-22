@@ -23,7 +23,7 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 	const maxWidth_final = maxWidth_normal - (leftMarginForLines != null ? leftMarginForLines : 0);
 
 	const displayText = GetNodeDisplayText(node, path, map);
-	const fontSize = GetFontSizeForNode(node);
+	const fontSize = GetFontSizeForNode(node, path);
 	const expectedTextWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({fontSize, whiteSpace: "nowrap"})}'>`) as HTMLElement;
 	expectedTextWidth_tester.innerHTML = displayText;
 	let expectedTextWidth = expectedTextWidth_tester.offsetWidth;
