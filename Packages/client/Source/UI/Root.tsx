@@ -59,7 +59,6 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		if (!hasHotReloaded) {
 			LoadURL(startURL);
 		}
-		// UpdateURL(false);
 		if (PROD && store.main.analyticsEnabled) {
 			console.log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});

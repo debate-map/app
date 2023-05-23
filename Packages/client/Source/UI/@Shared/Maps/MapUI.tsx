@@ -1,41 +1,25 @@
-import {AccessPolicy, DoesMapPolicyGiveMeAccess_ExtraCheck, GetAccessPolicy, GetMap, GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, Map, NodeL3, NodeType, NodeType_Info, PrefixTextExtractLocation, ShowNodeToolbars} from "dm_common";
-import React, {useCallback, useMemo, useState} from "react";
-import {store} from "Store/index.js";
+import {GetMap, GetParentNodeL3, GetParentPath, Map, MapView, NodeL3, NodeType_Info} from "dm_common";
+import React, {useCallback, useState} from "react";
 import {GetOpenMapID} from "Store/main.js";
-import {GetPreloadData_ForMapLoad} from "Store/main/@Preloading/ForMapLoad.js";
-import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
-import {Graph, GraphContext, GraphColumnsVisualizer, ConnectorLinesUI, SpaceTakerUI} from "tree-grapher";
+import {ConnectorLinesUI, Graph, GraphColumnsVisualizer, GraphContext, SpaceTakerUI} from "tree-grapher";
 import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
-import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction, SubNavBar, SubNavBarButton, UseWindowEventListener} from "web-vcore";
+import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
 import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
-import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {Padding} from "./MapUIWrapper.js";
 import {ExpandableBox} from "./Node/ExpandableBox.js";
-import {NodeUI} from "./Node/NodeUI.js";
-import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
 import {NodeBox} from "./Node/NodeBox.js";
-import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
-import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
-import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
-import {TimelinePanel} from "../Timelines/TimelinePanel.js";
-import {TimelinePlayerUI} from "../Timelines/TimelinePlayerUI.js";
+import {NodeUI} from "./Node/NodeUI.js";
 
-export function GetNodeBoxForPath(path: string) {
-	const nodeInnerBoxes = FindDOMAll(".NodeBox").map(a=>DeepGet(FindReact(a), "props/parent") as NodeBox);
-	return nodeInnerBoxes.FirstOrX(a=>a.props.path == path);
-}
-export function GetNodeBoxClosestToViewCenter() {
+export function GetViewOffsetForNodeBox(nodeBoxEl: Element) {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return FindDOMAll(".NodeBox").Min(nodeBox=>GetDistanceBetweenRectAndPoint(GetViewportRect(nodeBox), viewCenter_onScreen));
-}
-export function GetViewOffsetForNodeBox(nodeBox: Element) {
-	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return viewCenter_onScreen.Minus(GetViewportRect(nodeBox).Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
+	return viewCenter_onScreen.Minus(GetViewportRect(nodeBoxEl).Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 }
 
 export const ACTUpdateAnchorNodeAndViewOffset = StoreAction((mapID: string)=>{
@@ -53,13 +37,12 @@ export const ACTUpdateAnchorNodeAndViewOffset = StoreAction((mapID: string)=>{
 	// CreateMapViewIfMissing(mapID);
 	/* let selectedNodePath = GetSelectedNodePath(mapID);
 	let anchorNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter(); */
-	const anchorNodeBox = GetNodeBoxClosestToViewCenter();
+	const anchorNodeBox = MapUI.CurrentMapUI?.GetNodeBoxClosestToViewCenter();
 	if (anchorNodeBox == null) return; // can happen if node was just deleted
 
-	const anchorNodeBoxComp = FindReact(anchorNodeBox).props.parent as NodeBox;
-	const anchorNodePath = anchorNodeBoxComp.props.path;
+	const anchorNodePath = anchorNodeBox.props.path;
 	if (anchorNodePath == null) return; // can happen sometimes; not sure what causes
-	const viewOffset = GetViewOffsetForNodeBox(anchorNodeBox);
+	const viewOffset = GetViewOffsetForNodeBox(anchorNodeBox.DOM!);
 
 	ACTSetAnchorNodeAndViewOffset(mapID, anchorNodePath, viewOffset);
 });
@@ -74,131 +57,29 @@ export const ACTSetAnchorNodeAndViewOffset = StoreAction((mapID: string, anchorN
 	}
 });
 
-export class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
-	render() {
-		const {message} = this.props;
-		return (
-			<div style={ES({
-				display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25,
-				//textShadow: "#000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px, #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px",
-				color: "white",
-				textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
-			})}>
-				{message}
-			</div>
-		);
-	}
-}
-
 export function GetMapUICSSFilter() {
 	return GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,.75) 0px 0px 10px)";
 }
 
-export class NodeDataForTreeGrapher {
-	constructor(data?: Partial<NodeDataForTreeGrapher>) {
-		Object.assign(this, data);
-	}
-	nodeType?: NodeType;
-	width?: number;
-	expanded?: boolean;
-	aboveToolbar_visible?: boolean;
-	aboveToolbar_hasLeftButton?: boolean;
-}
-
-type Padding = {left: number, right: number, top: number, bottom: number};
-
 type Props = {
-	mapID: string, rootNode?: NodeL3, withinPage?: boolean,
-	padding?: Padding,
-	//subNavBarWidth?: number,
+	// pass-through
+	mapID: string, withinPage?: boolean, padding?: Padding,
+	// from wrapper
+	graphInfo: Graph, forLayoutHelper?: boolean,
+	// could recalc these here, but might as well get from wrapper (it handles it already, due to checking if needs to show the wait-messages)
+	map: Map, mapState: MapState, mapView: MapView, rootNode: NodeL3,
 } & HTMLProps<"div">;
 @Observer
 export class MapUI extends BaseComponent<Props, {}> {
 	private static currentMapUI: MapUI|n;
 	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted ? MapUI.currentMapUI : null; }
 
-	static ValidateProps(props) {
-		const {rootNode} = props;
-		if (rootNode) {
-			Assert(IsNodeL2(rootNode), "Node supplied to MapUI is not level-2!");
-			Assert(IsNodeL3(rootNode), "Node supplied to MapUI is not level-3!");
-		}
-	}
-
 	scrollView: ScrollView|n;
 	mapUIEl: HTMLDivElement|n;
 	downPos: Vector2|n;
 	render() {
-		const {mapID, rootNode: rootNode_passed, withinPage, ...rest} = this.props;
-		//Assert(padding && subNavBarWidth != null); // nn: default-values set
+		const {mapID, rootNode: rootNode_passed, withinPage, padding, graphInfo, forLayoutHelper, map, mapState, mapView, rootNode, ...rest} = this.props;
 
-		const GetMapUIPadding = (): Padding=>{
-			if (this.props.padding) return padding;
-
-			/*const winWidth = screen.availWidth;
-			const winHeight = screen.availHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar*/
-			const winWidth = window.innerWidth;
-			const winHeight = window.innerHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar
-
-			// if header hidden, we're probably in iframe, so adjust padding to be a lot smaller (large paddings are confusing in small viewport)
-			const mult = ShowHeader ? .9 : .3;
-			return {left: winWidth * mult, right: winWidth * mult, top: winHeight * mult, bottom: winHeight * mult};
-		};
-		const [padding, setPadding] = useState(GetMapUIPadding());
-		UseWindowEventListener("resize", ()=>{
-			setPadding(GetMapUIPadding());
-		});
-
-		Assert(mapID, "mapID is null!");
-
-		const graphInfo = useMemo(()=>{
-			const graph = new Graph({
-				//uiDebugKit: {FlashComp},
-				layoutOpts: {
-					nodeSpacing: (nodeA, nodeB)=>{
-						const nodeAParentPath = nodeA.data.path_parts.slice(0, -1).join("/");
-						const nodeBParentPath = nodeB.data.path_parts.slice(0, -1).join("/");
-						const nodeAData = nodeA.data.leftColumn_userData as NodeDataForTreeGrapher;
-						const nodeBData = nodeB.data.leftColumn_userData as NodeDataForTreeGrapher;
-
-						// if we have parent-argument's arg-control-bar above, and premise of that arg below, use regular spacing
-						// (this logic breaks/causes-overlap if arg+premise1 have 4+ toolbar-buttons among them, but this is rare/unlikely enough to ignore for now)
-						if (nodeAParentPath == nodeBParentPath && nodeAData.nodeType == null && nodeBData.nodeType == NodeType.claim) return 8;
-
-						// standard spacing: if both are nodes, use 12; else use 8
-						let standardSpacing = nodeAData.nodeType != null && nodeBData.nodeType != null ? 12 : 8;
-
-						const nodeAIsArgOfNodeB = nodeB.data.leftColumn_connectorOpts.parentIsAbove && nodeAData.nodeType == NodeType.argument && nodeBData.nodeType == NodeType.claim && nodeA.data.path == nodeBParentPath;
-						if (nodeAIsArgOfNodeB) standardSpacing = 5;
-
-						// if node-b has toolbar above it, we may need to add extra spacing between the two nodes (since a node's toolbar isn't part of its "main rect" used for generic layout)
-						if (nodeBData.aboveToolbar_visible) {
-							// do special spacing between argument and its first premise (unless it has a left-aligned toolbar-button)
-							if (nodeAIsArgOfNodeB && !nodeBData.aboveToolbar_hasLeftButton) {
-								if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
-								if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
-							} else {
-								return TOOLBAR_HEIGHT + 8;
-							}
-						}
-
-						return standardSpacing;
-					},
-					styleSetter_layoutPending: style=>{
-						//style.right = "100%"; // not ideal, since can cause some issues (eg. during map load, the center-on-loading-nodes system can jump to empty left-area of map) 
-						style.opacity = "0";
-						style.pointerEvents = "none";
-					},
-					styleSetter_layoutDone: style=>{
-						//style.right = "";
-						style.opacity = "";
-						style.pointerEvents = "";
-					},
-				},
-			});
-			globalThis.mainGraph = graph; // for debugging
-			return graph;
-		}, []);
 		const [containerElResolved, setContainerElResolved] = useState(false);
 		const mapUI_ref = useCallback(c=>{
 			this.mapUIEl = c;
@@ -206,176 +87,97 @@ export class MapUI extends BaseComponent<Props, {}> {
 			if (graphInfo.containerEl != null) setContainerElResolved(true);
 		}, [graphInfo]);
 
-		const map = GetMap(mapID);
-		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
-		// defensive; in case something goes wrong with the server-side permission-enforcing, do a basic check here as well
-		if (!DoesMapPolicyGiveMeAccess_ExtraCheck(mapID)) return <MapUIWaitMessage message="Map is private/deleted."/>;
-
-		// atm, only enable this in dev-mode (it makes the initial-loading too slow to be enabled in prod, atm :/ -- keeping it enabled in dev, so I can keep optimizing it, however)
-		/*if (DEV) {
-			GetPreloadData_ForMapLoad(mapID);
-		}*/
-		const mapState = GetMapState(mapID);
-		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
-
-		// update some graph info
-		graphInfo.containerPadding = padding;
 		const zoomLevel = mapState && mapState.zoomLevel != 1 ? mapState.zoomLevel : 1;
 		//graphInfo.contentScaling = zoomLevel;
 		//graphInfo.SetContentScaling(zoomLevel);
 
-		const mapView = GetMapView(mapID);
-		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
-
-		const rootNode = (()=>{
-			let result: NodeL3|n = rootNode_passed;
-			if (result == null && map && map.rootNode) {
-				result = GetNodeL3(`${map.rootNode}`);
-			}
-			if (isBot && map) {
-				if (mapView) {
-					const nodeID = mapView.bot_currentNodeID;
-					if (nodeID) {
-						result = GetNodeL3(`${nodeID}`);
-					}
-				}
-			}
-			return result;
-		})();
-		if (rootNode == null) return <MapUIWaitMessage message="Map's content is private/deleted."/>;
-		// if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
-
-		if (isBot) {
-			return <NodeUI_ForBots map={map} node={rootNode}/>;
-		}
-
-		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
-		//const playingTimeline = GetPlayingTimeline(map ? map.id : null);
-
-		//const subNavBarWidth = 104;
-		const subNavBarWidth = 0;
-		const actionBarHeight = ShowHeader ? 30 : 0;
 		return (
-			<Column style={ES({flex: 1})}>
-				{!withinPage && ShowHeader &&
-				<>
-					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>
-					{/*<SubNavBar>
-						<SubNavBarButton page={store.main.page} subpage="graph" text="Graph"/>
-						<SubNavBarButton page={store.main.page} subpage="focus" text="Focus"/>
-					</SubNavBar>*/}
-					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>
-				</>}
-				{/*!withinPage &&
-					<TimelinePlayerUI map={map}/>*/}
-				{/*!withinPage &&
-					<TimelineOverlayUI map={map}/>*/}
-				<Row style={{marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start"}}>
-					{!withinPage && timelinePanelOpen &&
-						<TimelinePanel map={map}/>}
-					<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
-						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.scrollView!.contentSizeWatcher || a == this.mapUIEl}
-						style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
-						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-						contentStyle={E(
-							{willChange: "transform"},
-							// when zoomed, disable the willChange:transform optimization, since it can disrupt text-rendering (eg. blurry when zoomed-in, until user hovers over node-box)
-							//mapState && mapState.zoomLevel != 1 && {willChange: null},
-							withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
-							withinPage && inFirefox && {overflow: "hidden"},
-						)}
-						// the ResizeObserver that react-vscrollview uses to detect content-size ignores transform:scale, so we need to provide that information for final content-size calculation
-						//contentScaling={zoomLevel}
-						/*contentSizeWatcherStyle={E(
-							// apply the zoom to the content-size-watcher instead of MapUI, because we want the scrollbar system to "see" the scaled size(the watcher's width:fit-content and height:fit-content can't "see" it for children)
-							mapState.zoomLevel != 1 && {
-								transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
-								transformOrigin: "0% 0%",
-							},
-						)}*/
-						// contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
-						// bufferScrollEventsBy={10000}
-						onScrollEnd={pos=>{
-							// if (withinPage) return;
-							ACTUpdateAnchorNodeAndViewOffset(map.id);
-						}}
-					>
-						<SpaceTakerUI graph={graphInfo} scaling={zoomLevel}/>
-						<style>{`
-						.MapUI {
-							display: inline-flex;
-							/*flex-wrap: wrap;*/
+			<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
+				backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.scrollView!.contentSizeWatcher || a == this.mapUIEl}
+				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
+				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
+				contentStyle={E(
+					{willChange: "transform"}, // keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization
+					withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
+					withinPage && inFirefox && {overflow: "hidden"},
+				)}
+				onScrollEnd={pos=>{
+					ACTUpdateAnchorNodeAndViewOffset(map.id);
+				}}
+			>
+				<SpaceTakerUI graph={graphInfo} scaling={zoomLevel}/>
+				<style>{`
+				.MapUI {
+					display: inline-flex;
+					/*flex-wrap: wrap;*/
+				}
+				.MapUI.scrolling > * { pointer-events: none; }
+				`}</style>
+				<div className="MapUI"
+					ref={mapUI_ref}
+					style={ES(
+						{
+							//position: "relative",
+							position: "absolute", left: 0, top: 0,
+							width: (1 / zoomLevel).ToPercentStr(), height: (1 / zoomLevel).ToPercentStr(),
+							/* display: "flex", */ whiteSpace: "nowrap",
+							//padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
+							alignItems: "center",
+							filter: GetMapUICSSFilter(),
+						},
+						//mapState.zoomLevel != 1 && {zoom: mapState.zoomLevel.ToPercentStr()},
+						mapState.zoomLevel != 1 && {
+							transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
+							transformOrigin: "0% 0%",
+						},
+					)}
+					onMouseDown={e=>{
+						this.downPos = new Vector2(e.clientX, e.clientY);
+						if (e.button == 2) { this.mapUIEl!.classList.add("scrolling"); }
+					}}
+					onMouseUp={e=>{
+						this.mapUIEl!.classList.remove("scrolling");
+					}}
+					onClick={e=>{
+						if (e.target != this.mapUIEl) return;
+						if (this.downPos && new Vector2(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
+						if (GetSelectedNodePath(map.id)) {
+							ACTNodeSelect(map.id, null);
+							//UpdateAnchorNodeAndViewOffset(map._id);
 						}
-						.MapUI.scrolling > * { pointer-events: none; }
-						`}</style>
-						<div className="MapUI"
-							ref={mapUI_ref}
-							style={ES(
-								{
-									//position: "relative",
-									position: "absolute", left: 0, top: 0,
-									width: (1 / zoomLevel).ToPercentStr(), height: (1 / zoomLevel).ToPercentStr(),
-									/* display: "flex", */ whiteSpace: "nowrap",
-									//padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
-									alignItems: "center",
-									filter: GetMapUICSSFilter(),
-								},
-								//mapState.zoomLevel != 1 && {zoom: mapState.zoomLevel.ToPercentStr()},
-								mapState.zoomLevel != 1 && {
-									transform: `scale(${mapState.zoomLevel.ToPercentStr()})`,
-									transformOrigin: "0% 0%",
-								},
-							)}
-							onMouseDown={e=>{
-								this.downPos = new Vector2(e.clientX, e.clientY);
-								if (e.button == 2) { this.mapUIEl!.classList.add("scrolling"); }
-							}}
-							onMouseUp={e=>{
-								this.mapUIEl!.classList.remove("scrolling");
-							}}
-							onClick={e=>{
-								if (e.target != this.mapUIEl) return;
-								if (this.downPos && new Vector2(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
-								const mapView = GetMapView(GetOpenMapID());
-								if (GetSelectedNodePath(map.id)) {
-									ACTNodeSelect(map.id, null);
-									//UpdateAnchorNodeAndViewOffset(map._id);
-								}
-							}}
-							onContextMenu={e=>{
-								if (e.nativeEvent["handled"]) return true;
-								// block regular right-click actions on map background (so it doesn't conflict with custom right-click contents)
-								if (ShowHeader) {
-									e.preventDefault();
-								} else {
-									// if not in iframe, only block it if right-click was over a node-ui (one reason being that, in iframe, the native right-click menu is needed to press "Back")
-									const rightClickedOverNode = (e.nativeEvent.target as HTMLElement).closest(".NodeUI") != null;
-									if (rightClickedOverNode) {
-										e.preventDefault();
-									}
-								}
-							}}
-						>
-							{containerElResolved &&
-							<GraphContext.Provider value={graphInfo}>
-								{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
-								<ConnectorLinesUI/>
-								{/*playingTimeline != null &&
-								<TimelineIntroBox timeline={playingTimeline}/>*/}
-								<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0" standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth}/>
-								{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
-								{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
-									this.LoadScroll();
-								}}/> */}
-								{ShowHeader && // on right-click, show hint about how to add nodes -- but only if header is shown (ie. not in iframe)
-								<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
-									<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
-								</VMenuStub>}
-							</GraphContext.Provider>}
-						</div>
-					</ScrollView>
-				</Row>
-			</Column>
+					}}
+					onContextMenu={e=>{
+						if (e.nativeEvent["handled"]) return true;
+						// block regular right-click actions on map background (so it doesn't conflict with custom right-click contents)
+						if (ShowHeader) {
+							e.preventDefault();
+						} else {
+							// if not in iframe, only block it if right-click was over a node-ui (one reason being that, in iframe, the native right-click menu is needed to press "Back")
+							const rightClickedOverNode = (e.nativeEvent.target as HTMLElement).closest(".NodeUI") != null;
+							if (rightClickedOverNode) {
+								e.preventDefault();
+							}
+						}
+					}}
+				>
+					{containerElResolved &&
+					<GraphContext.Provider value={graphInfo}>
+						{TreeGraphDebug() && <GraphColumnsVisualizer levelsToScrollContainer={3}/>}
+						<ConnectorLinesUI/>
+						{/*playingTimeline != null && <TimelineIntroBox timeline={playingTimeline}/>*/}
+						<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())} treePath="0"
+							standardWidthInGroup={NodeType_Info.for[rootNode.type].minWidth} forLayoutHelper={forLayoutHelper ?? false}/>
+						{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
+						{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
+							this.LoadScroll();
+						}}/>*/}
+						{ShowHeader && // on right-click, show hint about how to add nodes -- but only if header is shown (ie. not in iframe)
+						<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
+							<VMenuItem text="(To add a node, right click on an existing node.)" style={liveSkin.Style_VMenuItem()}/>
+						</VMenuStub>}
+					</GraphContext.Provider>}
+				</div>
+			</ScrollView>
 		);
 	}
 
@@ -384,11 +186,15 @@ export class MapUI extends BaseComponent<Props, {}> {
 	}
 
 	async ComponentDidMount() {
-		MapUI.currentMapUI = this;
+		const {forLayoutHelper} = this.props;
+		// don't set this map-ui as the "current/main one", if it's the "layout helper" map (ie. the hidden, secondary map used just for helping with layout calculations) 
+		if (!forLayoutHelper) {
+			MapUI.currentMapUI = this;
+		}
 
 		NodeUI.renderCount = 0;
-		/* NodeUI.lastRenderTime = Date.now();
-		let lastRenderCount = 0; */
+		/*NodeUI.lastRenderTime = Date.now();
+		let lastRenderCount = 0;*/
 
 		for (let i = 0; i < 30 && this.Map == null; i++) await SleepAsync(100);
 		if (this.Map == null) return;
@@ -396,7 +202,9 @@ export class MapUI extends BaseComponent<Props, {}> {
 		this.StartLoadingScroll();
 	}
 	ComponentWillUnmount() {
-		MapUI.currentMapUI = null;
+		if (MapUI.currentMapUI == this) {
+			MapUI.currentMapUI = null;
+		}
 	}
 
 	lastScrolledToPath: string;
@@ -435,7 +243,6 @@ export class MapUI extends BaseComponent<Props, {}> {
 			TimeSincePageLoad: ${Date.now() - performance.timing.domComplete}ms
 		`.AsMultiline(0));
 		this.LoadStoredScroll();
-		// UpdateURL(false);
 	}
 
 	// funcs to keep view-center while zooming
@@ -468,9 +275,9 @@ export class MapUI extends BaseComponent<Props, {}> {
 	PostRender() {
 		const {withinPage} = this.props;
 		const map = this.Map;
-		/* if (withinPage && this.scrollView) {
+		/*if (withinPage && this.scrollView) {
 			this.scrollView.vScrollableDOM = $('#HomeScrollView').children('.content')[0];
-		} */
+		}*/
 		if (map) {
 			SetMapVisitTimeForThisSession(map.id, Date.now());
 		}
@@ -493,29 +300,34 @@ export class MapUI extends BaseComponent<Props, {}> {
 		return this.ScrollToNode(anchorNode_target);
 	}
 
-	FindNodeBox(nodePath: string, ifMissingFindAncestor = false) {
-		const nodeUIs = Array.from(document.querySelectorAll(".NodeBox")).map(nodeUI_boxEl=>{
+	GetNodeBoxes() {
+		if (this.mapUIEl == null) return [];
+		const nodeBoxes = Array.from(this.mapUIEl.querySelectorAll(".NodeBox")).map(nodeUI_boxEl=>{
 			const boxEl = FindReact(nodeUI_boxEl) as ExpandableBox;
 			const result = boxEl.props.parent as NodeBox;
 			Assert(result instanceof NodeBox);
 			return result;
 		});
+		return nodeBoxes;
+	}
+	GetNodeBoxClosestToViewCenter() {
+		const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
+		const nodeBoxes = this.GetNodeBoxes();
+		return nodeBoxes.filter(box=>box.DOM != null).Min(box=>GetDistanceBetweenRectAndPoint(GetViewportRect(box.DOM!), viewCenter_onScreen));
+	}
+	FindNodeBox(nodePath: string, ifMissingFindAncestor = false) {
+		const nodeBoxes = this.GetNodeBoxes();
 
-		let targetNodeUI: NodeBox|n;
+		let targetNodeBox: NodeBox|n;
 		let nextPathTry = nodePath;
-		while (targetNodeUI == null) {
-			targetNodeUI = nodeUIs.FirstOrX(nodeUI=>{ // eslint-disable-line
-				const {node, path} = nodeUI.props;
-				const parentPath = GetParentPath(path);
-				const parent = GetParentNodeL3(path);
-				return path == nextPathTry;
-			});
+		while (targetNodeBox == null) {
+			targetNodeBox = nodeBoxes.FirstOrX(box=>box.props.path == nextPathTry);
 			// if finding ancestors is disabled, or there are no ancestors left, stop up-search
 			if (!ifMissingFindAncestor || !nextPathTry.Contains("/")) break;
-			nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
+			nextPathTry = nextPathTry.slice(0, nextPathTry.lastIndexOf("/"));
 		}
 		// if (targetNodeUI == null) Log(`Failed to find node-box for: ${nodePath}`);
-		return targetNodeUI;
+		return targetNodeBox;
 	}
 	ScrollToNode(nodePath: string) {
 		const map = this.Map;

@@ -1,4 +1,4 @@
-import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -20,9 +20,11 @@ import {ChildLimitBar} from "./ChildLimitBar.js";
 import {GetMeasurementInfoForNode} from "./NodeMeasurer.js";
 
 type Props = {
-	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, nodeChildrenToShow: NodeL3[], group: ChildGroup, showEvenIfParentNotExpanded: boolean,
+	map: Map, parentNode: NodeL3, parentPath: string, parentTreePath: string, parentTreePath_priorChildCount?: number, showEvenIfParentNotExpanded: boolean, group: ChildGroup,
 	separateChildren: boolean, showArgumentsControlBar: boolean, belowNodeUI?: boolean, minWidth?: number,
 	onSizesChange?: (aboveSize: number, belowSize: number)=>void,
+	forLayoutHelper: boolean,
+	nodeChildrenToShow: NodeL3[],
 };
 const initialState = {
 	childrenWidthOverride: null as number|n,
@@ -33,15 +35,15 @@ const initialState = {
 @WarnOfTransientObjectProps
 @Observer
 export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, initialState, {} as {nodeChildren_orderingValues: {[key: string]: number | string}}) {
-	/* static ValidateProps(props) {
+	/*static ValidateProps(props) {
 		let {node, path} = props;
 		//Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
-	} */
+	}*/
 
 	childBoxes: {[key: number]: NodeUI} = {};
 	//childInnerUIs: {[key: number]: NodeBox} = {};
 	render() {
-		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth} = this.props;
+		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth, forLayoutHelper, nodeChildrenToShow} = this.props;
 		const {placeholderRect} = this.state;
 
 		const playingTimeline = GetPlayingTimeline(map.id);
@@ -58,11 +60,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {currentNodeBeingAdded_path} = store.main.maps;
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
-		//let nodeChildrenToShowInRelevanceBox;
-		/*if (IsMultiPremiseArgument(node) && group == ChildGroup.generic) {
-			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a.type == NodeType.claim);
-			//nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == NodeType.argument);
-		}*/
 		// always apply an initial sorting by manual-ordering data, so that if main ordering values are the same for a set (eg. no vote data), the set still has sub-sorting
 		nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(a=>GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering));
 		// then apply the sorting for the main ordering-type (latest OrderBy() operation has higher priority, naturally)
@@ -136,12 +133,14 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					}}/>;
 				};
 				const getNodeUI = ()=>{
+					const nodeIDAlreadyInPath = GetPathNodeIDs(parentPath).includes(child.id);
 					return <NodeUI key={child.id}
 						ref={UseCallback(c=>parent.childBoxes[child.id] = c, [child.id, parent.childBoxes])} // eslint-disable-line
 						//ref_nodeBox={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 						indexInNodeList={index} map={map} node={child}
 						path={`${parentPath}/${child.id}`}
 						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
+						forLayoutHelper={forLayoutHelper && !nodeIDAlreadyInPath} // stop auto-expansion when we detect a cycle
 						inBelowGroup={belowNodeUI}
 						standardWidthInGroup={widthOverride}
 						onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;
@@ -166,11 +165,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 			//renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
 			return (
-				<Droppable type="NodeL1" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
+				<Droppable type="NodeL1" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /*renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;
 					const pack = childrenHere.slice(0, childLimit)[index];
 					return RenderChild(pack, index, childrenHere);
-				}} */>
+				}}*/>
 					{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
 						const dragIsOverDropArea = provided.placeholder?.props["on"] != null;
 						if (dragIsOverDropArea) {
@@ -207,29 +206,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath, childGroup: group});
 		return (
 			<>
-				{/*<Column ref={useCallback(c=>{
-					this.childHolder = c;
-				}, [])} className="NodeChildHolder clickThrough" style={E(
-					{
-						position: "relative", // needed so position:absolute in RenderGroup takes into account NodeUI padding
-						// marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
-						//marginLeft: belowNodeUI ? 20 : 30,
-						paddingLeft: belowNodeUI ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH,
-						// display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-					},
-					TreeGraphDebug() && {background: StripesCSS({angle: (parentTreePath.split("/").length - 1) * 45, stripeColor: "rgba(255,150,0,.5)"})}, // for testing
-					//belowNodeUI && {marginTop: -5, paddingTop: 5}, // fixes gap that was present
-					//! expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
-					// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
-					//lastChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
-				)}>
-					{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
-					{/*IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
-						<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
-							widthOfNode={childrenWidthOverride}
-							nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
-							onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>*#/}
-				</Column>*/}
 				{!separateChildren &&
 					RenderPolarityGroup("all")}
 				{separateChildren &&

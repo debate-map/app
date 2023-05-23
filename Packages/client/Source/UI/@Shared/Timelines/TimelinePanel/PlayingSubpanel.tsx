@@ -349,6 +349,11 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 									<Text>Show focus-nodes:</Text>
 									<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
 								</Row>
+								<Row>
+									<Text>Layout-helper map:</Text>
+									<CheckBox ml={5} text="Load" value={uiState.layoutHelperMap_load} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_load = val)}/>
+									<CheckBox ml={5} text="Show" value={uiState.layoutHelperMap_show} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_show = val)}/>
+								</Row>
 							</Column></DropDownContent>
 						</DropDown>
 					</Row>

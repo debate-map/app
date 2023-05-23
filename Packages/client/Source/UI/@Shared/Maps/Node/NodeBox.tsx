@@ -178,6 +178,7 @@ export class NodeBox extends BaseComponentPlus(
 			// setDragActive(this.root.DOM.getBoundingClientRect().width);
 			if (this.root?.DOM) {
 				let renderedWidth = this.root.DOM.getBoundingClientRect().width;
+				// store the pre-zoomed width, because we use it for the space-keeper (outside of draggable), on top of which zoom already gets applied
 				if (mapState != null && mapState?.zoomLevel != 1) {
 					renderedWidth /= mapState.zoomLevel;
 				}

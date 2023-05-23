@@ -1,7 +1,7 @@
 import {GetTimelines, GetTimelineStep, GetTimelineSteps, Map, MeID} from "dm_common";
 import React from "react";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
-import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUI";
+import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUIWrapper.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
 import {RunCommand_DeleteTimeline} from "Utils/DB/Command";

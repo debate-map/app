@@ -6,7 +6,6 @@ import {GetPlayingTimeline, GetPlayingTimelineRevealPaths_UpToAppliedStep, GetPl
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolder.js";
-import {NodeChildHolderBox} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
@@ -15,7 +14,7 @@ import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals}
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store/index.js";
-import {NodeDataForTreeGrapher} from "../MapUI.js";
+import {NodeDataForTreeGrapher} from "../MapGraph.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
@@ -41,7 +40,7 @@ class ObservedValues {
 @Observer
 export class NodeUI extends BaseComponentPlus(
 	{} as {
-		indexInNodeList: number, map: Map, node: NodeL3, path: string, treePath: string, style?,
+		indexInNodeList: number, map: Map, node: NodeL3, path: string, treePath: string, forLayoutHelper: boolean, style?,
 		inBelowGroup?: boolean,
 		standardWidthInGroup?: number|n, // this is set by parent NodeChildHolder, once it determines the width that all children should use
 		onHeightOrPosChange?: ()=>void
@@ -67,7 +66,6 @@ export class NodeUI extends BaseComponentPlus(
 	nodeUI: HTMLDivElement|n;
 	nodeBox: NodeBox|n;
 	rightColumn: Column|n;
-	childBoxes: {[key: string]: NodeChildHolderBox|n} = {};
 	nodeChildHolder_generic: NodeChildHolder|n;
 
 	// we don't have an easy way to position loading-uis within the new node-layout system, so don't show them at all for now (well, we render it for debugging purposes, but have it visually hidden)
@@ -82,7 +80,7 @@ export class NodeUI extends BaseComponentPlus(
 	}
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, inBelowGroup, children} = this.props;
+		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, forLayoutHelper, inBelowGroup, children} = this.props;
 		const {obs} = this.state;
 
 		performance.mark("NodeUI_1");
@@ -91,9 +89,9 @@ export class NodeUI extends BaseComponentPlus(
 		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true) : ea);
 
 		//const nodeChildren = GetNodeChildren(node, path);
-		const nodeChildrenToShow = GetNodeChildrenToShow(node, path);
+		const nodeChildrenToShow = forLayoutHelper ? GetNodeChildren(node, path) : GetNodeChildrenToShow(node, path);
 		const nodeView = GetNodeView(map.id, path);
-		const boxExpanded = nodeView?.expanded ?? false;
+		const boxExpanded = (forLayoutHelper ? true : null) ?? nodeView?.expanded ?? false;
 
 		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);
@@ -145,7 +143,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		// hooks must be constant between renders, so always init the shape (comps will just not be added to tree, if shouldn't be visible)
 		const nodeChildHolder_truth = IsChildGroupValidForNode(node, ChildGroup.truth) &&
-			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true}}
+			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true, forLayoutHelper}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				group={ChildGroup.truth}
 				showEvenIfParentNotExpanded={false}
@@ -155,7 +153,7 @@ export class NodeUI extends BaseComponentPlus(
 			/>;
 		treeChildrenAddedSoFar += ncToShow_truth.length + 3; // + 3 is for the arguments-control-bar, and the two possible limit-bars (it's ok to over-reserve slots)
 		const nodeChildHolder_relevance = IsChildGroupValidForNode(node, ChildGroup.relevance) &&
-			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true}}
+			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: true, showArgumentsControlBar: true, forLayoutHelper}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				group={ChildGroup.relevance}
 				showEvenIfParentNotExpanded={false}
@@ -165,7 +163,7 @@ export class NodeUI extends BaseComponentPlus(
 			/>;
 		treeChildrenAddedSoFar += ncToShow_relevance.length + 3; // + 3 is for the arguments-control-bar, and the two possible limit-bars (it's ok to over-reserve slots)
 		const nodeChildHolder_freeform = IsChildGroupValidForNode(node, ChildGroup.freeform) &&
-			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false}}
+			<NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false, forLayoutHelper}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				group={ChildGroup.freeform}
 				showEvenIfParentNotExpanded={false}
@@ -179,7 +177,7 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeChildHolder_generic_ref = UseCallback(c=>this.nodeChildHolder_generic = c, []);
 		const showGenericBelow = node.type == NodeType.argument;
 		if (showGenericBelow || boxExpanded) {
-			nodeChildHolder_generic = <NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false}}
+			nodeChildHolder_generic = <NodeChildHolder {...{map, parentNode: node, parentPath: path, separateChildren: false, showArgumentsControlBar: false, forLayoutHelper}}
 				parentTreePath={treePath} parentTreePath_priorChildCount={treeChildrenAddedSoFar}
 				ref={nodeChildHolder_generic_ref}
 				group={ChildGroup.generic}

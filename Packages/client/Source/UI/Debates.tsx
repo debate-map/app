@@ -1,29 +1,28 @@
-import {BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID} from "dm_common";
-import {store} from "Store";
-import {GetSelectedDebatesPageMap, GetSelectedDebatesPageMapID} from "Store/main/debates";
-import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {runInAction} from "web-vcore/nm/mobx.js";
-import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import React from "react";
+import {store} from "Store";
+import {GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
-import {MapUI} from "./@Shared/Maps/MapUI";
+import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GADDemo, GADDemo_AI, GetAIPrefixInfoFromMapName} from "./@GAD/GAD";
+import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
+import {MapUIWrapper} from "./@Shared/Maps/MapUIWrapper";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {MapEntryUI} from "./Debates/MapEntryUI";
-import {ShowAddMapDialog} from "./@Shared/Maps/MapDetailsUI";
 
 @Observer
-export class DebatesUI extends BaseComponentPlus({} as {}, {}) {
+export class DebatesUI extends BaseComponent<{}, {}> {
 	render() {
 		const selectedMapID = GetSelectedDebatesPageMapID();
 		if (selectedMapID) {
 			return (
 				<PageContainer preset="full" style={{margin: 0}}>
-					<MapUI mapID={selectedMapID}/>
+					<MapUIWrapper mapID={selectedMapID}/>
 				</PageContainer>
 			);
 		}
