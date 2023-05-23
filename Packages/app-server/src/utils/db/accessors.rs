@@ -126,7 +126,7 @@ impl<'a> AccessorContext<'a> {
         match simple_err_for_client {
             None => result,
             Some(simple_err_for_client) => result.map_err(|err| {
-                // log full error to app-server log, but return a generic error to client (we generallydon't want data from rls-disabled block to be leaked to client)
+                // log full error to app-server log, but return a generic error to client (we generally don't want data from rls-disabled block to be leaked to client)
                 error!("{} @fullError:{:?}", simple_err_for_client, err);
                 anyhow!("{}", simple_err_for_client)
             }),

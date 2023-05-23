@@ -168,7 +168,8 @@ impl QueryShard_General_Search {
         let rows = {
             //let _permit = SEMAPHORE__SEARCH_EXECUTION.acquire().await.unwrap(); // semaphore not needed, since query fast enough
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client
-            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, false).await?;
+            // For this query, bypass rls-checks. It appears safe, and brings major speed-gains (presumably since can use index): with bypass-rls=false, takes ~3000ms; with bypass-rls=true, takes <100ms
+            let ctx = AccessorContext::new_read(&mut anchor, gql_ctx, true).await?;
             let rows: Vec<Row> = ctx.tx.query_raw(r#"SELECT * from search_for_external_ids($1, $2)"#, params(&[
                 &id_field, &ids,
             ])).await?.try_collect().await?;
