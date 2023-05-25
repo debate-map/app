@@ -86,7 +86,6 @@ The websites below don't really match the "collaborative debating" concept, but 
 @SimpleShouldUpdate
 export class LinksUI extends BaseComponent<{}, {}> {
 	render() {
-		const {page, match} = this.props;
 		return (
 			<PageContainer scrollable={true}>
 				<article className="selectableAC">

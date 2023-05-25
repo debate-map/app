@@ -226,18 +226,18 @@ impl LQGroupImpl {
                             // if instance's initial contents are already populated, just return it (well, after broadcasting an event so async caller knows about it)
                             if lqi.last_entries_set_count.load(Ordering::SeqCst) > 0 {
                                 self.send_message_out(LQGroup_OutMsg::LQInstanceIsInitialized(lqi.lq_key.clone(), lqi.clone(), false)).await;
-                                mtx.section(format!("LQ-instance was retrieved and returned, since already initialized. @lq_key:{}", lqi.lq_key));
+                                mtx.section(format!("LQ-instance retrieved and returned, since already initialized. @lq_key:{}", lqi.lq_key));
                                 return Some(lqi);
                             }
                             // else, it must still be scheduled for population in a buffering/executing batch; so just return none (batch will automatically broadcast messages for the lqi's initialization once it happens)
                             else {
-                                mtx.section(format!("LQ-instance is already scheduled in a progressing-batch. @lq_key:{}", lqi.lq_key));
+                                mtx.section(format!("LQ-instance already scheduled in a progressing-batch. @lq_key:{}", lqi.lq_key));
                                 return None;
                             }
                         },
                         None => {
                             // if instance was scheduled for initialization in batch, return none (batch will automatically broadcast messages for the lqi's initialization once it happens)
-                            mtx.section(format!("LQ-instance was just now scheduled in the buffering-batch. @lq_key:{}", lq_key));
+                            mtx.section(format!("LQ-instance just scheduled in buffering-batch. @lq_key:{}", lq_key));
                             return None;
                         },
                     }

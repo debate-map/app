@@ -1,7 +1,6 @@
 import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbars, NodeType, ChildGroup} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
-import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
 import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
 import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
 import {GetToolbarItemsToShow} from "../NodeBox/NodeToolbar";
@@ -15,7 +14,8 @@ import {GetToolbarItemsToShow} from "../NodeBox/NodeToolbar";
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 }); */
 
-export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: string, map: Map)=>{
+/* keep func-name, for clearer profiling */ // eslint-disable-next-line
+export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementInfoForNode(node: NodeL3, path: string, map: Map, calcHeight = false) {
 	const inBelowGroup = node.link?.c_parentType == NodeType.argument && node.link?.c_childType == NodeType.claim && node.link?.group == ChildGroup.generic;
 	const leftMarginForLines = inBelowGroup ? GUTTER_WIDTH_SMALL : 0;
 
@@ -25,19 +25,20 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 
 	const displayText = GetNodeDisplayText(node, path, map);
 	const fontSize = GetFontSizeForNode(node, path);
-	const expectedTextWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({fontSize, whiteSpace: "nowrap"})}'>`) as HTMLElement;
+	// Why not using ConvertStyleObjectToCSSString here? Because it's not needed, and this saves ~70ms over 20s map-load
+	const expectedTextWidth_tester = GetAutoElement(`<span style='font-size: ${fontSize}px; white-space: nowrap;'>`) as HTMLElement;
 	expectedTextWidth_tester.innerHTML = displayText;
 	let expectedTextWidth = expectedTextWidth_tester.offsetWidth;
 
 	let noteWidth = 0;
 	if (node.current.phrasing.note) {
-		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
+		const noteWidth_tester = GetAutoElement(`<span style='margin-left: 15px; font-size: 11px; white-space: nowrap;'>`) as HTMLElement;
 		noteWidth_tester.innerHTML = node.current.phrasing.note;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	const titleAttachment = GetTitleIntegratedAttachment(node.current);
 	if (titleAttachment?.equation && titleAttachment?.equation.explanation) {
-		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
+		const noteWidth_tester = GetAutoElement(`<span style='margin-left: 15px; font-size: 11px; white-space: nowrap;'>`) as HTMLElement;
 		noteWidth_tester.innerHTML = titleAttachment?.equation.explanation;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
@@ -69,14 +70,17 @@ export const GetMeasurementInfoForNode = CreateAccessor((node: NodeL3, path: str
 
 	const width = node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, maxWidth_final);
 
-	const maxTextWidth = width - expectedOtherStuffWidth;
-	const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='${ConvertStyleObjectToCSSString({whiteSpace: "initial", display: "inline-block"})}'>`) as HTMLElement;
-	expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
-	expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
-	expectedTextHeight_tester.innerHTML = displayText;
-	const expectedTextHeight = GetContentSize(expectedTextHeight_tester).height as number;
-	const expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
-	// this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
+	let expectedHeight = -1;
+	if (calcHeight) {
+		const maxTextWidth = width - expectedOtherStuffWidth;
+		const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='white-space: initial; display: inline-block;'>`) as HTMLElement;
+		expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
+		expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
+		expectedTextHeight_tester.innerHTML = displayText;
+		const expectedTextHeight = GetContentSize(expectedTextHeight_tester).height as number;
+		expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
+		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
+	}
 
 	return {expectedBoxWidth, width, expectedHeight};
 });

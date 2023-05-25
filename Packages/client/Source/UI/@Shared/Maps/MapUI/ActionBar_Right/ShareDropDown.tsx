@@ -30,17 +30,19 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button mr={5} text="Share"/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", right: 0, width: 700, borderRadius: "0 0 0 5px"}}>
-					<Column>
-						<Row mb={5}>
-							<Select options={GetEntries(ShareTab, "ui")} displayType="button bar"
-								value={uiState.tab} onChange={val=>RunInAction_Set(this, ()=>uiState.tab = val)}/>
-						</Row>
-						{uiState.tab == ShareTab.allMaps && <SharesListUI filter_mapID={null}/>}
-						{uiState.tab == ShareTab.thisMap && <SharesListUI filter_mapID={map.id}/>}
-						{uiState.tab == ShareTab.current && <NewShareUI mapID={map.id}/>}
-					</Column>
-				</DropDownContent>
+				<DropDownContent style={{position: "fixed", right: 0, width: 700, borderRadius: "0 0 0 5px"}}
+					// use render-prop approach here, because NewShareUI can be heavy
+					content={()=>(
+						<Column>
+							<Row mb={5}>
+								<Select options={GetEntries(ShareTab, "ui")} displayType="button bar"
+									value={uiState.tab} onChange={val=>RunInAction_Set(this, ()=>uiState.tab = val)}/>
+							</Row>
+							{uiState.tab == ShareTab.allMaps && <SharesListUI filter_mapID={null}/>}
+							{uiState.tab == ShareTab.thisMap && <SharesListUI filter_mapID={map.id}/>}
+							{uiState.tab == ShareTab.current && <NewShareUI mapID={map.id}/>}
+						</Column>
+					)}/>
 			</DropDown>
 		);
 	}

@@ -9,6 +9,7 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 import {setContext} from "@apollo/client/link/context";
 import {GetUserInfoJWTString, OnUserJWTChanged, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
 import {graph} from "./MobXGraphlink.js";
+import {VoidCache} from "./Apollo/VoidCache.js";
 
 /*export function GetWebServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
@@ -186,7 +187,7 @@ export function InitApollo() {
 		//credentials: "include", // allows cookies to be sent with "graphql" calls (eg. for passing passportjs session-token with mutation/command calls) // this way doesn't work, I think because we send a custom "link"
 		//link,
 		link: link_withErrorHandling,
-		cache: new InMemoryCache({
+		/*cache: new InMemoryCache({
 			//dataIdFromObject: a=>a.nodeId as string ?? null,
 			dataIdFromObject: a=>a.id as string ?? null,
 			typePolicies: {
@@ -203,7 +204,9 @@ export function InitApollo() {
 					},
 				},
 			},
-		}),
+		}),*/
+		// replace InMemoryCache with VoidCache, because even a "not used" InMemoryCache has significant overhead, for checking for cache matches and such (>1s over ~25s map-load)
+		cache: new VoidCache(),
 		// default to not using the cache (it does nothing for subscriptions, and often does *opposite* of what we want for queries [eg. search]; and even when wanted, it's better to explicitly set it)
 		defaultOptions: {
 			watchQuery: {

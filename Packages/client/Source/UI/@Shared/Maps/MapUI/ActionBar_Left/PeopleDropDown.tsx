@@ -24,54 +24,56 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="People"/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", left: 0, width: 500, borderRadius: "0 0 5px 0"}}><Column>
-					<Row center style={{justifyContent: "center"}}>
-						<Text style={{color: "red", fontSize: 13}}>{`Note: Actual access/edit permissions are set by nodes' access-policies.`}</Text>
-						<InfoButton ml={5} text={`
-							The map's "list of editors" is a legacy feature that has no "actual function" atm (other than for reference), though functionality will be added here in the future.
-							Note: You can set the "default access-policy" for new nodes in the map's Details panel.
-						`.AsMultiline(0)}/>
-					</Row>
-					<Row mt={5} center>
-						<Text>Editors:</Text>
-						{creatorOrMod &&
-						<Button ml="auto" text="Add editor" onClick={async()=>{
-							const newEditors = CloneWithPrototypes(map.editors || []);
-							newEditors.push(userIDPlaceholder);
-							//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
-							await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
-						}}/>}
-					</Row>
-					{map.editors.map((editorID, index)=>{
-						const editor = editors[index];
-						const displayName = editor?.displayName ?? "n/a";
-						return (
-							<Row key={index} mt={5}>
-								<UserPicker value={editorID} onChange={async val=>{
-									const newEditors = CloneWithPrototypes(map.editors);
-									newEditors[index] = val;
-									//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
-									await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
-								}}>
-									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
-								</UserPicker>
-								{creatorOrMod &&
-								<Button ml={5} text="X" style={{...liveSkin.Style_XButton()}} onClick={()=>{
-									ShowMessageBox({
-										title: `Remove editor "${displayName}"`, cancelButton: true,
-										message: `Remove editor "${displayName}" (id: ${editorID})?`,
-										onOK: async()=>{
-											const newEditors = CloneWithPrototypes(map.editors);
-											newEditors.RemoveAt(index);
-											//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
-											await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
-										},
-									});
-								}}/>}
-							</Row>
-						);
-					})}
-				</Column></DropDownContent>
+				<DropDownContent style={{position: "fixed", left: 0, width: 500, borderRadius: "0 0 5px 0"}} content={()=>(
+					<Column>
+						<Row center style={{justifyContent: "center"}}>
+							<Text style={{color: "red", fontSize: 13}}>{`Note: Actual access/edit permissions are set by nodes' access-policies.`}</Text>
+							<InfoButton ml={5} text={`
+								The map's "list of editors" is a legacy feature that has no "actual function" atm (other than for reference), though functionality will be added here in the future.
+								Note: You can set the "default access-policy" for new nodes in the map's Details panel.
+							`.AsMultiline(0)}/>
+						</Row>
+						<Row mt={5} center>
+							<Text>Editors:</Text>
+							{creatorOrMod &&
+							<Button ml="auto" text="Add editor" onClick={async()=>{
+								const newEditors = CloneWithPrototypes(map.editors || []);
+								newEditors.push(userIDPlaceholder);
+								//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+								await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
+							}}/>}
+						</Row>
+						{map.editors.map((editorID, index)=>{
+							const editor = editors[index];
+							const displayName = editor?.displayName ?? "n/a";
+							return (
+								<Row key={index} mt={5}>
+									<UserPicker value={editorID} onChange={async val=>{
+										const newEditors = CloneWithPrototypes(map.editors);
+										newEditors[index] = val;
+										//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+										await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
+									}}>
+										<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
+									</UserPicker>
+									{creatorOrMod &&
+									<Button ml={5} text="X" style={{...liveSkin.Style_XButton()}} onClick={()=>{
+										ShowMessageBox({
+											title: `Remove editor "${displayName}"`, cancelButton: true,
+											message: `Remove editor "${displayName}" (id: ${editorID})?`,
+											onOK: async()=>{
+												const newEditors = CloneWithPrototypes(map.editors);
+												newEditors.RemoveAt(index);
+												//new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
+												await RunCommand_UpdateMap({id: map.id, updates: {editors: newEditors}});
+											},
+										});
+									}}/>}
+								</Row>
+							);
+						})}
+					</Column>
+				)}/>
 			</DropDown>
 		);
 	}

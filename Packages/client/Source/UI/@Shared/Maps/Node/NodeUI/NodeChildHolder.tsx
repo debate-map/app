@@ -68,8 +68,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
 		const downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
 
-		let childLimit_up = (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
-		let childLimit_down = (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_up = (forLayoutHelper ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_down = (forLayoutHelper ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
 		const showAll = parentNode.id == map.rootNode || parentNode.type == NodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
@@ -160,8 +160,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-uis array
 			// if (direction == 'up') childrenHereUIs.reverse();
 
-			const dragBox = document.querySelector(".NodeBox.DragPreview");
-			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());
+			/*const dragBox = document.querySelector(".NodeBox.DragPreview");
+			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());*/
 
 			//renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
 			return (

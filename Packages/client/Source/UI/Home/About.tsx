@@ -30,7 +30,6 @@ I'm confident that it will someday become an invaluable tool for bringing clarit
 @SimpleShouldUpdate
 export class AboutUI extends BaseComponent<{}, {}> {
 	render() {
-		const {page, match} = this.props;
 		return (
 			<PageContainer scrollable={true}>
 				<article>
