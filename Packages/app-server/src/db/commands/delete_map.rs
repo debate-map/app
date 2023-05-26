@@ -7,7 +7,7 @@ use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Deserialize};
+use rust_shared::serde::{Serialize, Deserialize};
 
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, command_boilerplate};
@@ -33,7 +33,7 @@ wrap_slow_macros!{
     }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct DeleteMapInput {
 	pub id: String,
 }

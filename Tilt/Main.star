@@ -28,6 +28,15 @@ load('ext://helm_resource', 'helm_resource', 'helm_repo')
 load('./Utils.star', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'Base64Encode', 'GetDateTime')
 load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddResourceNamesBatch_IfValid', 'NEXT_k8s_resource_batch', 'k8s_yaml_grouped', 'CreateNamespace', 'CreateNamespaces')
 
+# customize handling of Tiltfile args (ie. the args after the "--" in launch-command, or the unnamed args at end if no "--" is present)
+# ==========
+
+config.define_string_list("to-run", args=True) # args=True means we take the unnamed list of args at the end of the command as this config-entry's value
+config.define_bool("compileWithCranelift")
+config.define_bool("compileWithRelease")
+cfg = config.parse()
+config.set_enabled_resources(cfg.get("to-run", []))
+
 # generate globals
 # ==========
 
@@ -35,6 +44,8 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 load('ext://dotenv', 'dotenv')
 dotenv(fn="../.env")
 #print("Env vars after loading from .env file:", os.environ)
+launchArgs = sys.argv
+print("Tilt launch args:", launchArgs)
 
 ENV = os.getenv("ENV")
 DEV = ENV == "dev"
@@ -56,8 +67,8 @@ if os.getenv("TIME_OF_TILT_UP_COMMAND") == None:
 	os.putenv("TIME_OF_TILT_UP_COMMAND", timeOfThisTiltfileUpdate)
 timeOfTiltUpCommand = os.getenv("TIME_OF_TILT_UP_COMMAND")
 
-APP_USE_RELEASE_FLAG = False
-APP_USE_RELEASE_FLAG = PROD # comment this for faster release builds (though with less optimization)
+compileWithCranelift = cfg.get("compileWithCranelift", False)
+compileWithRelease = cfg.get("compileWithRelease", PROD) # default to compiling: PROD -> release, DEV (or others) -> debug
 
 g = {
 	"appliedResourceNames_batches": [],
@@ -71,7 +82,8 @@ g = {
 	"bucket_uniformPrivate_name": bucket_uniformPrivate_name,
 	"timeOfThisTiltfileUpdate": timeOfThisTiltfileUpdate,
 	"timeOfTiltUpCommand": timeOfTiltUpCommand,
-	"APP_USE_RELEASE_FLAG": APP_USE_RELEASE_FLAG,
+	"compileWithCranelift": compileWithCranelift,
+	"compileWithRelease": compileWithRelease,
 }
 
 # start specifying resources (to be deployed to k8s soon)

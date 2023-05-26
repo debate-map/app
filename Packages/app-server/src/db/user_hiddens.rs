@@ -54,7 +54,7 @@ impl From<Row> for UserHidden {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct UserHiddenUpdates {
 	pub backgroundID: FieldUpdate_Nullable<String>,
 	pub backgroundCustom_enabled: FieldUpdate_Nullable<bool>,

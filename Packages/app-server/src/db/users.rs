@@ -58,7 +58,7 @@ impl From<Row> for User {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct UserUpdates {
 	pub displayName: FieldUpdate<String>,
 	pub permissionGroups: FieldUpdate<PermissionGroups>,

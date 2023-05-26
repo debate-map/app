@@ -93,7 +93,7 @@ pub struct NodeTagInput {
     pub cloneHistory: Option<TagComp_CloneHistory>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeTagUpdates {
     pub nodes: FieldUpdate<Vec<String>>,
     pub labels: FieldUpdate_Nullable<TagComp_Labels>,

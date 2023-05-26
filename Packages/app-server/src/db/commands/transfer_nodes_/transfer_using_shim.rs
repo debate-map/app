@@ -10,7 +10,7 @@ use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error, Context, ensure, bail};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Deserialize};
+use rust_shared::serde::{Serialize, Deserialize};
 use tracing::info;
 
 use crate::db::_shared::path_finder::search_up_from_node_for_node_matching_x;

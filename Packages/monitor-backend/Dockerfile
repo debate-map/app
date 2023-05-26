@@ -13,12 +13,13 @@
 	ARG env_ENV
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
+	ARG cargo_path
 	ARG copy_from_path
 # ----------
 
 # initial arg processing
 ENV ENV=$env_ENV
-RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
+RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
 
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/

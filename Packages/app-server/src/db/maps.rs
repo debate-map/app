@@ -61,7 +61,7 @@ pub struct MapInput {
     pub extras: JSONValue,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct MapUpdates {
     pub accessPolicy: FieldUpdate<String>,
     pub name: FieldUpdate<String>,

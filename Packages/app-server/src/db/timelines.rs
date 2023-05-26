@@ -50,7 +50,7 @@ pub struct TimelineInput {
     pub videoHeightVSWidthPercent: Option<f64>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct TimelineUpdates {
     pub accessPolicy: FieldUpdate<String>,
     pub name: FieldUpdate<String>,

@@ -50,13 +50,13 @@ wrap_slow_macros!{
     }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct TransferNodesInput {
 	pub mapID: Option<String>,
 	pub nodes: Vec<NodeInfoForTransfer>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeInfoForTransfer {
 	pub nodeID: Option<String>, // can be null, if transfer is of type "shim"
 	pub oldParentID: Option<String>,

@@ -83,7 +83,7 @@ pub struct TimelineStepInput {
 	pub nodeReveals: Vec<NodeReveal>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct TimelineStepUpdates {
     pub orderKey: FieldUpdate<OrderKey>,
     pub groupID: FieldUpdate<String>,

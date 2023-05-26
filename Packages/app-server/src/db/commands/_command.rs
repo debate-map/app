@@ -241,6 +241,7 @@ macro_rules! command_boilerplate {
         let mut anchor = $crate::utils::general::data_anchor::DataAnchorFor1::empty(); // holds pg-client
 		let ctx = $crate::utils::db::accessors::AccessorContext::new_write_advanced(&mut anchor, $gql_ctx, false, $only_validate).await?;
 		let actor = $crate::db::general::sign_in_::jwt_utils::get_user_info_from_gql_ctx($gql_ctx, &ctx).await?;
+        let input_json = serde_json::to_string(&$input)?;
 
 		let result = $command_impl_func(&ctx, &actor, true, $input, Default::default()).await?;
 
@@ -250,10 +251,10 @@ macro_rules! command_boilerplate {
             
             // the transaction would be rolled-back automatically after this blocks ends, but let's call rollback() explicitly just to be clear/certain
             ctx.tx.rollback().await?;
-            tracing::info!("Command completed a \"validation only\" run without hitting errors. Result:{:?}", result);
+            tracing::info!("Command completed a \"validation only\" run without hitting errors. @Result:{:?} @Input:{} ", result, input_json);
         } else {
             ctx.tx.commit().await?;
-            tracing::info!("Command executed. Result:{:?}", result);
+            tracing::info!("Command executed. @Result:{:?} @Input:{}", result, input_json);
         }
 		return Ok(result);
     }

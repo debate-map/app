@@ -56,7 +56,7 @@ pub struct NodeInput {
 	//pub extras: JSONValue, // to set this, use updateNode command instead (this consolidates/simplifies the subfield-sensitive validation code)
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeUpdates {
 	pub accessPolicy: FieldUpdate<String>,
 	//pub multiPremiseArgument: FieldUpdate_Nullable<bool>, // excluded, since updating this field has external side-effects that would be unexpected in a generic update_x command

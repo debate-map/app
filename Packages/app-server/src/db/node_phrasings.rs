@@ -95,7 +95,7 @@ pub struct NodePhrasingInput {
 	pub references: Vec<String>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct NodePhrasingUpdates {
 	pub r#type: FieldUpdate<NodePhrasingType>,
     #[graphql(name = "text_base")]

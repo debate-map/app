@@ -9,7 +9,7 @@ use rust_shared::db_constants::SYSTEM_USER_ID;
 use rust_shared::{async_graphql, serde_json, anyhow, GQLError};
 use rust_shared::async_graphql::{Object};
 use rust_shared::anyhow::{anyhow, Error, Context};
-use rust_shared::serde::{Deserialize};
+use rust_shared::serde::{Serialize, Deserialize};
 use tracing::{info, warn};
 
 use crate::db::users::User;
@@ -40,7 +40,7 @@ wrap_slow_macros!{
     }
 }
 
-/*#[derive(InputObject, Deserialize)]
+/*#[derive(InputObject, Serialize, Deserialize)]
 pub struct GetDBDumpInput {
 }*/
 

@@ -74,7 +74,7 @@ pub struct TermInput {
     pub attachments: Vec<Attachment>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct TermUpdates {
     pub accessPolicy: FieldUpdate<String>,
     pub name: FieldUpdate<String>,

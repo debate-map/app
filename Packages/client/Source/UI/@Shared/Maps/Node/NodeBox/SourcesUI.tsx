@@ -31,7 +31,7 @@ export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sou
 							return (source.name || "") + (source.author ? ` (${source.author})` : "");
 						}).join(" <- ");
 
-					const {link} = chain.sources.Last();
+					const {link} = chain.sources.filter(a=>a.link).Last();
 					return (
 						<Row key={chainIndex}>
 							{link &&

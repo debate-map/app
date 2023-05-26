@@ -87,7 +87,7 @@ pub fn get_err_auth_data_required() -> Error {
 
 wrap_slow_macros!{
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct SignInStartInput {
 	pub provider: String,
     pub jwtDuration: i64,
@@ -299,7 +299,7 @@ impl SubscriptionShard_SignIn {
     }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct SignInAttachInput {
     // this is settable to null/none, since caller may have cases where it wants to "sign out", yet keep the same websocket connection open
 	pub jwt: Option<String>,

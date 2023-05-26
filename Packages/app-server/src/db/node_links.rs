@@ -120,7 +120,7 @@ pub struct NodeLinkInput {
 	pub polarity: Option<Polarity>,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeLinkUpdates {
 	pub orderKey: FieldUpdate<OrderKey>,
 	pub form: FieldUpdate_Nullable<ClaimForm>,

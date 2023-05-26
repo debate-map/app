@@ -45,7 +45,7 @@ wrap_slow_macros!{
 // queries
 // ==========
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct SearchGloballyInput {
     query: String,
     search_limit: usize,
@@ -82,7 +82,7 @@ pub enum ExternalIdType {
 	#[graphql(name = "claimMiner")] claimMiner,
 	#[graphql(name = "hypothesisAnnotation")] hypothesisAnnotation,
 }
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct SearchForExternalIdsInput {
     id_type: ExternalIdType,
     ids: Vec<String>

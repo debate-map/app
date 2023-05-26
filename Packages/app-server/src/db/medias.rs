@@ -54,7 +54,7 @@ pub struct MediaInput {
     pub description: String,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct MediaUpdates {
     pub accessPolicy: FieldUpdate<String>,
     pub name: FieldUpdate<String>,

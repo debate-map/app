@@ -248,8 +248,9 @@ function GetPortForwardCommandsStr(context) {
 	return `concurrently --kill-others --names db,ws,asr,mo "${forDB}" "${forWebServer}" "${forAppServer}" "${forMonitor}"`;
 }
 
-function RunTiltUp_ForSpecificPod(podName, port) {
-	const command = `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt up ${podName} --stream      -f ./Tilt/Main.star --context ovh --port ${port}`;
+function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
+	let command = `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt up ${podName} --stream      -f ./Tilt/Main.star --context ovh --port ${port}`;
+	if (tiltfileArgsStr) command += ` -- ${tiltfileArgsStr}`;
 	//const command_parts = command.split(" ");
 	const commandProcess = spawn("cmd", ["/c", command]);
 	commandProcess.stdout.on("data", chunk=>{
@@ -298,9 +299,11 @@ Object.assign(scripts, {
 		tiltUp_ovh:                `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt up   -f ./Tilt/Main.star --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
 		tiltDown_ovh:              `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt down -f ./Tilt/Main.star --context ovh`,
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
-		tiltUp_ovh_webServer:      Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
-		tiltUp_ovh_appServer:      Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
-		tiltUp_ovh_monitorBackend: Dynamic(()=>RunTiltUp_ForSpecificPod("dm-monitor-backend", 10363)), // tilt-port +(10+3), as targeted tilt-up #3
+		tiltUp_ovh_webServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
+		tiltUp_ovh_appServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_appServer_quicker:  Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift")), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_appServer_quickest: Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362, "--compileWithCranelift --compileWithRelease=False")), // tilt-port +(10+2), as targeted tilt-up #2
+		tiltUp_ovh_monitorBackend:     Dynamic(()=>RunTiltUp_ForSpecificPod("dm-monitor-backend", 10363)), // tilt-port +(10+3), as targeted tilt-up #3
 
 		// Using tilt to deploy is convenient, but does have some negatives -- biggest one being that pressing "Trigger update" delete the pod, builds, then deploy the pod, leaving a gap/downtime.
 		// So provide a way to do a "traditional" `kubectl apply` for the main debate-map pods, which avoids that pod downtime.
@@ -432,6 +435,7 @@ scripts.backend.dockerBuild_gitlab_base = `${PrepDockerCmd()} docker build -f ./
 function SetTileEnvCmd(prod, context) {
 	return SetEnvVarsCmd({
 		TILT_WATCH_WINDOWS_BUFFER_SIZE: "65536999",
+		// todo: probably make-so these are passed as Tiltfile-args (see config.parse() in Main.star) rather than environment-variables
 		ENV: prod ? "prod" : "dev",
 		CONTEXT: context,
 	});

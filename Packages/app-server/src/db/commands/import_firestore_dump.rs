@@ -16,7 +16,7 @@ use rust_shared::async_graphql::{Object};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::anyhow::{anyhow, Error, ensure, bail, Context};
 use rust_shared::utils::time::{time_since_epoch_ms_i64};
-use rust_shared::serde::{Deserialize};
+use rust_shared::serde::{Serialize, Deserialize};
 use tracing::{info, warn};
 
 use crate::db::_shared::access_policy_target::AccessPolicyTarget;
@@ -60,7 +60,7 @@ wrap_slow_macros!{
     }
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct ImportFirestoreDumpInput {
 	pub placeholder: Option<bool>,
 }

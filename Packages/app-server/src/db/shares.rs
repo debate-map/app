@@ -50,7 +50,7 @@ pub struct ShareInput {
     pub mapView: JSONValue,
 }
 
-#[derive(InputObject, Deserialize)]
+#[derive(InputObject, Serialize, Deserialize)]
 pub struct ShareUpdates {
     pub name: FieldUpdate<String>,
 	//pub r#type: FieldUpdate<ShareType>,

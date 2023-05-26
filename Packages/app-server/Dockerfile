@@ -8,18 +8,19 @@
 # STAGE 2 (base-image: dm-rust-base)
 # ==================================================
 # ----------
-	# see: ./Tiltfile (or source: Packages/deploy/@RustBase/Dockerfile)
+	# see: ./Tilt/Main.star (or source: Packages/deploy/@RustBase/Dockerfile)
 	FROM $RUST_BASE_URL as cargo-build
 	ARG env_ENV
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
+	ARG cargo_path
 	ARG copy_from_path
 # ----------
 
 # initial arg processing
 WORKDIR "/dm_repo"
 ENV ENV=$env_ENV
-RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
+RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
 
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
@@ -41,15 +42,14 @@ WORKDIR /dm_repo/Packages/app-server
 # to clear the cache below (and all other mount-caches), run: docker builder prune --filter type=exec.cachemount
 #RUN --mount=type=cache,target=/usr/local/cargo,from=dm-rust-base,source=/usr/local/cargo \
 RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
+#	--mount=type=cache,target=/cg_clif,from=rust,source=/cg_clif \
+#	--mount=type=cache,target=/cg_clif \
+#	--mount=type=cache,target=/usr/local/rustup \
+#	--mount=type=cache,target=/cg_clif/dist/lib \
 	--mount=type=cache,target=/dm_repo/target \
 #	RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag} -- -Z time-passes
 #	RUSTC_BOOTSTRAP=1 cargo build --timings ${debug_vs_release_flag} && \
-#	cargo build --timings ${debug_vs_release_flag} && \
-# next line/variant must be accompanied by comment of `"release" if...` branch in App.star
-#	cargo build --timings && \
-	/cg_clif/dist/bin/cargo-clif build --timings ${debug_vs_release_flag} && \
-# next line/variant must be accompanied by comment of `"release" if...` branch in App.star
-#	/cg_clif/dist/bin/cargo-clif build --timings && \
+	${cargo_path} build --timings ${debug_vs_release_flag} && \
 	# move binary out of target folder, else will stay in cache volume and be inaccessible in later steps
 	mv ${copy_from_path} /dm_repo/Packages/app-server/app-server-binary
 

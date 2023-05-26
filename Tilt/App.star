@@ -28,8 +28,8 @@ def Start_App(g):
 	docker_build(imageURL_rustBase, '..', dockerfile='../Packages/deploy/@RustBase/Dockerfile',
 		build_args={
 			"env_ENV": os.getenv("ENV") or "dev",
-			"debug_vs_release": "release" if g["APP_USE_RELEASE_FLAG"] else "debug",
-			"debug_vs_release_flag": "--release" if g["APP_USE_RELEASE_FLAG"] else "",
+			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
+			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 		},
 	)
 
@@ -38,11 +38,12 @@ def Start_App(g):
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
 			"env_ENV": os.getenv("ENV") or "dev",
-			"debug_vs_release": "release" if g["APP_USE_RELEASE_FLAG"] else "debug",
-			"debug_vs_release_flag": "--release" if g["APP_USE_RELEASE_FLAG"] else "",
+			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
+			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
+			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
 			# todo: probably just always use dev/debug mode (there are very few users of the monitor tool, so compile speed is more important than execution speed)
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
-			"copy_from_path": "/dm_repo/target/" + ("release" if g["APP_USE_RELEASE_FLAG"] else "debug") + "/monitor-backend",
+			"copy_from_path": "/dm_repo/target/" + ("release" if g["compileWithRelease"] else "debug") + "/monitor-backend",
 		},
 	)
 	imageURL_webServer = g["registryURL"] + '/dm-web-server-' + os.getenv("ENV")
@@ -50,10 +51,11 @@ def Start_App(g):
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
 			"env_ENV": os.getenv("ENV") or "dev",
-			"debug_vs_release": "release" if g["APP_USE_RELEASE_FLAG"] else "debug",
-			"debug_vs_release_flag": "--release" if g["APP_USE_RELEASE_FLAG"] else "",
+			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
+			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
+			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
-			"copy_from_path": "/dm_repo/target/" + ("release" if g["APP_USE_RELEASE_FLAG"] else "debug") + "/web-server",
+			"copy_from_path": "/dm_repo/target/" + ("release" if g["compileWithRelease"] else "debug") + "/web-server",
 		},
 	)
 	imageURL_appServer = g["registryURL"] + '/dm-app-server-' + os.getenv("ENV")
@@ -61,10 +63,11 @@ def Start_App(g):
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
 			"env_ENV": os.getenv("ENV") or "dev",
-			"debug_vs_release": "release" if g["APP_USE_RELEASE_FLAG"] else "debug",
-			"debug_vs_release_flag": "--release" if g["APP_USE_RELEASE_FLAG"] else "",
+			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
+			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
+			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
 			# docker doesn't seem to support string interpolation in COPY command, so do it here
-			"copy_from_path": "/dm_repo/target/" + ("release" if g["APP_USE_RELEASE_FLAG"] else "debug") + "/app-server",
+			"copy_from_path": "/dm_repo/target/" + ("release" if g["compileWithRelease"] else "debug") + "/app-server",
 		},
 	)
 

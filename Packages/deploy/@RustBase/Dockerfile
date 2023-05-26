@@ -7,14 +7,15 @@
 	# NOTE: sync with entry in Tiltfile
 	FROM instrumentisto/rust:nightly-bullseye-2023-05-24
 
-	ARG env_ENV
-	ARG debug_vs_release
-	ARG debug_vs_release_flag
+	# commented; these args aren't used in this dockerfile anyway, so leave them out, to allow complete skipping of this dockerfile (execution can be fast anyway when most steps cached, but this way keeps the logs leaner)
+	#ARG env_ENV
+	#ARG debug_vs_release
+	#ARG debug_vs_release_flag
 # ----------
 
 # initial arg processing
-ENV ENV=$env_ENV
-RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
+#ENV ENV=$env_ENV
+#RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
 
 # generic env-var for code to know if its running as part of a Dockerfile
 ENV IN_DOCKER=1
@@ -62,19 +63,16 @@ COPY .cargo/config.toml .cargo/config.toml
 # this sets the debugging-info granularity to "per line", rather than the default "2" which is more detailed; this speeds up builds a bit 
 ENV CARGO_PROFILE_DEV_DEBUG=1
 
-# cargo's "update crates.io index" step is slow; cache that step in its own layer
-# TODO: remove this step, as it's not important anymore (now that cargo is configured to use the "sparse index" option, which is close to instant)
-#RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
-RUN USER=root cargo new --bin update-index-helper
-WORKDIR /dm_repo/update-index-helper
+# rust-base may end up with an old version of the cargo components cached (see next section); to break this cache, we can toggle the number in the next line
+RUN echo "Cache-breaker (0 or 1): 0"
+
+# depending on build variables, we may need to collect a few more files before compiling; do this ahead of time for those scenarios, so its cached in the RustBase image
+RUN USER=root cargo new --bin cargo-build-prepper
+WORKDIR /dm_repo/cargo-build-prepper
 # add one tiny dependency (with no subdeps), so cargo-build updates the index
 RUN echo "void = \"1\"" >> Cargo.toml
-#RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
-#RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag}
-#RUN cargo rustc ${debug_vs_release_flag}
-#RUN cargo rustc # must be accompanied by comment of `"release" if...` branch in App.star
-RUN /cg_clif/dist/bin/cargo-clif build ${debug_vs_release_flag}
-#RUN /cg_clif/dist/bin/cargo-clif build # must be accompanied by comment of `"release" if...` branch in App.star
+# compile once with cranelift, so that it can download and install the cargo components it needs (mount-cache attempt in main build command not working fsr)
+RUN /cg_clif/dist/bin/cargo-clif build
 
 WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
