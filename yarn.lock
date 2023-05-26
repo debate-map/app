@@ -2430,7 +2430,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
-    ui-debug-kit: 0.0.6
+    ui-debug-kit: 0.0.7
     web-vcore: 0.0.74
   languageName: unknown
   linkType: soft
@@ -9584,7 +9584,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.39, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
+"mobx-graphlink@0.0.38, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
   version: 0.0.0-use.local
   resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
   dependencies:
@@ -13969,17 +13969,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"ui-debug-kit@npm:0.0.6":
-  version: 0.0.6
-  resolution: "ui-debug-kit@npm:0.0.6"
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  checksum: 79ab0ada0d90f26c959ac29f790447658644a5c46c259b4367c475f1f9dd0fc86b578cd94d6d761261dd0a286c2e526a5fcf5cf6b9eb254198bd966657992348
-  languageName: node
-  linkType: hard
-
-"ui-debug-kit@workspace:.yalc/ui-debug-kit":
+"ui-debug-kit@0.0.7, ui-debug-kit@workspace:.yalc/ui-debug-kit":
   version: 0.0.0-use.local
   resolution: "ui-debug-kit@workspace:.yalc/ui-debug-kit"
   peerDependencies:
@@ -14539,7 +14529,7 @@ typescript@~3.7.3:
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.39
+    mobx-graphlink: 0.0.38
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0

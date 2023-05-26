@@ -3,6 +3,7 @@ import "web-vcore/nm/mobx"; // import mobx before we declare the module below, o
 import {Graphlink, SetDefaultGraphOptions, ProvideReactModule} from "web-vcore/nm/mobx-graphlink.js";
 import React from "react";
 import {GetCookie} from "web-vcore";
+import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
 import {RootState, store} from "../../Store/index.js";
 import {apolloClient} from "./Apollo.js";
 
@@ -26,6 +27,7 @@ export function InitGraphlink() {
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 		onServer: false,
 		//unsubscribeTreeNodesAfter: 30000, // on live-query's data becoming unobserved, wait 30s before unsubscribing (user may re-expand something just closed, in the short-term)
+		unsubscribeTreeNodesAfter: GetMGLUnsubscribeDelay(),
 	});
 	// user-info is now supplied at the end of InitApollo() instead
 	/*graph.userInfo = {
@@ -34,6 +36,10 @@ export function InitGraphlink() {
 		//id: userID,
 	};*/
 	ProvideReactModule(React);
+}
+
+export function GetMGLUnsubscribeDelay() {
+	return store.main.blockMobXUnsubscribing ? MAX_TIMEOUT_DURATION : 5000;
 }
 
 // modify some default options

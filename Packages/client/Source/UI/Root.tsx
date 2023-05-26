@@ -4,6 +4,7 @@ import {hasHotReloaded} from "Main";
 import React from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
+import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, PageContainer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {Clone, Vector2} from "web-vcore/nm/js-vextensions.js";
@@ -52,6 +53,9 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 
 		await trunk.init();
 		console.log("Loaded state:", Clone(store));
+
+		// some fields that need to be (re-)set after store is loaded (eg. due to their being initialized prior to the store, but some of their settings being controlled by in-store values)
+		graph.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
 
 		// start auto-runs, now that store+firelink are created (and store has initialized -- not necessary, but nice)
 		//require("../Utils/AutoRuns");

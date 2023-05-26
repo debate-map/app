@@ -30,8 +30,10 @@ export class MainState {
 	//@O dbVersionOverride: string|n;
 
 	@O analyticsEnabled = true;
-	// topLeftOpenPanel: string;
-	// topRightOpenPanel: string;
+	@O blockMobXUnsubscribing = false;
+	@O blockCacheClearing = false;
+	//topLeftOpenPanel: string;
+	//topRightOpenPanel: string;
 	@O @ignore shareBeingLoaded: string|n;
 	@O @ignore selectNode_fragmentPath: string|n;
 

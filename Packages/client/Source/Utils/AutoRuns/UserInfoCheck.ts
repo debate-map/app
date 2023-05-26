@@ -1,3 +1,4 @@
+import {store} from "Store";
 import {AttachUserJWTToWebSocketConnection} from "Utils/LibIntegrations/Apollo";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddNotificationMessage} from "web-vcore";
@@ -48,10 +49,11 @@ export function OnUserJWTChanged() {
 /** Call this whenever the jwt-data attached to the websocket connection is has changed. (so that requests are re-made, with the new auth-data) */
 export async function SendUserJWTToMGL() {
 	const userInfoFromToken = GetUserInfoFromStoredJWT();
+	// maybe todo: if prior user-info matches the user-info we're about to set, then don't clear the cache (we may merely be calling this as part of websocket reconnect, thus it may not be necessary)
 	if (userInfoFromToken != null) {
-		await graph.SetUserInfo({id: userInfoFromToken.id});
+		await graph.SetUserInfo({id: userInfoFromToken.id}, !store.main.blockCacheClearing);
 	} else {
-		await graph.SetUserInfo(null);
+		await graph.SetUserInfo(null, !store.main.blockCacheClearing);
 	}
 }
 
