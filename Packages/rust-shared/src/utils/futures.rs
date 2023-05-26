@@ -1,9 +1,11 @@
 use std::future::Future;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::task::{Context, Poll, Wake};
 use std::thread::{self, Thread};
 use std::time::Duration;
 use tokio;
+use futures::lock::Mutex;
 
 // attempt 1
 // ==========
@@ -62,13 +64,16 @@ pub async fn make_reliable<T>(fut: impl Future<Output = T>, poll_frequency: Dura
 
     // Create a new context to be passed to the future.
     let waker = Arc::new(EmptyWaker).into();
-    let mut cx = Context::from_waker(&waker);
+
+    // maybe temp; have a new Context created at each loop, since (after update) error occurs at await-point otherwise (about some `*mut ()` being non-Send)
+    //let mut cx = Context::from_waker(&waker);
 
     let mut interval = tokio::time::interval(poll_frequency);
     loop {
         // The next two lines are where the magic happens: every X interval, poll the future...
         // ...even if the future-context "above" this function/future is not getting polled reliably
         interval.tick().await;
+        let mut cx = Context::from_waker(&waker);
         match fut.as_mut().poll(&mut cx) {
             Poll::Pending => {},
             Poll::Ready(res) => {

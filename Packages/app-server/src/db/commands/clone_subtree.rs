@@ -184,7 +184,7 @@ pub async fn clone_subtree(gql_ctx: &async_graphql::Context<'_>, payload_raw: JS
         // todo: recreate the CalculateNodeIDsForTag function, so we don't need manual updating of the "nodes" field
 
         // for now, only transfer tags in the "basics" group like labels, and special-cases like clone-history tags (see MaybeCloneAndRetargetNodeTag func)
-        if let Some(mut labels) = tag.labels.as_mut() {
+        if let Some(labels) = tag.labels.as_mut() {
             let old_nodeX_id = labels.nodeX.clone();
             labels.nodeX = get_new_id_str(&labels.nodeX);
             tag.nodes = tag.nodes.into_iter().map(|node_id| if node_id == old_nodeX_id { labels.nodeX.clone() } else { node_id }).collect_vec();

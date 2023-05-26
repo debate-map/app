@@ -29,7 +29,7 @@ use axum::routing::{get, post, MethodFilter, on_service};
 use axum::{extract, Router};
 use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
-use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
+use axum::extract::{FromRequest, WebSocketUpgrade};
 use axum::http::{self, uri::Uri, Request, Response, StatusCode};
 use axum::Error;
 use axum::{

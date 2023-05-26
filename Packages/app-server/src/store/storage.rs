@@ -28,7 +28,7 @@ use rust_shared::async_graphql::futures_util::task::{Context, Poll};
 use rust_shared::async_graphql::http::{WebSocketProtocols, WsMessage, ALL_WEBSOCKET_PROTOCOLS};
 use axum::body::{boxed, BoxBody, HttpBody};
 use axum::extract::ws::{CloseFrame, Message};
-use axum::extract::{FromRequest, RequestParts, WebSocketUpgrade};
+use axum::extract::{FromRequest, WebSocketUpgrade};
 use axum::http::{self, Request, Response, StatusCode};
 use axum::Error;
 use futures_util::future::{BoxFuture, Ready};

@@ -12,7 +12,7 @@ use rust_shared::hyper::server::conn::AddrStream;
 use rust_shared::hyper::{client::HttpConnector, Body, Server, StatusCode};
 use rust_shared::hyper::client::{Client};
 use rust_shared::hyper::service::{service_fn, make_service_fn};
-use axum::extract::{FromRequest, RequestParts, Extension};
+use axum::extract::{FromRequest, Extension};
 use axum::http::{Method, HeaderValue};
 use axum::http::header::CONTENT_TYPE;
 use axum::response::{self, IntoResponse};

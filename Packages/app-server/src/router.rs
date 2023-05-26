@@ -1,4 +1,4 @@
-use rust_shared::{axum::{self, response::{self, IntoResponse}, extract::Extension}, tower_http, utils::{general::k8s_env}, anyhow::{bail, ensure}};
+use rust_shared::{axum::{self, response::{self, IntoResponse, Response}, extract::Extension, middleware::Next}, tower_http, utils::{general::k8s_env}, anyhow::{bail, ensure}};
 use rust_shared::hyper::{Request, Body, Method};
 use axum::{
     response::{Html},
@@ -72,7 +72,7 @@ pub async fn start_router(app_state: AppStateArc) {
     let app = app
         .layer(Extension(app_state.clone()))
         //.with_state(app_state.clone()) // for new version of axum apparently
-        .layer(Extension(middleware::from_fn(print_request_response)))
+        .layer(Extension(middleware::from_fn::<_, Response<Body>>(print_request_response)))
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
