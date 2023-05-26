@@ -46,6 +46,13 @@ RUN apt-get install -y tree
 # ensure mold is installed
 RUN mold --version
 
+# install the cranelift compiler
+RUN mkdir /cg_clif && \
+	cd /cg_clif && \
+	curl -o cg_clif-x86_64-unknown-linux-gnu.tar.xz -L https://github.com/bjorn3/rustc_codegen_cranelift/releases/download/dev/cg_clif-x86_64-unknown-linux-gnu.tar.xz && \
+	tar -xf cg_clif-x86_64-unknown-linux-gnu.tar.xz && \
+	ls
+
 WORKDIR /dm_repo
 
 # this makes-so cargo-build and such uses mold as its linker
@@ -56,6 +63,7 @@ COPY .cargo/config.toml .cargo/config.toml
 ENV CARGO_PROFILE_DEV_DEBUG=1
 
 # cargo's "update crates.io index" step is slow; cache that step in its own layer
+# TODO: remove this step, as it's not important anymore (now that cargo is configured to use the "sparse index" option, which is close to instant)
 #RUN cd ~/.cargo/registry/index/github.com-1ecc6299db9ec823 && git fetch
 RUN USER=root cargo new --bin update-index-helper
 WORKDIR /dm_repo/update-index-helper
@@ -63,7 +71,10 @@ WORKDIR /dm_repo/update-index-helper
 RUN echo "void = \"1\"" >> Cargo.toml
 #RUN RUSTC_BOOTSTRAP=1 cargo build ${debug_vs_release_flag}
 #RUN RUSTC_BOOTSTRAP=1 cargo rustc ${debug_vs_release_flag}
-RUN cargo rustc ${debug_vs_release_flag}
+#RUN cargo rustc ${debug_vs_release_flag}
+#RUN cargo rustc # must be accompanied by comment of `"release" if...` branch in App.star
+RUN /cg_clif/dist/bin/cargo-clif build ${debug_vs_release_flag}
+#RUN /cg_clif/dist/bin/cargo-clif build # must be accompanied by comment of `"release" if...` branch in App.star
 
 WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
