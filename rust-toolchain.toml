@@ -1,7 +1,8 @@
 [toolchain]
 #channel = "1.65.0"
 # use nightly, so that it's easy to run tests and such (no need for RUSTC_BOOTSTRAP=1 hack everywhere, due to use of feature flags)
-channel = "nightly-2022-12-07"
+# NOTE: Keep this in sync with version of "instrumentisto/rust" in "@RustBase/Dockerfile".
+channel = "nightly-2023-05-24"
 
 #components = ["rustfmt", "rust-std", "clippy"]
 #targets = ["wasm32-unknown-unknown", "x86_64-unknown-linux-gnu"]

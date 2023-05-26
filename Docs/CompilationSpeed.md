@@ -9,15 +9,19 @@ Shortenings:
 Timings (fresh, standard, debug):
 * 2023-05-26, SW (possibly not 100% fresh): "Finished dev [unoptimized + debuginfo] target(s) in 5m 19s"
 * 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 7m 01s"
+* 2023-05-26b, SW (possibly not 100% fresh): "Finished dev [unoptimized + debuginfo] target(s) in 5m 11s"
 
 Timings (fresh, cranelift-msvc, debug):
 * 2023-05-26, SW: "Finished dev [unoptimized + debuginfo] target(s) in 5m 55s"
+* 2023-05-26b, SW: "Finished dev [unoptimized + debuginfo] target(s) in 4m 25s"
 
 Timings (fresh, release, standard):
 * 2023-05-26, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 9m 47s"
+* 2023-05-26b, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 8m 21s"
 
 Timings (fresh, release, cranelift-msvc):
 * 2023-05-26, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 5m 05s"
+* 2023-05-26b, SW (possibly not 100% fresh; had debug-build artifacts present): "Finished release [optimized] target(s) in 4m 03s"
 
 ## Incremental
 
