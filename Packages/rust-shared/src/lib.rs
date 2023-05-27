@@ -91,7 +91,10 @@ pub mod utils {
     }
     pub mod _k8s;
     pub mod k8s {
+        pub mod cert_handling;
         pub mod k8s_structs;
+        pub mod k8s_client;
+        pub mod upgrade;
     }
     pub mod locks {
         pub mod check_lock_order;

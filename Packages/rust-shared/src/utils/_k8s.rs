@@ -3,34 +3,18 @@ use std::{env, fs::{self, File}, str::FromStr, sync::Arc, io::Read, time::System
 use anyhow::{Context, anyhow, Error, bail, ensure};
 use axum::http;
 use futures::StreamExt;
-use hyper::{upgrade, Body};
+use hyper::{upgrade, Body, client::HttpConnector};
+use hyper_rustls::HttpsConnector;
 use itertools::Itertools;
-use k8s_openapi::api::core::v1::Pod;
-use kube::{Api, Client, api::{AttachParams, AttachedProcess}};
 use reqwest::Url;
+use rustls::ClientConfig;
 use serde_json::{json, self};
-use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config, tungstenite::{self, Message}};
+use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config, tungstenite::{self, Message, protocol::WebSocketConfig}};
 use tower::ServiceBuilder;
-use super::type_aliases::JSONValue;
+use super::{type_aliases::JSONValue, k8s::cert_handling::get_reqwest_client_with_k8s_certs};
 use tracing::{info, error, instrument::WithSubscriber, warn};
 
-use crate::{utils::k8s::k8s_structs::K8sSecret, domains::{get_server_url, DomainsConstants}};
-
-pub fn get_reqwest_client_with_k8s_certs() -> Result<reqwest::Client, Error> {
-    /*let mut buf = Vec::new();
-    File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?
-        .read_to_end(&mut buf)?;
-    let cert = reqwest::Certificate::from_pem(&buf)?;
-    Ok(reqwest::ClientBuilder::new()
-        .add_root_certificate(cert).build()?)*/
-
-    // temp: For now, completely disable cert-verification for connecting to the k8s service, to avoid "presented server name type wasn't supported" error.
-    // This step won't be necessary once the issue below is resolved:
-    // * issue in rustls (key comment): https://github.com/rustls/rustls/issues/184#issuecomment-1116235856
-    // * pull-request in webpki subdep: https://github.com/briansmith/webpki/pull/260
-    Ok(reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true).build()?)
-}
+use crate::{utils::k8s::{k8s_structs::K8sSecret, k8s_client::upgrade_to_websocket, cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_dangerous}}, domains::{get_server_url, DomainsConstants}};
 
 #[derive(Debug)]
 pub struct K8sPodBasicInfo {
@@ -137,6 +121,8 @@ pub async fn get_or_create_k8s_secret(name: String, namespace: &str, new_data_if
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>, allow_utf8_lossy: bool) -> Result<String, Error> {
     info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
     let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+    /*let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
+    let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;*/
 
     let mut query_str = format!("?command={}", command_name);
     for arg in &command_args {
@@ -147,21 +133,31 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     }
     query_str.push_str("&stdin=true&stderr=true&stdout=true&tty=true");
 
+    let client = get_hyper_client_with_k8s_certs()?;
+    //let client = get_reqwest_client_with_k8s_certs()?;
+    /*let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
+        .header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {token}"))
+        .body(vec![]).build()?;*/
+    //let req = tungstenite::http::Request::builder().uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
     let req = tungstenite::http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
         .header("Authorization", format!("Bearer {token}"))
         .body(vec![]).unwrap();
-
-    // this constructor automatically finds the k8s auth-data from environment (eg. token from "/var/run/secrets/kubernetes.io/serviceaccount/token", and k8s host/port from env-vars and/or default service uri)
-    let client = Client::try_default().await?;
+        //.body(()).unwrap();
 
     // commented; this doesn't work for endpoints that require https->ws upgrade (eg. exec), so we just always use the semi-manual approach below instead
     /*let pods: Api<Pod> = Api::namespaced(client, pod_namespace);
     let attached = pods.exec(pod_name, command_name_and_args, &AttachParams::default().tty(false).stderr(true)).await?;
     //Api::attach(&self, name, ap).await.unwrap().*/
 
+    // this route gets error: "URL error: URL scheme not supported"
+    // (seems the issue is that the function used expects a websocket connection from the start, ie. it cannot handle the tricky upgrade part)
+    //let res_as_str = process_exec_ws_messages(req).await?;
+
     // if desired, the websocket connection code is probably not that hard to extract; for ref: https://github.com/kubernetes-client/python/issues/409#issuecomment-1241425302
-    let mut response = client.connect(req).await?;
+    // this route gets error (using direct hyper): "failed to switch protocol: 403 Forbidden"
+    let mut response = upgrade_to_websocket(client, req).await?;
     let mut res_as_str = String::new();
     loop {
         let (next_item, rest_of_response) = response.into_future().await;
@@ -206,3 +202,29 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     info!("Got response from k8s server, on trying to run command using exec. @command:\"{} {}\" @response_len: {}", command_name, command_args.join(" "), res_as_str.len());
     Ok(res_as_str)
 }
+
+/*pub async fn process_exec_ws_messages(req: tokio_tungstenite::tungstenite::http::Request<()>) -> Result<String, Error> {
+    //let (mut socket, response) = connect_async(req).await?;
+    let (mut socket, response) = connect_async_tls_with_config(req, None, Some(tokio_tungstenite::Connector::Rustls(Arc::new(get_rustls_config_dangerous()?)))).await?;
+    info!("Connection made with k8s api's exec endpoint. @response:{response:?}");
+
+    let mut combined_result = String::new();
+    loop {
+        let msg = match socket.next().await {
+            None => {
+                // when None is returned, it means stream has ended, so break this loop
+                break;
+            },
+            Some(entry) => match entry {
+                Ok(msg) => msg,
+                Err(err) => {
+                    bail!("Error reading message from websocket connection:{}", err);
+                }
+            },
+        };
+        let msg_as_str = msg.into_text().unwrap();
+        info!("Got websocket message: {}", msg_as_str);
+        combined_result.push_str(&msg_as_str);
+    }
+    Ok(combined_result)
+}*/
