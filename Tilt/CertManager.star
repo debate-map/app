@@ -20,8 +20,11 @@ def Start_CertManager(g):
 			namespace="cert-manager",
 			create_namespace=True,
 			set=[
+				# for list of options, see here: https://github.com/lvyanru8200/cert-manager/blob/2f0d49203603cebe47551a9ed940fbfd26ac9715/deploy/charts/cert-manager/README.template.md
 				"installCRDs=true",
-				"extraArgs={--feature-gates=ExperimentalGatewayAPISupport=true}",
+				#"featureGates=\"ExperimentalGatewayAPISupport=true\"", # note sure if this is the correct quoting to use
+				"extraArgs={--feature-gates=ExperimentalGatewayAPISupport=true}", # use extraArgs instead of dedicated featureGates field for now (since we know this works)
+				"maxConcurrentChallenges=1" # rather than add ",--max-concurrent-challenges=2" to the "extraArgs" field above, use the dedicated field for it (else dedicated-field's value gets added to launch args as well!)
 			],
 		)
 

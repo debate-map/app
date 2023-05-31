@@ -14,22 +14,21 @@ spec:
   - "debatemap.app"
   - "debates.app"
   rules:
-    -
-      # matches:
-      #   - path:
-      #       #type: Exact
-      #       # match all paths, except for those starting with "/.well-known" (since that signifies an ACME certificate-challenge solver request, which will break if handled by this route)
-      #       type: RegularExpression
-      #       #value: "^(?!/.well-known)"
-      #       #value: "^(?!/\\.well-known)"
-      #       value: "/[a-zA-Z0-9_-]" # basically, match everything except a path that starts with "/." (see above)
-      # matches:
-      #   - path:
-      #       type: Exact
-      #       value: "/test1"
-      backendRefs:
+    - backendRefs:
         - name: dm-web-server
           port: 5100
+      matches:
+        #- {path: {type: "Exact", value: "/test1"}}
+
+        # Match all paths, except for those starting with "/.well-known". (since that signifies an ACME certificate-challenge solver request)
+        # Note that this exclusion is not really necessary (the solver routes override this generic one anyway), but this makes cert-manager error-messages less confusing.
+        #- {path: {type: "RegularExpression", value: "^(?!/.well-known)"}} # basically, match everything except a path that starts with "/." (see above)
+        #- {path: {type: "RegularExpression", value: "^(?!/\\.well-known)"}} # basically, match everything except a path that starts with "/." (see above)
+        - {path: {type: "RegularExpression", value: "/[a-zA-Z0-9_-]"}} # basically, match everything except a path that starts with "/." (see above)
+      # matches:
+      #   -
+      #     type: Exact
+      #     value: "/test1"
 ---
 apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: HTTPRoute

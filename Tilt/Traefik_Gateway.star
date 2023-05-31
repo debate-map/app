@@ -77,7 +77,7 @@ def Start_TraefikGateway(g):
 	# gateway api (layer on top of traefik)
 	# ==========
 
-	k8s_yaml(kustomize("../Packages/deploy/LoadBalancer/@Attempt7")) # from: https://github.com/kubernetes-sigs/gateway-api/tree/v0.4.3/config/crd
+	k8s_yaml(kustomize("../Packages/deploy/LoadBalancer/@Attempt7")) # from: https://github.com/kubernetes-sigs/gateway-api/tree/v0.7.0/config/crd
 	#k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt7/gateway-webhooks/admission_webhook.yaml") # from: https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.4.3/deploy/admission_webhook.yaml
 	#k8s_yaml("./Packages/deploy/LoadBalancer/@Attempt7/gateway-webhooks/certificate_config.yaml") # from: https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.4.3/deploy/certificate_config.yaml
 
@@ -105,11 +105,14 @@ def Start_TraefikGateway(g):
 				#"gateway-api:namespace",
 				"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
 				"gateways.gateway.networking.k8s.io:customresourcedefinition",
-				"httproutes.gateway.networking.k8s.io:customresourcedefinition",
-				"referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
-				"tcproutes.gateway.networking.k8s.io:customresourcedefinition",
-				"tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
-				"udproutes.gateway.networking.k8s.io:customresourcedefinition",
+
+				# some objects commented during update of gateway-api crds from 0.4.3 to 0.7.0
+				# todo: add back whatever objects there are in the new gateway-api crds
+				# "httproutes.gateway.networking.k8s.io:customresourcedefinition",
+				# "referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
+				# "tcproutes.gateway.networking.k8s.io:customresourcedefinition",
+				# "tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
+				# "udproutes.gateway.networking.k8s.io:customresourcedefinition",
 			],
 		},
 	])
