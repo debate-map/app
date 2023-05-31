@@ -16,7 +16,7 @@ def Start_CertManager(g):
 	if g["REMOTE"]:
 		helm_remote('cert-manager',
 			repo_url='https://charts.jetstack.io',
-			version='1.8.2',
+			version='1.12.1',
 			namespace="cert-manager",
 			create_namespace=True,
 			set=[
