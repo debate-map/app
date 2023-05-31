@@ -17,18 +17,37 @@ spec:
     - backendRefs:
         - name: dm-web-server
           port: 5100
-      matches:
+      #matches:
         #- {path: {type: "Exact", value: "/test1"}}
 
         # Match all paths, except for those starting with "/.well-known". (since that signifies an ACME certificate-challenge solver request)
         # Note that this exclusion is not really necessary (the solver routes override this generic one anyway), but this makes cert-manager error-messages less confusing.
         #- {path: {type: "RegularExpression", value: "^(?!/.well-known)"}} # basically, match everything except a path that starts with "/." (see above)
         #- {path: {type: "RegularExpression", value: "^(?!/\\.well-known)"}} # basically, match everything except a path that starts with "/." (see above)
-        - {path: {type: "RegularExpression", value: "/[a-zA-Z0-9_-]"}} # basically, match everything except a path that starts with "/." (see above)
-      # matches:
-      #   -
-      #     type: Exact
-      #     value: "/test1"
+        #- {path: {type: "RegularExpression", value: "/[a-zA-Z0-9_-]"}} # basically, match everything except a path that starts with "/." (see above)
+
+        # Traefik apparently does not support the "RegularExpression" path-type, so try using "ImplementationSpecific". See:
+        # 1) https://github.com/traefik/traefik/blob/cf1cbb24dfc6f5249f0315f239d6cd9003b7697f/pkg/provider/kubernetes/ingress/fixtures/v18-Ingress-with-implementationSpecific-pathType_ingress.yml
+        # 2) https://gateway-api.sigs.k8s.io/references/spec/#gateway.networking.k8s.io%2fv1beta1.PathMatchType
+        # 3) https://doc.traefik.io/traefik/routing/routers/#rule
+        #- {path: {type: "ImplementationSpecific", value: "/{path:(?i:[a-zA-Z0-9_-])}"}} # basically, match everything except a path that starts with "/." (see above)
+        
+      # since Traefik doesn't support regular-expressions or the like, try doing it with a bunch of "PathPrefix" matches instead # edit: this doesn't work; gateway api apparently limits the matches to 8
+      # matches: [
+      #   {path: {type: "PathPrefix", value: "/a"}},{path: {type: "PathPrefix", value: "/b"}},{path: {type: "PathPrefix", value: "/c"}},{path: {type: "PathPrefix", value: "/d"}},{path: {type: "PathPrefix", value: "/e"}},
+      #   {path: {type: "PathPrefix", value: "/f"}},{path: {type: "PathPrefix", value: "/g"}},{path: {type: "PathPrefix", value: "/h"}},{path: {type: "PathPrefix", value: "/i"}},{path: {type: "PathPrefix", value: "/j"}},
+      #   {path: {type: "PathPrefix", value: "/k"}},{path: {type: "PathPrefix", value: "/l"}},{path: {type: "PathPrefix", value: "/m"}},{path: {type: "PathPrefix", value: "/n"}},{path: {type: "PathPrefix", value: "/o"}},
+      #   {path: {type: "PathPrefix", value: "/p"}},{path: {type: "PathPrefix", value: "/q"}},{path: {type: "PathPrefix", value: "/r"}},{path: {type: "PathPrefix", value: "/s"}},{path: {type: "PathPrefix", value: "/t"}},
+      #   {path: {type: "PathPrefix", value: "/u"}},{path: {type: "PathPrefix", value: "/v"}},{path: {type: "PathPrefix", value: "/w"}},{path: {type: "PathPrefix", value: "/x"}},{path: {type: "PathPrefix", value: "/y"}},
+      #   {path: {type: "PathPrefix", value: "/z"}},
+      #   {path: {type: "PathPrefix", value: "/A"}},{path: {type: "PathPrefix", value: "/B"}},{path: {type: "PathPrefix", value: "/C"}},{path: {type: "PathPrefix", value: "/D"}},{path: {type: "PathPrefix", value: "/E"}},
+      #   {path: {type: "PathPrefix", value: "/F"}},{path: {type: "PathPrefix", value: "/G"}},{path: {type: "PathPrefix", value: "/H"}},{path: {type: "PathPrefix", value: "/I"}},{path: {type: "PathPrefix", value: "/J"}},
+      #   {path: {type: "PathPrefix", value: "/K"}},{path: {type: "PathPrefix", value: "/L"}},{path: {type: "PathPrefix", value: "/M"}},{path: {type: "PathPrefix", value: "/N"}},{path: {type: "PathPrefix", value: "/O"}},
+      #   {path: {type: "PathPrefix", value: "/P"}},{path: {type: "PathPrefix", value: "/Q"}},{path: {type: "PathPrefix", value: "/R"}},{path: {type: "PathPrefix", value: "/S"}},{path: {type: "PathPrefix", value: "/T"}},
+      #   {path: {type: "PathPrefix", value: "/U"}},{path: {type: "PathPrefix", value: "/V"}},{path: {type: "PathPrefix", value: "/W"}},{path: {type: "PathPrefix", value: "/X"}},{path: {type: "PathPrefix", value: "/Y"}},
+      #   {path: {type: "PathPrefix", value: "/Z"}},
+      #   {path: {type: "PathPrefix", value: "/_"}},{path: {type: "PathPrefix", value: "/-"}}
+      # ]
 ---
 apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: HTTPRoute
