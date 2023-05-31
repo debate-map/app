@@ -49,21 +49,21 @@ spec:
 # 1st variant of listeners, use numbered certificate keys
   listeners:
     # origin/ovh
-    - {name: https-ovh, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-ovh-as, hostname: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-ovh-monitor, hostname: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
+    - {name: https-ovh, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-ovh-as, hostname: app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-ovh-monitor, hostname: monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
     # debating.app
-    - {name: https-d1, hostname: debating.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-d1-as, hostname: app-server.debating.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-d1-monitor, hostname: monitor.debating.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
+    - {name: https-d1, hostname: debating.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-d1-as, hostname: app-server.debating.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-d1-monitor, hostname: monitor.debating.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
     # debatemap.app
-    - {name: https-d2, hostname: debatemap.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-d2-as, hostname: app-server.debatemap.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-d2-monitor, hostname: monitor.debatemap.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
+    - {name: https-d2, hostname: debatemap.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-d2-as, hostname: app-server.debatemap.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-d2-monitor, hostname: monitor.debatemap.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
     # debates.app
-    - {name: https-d3, hostname: debates.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-d3-as, hostname: app-server.debates.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
-    - {name: https-d3-monitor, hostname: monitor.debates.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod13, kind: Secret, group: core}]}}
+    - {name: https-d3, hostname: debates.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-d3-as, hostname: app-server.debates.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
+    - {name: https-d3-monitor, hostname: monitor.debates.app, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-prod15, kind: Secret, group: core}]}}
 
 # 2nd variant of listeners, using "named" certificate keys
   # listeners:

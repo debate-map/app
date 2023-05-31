@@ -119,6 +119,10 @@ Start_Reflector(g)
 load('./Postgres.star', 'Start_Postgres')
 Start_Postgres(g)
 
+# policy manager (eg. to block deletion of certain resources)
+load('./Kyverno.star', 'Start_Kyverno')
+Start_Kyverno(g)
+
 # load-balancer/reverse-proxy (traefik, ingress-based [old])
 # load('./Traefik_Ingress.star', 'Start_TraefikIngress')
 # Start_TraefikIngress(g)

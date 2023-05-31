@@ -1,0 +1,31 @@
+# based on: https://www.linkedin.com/pulse/kubernetes-protecting-resources-from-deletion-them-rodrigo/
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: protect-cert-manager-services
+spec:
+  validationFailureAction: enforce
+  background: false
+  rules:
+    - name: protect-cert-manager-services-rule
+      match:
+        namespaces:
+          - "default"
+        resources:
+          kinds:
+            - Service
+          # selector:
+          #   matchLabels:
+          #     acme.cert-manager.io/http01-solver: "true"
+      validate:
+        message: "Ops! You are not allowed to remove `Services` with label `acme.cert-manager.io/http01-solver=true`."
+        # pattern:
+        #   (namespace): default
+        deny:
+          conditions:
+            # The request.operation object contains the type of action being performed. 
+            # Values are either CREATE, UPDATE, or DELETE.
+            - key: "{{request.operation}}"
+              operator: In
+              value:
+                - DELETE
