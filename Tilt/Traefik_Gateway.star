@@ -139,7 +139,7 @@ def Start_TraefikGateway(g):
 				
 				# relating to certificate-provisioning
 				# temp-disabled (traefik issue 9158)
-				"gateway-https:gateway",
+				#"gateway-https:gateway",
 				
 				"route-web-server:httproute",
 				"route-app-server:httproute",

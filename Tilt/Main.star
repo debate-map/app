@@ -120,8 +120,8 @@ load('./Postgres.star', 'Start_Postgres')
 Start_Postgres(g)
 
 # policy manager (eg. to block deletion of certain resources)
-load('./Kyverno.star', 'Start_Kyverno')
-Start_Kyverno(g)
+# load('./Kyverno.star', 'Start_Kyverno')
+# Start_Kyverno(g)
 
 # load-balancer/reverse-proxy (traefik, ingress-based [old])
 # load('./Traefik_Ingress.star', 'Start_TraefikIngress')
@@ -132,8 +132,9 @@ load('./Traefik_Gateway.star', 'Start_TraefikGateway')
 Start_TraefikGateway(g)
 
 # cert-manager (for creating/renewing SSL certificates)
-load('./CertManager.star', 'Start_CertManager')
-Start_CertManager(g)
+# temp-disabled (traefik issue 9158)
+# load('./CertManager.star', 'Start_CertManager')
+# Start_CertManager(g)
 
 # own app (docker build and such)
 load('./App.star', 'Start_App')
