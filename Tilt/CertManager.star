@@ -11,9 +11,9 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 # main
 # ==========
 
-def Start_Gateway(g):
+def Start_CertManager(g):
 	# only install the netdata pods if we're in remote cluster (it has nothing to do in local cluster)
-	if REMOTE:
+	if g["REMOTE"]:
 		helm_remote('cert-manager',
 			repo_url='https://charts.jetstack.io',
 			version='1.8.2',
@@ -25,7 +25,7 @@ def Start_Gateway(g):
 			],
 		)
 
-		NEXT_k8s_resource_batch([
+		NEXT_k8s_resource_batch(g, [
 			{"workload": "cert-manager", "labels": ["cert-manager"]},
 			{"workload": "cert-manager-cainjector", "labels": ["cert-manager"]},
 			{"workload": "cert-manager-webhook", "labels": ["cert-manager"]},
@@ -80,11 +80,11 @@ def Start_Gateway(g):
 			"TILT_PLACEHOLDER:eab_hmacKey": os.getenv("EAB_HMAC_KEY"),
 			"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
 		}))
-		# NEXT_k8s_resource_batch([
+		# NEXT_k8s_resource_batch(g, [
 		# 	{"workload": "zerossl-issuer", "labels": ["cert-manager"]},
 		# ])
 
-		NEXT_k8s_resource(new_name="zerossl-issuer", labels=["cert-manager"],
+		NEXT_k8s_resource(g, new_name="zerossl-issuer", labels=["cert-manager"],
 			objects=[
 				"zerossl-eab:secret",
 				"zerossl-issuer:clusterissuer",

@@ -7,7 +7,7 @@ metadata:
 spec:
   parentRefs:
     - name: gateway-http
-    # - name: gateway-https # temp-disabled (traefik issue 9158)
+    - name: gateway-https # temp-disabled (traefik issue 9158)
   hostnames:
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "debating.app"
@@ -39,7 +39,7 @@ metadata:
 spec:
   parentRefs:
     - name: gateway-http
-    # - name: gateway-https # temp-disabled (traefik issue 9158)
+    - name: gateway-https # temp-disabled (traefik issue 9158)
   hostnames:
   - "app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "app-server.debating.app"
@@ -59,7 +59,7 @@ metadata:
 spec:
   parentRefs:
     - name: gateway-http
-    # - name: gateway-https # temp-disabled (traefik issue 9158)
+    - name: gateway-https # temp-disabled (traefik issue 9158)
   hostnames:
   - "monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "monitor.debating.app"
@@ -85,8 +85,8 @@ spec:
     - name: gateway-http
       namespace: default
     # temp-disabled (traefik issue 9158)
-    # - name: gateway-https
-    #   namespace: default
+    - name: gateway-https
+      namespace: default
   hostnames:
   - "grafana.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "grafana.debating.app"

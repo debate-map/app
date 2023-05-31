@@ -128,8 +128,8 @@ load('./Traefik_Gateway.star', 'Start_TraefikGateway')
 Start_TraefikGateway(g)
 
 # cert-manager (for creating/renewing SSL certificates)
-# load('./CertManager.star', 'Start_CertManager')
-# Start_CertManager(g)
+load('./CertManager.star', 'Start_CertManager')
+Start_CertManager(g)
 
 # own app (docker build and such)
 load('./App.star', 'Start_App')

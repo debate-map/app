@@ -18,7 +18,7 @@ def Start_Reflector(g):
 	# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
 	# k8s_yaml("../Packages/deploy/Reflector/reflector.yaml")
 	# k8s_yaml('../Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
-	# NEXT_k8s_resource("reflector",
+	# NEXT_k8s_resource(g, "reflector",
 	# 	objects=[
 	# 		"reflector:clusterrole",
 	# 		"reflector:clusterrolebinding",
@@ -33,7 +33,7 @@ def Start_Reflector(g):
 	# 	#version='5.4.17',
 	# 	version='6.1.47',
 	# )
-	# NEXT_k8s_resource("reflector",
+	# NEXT_k8s_resource(g, "reflector",
 	# 	objects=[
 	# 		"reflector:clusterrole",
 	# 		"reflector:clusterrolebinding",

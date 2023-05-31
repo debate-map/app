@@ -80,14 +80,14 @@ def Start_Postgres(g):
 	)
 
 	# Wait until the CRDs are ready.
-	#local_resource('pgo_crd-definition_ready', cmd='kubectl wait --for=condition=Established crd ' + pgo_crdName, resource_deps=GetLastResourceNamesBatch(), labels=["database_DO-NOT-RESTART-THESE"])
+	#local_resource('pgo_crd-definition_ready', cmd='kubectl wait --for=condition=Established crd ' + pgo_crdName, resource_deps=GetLastResourceNamesBatch(g), labels=["database_DO-NOT-RESTART-THESE"])
 	local_resource('pgo_crd-definition_ready', labels=["database_DO-NOT-RESTART-THESE"],
 		cmd="tilt wait --for=condition=Ready uiresource/pgo_crd-definition",
 		resource_deps=GetLastResourceNamesBatch(g),
 	)
 	AddResourceNamesBatch_IfValid(g, ["pgo_crd-definition_ready"])
 
-	# NEXT_k8s_resource(new_name='pgo_crd-instance',
+	# NEXT_k8s_resource(g, new_name='pgo_crd-instance',
 	# 	objects=[
 	# 		"debate-map:postgrescluster", # the CRD instance?
 	# 	],
@@ -131,12 +131,12 @@ def Start_Postgres(g):
 
 	# k8s_yaml(kustomize('../Packages/deploy/Monitors/pg-monitor-pack'))
 	# # nothing depends on these pods, so don't wait for them to be "ready"
-	# NEXT_k8s_resource("crunchy-prometheus", pod_readiness='ignore', labels=["monitoring"])
-	# NEXT_k8s_resource("crunchy-alertmanager", pod_readiness='ignore', labels=["monitoring"])
-	# NEXT_k8s_resource("crunchy-grafana", pod_readiness='ignore', labels=["monitoring"],
+	# NEXT_k8s_resource(g, "crunchy-prometheus", pod_readiness='ignore', labels=["monitoring"])
+	# NEXT_k8s_resource(g, "crunchy-alertmanager", pod_readiness='ignore', labels=["monitoring"])
+	# NEXT_k8s_resource(g, "crunchy-grafana", pod_readiness='ignore', labels=["monitoring"],
 	# 	port_forwards='4405:3000' if g["REMOTE"] else '3405:3000',
 	# )
-	# NEXT_k8s_resource(new_name="crunchy-others", labels=["monitoring"],
+	# NEXT_k8s_resource(g, new_name="crunchy-others", labels=["monitoring"],
 	# 	pod_readiness='ignore',
 	# 	objects=[
 	# 		"alertmanager:serviceaccount",

@@ -13,7 +13,7 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 
 def Start_TraefikIngress(g):
 	k8s_yaml(kustomize('../Packages/deploy/LoadBalancer/@Attempt6'))
-	traefik_resourceDeps = GetLastResourceNamesBatch()
+	traefik_resourceDeps = GetLastResourceNamesBatch(g)
 	k8s_resource("traefik-daemon-set",
 		resource_deps=traefik_resourceDeps,
 		labels=["traefik"],

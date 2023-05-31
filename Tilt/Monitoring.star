@@ -20,14 +20,14 @@ def Start_Monitoring(g):
 
 	# only install the netdata pods if we're in remote cluster (it can't collect anything useful in docker-desktop anyway; and removing it saves memory)
 	# temp-disabled (to make sure it's not messing up the cert-manager stuff, since some netdata pods were showing in its logs)
-	# if REMOTE:
+	# if g["REMOTE"]:
 	# 	helm_remote('netdata',
 	# 		repo_url='https://netdata.github.io/helmchart',
 	# 		#version='1.33.1',
 	# 		version='3.7.12', # helm-chart version is different from netdata version
 	# 	)
 
-	# 	NEXT_k8s_resource_batch([
+	# 	NEXT_k8s_resource_batch(g, [
 	# 		{"workload": "netdata-parent", "labels": ["monitoring"]},
 	# 		{"workload": "netdata-child", "labels": ["monitoring"]},
 	# 		{
