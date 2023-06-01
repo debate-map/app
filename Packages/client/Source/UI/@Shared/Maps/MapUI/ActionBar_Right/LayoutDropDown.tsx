@@ -104,7 +104,27 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
 						<Text>Screenshots:</Text>
-						<Button text="Take screenshot" onClick={async()=>{
+
+						<TextPlus sel info={`
+							When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with a cleaner appearance. Specifically:
+							1) Nav-bar shadows are removed, to reduce visual artifacts at the edges of map. (scroll-bars are also hidden, for if using screenshot extension)
+							2) Argument control-bars are hidden. (not relevant to non-interactive viewing)
+							3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
+							4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
+							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
+						`.AsMultiline(0)}>Screenshot mode:</TextPlus>
+						<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
+						{uiState.screenshotMode &&
+						<style>{`
+							.scrollTrack {
+								display: none !important;
+							}
+							nav, nav > div {
+								box-shadow: none !important;
+							}
+						`}</style>}
+
+						<Button ml={5} text="Take screenshot" onClick={async()=>{
 							const mapUIEl = MapUI.CurrentMapUI?.DOM_HTML;
 							const mapUIRootEl = mapUIEl?.querySelector(".MapUI") as HTMLElement;
 							if (mapUIRootEl == null) return void alert("Could not find the root \".MapUI\" element.");
@@ -122,20 +142,6 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 
 							StartDownload(dataUrl, "MapScreenshot.png", "", false);
 						}}/>
-						<TextPlus ml={5} sel info={`
-							When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with reduced visual artifacts at the edges of each section/sub-screenshot.
-							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
-						`.AsMultiline(0)}>Screenshot mode (alt):</TextPlus>
-						<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
-						{uiState.screenshotMode &&
-						<style>{`
-							.scrollTrack {
-								display: none !important;
-							}
-							nav, nav > div {
-								box-shadow: none !important;
-							}
-						`}</style>}
 					</RowLR>
 					<Row mt={3}>
 						<Button text="Clear map-view state" onClick={()=>{

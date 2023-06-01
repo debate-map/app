@@ -48,7 +48,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {placeholderRect} = this.state;
 
 		const playingTimeline = GetPlayingTimeline(map.id);
-		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls) && (!GADDemo || ShowHeader);
+		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls) && !(GADDemo && !ShowHeader) && !store.main.maps.screenshotMode;
 
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
@@ -127,6 +127,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 				// wrap these in funcs, so the execution-orders always match the display-orders (so that tree-path is correct)
 				const getLimitBar = ()=>{
+					if (store.main.maps.screenshotMode) return null;
 					return <ChildLimitBar {...{
 						map, path: parentPath, treePath: `${parentTreePath}/${nextChildFullIndex++}`,
 						inBelowGroup: belowNodeUI ?? false,

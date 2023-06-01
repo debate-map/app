@@ -21,6 +21,7 @@ import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
+import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -231,7 +232,9 @@ export class NodeBox extends BaseComponentPlus(
 		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 		const subPanelShow = attachments_forSubPanel.length > 0;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
-		const expanded = nodeView?.expanded ?? false;
+		let expanded = nodeView?.expanded ?? false;
+		// passing forLayoutHelperMap=false is fine here (our usage here only affects the node's display, and the layout-helper-map is only used for layout purposes)
+		if (UseForcedExpandForPath(path, false)) expanded = true;
 
 		const onMouseEnter = UseCallback(e=>{
 			if (!IsMouseEnterReal(e, this.DOM_HTML)) return;

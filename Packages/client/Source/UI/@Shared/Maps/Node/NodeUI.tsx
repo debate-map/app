@@ -233,7 +233,7 @@ export class NodeUI extends BaseComponentPlus(
 				>
 					{showFocusNodeStatusMarker &&
 						<FocusNodeStatusMarker map={map} node={node} path={path}/>}
-					{!showFocusNodeStatusMarker &&
+					{!showFocusNodeStatusMarker && !store.main.maps.screenshotMode &&
 						<CloneHistoryButton node={node}/>}
 					<NodeBox ref={UseCallback(c=>{
 						this.nodeBox = GetInnerComp(c);
