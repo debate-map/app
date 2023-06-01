@@ -124,7 +124,7 @@ export class NodeUI extends BaseComponentPlus(
 		const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 		const {width} = GetMeasurementInfoForNode(node, path, map);
 		const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
-		const aboveToolbar_visible = ShowNodeToolbars(map) && node.type != NodeType.argument && (node.type != NodeType.category || usesToolbarForPrefixText);
+		const aboveToolbar_visible = ShowNodeToolbars(map) && ((node.type != NodeType.argument && node.type != NodeType.category) || usesToolbarForPrefixText);
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(
 			treePath,
