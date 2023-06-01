@@ -2419,6 +2419,7 @@ __metadata:
     dotenv: ^16.0.3
     file-syncer: ^0.0.8
     fractional-indexing: ^3.1.0
+    html-to-image: ^1.11.11
     node-fetch: ^3.0.0
     nps: ^5.10.0
     patch-package: ^6.4.7
@@ -2431,7 +2432,7 @@ __metadata:
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.7
-    web-vcore: 0.0.74
+    web-vcore: 0.0.75
   languageName: unknown
   linkType: soft
 
@@ -7641,6 +7642,13 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"html-to-image@npm:^1.11.11":
+  version: 1.11.11
+  resolution: "html-to-image@npm:1.11.11"
+  checksum: b453beca72a697bf06fae4945e5460d1d9b1751e8569a0d721dda9485df1dde093938cc9bd9172b8df5fc23133a53a4d619777b3d22f7211cd8a67e3197ab4e8
+  languageName: node
+  linkType: hard
+
 "html-webpack-plugin@npm:^5.3.1":
   version: 5.5.0
   resolution: "html-webpack-plugin@npm:5.5.0"
@@ -11654,7 +11662,7 @@ fsevents@~2.3.2:
   languageName: unknown
   linkType: soft
 
-"react-vextensions@1.0.17, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
+"react-vextensions@1.0.18, react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions":
   version: 0.0.0-use.local
   resolution: "react-vextensions@workspace:.yalc/web-vcore/.yalc/react-vextensions"
   dependencies:
@@ -14476,7 +14484,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.74, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.75, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -14546,7 +14554,7 @@ typescript@~3.7.3:
     react-universal-hooks: 0.5.1
     react-uplot: 0.0.8
     react-vcomponents: 1.0.43
-    react-vextensions: 1.0.17
+    react-vextensions: 1.0.18
     react-vmarkdown: 1.0.3
     react-vmenu: 1.0.14
     react-vmessagebox: 1.0.14

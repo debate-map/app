@@ -7,11 +7,13 @@ import {BuildErrorWrapperComp, Chroma, Chroma_Safe, defaultErrorUI, EB_StoreErro
 import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRuleComp_AccessPolicyDoesNotMatch, NodeStyleRuleComp_LastEditorIs, NodeStyleRuleComp_SetBackgroundColor, NodeStyleRule_IfType, NodeStyleRule_IfType_displayTexts, NodeStyleRule_ThenType, NodeStyleRule_ThenType_displayTexts} from "Store/main/maps";
 import {GetUser, Map, ChildOrdering, ChildOrdering_infoText} from "dm_common";
 import React, {Fragment} from "react";
-import {GetEntries} from "js-vextensions";
+import {GetEntries, StartDownload} from "js-vextensions";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
+import * as htmlToImage from "html-to-image";
+import {MapUI} from "../../MapUI";
 
 const changesSince_options = [] as {name: string, value: string}[];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
@@ -101,11 +103,30 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						</>}
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
-						<TextPlus sel info={`
+						<Text>Screenshots:</Text>
+						<Button text="Take screenshot" onClick={async()=>{
+							const mapUIEl = MapUI.CurrentMapUI?.DOM_HTML;
+							const mapUIRootEl = mapUIEl?.querySelector(".MapUI") as HTMLElement;
+							if (mapUIRootEl == null) return void alert("Could not find the root \".MapUI\" element.");
+
+							// if width/height other than 100% (ie. if map is zoomed), temporarily override width/height to 100% (else screenshotter gets confused / is sized wrong)
+							Object.assign(mapUIRootEl.style, {minWidth: "100%", maxWidth: "100%", minHeight: "100%", maxHeight: "100%"});
+							//const oldWidth = mapUIRootEl.style.width, oldHeight = mapUIRootEl.style.height;
+							//Object.assign(mapUIRootEl.style, {width: "100%", height: "100%"});
+
+							const dataUrl = await htmlToImage.toPng(mapUIRootEl);
+
+							// reset map-root-el's width/height to normal
+							Object.assign(mapUIRootEl.style, {minWidth: null, maxWidth: null, minHeight: null, maxHeight: null});
+							//Object.assign(mapUIRootEl.style, {width: oldWidth, maxWidth: oldHeight});
+
+							StartDownload(dataUrl, "MapScreenshot.png", "", false);
+						}}/>
+						<TextPlus ml={5} sel info={`
 							When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with reduced visual artifacts at the edges of each section/sub-screenshot.
 							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
-						`.AsMultiline(0)}>Screenshot mode:</TextPlus>
-						<CheckBox value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
+						`.AsMultiline(0)}>Screenshot mode (alt):</TextPlus>
+						<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
 						{uiState.screenshotMode &&
 						<style>{`
 							.scrollTrack {

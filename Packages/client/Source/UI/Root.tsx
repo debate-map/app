@@ -131,19 +131,23 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			document.body.style.minHeight = null as any;
 		}
 
-		// add Quicksand font
-		const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet"/>;
-		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head
+		// add Quicksand font // commented; we embed the css directly in index.html now (we're hosting fonts ourselves now, so can't use google's standardized css url; and embedding directly may speed font-loading)
+		/*const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet"/>;
+		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head*/
 
 		if (GADDemo) {
-			const linkEl2 = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet"/>;
-			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head
+			/*const linkEl2 = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet"/>;
+			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head*/
 
-			//const linkEl2 = <link rel="stylesheet" media="screen" href="//fontlibrary.org/face/bebasneueregular" type="text/css"/>;
-			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue-Bold.css" type="text/css"/>;
-			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue-Regular.css" type="text/css"/>;
-			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue.css" type="text/css"/>;
-			//const linkEl2 = <link rel="stylesheet" media="screen" href="//cdn.jsdelivr.net/npm/@typopro/web-bebas-neue@3.7.5/TypoPRO-BebasNeue-Thin.css" type="text/css"/>;
+			// css generated from: https://gwfh.mranftl.com/fonts/cinzel?subsets=latin,latin-ext
+			const styleEl = <style>{`
+				@font-face { /* cinzel-regular - latin_latin-ext */
+					font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+					font-family: 'Cinzel'; font-style: normal; font-weight: 400;
+					src: url('/Fonts/cinzel-v23-latin_latin-ext-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+				}
+			`}</style>;
+			ReactDOM.render(ReactDOM.createPortal(styleEl, document.head), document.createElement("div")); // render directly into head
 		}
 	}
 }
