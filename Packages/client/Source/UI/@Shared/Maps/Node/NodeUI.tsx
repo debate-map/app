@@ -14,6 +14,7 @@ import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals}
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store/index.js";
+import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
@@ -89,9 +90,10 @@ export class NodeUI extends BaseComponentPlus(
 		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true) : ea);
 
 		//const nodeChildren = GetNodeChildren(node, path);
-		const nodeChildrenToShow = forLayoutHelper ? GetNodeChildren(node, path) : GetNodeChildrenToShow(node, path);
+		const useForcedExpand = UseForcedExpandForPath(path, forLayoutHelper);
+		const nodeChildrenToShow = useForcedExpand ? GetNodeChildren(node, path) : GetNodeChildrenToShow(node, path);
 		const nodeView = GetNodeView(map.id, path);
-		const boxExpanded = (forLayoutHelper ? true : null) ?? nodeView?.expanded ?? false;
+		const boxExpanded = (useForcedExpand ? true : null) ?? nodeView?.expanded ?? false;
 
 		const ncToShow_generic = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.generic);
 		const ncToShow_truth = nodeChildrenToShow.filter(a=>a.link?.group == ChildGroup.truth);

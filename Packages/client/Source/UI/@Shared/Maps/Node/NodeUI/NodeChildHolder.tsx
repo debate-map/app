@@ -2,6 +2,7 @@ import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNode
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
+import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
@@ -68,8 +69,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
 		const downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
 
-		let childLimit_up = (forLayoutHelper ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
-		let childLimit_down = (forLayoutHelper ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
+		const useForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelper);
+		let childLimit_up = (useForcedExpand ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_down = (useForcedExpand ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
 		const showAll = parentNode.id == map.rootNode || parentNode.type == NodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
@@ -133,14 +135,14 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					}}/>;
 				};
 				const getNodeUI = ()=>{
-					const nodeIDAlreadyInPath = GetPathNodeIDs(parentPath).includes(child.id);
+					//const nodeIDAlreadyInPath = GetPathNodeIDs(parentPath).includes(child.id);
 					return <NodeUI key={child.id}
 						ref={UseCallback(c=>parent.childBoxes[child.id] = c, [child.id, parent.childBoxes])} // eslint-disable-line
 						//ref_nodeBox={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 						indexInNodeList={index} map={map} node={child}
 						path={`${parentPath}/${child.id}`}
 						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
-						forLayoutHelper={forLayoutHelper && !nodeIDAlreadyInPath} // stop auto-expansion when we detect a cycle
+						forLayoutHelper={forLayoutHelper}
 						inBelowGroup={belowNodeUI}
 						standardWidthInGroup={widthOverride}
 						onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;

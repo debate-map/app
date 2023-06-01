@@ -13,7 +13,8 @@ import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import React from "react";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {Me} from "dm_common";
+import {HasAdminPermissions, Me, MeID} from "dm_common";
+import {DebugPanel} from "UI/@Shared/NavBar/DebugPanel.js";
 import {GADDemo_2020, GADDemo_AI, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear, GetGADExternalSiteURL} from "./GAD.js";
 
 // main
@@ -23,27 +24,24 @@ import {GADDemo_2020, GADDemo_AI, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear
 export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 	//loadingUI = ()=>null; // UI looks bad when nav-bar shows loading text (size changes)
 	render() {
-		const {topRightOpenPanel} = store.main;
+		const uiState = store.main;
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
 				position: "relative", zIndex: zIndexes.navBar, height: 150, boxShadow: liveSkin.NavBarBoxShadow(),
-				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
-				// background: 'rgba(0,0,0,1)',
+				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
+				//background: 'rgba(0,0,0,1)',
 			}}>
 				<Row center style={{height: "100%"}}>
 					<span style={{position: "absolute", left: 0}}>
-						{/* <NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
-						<NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
-						<NavBarPanelButton text={
-							<Div className="cursorSet" style={{position: "relative", height: 45}}>
-								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
-								{/*<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: 100</Div>
-								<Div style={{position: "absolute", bottom: 3, width: "100%", textAlign: "center",
-									fontSize: 11, lineHeight: "11px", color: "rgba(0,255,0,.7)"}}>+100</Div>*#/}
-							</Div> as any
-						} panel="reputation" corner="top-left"/> */}
+						{HasAdminPermissions(MeID()) && store.main.maps.forcedExpand && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
 					</span>
+					<div style={{
+						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",
+						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
+					}}>
+						{uiState.topLeftOpenPanel == "debug" && <DebugPanel/>}
+					</div>
 					<NotificationsUI placement="topLeft" navBarHeight={150}/>
 
 					{!GADDemo_2020 &&
@@ -69,8 +67,8 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
-						{topRightOpenPanel == "search" && <SearchPanel/>}
-						{topRightOpenPanel == "profile" && <UserPanel/>}
+						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
+						{uiState.topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</Row>
 			</nav>

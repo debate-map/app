@@ -1,10 +1,10 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
-import {Assert, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CreateStringEnum, GetPercentFromXToY} from "web-vcore/nm/js-vextensions.js";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
@@ -44,6 +44,8 @@ export class MapsState {
 	@O autoExpandNewNodes = true;
 	@O showCloneHistoryButtons = false;
 	@O toolbarRatingPreviews = RatingPreviewType.chart;
+	@O @ignore forcedExpand = false;
+	@O forcedExpand_depth = 1;
 	@O @ignore screenshotMode = false;
 	//@O nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
@@ -171,6 +173,33 @@ export const GetCopiedNode = CreateAccessor(()=>{
 	const path = GetCopiedNodePath();
 	if (!path) return null;
 	return GetNodeL3(path);
+});
+
+const idChars = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".split("");
+export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHelperMap: boolean)=>{
+	const nodeIDsInPath = GetPathNodeIDs(path);
+	const pathHasCycle = nodeIDsInPath.Distinct().length != nodeIDsInPath.length;
+	if (pathHasCycle) return false; // never force-expand a path that has a cycle
+
+	if (forLayoutHelperMap) return true;
+	const uiState = store.main.maps;
+	if (uiState.forcedExpand) {
+		const pathNodeIDs = GetPathNodeIDs(path);
+		const depth = pathNodeIDs.length;
+
+		// if we haven't reached the "layer" of the target/expand-to depth yet, then force-expand
+		// (we use "<" rather than "<=", because "force expanding" the node at depth X-1 is sufficient to "reach" displaying of all nodes at target depth X)
+		if (depth < uiState.forcedExpand_depth.FloorTo(1)) return true;
+
+		// if instead we've reached the correct layer, then use the "fractional depth" of this node (based on id's first-char) to determine whether we force-expand this node
+		if (uiState.forcedExpand_depth != uiState.forcedExpand_depth.FloorTo(1)) {
+			const nodeID = nodeIDsInPath.Last();
+			const fractionalPosition = idChars.indexOf(nodeID[0]) / (idChars.length - 1);
+			const fractionalLimit = uiState.forcedExpand_depth - uiState.forcedExpand_depth.FloorTo(1);
+			if (fractionalPosition < fractionalLimit) return true;
+		}
+	}
+	return false;
 });
 
 // actions

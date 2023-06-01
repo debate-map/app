@@ -35,9 +35,7 @@ const avatarStyles = {
 @Observer
 export class NavBar extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		// const topLeftOpenPanel = State((a) => a.main.topLeftOpenPanel);
-		// const topRightOpenPanel = State(a => a.main.topRightOpenPanel);
-		const {topLeftOpenPanel, topRightOpenPanel} = store.main;
+		const uiState = store.main;
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
@@ -64,9 +62,9 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
-						{topLeftOpenPanel == "stream" && <StreamPanel/>}
-						{topLeftOpenPanel == "debug" && <DebugPanel/>}
-						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
+						{uiState.topLeftOpenPanel == "stream" && <StreamPanel/>}
+						{uiState.topLeftOpenPanel == "debug" && <DebugPanel/>}
+						{uiState.topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
 					<NotificationsUI placement="topLeft" navBarHeight={45}/>
 
@@ -90,9 +88,9 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
-						{topRightOpenPanel == "search" && <SearchPanel/>}
-						{topRightOpenPanel == "guide" && <GuidePanel/>}
-						{topRightOpenPanel == "profile" && <UserPanel/>}
+						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
+						{uiState.topRightOpenPanel == "guide" && <GuidePanel/>}
+						{uiState.topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</div>
 			</nav>

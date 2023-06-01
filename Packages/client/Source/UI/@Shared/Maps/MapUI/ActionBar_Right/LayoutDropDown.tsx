@@ -85,6 +85,22 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 							value={uiState.toolbarRatingPreviews} onChange={val=>RunInAction_Set(this, ()=>uiState.toolbarRatingPreviews = val)}/>
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
+						<Pre>Forced-expand:</Pre>
+						<CheckBox value={uiState.forcedExpand} onChange={val=>RunInAction_Set(this, ()=>uiState.forcedExpand = val)}/>
+						{uiState.forcedExpand &&
+						<>
+							<Spinner ml={5} min={0} instant={true} style={{width: 100}} value={uiState.forcedExpand_depth} onChange={val=>{
+								RunInAction_Set(this, ()=>uiState.forcedExpand_depth = val);
+							}}/>
+							<Button ml={3} p={5} text="+1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 1)}/>
+							<Button ml={3} p={5} text="+0.5" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.5)}/>
+							<Button ml={3} p={5} text="+0.2" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.2)}/>
+							<Button ml={3} p={5} text="+0.1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.1)}/>
+							<Button ml={3} p={5} text="+0.05" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.05)}/>
+							<Button ml={3} p={5} text="+0.01" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.01)}/>
+						</>}
+					</RowLR>
+					<RowLR mt={3} splitAt={splitAt}>
 						<TextPlus sel info={`
 							When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with reduced visual artifacts at the edges of each section/sub-screenshot.
 							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
