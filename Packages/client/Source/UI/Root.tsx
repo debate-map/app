@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, PageContainer, RunInAction} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
-import {Clone, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {Clone, SleepAsync, SleepAsyncUntil, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
@@ -24,7 +24,7 @@ import {MoreUI} from "../UI/More.js";
 import {GADDemo, ShowHeader} from "./@GAD/GAD.js";
 import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
-import {OnDragEnd} from "./@Root/RootDragHandler";
+import {OnDragEnd} from "./@Root/RootDragHandler.js";
 import {RootStyles} from "./@Root/RootStyles.js";
 import {NodeDetailBoxesLayer} from "./@Shared/Maps/Node/DetailBoxes/NodeDetailBoxesLayer.js";
 import {DatabaseUI} from "./Database.js";
@@ -51,11 +51,37 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			await trunk.clear();
 		}
 
+		// monkey-patch async-trunk's persist function to add throttling (else can majorly slow down the app in certain cases, eg. when loading maps with tons of nodes expanded)
+		trunk.persist = function() {
+			// Why are we redundantly stringifying the store here? Because it's needed to ensure that mobx knows this function is "watching" the store's data. (this func gets passed into a mobx autorun)
+			let storeJSON = JSON.stringify(this.store);
+
+			return (async()=>{
+				if (this.persistingScheduled) return;
+				this.persistingScheduled = true;
+
+				const lastPersistTime = this.lastPersistTime ?? 0;
+				if (Date.now() - lastPersistTime < 500) {
+					await SleepAsyncUntil(lastPersistTime + 500);
+				}
+
+				// now proceed with actual persisting
+				this.lastPersistTime = Date.now();
+				this.persistingScheduled = false;
+				try {
+					storeJSON = JSON.stringify(this.store);
+					await this.storage.setItem(this.storageKey, storeJSON);
+				} catch (reason) {
+					this.onError(reason);
+				}
+			})();
+		};
+
 		await trunk.init();
 		console.log("Loaded state:", Clone(store));
 
 		// some fields that need to be (re-)set after store is loaded (eg. due to their being initialized prior to the store, but some of their settings being controlled by in-store values)
-		graph.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
+		graph.options.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
 
 		// start auto-runs, now that store+firelink are created (and store has initialized -- not necessary, but nice)
 		//require("../Utils/AutoRuns");

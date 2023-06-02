@@ -33,7 +33,7 @@ export class DebugPanel extends BaseComponent<{}, {}> {
 				<Row>
 					<CheckBox text="Block MobX unsubscribing (on data becoming unobserved)" value={store.main.blockMobXUnsubscribing} onChange={val=>{
 						RunInAction_Set(this, ()=>store.main.blockMobXUnsubscribing = val);
-						graph.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
+						graph.options.unsubscribeTreeNodesAfter = GetMGLUnsubscribeDelay();
 					}}/>
 					<InfoButton ml={5} text="Requires page-reload to (fully) take effect."/>
 				</Row>

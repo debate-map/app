@@ -44,7 +44,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final text="Layout" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", right: 0, width: uiState.nodeStyleRules.length ? 700 : 350, borderRadius: "0 0 0 5px"}}><Column>
+				<DropDownContent style={{position: "fixed", right: 0, width: uiState.nodeStyleRules.length ? 700 : 550, borderRadius: "0 0 0 5px"}}><Column>
 					<RowLR splitAt={splitAt}>
 						<Pre>Initial child limit:</Pre>
 						<Spinner min={1} style={{width: 100}} value={uiState.initialChildLimit} onChange={val=>{
@@ -94,12 +94,12 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 							<Spinner ml={5} min={0} instant={true} style={{width: 100}} value={uiState.forcedExpand_depth} onChange={val=>{
 								RunInAction_Set(this, ()=>uiState.forcedExpand_depth = val);
 							}}/>
-							<Button ml={3} p={5} text="+1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 1)}/>
-							<Button ml={3} p={5} text="+0.5" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.5)}/>
-							<Button ml={3} p={5} text="+0.2" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.2)}/>
-							<Button ml={3} p={5} text="+0.1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.1)}/>
-							<Button ml={3} p={5} text="+0.05" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.05)}/>
-							<Button ml={3} p={5} text="+0.01" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.01)}/>
+							<Button ml={3} p={5} style={{fontSize: 12}} text="+1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 1)}/>
+							<Button ml={3} p={5} style={{fontSize: 12}} text="+.5" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.5)}/>
+							<Button ml={3} p={5} style={{fontSize: 12}} text="+.2" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.2)}/>
+							<Button ml={3} p={5} style={{fontSize: 12}} text="+.1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.1)}/>
+							<Button ml={3} p={5} style={{fontSize: 12}} text="+.05" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.05)}/>
+							<Button ml={3} p={5} style={{fontSize: 12}} text="+.01" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 0.01)}/>
 						</>}
 					</RowLR>
 					<RowLR mt={3} splitAt={splitAt}>
@@ -112,7 +112,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 							3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
 							4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
 							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
-						`.AsMultiline(0)}>Screenshot mode:</TextPlus>
+						`.AsMultiline(0)}>Prep:</TextPlus>
 						<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
 						{uiState.screenshotMode &&
 						<style>{`

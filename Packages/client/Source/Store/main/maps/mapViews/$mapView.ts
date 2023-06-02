@@ -5,16 +5,25 @@ import {store} from "Store";
 import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges, WaitTillResolvedThenExecuteSideEffects, RunInAction, BailError} from "web-vcore/nm/mobx-graphlink.js";
 import {PathSegmentToNodeID, MapView, NodeView, GetNode, NodeType, GetDefaultExpansionFieldsForNodeView, ToPathNodes} from "dm_common";
 
+export let cache_lastSelectedNode_nodePath: string[] = [];
 export const GetSelectedNodePathNodes = CreateAccessor((mapViewOrMapID: string | MapView)=>{
 	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 
+	// optimization; if last-selected-node is still selected, return that (faster than doing a tree-search for a node with selected=true)
+	// [without this, large perf impact was occuring on maps with many expanded nodes; that said, this approach is probably temp, since it only works when a node is actually selected!]
+	const cache_lastSelectedNode_dataPath = ConvertNodePathToDataPath(cache_lastSelectedNode_nodePath);
+	const nodeViewAtLastPath = DeepGet(mapView.rootNodeViews, cache_lastSelectedNode_dataPath) as NodeView|n;
+	if (nodeViewAtLastPath?.selected) return cache_lastSelectedNode_nodePath;
+
 	const selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
 	if (selectedTreeNode == null) return [];
 
-	const selectedNodeView = selectedTreeNode.ancestorNodes.Last();
+	const selectedNodeView_entry = selectedTreeNode.ancestorNodes.Last();
 	// return selectedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
-	return GetPathFromDataPath(selectedNodeView.PathNodes);
+	const nodePath = ConvertDataPathToNodePath(selectedNodeView_entry.PathNodes);
+	cache_lastSelectedNode_nodePath = nodePath;
+	return nodePath;
 });
 export function GetSelectedNodePath(mapViewOrMapID: string | MapView): string {
 	return GetSelectedNodePathNodes(mapViewOrMapID).join("/");
@@ -23,7 +32,7 @@ export function GetSelectedNodeID(mapID: string): string {
 	return PathSegmentToNodeID(GetSelectedNodePathNodes(mapID).LastOrX());
 }
 
-export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): string[] {
+export function ConvertDataPathToNodePath(dataPathUnderRootNodeViews: string[]): string[] {
 	const result = [] as string[];
 	for (const [index, prop] of dataPathUnderRootNodeViews.entries()) {
 		if (index == 0) { // first one is the root-node-id
@@ -34,6 +43,16 @@ export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): strin
 	}
 	return result;
 }
+export function ConvertNodePathToDataPath(pathOrPathNodes: string | string[]): string[] {
+	const pathNodes = ToPathNodes(pathOrPathNodes);
+	// this has better perf than the simpler approaches
+	// let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
+	return pathNodes.SelectMany(nodeStr=>["children", nodeStr]).slice(1);
+}
+/*export function GetNodeViewDataPath_FromStore(mapID: string, pathOrPathNodes: string | string[]): string[] {
+	const childPathNodes = GetNodeViewDataPath_FromRootNodeViews(mapID, pathOrPathNodes);
+	return ['main', 'mapViews', `${mapID}`, 'rootNodeViews', ...childPathNodes];
+}*/
 
 export class FoundNodeViewInfo {
 	nodeView: NodeView;
@@ -83,16 +102,6 @@ export const GetAnchorNodeID = CreateAccessor((mapID: string)=>{
 export const GetMapView = CreateAccessor(function(mapID: string|n) {
 	return this!.store.main.maps.mapViews.get(mapID!); // nn: get() accepts null
 });
-export function GetNodeViewDataPath_FromRootNodeViews(mapID: string, pathOrPathNodes: string | string[]): string[] {
-	const pathNodes = ToPathNodes(pathOrPathNodes);
-	// this has better perf than the simpler approaches
-	// let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
-	return pathNodes.SelectMany(nodeStr=>["children", nodeStr]).slice(1);
-}
-/* export function GetNodeViewDataPath_FromStore(mapID: string, pathOrPathNodes: string | string[]): string[] {
-	const childPathNodes = GetNodeViewDataPath_FromRootNodeViews(mapID, pathOrPathNodes);
-	return ['main', 'mapViews', `${mapID}`, 'rootNodeViews', ...childPathNodes];
-} */
 
 export const GetNodeView = CreateAccessor((<{
 	(mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing?: true): NodeView;

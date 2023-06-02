@@ -1,6 +1,6 @@
 import {GraphDBShape} from "dm_common";
 import "web-vcore/nm/mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
-import {Graphlink, SetDefaultGraphOptions, ProvideReactModule} from "web-vcore/nm/mobx-graphlink.js";
+import {Graphlink, SetDefaultGraphRefs, ProvideReactModule} from "web-vcore/nm/mobx-graphlink.js";
 import React from "react";
 import {GetCookie} from "web-vcore";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
@@ -15,7 +15,7 @@ declare module "mobx-graphlink/Dist/UserTypes" {
 
 export const graph = new Graphlink<RootState, GraphDBShape>();
 store.graphlink = graph;
-SetDefaultGraphOptions({graph});
+SetDefaultGraphRefs({graph});
 
 //const linkRootPath = `versions/v${dbVersion}-${DB_SHORT}`;
 export function InitGraphlink() {
@@ -26,8 +26,16 @@ export function InitGraphlink() {
 		rootStore: store,
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 		onServer: false,
+	}, {
 		//unsubscribeTreeNodesAfter: 30000, // on live-query's data becoming unobserved, wait 30s before unsubscribing (user may re-expand something just closed, in the short-term)
 		unsubscribeTreeNodesAfter: GetMGLUnsubscribeDelay(),
+		// we want some buffering to take place, otherwise map-loading gets really slow when lots of nodes are visible
+		// (ie. if there are multiple data-update messages received over socket, we want them all to get committed at once, to avoid overhead of rendering between each one; this requires buffering)
+		dataUpdateBuffering_minWait: 10,
+		dataUpdateBuffering_maxWait: 100,
+		dataUpdateBuffering_commitSetMaxFuncCount: 50,
+		dataUpdateBuffering_commitSetMaxTime: 1000, // this option doesn't really do anything atm (due to the mobx *reactions* being where the time is taken)
+		dataUpdateBuffering_breakDuration: 0,
 	});
 	// user-info is now supplied at the end of InitApollo() instead
 	/*graph.userInfo = {

@@ -26,20 +26,22 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 	const displayText = GetNodeDisplayText(node, path, map);
 	const fontSize = GetFontSizeForNode(node, path);
 	// Why not using ConvertStyleObjectToCSSString here? Because it's not needed, and this saves ~70ms over 20s map-load
-	const expectedTextWidth_tester = GetAutoElement(`<span style='font-size: ${fontSize}px; white-space: nowrap;'>`) as HTMLElement;
-	expectedTextWidth_tester.innerHTML = displayText;
+	const expectedTextWidth_tester = GetAutoElement(`<span style="position: absolute; font-size: ${fontSize}px; white-space: nowrap;">`) as HTMLElement;
+	expectedTextWidth_tester.innerText = displayText;
 	let expectedTextWidth = expectedTextWidth_tester.offsetWidth;
+	/*expectedTextWidth_tester.innerText = `${displayText}...`;
+	const expectedTextWidth2 = expectedTextWidth_tester.getBoundingClientRect().width;*/
 
 	let noteWidth = 0;
 	if (node.current.phrasing.note) {
-		const noteWidth_tester = GetAutoElement(`<span style='margin-left: 15px; font-size: 11px; white-space: nowrap;'>`) as HTMLElement;
-		noteWidth_tester.innerHTML = node.current.phrasing.note;
+		const noteWidth_tester = GetAutoElement(`<span style="position: absolute; margin-left: 15px; font-size: 11px; white-space: nowrap;">`) as HTMLElement;
+		noteWidth_tester.innerText = node.current.phrasing.note;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	const titleAttachment = GetTitleIntegratedAttachment(node.current);
 	if (titleAttachment?.equation && titleAttachment?.equation.explanation) {
-		const noteWidth_tester = GetAutoElement(`<span style='margin-left: 15px; font-size: 11px; white-space: nowrap;'>`) as HTMLElement;
-		noteWidth_tester.innerHTML = titleAttachment?.equation.explanation;
+		const noteWidth_tester = GetAutoElement(`<span style="position: absolute; margin-left: 15px; font-size: 11px; white-space: nowrap;">`) as HTMLElement;
+		noteWidth_tester.innerText = titleAttachment?.equation.explanation;
 		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	expectedTextWidth += noteWidth;
@@ -73,10 +75,10 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 	let expectedHeight = -1;
 	if (calcHeight) {
 		const maxTextWidth = width - expectedOtherStuffWidth;
-		const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='white-space: initial; display: inline-block;'>`) as HTMLElement;
+		const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style="position: absolute; white-space: initial; display: inline-block;">`) as HTMLElement;
 		expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
 		expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
-		expectedTextHeight_tester.innerHTML = displayText;
+		expectedTextHeight_tester.innerText = displayText;
 		const expectedTextHeight = GetContentSize(expectedTextHeight_tester).height as number;
 		expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
