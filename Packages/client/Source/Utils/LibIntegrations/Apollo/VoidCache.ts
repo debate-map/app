@@ -1,26 +1,28 @@
-import {ApolloCache, NormalizedCacheObject} from "web-vcore/nm/@apollo/client.js";
+import {ApolloCache, NormalizedCacheObject, Cache} from "web-vcore/nm/@apollo/client.js";
 
 const emptyCacheObj = {};
 export class VoidCache extends ApolloCache<NormalizedCacheObject> {
-	init() {}
-	resetResultCache(resetResultIdentities) {}
-	restore(data) { return this; }
-	extract(optimistic) { return emptyCacheObj; }
 	read(options) { return null; }
 	write(options) { return undefined; }
-	modify(options) { return false; }
 	diff(options) { return {}; }
 	watch(watch) { return ()=>{}; }
-	gc() { return [] as string[]; }
-	retain(rootId, optimistic) {}
-	release(rootId, optimistic) {}
-	identify(object) { return undefined; }
+	async reset() {} // eslint-disable-line
 	evict(options) { return false; }
-	async reset() {}
-	removeOptimistic(idToRemove) {}
-	batch(options) {}
+	restore(data) { return this; }
+	extract(optimistic) { return emptyCacheObj; }
+	removeOptimistic(id) {}
+	batch(options) { return undefined as any; }
 	performTransaction(update, optimisticId) {}
+	recordOptimisticTransaction(transaction, optimisticId) {}
 	transformDocument(document) { return document; }
-	broadcastWatches(options) {}
-	broadcastWatch(c, options) {}
+	transformForLink(document) { return document; }
+	identify(object) { return undefined; }
+	gc() { return [] as string[]; }
+	modify(options) { return false; }
+	readQuery(options, optimistic?) { return null; }
+	readFragment(options, optimistic?) { return null; }
+	writeQuery(opts) { return undefined; }
+	writeFragment(opts) { return undefined; }
+	updateQuery(options, update) { return null; }
+	updateFragment(options, update) { return null; }
 }
