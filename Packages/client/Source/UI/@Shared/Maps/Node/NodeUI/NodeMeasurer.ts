@@ -25,39 +25,27 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 
 	const displayText = GetNodeDisplayText(node, path, map);
 	const fontSize = GetFontSizeForNode(node, path);
-	//const elForFontCSSGrabbing = GetAutoElement(`<span style="position: absolute; white-space: nowrap;">`) as HTMLElement;
 
-	/*const start1 = performance.now();
-	const expectedTextWidth_tester = GetAutoElement(`<span style="position: absolute; font-size: ${fontSize}px; white-space: nowrap;">`) as HTMLElement;
+	// old, dom-based measurements (slows down for large maps)
+	/*const expectedTextWidth_tester = GetAutoElement(`<span style="position: absolute; font-size: ${fontSize}px; white-space: nowrap;">`) as HTMLElement;
 	expectedTextWidth_tester.innerText = displayText;
-	const expectedTextWidth1 = expectedTextWidth_tester.offsetWidth;
-	const end1 = performance.now();*/
+	const expectedTextWidth1 = expectedTextWidth_tester.offsetWidth;*/
 
-	//const start2 = performance.now();
-	// Why not using ConvertStyleObjectToCSSString here? Because it's not needed, and this saves ~70ms over 20s map-load
+	// new, canvas-based measurements (doesn't slow down for large maps)
 	let expectedTextWidth = GetTextWidth(displayText, GetCanvasFont(`${fontSize}px`));
-	/*const end2 = performance.now();
-	console.log(`Widths: ${expectedTextWidth1} ${expectedTextWidth}`);
-	console.log(`Times: ${(end1 - start1).toLocaleString("en-US")} ${(end2 - start2).toLocaleString("en-US")}`);*/
 
 	let noteWidth = 0;
 	if (node.current.phrasing.note) {
-		/*const noteWidth_tester = GetAutoElement(`<span style="position: absolute; margin-left: 15px; font-size: 11px; white-space: nowrap;">`) as HTMLElement;
-		noteWidth_tester.innerText = node.current.phrasing.note;
-		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);*/
 		noteWidth = Math.max(noteWidth, GetTextWidth(node.current.phrasing.note, GetCanvasFont("11px")) + 15);
 	}
 	const titleAttachment = GetTitleIntegratedAttachment(node.current);
 	if (titleAttachment?.equation && titleAttachment?.equation.explanation) {
-		/*const noteWidth_tester = GetAutoElement(`<span style="position: absolute; margin-left: 15px; font-size: 11px; white-space: nowrap;">`) as HTMLElement;
-		noteWidth_tester.innerText = titleAttachment?.equation.explanation;
-		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);*/
 		noteWidth = Math.max(noteWidth, GetTextWidth(titleAttachment?.equation.explanation, GetCanvasFont("11px")) + 15);
 	}
 	expectedTextWidth += noteWidth;
 
 	const subPanelAttachments = GetSubPanelAttachments(node.current);
-	// let expectedOtherStuffWidth = 26;
+	//let expectedOtherStuffWidth = 26;
 	let expectedOtherStuffWidth = 28;
 	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
 		expectedOtherStuffWidth += 14;

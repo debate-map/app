@@ -2427,19 +2427,20 @@ __metadata:
     file-syncer: ^0.0.8
     fractional-indexing: ^3.1.0
     html-to-image: ^1.11.11
+    mobx-utils: ^6.0.6
     node-fetch: ^3.0.0
     nps: ^5.10.0
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0
     sync-directory: ^2.2.22
-    tree-grapher: 0.0.7
+    tree-grapher: 0.0.8
     ts-loader: 9.2.3
     ts-node: ^10.8.0
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
     ui-debug-kit: 0.0.7
-    web-vcore: 0.0.77
+    web-vcore: 0.0.78
   languageName: unknown
   linkType: soft
 
@@ -9617,7 +9618,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"mobx-graphlink@0.0.39, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
+"mobx-graphlink@0.0.40, mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink":
   version: 0.0.0-use.local
   resolution: "mobx-graphlink@workspace:.yalc/web-vcore/.yalc/mobx-graphlink"
   dependencies:
@@ -9685,6 +9686,15 @@ fsevents@~2.3.2:
   peerDependencies:
     mobx: "*"
   checksum: 4f62b2dc13065fb75369378443d459b32a554a7c6f21677cefb6c380bf4e0f24223e3501701c4a2a3b642b6bb0cbc8c4e170a8bbea9d78c99ac8c0752d34cecd
+  languageName: node
+  linkType: hard
+
+"mobx-utils@npm:^6.0.6":
+  version: 6.0.6
+  resolution: "mobx-utils@npm:6.0.6"
+  peerDependencies:
+    mobx: ^6.0.0
+  checksum: 10d1dc8612143a49bc33380532615e052ecf68cbca20c354d5b8adcafc3a7e5181ec9bbb2360181ce7f8a191297b2d86a1bd177191fbab463c9120401b93598c
   languageName: node
   linkType: hard
 
@@ -13622,7 +13632,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-grapher@0.0.7, tree-grapher@workspace:.yalc/tree-grapher":
+"tree-grapher@0.0.8, tree-grapher@workspace:.yalc/tree-grapher":
   version: 0.0.0-use.local
   resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:
@@ -14516,7 +14526,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"web-vcore@0.0.77, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@0.0.78, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -14570,7 +14580,7 @@ typescript@~3.7.3:
     lodash: ^4.17.15
     mini-css-extract-plugin: ^1.6.0
     mobx: ^6.3.2
-    mobx-graphlink: 0.0.39
+    mobx-graphlink: 0.0.40
     mobx-react: ^7.2.0
     mobx-sync: 3.0.0
     moment: 2.24.0

@@ -125,10 +125,10 @@ export function InitApollo() {
 			opened: ()=>{
 				console.log("WebSocket opened.");
 			},
-			closed: ()=>{
+			closed: (event: CloseEvent)=>{
 				// only log the "disconnection" if this is the first one, or we know it had actually been connected just prior (the WS "disconnects" each time a reconnect attempt is made)
 				if (store.wvc.webSocketLastDCTime == null || store.wvc.webSocketConnected) {
-					console.log("WebSocket disconnected.");
+					console.log("WebSocket disconnected. @code:", event.code, "@reason:", event.reason);
 				}
 				RunInAction("wsClient.onDisconnected", ()=>{
 					store.wvc.webSocketConnected = false;

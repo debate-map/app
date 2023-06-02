@@ -5,11 +5,12 @@ import React from "react";
 import * as ReactColor from "react-color";
 import {store} from "Store";
 import {GetMGLUnsubscribeDelay, graph} from "Utils/LibIntegrations/MobXGraphlink";
-import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, PageContainer, RunInAction} from "web-vcore";
+import {AddressBarWrapper, ErrorBoundary, GetMirrorOfMobXTree, GetMirrorOfMobXTree_New, GetMirrorOfMobXTree_Options, LoadURL, Observer, PageContainer, RunInAction, GetMirrorOfMobXTree_New2} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
-import {Clone, SleepAsync, SleepAsyncUntil, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {Clone, E, SleepAsync, SleepAsyncUntil, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
-import {makeObservable, observable} from "web-vcore/nm/mobx.js";
+import {autorun, makeObservable, observable} from "web-vcore/nm/mobx.js";
+import {deepObserve} from "mobx-utils";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
 import {ColorPickerBox, Column, Div, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -45,16 +46,45 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 	}
 
 	async ComponentWillMount() {
+		let storeReady_local = false; // parallels the value of this.storeReady, except without being an observable (so can be called from onChange function below safely)
 		const trunk = new AsyncTrunk(store, {storage: localStorage});
 		if (startURL.GetQueryVar("clearState") == "true") {
 			console.log("Clearing state. State before clear:", Clone(store));
 			await trunk.clear();
 		}
 
+		/*const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {} as Partial<GetMirrorOfMobXTree_Options>);
+		//const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {useTransformers: true, alreadyInReactive: true, onlyCopyMobXProps: false} as Partial<GetMirrorOfMobXTree_Options>);
+		//const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {useComputed: true /*alreadyInReactive: true, onlyCopyMobXProps: false*#/} as Partial<GetMirrorOfMobXTree_Options>);*/
+
+		// we start a mirror-generation here, but merely so that we can hook into its "onChange" event (to trigger another call to trunk.persist)
+		let changeCount = 0;
+		const mirrorOpts = E(new GetMirrorOfMobXTree_Options(), {
+			onChange: (sourceObj, mirrorObj, mirrorObj_old)=>{
+				//if (!this.storeReady) return; // ignore "changes" that occur before store has finished loading (early "change" events are just from tree initialization)
+				if (!storeReady_local) return; // ignore "changes" that occur before store has finished loading (early "change" events are just from tree initialization)
+				changeCount++;
+				console.log(`Mirror changed (${changeCount})! Possibly persisting... (ie. if cooldown has passed) @SourceObj:`, sourceObj, "@MirrorObj:", mirrorObj, "@MirrorObj_Old:", mirrorObj_old);
+				//trunk.persist();
+				setTimeout(()=>trunk.persist(), 0); // call trunk.persist from a timeout, to ensure its json-stringifying doesn't affect the GetMirrorOfMobXTree reactions
+			},
+			//keepAlive: true,
+		} as Partial<GetMirrorOfMobXTree_Options>);
+		const root = GetMirrorOfMobXTree(store, mirrorOpts);
+		/*autorun(()=>{
+			const root = GetMirrorOfMobXTree_New(store, mirrorOpts);
+			//const root = GetMirrorOfMobXTree_New2(store, mirrorOpts).get();
+		});*/
+		//console.log("Keys:", Object.keys(root.get())); // force child computed-value to actually get computed
+
 		// monkey-patch async-trunk's persist function to add throttling (else can majorly slow down the app in certain cases, eg. when loading maps with tons of nodes expanded)
 		trunk.persist = function() {
 			// Why are we redundantly stringifying the store here? Because it's needed to ensure that mobx knows this function is "watching" the store's data. (this func gets passed into a mobx autorun)
-			let storeJSON = JSON.stringify(this.store);
+			//let storeJSON = JSON.stringify(this.store);
+			// create mobx-mirror of store; this ensures that mobx knows this function is "watching" the store's data
+			// (while being more lightweight than JSON.stringify, since changes trigger only "local" reflection, rather than a recurse of the whole structure)
+			/*const root = GetMirrorOfMobXTree(this.store, mirrorOpts);
+			console.log("Keys:", Object.keys(root.get())); // force child computed-value to actually get computed*/
 
 			return (async()=>{
 				if (this.persistingScheduled) return;
@@ -69,7 +99,8 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 				this.lastPersistTime = Date.now();
 				this.persistingScheduled = false;
 				try {
-					storeJSON = JSON.stringify(this.store);
+					console.log("Saving...");
+					const storeJSON = JSON.stringify(this.store);
 					await this.storage.setItem(this.storageKey, storeJSON);
 				} catch (reason) {
 					this.onError(reason);
@@ -103,7 +134,10 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		/* try {
 			this.SetState({ storeReady: true });
 		} finally { */
-		RunInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>this.storeReady = true);
+		RunInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>{
+			this.storeReady = true;
+			storeReady_local = true;
+		});
 		//console.log("Marked ready!:", this.storeReady);
 	}
 	// use observable field for this rather than react state, since setState synchronously triggers rendering -- which breaks loading process above, when rendering fails

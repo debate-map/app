@@ -84,7 +84,7 @@ export class NodeUI extends BaseComponentPlus(
 		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, forLayoutHelper, inBelowGroup, children} = this.props;
 		const {obs} = this.state;
 
-		performance.mark("NodeUI_1");
+		if (DEV_DYN) performance.mark("NodeUI_1");
 
 		const GetNodeChildren = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3(node2.id, path2) : ea);
 		const GetNodeChildrenToShow = (node2: NodeL3|n, path2: string|n): NodeL3[]=>(node2 && path2 ? GetNodeChildrenL3_Advanced(node2.id, path2, map.id, true, undefined, true) : ea);
@@ -107,7 +107,7 @@ export class NodeUI extends BaseComponentPlus(
 		const playingTimelineVisibleNodes = GetPlayingTimelineRevealPaths_UpToAppliedStep(map.id, false); // false, so that if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
 		if (playingTimeline != null && !playingTimelineVisibleNodes.Any(a=>a.startsWith(path))) return null;*/
 
-		performance.mark("NodeUI_2");
+		if (DEV_DYN) performance.mark("NodeUI_2");
 		if (ShouldLog(a=>a.nodeRenders)) {
 			if (logTypes.nodeRenders_for) {
 				if (logTypes.nodeRenders_for == node.id) {
@@ -197,10 +197,12 @@ export class NodeUI extends BaseComponentPlus(
 		const playingTimeline = GetPlayingTimeline(map.id);
 		const showFocusNodeStatusMarker = playingTimeline != null && store.main.timelines.showFocusNodes;
 
-		performance.mark("NodeUI_3");
-		performance.measure("NodeUI_Part1", "NodeUI_1", "NodeUI_2");
-		performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
-		this.Stash({nodeChildrenToShow}); // for debugging
+		if (DEV_DYN) {
+			performance.mark("NodeUI_3");
+			performance.measure("NodeUI_Part1", "NodeUI_1", "NodeUI_2");
+			performance.measure("NodeUI_Part2", "NodeUI_2", "NodeUI_3");
+			this.Stash({nodeChildrenToShow}); // for debugging
+		}
 
 		const {css} = cssHelper(this);
 		return (
