@@ -91,7 +91,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						<CheckBox value={uiState.forcedExpand} onChange={val=>RunInAction_Set(this, ()=>uiState.forcedExpand = val)}/>
 						{uiState.forcedExpand &&
 						<>
-							<Spinner ml={5} min={0} instant={true} style={{width: 100}} value={uiState.forcedExpand_depth} onChange={val=>{
+							<Spinner ml={5} min={0} instant={true} style={{width: 50}} value={uiState.forcedExpand_depth} onChange={val=>{
 								RunInAction_Set(this, ()=>uiState.forcedExpand_depth = val);
 							}}/>
 							<Button ml={3} p={5} style={{fontSize: 12}} text="+1" onClick={()=>RunInAction_Set(this, ()=>uiState.forcedExpand_depth += 1)}/>
@@ -111,6 +111,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 							2) Argument control-bars are hidden. (not relevant to non-interactive viewing)
 							3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
 							4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
+							5) Reduces map-padding to 100px. (for faster full-page screenshots from extension; switch page away and back to apply)
 							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
 						`.AsMultiline(0)}>Prep:</TextPlus>
 						<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>

@@ -56,6 +56,7 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 
 		const GetMapUIPadding = (): Padding=>{
 			if (this.props.padding) return padding;
+			if (store.main.maps.screenshotMode) return {left: 100, right: 100, top: 100, bottom: 100};
 
 			/*const winWidth = screen.availWidth;
 			const winHeight = screen.availHeight - 45 - 30; // exclude the nav-bar and sub-nav-bar*/
