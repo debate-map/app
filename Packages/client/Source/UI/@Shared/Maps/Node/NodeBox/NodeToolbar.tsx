@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
 import {RatingPreviewType} from "Store/main/maps.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {ES, HSLA, InfoButton, Observer} from "web-vcore";
@@ -98,7 +98,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 										return <Text key={labelI} mt={-1} mb={-1} p="0 5px"
 											style={E(
 												{display: "inline-block", background: HSLA(0, 0, 1, .3), borderRadius: 5, cursor: "pointer"},
-												GADDemo && {
+												SLMode && {
 													background: "transparent", border: "1px solid rgba(43,55,85,.7)", color: "rgba(43,55,85,1)",
 												},
 											)}>
@@ -133,7 +133,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
 						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
-						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
+						color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css(),
 						position: "absolute", bottom: "100%", left: 0,
 					},
 					showBottomBorder && {borderBottom: "1px solid black"},
@@ -143,7 +143,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
 						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
-						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .4).css(),
+						color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css(),
 						//minWidth: 250, // temp
 					},
 					node.type == NodeType.argument && {
@@ -258,7 +258,7 @@ class ToolBarButton extends BaseComponent<{
 						//position: "absolute", left: 0,
 						padding: "0 10px",
 					},
-					GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
+					SLMode && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},
 					style,
 				)}

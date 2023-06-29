@@ -81,13 +81,13 @@ export class UserHidden_Extras {
 export class UserFollow {
 	@Field({type: "boolean"})
 	markRatings = true;
-	
+
 	@Field({type: "string"})
 	markRatings_symbol = "X";
-	
+
 	@Field({type: "string"})
 	markRatings_color = chroma("yellow").css();
-	
+
 	@Field({type: "number"})
 	markRatings_size = 10;
 }

@@ -1,3 +1,4 @@
+use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject};
@@ -20,7 +21,7 @@ excludeLinesWith = "#[graphql(name"
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct GlobalData {
     pub id: ID,
-    pub extras: serde_json::Value,
+    pub extras: JSONValue,
 }
 impl From<Row> for GlobalData {
 	fn from(row: Row) -> Self {

@@ -1,7 +1,7 @@
 import {Button, CheckBox, Column, Text, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Select, Spinner, ColorPickerBox} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
-import {Button_GAD} from "UI/@GAD/GADButton.js";
+import {SLMode} from "UI/@SL/SL.js";
+import {Button_SL} from "UI/@SL/SLButton.js";
 import {store} from "Store";
 import {BuildErrorWrapperComp, Chroma, Chroma_Safe, defaultErrorUI, EB_StoreError, Observer, ReactError, RunInAction, RunInAction_Set, TextPlus} from "web-vcore";
 import {ACTEnsureMapStateInit, NodeStyleRule, NodeStyleRuleComp_AccessPolicyDoesNotMatch, NodeStyleRuleComp_LastEditorIs, NodeStyleRuleComp_SetBackgroundColor, NodeStyleRule_IfType, NodeStyleRule_IfType_displayTexts, NodeStyleRule_ThenType, NodeStyleRule_ThenType_displayTexts} from "Store/main/maps";
@@ -13,7 +13,7 @@ import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import * as htmlToImage from "html-to-image";
-import {MapUI} from "../../MapUI";
+import {MapUI} from "../../MapUI.js";
 
 const changesSince_options = [] as {name: string, value: string}[];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
@@ -39,7 +39,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		const {showChangesSince_visitOffset} = mapState;
 		const {childOrdering: weighting} = store.main.maps;
 
-		const Button_Final = GADDemo ? Button_GAD : Button;
+		const Button_Final = SLMode ? Button_SL : Button;
 		const splitAt = 210;
 		return (
 			<DropDown>

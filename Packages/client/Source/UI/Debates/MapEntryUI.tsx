@@ -2,7 +2,7 @@ import {VURL, E} from "web-vcore/nm/js-vextensions.js";
 import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo, GADDemo_AI, GetAIPrefixInfoFromMapName} from "UI/@GAD/GAD.js";
+import {SLMode, SLMode_AI, GetAIPrefixInfoFromMapName} from "UI/@SL/SL.js";
 import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -18,7 +18,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		const creator = map && GetUser(map.creator);
 
 		let mapNameToDisplay = map.name;
-		if (GADDemo_AI) {
+		if (SLMode_AI) {
 			const [matchStr, orderingNumber] = GetAIPrefixInfoFromMapName(map.name);
 			if (matchStr) {
 				mapNameToDisplay = mapNameToDisplay.slice(matchStr.length);
@@ -30,11 +30,11 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? liveSkin.ListEntryBackgroundColor_Light().css() : liveSkin.ListEntryBackgroundColor_Dark().css()},
-				GADDemo && {
+				SLMode && {
 					color: gadTextColor,
 					fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17,
 				},
-				GADDemo && GetCinzelStyleForBold(),
+				SLMode && GetCinzelStyleForBold(),
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>
@@ -47,7 +47,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 						<Row style={{fontSize: 13}}>{map.note}</Row>
 					</Column> */}
 					<Div style={{position: "relative", flex: columnWidths[0]}}>
-						<Link text={mapNameToDisplay} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: gadTextColor})} onClick={e=>{
+						<Link text={mapNameToDisplay} to={toURL.toString({domain: false})} style={E({fontSize: 17}, SLMode && {color: gadTextColor})} onClick={e=>{
 							e.preventDefault();
 							RunInAction("MapEntryUI.onClick", ()=>{
 								store.main.page = "debates";
@@ -62,9 +62,9 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 								{map.note}
 							</Div>}
 					</Div>
-					{!GADDemo && <span style={{flex: columnWidths[1]}}>{map.edits || 0}</span>}
-					{!GADDemo_AI && <span style={{flex: columnWidths[2]}}>{Moment(map.editedAt).format("YYYY-MM-DD")}</span>}
-					{!GADDemo_AI && <span style={{flex: columnWidths[3]}}>{creator ? creator.displayName : "..."}</span>}
+					{!SLMode && <span style={{flex: columnWidths[1]}}>{map.edits || 0}</span>}
+					{!SLMode_AI && <span style={{flex: columnWidths[2]}}>{Moment(map.editedAt).format("YYYY-MM-DD")}</span>}
+					{!SLMode_AI && <span style={{flex: columnWidths[3]}}>{creator ? creator.displayName : "..."}</span>}
 				</Row>
 			</Column>
 		);

@@ -3,10 +3,10 @@ import {store} from "Store";
 import {SubNavBar, SubNavBarButton} from "web-vcore";
 import {Switch} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo_2020, GADDemo_AI, GetGADExternalSiteURL} from "./GAD.js";
-import {HomeUI2_GAD} from "./Home2_GAD.js";
+import {SLMode_2020, SLMode_AI, GetGADExternalSiteURL} from "./SL.js";
+import {HomeUI2_SL} from "./Home2_SL.js";
 
-export class HomeUI_GAD extends BaseComponentPlus({}, {}) {
+export class HomeUI_SL extends BaseComponentPlus({}, {}) {
 	render() {
 		const currentSubpage = store.main.home.subpage;
 		const page = "home";
@@ -15,10 +15,10 @@ export class HomeUI_GAD extends BaseComponentPlus({}, {}) {
 			<>
 				<SubNavBar>
 					<SubNavBarButton page={page} subpage='home' text='Home'/>
-					{!GADDemo_2020 && !GADDemo_AI && <SubNavBarButton to={GetGADExternalSiteURL()} page={page} subpage='about' text='About'/>}
+					{!SLMode_2020 && !SLMode_AI && <SubNavBarButton to={GetGADExternalSiteURL()} page={page} subpage='about' text='About'/>}
 				</SubNavBar>
 				<Switch>
-					<HomeUI2_GAD/>
+					<HomeUI2_SL/>
 				</Switch>
 			</>
 		);

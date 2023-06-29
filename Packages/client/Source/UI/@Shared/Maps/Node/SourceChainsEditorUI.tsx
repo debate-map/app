@@ -1,5 +1,5 @@
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Row, TextInput, Select, Text, Pre, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
 import {Fragment} from "react";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -188,6 +188,22 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 					})}
 					{fieldsToShow.extra.length > 0 &&
 						<Button text="..." ml={3} style={{padding: "1px 7px"}} onClick={()=>this.SetState({expanded: !expanded})}/>}
+					{source.extras != null &&
+						<Button text="E" title={`Show json data in the open-ended "extras" field.`} ml={3} style={{padding: "1px 7px"}} onClick={()=>{
+							const json = JSON.stringify(source.extras, null, 2);
+							ShowMessageBox({
+								title: "Extras (open-ended json-data)",
+								message: ()=>{
+									return (
+										<Column style={{width: 600}}>
+											<Row style={{padding: "10px 0"}}>
+												<TextArea editable={false} autoSize={true} value={json}/>
+											</Row>
+										</Column>
+									);
+								},
+							});
+						}}/>}
 					{chain.sources.length > 1 && enabled &&
 						<Button text="X" ml={3} style={{padding: "1px 7px"}} onClick={()=>Change(chain.sources.RemoveAt(index))}/>}
 				</Row>

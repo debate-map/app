@@ -8,7 +8,7 @@ import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, NodeT
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
-import {GADDemo_Main} from "UI/@GAD/GAD";
+import {SLMode_GAD} from "UI/@SL/SL";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {RunCommand_AddNodePhrasing} from "Utils/DB/Command";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
@@ -49,7 +49,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 		const Change = (..._)=>this.OnChange();
 
 		let noteField_label = "Note";
-		if (GADDemo_Main) {
+		if (SLMode_GAD) {
 			noteField_label = "Description";
 			/*noteField_label = embeddedInNodeRevision
 				? "Description" // main-phrasing uses the note-field for a "description" (since it can use references-attachment for references)

@@ -4,7 +4,7 @@ import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
 import {ConnectorLinesUI, Graph, GraphColumnsVisualizer, GraphContext, SpaceTakerUI} from "tree-grapher";
-import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
+import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
 import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
@@ -58,7 +58,7 @@ export const ACTSetAnchorNodeAndViewOffset = StoreAction((mapID: string, anchorN
 });
 
 export function GetMapUICSSFilter() {
-	return GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,.75) 0px 0px 10px)";
+	return SLMode ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,.75) 0px 0px 10px)";
 }
 
 type Props = {

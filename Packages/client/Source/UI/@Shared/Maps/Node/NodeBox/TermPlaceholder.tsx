@@ -1,7 +1,7 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {HSLA, Observer} from "web-vcore";
 import {GetTerm} from "dm_common";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLMode} from "UI/@SL/SL.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 
@@ -48,7 +48,7 @@ export class TermPlaceholder extends BaseComponentPlus(
 				{/* term.name */}
 				<span style={E(
 					{textDecoration: "underline rgba(255,255,255,.5) solid"},
-					GADDemo && {textDecoration: "underline solid rgba(0,0,0,.5)"},
+					SLMode && {textDecoration: "underline solid rgba(0,0,0,.5)"},
 				)}>
 					{refText}
 				</span>

@@ -37,6 +37,8 @@ pub struct Source {
     
 	pub claimMinerId: Option<String>,
 	pub hypothesisAnnotationId: Option<String>,
+
+    pub extras: Option<JSONValue>, // used for, eg. additional targeting data from hypothesis
 }
 
 }
@@ -73,6 +75,7 @@ pub fn source_chain_from_old_json_data(data: &JSONValue) -> Result<SourceChain, 
             link: source.get("link").map(|a| a.as_string()).unwrap_or(None),
             claimMinerId: None,
             hypothesisAnnotationId: None,
+            extras: None,
         }
     }).collect();
     Ok(SourceChain {

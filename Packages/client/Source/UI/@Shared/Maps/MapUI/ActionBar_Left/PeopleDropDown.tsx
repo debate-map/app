@@ -2,8 +2,8 @@ import {CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput, Pre} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
-import {Button_GAD} from "UI/@GAD/GADButton.js";
+import {SLMode} from "UI/@SL/SL.js";
+import {Button_SL} from "UI/@SL/SLButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
 import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, Map} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
@@ -19,7 +19,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 		//const editors = GetMapEditors(map.id).filter(a=>a);
 		const editors = GetMapEditors(map.id);
 
-		const Button_Final = GADDemo ? Button_GAD : Button;
+		const Button_Final = SLMode ? Button_SL : Button;
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
 		return (
 			<DropDown>

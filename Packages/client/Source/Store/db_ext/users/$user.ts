@@ -1,7 +1,7 @@
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
-import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
 import {GetUserHidden} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
+import {SLMode, ShowHeader} from "../../../UI/@SL/SL.js";
 
 // backgrounds
 // ==========
@@ -24,11 +24,11 @@ export class BackgroundConfig {
 }
 
 export const GetUserBackground = CreateAccessor((userID: string|n): BackgroundConfig=>{
-	if (GADDemo) {
+	if (SLMode) {
 		// if header is disabled, it means we're in the iframe for the special frontend; change background accordingly
 		if (!ShowHeader) {
 			return {
-				url_max: "background: repeat url(/Images/@GAD/BackgroundTile.png), #ffffff",
+				url_max: "background: repeat url(/Images/@SL/BackgroundTile.png), #ffffff",
 			};
 		}
 		return {color: "#ffffff"};

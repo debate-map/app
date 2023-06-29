@@ -1,7 +1,7 @@
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 import {GetNodeChildrenL3, GetNodeRevisions, GetTimelineSteps, NodeL3, NodeRevision, NodeType, Polarity} from "dm_common";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {GADDemo} from "UI/@GAD/GAD";
+import {SLMode} from "UI/@SL/SL";
 import {Chroma_Safe, HSLA} from "web-vcore";
 import {Assert} from "js-vextensions";
 import {store} from "Store";
@@ -78,7 +78,7 @@ export function GetNodeColor(node: RequiredBy<Partial<NodeL3>, "type">, type: "b
 	}
 
 	if (allowOverrides) {
-		if (GADDemo) {
+		if (SLMode) {
 			//result = chroma.mix(result, HSLA(0, 0, 1), .7); // mix result with white (70% white, 30% normal color)
 			result = Chroma_Safe(HSLA(0, 0, 1));
 		}

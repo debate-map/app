@@ -4,7 +4,7 @@ import {store} from "Store/index.js";
 import {GetMapState, GetPlayingTimeline, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph} from "tree-grapher";
-import {ShowHeader} from "UI/@GAD/GAD.js";
+import {ShowHeader} from "UI/@SL/SL.js";
 import {ES, HTMLProps, Observer, UseWindowEventListener} from "web-vcore";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";

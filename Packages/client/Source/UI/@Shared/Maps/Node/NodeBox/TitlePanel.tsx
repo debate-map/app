@@ -10,7 +10,7 @@ import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, 
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
+import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
@@ -133,7 +133,7 @@ export class TitlePanel extends BaseComponentPlus(
 						color: liveSkin.NodeTextColor(),
 					},
 					node.type == NodeType.argument && {
-						color: liveSkin.NodeTextColor().alpha(GADDemo ? 1 : .5).toString(), // for arguments, make text more transparent, since text is repetitive and can be distracting
+						color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .5).toString(), // for arguments, make text more transparent, since text is repetitive and can be distracting
 						flex: 1, // maybe temp; since width is locked apparently, have title-panel fill gap (so toolbar-button goes all the way to right)
 					},
 					style,

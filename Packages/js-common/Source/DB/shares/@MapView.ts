@@ -1,9 +1,6 @@
+import {Vector2} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
-import {Vector2, Clone, GetValues} from "web-vcore/nm/js-vextensions.js";
-import {accessorMetadata, AddSchema, CreateAccessor, DB, defaultGraphOptions, Field, MGLClass, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
-import {ignore} from "web-vcore/nm/mobx-sync.js";
-import {GetNode, GetNodeID, GetParentNodeID, ToPathNodes} from "../../DB/nodes.js";
-import {NodeType} from "../../DB/nodes/@NodeType.js";
 
 // this module is in "dm_common", so avoid import from web-vcore (just be careful, since the new @O doesn't warn about classes with missing makeObservable calls)
 //import {O} from "web-vcore";

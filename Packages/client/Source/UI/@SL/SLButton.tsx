@@ -5,7 +5,7 @@ import {HSLA} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 
-export class Button_GAD extends BaseComponent<{} & ButtonProps, {}> {
+export class Button_SL extends BaseComponent<{} & ButtonProps, {}> {
 	render() {
 		const {style, ...rest} = this.props;
 		return (

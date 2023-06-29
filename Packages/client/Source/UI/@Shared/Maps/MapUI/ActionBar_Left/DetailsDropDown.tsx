@@ -5,8 +5,8 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
-import {GADDemo} from "UI/@GAD/GAD.js";
-import {Button_GAD} from "UI/@GAD/GADButton.js";
+import {SLMode} from "UI/@SL/SL.js";
+import {Button_SL} from "UI/@SL/SLButton.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
 import {RunCommand_DeleteMap, RunCommand_UpdateMap} from "Utils/DB/Command.js";
@@ -46,7 +46,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 		const {map} = this.props;
 		const {dataError} = this.state;
 
-		const Button_Final = GADDemo ? Button_GAD : Button;
+		const Button_Final = SLMode ? Button_SL : Button;
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
 
 		const setMapFeaturedCommand = new SetMapFeatured({id: map.id, featured: !map.featured}); // kept atm just for permission-checking

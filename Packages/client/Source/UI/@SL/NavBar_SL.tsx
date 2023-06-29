@@ -15,13 +15,13 @@ import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {HasAdminPermissions, Me, MeID} from "dm_common";
 import {DebugPanel} from "UI/@Shared/NavBar/DebugPanel.js";
-import {GADDemo_2020, GADDemo_AI, GADDemo_COVID, GADDemo_Main as GADDemo_Nuclear, GetGADExternalSiteURL} from "./GAD.js";
+import {SLMode_2020, SLMode_AI, SLMode_COVID, GetGADExternalSiteURL, SLMode_GAD, SLMode_Main} from "./SL.js";
 
 // main
 // ==========
 
 @Observer
-export class NavBar_GAD extends BaseComponentPlus({}, {}) {
+export class NavBar_SL extends BaseComponent<{}, {}> {
 	//loadingUI = ()=>null; // UI looks bad when nav-bar shows loading text (size changes)
 	render() {
 		const uiState = store.main;
@@ -44,13 +44,13 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					</div>
 					<NotificationsUI placement="topLeft" navBarHeight={150}/>
 
-					{!GADDemo_2020 &&
+					{!SLMode_2020 &&
 					<span style={{margin: "0 auto", paddingRight: 13}}>
 						<NavBarPageButton page="database" text="Database"/>
 						<NavBarPageButton page="home" text="Home"/>
 						<NavBarPageButton page="debates" text="Debates"/>
 					</span>}
-					{GADDemo_2020 &&
+					{SLMode_2020 &&
 					<span style={{margin: "0 auto", paddingLeft: 100}}>
 						<NavBarPageButton page="home" text="Home"/>
 						<NavBarPageButton page="debates" text="Debate" actionFunc={s=>{
@@ -108,11 +108,12 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 		if (page == "home") {
 			finalStyle = E(
 				finalStyle,
-				{margin: "0 30px", backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat"},
-				GADDemo_Nuclear && {width: 400, height: 150, backgroundImage: "url(/Images/@GAD/Nuclear/Title_Cropped.png)"},
-				GADDemo_COVID && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/COVID/Title.png)"},
-				GADDemo_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@GAD/2020ElectionDemo.png)"},
-				GADDemo_AI && {width: 300, height: 150, backgroundImage: "url(/Images/@GAD/AI/Title_Cropped.png)", backgroundSize: "90%"},
+				{margin: "0 30px", backgroundRepeat: "no-repeat", backgroundPosition: "center", backgroundOrigin: "content-box", backgroundSize: "contain", padding: "20px 0"}, // alt to padding: {backgroundSize: "auto calc(100% - 25px)"}
+				SLMode_Main && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/Main/Title.png)"},
+				SLMode_GAD && {width: 400, height: 150, backgroundImage: "url(/Images/@SL/GAD/Title_Cropped.png)", padding: "5px 0"},
+				SLMode_COVID && {width: 500, height: 150, backgroundImage: "url(/Images/@SL/COVID/Title.png)", padding: "15px 0"},
+				SLMode_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@SL/2020/2020ElectionDemo.png)"},
+				SLMode_AI && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/AI/Title_Cropped.png)", padding: "15px 0"},
 				//GADDemo_Nuclear && {pointerEvents: "none"},
 			);
 			text = null as any;

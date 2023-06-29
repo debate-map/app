@@ -7,7 +7,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {Observer, HSLA, RunInAction, RunInAction_Set} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, ChildOrdering} from "dm_common";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
@@ -57,9 +57,9 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 				<Row style={E(
 					{
 						justifyContent: "flex-end", background: liveSkin.NavBarPanelBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
-						width: "100%", height: GADDemo ? 40 : 30, borderRadius: "0 0 0 10px",
+						width: "100%", height: SLMode ? 40 : 30, borderRadius: "0 0 0 10px",
 					},
-					GADDemo && {
+					SLMode && {
 						background: HSLA(0, 0, 1, 1),
 						boxShadow: "rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px",
 						// boxShadow: null,
@@ -72,7 +72,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 							<Button ml={3} p="3px 10px" text="-" enabled={mapState.zoomLevel > .1} onClick={()=>ChangeZoom((mapState.zoomLevel - .1).RoundTo(.1))}/>
 							<Button ml={3} p="3px 10px" text="+" enabled={mapState.zoomLevel < 10} onClick={()=>ChangeZoom((mapState.zoomLevel + .1).RoundTo(.1))}/>
 						</Row>
-						{!GADDemo &&
+						{!SLMode &&
 							<ShareDropDown map={map}/>}
 					<LayoutDropDown map={map}/>
 				</Row>

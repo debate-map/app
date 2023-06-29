@@ -1,7 +1,7 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Button} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions.js";
-import {GADDemo, ShowHeader} from "UI/@GAD/GAD.js";
+import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
@@ -100,7 +100,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					{height: 17, fontSize: group == ChildGroup.truth ? 10 : 9, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
-					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 12, letterSpacing: 1*/},
+					SLMode && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 12, letterSpacing: 1*/},
 					style,
 				)}
 				onClick={UseCallback(e=>{

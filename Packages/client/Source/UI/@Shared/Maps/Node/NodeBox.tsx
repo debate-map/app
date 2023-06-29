@@ -5,7 +5,7 @@ import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {GADDemo} from "UI/@GAD/GAD.js";
+import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {FlashComp} from "ui-debug-kit";
@@ -203,7 +203,7 @@ export class NodeBox extends BaseComponentPlus(
 		const outlineColor = GetChangeTypeOutlineColor(changeType);
 		let outlineThickness = 1;
 		// in GADDemo, since node-background are white, we need to make these outlines more prominent
-		if (GADDemo && outlineColor != null) {
+		if (SLMode && outlineColor != null) {
 			//outlineColor = chroma.mix(outlineColor, "black", .5);
 			outlineThickness = 4;
 		}
@@ -382,7 +382,7 @@ export class NodeBox extends BaseComponentPlus(
 					parent={this}
 					{...{
 						outlineColor, outlineThickness, expanded,
-						backgroundFillPercent: GADDemo ? 100 : backgroundFillPercent,
+						backgroundFillPercent: SLMode ? 100 : backgroundFillPercent,
 						backgroundColor, markerPercent,
 						//width,
 						width: width_final,

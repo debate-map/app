@@ -53,6 +53,8 @@ export class Source {
 	// for system-specific sources
 	claimMinerId?: string;
 	hypothesisAnnotationId?: string;
+
+	extras?: {[key: string]: any};
 }
 AddSchema("Source", {
 	properties: {
@@ -67,11 +69,12 @@ AddSchema("Source", {
 		link: {type: "string"}, // allow overriding url pattern; it just highlights possible mistakes
 		claimMinerId: {type: "string"},
 		hypothesisAnnotationId: {type: "string"},
+		extras: {type: "object"},
 	},
 });
 
 type SourceTypeFieldSet = {main: Array<keyof Source>, extra: Array<keyof Source>};
-export const sourceType_allFields: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", "claimMinerId", "hypothesisAnnotationId"];
+export const sourceType_allFieldsOfTypes: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", "claimMinerId", "hypothesisAnnotationId"];
 export const sourceType_fieldSets = new Map<SourceType, SourceTypeFieldSet>([
 	[SourceType.speech, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.text, {main: ["name", "author"], extra: ["time_min", "time_max"]}],
@@ -86,7 +89,7 @@ export function CleanUpdatedSourceChains(sourceChains: SourceChain[]) {
 	// clean data (according to rules defined in field-sets map above)
 	for (const chain of sourceChains) {
 		for (const source of chain.sources) {
-			const fieldsNotForThisType = sourceType_allFields.Exclude(...sourceType_fieldSets.get(source.type)!.main, ...sourceType_fieldSets.get(source.type)!.extra);
+			const fieldsNotForThisType = sourceType_allFieldsOfTypes.Exclude(...sourceType_fieldSets.get(source.type)!.main, ...sourceType_fieldSets.get(source.type)!.extra);
 			for (const field of fieldsNotForThisType) {
 				delete source[field];
 			}

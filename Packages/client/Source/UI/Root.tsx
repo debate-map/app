@@ -22,9 +22,9 @@ import {NavBar} from "../UI/@Shared/NavBar.js";
 import {GlobalUI} from "../UI/Global.js";
 import {HomeUI} from "../UI/Home.js";
 import {MoreUI} from "../UI/More.js";
-import {GADDemo, ShowHeader} from "./@GAD/GAD.js";
-import {HomeUI_GAD} from "./@GAD/Home_GAD.js";
-import {NavBar_GAD} from "./@GAD/NavBar_GAD.js";
+import {SLMode, ShowHeader} from "./@SL/SL.js";
+import {HomeUI_SL} from "./@SL/Home_SL.js";
+import {NavBar_SL} from "./@SL/NavBar_SL.js";
 import {OnDragEnd} from "./@Root/RootDragHandler.js";
 import {RootStyles} from "./@Root/RootStyles.js";
 import {NodeDetailBoxesLayer} from "./@Shared/Maps/Node/DetailBoxes/NodeDetailBoxesLayer.js";
@@ -169,7 +169,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		/*const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet"/>;
 		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head*/
 
-		if (GADDemo) {
+		if (SLMode) {
 			/*const linkEl2 = <link href="//fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet"/>;
 			ReactDOM.render(ReactDOM.createPortal(linkEl2, document.head), document.createElement("div")); // render directly into head*/
 
@@ -213,8 +213,8 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 				</ErrorBoundary>
 				{ShowHeader &&
 				<ErrorBoundary>
-					{!GADDemo && <NavBar/>}
-					{GADDemo && <NavBar_GAD/>}
+					{!SLMode && <NavBar/>}
+					{SLMode && <NavBar_SL/>}
 				</ErrorBoundary>}
 				{/* <InfoButton_TooltipWrapper/> */}
 				<ErrorBoundary
@@ -233,8 +233,8 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "forum" && <ForumUI/>}
 						{page == "feedback" && <FeedbackUI/>}
 						{page == "more" && <MoreUI/>}
-						{page == "home" && !GADDemo && <HomeUI/>}
-						{page == "home" && GADDemo && <HomeUI_GAD/>}
+						{page == "home" && !SLMode && <HomeUI/>}
+						{page == "home" && SLMode && <HomeUI_SL/>}
 						{page == "social" && <SocialUI/>}
 						{page == "debates" && <DebatesUI/>}
 						{page == "global" && <GlobalUI/>}
