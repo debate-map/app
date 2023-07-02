@@ -1,4 +1,6 @@
+**/.DS_Store
 **/.idea
+**/*.log
 
 /node_modules
 /tilt_modules

@@ -24,7 +24,7 @@ declare module "web-vcore_UserTypes" {
 //declare module "../../../../../node_modules/web-vcore/Dist/UserTypes.js" {
 //declare module "../../../../../node_modules/web-vcore/Dist/UserTypes.d.ts" {
 	interface RootStore extends RootState {}
-	// interface DBShape extends GraphDBShape {}
+	//interface DBShape extends GraphDBShape {}
 	interface LogTypes extends LogTypes_New {}
 }
 
@@ -45,6 +45,12 @@ export function InitWVC() {
 		HasHotReloaded: ()=>hasHotReloaded,
 		logTypes,
 		mobxCompatMode: true,
+		PostHandleError: (error, errorStr)=>{
+			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
+			setTimeout(()=>{
+				RunInAction("WVC.PostHandleError", ()=>AddNotificationMessage(errorStr));
+			});
+		},
 
 		// urls
 		GetSkin: ()=>liveSkin,
@@ -53,31 +59,23 @@ export function InitWVC() {
 		GetLoadActionFuncForURL,
 		GetNewURL,
 		DoesURLChangeCountAsPageChange,
+		GetNewURLForStoreChanges,
 
+		// store+db
 		GetStore: ()=>store,
-		// WithStore,
-		// firebaseConfig,
+		GetAuth: ()=>null, // todo
+		GetUserID: MeID,
+		ValidateDBData: ()=>{},
+		//WithStore,
+		//firebaseConfig,
 
+		// others
 		globalConnectorPropGetters: {
 			// also access some other paths here, so that when they change, they trigger ui updates for everything
 			_user: ()=>Me(),
 			_permissions: ()=>GetUserPermissionGroups(MeID()),
 			// _extraInfo: function() { return this.extraInfo; }, // special debug info from within FirebaseConnect function
 		},
-
-		PostHandleError: (error, errorStr)=>{
-			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
-			setTimeout(()=>{
-				RunInAction("WVC.PostHandleError", ()=>AddNotificationMessage(errorStr));
-			});
-		},
-
-		GetAuth: ()=>null, // todo
-		GetUserID: MeID,
-
-		ValidateDBData: ()=>{},
-
-		GetNewURLForStoreChanges,
 	});
 }
 
