@@ -38,7 +38,7 @@ export function InitWVC() {
 		useExpandedNavBar: ()=>true,
 
 		// core
-		db_short: DB_SHORT,
+		db_short: DB,
 		devEnv: DEV,
 		prodEnv: PROD,
 		dbVersion: 12, // last version used (n/a anymore since not using firestore)

@@ -93,27 +93,24 @@ Object.assign(g, {ENV_DYN: ENV, ENV_DYN_ORIG: ENV, DEV_DYN: DEV, PROD_DYN: PROD,
 // now, check the URL and store for potential user-overrides of the "X_DYN" derivative-vars (eg. the subset of env-references that opt-in to allowing runtime overrides)
 const envStr = AsNotNull(startURL.GetQueryVar("env")) || storeTemp.main?.envOverride;
 if (envStr) {
-	console.log(`Using env: ${ENV}`);
-	const newEnv = {dev: "dev", prod: "prod"}[envStr] || envStr;
-	g.ENV = newEnv;
-	g.DEV = newEnv == "dev";
-	g.PROD = newEnv == "prod";
-	g.TEST = newEnv == "test";
+	console.log(`Using env: ${envStr}`);
+	g.ENV_DYN = envStr;
+	g.DEV_DYN = envStr == "dev";
+	g.PROD_DYN = envStr == "prod";
+	g.TEST_DYN = envStr == "test";
 }
 
-// only compile-time if compiled for production (otherwise, can be overriden)
-declare global { var DB: string; var DB_SHORT: string; }
+declare global { var DB: string; }
 
-g.DB = g.ENV;
+g.DB = g.ENV_DYN;
 if (location.host == "localhost:5100" || location.host == "localhost:5101") {
 	g.DB = "dev";
 }
 const dbStr = AsNotNull(startURL.GetQueryVar("db")) || storeTemp.main?.dbOverride;
 if (dbStr) {
-	g.DB = {dev: "dev", prod: "prod"}[dbStr] || dbStr;
-	console.log(`Using db: ${DB}`);
+	console.log(`Using db: ${dbStr}`);
+	g.DB = dbStr;
 }
-g.DB_SHORT = {development: "dev", production: "prod"}[DB] || DB;
 
 /*let dbVersion = 12;
 const dbVersionStr = AsNotNull(startURL.GetQueryVar("dbVersion")) || storeTemp.main?.dbVersionOverride;
