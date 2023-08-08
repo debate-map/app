@@ -57,9 +57,13 @@ impl From<Row> for UserHidden {
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct UserHiddenUpdates {
 	pub backgroundID: FieldUpdate_Nullable<String>,
+    #[graphql(name = "backgroundCustom_enabled")]
 	pub backgroundCustom_enabled: FieldUpdate_Nullable<bool>,
+    #[graphql(name = "backgroundCustom_color")]
 	pub backgroundCustom_color: FieldUpdate_Nullable<String>,
+    #[graphql(name = "backgroundCustom_url")]
 	pub backgroundCustom_url: FieldUpdate_Nullable<String>,
+    #[graphql(name = "backgroundCustom_position")]
 	pub backgroundCustom_position: FieldUpdate_Nullable<String>,
 	pub addToStream: FieldUpdate<bool>,
 }

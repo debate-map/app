@@ -13,6 +13,7 @@ import {ProfilePanel} from "Store/main/profile";
 import {store} from "Store";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_SetUserFollowData, RunCommand_UpdateUser, RunCommand_UpdateUserHidden} from "Utils/DB/Command";
+import {GetUserBackground} from "Store/db_ext/users/$user";
 
 // todo: move these to a better, more widely usable place
 /*type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -213,6 +214,9 @@ class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, 
 						value={profileUser_h.backgroundCustom_url} onChange={val=>{
 							RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_url: val}});
 						}}/>
+					<Button ml={5} mdIcon="scanner" title="Set to the currently-selected, non-custom background-image. (eg. for customization)" onClick={()=>{
+						RunCommand_UpdateUserHidden({id: user.id, updates: {backgroundCustom_url: GetUserBackground(user.id, false).url_max}});
+					}}/>
 				</Row>
 				<Row mt={5}>
 					<Pre>Anchor: </Pre>

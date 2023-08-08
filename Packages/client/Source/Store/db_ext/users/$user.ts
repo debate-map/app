@@ -23,7 +23,7 @@ export class BackgroundConfig {
 	//styleOverride?: string;
 }
 
-export const GetUserBackground = CreateAccessor((userID: string|n): BackgroundConfig=>{
+export const GetUserBackground = CreateAccessor((userID: string|n, allowCustomOverride = true): BackgroundConfig=>{
 	if (SLMode) {
 		// if header is disabled, it means we're in the iframe for the special frontend; change background accordingly
 		if (!ShowHeader) {
@@ -37,7 +37,7 @@ export const GetUserBackground = CreateAccessor((userID: string|n): BackgroundCo
 	const user_p = GetUserHidden(userID);
 	if (!user_p) return presetBackgrounds[defaultPresetBackground];
 
-	if (user_p.backgroundCustom_enabled) {
+	if (user_p.backgroundCustom_enabled && allowCustomOverride) {
 		return {
 			color: user_p.backgroundCustom_color,
 			url_1920: user_p.backgroundCustom_url,
