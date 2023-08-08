@@ -239,7 +239,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 				<Row mt={5}>
 					<CheckBox text="Get data" value={getData} onChange={val=>this.SetState({getData: val})}/>
 					<Button ml={5} text="Download data" enabled={(subtreeData_string?.length ?? 0) > 0} onClick={()=>{
-						StartDownload(subtreeData_string!, DataExchangeFormat[dialogState.targetFormat].endsWith("_CSV") ? "Data.csv" : "Data.json");
+						StartDownload(subtreeData_string!, DataExchangeFormat[dialogState.targetFormat].includes("csv") ? "Data.csv" : "Data.json");
 						/*ShowMessageBox({
 							title: "Data downloaded",
 							message: `Completed export of subtree.`,
