@@ -4,7 +4,7 @@ import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
-import {Assert, CreateStringEnum, GetPercentFromXToY} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY} from "web-vcore/nm/js-vextensions.js";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
@@ -151,10 +151,15 @@ export class ImportSubtreeDialogState {
 	@O importRatings_userIDsStr = "";*/
 }
 
+export enum ExportRetrievalMethod {
+	"server" = "server",
+	"client" = "client",
+}
 export class ExportSubtreeDialogState {
 	constructor() { makeObservable(this); }
-	@O targetFormat = DataExchangeFormat.json_dm;
+	@O retrievalMethod = ExportRetrievalMethod.server;
 	@O maxExportDepth = 5;
+	@O @version(2) targetFormat = DataExchangeFormat.json_dm;
 }
 
 export const GetLastAcknowledgementTime = CreateAccessor(function(nodeID: string) {

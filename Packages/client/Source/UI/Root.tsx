@@ -18,6 +18,7 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {VMenuLayer} from "web-vcore/nm/react-vmenu.js";
 import {MessageBoxLayer} from "web-vcore/nm/react-vmessagebox.js";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
+import {ApolloProvider} from "web-vcore/nm/@apollo/client";
 import {NavBar} from "../UI/@Shared/NavBar.js";
 import {GlobalUI} from "../UI/Global.js";
 import {HomeUI} from "../UI/Home.js";
@@ -34,6 +35,7 @@ import {DebatesUI} from "./Debates.js";
 import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
+import {apolloClient} from "../Utils/LibIntegrations/Apollo.js";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -128,7 +130,9 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 
 		return (
 			<DragDropContext_Beautiful onDragEnd={OnDragEnd}>
-				<RootUI/>
+				<ApolloProvider client={apolloClient}>
+					<RootUI/>
+				</ApolloProvider>
 			</DragDropContext_Beautiful>
 		);
 	}

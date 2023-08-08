@@ -1,16 +1,19 @@
-import {GetExpandedByDefaultAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeLink, Term} from "dm_common";
+import {GetExpandedByDefaultAttachment, GetMedia, GetNodeChildren, GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, GetNodePhrasings, GetTermsAttached, HasModPermissions, NodeL2, NodeL3, NodePhrasing, NodeRevision, Media, MeID, NodeLink, Term, NodeL1, GetNodeTitleFromPhrasingAndForm, ClaimForm, NodeType} from "dm_common";
 import React from "react";
 import {store} from "Store";
-import {DataExchangeFormat} from "Utils/DataFormats/DataExchangeFormat.js";
+import {DataExchangeFormat, DataExchangeFormat_entries_supportedBySubtreeExporter} from "Utils/DataFormats/DataExchangeFormat.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer, RunInAction_Set} from "web-vcore";
+import {gql, useQuery} from "web-vcore/nm/@apollo/client";
 import {Assert, Clone, GetEntries, ModifyString, NN, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {ClassKeys, CreateAccessor, GetSchemaJSON, TableNameToDocSchemaName} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, CheckBox, Column, Row, RowLR, Select, Spinner, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ExportRetrievalMethod} from "../../../../../Store/main/maps.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
+import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server} from "./Dialogs/SubtreeExportHelpers.js";
 
 @Observer
 export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -45,6 +48,19 @@ export function CSVCell(text: string) {
 	return result;
 }
 
+export class SubtreeIncludeKeys {
+	constructor(data?: Partial<SubtreeIncludeKeys>) {
+		Object.assign(this, data);
+	}
+	//nodes = ClassKeys<NodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType");
+	nodes = ClassKeys<NodeL1>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType");
+	nodeLinks = ClassKeys<NodeLink>("id", "parent", "child", "form", "polarity");
+	nodeRevisions = ClassKeys<NodeRevision>("id", "node", "phrasing", "attachments");
+	nodePhrasings = ClassKeys<NodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "note", "terms", "references");
+	terms = ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note");
+	medias = ClassKeys<Media>("id", "name", "type", "url", "description");
+}
+
 @Observer
 class ExportSubtreeUI extends BaseComponentPlus(
 	{} as {controller: BoxController} & MI_SharedProps,
@@ -53,65 +69,101 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		tab: ExportSubtreeUI_MidTab.Nodes,
 		nodesToLink: {} as {[key: string]: string},
 		error: null as string|n, dbUpdates: null,
-		/*ignoreKeys: {
-			nodes: ClassKeys<NodeL3>("creator", "createdAt", "accessPolicy", "policy", "current", "displayPolarity", "link"),
-			nodeLinks: ClassKeys<NodeLink>("creator", "createdAt", "c_parentType", "c_childType", "_mirrorLink", "seriesAnchor", "seriesEnd", "slot"),
-			nodeRevisions: ClassKeys<NodeRevision>("creator", "createdAt", "displayDetails", "equation", "phrasing_tsvector", "quote"),
-			nodePhrasings: ClassKeys<NodePhrasing>("creator", "createdAt"),
-			terms: ClassKeys<Term>("creator", "createdAt"),
-			medias: ClassKeys<Media>("creator", "createdAt", "accessPolicy"),
-		},*/
-		includeKeys: {
-			nodes: ClassKeys<NodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType"),
-			nodeLinks: ClassKeys<NodeLink>("id", "parent", "child", "form", "polarity"),
-			nodeRevisions: ClassKeys<NodeRevision>("id", "node", "phrasing", "attachments"),
-			nodePhrasings: ClassKeys<NodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "note", "terms", "references"),
-			terms: ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note"),
-			medias: ClassKeys<Media>("id", "name", "type", "url", "description"),
-		},
+		includeKeys: new SubtreeIncludeKeys(),
 	},
 	) {
 	render() {
-		const {mapID, node, path, controller} = this.props;
+		const {mapID, node: rootNode, path: rootNodePath, controller} = this.props;
 		const {getData, tab, nodesToLink, error, dbUpdates, includeKeys} = this.state;
 		const dialogState = store.main.maps.exportSubtreeDialog;
 
-		let subtreeExportData: string|n;
-		if (getData) {
-			var searchInfo = PopulateSearchInfoUsingSubtree(path, {maxDepth: dialogState.maxExportDepth});
+		let includeKeys_final = Clone(includeKeys);
+		if (dialogState.targetFormat == DataExchangeFormat.csv_basic) {
+			// for this export format, we only need a subset of the data (keep in sync with the "csv_basic" branch's code below)
+			includeKeys_final = new SubtreeIncludeKeys({
+				nodes: ClassKeys<NodeL1>("id", "type", "c_currentRevision"),
+				nodeLinks: ClassKeys<NodeLink>("parent", "child", "form", "polarity"),
+				nodeRevisions: ClassKeys<NodeRevision>("id", "phrasing"),
+				nodePhrasings: ClassKeys<NodePhrasing>(),
+				terms: ClassKeys<Term>(),
+				medias: ClassKeys<Media>(),
+			});
+		}
+
+		// todo: if this fails authentication, use query-fetching approach seen in Admin.tsx for db-backups
+		const {data: queryData, loading, refetch} = useQuery(GetServerSubtreeData_GQLQuery(rootNode.id, dialogState.maxExportDepth, includeKeys_final), {
+			skip: dialogState.retrievalMethod != ExportRetrievalMethod.server || !getData,
+			// not sure if these are needed
+			fetchPolicy: "no-cache",
+			nextFetchPolicy: "no-cache",
+		});
+
+		let subtreeData: SubtreeData_Server|n;
+		if (dialogState.retrievalMethod == ExportRetrievalMethod.server) {
+			subtreeData = queryData?.subtree;
+		} else {
+			const subtreeData_local = PopulateLocalSubtreeData(rootNodePath, {maxDepth: dialogState.maxExportDepth});
+			subtreeData = ConvertLocalSubtreeDataToServerStructure(subtreeData_local);
+		}
+
+		let subtreeData_string: string|n;
+		if (getData && subtreeData != null) {
 			if (dialogState.targetFormat == DataExchangeFormat.json_dm) {
-				subtreeExportData = JSON.stringify({
-					// todo: make-so the UI lets you choose which fields to keep, whether to include old node-revisions, etc.
-					nodes: [...searchInfo.nodes.values()].map(node=>node.IncludeKeys(...includeKeys.nodes)),
-					nodeLinks: [...searchInfo.nodeLinks.values()].map(link=>link.IncludeKeys(...includeKeys.nodeLinks)),
-					nodeRevisions: [...searchInfo.nodeRevisions.values()].map(revision=>revision.IncludeKeys(...includeKeys.nodeRevisions)),
-					nodePhrasings: [...searchInfo.nodePhrasings.values()].map(phrasing=>phrasing.IncludeKeys(...includeKeys.nodePhrasings)),
-					terms: [...searchInfo.terms.values()].map(term=>term.IncludeKeys(...includeKeys.terms)),
-					medias: [...searchInfo.medias.values()].map(media=>media.IncludeKeys(...includeKeys.medias)),
-				}, (key, value)=>{
+				subtreeData_string = JSON.stringify({
+					nodes: subtreeData.nodes!.map(node=>node.IncludeKeys(...includeKeys.nodes)),
+					nodeLinks: subtreeData.nodeLinks!.map(link=>link.IncludeKeys(...includeKeys.nodeLinks)),
+					nodeRevisions: subtreeData.nodeRevisions!.map(revision=>revision.IncludeKeys(...includeKeys.nodeRevisions)),
+					nodePhrasings: subtreeData.nodePhrasings!.map(phrasing=>phrasing.IncludeKeys(...includeKeys.nodePhrasings)),
+					terms: subtreeData.terms!.map(term=>term.IncludeKeys(...includeKeys.terms)),
+					medias: subtreeData.medias!.map(media=>media.IncludeKeys(...includeKeys.medias)),
+				}, null, "\t");
+				/*, (key, value)=>{
 					// also apply include-keys filtering to embedded links/revisions/phrasings
 					if (key == "link" && typeof value == "object") return value.IncludeKeys(...includeKeys.nodeLinks);
 					if (key == "current") return value.IncludeKeys(...includeKeys.nodeRevisions);
 					if (key == "phrasing") return value.IncludeKeys(...includeKeys.nodePhrasings);
 					return value;
-				}, "\t");
+				}, "\t");*/
+			} else if (dialogState.targetFormat == DataExchangeFormat.csv_basic) {
+				// NOTE: If you add new field-accesses in code below, make sure to update the "includeKeys_final" above to include the new fields.
+				const data = subtreeData!;
+				function EnhanceNode(path: string, node: NodeL1, link?: NodeLink|n) {
+					const rev = data.nodeRevisions!.find(a=>a.id == node.c_currentRevision)!;
+					const childLinks = data.nodeLinks!.filter(a=>a.parent == node.id);
+					const childNodes = childLinks.map(a=>data.nodes!.find(b=>b.id == a.child)!);
+					let displayText = GetNodeTitleFromPhrasingAndForm(rev.phrasing, link?.form ?? ClaimForm.base);
+					if (!displayText.rawTitle) {
+						const textParts = [`untitled ${node.type}`];
+						if (node.type == NodeType.argument && link?.polarity != null) {
+							textParts.push(link.polarity == "supporting" ? "(pro)" : "(con)");
+						}
+						displayText = {...displayText, rawTitle: `<${textParts.join(" ")}>`};
+					}
+					const childNodes_enhanced = childNodes
+						.filter(child=>!path.split("/").includes(child.id)) // ignore children already part of current-path (to avoid recursion-loops)
+						.map(child=>EnhanceNode(`${path}/${child.id}`, child, childLinks.find(a=>a.child == child.id)));
+					return {...node, path, displayText, childNodes_enhanced};
+				}
+				type NodeEnhanced = ReturnType<typeof EnhanceNode>;
+				const rootNode_enhanced = EnhanceNode(rootNode.id, data.nodes!.find(a=>a.id == rootNode.id)!);
+
+				const csvLines = [] as string[];
+				csvLines.push([...Array(dialogState.maxExportDepth + 1).keys()].map(depth=>CSVCell(`Node depth ${depth}`)).join(",")); // headers
+				function PrintNodeToCSV(node: NodeEnhanced) {
+					const csvCells = [] as string[];
+					for (const parentID of node.path.split("/").slice(0, -1)) {
+						csvCells.push(CSVCell(""));
+					}
+					csvCells.push(CSVCell(node.displayText.rawTitle ?? ""));
+					csvLines.push(csvCells.join(","));
+					for (const child of node.childNodes_enhanced) {
+						PrintNodeToCSV(child);
+					}
+				}
+				PrintNodeToCSV(rootNode_enhanced);
+
+				subtreeData_string = csvLines.join("\n");
 			}
-			/*} else if (dialogState.targetFormat == DataExchangeFormat.gad_csv) {
-				const positions = subtree.childrenData.VValues();
-				subtreeExportData = positions.map(position=>{
-					const categories = position.childrenData.VValues();
-					return categories.map((category, categoryIndex)=>{
-						const subcategories = category.childrenData.VValues();
-						const cells = [] as string[];
-						cells.push(CSVCell(categoryIndex == 0 ? GetNodeDisplayText(position) : ""));
-						cells.push(CSVCell(GetNodeDisplayText(category)));
-						cells.push(...subcategories.map(subcategory=>{
-							return CSVCell(GetNodeDisplayText(subcategory));
-						}));
-						return cells.join(",");
-					}).join("\n");
-				}).join("\n");
-			}*/
 		}
 
 		const splitAt = 140;
@@ -121,8 +173,8 @@ class ExportSubtreeUI extends BaseComponentPlus(
 				<Row style={{flex: 1, minHeight: 0}}>
 					<Column style={{width: 500}}>
 						<RowLR splitAt={splitAt}>
-							<Text>Target format:</Text>
-							<Select ml={5} options={GetEntries(DataExchangeFormat)} value={dialogState.targetFormat} onChange={val=>RunInAction_Set(this, ()=>dialogState.targetFormat = val)}/>
+							<Text>Retrieval method:</Text>
+							<Select ml={5} options={GetEntries(ExportRetrievalMethod)} value={dialogState.retrievalMethod} onChange={val=>RunInAction_Set(this, ()=>dialogState.retrievalMethod = val)}/>
 						</RowLR>
 						<RowLR mt={5} splitAt={splitAt}>
 							<Row center>
@@ -134,30 +186,39 @@ class ExportSubtreeUI extends BaseComponentPlus(
 							</Row>
 							<Spinner ml={5} min={0} max={30} value={dialogState.maxExportDepth} onChange={val=>RunInAction_Set(this, ()=>dialogState.maxExportDepth = val)}/>
 						</RowLR>
-						<Row mt={5}>Include keys:</Row>
-						{Object.keys(includeKeys).map(tableName=>{
-							const docSchemaName = TableNameToDocSchemaName(tableName);
-							const schema = GetSchemaJSON(docSchemaName);
-							const fieldNames = Object.keys(schema.properties!);
-							if (tableName == "nodes") fieldNames.push("policy", "current", "displayPolarity", "link"); // extra fields attached for NodeL3
-							const fieldNames_oldEnabled = includeKeys[tableName];
+						<RowLR mt={5} splitAt={splitAt}>
+							<Text>Target format:</Text>
+							<Select ml={5} options={DataExchangeFormat_entries_supportedBySubtreeExporter} value={dialogState.targetFormat} onChange={val=>RunInAction_Set(this, ()=>dialogState.targetFormat = val)}/>
+						</RowLR>
+						{dialogState.targetFormat == DataExchangeFormat.json_dm && <>
+							<Row mt={5}>Include keys:</Row>
+							{Object.keys(includeKeys).map(tableName=>{
+								const docSchemaName = TableNameToDocSchemaName(tableName);
+								const schema = GetSchemaJSON(docSchemaName);
+								const fieldNames = Object.keys(schema.properties!);
+								// for "nodes" collection, include extra fields attached for NodeL3 (if retrieval method is on-client)
+								/*if (tableName == "nodes" && dialogState.retrievalMethod == ExportRetrievalMethod.client) {
+									fieldNames.push("policy", "current", "displayPolarity", "link");
+								}*/
+								const fieldNames_oldEnabled = includeKeys[tableName];
 
-							const splitAt_includeKeys = 120;
-							return (
-								<RowLR key={tableName} mt={10} splitAt={splitAt_includeKeys} rightStyle={{flexWrap: "wrap", columnGap: 5}}>
-									<Text>{ModifyString(tableName, m=>[m.startLower_to_upper, m.lowerUpper_to_lowerSpaceLower])}:</Text>
-									{/*<TextInput value={includeKeys[tableName].join(", ")} onChange={val=>Change(includeKeys[tableName] = val.split(",").map(a=>a.trim()) as any)}/>*/}
-									{fieldNames.map(fieldName=>{
-										return (
-											<CheckBox key={fieldName} text={fieldName} value={includeKeys[tableName].includes(fieldName)} onChange={val=>{
-												includeKeys[tableName] = fieldNames.filter(a=>(a == fieldName ? val : fieldNames_oldEnabled.includes(a)));
-												this.Update();
-											}}/>
-										);
-									})}
-								</RowLR>
-							);
-						})}
+								const splitAt_includeKeys = 120;
+								return (
+									<RowLR key={tableName} mt={10} splitAt={splitAt_includeKeys} rightStyle={{flexWrap: "wrap", columnGap: 5}}>
+										<Text>{ModifyString(tableName, m=>[m.startLower_to_upper, m.lowerUpper_to_lowerSpaceLower])}:</Text>
+										{/*<TextInput value={includeKeys[tableName].join(", ")} onChange={val=>Change(includeKeys[tableName] = val.split(",").map(a=>a.trim()) as any)}/>*/}
+										{fieldNames.map(fieldName=>{
+											return (
+												<CheckBox key={fieldName} text={fieldName} value={includeKeys[tableName].includes(fieldName)} onChange={val=>{
+													includeKeys[tableName] = fieldNames.filter(a=>(a == fieldName ? val : fieldNames_oldEnabled.includes(a)));
+													this.Update();
+												}}/>
+											);
+										})}
+									</RowLR>
+								);
+							})}
+						</>}
 					</Column>
 					{/*<Column style={{width: 500, padding: "0 5px"}}>
 						<Row>
@@ -172,13 +233,13 @@ class ExportSubtreeUI extends BaseComponentPlus(
 					</Column>*/}
 					<Column style={{width: 500}}>
 						<Row>Data:</Row>
-						<TextArea value={subtreeExportData ?? ""} style={{flex: 1}} editable={false}/>
+						<TextArea value={subtreeData_string ?? ""} style={{flex: 1}} editable={false}/>
 					</Column>
 				</Row>
 				<Row mt={5}>
 					<CheckBox text="Get data" value={getData} onChange={val=>this.SetState({getData: val})}/>
-					<Button ml={5} text="Download data" enabled={(subtreeExportData?.length ?? 0) > 0} onClick={()=>{
-						StartDownload(subtreeExportData!, DataExchangeFormat[dialogState.targetFormat].endsWith("_CSV") ? "Data.csv" : "Data.json");
+					<Button ml={5} text="Download data" enabled={(subtreeData_string?.length ?? 0) > 0} onClick={()=>{
+						StartDownload(subtreeData_string!, DataExchangeFormat[dialogState.targetFormat].endsWith("_CSV") ? "Data.csv" : "Data.json");
 						/*ShowMessageBox({
 							title: "Data downloaded",
 							message: `Completed export of subtree.`,
@@ -192,82 +253,3 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		);
 	}
 }
-
-export class GetSubtree_SearchConfig {
-	maxDepth: number;
-	//simplifyOutput: boolean;
-}
-export class GetSubtree_SearchInfo {
-	constructor(data: Partial<GetSubtree_SearchInfo>) {
-		Object.assign(this, data);
-	}
-
-	// temp
-	rootPathSegments: string[];
-	//nodes_nextToProcess: NodeL2[] = [];
-
-	// result
-	nodes = new Map<string, NodeL3>();
-	nodeLinks = new Map<string, NodeLink>();
-	nodeRevisions = new Map<string, NodeRevision>();
-	nodePhrasings = new Map<string, NodePhrasing>();
-	terms = new Map<string, Term>();
-	medias = new Map<string, Media>();
-}
-
-const PopulateSearchInfoUsingSubtree = CreateAccessor((currentPath: string, searchConfig: GetSubtree_SearchConfig, searchInfo?: GetSubtree_SearchInfo)=>{
-	const pathSegments = currentPath.split("/");
-	searchInfo = searchInfo ?? new GetSubtree_SearchInfo({rootPathSegments: pathSegments});
-
-	const node = NN(GetNodeL3(currentPath));
-
-	// check link first, because link can differ depending on path (ie. even if node has been seen, this link may not have been)
-	const isSubtreeRoot = pathSegments.join("/") == searchInfo.rootPathSegments.join("/");
-	if (node.link && !isSubtreeRoot && !searchInfo.nodeLinks.has(node.link.id)) searchInfo.nodeLinks.set(node.link.id, node.link);
-
-	// now check if node itself has been seen/processed; if so, ignore the rest of its data
-	if (searchInfo.nodes.has(node.id)) return searchInfo;
-	searchInfo.nodes.set(node.id, node);
-
-	Assert(!searchInfo.nodeRevisions.has(node.current.id), `Node-revisions should be node-specific, yet entry (${node.current.id}) was seen twice.`);
-	searchInfo.nodeRevisions.set(node.current.id, node.current);
-
-	const phrasings = GetNodePhrasings(node.id);
-	for (const phrasing of phrasings) {
-		Assert(!searchInfo.nodePhrasings.has(phrasing.id), `Node-phrasings should be node-specific, yet entry (${phrasing.id}) was seen twice.`);
-		searchInfo.nodePhrasings.set(phrasing.id, phrasing);
-	}
-
-	const terms = GetTermsAttached(node.current.id).filter(a=>a) as Term[];
-	for (const term of terms) {
-		if (!searchInfo.terms.has(term.id)) searchInfo.terms.set(term.id, term);
-	}
-
-	const mainAttachment = GetExpandedByDefaultAttachment(node.current);
-	if (mainAttachment?.media && !searchInfo.terms.has(mainAttachment?.media.id)) {
-		const media = GetMedia(mainAttachment?.media.id)!;
-		searchInfo.medias.set(media.id, media);
-	}
-
-	const currentDepth = pathSegments.length - searchInfo.rootPathSegments.length;
-	if (currentDepth < searchConfig.maxDepth) {
-		for (const child of GetNodeChildren(node.id, currentPath)) {
-			PopulateSearchInfoUsingSubtree(`${currentPath}/${child.id}`, searchConfig, searchInfo);
-		}
-	}
-	return searchInfo;
-});
-/*async function LogSelectedSubtree() {
-	let state = store.getState();
-	let selectedPath = RR.GetSelectedNodePath(state.main.page == "global" ? RR.globalMapID : state.main[state.main.page].selectedMapID);
-	let subtree = await GetAsync(()=>{
-		let selectedNode = RR.GetNodeL3(selectedPath);
-		let selectedNode_parent = RR.GetParentNodeL3(selectedPath);
-		let selectedPath_final = selectedPath;
-		if (RR.IsPremiseOfSinglePremiseArgument(selectedNode, selectedNode_parent)) {
-			selectedPath_final = RR.SlicePath(selectedPath, 1);
-		}
-		return GetSubtree(selectedPath_final);
-	});
-	console.log(ToJSON(subtree));
-}*/

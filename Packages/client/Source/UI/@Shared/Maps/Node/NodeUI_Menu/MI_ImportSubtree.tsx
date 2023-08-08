@@ -3,7 +3,7 @@ import React, {ComponentProps} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
 import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
-import {DataExchangeFormat, ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
+import {DataExchangeFormat, DataExchangeFormat_entries_supportedBySubtreeImporter, ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
 import {FS_NodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Node.js";
 import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
@@ -161,14 +161,7 @@ class ImportSubtreeUI extends BaseComponent<
 						<Row>
 							<Select displayType="button bar" options={GetEntries(ImportSubtreeUI_LeftTab, "ui")} value={leftTab} onChange={val=>this.SetState({leftTab: val})}/>
 							<Text ml={5}>Source type:</Text>
-							<Select ml={5}
-								options={GetEntries(DataExchangeFormat, val=>{
-									if (val == DataExchangeFormat.json_dm) return "JSON (DM)";
-									if (val == DataExchangeFormat.csv_sl) return "CSV (SL)";
-									return val;
-								})}
-								value={uiState.sourceType}
-								onChange={val=>RunInAction_Set(this, ()=>uiState.sourceType = val)}/>
+							<Select ml={5} options={DataExchangeFormat_entries_supportedBySubtreeImporter} value={uiState.sourceType} onChange={val=>RunInAction_Set(this, ()=>uiState.sourceType = val)}/>
 						</Row>
 						{leftTab == ImportSubtreeUI_LeftTab.source &&
 						<>

@@ -329,11 +329,8 @@ export function GetAllNodeRevisionTitles(nodeRevision: NodeRevision): string[] {
 }
 
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
-/** Subfunction of GetNodeDisplayText, that only uses a node's raw title-texts to give its rawTitle result. (useful, eg. for double-click editing of a node's text) */
-export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
-	form = form || GetNodeForm(node, path);
-	const phrasing = node.current.phrasing || {} as NodePhrasing_Embedded;
-
+/** Level-1 function to obtain node's display-text; pure function, which uses only the supplied phrasing and form arguments to derive its result. (useful, eg. for exporting server-subtree-data to CSV) */
+export const GetNodeTitleFromPhrasingAndForm = CreateAccessor((phrasing: NodePhrasing_Embedded, form: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
 	const [rawTitle, desiredField, usedField, missingMessage] = ((): [string | undefined, string, string, string]=>{
 		if (form) {
 			if (form == ClaimForm.negation) return [phrasing.text_negation, "text_negation", "text_negation", missingTitleStrings[1]];
@@ -348,6 +345,12 @@ export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: strin
 	})();
 	return {rawTitle: (rawTitle?.trim().length ?? 0) > 0 ? rawTitle : undefined, desiredField, usedField, missingMessage};
 });
+/** Level-2 function to obtain node's display-text; uses only a node's raw title-texts to give its rawTitle result. (useful, eg. for double-click editing of a node's text) */
+export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
+	form = form || GetNodeForm(node, path);
+	const phrasing = node.current.phrasing || {} as NodePhrasing_Embedded;
+	return GetNodeTitleFromPhrasingAndForm(phrasing, form);
+});
 
 export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|undefined)=>{
 	// in sl-mode, allow custom titles for arguments to actually display in-place of the standard "True, because..." etc. texts
@@ -356,7 +359,7 @@ export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|un
 	return true;
 });
 
-/** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
+/** Level-3 function to obtain node's display-text; gets the final display-text for a node. (doesn't include equation explanation, quote sources, etc., since those are obtained and displayed elsewhere) */
 export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm, allowPrefixTextHandling = true): string=>{
 	const {rawTitle, missingMessage} = GetNodeRawTitleAndSuch(node, path, form);
 	let resultTitle = rawTitle || missingMessage;

@@ -1,12 +1,26 @@
 import {NodeLink, NodeL1, NodeRevision, NodeType, systemUserID, CullNodePhrasingToBeEmbedded, NodePhrasing, ChildGroup, AddChildNode} from "dm_common";
+import {GetEntries} from "js-vextensions";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 
 export enum DataExchangeFormat {
 	json_dm = "json_dm",
+	csv_basic = "csv_basic",
+
+	// planned
 	//json_cd = "json_cd",
-	csv_sl = "csv_sl",
+
+	// deprecated
+	csv_sl = "csv_sl", // old; import-only
 }
+export const DataExchangeFormat_entries = GetEntries(DataExchangeFormat, val=>{
+	if (val == DataExchangeFormat.json_dm) return "JSON (DM)";
+	if (val == DataExchangeFormat.csv_basic) return "CSV (basic)";
+	if (val == DataExchangeFormat.csv_sl) return "CSV (SL)";
+	return val;
+});
+export const DataExchangeFormat_entries_supportedBySubtreeImporter = DataExchangeFormat_entries.filter(a=>[DataExchangeFormat.json_dm, DataExchangeFormat.csv_sl].includes(a.value));
+export const DataExchangeFormat_entries_supportedBySubtreeExporter = DataExchangeFormat_entries.filter(a=>[DataExchangeFormat.json_dm, DataExchangeFormat.csv_basic].includes(a.value));
 
 // shared import structures
 // ==========

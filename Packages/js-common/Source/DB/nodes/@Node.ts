@@ -140,12 +140,15 @@ export class RatingSummary {
 
 // helpers
 // export type NodeL2 = NodeL1 & {finalType: NodeType};
+export const NodeL2_addedKeys = ["policy", "current"] as const;
 /** NodeL1, except with the access-policy and current-revision data attached. (no view-related stuff) */
 export interface NodeL2 extends NodeL1 {
 	// todo: maybe make-so these added/attached cached-data properties have "_" at the start of their name, to make them easier to recognize
 	policy: AccessPolicy;
 	current: NodeRevision;
 }
+
+export const NodeL3_addedKeys = ["displayPolarity", "link"] as const;
 /** NodeL2, except with some view-related stuff included. (eg. display-polarity based on path, current lens) */
 export interface NodeL3 extends NodeL2 {
 	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
