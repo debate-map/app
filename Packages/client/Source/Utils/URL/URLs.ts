@@ -123,7 +123,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 		const page = url.pathNodes[0];
 		store.main.page = page;
 		const subpage = url.pathNodes[1];
-		if (url.pathNodes[1] && pageTree.children[page]?.simpleSubpages) {
+		if (url.pathNodes[1] && pageTree.children[page]?.simpleSubpages && pageTree.children[page]?.ChildKeys.includes(subpage)) {
 			store.main[page].subpage = subpage;
 		}
 
