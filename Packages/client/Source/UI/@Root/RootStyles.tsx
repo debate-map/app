@@ -8,6 +8,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 //export const Button_background_dark = Chroma("rgba(90,100,110,0.9)").css(); // same as hover color, except .9 alpha instead of .8
 //export const Button_background_dark = Chroma(Button_styles.root.backgroundColor).darken(chroma_maxDarken * .05).css();
 
+// This class is defined in user-project rather than web-vcore, so that it can use @Observer (ie. evaluate mobx-fields) while determining its final css.
 @Observer
 export class RootStyles extends BaseComponent<{}, {}> {
 	ComponentWillMount() {
@@ -24,11 +25,8 @@ export class RootStyles extends BaseComponent<{}, {}> {
 
 		return (
 			<style>{`
-
-			html, body:not(.neverMatch) {
-				font-family: ${skin.MainFont()};
-				color: ${skin.TextColor().css()};
-			}
+			${skin.RawCSS_ApplyScalarsAndStyles()}
+			${skin.RawCSS_Freeform()}
 
 			.background {
 			${
@@ -58,8 +56,6 @@ export class RootStyles extends BaseComponent<{}, {}> {
 				}
 				}
 			}
-
-			${skin.StyleBlock_Freeform()}
 
 			`}</style>
 		);

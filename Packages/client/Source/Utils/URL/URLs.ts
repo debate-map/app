@@ -127,7 +127,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			store.main[page].subpage = subpage;
 		}
 
-		/* if (url.pathNodes[0] == 'forum') {
+		/*if (url.pathNodes[0] == 'forum') {
 			const subforumStr = url.pathNodes[1];
 			if (subforumStr != '*') {
 				const subforumIDMatch = subforumStr && subforumStr.match(/([0-9]+)$/);
@@ -139,7 +139,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			const threadIDMatch = threadStr && threadStr.match(/([0-9]+)$/);
 			const threadID = threadIDMatch ? threadIDMatch[1].ToInt() : null;
 			result.push(new ACTThreadSelect({ id: threadID }));
-		} */
+		}*/
 
 		/*if (page == "feedback") {
 			if (subpage == "proposals") {

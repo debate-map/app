@@ -73,7 +73,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			document.body.style.minHeight = null as any;
 		}
 
-		// add Quicksand font
+		// add Quicksand font, from google-fonts // todo: probably switch to use locally-hosted font, as done for "client" package
 		const linkEl = <link href="//fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet" />;
 		ReactDOM.render(ReactDOM.createPortal(linkEl, document.head), document.createElement("div")); // render directly into head
 	}

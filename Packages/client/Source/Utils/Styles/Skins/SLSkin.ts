@@ -1,7 +1,6 @@
 import {UserRow} from "UI/Database/Users.js";
-import {chroma_maxDarken} from "web-vcore";
+import {chroma_maxDarken, inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {inFirefox, NavBarButton, SubNavBar, SubNavBarButton} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
 import {DMSkin} from "./DMSkin.js";
@@ -18,23 +17,23 @@ export class SLSkin extends DMSkin {
 	// scalars
 	// ==========
 
-	NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
-	HeaderFont = ()=>"Cinzel";
-	TextColor = ()=>chroma("rgb(43,55,85)");
-	NodeTextColor = ()=>this.TextColor();
-	NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.2)");
-	ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().alpha(1);
-	ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
+	override NavBarPanelBackgroundColor = ()=>this.OverlayPanelBackgroundColor();
+	override HeaderFont = ()=>"Cinzel";
+	override TextColor = ()=>chroma("rgb(43,55,85)");
+	override NodeTextColor = ()=>this.TextColor();
+	override NodeSubPanelBackgroundColor = ()=>chroma("rgba(0,0,0,.2)");
+	override ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().alpha(1);
+	override ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
 
 	// styles
 	// ==========
 
-	// style overrides and blocks
+	// blocks of raw-css or hooks/code
 	// ==========
 
-	StyleBlock_Freeform() {
+	override RawCSS_Freeform() {
 		return `
-			${DMSkin.prototype.StyleBlock_Freeform.call(this)}
+			${super.RawCSS_Freeform()}
 			
 			/* overrides */
 			.NodeBox > .ExpandableBox_mainContent .Button, .NodeUI_BottomPanel .Button {
@@ -46,8 +45,8 @@ export class SLSkin extends DMSkin {
 			}
 		`;
 	}
-	CSSHooks_Freeform() {
-		DMSkin.prototype.CSSHooks_Freeform.call(this);
+	override CSSHooks_Freeform() {
+		super.CSSHooks_Freeform();
 		addHook_css(NavBarButton, ctx=>{
 			if (ctx.callIndex == 0) {
 				ctx.styleArgs.push({

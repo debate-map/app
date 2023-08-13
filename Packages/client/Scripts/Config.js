@@ -10,7 +10,7 @@ require("dotenv").config({path: `${__dirname}/../../../.env`});
 
 const {NODE_ENV, PORT, USE_TSLOADER} = process.env;
 
-// modify the imported config-base, then return it (that's fine/intended)
+// call CreateConfig (with some customizations passed-in), then customize further by modifying the returned config before export (that's fine/intended)
 export const config = CreateConfig({
 	path_base: path.resolve(__dirname, ".."),
 	//path_base: path.resolve(".."), // if cwd is Scripts
