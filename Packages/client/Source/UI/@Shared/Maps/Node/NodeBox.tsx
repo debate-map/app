@@ -27,7 +27,7 @@ import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "./ExpandableBox.js";
-import {NodeToolbar} from "./NodeBox/NodeToolbar.js";
+import {GetToolbarItemsToShow, NodeToolbar} from "./NodeBox/NodeToolbar.js";
 import {SubPanel} from "./NodeBox/SubPanel.js";
 import {TitlePanel} from "./NodeBox/TitlePanel.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
@@ -54,7 +54,7 @@ export type NodeBox_Props = {
 	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map,
 	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
-	usePortalForDetailBoxes?: boolean,
+	childrenShownByNodeExpandButton?: number, usePortalForDetailBoxes?: boolean,
 } & {dragInfo?: DragInfo};
 
 /* @MakeDraggable(({ node, path, indexInNodeList }: TitlePanelProps) => {
@@ -109,7 +109,7 @@ export class NodeBox extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, treePath, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
+		const {indexInNodeList, map, node, path, treePath, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
@@ -223,6 +223,7 @@ export class NodeBox extends BaseComponentPlus(
 		}, [selected, leftPanelPinned]);*/
 
 		const toolbarShow = ShowNodeToolbars(map);
+		const toolbarShow_hasRightAnchoredItems = toolbarShow && GetToolbarItemsToShow(node, map).length > 0;
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
@@ -364,6 +365,7 @@ export class NodeBox extends BaseComponentPlus(
 						marginTop: 1,
 					}}/>*/}
 				{!toolbarShow && titlePanel}
+				{/* for arguments, we render the toolbar after the title, because it is an "inline toolbar" that is rendered right-of-title on the same row */}
 				{toolbarShow && node.type == NodeType.argument &&
 					<Row>{titlePanel}{toolbarElement}</Row>}
 				{toolbarShow && node.type != NodeType.argument &&
@@ -451,7 +453,8 @@ export class NodeBox extends BaseComponentPlus(
 						<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
 					</>}
 					toggleExpanded={toggleExpanded}
-					expandButtonStyle={E(toolbarShow && {borderRadius: "0 0 5px 0"})}
+					expandButtonStyle={E(toolbarShow_hasRightAnchoredItems && {borderRadius: "0 0 5px 0"})}
+					isExpandButtonForNodeChildren={(childrenShownByNodeExpandButton ?? 0) > 0}
 					afterChildren={<>
 						{bottomPanelShow
 							&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}

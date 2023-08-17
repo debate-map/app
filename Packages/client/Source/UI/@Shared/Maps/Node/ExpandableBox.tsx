@@ -4,8 +4,11 @@ import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import React from "react";
 import {Chroma_Mix} from "Utils/ClassExtensions/CE_General";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {ES} from "web-vcore";
+import {ES, Observer, RunInAction_Set} from "web-vcore";
 import {BorderRadiusCSS as CSSForCorners} from "Utils/UI/General";
+import {store} from "Store";
+import {TourDot} from "UI/@Shared/TourUI/TourDot";
+import {NodeBox} from "./NodeBox";
 
 type Props = {
 	parent?,
@@ -15,8 +18,10 @@ type Props = {
 	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number|n,
 	text, onTextHolderClick?, textHolderStyle?,
 	beforeChildren?, afterChildren?,
-	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?,
+	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any, expandButtonStyle?, isExpandButtonForNodeChildren: boolean,
 };
+
+@Observer
 export class ExpandableBox extends BaseComponent<Props, {}> {
 	static defaultProps = {outlineThickness: 1, roundedTopLeftCorner: true};
 	static ValidateProps(props: Props) {
@@ -32,8 +37,9 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 			className, width, widthOverride, innerWidth, outlineColor, outlineThickness, roundedTopLeftCorner, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,
 			backgroundFillPercent, backgroundColor, markerPercent,
 			text, onTextHolderClick, textHolderStyle, beforeChildren, afterChildren,
-			expanded, toggleExpanded, expandButtonStyle, ...rest} = this.props;
+			expanded, toggleExpanded, expandButtonStyle, isExpandButtonForNodeChildren, ...rest} = this.props;
 		this.parent = parent; // probably temp; used to access NodeBox comp's props, from MapUI.FindNodeBox
+		//const forNodeBox = parent instanceof NodeBox;
 
 		const {key, css} = cssHelper(this);
 		return (
@@ -75,7 +81,11 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 						{/* children */}
 					</div>
 					<Button ref={c=>this.expandButton = c}
-						text={expanded ? "-" : "+"} // size={28}
+						text={<>
+							{expanded ? "-" : "+"}
+							{!expanded && isExpandButtonForNodeChildren &&
+							<TourDot stateKey="nodeUI_expandButton" text={`Click "+" below to expand the children nodes.`}/>}
+						</>} // size={28}
 						style={css(
 							{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
@@ -90,7 +100,12 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 							},
 							expandButtonStyle,
 						)}
-						onClick={toggleExpanded}/>
+						onClick={e=>{
+							if (!expanded && isExpandButtonForNodeChildren && store.main.guide.tourDotStates.nodeUI_expandButton == null) {
+								RunInAction_Set(this, ()=>store.main.guide.tourDotStates.nodeUI_expandButton = Date.now());
+							}
+							return toggleExpanded(e);
+						}}/>
 				</Row>
 				{afterChildren}
 			</div>

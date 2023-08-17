@@ -1,7 +1,7 @@
 import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 
-export class GuidePanel extends BaseComponent<{auth?}, {}> {
+export class GuidePanel extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div style={{

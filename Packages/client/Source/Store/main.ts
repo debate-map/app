@@ -6,6 +6,7 @@ import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {DatabaseState} from "./main/database.js";
 import {DebatesPageState} from "./main/debates.js";
+import {GuideState} from "./main/guide.js";
 import {MapsState} from "./main/maps.js";
 import {MorePageState} from "./main/more.js";
 import {ProfileState} from "./main/profile.js";
@@ -54,7 +55,7 @@ export class MainState {
 	@O global = {} as {subpage: string};
 
 	@O search = new SearchState();
-	// guide: {subpage: string};
+	@O guide = new GuideState();
 	@O profile = new ProfileState();
 
 	@O topLeftOpenPanel: string|n;

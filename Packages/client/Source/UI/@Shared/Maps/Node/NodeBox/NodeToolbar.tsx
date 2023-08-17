@@ -30,6 +30,9 @@ export function GetToolbarItemsToTryToShow(map?: Map|n) {
 }
 export function GetToolbarItemsToShow(node: NodeL3, map?: Map|n) {
 	if (!ShowNodeToolbars(map)) return [];
+	// don't show any of the standard toolbar-items for category-nodes, since looks bad (and less useful there) [NodeToolbar comp still rendered, since may be needed to show prefix-text "button"]
+	if (node.type == NodeType.category) return [];
+
 	const itemsToTryToShow = GetToolbarItemsToTryToShow(map);
 	return itemsToTryToShow.filter((item, index)=>{
 		if (item.panel == "truth" && node.type == NodeType.claim) return true;
@@ -57,10 +60,8 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const labels = tags.filter(a=>a.labels != null).SelectMany(a=>a.labels!.labels).Distinct();
 		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
 		const labelsAndOtherTags = labels.length + tags.filter(a=>a.labels == null && a.cloneHistory == null).length;
+		// "standard toolbar items" meaning "all except the pseudo-toolbar-item potentially anchored to the left to display the node's extracted-prefix-text"
 		const getStandardToolbarItemUIs = ()=>{
-			// don't show any of the standard toolbar-items for category-nodes, since looks bad (and less useful there) [NodeToolbar comp still rendered, since may be needed to show prefix-text "button"]
-			if (node.type == NodeType.category) return [];
-
 			let indexAmongEnabled = 0;
 			return toolbarItemsToShow.map((item, index)=>{
 				if (item.panel == "truth") {
