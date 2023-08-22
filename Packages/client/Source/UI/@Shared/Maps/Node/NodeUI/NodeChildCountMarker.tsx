@@ -7,6 +7,7 @@ import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$map
 import {ChangeType, Map} from "dm_common";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits";
 import {Observer} from "web-vcore";
+import {SLMode} from "UI/@SL/SL.js";
 import {NodeChangesMarker} from "./NodeChangesMarker.js";
 
 @Observer
@@ -21,8 +22,10 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.edit).length;
 		const showChangesMarker = addedDescendants > 0 || editedDescendants > 0;
 
+		let leftGap = showChangesMarker ? 4 : 8;
+		if (SLMode) leftGap = showChangesMarker ? 4 : 5; // use slightly smaller gap in sl-mode, since font-size is larger
 		return (
-			<Column style={{position: "absolute", left: `calc(100% + ${showChangesMarker ? 4 : 8}px)`, top: 0, bottom: 0, justifyContent: "center"}}>
+			<Column style={{position: "absolute", left: `calc(100% + ${leftGap}px)`, top: 0, bottom: 0, justifyContent: "center"}}>
 				<div
 					title={`Child count: ${childCount}`}
 					style={E(
@@ -31,6 +34,12 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 							// filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
 							textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
 						},
+						SLMode && {
+							fontSize: 16,
+							fontWeight: 700,
+							color: "#1C4C6C",
+							textShadow: null,
+						},
 						//showBelowMessage && {paddingBottom: 13},
 						showChangesMarker && {
 							background: "rgba(0,0,0,.3)", padding: "1px 3px", borderRadius: 3, textAlign: "center" as const,
@@ -38,7 +47,7 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 						},
 					)}
 				>
-					{childCount}
+					{SLMode ? "+" : ""}{childCount}
 				</div>
 				{showChangesMarker &&
 					<NodeChangesMarker {...{addedDescendants, editedDescendants}}/>}

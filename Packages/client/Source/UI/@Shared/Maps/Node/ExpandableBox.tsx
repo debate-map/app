@@ -82,16 +82,18 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					</div>
 					<Button ref={c=>this.expandButton = c}
 						text={<>
-							{expanded ? "-" : "+"}
+							{/*expanded ? "-" : "+"*/}
+							{expanded ? "<" : ">"}
 							{!expanded && isExpandButtonForNodeChildren &&
-							<TourDot stateKey="nodeUI_expandButton" text={`Click "+" below to expand the children nodes.`}/>}
+							<TourDot stateKey="nodeUI_expandButton" text={`Click ">" below to expand the children nodes.`}/>}
 						</>} // size={28}
 						style={css(
 							{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 17, // minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
 								padding: 0,
-								fontSize: expanded ? 23 : 17,
+								//fontSize: expanded ? 23 : 17, // for +/-
+								fontSize: 14, fontWeight: "bold", // for arrows
 								lineHeight: "1px", // keeps text from making meta-theses too tall
 								backgroundColor: Chroma_Mix(backgroundColor, "black", 0.2).alpha(0.9).css(),
 								border: "none",

@@ -38,7 +38,8 @@ AddGlobalStyle(`
 			display: block;
 			width: 100%;
 			height: 100%;
-			background-color: rgba(0,180,255,1);
+			background-color: hsla(205,100%,75%,1);
+			border: 1px solid rgba(0,0,0,.3);
 			border-radius: 15px;
 			box-shadow: 0 0 8px rgba(0,0,0,.3);
 			/*animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -.4s infinite;*/
@@ -133,6 +134,8 @@ export class TourDot extends BaseComponent<{stateKey: keyof TourDotClicks, text:
 						lineHeight: "initial", // needed to fix "height:1px" issue that otherwise happens when TourDot is "inside" a Button's "text" contents
 						background: "rgba(255,255,255,.7)", borderRadius: 5, color: "black",
 						fontSize: 12, padding: 5, whiteSpace: "normal", maxWidth: 200,
+						// reset some stylings that parent components may have set (eg. ExpandableBox sets {fontWeight:bold})
+						fontWeight: "initial",
 						// fsr,"max-content" is needed here (in some contexts, eg. in Button's "text"), in order to have the div actually expand to the max-width for long content (else, only expands enough for largest word/line)
 						width: "max-content",
 					}}
