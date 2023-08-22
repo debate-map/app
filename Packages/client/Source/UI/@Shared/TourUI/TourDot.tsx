@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {store} from "Store";
 import {TourDotClicks} from "Store/main/guide";
+import {SLMode} from "UI/@SL/SL";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {Observer, RunInAction_Set} from "web-vcore";
 import {Row} from "web-vcore/nm/react-vcomponents";
@@ -65,6 +66,16 @@ AddGlobalStyle(`
 		}
 	}
 `);
+if (SLMode) {
+	AddGlobalStyle(`
+		.pulsating-circle {
+			&:after {
+				background-color: #E7F5FF;
+				border: 2px solid #3C87B8;
+			}
+		}
+	`);
+}
 
 @Observer
 export class TourDot extends BaseComponent<{stateKey: keyof TourDotClicks, text: string, dotSize: number}, {jut}> {
