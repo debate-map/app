@@ -99,11 +99,13 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		});
 
 		let subtreeData: SubtreeData_Server|n;
-		if (dialogState.retrievalMethod == ExportRetrievalMethod.server) {
-			subtreeData = queryData?.subtree;
-		} else {
-			const subtreeData_local = PopulateLocalSubtreeData(rootNodePath, {maxDepth: dialogState.maxExportDepth});
-			subtreeData = ConvertLocalSubtreeDataToServerStructure(subtreeData_local);
+		if (getData) {
+			if (dialogState.retrievalMethod == ExportRetrievalMethod.server) {
+				subtreeData = queryData?.subtree;
+			} else {
+				const subtreeData_local = PopulateLocalSubtreeData(rootNodePath, {maxDepth: dialogState.maxExportDepth});
+				subtreeData = ConvertLocalSubtreeDataToServerStructure(subtreeData_local);
+			}
 		}
 
 		let subtreeData_string: string|n;
