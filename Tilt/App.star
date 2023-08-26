@@ -2,7 +2,7 @@
 # ==========
 
 # other tilt extensions
-load('ext://helm_remote', 'helm_remote')
+load('./@Extensions/helm_remote.star', 'helm_remote')
 load('ext://helm_resource', 'helm_resource', 'helm_repo')
 # custom tilt files
 load('./Utils.star', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'Base64Encode', 'GetDateTime')

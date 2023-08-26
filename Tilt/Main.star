@@ -21,8 +21,12 @@ docker_prune_settings(disable=True)
 # ==========
 
 # other tilt extensions
-load('ext://helm_remote', 'helm_remote')
 load('ext://helm_resource', 'helm_resource', 'helm_repo')
+# load modified version of helm_remote (with better caching, for faster tilt startup @before:34.4s,17.7s,19s @after:10.5s,10.4,12.3s,10.6s)
+#load('ext://helm_remote', 'helm_remote')
+load('./@Extensions/helm_remote.star', 'helm_remote')
+
+
 
 # custom tilt files
 load('./Utils.star', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'Base64Encode', 'GetDateTime')
