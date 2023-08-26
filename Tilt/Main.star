@@ -144,6 +144,10 @@ Start_TraefikGateway(g)
 load('./App.star', 'Start_App')
 Start_App(g)
 
+# hyperknowledge experiment (as alternative backend)
+load('./Hyperknowledge.star', 'Start_Hyperknowledge')
+Start_Hyperknowledge(g)
+
 # monitoring
 load('./Monitoring.star', 'Start_Monitoring')
 Start_Monitoring(g)

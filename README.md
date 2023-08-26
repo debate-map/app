@@ -123,12 +123,16 @@ Local:
 * `localhost:5120`: local (k8s), postgres instance (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5130`: local (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5131`: local (webpack), monitor-client (alt web-server) (`monitorClient.dev` must be running)
+* `localhost:5140`: local (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:5141`: local (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (private port-forwards/proxies):
 * `localhost:5200`: remote (k8s), web-server (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5210`: remote (k8s), app-server (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5220`: remote (k8s), postgres instance (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5230`: remote (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5240`: remote (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_local` must be running)
+* `localhost:5241`: remote (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (public): \[note: the new version of debate-map is not yet served at these endpoints; these are the target urls, however, for when it's ready for public access]
 * `debatemap.app`: remote (k8s), web-server
@@ -138,7 +142,7 @@ Remote (public): \[note: the new version of debate-map is not yet served at thes
 Port-assignment scheme: (ie. meaning of each digit in `ABCD`)
 * A) app/project [5: debate-map]
 * B) cluster [0: skipped, 1: local, 2: remote] (0 is skipped to avoid clashes with common ports, eg. 5000 for UPnP)
-* C) pod [0: web-server, 1: app-server, 2: postgres instance, 3: monitor]
+* C) pod [0: web-server, 1: app-server, 2: postgres instance, 3: monitor, 4: hyperknowledge]
 * D) variant [0: main, 1: served from webpack, etc.]
 
 > Note: Not all web-accessible k8s services are shown in the list above. Specifically:

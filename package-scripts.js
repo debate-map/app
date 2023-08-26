@@ -244,6 +244,8 @@ function GetPortForwardCommandsStr(context) {
 	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:5100`;
 	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}10:5110`;
 	const forMonitor = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}30:5130`;
+	/*const forHKServer = `TODO`;
+	const forHKPostgres = `TODO`;*/
 
 	return `concurrently --kill-others --names db,ws,asr,mo "${forDB}" "${forWebServer}" "${forAppServer}" "${forMonitor}"`;
 }

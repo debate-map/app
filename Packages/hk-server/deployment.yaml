@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hk-server
+  labels:
+    app: hk-server
+spec:
+  selector:
+    app: hk-server
+  ports:
+    - name: main
+      port: 8000
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hk-server
+  labels:
+    app: hk-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hk-server
+  template:
+    metadata:
+      labels:
+        app: hk-server
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+      - name: hk-server
+        image: "TILT_PLACEHOLDER:imageURL_hkServer"
+        resources:
+          requests:
+            memory: 100Mi
+          limits:
+            memory: 500Mi
+        env:
+        # temp; tell postgres to not require password to connect
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: "trust"

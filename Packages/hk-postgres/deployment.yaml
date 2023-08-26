@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hk-postgres
+  labels:
+    app: hk-postgres
+spec:
+  selector:
+    app: hk-postgres
+  ports:
+    - name: main
+      #port: 5141
+      port: 5432
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hk-postgres
+  labels:
+    app: hk-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hk-postgres
+  template:
+    metadata:
+      labels:
+        app: hk-postgres
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+      - name: hk-postgres
+        image: "TILT_PLACEHOLDER:imageURL_hkPostgres"
+        resources:
+          requests:
+            memory: 100Mi
+          limits:
+            memory: 500Mi
+        env:
+        # temp; tell postgres to not require password to connect
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: "trust"
