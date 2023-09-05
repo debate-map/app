@@ -19,9 +19,11 @@ export const SLMode_COVID = startURL.GetQueryVar("extra") == "cov";
 export const SLMode_2020 = startURL.GetQueryVar("extra") == "2020";
 export const SLMode_AI = startURL.GetQueryVar("extra") == "ai";
 export const ShowHeader = startURL.GetQueryVar("header") != "0";
+export const HKMode = startURL.GetQueryVar("extra") == "hk";
 // These are utilized by the helper functions in $node_sl.ts.
-globalThis.GADDemo_forJSCommon = SLMode;
+globalThis.SLDemo_forJSCommon = SLMode;
 globalThis.ShowHeader_forJSCommon = ShowHeader;
+globalThis.HKMode_forJSCommon = HKMode;
 
 export function GetGADExternalSiteURL() {
 	if (SLMode_COVID) return "https://www.covidconvo.org";

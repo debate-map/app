@@ -20,7 +20,7 @@ import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js"
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
 import {Attachment} from "../@Shared/Attachments/@Attachment.js";
-import {GADDemo_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
+import {SLDemo_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -355,7 +355,7 @@ export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: strin
 export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|undefined)=>{
 	// in sl-mode, allow custom titles for arguments to actually display in-place of the standard "True, because..." etc. texts
 	// (normally, we enforce those standard-texts for arguments, to avoid rhetorical advantage from overriding the "generic container text" -- but sl mostly avoids this concern with a consistent editor team)
-	if (GADDemo_ForJSCommon() && rawTitle != null) return false;
+	if (SLDemo_ForJSCommon() && rawTitle != null) return false;
 	return true;
 });
 
@@ -401,7 +401,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 	}
 
 	// in SL+NoHeader mode: if there are special sl-related chars at start of text, remove those chars
-	if (GADDemo_ForJSCommon() && !ShowHeader_ForJSCommon()) {
+	if (SLDemo_ForJSCommon() && !ShowHeader_ForJSCommon()) {
 		// three parts: word/emoji + space [at start; optional], bracketed-text, space(s) after bracket-text [optional]
 		// this regex strips out parts 2 and 3, but leaves in part 1
 		resultTitle = resultTitle.replace(/^([➸ ]*)/, "");

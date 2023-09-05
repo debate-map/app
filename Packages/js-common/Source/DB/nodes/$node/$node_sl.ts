@@ -12,15 +12,18 @@ import {GetNodeDisplayText} from "../$node.js";
 
 // See "GAD.ts" for definition of these globals.
 // (Yes, this is hacky; there's not a straightforward alternative atm though, since startURL + derived-consts are in the "client" package, and moving it to js-common doesn't really fit conceptually.)
-export function GADDemo_ForJSCommon() {
-	return globalThis.GADDemo_forJSCommon;
+export function SLDemo_ForJSCommon() {
+	return globalThis.SLDemo_forJSCommon;
 }
 export function ShowHeader_ForJSCommon() {
 	return globalThis.ShowHeader_forJSCommon;
 }
+export function HKMode_ForJSCommon() {
+	return globalThis.HKMode_forJSCommon;
+}
 
 export function ShouldExtractPrefixText(childLayout: ChildLayout) {
-	return childLayout == ChildLayout.slStandard || GADDemo_ForJSCommon(); // see GAD.ts for definition
+	return childLayout == ChildLayout.slStandard || SLDemo_ForJSCommon(); // see GAD.ts for definition
 }
 export type PrefixTextExtractLocation = "toolbar" | "parentArgument";
 export const WhereShouldNodePrefixTextBeShown = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): PrefixTextExtractLocation=>{

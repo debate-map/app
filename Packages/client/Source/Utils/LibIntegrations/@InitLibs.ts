@@ -8,6 +8,7 @@ import {InitReactVComponents} from "./ReactVComponents.js";
 import {InitGraphlink} from "./MobXGraphlink.js";
 import {InitApollo} from "./Apollo.js";
 import {InitGraphQLFeedback} from "./GraphQLFeedback.js";
+import {InitMobXHyperknowledge} from "./MobXHK.js";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)
 function ExposeGlobals() {
@@ -46,6 +47,7 @@ export function InitLibs() {
 	//InitFirebase();
 	InitWVC();
 	InitGraphlink(); // init this early, so we can use mobx-graphlink's DBPath() for the later modules (eg. graphql-feedback)
+	InitMobXHyperknowledge();
 	InitGraphQLFeedback();
 	//InitForum();
 	InitSentry();

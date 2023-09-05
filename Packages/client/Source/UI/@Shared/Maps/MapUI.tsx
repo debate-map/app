@@ -93,7 +93,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		return (
 			<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
-				backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.scrollView!.contentSizeWatcher || a == this.mapUIEl}
+				backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.contentOuter) || a == this.scrollView!.content || a == this.mapUIEl}
 				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
 				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 				contentStyle={E(
@@ -347,7 +347,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		const {withinPage} = this.props;
 		Assert(this.scrollView);
 		//const scrollContainerViewportSize = new Vector2(this.scrollView.vScrollableDOM.getBoundingClientRect().width, this.scrollView.vScrollableDOM.getBoundingClientRect().height);
-		const scrollContainerViewportSize = GetViewportRect(GetDOM(this.scrollView.content)!).Size;
+		const scrollContainerViewportSize = GetViewportRect(GetDOM(this.scrollView.contentOuter)!).Size;
 		const topBarsHeight = window.innerHeight - scrollContainerViewportSize.y;
 
 		const oldScroll = this.scrollView.GetScroll();
@@ -373,7 +373,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		const mapUIBackgroundRect = GetViewportRect(this.mapUIEl);
 		const oldScroll = this.scrollView.GetScroll();
-		const viewportRect = GetViewportRect(GetDOM(this.scrollView.content)!).NewPosition(a=>a.Minus(mapUIBackgroundRect));
+		const viewportRect = GetViewportRect(GetDOM(this.scrollView.contentOuter)!).NewPosition(a=>a.Minus(mapUIBackgroundRect));
 
 		const newViewportRect = viewportRect.Clone();
 		if (targetRect.Left < newViewportRect.Left) newViewportRect.x = targetRect.x; // if target-rect extends further left, reposition left

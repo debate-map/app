@@ -1,14 +1,12 @@
-import {GetServerURL} from "dm_common";
-import {store} from "Store";
-import {HandleError, RunInAction, SendErrorToSentry} from "web-vcore";
-import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
-import {ErrorResponse, getMainDefinition, onError, WebSocketLink, GraphQLWsLink} from "web-vcore/nm/@apollo/client_deep.js";
-import {Assert, Timer} from "web-vcore/nm/js-vextensions";
-import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 import {setContext} from "@apollo/client/link/context";
-import {GetUserInfoJWTString, OnUserJWTChanged, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
-import {createClient, Client} from "graphql-ws";
-import {graph} from "./MobXGraphlink.js";
+import {GetServerURL} from "dm_common";
+import {Client, createClient} from "graphql-ws";
+import {store} from "Store";
+import {GetUserInfoJWTString, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
+import {RunInAction} from "web-vcore";
+import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
+import {getMainDefinition, GraphQLWsLink, onError} from "web-vcore/nm/@apollo/client_deep.js";
+import {Timer} from "web-vcore/nm/js-vextensions";
 import {VoidCache} from "./Apollo/VoidCache.js";
 
 /*export function GetWebServerURL(subpath: string) {
