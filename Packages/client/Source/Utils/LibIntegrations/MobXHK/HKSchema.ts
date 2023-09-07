@@ -32,16 +32,16 @@ JSON.stringify({
 			"@type": "hk:EventSchema",
 			attributes: [
 				{name: "topic", range: "ex:link", create: true},
-				{name: "source"},
-				{name: "target"},
+				{name: "source", range: ["ex:node", "ex:link"]},
+				{name: "target", range: ["ex:node", "ex:link"]},
 			],
 		},
 		update_link: {
 			"@type": "hk:EventSchema",
 			attributes: [
 				{name: "topic", range: "ex:link"},
-				{name: "source"},
-				{name: "target"},
+				{name: "source", range: ["ex:node", "ex:link"]},
+				{name: "target", range: ["ex:node", "ex:link"]},
 			],
 		},
 	},
@@ -54,8 +54,8 @@ JSON.stringify({
 		},
 		link: {
 			attributes: [
-				{name: "source", map_prop: "source"},
-				{name: "target", map_prop: "target"},
+				{name: "source", map_prop: "source", range: ["ex:node", "ex:link"]},
+				{name: "target", map_prop: "target", range: ["ex:node", "ex:link"]},
 			],
 		},
 	},
