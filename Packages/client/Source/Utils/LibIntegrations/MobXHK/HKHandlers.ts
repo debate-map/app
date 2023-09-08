@@ -44,8 +44,7 @@ JSON.stringify({
 }, null, 2);
 // ==========
 export const hkHandlers = JSON.parse(hkHandlersStr) as {
-	handlers:
-		Array<{
+	handlers: Array<{
 		event_type: string;
 		target_role: string;
 		target_range: string;

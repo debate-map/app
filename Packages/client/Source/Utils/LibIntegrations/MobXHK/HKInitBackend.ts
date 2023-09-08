@@ -15,6 +15,7 @@ export async function HKInitBackend() {
 	const accessToken = await HKLogIn();
 	await HKAddSchema();
 	await HKAddHandlers();
+	await HKAddSource();
 	await HKAddRootNode();
 }
 
@@ -56,6 +57,16 @@ export async function HKAddHandlers() {
 	});
 	const responseText = await response.text();
 	return responseText.startsWith("[");
+}
+
+/** Returns true if call succeeded. */
+export async function HKAddSource() {
+	const response = await fetch(`${hkAddress}/source`, {
+		method: "POST",
+		body: JSON.stringify({local_name: "main"}),
+	});
+	const responseText = await response.text();
+	return responseText.startsWith("{");
 }
 
 /** Returns true if call succeeded. */
