@@ -1,7 +1,4 @@
-// temporary hard coded values for testing
-const hkAddress = "http://localhost:5140";
-const hkUser = "user";
-const hkPass = "pass";
+import {hkAddress, hkUser, hkPass} from "./HKInitBackend";
 
 export async function HKLogIn() {
 	const formData = new FormData();
