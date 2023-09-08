@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -15,6 +15,8 @@ import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store/index.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
+import {globalRootNodeID_hk} from "Utils/LibIntegrations/MobXHK/HKInitBackend.js";
+import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
@@ -83,6 +85,11 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, forLayoutHelper, inBelowGroup, children} = this.props;
 		const {obs} = this.state;
+
+		// temp
+		if (map?.id == globalMapID && node.id == globalRootNodeID) {
+			return <NodeUI_HK nodeID={globalRootNodeID_hk}/>;
+		}
 
 		if (DEV_DYN) performance.mark("NodeUI_1");
 

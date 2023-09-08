@@ -43,4 +43,16 @@ JSON.stringify({
 	],
 }, null, 2);
 // ==========
-export const hkHandlers = JSON.parse(hkHandlersStr);
+export const hkHandlers = JSON.parse(hkHandlersStr) as {
+	handlers:
+		Array<{
+		event_type: string;
+		target_role: string;
+		target_range: string;
+		code_text: string;
+	}>
+};
+export const hkHandlers_active = hkHandlers.handlers.map(handlerJSON=>{
+	const handler = eval(`(${handlerJSON.code_text})`) as (event: any, existing: any)=>any;
+	return {...handlerJSON, handler};
+});

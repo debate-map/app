@@ -1,28 +1,100 @@
-import {SleepAsync} from "web-vcore/.yalc/js-vextensions";
+import {O, RunInAction} from "web-vcore";
+import {Clone, SleepAsync} from "web-vcore/.yalc/js-vextensions";
+import {CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
+import {makeObservable} from "web-vcore/nm/mobx";
+import {hkHandlers, hkHandlers_active} from "./HKHandlers";
 import {hkAddress} from "./HKInitBackend";
 
-export class HKStore {
-	static main = new HKStore();
-	//constructor() {}
+export class HKEvent<T = any> {
+	source: string;
+	created: string;
+	creator: string;
+	data: T;
+}
 
-	Start(accessToken: string) {
+export class HKStore {
+	//static main: HKStore;
+	constructor() {
+		makeObservable(this);
+	}
+
+	accessToken: string;
+	@O events = [] as HKEvent[];
+
+	async Start(accessToken: string) {
+		this.accessToken = accessToken;
+		await this.GetInitialData();
+		await this.StartWebsocket();
+	}
+
+	async GetInitialData() {
+		const response = await fetch(`${hkAddress}/source/main/events?limit=500`);
+		const events = await response.json();
+		console.log("HKStore initial events:", events);
+		RunInAction("HKStore.GetInitialData", ()=>this.events = events);
+	}
+
+	async StartWebsocket() {
 		const websocket = new WebSocket(`${hkAddress.replace("http", "ws")}/ws`);
-		websocket.addEventListener("open", async event=>{
-			console.log("Sending access-token:", accessToken);
-			websocket.send(JSON.stringify({token: accessToken}));
-			await SleepAsync(1000);
+		websocket.addEventListener("open", async e=>{
+			console.log("Sending access-token:", this.accessToken);
+			websocket.send(JSON.stringify({token: this.accessToken}));
+			//await SleepAsync(1000);
 
 			console.log("Starting listen on source \"main\".");
 			websocket.send(JSON.stringify({
 				cmd: "listen", source: "main",
-				name: `main_dm_${Date.now()}`, // set time-based name, so each page-refresh has its own listener/cursor
+				processor: `main_dm_${Date.now()}`, // set time-based name, so each page-refresh has its own listener/cursor
 			}));
-			await SleepAsync(1000);
+			//await SleepAsync(1000);
 		});
 		// listen for messages
-		websocket.addEventListener("message", event=>{
-			const message = JSON.parse(event.data);
-			console.log("HKStore websocket message:", message);
+		websocket.addEventListener("message", e=>{
+			const message = JSON.parse(e.data);
+			if ("data" in message && "source" in message) {
+				const event = message as HKEvent;
+				console.log("HK event received:", event);
+
+				const copyOfEventAlreadyCommitted = this.events.find(a=>a.created == event.created);
+				if (copyOfEventAlreadyCommitted) {
+					console.log("Event already committed; ignoring.");
+					return;
+				}
+
+				RunInAction("HKStore.ReceiveNewEvent", ()=>this.events.push(event));
+			} else {
+				console.log("HK websocket non-event message received:", message);
+			}
 		});
 	}
 }
+// define this afterward, so that decorations are attached prior to the constructor being called (since it calls "makeObservable")
+export const hkStore = new HKStore();
+
+export class Node_HK {
+	"@id": string;
+	title: {"@value": string, "@lang": string};
+}
+
+export const GetEventsForTopic = CreateAccessor((id: string)=>{
+	return hkStore.events.filter(event=>event.data.topic == `urn:uuid:${id}`);
+});
+
+/*export const GetNodes_HK = CreateAccessor(()=>{
+	const events = HKStore.main.events;
+});*/
+export const GetNode_HK = CreateAccessor((id: string)=>{
+	let node: Node_HK|n = null;
+	const events = GetEventsForTopic(id); // separate line, for easier debugging
+	for (const event of events) {
+		const eventType = event.data["@type"];
+		const handler = hkHandlers_active.find(a=>a.event_type == eventType)?.handler;
+		if (handler) {
+			// clone "event" and "node" before passing in, so that the handlers can only mutate their own copy, not that in the hk-store
+			node = handler(Clone(event), {topic: Clone(node)});
+		} else {
+			console.warn(`No handler found for event-type: ${eventType}`);
+		}
+	}
+	return node;
+});
