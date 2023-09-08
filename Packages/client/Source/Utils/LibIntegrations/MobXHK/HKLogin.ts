@@ -10,7 +10,7 @@ export async function HKLogIn() {
 		body: formData,
 	});
 	const responseJSON = await response.json();
-	const {accessToken, token_type} = responseJSON as {accessToken: string, token_type: string};
 	console.log("HKLogIn response:", responseJSON);
-	return accessToken;
+	const {access_token, token_type} = responseJSON as {access_token: string, token_type: string};
+	return access_token;
 }
