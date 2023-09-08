@@ -1,4 +1,3 @@
-import {globalRootNodeID} from "dm_common";
 import {hkHandlersStr} from "./HKHandlers";
 import {HKLogIn} from "./HKLogin";
 import {hkSchemaStr} from "./HKSchema";
@@ -7,6 +6,9 @@ import {hkSchemaStr} from "./HKSchema";
 export const hkAddress = "http://localhost:5140";
 export const hkUser = "user";
 export const hkPass = "pass";
+
+// data
+export const globalRootNodeID_hk = "00000000-0000-0000-0000-000000000001";
 
 export async function HKInitBackend() {
 	await CreateUser();
@@ -62,7 +64,7 @@ export async function HKAddRootNode() {
 		method: "POST",
 		body: JSON.stringify({
 			data: {
-				topic: `urn:uuid:${globalRootNodeID}`,
+				topic: `urn:uuid:${globalRootNodeID_hk}`,
 				title: {
 					"@value": "Root",
 					"@lang": "en",
