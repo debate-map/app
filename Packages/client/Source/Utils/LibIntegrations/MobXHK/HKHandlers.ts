@@ -11,7 +11,9 @@ JSON.stringify({
 			target_role: "topic",
 			target_range: "ex:node",
 			code_text: function handler(event, existing) {
-				return {...event.data, "@id": event.data.topic, topic: undefined};
+				//return {...event.data, "@id": event.data.topic, topic: undefined};
+				// use Object.assign instead of spread-operator, since typescript is currently transpiling it to use "_extends" (which doesn't exist in the hk-backend's js-context)
+				return Object.assign({}, event.data, {"@id": event.data.topic}, {topic: undefined}); // eslint-disable-line
 			}.toString(),
 		},
 		{
@@ -28,7 +30,9 @@ JSON.stringify({
 			target_role: "topic",
 			target_range: "ex:link",
 			code_text: function handler(event, existing) {
-				return {...event.data, "@id": event.data.topic, topic: undefined};
+				//return {...event.data, "@id": event.data.topic, topic: undefined};
+				// use Object.assign instead of spread-operator, since typescript is currently transpiling it to use "_extends" (which doesn't exist in the hk-backend's js-context)
+				return Object.assign({}, event.data, {"@id": event.data.topic}, {topic: undefined}); // eslint-disable-line
 			}.toString(),
 		},
 		{

@@ -43,6 +43,11 @@ def Start_Hyperknowledge(g):
 	# configure resources
 	# ==========
 
+	# IMPORTANT NOTE: For those using Kaspersky Antivirus, its default settings cause websockets to the HK backend to be unstable. (its keepalive messages get blocked/disrupted)
+	# To fix, change these settings under "Security -> Network settings -> Monitored ports": (not 100% sure if both changes are needed, but at least one is)
+	# 1) Monitor selected network ports only -> list: deselect "Port: 5101" in list (this is the port that debate-map's webpack is served from)
+	# 2) Monitor all ports for the applications from the list recommended by Kaspersky: enabled -> disabled [apparently Chrome is on this list]
+
 	NEXT_k8s_resource_batch(g, [
 		{
 			"workload": 'hk-server',
