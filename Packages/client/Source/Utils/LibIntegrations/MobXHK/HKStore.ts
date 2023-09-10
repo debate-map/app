@@ -34,22 +34,30 @@ export class HKStore {
 		RunInAction("HKStore.GetInitialData", ()=>this.events = events);
 	}
 
+	websocket: WebSocket;
+	nextReconnectDelay = 0;
 	async StartWebsocket() {
-		const websocket = new WebSocket(`${hkAddress.replace("http", "ws")}/ws`);
-		websocket.addEventListener("open", async e=>{
+		this.websocket = new WebSocket(`${hkAddress.replace("http", "ws")}/ws`);
+		this.websocket.addEventListener("open", async e=>{
 			console.log("Sending access-token:", this.accessToken);
-			websocket.send(JSON.stringify({token: this.accessToken}));
+			this.websocket.send(JSON.stringify({token: this.accessToken}));
 			//await SleepAsync(1000);
 
 			console.log("Starting listen on source \"main\".");
-			websocket.send(JSON.stringify({
+			this.websocket.send(JSON.stringify({
 				cmd: "listen", source: "main",
 				processor: `main_dm_${Date.now()}`, // set time-based name, so each page-refresh has its own listener/cursor
 			}));
 			//await SleepAsync(1000);
 		});
+		this.websocket.addEventListener("close", async e=>{
+			console.log("HK websocket closed; reconnecting.");
+			await SleepAsync(this.nextReconnectDelay);
+			this.StartWebsocket();
+			this.nextReconnectDelay = (this.nextReconnectDelay + 1000).KeepAtMost(60000);
+		});
 		// listen for messages
-		websocket.addEventListener("message", e=>{
+		this.websocket.addEventListener("message", e=>{
 			const message = JSON.parse(e.data);
 			if ("data" in message && "source" in message) {
 				const event = message as HKEvent;
