@@ -105,10 +105,9 @@ def Start_TraefikGateway(g):
 				#"gateway-api:namespace",
 				"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
 				"gateways.gateway.networking.k8s.io:customresourcedefinition",
+				"httproutes.gateway.networking.k8s.io:customresourcedefinition",
 
-				# some objects commented during update of gateway-api crds from 0.4.3 to 0.7.0
-				# todo: add back whatever objects there are in the new gateway-api crds
-				# "httproutes.gateway.networking.k8s.io:customresourcedefinition",
+				# these objects commented during update of gateway-api crds from 0.4.3 to 0.7.0
 				# "referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
 				# "tcproutes.gateway.networking.k8s.io:customresourcedefinition",
 				# "tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
