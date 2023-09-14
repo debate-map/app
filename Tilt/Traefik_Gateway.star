@@ -22,9 +22,12 @@ def Start_TraefikGateway(g):
 	# ==========
 
 	helm_remote('traefik',
-		repo_url='https://helm.traefik.io/traefik',
+		#repo_url='https://helm.traefik.io/traefik', # this repo was old/outdated! (apparently; v24.0.0 of helm-chart somehow had older contents; I guess it used a different versioning system)
+		repo_url='https://traefik.github.io/charts',
 		#version='10.24.0', # helm-chart version is different from traefik version
-		version='20.8.0', # helm-chart version is different from traefik version
+		version='24.0.0', # helm-chart version is different from traefik version
+		#version='20.8.0', # helm-chart version is different from traefik version
+		#version='20.7.0', # helm-chart version is different from traefik version
 		# set=[
 		# 	"additionalArguments={--experimental.kubernetesgateway=true,--providers.kubernetesgateway=true}",
 		# 	# maybe temp (from: https://www.jetstack.io/blog/cert-manager-gateway-api-traefik-guide)
@@ -55,7 +58,7 @@ def Start_TraefikGateway(g):
 				"serverstransports.traefik.containo.us:CustomResourceDefinition:default",
 				"tlsoptions.traefik.containo.us:CustomResourceDefinition:default",
 				"tlsstores.traefik.containo.us:CustomResourceDefinition:default",
-				"traefikservices.traefik.containo.us:CustomResourceDefinition:default",
+				#"traefikservices.traefik.containo.us:CustomResourceDefinition:default", # commented during traefik update: 20.8.0 -> 24.0.0
 				"traefik:ServiceAccount:default",
 				"traefik-dashboard:IngressRoute:default",
 				# gone from update
@@ -98,20 +101,46 @@ def Start_TraefikGateway(g):
 		{"workload": "gateway-api-admission-patch", "labels": ["traefik"]},
 	])
 
+	# test1-added
+	NEXT_k8s_resource_batch(g, [
+		{
+			"new_name": "gateway-api-crd-early", "labels": ["traefik"],
+			"objects": [
+				"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
+			],
+		},
+	])
+
 	NEXT_k8s_resource_batch(g, [
 		{
 			"new_name": "gateway-api-crd", "labels": ["traefik"],
 			"objects": [
 				#"gateway-api:namespace",
-				"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
+				#"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition", # test1-removed
 				"gateways.gateway.networking.k8s.io:customresourcedefinition",
 				"httproutes.gateway.networking.k8s.io:customresourcedefinition",
+				"referencegrants.gateway.networking.k8s.io:customresourcedefinition",
 
 				# these objects commented during update of gateway-api crds from 0.4.3 to 0.7.0
 				# "referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
 				# "tcproutes.gateway.networking.k8s.io:customresourcedefinition",
 				# "tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
 				# "udproutes.gateway.networking.k8s.io:customresourcedefinition",
+
+				# added during update of gateway-api crds from 0.7.0 to 0.8.0 (completion of it)
+				"traefikservices.traefik.containo.us:customresourcedefinition",
+				"ingressroutes.traefik.io:customresourcedefinition",
+				"ingressroutetcps.traefik.io:customresourcedefinition",
+				"ingressrouteudps.traefik.io:customresourcedefinition",
+				"middlewares.traefik.io:customresourcedefinition",
+				"middlewaretcps.traefik.io:customresourcedefinition",
+				"serverstransports.traefik.io:customresourcedefinition",
+				"serverstransporttcps.traefik.io:customresourcedefinition",
+				"tlsoptions.traefik.io:customresourcedefinition",
+				"tlsstores.traefik.io:customresourcedefinition",
+				"traefikservices.traefik.io:customresourcedefinition",
+				"tcproutes.gateway.networking.k8s.io:customresourcedefinition",
+				"tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
 			],
 		},
 	])
