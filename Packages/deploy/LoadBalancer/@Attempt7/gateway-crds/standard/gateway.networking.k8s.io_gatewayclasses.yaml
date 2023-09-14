@@ -228,6 +228,7 @@ spec:
     storage: true # v-changed
     subresources:
       status: {}
+# v-removed
   # - additionalPrinterColumns:
   #   - jsonPath: .spec.controllerName
   #     name: Controller

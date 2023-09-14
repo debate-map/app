@@ -152,6 +152,7 @@ spec:
     served: true # v-changed
     storage: true # v-changed
     subresources: {}
+# v-removed
   # - additionalPrinterColumns:
   #   - jsonPath: .metadata.creationTimestamp
   #     name: Age
