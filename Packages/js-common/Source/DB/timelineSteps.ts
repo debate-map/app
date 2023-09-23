@@ -20,21 +20,36 @@ export const GetTimelineSteps = CreateAccessor((timelineID: string, orderByOrder
 export const GetTimelineStepTimeFromStart = CreateAccessor((stepID: string|n): number|null=>{
 	const step = GetTimelineStep(stepID);
 	if (step == null) return null;
+	// quick route: if step's time is specified absolutely, just return that
 	if (step.timeFromStart != null) return step.timeFromStart;
 
 	const steps = GetTimelineSteps(step.timelineID);
-	const index = steps.findIndex(a=>a.id == stepID);
-	if (index == -1) return null;
-	let totalTimeSoFar = 0;
-	for (const step2 of steps) {
-		if (step2.timeFromStart != null) {
-			totalTimeSoFar = step2.timeFromStart;
-		} else if (step2.timeFromLastStep != null) {
-			totalTimeSoFar += step2.timeFromLastStep;
+	const stepIndex = steps.findIndex(a=>a.id == step.id);
+	if (stepIndex == -1) return null;
+
+	/*const stepsUpToStep = steps.slice(0, stepIndex + 1);
+	const stepTimes = GetTimelineStepTimesFromStart(stepsUpToStep);*/
+	// best to just get the step-times for all steps; this way we only need to cache one return-value for the "GetTimelineStepTimesFromStart" function 
+	const stepTimes = GetTimelineStepTimesFromStart(steps);
+	return stepTimes[stepIndex];
+});
+export const GetTimelineStepTimesFromStart = CreateAccessor((steps: TimelineStep[])=>{
+	const result = [] as number[];
+	let lastTimeReached = 0;
+	for (const step of steps) {
+		if (step.timeFromStart != null) {
+			lastTimeReached = step.timeFromStart;
+		} else if (step.timeFromLastStep != null) {
+			lastTimeReached += step.timeFromLastStep;
 		}
-		if (step2.id == step.id) break;
+		result.push(lastTimeReached);
 	}
-	return totalTimeSoFar;
+	return result;
+});
+export const GetTimelineStepsReachedByTimeX = CreateAccessor((timelineID: string, timeX: number)=>{
+	const steps = GetTimelineSteps(timelineID);
+	const stepTimes = GetTimelineStepTimesFromStart(steps);
+	return steps.filter((_, i)=>stepTimes[i] <= timeX);
 });
 export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((stepID: string, timeX: number)=>{
 	const timeFromStart = GetTimelineStepTimeFromStart(stepID);
@@ -44,50 +59,66 @@ export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((stepID: s
 
 export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
 	const pathRevealTimes = {} as {[key: string]: number};
+	const stepTimes = GetTimelineStepTimesFromStart(steps);
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
+			const stepTime = stepTimes[index];
+			const stepTime_safe = stepTime ?? 0;
+
+			let descendentRevealDepth = 0;
 			if (reveal.show) {
-				const stepTime = GetTimelineStepTimeFromStart(step.id);
-				const stepTime_safe = stepTime ?? CE(steps.slice(0, index).map(a=>GetTimelineStepTimeFromStart(a.id))).LastOrX(a=>a != null) ?? 0;
 				if (baseOnLastReveal) {
 					pathRevealTimes[reveal.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[reveal.path], 0));
 				} else {
 					pathRevealTimes[reveal.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[reveal.path], Number.MAX_SAFE_INTEGER));
 				}
 
-				const revealDepth = ToNumber(reveal.show_revealDepth, 0);
-				if (revealDepth >= 1) {
-					const node = GetNode(CE(reveal.path.split("/")).Last());
-					if (node == null) continue;
-					// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
-					let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${reveal.path}/${child.id}`}));
-					if (CE(currentChildren).Any(a=>a.node == null)) {
-						// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
-						return emptyArray_forLoading;
-					}
+				descendentRevealDepth = Math.max(descendentRevealDepth, reveal.show_revealDepth ?? 0);
+			}
+			if (reveal.setExpandedTo == true) {
+				descendentRevealDepth = Math.max(descendentRevealDepth, 1);
+			}
+			if (descendentRevealDepth >= 1) {
+				const node = GetNode(CE(reveal.path.split("/")).Last());
+				if (node == null) continue;
+				// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
+				let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${reveal.path}/${child.id}`}));
+				if (CE(currentChildren).Any(a=>a.node == null)) {
+					// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
+					return emptyArray_forLoading;
+				}
 
-					for (let childrenDepth = 1; childrenDepth <= revealDepth; childrenDepth++) {
-						const nextChildren = [];
-						for (const child of currentChildren) {
-							if (baseOnLastReveal) {
-								pathRevealTimes[child.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[child.path], 0));
-							} else {
-								pathRevealTimes[child.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[child.path], Number.MAX_SAFE_INTEGER));
-							}
-							// if there's another loop/depth after this one
-							if (childrenDepth < revealDepth) {
-								const childChildren = GetNodeChildren(child.node.id).map(child2=>({node: child2, path: child2 && `${child.path}/${child2.id}`}));
-								if (CE(childChildren).Any(a=>a == null)) {
-									// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
-									return emptyArray_forLoading;
-								}
-								CE(nextChildren).AddRange(childChildren);
-							}
+				for (let childrenDepth = 1; childrenDepth <= descendentRevealDepth; childrenDepth++) {
+					const nextChildren = [];
+					for (const child of currentChildren) {
+						if (baseOnLastReveal) {
+							pathRevealTimes[child.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[child.path], 0));
+						} else {
+							pathRevealTimes[child.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[child.path], Number.MAX_SAFE_INTEGER));
 						}
-						currentChildren = nextChildren;
+						// if there's another loop/depth after this one
+						if (childrenDepth < descendentRevealDepth) {
+							const childChildren = GetNodeChildren(child.node.id).map(child2=>({node: child2, path: child2 && `${child.path}/${child2.id}`}));
+							if (CE(childChildren).Any(a=>a == null)) {
+								// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
+								return emptyArray_forLoading;
+							}
+							CE(nextChildren).AddRange(childChildren);
+						}
+					}
+					currentChildren = nextChildren;
+				}
+			}
+
+			if (reveal.setExpandedTo == false) {
+				for (const path of CE(pathRevealTimes).VKeys()) {
+					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only hides descendants)
+						delete pathRevealTimes[path];
 					}
 				}
-			} else if (reveal.hide) {
+			}
+
+			if (reveal.hide) {
 				for (const path of CE(pathRevealTimes).VKeys()) {
 					if (path.startsWith(reveal.path)) {
 						delete pathRevealTimes[path];

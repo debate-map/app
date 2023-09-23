@@ -1,12 +1,17 @@
-import {NodeType} from "dm_common";
+import {GetMap, GetTimelineStepTimesFromStart, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetVisiblePathsAfterSteps, NodeType, TimelineStep} from "dm_common";
 import {useMemo} from "react";
-import {Graph} from "tree-grapher";
+import {Graph, KeyframeInfo} from "tree-grapher";
+import {GetMapState, GetPlayingTimeline, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineRevealNodes_All} from "Store/main/maps/mapStates/$mapState";
+import {GetOpenMapID} from "Store/main";
+import {GetPercentFromXToY} from "js-vextensions";
+import {CatchBail} from "web-vcore/.yalc/mobx-graphlink";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants";
 
 export class NodeDataForTreeGrapher {
 	constructor(data?: Partial<NodeDataForTreeGrapher>) {
 		Object.assign(this, data);
 	}
+	nodePath?: string;
 	nodeType?: NodeType;
 	width?: number;
 	expanded?: boolean;
@@ -14,8 +19,44 @@ export class NodeDataForTreeGrapher {
 	aboveToolbar_hasLeftButton?: boolean;
 }
 
-export function useGraph(forLayoutHelper: boolean) {
+const animation_transitionPeriod = .5;
+const GetPercentThroughTransition = (lastKeyframe_time: number, nextKeyframe_time: number, currentTime: number)=>{
+	return GetPercentFromXToY(lastKeyframe_time.KeepAtLeast(nextKeyframe_time - animation_transitionPeriod), nextKeyframe_time, currentTime);
+};
+
+export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null) {
 	const graphInfo = useMemo(()=>{
+		const getGroupStablePath = group=>group.leftColumn_userData?.["nodePath"];
+		const mainGraph_getNextKeyframeInfo_base = (): KeyframeInfo|null=>{
+			const mapID = GetOpenMapID();
+			if (mapID == null) return null;
+			const map = GetMap(mapID);
+			if (map == null) return null;
+			const mapState = GetMapState(mapID);
+			if (mapState == null) return null;
+			const timeline = GetPlayingTimeline(mapID);
+			if (timeline == null) return null;
+			const currentTime = mapState.playingTimeline_time ?? 0;
+			const steps = GetTimelineSteps(timeline.id);
+			if (steps.length == 0) return null;
+
+			const stepTimes = GetTimelineStepTimesFromStart(steps);
+			const stepsReached = GetTimelineStepsReachedByTimeX(timeline.id, currentTime);
+			const lastKeyframe_time = stepTimes[stepsReached.length - 1];
+			const nextKeyframe_time = stepTimes[stepsReached.length];
+			const stepsReachedAtNextKeyframe = stepsReached.concat(steps[stepsReached.length]);
+			//const finalKeyframe_time = stepTimes.Last();
+			const nodePathsVisibleAtNextKeyframe = [map.rootNode].concat(GetVisiblePathsAfterSteps(stepsReachedAtNextKeyframe));
+			const layout = layoutHelperGraph!.GetLayout(undefined, group=>{
+				const nodePath = group.leftColumn_userData?.["nodePath"] as string;
+				//return nodePathsVisibleAtKeyframe.includes(nodePath);
+				return nodePathsVisibleAtNextKeyframe.Any(a=>a.startsWith(nodePath)); // use startsWith, since some node-reveals are for descendents (ie. without explicitly listing in-between nodes, yet those in-betweens do get shown)
+			})!;
+			const percentThroughTransition = GetPercentThroughTransition(lastKeyframe_time, nextKeyframe_time, currentTime);
+			return {layout, percentThroughTransition};
+		};
+		const mainGraph_getNextKeyframeInfo = ()=>CatchBail(null, mainGraph_getNextKeyframeInfo_base);
+
 		const graph = new Graph({
 			//uiDebugKit: {FlashComp},
 			layoutOpts: {
@@ -66,6 +107,11 @@ export function useGraph(forLayoutHelper: boolean) {
 		} else {
 			globalThis.mainGraph = graph;
 		}
+
+		if (layoutHelperGraph != null) {
+			graph.StartAnimating(mainGraph_getNextKeyframeInfo, getGroupStablePath);
+		}
+
 		return graph;
 	}, []);
 	return graphInfo;

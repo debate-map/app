@@ -142,7 +142,7 @@ export class NodeUI extends BaseComponentPlus(
 				parentIsAbove: inBelowGroup,
 			},
 			new NodeDataForTreeGrapher({
-				nodeType: node.type, width, expanded: boxExpanded,
+				nodePath: path, nodeType: node.type, width, expanded: boxExpanded,
 				aboveToolbar_visible,
 				aboveToolbar_hasLeftButton: aboveToolbar_visible && usesToolbarForPrefixText,
 			}),

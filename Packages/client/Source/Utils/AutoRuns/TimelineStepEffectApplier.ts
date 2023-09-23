@@ -29,7 +29,7 @@ autorun(()=>{
 			ApplyNodeEffectsForTimelineStepsUpToX(mapID, playingTimeline_step);
 		}
 	}
-}, {name: "TimelineNodeFocuser"});
+}, {name: "TimelineStepEffectApplier"});
 
 async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: number) {
 	// since this GetAsync call may take a moment to complete, we need to make sure it returns the same data regardless of if the "current step" changes in the meantime

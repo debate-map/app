@@ -81,9 +81,13 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		if (mapState == null) return;
 		RunInAction("PlayingSubpanel.SetTargetTime", ()=>{
 			this.targetTime = newTargetTime;
-			if (newTargetTime.FloorTo(1) != mapState.playingTimeline_time) {
+
+			// commented; for node/line animation to work, the global timeline-time field must be updated
+			/*if (newTargetTime.FloorTo(1) != mapState.playingTimeline_time) {
 				mapState.playingTimeline_time = newTargetTime.FloorTo(1);
-			}
+			}*/
+			mapState.playingTimeline_time = newTargetTime;
+
 			this.lastPosChangeSource = source;
 		});
 	}

@@ -25,6 +25,7 @@ use rust_shared::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::{get_uri_params, k8s_dev};
 use rust_shared::indoc::{indoc, formatdoc};
+use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::utils::type_aliases::{JSONValue, JWTDuration};
 use rust_shared::utils::_k8s::{get_or_create_k8s_secret};
@@ -132,7 +133,7 @@ impl SubscriptionShard_SignIn {
         let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".to_string()).expect("Invalid token endpoint URL");
 
         let referrer = try_get_referrer_from_gql_ctx(gql_ctx);
-        let callback_url = get_server_url(ServerPod::AppServer, "/auth/google/callback", referrer, GetServerURL_Options { force_localhost: false, force_https: false }).unwrap();
+        let callback_url = get_server_url(ServerPod::AppServer, "/auth/google/callback", referrer, GetServerURL_Options { force_localhost: false, force_https: false }).expect("Could not construct callback URL");
 
         // Set up the config for the Google OAuth2 process.
         let client = BasicClient::new(google_client_id, Some(google_client_secret), auth_url, Some(token_url))
@@ -145,7 +146,7 @@ impl SubscriptionShard_SignIn {
         // Create a PKCE code verifier and SHA-256 encode it as a code challenge.
         let (pkce_code_challenge, pkce_code_verifier) = PkceCodeChallenge::new_random_sha256();
         //let pkce_code_verifier_as_json = pkce_code_verifier.secret();
-        let pkce_code_verifier_as_json = serde_json::to_string(&pkce_code_verifier).unwrap();
+        let pkce_code_verifier_as_json = serde_json::to_string(&pkce_code_verifier).expect("Could not serialize pkce code-verifier to json string");
     
         // Generate the authorization URL to which we'll redirect the user.
         // (The csrf_state is essentially an "attempt ID"; use this to match up this attempt's callback-data with our async code-run here.)
@@ -221,14 +222,14 @@ impl SubscriptionShard_SignIn {
                                             let pkce_code_verifier_copy = serde_json::from_str(&pkce_code_verifier_as_json).unwrap();
         
                                             // Exchange the code with a token.
-                                            let token_response = client
+                                            let token_or_error_response = client
                                                 .exchange_code(code)
                                                 .set_pkce_verifier(pkce_code_verifier_copy)
                                                 .request_async(async_http_client).await;
         
-                                            info!("Google returned the following token:\n{:?}\n", token_response);
+                                            info!("Google returned the following token/error response:\n{:?}\n", token_or_error_response);
         
-                                            let token_response = token_response.unwrap();
+                                            let token_response = token_or_error_response.with_context(|| "Google token-retrieval request had an error response.").map_err(to_sub_err)?;
                                             let token_str = token_response.access_token().secret();
                                             info!("Got token-str:{}", token_str);
         

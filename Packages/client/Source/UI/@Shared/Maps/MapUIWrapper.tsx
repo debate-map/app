@@ -74,8 +74,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 
 		Assert(mapID, "mapID is null!");
 
-		const graphInfo_main = useGraph(false);
-		const graphInfo_forLayoutHelper = useGraph(true);
+		const graphInfo_forLayoutHelper = useGraph(true, null);
+		const graphInfo_main = useGraph(false, graphInfo_forLayoutHelper);
 
 		const map = GetMap(mapID);
 		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;

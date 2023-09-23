@@ -17,5 +17,6 @@
 		".."
 	],*/
 	"eslint.options.resolvePluginsRelativeTo": "../node_modules/web-vcore",
-	"eslint.nodePath": "../node_modules/web-vcore"
+	"eslint.nodePath": "../node_modules/web-vcore",
+	"git.openRepositoryInParentFolders": "always",
 }
