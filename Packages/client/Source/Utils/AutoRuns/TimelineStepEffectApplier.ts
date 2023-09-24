@@ -9,7 +9,7 @@ import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps, ToPathNodes} from "dm_common";
+import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps, ToPathNodes, GetTimelineStepTimesFromStart} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 
 /*function AreSetsEqual(setA, setB) {
@@ -31,26 +31,29 @@ autorun(()=>{
 	}
 }, {name: "TimelineStepEffectApplier"});
 
+// todo: rework this to just calculate all effects from timeline start, for last-applied-step and new-current-step, then compare the difference to know what to "apply right now"
 async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: number) {
 	// since this GetAsync call may take a moment to complete, we need to make sure it returns the same data regardless of if the "current step" changes in the meantime
 	// (todo: make this a non-issue by finding a way to have such a delayed GetAsync call simply "canceled" if another call to ApplyNodeEffectsForTimelineStepsUpToX happens during that time)
-	const {stepsUpToTarget, step, newlyRevealedNodePaths, focusNodes} = await GetAsync(()=>{
+	const {stepsUpToTarget, targetSteps, newlyRevealedNodePaths, focusNodes} = await GetAsync(()=>{
 		//const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
 		const timeline = GetPlayingTimeline(mapID);
-		if (timeline == null) return {stepsUpToTarget: null, step: null, newlyRevealedNodePaths: [], focusNodes: []};
+		if (timeline == null) return {stepsUpToTarget: null, targetSteps: [], newlyRevealedNodePaths: [], focusNodes: []};
 		const steps = GetTimelineSteps(timeline.id);
+		const stepTimes = GetTimelineStepTimesFromStart(steps);
 		const stepsUpToTarget_ = steps.slice(0, stepIndex + 1);
-		const step_ = steps[stepIndex];
-		const newlyRevealedNodePaths_ = GetVisiblePathsAfterSteps([step_]);
+		//const targetSteps_last = steps[stepIndex];
+		const targetSteps_ = steps.filter((a, i)=>stepTimes[i] == stepTimes[stepIndex]); // we need to do this, since multiple steps get "applied" at the same time (ie. with the same timeFromStart)
+		const newlyRevealedNodePaths_ = GetVisiblePathsAfterSteps(targetSteps_);
 		const focusNodes_ = GetPathsWith1PlusFocusLevelAfterSteps(stepsUpToTarget_);
-		return {stepsUpToTarget: stepsUpToTarget_, step: step_, newlyRevealedNodePaths: newlyRevealedNodePaths_, focusNodes: focusNodes_};
+		return {stepsUpToTarget: stepsUpToTarget_, targetSteps: targetSteps_, newlyRevealedNodePaths: newlyRevealedNodePaths_, focusNodes: focusNodes_};
 	});
-	if (stepsUpToTarget == null || step == null) return;
+	if (stepsUpToTarget == null || targetSteps.length == 0) return;
 
 	// apply the store changes all in one batch (so that any dependent UI components only have to re-render once)
 	RunWithRenderingBatched(()=>{
 		RunInAction(`ApplyNodeEffectsForTimelineStepsUpToX.forStepIndex:${stepIndex}`, ()=>{
-			// for the just-reached step, apply the expansion part required its node "show" effects (the actual showing/hiding of node-ui is handled within NodeUI.tsx)
+			// for the just-reached steps, apply the expansion part required its node "show" effects (the actual showing/hiding of node-ui is handled within NodeUI.tsx)
 			//console.log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
 			if (newlyRevealedNodePaths.length) {
 				ExpandToNodes(mapID, newlyRevealedNodePaths);
@@ -59,8 +62,8 @@ async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: n
 				//FocusOnNodes(mapID, newlyRevealedNodePaths);
 			}
 
-			// for the just-reached step, apply node expand/collapse effects
-			for (const nodeReveal of step.nodeReveals) {
+			// for the just-reached steps, apply node expand/collapse effects
+			for (const nodeReveal of targetSteps.SelectMany(a=>a.nodeReveals)) {
 				if (nodeReveal.setExpandedTo != null) {
 					ACTNodeExpandedSet({mapID, path: nodeReveal.path, expanded: nodeReveal.setExpandedTo});
 				}
