@@ -16,6 +16,7 @@ import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
 import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
+import {TimelineEffectApplier_Smooth} from "./MapUI/TimelineEffectApplier_Smooth.js";
 
 export class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
 	render() {
@@ -74,8 +75,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 
 		Assert(mapID, "mapID is null!");
 
-		const graphInfo_forLayoutHelper = useGraph(true, null);
-		const graphInfo_main = useGraph(false, graphInfo_forLayoutHelper);
+		const graph_forLayoutHelper = useGraph(true, null);
+		const graph_main = useGraph(false, graph_forLayoutHelper);
 
 		const map = GetMap(mapID);
 		if (map == null) return <MapUIWaitMessage message="Map is private/deleted."/>;
@@ -90,8 +91,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 		if (!mapState?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
 
 		// update some graph info
-		graphInfo_main.containerPadding = padding;
-		graphInfo_forLayoutHelper.containerPadding = padding;
+		graph_main.containerPadding = padding;
+		graph_forLayoutHelper.containerPadding = padding;
 
 		const mapView = GetMapView(mapID);
 		if (mapView == null) return <MapUIWaitMessage message="Initializing map view..."/>;
@@ -142,21 +143,24 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
 					<div style={{position: "relative", flex: 1, minWidth: 0, height: "100%"}}>
-						<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graphInfo_main}/>
-						{playingTimeline && uiState.layoutHelperMap_load &&
-						<div
-							className={
-								[!uiState.layoutHelperMap_show && "hideAndCompletelyBlockMouseEvents"].filter(a=>a).join(" ")
-							}
-							style={ES(
-								{position: "absolute", left: 0, top: 0, right: 0, bottom: 0 /*zIndex: 1*/},
-							)}>
-							<style>{`
-							.hideAndCompletelyBlockMouseEvents { opacity: 0 !important; pointer-events: none !important; }
-							.hideAndCompletelyBlockMouseEvents * { opacity: 0 !important; pointer-events: none !important; }
-							`}</style>
-							<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graphInfo_forLayoutHelper} forLayoutHelper={true}/>
-						</div>}
+						<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_main}/>
+						{playingTimeline && uiState.layoutHelperMap_load && <>
+							<TimelineEffectApplier_Smooth {...{map, mapState}} mainGraph={graph_main} layoutHelperGraph={graph_forLayoutHelper}/>
+							<div
+								className={
+									[!uiState.layoutHelperMap_show && "hideAndCompletelyBlockMouseEvents"].filter(a=>a).join(" ")
+								}
+								style={ES(
+									{position: "absolute", left: 0, top: 0, right: 0, bottom: 0 /*zIndex: 1*/},
+								)}
+							>
+								<style>{`
+								.hideAndCompletelyBlockMouseEvents { opacity: 0 !important; pointer-events: none !important; }
+								.hideAndCompletelyBlockMouseEvents * { opacity: 0 !important; pointer-events: none !important; }
+								`}</style>
+								<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_forLayoutHelper} forLayoutHelper={true}/>
+							</div>
+						</>}
 					</div>
 				</Row>
 			</Column>

@@ -133,6 +133,7 @@ export const GetVisiblePathsAfterSteps = CreateAccessor((steps: TimelineStep[])=
 	return CE(GetVisiblePathRevealTimesInSteps(steps)).VKeys();
 });
 
+/** Note: This can return non-zero focus-levels even for nodes that aren't visible. */
 export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	const pathFocusLevels = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
@@ -144,10 +145,12 @@ export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[
 	}
 	return pathFocusLevels;
 });
+/** Note: This can return non-zero focus-levels even for nodes that aren't visible. */
 export const GetPathsWith1PlusFocusLevelAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	return Object.entries(GetPathFocusLevelsAfterSteps(steps)).filter(a=>a[1] >= 1).map(a=>a[0]);
 });
 
+/** Note: This can return non-zero focus-levels even for nodes that aren't visible. */
 export const GetPathFocusLevelRangesWithinSteps = CreateAccessor((steps: TimelineStep[])=>{
 	const ranges = [] as PathFocusLevelRange[];
 	for (const [index, step] of steps.entries()) {

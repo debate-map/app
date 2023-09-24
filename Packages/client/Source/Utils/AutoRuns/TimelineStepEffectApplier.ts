@@ -78,7 +78,10 @@ async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: n
 	});*/
 
 	// for all steps reached so far, apply scrolling and zooming such that the current list of focus-nodes are all visible (just sufficiently so)
-	FocusOnNodes(mapID, focusNodes);
+	// if layout-helper-map is enabled, node-focusing happens in a more precise way, in TimelineEffectApplier_Smooth.tsx
+	if (!store.main.timelines.layoutHelperMap_load) {
+		FocusOnNodes(mapID, focusNodes);
+	}
 }
 
 function ExpandToNodes(mapID: string, paths: string[]) {

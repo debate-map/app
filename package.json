@@ -58,7 +58,7 @@
     "sync-directory": "^2.2.22",
     "tree-grapher": "0.0.8",
     "ui-debug-kit": "0.0.7",
-    "web-vcore": "0.0.81"
+    "web-vcore": "0.0.83"
   },
   "packageManager": "yarn@3.3.0"
 }
