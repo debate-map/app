@@ -390,20 +390,18 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 		if (node.type == NodeType.argument && premises.length == 1) {
 			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined);
 			if (extractedPrefixTextInfo != null && extractedPrefixTextInfo.extractLocation == "parentArgument") {
-				resultTitle = extractedPrefixTextInfo.prefixText;
+				resultTitle = extractedPrefixTextInfo.bracketedText;
 			}
 		} else {
 			const ownPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map, form);
 			if (ownPrefixTextInfo != null) {
-				resultTitle = ownPrefixTextInfo.titleWithoutPrefix;
+				resultTitle = ownPrefixTextInfo.regularTextWithSymbol;
 			}
 		}
 	}
 
-	// in SL+NoHeader mode: if there are special sl-related chars at start of text, remove those chars
+	// in SL+NoHeader mode: if there are special sl-related chars at start of text (part-1 of the prefix-text, ie. the symbol/arrow), remove those chars
 	if (SLDemo_ForJSCommon() && !ShowHeader_ForJSCommon()) {
-		// three parts: word/emoji + space [at start; optional], bracketed-text, space(s) after bracket-text [optional]
-		// this regex strips out parts 2 and 3, but leaves in part 1
 		resultTitle = resultTitle.replace(/^([➸ ]*)/, "");
 	}
 

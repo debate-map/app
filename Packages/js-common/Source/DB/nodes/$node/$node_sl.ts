@@ -38,11 +38,29 @@ export const WhereShouldNodePrefixTextBeShown = CreateAccessor((node: NodeL2, pa
 	}
 	return "toolbar";
 });
+/**
+ * There are three parts to the SL prefix-text system:
+ * 1) symbol-prefix: arrow/symbol + space [at start; optional]
+ * 2) bracketed-text
+ * 3) space(s) after bracketed-text [optional]
+ * 4*) the regular node text (*: not part of the prefix-text; it's just numbered for reference)
+ * 
+ * Example input: "➸ [including reasons like] When it's day on one side of the world, it's night on the other side"
+ * 
+ * This function separates out those parts, returning:
+ * * matchStr (parts 1-3 combined): "➸ [including reasons like] "
+ * * symbolPrefix (part 1): "➸ "
+ * * bracketedText (part 2, exl. the bracket-chars): "including reasons like" 
+ * * regularText (part 4): "When it's day on one side of the world, it's night on the other side"
+ * * regularTextWithSymbol (parts 1 and 4 combined): "➸ When it's day on one side of the world, it's night on the other side"
+ **/
 export function GetExtractedPrefixTextInfo_Base(title: string) {
 	const match = title.match(/^([➸ ]*)\[([^\]]*)\]( *)/);
 	if (match == null) return null;
-	const [matchStr, specialCharsAtStart, prefixText] = match;
-	return {matchStr, specialCharsAtStart, prefixText, titleWithoutPrefix: specialCharsAtStart + title.slice(matchStr.length)};
+	const [matchStr, symbolPrefix, bracketedText] = match;
+	const regularText = title.slice(matchStr.length);
+	const regularTextWithSymbol = symbolPrefix + regularText;
+	return {matchStr, symbolPrefix, bracketedText, regularText, regularTextWithSymbol};
 }
 export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm) {
 	const childLayout = GetChildLayout_Final(node.current, map);
