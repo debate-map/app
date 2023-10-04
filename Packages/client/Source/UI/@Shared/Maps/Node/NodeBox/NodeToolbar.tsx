@@ -139,7 +139,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 					},
 					showBottomBorder && {borderBottom: "1px solid black"},
 				)}>
-					<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo.prefixText} panel="extractedPrefixText" enabled={false}/>
+					<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo.bracketedText} panel="extractedPrefixText" enabled={false}/>
 				</Row>}
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{

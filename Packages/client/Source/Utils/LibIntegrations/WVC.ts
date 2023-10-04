@@ -46,6 +46,9 @@ export function InitWVC() {
 		logTypes,
 		mobxCompatMode: true,
 		PostHandleError: (error, errorStr)=>{
+			// ignore the "Socket closed" error; this is redundant (and clutters the UI, since they pile up), because the UI already displays a dedicated "Websocket [...] Attempting reconnection..." message
+			if (errorStr == "Uncaught Error: Socket closed" || error?.message == "Socket closed") return true;
+
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
 				RunInAction("WVC.PostHandleError", ()=>AddNotificationMessage(errorStr));

@@ -52,6 +52,8 @@ export function InitWVC() {
 		globalConnectorPropGetters: {},
 
 		PostHandleError: (error, errorStr)=>{
+			if (errorStr == "Uncaught Error: Socket closed" || error?.message == "Socket closed") return true;
+
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
 				RunInAction("WVC.PostHandleError", ()=>AddNotificationMessage(errorStr));
