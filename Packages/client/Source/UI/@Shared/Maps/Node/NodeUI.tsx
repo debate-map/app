@@ -17,6 +17,7 @@ import {store} from "Store/index.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {globalRootNodeID_hk} from "Utils/LibIntegrations/MobXHK/HKInitBackend.js";
 import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
+import {HKMode} from "UI/@SL/SL.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
@@ -86,8 +87,7 @@ export class NodeUI extends BaseComponentPlus(
 		const {indexInNodeList, map, node, path, standardWidthInGroup, style, onHeightOrPosChange, ref_nodeBox, treePath, forLayoutHelper, inBelowGroup, children} = this.props;
 		const {obs} = this.state;
 
-		// temp
-		if (map?.id == globalMapID && node.id == globalRootNodeID) {
+		if (HKMode && map?.id == globalMapID && node.id == globalRootNodeID) {
 			return <NodeUI_HK nodeID={globalRootNodeID_hk}/>;
 		}
 

@@ -15,7 +15,7 @@ import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {HasAdminPermissions, Me, MeID} from "dm_common";
 import {DebugPanel} from "UI/@Shared/NavBar/DebugPanel.js";
-import {SLMode_2020, SLMode_AI, SLMode_COVID, GetGADExternalSiteURL, SLMode_GAD, SLMode_Main} from "./SL.js";
+import {SLMode_2020, SLMode_AI, SLMode_COVID, GetGADExternalSiteURL, SLMode_GAD, SLMode_Main, SLMode_IA} from "./SL.js";
 
 // main
 // ==========
@@ -114,6 +114,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 				SLMode_COVID && {width: 500, height: 150, backgroundImage: "url(/Images/@SL/COVID/Title.png)", padding: "15px 0"},
 				SLMode_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@SL/2020/2020ElectionDemo.png)"},
 				SLMode_AI && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/AI/Title_Cropped.png)", padding: "15px 0"},
+				SLMode_IA && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/IA/Title.png)", padding: "15px 0"},
 				//GADDemo_Nuclear && {pointerEvents: "none"},
 			);
 			text = null as any;

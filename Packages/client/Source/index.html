@@ -21,7 +21,7 @@
 			window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = window.parent.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 		}
 		// if has an SL flag, delay title loading till GAD.ts runs
-		if (["gad", "cov", "2020", "ai"].find(flag=>window.location.href.includes(`?extra=${flag}`))) {
+		if (["sl", "gad", "cov", "2020", "ai", "ia"].find(flag=>window.location.href.includes(`?extra=${flag}`))) {
 			document.getElementById("title").innerText = "";
 		}
 		</script>

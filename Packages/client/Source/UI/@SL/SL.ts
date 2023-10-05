@@ -11,13 +11,14 @@ Notes:
 2) Changes that affect the data-structure of nodes, or otherwise "change what people enter into the map" (eg. bracketed prefix-text), should be done via the child-layout setting.
 */
 
-const GAD_extraFlags = ["sl", "gad", "cov", "2020", "ai"]; // if entry is changed/added, do the same for line in index.html
+const GAD_extraFlags = ["sl", "gad", "cov", "2020", "ai", "ia"]; // if entry is changed/added, do the same for line in index.html
 export const SLMode = startURL.domain == "demo.greatamericandebate.org" || GAD_extraFlags.includes(startURL.GetQueryVar("extra") ?? "");
 export const SLMode_Main = startURL.GetQueryVar("extra") == "sl";
 export const SLMode_GAD = startURL.GetQueryVar("extra") == "gad";
 export const SLMode_COVID = startURL.GetQueryVar("extra") == "cov";
 export const SLMode_2020 = startURL.GetQueryVar("extra") == "2020";
 export const SLMode_AI = startURL.GetQueryVar("extra") == "ai";
+export const SLMode_IA = startURL.GetQueryVar("extra") == "ia";
 export const ShowHeader = startURL.GetQueryVar("header") != "0";
 export const HKMode = startURL.GetQueryVar("extra") == "hk";
 // These are utilized by the helper functions in $node_sl.ts.
@@ -57,7 +58,10 @@ if (SLMode) {
 				logoEl.href = "/Images/@SL/2020/2020ElectionDemo.png";
 			} else if (SLMode_AI) {
 				titleEl.innerText = "AI / AGI Debates";
-				logoEl.href = "/Images/@SL/Logo.png";
+				logoEl.href = "/Images/@SL/Main/Logo.png";
+			} else if (SLMode_IA) {
+				titleEl.innerText = "Internet Archive AI Debates";
+				logoEl.href = "/Images/@SL/IA/Logo.png";
 			}
 			timer.Stop();
 		} catch {}
