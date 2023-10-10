@@ -103,6 +103,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			maps:				new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), addChild: PC_Anyone(), addPhrasing: PC_Anyone(), vote: PC_Anyone()}),
 			nodeRatings:	new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			others:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 		})),
 		permissions_userExtends: {},
 	},
@@ -117,6 +118,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			maps:				new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), addChild: PC_NoOne(), addPhrasing: PC_NoOne(), vote: PC_Anyone()}),
 			nodeRatings:	new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			others:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
 		})),
 		permissions_userExtends: {},
 	},
@@ -131,6 +133,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			maps:				new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
 			nodes:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne(), addChild: PC_NoOne(), vote: PC_NoOne(), addPhrasing: PC_NoOne()}),
 			nodeRatings:	new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
+			others:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
 		})),
 		permissions_userExtends: {},
 	},
@@ -250,6 +253,7 @@ function Add(query: Knex.QueryBuilder<any, any>) {
 }
 
 export default async function seed(knex: Knex) {
+	AddRaw("-- NOTE: DO NOT MANUALLY MODIFY THIS FILE, AS IT IS AUTO-GENERATED. (modify GenerateSeedDB.ts instead)");
 	AddRaw("\\set ON_ERROR_STOP 1");
 	AddRaw("begin;"); // start transaction
 	AddRaw("");
