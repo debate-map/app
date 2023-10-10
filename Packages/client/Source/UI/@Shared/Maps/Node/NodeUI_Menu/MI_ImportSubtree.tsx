@@ -10,7 +10,7 @@ import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {AddNotificationMessage, ES, InfoButton, O, Observer, RunInAction_Set} from "web-vcore";
 import {gql} from "web-vcore/nm/@apollo/client";
-import {E, FromJSON, GetEntries, ModifyString, Timer} from "web-vcore/nm/js-vextensions.js";
+import {E, FromJSON, GetEntries, ModifyString, SleepAsync, Timer} from "web-vcore/nm/js-vextensions.js";
 import {makeObservable} from "web-vcore/nm/mobx";
 import {ignore} from "web-vcore/nm/mobx-sync";
 import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
@@ -290,11 +290,14 @@ class ImportSubtreeUI extends BaseComponent<
 							<Row>
 								<CheckBox text="Auto-search by title" value={uiState.autoSearchByTitle} onChange={val=>RunInAction_Set(this, ()=>uiState.autoSearchByTitle = val)}/>
 								<CheckBox ml={5} text="Show auto-insert tools" value={uiState.showAutoInsertTools} onChange={val=>RunInAction_Set(this, ()=>uiState.showAutoInsertTools = val)}/>
-								{/*uiState.showAutoInsertTools &&
+								{uiState.showAutoInsertTools &&
 								<>
-									<Text ml={5}>Batch:</Text>
-									<Spinner ml={5} value={uiState.autoInsert_batchSize} onChange={val=>RunInAction_Set(this, ()=>uiState.autoInsert_batchSize = val)}/>
-								</>*/}
+									<Text ml={10}>Interval:</Text>
+									<Spinner ml={5} value={uiState.autoInsert_interval} onChange={val=>RunInAction_Set(this, ()=>uiState.autoInsert_interval = val)}/>
+									<Text ml={3}>ms</Text>
+									{/*<Text ml={5}>Batch:</Text>
+									<Spinner ml={5} value={uiState.autoInsert_batchSize} onChange={val=>RunInAction_Set(this, ()=>uiState.autoInsert_batchSize = val)}/>*/}
+								</>}
 							</Row>
 							<ScrollView>
 								<ReactList type="variable" length={resources.length}
@@ -314,9 +317,10 @@ class ImportSubtreeUI extends BaseComponent<
 	}
 
 	SetTimerEnabled(enabled: boolean) {
+		const uiState = store.main.maps.importSubtreeDialog;
 		this.nodeCreationTimer.Enabled = enabled;
 		if (enabled) {
-			setTimeout(()=>this.nodeCreationTimer.func(), 1000); // run first iteration in 1s
+			setTimeout(()=>this.nodeCreationTimer.func(), uiState.autoInsert_interval); // run first iteration soon (1s by default)
 		}
 		this.forceUpdate();
 	}
@@ -340,18 +344,30 @@ class ImportSubtreeUI extends BaseComponent<
 			// if a node in the insert-path doesn't exist, create it now (as this timer-tick's action)
 			const insertPath_indexOfFirstMissingNode = insertPath_resolvedNodeIDs.findIndex(a=>a == null);
 			if (insertPath_indexOfFirstMissingNode != -1) {
-				const parentNodeID = insertPath_indexOfFirstMissingNode == 0 ? rootNodeForImport.id : insertPath_resolvedNodeIDs[insertPath_indexOfFirstMissingNode - 1]!;
 				const newNodeText = insertPath[insertPath_indexOfFirstMissingNode];
+
+				// commented; hit what seems to be a race-condition with this (presumably GetAsync above "missed" a node that had just been added, on the previous timer-tick)
+				// It's not really needed anyway (user can just select-for-insert or manually-add the rows for the ancestor nodes as well), so will just leave it out for now (to prevent duplicate ancestor-adding).
+				/*const parentNodeID = insertPath_indexOfFirstMissingNode == 0 ? rootNodeForImport.id : insertPath_resolvedNodeIDs[insertPath_indexOfFirstMissingNode - 1]!;
 				const success = await CreateAncestorForResource(res, map?.id, parentNodeID, newNodeText, res.node.accessPolicy);
 				if (!success) {
 					AddNotificationMessage(`Could not create ancestor "${newNodeText}".`);
+					this.SetTimerEnabled(false);
+					return;
+				}*/
+				// try again after 3s; if node still missing, give up (safer alternative to auto-insert of ancestor)
+				await SleepAsync(3000);
+				const insertPath_resolvedNodeIDs_retry = await GetAsync(()=>ResolveNodeIDsForInsertPath(rootNodeForImport.id, insertPath));
+				const insertPath_indexOfFirstMissingNode_retry = insertPath_resolvedNodeIDs_retry.findIndex(a=>a == null);
+				if (insertPath_indexOfFirstMissingNode_retry != -1) {
+					AddNotificationMessage(`Auto-import canceled since required ancestor was missing. Ancestor title: ${newNodeText}`);
 					this.SetTimerEnabled(false);
 					return;
 				}
 
 				//await commandForAncestor.RunOnServer();
 				this.TriggerSearchesToRerun();
-				setTimeout(()=>this.nodeCreationTimer.func(), 1000); // run next iteration in 1s
+				setTimeout(()=>this.nodeCreationTimer.func(), uiState.autoInsert_interval); // run next iteration soon (1s by default)
 				return;
 			}
 
@@ -361,7 +377,7 @@ class ImportSubtreeUI extends BaseComponent<
 				uiState.selectedImportResources.delete(res);
 			});
 			this.TriggerSearchesToRerun();
-			setTimeout(()=>this.nodeCreationTimer.func(), 1000); // run next iteration in 1s
+			setTimeout(()=>this.nodeCreationTimer.func(), uiState.autoInsert_interval); // run next iteration soon (1s by default)
 			return;
 		} catch (err) {
 			AddNotificationMessage(`Got error in node-creation-timer for resource-importing; stopping timer. @error:${err}`);
@@ -604,10 +620,10 @@ export async function CreateAncestorForResource(res: ImportResource, mapID: stri
 		node: AsNodeL1Input(new NodeL1({
 			type: NodeType.category,
 			accessPolicy: newNodeAccessPolicy,
-			creator: systemUserID,
+			//creator: systemUserID,
 		})),
 		revision: new NodeRevision({
-			creator: systemUserID,
+			//creator: systemUserID,
 			phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
 				text_base: newNodeTitle,
 			})),

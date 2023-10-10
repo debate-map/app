@@ -35,30 +35,6 @@
 			"group": "build"
 		},
 		{
-			"label": "## backend.dockerBuildAndPush_gitlab.base",
-			"type": "shell",
-			"command": "npm start backend.dockerBuildAndPush_gitlab.base",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"group": "build"
-		},
-		{
-			"label": "## backend.dockerBuildAndPush_gitlab.server",
-			"type": "shell",
-			"command": "npm start backend.dockerBuildAndPush_gitlab.server",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"group": "build"
-		},
-		{
-			"label": "## backend.dockerBuildAndPush_gitlab.web-server",
-			"type": "shell",
-			"command": "npm start backend.dockerBuildAndPush_gitlab.web-server",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"group": "build"
-		},
-		{
 			"label": "## backend.pulumiUp",
 			"type": "shell",
 			"command": "npm start backend.pulumiUp",
@@ -97,6 +73,30 @@
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
+		},
+		{
+			"label": "## backend.tiltUp_ovh_webServer",
+			"type": "shell",
+			"command": "npm start backend.tiltUp_ovh_webServer",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "## backend.tiltUp_ovh_appServer",
+			"type": "shell",
+			"command": "npm start backend.tiltUp_ovh_appServer",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "## backend.tiltUp_ovh_monitorBackend",
+			"type": "shell",
+			"command": "npm start backend.tiltUp_ovh_monitorBackend",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
 		},
 
 		// server

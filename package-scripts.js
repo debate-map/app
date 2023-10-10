@@ -318,7 +318,11 @@ Object.assign(scripts, {
 			return `wsl ${pathToKillScript_wsl} ${commandArgs.join(" ")}`;
 		}),
 
-		// dumps (ie. pg_dump backups) [you can also use DBeaver to make a dump; see readme for details]
+		// dumps (ie. pg_dump backups)
+		// Alternatives:
+		// * Run: `node ./Scripts/DBBackups/GQLBackupHelper.js backup` (does basically the same thing as done here, except through the app-server, rather than connecting directly to the pod)
+		// * Use DBeaver to make a dump. (see readme for details)
+		// * Make a pgbackrest-based backup of the database. (see readme for details)
 		makeDBDump: Dynamic(()=>{
 			const context = commandArgs[0] ?? K8sContext_Current();
 			const inPodCmd = "pg_dump -U postgres debate-map";

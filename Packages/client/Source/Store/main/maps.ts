@@ -142,6 +142,7 @@ export class ImportSubtreeDialogState {
 	@O sourceType = DataExchangeFormat.csv_sl;
 	@O autoSearchByTitle = true;
 	@O showAutoInsertTools = true;
+	@O autoInsert_interval = 1000;
 	//@O hideFoundEntries = false;
 
 	@O @ignore selectedImportResources = new Set<ImportResource>();
