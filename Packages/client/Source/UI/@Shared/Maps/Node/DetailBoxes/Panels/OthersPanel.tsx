@@ -150,7 +150,7 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 		let canSetAsSeriesAnchor = false;
 		if (node.type == NodeType.claim && node.link) {
 			const claimType = GetAttachmentType_Node(node);
-			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.question;
+			canSetAsNegation = claimType === AttachmentType.none;
 			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.attachments[0]?.equation!.isStep; // && !creating;
 		}
 
@@ -175,15 +175,23 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 							}}/>
 					</Row>}
 				{node.link && canSetAsNegation &&
+					// todo: maybe restrict this in "publicly governed" maps, to only let admins switch between forms "question" and ["base" or "negation"] (as it used to be)
 					<Row style={{display: "flex", alignItems: "center"}}>
-						<Pre>Show as negation: </Pre>
-						<CheckBox value={node.link.form == ClaimForm.negation}
+						<Pre>Form to show: </Pre>
+						<Select displayType="button bar"
+							options={[
+								{name: "Default", value: null},
+								{name: "Base", value: ClaimForm.base},
+								{name: "Negation", value: ClaimForm.negation},
+								{name: "Question", value: ClaimForm.question},
+							]}
+							value={node.link.form}
 							onChange={async val=>{
 								/*new UpdateLink({
 									linkID: node.link!.id,
 									linkUpdates: {form: val ? ClaimForm.negation : ClaimForm.base},
 								}).RunOnServer();*/
-								await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {form: val ? ClaimForm.negation : ClaimForm.base}});
+								await RunCommand_UpdateNodeLink({id: node.link!.id, updates: {form: val}});
 							}}/>
 					</Row>}
 				{node.link && canSetAsSeriesAnchor &&

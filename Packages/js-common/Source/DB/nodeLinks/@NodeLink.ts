@@ -45,7 +45,7 @@ export class NodeLink {
 	@Field({$ref: "ClaimForm"}, {opt: true})
 	form?: ClaimForm|n;
 
-	/** I forget what this is for. */
+	/** IIRC this marks the first claim within a child-group that is supposed to be "auto-numbered", eg. for sequences of math steps. */
 	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})
 	seriesAnchor?: boolean;

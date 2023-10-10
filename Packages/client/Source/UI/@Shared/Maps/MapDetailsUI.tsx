@@ -4,9 +4,10 @@ import {PolicyPicker} from "UI/Database/Policies/PolicyPicker.js";
 import {RunCommand_AddMap} from "Utils/DB/Command.js";
 import {Observer, TextPlus} from "web-vcore";
 import {DEL, GetEntries, ToNumber} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink";
 import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./Node/NodeDetailsUI/PermissionsPanel.js";
@@ -157,7 +158,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 	}
 }
 
-export async function ShowAddMapDialog() {
+export async function ShowAddMapDialog(openMapAfterCreation = true) {
 	const prep = await GetAsync(()=>{
 		return {accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy};
 	});
@@ -181,8 +182,11 @@ export async function ShowAddMapDialog() {
 				</Column>
 			);
 		},
-		onOK: ()=>{
-			RunCommand_AddMap(newMap);
+		onOK: async()=>{
+			const result = await RunCommand_AddMap(newMap);
+			RunInAction("ShowAddMapDialog.onOK", ()=>{
+				store.main.debates.selectedMapID = result.id;
+			});
 		},
 	});
 }

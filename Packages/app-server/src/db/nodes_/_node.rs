@@ -69,6 +69,8 @@ pub struct NodeUpdates {
 //#[graphql(name = "Node_Extras", input_name = "Node_ExtrasInput")] # todo: use this approach once async-graphql is updated*/
 pub struct Node_Extras {
 	pub ratingSummaries: Option<IndexMap<String, RatingSummary>>,
+	// namespaces/patterns used/expected atm: "claimgen:<uuid, full-form>"
+	pub externalId: String,
 }
 
 #[derive(/*SimpleObject, InputObject,*/ Clone, Serialize, Deserialize)]

@@ -122,6 +122,9 @@ export class Node_Extras {
 		patternProperties: {".+": {$ref: "RatingSummary"}},
 	}, {opt: true})
 	ratingSummaries? = {} as {[key: string]: RatingSummary}; // derived from "nodeRatings" table
+
+	@Field({type: "boolean"}, {opt: true})
+	externalId?: string|n;
 }
 @MGLClass()
 export class RatingSummary {

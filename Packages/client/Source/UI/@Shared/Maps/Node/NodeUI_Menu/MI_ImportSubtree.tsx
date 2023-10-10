@@ -1,5 +1,5 @@
-import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeLink, Polarity, SourceType, systemUserID, AsNodeL1Input} from "dm_common";
-import React, {ComponentProps} from "react";
+import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeLink, Polarity, SourceType, systemUserID, AsNodeL1Input, MapNodeEdit, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
+import React, {ComponentProps, ReactEventHandler, useMemo} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
 import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
@@ -25,6 +25,8 @@ import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
 import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
+import {CG_Debate, CG_Node} from "Utils/DataFormats/JSON/ClaimGen/DataModel.js";
+import {GetResourcesInImportSubtree_CG} from "Utils/DataFormats/JSON/ClaimGen/ImportHelpers.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -108,6 +110,7 @@ class ImportSubtreeUI extends BaseComponent<
 		sourceText: string,
 		sourceText_parseError: string|n,
 		forJSONDM_subtreeData: FS_NodeL3|n,
+		forJSONCG_subtreeData: CG_Debate|n,
 		forCSVSL_subtreeData: CSV_SL_Row[]|n,
 
 		// right-panel
@@ -129,14 +132,21 @@ class ImportSubtreeUI extends BaseComponent<
 	};
 
 	render() {
-		const {mapID, node, path, controller} = this.props;
-		const {sourceText, sourceText_parseError, forJSONDM_subtreeData, forCSVSL_subtreeData, process, importSelected, selectedIRs_nodeAndRev_atImportStart, leftTab, rightTab, showLeftPanel} = this.state;
+		const {mapID, map, node, path, controller} = this.props;
+		const {sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process, importSelected, selectedIRs_nodeAndRev_atImportStart, leftTab, rightTab, showLeftPanel} = this.state;
 		const uiState = store.main.maps.importSubtreeDialog;
+		if (map == null) return null;
+
+		// todo: have this be used by the json-dm and csv-sl importer functions as well
+		const nodeAccessPolicyID = map.nodeAccessPolicy ?? GetSystemAccessPolicyID(systemPolicy_publicUngoverned_name);
+		const importContext = useMemo(()=>({mapID: map.id, nodeAccessPolicyID}), [map.id, nodeAccessPolicyID]);
 
 		let resources: ImportResource[] = [];
 		if (process) {
 			if (uiState.sourceType == DataExchangeFormat.json_dm && forJSONDM_subtreeData != null) {
 				resources = GetResourcesInImportSubtree(forJSONDM_subtreeData);
+			} else if (uiState.sourceType == DataExchangeFormat.json_cg && forJSONCG_subtreeData != null) {
+				resources = GetResourcesInImportSubtree_CG(importContext, forJSONCG_subtreeData);
 			} else if (uiState.sourceType == DataExchangeFormat.csv_sl && forCSVSL_subtreeData != null) {
 				resources = GetResourcesInImportSubtree_CSV_SL(forCSVSL_subtreeData);
 			}
@@ -181,6 +191,13 @@ class ImportSubtreeUI extends BaseComponent<
 										8) Proceed with the import process. (check "Start extracting resources", select nodes, then right-click locations in map and press "Recreate import-node here")
 									`.AsMultiline(0)}/>
 								</Row>}
+								{/*uiState.sourceType == DataExchangeFormat.json_cg &&
+								<Row center style={{flex: 1}}>
+									<Text>Subtree JSON:</Text>
+									<InfoButton ml={5} text={`
+										Obtain this subtree-json from the claimgen tool. (todo: add exact instructions on the export steps)
+									`.AsMultiline(0)}/>
+								</Row>*/}
 								{uiState.sourceType == DataExchangeFormat.csv_sl &&
 								<Row center style={{flex: 1}}>
 									<Text>Spreadsheet CSV:</Text>
@@ -198,41 +215,46 @@ class ImportSubtreeUI extends BaseComponent<
 								</Row>
 							</Row>
 							<TextArea value={sourceText} style={{flex: 1}} onChange={newSourceText=>{
-								this.SetState({sourceText: newSourceText});
+								const newState = {sourceText: newSourceText} as ExtractState<ImportSubtreeUI>;
 
-								const sourceText = this.state.sourceText;
 								if (uiState.sourceType == DataExchangeFormat.json_dm) {
 									let subtreeData_new: FS_NodeL3|n = null;
 									try {
-										subtreeData_new = FromJSON(sourceText) as FS_NodeL3;
-										this.SetState({
-											forJSONDM_subtreeData: subtreeData_new,
-											sourceText_parseError: null,
-										});
+										subtreeData_new = FromJSON(newSourceText) as FS_NodeL3;
+										newState.forJSONDM_subtreeData = subtreeData_new;
+										newState.sourceText_parseError = null;
 									} catch (err) {
-										this.SetState({
-											forJSONDM_subtreeData: null,
-											sourceText_parseError: err,
-										});
+										newState.forJSONDM_subtreeData = null;
+										newState.sourceText_parseError = err;
 									}
+									this.SetState(newState);
+								} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
+									let subtreeData_new: CG_Debate|n = null;
+									try {
+										subtreeData_new = FromJSON(newSourceText) as CG_Debate;
+										newState.forJSONCG_subtreeData = subtreeData_new;
+										newState.sourceText_parseError = null;
+									} catch (err) {
+										newState.forJSONCG_subtreeData = null;
+										newState.sourceText_parseError = err;
+									}
+									this.SetState(newState);
 								} else if (uiState.sourceType == DataExchangeFormat.csv_sl) {
 									const collectedRows = [] as RowMap<any>[];
-									parseString(sourceText, {headers: true})
+									parseString(newSourceText, {headers: true})
 										.on("data", (row: RowMap<any>)=>{
 											collectedRows.push(row);
 										})
 										.on("error", err=>{
-											this.SetState({
-												forCSVSL_subtreeData: null,
-												sourceText_parseError: `${err}`,
-											});
+											newState.forCSVSL_subtreeData = null;
+											newState.sourceText_parseError = `${err}`;
+											this.SetState(newState);
 										})
 										.on("end", (rowCount: number)=>{
 											const subtreeData_new = collectedRows.map(row=>CSV_SL_Row.FromRawRow(row));
-											this.SetState({
-												forCSVSL_subtreeData: subtreeData_new,
-												sourceText_parseError: null,
-											});
+											newState.forCSVSL_subtreeData = subtreeData_new;
+											newState.sourceText_parseError = null;
+											this.SetState(newState);
 										});
 								}
 							}}/>
@@ -275,18 +297,7 @@ class ImportSubtreeUI extends BaseComponent<
 								</>*/}
 							</Row>
 							<ScrollView>
-								{/*resources.map((resource, index)=>{
-									return <ImportResourceUI key={index} {...{resource, index, autoSearchByTitle: uiState.autoSearchByTitle}}/>;
-								})*/}
 								<ReactList type="variable" length={resources.length}
-									//pageSize={20} threshold={300}
-									/*itemsRenderer={(items, ref) => {
-										return <div ref={ref}>
-											<Column style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 20, background: HSLA(0, 0, 0, 1) }}>
-											</Column>
-											{items}
-										</div>;
-									}}*/
 									itemRenderer={this.RenderResource}
 									itemSizeEstimator={this.EstimateResourceUIHeight}/>
 							</ScrollView>
@@ -323,7 +334,7 @@ class ImportSubtreeUI extends BaseComponent<
 			}
 
 			const res = selectedIRs_nodeAndRev[0];
-			const insertPath = res instanceof IR_NodeAndRevision && res.insertPath ? res.insertPath : [];
+			const insertPath = res instanceof IR_NodeAndRevision && res.insertPath_titles ? res.insertPath_titles : [];
 			const insertPath_resolvedNodeIDs = await GetAsync(()=>ResolveNodeIDsForInsertPath(rootNodeForImport.id, insertPath));
 
 			// if a node in the insert-path doesn't exist, create it now (as this timer-tick's action)
@@ -370,10 +381,15 @@ class ImportSubtreeUI extends BaseComponent<
 		const {resources} = this.stash;
 		const resource = resources[index];
 		const uiState = store.main.maps.importSubtreeDialog;
+
+		let autoSearchByTitle = uiState.autoSearchByTitle;
+		// temp-disabled, till backend supports the search feature
+		autoSearchByTitle = false;
+
 		return (
 			<ImportResourceUI key={index} rootNodeForImport={node} searchQueryGen={searchQueryGen}
 				onNodeCreated={this.TriggerSearchesToRerun}
-				{...{resource, index, resources, autoSearchByTitle: uiState.autoSearchByTitle}}/>
+				{...{resource, index, resources, autoSearchByTitle}}/>
 		);
 	};
 }
@@ -401,6 +417,7 @@ class ImportResourceUI extends BaseComponent<
 	async ApplySearchSetting() {
 		const res = this.props.resource;
 		if (this.state.search && res instanceof IR_NodeAndRevision && res.CanSearchByTitle()) {
+			// todo: update this to work against new rust backend! (atm this query fails, hence ui option for it disabled)
 			const result = await apolloClient.query({
 				query: gql`
 					query SearchQueryForImport($title: String!) {
@@ -427,8 +444,13 @@ class ImportResourceUI extends BaseComponent<
 
 		const map = GetMap(GetOpenMapID());
 
-		const insertPath = res instanceof IR_NodeAndRevision && res.insertPath ? res.insertPath : [];
+		const insertPath = res instanceof IR_NodeAndRevision && res.insertPath_titles ? res.insertPath_titles : [];
 		const insertPath_resolvedNodeIDs = ResolveNodeIDsForInsertPath(rootNodeForImport.id, insertPath);
+		const parentNodeID = insertPath.length > 0 ? insertPath_resolvedNodeIDs.LastOrX() : rootNodeForImport.id;
+		const ownNodeTextResolved = parentNodeID != null && res instanceof IR_NodeAndRevision && res.ownTitle != null
+			// use CatchBail, so that after each node-add, it doesn't cause the rows to switch to "Loading..." (which causes loss of the scroll-position)
+			? ResolveNodeIDsForInsertPath.CatchBail([null], parentNodeID, [res.ownTitle]).Last() != null
+			: false;
 
 		return (
 			<Column mt={index == 0 ? 0 : 5} pr={5} sel style={{border: "solid gray", borderWidth: index == 0 ? 0 : "1px 0 0 0"}}>
@@ -436,15 +458,18 @@ class ImportResourceUI extends BaseComponent<
 					{res instanceof IR_NodeAndRevision &&
 					<>
 						<Text style={{flexShrink: 0, fontWeight: "bold", padding: "0 3px", background: "rgba(128,128,128,.5)", marginBottom: -5}}>{pathStr}</Text>
-						<Text ml={5} mr={5} style={{flex: 1, display: "block"}}>
+						<Row ml={5} mr={5} style={{flex: 1, display: "block"}}>
 							<Text mr={3} style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}>
 								{ModifyString(res.node.type, m=>[m.startLower_to_upper])}
 								{res.node.type == NodeType.argument && res.link.polarity != null &&
 									<Text style={{display: "inline-block", flexShrink: 0, fontWeight: "bold"}}> [{res.link.polarity == Polarity.supporting ? "pro" : "con"}]</Text>}
 								{":"}
 							</Text>
-							{res.revision.phrasing.text_base}
-						</Text>
+							<Column>
+								<Row>{res.revision.phrasing.text_base}</Row>
+								{(res.revision.phrasing.text_question ?? "").length > 0 && <Row>{`<question form> ${res.revision.phrasing.text_question}`}</Row>}
+							</Column>
+						</Row>
 					</>}
 					<Column>
 						{res instanceof IR_NodeAndRevision && res.CanSearchByTitle() &&
@@ -454,6 +479,11 @@ class ImportResourceUI extends BaseComponent<
 									existingNodesWithTitle == 0 && {background: "rgba(0,255,0,.5)"},
 									existingNodesWithTitle != null && existingNodesWithTitle > 0 && {background: "rgba(255,0,0,.5)"},
 								)}
+
+								// temp-disabled, till backend supports the search feature
+								enabled={false}
+								title="This feature is currently disabled, until the backend is updated to support title-based node[-revision] searching."
+
 								value={search} onChange={async val=>{
 									this.SetState({search: val}, ()=>{
 										this.ApplySearchSetting();
@@ -470,7 +500,7 @@ class ImportResourceUI extends BaseComponent<
 									const newSelected = val;
 									let startI = index;
 									let lastI = index;
-									if (e.nativeEvent.shiftKey) {
+									if ((e.nativeEvent as MouseEvent).ctrlKey) {
 										if (uiState.selectFromIndex != -1) {
 											startI = Math.min(uiState.selectFromIndex, index);
 											lastI = Math.max(uiState.selectFromIndex, index);
@@ -533,10 +563,14 @@ class ImportResourceUI extends BaseComponent<
 					<Row ml="auto">
 						{res instanceof IR_NodeAndRevision &&
 						<>
-							<Button text="Create" p="0 10px" enabled={insertPath_resolvedNodeIDs.Last() != null} onClick={async()=>{
-								await CreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
-								onNodeCreated();
-							}}/>
+							<Button text={ownNodeTextResolved ? "Create (again)" : "Create"} p="0 10px" enabled={insertPath_resolvedNodeIDs.length == 0 || insertPath_resolvedNodeIDs.LastOrX() != null}
+								style={E(
+									ownNodeTextResolved && {backgroundColor: "rgba(0,255,0,.5)"},
+								)}
+								onClick={async()=>{
+									await CreateResource(res, map?.id, insertPath_resolvedNodeIDs.LastOrX() ?? rootNodeForImport.id);
+									onNodeCreated();
+								}}/>
 						</>}
 					</Row>
 				</Row>}
@@ -550,7 +584,10 @@ export const ResolveNodeIDsForInsertPath = CreateAccessor((rootNodeID: string, i
 	for (const segment of insertPath) {
 		const prevNodeID = resolvedNodeIDs.length == 0 ? rootNodeID : resolvedNodeIDs.Last();
 		const prevNodeChildren = prevNodeID != null ? GetNodeChildrenL2(prevNodeID) : [];
-		const nodeForSegment = prevNodeChildren.find(a=>a.current.phrasing.text_base.trim() == segment.trim());
+		const nodeForSegment = prevNodeChildren.find(a=>{
+			return a.current.phrasing.text_base.trim() == segment.trim()
+				|| (a.current.phrasing.text_question ?? "").trim() == segment.trim(); // maybe temp; also match on text_question (needed atm for SL imports, but should maybe find a more elegant/generalizable way to handle this need)
+		});
 		resolvedNodeIDs.push(nodeForSegment?.id ?? null);
 	}
 	return resolvedNodeIDs;
@@ -583,8 +620,11 @@ export async function CreateResource(res: ImportResource, mapID: string|n, paren
 	if (res instanceof IR_NodeAndRevision) {
 		await RunCommand_AddChildNode({
 			mapID, parentID,
-			node: AsNodeL1Input(res.node), revision: res.revision, link: res.link,
+			node: AsNodeL1Input(res.node),
+			revision: res.revision.ExcludeKeys("creator", "createdAt"),
+			link: res.link,
 		});
+	} else {
+		Assert(false, `Cannot generate command to create resource of type "${res.constructor.name}".`);
 	}
-	Assert(false, `Cannot generate command to create resource of type "${res.constructor.name}".`);
 }

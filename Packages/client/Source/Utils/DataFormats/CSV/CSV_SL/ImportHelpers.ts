@@ -63,7 +63,7 @@ export const GetResourceForRow = CreateAccessor((row: CSV_SL_Row)=>{
 	return new IR_NodeAndRevision({
 		pathInData: [],
 		link, node, revision,
-		insertPath: [
+		insertPath_titles: [
 			row.position,
 			row.topic,
 			row.subtopic,
