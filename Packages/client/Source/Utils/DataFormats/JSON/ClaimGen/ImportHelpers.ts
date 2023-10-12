@@ -1,6 +1,7 @@
 import {IR_NodeAndRevision, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodeLink, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, OrderKey, systemUserID} from "dm_common";
+import {Assert} from "js-vextensions";
 import {CG_Category, CG_Claim, CG_Debate, CG_Node, CG_Position, CG_Question} from "./DataModel.js";
 
 export class ImportContext {
@@ -11,7 +12,7 @@ export class ImportContext {
 export const GetResourcesInImportSubtree_CG = CreateAccessor((context: ImportContext, debate: CG_Debate)=>{
 	const result = [] as ImportResource[];
 	for (const [i, question] of debate.questions.entries()) {
-		result.push(...GetResourcesInQuestion_CG(context, question, [i], [CG_Node.GetTitle(question)]));
+		result.push(...GetResourcesInQuestion_CG(context, question, [i], [CG_Node.GetTitle_Main(question)]));
 	}
 	return result;
 });
@@ -19,7 +20,7 @@ export const GetResourcesInQuestion_CG = CreateAccessor((context: ImportContext,
 	const result = [] as ImportResource[];
 	result.push(NewNodeResource(context, question, NodeType.category, path_indexes, path_titles));
 	for (const [i, position] of question.positions.entries()) {
-		result.push(...GetResourcesInPosition_CG(context, position, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle(position))));
+		result.push(...GetResourcesInPosition_CG(context, position, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(position))));
 	}
 	return result;
 });
@@ -28,7 +29,7 @@ export const GetResourcesInPosition_CG = CreateAccessor((context: ImportContext,
 	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency (SL also relies on this)
 	result.push(NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question));
 	for (const [i, category] of position.categories.entries()) {
-		result.push(...GetResourcesInCategory_CG(context, category, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle(category))));
+		result.push(...GetResourcesInCategory_CG(context, category, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(category))));
 	}
 	return result;
 });
@@ -37,7 +38,7 @@ export const GetResourcesInCategory_CG = CreateAccessor((context: ImportContext,
 	result.push(NewNodeResource(context, category, NodeType.category, path_indexes, path_titles, ChildGroup.freeform));
 	for (const [i, claim] of category.claims.entries()) {
 		// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency (SL also relies on this)
-		result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle(claim)), undefined, ClaimForm.question));
+		result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim)), undefined, ClaimForm.question));
 	}
 	return result;
 });
@@ -68,6 +69,28 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		form: claimForm,
 	});
 
+	const mainTitle = CG_Node.GetTitle_Main(data);
+	const narrativeTitle = CG_Node.GetTitle_Narrative(data);
+	const placementInMapWantsQuestionFormSupplied = claimForm == ClaimForm.question;
+
+	let text_base: string;
+	let text_question: string|n;
+	// if narrative-title was supplied, store it using the current SL pattern (of text_base for narrative title, text_question for regular/main title)
+	if (narrativeTitle != null) {
+		Assert(nodeType == NodeType.claim, "Narrative-title should only be supplied for claims. (ui doesn't support editing other titles for non-claim nodes)");
+		text_base = narrativeTitle;
+		text_question = mainTitle;
+	}
+	// if no narrative-title was supplied, but the placement in map has debate-map wanting/displaying the question-form, then just use the main-title to fill both title fields
+	else if (placementInMapWantsQuestionFormSupplied) {
+		text_base = mainTitle;
+		text_question = mainTitle;
+	}
+	// else, just supply the main-title as text_base (this is what's expected for many nodes, eg. category nodes)
+	else {
+		text_base = mainTitle;
+	}
+
 	const revision = new NodeRevision({
 		//createdAt: Date.now(),
 		//creator: systemUserID,
@@ -80,15 +103,9 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 			createdAt: Date.now(),
 			creator: systemUserID,
 			node: node.id,
-			...(
-				nodeType == NodeType.category
-					// category nodes cannot currently have a "question" form (eg. ui only presents text_base for editing), so must use only the "text_base" field
-					? {text_base: CG_Node.GetTitle(data)}
-					: {
-						text_base: "", // todo: have this field populated (for alt-title that gets imported/displayed in Papers), once part of spec/data-files
-						text_question: CG_Node.GetTitle(data),
-					}
-			),
+			...(text_question != null
+				? {text_base, text_question}
+				: {text_base}),
 		})),
 	});
 	return new IR_NodeAndRevision({
