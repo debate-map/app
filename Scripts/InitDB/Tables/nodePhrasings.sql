@@ -7,10 +7,12 @@ CREATE TABLE app."nodePhrasings" (
 	text_base text NOT NULL,
 	text_negation text,
 	text_question text,
+	text_narrative text,
 	note text,
 	terms jsonb[] NOT NULL,
 	"references" text[] NOT NULL,
 	
+	-- we could add text_negation and/or text_narrative to this, but it might be better to just wait until the search-system revamp (that of integrating semantic search)
 	phrasing_tsvector tsvector GENERATED ALWAYS AS (app.phrasings_to_tsv(text_base, text_question)) STORED NOT NULL,
 	"c_accessPolicyTargets" text[] NOT NULL
 );
