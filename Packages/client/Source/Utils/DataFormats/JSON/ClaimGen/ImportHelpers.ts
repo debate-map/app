@@ -26,8 +26,9 @@ export const GetResourcesInQuestion_CG = CreateAccessor((context: ImportContext,
 });
 export const GetResourcesInPosition_CG = CreateAccessor((context: ImportContext, position: CG_Position, path_indexes: number[], path_titles: string[])=>{
 	const result = [] as ImportResource[];
-	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency (SL also relies on this)
-	result.push(NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question));
+	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
+	//result.push(NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question));
+	result.push(NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles));
 	for (const [i, category] of position.categories.entries()) {
 		result.push(...GetResourcesInCategory_CG(context, category, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(category))));
 	}
@@ -37,8 +38,9 @@ export const GetResourcesInCategory_CG = CreateAccessor((context: ImportContext,
 	const result = [] as ImportResource[];
 	result.push(NewNodeResource(context, category, NodeType.category, path_indexes, path_titles, ChildGroup.freeform));
 	for (const [i, claim] of category.claims.entries()) {
-		// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency (SL also relies on this)
-		result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim)), undefined, ClaimForm.question));
+		// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
+		//result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim)), undefined, ClaimForm.question));
+		result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim))));
 	}
 	return result;
 });
@@ -71,24 +73,9 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 
 	const mainTitle = CG_Node.GetTitle_Main(data);
 	const narrativeTitle = CG_Node.GetTitle_Narrative(data);
-	const placementInMapWantsQuestionFormSupplied = claimForm == ClaimForm.question;
-
-	let text_base: string;
-	let text_question: string|n;
-	// if narrative-title was supplied, store it using the current SL pattern (of text_base for narrative title, text_question for regular/main title)
+	//const placementInMapWantsQuestionFormSupplied = claimForm == ClaimForm.question;
 	if (narrativeTitle != null) {
 		Assert(nodeType == NodeType.claim, "Narrative-title should only be supplied for claims. (ui doesn't support editing other titles for non-claim nodes)");
-		text_base = narrativeTitle;
-		text_question = mainTitle;
-	}
-	// if no narrative-title was supplied, but the placement in map has debate-map wanting/displaying the question-form, then just use the main-title to fill both title fields
-	else if (placementInMapWantsQuestionFormSupplied) {
-		text_base = mainTitle;
-		text_question = mainTitle;
-	}
-	// else, just supply the main-title as text_base (this is what's expected for many nodes, eg. category nodes)
-	else {
-		text_base = mainTitle;
 	}
 
 	const revision = new NodeRevision({
@@ -103,9 +90,9 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 			createdAt: Date.now(),
 			creator: systemUserID,
 			node: node.id,
-			...(text_question != null
-				? {text_base, text_question}
-				: {text_base}),
+			...(narrativeTitle != null
+				? {text_base: mainTitle, text_narrative: narrativeTitle}
+				: {text_base: mainTitle}),
 		})),
 	});
 	return new IR_NodeAndRevision({

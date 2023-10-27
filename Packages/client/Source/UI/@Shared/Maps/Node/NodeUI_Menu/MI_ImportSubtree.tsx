@@ -484,6 +484,7 @@ class ImportResourceUI extends BaseComponent<
 							<Column>
 								<Row>{res.revision.phrasing.text_base}</Row>
 								{(res.revision.phrasing.text_question ?? "").length > 0 && <Row>{`<question form> ${res.revision.phrasing.text_question}`}</Row>}
+								{(res.revision.phrasing.text_narrative ?? "").length > 0 && <Row>{`<narrative form> ${res.revision.phrasing.text_narrative}`}</Row>}
 							</Column>
 						</Row>
 					</>}
@@ -602,7 +603,10 @@ export const ResolveNodeIDsForInsertPath = CreateAccessor((rootNodeID: string, i
 		const prevNodeChildren = prevNodeID != null ? GetNodeChildrenL2(prevNodeID) : [];
 		const nodeForSegment = prevNodeChildren.find(a=>{
 			return a.current.phrasing.text_base.trim() == segment.trim()
-				|| (a.current.phrasing.text_question ?? "").trim() == segment.trim(); // maybe temp; also match on text_question (needed atm for SL imports, but should maybe find a more elegant/generalizable way to handle this need)
+				// maybe temp; also match on text_question (needed atm for SL imports, but should maybe find a more elegant/generalizable way to handle this need)
+				|| (a.current.phrasing.text_question ?? "").trim() == segment.trim()
+				// maybe temp; also match on text_narrative (newer version of SL imports should use this instead of text_question)
+				|| (a.current.phrasing.text_narrative ?? "").trim() == segment.trim();
 		});
 		resolvedNodeIDs.push(nodeForSegment?.id ?? null);
 	}

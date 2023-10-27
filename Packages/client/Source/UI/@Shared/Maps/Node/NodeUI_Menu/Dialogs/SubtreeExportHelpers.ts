@@ -31,7 +31,7 @@ export function GetServerSubtreeData_GQLQuery(rootNodeID: string, maxExportDepth
 		subtree(rootNodeId: "${rootNodeID}", maxDepth: ${maxExportDepth}) {
 			nodes { ${Fields(includeKeys.nodes)} }
 			nodeLinks { ${Fields(includeKeys.nodeLinks)} }
-			nodeRevisions { ${Fields(includeKeys.nodeRevisions, {phrasing: "text_base text_negation text_question note terms { id }", attachments: "equation references quote media description"})} }
+			nodeRevisions { ${Fields(includeKeys.nodeRevisions, {phrasing: "text_base text_negation text_question text_narrative note terms { id }", attachments: "equation references quote media description"})} }
 			nodePhrasings { ${Fields(includeKeys.nodePhrasings, {terms: "id"})} }
 			terms { ${Fields(includeKeys.terms, {attachments: "equation references quote media"})} }
 			medias { ${Fields(includeKeys.medias)} }

@@ -5,7 +5,7 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {NodeL1, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeLink, GetAccessPolicy, NodeL2} from "dm_common";
+import {NodeL1, NodeL3, NodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType_Node, NodeLink, GetAccessPolicy, Map, NodeL2} from "dm_common";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
 import React from "react";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
@@ -16,9 +16,10 @@ import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 
 type Props = {
+	map: Map|n, parent: NodeL3|n,
 	baseData: NodeL1,
 	baseRevisionData: NodeRevision,
-	baseLinkData: NodeLink|n, parent: NodeL3|n,
+	baseLinkData: NodeLink|n,
 	forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
 	style?, onChange?: (newData: NodeL1, newRevisionData: NodeRevision, newLinkData: NodeLink, component: NodeDetailsUI)=>void,
 	// onSetError: (error: string)=>void,

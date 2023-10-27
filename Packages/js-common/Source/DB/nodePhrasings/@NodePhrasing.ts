@@ -49,6 +49,10 @@ export class NodePhrasing {
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
+	text_narrative?: string;
+
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
 	note?: string;
 
 	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
@@ -64,7 +68,7 @@ export class NodePhrasing {
 	references: string[] = [];
 }
 
-const NodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "note", "terms"] as const;
+const NodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "text_narrative", "note", "terms"] as const;
 export type NodePhrasing_Embedded = Pick<NodePhrasing, typeof NodePhrasing_Embedded_keys[number]>;
 AddSchema("NodePhrasing_Embedded", DeriveJSONSchema(NodePhrasing, {includeOnly: NodePhrasing_Embedded_keys as any}));
 export function CullNodePhrasingToBeEmbedded(phrasing: NodePhrasing): NodePhrasing_Embedded {
@@ -76,7 +80,7 @@ export function CullNodePhrasingToBeEmbedded(phrasing: NodePhrasing): NodePhrasi
 	return phrasing;
 }
 
-export const TitleKey_values = ["text_base", "text_negation", "text_question"] as const;
+export const TitleKey_values = ["text_base", "text_negation", "text_question", "text_narrative"] as const;
 export type TitleKey = typeof TitleKey_values[number];
 
 export enum NodePhrasingType {

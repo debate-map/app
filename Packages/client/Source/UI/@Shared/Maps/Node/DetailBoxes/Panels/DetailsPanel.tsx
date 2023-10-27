@@ -33,8 +33,8 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		const canEdit = IsUserCreatorOrMod(MeID(), node); // temp
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
-				<NodeDetailsUI ref={c=>this.detailsUI = c}
-					baseData={node} baseRevisionData={node.current} baseLinkData={link} parent={parentNode}
+				<NodeDetailsUI ref={c=>this.detailsUI = c} map={map} parent={parentNode}
+					baseData={node} baseRevisionData={node.current} baseLinkData={link}
 					forNew={false} enabled={canEdit}
 					onChange={(newData, newRevisionData, newLinkData, comp)=>{
 						/*if (map?.requireMapEditorsCanEdit) {

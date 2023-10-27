@@ -200,12 +200,16 @@ export class NodeBox extends BaseComponentPlus(
 
 		// Log(`${node.id} -- ${dragInfo && dragInfo.snapshot.isDragging}; ${dragInfo && dragInfo.snapshot.draggingOver}`);
 
-		const outlineColor = GetChangeTypeOutlineColor(changeType);
+		let outlineColor = GetChangeTypeOutlineColor(changeType);
 		let outlineThickness = 1;
 		// in GADDemo, since node-background are white, we need to make these outlines more prominent
 		if (SLMode && outlineColor != null) {
 			//outlineColor = chroma.mix(outlineColor, "black", .5);
 			outlineThickness = 4;
+		}
+		if (store.main.maps.screenshotMode) {
+			outlineColor = null;
+			outlineThickness = 0;
 		}
 
 		const barSize = 5;

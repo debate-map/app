@@ -18,7 +18,7 @@ import {GetNodeLinks} from "../nodeLinks.js";
 import {NodeLink} from "../nodeLinks/@NodeLink.js";
 import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
-import {NodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
+import {NodePhrasing_Embedded, TitleKey, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
 import {Attachment} from "../@Shared/Attachments/@Attachment.js";
 import {SLDemo_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
 
@@ -330,8 +330,9 @@ export function GetAllNodeRevisionTitles(nodeRevision: NodeRevision): string[] {
 
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 /** Level-1 function to obtain node's display-text; pure function, which uses only the supplied phrasing and form arguments to derive its result. (useful, eg. for exporting server-subtree-data to CSV) */
-export const GetNodeTitleFromPhrasingAndForm = CreateAccessor((phrasing: NodePhrasing_Embedded, form: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
-	const [rawTitle, desiredField, usedField, missingMessage] = ((): [string | undefined, string, string, string]=>{
+export const GetNodeTitleFromPhrasingAndForm = CreateAccessor((phrasing: NodePhrasing_Embedded, form: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: TitleKey, missingMessage: string}=>{
+	// note: text_narrative is not considered below, because it's not used for display within debate-map (only for use in, eg. the papers app)
+	const [rawTitle, desiredField, usedField, missingMessage] = ((): [string | undefined, string, TitleKey, string]=>{
 		if (form) {
 			if (form == ClaimForm.negation) return [phrasing.text_negation, "text_negation", "text_negation", missingTitleStrings[1]];
 			if (form == ClaimForm.question) {
@@ -346,7 +347,7 @@ export const GetNodeTitleFromPhrasingAndForm = CreateAccessor((phrasing: NodePhr
 	return {rawTitle: (rawTitle?.trim().length ?? 0) > 0 ? rawTitle : undefined, desiredField, usedField, missingMessage};
 });
 /** Level-2 function to obtain node's display-text; uses only a node's raw title-texts to give its rawTitle result. (useful, eg. for double-click editing of a node's text) */
-export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: string, missingMessage: string}=>{
+export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): {rawTitle: string | undefined, desiredField: string, usedField: TitleKey, missingMessage: string}=>{
 	form = form || GetNodeForm(node, path);
 	const phrasing = node.current.phrasing || {} as NodePhrasing_Embedded;
 	return GetNodeTitleFromPhrasingAndForm(phrasing, form);

@@ -88,6 +88,7 @@ pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, in
 			text_base: "Root".o(),
 			text_negation: None,
 			text_question: None,
+			text_narrative: None,
 			note: None,
 			terms: vec![],
 		},

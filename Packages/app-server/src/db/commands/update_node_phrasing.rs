@@ -54,6 +54,7 @@ pub async fn update_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_r
 		text_base: update_field(updates.text_base, old_data.text_base),
 		text_negation: update_field_nullable(updates.text_negation, old_data.text_negation),
 		text_question: update_field_nullable(updates.text_question, old_data.text_question),
+		text_narrative: update_field_nullable(updates.text_narrative, old_data.text_narrative),
 		note: update_field_nullable(updates.note, old_data.note),
 		terms: update_field(updates.terms, old_data.terms),
 		references: update_field(updates.references, old_data.references),

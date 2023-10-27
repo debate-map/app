@@ -46,14 +46,14 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 					`.AsMultiline(0)}/>
 					<Button ml="auto" text="Add phrasing" enabled={CanAddPhrasing(MeID(), accessPolicy.id)} title="Add phrasing-variant for this node, of the selected type." onClick={()=>{
 						if (MeID() == null) return ShowSignInPopup();
-						ShowAddPhrasingDialog(node, selectedPhrasingType);
+						ShowAddPhrasingDialog(node, selectedPhrasingType, map);
 					}}/>
 				</Row>
 				<Column ptb={5}>
 					{phrasings.filter(a=>a.type == selectedPhrasingType).length == 0 &&
 						<Pre style={{color: "rgba(255,255,255,.5)"}}>No {selectedPhrasingType} phrasings submitted yet.</Pre>}
 					{phrasings.filter(a=>a.type == selectedPhrasingType).map((phrasing, index)=>{
-						return <PhrasingRow key={index} phrasing={phrasing} node={node} index={index} selected={phrasing.id == selectedPhrasingID} toggleSelected={()=>this.TogglePhrasingSelected(phrasing.id)}/>;
+						return <PhrasingRow key={index} phrasing={phrasing} node={node} map={map} index={index} selected={phrasing.id == selectedPhrasingID} toggleSelected={()=>this.TogglePhrasingSelected(phrasing.id)}/>;
 					})}
 				</Column>
 			</Column>
@@ -66,9 +66,9 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 }
 
 @Observer
-export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: NodeL3, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
+export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: NodeL3, map: Map|n, index: number, selected: boolean, toggleSelected: ()=>any}, {}> {
 	render() {
-		const {phrasing, node, index, selected, toggleSelected} = this.props;
+		const {phrasing, node, map, index, selected, toggleSelected} = this.props;
 		const termsToSearchFor = (phrasing.terms?.map(attachment=>{
 			//if (Validate("UUID", attachment.id) != null) return null; // if invalid term-id, don't try to retrieve entry
 			return BailIfNull(GetDoc({}, a=>a.terms.get(attachment.id)));
@@ -98,15 +98,15 @@ export class PhrasingRow extends BaseComponent<{phrasing: NodePhrasing, node: No
 
 				{/* <Pre title="Quality">Q: 50%</Pre> */}
 				{selected &&
-					<Phrasing_RightPanel phrasing={phrasing} node={node}/>}
+					<Phrasing_RightPanel phrasing={phrasing} node={node} map={map}/>}
 			</Row>
 		);
 	}
 }
 
-class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasing, node: NodeL3}, {}) {
+class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasing, node: NodeL3, map: Map|n}, {}) {
 	render() {
-		const {phrasing, node} = this.props;
+		const {phrasing, node, map} = this.props;
 		const backgroundColor = GetNodeColor({type: NodeType.category} as any);
 		return (
 			<Row
@@ -119,7 +119,7 @@ class Phrasing_RightPanel extends BaseComponentPlus({} as {phrasing: NodePhrasin
 					// return false;
 					e.preventDefault();
 				}}>
-				<DetailsPanel_Phrasings phrasing={phrasing} node={node}/>
+				<DetailsPanel_Phrasings phrasing={phrasing} node={node} map={map}/>
 			</Row>
 		);
 	}

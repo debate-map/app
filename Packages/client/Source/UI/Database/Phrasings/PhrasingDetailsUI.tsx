@@ -4,7 +4,7 @@ import {Column, Pre, RowLR, Select, TextArea, TextInput, Row, Text} from "web-vc
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus, BaseComponent, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment} from "dm_common";
+import {NodePhrasing, NodePhrasingType, AddPhrasing, NodeRevision, NodeL1, Map, NodeType, GetAttachmentType_Node, NodeL2, AttachmentType, NodePhrasing_Embedded, TermAttachment, NodeRevision_titlePattern, TitleKey, NodeLink, ClaimForm, NodeL3, GetExpandedByDefaultAttachment, GetChildLayout_Final, ShouldShowNarrativeFormForEditing} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES, Observer} from "web-vcore";
@@ -16,7 +16,7 @@ import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
 type Props = {
 	baseData: NodePhrasing_Embedded & {id?: string},
-	node: NodeL3, // node properties are used to constrain what phrasing options are available
+	map: Map|n, node: NodeL3, // node properties are used to constrain what phrasing options are available
 	forNew: boolean, enabled?: boolean, style?, onChange?: (newData: NodePhrasing, error: string)=>void,
 	embeddedInNodeRevision?: boolean,
 };
@@ -133,8 +133,10 @@ const WillNodePreferQuestionTitleHere = CreateAccessor((node: NodeL2, linkData: 
 
 class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	render() {
-		const {forNew, node, splitAt, Change} = this.props;
+		const {forNew, map, node, splitAt, Change} = this.props;
 		const willPreferQuestionTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
+		const childLayout = GetChildLayout_Final(node.current, map);
+		const showNarrativeForm = ShouldShowNarrativeFormForEditing(childLayout, node.current.phrasing);
 		return (
 			<>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
@@ -147,6 +149,11 @@ class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 						value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
 					<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
 				</RowLR>
+				{showNarrativeForm &&
+				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+					<Pre>Title (narrative): </Pre>
+					<TitleInput {...OmitRef(this.props)} titleKey="text_narrative"/>
+				</RowLR>}
 				{willPreferQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>At this location (under a category node), this node will be displayed with its (yes or no) question title, if specified.</Pre>
@@ -162,7 +169,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 		let extraProps = {};
 		if (titleKey == "text_base") {
 			//const hasOtherTitles = newDataAsL2.type == NodeType.claim && newDataAsL2 == AttachmentType.none;
-			const hasOtherTitlesEntered = newData.text_negation || newData.text_question;
+			const hasOtherTitlesEntered = newData.text_negation || newData.text_question || newData.text_narrative;
 			const willPreferYesNoTitleHere = WillNodePreferQuestionTitleHere(node, node.link);
 			extraProps = {
 				// commented; node may have an attachment, in which case having a base-title may be unwanted (since it overrides the auto-text)
@@ -200,7 +207,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 	}
 }
 
-export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType) {
+export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType, map: Map|n) {
 	let newEntry = new NodePhrasing({
 		node: node.id,
 		type,
@@ -215,6 +222,7 @@ export function ShowAddPhrasingDialog(node: NodeL3, type: NodePhrasingType) {
 					<PhrasingDetailsUI
 						baseData={newEntry}
 						node={node}
+						map={map}
 						forNew={true}
 						onChange={(val, error)=>{
 							newEntry = val;

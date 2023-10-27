@@ -5,6 +5,7 @@ import {ClaimForm, NodeL2} from "../@Node.js";
 import {ChildLayout, GetChildLayout_Final} from "../@NodeRevision.js";
 import {ChildGroup, NodeType} from "../@NodeType.js";
 import {GetNodeDisplayText} from "../$node.js";
+import {NodePhrasing_Embedded} from "../../nodePhrasings/@NodePhrasing.js";
 
 // The node-related functions in this file are specific to use-cases of the society-library (or at least, that is their primary reason for existing).
 // They are separated into their own file, to keep the main $node.ts file tidier. (since some of the sl-specific customizations have fairly nuanced logic/decisions)
@@ -12,18 +13,26 @@ import {GetNodeDisplayText} from "../$node.js";
 
 // See "GAD.ts" for definition of these globals.
 // (Yes, this is hacky; there's not a straightforward alternative atm though, since startURL + derived-consts are in the "client" package, and moving it to js-common doesn't really fit conceptually.)
-export function SLDemo_ForJSCommon() {
+export function SLDemo_ForJSCommon(): boolean {
 	return globalThis.SLDemo_forJSCommon;
 }
-export function ShowHeader_ForJSCommon() {
+export function ShowHeader_ForJSCommon(): boolean {
 	return globalThis.ShowHeader_forJSCommon;
 }
-export function HKMode_ForJSCommon() {
+export function HKMode_ForJSCommon(): boolean {
 	return globalThis.HKMode_forJSCommon;
 }
 
-export function ShouldExtractPrefixText(childLayout: ChildLayout) {
+export function IsSLModeOrLayout(childLayout: ChildLayout) {
 	return childLayout == ChildLayout.slStandard || SLDemo_ForJSCommon(); // see GAD.ts for definition
+}
+
+export function ShouldShowNarrativeFormForEditing(childLayout: ChildLayout, phrasing: NodePhrasing_Embedded) {
+	return IsSLModeOrLayout(childLayout) || (phrasing.text_narrative ?? "").trim().length > 0;
+}
+
+export function ShouldExtractPrefixText(childLayout: ChildLayout) {
+	return IsSLModeOrLayout(childLayout);
 }
 export type PrefixTextExtractLocation = "toolbar" | "parentArgument";
 export const WhereShouldNodePrefixTextBeShown = CreateAccessor((node: NodeL2, path?: string|n, form?: ClaimForm): PrefixTextExtractLocation=>{

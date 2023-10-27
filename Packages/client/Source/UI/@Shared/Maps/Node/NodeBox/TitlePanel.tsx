@@ -6,7 +6,7 @@ import {Button, Pre, Row, Text, TextArea} from "web-vcore/nm/react-vcomponents.j
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeL2, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
 import React from "react";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -62,7 +62,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @Observer
 export class TitlePanel extends BaseComponentPlus(
 	{} as {parent: NodeBox, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
-	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
+	{editing: false, edit_newTitle: null as string|n, edit_titleKey: null as TitleKey|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{
 		const {node, path, map} = this.props;
@@ -73,14 +73,14 @@ export class TitlePanel extends BaseComponentPlus(
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
 		const titleAttachment = GetTitleIntegratedAttachment(node.current);
-		const {rawTitle} = await GetAsync(()=>{
+		const {titleInfo} = await GetAsync(()=>{
 			return {
 				//displayText: GetNodeDisplayText(node, path, map),
-				rawTitle: GetNodeRawTitleAndSuch(node, path).rawTitle,
+				titleInfo: GetNodeRawTitleAndSuch(node, path),
 			};
 		});
 		if (IsUserCreatorOrMod(MeID(), node) && titleAttachment?.equation == null) {
-			this.SetState({editing: true, edit_newTitle: rawTitle});
+			this.SetState({editing: true, edit_newTitle: titleInfo.rawTitle, edit_titleKey: titleInfo.usedField});
 		}
 	};
 
@@ -206,18 +206,18 @@ export class TitlePanel extends BaseComponentPlus(
 	}
 
 	async ApplyEdit() {
-		const {map, node, path, edit_newTitle} = this.PropsStateStash;
+		const {map, node, path, edit_newTitle, edit_titleKey} = this.PropsStateStash;
 		if (edit_newTitle == null) return; // wait till loaded, within render() [yes, this could benefit from a cleanup]
 
 		this.SetState({applyingEdit: true});
 
 		//const parentNode = GetParentNode(path);
 
-		const form = GetNodeForm(node, path);
-		const titleKey: TitleKey = {[ClaimForm.negation]: "text_negation", [ClaimForm.question]: "text_question"}[form] || "text_base";
+		//const form = GetNodeForm(node, path);
+		//const titleKey: TitleKey = {[ClaimForm.negation]: "text_negation", [ClaimForm.question]: "text_question"}[form] || "text_base";
 		const newRevision = (Clone(node.current) as NodeRevision).OmitUndefined(true);
-		if (newRevision.phrasing[titleKey] != edit_newTitle) {
-			newRevision.phrasing[titleKey] = edit_newTitle;
+		if (newRevision.phrasing[edit_titleKey!] != edit_newTitle) {
+			newRevision.phrasing[edit_titleKey!] = edit_newTitle;
 
 			/*const command = new AddNodeRevision({mapID: map?.id, revision: newRevision});
 			const revisionID = await command.RunOnServer();*/

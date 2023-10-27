@@ -53,6 +53,8 @@ pub struct NodePhrasing_Embedded {
 	pub text_negation: Option<String>,
     #[graphql(name = "text_question")]
 	pub text_question: Option<String>,
+    #[graphql(name = "text_narrative")]
+	pub text_narrative: Option<String>,
 	pub note: Option<String>,
 	pub terms: Vec<TermAttachment>,
 }
@@ -70,6 +72,8 @@ pub struct NodePhrasing {
 	pub text_negation: Option<String>,
     #[graphql(name = "text_question")]
 	pub text_question: Option<String>,
+    #[graphql(name = "text_narrative")]
+	pub text_narrative: Option<String>,
 	pub note: Option<String>,
 	pub terms: Vec<TermAttachment>,
 	pub references: Vec<String>,
@@ -90,6 +94,8 @@ pub struct NodePhrasingInput {
 	pub text_negation: Option<String>,
     #[graphql(name = "text_question")]
 	pub text_question: Option<String>,
+    #[graphql(name = "text_narrative")]
+	pub text_narrative: Option<String>,
 	pub note: Option<String>,
 	pub terms: Vec<TermAttachment>,
 	pub references: Vec<String>,
@@ -104,6 +110,8 @@ pub struct NodePhrasingUpdates {
 	pub text_negation: FieldUpdate_Nullable<String>,
     #[graphql(name = "text_question")]
 	pub text_question: FieldUpdate_Nullable<String>,
+    #[graphql(name = "text_narrative")]
+	pub text_narrative: FieldUpdate_Nullable<String>,
 	pub note: FieldUpdate_Nullable<String>,
 	pub terms: FieldUpdate<Vec<TermAttachment>>,
 	pub references: FieldUpdate<Vec<String>>,

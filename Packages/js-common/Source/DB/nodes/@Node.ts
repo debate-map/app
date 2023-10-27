@@ -15,6 +15,7 @@ export enum ClaimForm {
 	base = "base",
 	negation = "negation",
 	question = "question",
+	//narrative = "narrative", // commented, because the narrative-form is never displayed in the debate-map tree itself atm (instead used for, eg. the papers app)
 }
 //export type ClaimForm = typeof ClaimForm_values[number];
 AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});

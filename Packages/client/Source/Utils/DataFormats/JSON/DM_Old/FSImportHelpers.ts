@@ -62,6 +62,7 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_NodeL3, id?:
 			text_base: revData.titles.base ?? "",
 			text_negation: revData.titles.negation,
 			text_question: revData.titles.yesNoQuestion,
+			//text_narrative: undefined,
 		})),
 	});
 	result.push(new IR_NodeAndRevision({pathInData: path, link, node, revision}));

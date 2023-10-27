@@ -52,7 +52,8 @@ export class IR_NodeAndRevision extends ImportResource {
 	revision: NodeRevision;
 	CanSearchByTitle() {
 		return (this.revision.phrasing.text_base ?? "").trim().length > 0
-			|| (this.revision.phrasing.text_question ?? "").trim().length > 0;
+			//|| (this.revision.phrasing.text_question ?? "").trim().length > 0 // commented, since text_question is no longer needed for sl imports
+			|| (this.revision.phrasing.text_narrative ?? "").trim().length > 0;
 	}
 
 	// note: this "insert path" has node-titles as its segments, rather than node-ids

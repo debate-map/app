@@ -12,7 +12,7 @@ const MTName = MTClass.name;
 @CommandMeta({
 	payloadSchema: ()=>SimpleSchema({
 		$id: {$ref: "UUID"},
-		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["type", "text_base", "text_negation", "text_question", "note", "terms", "references"], makeOptional_all: true}),
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["type", "text_base", "text_negation", "text_question", "text_narrative", "note", "terms", "references"], makeOptional_all: true}),
 	}),
 })
 export class UpdatePhrasing extends Command<{id: string, updates: Partial<MT>}> {

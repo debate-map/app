@@ -61,6 +61,7 @@ pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		text_base: phrasing_.text_base,
 		text_negation: phrasing_.text_negation,
 		text_question: phrasing_.text_question,
+		text_narrative: phrasing_.text_narrative,
 		note: phrasing_.note,
 		terms: phrasing_.terms,
 		references: phrasing_.references,

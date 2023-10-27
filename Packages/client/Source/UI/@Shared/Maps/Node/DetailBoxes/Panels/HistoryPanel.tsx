@@ -45,7 +45,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 					background: "transparent",
 				})}>
 					{revisions.map((revision, index)=>{
-						return <RevisionEntryUI key={revision.id} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>;
+						return <RevisionEntryUI key={revision.id} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path} map={map}/>;
 					})}
 				</ScrollView>
 			</Column>
@@ -53,11 +53,11 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 	}
 }
 
-type RevisionEntryUI_Props = {index: number, last: boolean, revision: NodeRevision, node: NodeL3, path: string};
+type RevisionEntryUI_Props = {index: number, last: boolean, revision: NodeRevision, node: NodeL3, path: string, map: Map|n};
 @Observer
 class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {}) {
 	render() {
-		const {index, last, revision, node, path} = this.props;
+		const {index, last, revision, node, path, map} = this.props;
 		const parent = GetParentNodeL3(path);
 		const link = GetLinkUnderParent(node.id, parent);
 		const creator = GetUser(revision.creator);
@@ -82,8 +82,8 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 							message: ()=>{
 								return (
 									<div style={{minWidth: 500}}>
-										<NodeDetailsUI
-											baseData={node} baseRevisionData={revision} baseLinkData={link} parent={parent}
+										<NodeDetailsUI map={map} parent={parent}
+											baseData={node} baseRevisionData={revision} baseLinkData={link}
 											forNew={false} forOldRevision={true} enabled={false}/>
 									</div>
 								);

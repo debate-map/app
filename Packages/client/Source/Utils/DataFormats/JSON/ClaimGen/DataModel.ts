@@ -3,13 +3,13 @@ export abstract class CG_Node {
 	narrative?: string;
 
 	//abstract GetTitle(): string;
-	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_question *if* a narrative-text exists for the claim; else stored as text_base) */
+	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
 	static GetTitle_Main(node: CG_Node): string {
 		const d = node as any;
 		const result = d.name ?? d.questionText ?? d.position ?? d.category ?? d.claim;
 		return (result ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
 	}
-	/** Get the "narrative" text of the claim, as displayed in the papers app. (stored in debate-map as text_base) */
+	/** Get the "narrative" text of the claim, as displayed in the papers app. (stored in debate-map as text_narration) */
 	static GetTitle_Narrative(node: CG_Node) {
 		const result = node.narrative;
 		return (result ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up

@@ -282,6 +282,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 			text_base: val.try_get("text")?.try_as_string()?,
 			text_negation: None, //val.get("text_negation").map(|a| a.as_string()).unwrap_or(None),
 			text_question: None, //val.get("text_question").map(|a| a.as_string()).unwrap_or(None),
+			text_narrative: None, //val.get("text_narrative").map(|a| a.as_string()).unwrap_or(None),
 			note: val.get("description").map(|a| a.as_string()).unwrap_or(None),
 			terms: vec![],
 			references: vec![],
@@ -446,6 +447,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 				text_base: val.try_get("titles")?.get("base").and_then(|a| a.as_string()).unwrap_or("".o()),
 				text_negation: val.try_get("titles")?.get("negation").and_then(|a| a.as_string()),
 				text_question: val.try_get("titles")?.get("yesNoQuestion").and_then(|a| a.as_string()),
+				text_narrative: None,
 			},
 			displayDetails: Some(json!({
 				"fontSizeOverride": val.get("fontSizeOverride").map(|a| a.as_f64()).unwrap_or(None),

@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input} from "dm_common";
+import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2} from "dm_common";
 import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
@@ -21,8 +21,9 @@ export class AddChildHelper {
 		this.node_parentPath = parentPath;
 		this.map = GetMap(mapID);
 		Assert(this.map, "Map was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetMap(mapID));");
-		const parentNode = GetNode(this.Node_ParentID);
+		const parentNode = GetNodeL2(this.Node_ParentID);
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
+		const slModeOrLayout = IsSLModeOrLayout(GetChildLayout_Final(parentNode.current, this.map));
 
 		const parent_childLinks = GetNodeLinks(this.Node_ParentID);
 		const parent_lastOrderKey = parent_childLinks.OrderBy(a=>a.orderKey).LastOrX()?.orderKey ?? OrderKey.mid().toString();
@@ -45,7 +46,8 @@ export class AddChildHelper {
 				group,
 				orderKey: orderKeyForOuterNode,
 			},
-			childType == NodeType.claim && {form: parentNode.type == NodeType.category ? ClaimForm.question : ClaimForm.base},
+			//childType == NodeType.claim && {form: parentNode.type == NodeType.category ? ClaimForm.question : ClaimForm.base},
+			childType == NodeType.claim && parentNode.type == NodeType.category && !slModeOrLayout && {form: ClaimForm.question},
 			childType == NodeType.argument && {polarity: childPolarity},
 		) as NodeLink;
 
@@ -170,6 +172,8 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 				}
 				throw ex;
 			}*/
+			// are these CatchBail's really the best way to handle this? (maybe just use a "loading" state, and don't show the box until ready, eg. by creating a variant of the `observer` wrapper-func)
+			const map = GetMap.CatchBail(null, mapID);
 
 			const accessPolicy = GetAccessPolicy.CatchBail(null, helper.node.accessPolicy);
 			if (accessPolicy == null) return null as any as JSX.Element; // wait
@@ -201,7 +205,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 					</Row>}
 					{tab == AddChildDialogTab.Argument &&
 					<>
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: 0}} parent={prep.parentNode}
+						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: 0}} map={map} parent={prep.parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 								/*if (map?.requireMapEditorsCanEdit) {
@@ -230,7 +234,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 								<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Add structured child" -> "New claim".`}</Row>
 							</Column>}
 							{advanced &&
-							<NodeDetailsUI style={{padding: "5px 0 0 0"}} parent={newNodeAsL3}
+							<NodeDetailsUI style={{padding: "5px 0 0 0"}} map={map} parent={newNodeAsL3}
 								baseData={helper.subNode!} baseRevisionData={helper.subNode_revision!} baseLinkData={helper.subNode_link} forNew={true}
 								onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 									/*if (map?.requireMapEditorsCanEdit) {
@@ -241,7 +245,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 								}}/>}
 						</>}
 						{childType != NodeType.argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == NodeType.claim ? "5px 0 0 0" : 0}} parent={prep.parentNode}
+						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == NodeType.claim ? "5px 0 0 0" : 0}} map={map} parent={prep.parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 								/*if (map?.requireMapEditorsCanEdit) {
