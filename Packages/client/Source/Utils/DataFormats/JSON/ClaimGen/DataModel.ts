@@ -6,13 +6,14 @@ export abstract class CG_Node {
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
 	static GetTitle_Main(node: CG_Node): string {
 		const d = node as any;
-		const result = d.name ?? d.questionText ?? d.position ?? d.category ?? d.claim;
-		return (result ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
+		const result_raw = d.name ?? d.questionText ?? d.position ?? d.category ?? d.claim ?? d.argument;
+		const result = (result_raw ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
+		return result.length ? result : null;
 	}
 	/** Get the "narrative" text of the claim, as displayed in the papers app. (stored in debate-map as text_narration) */
 	static GetTitle_Narrative(node: CG_Node) {
-		const result = node.narrative;
-		return (result ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
+		const result = (node.narrative ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
+		return result.length ? result : null;
 	}
 }
 
@@ -33,5 +34,13 @@ export class CG_Category extends CG_Node {
 	claims: CG_Claim[];
 }
 export class CG_Claim extends CG_Node {
-	claim: string;
+	// old
+	claim?: string;
+
+	// new
+	argument?: string;
+	/*generated?: string;
+	valid?: boolean;
+	similarity?: boolean;
+	edited?: boolean;*/
 }

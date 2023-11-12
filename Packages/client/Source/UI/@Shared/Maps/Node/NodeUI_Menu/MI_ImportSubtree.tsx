@@ -231,7 +231,14 @@ class ImportSubtreeUI extends BaseComponent<
 								} else if (uiState.sourceType == DataExchangeFormat.json_cg) {
 									let subtreeData_new: CG_Debate|n = null;
 									try {
-										subtreeData_new = FromJSON(newSourceText) as CG_Debate;
+										const rawData = FromJSON(newSourceText);
+										if ("questions" in rawData) {
+											subtreeData_new = rawData as CG_Debate;
+										} else if ("positions" in rawData) {
+											subtreeData_new = {
+												questions: [rawData],
+											} as CG_Debate;
+										}
 										newState.forJSONCG_subtreeData = subtreeData_new;
 										newState.sourceText_parseError = null;
 									} catch (err) {
