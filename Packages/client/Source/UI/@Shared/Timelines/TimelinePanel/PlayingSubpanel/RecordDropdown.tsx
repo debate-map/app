@@ -3,7 +3,7 @@ import {GetOpenMapID} from "Store/main";
 import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX} from "dm_common";
-import {Assert, ShallowEquals, SleepAsync, Timer} from "js-vextensions";
+import {Assert, ShallowEquals, SleepAsync, Timer, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {Observer, RunInAction_Set} from "web-vcore";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -79,18 +79,29 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 			const currentFrameTime = mapState.playingTimeline_time;
 
 			// wait for current-frame's data to finish rendering in the react tree
+			const renderWaitStartTime = Date.now();
 			while (uiState.recordPanel.recording) {
-				const elementsForFrameRender = document.getElementsByClassName("forFrameRender").length;
-				const elementsForCurrentFrameRender = document.getElementsByClassName(GetClassForFrameRenderAtTime(currentFrameTime)).length;
-				const isCurrentFrameFullyRendered = elementsForCurrentFrameRender > 0 && elementsForCurrentFrameRender == elementsForFrameRender;
+				const elementsForFrameRender = document.getElementsByClassName("forFrameRender");
+				const elementsForCurrentFrameRender = document.getElementsByClassName(GetClassForFrameRenderAtTime(currentFrameTime));
+				const isCurrentFrameFullyRendered = elementsForCurrentFrameRender.length > 0 && elementsForCurrentFrameRender.length == elementsForFrameRender.length;
 				if (isCurrentFrameFullyRendered) {
 					break;
+				} else if (Date.now() - renderWaitStartTime > 5000) {
+					console.error("Render-wait loop appears to be stuck. @elementsForFrameRender:", elementsForFrameRender, "@elementsForCurrentFrameRender:", elementsForCurrentFrameRender);
 				}
 				await SleepAsync(50);
 			}
 
 			// capture current frame (this requires that the debate-map chrome-extension is installed)
-			await this.CaptureFrame(map.id, currentFrameTime);
+			let frameCaptured = false;
+			while (uiState.recordPanel.recording && !frameCaptured) {
+				try {
+					await this.CaptureFrame(map.id, currentFrameTime);
+					frameCaptured = true;
+				} catch (ex) {
+					await SleepAsync(50);
+				}
+			}
 
 			// if we're now past the last frame in the timeline, stop the timer
 			const steps = await GetTimelineSteps.Async(mapState.selectedTimeline ?? "n/a");
@@ -106,6 +117,7 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 	}
 
 	CaptureFrame(mapID: string, frameTime: number): Promise<void> {
+		let resolved = false;
 		return new Promise<void>((resolve, reject)=>{
 			const frameNumber = GetTimelineTimeAsFrameNumber(frameTime);
 			const message = {type: "DebateMap_CaptureFrame", mapID, renderStartTime: this.renderStartTime, currentFrameTime: frameTime, currentFrameNumber: frameNumber};
@@ -119,11 +131,17 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 					if (ShallowEquals(event.data.ExcludeKeys("type"), message.ExcludeKeys("type"))) {
 						console.log("Finished rendering frame:", frameNumber);
 						window.removeEventListener("message", listener);
+						resolved = true;
 						resolve();
 					}
 				}
 			};
 			window.addEventListener("message", listener);
+
+			WaitXThenRun(500, ()=>{
+				if (resolved) return;
+				reject(new Error(`Timed out waiting for frame ${frameNumber} to render.`));
+			});
 		});
 	}
 }
@@ -141,5 +159,5 @@ export function GetTimelineTimeAsFrameNumber(time: number, fps = 60) {
 }
 
 export function GetClassForFrameRenderAtTime(time: number|n) {
-	return `forFrameRender_${time ? time.toString().replace(".", "_") : "forFrameRender_na"}`;
+	return `forFrameRender_${time != null ? time.toString().replace(".", "_") : "forFrameRender_na"}`;
 }

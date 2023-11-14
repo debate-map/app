@@ -377,9 +377,6 @@ export class NodeBox extends BaseComponentPlus(
 					<>{toolbarElement}{titlePanel}</>}
 			</>;
 
-			const timelinesState = store.main.timelines;
-			const mapState = map ? GetMapState(map.id) : null;
-
 			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 			return (
 				<ExpandableBox
@@ -403,10 +400,10 @@ export class NodeBox extends BaseComponentPlus(
 							"NodeBox", "useLightText",
 							asDragPreview && "DragPreview",
 							pathNodeIDs.length == 0 && "root",
-							...(timelinesState.recordPanel.recording && mapState?.playingTimeline_time != null ? [
+							/*...(timelinesState.recordPanel.recording && mapState?.playingTimeline_time != null ? [
 								"forFrameRender",
-								GetClassForFrameRenderAtTime(mapState?.playingTimeline_time),
-							] : []),
+								GetClassForFrameRenderAtTime(mapState.playingTimeline_time),
+							] : []),*/
 						].filter(a=>a).join(" ")
 					}
 					onMouseEnter={onMouseEnter}
@@ -505,6 +502,7 @@ export class NodeBox extends BaseComponentPlus(
 		}
 
 		const draggableID = ToJSON(dndProps.draggableInfo);
+		const renderInner_tracker1 = renderInner(); // always call renderInner once here "outside of Draggable's conditional rendering", so that mobx-accesses are always tracked by this outer observer-component
 		return (
 			<>
 				{/* <div>asDragPreview: {asDragPreview}</div> */}
@@ -519,6 +517,7 @@ export class NodeBox extends BaseComponentPlus(
 					}}
 				</Draggable>
 				<div style={{width: lastWidthWhenNotPreview}}/>
+				<FrameRenderSignal map={map}/>
 			</>
 		);
 	}
@@ -543,6 +542,29 @@ class ReasonScoreValueMarkers extends BaseComponent<{node: NodeL3, reasonScoreVa
 				}`}
 				{node.type == NodeType.claim && `Truth score: ${mainScore.ToPercentStr()}`}
 			</div>
+		);
+	}
+}
+
+/**
+ * This is a helper component, used to signify to the timeline frame-renderer system when react has completed rendering of the component tree to reflect the new current-time. (see RecordDropdown.tsx)
+ * (this is better than putting the access of mapState.playingTimeline_time in NodeBox directly, since that would cause unnecessary processing of other data during each re-render)
+ */
+@Observer
+export class FrameRenderSignal extends BaseComponent<{map: Map|n}> {
+	render() {
+		const {map} = this.props;
+		const timelinesState = store.main.timelines;
+		const mapState = map ? GetMapState(map.id) : null;
+		return (
+			<div className={
+				(
+					timelinesState.recordPanel.recording && mapState?.playingTimeline_time != null ? [
+						"forFrameRender",
+						GetClassForFrameRenderAtTime(mapState.playingTimeline_time),
+					] : []
+				).filter(a=>a).join(" ")
+			}/>
 		);
 	}
 }
