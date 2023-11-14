@@ -3,12 +3,13 @@ import {GetOpenMapID} from "Store/main";
 import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX} from "dm_common";
-import {Assert, ShallowEquals, SleepAsync, Timer, WaitXThenRun} from "js-vextensions";
+import {Assert, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {Observer, RunInAction_Set} from "web-vcore";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
+import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
 import {PlayingSubpanel} from "../PlayingSubpanel.js";
 
 @Observer
@@ -22,11 +23,13 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 					<Row>
 						<Text style={{whiteSpace: "pre-wrap"}}>{`
 						Notes:
-						* Before starting, ensure the debate-map chrome-extension is installed.
-						* Before starting, activate the extension by opening the popup once (without navigating away from page).
-						* The nav-bar and most panels will disappear when recording starts.
-						* To stop recording, press the key "p" on your keyboard.
+						* Before starting, ensure you're in Firefox, with the debate-map chrome-extension installed, and "all-urls access" enabled. (chrome has severe rate-limiting on screenshots, and all-urls access is required atm for firefox to take screenshots)
+						* Before starting, enable "screenshot mode" using the checkbox below; this will hide the scrollbars and such, for a clean recording.
+						* To start recording, enable "Start recording" below; to stop recording, disable it. (or press "p" on your keyboard)
 						`.AsMultiline(0)}</Text>
+					</Row>
+					<Row>
+						<ScreenshotModeCheckbox text="Screenshot mode:"/>
 					</Row>
 					<Row>
 						<Text>Start recording:</Text>
@@ -120,7 +123,15 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 		let resolved = false;
 		return new Promise<void>((resolve, reject)=>{
 			const frameNumber = GetTimelineTimeAsFrameNumber(frameTime);
-			const message = {type: "DebateMap_CaptureFrame", mapID, renderStartTime: this.renderStartTime, currentFrameTime: frameTime, currentFrameNumber: frameNumber};
+			const scrollViewEl = document.querySelector(".MapUI")?.parentElement?.parentElement;
+			if (scrollViewEl == null) return void reject(new Error("Could not find map-ui element."));
+			const rect = VRect.FromLTWH(scrollViewEl.getBoundingClientRect());
+
+			const message = {
+				type: "DebateMap_CaptureFrame",
+				mapID, rect,
+				renderStartTime: this.renderStartTime, currentFrameTime: frameTime, currentFrameNumber: frameNumber,
+			};
 			window.postMessage(message, "*");
 
 			const listener = (event: MessageEvent<any>)=>{
@@ -128,7 +139,7 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 				if (event.source != window) return;
 
 				if (event.data?.type == "DebateMap_CaptureFrame_done") {
-					if (ShallowEquals(event.data.ExcludeKeys("type"), message.ExcludeKeys("type"))) {
+					if (DeepEquals(event.data.ExcludeKeys("type"), message.ExcludeKeys("type"))) {
 						console.log("Finished rendering frame:", frameNumber);
 						window.removeEventListener("message", listener);
 						resolved = true;

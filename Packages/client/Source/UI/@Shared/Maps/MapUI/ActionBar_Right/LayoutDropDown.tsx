@@ -105,26 +105,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 					<RowLR mt={3} splitAt={splitAt}>
 						<Text>Screenshots:</Text>
 
-						<TextPlus sel info={`
-							When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with a cleaner appearance. Specifically:
-							1) Nav-bar shadows are removed, to reduce visual artifacts at the edges of map. (scroll-bars are also hidden, for if using screenshot extension)
-							2) Argument control-bars are hidden. (not relevant to non-interactive viewing)
-							3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
-							4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
-							5) Reduces map-padding to 100px. (for faster full-page screenshots from extension; switch page away and back to apply)
-							6) Node outlines (eg. for recent changes) are hidden.
-							Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
-						`.AsMultiline(0)}>Prep:</TextPlus>
-						<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
-						{uiState.screenshotMode &&
-						<style>{`
-							.scrollTrack {
-								display: none !important;
-							}
-							nav, nav > div {
-								box-shadow: none !important;
-							}
-						`}</style>}
+						<ScreenshotModeCheckbox text="Prep:"/>
 
 						<Button ml={5} text="Take screenshot" onClick={async()=>{
 							const mapUIEl = MapUI.CurrentMapUI?.DOM_HTML;
@@ -170,6 +151,38 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 					})}
 				</Column></DropDownContent>
 			</DropDown>
+		);
+	}
+}
+
+@Observer
+export class ScreenshotModeCheckbox extends BaseComponent<{text: string}, {}> {
+	render() {
+		const {text} = this.props;
+		const uiState = store.main.maps;
+		return (
+			<>
+				<TextPlus sel info={`
+					When enabled, certain styling changes are made so that a "full-page screenshot" of the page/map can be taken, with a cleaner appearance. Specifically:
+					1) Nav-bar shadows are removed, to reduce visual artifacts at the edges of map. (scroll-bars are also hidden, for if using screenshot extension)
+					2) Argument control-bars are hidden. (not relevant to non-interactive viewing)
+					3) Clone-history buttons are hidden. (not relevant to non-interactive viewing)
+					4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
+					5) Reduces map-padding to 100px. (for faster full-page screenshots from extension; switch page away and back to apply)
+					6) Node outlines (eg. for recent changes) are hidden.
+					Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
+				`.AsMultiline(0)}>{text}</TextPlus>
+				<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
+				{uiState.screenshotMode && // NOTE: This scrollbar-hiding css applies globally when the screenshotMode state is set to true, even when panel is "closed", ie. hidden. (hacky, but fine for now)
+				<style>{`
+					.scrollTrack {
+						display: none !important;
+					}
+					nav, nav > div {
+						box-shadow: none !important;
+					}
+				`}</style>}
+			</>
 		);
 	}
 }
