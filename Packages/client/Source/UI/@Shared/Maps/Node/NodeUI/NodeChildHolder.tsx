@@ -3,7 +3,7 @@ import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
-import {GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";

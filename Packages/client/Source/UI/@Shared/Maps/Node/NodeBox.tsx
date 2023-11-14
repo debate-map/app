@@ -22,6 +22,7 @@ import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/PlayingSubpanel/RecordDropdown.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -376,6 +377,9 @@ export class NodeBox extends BaseComponentPlus(
 					<>{toolbarElement}{titlePanel}</>}
 			</>;
 
+			const timelinesState = store.main.timelines;
+			const mapState = map ? GetMapState(map.id) : null;
+
 			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 			return (
 				<ExpandableBox
@@ -395,7 +399,15 @@ export class NodeBox extends BaseComponentPlus(
 					}}
 					className={
 						//classNames("NodeBox", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
-						["NodeBox", "useLightText", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
+						[
+							"NodeBox", "useLightText",
+							asDragPreview && "DragPreview",
+							pathNodeIDs.length == 0 && "root",
+							...(timelinesState.recordPanel.recording && mapState?.playingTimeline_time != null ? [
+								"forFrameRender",
+								GetClassForFrameRenderAtTime(mapState?.playingTimeline_time),
+							] : []),
+						].filter(a=>a).join(" ")
 					}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}

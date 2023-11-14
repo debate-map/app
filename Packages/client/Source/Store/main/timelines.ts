@@ -10,4 +10,10 @@ export class TimelinesState {
 	@O layoutHelperMap_load = false;
 	@O layoutHelperMap_show = false;
 	@O @ignore autoScroll = true;
+	@O recordPanel = new RecordPanelState();
+}
+
+class RecordPanelState {
+	constructor() { makeObservable(this); }
+	@O @ignore recording = false;
 }

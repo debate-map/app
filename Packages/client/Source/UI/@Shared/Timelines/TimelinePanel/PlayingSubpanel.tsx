@@ -14,6 +14,7 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {StepUI} from "./PlayingSubpanel/StepUI.js";
+import {RecordDropdown} from "./PlayingSubpanel/RecordDropdown.js";
 
 class NoVideoPlayer {
 	constructor(comp: PlayingSubpanel) {
@@ -249,48 +250,12 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		const steps = timeline ? GetTimelineSteps(timeline.id) : null;
 		const targetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
 
-		/* const [ref, { width, height }] = UseSize();
-		useEffect(() => ref(this.DOM), [ref]); */
-		// const [videoRef, { height: videoHeight }] = UseSize();
 		const [messageAreaRef, {height: messageAreaHeight}] = UseSize();
 		// this.Stash({ messageAreaHeight });
 		// todo: make sure this is correct
 		useEffect(()=>{
 			RunInAction("PlayingSubpanel.render.useEffect", ()=>this.messageAreaHeight = messageAreaHeight ?? 0); // set for other observers
 		});
-
-		// const targetTime_floored = GetPlayingTimelineTime(map.id); // no need to watch, since only used as start-pos for video, if in initial mount
-		const uiState = store.main.timelines;
-		//const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
-		//const firstNormalStep = GetTimelineStep(timeline ? timeline.steps[1] : null); // just watch for PostRender->UpdateTargetInfo code
-
-		/* (useEffect as any)(() => {
-			const targetTime_fromRedux = GetPlayingTimelineTime(map.id); // from redux store
-			let loadScrollTimer: Timer;
-
-			// on component mount, load timeline-time from redux-store
-			if (this.newTargetTime == null && targetTime == null) {
-				this.newTargetTime = targetTime_fromRedux;
-				if (autoScroll) {
-					loadScrollTimer = new Timer(500, () => {
-						const [firstVisibleIndex, lastVisibleIndex] = this.list.getVisibleRange();
-						this.list.
-						if (lastVisibleIndex < targetStepIndex + 3) {
-							// todo
-						} else {
-							// jump one further down, so that the target point *within* the target step is visible (and with enough space for the arrow button itself)
-							// this.list.scrollAround(newTargetStepIndex + 1);
-							// jump X further down, so that we see some of the upcoming text (also for if video-time data is off some)
-							this.list.scrollAround(targetStepIndex + 3);
-							WaitXThenRun(0, () => this.list.scrollAround(targetStepIndex)); // make sure target box itself is still visible, however
-						}
-					}).Start();
-				}
-			}
-			return () => {
-				if (loadScrollTimer) loadScrollTimer.Stop();
-			};
-		}, []); */
 
 		// update some stuff based on timer (since user may have scrolled)
 		useEffect(()=>{
@@ -338,28 +303,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						<Button text="±60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 60)}/>
 					</Row>
 					<Row ml="auto" style={{position: "relative"}}>
-						<DropDown>
-							<DropDownTrigger><Button text="Options" style={{height: "100%"}}/></DropDownTrigger>
-							<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
-								<Row>
-									<Text>Node-reveal highlight time:</Text>
-									<Spinner ml={5} min={0} value={uiState.nodeRevealHighlightTime} onChange={val=>RunInAction_Set(this, ()=>uiState.nodeRevealHighlightTime = val)}/>
-								</Row>
-								<Row>
-									<Text>Hide editing controls:</Text>
-									<CheckBox ml={5} value={uiState.hideEditingControls} onChange={val=>RunInAction_Set(this, ()=>uiState.hideEditingControls = val)}/>
-								</Row>
-								<Row>
-									<Text>Show focus-nodes:</Text>
-									<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
-								</Row>
-								<Row>
-									<Text>Layout-helper map:</Text>
-									<CheckBox ml={5} text="Load" value={uiState.layoutHelperMap_load} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_load = val)}/>
-									<CheckBox ml={5} text="Show" value={uiState.layoutHelperMap_show} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_show = val)}/>
-								</Row>
-							</Column></DropDownContent>
-						</DropDown>
+						<RecordDropdown playingSubpanel={this}/>
+						<OptionsDropdown/>
 					</Row>
 				</Row>
 				<Row ref={c=>c && c.DOM && messageAreaRef(c.DOM)} style={{flex: 1, minHeight: 0}}>
@@ -414,6 +359,37 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 					</ScrollView>
 				</Row>
 			</Column>
+		);
+	}
+}
+
+@Observer
+class OptionsDropdown extends BaseComponent<{}, {}> {
+	render() {
+		const uiState = store.main.timelines;
+		return (
+			<DropDown>
+				<DropDownTrigger><Button text="Options" style={{height: "100%"}}/></DropDownTrigger>
+				<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
+					<Row>
+						<Text>Node-reveal highlight time:</Text>
+						<Spinner ml={5} min={0} value={uiState.nodeRevealHighlightTime} onChange={val=>RunInAction_Set(this, ()=>uiState.nodeRevealHighlightTime = val)}/>
+					</Row>
+					<Row>
+						<Text>Hide editing controls:</Text>
+						<CheckBox ml={5} value={uiState.hideEditingControls} onChange={val=>RunInAction_Set(this, ()=>uiState.hideEditingControls = val)}/>
+					</Row>
+					<Row>
+						<Text>Show focus-nodes:</Text>
+						<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
+					</Row>
+					<Row>
+						<Text>Layout-helper map:</Text>
+						<CheckBox ml={5} text="Load" value={uiState.layoutHelperMap_load} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_load = val)}/>
+						<CheckBox ml={5} text="Show" value={uiState.layoutHelperMap_show} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_show = val)}/>
+					</Row>
+				</Column></DropDownContent>
+			</DropDown>
 		);
 	}
 }
