@@ -110,15 +110,15 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 			const steps = GetTimelineSteps(timeline.id);
 			//const stepTimesFromStart = steps.map(step=>GetTimelineStepTimeFromStart(step.id));
 			const firstNormalStep = steps[1];
-			const targetStep = steps.Skip(1).LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a.id, this.targetTime)) ?? firstNormalStep!;
+			const targetStep = steps.Skip(1).LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a, this.targetTime)) ?? firstNormalStep!;
 			if (targetStep) {
 				targetStepIndex = steps.indexOf(targetStep);
 				//const postTargetStepIndex = targetStepIndex + 1 < steps.length ? targetStepIndex + 1 : -1;
 				const postTargetStepIndex = (targetStepIndex + 1).KeepAtMost(steps.length - 1); // if on last step, we want arrow to stop there, so consider last-step both the current-step and next-step (for arrow positioning)
 				const postTargetStep: TimelineStep|n = steps[postTargetStepIndex];
 
-				const targetStepTimeFromStart = GetTimelineStepTimeFromStart(targetStep.id);
-				const postTargetStepTimeFromStart = GetTimelineStepTimeFromStart(postTargetStep?.id);
+				const targetStepTimeFromStart = GetTimelineStepTimeFromStart(targetStep);
+				const postTargetStepTimeFromStart = GetTimelineStepTimeFromStart(postTargetStep);
 
 				// const targetStep_rect = this.stepRects[targetStepIndex];
 				/* const targetStep_comp = this.stepComps[targetStepIndex];
@@ -196,7 +196,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 			const steps = GetTimelineSteps(timeline.id);
 			const firstStep = steps[0];
 
-			const targetStep = steps.LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a.id, this.targetTime)) ?? firstStep;
+			const targetStep = steps.LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a, this.targetTime)) ?? firstStep;
 			if (targetStep) {
 				const newCurrentStepIndex = steps.indexOf(targetStep);
 				//const newAppliedStepIndex = newCurrentStepIndex.KeepAtLeast(oldAppliedStepIndex);

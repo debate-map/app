@@ -27,7 +27,7 @@ export class StepUI extends BaseComponentPlus(
 	render() {
 		const {index, last, map, timeline, steps, step, player} = this.props;
 		const {showNodeReveals, editorOpen} = this.state;
-		const timeFromStart = GetTimelineStepTimeFromStart(step?.id);
+		const timeFromStart = GetTimelineStepTimeFromStart(step);
 
 		let margin: string|undefined;
 		if (step.groupID == PositionOptionsEnum.center) margin = "0 30px";

@@ -7,6 +7,11 @@ import {GetNode, GetNodeChildren} from "./nodes.js";
 export const GetTimelineStep = CreateAccessor((id: string|n): TimelineStep|n=>{
 	return GetDoc({}, a=>a.timelineSteps.get(id!));
 });
+/** In most cases, this is more efficient than GetTimelineStep, since it makes (and caches) only one backend query. */
+export const GetTimelineStep_Batched = CreateAccessor((id: string|n, timelineID: string): TimelineStep|n=>{
+	const steps = GetTimelineSteps(timelineID);
+	return steps.find(a=>a.id == id);
+});
 export const GetTimelineSteps = CreateAccessor((timelineID: string, orderByOrderKeys = true): TimelineStep[]=>{
 	let result = GetDocs({
 		params: {filter: {
@@ -17,8 +22,8 @@ export const GetTimelineSteps = CreateAccessor((timelineID: string, orderByOrder
 	return result;
 });
 
-export const GetTimelineStepTimeFromStart = CreateAccessor((stepID: string|n): number|null=>{
-	const step = GetTimelineStep(stepID);
+export const GetTimelineStepTimeFromStart = CreateAccessor((step: TimelineStep|n): number|null=>{
+	//const step = GetTimelineStep(stepID);
 	if (step == null) return null;
 	// quick route: if step's time is specified absolutely, just return that
 	if (step.timeFromStart != null) return step.timeFromStart;
@@ -51,8 +56,8 @@ export const GetTimelineStepsReachedByTimeX = CreateAccessor((timelineID: string
 	const stepTimes = GetTimelineStepTimesFromStart(steps);
 	return steps.filter((_, i)=>stepTimes[i] <= timeX);
 });
-export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((stepID: string, timeX: number)=>{
-	const timeFromStart = GetTimelineStepTimeFromStart(stepID);
+export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((step: TimelineStep|n, timeX: number)=>{
+	const timeFromStart = GetTimelineStepTimeFromStart(step);
 	if (timeFromStart == null) return false;
 	return timeFromStart <= timeX;
 });
