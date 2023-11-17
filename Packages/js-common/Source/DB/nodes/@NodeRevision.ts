@@ -57,7 +57,10 @@ export const ChildLayout_optionsStr = `
 Options:
 * Unchanged: Don't change the child-layout from the contextual default. (see below)
 * Debate Map standard
-* Society Library standard (adds some extra functionality, eg. titles can have narrative form, and bracketed prefix-text gets extracted)
+* Society Library standard, with some extra functionality:
+1) Titles can have narrative form. (and new claims under categories don't default to question form)
+2) Bracketed prefix-text gets extracted.
+3) Multi-premise args start with premises collapsed.
 
 The final ordering-type is determined by the first provided value (ie. not set to "Unchanged") in this list:
 1) Node setting, in node's Details->Others panel (if map has "Allow special" for child-layouts enabled)

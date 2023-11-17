@@ -1,4 +1,4 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
@@ -257,7 +257,7 @@ export const GetChildLimitInfoAtLocation = CreateAccessor(function(map: Map, for
 	let showTarget_initial = this!.store.main.maps.initialChildLimit;
 	if (parentNode.type == NodeType.argument && childCount > 1) {
 		// in sl-layout, multi-premise args are wanted to start out showing no children (requiring click on child-limit expand button to see premises); in regular dm-layout, they start showing first 2 premises
-		showTarget_initial = childLayout == ChildLayout.slStandard ? 0 : 2;
+		showTarget_initial = IsSLModeOrLayout(childLayout) ? 0 : 2;
 	}
 	const showTarget_min = showAll ? 1_000_000 : showTarget_initial.KeepAtMost(childCount); // we can't have the target-min be greater than the actual child-count (else messes up display logic)
 	const showTarget_max = showAll ? 1_000_000 : childCount;

@@ -97,8 +97,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			if (measurementInfo == null) return {expectedBoxWidth: 100, width: 100, expectedHeight: null};
 			return measurementInfo;
 		});
-		const childrenWidthOverride_prep = ncToShowHere_all_trimmed_measurements.map(a=>a.width).concat(0).Max(undefined, true);
-		const childrenWidthOverride = childrenWidthOverride_prep ? childrenWidthOverride_prep.KeepAtLeast(minWidth ?? 0) : null;
+		/*const childrenWidthOverride_prep = ncToShowHere_all_trimmed_measurements.map(a=>a.width).concat(0).Max(undefined, true);
+		const childrenWidthOverride = childrenWidthOverride_prep ? childrenWidthOverride_prep.KeepAtLeast(minWidth ?? 0) : null;*/
+		const childrenWidthOverride = ncToShowHere_all_trimmed_measurements.map(a=>a.width).concat(0).Max(undefined, true).KeepAtLeast(minWidth ?? 0);
 
 		let nextChildFullIndex = parentTreePath_priorChildCount ?? 0;
 		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
