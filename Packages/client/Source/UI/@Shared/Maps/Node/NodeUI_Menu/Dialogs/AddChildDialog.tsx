@@ -66,8 +66,8 @@ export class AddChildHelper {
 			});
 		} else {
 			let usedTitleKey = "text_base";
-			if (childType == NodeType.claim) {
-				usedTitleKey = `text_${ClaimForm[this.node_link.form!].replace(/^./, ch=>ch.toLowerCase())}`;
+			if (childType == NodeType.claim && this.node_link.form) {
+				usedTitleKey = `text_${ClaimForm[this.node_link.form].replace(/^./, ch=>ch.toLowerCase())}`;
 			}
 			this.node_revision.phrasing[usedTitleKey] = title;
 		}
