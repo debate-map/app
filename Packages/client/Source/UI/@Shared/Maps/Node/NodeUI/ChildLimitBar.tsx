@@ -1,4 +1,4 @@
-import {Map} from "dm_common";
+import {ChildLayout, GetChildLayout_Final, GetParentNode, Map, NodeL3, NodeType} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {VMenuItem, VMenuStub} from "react-vmenu";
@@ -9,21 +9,29 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, Icon, Observer, RunInAction} from "web-vcore";
 import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {ChildLimitInfo} from "Store/main/maps.js";
+import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 
 @Observer
-export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, direction: "up" | "down", childCount: number, childLimit: number}, {}> {
+export class ChildLimitBar extends BaseComponent<{map: Map, node: NodeL3, path: string, treePath: string, inBelowGroup: boolean, childrenWidthOverride: number|n, childLimitInfo: ChildLimitInfo}, {}> {
 	static HEIGHT = 36;
 	render() {
-		const {map, path, treePath, inBelowGroup, childrenWidthOverride, direction, childCount, childLimit} = this.props;
+		const {map, node, path, treePath, inBelowGroup, childrenWidthOverride, childLimitInfo} = this.props;
+		const {direction, showTarget_min, showTarget_max, showTarget_actual, childCount, childCountShowing} = childLimitInfo;
 		const nodeView = GetNodeView(map.id, path);
+		const nodeLayout = GetChildLayout_Final(node.current, map);
 		const {initialChildLimit} = store.main.maps;
-		const childrenVisible = childCount.KeepAtMost(childLimit);
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
-			color: "transparent",
+			// if limit-bar is for showing/hiding premises, have the connector actually be visible (to clarify the limit-bar's role of involving the premises)
+			color: inBelowGroup ? GetNodeColor({type: NodeType.claim}, "connector", false).css() : "transparent",
 			gutterWidth: inBelowGroup ? GUTTER_WIDTH_SMALL : GUTTER_WIDTH, parentGutterWidth: GUTTER_WIDTH,
+			parentIsAbove: inBelowGroup,
 		});
+
+		// in sl-layout, many of the "premises" are not really premises, but rather broken-down components of the "argument"; so use more generic term
+		//const premisesOrComponentsStr = nodeLayout == ChildLayout.slStandard ? "components" : "premises";
 
 		return (
 			<Row
@@ -45,38 +53,49 @@ export class ChildLimitBar extends BaseComponent<{map: Map, path: string, treePa
 					paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
 				}}
 			>
-				<Button text={
-					<Row>
-						<Icon icon={`arrow-${direction}`} size={15}/>
-						<Div ml={3}>{childCount > childrenVisible ? childCount - childrenVisible : null}</Div>
-					</Row>
-				} title="Show more"
-				enabled={childrenVisible < childCount} style={ES({flex: 1})} onClick={()=>{
-					RunInAction("ChildLimitBar.showMore.onClick", ()=>{
-						nodeView[`childLimit_${direction}`] = (childrenVisible + 3).KeepAtMost(childCount);
-					});
-				}}/>
-				<Button ml={5} text={
-					<>
+				<Button title="Show more" enabled={childLimitInfo.HaveShowMoreButtonEnabled()} style={ES({flex: 1})}
+					text={
 						<Row>
-							<Icon icon={`arrow-${direction == "up" ? "down" : "up"}`} size={15}/>
+							<Icon icon={`arrow-${direction}`} size={15}/>
+							<Div ml={3}>{[
+								childCount > showTarget_actual ? childCount.Distance(showTarget_actual) : null,
+								//` [${showTarget_actual} -> ${childLimitInfo.ShowMore_NewLimit()}]`, // for debugging
+								//node?.type == NodeType.argument && inBelowGroup ? ` (${premisesOrComponentsStr})` : "",
+							].filter(a=>a != null).join("")}</Div>
 						</Row>
-						<VMenuStub>
-							<VMenuItem text="Collapse to minimum" style={liveSkin.Style_VMenuItem()}
-								onClick={e=>{
-									if (e.button !== 0) return;
-									RunInAction("ChildLimitBar.showLess.collapseToMinumum", ()=>{
-										nodeView[`childLimit_${direction}`] = initialChildLimit;
-									});
-								}}/>
-						</VMenuStub>
-					</>
-				} title="Show less"
-				enabled={childrenVisible > initialChildLimit} style={ES({flex: 1})} onClick={()=>{
-					RunInAction("ChildLimitBar.showLess.onClick", ()=>{
-						nodeView[`childLimit_${direction}`] = (childrenVisible - 3).KeepAtLeast(initialChildLimit);
-					});
-				}}/>
+					}
+					onClick={()=>{
+						RunInAction("ChildLimitBar.showMore.onClick", ()=>{
+							nodeView[`childLimit_${direction}`] = childLimitInfo.ShowMore_NewLimit();
+						});
+					}}/>
+				<Button ml={5} title="Show less" enabled={childLimitInfo.HaveShowLessButtonEnabled()} style={ES({flex: 1})}
+					text={
+						<>
+							<Row>
+								<Icon icon={`arrow-${direction == "up" ? "down" : "up"}`} size={15}/>
+								{/*<Div ml={3}>{[
+									showTarget_actual > showTarget_min ? showTarget_actual.Distance(showTarget_min) : null,
+									//` [${showTarget_actual} -> ${childLimitInfo.ShowLess_NewLimit()}]`, // for debugging
+									//node?.type == NodeType.argument && inBelowGroup ? ` (${premisesOrComponentsStr})` : "",
+								].filter(a=>a != null).join("")}</Div>*/}
+							</Row>
+							<VMenuStub>
+								<VMenuItem text="Collapse to minimum" style={liveSkin.Style_VMenuItem()}
+									onClick={e=>{
+										if (e.button !== 0) return;
+										RunInAction("ChildLimitBar.showLess.collapseToMinumum", ()=>{
+											nodeView[`childLimit_${direction}`] = showTarget_min;
+										});
+									}}/>
+							</VMenuStub>
+						</>
+					}
+					onClick={()=>{
+						RunInAction("ChildLimitBar.showLess.onClick", ()=>{
+							nodeView[`childLimit_${direction}`] = childLimitInfo.ShowLess_NewLimit();
+						});
+					}}/>
 			</Row>
 		);
 	}

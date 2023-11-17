@@ -1,8 +1,8 @@
-import {ChildGroup, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
-import {UseForcedExpandForPath} from "Store/main/maps.js";
+import {GetChildLimitInfoAtLocation, UseForcedExpandForPath} from "Store/main/maps.js";
 import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
@@ -50,6 +50,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const playingTimeline = GetPlayingTimeline(map.id);
 		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls) && !(SLMode && !ShowHeader) && !store.main.maps.screenshotMode;
 
+		const childLayout = GetChildLayout_Final(parentNode.current, map);
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
 		const nodeChildren_orderingValues = nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
@@ -57,7 +58,6 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		}); //.SimplifyEmpty();
 		this.Stash({nodeChildren_orderingValues});
 
-		const {initialChildLimit} = store.main.maps;
 		const {currentNodeBeingAdded_path} = store.main.maps;
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
@@ -69,23 +69,21 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
 		const downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
 
-		const useForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelper);
-		let childLimit_up = (useForcedExpand ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
-		let childLimit_down = (useForcedExpand ? Number.MAX_SAFE_INTEGER / 2 : null) ?? (nodeView?.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
-		// if the map's root node, or an argument node, show all children
-		const showAll = parentNode.id == map.rootNode || parentNode.type == NodeType.argument;
-		if (showAll) [childLimit_up, childLimit_down] = [500, 500];
+		// if the map's root node, show all children
+		const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
+		const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelper);
+		const showAll = showAll_regular || showAll_forForcedExpand;
 
 		const PrepPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
-			const childLimit = direction == "up" ? childLimit_up : childLimit_down; // polarity-groups "all" and "down" both use a "down" child-limit
-
 			const childrenHere_untrimmed = polarityGroup == "all" ? nodeChildrenToShowHere : polarityGroup == "up" ? upChildren : downChildren;
-			const childrenHere = childrenHere_untrimmed.slice(0, childLimit); // trim to the X most significant children (ie. strongest arguments)
+			const childLimitInfo = GetChildLimitInfoAtLocation(map, forLayoutHelper, parentNode, parentPath, direction, childrenHere_untrimmed.length);
+
+			const childrenHere = childrenHere_untrimmed.slice(0, childLimitInfo.showTarget_actual); // trim to the X most significant children (ie. strongest arguments)
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-here array
 			if (direction == "up") childrenHere.reverse();
 
-			return {direction: direction as "up" | "down", childLimit, children_untrimmed: childrenHere_untrimmed, children_trimmed: childrenHere};
+			return {direction: direction as "up" | "down", childLimitInfo, children_untrimmed: childrenHere_untrimmed, children_trimmed: childrenHere};
 		};
 		const ncToShowHere_groupAll = PrepPolarityGroup("all");
 		const ncToShowHere_groupUp = PrepPolarityGroup("up");
@@ -109,47 +107,40 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				polarityGroup == "up" ? ncToShowHere_groupUp :
 				ncToShowHere_groupDown;
 			const childrenHere = ncToShowHere_thisGroup.children_trimmed;
-			const childrenHereUIs = childrenHere.map((child, index)=>{
-				const parent = this;
-				const collection_untrimmed = ncToShowHere_thisGroup.children_untrimmed;
-				const widthOverride = childrenWidthOverride;
 
-				/*if (pack.node.premiseAddHelper) {
-					return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
-				}*/
+			const showLimitBar = ncToShowHere_thisGroup.childLimitInfo.ShouldLimitBarShow() && !store.main.maps.screenshotMode;
+			// wrap in func, so the execution-orders always match the display-orders (so that tree-path is correct)
+			const getLimitBar = ()=>{
+				return <ChildLimitBar key="limit-bar" {...{
+					map, node: parentNode, path: parentPath, treePath: `${parentTreePath}/${nextChildFullIndex++}`,
+					inBelowGroup: belowNodeUI ?? false,
+					childrenWidthOverride,
+					//childCount: ncToShowHere_thisGroup.children_untrimmed.length,
+					childLimitInfo: ncToShowHere_thisGroup.childLimitInfo,
+				}}/>;
+			};
 
-				const indexOfLastVisibleChild = childrenHere.length - 1; // the childrenHere array is already trimmed to the child-limit, so its last entry is the last visible
-				const isFarthestChildFromDivider = index == (ncToShowHere_thisGroup.direction == "down" ? indexOfLastVisibleChild : 0);
-				const childLimit_minShowableNow = initialChildLimit;
-				const childLimit_maxShowableNow = collection_untrimmed.length;
-				const childrenVisible = collection_untrimmed.length.KeepAtMost(ncToShowHere_thisGroup.childLimit);
-				const showLimitBar = isFarthestChildFromDivider && !showAll && (childrenVisible > childLimit_minShowableNow || childrenVisible < childLimit_maxShowableNow);
+			const childrenHereAndLimitBarUIs = childrenHere.map((child, index)=>{
+				const childHolderComp = this;
 
-				// wrap these in funcs, so the execution-orders always match the display-orders (so that tree-path is correct)
-				const getLimitBar = ()=>{
-					if (store.main.maps.screenshotMode) return null;
-					return <ChildLimitBar {...{
-						map, path: parentPath, treePath: `${parentTreePath}/${nextChildFullIndex++}`,
-						inBelowGroup: belowNodeUI ?? false,
-						childrenWidthOverride: widthOverride, direction: ncToShowHere_thisGroup.direction, childLimit: ncToShowHere_thisGroup.childLimit,
-						childCount: collection_untrimmed.length,
-					}}/>;
-				};
+				const indexOfOutermostVisibleChild = ncToShowHere_thisGroup.direction == "down" ? childrenHere.length - 1 : 0; // the childrenHere array is already trimmed to the child-limit, so its first/last entry is the outermost visible
+				const showLimitBarHere = index == indexOfOutermostVisibleChild && showLimitBar;
+
 				const getNodeUI = ()=>{
 					//const nodeIDAlreadyInPath = GetPathNodeIDs(parentPath).includes(child.id);
 					return <NodeUI key={child.id}
-						ref={UseCallback(c=>parent.childBoxes[child.id] = c, [child.id, parent.childBoxes])} // eslint-disable-line
-						//ref_nodeBox={UseCallback(c=>WaitXThenRun_Deduped(parent, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
+						ref={UseCallback(c=>childHolderComp.childBoxes[child.id] = c, [child.id, childHolderComp.childBoxes])} // eslint-disable-line
+						//ref_nodeBox={UseCallback(c=>WaitXThenRun_Deduped(childHolderComp, "UpdateChildBoxOffsets", 0, ()=>parent.UpdateChildBoxOffsets()), [parent])}
 						indexInNodeList={index} map={map} node={child}
 						path={`${parentPath}/${child.id}`}
 						treePath={`${parentTreePath}/${nextChildFullIndex++}`}
 						forLayoutHelper={forLayoutHelper}
 						inBelowGroup={belowNodeUI}
-						standardWidthInGroup={widthOverride}
-						onHeightOrPosChange={parent.OnChildHeightOrPosChange}/>;
+						standardWidthInGroup={childrenWidthOverride}
+						onHeightOrPosChange={childHolderComp.OnChildHeightOrPosChange}/>;
 				};
 
-				if (showLimitBar) {
+				if (showLimitBarHere) {
 					return (
 						<React.Fragment key={child.id}>
 							{ncToShowHere_thisGroup.direction == "up" && getLimitBar()}
@@ -160,13 +151,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				}
 				return getNodeUI();
 			});
-			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-uis array
-			// if (direction == 'up') childrenHereUIs.reverse();
+			// special case: we need to manually add the limit-bar, if loop above never ran (due to children limit currently being at 0, ie. no children node-uis rendering atm)
+			if (childrenHere.length == 0 && ncToShowHere_thisGroup.children_untrimmed.length > 0) {
+				childrenHereAndLimitBarUIs.push(getLimitBar());
+			}
 
-			/*const dragBox = document.querySelector(".NodeBox.DragPreview");
-			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());*/
-
-			//renderedChildrenOrder.push(...childrenHere.map(a=>a.id));
 			return (
 				<Droppable type="NodeL1" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /*renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;
@@ -198,7 +187,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 											border: "1px dashed rgba(255,255,255,1)", borderRadius: 5,
 										}}/>}
 								</Column>
-								{childrenHereUIs}
+								{childrenHereAndLimitBarUIs}
 							</>
 						);
 					}}

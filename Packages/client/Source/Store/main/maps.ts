@@ -1,4 +1,4 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
@@ -7,7 +7,7 @@ import {O, StoreAction} from "web-vcore";
 import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY} from "web-vcore/nm/js-vextensions.js";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
-import {GetMapView} from "./maps/mapViews/$mapView.js";
+import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
 
 export enum RatingPreviewType {
 	none = "none",
@@ -206,6 +206,65 @@ export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHel
 		}
 	}
 	return false;
+});
+
+export class ChildLimitInfo {
+	constructor(data: Partial<ChildLimitInfo>) { Object.assign(this, data); }
+
+	direction: "up" | "down";
+	adjustDelta: number;
+
+	showTarget_initial: number;
+	showTarget_min: number;
+	/** Generally this equals the number of children that actually exist at this location atm -- but can be higher, if "show all children" is active here. */
+	showTarget_max: number;
+	/** ie. the number of children that are "trying to be shown" currently */
+	showTarget_actual: number;
+
+	childCount: number;
+	childCountShowing: number;
+
+	ShowMore_NewLimit() {
+		return (this.showTarget_actual + this.adjustDelta).KeepBetween(this.showTarget_min, this.showTarget_max);
+	}
+	ShowLess_NewLimit() {
+		return (this.showTarget_actual - this.adjustDelta).KeepBetween(this.showTarget_min, this.showTarget_max);
+	}
+
+	HaveShowMoreButtonEnabled() {
+		//return this.childCountTryingToShow < this.showLimit_max && this.childrenActuallyShowing < this.showLimit_max;
+		return this.ShowMore_NewLimit() != this.showTarget_actual;
+	}
+	HaveShowLessButtonEnabled() {
+		//return this.childCountTryingToShow > this.showLimit_min && this.childrenActuallyShowing > this.showLimit_min;
+		return this.ShowLess_NewLimit() != this.showTarget_actual;
+	}
+
+	ShouldLimitBarShow() {
+		return this.HaveShowMoreButtonEnabled() || this.HaveShowLessButtonEnabled();
+	}
+}
+export const GetChildLimitInfoAtLocation = CreateAccessor(function(map: Map, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number): ChildLimitInfo {
+	// if the map's root node, show all children
+	const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
+	const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelperMap);
+	const showAll = showAll_regular || showAll_forForcedExpand;
+
+	const parentNodeView = GetNodeView(map.id, parentPath);
+	const childLayout = GetChildLayout_Final(parentNode.current, map);
+	const adjustDelta = childLayout == ChildLayout.slStandard && parentNode.type == NodeType.argument ? 5 : 3;
+
+	let showTarget_initial = this!.store.main.maps.initialChildLimit;
+	if (parentNode.type == NodeType.argument && childCount > 1) {
+		// in sl-layout, multi-premise args are wanted to start out showing no children (requiring click on child-limit expand button to see premises); in regular dm-layout, they start showing first 2 premises
+		showTarget_initial = childLayout == ChildLayout.slStandard ? 0 : 2;
+	}
+	const showTarget_min = showAll ? 1_000_000 : showTarget_initial.KeepAtMost(childCount); // we can't have the target-min be greater than the actual child-count (else messes up display logic)
+	const showTarget_max = showAll ? 1_000_000 : childCount;
+
+	const showLimit_actual = (showAll ? 1_000_000 : null) ?? (parentNodeView?.[`childLimit_${direction}`] ?? showTarget_initial).KeepBetween(showTarget_min, showTarget_max);
+	const childCountShowing = showLimit_actual.KeepAtMost(childCount);
+	return new ChildLimitInfo({direction, adjustDelta, showTarget_initial, showTarget_min, showTarget_max, showTarget_actual: showLimit_actual, childCount, childCountShowing});
 });
 
 // actions
