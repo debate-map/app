@@ -37,7 +37,8 @@ pub struct NodeRevision {
     pub creator: String,
     pub createdAt: i64,
     pub node: String,
-    pub replacedBy: Option<String>, 
+    /// Warning: In rare cases, this can reference a node-revision that no longer exists. (eg. if admin force-deleted a node-revision)
+    pub replacedBy: Option<String>,
     pub phrasing: NodePhrasing_Embedded,
     /*#[graphql(name = "phrasing_tsvector")]
     #[serde(skip_serializing)] // makes-so when serializing the struct for saving to the db, this field is excluded (as it must be, since it's auto-generated)

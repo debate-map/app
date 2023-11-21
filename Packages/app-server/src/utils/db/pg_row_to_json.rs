@@ -6,18 +6,17 @@ use rust_shared::serde_json::{json, Map, self};
 use rust_shared::tokio_postgres::{Column, types};
 use rust_shared::tokio_postgres::types::{Type, FromSql};
 use rust_shared::tokio_postgres::{Row};
+use rust_shared::utils::general_::extensions::IteratorV;
 use rust_shared::utils::type_aliases::{JSONValue, RowData};
 
 pub fn postgres_row_to_struct<'a, T: for<'de> Deserialize<'de>>(row: Row) -> Result<T, Error> {
     let as_json = postgres_row_to_json_value(row, 100)?;
     Ok(serde_json::from_value(as_json)?)
 }
-
 pub fn postgres_row_to_json_value(row: Row, columns_to_process: usize) -> Result<JSONValue, Error> {
     let row_data = postgres_row_to_row_data(row, columns_to_process)?;
     Ok(JSONValue::Object(row_data))
 }
-
 pub fn postgres_row_to_row_data(row: Row, columns_to_process: usize) -> Result<RowData, Error> {
     let mut result: Map<String, JSONValue> = Map::new();
     for (i, column) in row.columns().iter().take(columns_to_process).enumerate() {
@@ -30,6 +29,7 @@ pub fn postgres_row_to_row_data(row: Row, columns_to_process: usize) -> Result<R
     Ok(result)
 }
 
+// keep overall structure in-sync with wal_structs.rs
 pub fn pg_cell_to_json_value(row: &Row, column: &Column, column_i: usize) -> Result<JSONValue, Error> {
     let f64_to_json_number = |raw_val: f64| -> Result<JSONValue, Error> {
         let temp = serde_json::Number::from_f64(raw_val.into()).ok_or(anyhow!("invalid json-float"))?;
@@ -74,18 +74,19 @@ fn get_basic<'a, T: FromSql<'a>>(row: &'a Row, column: &Column, column_i: usize,
 fn get_array<'a, T: FromSql<'a>>(row: &'a Row, column: &Column, column_i: usize, val_to_json_val: impl Fn(T) -> Result<JSONValue, Error>) -> Result<JSONValue, Error> {
     let raw_val_array = row.try_get::<_, Option<Vec<T>>>(column_i).with_context(|| format!("column_name:{}", column.name()))?;
     Ok(match raw_val_array {
-        Some(val_array) => {
+        /*Some(val_array) => {
             let mut result = vec![];
             for val in val_array {
                 result.push(val_to_json_val(val)?);
             }
             JSONValue::Array(result)
-        },
+        },*/
+        Some(val_array) => JSONValue::Array(val_array.into_iter().map(|a| val_to_json_val(a)).try_collect2::<Vec<_>>()?),
         None => JSONValue::Null,
     })
 }
 
-struct StringCollector(String);
+pub struct StringCollector(pub String);
 impl FromSql<'_> for StringCollector {
     fn from_sql(_: &Type, raw: &[u8]) -> Result<StringCollector, Box<dyn std::error::Error + Sync + Send>> {
         /*let result = std::str::from_utf8_lossy(raw);

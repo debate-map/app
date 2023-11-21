@@ -136,6 +136,9 @@ pub struct LDChange {
     pub columntypes: Option<Vec<String>>,
     pub columnvalues: Option<Vec<JSONValue>>,
     pub oldkeys: Option<OldKeys>,
+
+    // custom
+    pub needs_wal2json_jsonval_fixes: Option<bool>,
 }
 impl LDChange {
     pub fn new_data_as_map(&self) -> Option<RowData> {
@@ -145,7 +148,12 @@ impl LDChange {
         for (i, key) in self.columnnames.as_ref()?.iter().enumerate() {
             let typ = self.columntypes.as_ref()?.get(i).unwrap();
             let value = self.columnvalues.as_ref()?.get(i).unwrap();
-            new_entry.insert(key.to_owned(), clone_ldchange_val_0with_type_fixes(value, typ));
+            let value_final = if self.needs_wal2json_jsonval_fixes.unwrap_or(true) { // if unspecified, try to apply fixes
+                clone_ldchange_val_0with_type_fixes(value, typ)
+            } else {
+                value.clone()
+            };
+            new_entry.insert(key.to_owned(), value_final);
         }
         //*new_entry.as_object().unwrap()
         Some(new_entry)
@@ -170,6 +178,12 @@ fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &str) -> JSONValu
         let item_type = String::from_utf8(item_type_as_bytes.to_vec()).unwrap();
         return parse_postgres_array(value.as_str().unwrap(), item_type == "jsonb");
     }
+    // like above, except for alternate naming scheme (eg. "_text" instead of "text[]")
+    /*if typ.starts_with("_") {
+        let item_type_as_bytes = &typ.as_bytes()[1..];
+        let item_type = String::from_utf8(item_type_as_bytes.to_vec()).unwrap();
+        return parse_postgres_array(value.as_str().unwrap(), item_type == "jsonb");
+    }*/
     match typ {
         "jsonb" => {
             // the LDChange vals of type jsonb are initially stored as strings
@@ -190,6 +204,9 @@ pub struct OldKeys {
     pub keynames: Vec<String>,
     pub keytypes: Vec<String>,
     pub keyvalues: Vec<JSONValue>,
+
+    // custom
+    pub needs_wal2json_jsonval_fixes: Option<bool>,
 }
 }
 impl OldKeys {
@@ -198,14 +215,19 @@ impl OldKeys {
         for (i, key) in self.keynames.iter().enumerate() {
             let typ = self.keytypes.get(i).unwrap();
             let value = self.keyvalues.get(i).unwrap();
-            new_entry.insert(key.to_owned(), clone_ldchange_val_0with_type_fixes(value, typ));
+            let value_final = if self.needs_wal2json_jsonval_fixes.unwrap_or(true) { // if unspecified, try to apply fixes
+                clone_ldchange_val_0with_type_fixes(value, typ)
+            } else {
+                value.clone()
+            };
+            new_entry.insert(key.to_owned(), value_final);
         }
         new_entry
     }
 }
 
 /*
-[postgres logical-decoding message examples]
+[postgres logical-decoding message examples; further examples can be seen here: https://github.com/eulerto/wal2json]
 
 row addition
 ==========

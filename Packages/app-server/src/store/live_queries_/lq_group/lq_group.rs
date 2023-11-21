@@ -248,6 +248,7 @@ impl LQGroup {
                 columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
                 oldkeys: None,
                 schema: "".to_owned(),
+                needs_wal2json_jsonval_fixes: Some(true), // todo: probably not needed as true, so probably change to false
             };
 
             lqi.on_table_changed(&new_data_as_change, None).await;

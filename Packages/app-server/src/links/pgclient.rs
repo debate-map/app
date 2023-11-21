@@ -1,5 +1,5 @@
-use std::{env, time::{SystemTime, UNIX_EPOCH, Duration}, task::{Poll}, cmp::max};
-use rust_shared::{tokio_postgres, bytes::{Bytes, self}, tokio, utils::type_aliases::JSONValue, serde_json, indoc::formatdoc, once_cell::sync::Lazy};
+use std::{env, time::{SystemTime, UNIX_EPOCH, Duration}, task::{Poll}, cmp::max, collections::HashMap};
+use rust_shared::{tokio_postgres, bytes::{Bytes, self}, tokio, utils::{type_aliases::JSONValue, general_::extensions::ToOwnedV}, serde_json, indoc::formatdoc, once_cell::sync::Lazy, itertools::Itertools};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, PoolConfig};
 use rust_shared::{futures, axum, tower, tower_http};
 use futures::{future, StreamExt, Sink, ready};
@@ -11,7 +11,7 @@ use rust_shared::anyhow::{anyhow, Error};
 use rust_shared::postgres_protocol::message::backend::{LogicalReplicationMessage, ReplicationMessage};
 use rust_shared::tokio_postgres::replication::LogicalReplicationStream;
 
-use crate::{store::{live_queries::{LQStorageArc}, storage::AppStateArc}, utils::{db::pg_stream_parsing::LDChange}};
+use crate::{store::{live_queries::{LQStorageArc}, storage::AppStateArc}, utils::{db::pg_stream_parsing::{LDChange, OldKeys}}, links::pgclient_::wal_structs::{TableInfo, ColumnInfo, wal_data_tuple_to_row_data}};
 
 pub fn start_pgclient_with_restart(app_state: AppStateArc) {
     let _handler = tokio::spawn(async move {
@@ -92,19 +92,6 @@ pub fn create_db_pool() -> Pool {
     pool
 }
 
-/*struct LogicalReplicationStreamWrapper(LogicalReplicationStream);
-impl Stream for LogicalReplicationStreamWrapper {
-    type Item = Result<ReplicationMessage<LogicalReplicationMessage>, Error>;
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let this = self.project();
-        let result = this.0.poll_next(cx);
-        if (result.is_ready()) {
-            info!("LogicalReplicationStreamWrapper::poll_next result:{:?}", result);
-        }
-        result
-    }
-}*/
-
 /**
  * There appear to be three ways to use replication slots:
  * 1) `CREATE_REPLICATION_SLOT` followed by `pg_logical_slot_get_changes()`.
@@ -133,6 +120,7 @@ pub async fn start_streaming_changes(
 
         //let slot_name = "slot";
         let slot_name = "slot_".to_owned() + &SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis().to_string();
+        // todo: now that wal2json is not used for processing the logical-replication stream, probably remove all of the wal2json-specific handling code, to keep things tidy
         //let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"wal2json\"", slot_name);
         let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"pgoutput\" NOEXPORT_SNAPSHOT", slot_name);
         let lsn = q(&client, &slot_query).await[0].get("consistent_point").unwrap().to_owned();
@@ -150,6 +138,8 @@ pub async fn start_streaming_changes(
         let mut stream = Box::pin(LogicalReplicationStream::new(stream_raw));
 
         let mut wal_pos_last_processed: u64 = 0;
+        // hashmap
+        let mut table_infos = HashMap::<u32, TableInfo>::new();
 
         loop {
             let event_res_opt = stream.as_mut().next().await;
@@ -182,48 +172,70 @@ pub async fn start_streaming_changes(
                     let core_data = body.into_data();
                     info!("Got XLogData/data-change event. @wal_pos_last_processed:{}", wal_pos_last_processed);
                     match core_data {
-                        // todo: probably rework my code to just use the existing LogicalReplicationMessage struct, rather than this custom LDChange
+                        Relation(body2) => {
+                            info!("Got relation event:{:?}", body2);
+                            table_infos.insert(body2.rel_id(), TableInfo {
+                                name: body2.name().unwrap().to_owned(),
+                                columns: body2.columns().into_iter().map(|c| ColumnInfo::from_column(c)).collect_vec(),
+                            });
+                        },
+                        // todo: maybe rework my code to just use the existing LogicalReplicationMessage struct, rather than the LDChange struct (which was the data-structure sent by wal2json, but arguably not relevant anymore)
                         Insert(body2) => {
                             info!("Got insert event:{:?}", body2);
-                            /*let change = LDChange {
-                                table: self.lq_key.table_name.clone(),
-                                kind: "insert".to_owned(),
-                                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                            let table_info = table_infos.get(&body2.rel_id()).unwrap();
+                            let new_data = wal_data_tuple_to_row_data(body2.tuple(), table_info, 100).unwrap();
+                            let change = LDChange {
+                                kind: "insert".o(),
+                                schema: "".o(),
+                                table: table_info.name.o(),
+                                //columnnames: Some(table_info.columns.iter().map(|a| a.name).collect()),
+                                columnnames: Some(new_data.keys().map(|a| a.o()).collect_vec()),
+                                columntypes: Some(table_info.columns.iter().map(|a| a.data_type.name().o()).collect()),
                                 columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
-                                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
-                                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
                                 oldkeys: None,
-                                schema: "".to_owned(),
+                                needs_wal2json_jsonval_fixes: Some(false),
                             };
-                            storage_wrapper.notify_of_ld_change(change).await;*/
+                            storage_wrapper.notify_of_ld_change(change).await;
                         },
                         Update(body2) => {
                             info!("Got update event:{:?}", body2);
-                            /*let change = LDChange {
-                                table: self.lq_key.table_name.clone(),
-                                kind: "update".to_owned(),
-                                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                            let table_info = table_infos.get(&body2.rel_id()).unwrap();
+                            let new_data = wal_data_tuple_to_row_data(body2.new_tuple(), table_info, 100).unwrap();
+                            let change = LDChange {
+                                kind: "update".o(),
+                                schema: "".o(),
+                                table: table_info.name.o(),
+                                //columnnames: Some(table_info.columns.iter().map(|a| a.name).collect()),
+                                columnnames: Some(new_data.keys().map(|a| a.o()).collect_vec()),
+                                columntypes: Some(table_info.columns.iter().map(|a| a.data_type.name().o()).collect()),
                                 columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
-                                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
-                                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
                                 oldkeys: None,
-                                schema: "".to_owned(),
+                                needs_wal2json_jsonval_fixes: Some(false),
                             };
-                            storage_wrapper.notify_of_ld_change(change).await;*/
+                            storage_wrapper.notify_of_ld_change(change).await;
                         },
                         Delete(body2) => {
                             info!("Got delete event:{:?}", body2);
-                            /*let change = LDChange {
-                                table: body2.,
-                                kind: "delete".to_owned(),
-                                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
-                                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
-                                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
-                                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
-                                oldkeys: None,
-                                schema: "".to_owned(),
+                            let table_info = table_infos.get(&body2.rel_id()).unwrap();
+                            let key_tuple = body2.key_tuple().ok_or(anyhow!("Delete event didn't have key-tuple!"))?;
+                            let old_data_partial = wal_data_tuple_to_row_data(key_tuple, table_info, 100).unwrap();
+                            let change = LDChange {
+                                kind: "delete".o(),
+                                schema: "".o(),
+                                table: table_info.name.o(),
+                                //columnnames: Some(table_info.columns.iter().map(|a| a.name).collect()),
+                                columnnames: None,
+                                columntypes: None,
+                                columnvalues: None,
+                                oldkeys: Some(OldKeys {
+                                    keynames: old_data_partial.keys().map(|a| a.o()).collect_vec(),
+                                    keytypes: table_info.columns.iter().map(|a| a.data_type.name().o()).collect(),
+                                    keyvalues: old_data_partial.values().map(|a| a.clone()).collect(),
+                                    needs_wal2json_jsonval_fixes: Some(false),
+                                }),
+                                needs_wal2json_jsonval_fixes: Some(false),
                             };
-                            storage_wrapper.notify_of_ld_change(change).await;*/
+                            storage_wrapper.notify_of_ld_change(change).await;
                         },
                         // ignore all other message-types
                         enum_type => {
@@ -234,7 +246,7 @@ pub async fn start_streaming_changes(
                 // type: keepalive message
                 PrimaryKeepAlive(data) => {
                     let should_send_response = data.reply() == 1;
-                    info!("Got keepalive message:{:x?} @should_send_response:{}", data, should_send_response);
+                    debug!("Got keepalive message:{:x?} @should_send_response:{}", data, should_send_response);
 
                     // todo: someday probably use a timer to send keepalive messages to server proactively, since in some cases server warning can come too late (https://github.com/sfackler/rust-postgres/pull/696#discussion_r789698737)
                     if should_send_response {

@@ -15,7 +15,7 @@ max_replication_slots = 10
 ```
 (Note: you can determine where your `postgresql.conf` file is by running `psql template1 -c 'SHOW config_file'`)
 
-* 3\) Ensure the `wal2json` PostgreSQL plugin is installed: https://github.com/eulerto/wal2json#build-and-install
+* 3\) Ensure the `wal2json` PostgreSQL plugin is installed: https://github.com/eulerto/wal2json#build-and-install [note: as of 2023-11-21, the debate-map app-server was reworked to use pgoutput as its logical-replication plugin, presumably making installation of `wal2json` no longer necessary; haven't yet confirmed if wal2json is needed elsewhere, however]
 
 * 4\) Create a Postgres database for this project, by running: `createdb debate-map`
 
