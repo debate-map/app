@@ -227,6 +227,7 @@ export class ChildLimitInfo {
 	ShowMore_NewLimit() {
 		return (this.showTarget_actual + this.adjustDelta).KeepBetween(this.showTarget_min, this.showTarget_max);
 	}
+	// todo: maybe have this function "preserve offset from initial-target that's a multiple of the delta"
 	ShowLess_NewLimit() {
 		return (this.showTarget_actual - this.adjustDelta).KeepBetween(this.showTarget_min, this.showTarget_max);
 	}

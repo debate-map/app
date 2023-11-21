@@ -1,12 +1,15 @@
-use std::{env, time::{SystemTime, UNIX_EPOCH}, task::{Poll}};
-use rust_shared::{tokio_postgres, bytes::{Bytes, self}, tokio, utils::type_aliases::JSONValue, serde_json, indoc::formatdoc};
+use std::{env, time::{SystemTime, UNIX_EPOCH, Duration}, task::{Poll}, cmp::max};
+use rust_shared::{tokio_postgres, bytes::{Bytes, self}, tokio, utils::type_aliases::JSONValue, serde_json, indoc::formatdoc, once_cell::sync::Lazy};
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod, Runtime, PoolConfig};
 use rust_shared::{futures, axum, tower, tower_http};
 use futures::{future, StreamExt, Sink, ready};
 use rust_shared::tokio::{join, select};
 use rust_shared::tokio_postgres::{NoTls, Client, SimpleQueryMessage, SimpleQueryRow, tls::NoTlsStream, Socket, Connection};
-use tracing::{info, debug, error, trace};
+use rust_shared::tokio_postgres::types::{PgLsn};
+use tracing::{info, debug, error, trace, warn};
 use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::postgres_protocol::message::backend::{LogicalReplicationMessage, ReplicationMessage};
+use rust_shared::tokio_postgres::replication::LogicalReplicationStream;
 
 use crate::{store::{live_queries::{LQStorageArc}, storage::AppStateArc}, utils::{db::pg_stream_parsing::LDChange}};
 
@@ -89,6 +92,19 @@ pub fn create_db_pool() -> Pool {
     pool
 }
 
+/*struct LogicalReplicationStreamWrapper(LogicalReplicationStream);
+impl Stream for LogicalReplicationStreamWrapper {
+    type Item = Result<ReplicationMessage<LogicalReplicationMessage>, Error>;
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let this = self.project();
+        let result = this.0.poll_next(cx);
+        if (result.is_ready()) {
+            info!("LogicalReplicationStreamWrapper::poll_next result:{:?}", result);
+        }
+        result
+    }
+}*/
+
 /**
  * There appear to be three ways to use replication slots:
  * 1) `CREATE_REPLICATION_SLOT` followed by `pg_logical_slot_get_changes()`.
@@ -111,96 +127,125 @@ pub async fn start_streaming_changes(
 
     let fut2 = tokio::spawn(async move {
         // now we can execute a simple statement just to confirm the connection was made
-        let rows = q(&client, "SELECT '123'").await;
-        assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");
+        // commented for now; LogicalReplicationStream expects all messages with client to be replication messages, so crashes if we run this test-query
+        /*let rows = q(&client, "SELECT '123'").await;
+        assert_eq!(rows[0].get(0).unwrap(), "123", "Simple data-free postgres query failed; something is wrong.");*/
 
         //let slot_name = "slot";
         let slot_name = "slot_".to_owned() + &SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis().to_string();
-        let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"wal2json\"", slot_name);
+        //let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"wal2json\"", slot_name);
+        let slot_query = format!("CREATE_REPLICATION_SLOT {} TEMPORARY LOGICAL \"pgoutput\" NOEXPORT_SNAPSHOT", slot_name);
         let lsn = q(&client, &slot_query).await[0].get("consistent_point").unwrap().to_owned();
 
-        let query = format!("START_REPLICATION SLOT {} LOGICAL {}", slot_name, lsn);
-        let duplex_stream = client.copy_both_simple::<bytes::Bytes>(&query).await.unwrap();
-        let mut duplex_stream_pin = Box::pin(duplex_stream);
+        client.simple_query("DROP PUBLICATION IF EXISTS dm_app_server_main").await.unwrap();
+        client.simple_query("CREATE PUBLICATION dm_app_server_main FOR ALL TABLES").await.unwrap();
+
+        //let query = format!("START_REPLICATION SLOT {} LOGICAL {}", slot_name, lsn);
+        let query = format!("START_REPLICATION SLOT {} LOGICAL {} (\"proto_version\" '1', \"publication_names\" 'dm_app_server_main')", slot_name, lsn);
+        
+        /*let duplex_stream = client.copy_both_simple::<bytes::Bytes>(&query).await.unwrap();
+        let mut duplex_stream_pin = Box::pin(duplex_stream);*/
+
+        let stream_raw = client.copy_both_simple(&query).await.unwrap();
+        let mut stream = Box::pin(LogicalReplicationStream::new(stream_raw));
+
+        let mut wal_pos_last_processed: u64 = 0;
 
         loop {
-            let event_res_opt = duplex_stream_pin.as_mut().next().await;
+            let event_res_opt = stream.as_mut().next().await;
             if event_res_opt.is_none() {
                 info!("Duplex-stream from pgclient returned a None; breaking listen loop. (parent should spawn new connection soon)");
                 break;
             }
-            //if event_res_opt.is_none() { continue; }
             let event_res = event_res_opt.unwrap();
-            if event_res.is_err() { continue }
-            let event = event_res.unwrap();
+            let event = match event_res {
+                Ok(event) => event,
+                Err(err) => {
+                    warn!("Duplex-stream from pgclient returned an error; resuming listen loop. @error:{:?}", err);
+                    // if error is of type that signifies that the the connection has closed, just break the loop
+                    if err.is_closed() { break; }
+                    continue;
+                },
+            };
 
+            //let event_bytes = event_res.unwrap();
+            //let event: LogicalReplicationMessage = serde_json::from_slice(&event_bytes).unwrap();
+            //let event = event_res.unwrap();
+
+            use ReplicationMessage::*;
+            use LogicalReplicationMessage::*;
             // see here for list of message-types: https://www.postgresql.org/docs/10/protocol-replication.html
-            // type: XLogData (WAL data, ie. change of data in db)
-            if event[0] == b'w' {
-                debug!("Got XLogData/data-change event:{:?}", event);
-                //let event_as_str = std::str::from_utf8(&*event).unwrap();
-                //let event_as_str = format!("{:?}", event); // format is more reliable (not all bytes need to be valid utf-8 to be stringified this way)
-                let event_as_str_cow = String::from_utf8_lossy(&*event);
-                let event_as_str = event_as_str_cow.as_ref();
-                const START_OF_CHANGE_JSON: &str = "{\"change\":[";
-                
-                /*let event_as_str_bytes = event_as_str.as_bytes();
-                let idx = event_as_str.find("substring to match").unwrap();
-                let substring_bytes = &event_as_str_bytes[idx..];
-                let json_section_str = String::from_utf8(substring_bytes.to_vec()).unwrap();*/
-                let json_section_str = START_OF_CHANGE_JSON.to_owned() + event_as_str.split_once(START_OF_CHANGE_JSON).unwrap().1;
-                debug!("JSON section(@length:{}):{}", json_section_str.len(), json_section_str);
-                
-                // see bottom of storage.rs for example json-data
-                let data: JSONValue = serde_json::from_str(json_section_str.as_str()).unwrap();
-                for change_raw in data["change"].as_array().unwrap() {
-                    let change: LDChange = serde_json::from_value(change_raw.clone()).unwrap();
-                    storage_wrapper.notify_of_ld_change(change).await;
-                }
-            }
-            // type: keepalive message
-            else if event[0] == b'k' {
-                let last_byte = event.last().unwrap();
-                let timeout_imminent = last_byte == &1;
-                debug!("Got keepalive message:{:x?} @timeout_imminent:{}", event, timeout_imminent);
-                if timeout_imminent {
-                    // not sure if sending the client system's "time since 2000-01-01" is actually necessary, but lets do as postgres asks just in case
-                    const SECONDS_FROM_UNIX_EPOCH_TO_2000: u128 = 946_684_800;
-                    let time_since_2000: u64 = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros() - (SECONDS_FROM_UNIX_EPOCH_TO_2000 * 1000 * 1000)).try_into().unwrap();
-                    
-                    // see here for format details: https://www.postgresql.org/docs/10/protocol-replication.html
-                    let mut data_to_send: Vec<u8> = vec![];
-                    // Byte1('r'); Identifies the message as a receiver status update.
-                    data_to_send.extend_from_slice(&[114]); // "r" in ascii
-                    // The location of the last WAL byte + 1 received and written to disk in the standby.
-                    data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
-                    // The location of the last WAL byte + 1 flushed to disk in the standby.
-                    data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
-                    // The location of the last WAL byte + 1 applied in the standby.
-                    data_to_send.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 0]);
-                    // The client's system clock at the time of transmission, as microseconds since midnight on 2000-01-01.
-                    //0, 0, 0, 0, 0, 0, 0, 0,
-                    data_to_send.extend_from_slice(&time_since_2000.to_be_bytes());
-                    // Byte1; If 1, the client requests the server to reply to this message immediately. This can be used to ping the server, to test if the connection is still healthy.
-                    data_to_send.extend_from_slice(&[1]);
+            match event {
+                // type: XLogData (WAL data, ie. change of data in db)
+                XLogData(body) => {
+                    wal_pos_last_processed = max(wal_pos_last_processed, body.wal_end());
+                    let core_data = body.into_data();
+                    info!("Got XLogData/data-change event. @wal_pos_last_processed:{}", wal_pos_last_processed);
+                    match core_data {
+                        // todo: probably rework my code to just use the existing LogicalReplicationMessage struct, rather than this custom LDChange
+                        Insert(body2) => {
+                            info!("Got insert event:{:?}", body2);
+                            /*let change = LDChange {
+                                table: self.lq_key.table_name.clone(),
+                                kind: "insert".to_owned(),
+                                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
+                                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
+                                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
+                                oldkeys: None,
+                                schema: "".to_owned(),
+                            };
+                            storage_wrapper.notify_of_ld_change(change).await;*/
+                        },
+                        Update(body2) => {
+                            info!("Got update event:{:?}", body2);
+                            /*let change = LDChange {
+                                table: self.lq_key.table_name.clone(),
+                                kind: "update".to_owned(),
+                                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
+                                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
+                                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
+                                oldkeys: None,
+                                schema: "".to_owned(),
+                            };
+                            storage_wrapper.notify_of_ld_change(change).await;*/
+                        },
+                        Delete(body2) => {
+                            info!("Got delete event:{:?}", body2);
+                            /*let change = LDChange {
+                                table: body2.,
+                                kind: "delete".to_owned(),
+                                columnnames: Some(new_data.keys().map(|a| a.clone()).collect()),
+                                columnvalues: Some(new_data.values().map(|a| a.clone()).collect()),
+                                // marking the type as "unknown" is fine; the type is only needed when converting from-lds data into proper `JSONValue`s
+                                columntypes: Some(new_data.keys().map(|_| "unknown".to_owned()).collect()),
+                                oldkeys: None,
+                                schema: "".to_owned(),
+                            };
+                            storage_wrapper.notify_of_ld_change(change).await;*/
+                        },
+                        // ignore all other message-types
+                        enum_type => {
+                            info!("Got other event: {:?}", enum_type);
+                        },
+                    }
+                },
+                // type: keepalive message
+                PrimaryKeepAlive(data) => {
+                    let should_send_response = data.reply() == 1;
+                    info!("Got keepalive message:{:x?} @should_send_response:{}", data, should_send_response);
 
-                    let buf = Bytes::from(data_to_send);
-
-                    debug!("Responding to keepalive message/warning... @response:{:x?}", buf);
-                    let mut next_step = 1;
-                    future::poll_fn(|cx| {
-                        loop {
-                            match next_step {
-                                1 => { ready!(duplex_stream_pin.as_mut().poll_ready(cx)).unwrap(); }
-                                2 => { duplex_stream_pin.as_mut().start_send(buf.clone()).unwrap(); },
-                                3 => { ready!(duplex_stream_pin.as_mut().poll_flush(cx)).unwrap(); },
-                                4 => { return Poll::Ready(()) },
-                                _ => panic!(),
-                            }
-                            next_step += 1;
-                        }
-                    }).await;
-                }
+                    // todo: someday probably use a timer to send keepalive messages to server proactively, since in some cases server warning can come too late (https://github.com/sfackler/rust-postgres/pull/696#discussion_r789698737)
+                    if should_send_response {
+                        debug!("Responding to keepalive message/warning... @wal_pos_last_processed:{}", wal_pos_last_processed);
+                        let lsn = PgLsn::from(wal_pos_last_processed);
+                        let ts: i64 = PG_EPOCH.elapsed().unwrap().as_micros().try_into().unwrap();
+                        let request_server_response = 1; // If 1, the client requests the server to reply to this message immediately. This can be used to ping the server, to test if the connection is still healthy.
+                        stream.as_mut().standby_status_update(lsn, lsn, lsn, ts, request_server_response).await?;
+                    }
+                },
+                _ => debug!("Got unknown replication event:{:?}", event),
             }
         }
 
@@ -230,3 +275,6 @@ pub async fn start_streaming_changes(
         },
     }
 }
+
+/// Postgres epoch is 2000-01-01T00:00:00Z
+static PG_EPOCH: Lazy<SystemTime> = Lazy::new(|| UNIX_EPOCH + Duration::from_secs(946_684_800));

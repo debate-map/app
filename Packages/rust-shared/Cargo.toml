@@ -81,14 +81,23 @@ serde = "1.0.144"
 
 # sync version with root Cargo.toml
 [dependencies.tokio-postgres]
+
 # git = "https://github.com/petrosagg/rust-postgres.git"
 # branch = "copy-both"
+
 # temp; use own branch, which is a fork of petrosagg's, from before he force-pushed a broken version of the copy-both feature (materialize fork also has same issue atm)
-git = "https://github.com/Venryx/rust-postgres.git"
-branch = "copy-both"
-# git = "https://github.com/MaterializeInc/rust-postgres.git"
-# rev = "54331183eaa6ee57f0dfeb01770b93360544c904"
+#git = "https://github.com/Venryx/rust-postgres.git"
+#branch = "copy-both"
+
+git = "https://github.com/MaterializeInc/rust-postgres.git"
+rev = "7bdd17b5acf4d7dbc53b08a9038793ab7e49da6c"
+
 features = [
 	"with-serde_json-1", # needed for serde_json::Value to auto-convert to a declared struct
 	"array-impls"
 ]
+
+[dependencies.postgres-protocol]
+
+git = "https://github.com/MaterializeInc/rust-postgres.git"
+rev = "7bdd17b5acf4d7dbc53b08a9038793ab7e49da6c"

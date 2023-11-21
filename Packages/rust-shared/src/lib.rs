@@ -51,6 +51,7 @@ pub extern crate serde;
 pub extern crate serde_json;
 pub extern crate tokio;
 pub extern crate tokio_postgres;
+pub extern crate postgres_protocol;
 pub extern crate tower;
 pub extern crate tower_http;
 pub extern crate tower_service;

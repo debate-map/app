@@ -357,6 +357,7 @@ export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|un
 	// in sl-mode, allow custom titles for arguments to actually display in-place of the standard "True, because..." etc. texts
 	// (normally, we enforce those standard-texts for arguments, to avoid rhetorical advantage from overriding the "generic container text" -- but sl mostly avoids this concern with a consistent editor team)
 	if (SLDemo_ForJSCommon() && rawTitle != null) return false;
+	// todo: maybe extend branch above (for sl-mode) to accept "sl-layout" as well (for allowing custom arg-titles)
 	return true;
 });
 

@@ -524,7 +524,7 @@ class ImportResourceUI extends BaseComponent<
 									const newSelected = val;
 									let startI = index;
 									let lastI = index;
-									if ((e.nativeEvent as MouseEvent).ctrlKey) {
+									if ((e.nativeEvent as MouseEvent).ctrlKey || (e.nativeEvent as MouseEvent).shiftKey) {
 										if (uiState.selectFromIndex != -1) {
 											startI = Math.min(uiState.selectFromIndex, index);
 											lastI = Math.max(uiState.selectFromIndex, index);
