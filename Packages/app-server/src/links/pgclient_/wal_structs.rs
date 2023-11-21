@@ -12,6 +12,7 @@ use serde::Deserialize;
 use crate::utils::db::pg_row_to_json::{pg_cell_to_json_value, StringCollector};
 use crate::utils::db::pg_stream_parsing::parse_postgres_array_as_strings;
 
+/// Table info, as collected from "Relation" messages, received from the `pgoutput` plugin. For example contents of `pgoutput` messages, see `@FormatExamples/PGOutput_Messages.md`. 
 pub struct TableInfo {
     pub name: String,
     pub columns: Vec<ColumnInfo>,

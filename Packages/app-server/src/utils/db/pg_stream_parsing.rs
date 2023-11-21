@@ -126,6 +126,7 @@ pub fn parse_postgres_array_as_strings(array_str: &str) -> Vec<String> {
     result_as_strings
 }
 
+/// For example contents (as received directly from wal2json), see `@FormatExamples/WAL2JSON_Messages.md`.
 #[derive(Debug, Clone, Deserialize)]
 pub struct LDChange {
     pub kind: String,
@@ -225,59 +226,3 @@ impl OldKeys {
         new_entry
     }
 }
-
-/*
-[postgres logical-decoding message examples; further examples can be seen here: https://github.com/eulerto/wal2json]
-
-row addition
-==========
-{"change":[
-    {
-        "kind":"insert",
-        "schema":"app",
-        "table":"globalData",
-        "columnnames":["extras","id"],
-        "columntypes":["jsonb","text"],
-        "columnvalues":[
-            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test1\"}",
-            "main2"
-        ]
-    }
-]}
-
-row change
-==========
-{"change": [
-    {
-        "kind":"update",
-        "schema":"app",
-        "table":"globalData",
-        "columnnames":["extras","id"],
-        "columntypes":["jsonb","text"],
-        "columnvalues":[
-            "{\"dbReadOnly\": false, \"dbReadOnly_message\": \"test123\"}",
-            "main"
-        ],
-        "oldkeys":{
-            "keynames":["id"],
-            "keytypes":["text"],
-            "keyvalues":["main"]
-        }
-    }
-]}
-
-row deletion (regular mode)
-==========
-{"change":[
-    {
-        "kind":"delete",
-        "schema":"app",
-        "table":"globalData",
-        "oldkeys":{
-            "keynames":["id"],
-            "keytypes":["text"],
-            "keyvalues":["main2"]
-        }
-    }
-]}
-*/
