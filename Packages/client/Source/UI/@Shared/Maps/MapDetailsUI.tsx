@@ -22,7 +22,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 		const accessPolicy = GetAccessPolicy(newData.accessPolicy);
 		const nodeAccessPolicy = GetAccessPolicy(newData.nodeAccessPolicy);
 
-		const splitAt = 190;
+		const splitAt = 160;
 		const width = 600;
 		return (
 			<Column style={style}>
@@ -99,8 +99,9 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 						<Text>Show:</Text>
 						<CheckBox ml={5} enabled={enabled} value={newData.extras.defaultNodeToolbarEnabled ?? true} onChange={val=>Change(newData.extras.defaultNodeToolbarEnabled = val)}/>
 						<TextPlus ml={10} info={`
-							* If no items are enabled, the default toolbar-items will be shown.
+							* If no items are enabled, the default toolbar-items will try to be shown. (prefix, truth, relevance, phrasings)
 							* For an item to be shown, it still must be valid for the given node.
+							* The "Prefix" entry is only applicable in SL mode/layout. (for left-anchored prefix-text extractions)
 						`.AsMultiline(0)}>Items:</TextPlus>
 						{(()=>{
 							const setToolbarItemEnabled = (item_panel: string, new_enabled: boolean)=>{
@@ -119,8 +120,9 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 							};
 							return (
 								<Row style={{fontSize: 12}}>
-									<CheckBox ml={5} text="Agreement" value={newData.extras.toolbarItems?.Any(a=>a.panel == "truth") ?? false} onChange={val=>setToolbarItemEnabled("truth", val)}/>
-									<CheckBox ml={5} text="Relevance" value={newData.extras.toolbarItems?.Any(a=>a.panel == "relevance") ?? false} onChange={val=>setToolbarItemEnabled("relevance", val)}/>
+									<CheckBox ml={5} text="Prefix" value={newData.extras.toolbarItems?.Any(a=>a.panel == "prefix") ?? false} onChange={val=>setToolbarItemEnabled("prefix", val)}/>
+									<CheckBox ml={5} text="Agree." value={newData.extras.toolbarItems?.Any(a=>a.panel == "truth") ?? false} onChange={val=>setToolbarItemEnabled("truth", val)}/>
+									<CheckBox ml={5} text="Relev." value={newData.extras.toolbarItems?.Any(a=>a.panel == "relevance") ?? false} onChange={val=>setToolbarItemEnabled("relevance", val)}/>
 									<CheckBox ml={5} text="Tags" value={newData.extras.toolbarItems?.Any(a=>a.panel == "tags") ?? false} onChange={val=>setToolbarItemEnabled("tags", val)}/>
 									<CheckBox ml={5} text="Phrasings" value={newData.extras.toolbarItems?.Any(a=>a.panel == "phrasings") ?? false} onChange={val=>setToolbarItemEnabled("phrasings", val)}/>
 								</Row>

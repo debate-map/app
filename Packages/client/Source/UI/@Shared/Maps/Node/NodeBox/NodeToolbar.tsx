@@ -26,7 +26,7 @@ export type NodeToolbar_Props = {
 export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
 export function GetToolbarItemsToTryToShow(map?: Map|n) {
-	return (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
+	return (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "prefix"}, {panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
 }
 export function GetToolbarItemsToShow(node: NodeL3, map?: Map|n) {
 	if (!ShowNodeToolbars(map)) return [];
@@ -35,6 +35,7 @@ export function GetToolbarItemsToShow(node: NodeL3, map?: Map|n) {
 
 	const itemsToTryToShow = GetToolbarItemsToTryToShow(map);
 	return itemsToTryToShow.filter((item, index)=>{
+		if (item.panel == "prefix") return true;
 		if (item.panel == "truth" && node.type == NodeType.claim) return true;
 		if (item.panel == "relevance" && node.type == NodeType.argument) return true;
 		if (item.panel == "tags" && node.type != NodeType.argument) return true;
@@ -130,7 +131,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			true;
 		return (
 			<>
-				{extractedPrefixTextInfo?.extractLocation == "toolbar" &&
+				{extractedPrefixTextInfo?.extractLocation == "toolbar" && toolbarItemsToShow.Any(a=>a.panel == "prefix") &&
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
 						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",

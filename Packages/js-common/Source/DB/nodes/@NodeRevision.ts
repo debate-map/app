@@ -61,6 +61,7 @@ Options:
 1) Titles can have narrative form. (and new claims under categories don't default to question form)
 2) Bracketed prefix-text gets extracted.
 3) Multi-premise args start with premises collapsed.
+4) The "arguments control-bar" does not display.
 
 The final ordering-type is determined by the first provided value (ie. not set to "Unchanged") in this list:
 1) Node setting, in node's Details->Others panel (if map has "Allow special" for child-layouts enabled)

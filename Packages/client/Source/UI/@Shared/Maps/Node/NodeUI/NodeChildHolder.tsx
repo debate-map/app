@@ -1,4 +1,4 @@
-import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
+import {ChildGroup, GetChildLayout_Final, GetChildOrdering_Final, GetOrderingValue_AtPath, GetPathNodeIDs, IsSLModeOrLayout, Map, NodeL3, NodeType, NodeType_Info, Polarity} from "dm_common";
 import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
@@ -48,9 +48,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {placeholderRect} = this.state;
 
 		const playingTimeline = GetPlayingTimeline(map.id);
-		const showArgumentsControlBar_final = showArgumentsControlBar && (!playingTimeline || !store.main.timelines.hideEditingControls) && !(SLMode && !ShowHeader) && !store.main.maps.screenshotMode;
-
 		const childLayout = GetChildLayout_Final(parentNode.current, map);
+		const showArgumentsControlBar_final = showArgumentsControlBar && !(playingTimeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
+
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);
 		const nodeChildren_orderingValues = nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
