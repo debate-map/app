@@ -8,6 +8,8 @@ import {GetMap} from "../maps.js";
 import {GetUser, MeID} from "../users.js";
 import {IsUserCreatorOrAdmin} from "../users/$user.js";
 import {Map} from "./@Map.js";
+import {GetToolbarItemsToShow} from "../nodes/$node.js";
+import {NodeL2} from "../nodes/@Node.js";
 
 export function IsUserMap(map: Map) {
 	return map.id != globalMapID;
@@ -26,8 +28,11 @@ export const GetMapEditors = CreateAccessor((mapID: string)=>{
 	return GetMapEditorIDs.BIN(mapID).map(id=>GetUser(id));
 });
 
-export function ShowNodeToolbars(map: Map|n) {
+export function IsNodeToolbarEnabled(map: Map|n) {
 	return map?.extras.defaultNodeToolbarEnabled ?? true;
+}
+export function ShowNodeToolbar(node: NodeL2, path?: string|n, map?: Map|n) {
+	return GetToolbarItemsToShow(node, path, map).length > 0;
 }
 
 /*

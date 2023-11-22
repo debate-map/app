@@ -21,6 +21,7 @@ import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodePhrasing_Embedded, TitleKey, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
 import {Attachment} from "../@Shared/Attachments/@Attachment.js";
 import {SLDemo_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
+import {IsNodeToolbarEnabled, ShowNodeToolbar} from "../maps/$map.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -389,6 +390,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 	// special bracketed-prefix-text handling; in sl mode/layout, extract prefix-text of single-premise into/as its parent argument's main-text, and put other cases above the node into a left-positioned "toolbar button"
 	if (allowPrefixTextHandling && ShouldExtractPrefixText(childLayout)) {
 		const premises = node.type == NodeType.argument ? GetNodeChildrenL3(node.id).filter(a=>a && a.link?.group == ChildGroup.generic && a.type == NodeType.claim) : [];
+		// todo: maybe make-so the prefix-text-extraction is considered canceled in this function (reverting to showing prefix-text in node's display-text), if the GetToolbarItemsToShow ends up not displaying the prefix toolbar-item
 		if (node.type == NodeType.argument && premises.length == 1) {
 			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(premises[0], path ? `${path}/${premises[0].id}` : `${node.id}/${premises[0].id}`, map, undefined);
 			if (extractedPrefixTextInfo != null && extractedPrefixTextInfo.extractLocation == "parentArgument") {
@@ -499,3 +501,29 @@ export const IsPremiseOfArgument = CreateAccessor((node: NodeL1, parent: NodeL1|
 	if (parent == null) return false;
 	return node.type == NodeType.claim && parent.type == NodeType.argument;
 });
+
+export function GetToolbarItemsToTryToShow(map?: Map|n) {
+	return (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "prefix"}, {panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
+}
+export function GetToolbarItemsToShow(node: NodeL2, path?: string|n, map?: Map|n) {
+	if (!IsNodeToolbarEnabled(map)) return [];
+
+	let itemsToTryToShow = GetToolbarItemsToTryToShow(map);
+	// for category-nodes, block displaying of all toolbar-items other than the prefix-text-extraction, since they look (and are less useful) there
+	if (node.type == NodeType.category) {
+		itemsToTryToShow = itemsToTryToShow.filter(a=>a.panel == "prefix");
+	}
+
+	return itemsToTryToShow.filter((item, index)=>{
+		if (item.panel == "prefix") {
+			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
+			if (extractedPrefixTextInfo?.extractLocation != "toolbar") return false;
+			return true;
+		}
+		if (item.panel == "truth" && node.type == NodeType.claim) return true;
+		if (item.panel == "relevance" && node.type == NodeType.argument) return true;
+		if (item.panel == "tags" && node.type != NodeType.argument) return true;
+		if (item.panel == "phrasings" && node.type != NodeType.argument) return true;
+		return false;
+	});
+}

@@ -1,4 +1,4 @@
-import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, Map, NodeL3, NodeRatingType, NodeType, Polarity, ShowNodeToolbars} from "dm_common";
+import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, GetToolbarItemsToShow, Map, NodeL3, NodeRatingType, NodeType, Polarity, ShowNodeToolbar} from "dm_common";
 import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
@@ -25,25 +25,6 @@ export type NodeToolbar_Props = {
 } & NodeBox_Props;
 export type NodeToolbar_SharedProps = NodeToolbar_Props & {buttonCount: number}
 
-export function GetToolbarItemsToTryToShow(map?: Map|n) {
-	return (map?.extras.toolbarItems?.length ?? 0) > 0 ? map?.extras.toolbarItems! : [{panel: "prefix"}, {panel: "truth"}, {panel: "relevance"}, {panel: "phrasings"}];
-}
-export function GetToolbarItemsToShow(node: NodeL3, map?: Map|n) {
-	if (!ShowNodeToolbars(map)) return [];
-	// don't show any of the standard toolbar-items for category-nodes, since looks bad (and less useful there) [NodeToolbar comp still rendered, since may be needed to show prefix-text "button"]
-	if (node.type == NodeType.category) return [];
-
-	const itemsToTryToShow = GetToolbarItemsToTryToShow(map);
-	return itemsToTryToShow.filter((item, index)=>{
-		if (item.panel == "prefix") return true;
-		if (item.panel == "truth" && node.type == NodeType.claim) return true;
-		if (item.panel == "relevance" && node.type == NodeType.argument) return true;
-		if (item.panel == "tags" && node.type != NodeType.argument) return true;
-		if (item.panel == "phrasings" && node.type != NodeType.argument) return true;
-		return false;
-	});
-}
-
 @Observer
 export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 	render() {
@@ -56,7 +37,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 		const sharedProps = E(this.props, {buttonCount: 1}); // button-count is updated shortly
 		const {key, css} = cssHelper(this);
 
-		const toolbarItemsToShow = GetToolbarItemsToShow(node, map);
+		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
 		const tags = GetNodeTags(node.id);
 		const labels = tags.filter(a=>a.labels != null).SelectMany(a=>a.labels!.labels).Distinct();
 		// exclude clone-history tags because they're auto-created (ie. not relevant for readers, nor for most manual curation work)
@@ -119,7 +100,8 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			});
 		};
 		// for this call, we are just getting the number of toolbar-buttons (fine to discard result)
-		sharedProps.buttonCount = getStandardToolbarItemUIs().filter(a=>a != null).length;
+		//sharedProps.buttonCount = getStandardToolbarItemUIs().filter(a=>a != null).length;
+		sharedProps.buttonCount = toolbarItemsToShow.length; // todo: confirm this is correct (eg. confirm prefix-button is supposed to be included)
 
 		/*const [contextMenuOpen, setContextMenuOpen] = useState(false);
 		const processedMouseEvents = useMemo(()=>new WeakSet<MouseEvent>(), []); // use WeakSet, so storage about event can be dropped after its processing-queue completes
@@ -131,7 +113,8 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 			true;
 		return (
 			<>
-				{extractedPrefixTextInfo?.extractLocation == "toolbar" && toolbarItemsToShow.Any(a=>a.panel == "prefix") &&
+				{/*extractedPrefixTextInfo?.extractLocation == "toolbar" &&*/}
+				{toolbarItemsToShow.Any(a=>a.panel == "prefix") &&
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
 						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
@@ -140,7 +123,7 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 					},
 					showBottomBorder && {borderBottom: "1px solid black"},
 				)}>
-					<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo.bracketedText} panel="extractedPrefixText" enabled={false}/>
+					<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo?.bracketedText ?? "n/a"} panel="extractedPrefixText" enabled={false}/>
 				</Row>}
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{

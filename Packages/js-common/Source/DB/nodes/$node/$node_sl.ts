@@ -4,7 +4,7 @@ import {Map} from "../../maps/@Map.js";
 import {ClaimForm, NodeL2} from "../@Node.js";
 import {ChildLayout, GetChildLayout_Final} from "../@NodeRevision.js";
 import {ChildGroup, NodeType} from "../@NodeType.js";
-import {GetNodeDisplayText} from "../$node.js";
+import {GetNodeDisplayText, GetToolbarItemsToShow} from "../$node.js";
 import {NodePhrasing_Embedded} from "../../nodePhrasings/@NodePhrasing.js";
 
 // The node-related functions in this file are specific to use-cases of the society-library (or at least, that is their primary reason for existing).
@@ -80,5 +80,13 @@ export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: 
 	const info_base = GetExtractedPrefixTextInfo_Base(title);
 	if (info_base == null) return null;
 	const extractLocation = WhereShouldNodePrefixTextBeShown(node, path, form);
+
+	// commented; could cause infinite-loop (since GetToolbarItemsToShow calls this function, to check if prefix-text toolbar-item should actually show)
+	/*const toolbarItems = GetToolbarItemsToShow(node, path, map);
+	// if we're supposed to extract prefix-text to toolbar, but that toolbar-item is disabled, then cancel the prefix-text-extraction
+	if (extractLocation == "toolbar" && !toolbarItems.Any(a=>a.panel == "prefix")) {
+		return null;
+	}*/
+
 	return {...info_base, extractLocation};
 }

@@ -1,9 +1,8 @@
-import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbars, NodeType, ChildGroup} from "dm_common";
+import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbar, NodeType, ChildGroup, GetToolbarItemsToShow} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
 import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
-import {GetToolbarItemsToShow} from "../NodeBox/NodeToolbar";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;
@@ -50,8 +49,9 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
 		expectedOtherStuffWidth += 14;
 	}
-	if (node.type == NodeType.argument && ShowNodeToolbars(map)) {
-		expectedOtherStuffWidth += (GetToolbarItemsToShow(node, map).length * TOOLBAR_BUTTON_WIDTH); // add space for the "Relevance" toolbar-item (if visible)
+	if (node.type == NodeType.argument) {
+		const toolbarItemsToShow_inline = GetToolbarItemsToShow(node, path, map).filter(a=>a.panel != "prefix"); // todo: confirm whether the filter op is correct here
+		expectedOtherStuffWidth += (toolbarItemsToShow_inline.length * TOOLBAR_BUTTON_WIDTH); // add space for the inline toolbar-items (eg. "Relevance")
 	}
 
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;

@@ -1,4 +1,4 @@
-import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbars, GetExtractedPrefixTextInfo} from "dm_common";
+import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow} from "dm_common";
 import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
@@ -28,7 +28,7 @@ import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {RatingsPanel} from "./DetailBoxes/Panels/RatingsPanel.js";
 import {ExpandableBox} from "./ExpandableBox.js";
-import {GetToolbarItemsToShow, NodeToolbar} from "./NodeBox/NodeToolbar.js";
+import {NodeToolbar} from "./NodeBox/NodeToolbar.js";
 import {SubPanel} from "./NodeBox/SubPanel.js";
 import {TitlePanel} from "./NodeBox/TitlePanel.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
@@ -227,8 +227,9 @@ export class NodeBox extends BaseComponentPlus(
 			if (leftPanelPinned && !(selected || hovered)) setLeftPanelPinned(false); 
 		}, [selected, leftPanelPinned]);*/
 
-		const toolbarShow = ShowNodeToolbars(map);
-		const toolbarShow_hasRightAnchoredItems = toolbarShow && GetToolbarItemsToShow(node, map).length > 0;
+		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
+		const toolbarShow = toolbarItemsToShow.length > 0;
+		const toolbar_hasRightAnchoredItems = toolbarItemsToShow.filter(a=>a.panel != "prefix").length > 0;
 		const panelToShow = hoverPanel || nodeView?.openPanel;
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
@@ -377,7 +378,9 @@ export class NodeBox extends BaseComponentPlus(
 					<>{toolbarElement}{titlePanel}</>}
 			</>;
 
-			const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
+			//const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
+			//const isShowingToolbarButtonAtTopLeft = extractedPrefixTextInfo?.extractLocation == "toolbar";
+			const isShowingToolbarButtonAtTopLeft = toolbarItemsToShow.Any(a=>a.panel == "prefix");
 			return (
 				<ExpandableBox
 					ref={useCallback(c=>{
@@ -425,7 +428,7 @@ export class NodeBox extends BaseComponentPlus(
 					)}
 					//padding={GetPaddingForNode(node/*, isSubnode*/)}
 					padding={0}
-					roundedTopLeftCorner={extractedPrefixTextInfo?.extractLocation != "toolbar"}
+					roundedTopLeftCorner={!isShowingToolbarButtonAtTopLeft}
 					onClick={onClick}
 					onDirectClick={onDirectClick}
 					beforeChildren={<>
@@ -466,7 +469,7 @@ export class NodeBox extends BaseComponentPlus(
 						<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
 					</>}
 					toggleExpanded={toggleExpanded}
-					expandButtonStyle={E(toolbarShow_hasRightAnchoredItems && {borderRadius: "0 0 5px 0"})}
+					expandButtonStyle={E(toolbar_hasRightAnchoredItems && {borderRadius: "0 0 5px 0"})}
 					isExpandButtonForNodeChildren={(childrenShownByNodeExpandButton ?? 0) > 0}
 					afterChildren={<>
 						{bottomPanelShow

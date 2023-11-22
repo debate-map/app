@@ -1,4 +1,4 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbars} from "dm_common";
+import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, GetToolbarItemsToShow, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbar} from "dm_common";
 import React, {useCallback} from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
@@ -127,11 +127,13 @@ export class NodeUI extends BaseComponentPlus(
 		//NodeUI.renderCount++;
 		//NodeUI.lastRenderTime = Date.now();
 
-		const displayText = GetNodeDisplayText(node, path, map); // don't remove this; it's needed, since it's a dependency of GetMeasurementInfo, but within a "CatchBail" suppressor
-		const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
+		//const displayText = GetNodeDisplayText(node, path, map); // don't remove this; it's needed, since it's a dependency of GetMeasurementInfo, but within a "CatchBail" suppressor
+		//const extractedPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map);
 		const {width} = GetMeasurementInfoForNode(node, path, map);
-		const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
-		const aboveToolbar_visible = ShowNodeToolbars(map) && ((node.type != NodeType.argument && node.type != NodeType.category) || usesToolbarForPrefixText);
+		//const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
+		//const aboveToolbar_visible = ShowNodeToolbars(map) && ((node.type != NodeType.argument && node.type != NodeType.category) || usesToolbarForPrefixText);
+		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
+		const aboveToolbar_visible = toolbarItemsToShow.length > 0;
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(
 			treePath,
@@ -144,7 +146,7 @@ export class NodeUI extends BaseComponentPlus(
 			new NodeDataForTreeGrapher({
 				nodePath: path, nodeType: node.type, width, expanded: boxExpanded,
 				aboveToolbar_visible,
-				aboveToolbar_hasLeftButton: aboveToolbar_visible && usesToolbarForPrefixText,
+				aboveToolbar_hasLeftButton: aboveToolbar_visible && toolbarItemsToShow.Any(a=>a.panel == "prefix"),
 			}),
 		);
 
