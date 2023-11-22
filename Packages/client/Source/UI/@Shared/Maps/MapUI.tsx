@@ -72,7 +72,7 @@ type Props = {
 @Observer
 export class MapUI extends BaseComponent<Props, {}> {
 	private static currentMapUI: MapUI|n;
-	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted ? MapUI.currentMapUI : null; }
+	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted && MapUI.currentMapUI.scrollView ? MapUI.currentMapUI : null; }
 
 	scrollView: ScrollView|n;
 	mapUIEl: HTMLDivElement|n;

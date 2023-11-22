@@ -147,16 +147,23 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 						{playingTimeline && uiState.layoutHelperMap_load && <>
 							<TimelineEffectApplier_Smooth {...{map, mapState}} mainGraph={graph_main} layoutHelperGraph={graph_forLayoutHelper}/>
 							<div
-								className={
-									[!uiState.layoutHelperMap_show && "hideAndCompletelyBlockMouseEvents"].filter(a=>a).join(" ")
-								}
+								className={[
+									!uiState.layoutHelperMap_show && "hideAndCompletelyBlockMouseEvents",
+								].filter(a=>a).join(" ")}
 								style={ES(
 									{position: "absolute", left: 0, top: 0, right: 0, bottom: 0 /*zIndex: 1*/},
+									// Even though class styles result in hiding, the positioning of the map causes chrome slowdown.
+									// Pushing its rect off-screen and/or zeroing its width/height yields major perf boost for scrolling on heavy maps. (yes, was tested)
+									!uiState.layoutHelperMap_show && {
+										right: 9999, bottom: 9999,
+										width: 0, height: 0,
+									},
 								)}
 							>
 								<style>{`
-								.hideAndCompletelyBlockMouseEvents { opacity: 0 !important; pointer-events: none !important; }
-								.hideAndCompletelyBlockMouseEvents * { opacity: 0 !important; pointer-events: none !important; }
+								/* Given "visibility:hidden", "opacity:0" and "pointer-event:none" are presumably not needed, but we add them to ensure hiding/input-disabling in case of browser inconsistencies. */
+								.hideAndCompletelyBlockMouseEvents { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+								.hideAndCompletelyBlockMouseEvents * { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 								`}</style>
 								<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_forLayoutHelper} forLayoutHelper={true}/>
 							</div>
