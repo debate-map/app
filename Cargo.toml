@@ -29,7 +29,7 @@ members = [
 
 [patch.crates-io]
 # force deadpool-postgres to use the same version of tokio-postgres as our root project
-# sync:version with root Cargo.toml
+# sync:version with "rust-shared/Cargo.toml"
 #tokio-postgres = "0.7.1"
 #tokio-postgres = {git = "https://github.com/petrosagg/rust-postgres.git", branch = "copy-both", features = ["with-serde_json-1", "array-impls"]}
 #tokio-postgres = {git = "https://github.com/Venryx/rust-postgres.git", branch = "copy-both", features = ["with-serde_json-1", "array-impls"]}

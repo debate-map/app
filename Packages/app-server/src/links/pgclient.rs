@@ -151,9 +151,12 @@ pub async fn start_streaming_changes(
             let event = match event_res {
                 Ok(event) => event,
                 Err(err) => {
-                    warn!("Duplex-stream from pgclient returned an error; resuming listen loop. @error:{:?}", err);
                     // if error is of type that signifies that the the connection has closed, just break the loop
-                    if err.is_closed() { break; }
+                    if err.is_closed() {
+                        warn!("Duplex-stream from pgclient returned a connecting-closing error; breaking listen loop. @error:{:?}", err);
+                        break;
+                    }
+                    warn!("Duplex-stream from pgclient returned a non-connecting-closing error; resuming listen loop. @error:{:?}", err);
                     continue;
                 },
             };
@@ -170,10 +173,10 @@ pub async fn start_streaming_changes(
                 XLogData(body) => {
                     wal_pos_last_processed = max(wal_pos_last_processed, body.wal_end());
                     let core_data = body.into_data();
-                    info!("Got XLogData/data-change event. @wal_pos_last_processed:{}", wal_pos_last_processed);
+                    debug!("Got XLogData/data-change event. @wal_pos_last_processed:{}", wal_pos_last_processed);
                     match core_data {
                         Relation(body2) => {
-                            info!("Got relation event:{:?}", body2);
+                            debug!("Got relation event:{:?}", body2);
                             table_infos.insert(body2.rel_id(), TableInfo {
                                 name: body2.name().unwrap().to_owned(),
                                 columns: body2.columns().into_iter().map(|c| ColumnInfo::from_column(c)).collect_vec(),
@@ -181,7 +184,7 @@ pub async fn start_streaming_changes(
                         },
                         // todo: maybe rework my code to just use the existing LogicalReplicationMessage struct, rather than the LDChange struct (which was the data-structure sent by wal2json, but arguably not relevant anymore)
                         Insert(body2) => {
-                            info!("Got insert event:{:?}", body2);
+                            debug!("Got insert event:{:?}", body2);
                             let table_info = table_infos.get(&body2.rel_id()).unwrap();
                             let new_data = wal_data_tuple_to_row_data(body2.tuple(), table_info, 100).unwrap();
                             let change = LDChange {
@@ -198,7 +201,7 @@ pub async fn start_streaming_changes(
                             storage_wrapper.notify_of_ld_change(change).await;
                         },
                         Update(body2) => {
-                            info!("Got update event:{:?}", body2);
+                            debug!("Got update event:{:?}", body2);
                             let table_info = table_infos.get(&body2.rel_id()).unwrap();
                             let new_data = wal_data_tuple_to_row_data(body2.new_tuple(), table_info, 100).unwrap();
                             let change = LDChange {
@@ -215,7 +218,7 @@ pub async fn start_streaming_changes(
                             storage_wrapper.notify_of_ld_change(change).await;
                         },
                         Delete(body2) => {
-                            info!("Got delete event:{:?}", body2);
+                            debug!("Got delete event:{:?}", body2);
                             let table_info = table_infos.get(&body2.rel_id()).unwrap();
                             let key_tuple = body2.key_tuple().ok_or(anyhow!("Delete event didn't have key-tuple!"))?;
                             let old_data_partial = wal_data_tuple_to_row_data(key_tuple, table_info, 100).unwrap();
@@ -239,7 +242,7 @@ pub async fn start_streaming_changes(
                         },
                         // ignore all other message-types
                         enum_type => {
-                            info!("Got other event: {:?}", enum_type);
+                            debug!("Got other event: {:?}", enum_type);
                         },
                     }
                 },
@@ -257,6 +260,8 @@ pub async fn start_streaming_changes(
                         stream.as_mut().standby_status_update(lsn, lsn, lsn, ts, request_server_response).await?;
                     }
                 },
+                // todo: maybe delay ingesting insert/update/delete events until after we get the corresponding "commit" message (unsure if this is necessary)
+                //Commit(commit) => {},
                 _ => debug!("Got unknown replication event:{:?}", event),
             }
         }

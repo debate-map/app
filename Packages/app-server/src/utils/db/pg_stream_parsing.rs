@@ -187,7 +187,7 @@ fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &str) -> JSONValu
     }*/
     match typ {
         "jsonb" => {
-            // the LDChange vals of type jsonb are initially stored as strings
+            // the wal2json-sourced LDChange vals of type jsonb are initially stored as strings
             // convert that to a serde_json::Value::Object, so serde_json::from_value(...) can auto-deserialize it to a nested struct
             match value.as_str() {
                 Some(val_as_str) => {

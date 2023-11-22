@@ -134,6 +134,7 @@ fn pg_array_type_to_basic_type(array_type: &Type) -> Option<Type> {
         Type::JSONB_ARRAY => Some(Type::JSONB),
         Type::FLOAT4_ARRAY => Some(Type::FLOAT4),
         Type::FLOAT8_ARRAY => Some(Type::FLOAT8),
+        //Type::TS_VECTOR_ARRAY => Some(Type::TS_VECTOR), // not needed atm, since tsvector columns are currently ignored by data_tuple_entry_to_json_value
         _ => None,
     }
 }
