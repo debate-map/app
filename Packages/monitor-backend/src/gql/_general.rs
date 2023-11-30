@@ -1,5 +1,5 @@
 use rust_shared::itertools::Itertools;
-use rust_shared::anyhow::{anyhow, Context, Error, bail};
+use rust_shared::anyhow::{anyhow, Context, Error, bail, ensure};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject, self};
 use rust_shared::flume::{Receiver, Sender};
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
@@ -35,15 +35,15 @@ use crate::store::storage::{AppStateArc, LQInstance_Partial};
 use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::{ABSender, ABReceiver};
 
-pub fn admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> bool {
+pub fn admin_key_is_correct(admin_key: String, log_message_if_wrong: bool) -> bool {
     let result = admin_key == env::var("MONITOR_BACKEND_ADMIN_KEY").unwrap();
-    if !result && print_message_if_wrong {
+    if !result && log_message_if_wrong {
         error!("Admin-key is incorrect! Submitted:{}", admin_key);
     }
     return result;
 }
-pub fn ensure_admin_key_is_correct(admin_key: String, print_message_if_wrong: bool) -> Result<(), Error> {
-    if !admin_key_is_correct(admin_key, print_message_if_wrong) {
+pub fn ensure_admin_key_is_correct(admin_key: String, log_message_if_wrong: bool) -> Result<(), Error> {
+    if !admin_key_is_correct(admin_key, log_message_if_wrong) {
         return Err(anyhow!("Admin-key is incorrect!"));
     }
     Ok(())

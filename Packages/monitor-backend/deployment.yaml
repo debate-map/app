@@ -68,7 +68,7 @@ spec:
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
-        # just reuse the db-password as the admin-key for now
+        # just reuse the db-password as the admin-key for now # todo: probably switch this to use the "debate-map-trusted-operator" secret's "passkey" instead
         - name: MONITOR_BACKEND_ADMIN_KEY
           valueFrom: { secretKeyRef: { name: debate-map-pguser-admin, key: password } }
 

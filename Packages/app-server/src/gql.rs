@@ -95,6 +95,7 @@ use crate::db::general::search::QueryShard_General_Search;
 use crate::db::general::sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
+use crate::db::general::trusted_operators::QueryShard_General_TrustedOperators;
 use crate::db::timeline_steps::SubscriptionShard_TimelineStep;
 use crate::db::timelines::SubscriptionShard_Timeline;
 use crate::store::storage::AppStateArc;
@@ -127,7 +128,7 @@ wrap_slow_macros!{
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
-    QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search,
+    QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search, QueryShard_General_TrustedOperators,
 );
 
 #[derive(MergedObject, Default)]

@@ -54,6 +54,8 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 3
         env:
+        - name: TRUSTED_OPERATOR_PASSKEY
+          valueFrom: { secretKeyRef: { name: debate-map-trusted-operator, key: passkey, optional: true } }
         - name: DB_VENDOR
           value: "postgres"
         - name: DB_ADDR

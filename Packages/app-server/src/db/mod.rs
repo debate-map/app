@@ -91,6 +91,7 @@ pub mod general {
     pub mod subtree_collector_old;
     pub mod subtree;
     pub mod subtree_collector;
+    pub mod trusted_operators;
 }
 pub mod nodes_ {
     pub mod _node;
