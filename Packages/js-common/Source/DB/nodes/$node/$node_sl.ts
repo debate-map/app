@@ -5,7 +5,7 @@ import {ClaimForm, NodeL2} from "../@Node.js";
 import {ChildLayout, GetChildLayout_Final} from "../@NodeRevision.js";
 import {ChildGroup, NodeType} from "../@NodeType.js";
 import {GetNodeDisplayText, GetToolbarItemsToShow} from "../$node.js";
-import {NodePhrasing_Embedded} from "../../nodePhrasings/@NodePhrasing.js";
+import {NodePhrasing_Embedded, TitleKey_values} from "../../nodePhrasings/@NodePhrasing.js";
 
 // The node-related functions in this file are specific to use-cases of the society-library (or at least, that is their primary reason for existing).
 // They are separated into their own file, to keep the main $node.ts file tidier. (since some of the sl-specific customizations have fairly nuanced logic/decisions)
@@ -71,22 +71,23 @@ export function GetExtractedPrefixTextInfo_Base(title: string) {
 	const regularTextWithSymbol = symbolPrefix + regularText;
 	return {matchStr, symbolPrefix, bracketedText, regularText, regularTextWithSymbol};
 }
+/** Note: This function may return prefix-text-extraction contents, even if (in one case) it isn't ultimately shown. (specifically, if extraction would go into toolbar, but that item is disabled) */
 export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: Map|n, form?: ClaimForm) {
 	const childLayout = GetChildLayout_Final(node.current, map);
 	const shouldExtract = ShouldExtractPrefixText(childLayout);
 	if (!shouldExtract) return null;
 
 	const title = GetNodeDisplayText(node, path, map, form, false);
-	const info_base = GetExtractedPrefixTextInfo_Base(title);
-	if (info_base == null) return null;
+	let info_base = GetExtractedPrefixTextInfo_Base(title);
+	if (info_base == null) {
+		// The SL preference is to show a prefix-text for a node, even if that prefix-text is not present in the "active title form" for the given location.
+		// So search the other title-forms. (we only search the node's own forms, not external phrasing entries)
+		const allTitles = Object.entries(node.current.phrasing).filter(a=>TitleKey_values.includes(a[0] as any)).map(a=>a[1] as string).filter(a=>a != null);
+		info_base = allTitles.map(altTitle=>GetExtractedPrefixTextInfo_Base(altTitle)).find(a=>a) ?? null;
+		// if we didn't find a prefix-text in any of the title-forms, return null
+		if (info_base == null) return null;
+	}
 	const extractLocation = WhereShouldNodePrefixTextBeShown(node, path, form);
-
-	// commented; could cause infinite-loop (since GetToolbarItemsToShow calls this function, to check if prefix-text toolbar-item should actually show)
-	/*const toolbarItems = GetToolbarItemsToShow(node, path, map);
-	// if we're supposed to extract prefix-text to toolbar, but that toolbar-item is disabled, then cancel the prefix-text-extraction
-	if (extractLocation == "toolbar" && !toolbarItems.Any(a=>a.panel == "prefix")) {
-		return null;
-	}*/
 
 	return {...info_base, extractLocation};
 }
