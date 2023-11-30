@@ -79,6 +79,7 @@ export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: 
 
 	const title = GetNodeDisplayText(node, path, map, form, false);
 	let info_base = GetExtractedPrefixTextInfo_Base(title);
+	const prefixTextIsFromActiveForm = info_base != null;
 	if (info_base == null) {
 		// The SL preference is to show a prefix-text for a node, even if that prefix-text is not present in the "active title form" for the given location.
 		// So search the other title-forms. (we only search the node's own forms, not external phrasing entries)
@@ -89,5 +90,5 @@ export function GetExtractedPrefixTextInfo(node: NodeL2, path?: string|n, map?: 
 	}
 	const extractLocation = WhereShouldNodePrefixTextBeShown(node, path, form);
 
-	return {...info_base, extractLocation};
+	return {...info_base, extractLocation, prefixTextIsFromActiveForm};
 }

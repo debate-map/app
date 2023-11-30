@@ -398,7 +398,8 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 			}
 		} else {
 			const ownPrefixTextInfo = GetExtractedPrefixTextInfo(node, path, map, form);
-			if (ownPrefixTextInfo != null) {
+			// regarding second condition: even if prefix-text-extraction searches all forms, we want the node's actual display-text to be based only on the "active form" for the given location
+			if (ownPrefixTextInfo != null && ownPrefixTextInfo.prefixTextIsFromActiveForm) {
 				resultTitle = ownPrefixTextInfo.regularTextWithSymbol;
 			}
 		}
