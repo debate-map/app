@@ -139,17 +139,12 @@ fn pg_array_type_to_basic_type(array_type: &Type) -> Option<Type> {
     }
 }
 fn lds_text_to_json_value_using_pg_data_type<'a, T: for<'de> Deserialize<'de>>(val_as_bytes: &Bytes, data_type: Type, val_to_json_val: impl Fn(T) -> Result<JSONValue, Error>) -> Result<JSONValue, Error> {
-    let val_as_bytes_final = if data_type == Type::TEXT || data_type == Type::VARCHAR {
-        // add quote chars at start and end
-        let mut temp2 = Vec::with_capacity(val_as_bytes.len() + 2);
-        temp2.push(b'"');
-        temp2.extend_from_slice(val_as_bytes);
-        temp2.push(b'"');
-        Bytes::from(temp2)
-    } else {
-        val_as_bytes.clone()
-    };
-    let val_as_u8_slice = val_as_bytes_final.as_ref();
+    let val_as_u8_slice = val_as_bytes.as_ref();
+    
+    if data_type == Type::TEXT || data_type == Type::VARCHAR {
+        return Ok(JSONValue::String(String::from_utf8_lossy(val_as_u8_slice).to_string()));
+    }
+
     if val_as_u8_slice.len() == 0 || val_as_u8_slice == b"null" {
         return Ok(JSONValue::Null);
     }
