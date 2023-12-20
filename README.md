@@ -15,6 +15,14 @@ The maps are constructed from "claims" (gray), and "arguments" (green and red) w
 
 For more information, visit the website at: <https://debatemap.app>
 
+# Contributing
+
+Areas where help would be welcome:
+* Completing development tasks in TypeScript (frontend) or Rust (backend). You can find a [structured view here](https://github.com/orgs/debate-map/projects/1/views/1), or the unstructured [list of tasks/issues here](https://github.com/debate-map/app/issues).
+* Contributing to the content on the debate-map website. (eg. expanding existing maps, creating new ones, improving phrasing or organization, voting on existing claims/arguments)
+* Assisting with creation of videos demonstrating site functionality and usefulness. (whether creating your own, or getting in touch to assist with a video-series I'm working on for YouTube)
+* Providing feedback on the site (or general direction of debate-mapping tools) by joining the [Canonical Debate Lab slack server](https://join.slack.com/t/canonicaldebatelab/shared_invite/zt-408acfmb-qhowbidwY0aKaET7wP_IEQ) (Debate Map is one of several projects associated with the CDL group)
+
 # Associated projects
 
 ### Society Library
