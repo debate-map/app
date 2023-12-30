@@ -4,7 +4,7 @@ import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {ES, HSLA, Observer, observer_simple, ParseYoutubeVideoID, YoutubePlayerUI} from "web-vcore";
 import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, observer_mgl} from "web-vcore/nm/mobx-graphlink";
 import {Button, Column, Pre, Row, RowLR, Select, Span, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
@@ -99,7 +99,7 @@ export async function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?:
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add media", cancelButton: true,
-		message: observer(()=>{
+		message: observer_mgl(()=>{
 			/*const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

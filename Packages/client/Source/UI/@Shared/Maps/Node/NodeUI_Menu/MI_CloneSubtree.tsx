@@ -6,7 +6,7 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {InfoButton, Observer} from "web-vcore";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {GetEntries, GetValues, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {SlicePath, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {Button, Column, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
@@ -81,7 +81,7 @@ export async function ShowCloneSubtreeDialog(payload_initial: CloneSubtreePayloa
 	const boxController = ShowMessageBox({
 		okButtonProps: {enabled: false}, // start disabled (see Change function for updating)
 		title: "Clone subtree", cancelButton: true,
-		message: observer(()=>{
+		message: observer_mgl(()=>{
 			return (
 				<Column ref={c=>root = c} style={{width: 1000}}>
 					<Row style={{whiteSpace: "pre-wrap"}}>{`

@@ -4,7 +4,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {ES, InfoButton, Observer, observer_simple} from "web-vcore";
-import {Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Validate, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, NodeType, AddNodeTag, NodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp, TagComp_CloneHistory} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
@@ -240,7 +240,7 @@ export function ShowAddTagDialog(initialData: Partial<NodeTag>, postAdd?: (id: s
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add tag", cancelButton: true,
-		message: observer(()=>{
+		message: observer_mgl(()=>{
 			/*const tempCommand = getCommand();
 			const oldProps = boxController.options.okButtonProps;
 			boxController.options.okButtonProps = {

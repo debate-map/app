@@ -47,7 +47,7 @@ class BasicInfo {
 /*@Observer
 class SettingsUI extends BaseComponent<{}, {}> {
 	render() {*/
-const SettingsUI = observer(()=>{
+const SettingsUI = observer(()=>{ // todo: replace with "observer_mgl", if it works (ie. doesn't conflict with use of useMutation and such)
 	//let {} = this.props;
 	const adminKey = store.main.adminKey;
 

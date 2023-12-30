@@ -6,7 +6,7 @@ import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
 import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2} from "dm_common";
-import {BailError, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {BailError, CatchBail, GetAsync, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
@@ -155,7 +155,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 	const boxController = ShowMessageBox({
 		title: `Add ${prep.displayName}`, cancelButton: true,
 		//message: observer_simple(()=>{
-		message: observer(()=>{
+		message: observer_mgl(()=>{
 			/*try {
 				const tempCommand = helper.GetCommand();
 				boxController.options.okButtonProps = {
@@ -173,10 +173,10 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 				throw ex;
 			}*/
 			// are these CatchBail's really the best way to handle this? (maybe just use a "loading" state, and don't show the box until ready, eg. by creating a variant of the `observer` wrapper-func)
-			const map = GetMap.CatchBail(null, mapID);
+			const map = GetMap(mapID);
 
-			const accessPolicy = GetAccessPolicy.CatchBail(null, helper.node.accessPolicy);
-			if (accessPolicy == null) return null as any as JSX.Element; // wait
+			const accessPolicy = GetAccessPolicy(helper.node.accessPolicy);
+			if (accessPolicy == null) return null; // if access-policy was somehow deleted while dialog was open[ing], just render empty ui
 			//Object.defineProperty(helper.node, "policy", {configurable: true, set: val=>{ debugger; }});
 			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, accessPolicy);
 			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, childPolarity);

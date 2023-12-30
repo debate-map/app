@@ -4,7 +4,7 @@ import {BaseComponentPlus, UseEffect, UseState} from "web-vcore/nm/react-vextens
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
-import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {NoID, observer_mgl, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Chroma, Chroma_Safe, ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, RunInAction_Set, uplotDefaults} from "web-vcore";
 import {NodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, NodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
@@ -175,8 +175,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					const Change = (..._)=>boxController.UpdateUI();
 					const boxController = ShowMessageBox({
 						title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
-						message: observer(()=>{
-							const newRating_accessPolicy = GetAccessPolicy.CatchBail(null, newRating_accessPolicyID);
+						message: observer_mgl(()=>{
+							const newRating_accessPolicy = GetAccessPolicy(newRating_accessPolicyID);
 							return (
 								<Column p="10px 0">
 									<RowLR splitAt={splitAt}>

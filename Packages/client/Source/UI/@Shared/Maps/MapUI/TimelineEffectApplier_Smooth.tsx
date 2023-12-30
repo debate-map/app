@@ -6,12 +6,13 @@ import {Graph, NodeGroup, FlexNode, GetTreeNodeBaseRect, GetTreeNodeOffset} from
 import {GetPathsWith1PlusFocusLevelAfterSteps, GetVisiblePathsAfterSteps, Map, TimelineStep} from "dm_common";
 import {MapState} from "Store/main/maps/mapStates/@MapState";
 import {GetOpenMapID} from "Store/main";
+import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "web-vcore/nm/mobx-graphlink";
 import {GetPercentThroughTransition, GetTimelineApplyEssentials, RevealPathsIncludesNode} from "../MapGraph";
 import {ACTUpdateAnchorNodeAndViewOffset, MapUI} from "../MapUI";
 
 //let ignoreNextZoomChange = false;
 /** This component replaces the node-focusing portion of TimelineStepAffectApplier with a smoother variant of it, when the layout-helper map is loaded. (layout-helper is required for the smoothing) */
-export const TimelineEffectApplier_Smooth = observer((props: {map: Map, mapState: MapState, mainGraph: Graph, layoutHelperGraph: Graph|n})=>{
+export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapState: MapState, mainGraph: Graph, layoutHelperGraph: Graph|n})=>{
 	const {map, mapState, mainGraph, layoutHelperGraph} = props;
 	//const zoomLevel = store.zoomLevel;
 	/*if (ignoreNextZoomChange) {
