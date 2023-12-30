@@ -164,7 +164,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					return RenderChild(pack, index, childrenHere);
 				}}*/>
 					{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
-						const dragIsOverDropArea = provided.placeholder?.props["on"] != null;
+						const dragIsOverDropArea = (provided.placeholder as any)?.props["on"] != null;
 						if (dragIsOverDropArea) {
 							WaitXThenRun(0, ()=>this.StartGeneratingPositionedPlaceholder(polarityGroup));
 						}

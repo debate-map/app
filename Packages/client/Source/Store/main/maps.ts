@@ -37,6 +37,7 @@ export class MapsState {
 	@O copiedNodePath: string|n;
 	@O copiedNodePath_asCut: boolean;
 
+	@O audioMode = true;
 	@O lockMapScrolling = true;
 	@O initialChildLimit = 5;
 	@O childOrdering?: ChildOrdering;

@@ -164,7 +164,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						}}/>
 					<Droppable type="NodeL1" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", timelineID: timeline.id, stepID: step.id}))} isDropDisabled={!creatorOrMod}>
 						{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
-							const dragIsOverDropArea = provided.placeholder?.props["on"] != null;
+							const dragIsOverDropArea = (provided.placeholder as any)?.props["on"] != null;
 							if (dragIsOverDropArea) {
 								WaitXThenRun(0, ()=>this.StartGeneratingPositionedPlaceholder());
 							}

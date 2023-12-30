@@ -227,7 +227,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: NodeType
 								</Row>
 								<Row style={{display: "flex", alignItems: "center"}}>
 									<TextArea required={true} pattern={NodeRevision_titlePattern}
-										allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
+										allowLineBreaks={false} autoSize={true} style={E({flex: 1, minWidth: 0})}
 										value={helper.subNode_revision!.phrasing["text_base"]}
 										onChange={val=>Change(helper.subNode_revision!.phrasing["text_base"] = val)}/>
 								</Row>

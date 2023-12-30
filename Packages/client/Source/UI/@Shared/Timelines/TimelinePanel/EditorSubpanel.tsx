@@ -38,7 +38,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
 		// timelineSteps: timeline && GetTimelineSteps(timeline, false),
 		const showTimelineDetails = GetShowTimelineDetails(map && map.id);
-		const {lockMapScrolling} = store.main.maps;
+		const uiState = store.main.maps;
 		const droppableInfo = new DroppableInfo({type: "TimelineStepList", timelineID: timeline ? timeline.id : null});
 
 		const timelineSteps = GetTimelineSteps(timeline.id);
@@ -73,8 +73,11 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 					<CheckBox ml={5} text="Details" value={showTimelineDetails} onChange={val=>{
 						RunInAction("EditorSubpanel.Details.onChange", ()=>mapState.showTimelineDetails = val);
 					}}/>
-					<CheckBox ml="auto" text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)" value={lockMapScrolling} onChange={val=>{
-						RunInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>store.main.maps.lockMapScrolling = val);
+					<CheckBox ml="auto" text="Audio mode" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps." value={uiState.audioMode} onChange={val=>{
+						RunInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>uiState.audioMode = val);
+					}}/>
+					<CheckBox ml={5} text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)" value={uiState.lockMapScrolling} onChange={val=>{
+						RunInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>uiState.lockMapScrolling = val);
 					}}/>
 				</Row>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({

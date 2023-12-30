@@ -45,7 +45,7 @@ COPY Scripts/PostInstall.js Scripts/PostInstall.js
 #RUN yarn install --inline-builds --production=true
 #	RUN yarn install --cache-folder ./cross-build-yarn-cache
 #	RUN --mount=type=cache,target=.yarn/cache yarn install
-#	ENV YARN_CACHE_FOLDER=../.yarn_cache
+#	ENV YARN_CACHE_FOLDER=../.yarn_cache # NOTE: If you want to use this again, you need to set "enableGlobalCache: false" in .yarnrc.yml
 #	RUN --mount=type=cache,target=../.yarn_cache yarn install
 #	RUN --mount=type=cache,mode=0777,target=../.yarn_cache yarn install
 #	RUN --mount=type=cache,target=/tmp/yarn_cache yarn install --prefer-offline --frozen-lockfile

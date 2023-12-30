@@ -74,12 +74,12 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 					</RowLR> */}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Definition: </Pre>
-					<TextArea autoSize={true} enabled={enabled} style={ES({flex: 1})} required
+					<TextArea autoSize={true} enabled={enabled} style={E({flex: 1, minWidth: 0})} required
 						value={newData.definition} onChange={val=>Change(newData.definition = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Note: </Pre>
-					<TextArea autoSize={true} enabled={enabled} style={ES({flex: 1})}
+					<TextArea autoSize={true} enabled={enabled} style={E({flex: 1, minWidth: 0})}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>

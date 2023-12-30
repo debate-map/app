@@ -183,7 +183,7 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{!applyingEdit &&
-							<TextArea required={true} pattern={NodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
+							<TextArea required={true} pattern={NodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={E({flex: 1, minWidth: 0})}
 								instant // must be instant-apply, since rb-dnd blocks button-triggered on-blur
 								ref={a=>a && a.DOM_HTML.focus()}
 								onKeyDown={e=>{

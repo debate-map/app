@@ -7,6 +7,7 @@ import {Observer, RunInAction} from "web-vcore";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState.js";
 import {Map} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel.js";
 import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel.js";
 import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel.js";
@@ -15,6 +16,7 @@ import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel.js";
 export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
+		const uiState = store.main.maps;
 		const subpanel = GetTimelineOpenSubpanel(map.id);
 
 		const mapState = GetMapState(map.id);
@@ -34,6 +36,9 @@ export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 					{subpanel == TimelineSubpanel.editor && <EditorSubpanel map={map}/>}
 					{subpanel == TimelineSubpanel.playing && <PlayingSubpanel map={map}/>}
 				</Column>
+				{uiState.audioMode &&
+				<Column style={{position: "absolute", zIndex: zIndexes.draggable + 1, left: 600, right: 0, height: "100%", background: "rgba(100,100,100,1)"}}>
+				</Column>}
 			</Row>
 		);
 	}

@@ -73,7 +73,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 					<OtherTitles {...sharedProps}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>{noteField_label}: </Pre>
-					<TextArea enabled={enabled} autoSize={true} style={ES({flex: 1})}
+					<TextArea enabled={enabled} autoSize={true} style={E({flex: 1, minWidth: 0})}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
 				<TermAttachmentsUI {...sharedProps}/>
@@ -180,7 +180,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: TitleKey, innerRef?:
 		return (
 			//<TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
 			<TextArea
-				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={NodeRevision_titlePattern} autoSize={true}
+				enabled={enabled} allowLineBreaks={false} style={E({flex: 1, minWidth: 0})} pattern={NodeRevision_titlePattern} autoSize={true}
 				value={newData[titleKey]} onChange={val=>{
 					// find any term-markers, adding entries for them then removing the markers (eg. "some {term} name" -> "some term name")
 					const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
