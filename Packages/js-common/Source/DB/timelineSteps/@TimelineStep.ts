@@ -29,6 +29,9 @@ export class TimelineStep {
 	@Field({type: "number"}, {opt: true})
 	timeFromLastStep?: number|n;
 
+	@Field({type: "number"}, {opt: true})
+	timeUntilNextStep?: number|n;
+
 	@Field({type: "string"})
 	message: string;
 

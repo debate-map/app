@@ -70,7 +70,10 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		if (step == null) {
 			return <div style={{height: 100}}><div {...(dragInfo && dragInfo.provided.draggableProps)} {...(dragInfo && dragInfo.provided.dragHandleProps)}/></div>;
 		}
-		const timeType = step?.timeFromLastStep != null ? "last step" : "start";
+		const timeType =
+			step?.timeFromStart != null ? "from start" :
+			step?.timeFromLastStep != null ? "from last step" :
+			"until next step";
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
@@ -88,24 +91,33 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							ShowEditTimelineStepDialog(MeID(), step);
 						}}/> */}
 						<Row center ml="auto">
-							<Text>Time from </Text>
-							<Select options={["start", "last step"]} value={timeType} onChange={typeStr=>{
-								const val = (step.timeFromStart ?? step.timeFromLastStep) ?? 0;
-								if (typeStr == "start") {
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val, timeFromLastStep: null}});
-								} else {
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: val}});
+							<Text>Time </Text>
+							<Select options={["from start", "from last step", "until next step"]} value={timeType} onChange={typeStr=>{
+								const val = (step.timeFromStart ?? step.timeFromLastStep ?? step.timeUntilNextStep) ?? 0;
+								if (typeStr == "from start") {
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val, timeFromLastStep: null, timeUntilNextStep: null}});
+								} else if (typeStr == "from last step") {
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: val, timeUntilNextStep: null}});
+								} else if (typeStr == "until next step") {
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: null, timeUntilNextStep: val}});
 								}
 							}}/>
 							<Text> : </Text>
-							{timeType == "start" &&
+							{timeType == "from start" &&
 							<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} enabled={creatorOrMod} value={step.timeFromStart ?? 0} onChange={val=>{
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val}});
 							}}/>}
-							{timeType == "last step" &&
+							{timeType == "from last step" &&
 							<>
 								<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeFromLastStep ?? 0} onChange={val=>{
 									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}});
+								}}/>
+								<Text title="seconds">s</Text>
+							</>}
+							{timeType == "until next step" &&
+							<>
+								<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeUntilNextStep ?? 0} onChange={val=>{
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeUntilNextStep: val}});
 								}}/>
 								<Text title="seconds">s</Text>
 							</>}

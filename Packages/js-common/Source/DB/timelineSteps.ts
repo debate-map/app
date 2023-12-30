@@ -48,6 +48,9 @@ export const GetTimelineStepTimesFromStart = CreateAccessor((steps: TimelineStep
 			lastTimeReached += step.timeFromLastStep;
 		}
 		result.push(lastTimeReached);
+		if (step.timeUntilNextStep != null) {
+			lastTimeReached += step.timeUntilNextStep;
+		}
 	}
 	return result;
 });

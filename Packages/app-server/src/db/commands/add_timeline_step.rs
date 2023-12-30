@@ -55,6 +55,7 @@ pub async fn add_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		groupID: step_.groupID,
 		timeFromStart: step_.timeFromStart,
 		timeFromLastStep: step_.timeFromLastStep,
+		timeUntilNextStep: step_.timeUntilNextStep,
 		message: step_.message,
 		nodeReveals: step_.nodeReveals,
 		c_accessPolicyTargets: vec![], // auto-set by db

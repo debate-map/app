@@ -51,6 +51,7 @@ pub struct TimelineStep {
 	pub groupID: String,
     pub timeFromStart: Option<f64>,
     pub timeFromLastStep: Option<f64>,
+    pub timeUntilNextStep: Option<f64>,
 	pub message: String,
     pub nodeReveals: Vec<NodeReveal>,
     #[graphql(name = "c_accessPolicyTargets")]
@@ -79,6 +80,7 @@ pub struct TimelineStepInput {
     pub groupID: String,
     pub timeFromStart: Option<f64>,
     pub timeFromLastStep: Option<f64>,
+    pub timeUntilNextStep: Option<f64>,
 	pub message: String,
 	pub nodeReveals: Vec<NodeReveal>,
 }
@@ -89,6 +91,7 @@ pub struct TimelineStepUpdates {
     pub groupID: FieldUpdate<String>,
 	pub timeFromStart: FieldUpdate_Nullable<f64>,
 	pub timeFromLastStep: FieldUpdate_Nullable<f64>,
+	pub timeUntilNextStep: FieldUpdate_Nullable<f64>,
 	pub message: FieldUpdate<String>,
 	pub nodeReveals: FieldUpdate<Vec<NodeReveal>>,
 }
