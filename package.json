@@ -27,14 +27,16 @@
     "file-syncer": "^0.0.8",
     "nps": "^5.10.0",
     "ts-loader": "9.2.3",
-    "ts-node": "^10.8.0",
-    "ts-node-dev": "1.1.6",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "2.0.0",
     "tsc-watch": "^4.4.0",
-    "typescript": "^4.3.2"
+    "typescript": "5.3.3"
   },
   "@resolutions_c": "The 'version locks' below (other than mathjs toggle) are for version-sensitive (or duplicate-sensitive) deps (eg. those with patches specified), for which updates should only happen after deliberation.",
+  "@resolutions_c2": "1) @types/node is temporarily locked to 20.0.0, since 20.10.6 (in web-vcore) causes error regarding 'undici-types' module not being found, despite it resolving to part of vscode's ts-types in web-vcore repo.",
   "resolutions": {
     "mathjs": "1.0.0",
+    "@types/node": "20.0.0",
     "@types/react": "17.0.74",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -58,7 +60,8 @@
     "sync-directory": "^2.2.22",
     "tree-grapher": "0.0.8",
     "ui-debug-kit": "0.0.7",
-    "web-vcore": "0.0.90"
+    "wavesurfer.js": "7.6.0",
+    "web-vcore": "0.0.91"
   },
   "packageManager": "yarn@4.0.2"
 }

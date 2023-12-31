@@ -11,6 +11,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel.js";
 import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel.js";
 import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel.js";
+import {AudioPanel} from "./TimelinePanel/AudioPanel.js";
 
 @Observer
 export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
@@ -38,6 +39,7 @@ export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 				</Column>
 				{uiState.audioMode &&
 				<Column style={{position: "absolute", zIndex: zIndexes.draggable + 1, left: 600, right: 0, height: "100%", background: "rgba(100,100,100,1)"}}>
+					<AudioPanel/>
 				</Column>}
 			</Row>
 		);

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
-const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
+const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
 
 const scripts = {};
 module.exports.scripts = scripts;
@@ -27,7 +27,8 @@ Object.assign(scripts, {
 			//part2: `cross-env NODE_OPTIONS="--experimental-modules" ts-node --project Scripts/tsconfig.json Scripts/Bin/Server.js`,
 			//part2: `cross-env ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Bin/Server.js`,
 			//part2: TSScript("client", "Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
-			part2: TSScript({pkg: _packagesRootStr}, "client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+			//part2: TSScript({pkg: _packagesRootStr}, "client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+			part2: JSScript({pkg: _packagesRootStr}, "client/Scripts/Bin/Server"),
 
 			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192 --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
 			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=8192" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
@@ -70,7 +71,7 @@ Object.assign(scripts, {
 		tsc: `cd Packages/monitor-client && ${pathToNPMBin("tsc", 2)} --build --watch`,
 		dev: {
 			default: GetServeCommand("dev", "monitor-client"),
-			part2: TSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+			part2: JSScript({pkg: _packagesRootStr}, "monitor-client/Scripts/Bin/Server"),
 		},
 		clean: "cd Packages/monitor-client && shx rm -rf Dist",
 		//compile: TSScript({pkg: "monitor-client"}, "Scripts/Bin/Compile"),
@@ -573,5 +574,6 @@ Object.assign(scripts, {
 });
 
 function GetBuildSeedDBScriptCommand() {
+	// todo: make sure this still works (TSScript function had issue for "dev" script as of 2023-12-31)
 	return TSScript({tsConfigPath: "./Scripts/SeedDBGenerator/tsconfig.json"}, `./Scripts/SeedDBGenerator/GenerateSeedDB.ts`);
 }

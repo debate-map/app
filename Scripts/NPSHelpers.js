@@ -40,6 +40,19 @@ exports.pathToNPMBin = (binaryName, depth = 0, normalize = true, abs = false)=>{
 };
 
 const _packagesRootStr = exports._packagesRootStr = "{packagesRoot}"; // useful for setting working-directory to "./Packages/", eg. so when running webpack, its error paths are "resolvable" by vscode window #1
+exports.JSScript = (/** @type {{pkg: string, envStrAdd: string, tsConfigPath: string}} */ opts, scriptSubpath, ...args)=>{
+	let cdCommand = "";
+	if (opts.pkg) {
+		if (opts.pkg == _packagesRootStr) {
+			cdCommand = `cd Packages && `;
+		} else {
+			cdCommand = `cd Packages/${opts.pkg} && `;
+		}
+	}
+
+	const nodeFlags = `--experimental-specifier-resolution=node`;
+	return `${cdCommand}node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
+};
 exports.TSScript = (/** @type {{pkg: string, envStrAdd: string, tsConfigPath: string}} */ opts, scriptSubpath, ...args)=>{
 	let cdCommand = "";
 	let tsConfigPath = "";

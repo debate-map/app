@@ -32,14 +32,14 @@
 		//"strictPropertyInitialization": true,
 
 		// modules/paths
-		"module": "esnext",
+		"module": "ESNext",
 		"moduleResolution": "node",
 		"composite": true,
 		"rootDir": ".",
 		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules
 		// paths are relative to "baseUrl" (ie. ./Packages/XXX/Source)
 		// commented these, since it seems like they aren't needed anymore (now that I'm using "nm" structure in web-vcore, and/or using yalc for symlinks)
-		/*"paths": {
+		"paths": {
 			"pg": ["../../../node_modules/pg"],
 			"postgraphile": ["../../../node_modules/postgraphile"],
 			"graphile-utils": ["../../../node_modules/graphile-utils"],
@@ -60,16 +60,7 @@
 				"../../../node_modules/web-vcore/node_modules/mobx-graphlink/*",
 				"../../../node_modules/mobx-graphlink/*",
 			],
-			// temp; fixes odd import bug in CodeMirrorConfig.ts
-			"codemirror": [
-				"../../../node_modules/web-vcore/node_modules/codemirror",
-				"../../../node_modules/codemirror",
-			],
-			"codemirror/*": [
-				"../../../node_modules/web-vcore/node_modules/codemirror/*",
-				"../../../node_modules/codemirror/*",
-			]
-		},*/
+		},
 	},
 	"include": [
 		// these are relative to this file's folder (repo root)
