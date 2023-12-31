@@ -250,7 +250,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		const steps = timeline ? GetTimelineSteps(timeline.id) : null;
 		const targetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
 
-		const [messageAreaRef, {height: messageAreaHeight}] = UseSize();
+		const [messageAreaRef, {height: messageAreaHeight}] = UseSize(); // todo: maybe switch this to use `useResizeObserver()`, so reacts to [css/window]-only height changes
 		// this.Stash({ messageAreaHeight });
 		// todo: make sure this is correct
 		useEffect(()=>{

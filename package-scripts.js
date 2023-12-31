@@ -487,7 +487,7 @@ Object.assign(scripts, {
 });
 
 // todo: clean up the initDB stuff, to be more certain to be safe
-function StartPSQLInK8s(context, database = "debate-map", spawnOptions) {
+function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
 	const password = execSync(getPasswordCmd).toString().trim();
 	

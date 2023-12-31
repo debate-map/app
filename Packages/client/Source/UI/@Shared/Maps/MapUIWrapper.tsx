@@ -139,7 +139,10 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 				</>}
 				{/*!withinPage && <TimelinePlayerUI map={map}/>*/}
 				{/*!withinPage && <TimelineOverlayUI map={map}/>*/}
-				<Row style={{marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start"}}>
+				<Row style={{
+					position: "relative", // needed for TimelinePanel->AudioPanel to be positioned correctly
+					marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start",
+				}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
 					<div style={{position: "relative", flex: 1, minWidth: 0, height: "100%"}}>
