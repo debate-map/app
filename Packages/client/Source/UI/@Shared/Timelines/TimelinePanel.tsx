@@ -17,7 +17,7 @@ import {AudioPanel} from "./TimelinePanel/AudioPanel.js";
 export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
-		const uiState = store.main.maps;
+		const uiState = store.main.timelines;
 		const subpanel = GetTimelineOpenSubpanel(map.id);
 
 		const mapState = GetMapState(map.id);

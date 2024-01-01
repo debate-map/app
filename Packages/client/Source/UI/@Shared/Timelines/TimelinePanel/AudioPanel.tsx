@@ -1,12 +1,18 @@
-import {Button, Column, Row} from "react-vcomponents";
+import {Button, CheckBox, Column, Row} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import WaveSurfer from "wavesurfer.js";
 import {StartUpload, Range} from "js-vextensions";
-import {Observer, UseSize} from "web-vcore";
-import {useMemo, useState} from "react";
+import {Observer, RunInAction, RunInAction_Set, UseSize} from "web-vcore";
+import {useEffect, useMemo, useState} from "react";
 import useResizeObserver from "use-resize-observer";
-import {GetPercentFromXToY, Lerp} from "web-vcore/nm/js-vextensions";
+import {GetPercentFromXToY, Lerp, Timer} from "web-vcore/nm/js-vextensions";
+import {store} from "Store";
 
+class ParseData {
+	samplesPerRow: number;
+	combinedData: RowData;
+	rowDatas: RowData[];
+}
 class RowData {
 	minValues = [] as number[];
 	maxValues = [] as number[];
@@ -17,6 +23,8 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 	wavesurferRoot: HTMLDivElement|n;
 	render() {
 		let {} = this.props;
+		const uiState = store.main.timelines.audioPanel;
+		const tracker1 = uiState.wavesurferStateChangedAt;
 
 		//const [rowContainerRef, {width: rowContainerWidth, height: rowContainerHeight}] = UseSize();
 		const {ref: rowContainerRef, width: rowContainerWidth, height: rowContainerHeight} = useResizeObserver();
@@ -35,7 +43,8 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 			return val;
 		}, []);
 
-		const [rowDatas, setRowDatas] = useState<RowData[]>([]);
+		const [parseData, setParseData] = useState<ParseData|null>(null);
+		const rowDatas = parseData?.rowDatas ?? [];
 		const ParseWavesurferData = ()=>{
 			// export peaks with just enough max-length/precision that each pixel-column in the row-container will have 1 sample
 			const newSamples_targetCount = (rowContainerWidth ?? 500) * rows;
@@ -90,18 +99,32 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 				return rowData;
 			});
 
-			setRowDatas(rowDatas_new);
+			setParseData({
+				samplesPerRow,
+				combinedData,
+				rowDatas: rowDatas_new,
+			});
 		};
 
 		return (
 			<Column style={{flex: 1}}>
-				<Row>
+				<Row style={{height: 30}}>
 					<Button text="Load audio file" onClick={async()=>{
 						const file = await StartUpload();
 						await wavesurfer.loadBlob(file);
 						ParseWavesurferData();
 					}}/>
-					<Button text="Reparse" onClick={()=>ParseWavesurferData()}/>
+					<Button ml={5} text="Reparse" onClick={()=>ParseWavesurferData()}/>
+					{/* play/pause button */}
+					<Button ml={5} enabled={parseData != null} text={wavesurfer.isPlaying() ? "⏸" : "▶"} onClick={()=>{
+						if (wavesurfer.isPlaying()) {
+							wavesurfer.pause();
+						} else {
+							wavesurfer.play();
+						}
+						RunInAction("AudioPanel.playPauseButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
+					}}/>
+					<CheckBox ml={5} text="Play on click" value={uiState.playOnClick} onChange={val=>RunInAction_Set(this, ()=>uiState.playOnClick = val)}/>
 				</Row>
 				<div style={{position: "absolute", left: 0, top: 0, width: "100%", display: "none"}} ref={c=>{
 					if (c) {
@@ -114,6 +137,7 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 						rowContainerRef(c);
 					}
 				}}>
+					{parseData != null && <TimeMarker wavesurfer={wavesurfer} parseData={parseData}/>}
 					{Range(0, rows, 1, false).map(i=>{
 						const samplesPerRow = rowDatas.map(a=>a.maxValues.length).Max();
 						return (
@@ -149,6 +173,36 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 					})}
 				</div>
 			</Column>
+		);
+	}
+}
+
+@Observer
+class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: ParseData}, {}> {
+	render() {
+		const {wavesurfer, parseData} = this.props;
+
+		useEffect(()=>{
+			const timer = new Timer(1000 / 30, ()=>{
+				this.Update();
+			}).Start();
+			return ()=>timer.Stop();
+		});
+
+		const rowFractionOfFull = parseData.samplesPerRow / parseData.combinedData.maxValues.length;
+		const secondsPerRow = wavesurfer.getDuration() * rowFractionOfFull;
+		const currentRow = Math.floor(wavesurfer.getCurrentTime() / secondsPerRow);
+
+		return (
+			<div style={{
+				position: "absolute",
+				zIndex: 1,
+				left: ((wavesurfer.getCurrentTime() % secondsPerRow) / secondsPerRow).ToPercentStr(),
+				top: 100 * currentRow,
+				width: 1,
+				height: 100,
+				background: "rgba(0,255,0,1)",
+			}}/>
 		);
 	}
 }
