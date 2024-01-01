@@ -21,6 +21,8 @@ export class TimelinesState {
 
 class AudioPanelState {
 	constructor() { makeObservable(this); }
+	@O @ignore selection_start = 0;
+	//@O @ignore selection_end = 0;
 	@O playOnClick = true;
 
 	@O @ignore wavesurferStateChangedAt = 0;

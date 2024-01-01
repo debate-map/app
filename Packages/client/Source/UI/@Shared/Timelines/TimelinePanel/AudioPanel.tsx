@@ -1,4 +1,4 @@
-import {Button, CheckBox, Column, Row} from "react-vcomponents";
+import {Button, CheckBox, Column, Row, Text, TimeSpanInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import WaveSurfer from "wavesurfer.js";
 import {StartUpload, Range} from "js-vextensions";
@@ -10,6 +10,9 @@ import {store} from "Store";
 
 class ParseData {
 	samplesPerRow: number;
+	rowFractionOfFull: number;
+	secondsPerRow: number;
+
 	combinedData: RowData;
 	rowDatas: RowData[];
 }
@@ -27,8 +30,10 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 		const tracker1 = uiState.wavesurferStateChangedAt;
 
 		//const [rowContainerRef, {width: rowContainerWidth, height: rowContainerHeight}] = UseSize();
-		const {ref: rowContainerRef, width: rowContainerWidth, height: rowContainerHeight} = useResizeObserver();
-		const rows = ((rowContainerHeight ?? 0) / 100).FloorTo(1).KeepAtLeast(1);
+		const {ref: rowContainerRef, width: rowContainerWidth_raw, height: rowContainerHeight_raw} = useResizeObserver();
+		const rowContainerWidth = rowContainerWidth_raw ?? 500;
+		const rowContainerHeight = rowContainerHeight_raw ?? 0;
+		const rows = (rowContainerHeight / 100).FloorTo(1).KeepAtLeast(1);
 
 		const wavesurfer = useMemo(()=>{
 			const val = WaveSurfer.create({
@@ -47,7 +52,7 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 		const rowDatas = parseData?.rowDatas ?? [];
 		const ParseWavesurferData = ()=>{
 			// export peaks with just enough max-length/precision that each pixel-column in the row-container will have 1 sample
-			const newSamples_targetCount = (rowContainerWidth ?? 500) * rows;
+			const newSamples_targetCount = rowContainerWidth * rows;
 			/*const allChannelPeaks = wavesurfer.exportPeaks({maxLength: targetSampleCount});
 			const combinedData = new RowData();
 			const sampleCount = allChannelPeaks.map(channelPeaks=>channelPeaks.length / 2).Max();
@@ -99,8 +104,14 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 				return rowData;
 			});
 
+			// extra info
+			const rowFractionOfFull = samplesPerRow / combinedData.maxValues.length;
+			const secondsPerRow = wavesurfer.getDuration() * rowFractionOfFull;
+
 			setParseData({
 				samplesPerRow,
+				rowFractionOfFull,
+				secondsPerRow,
 				combinedData,
 				rowDatas: rowDatas_new,
 			});
@@ -115,16 +126,27 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 						ParseWavesurferData();
 					}}/>
 					<Button ml={5} text="Reparse" onClick={()=>ParseWavesurferData()}/>
-					{/* play/pause button */}
 					<Button ml={5} enabled={parseData != null} text={wavesurfer.isPlaying() ? "⏸" : "▶"} onClick={()=>{
 						if (wavesurfer.isPlaying()) {
 							wavesurfer.pause();
 						} else {
+							//wavesurfer.seekTo(uiState.selection_start / wavesurfer.getDuration());
 							wavesurfer.play();
 						}
 						RunInAction("AudioPanel.playPauseButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
 					}}/>
+					<Button ml={5} enabled={parseData != null} text={"■"} onClick={()=>{
+						if (wavesurfer.isPlaying()) {
+							wavesurfer.pause();
+						}
+						wavesurfer.seekTo(uiState.selection_start / wavesurfer.getDuration());
+						RunInAction("AudioPanel.stopButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
+					}}/>
 					<CheckBox ml={5} text="Play on click" value={uiState.playOnClick} onChange={val=>RunInAction_Set(this, ()=>uiState.playOnClick = val)}/>
+					<Text ml={5}>Selection:</Text>
+					<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} enabled={parseData != null} value={uiState.selection_start} onChange={val=>{
+						RunInAction_Set(this, ()=>uiState.selection_start = val);
+					}}/>
 				</Row>
 				<div style={{position: "absolute", left: 0, top: 0, width: "100%", display: "none"}} ref={c=>{
 					if (c) {
@@ -138,38 +160,9 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 					}
 				}}>
 					{parseData != null && <TimeMarker wavesurfer={wavesurfer} parseData={parseData}/>}
+					{parseData != null && <SelectionMarker wavesurfer={wavesurfer} parseData={parseData}/>}
 					{Range(0, rows, 1, false).map(i=>{
-						const samplesPerRow = rowDatas.map(a=>a.maxValues.length).Max();
-						return (
-							<canvas key={i}
-								// set canvas-width to match the number of samples in the row, for easy rendering
-								width={samplesPerRow ?? rowContainerWidth} height={100}
-								style={{
-									position: "absolute", left: 0, top: i * 100,
-									// but set the css-width to just whatever the container's width is, so it fills the visual area (canvas takes care of visual scaling)
-									//width: "100%", height: 100,
-								}}
-								ref={c=>{
-									if (c) {
-										const rowData = rowDatas[i];
-										const ctx = c.getContext("2d")!;
-										ctx.fillStyle = "rgb(0, 0, 0)";
-										ctx.fillRect(0, 0, c.width, c.height);
-
-										if (rowDatas[i] == null) return;
-
-										ctx.fillStyle = "rgb(255, 255, 255)";
-										//const halfHeight = 50;
-										for (let x = 0; x < rowData.maxValues.length; x++) {
-											/*const y1 = halfHeight + (rowData.maxValues[x] * halfHeight);
-											const y2 = halfHeight + (rowData.minValues[x] * halfHeight);*/
-											const y1 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.maxValues[x]));
-											const y2 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.minValues[x]));
-											ctx.fillRect(x, y1, 1, y2 - y1);
-										}
-									}
-								}}/>
-						);
+						return <AudioRow key={i} rowIndex={i} parseData={parseData} rowContainerWidth={rowContainerWidth} wavesurfer={wavesurfer}/>;
 					})}
 				</div>
 			</Column>
@@ -178,9 +171,32 @@ export class AudioPanel extends BaseComponent<{}, {}> {
 }
 
 @Observer
+class SelectionMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: ParseData}, {}> {
+	render() {
+		const {parseData} = this.props;
+		const {secondsPerRow} = parseData;
+		const uiState = store.main.timelines.audioPanel;
+
+		const selectionStart_row = Math.floor(uiState.selection_start / secondsPerRow);
+
+		return (
+			<div style={{
+				position: "absolute", zIndex: 1, pointerEvents: "none",
+				left: ((uiState.selection_start % secondsPerRow) / secondsPerRow).ToPercentStr(),
+				top: 100 * selectionStart_row,
+				width: 1,
+				height: 100,
+				background: "rgba(0,255,0,1)",
+			}}/>
+		);
+	}
+}
+
+@Observer
 class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: ParseData}, {}> {
 	render() {
 		const {wavesurfer, parseData} = this.props;
+		const {secondsPerRow} = parseData;
 
 		useEffect(()=>{
 			const timer = new Timer(1000 / 30, ()=>{
@@ -189,20 +205,72 @@ class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: Parse
 			return ()=>timer.Stop();
 		});
 
-		const rowFractionOfFull = parseData.samplesPerRow / parseData.combinedData.maxValues.length;
-		const secondsPerRow = wavesurfer.getDuration() * rowFractionOfFull;
 		const currentRow = Math.floor(wavesurfer.getCurrentTime() / secondsPerRow);
 
 		return (
 			<div style={{
-				position: "absolute",
-				zIndex: 1,
+				position: "absolute", zIndex: 1, pointerEvents: "none",
 				left: ((wavesurfer.getCurrentTime() % secondsPerRow) / secondsPerRow).ToPercentStr(),
 				top: 100 * currentRow,
 				width: 1,
 				height: 100,
-				background: "rgba(0,255,0,1)",
+				background: "rgba(0,130,255,1)",
 			}}/>
+		);
+	}
+}
+
+class AudioRow extends BaseComponent<{rowIndex: number, parseData: ParseData|null, rowContainerWidth: number, wavesurfer: WaveSurfer}, {}> {
+	render() {
+		const {rowIndex, parseData, rowContainerWidth, wavesurfer} = this.props;
+		const uiState = store.main.timelines.audioPanel;
+
+		return (
+			<canvas
+				// set canvas-width to match the number of samples in the row, for pixel-perfect/no-scaling rendering
+				width={parseData?.samplesPerRow ?? rowContainerWidth} height={100}
+				style={{
+					position: "absolute", left: 0, top: rowIndex * 100,
+					// but set the css-width to just whatever the container's width is, so it fills the visual area (canvas takes care of visual scaling)
+					//width: "100%", height: 100,
+				}}
+				onClick={e=>{
+					if (parseData == null) return;
+					const timeAtStartOfRow = rowIndex * parseData.secondsPerRow;
+					const timeAtEndOfRow = (rowIndex + 1) * parseData.secondsPerRow;
+					const targetTimeInSeconds = Lerp(timeAtStartOfRow, timeAtEndOfRow, e.nativeEvent.offsetX / rowContainerWidth);
+					wavesurfer.seekTo(targetTimeInSeconds / wavesurfer.getDuration());
+					if (uiState.playOnClick) {
+						wavesurfer.play();
+					} else {
+						wavesurfer.pause();
+					}
+					RunInAction("AudioRow.canvas.onClick", ()=>{
+						uiState.selection_start = targetTimeInSeconds;
+						uiState.wavesurferStateChangedAt = Date.now();
+					});
+				}}
+				ref={c=>{
+					if (c && parseData) {
+						const {rowDatas} = parseData;
+						const rowData = rowDatas[rowIndex];
+						const ctx = c.getContext("2d")!;
+						ctx.fillStyle = "rgb(0, 0, 0)";
+						ctx.fillRect(0, 0, c.width, c.height);
+
+						if (rowDatas[rowIndex] == null) return;
+
+						ctx.fillStyle = "rgb(255, 255, 255)";
+						//const halfHeight = 50;
+						for (let x = 0; x < rowData.maxValues.length; x++) {
+							/*const y1 = halfHeight + (rowData.maxValues[x] * halfHeight);
+							const y2 = halfHeight + (rowData.minValues[x] * halfHeight);*/
+							const y1 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.maxValues[x]));
+							const y2 = Lerp(100, 0, GetPercentFromXToY(-1, 1, rowData.minValues[x]));
+							ctx.fillRect(x, y1, 1, y2 - y1);
+						}
+					}
+				}}/>
 		);
 	}
 }
