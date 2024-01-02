@@ -73,14 +73,18 @@ export class StepUI extends BaseComponentPlus(
 					>
 						<Row style={{float: "right", fontSize: 16}}>{index + 1}</Row>
 						<VReactMarkdown_Remarkable addMarginsForDanglingNewLines={true}
-							className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}
+							className="onlyTopMargin"
+							style={{
+								marginTop: 5, display: "flex", flexDirection: "column",
+								//filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"
+							}}
 							source={step.message} replacements={{}} extraInfo={{}}/>
 					</Div>
 					{step.nodeReveals && step.nodeReveals.length > 0 &&
 					<Column style={E(
 						{position: "relative", background: "rgba(255,255,255,.3)", borderRadius: "0 0 10px 10px"},
 					)}>
-						<div style={{fontSize: 11, opacity: 0.7, textAlign: "center", padding: "3px 5px"}} onClick={()=>{
+						<div style={{fontSize: 11, opacity: 0.7, textAlign: "center", padding: "3px 5px", cursor: "pointer"}} onClick={()=>{
 							this.SetState({showNodeReveals: !showNodeReveals});
 						}}>
 							Message affects display of {step.nodeReveals.length} node{step.nodeReveals.length > 1 ? "s" : ""}. (click to {showNodeReveals ? "hide" : "view"})

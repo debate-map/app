@@ -81,11 +81,18 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 			<div style={{paddingTop: index == 0 ? 0 : 7}}>
 				<Column /* mt={index == 0 ? 0 : 7} */ {...(dragInfo && dragInfo.provided.draggableProps)}
 					style={E(
-						{background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"},
+						{
+							background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: 10,
+							//border: "1px solid rgba(255,255,255,.15)"
+						},
 						dragInfo && dragInfo.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
 					)}>
-					<Row center p="7px 10px" {...(dragInfo && dragInfo.provided.dragHandleProps)}>
+					<Row center p="3px 7px" {...(dragInfo && dragInfo.provided.dragHandleProps)} style={{
+						borderRadius: "10px 10px 0 0",
+						/*background: "rgba(0,0,0,.7)",
+						color: "rgba(255,255,255,.7)",*/
+					}}>
 						<Pre>Step {index + 1}</Pre>
 						{/* <Button ml={5} text="Edit" title="Edit this step" style={{ flexShrink: 0 }} onClick={() => {
 							ShowEditTimelineStepDialog(MeID(), step);
@@ -157,6 +164,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						style={{
 							//background: "rgba(255,255,255,.2)",
 							padding: 5, outline: "none",
+							borderWidth: "1px 0 1px 0",
 						}}
 						value={step.message} enabled={creatorOrMod}
 						onChange={val=>{
@@ -172,7 +180,10 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							return (
 								<Column ref={c=>{ this.nodeHolder = c; provided.innerRef(GetDOM(c) as any); }} {...provided.droppableProps}
 									style={E(
-										{position: "relative", padding: 7, background: "rgba(255,255,255,.3)", borderRadius: "0 0 10px 10px"},
+										{
+											position: "relative", padding: 7, background: "rgba(255,255,255,.3)", borderRadius: "0 0 10px 10px",
+											//border: "solid rgba(0,0,0,.7)", borderWidth: "0 1px 1px 1px"
+										},
 										(step.nodeReveals == null || step.nodeReveals.length == 0) && {padding: "3px 5px"},
 									)}>
 									{(step.nodeReveals == null || step.nodeReveals.length == 0) && !dragIsOverDropArea &&
@@ -276,7 +287,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 			<>
 				<Row key={index} sel mt={index === 0 ? 0 : 5}
 					style={E(
-						{width: "100%", padding: 5, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)"},
+						{width: "100%", padding: 3, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)"},
 						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
 					)}
 					onMouseDown={e=>{
@@ -285,9 +296,9 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					}}
 					onClick={()=>this.SetState({detailsOpen: !detailsOpen})}
 				>
-					<span style={{position: "relative", paddingTop: 2}}>
+					<span style={{position: "relative", paddingTop: 2, fontSize: 12, color: "rgba(20,20,20,1)"}}>
 						<span style={{
-							position: "absolute", left: -5, top: -10, color: "yellow", fontSize: 10,
+							position: "absolute", left: -5, top: -8, lineHeight: "11px", fontSize: 10, color: "yellow",
 							background: "rgba(50,50,50,1)", borderRadius: 5, padding: "0 3px",
 						}}>
 							{[

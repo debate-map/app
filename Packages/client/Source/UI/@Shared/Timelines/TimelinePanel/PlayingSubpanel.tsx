@@ -331,7 +331,15 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 								RunInAction("PlayingSubpanel.targetArrow.onClick", ()=>store.main.timelines.autoScroll = newAutoScroll);
 							}, [targetStepIndex])}/>
 					</Column>
-					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative", padding: 7, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"})} onScroll={this.OnScroll}>
+					<ScrollView className="brightScrollBars" style={ES({flex: 1})}
+						contentStyle={ES({
+							flex: 1, position: "relative", padding: 7,
+							//filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)",
+							background: "rgba(0,0,0,1)",
+						})}
+						scrollVBarStyle={{width: 7}} // width:7 to match with container padding
+						onScroll={this.OnScroll}
+					>
 						{/* timelineSteps && timelineSteps.map((step, index) => <StepUI key={index} index={index} last={index == timeline.steps.length - 1} map={map} timeline={timeline} step={step}/>) */}
 						<ReactList type='variable' length={steps?.length ?? 0}
 							ref={UseCallback(c=>{

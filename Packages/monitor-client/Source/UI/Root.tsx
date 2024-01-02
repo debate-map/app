@@ -138,7 +138,7 @@ export class RootStyles extends BaseComponent<{}, {}> {
 				font-family: ${skin.MainFont()};
 				color: ${skin.TextColor().css()};
 			}
-			${skin.StyleBlock_Freeform()}
+			${skin.RawCSS_Freeform()}
 			`}</style>
 		);
 	}

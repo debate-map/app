@@ -14,21 +14,21 @@ export class MainSkin extends Skin {
 	// scalars
 	// ==========
 
-	BasePanelBackgroundColor = ()=>Chroma("rgba(200,200,200,.7)");
-	BasePanelDropShadowFilter = ()=>"drop-shadow(rgba(200,200,200,.7) 0px 0px 10px)";
-	OverlayPanelBackgroundColor = ()=>Chroma("rgba(255,255,255,.7)");
-	//NavBarPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.7)");
-	//NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(.9);
-	NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(1);
-	OverlayBorderColor = ()=>Chroma("rgba(0,0,0,.3)");
-	OverlayBorder = ()=>`1px solid ${this.OverlayBorderColor().css()}`;
-	HeaderFont = ()=>this.MainFont();
-	MainFont = ()=>"'Quicksand', sans-serif";
-	TextColor = ()=>Chroma("rgb(50,50,50)");
-	NavBarBoxShadow = ()=>"rgba(100,100,100,.3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
-	HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();
-	ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
-	ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.15 * chroma_maxDarken).alpha(1);
+	override BasePanelBackgroundColor = ()=>Chroma("rgba(200,200,200,.7)");
+	override BasePanelDropShadowFilter = ()=>"drop-shadow(rgba(200,200,200,.7) 0px 0px 10px)";
+	override OverlayPanelBackgroundColor = ()=>Chroma("rgba(255,255,255,.7)");
+	//override NavBarPanelBackgroundColor = ()=>Chroma("rgba(0,0,0,.7)");
+	//override NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(.9);
+	override NavBarPanelBackgroundColor = ()=>this.BasePanelBackgroundColor().alpha(1);
+	override OverlayBorderColor = ()=>Chroma("rgba(0,0,0,.3)");
+	override OverlayBorder = ()=>`1px solid ${this.OverlayBorderColor().css()}`;
+	override HeaderFont = ()=>this.MainFont();
+	override MainFont = ()=>"'Quicksand', sans-serif";
+	override TextColor = ()=>Chroma("rgb(50,50,50)");
+	override NavBarBoxShadow = ()=>"rgba(100,100,100,.3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
+	override HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();
+	override ListEntryBackgroundColor_Light = ()=>this.BasePanelBackgroundColor().darken(.075 * chroma_maxDarken).alpha(1);
+	override ListEntryBackgroundColor_Dark = ()=>this.BasePanelBackgroundColor().darken(.15 * chroma_maxDarken).alpha(1);
 
 	// dm-specific
 	//NodeTextColor = ()=>Chroma("rgb(0,0,0)");
@@ -39,17 +39,20 @@ export class MainSkin extends Skin {
 	// ==========
 
 	// fixes that height:100% doesn't work in safari, when in flex container
-	Style_Page = ()=>({width: 960, flex: 1, margin: "100px auto", padding: 50, background: "rgba(0,0,0,.75)", borderRadius: 10, cursor: "auto"});
-	Style_VMenuItem = ()=>({padding: "3px 5px", borderTop: "1px solid rgba(255,255,255,.1)", backgroundColor: "rgba(255,255,255,1)"});
-	Style_FillParent = ()=>({position: "absolute", left: 0, right: 0, top: 0, bottom: 0});
-	Style_XButton = ()=>({padding: "5px 10px"});
+	override Style_Page = ()=>({width: 960, flex: 1, margin: "100px auto", padding: 50, background: "rgba(0,0,0,.75)", borderRadius: 10, cursor: "auto"});
+	override Style_VMenuItem = ()=>({padding: "3px 5px", borderTop: "1px solid rgba(255,255,255,.1)", backgroundColor: "rgba(255,255,255,1)"});
+	override Style_FillParent = ()=>({position: "absolute", left: 0, right: 0, top: 0, bottom: 0});
+	override Style_XButton = ()=>({padding: "5px 10px"});
 
-	// style overrides and blocks
+	// blocks of raw-css or hooks/code
 	// ==========
 
-	// we implement these as regular prototype-bound methods, so that child-classes can rebind the func's "this" to itself
-	StyleBlock_Freeform() {
-		const styleFixesFromWVC = DefaultSkin.prototype.StyleBlock_Freeform.call(this);
+	override RawCSS_ApplyScalarsAndStyles() {
+		const cssFromWVC = DefaultSkin.prototype.RawCSS_ApplyScalarsAndStyles.call(this); // can't use "super.X()", since MainSkin doesn't inherit from DefaultSkin
+		return cssFromWVC;
+	}
+	override RawCSS_Freeform() {
+		const styleFixesFromWVC = DefaultSkin.prototype.RawCSS_Freeform.call(this);
 		return `
 			${styleFixesFromWVC}
 			
@@ -128,7 +131,7 @@ export class MainSkin extends Skin {
 			}
 		`;
 	}
-	CSSHooks_Freeform() {
+	override CSSHooks_Freeform() {
 		// these hooks are (also) used as the base for other skins
 		addHook_css(Button, ctx=>{
 			if (ctx.key == "finalStyle") {

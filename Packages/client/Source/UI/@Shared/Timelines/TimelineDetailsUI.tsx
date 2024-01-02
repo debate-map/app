@@ -5,6 +5,7 @@ import {GetUpdates} from "web-vcore";
 import {Timeline} from "dm_common";
 import React from "react";
 import {RunCommand_UpdateTimeline} from "Utils/DB/Command";
+import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI";
 
 export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {
@@ -33,6 +34,12 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 					<Pre>Name: </Pre>
 					<TextInput required enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}>
+					<Pre>Access policy: </Pre>
+					<PolicyPicker value={newData.accessPolicy} onChange={val=>Change(newData.accessPolicy = val)}>
+						{text=><Button enabled={enabled} text={text} style={{width: "100%"}}/>}
+					</PolicyPicker>
 				</RowLR>
 			</Column>
 		);

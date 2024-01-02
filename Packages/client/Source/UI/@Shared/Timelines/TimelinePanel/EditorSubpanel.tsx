@@ -81,10 +81,14 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 						RunInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>uiState_maps.lockMapScrolling = val);
 					}}/>
 				</Row>
-				<ScrollView style={ES({flex: 1})} contentStyle={ES({
-					flex: 1, position: "relative", padding: 7,
-					// filter: 'drop-shadow(rgb(0, 0, 0) 0px 0px 10px)', // disabled for now, since otherwise causes issue with dnd system (and portal fix causes errors here, fsr)
-				})}>
+				<ScrollView className="brightScrollBars" style={ES({flex: 1})}
+					contentStyle={ES({
+						flex: 1, position: "relative", padding: 7,
+						//filter: 'drop-shadow(rgb(0, 0, 0) 0px 0px 10px)', // disabled for now, since otherwise causes issue with dnd system (and portal fix causes errors here, fsr)
+						background: "rgba(0,0,0,1)",
+					})}
+					scrollVBarStyle={{filter: "none", width: 7}} // width:7 to match with container padding
+				>
 					{showTimelineDetails &&
 					<TimelineDetailsEditor timeline={timeline} editing={creatorOrMod}/>}
 					{timeline.videoID != null &&
