@@ -39,7 +39,7 @@ export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 				</Column>
 				{uiState.audioMode &&
 				<Column style={{position: "absolute", zIndex: zIndexes.draggable + 1, left: 600, right: 0, top: 0, bottom: 0, background: "rgba(100,100,100,1)"}}>
-					<AudioPanel/>
+					<AudioPanel map={map}/>
 				</Column>}
 			</Row>
 		);

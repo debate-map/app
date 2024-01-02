@@ -21,6 +21,9 @@ export class TimelinesState {
 
 class AudioPanelState {
 	constructor() { makeObservable(this); }
+	@O selectedFile: string|n;
+
+	@O waveformRows = 0;
 	@O @ignore selection_start = 0;
 	//@O @ignore selection_end = 0;
 	@O playOnClick = true;
