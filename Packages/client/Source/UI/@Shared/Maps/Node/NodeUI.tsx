@@ -133,7 +133,7 @@ export class NodeUI extends BaseComponentPlus(
 		//const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
 		//const aboveToolbar_visible = ShowNodeToolbars(map) && ((node.type != NodeType.argument && node.type != NodeType.category) || usesToolbarForPrefixText);
 		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
-		const aboveToolbar_visible = toolbarItemsToShow.length > 0;
+		const aboveToolbar_visible = toolbarItemsToShow.length > 0 && node.type != NodeType.argument; // if node is argument, toolbar is not shown above the node, but rather to the right of its regular content
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(
 			treePath,
@@ -292,13 +292,17 @@ export class NodeUI extends BaseComponentPlus(
 		this.SetState({obs});
 
 		if (obs.innerUIHeight != this.lastObservedValues.innerUIHeight) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnInnerUIHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewInnerUIHeight:${obs.innerUIHeight}`);
+			MaybeLog(
+				a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnInnerUIHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewInnerUIHeight:${obs.innerUIHeight}`,
+			);
 			// if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 		if (obs.height != this.lastObservedValues.height) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${obs.height}`);
+			MaybeLog(
+				a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${obs.height}`,
+			);
 			if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 

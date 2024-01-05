@@ -360,7 +360,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
 					{/* <NodeUI_Menu_Stub {...{ node: nodeL3, path: `${node.id}`, inList: true }}/> */}
 					{editing &&
-					<Button ml="auto" text="X" style={{margin: -3, padding: "3px 10px"}} onClick={()=>{
+					<Button ml="auto" mdIcon="delete" style={{margin: -3, padding: "3px 10px"}} onClick={()=>{
 						const newNodeReveals = step.nodeReveals.Exclude(nodeReveal);
 						RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
 					}}/>}
