@@ -208,7 +208,7 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 					}}/>
 
 					{audioData != null && <>
-						<Button ml={15} text={wavesurfer.isPlaying() ? "⏸" : "▶"} onClick={()=>{
+						<Button ml={15} mdIcon={wavesurfer.isPlaying() ? "pause" : "play"} onClick={()=>{
 							if (wavesurfer.isPlaying()) {
 								wavesurfer.pause();
 							} else {
@@ -217,7 +217,7 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 							}
 							RunInAction("AudioPanel.playPauseButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
 						}}/>
-						<Button ml={5} text={"■"} onClick={()=>{
+						<Button ml={5} mdIcon="stop" onClick={()=>{
 							if (wavesurfer.isPlaying()) {
 								wavesurfer.pause();
 							}
