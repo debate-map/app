@@ -10,10 +10,9 @@ import {store} from "Store";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {Map} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
+import {autorun} from "web-vcore/nm/mobx";
 
-//type ParseData_FileType = "audio" | "text";
 class ParseData {
-	//type: ParseData_FileType;
 	audioData?: ParseData_Audio;
 	textData?: ParseData_Text;
 }
@@ -55,7 +54,6 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 				container: document.createElement("div"), // placeholder (real container is set in ref callback of div below)
 				waveColor: "rgb(200, 0, 200)",
 				progressColor: "rgb(100, 0, 100)",
-				//url: "/examples/audio/audio.wav",
 			});
 			//val.on("click", ()=>wavesurfer.play());
 			//val.on("ready", ()=>LoadSelectedFileIntoWavesurfer_IfNotAlready());
@@ -71,8 +69,6 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 				wavesurfer.empty();
 				await SleepAsync(0); // wait moment, so react warning doesn't happen (of setting state during render)
 				setParseData({
-					/*samplesPerRow: 1, rowFractionOfFull: 1, secondsPerRow: 1,
-					combinedData: new RowData(), rowDatas: [],*/
 					textData: {text: await file.text()},
 				});
 				return;
@@ -82,6 +78,24 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 			if (file != wavesurfer["lastFileLoaded"]) return; // if another file was loaded in the meantime, cancel completion of this load (else could overwrite loading of more recent one)
 			ParseWavesurferData();
 		}
+		useEffect(()=>{
+			const dispose = autorun(()=>{
+				if (uiState.act_startPlayAtTimeX != 0) {
+					const targetTime = uiState.act_startPlayAtTimeX;
+					// avoid recursive loop, by performing action out of call-stack (and thus mobx autorun's observation)
+					(async()=>{
+						RunInAction("AudioPanel.useEffect[for mobx act_X]", ()=>{
+							uiState.act_startPlayAtTimeX = 0; // reset flag
+							uiState.selection_start = targetTime;
+							wavesurfer.seekTo(targetTime / wavesurfer.getDuration());
+							wavesurfer.play();
+							uiState.wavesurferStateChangedAt = Date.now();
+						});
+					})();
+				}
+			});
+			return ()=>dispose();
+		});
 
 		const [parseData, setParseData] = useState<ParseData|null>(null);
 		const {audioData, textData} = parseData ?? {};
@@ -89,15 +103,6 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 		const ParseWavesurferData = ()=>{
 			// export peaks with just enough max-length/precision that each pixel-column in the row-container will have 1 sample
 			const newSamples_targetCount = rowContainerWidth * rows;
-			/*const allChannelPeaks = wavesurfer.exportPeaks({maxLength: targetSampleCount});
-			const combinedData = new RowData();
-			const sampleCount = allChannelPeaks.map(channelPeaks=>channelPeaks.length / 2).Max();
-			for (let i = 0; i < sampleCount; i++) {
-				const sampleMaxValues_channelAvg = allChannelPeaks.map(channelPeaks=>channelPeaks[i * 2]).Average();
-				const sampleMinValues_channelAvg = allChannelPeaks.map(channelPeaks=>channelPeaks[(i * 2) + 1]).Average();
-				combinedData.maxValues.push(sampleMaxValues_channelAvg);
-				combinedData.minValues.push(sampleMinValues_channelAvg);
-			}*/
 
 			const decodedData = wavesurfer.getDecodedData();
 			if (decodedData == null) return;

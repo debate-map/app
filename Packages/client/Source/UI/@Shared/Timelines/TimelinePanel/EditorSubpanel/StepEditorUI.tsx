@@ -6,7 +6,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {DragInfo, InfoButton, MakeDraggable, Observer} from "web-vcore";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub.js";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
 import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, TimelineStep, NodeReveal, GetNodeID, GetNode, GetNodeL2, GetNodeL3, GetNodeDisplayText, NodeType, SearchUpFromNodeForNodeMatchingX, Map, OrderKey, GetPathNodes, GetNodeLinks} from "dm_common";
@@ -191,8 +191,12 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 									SetStepStartTimeInAudioFile(audioFileMeta.key, step.id, val);
 								}}/>
 								<Button ml={5} mdIcon="play" enabled={audioUIState.selectedFile == audioFileMeta.key} onClick={()=>{
-									//audioUIState.selectedFile = audioFileMeta.key;
-									audioUIState.selection_start = startTime;
+									RunInAction("StepEditorUI.playAudio", ()=>{
+										//audioUIState.selectedFile = audioFileMeta.key;
+										//audioUIState.selection_start = startTime;
+										//audioUIState.act_startPlayAtTimeX = Date.now(); // this triggers the wavesurfer to actually start playing
+										audioUIState.act_startPlayAtTimeX = startTime;
+									});
 								}}/>
 								<Button ml={5} mdIcon="delete" onClick={()=>{
 									SetStepStartTimeInAudioFile(audioFileMeta.key, step.id, null);

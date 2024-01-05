@@ -29,6 +29,7 @@ class AudioPanelState {
 	@O playOnClick = true;
 
 	@O @ignore wavesurferStateChangedAt = 0;
+	@O @ignore act_startPlayAtTimeX = 0;
 }
 
 class RecordPanelState {
