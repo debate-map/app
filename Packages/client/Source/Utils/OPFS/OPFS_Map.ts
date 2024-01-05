@@ -2,6 +2,7 @@ import {O, RunInAction} from "web-vcore";
 import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {computed, makeObservable, observable} from "web-vcore/nm/mobx";
+import {AudioMeta} from "./Map/AudioMeta";
 
 export class OPFS_Map {
 	static entries = new Map<string, OPFS_Map>();
@@ -24,6 +25,28 @@ export class OPFS_Map {
 		// kick off loading process now; this getter will re-run once files are loaded
 		this.LoadFiles_IfNotStarted();
 		return this.files;
+	}
+
+	@computed get File_AudioMeta() {
+		return this.files.find(a=>a.name == "AudioMeta.json");
+	}
+	@O audioMeta_cache_data: AudioMeta|n;
+	@O audioMeta_cache_lastFileWithLoadStarted: File|n;
+	@computed get AudioMeta() {
+		const file = this.File_AudioMeta;
+		if (file == null) return null;
+
+		// if this file instance hasn't had a load of its data started yet, start that now (once it's loaded, the getter will re-run)
+		if (file != this.audioMeta_cache_lastFileWithLoadStarted) {
+			this.audioMeta_cache_lastFileWithLoadStarted = file;
+			(async()=>{
+				const json = await file.text();
+				if (file != this.audioMeta_cache_lastFileWithLoadStarted) return; // if another file-instance has started loading, abort (since this file-instance's data is no longer needed)
+				RunInAction("AudioMeta.fileLoadCompleted", ()=>this.audioMeta_cache_data = JSON.parse(json));
+			})();
+		}
+
+		return this.audioMeta_cache_data;
 	}
 
 	LoadFiles_IfNotStarted() {
@@ -66,6 +89,10 @@ export class OPFS_Map {
 		});
 	}
 
+	async SaveFile_Text(fileContents: string, fileName: string, fileType = "text/plain") {
+		const file = new File([fileContents], fileName, {type: fileType});
+		return await this.SaveFile(file);
+	}
 	async SaveFile(file: File, nameOverride?: string) {
 		Assert(this.loaded, "OPFS_Map must have its files loaded before saving files.");
 

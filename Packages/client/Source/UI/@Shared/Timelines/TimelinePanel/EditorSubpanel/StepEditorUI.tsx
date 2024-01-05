@@ -13,6 +13,9 @@ import {Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, TimelineStep, NodeR
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_AddTimelineStep, RunCommand_DeleteTimelineStep, RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {GetNodeColor} from "Store/db_ext/nodes";
+import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
+import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
+import {store} from "Store";
 
 export enum PositionOptionsEnum {
 	full = "full",
@@ -66,6 +69,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		const {placeholderRect} = this.state;
 		//const step = GetTimelineStep(stepID);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
+		const audioUIState = store.main.timelines.audioPanel;
 
 		if (step == null) {
 			return <div style={{height: 100}}><div {...(dragInfo && dragInfo.provided.draggableProps)} {...(dragInfo && dragInfo.provided.dragHandleProps)}/></div>;
@@ -74,6 +78,22 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 			step?.timeFromStart != null ? "from start" :
 			step?.timeFromLastStep != null ? "from last step" :
 			"until next step";
+
+		const opfsForMap = OPFS_Map.GetEntry(map.id);
+		//const files = opfsForMap.Files;
+		const audioMeta = opfsForMap.AudioMeta;
+		const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
+		const stepStartTimesInAudioFiles = audioFileMetas.map(a=>a.value.stepStartTimes[step.id]).filter(a=>a != null);
+		const SetStepStartTimeInAudioFile = async(audioFileName: string, stepID: string, startTime: number|null)=>{
+			const newAudioMeta = audioMeta ? Clone(audioMeta) as AudioMeta : new AudioMeta();
+			const newAudioFileMeta = AudioMeta.GetOrCreateFileMeta(newAudioMeta, audioFileName);
+			if (startTime == null) {
+				delete newAudioFileMeta[stepID];
+			} else {
+				newAudioFileMeta.stepStartTimes[stepID] = startTime;
+			}
+			await opfsForMap.SaveFile_Text(JSON.stringify(newAudioMeta), "AudioMeta.json");
+		};
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
@@ -134,7 +154,10 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {groupID: val}});
 							}}/>
-							<Button ml={5} text="X" enabled={creatorOrMod} onClick={()=>{
+							<Button ml={5} mdIcon="ray-start-arrow" enabled={creatorOrMod && store.main.timelines.audioPanel.selectedFile != null} onClick={()=>{
+								SetStepStartTimeInAudioFile(audioUIState.selectedFile!, step.id, store.main.timelines.audioPanel.selection_start);
+							}}/>
+							<Button ml={5} mdIcon="delete" enabled={creatorOrMod} onClick={()=>{
 								ShowMessageBox({
 									title: `Delete step ${index + 1}`, cancelButton: true,
 									message: `
@@ -159,6 +182,24 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								}}/>
 						</VMenuStub>}
 					</Row>
+					{stepStartTimesInAudioFiles.map((startTime, index)=>{
+						const audioFileMeta = audioFileMetas[index];
+						return (
+							<Row key={index} mt={5} p="1px 5px">
+								<Text>{`In audio file "${audioFileMeta.key}": Step start time:`}</Text>
+								<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} enabled={creatorOrMod} value={startTime} onChange={async val=>{
+									SetStepStartTimeInAudioFile(audioFileMeta.key, step.id, val);
+								}}/>
+								<Button ml={5} mdIcon="play" enabled={audioUIState.selectedFile == audioFileMeta.key} onClick={()=>{
+									//audioUIState.selectedFile = audioFileMeta.key;
+									audioUIState.selection_start = startTime;
+								}}/>
+								<Button ml={5} mdIcon="delete" onClick={()=>{
+									SetStepStartTimeInAudioFile(audioFileMeta.key, step.id, null);
+								}}/>
+							</Row>
+						);
+					})}
 					{/* <Row ml={5} style={{ minHeight: 20 }}>{step.message}</Row> */}
 					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true}
 						style={{

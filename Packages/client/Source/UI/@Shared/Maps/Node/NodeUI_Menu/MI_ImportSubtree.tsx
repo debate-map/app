@@ -520,11 +520,13 @@ class ImportResourceUI extends BaseComponent<
 							)}
 							value={uiState.selectedImportResources.has(res)}
 							onChange={(val, e)=>{
+								const ev = e.nativeEvent as MouseEvent;
 								RunInAction_Set(this, ()=>{
 									const newSelected = val;
 									let startI = index;
 									let lastI = index;
-									if ((e.nativeEvent as MouseEvent).ctrlKey || (e.nativeEvent as MouseEvent).shiftKey) {
+									// select range, if holding down ctrl-key (on windows), command-key (on mac), or shift-key (on either -- though must click *exactly* on the checkbox, not the label)
+									if (ev.ctrlKey || ev.metaKey || ev.shiftKey) {
 										if (uiState.selectFromIndex != -1) {
 											startI = Math.min(uiState.selectFromIndex, index);
 											lastI = Math.max(uiState.selectFromIndex, index);

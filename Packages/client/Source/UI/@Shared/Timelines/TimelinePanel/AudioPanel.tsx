@@ -1,17 +1,24 @@
-import {Button, CheckBox, Column, Row, Spinner, Text, TimeSpanInput} from "react-vcomponents";
+import {Button, CheckBox, Column, Row, Spinner, Text, TextArea, TimeSpanInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import WaveSurfer from "wavesurfer.js";
 import {StartUpload, Range} from "js-vextensions";
 import {Observer, RunInAction, RunInAction_Set, TextPlus, UseSize} from "web-vcore";
 import {useEffect, useMemo, useState} from "react";
 import useResizeObserver from "use-resize-observer";
-import {E, GetPercentFromXToY, Lerp, Timer} from "web-vcore/nm/js-vextensions";
+import {E, GetPercentFromXToY, Lerp, SleepAsync, StartDownload, Timer, WaitXThenRun} from "web-vcore/nm/js-vextensions";
 import {store} from "Store";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {Map} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 
+//type ParseData_FileType = "audio" | "text";
 class ParseData {
+	//type: ParseData_FileType;
+	audioData?: ParseData_Audio;
+	textData?: ParseData_Text;
+}
+
+class ParseData_Audio {
 	samplesPerRow: number;
 	rowFractionOfFull: number;
 	secondsPerRow: number;
@@ -22,6 +29,10 @@ class ParseData {
 class RowData {
 	minValues = [] as number[];
 	maxValues = [] as number[];
+}
+
+class ParseData_Text {
+	text?: string;
 }
 
 @Observer
@@ -50,17 +61,31 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 			//val.on("ready", ()=>LoadSelectedFileIntoWavesurfer_IfNotAlready());
 			return val;
 		}, []);
-		async function LoadFileIntoWavesurfer_IfNotAlready(file: File|n) {
+		async function LoadFileIntoWavesurfer_IfNotAlreadyAndValid(file: File|n) {
 			if (file == null) return;
 			if (wavesurfer["lastFileLoaded"] == file) return;
+			wavesurfer["lastFileLoaded"] = file;
+
+			// if selected file has an extension we know-about/create, but which are not media files, then just clear the parse-data and waveform-ui
+			if (file.name.EndsWithAny(".json")) {
+				wavesurfer.empty();
+				await SleepAsync(0); // wait moment, so react warning doesn't happen (of setting state during render)
+				setParseData({
+					/*samplesPerRow: 1, rowFractionOfFull: 1, secondsPerRow: 1,
+					combinedData: new RowData(), rowDatas: [],*/
+					textData: {text: await file.text()},
+				});
+				return;
+			}
 
 			await wavesurfer.loadBlob(file);
+			if (file != wavesurfer["lastFileLoaded"]) return; // if another file was loaded in the meantime, cancel completion of this load (else could overwrite loading of more recent one)
 			ParseWavesurferData();
-			wavesurfer["lastFileLoaded"] = file;
 		}
 
 		const [parseData, setParseData] = useState<ParseData|null>(null);
-		const rowDatas = parseData?.rowDatas ?? [];
+		const {audioData, textData} = parseData ?? {};
+		//const rowDatas = parseData?.audioData?.rowDatas ?? [];
 		const ParseWavesurferData = ()=>{
 			// export peaks with just enough max-length/precision that each pixel-column in the row-container will have 1 sample
 			const newSamples_targetCount = rowContainerWidth * rows;
@@ -120,18 +145,20 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 			const secondsPerRow = wavesurfer.getDuration() * rowFractionOfFull;
 
 			setParseData({
-				samplesPerRow,
-				rowFractionOfFull,
-				secondsPerRow,
-				combinedData,
-				rowDatas: rowDatas_new,
+				audioData: {
+					samplesPerRow,
+					rowFractionOfFull,
+					secondsPerRow,
+					combinedData,
+					rowDatas: rowDatas_new,
+				},
 			});
 		};
 
 		const opfsForMap = OPFS_Map.GetEntry(map.id);
 		const files = opfsForMap.Files;
 		const selectedFile = files.find(a=>a.name == uiState.selectedFile);
-		LoadFileIntoWavesurfer_IfNotAlready(selectedFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
+		LoadFileIntoWavesurfer_IfNotAlreadyAndValid(selectedFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
 		return (
 			<Column style={{flex: 1}}>
 				<Row plr={5} style={{height: 30}}>
@@ -156,7 +183,12 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 						/*await wavesurfer.loadBlob(file);
 						ParseWavesurferData();*/
 					}}/>
-					<Button ml={15} text="Delete" enabled={selectedFile != null} onClick={()=>{
+					<Button ml={15} mdIcon="download" enabled={selectedFile != null} onClick={async()=>{
+						const lastDotIndex = selectedFile!.name.lastIndexOf(".");
+						const [fileName_noExt, ext] = lastDotIndex == -1 ? [selectedFile!.name, ""] : [selectedFile!.name.slice(0, lastDotIndex), selectedFile!.name.slice(lastDotIndex + 1)];
+						StartDownload(await selectedFile!.text(), `Map(${map.id})_File(${fileName_noExt})_Export(${new Date().toLocaleString("sv").replace(/[ :]/g, "-")}).${ext}`);
+					}}/>
+					<Button ml={5} mdIcon="delete" enabled={selectedFile != null} onClick={()=>{
 						ShowMessageBox({
 							title: "Delete file", cancelButton: true,
 							message: `Delete file "${selectedFile!.name}"?`,
@@ -169,29 +201,32 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 					<Button ml={5} text="Reparse" onClick={()=>{
 						ParseWavesurferData();
 					}}/>
-					<Button ml={5} enabled={parseData != null} text={wavesurfer.isPlaying() ? "⏸" : "▶"} onClick={()=>{
-						if (wavesurfer.isPlaying()) {
-							wavesurfer.pause();
-						} else {
-							//wavesurfer.seekTo(uiState.selection_start / wavesurfer.getDuration());
-							wavesurfer.play();
-						}
-						RunInAction("AudioPanel.playPauseButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
-					}}/>
-					<Button ml={5} enabled={parseData != null} text={"■"} onClick={()=>{
-						if (wavesurfer.isPlaying()) {
-							wavesurfer.pause();
-						}
-						wavesurfer.seekTo(uiState.selection_start / wavesurfer.getDuration());
-						RunInAction("AudioPanel.stopButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
-					}}/>
-					<CheckBox ml={5} text="Play on click" value={uiState.playOnClick} onChange={val=>RunInAction_Set(this, ()=>uiState.playOnClick = val)}/>
-					<Text ml={5}>Selection:</Text>
-					<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} enabled={parseData != null} value={uiState.selection_start} onChange={val=>{
-						RunInAction_Set(this, ()=>uiState.selection_start = val);
-					}}/>
-					<TextPlus ml={5} info={`0 means as many rows as fits in the container.`}>Rows:</TextPlus>
-					<Spinner ml={5} value={uiState.waveformRows} onChange={val=>RunInAction_Set(this, ()=>uiState.waveformRows = val)}/>
+
+					{audioData != null && <>
+						<Button ml={15} text={wavesurfer.isPlaying() ? "⏸" : "▶"} onClick={()=>{
+							if (wavesurfer.isPlaying()) {
+								wavesurfer.pause();
+							} else {
+								//wavesurfer.seekTo(uiState.selection_start / wavesurfer.getDuration());
+								wavesurfer.play();
+							}
+							RunInAction("AudioPanel.playPauseButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
+						}}/>
+						<Button ml={5} text={"■"} onClick={()=>{
+							if (wavesurfer.isPlaying()) {
+								wavesurfer.pause();
+							}
+							wavesurfer.seekTo(uiState.selection_start / wavesurfer.getDuration());
+							RunInAction("AudioPanel.stopButton.onClick", ()=>uiState.wavesurferStateChangedAt = Date.now());
+						}}/>
+						<CheckBox ml={5} text="Play on click" value={uiState.playOnClick} onChange={val=>RunInAction_Set(this, ()=>uiState.playOnClick = val)}/>
+						<Text ml={5}>Selection:</Text>
+						<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} value={uiState.selection_start} onChange={val=>{
+							RunInAction_Set(this, ()=>uiState.selection_start = val);
+						}}/>
+						<TextPlus ml={5} info={`0 means as many rows as fits in the container.`}>Rows:</TextPlus>
+						<Spinner ml={5} value={uiState.waveformRows} onChange={val=>RunInAction_Set(this, ()=>uiState.waveformRows = val)}/>
+					</>}
 				</Row>
 				<div style={{position: "absolute", left: 0, top: 0, width: "100%", display: "none"}} ref={c=>{
 					if (c) {
@@ -204,11 +239,18 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 						rowContainerRef(c);
 					}
 				}}>
-					{parseData != null && <TimeMarker wavesurfer={wavesurfer} parseData={parseData}/>}
-					{parseData != null && <SelectionMarker wavesurfer={wavesurfer} parseData={parseData}/>}
-					{Range(0, rows, 1, false).map(i=>{
-						return <AudioRow key={i} rowIndex={i} parseData={parseData} rowContainerWidth={rowContainerWidth} wavesurfer={wavesurfer}/>;
-					})}
+					{audioData != null && <>
+						<TimeMarker wavesurfer={wavesurfer} audioData={audioData}/>
+						<SelectionMarker wavesurfer={wavesurfer} audioData={audioData}/>
+						{Range(0, rows, 1, false).map(i=>{
+							return <AudioRow key={i} rowIndex={i} audioData={audioData} rowContainerWidth={rowContainerWidth} wavesurfer={wavesurfer}/>;
+						})}
+					</>}
+					{textData != null && <>
+						<TextArea style={{height: "100%"}} value={textData.text ?? ""} onChange={val=>{
+							opfsForMap.SaveFile_Text(val, uiState.selectedFile!);
+						}}/>
+					</>}
 				</div>
 			</Column>
 		);
@@ -216,10 +258,10 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 }
 
 @Observer
-class SelectionMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: ParseData}, {}> {
+class SelectionMarker extends BaseComponent<{wavesurfer: WaveSurfer, audioData: ParseData_Audio}, {}> {
 	render() {
-		const {parseData} = this.props;
-		const {secondsPerRow} = parseData;
+		const {audioData} = this.props;
+		const {secondsPerRow} = audioData;
 		const uiState = store.main.timelines.audioPanel;
 
 		const selectionStart_row = Math.floor(uiState.selection_start / secondsPerRow);
@@ -238,10 +280,10 @@ class SelectionMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: 
 }
 
 @Observer
-class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: ParseData}, {}> {
+class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, audioData: ParseData_Audio}, {}> {
 	render() {
-		const {wavesurfer, parseData} = this.props;
-		const {secondsPerRow} = parseData;
+		const {wavesurfer, audioData} = this.props;
+		const {secondsPerRow} = audioData;
 
 		useEffect(()=>{
 			const timer = new Timer(1000 / 30, ()=>{
@@ -265,24 +307,24 @@ class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, parseData: Parse
 	}
 }
 
-class AudioRow extends BaseComponent<{rowIndex: number, parseData: ParseData|null, rowContainerWidth: number, wavesurfer: WaveSurfer}, {}> {
+class AudioRow extends BaseComponent<{rowIndex: number, audioData: ParseData_Audio|undefined, rowContainerWidth: number, wavesurfer: WaveSurfer}, {}> {
 	render() {
-		const {rowIndex, parseData, rowContainerWidth, wavesurfer} = this.props;
+		const {rowIndex, audioData, rowContainerWidth, wavesurfer} = this.props;
 		const uiState = store.main.timelines.audioPanel;
 
 		return (
 			<canvas
 				// set canvas-width to match the number of samples in the row, for pixel-perfect/no-scaling rendering
-				width={parseData?.samplesPerRow ?? rowContainerWidth} height={100}
+				width={audioData?.samplesPerRow ?? rowContainerWidth} height={100}
 				style={{
 					position: "absolute", left: 0, top: rowIndex * 100,
 					// but set the css-width to just whatever the container's width is, so it fills the visual area (canvas takes care of visual scaling)
 					//width: "100%", height: 100,
 				}}
 				onClick={e=>{
-					if (parseData == null) return;
-					const timeAtStartOfRow = rowIndex * parseData.secondsPerRow;
-					const timeAtEndOfRow = (rowIndex + 1) * parseData.secondsPerRow;
+					if (audioData == null) return;
+					const timeAtStartOfRow = rowIndex * audioData.secondsPerRow;
+					const timeAtEndOfRow = (rowIndex + 1) * audioData.secondsPerRow;
 					const targetTimeInSeconds = Lerp(timeAtStartOfRow, timeAtEndOfRow, e.nativeEvent.offsetX / rowContainerWidth);
 					wavesurfer.seekTo(targetTimeInSeconds / wavesurfer.getDuration());
 					if (uiState.playOnClick) {
@@ -296,8 +338,8 @@ class AudioRow extends BaseComponent<{rowIndex: number, parseData: ParseData|nul
 					});
 				}}
 				ref={c=>{
-					if (c && parseData) {
-						const {rowDatas} = parseData;
+					if (c && audioData) {
+						const {rowDatas} = audioData;
 						const rowData = rowDatas[rowIndex];
 						const ctx = c.getContext("2d")!;
 						ctx.fillStyle = "rgb(0, 0, 0)";
