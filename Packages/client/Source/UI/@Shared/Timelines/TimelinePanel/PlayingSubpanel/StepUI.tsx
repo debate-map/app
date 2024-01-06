@@ -26,6 +26,7 @@ export class StepUI extends BaseComponentPlus(
 
 	render() {
 		const {index, last, map, timeline, steps, step, player} = this.props;
+		const nextStep = steps[index + 1];
 		const {showNodeReveals, editorOpen} = this.state;
 		const timeFromStart = GetTimelineStepTimeFromStart(step);
 
@@ -106,7 +107,7 @@ export class StepUI extends BaseComponentPlus(
 					</VMenuStub>}
 				</Column>
 				{editorOpen &&
-					<StepEditorUI index={index} last={index == steps.length - 1} map={map} timeline={timeline} step={step} draggable={false}/>}
+					<StepEditorUI index={index} map={map} timeline={timeline} step={step} nextStep={nextStep} draggable={false}/>}
 			</div>
 		);
 	}

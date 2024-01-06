@@ -6,7 +6,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {DragInfo, InfoButton, MakeDraggable, Observer} from "web-vcore";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub.js";
-import {GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
 import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, TimelineStep, NodeReveal, GetNodeID, GetNode, GetNodeL2, GetNodeL3, GetNodeDisplayText, NodeType, SearchUpFromNodeForNodeMatchingX, Map, OrderKey, GetPathNodes, GetNodeLinks} from "dm_common";
@@ -37,7 +37,21 @@ WaitXThenRun(0, () => {
 	document.body.appendChild(portal);
 }); */
 
-export type StepEditorUIProps = {index: number, last: boolean, map: Map, timeline: Timeline, step: TimelineStep, draggable?: boolean} & {dragInfo?: DragInfo};
+export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
+
+export const GetStepDurationInAudioFile = CreateAccessor((step: TimelineStep, nextStep: TimelineStep|n, mapID: string)=>{
+	if (nextStep == null) return null;
+	const opfsForMap = OPFS_Map.GetEntry(mapID);
+	const audioMeta = opfsForMap.AudioMeta;
+	const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
+
+	const topAudioFileForStep = audioFileMetas.find(a=>a.value.stepStartTimes[step.id] != null); // todo: once custom ordering is implementing, use that for audio-file selection here
+	const stepStartTimeInTopAudioFile = topAudioFileForStep?.value.stepStartTimes[step.id];
+	const nextStepStartTimeInTopAudioFile = topAudioFileForStep?.value.stepStartTimes[nextStep.id];
+	if (stepStartTimeInTopAudioFile == null || nextStepStartTimeInTopAudioFile == null) return null;
+
+	return nextStepStartTimeInTopAudioFile - stepStartTimeInTopAudioFile;
+});
 
 @MakeDraggable(({index, step, draggable}: StepEditorUIProps)=>{
 	if (draggable == false) return null as any; // todo: is this "as any" valid?
@@ -65,7 +79,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 	} */
 
 	render() {
-		const {index, last, map, timeline, step, dragInfo} = this.props;
+		const {index, map, timeline, step, nextStep, dragInfo} = this.props;
 		const {placeholderRect} = this.state;
 		//const step = GetTimelineStep(stepID);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
@@ -94,6 +108,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 			}
 			await opfsForMap.SaveFile_Text(JSON.stringify(newAudioMeta), "AudioMeta.json");
 		};
+
+		const stepDurationDerivedFromAudio = GetStepDurationInAudioFile(step, nextStep, map.id);
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
@@ -136,18 +152,23 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							}}/>}
 							{timeType == "from last step" &&
 							<>
-								<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeFromLastStep ?? 0} onChange={val=>{
+								<Spinner style={{width: 60}} enabled={creatorOrMod} step="any" value={step.timeFromLastStep ?? 0} onChange={val=>{
 									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}});
 								}}/>
 								<Text title="seconds">s</Text>
 							</>}
 							{timeType == "until next step" &&
 							<>
-								<Spinner style={{width: 60}} enabled={creatorOrMod} step={.1} value={step.timeUntilNextStep ?? 0} onChange={val=>{
+								<Spinner style={{width: 60}} enabled={creatorOrMod} step="any" value={step.timeUntilNextStep ?? 0} onChange={val=>{
 									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeUntilNextStep: val}});
 								}}/>
 								<Text title="seconds">s</Text>
 							</>}
+							<Button mdIcon="creation" title={`Derive time from audio file (${stepDurationDerivedFromAudio}s)`} ml={5}
+								enabled={creatorOrMod && nextStep != null && stepDurationDerivedFromAudio != null && stepDurationDerivedFromAudio.toFixed(3) != step.timeUntilNextStep?.toFixed(3)} // number stored in db can differ slightly, so round to 1ms
+								onClick={()=>{
+									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: null, timeUntilNextStep: stepDurationDerivedFromAudio}});
+								}}/>
 							{/* <Pre>Speaker: </Pre>
 							<Select value={} onChange={val=> {}}/> */}
 							<Pre ml={5}>Position: </Pre>
