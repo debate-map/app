@@ -1,4 +1,4 @@
-import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "web-vcore/nm/js-vextensions.js";
+import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn, emptyArray, ea} from "web-vcore/nm/js-vextensions.js";
 import {computed, makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
@@ -13,8 +13,13 @@ import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIn
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
-import {StepUI} from "./PlayingSubpanel/StepUI.js";
+import WaveSurfer from "wavesurfer.js";
+import {CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
+import {OPFS_Map} from "Utils/OPFS/OPFS_Map.js";
+import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/AudioMeta.js";
 import {RecordDropdown} from "./PlayingSubpanel/RecordDropdown.js";
+import {StepUI} from "./PlayingSubpanel/StepUI.js";
+import {AudioFilePlayer} from "./PlayingSubpanel/AudioFilePlayer.js";
 
 class NoVideoPlayer {
 	constructor(comp: PlayingSubpanel) {
@@ -37,10 +42,33 @@ class NoVideoPlayer {
 	SetPlaying(playing: boolean) {
 		RunInAction("NoVideoPlayer.SetPlaying", ()=>this.playing = playing);
 		this.timer.Enabled = playing;
+		if (playing) this.timer_ticksSinceStart = 0;
+
+		// debug
+		//if (playing) window.Extend({startedAt_realTime: Date.now(), startedAt_simTime: this.comp.targetTime, startedAt_ticks: 0});
 	}
 
+	timer_ticksSinceStart = 0;
 	timer = new Timer(1000 / 30, ()=>{
-		this.comp.AdjustTargetTimeByFrames(2);
+		this.timer_ticksSinceStart++;
+		let framesToProgress = 2; // 2 frames = 1/30th of a second
+
+		// Apparently, Timer/setInterval can easily "fall behind" on the number of ticks that end up running!
+		// To fix this, detect whenever our fall-behind amount is enough to warrant another half-tick (equating to 1 frame), and execute that half-tick synthetically.
+		const timeSinceStart = Date.now() - this.timer.startTime;
+		const ticksExpectedSinceStart = timeSinceStart / this.timer.intervalInMS;
+		const ticksLost = ticksExpectedSinceStart - this.timer_ticksSinceStart;
+		if (ticksLost >= .5) {
+			this.timer_ticksSinceStart += .5;
+			//this.comp.AdjustTargetTimeByFrames(1);
+			framesToProgress += 1;
+		}
+
+		this.comp.AdjustTargetTimeByFrames(framesToProgress);
+
+		// debug
+		/*window["startedAt_ticks"] = (window["startedAt_ticks"] ?? 0) + 1;
+		console.log("@realTimePassed:", Date.now() - window["startedAt_realTime"], "@simTimePassed:", (this.comp.targetTime - window["startedAt_simTime"]) * 1000, "@ticks:", window["startedAt_ticks"], "@asTime:", window["startedAt_ticks"] * (1000 / 30));*/
 	});
 }
 
@@ -57,8 +85,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 	noVideoPlayer = new NoVideoPlayer(this);
 	listRootEl: HTMLDivElement;
 	sideBarEl: HTMLDivElement;
-	// stepRects = [] as VRect[];
-	// stepComps = [] as StepUI[];
+	//stepRects = [] as VRect[];
+	//stepComps = [] as StepUI[];
 	stepElements = [] as HTMLDivElement[];
 	stepElements_updateTimes = {};
 
@@ -69,7 +97,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 	@observable messageAreaHeight = 0;
 
 	@observable targetTime: number;
-	// targetStepIndex = null as number;
+	//targetStepIndex = null as number;
 	lastPosChangeSource: PosChangeSource;
 
 	AdjustTargetTimeByFrames(frameDelta: number) {
@@ -247,8 +275,10 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		const mapState = GetMapState(map.id);
 		if (mapState == null) return null;
 		const timeline = GetSelectedTimeline(map.id);
-		const steps = timeline ? GetTimelineSteps(timeline.id) : null;
+		const steps = timeline ? GetTimelineSteps(timeline.id) : ea;
 		const targetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
+
+		const audioFiles = timeline ? GetAudioFilesActiveForTimeline(map.id, timeline.id) : [];
 
 		const [messageAreaRef, {height: messageAreaHeight}] = UseSize(); // todo: maybe switch this to use `useResizeObserver()`, so reacts to [css/window]-only height changes
 		// this.Stash({ messageAreaHeight });
@@ -289,6 +319,9 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						if (pos == 0) return; // ignore "pos 0" event; this just happens when the video first loads (even if seek-to time set otherwise)
 						this.SetTargetTime(pos, source);
 					}}/>}
+				{audioFiles.map((audioFile, index)=>{
+					return <AudioFilePlayer key={audioFile.name} map={map} timeline={timeline} steps={steps} audioFile={audioFile} isPlayingGetter={()=>this.noVideoPlayer.playing} timeGetter={()=>this.targetTime}/>;
+				})}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
 					<Row>
 						<Button text={this.noVideoPlayer.playing ? "⏸" : "▶"} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>

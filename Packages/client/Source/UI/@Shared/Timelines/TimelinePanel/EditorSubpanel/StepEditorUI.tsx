@@ -1,4 +1,4 @@
-import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "web-vcore/nm/react-vextensions.js";
@@ -14,7 +14,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_AddTimelineStep, RunCommand_DeleteTimelineStep, RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
-import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
+import {AudioMeta, GetStepAudioSegmentInfo} from "Utils/OPFS/Map/AudioMeta";
 import {store} from "Store";
 
 export enum PositionOptionsEnum {
@@ -38,20 +38,6 @@ WaitXThenRun(0, () => {
 }); */
 
 export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
-
-export const GetStepDurationInAudioFile = CreateAccessor((step: TimelineStep, nextStep: TimelineStep|n, mapID: string)=>{
-	if (nextStep == null) return null;
-	const opfsForMap = OPFS_Map.GetEntry(mapID);
-	const audioMeta = opfsForMap.AudioMeta;
-	const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
-
-	const topAudioFileForStep = audioFileMetas.find(a=>a.value.stepStartTimes[step.id] != null); // todo: once custom ordering is implementing, use that for audio-file selection here
-	const stepStartTimeInTopAudioFile = topAudioFileForStep?.value.stepStartTimes[step.id];
-	const nextStepStartTimeInTopAudioFile = topAudioFileForStep?.value.stepStartTimes[nextStep.id];
-	if (stepStartTimeInTopAudioFile == null || nextStepStartTimeInTopAudioFile == null) return null;
-
-	return nextStepStartTimeInTopAudioFile - stepStartTimeInTopAudioFile;
-});
 
 @MakeDraggable(({index, step, draggable}: StepEditorUIProps)=>{
 	if (draggable == false) return null as any; // todo: is this "as any" valid?
@@ -109,7 +95,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 			await opfsForMap.SaveFile_Text(JSON.stringify(newAudioMeta), "AudioMeta.json");
 		};
 
-		const stepDurationDerivedFromAudio = GetStepDurationInAudioFile(step, nextStep, map.id);
+		const stepAudioSegment = GetStepAudioSegmentInfo(step, nextStep, map.id);
+		const stepDurationDerivedFromAudio = stepAudioSegment?.duration;
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
