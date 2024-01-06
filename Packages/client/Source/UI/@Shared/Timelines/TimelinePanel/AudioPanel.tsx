@@ -164,6 +164,11 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 		const files = opfsForMap.Files;
 		const selectedFile = files.find(a=>a.name == uiState.selectedFile);
 		LoadFileIntoWavesurfer_IfNotAlreadyAndValid(selectedFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
+
+		const audioMeta = opfsForMap.AudioMeta;
+		const audioFileMeta = audioMeta?.fileMetas[selectedFile?.name ?? ""];
+		const stepStartTimesInAudioFile = audioFileMeta?.stepStartTimes.Pairs() ?? [];
+
 		return (
 			<Column style={{flex: 1}}>
 				<Row plr={5} style={{height: 30}}>
@@ -245,8 +250,13 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 					}
 				}}>
 					{audioData != null && <>
-						<TimeMarker wavesurfer={wavesurfer} audioData={audioData}/>
-						<SelectionMarker wavesurfer={wavesurfer} audioData={audioData}/>
+						{stepStartTimesInAudioFile.map((entry, index)=>{
+							return (
+								<TimeMarker key={index} audioData={audioData} timeGetter={()=>entry.value} color="rgba(255,100,0,1)"/>
+							);
+						})}
+						<TimeMarker audioData={audioData} timeGetter={()=>wavesurfer.getCurrentTime()} color="rgba(0,130,255,1)" updateInterval={1000 / 30}/>
+						<TimeMarker audioData={audioData} timeGetter={()=>uiState.selection_start} color="rgba(0,255,0,1)"/>
 						{Range(0, rows, 1, false).map(i=>{
 							return <AudioRow key={i} rowIndex={i} audioData={audioData} rowContainerWidth={rowContainerWidth} wavesurfer={wavesurfer}/>;
 						})}
@@ -263,50 +273,29 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 }
 
 @Observer
-class SelectionMarker extends BaseComponent<{wavesurfer: WaveSurfer, audioData: ParseData_Audio}, {}> {
+class TimeMarker extends BaseComponent<{audioData: ParseData_Audio, timeGetter: ()=>number, color: string, updateInterval?: number}, {}> {
 	render() {
-		const {audioData} = this.props;
-		const {secondsPerRow} = audioData;
-		const uiState = store.main.timelines.audioPanel;
-
-		const selectionStart_row = Math.floor(uiState.selection_start / secondsPerRow);
-
-		return (
-			<div style={{
-				position: "absolute", zIndex: 1, pointerEvents: "none",
-				left: ((uiState.selection_start % secondsPerRow) / secondsPerRow).ToPercentStr(),
-				top: 100 * selectionStart_row,
-				width: 1,
-				height: 100,
-				background: "rgba(0,255,0,1)",
-			}}/>
-		);
-	}
-}
-
-@Observer
-class TimeMarker extends BaseComponent<{wavesurfer: WaveSurfer, audioData: ParseData_Audio}, {}> {
-	render() {
-		const {wavesurfer, audioData} = this.props;
+		const {audioData, timeGetter, color, updateInterval} = this.props;
 		const {secondsPerRow} = audioData;
 
 		useEffect(()=>{
-			const timer = new Timer(1000 / 30, ()=>{
+			if (updateInterval == null) return;
+			const timer = new Timer(updateInterval, ()=>{
 				this.Update();
 			}).Start();
 			return ()=>timer.Stop();
-		});
+		}, [updateInterval]);
 
-		const currentRow = Math.floor(wavesurfer.getCurrentTime() / secondsPerRow);
+		const currentRow = Math.floor(timeGetter() / secondsPerRow);
 
 		return (
 			<div style={{
 				position: "absolute", zIndex: 1, pointerEvents: "none",
-				left: ((wavesurfer.getCurrentTime() % secondsPerRow) / secondsPerRow).ToPercentStr(),
+				left: ((timeGetter() % secondsPerRow) / secondsPerRow).ToPercentStr(),
 				top: 100 * currentRow,
 				width: 1,
 				height: 100,
-				background: "rgba(0,130,255,1)",
+				background: color,
 			}}/>
 		);
 	}
