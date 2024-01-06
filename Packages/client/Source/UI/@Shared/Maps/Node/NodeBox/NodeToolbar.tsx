@@ -137,7 +137,10 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 					node.type != NodeType.argument && {
 						position: "absolute", bottom: "100%", right: -17, // extend 17px past right edge, to account for +/- button below
 					},
-					showBottomBorder && {borderBottom: "1px solid black"},
+					showBottomBorder && {
+						borderBottom: "1px solid black",
+						boxSizing: "content-box", // needed for border to not cut into content (eg. making ratings-preview look inconsistent)
+					},
 				)}>
 					{getStandardToolbarItemUIs()}
 				</Row>
@@ -220,6 +223,7 @@ class ToolBarButton extends BaseComponent<{
 						//border: "solid rgba(0,0,0,.5)",
 						border: "solid rgba(0,0,0,1)",
 						borderWidth: `0 0 ${showBottomBorder ? "1px" : "0"} ${showLeftBorder ? "1px" : "0"}`,
+						boxSizing: "content-box", // needed for border to not cut into content (eg. making ratings-preview look inconsistent)
 					},
 					highlightOrHovered && {background: "rgba(255,255,255,.2)"},
 					//!showLeftBorder && {borderRadius: "5px 0 0 0"},
@@ -235,6 +239,8 @@ class ToolBarButton extends BaseComponent<{
 						width: icon == "transfer-left" ? [35, 25, 20, 15][sizeIndex] : [30, 25, 20, 15][sizeIndex],
 						fontSize: 16,
 					},
+					// atm, toolbar-buttons are always displayed with the same size, so just set it so explicitly
+					{width: TOOLBAR_BUTTON_WIDTH, height: TOOLBAR_HEIGHT},
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
 					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
 						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .15})`,
