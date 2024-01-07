@@ -277,37 +277,12 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.none) return null;
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType);
-		/*const ratings = GetRatings(ratingNode.id, ratingType);
-		const ratingsInEachRange = ratingTypeInfo.valueRanges.map(range=>{
-			return ratings.filter(a=>RatingValueIsInRange(a.value, range));
-		});*/
 		const ratingSummary = GetRatingSummary(node.id, ratingType);
+		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
 
-		/*ratingsPreview = (
-			<Row style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
-				{ratingTypeInfo.valueRanges.map((range, index)=>{
-					const ratingsInRange = ratingsInEachRange[index];
-					const ratingsInRange_relativeToMax = ratingsInRange.length / ratingsInEachRange.map(a=>a.length).Max();
-					return <div style={{
-						flex: 1,
-						background: "red",
-						height: ratingsInRange_relativeToMax.ToPercentStr(),
-					}}/>;
-				})}
-			</Row>
-		);*/
 		if (store.main.maps.toolbarRatingPreviews == RatingPreviewType.chart) {
-			//if (ratings.length == 0) return null;
-
-			/*const nodeColor = GetNodeColor(node, "raw");
-			const redNodeColor = GetNodeColor({type: NodeType.argument, displayPolarity: Polarity.opposing} as NodeL3, "raw");*/
-			const redNodeBackgroundColor = GetNodeColor({type: NodeType.argument, displayPolarity: Polarity.opposing} as NodeL3, "background");
-
-			//const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
 			const baselineValue = (ratingSummary.countsByRange.Max() / 10).KeepAtLeast(.1);
 			const ratingValues = ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue));
-
-			const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
 			const ratingValues_final = reverseRatings ? ratingValues.slice().reverse() : ratingValues;
 
 			return (
@@ -315,31 +290,26 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 					uplotData_override={[
 						// for splines style
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
-						//[0, ...ratingsInEachRange.map(a=>a.length), 0],
-						//[baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
 						[baselineValue, ...ratingValues_final, baselineValue],
 
 						// for bars style
 						/*ratingTypeInfo.valueRanges.map(a=>a.center),
 						ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)),*/
 					]}
-					// if background is red, decrease alpha of our orange fill-color (else it shows up too prominently, relative to when the background is green, etc.)
-					//customAlphaMultiplier={nodeColor.css() == redNodeColor.css() ? .5 : 1}
-					//customAlphaMultiplier={backgroundColor.css() == redNodeBackgroundColor.css() ? .7 : 1}
 				/>
 			);
 		}
 
 		//const backgroundFillPercent = GetFillPercent_AtPath(node, path, null);
 		const backgroundFillPercent = GetRatingAverage(node.id, ratingType, null) ?? 0;
+		const backgroundFillPercent_final = reverseRatings ? 100 - backgroundFillPercent : backgroundFillPercent;
 		return (
 			<>
-				<div style={{position: "absolute", top: 0, bottom: 0, right: 0, width: `${100 - backgroundFillPercent}%`, background: "black"}}/>
+				<div style={{position: "absolute", top: 0, bottom: 0, right: 0, width: `${100 - backgroundFillPercent_final}%`, background: "black"}}/>
 				{/* chart just for the my-rating bars */}
 				<RatingsPanel_Old node={node} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
-						//[0, ...ratingsInEachRange.map(a=>0), 0],
 						[0, ...ratingSummary.countsByRange.map(a=>0), 0],
 					]}
 					ownRatingOpacity={.5} // increase opacity of own-rating marker (else can be hard to see near filled/unfilled border -- using a shape rather than line should make this unnecessary in future)
