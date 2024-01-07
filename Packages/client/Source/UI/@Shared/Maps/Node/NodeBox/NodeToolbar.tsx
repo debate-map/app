@@ -1,4 +1,4 @@
-import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, GetToolbarItemsToShow, Map, NodeL3, NodeRatingType, NodeType, Polarity, ShowNodeToolbar} from "dm_common";
+import {GetExtractedPrefixTextInfo, GetNodeForm, GetNodeL3, GetNodeTags, GetRatingAverage, GetRatingSummary, GetRatingTypeInfo, GetToolbarItemsToShow, Map, NodeL3, NodeRatingType, NodeType, Polarity, ShouldRatingTypeBeReversed, ShowNodeToolbar} from "dm_common";
 import React, {useState} from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {store} from "Store/index.js";
@@ -305,6 +305,11 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 
 			//const baselineValue = (ratingsInEachRange.map(a=>a.length).Max() / 10).KeepAtLeast(.1);
 			const baselineValue = (ratingSummary.countsByRange.Max() / 10).KeepAtLeast(.1);
+			const ratingValues = ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue));
+
+			const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
+			const ratingValues_final = reverseRatings ? ratingValues.slice().reverse() : ratingValues;
+
 			return (
 				<RatingsPanel_Old node={node} path={path} ratingType={ratingType} asNodeUIOverlay={true}
 					uplotData_override={[
@@ -312,7 +317,7 @@ export class RatingsPreviewBackground extends BaseComponent<{path: string, node:
 						[0, ...ratingTypeInfo.valueRanges.map(a=>a.center), 100],
 						//[0, ...ratingsInEachRange.map(a=>a.length), 0],
 						//[baselineValue, ...ratingsInEachRange.map(a=>a.length.KeepAtLeast(baselineValue)), baselineValue],
-						[baselineValue, ...ratingSummary.countsByRange.map(a=>a.KeepAtLeast(baselineValue)), baselineValue],
+						[baselineValue, ...ratingValues_final, baselineValue],
 
 						// for bars style
 						/*ratingTypeInfo.valueRanges.map(a=>a.center),
