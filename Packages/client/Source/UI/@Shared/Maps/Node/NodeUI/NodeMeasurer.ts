@@ -90,18 +90,6 @@ export function GetTextWidth(text: string, font: string) {
 	// (before comparing, we remove the font-weight "normal/400" prefix from provided value [if present], since it gets removed as redundant by browser)
 	AssertWarn(context.font == font.replace(/^(normal |400 )/, ""), `Failed to set font. @tried(${font}) @result(${context.font})`);
 
-	// check if the browser has finished loading the fonts in question; if not, log a warning
-	/*const before = performance.now();
-	const ready = document.fonts.check(font.replace(", AdobeNotDef", ""));
-	const after = performance.now();
-	console.log("Checking time:", after - before);
-	if (!ready) {
-		console.warn(`
-			At time of GetCanvasFont being called, the provided fonts had not finished loading: ${font.replace(", AdobeNotDef", "")}
-			This can cause incorrect text-measurement, causing display bugs. Did you forget to update the font usages in container "hidden_early" of index.html, to trigger early font-loading?
-		`);
-	}*/
-
 	const metrics = context.measureText(text);
 	return metrics.width;
 }
@@ -116,13 +104,10 @@ export const GetCanvasFont = CreateAccessor((fontSize?: string, fontFamily?: str
 	const result = `${fontWeight_final} ${fontSize_final} ${fontFamily_final}`;
 
 	// check if the browser has finished loading the fonts in question; if not, log a warning
-	const before = performance.now();
-	const ready = document.fonts.check(result.replace(", AdobeNotDef", "")); // takes 0-0.2ms, according to performance.now() [generally says 0.1ms]
-	const after = performance.now();
-	console.log("Checking time:", after - before);
-	if (checkIfFontLoaded && !ready) {
+	const fontsExcludingOptional = result.replace(", AdobeNotDef", ""); // takes 0-0.2ms, according to performance.now() [generally says 0.1ms]
+	if (checkIfFontLoaded && !document.fonts.check(fontsExcludingOptional)) {
 		console.warn(`
-			At time of GetCanvasFont being called, the provided fonts had not finished loading: ${result.replace(", AdobeNotDef", "")}
+			At time of GetCanvasFont being called, the provided fonts had not finished loading: ${fontsExcludingOptional}
 			This can cause incorrect text-measurement, causing display bugs. Did you forget to update the font usages in container "hidden_early" of index.html, to trigger early font-loading?
 		`);
 	}

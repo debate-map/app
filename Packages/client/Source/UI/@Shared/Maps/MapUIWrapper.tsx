@@ -55,16 +55,6 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 		const {mapID, rootNode: rootNode_passed, withinPage, ...rest} = this.props;
 		//Assert(padding && subNavBarWidth != null); // nn: default-values set
 
-		// not needed currently, but may be someday (or in extreme circumstances, eg. super-slow font loading)
-		/*const fontsReady = document.fonts.check("400 11px Quicksand, Symbola");
-		//console.log("fontsReady:", fontsReady);
-		useEffect(()=>{
-			if (fontsReady) return;
-			const timer = new Timer(100, ()=>this.Update()).Start();
-			return ()=>timer.Stop();
-		});
-		if (!fontsReady) return <MapUIWaitMessage message="Loading fonts..."/>;*/
-
 		const GetMapUIPadding = (): Padding=>{
 			if (this.props.padding) return padding;
 			if (store.main.maps.screenshotMode) return {left: 100, right: 100, top: 100, bottom: 100};
