@@ -296,8 +296,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const height = this.DOM_HTML.offsetHeight;
 		const dividePoint = this.GetDividePoint();
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}${nl}dividePoint:${dividePoint}`);
+			MaybeLog(
+				a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}${nl}dividePoint:${dividePoint}`,
+			);
 
 			// this.UpdateState(true);
 			if (onSizesChange) onSizesChange(dividePoint, height - dividePoint);
@@ -316,8 +318,10 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	OnChildHeightOrPosChange = ()=>{
 		//FlashComp(this, {text: "NodeChildHolder.OnChildHeightOrPosChange"});
 		const {parentNode: node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
-			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}\ncenterY:${this.GetDividePoint()}`);
+		MaybeLog(
+			a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.parentNode.id}\ncenterY:${this.GetDividePoint()}`,
+		);
 
 		// this.OnHeightOrPosChange();
 		WaitXThenRun_Deduped(this, "OnChildHeightOrPosChange_lastPart", 0, ()=>{

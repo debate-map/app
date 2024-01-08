@@ -19,7 +19,7 @@ import {observer} from "web-vcore/nm/mobx-react";
 import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
-import {TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT} from "../../NodeLayoutConstants.js";
+import {TOOLBAR_BUTTON_HEIGHT, TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../../NodeLayoutConstants.js";
 
 type RatingsPanel_Props = {
 	node: NodeL3, path: string, ratingType: NodeRatingType,
@@ -42,7 +42,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 			},
 		});*/
 		// atm, toolbar-buttons are always displayed with the same size, so if in node-toolbar, just set the size explicitly (optimization; saves ~2s of cpu-time during import-helper load of vid-1 map)
-		const {ref: rootRef, width = -1, height = -1} = asNodeUIOverlay ? {ref: null, width: TOOLBAR_BUTTON_WIDTH, height: TOOLBAR_HEIGHT} : useResizeObserver();
+		const {ref: rootRef, width = -1, height = -1} = asNodeUIOverlay ? {ref: null, width: TOOLBAR_BUTTON_WIDTH, height: TOOLBAR_BUTTON_HEIGHT} : useResizeObserver();
 
 		const [rootRect, setRootRect] = UseState<VRect|n>(null);
 		const [chartBodyRect, setChartBodyRect] = UseState<VRect|n>(null);

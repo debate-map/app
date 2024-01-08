@@ -13,7 +13,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {RatingsPanel_Old} from "../DetailBoxes/Panels/RatingsPanel_Old.js";
-import {TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT} from "../NodeLayoutConstants.js";
+import {TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../NodeLayoutConstants.js";
 import {NodeBox_Props} from "../NodeBox.js";
 
 //export type NodeToolbar_SharedProps = NodeBox_Props & {backgroundColor: Color};
@@ -117,17 +117,20 @@ export class NodeToolbar extends BaseComponent<NodeToolbar_Props, {}> {
 				{toolbarItemsToShow.Any(a=>a.panel == "prefix") &&
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
-						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+						height: TOOLBAR_HEIGHT_BASE, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
 						color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css(),
 						position: "absolute", bottom: "100%", left: 0,
 					},
-					showBottomBorder && {borderBottom: "1px solid black"},
+					showBottomBorder && {
+						borderBottom: "1px solid black",
+						boxSizing: "content-box", // needed for border to not cut into content (to be consistent with height of the regular right-anchored toolbar section)
+					},
 				)}>
 					<ToolBarButton {...sharedProps} first={true} last={true} text={extractedPrefixTextInfo?.bracketedText ?? "n/a"} panel="extractedPrefixText" enabled={false}/>
 				</Row>}
 				<Row className={key("NodeToolbar useLightText")} style={css(
 					{
-						height: TOOLBAR_HEIGHT, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
+						height: TOOLBAR_HEIGHT_BASE, background: backgroundColor.css(), borderRadius: "5px 5px 0 0",
 						color: liveSkin.NodeTextColor().alpha(SLMode ? 1 : .4).css(),
 						//minWidth: 250, // temp
 					},
@@ -240,7 +243,7 @@ class ToolBarButton extends BaseComponent<{
 						fontSize: 16,
 					},
 					// atm, toolbar-buttons are always displayed with the same size, so just set it so explicitly
-					{width: TOOLBAR_BUTTON_WIDTH, height: TOOLBAR_HEIGHT},
+					{width: TOOLBAR_BUTTON_WIDTH, height: TOOLBAR_HEIGHT_BASE},
 					//(panel == "truth" || panel == "relevance") && {alignItems: "flex-start", fontSize: 10},
 					(panel == "truth" || panel == "relevance") && !highlightOrHovered && toolbarRatingPreviews != RatingPreviewType.none && {
 						color: `rgba(255,255,255,${toolbarRatingPreviews == RatingPreviewType.bar_average ? .2 : .15})`,

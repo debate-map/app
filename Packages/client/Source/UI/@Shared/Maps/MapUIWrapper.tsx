@@ -1,12 +1,12 @@
 import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, IsNodeL2, IsNodeL3, NodeL3, NodeType} from "dm_common";
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {store} from "Store/index.js";
 import {GetMapState, GetPlayingTimeline, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph} from "tree-grapher";
 import {ShowHeader} from "UI/@SL/SL.js";
 import {ES, HTMLProps, Observer, UseWindowEventListener} from "web-vcore";
-import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {Assert, Timer} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
@@ -14,7 +14,7 @@ import {useGraph} from "./MapGraph.js";
 import {MapUI} from "./MapUI.js";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
-import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants.js";
+import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants.js";
 import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
 import {TimelineEffectApplier_Smooth} from "./MapUI/TimelineEffectApplier_Smooth.js";
 
@@ -54,6 +54,16 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 	render() {
 		const {mapID, rootNode: rootNode_passed, withinPage, ...rest} = this.props;
 		//Assert(padding && subNavBarWidth != null); // nn: default-values set
+
+		// not needed currently, but may be someday (or in extreme circumstances, eg. super-slow font loading)
+		/*const fontsReady = document.fonts.check("400 11px Quicksand, Symbola");
+		//console.log("fontsReady:", fontsReady);
+		useEffect(()=>{
+			if (fontsReady) return;
+			const timer = new Timer(100, ()=>this.Update()).Start();
+			return ()=>timer.Stop();
+		});
+		if (!fontsReady) return <MapUIWaitMessage message="Loading fonts..."/>;*/
 
 		const GetMapUIPadding = (): Padding=>{
 			if (this.props.padding) return padding;

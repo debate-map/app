@@ -6,7 +6,7 @@ import {GetOpenMapID} from "Store/main";
 import {GetPercentFromXToY} from "js-vextensions";
 import {CatchBail, CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
 import {comparer} from "web-vcore/nm/mobx";
-import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT} from "./Node/NodeLayoutConstants";
+import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants";
 
 export class NodeDataForTreeGrapher {
 	constructor(data?: Partial<NodeDataForTreeGrapher>) {
@@ -97,10 +97,10 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 					if (nodeBData.aboveToolbar_visible) {
 						// do special spacing between argument and its first premise (unless it has a left-aligned toolbar-button)
 						if (nodeAIsArgOfNodeB && !nodeBData.aboveToolbar_hasLeftButton) {
-							if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
-							if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT + 8;
+							if (nodeAIsArgOfNodeB && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT_BASE + 8;
+							if (nodeAIsArgOfNodeB && nodeAData.expanded && (nodeAData.width ?? 0) > ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR) return TOOLBAR_HEIGHT_BASE + 8;
 						} else {
-							return TOOLBAR_HEIGHT + 8;
+							return TOOLBAR_HEIGHT_BASE + 8;
 						}
 					}
 

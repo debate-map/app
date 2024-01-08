@@ -2,16 +2,9 @@ import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, 
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
-import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH} from "../NodeLayoutConstants";
-
-/* interface JQuery {
-	positionFrom(referenceControl): void;
-} */
-/* setTimeout(()=>$.fn.positionFrom = function(referenceControl) {
-	var offset = $(this).offset();
-	var referenceControlOffset = referenceControl.offset();
-	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
-}); */
+import {AssertWarn} from "web-vcore/nm/js-vextensions";
+import {createAtom} from "web-vcore/nm/mobx";
+import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_WIDTH_WITH_BORDER} from "../NodeLayoutConstants";
 
 /* keep func-name, for clearer profiling */ // eslint-disable-next-line
 export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementInfoForNode(node: NodeL3, path: string, map: Map, calcHeight = false) {
@@ -44,14 +37,13 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 	expectedTextWidth += noteWidth;
 
 	const subPanelAttachments = GetSubPanelAttachments(node.current);
-	//let expectedOtherStuffWidth = 26;
-	let expectedOtherStuffWidth = 28;
+	let expectedOtherStuffWidth = 28; // 10px (TitlePanel padding, from GetPaddingForNode) + 17px (expand/collapse button) + 1px (expand 1px extra, to account for text-measurement yielding a fractional part)
 	if (subPanelAttachments.Any(a=>a.quote != null || a.description != null)) {
 		expectedOtherStuffWidth += 14;
 	}
 	if (node.type == NodeType.argument) {
 		const toolbarItemsToShow_inline = GetToolbarItemsToShow(node, path, map).filter(a=>a.panel != "prefix"); // todo: confirm whether the filter op is correct here
-		expectedOtherStuffWidth += (toolbarItemsToShow_inline.length * TOOLBAR_BUTTON_WIDTH); // add space for the inline toolbar-items (eg. "Relevance")
+		expectedOtherStuffWidth += (toolbarItemsToShow_inline.length * TOOLBAR_BUTTON_WIDTH_WITH_BORDER); // add space for the inline toolbar-items (eg. "Relevance")
 	}
 
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
@@ -88,22 +80,52 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 
 let textMeasurementCanvas: HTMLCanvasElement;
 let textMeasurementCanvasContext: CanvasRenderingContext2D;
-function GetTextWidth(text: string, font: string) {
+export function GetTextWidth(text: string, font: string) {
 	// re-use canvas object for better performance
 	const canvas = textMeasurementCanvas ?? (textMeasurementCanvas = document.createElement("canvas"));
 	const context = textMeasurementCanvasContext ?? (textMeasurementCanvasContext = canvas.getContext("2d")!);
 
 	context.font = font;
+	// if context's font doesn't match what we just set, warn (can mean invalid font was passed, making return-value inconsistent since context is re-used)
+	// (before comparing, we remove the font-weight "normal/400" prefix from provided value [if present], since it gets removed as redundant by browser)
+	AssertWarn(context.font == font.replace(/^(normal |400 )/, ""), `Failed to set font. @tried(${font}) @result(${context.font})`);
+
+	// check if the browser has finished loading the fonts in question; if not, log a warning
+	/*const before = performance.now();
+	const ready = document.fonts.check(font.replace(", AdobeNotDef", ""));
+	const after = performance.now();
+	console.log("Checking time:", after - before);
+	if (!ready) {
+		console.warn(`
+			At time of GetCanvasFont being called, the provided fonts had not finished loading: ${font.replace(", AdobeNotDef", "")}
+			This can cause incorrect text-measurement, causing display bugs. Did you forget to update the font usages in container "hidden_early" of index.html, to trigger early font-loading?
+		`);
+	}*/
+
 	const metrics = context.measureText(text);
 	return metrics.width;
 }
 
-function GetCSSStyle(element: HTMLElement, prop: string) {
+export function GetCSSStyle(element: HTMLElement, prop: string) {
 	return window.getComputedStyle(element, null).getPropertyValue(prop);
 }
-function GetCanvasFont(fontSize?: string, fontFamily?: string, fontWeight?: number, elForValFallbacks: HTMLElement = document.body) {
+export const GetCanvasFont = CreateAccessor((fontSize?: string, fontFamily?: string, fontWeight?: number, elForValFallbacks: HTMLElement = document.body, checkIfFontLoaded = true)=>{
 	const fontSize_final = fontSize || GetCSSStyle(elForValFallbacks, "font-size") || "14px";
 	const fontFamily_final = fontFamily || GetCSSStyle(elForValFallbacks, "font-family") || "Arial, sans-serif";
 	const fontWeight_final = fontWeight || GetCSSStyle(elForValFallbacks, "font-weight") || "normal";
-	return `${fontWeight_final} ${fontSize_final} ${fontFamily_final}`;
-}
+	const result = `${fontWeight_final} ${fontSize_final} ${fontFamily_final}`;
+
+	// check if the browser has finished loading the fonts in question; if not, log a warning
+	const before = performance.now();
+	const ready = document.fonts.check(result.replace(", AdobeNotDef", "")); // takes 0-0.2ms, according to performance.now() [generally says 0.1ms]
+	const after = performance.now();
+	console.log("Checking time:", after - before);
+	if (checkIfFontLoaded && !ready) {
+		console.warn(`
+			At time of GetCanvasFont being called, the provided fonts had not finished loading: ${result.replace(", AdobeNotDef", "")}
+			This can cause incorrect text-measurement, causing display bugs. Did you forget to update the font usages in container "hidden_early" of index.html, to trigger early font-loading?
+		`);
+	}
+
+	return result;
+});
