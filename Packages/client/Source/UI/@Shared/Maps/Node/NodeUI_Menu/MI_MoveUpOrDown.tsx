@@ -23,7 +23,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 		if (ownIndexAmongPeers == -1) return null; // defensive; this shouldn't happen, but if it does, cancel rendering until data resolves properly
 
 		let towardMin = direction == "up";
-		const directionInDataIsOpposite = node.link?.polarity == Polarity.supporting && node.link?.group != ChildGroup.freeform;
+		const directionInDataIsOpposite = node.link?.polarity == Polarity.supporting && node.link?.group != ChildGroup.freeform; // todo: make sure this is correct
 		if (directionInDataIsOpposite) towardMin = !towardMin;
 
 		// todo: make-so this jumping occurs relative to only the peers in the same rendered-child-group (though might be full list, eg. if "flat" view is used)

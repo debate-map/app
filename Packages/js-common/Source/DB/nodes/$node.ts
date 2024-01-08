@@ -6,7 +6,7 @@ import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {Map} from "../maps/@Map.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
-import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3} from "../nodes.js";
+import {CheckLinkIsValid, CheckNewLinkIsValid, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
 import {ClaimForm, NodeL1, NodeL2, NodeL3, Polarity} from "./@Node.js";
 import {ChildLayout, GetChildLayout_Final, NodeRevision} from "./@NodeRevision.js";
 import {ChildGroup, NodeType} from "./@NodeType.js";
@@ -106,6 +106,7 @@ export function GetSortByRatingType(node: NodeL3): NodeRatingType|n {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.supporting ? Polarity.opposing : Polarity.supporting;
 }
+/** If returns `Polarity.supporting`, then `node` supports the display form of its parent and shows as green; if returns `Polarity.opposing`, it opposes that displayed form and shows as red. */
 export const GetDisplayPolarityAtPath = CreateAccessor((node: NodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
 	Assert(node.type == NodeType.argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
@@ -125,6 +126,13 @@ export function GetDisplayPolarity(basePolarity: Polarity, parentForm: ClaimForm
 	}
 	return result;
 }
+/** If returns true, then node's form is `ClaimForm.negation`, thus its ratings need reversing in the UI. */
+export function ShouldRatingTypeBeReversed(node: NodeL3, ratingType: NodeRatingType) {
+	// return node.type == NodeType.Argument && node.finalPolarity != node.link.polarity;
+	// if (["impact", "relevance"].Contains(ratingType)) return false;
+	return node.link?.form == ClaimForm.negation;
+}
+
 export function IsNodeL1(node): node is NodeL1 {
 	return !node["current"];
 }
@@ -370,13 +378,14 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 	if (node.type == NodeType.argument && UseStandardArgTitleOverCustom(rawTitle)) {
 		const nodeL3 = GetNodeL3(path);
 		if (nodeL3 != null && nodeL3.link?.polarity != null) {
+			const displayPolarity = GetDisplayPolarityAtPath(node, path ?? node.id);
 			if (nodeL3.link.group == ChildGroup.truth) {
-				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "True, because 🡫" : "False, because 🡫";
+				resultTitle = displayPolarity == Polarity.supporting ? "True, because 🡫" : "False, because 🡫";
 			} else if (nodeL3.link.group == ChildGroup.relevance) {
-				//resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Relevance increaser 🡫" : "Relevance decreaser 🡫";
-				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Relevance increaser 🡫" : "Relevance reducer 🡫";
+				//resultTitle = displayPolarity == Polarity.supporting ? "Relevance increaser 🡫" : "Relevance decreaser 🡫";
+				resultTitle = displayPolarity == Polarity.supporting ? "Relevance increaser 🡫" : "Relevance reducer 🡫";
 			} else {
-				resultTitle = nodeL3.link.polarity == Polarity.supporting ? "Argument (supporting)" : "Argument (opposing)";
+				resultTitle = displayPolarity == Polarity.supporting ? "Argument (supporting)" : "Argument (opposing)";
 			}
 		} else {
 			resultTitle = "Argument (unknown polarity)";

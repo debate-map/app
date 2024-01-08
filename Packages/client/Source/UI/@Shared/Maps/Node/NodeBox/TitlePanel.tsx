@@ -157,10 +157,6 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 						titleAttachment == null && missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
-						{/*argNode != null &&
-						<Row style={{float: "left", whiteSpace: "pre", background: "black", borderRadius: "5px 0 0 0", marginLeft: -5, marginRight: 5, marginTop: -5, marginBottom: -5, height: 28, padding: "0 5px"}}>
-							<Text>{argNode?.link?.polarity == Polarity.supporting ? "Pro:" : "Con:"}</Text>
-						</Row>*/}
 						{titleAttachment?.equation && latex && <NodeMathUI text={titleAttachment.equation.text}
 							onTermHover={(id, hovered)=>this.OnTermHover([id], hovered)}
 							onTermClick={id=>this.OnTermClick([id])}

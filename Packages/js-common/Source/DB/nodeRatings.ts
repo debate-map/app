@@ -5,7 +5,7 @@ import {GetRatingTypeInfo, NodeRatingType, RatingType_Info} from "./nodeRatings/
 import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, GetNode} from "./nodes.js";
-import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
+import {GetMainRatingType, GetNodeL2, ShouldRatingTypeBeReversed} from "./nodes/$node.js";
 import {ClaimForm, NodeL2, NodeL3, RatingSummary} from "./nodes/@Node.js";
 import {ChildGroup, NodeType} from "./nodes/@NodeType.js";
 import {MeID} from "./users.js";
@@ -181,86 +181,10 @@ export const GetMarkerPercent_AtPath = CreateAccessor((node: NodeL3, path: strin
 	}
 });
 
-/* export function GetPaths_MainRatingSet(node: NodeL1) {
-	let mainRatingType = NodeL1.GetMainRatingTypes(node)[0];
-	return [`nodeRatings/${node._id}/${mainRatingType}`];
-}
-export function GetPaths_MainRatingAverage(node: NodeL1) {
-	let result = GetPaths_MainRatingSet(node);
-	if (node.type == NodeType.Argument || node.type == NodeType.Argument)
-		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
-	return result;
-} */
-
-/** Returns an int from 0 to 100. */
-/* export function GetMainRatingAverage(node: NodeL1, resultIfNoData = null): number {
-	// if static category, always show full bar
-	if (node._id < 100)
-		return 100;
-	return GetRatingAverage(node._id, NodeL1.GetMainRatingTypes(node)[0], resultIfNoData);
-} */
-
-/** Returns an int from 0 to 100. */
-/* export function GetMainRatingFillPercent(node: NodeL1) {
-	let mainRatingAverage = GetMainRatingAverage(node);
-	if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
-		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
-	return mainRatingAverage || 0;
-} */
-
-/* export function GetFillPercentForRatingAverage(node: NodeL1, ratingAverage: number, reverseRating?: boolean) {
-	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
-	/*if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
-		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*#/
-	return ratingAverage || 0;
-}
-export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
-	if (ratingValue == null) return null;
-	if (reverseRating) return 100 - ratingValue;
-	return ratingValue;
-} */
-
-/*export class RatingFilter {
-	constructor(initialData: Partial<RatingFilter>) {
-		CE(this).VSet(initialData);
-	}
-
-	includeUser = null as string;
-}
-export function FilterRatings(ratings: Rating[], filter: RatingFilter) {
-	return ratings.filter(a=>filter == null || filter.includeUser == a.id);
-}*/
-
 export function TransformRatingForContext(ratingValue: number, reverseRating: boolean): number;
 export function TransformRatingForContext(ratingValue: number|n, reverseRating: boolean): number|n;
 export function TransformRatingForContext(ratingValue: number|n, reverseRating: boolean) {
 	if (ratingValue == null) return null;
 	if (reverseRating) return 100 - ratingValue;
 	return ratingValue;
-}
-/* export function GetFillPercentForRatingType(node: NodeL3, path: string, ratingType: RatingType, filter?: RatingFilter) {
-	if (ratingType == "impact") {
-		let nodeChildren = GetNodeChildrenL3(node, path);
-		//let nodeChildren = GetNodeChildrenL2(node).map(child=>AsNodeL3(child, Polarity.Supporting, GetLinkUnderParent(child._id, node)));
-		if (nodeChildren.Any(a=>a == null)) return 0;
-		let premises = nodeChildren.filter(a=>a.type == NodeType.Claim);
-		let averageTruth = premises.map(premise=>GetRatingAverage_AtPath(premise, "truth", filter, null)).Average();
-		//Log(`Node: ${node._id} @averageTruth: ${averageTruth}`);
-
-		let averageRelevance = GetRatingAverage(node._id, "relevance", filter);
-
-		return ((averageTruth / 100) * (averageRelevance / 100)) * 100;
-	}
-
-	return GetRatingAverage_AtPath(node, ratingType, filter) || 0;
-} */
-
-/* export function ShouldRatingTypeBeReversed(ratingType: RatingType, nodeReversed: boolean, contextReversed: boolean) {
-	//return nodeReversed || (contextReversed && ratingType == "adjustment");
-	return nodeReversed;
-} */
-export function ShouldRatingTypeBeReversed(node: NodeL3, ratingType: NodeRatingType) {
-	// return node.type == NodeType.Argument && node.finalPolarity != node.link.polarity;
-	// if (["impact", "relevance"].Contains(ratingType)) return false;
-	return node.link?.form == ClaimForm.negation;
 }
