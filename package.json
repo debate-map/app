@@ -61,7 +61,7 @@
     "tree-grapher": "0.0.8",
     "ui-debug-kit": "0.0.7",
     "wavesurfer.js": "7.6.0",
-    "web-vcore": "0.0.91"
+    "web-vcore": "0.0.92"
   },
   "packageManager": "yarn@4.0.2"
 }

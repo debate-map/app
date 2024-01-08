@@ -1,23 +1,16 @@
+# common exclusions (not based on project-specific folder-structure or file-names)
+# ==========
+
 **/.DS_Store
 **/.idea
 **/*.log
-
 /node_modules
 /tilt_modules
-/.helm
-/target
-/NMOverwrites
-/Temp
-/Temp_Synced
-/.env
-/PulumiOutput_Private.json
-/Packages/*/node_modules
-/Packages/*/Dist
-/Packages/*/tsconfig.tsbuildinfo
-/Packages/*/nrdiag-*
-/Packages/deploy/NewRelic/newrelic-manifest.yaml
 /.yalc
 /yalc.lock
+/.env
+/.helm
+/target
 
 # yarn
 .yarn/*
@@ -28,9 +21,26 @@
 !.yarn/versions
 .pnp.*
 
+# project-specific exclusions
+# ==========
+
 # secrets
 Others/Secrets/*
 !Others/Secrets/README.md
+
+# others
+/NMOverwrites
+/Temp
+/Temp_Synced
+/PulumiOutput_Private.json
+/Packages/*/node_modules
+/Packages/*/Dist
+/Packages/*/tsconfig.tsbuildinfo
+/Packages/*/nrdiag-*
+/Packages/deploy/NewRelic/newrelic-manifest.yaml
+# the adobe-not-def font files are fully optional (used for debugging), so don't include in repo
+/Packages/client/Resources/Fonts/AdobeNotDef-Regular.otf
+/Packages/client/Resources/Fonts/AdobeNotDef-Regular.otf_disabled
 
 # temp
 @Temp_FirestoreImport.json

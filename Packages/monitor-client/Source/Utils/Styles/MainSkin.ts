@@ -23,7 +23,7 @@ export class MainSkin extends Skin {
 	override OverlayBorderColor = ()=>Chroma("rgba(0,0,0,.3)");
 	override OverlayBorder = ()=>`1px solid ${this.OverlayBorderColor().css()}`;
 	override HeaderFont = ()=>this.MainFont();
-	override MainFont = ()=>"'Quicksand', sans-serif";
+	override MainFont = ()=>"Quicksand, Symbola, AdobeNotDef, sans-serif";
 	override TextColor = ()=>Chroma("rgb(50,50,50)");
 	override NavBarBoxShadow = ()=>"rgba(100,100,100,.3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px";
 	override HeaderColor = ()=>this.ListEntryBackgroundColor_Dark();

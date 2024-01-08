@@ -152,7 +152,7 @@ export class TitlePanel extends BaseComponentPlus(
 						node.type == NodeType.argument && {
 							//whiteSpace: "pre", // for arguments, never wrap text // commented, since conflicts with sl arg-with-custom-text case; what case was this line needed for earlier?
 							alignSelf: "center",
-							marginTop: -1, // "center" is actually below the center, so bump it up a bit
+							//marginTop: -1, // "center" is actually below the center, so bump it up a bit
 						},
 						//isSubnode && {margin: "4px 0 1px 0"},
 						titleAttachment == null && missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},

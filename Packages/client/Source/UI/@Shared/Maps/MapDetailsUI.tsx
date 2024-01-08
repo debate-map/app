@@ -90,7 +90,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 					{!creating &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<TextPlus info={ChildOrdering_infoText}>Child ordering:</TextPlus>
-						<Select options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildOrdering, "ui")]}
+						<Select enabled={enabled} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildOrdering, "ui")]}
 							value={newData.extras.defaultChildOrdering} onChange={val=>Change(newData.extras.defaultChildOrdering = val)}/>
 					</RowLR>}
 
@@ -120,11 +120,11 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 							};
 							return (
 								<Row style={{fontSize: 12}}>
-									<CheckBox ml={5} text="Prefix" value={newData.extras.toolbarItems?.Any(a=>a.panel == "prefix") ?? false} onChange={val=>setToolbarItemEnabled("prefix", val)}/>
-									<CheckBox ml={5} text="Agree." value={newData.extras.toolbarItems?.Any(a=>a.panel == "truth") ?? false} onChange={val=>setToolbarItemEnabled("truth", val)}/>
-									<CheckBox ml={5} text="Relev." value={newData.extras.toolbarItems?.Any(a=>a.panel == "relevance") ?? false} onChange={val=>setToolbarItemEnabled("relevance", val)}/>
-									<CheckBox ml={5} text="Tags" value={newData.extras.toolbarItems?.Any(a=>a.panel == "tags") ?? false} onChange={val=>setToolbarItemEnabled("tags", val)}/>
-									<CheckBox ml={5} text="Phrasings" value={newData.extras.toolbarItems?.Any(a=>a.panel == "phrasings") ?? false} onChange={val=>setToolbarItemEnabled("phrasings", val)}/>
+									<CheckBox ml={5} text="Prefix" enabled={enabled} value={newData.extras.toolbarItems?.Any(a=>a.panel == "prefix") ?? false} onChange={val=>setToolbarItemEnabled("prefix", val)}/>
+									<CheckBox ml={5} text="Agree." enabled={enabled} value={newData.extras.toolbarItems?.Any(a=>a.panel == "truth") ?? false} onChange={val=>setToolbarItemEnabled("truth", val)}/>
+									<CheckBox ml={5} text="Relev." enabled={enabled} value={newData.extras.toolbarItems?.Any(a=>a.panel == "relevance") ?? false} onChange={val=>setToolbarItemEnabled("relevance", val)}/>
+									<CheckBox ml={5} text="Tags" enabled={enabled} value={newData.extras.toolbarItems?.Any(a=>a.panel == "tags") ?? false} onChange={val=>setToolbarItemEnabled("tags", val)}/>
+									<CheckBox ml={5} text="Phrasings" enabled={enabled} value={newData.extras.toolbarItems?.Any(a=>a.panel == "phrasings") ?? false} onChange={val=>setToolbarItemEnabled("phrasings", val)}/>
 								</Row>
 							);
 						})()}
