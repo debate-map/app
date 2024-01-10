@@ -111,15 +111,17 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						dragInfo && dragInfo.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
 					)}>
-					<Row center p="3px 7px" {...(dragInfo && dragInfo.provided.dragHandleProps)} style={{
+					<Row center p="3px 7px" style={{
 						borderRadius: "10px 10px 0 0",
 						/*background: "rgba(0,0,0,.7)",
 						color: "rgba(255,255,255,.7)",*/
 					}}>
-						<Pre>Step {index + 1}</Pre>
+						<Pre sel>{step.id.slice(0, 3)}</Pre>
+						<Pre> (#{index + 1})</Pre>
 						{/* <Button ml={5} text="Edit" title="Edit this step" style={{ flexShrink: 0 }} onClick={() => {
 							ShowEditTimelineStepDialog(MeID(), step);
 						}}/> */}
+						<div {...(dragInfo && dragInfo.provided.dragHandleProps)} style={E({flex: 1, alignSelf: "stretch", margin: "0 5px", borderRadius: 20, background: "rgba(0,0,0,.1)"})}/>
 						<Row center ml="auto">
 							<Text>Time </Text>
 							<Select options={["from start", "from last step", "until next step"]} value={timeType} onChange={typeStr=>{
