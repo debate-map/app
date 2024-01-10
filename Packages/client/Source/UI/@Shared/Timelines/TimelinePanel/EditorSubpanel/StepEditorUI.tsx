@@ -160,7 +160,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								}}/>
 							{/* <Pre>Speaker: </Pre>
 							<Select value={} onChange={val=> {}}/> */}
-							<Pre ml={5}>Position: </Pre>
+							<Pre ml={5}>Pos: </Pre>
 							<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {groupID: val}});
 							}}/>

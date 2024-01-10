@@ -57,13 +57,15 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 						}}/>
 						<Button ml={5} text="Statement" enabled={timeline != null} onClick={()=>{
 							if (MeID() == null) return ShowSignInPopup();
-							/*const lastVisibleStepIndex = this.stepList.getVisibleRange()[1];
-							const newStepIndex = lastVisibleStepIndex == timeline.steps.length - 1 ? null : lastVisibleStepIndex;*/
+							// calculate the insert-index to be just after the middle entry of the visible-step-range
+							const visibleStepRange = this.stepList?.getVisibleRange() ?? [timelineSteps.length - 1, timelineSteps.length - 1];
+							const insertIndex = Math.floor(visibleStepRange.Average() + 1);
+							const prevStep = timelineSteps[insertIndex];
+							const nextStep = timelineSteps[insertIndex + 1];
 
-							// todo: update this to add node at bottom of current visible-range, not end of entire list
 							const newStep = new TimelineStep({
 								timelineID: timeline.id,
-								orderKey: timelineSteps.length ? new OrderKey(timelineSteps.Last().orderKey).next().toString() : OrderKey.mid().toString(),
+								orderKey: OrderKey.between(prevStep?.orderKey, nextStep?.orderKey).toString(),
 								groupID: "full",
 								message: "",
 								nodeReveals: [],
