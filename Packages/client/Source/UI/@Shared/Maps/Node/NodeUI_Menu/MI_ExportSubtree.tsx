@@ -11,9 +11,11 @@ import {Button, CheckBox, Column, Row, RowLR, Select, Spinner, Text, TextArea, T
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {SubtreeDataToString_CSV_Quotes, csv_quotes_includeKeys} from "Utils/DataFormats/CSV/CSV_Quotes.js";
+import {SubtreeDataToString_CSV_Basic, csv_basic_includeKeys} from "Utils/DataFormats/CSV/CSV_Basic.js";
 import {ExportRetrievalMethod} from "../../../../../Store/main/maps.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
-import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server} from "./Dialogs/SubtreeExportHelpers.js";
+import {ConvertLocalSubtreeDataToServerStructure, GetServerSubtreeData_GQLQuery, PopulateLocalSubtreeData, SubtreeData_Server, SubtreeIncludeKeys} from "./Dialogs/SubtreeExportHelpers.js";
 
 @Observer
 export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -40,27 +42,6 @@ enum ExportSubtreeUI_MidTab {
 	Others = 20,
 }
 
-export function CSVCell(text: string) {
-	let result = text;
-	text = text.trim(); // remove extra spaces at start/end (dunno why, but some users seem to add them fairly frequently)
-	if (result.includes(`"`)) result = result.replace(/"/g, `\\"`);
-	if (result.includes(",")) result = `"${result}"`;
-	return result;
-}
-
-export class SubtreeIncludeKeys {
-	constructor(data?: Partial<SubtreeIncludeKeys>) {
-		Object.assign(this, data);
-	}
-	//nodes = ClassKeys<NodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType");
-	nodes = ClassKeys<NodeL1>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType");
-	nodeLinks = ClassKeys<NodeLink>("id", "parent", "child", "form", "polarity");
-	nodeRevisions = ClassKeys<NodeRevision>("id", "node", "phrasing", "attachments");
-	nodePhrasings = ClassKeys<NodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "text_narrative", "note", "terms", "references");
-	terms = ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note");
-	medias = ClassKeys<Media>("id", "name", "type", "url", "description");
-}
-
 @Observer
 class ExportSubtreeUI extends BaseComponentPlus(
 	{} as {controller: BoxController} & MI_SharedProps,
@@ -78,17 +59,9 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		const dialogState = store.main.maps.exportSubtreeDialog;
 
 		let includeKeys_final = Clone(includeKeys);
-		if (dialogState.targetFormat == DataExchangeFormat.csv_basic) {
-			// for this export format, we only need a subset of the data (keep in sync with the "csv_basic" branch's code below)
-			includeKeys_final = new SubtreeIncludeKeys({
-				nodes: ClassKeys<NodeL1>("id", "type", "c_currentRevision"),
-				nodeLinks: ClassKeys<NodeLink>("parent", "child", "form", "polarity"),
-				nodeRevisions: ClassKeys<NodeRevision>("id", "phrasing"),
-				nodePhrasings: ClassKeys<NodePhrasing>(),
-				terms: ClassKeys<Term>(),
-				medias: ClassKeys<Media>(),
-			});
-		}
+		// for the export formats below, we only need a specific subset of the data
+		if (dialogState.targetFormat == DataExchangeFormat.csv_basic) includeKeys_final = csv_basic_includeKeys;
+		else if (dialogState.targetFormat == DataExchangeFormat.csv_quotes) includeKeys_final = csv_quotes_includeKeys;
 
 		// todo: if this fails authentication, use query-fetching approach seen in Admin.tsx for db-backups
 		const {data: queryData, loading, refetch} = useQuery(GetServerSubtreeData_GQLQuery(rootNode.id, dialogState.maxExportDepth, includeKeys_final), {
@@ -127,44 +100,9 @@ class ExportSubtreeUI extends BaseComponentPlus(
 					return value;
 				}, "\t");*/
 			} else if (dialogState.targetFormat == DataExchangeFormat.csv_basic) {
-				// NOTE: If you add new field-accesses in code below, make sure to update the "includeKeys_final" above to include the new fields.
-				const data = subtreeData!;
-				function EnhanceNode(path: string, node: NodeL1, link?: NodeLink|n) {
-					const rev = data.nodeRevisions!.find(a=>a.id == node.c_currentRevision)!;
-					const childLinks = data.nodeLinks!.filter(a=>a.parent == node.id);
-					const childNodes = childLinks.map(a=>data.nodes!.find(b=>b.id == a.child)!);
-					let displayText = GetNodeTitleFromPhrasingAndForm(rev.phrasing, link?.form ?? ClaimForm.base);
-					if (!displayText.rawTitle) {
-						const textParts = [`untitled ${node.type}`];
-						if (node.type == NodeType.argument && link?.polarity != null) {
-							textParts.push(link.polarity == "supporting" ? "(pro)" : "(con)");
-						}
-						displayText = {...displayText, rawTitle: `<${textParts.join(" ")}>`};
-					}
-					const childNodes_enhanced = childNodes
-						.filter(child=>!path.split("/").includes(child.id)) // ignore children already part of current-path (to avoid recursion-loops)
-						.map(child=>EnhanceNode(`${path}/${child.id}`, child, childLinks.find(a=>a.child == child.id)));
-					return {...node, path, displayText, childNodes_enhanced};
-				}
-				type NodeEnhanced = ReturnType<typeof EnhanceNode>;
-				const rootNode_enhanced = EnhanceNode(rootNode.id, data.nodes!.find(a=>a.id == rootNode.id)!);
-
-				const csvLines = [] as string[];
-				csvLines.push([...Array(dialogState.maxExportDepth + 1).keys()].map(depth=>CSVCell(`Node depth ${depth}`)).join(",")); // headers
-				function PrintNodeToCSV(node: NodeEnhanced) {
-					const csvCells = [] as string[];
-					for (const parentID of node.path.split("/").slice(0, -1)) {
-						csvCells.push(CSVCell(""));
-					}
-					csvCells.push(CSVCell(node.displayText.rawTitle ?? ""));
-					csvLines.push(csvCells.join(","));
-					for (const child of node.childNodes_enhanced) {
-						PrintNodeToCSV(child);
-					}
-				}
-				PrintNodeToCSV(rootNode_enhanced);
-
-				subtreeData_string = csvLines.join("\n");
+				subtreeData_string = SubtreeDataToString_CSV_Basic(subtreeData, rootNode, dialogState.maxExportDepth);
+			} else if (dialogState.targetFormat == DataExchangeFormat.csv_quotes) {
+				subtreeData_string = SubtreeDataToString_CSV_Quotes(subtreeData, rootNode, dialogState.maxExportDepth);
 			}
 		}
 

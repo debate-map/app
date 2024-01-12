@@ -1,8 +1,20 @@
 import {GetExpandedByDefaultAttachment, GetMedia, GetNode, GetNodeChildren, GetNodeL3, GetNodePhrasings, GetTermsAttached, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeTag, Term} from "dm_common";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {Assert, NN} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {SubtreeIncludeKeys} from "../MI_ExportSubtree.js";
+import {ClassKeys, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+
+export class SubtreeIncludeKeys {
+	constructor(data?: Partial<SubtreeIncludeKeys>) {
+		Object.assign(this, data);
+	}
+	//nodes = ClassKeys<NodeL3>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType");
+	nodes = ClassKeys<NodeL1>("id", "type", "rootNodeForMap", "c_currentRevision", "multiPremiseArgument", "argumentType");
+	nodeLinks = ClassKeys<NodeLink>("id", "parent", "child", "form", "polarity");
+	nodeRevisions = ClassKeys<NodeRevision>("id", "node", "phrasing", "attachments");
+	nodePhrasings = ClassKeys<NodePhrasing>("id", "node", "type", "text_base", "text_negation", "text_question", "text_narrative", "note", "terms", "references");
+	terms = ClassKeys<Term>("id", "name", "forms", "disambiguation", "type", "definition", "note");
+	medias = ClassKeys<Media>("id", "name", "type", "url", "description");
+}
 
 export class SubtreeData_Server {
 	constructor(data?: Partial<SubtreeData_Server>) {

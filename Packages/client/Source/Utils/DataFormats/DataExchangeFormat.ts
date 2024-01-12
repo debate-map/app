@@ -7,6 +7,7 @@ export enum DataExchangeFormat {
 	json_dm = "json_dm",
 	json_cg = "json_cg",
 	csv_basic = "csv_basic",
+	csv_quotes = "csv_quotes",
 
 	// planned
 	//json_cd = "json_cd",
@@ -18,6 +19,7 @@ export const DataExchangeFormat_entries = GetEntries(DataExchangeFormat, val=>{
 	if (val == DataExchangeFormat.json_dm) return "JSON (debate-map)";
 	if (val == DataExchangeFormat.json_cg) return "JSON (claim-gen)";
 	if (val == DataExchangeFormat.csv_basic) return "CSV (basic)";
+	if (val == DataExchangeFormat.csv_quotes) return "CSV (quotes)";
 	if (val == DataExchangeFormat.csv_sl) return "CSV (sl)";
 	return val;
 });
@@ -32,6 +34,7 @@ export const DataExchangeFormat_entries_supportedBySubtreeExporter = DataExchang
 	return [
 		DataExchangeFormat.json_dm,
 		DataExchangeFormat.csv_basic,
+		DataExchangeFormat.csv_quotes,
 	].includes(a.value);
 });
 
