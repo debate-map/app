@@ -1,4 +1,4 @@
-import {Button, CheckBox, Column, Row, Spinner, Text, TextArea, TimeSpanInput} from "react-vcomponents";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextArea, TimeSpanInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import WaveSurfer from "wavesurfer.js";
 import {StartUpload, Range} from "js-vextensions";
@@ -12,6 +12,7 @@ import {GetTimelineSteps, Map, Timeline} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 import {autorun} from "web-vcore/nm/mobx";
 import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {ModifyAudioFileMeta, SetStepStartTimeInAudioFile} from "./EditorSubpanel/StepEditorUI";
 
 class ParseData {
@@ -184,20 +185,27 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 		return (
 			<Column style={{flex: 1}}>
 				<Row plr={5} style={{height: 30}}>
-					<Text>Files:</Text>
-					{files.map((file, index)=>{
-						return (
-							<Button key={index} ml={5} text={file.name}
-								style={E(
-									selectedFile == file && {backgroundColor: "rgba(255,255,255,.5)"},
-								)}
-								onClick={async()=>{
-									RunInAction_Set(this, ()=>uiState.selectedFile = file.name);
-									/*await wavesurfer.loadBlob(file);
-									ParseWavesurferData();*/
-								}}/>
-						);
-					})}
+				<DropDown>
+					<DropDownTrigger><Button text={`Files (${files.Any(a=>a.name == uiState.selectedFile) ? uiState.selectedFile : "none selected"})`} style={{height: "100%"}}/></DropDownTrigger>
+					<DropDownContent style={{left: 0, width: 500, zIndex: zIndexes.subNavBar}}><Column>
+						<Text>Files:</Text>
+						<div style={{display: "flex", flexWrap: "wrap", gap: 5}}>
+							{files.map((file, index)=>{
+								return (
+									<Button key={index} ml={5} text={file.name}
+										style={E(
+											selectedFile == file && {backgroundColor: "rgba(255,255,255,.5)"},
+										)}
+										onClick={async()=>{
+											RunInAction_Set(this, ()=>uiState.selectedFile = file.name);
+											/*await wavesurfer.loadBlob(file);
+											ParseWavesurferData();*/
+										}}/>
+								);
+							})}
+						</div>
+					</Column></DropDownContent>
+				</DropDown>
 					<Button ml={5} mdIcon="creation" title="Associate timeline-steps and audio-files whose names start with the same first 3 characters." onClick={async()=>{
 						let modifiedAudioMeta = audioMeta;
 						for (const step of timelineSteps) {
@@ -207,7 +215,7 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 							}
 						}
 					}}/>
-					<Button ml={5} text="+" onClick={async()=>{
+					<Button ml={5} mdIcon="upload" onClick={async()=>{
 						const newFiles = await StartUpload(true);
 						for (const file of newFiles) {
 							opfsForMap.SaveFile(file);
@@ -216,7 +224,9 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 						/*await wavesurfer.loadBlob(newFiles[0]);
 						ParseWavesurferData();*/
 					}}/>
-					<Button ml={15} mdIcon="download" enabled={selectedFile != null} onClick={async()=>{
+
+					<Text ml={15}>File:</Text>
+					<Button ml={5} mdIcon="download" enabled={selectedFile != null} onClick={async()=>{
 						const lastDotIndex = selectedFile!.name.lastIndexOf(".");
 						const [fileName_noExt, ext] = lastDotIndex == -1 ? [selectedFile!.name, ""] : [selectedFile!.name.slice(0, lastDotIndex), selectedFile!.name.slice(lastDotIndex + 1)];
 						StartDownload(await selectedFile!.text(), `Map(${map.id})_File(${fileName_noExt})_Export(${new Date().toLocaleString("sv").replace(/[ :]/g, "-")}).${ext}`);
@@ -236,7 +246,8 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 					}}/>
 
 					{audioData != null && <>
-						<Button ml={15} mdIcon={wavesurfer.isPlaying() ? "pause" : "play"} onClick={()=>{
+						<Text ml={15}>Audio:</Text>
+						<Button ml={5} mdIcon={wavesurfer.isPlaying() ? "pause" : "play"} onClick={()=>{
 							if (wavesurfer.isPlaying()) {
 								wavesurfer.pause();
 							} else {
