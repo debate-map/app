@@ -38,7 +38,7 @@ export class OPFS_Map {
 
 		// if this file instance hasn't had a load of its data started yet, start that now (once it's loaded, the getter will re-run)
 		if (file != this.audioMeta_cache_lastFileWithLoadStarted) {
-			this.audioMeta_cache_lastFileWithLoadStarted = file;
+			RunInAction("AudioMeta.fileLoadStarted", ()=>this.audioMeta_cache_lastFileWithLoadStarted = file);
 			(async()=>{
 				const json = await file.text();
 				if (file != this.audioMeta_cache_lastFileWithLoadStarted) return; // if another file-instance has started loading, abort (since this file-instance's data is no longer needed)

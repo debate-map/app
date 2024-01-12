@@ -8,9 +8,11 @@ import useResizeObserver from "use-resize-observer";
 import {E, GetPercentFromXToY, Lerp, SleepAsync, StartDownload, Timer, WaitXThenRun} from "web-vcore/nm/js-vextensions";
 import {store} from "Store";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
-import {Map} from "dm_common";
+import {GetTimelineSteps, Map, Timeline} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 import {autorun} from "web-vcore/nm/mobx";
+import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
+import {ModifyAudioFileMeta, SetStepStartTimeInAudioFile} from "./EditorSubpanel/StepEditorUI";
 
 class ParseData {
 	audioData?: ParseData_Audio;
@@ -35,12 +37,13 @@ class ParseData_Text {
 }
 
 @Observer
-export class AudioPanel extends BaseComponent<{map: Map}, {}> {
+export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}> {
 	wavesurferRoot: HTMLDivElement|n;
 	render() {
-		const {map} = this.props;
+		const {map, timeline} = this.props;
 		const uiState = store.main.timelines.audioPanel;
 		const tracker1 = uiState.wavesurferStateChangedAt;
+		const timelineSteps = GetTimelineSteps(timeline.id);
 
 		//const [rowContainerRef, {width: rowContainerWidth, height: rowContainerHeight}] = UseSize();
 		const {ref: rowContainerRef, width: rowContainerWidth_raw, height: rowContainerHeight_raw} = useResizeObserver();
@@ -80,12 +83,12 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 		}
 		useEffect(()=>{
 			const dispose = autorun(()=>{
-				if (uiState.act_startPlayAtTimeX != 0) {
+				if (uiState.act_startPlayAtTimeX != -1) {
 					const targetTime = uiState.act_startPlayAtTimeX;
 					// avoid recursive loop, by performing action out of call-stack (and thus mobx autorun's observation)
 					(async()=>{
 						RunInAction("AudioPanel.useEffect[for mobx act_X]", ()=>{
-							uiState.act_startPlayAtTimeX = 0; // reset flag
+							uiState.act_startPlayAtTimeX = -1; // reset flag
 							uiState.selection_start = targetTime;
 							wavesurfer.seekTo(targetTime / wavesurfer.getDuration());
 							wavesurfer.play();
@@ -149,6 +152,15 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 			const rowFractionOfFull = samplesPerRow / combinedData.maxValues.length;
 			const secondsPerRow = wavesurfer.getDuration() * rowFractionOfFull;
 
+			// update audio-file-meta, to store the audio's now-known duration
+			if (selectedFile != null) {
+				const audioMeta = opfsForMap.AudioMeta;
+				const audioFileMeta = audioMeta?.fileMetas[selectedFile.name ?? ""];
+				if (wavesurfer.getDuration() > 0 && wavesurfer.getDuration() != audioFileMeta?.duration) {
+					ModifyAudioFileMeta(opfsForMap, audioMeta, selectedFile?.name, newAudioFileMeta=>newAudioFileMeta.duration = wavesurfer.getDuration());
+				}
+			}
+
 			setParseData({
 				audioData: {
 					samplesPerRow,
@@ -186,11 +198,22 @@ export class AudioPanel extends BaseComponent<{map: Map}, {}> {
 								}}/>
 						);
 					})}
+					<Button ml={5} mdIcon="creation" title="Associate timeline-steps and audio-files whose names start with the same first 3 characters." onClick={async()=>{
+						let modifiedAudioMeta = audioMeta;
+						for (const step of timelineSteps) {
+							const stepNameStart = step.id.slice(0, 3);
+							for (const file of files.filter(a=>a.name.startsWith(stepNameStart))) {
+								modifiedAudioMeta = await SetStepStartTimeInAudioFile(opfsForMap, modifiedAudioMeta, file.name, step.id, 0);
+							}
+						}
+					}}/>
 					<Button ml={5} text="+" onClick={async()=>{
-						const file = await StartUpload();
-						opfsForMap.SaveFile(file);
-						RunInAction_Set(this, ()=>uiState.selectedFile = file.name);
-						/*await wavesurfer.loadBlob(file);
+						const newFiles = await StartUpload(true);
+						for (const file of newFiles) {
+							opfsForMap.SaveFile(file);
+						}
+						RunInAction_Set(this, ()=>uiState.selectedFile = newFiles[0].name);
+						/*await wavesurfer.loadBlob(newFiles[0]);
 						ParseWavesurferData();*/
 					}}/>
 					<Button ml={15} mdIcon="download" enabled={selectedFile != null} onClick={async()=>{

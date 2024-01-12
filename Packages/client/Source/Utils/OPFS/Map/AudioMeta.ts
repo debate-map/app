@@ -14,6 +14,7 @@ export class AudioMeta {
 	fileMetas = {} as {[key: string]: AudioFileMeta};
 }
 export class AudioFileMeta {
+	duration?: number = 0;
 	stepStartTimes = {} as {[key: string]: number}
 }
 
@@ -36,15 +37,20 @@ export const GetStepAudioSegmentInfo = CreateAccessor((step: TimelineStep, nextS
 	if (nextStep == null) return null;
 	const topAudioForStep = GetTopAudioForStep(step, mapID);
 	const stepStartTimeInTopAudioFile = topAudioForStep?.meta?.value.stepStartTimes[step.id];
-	const nextStepStartTimeInTopAudioFile = topAudioForStep?.meta?.value.stepStartTimes[nextStep.id];
-	if (stepStartTimeInTopAudioFile == null || nextStepStartTimeInTopAudioFile == null) return null;
+	if (stepStartTimeInTopAudioFile == null) return null;
+	const startTime = stepStartTimeInTopAudioFile;
 
-	return {
-		audio: topAudioForStep,
-		startTime: stepStartTimeInTopAudioFile,
-		endTime: nextStepStartTimeInTopAudioFile,
-		duration: nextStepStartTimeInTopAudioFile - stepStartTimeInTopAudioFile,
-	};
+	const nextStepStartTimeInTopAudioFile = topAudioForStep?.meta?.value.stepStartTimes[nextStep.id];
+	const endTime =
+		// if the next-step uses this audio-file, our play segment (for this audio-file) ends at that next-step's start-time in the audio
+		nextStepStartTimeInTopAudioFile ? nextStepStartTimeInTopAudioFile : // eslint-disable-line
+		// else (if there is no next-step that uses this audio-file), our play segment ends at the end of the audio file
+		topAudioForStep.meta?.value.duration ? topAudioForStep.meta.value.duration :
+		// else (if audio-file's duration metadata hasn't been stored yet), record a null end-time (since duration is unknown/undefined)
+		null;
+	const duration = endTime != null ? endTime - startTime : null;
+
+	return {audio: topAudioForStep, startTime, endTime, duration};
 });
 
 export const GetAudioFilesActiveForTimeline = CreateAccessor((mapID: string, timelineID: string)=>{

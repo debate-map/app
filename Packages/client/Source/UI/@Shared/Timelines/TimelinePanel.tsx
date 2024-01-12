@@ -19,6 +19,7 @@ export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 		const {map} = this.props;
 		const uiState = store.main.timelines;
 		const subpanel = GetTimelineOpenSubpanel(map.id);
+		const timeline = GetSelectedTimeline(map.id);
 
 		const mapState = GetMapState(map.id);
 		function SetSubpanel(subpanel: TimelineSubpanel) {
@@ -37,9 +38,9 @@ export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 					{subpanel == TimelineSubpanel.editor && <EditorSubpanel map={map}/>}
 					{subpanel == TimelineSubpanel.playing && <PlayingSubpanel map={map}/>}
 				</Column>
-				{uiState.audioMode &&
+				{uiState.audioMode && timeline != null &&
 				<Column style={{position: "absolute", zIndex: zIndexes.draggable + 1, left: 600, right: 0, top: 0, bottom: 0, background: "rgba(100,100,100,1)"}}>
-					<AudioPanel map={map}/>
+					<AudioPanel map={map} timeline={timeline}/>
 				</Column>}
 			</Row>
 		);

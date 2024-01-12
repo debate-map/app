@@ -33,7 +33,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 	render() {
 		const {map} = this.props;
 		const mapState = GetMapState.NN(map.id);
-		const timeline = GetSelectedTimeline(map && map.id);
+		const timeline = GetSelectedTimeline(map?.id);
 		if (timeline == null) return null;
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
 		// timelineSteps: timeline && GetTimelineSteps(timeline, false),

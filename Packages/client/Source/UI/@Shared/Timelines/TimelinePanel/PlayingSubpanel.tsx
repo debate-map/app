@@ -53,6 +53,9 @@ class NoVideoPlayer {
 		this.timer_ticksSinceStart++;
 		let framesToProgress = 2; // 2 frames = 1/30th of a second
 
+		// if parent component gets unmounted, stop the timer (parent *should* call `SetPlaying(false)` itself, but this is a reasonable safety hatch)
+		if (!this.comp.mounted) return void this.timer.Stop();
+
 		// Apparently, Timer/setInterval can easily "fall behind" on the number of ticks that end up running!
 		// To fix this, detect whenever our fall-behind amount is enough to warrant another half-tick (equating to 1 frame), and execute that half-tick synthetically.
 		const timeSinceStart = Date.now() - this.timer.startTime;
@@ -292,7 +295,11 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 			this.timer.Start();
 			return ()=>{
 				this.timer.Stop();
-				// when component is being unmounted, store the exact timeline playing-time (so it can be restored exactly to PlayingSubpanel.targetTime when component is re-mounted)
+
+				// when component is unmounted...
+				// stop the non-component-based timers/players
+				this.noVideoPlayer.SetPlaying(false);
+				// store the exact timeline playing-time (so it can be restored exactly to PlayingSubpanel.targetTime when component is re-mounted)
 				RunInAction("PlayingSubpanel.onUnmount", ()=>mapState.playingTimeline_time = this.targetTime);
 			};
 		}, ["depToEnsureEffectRunsOnFirstNonBailedRender"]); // eslint-disable-line
@@ -334,6 +341,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						<Button text="±5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 5)}/>
 						<Button text="±20" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(20)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 20)}/>
 						<Button text="±60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 60)}/>
+						<Button text="±600" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(600)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 600)}/>
 					</Row>
 					<Row ml="auto" style={{position: "relative"}}>
 						<RecordDropdown playingSubpanel={this}/>

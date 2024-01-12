@@ -46,10 +46,11 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		}
 		LoadFileIntoWavesurfer_IfNotAlreadyAndValid(audioFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
 
-		if (isPlayingGetter() && currentStepAudioSegment?.audio.file == audioFile) {
+		if (isPlayingGetter() && currentStepAudioSegment?.audio.file == audioFile && currentStepAudioSegment.endTime != null) {
 			const getTargetAudioTime = ()=>{
 				const percentThroughStep = GetPercentFromXToY(currentStep_startTimeInTimeline, currentStep_endTimeInTimeline, timeGetter());
-				const targetAudioTime = Lerp(currentStepAudioSegment.startTime, currentStepAudioSegment.endTime, percentThroughStep);
+				//if (currentStepAudioSegment.endTime == null) return null; // end-time unknown, so we can't know the exact point in the audio that we're supposed to target/seek-to
+				const targetAudioTime = Lerp(currentStepAudioSegment.startTime, currentStepAudioSegment.endTime!, percentThroughStep);
 				return targetAudioTime;
 			};
 
