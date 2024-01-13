@@ -7,5 +7,5 @@ export const zIndexes = {
 	navBar: 16, // since has dropdowns over sub-nav-bar/action-bar
 	overNavBarDropdowns: 17,
 	tourDotPopup: 18,
-	//messageBox: 19, // for ref; in Main.scss
+	//messageBox: 20, // for ref; in Main.scss
 };
