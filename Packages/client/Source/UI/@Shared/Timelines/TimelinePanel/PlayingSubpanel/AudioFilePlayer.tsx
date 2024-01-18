@@ -10,13 +10,13 @@ import {GetPercentFromXToY, Lerp} from "web-vcore/nm/js-vextensions";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 
 @Observer
-export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline, steps: TimelineStep[], audioFile: File, isPlayingGetter: ()=>boolean, timeGetter: ()=>number}, {}> {
+export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline, steps: TimelineStep[], audioFile: File, playSpeedGetter: ()=>number, isPlayingGetter: ()=>boolean, timeGetter: ()=>number}, {}> {
 	wavesurferRoot: HTMLDivElement|n;
 	wavesurferReady = false;
 	wavesurfer_onReady: (()=>any)|n;
 
 	render() {
-		const {map, timeline, steps, audioFile, isPlayingGetter, timeGetter} = this.props;
+		const {map, timeline, steps, audioFile, playSpeedGetter, isPlayingGetter, timeGetter} = this.props;
 		const stepTimes = GetTimelineStepTimesFromStart(steps);
 		const currentStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
 		const currentStep = steps[currentStepIndex ?? -1];
@@ -46,6 +46,11 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		}
 		LoadFileIntoWavesurfer_IfNotAlreadyAndValid(audioFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
 
+		// ensure wavesurfer's playback-speed matches the ui setting
+		if (wavesurfer.getPlaybackRate() != playSpeedGetter()) {
+			wavesurfer.setPlaybackRate(playSpeedGetter());
+		}
+
 		// ensure wavesurfer's volume matches the setting for the current-step's clip
 		if (currentStepAudioClipEnhanced?.volume != null && wavesurfer.getVolume() != currentStepAudioClipEnhanced.volume) {
 			wavesurfer.setVolume(currentStepAudioClipEnhanced.volume);
@@ -64,7 +69,8 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 			const wavesurferTimeDiffFromTarget = wavesurfer.getCurrentTime().Distance(getTargetAudioTime());
 			// if wavesurfer's playback drifts >=0.Xs from target-time, seek to the correct time
 			//console.log(wavesurfer.getCurrentTime() - getTargetAudioTime());
-			if (wavesurferTimeDiffFromTarget > .3) { // todo: maybe reduce this tolerance range, and/or make it adjustable (whether manually or automatically based on perf stats)
+			const timeDiffTolerance = .3 * playSpeedGetter(); // todo: maybe reduce this tolerance range, and/or make it adjustable (whether manually or automatically based on perf stats)
+			if (wavesurferTimeDiffFromTarget > timeDiffTolerance) {
 				const doLoad = ()=>{
 					const targetAudioTime = getTargetAudioTime();
 					wavesurfer.seekTo(targetAudioTime / wavesurfer.getDuration());

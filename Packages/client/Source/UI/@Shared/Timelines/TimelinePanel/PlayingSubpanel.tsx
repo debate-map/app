@@ -45,7 +45,7 @@ class NoVideoPlayer {
 		if (playing) this.timer_ticksSinceStart = 0;
 
 		// debug
-		//if (playing) window.Extend({startedAt_realTime: Date.now(), startedAt_simTime: this.comp.targetTime, startedAt_ticks: 0});
+		//if (playing) Object.assign(g, {nvpTest_startTimeReal: Date.now(), nvpTest_startTimeSim: this.comp.targetTime, nvpTest_ticks: 0});
 	}
 
 	timer_ticksSinceStart = 0;
@@ -60,8 +60,8 @@ class NoVideoPlayer {
 		// To fix this, detect whenever our fall-behind amount is enough to warrant another half-tick (equating to 1 frame), and execute that half-tick synthetically.
 		const timeSinceStart = Date.now() - this.timer.startTime;
 		const ticksExpectedSinceStart = timeSinceStart / this.timer.intervalInMS;
-		const ticksLost = ticksExpectedSinceStart - this.timer_ticksSinceStart;
-		if (ticksLost >= .5) {
+		const ticksLost = ()=>ticksExpectedSinceStart - this.timer_ticksSinceStart;
+		while (ticksLost() >= .5) {
 			this.timer_ticksSinceStart += .5;
 			//this.comp.AdjustTargetTimeByFrames(1);
 			framesToProgress += 1;
@@ -70,8 +70,8 @@ class NoVideoPlayer {
 		this.comp.AdjustTargetTimeByFrames(framesToProgress);
 
 		// debug
-		/*window["startedAt_ticks"] = (window["startedAt_ticks"] ?? 0) + 1;
-		console.log("@realTimePassed:", Date.now() - window["startedAt_realTime"], "@simTimePassed:", (this.comp.targetTime - window["startedAt_simTime"]) * 1000, "@ticks:", window["startedAt_ticks"], "@asTime:", window["startedAt_ticks"] * (1000 / 30));*/
+		/*g.nvpTest_ticks = (g.nvpTest_ticks ?? 0) + 1;
+		console.log("@realTimePassed:", Date.now() - g.nvpTest_startTimeReal, "@simTimePassed:", (this.comp.targetTime - g.nvpTest_startTimeSim) * 1000, "@ticks:", g.nvpTest_ticks, "@ticks_asSimTime[if 1x]:", g.nvpTest_ticks * (1000 / 30));*/
 	});
 }
 
@@ -327,7 +327,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						this.SetTargetTime(pos, source);
 					}}/>}
 				{audioFiles.map((audioFile, index)=>{
-					return <AudioFilePlayer key={audioFile.name} map={map} timeline={timeline} steps={steps} audioFile={audioFile} isPlayingGetter={()=>this.noVideoPlayer.playing} timeGetter={()=>this.targetTime}/>;
+					return <AudioFilePlayer key={audioFile.name} map={map} timeline={timeline} steps={steps} audioFile={audioFile}
+						playSpeedGetter={()=>this.noVideoPlayer.speed} isPlayingGetter={()=>this.noVideoPlayer.playing} timeGetter={()=>this.targetTime}/>;
 				})}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
 					<Row>
