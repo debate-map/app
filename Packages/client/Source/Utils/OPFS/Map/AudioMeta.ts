@@ -15,7 +15,21 @@ export class AudioMeta {
 }
 export class AudioFileMeta {
 	duration?: number = 0;
-	stepStartTimes = {} as {[key: string]: number}
+	stepClips = {} as {[key: string]: StepAudioClip}
+}
+
+export class StepAudioClip {
+	constructor(data?: Partial<StepAudioClip>) { Object.assign(this, data); }
+	timeInAudio = 0;
+	volume = 1;
+}
+export type AudioFileWithMeta = {file: File|undefined, meta: Pair<string, AudioFileMeta>|undefined};
+export class StepAudioClipEnhanced {
+	audio: AudioFileWithMeta;
+	startTime: number;
+	endTime: number|null;
+	duration: number|null;
+	volume: number;
 }
 
 export const GetAudioFileMetasForMap = CreateAccessor((mapID: string): Pair<string, AudioFileMeta>[]=>{
@@ -27,20 +41,20 @@ export const GetAudioFileMetasForMap = CreateAccessor((mapID: string): Pair<stri
 export const GetTopAudioForStep = CreateAccessor((step: TimelineStep, mapID: string)=>{
 	const audioFileMetas = GetAudioFileMetasForMap(mapID);
 	// todo: once custom ordering is implementing, use that for audio-file selection here
-	const topAudioFileMetaForStep = audioFileMetas.find(a=>a.value.stepStartTimes[step.id] != null);
+	const topAudioFileMetaForStep = audioFileMetas.find(a=>a.value.stepClips[step.id] != null);
 
 	const opfsForMap = OPFS_Map.GetEntry(mapID);
 	const topAudioFile = opfsForMap.Files.find(a=>a.name == topAudioFileMetaForStep?.key);
 	return {file: topAudioFile, meta: topAudioFileMetaForStep};
 });
-export const GetStepAudioSegmentInfo = CreateAccessor((step: TimelineStep, nextStep: TimelineStep|n, mapID: string)=>{
+export const GetStepAudioClipEnhanced = CreateAccessor((step: TimelineStep, nextStep: TimelineStep|n, mapID: string): StepAudioClipEnhanced|null=>{
 	if (nextStep == null) return null;
 	const topAudioForStep = GetTopAudioForStep(step, mapID);
-	const stepStartTimeInTopAudioFile = topAudioForStep?.meta?.value.stepStartTimes[step.id];
-	if (stepStartTimeInTopAudioFile == null) return null;
-	const startTime = stepStartTimeInTopAudioFile;
+	const stepClipInTopAudioFile = topAudioForStep?.meta?.value.stepClips[step.id];
+	if (stepClipInTopAudioFile == null) return null;
+	const startTime = stepClipInTopAudioFile.timeInAudio;
 
-	const nextStepStartTimeInTopAudioFile = topAudioForStep?.meta?.value.stepStartTimes[nextStep.id];
+	const nextStepStartTimeInTopAudioFile = topAudioForStep?.meta?.value.stepClips[nextStep.id]?.timeInAudio;
 	const endTime =
 		// if the next-step uses this audio-file, our play segment (for this audio-file) ends at that next-step's start-time in the audio
 		nextStepStartTimeInTopAudioFile ? nextStepStartTimeInTopAudioFile : // eslint-disable-line
@@ -50,7 +64,7 @@ export const GetStepAudioSegmentInfo = CreateAccessor((step: TimelineStep, nextS
 		null;
 	const duration = endTime != null ? endTime - startTime : null;
 
-	return {audio: topAudioForStep, startTime, endTime, duration};
+	return {audio: topAudioForStep, startTime, endTime, duration, volume: stepClipInTopAudioFile.volume};
 });
 
 export const GetAudioFilesActiveForTimeline = CreateAccessor((mapID: string, timelineID: string)=>{

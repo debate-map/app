@@ -1,5 +1,5 @@
 import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
-import {GetStepAudioSegmentInfo} from "Utils/OPFS/Map/AudioMeta";
+import {GetStepAudioClipEnhanced} from "Utils/OPFS/Map/AudioMeta";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {GetTimelineStepTimesFromStart, Map, Timeline, TimelineStep} from "dm_common";
 import {useMemo} from "react";
@@ -20,7 +20,7 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		const stepTimes = GetTimelineStepTimesFromStart(steps);
 		const currentStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
 		const currentStep = steps[currentStepIndex ?? -1];
-		const currentStepAudioSegment = currentStepIndex != null && currentStep ? GetStepAudioSegmentInfo(currentStep, steps[currentStepIndex + 1], map.id) : null;
+		const currentStepAudioClipEnhanced = currentStepIndex != null && currentStep ? GetStepAudioClipEnhanced(currentStep, steps[currentStepIndex + 1], map.id) : null;
 		const currentStep_startTimeInTimeline = stepTimes[currentStepIndex];
 		const currentStep_endTimeInTimeline = stepTimes[currentStepIndex + 1];
 
@@ -46,11 +46,17 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		}
 		LoadFileIntoWavesurfer_IfNotAlreadyAndValid(audioFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
 
-		if (isPlayingGetter() && currentStepAudioSegment?.audio.file == audioFile && currentStepAudioSegment.endTime != null) {
+		// ensure wavesurfer's volume matches the setting for the current-step's clip
+		if (currentStepAudioClipEnhanced?.volume != null && wavesurfer.getVolume() != currentStepAudioClipEnhanced.volume) {
+			wavesurfer.setVolume(currentStepAudioClipEnhanced.volume);
+		}
+
+		// ensure wavesurfer's play-position matches the progression through the current-step
+		if (isPlayingGetter() && currentStepAudioClipEnhanced?.audio.file == audioFile && currentStepAudioClipEnhanced.endTime != null) {
 			const getTargetAudioTime = ()=>{
 				const percentThroughStep = GetPercentFromXToY(currentStep_startTimeInTimeline, currentStep_endTimeInTimeline, timeGetter());
 				//if (currentStepAudioSegment.endTime == null) return null; // end-time unknown, so we can't know the exact point in the audio that we're supposed to target/seek-to
-				const targetAudioTime = Lerp(currentStepAudioSegment.startTime, currentStepAudioSegment.endTime!, percentThroughStep);
+				const targetAudioTime = Lerp(currentStepAudioClipEnhanced.startTime, currentStepAudioClipEnhanced.endTime!, percentThroughStep);
 				return targetAudioTime;
 			};
 

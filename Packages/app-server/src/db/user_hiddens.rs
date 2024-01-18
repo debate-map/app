@@ -50,6 +50,11 @@ pub struct UserHidden {
     pub lastAccessPolicy: Option<String>,
     pub extras: JSONValue,
 }
+impl UserHidden {
+	pub fn extras_known(&self) -> Result<UserHidden_Extras, Error> {
+		Ok(serde_json::from_value(self.extras.clone())?)
+	}
+}
 impl From<Row> for UserHidden {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

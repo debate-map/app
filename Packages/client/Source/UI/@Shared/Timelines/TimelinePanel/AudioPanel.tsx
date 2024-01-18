@@ -13,7 +13,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {autorun} from "web-vcore/nm/mobx";
 import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {ModifyAudioFileMeta, SetStepStartTimeInAudioFile} from "./EditorSubpanel/StepEditorUI";
+import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./EditorSubpanel/StepEditorUI";
 
 class ParseData {
 	audioData?: ParseData_Audio;
@@ -180,7 +180,7 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 
 		const audioMeta = opfsForMap.AudioMeta;
 		const audioFileMeta = audioMeta?.fileMetas[selectedFile?.name ?? ""];
-		const stepStartTimesInAudioFile = audioFileMeta?.stepStartTimes.Pairs() ?? [];
+		const stepClipsInAudioFile = audioFileMeta?.stepClips.Pairs() ?? [];
 
 		return (
 			<Column style={{flex: 1}}>
@@ -211,7 +211,7 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 						for (const step of timelineSteps) {
 							const stepNameStart = step.id.slice(0, 3);
 							for (const file of files.filter(a=>a.name.startsWith(stepNameStart))) {
-								modifiedAudioMeta = await SetStepStartTimeInAudioFile(opfsForMap, modifiedAudioMeta, file.name, step.id, 0);
+								modifiedAudioMeta = await SetStepClipTimeInAudio(opfsForMap, modifiedAudioMeta, file.name, step.id, 0);
 							}
 						}
 					}}/>
@@ -284,9 +284,9 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 					}
 				}}>
 					{audioData != null && <>
-						{stepStartTimesInAudioFile.map((entry, index)=>{
+						{stepClipsInAudioFile.map((clip, index)=>{
 							return (
-								<TimeMarker key={index} audioData={audioData} timeGetter={()=>entry.value} color="rgba(255,100,0,1)"/>
+								<TimeMarker key={index} audioData={audioData} timeGetter={()=>clip.value.timeInAudio} color="rgba(255,100,0,1)"/>
 							);
 						})}
 						<TimeMarker audioData={audioData} timeGetter={()=>wavesurfer.getCurrentTime()} color="rgba(0,130,255,1)" updateInterval={1000 / 30}/>

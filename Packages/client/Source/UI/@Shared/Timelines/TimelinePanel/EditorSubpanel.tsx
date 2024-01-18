@@ -92,7 +92,9 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 					scrollVBarStyle={{filter: "none", width: 7}} // width:7 to match with container padding
 				>
 					{showTimelineDetails &&
-					<TimelineDetailsEditor timeline={timeline} editing={creatorOrMod}/>}
+					<div style={{background: "rgb(200,200,200)", padding: 5, borderRadius: 10, marginBottom: 7}}>
+						<TimelineDetailsEditor timeline={timeline} editing={creatorOrMod}/>
+					</div>}
 					{timeline.videoID != null &&
 					<Row center mb={7} p="7px 10px" style={{background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"}}>
 						<Pre>Video ID: </Pre>

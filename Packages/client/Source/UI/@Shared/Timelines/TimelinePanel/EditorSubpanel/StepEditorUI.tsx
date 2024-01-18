@@ -14,7 +14,7 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_AddTimelineStep, RunCommand_DeleteTimelineStep, RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
-import {AudioFileMeta, AudioMeta, GetStepAudioSegmentInfo} from "Utils/OPFS/Map/AudioMeta";
+import {AudioFileMeta, AudioMeta, GetStepAudioClipEnhanced, StepAudioClip} from "Utils/OPFS/Map/AudioMeta";
 import {store} from "Store";
 
 export enum PositionOptionsEnum {
@@ -42,17 +42,24 @@ export async function ModifyAudioFileMeta(opfsForMap: OPFS_Map, audioMeta: Audio
 	const newAudioFileMeta = AudioMeta.GetOrCreateFileMeta(newAudioMeta, audioFileName);
 	modifierFunc(newAudioFileMeta);
 	if (saveNewAudioMeta) {
-		await opfsForMap.SaveFile_Text(JSON.stringify(newAudioMeta), "AudioMeta.json");
+		const json = JSON.stringify(newAudioMeta, null, "\t"); // pretty-print the json; contents are small, so readability is more important than size
+		await opfsForMap.SaveFile_Text(json, "AudioMeta.json");
 	}
 	return newAudioMeta; // return this, so if multiple modifications are made, they can build on top of each others' changes rather than overwriting them 
 }
-export async function SetStepStartTimeInAudioFile(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string, startTime: number|null) {
+export async function DeleteStepClip(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string) {
 	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
-		if (startTime == null) {
-			delete newAudioFileMeta[stepID];
-		} else {
-			newAudioFileMeta.stepStartTimes[stepID] = startTime;
-		}
+		delete newAudioFileMeta[stepID];
+	});
+}
+export async function SetStepClipTimeInAudio(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string, startTime: number) {
+	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
+		newAudioFileMeta.stepClips[stepID] = new StepAudioClip({...newAudioFileMeta.stepClips[stepID], timeInAudio: startTime});
+	});
+}
+export async function SetStepClipVolume(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string, volume: number) {
+	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
+		newAudioFileMeta.stepClips[stepID] = new StepAudioClip({...newAudioFileMeta.stepClips[stepID], volume});
 	});
 }
 
@@ -102,16 +109,16 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		//const files = opfsForMap.Files;
 		const audioMeta = opfsForMap.AudioMeta;
 		const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
-		const stepStartTimesInAudioFiles = audioFileMetas.ToMapObj(a=>a.key, a=>a.value.stepStartTimes[step.id]).Pairs().filter(a=>a.value != null);
+		const stepClipsInAudioFiles = audioFileMetas.ToMapObj(a=>a.key, a=>a.value.stepClips[step.id]).Pairs().filter(a=>a.value != null);
 
-		const stepAudioSegment = GetStepAudioSegmentInfo(step, nextStep, map.id);
+		const stepAudioSegment = GetStepAudioClipEnhanced(step, nextStep, map.id);
 		let stepDurationDerivedFromAudio = stepAudioSegment?.duration;
 		// if could not derive step-duration based on assumption of "step being one segment among many in audio file"...
 		if (stepDurationDerivedFromAudio == null) {
 			// ...then try to derive the step-duration from the audio-file's full-length (assuming this is the only step associated with that audio file)
 			for (const {value: audioFileMeta} of audioFileMetas) {
-				const stepStartTimesPairs = audioFileMeta.stepStartTimes.Pairs();
-				if (stepStartTimesPairs.length == 1 && stepStartTimesPairs[0].key == step.id) {
+				const stepClipPairs = audioFileMeta.stepClips.Pairs();
+				if (stepClipPairs.length == 1 && stepClipPairs[0].key == step.id) {
 					stepDurationDerivedFromAudio = audioFileMeta.duration;
 					break;
 				}
@@ -185,7 +192,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								RunCommand_UpdateTimelineStep({id: step.id, updates: {groupID: val}});
 							}}/>
 							<Button ml={5} mdIcon="ray-start-arrow" enabled={creatorOrMod && store.main.timelines.audioPanel.selectedFile != null} onClick={()=>{
-								SetStepStartTimeInAudioFile(opfsForMap, audioMeta, audioUIState.selectedFile!, step.id, store.main.timelines.audioPanel.selection_start);
+								SetStepClipTimeInAudio(opfsForMap, audioMeta, audioUIState.selectedFile!, step.id, store.main.timelines.audioPanel.selection_start);
 							}}/>
 							<Button ml={5} mdIcon="delete" enabled={creatorOrMod} onClick={()=>{
 								ShowMessageBox({
@@ -212,24 +219,28 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								}}/>
 						</VMenuStub>}
 					</Row>
-					{stepStartTimesInAudioFiles.map(startTimePair=>{
-						const audioFileMeta = audioFileMetas.find(a=>a.key == startTimePair.key)!;
+					{stepClipsInAudioFiles.map(stepClipPair=>{
+						const audioFileMeta = audioFileMetas.find(a=>a.key == stepClipPair.key)!;
 						return (
 							<Row key={index} mt={5} p="1px 5px">
-								<Text>{`In audio file "${audioFileMeta.key}": Step start time:`}</Text>
-								<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} enabled={creatorOrMod} value={startTimePair.value} onChange={async val=>{
-									SetStepStartTimeInAudioFile(opfsForMap, audioMeta, audioFileMeta.key, step.id, val);
+								<Text>{`In "${audioFileMeta.key}": Volume:`}</Text>
+								<Spinner ml={5} style={{width: 50}} enabled={creatorOrMod} value={stepClipPair.value.volume} onChange={async val=>{
+									SetStepClipVolume(opfsForMap, audioMeta, audioFileMeta.key, step.id, val);
+								}}/>
+								<Text ml={5}>{`Step start time:`}</Text>
+								<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} enabled={creatorOrMod} value={stepClipPair.value.timeInAudio} onChange={async val=>{
+									SetStepClipTimeInAudio(opfsForMap, audioMeta, audioFileMeta.key, step.id, val);
 								}}/>
 								<Button ml={5} mdIcon="play" enabled={audioUIState.selectedFile == audioFileMeta.key} onClick={()=>{
 									RunInAction("StepEditorUI.playAudio", ()=>{
 										//audioUIState.selectedFile = audioFileMeta.key;
 										//audioUIState.selection_start = startTime;
 										//audioUIState.act_startPlayAtTimeX = Date.now(); // this triggers the wavesurfer to actually start playing
-										audioUIState.act_startPlayAtTimeX = startTimePair.value;
+										audioUIState.act_startPlayAtTimeX = stepClipPair.value.timeInAudio;
 									});
 								}}/>
 								<Button ml={5} mdIcon="delete" onClick={()=>{
-									SetStepStartTimeInAudioFile(opfsForMap, audioMeta, audioFileMeta.key, step.id, null);
+									DeleteStepClip(opfsForMap, audioMeta, audioFileMeta.key, step.id);
 								}}/>
 							</Row>
 						);

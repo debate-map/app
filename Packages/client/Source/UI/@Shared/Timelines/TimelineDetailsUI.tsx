@@ -24,13 +24,12 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 			this.Update();
 		};
 
-		const splitAt = 170;
-		const width = 600;
+		const splitAt = 120;
 		return (
 			<Column style={style}>
 				{!forNew &&
 					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Name: </Pre>
 					<TextInput required enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>

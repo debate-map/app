@@ -35,7 +35,13 @@ pub struct Timeline {
 	pub videoID: Option<String>,
     pub videoStartTime: Option<f64>,
     pub videoHeightVSWidthPercent: Option<f64>,
+	//pub extras: JSONValue,
 }
+/*impl Timeline {
+	pub fn extras_known(&self) -> Result<Timeline_Extras, Error> {
+		Ok(serde_json::from_value(self.extras.clone())?)
+	}
+}*/
 impl From<Row> for Timeline {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
@@ -48,6 +54,7 @@ pub struct TimelineInput {
 	pub videoID: Option<String>,
 	pub videoStartTime: Option<f64>,
     pub videoHeightVSWidthPercent: Option<f64>,
+	//pub extras: JSONValue, // to set this, use updateNode command instead (this consolidates/simplifies the subfield-sensitive validation code)
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
@@ -57,7 +64,12 @@ pub struct TimelineUpdates {
     pub videoID: FieldUpdate_Nullable<String>,
     pub videoStartTime: FieldUpdate_Nullable<f64>,
     pub videoHeightVSWidthPercent: FieldUpdate_Nullable<f64>,
+	//pub extras: FieldUpdate<JSONValue>,
 }
+
+/*#[derive(Clone, Serialize, Deserialize)]
+pub struct Timeline_Extras {
+}*/
 
 #[derive(Clone)] pub struct GQLSet_Timeline { pub nodes: Vec<Timeline> }
 #[Object] impl GQLSet_Timeline { async fn nodes(&self) -> &Vec<Timeline> { &self.nodes } }
