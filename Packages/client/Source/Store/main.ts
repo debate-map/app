@@ -73,20 +73,20 @@ export class MainState {
 	//@O lastAccessPolicy: string|n;
 }
 
-export const GetOpenMapID = CreateAccessor(function() {
+export const GetOpenMapID = CreateAccessor({ctx: 1}, function() {
 	// return State(a=>a.main.openMap);
-	const {page} = this!.store.main;
+	const {page} = this.store.main;
 	// if (page == 'home') return demoMap._id;
-	if (page == "debates") return this!.store.main.debates.selectedMapID;
+	if (page == "debates") return this.store.main.debates.selectedMapID;
 	if (page == "global") return globalMapID;
 	return null;
 });
 
 // export type PageKey = "home" | ""
-export const GetPage = CreateAccessor(function() {
-	return this!.store.main.page || "home";
+export const GetPage = CreateAccessor({ctx: 1}, function() {
+	return this.store.main.page || "home";
 });
-export const GetSubpage = CreateAccessor(function() {
+export const GetSubpage = CreateAccessor({ctx: 1}, function() {
 	const page = GetPage();
-	return this!.store.main[page]?.subpage as string || rootPageDefaultChilds[page];
+	return this.store.main[page]?.subpage as string || rootPageDefaultChilds[page];
 });

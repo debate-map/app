@@ -1,7 +1,8 @@
 import {BaseComponent, BaseComponentPlus, ApplyBasicStyles} from "web-vcore/nm/react-vextensions.js";
-import {Text, Row} from "web-vcore/nm/react-vcomponents.js";
-import {Fragment} from "react";
+import {Text, Row, Button} from "web-vcore/nm/react-vcomponents.js";
+import React, {Fragment} from "react";
 import {SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
+import {CopyText} from "web-vcore/nm/js-vextensions";
 
 export class UUIDStub extends BaseComponent<{id: string}, {}> {
 	render() {
@@ -19,9 +20,10 @@ export class UUIDStub extends BaseComponent<{id: string}, {}> {
 }
 
 @ApplyBasicStyles
-export class UUIDPathStub extends BaseComponentPlus({} as {path: string}) {
+export class UUIDPathStub extends BaseComponent<{path: string, copyButton: boolean}> {
+	static defaultProps = {copyButton: true};
 	render() {
-		const {path} = this.props;
+		const {path, copyButton} = this.props;
 		const pathIDs = SplitStringBySlash_Cached(path);
 		return <Row>
 			{pathIDs.map((id, index)=>{
@@ -30,6 +32,9 @@ export class UUIDPathStub extends BaseComponentPlus({} as {path: string}) {
 					<UUIDStub id={id}/>
 				</Fragment>;
 			})}
+			{copyButton && <Button ml={5} mdIcon="content-copy" onClick={()=>{
+				CopyText(path);
+			}}/>}
 		</Row>;
 	}
 }

@@ -269,7 +269,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	get ShouldChildrenShow() {
 		const {map, parentPath: path, group, showEvenIfParentNotExpanded} = this.props;
-		const nodeView = GetNodeView(map.id, path);
+		const nodeView = GetNodeView(map.id, path)!;
 		return nodeView.expanded || showEvenIfParentNotExpanded;
 	}
 

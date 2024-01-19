@@ -3,7 +3,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimeline, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -14,7 +14,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DragInfo, HSLA, IsDoubleClick, Observer, RunInAction, RunInAction_Set, UseDocumentEventListener} from "web-vcore";
 import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 //import classNames from "classnames";
-import {DEL, DoNothing, E, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {DEL, DoNothing, E, GetPercentFromXToY, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
@@ -23,6 +23,7 @@ import {useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/PlayingSubpanel/RecordDropdown.js";
+import {autorun} from "mobx";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -133,15 +134,6 @@ export class NodeBox extends BaseComponentPlus(
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
-		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
-		//const outerNode = IsPremiseOfSinglePremiseArgument(node, parent) ? parent : node;
-
-		const mainRatingType = GetMainRatingType(node);
-		const ratingNode = node;
-		const ratingNodePath = path;
-		/* const mainRating_average = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType));
-		// let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, MeID());
-		const mainRating_mine = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({ includeUser: MeID() }))); */
 
 		const useReasonScoreValuesForThisNode = store.main.maps.childOrdering == ChildOrdering.reasonScore && (node.type == NodeType.argument || node.type == NodeType.claim);
 		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node.id, path, true) as ReasonScoreValues_RSPrefix;
@@ -155,18 +147,29 @@ export class NodeBox extends BaseComponentPlus(
 		//const phrasings = GetNodePhrasings(node.id);
 		const {showReasonScoreValues} = store.main.maps;
 
-		/*const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
-		let revealedByCurrentTimelineStep = playingTimeline_currentStepRevealNodes.Contains(path);
-		if (combinedWithParentArgument) {
-			revealedByCurrentTimelineStep = revealedByCurrentTimelineStep || playingTimeline_currentStepRevealNodes.Contains(parentPath);
-		}*/
-		const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
-		const timeSinceRevealedByTimeline_self = map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true) : null;
-		//const timeSinceRevealedByTimeline_parent = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, parentPath, true, true);
-		const timeSinceRevealedByTimeline = timeSinceRevealedByTimeline_self;
-		/*if (combinedWithParentArgument && timeSinceRevealedByTimeline_parent != null) {
-			timeSinceRevealedByTimeline = timeSinceRevealedByTimeline != null ? Math.min(timeSinceRevealedByTimeline, timeSinceRevealedByTimeline_parent) : timeSinceRevealedByTimeline_parent;
-		}*/
+		// for css effects that are based on the playing-timeline's "current time", apply these directly/without-reactjs (react has too much overhead for updates that happen many times per second)
+		//const playingTimeline = map ? GetPlayingTimeline(map.id) : null;
+		UseEffect(()=>{
+			//if (playingTimeline == null) return;
+			const dispose = autorun(()=>{
+				const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
+				const timeSinceRevealedByTimeline_simplified = map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true) : null;
+				const timeSinceRevealedByTimeline_precise = ()=>(map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, false) : null);
+
+				const boxStyle = this.root?.DOM_HTML?.style;
+				if (boxStyle) {
+					Object.assign(boxStyle, E(
+						timeSinceRevealedByTimeline_simplified != null && timeSinceRevealedByTimeline_simplified <= nodeRevealHighlightTime ? {
+							boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline_simplified / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`,
+						} : {boxShadow: null},
+						timeSinceRevealedByTimeline_simplified != null && timeSinceRevealedByTimeline_simplified.IsBetween(0, 1) && timeSinceRevealedByTimeline_precise() != null ? {
+							clipPath: `inset(-30px calc(100% - ${GetPercentFromXToY(0, 1, timeSinceRevealedByTimeline_precise()!).ToPercentStr()}) 0px 0px)`,
+						} : {clipPath: null},
+					));
+				}
+			});
+			return ()=>dispose();
+		}, [map, path]);
 
 		const mapState = GetMapState(map?.id);
 
@@ -199,11 +202,9 @@ export class NodeBox extends BaseComponentPlus(
 			local_openPanel = null;
 		} */
 
-		// Log(`${node.id} -- ${dragInfo && dragInfo.snapshot.isDragging}; ${dragInfo && dragInfo.snapshot.draggingOver}`);
-
 		let outlineColor = GetChangeTypeOutlineColor(changeType);
 		let outlineThickness = 1;
-		// in GADDemo, since node-background are white, we need to make these outlines more prominent
+		// in sl-mode, since node-background are white, we need to make these outlines more prominent
 		if (SLMode && outlineColor != null) {
 			//outlineColor = chroma.mix(outlineColor, "black", .5);
 			outlineThickness = 4;
@@ -216,8 +217,6 @@ export class NodeBox extends BaseComponentPlus(
 		const barSize = 5;
 		const pathNodeIDs = GetPathNodeIDs(path);
 		//const isSubnode = IsNodeSubnode(node);
-
-		const nodeReversed = nodeForm == ClaimForm.negation;
 
 		const selected = nodeView?.selected || false;
 		const leftPanelPinned = nodeView?.leftPanelPinned ?? false;
@@ -234,8 +233,6 @@ export class NodeBox extends BaseComponentPlus(
 		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
 			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
 			|| nodeView?.selected || hovered;
-		//const subPanelShow = node.type == NodeType.claim && (node.current.references || node.current.quote || node.current.media);
-		//const mainAttachment = GetMainAttachment(node.current);
 		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 		const subPanelShow = attachments_forSubPanel.length > 0;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
@@ -413,9 +410,6 @@ export class NodeBox extends BaseComponentPlus(
 					onMouseLeave={onMouseLeave}
 					{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, above
 					style={E(
-						timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime && {
-							boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`,
-						},
 						{
 							color: liveSkin.NodeTextColor().css(),
 							//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues

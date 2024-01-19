@@ -163,8 +163,8 @@ export class ExportSubtreeDialogState {
 	@O @version(2) targetFormat = DataExchangeFormat.json_dm;
 }
 
-export const GetLastAcknowledgementTime = CreateAccessor(function(nodeID: string) {
-	return this!.store.main.maps.nodeLastAcknowledgementTimes.get(nodeID) || 0;
+export const GetLastAcknowledgementTime = CreateAccessor({ctx: 1}, function(nodeID: string) {
+	return this.store.main.maps.nodeLastAcknowledgementTimes.get(nodeID) || 0;
 });
 
 /* export const GetLastAcknowledgementTime2 = StoreAccessor((nodeID: string) => {
@@ -172,8 +172,8 @@ export const GetLastAcknowledgementTime = CreateAccessor(function(nodeID: string
 	return State('main', 'nodeLastAcknowledgementTimes', nodeID) as number || 0;
 }); */
 
-export const GetCopiedNodePath = CreateAccessor(function() {
-	return this!.store.main.maps.copiedNodePath;
+export const GetCopiedNodePath = CreateAccessor({ctx: 1}, function() {
+	return this.store.main.maps.copiedNodePath;
 });
 export const GetCopiedNode = CreateAccessor(()=>{
 	const path = GetCopiedNodePath();
@@ -245,7 +245,7 @@ export class ChildLimitInfo {
 		return this.HaveShowMoreButtonEnabled() || this.HaveShowLessButtonEnabled();
 	}
 }
-export const GetChildLimitInfoAtLocation = CreateAccessor(function(map: Map, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number): ChildLimitInfo {
+export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map: Map, forLayoutHelperMap: boolean, parentNode: NodeL3, parentPath: string, direction: "up" | "down", childCount: number): ChildLimitInfo {
 	// if the map's root node, show all children
 	const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
 	const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelperMap);
@@ -255,7 +255,7 @@ export const GetChildLimitInfoAtLocation = CreateAccessor(function(map: Map, for
 	const childLayout = GetChildLayout_Final(parentNode.current, map);
 	const adjustDelta = childLayout == ChildLayout.slStandard && parentNode.type == NodeType.argument ? 5 : 3;
 
-	let showTarget_initial = this!.store.main.maps.initialChildLimit;
+	let showTarget_initial = this.store.main.maps.initialChildLimit;
 	if (parentNode.type == NodeType.argument && childCount > 1) {
 		// in sl-layout, multi-premise args are wanted to start out showing no children (requiring click on child-limit expand button to see premises); in regular dm-layout, they start showing first 2 premises
 		showTarget_initial = IsSLModeOrLayout(childLayout) ? 0 : 2;

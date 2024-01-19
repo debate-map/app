@@ -271,8 +271,8 @@ export function GetLoadActionFuncForURL(url: VURL) {
 // ==========
 
 // g.justChangedURLFromCode = false;
-export const GetNewURL = CreateAccessor(function(includeMapViewStr = true) {
-	const s = this!.store;
+export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: boolean = true) {
+	const s = this.store;
 	// let newURL = URL.Current();
 	/* let oldURL = URL.Current(true);
 	let newURL = new VURL(oldURL.domain, oldURL.pathNodes); */

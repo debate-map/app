@@ -1,34 +1,34 @@
 import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {O} from "web-vcore";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {AccessorCallPlan, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetVisiblePathsAfterSteps, GetMap, Timeline, GetVisiblePathRevealTimesInSteps, GetTimelineStep, GetTimelineSteps, GetTimeline, TimelineStep} from "dm_common";
 import {store} from "Store/index.js";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
 
-export const GetMapState = CreateAccessor(function(mapID: string|n) {
-	return this!.store.main.maps.mapStates.get(mapID!); // nn: get() actually accepts undefined
+export const GetMapState = CreateAccessor({ctx: 1}, function(mapID: string|n) {
+	return this.store.main.maps.mapStates.get(mapID!); // nn: get() actually accepts undefined
 });
 
-export const GetSelectedNodeID_InList = CreateAccessor(function(mapID: string) {
-	return this!.store.main.maps.mapStates.get(mapID)?.list_selectedNodeID;
+export const GetSelectedNodeID_InList = CreateAccessor({ctx: 1}, function(mapID: string) {
+	return this.store.main.maps.mapStates.get(mapID)?.list_selectedNodeID;
 });
 export const GetSelectedNode_InList = CreateAccessor((mapID: string)=>{
 	const nodeID = GetSelectedNodeID_InList(mapID);
 	return GetNode(nodeID);
 });
 
-export const GetMap_List_SelectedNode_OpenPanel = CreateAccessor(function(mapID: string) {
-	return this!.store.main.maps.mapStates.get(mapID)?.list_selectedNode_openPanel;
+export const GetMap_List_SelectedNode_OpenPanel = CreateAccessor({ctx: 1}, function(mapID: string) {
+	return this.store.main.maps.mapStates.get(mapID)?.list_selectedNode_openPanel;
 });
 
-export const GetTimelinePanelOpen = CreateAccessor(function(mapID: string): boolean {
-	return this!.store.main.maps.mapStates.get(mapID)?.timelinePanelOpen ?? false;
+export const GetTimelinePanelOpen = CreateAccessor({ctx: 1}, function(mapID: string): boolean {
+	return this.store.main.maps.mapStates.get(mapID)?.timelinePanelOpen ?? false;
 });
-export const GetTimelineOpenSubpanel = CreateAccessor(function(mapID: string) {
-	return this!.store.main.maps.mapStates.get(mapID)?.timelineOpenSubpanel;
+export const GetTimelineOpenSubpanel = CreateAccessor({ctx: 1}, function(mapID: string) {
+	return this.store.main.maps.mapStates.get(mapID)?.timelineOpenSubpanel;
 });
-export const GetShowTimelineDetails = CreateAccessor(function(mapID: string): boolean {
-	return this!.store.main.maps.mapStates.get(mapID)?.showTimelineDetails ?? false;
+export const GetShowTimelineDetails = CreateAccessor({ctx: 1}, function(mapID: string): boolean {
+	return this.store.main.maps.mapStates.get(mapID)?.showTimelineDetails ?? false;
 });
 
 // timeline-related
@@ -101,12 +101,12 @@ export const GetPlayingTimelineRevealPaths_UpToAppliedStep = CreateAccessor((map
 	return [`${map.rootNode}`].concat(GetVisiblePathsAfterSteps(appliedSteps));
 });
 
-export const GetNodeRevealHighlightTime = CreateAccessor(function() {
-	return this!.store.main.timelines.nodeRevealHighlightTime;
+export const GetNodeRevealHighlightTime = CreateAccessor({ctx: 1}, function() {
+	return this.store.main.timelines.nodeRevealHighlightTime;
 });
 export const GetTimeSinceNodeRevealedByPlayingTimeline = CreateAccessor((mapID: string, nodePath: string, timeSinceLastReveal = false, limitToJustPastHighlightRange = false): number|n=>{
 	const appliedSteps = GetPlayingTimelineAppliedSteps(mapID, true);
-	const nodeRevealTimes = GetVisiblePathRevealTimesInSteps(appliedSteps, timeSinceLastReveal);
+	const nodeRevealTimes = GetVisiblePathRevealTimesInSteps(appliedSteps, timeSinceLastReveal ? "last fresh reveal" : "first reveal");
 	const nodeRevealTime = nodeRevealTimes[nodePath];
 	if (nodeRevealTime == null) return null;
 

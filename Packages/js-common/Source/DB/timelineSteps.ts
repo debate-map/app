@@ -1,4 +1,4 @@
-import {emptyArray, ToNumber, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
+import {emptyArray, ToNumber, emptyArray_forLoading, CE, Assert} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
@@ -65,77 +65,102 @@ export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((step: Tim
 	return timeFromStart <= timeX;
 });
 
-export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
-	const pathRevealTimes = {} as {[key: string]: number};
+export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
+	const pathRevealTimes_first = {} as {[key: string]: number};
+	const pathRevealTimes_lastFresh = {} as {[key: string]: number};
+	const pathVisibilitiesSoFar = {} as {[key: string]: boolean};
+	const markPathRevealTime = (path: string, time: number)=>{
+		const wasRevealedAtSomePriorStep = pathRevealTimes_first[path] != null;
+		const wasRevealedAsOfLastStep = pathVisibilitiesSoFar[path] ?? false;
+
+		if (!wasRevealedAtSomePriorStep) pathRevealTimes_first[path] = time;
+		if (!wasRevealedAsOfLastStep) pathRevealTimes_lastFresh[path] = time;
+		pathVisibilitiesSoFar[path] = true;
+	};
+	const markPathHideTime = (path: string, time: number)=>{
+		//delete pathRevealTimes_lastFresh[path];
+		pathVisibilitiesSoFar[path] = false;
+	};
+
 	const stepTimes = GetTimelineStepTimesFromStart(steps);
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
 			const stepTime = stepTimes[index];
 			const stepTime_safe = stepTime ?? 0;
 
-			let descendentRevealDepth = 0;
-			if (reveal.show) {
-				if (baseOnLastReveal) {
-					pathRevealTimes[reveal.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[reveal.path], 0));
-				} else {
-					pathRevealTimes[reveal.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[reveal.path], Number.MAX_SAFE_INTEGER));
+			const nodesAreBeingRevealed = reveal.show || reveal.setExpandedTo == true;
+			if (nodesAreBeingRevealed) {
+				// whether we're targeting the entry's main-node for revealing, or its descendents, the main-node will always get revealed
+				markPathRevealTime(reveal.path, stepTime_safe);
+
+				// for each ancestor-path of the entry's main-node, mark that path as revealed at this reveal's target-time (since whenever a node is revealed, its ancestors are as well)
+				let ancestorPath = reveal.path;
+				while (ancestorPath.includes("/")) {
+					ancestorPath = ancestorPath.slice(0, ancestorPath.lastIndexOf("/"));
+					markPathRevealTime(ancestorPath, stepTime_safe);
 				}
 
-				descendentRevealDepth = Math.max(descendentRevealDepth, reveal.show_revealDepth ?? 0);
-			}
-			if (reveal.setExpandedTo == true) {
-				descendentRevealDepth = Math.max(descendentRevealDepth, 1);
-			}
-			if (descendentRevealDepth >= 1) {
-				const node = GetNode(CE(reveal.path.split("/")).Last());
-				if (node == null) continue;
-				// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
-				let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${reveal.path}/${child.id}`}));
-				if (CE(currentChildren).Any(a=>a.node == null)) {
-					// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
-					return emptyArray_forLoading;
+				// also reveal any descendants that are within the specified subdepth/range
+				let descendentRevealDepth = 0;
+				if (reveal.show && reveal.show_revealDepth != null) {
+					descendentRevealDepth = Math.max(descendentRevealDepth, reveal.show_revealDepth);
 				}
-
-				for (let childrenDepth = 1; childrenDepth <= descendentRevealDepth; childrenDepth++) {
-					const nextChildren = [];
-					for (const child of currentChildren) {
-						if (baseOnLastReveal) {
-							pathRevealTimes[child.path] = Math.max(stepTime_safe, ToNumber(pathRevealTimes[child.path], 0));
-						} else {
-							pathRevealTimes[child.path] = Math.min(stepTime_safe, ToNumber(pathRevealTimes[child.path], Number.MAX_SAFE_INTEGER));
-						}
-						// if there's another loop/depth after this one
-						if (childrenDepth < descendentRevealDepth) {
-							const childChildren = GetNodeChildren(child.node.id).map(child2=>({node: child2, path: child2 && `${child.path}/${child2.id}`}));
-							if (CE(childChildren).Any(a=>a == null)) {
-								// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
-								return emptyArray_forLoading;
-							}
-							CE(nextChildren).AddRange(childChildren);
-						}
+				if (reveal.setExpandedTo == true) {
+					descendentRevealDepth = Math.max(descendentRevealDepth, 1);
+				}
+				if (descendentRevealDepth >= 1) {
+					const node = GetNode(CE(reveal.path.split("/")).Last());
+					if (node == null) continue;
+					// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
+					let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${reveal.path}/${child.id}`}));
+					if (CE(currentChildren).Any(a=>a.node == null)) {
+						// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
+						return emptyArray_forLoading;
 					}
-					currentChildren = nextChildren;
+
+					for (let childrenDepth = 1; childrenDepth <= descendentRevealDepth; childrenDepth++) {
+						const nextChildren = [];
+						for (const child of currentChildren) {
+							markPathRevealTime(child.path, stepTime_safe);
+							// if there's another loop/depth after this one
+							if (childrenDepth < descendentRevealDepth) {
+								const childChildren = GetNodeChildren(child.node.id).map(child2=>({node: child2, path: child2 && `${child.path}/${child2.id}`}));
+								if (CE(childChildren).Any(a=>a == null)) {
+									// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
+									return emptyArray_forLoading;
+								}
+								CE(nextChildren).AddRange(childChildren);
+							}
+						}
+						currentChildren = nextChildren;
+					}
 				}
 			}
 
 			if (reveal.setExpandedTo == false) {
-				for (const path of CE(pathRevealTimes).VKeys()) {
+				for (const path of CE(pathVisibilitiesSoFar).VKeys()) {
 					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only hides descendants)
-						delete pathRevealTimes[path];
+						markPathHideTime(path, stepTime_safe);
 					}
 				}
 			}
 
 			if (reveal.hide) {
-				for (const path of CE(pathRevealTimes).VKeys()) {
+				for (const path of CE(pathVisibilitiesSoFar).VKeys()) {
 					if (path.startsWith(reveal.path)) {
-						delete pathRevealTimes[path];
+						markPathHideTime(path, stepTime_safe);
 					}
 				}
 			}
 		}
 	}
-	return pathRevealTimes;
+
+	const visiblePathsAtEnd = pathVisibilitiesSoFar.VKeys();
+	return visiblePathsAtEnd.ToMapObj(path=>path, path=>{
+		if (baseOn == "first reveal") return pathRevealTimes_first[path];
+		if (baseOn == "last fresh reveal") return pathRevealTimes_lastFresh[path];
+		Assert(false, "Invalid baseOn value.");
+	});
 });
 export const GetVisiblePathsAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	return CE(GetVisiblePathRevealTimesInSteps(steps)).VKeys();

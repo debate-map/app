@@ -9,10 +9,10 @@ export class DebatesPageState {
 	@O selectedMapID: string|n;
 }
 
-export const GetSelectedDebatesPageMapID = CreateAccessor(function() {
-	return this!.store.main.debates.selectedMapID;
+export const GetSelectedDebatesPageMapID = CreateAccessor({ctx: 1}, function() {
+	return this.store.main.debates.selectedMapID;
 });
-export const GetSelectedDebatesPageMap = CreateAccessor(function() {
+export const GetSelectedDebatesPageMap = CreateAccessor(()=>{
 	//const selectedID = this!.store.main.debates.selectedMapID;
 	const selectedID = GetSelectedDebatesPageMapID();
 	// return GetData(`maps/${selectedID}`);

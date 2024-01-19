@@ -19,7 +19,7 @@ export class ChildLimitBar extends BaseComponent<{map: Map, node: NodeL3, path: 
 	render() {
 		const {map, node, path, treePath, inBelowGroup, childrenWidthOverride, childLimitInfo} = this.props;
 		const {direction, showTarget_min, showTarget_max, showTarget_actual, childCount, childCountShowing} = childLimitInfo;
-		const nodeView = GetNodeView(map.id, path);
+		const nodeView = GetNodeView(map.id, path)!;
 
 		const {ref_leftColumn, ref_group} = useRef_nodeLeftColumn(treePath, {
 			// if limit-bar is for showing/hiding premises, have the connector actually be visible (to clarify the limit-bar's role of involving the premises)

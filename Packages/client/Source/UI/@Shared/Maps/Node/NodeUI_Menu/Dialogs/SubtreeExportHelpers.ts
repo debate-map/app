@@ -1,4 +1,4 @@
-import {GetExpandedByDefaultAttachment, GetMedia, GetNode, GetNodeChildren, GetNodeL3, GetNodePhrasings, GetTermsAttached, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeTag, Term} from "dm_common";
+import {GetExpandedByDefaultAttachment, GetMedia, GetNode, GetNodeChildren, GetNodeChildrenL2, GetNodeChildrenL3, GetNodeL3, GetNodePhrasings, GetTermsAttached, Media, NodeL1, NodeL3, NodeLink, NodePhrasing, NodeRevision, NodeTag, Term} from "dm_common";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {Assert, NN} from "web-vcore/nm/js-vextensions.js";
 import {ClassKeys, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
@@ -140,7 +140,8 @@ export const PopulateLocalSubtreeData = CreateAccessor((currentPath: string, sea
 
 	const currentDepth = pathSegments.length - subtreeData.rootPathSegments.length;
 	if (currentDepth < searchConfig.maxDepth) {
-		for (const child of GetNodeChildren(node.id, currentPath)) {
+		//for (const child of GetNodeChildrenL3(node.id, currentPath)) { // todo: maybe switch to this, for correct handling of mirror-children
+		for (const child of GetNodeChildren(node.id)) {
 			PopulateLocalSubtreeData(`${currentPath}/${child.id}`, searchConfig, subtreeData);
 		}
 	}

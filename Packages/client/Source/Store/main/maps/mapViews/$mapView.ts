@@ -99,8 +99,8 @@ export const GetAnchorNodeID = CreateAccessor((mapID: string)=>{
 	return anchorNodeStr ? PathSegmentToNodeID(anchorNodeStr) : null;
 });
 
-export const GetMapView = CreateAccessor(function(mapID: string|n) {
-	return this!.store.main.maps.mapViews.get(mapID!); // nn: get() accepts null
+export const GetMapView = CreateAccessor({ctx: 1}, function(mapID: string|n) {
+	return this.store.main.maps.mapViews.get(mapID!); // nn: get() accepts null
 });
 
 export const GetNodeView = CreateAccessor((<{
@@ -195,7 +195,7 @@ export const GetNodeViewsBelowPath = CreateAccessor((mapID: string|n, pathOrPath
 	if (mapID == null) return result;
 
 	const pathNodes = ToPathNodes(pathOrPathNodes);
-	const nodeView = GetNodeView(mapID, pathOrPathNodes);
+	const nodeView = GetNodeView(mapID, pathOrPathNodes)!;
 	if (includeSelf) result.set(pathNodes.join("/"), nodeView);
 
 	for (const [childID, child] of Object.entries(nodeView?.children ?? {})) {

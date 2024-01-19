@@ -1,8 +1,8 @@
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {User} from "./users/@User.js";
 
-export const MeID = CreateAccessor(function(): string|n {
-	return this!.graph.userInfo?.id;
+export const MeID = CreateAccessor({ctx: 1}, function(): string|n {
+	return this.graph.userInfo?.id;
 });
 export const Me = CreateAccessor(()=>{
 	const id = MeID();
