@@ -7,6 +7,24 @@
 
 ## Main series
 
+### Pushed on 2023-01-19
+
+* 1\) Added an `extras` column to `timelineSteps` table.
+	* DB response:
+		* 1\) Execute sql:
+			```sql
+			ALTER TABLE app."timelineSteps" ADD COLUMN "extras" jsonb DEFAULT '{}'::jsonb NOT NULL;
+			```
+
+### Pushed on 2023-01-??
+
+* 1\) Added an `timeUntilNextStep` column to `timelineSteps` table.
+	* DB response:
+		* 1\) Execute sql:
+			```sql
+			ALTER TABLE app."timelineSteps" ADD COLUMN "timeUntilNextStep" real;
+			```
+
 ### Pushed on 2023-05-21
 
 * 1\) Added a `searchForExternalIds` graphql endpoint, and a sql function to back it.

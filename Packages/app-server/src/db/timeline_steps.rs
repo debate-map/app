@@ -1,4 +1,5 @@
 use rust_shared::anyhow::Error;
+use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json, futures};
 use rust_shared::async_graphql::{self, MaybeUndefined, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
@@ -56,6 +57,7 @@ pub struct TimelineStep {
     pub nodeReveals: Vec<NodeReveal>,
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+	pub extras: JSONValue,
 }
 impl From<Row> for TimelineStep {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
@@ -73,6 +75,10 @@ pub struct NodeReveal {
     hide: Option<bool>,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct TimelineStep_Extras {
+}
+
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct TimelineStepInput {
     pub timelineID: String,
@@ -83,6 +89,7 @@ pub struct TimelineStepInput {
     pub timeUntilNextStep: Option<f64>,
 	pub message: String,
 	pub nodeReveals: Vec<NodeReveal>,
+	//pub extras: JSONValue, // to set this, use updateTimelineStep command instead (this consolidates/simplifies the subfield-sensitive validation code)
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
@@ -94,6 +101,7 @@ pub struct TimelineStepUpdates {
 	pub timeUntilNextStep: FieldUpdate_Nullable<f64>,
 	pub message: FieldUpdate<String>,
 	pub nodeReveals: FieldUpdate<Vec<NodeReveal>>,
+	pub extras: FieldUpdate<JSONValue>,
 }
 
 #[derive(Clone)] pub struct GQLSet_TimelineStep { pub nodes: Vec<TimelineStep> }

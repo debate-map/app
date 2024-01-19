@@ -1,21 +1,21 @@
-import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
-import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM, ShallowChanged} from "web-vcore/nm/react-vextensions.js";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {DragInfo, InfoButton, MakeDraggable, Observer} from "web-vcore";
-import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {UUIDPathStub} from "UI/@Shared/UUIDStub.js";
-import {CreateAccessor, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, TimelineStep, NodeReveal, GetNodeID, GetNode, GetNodeL2, GetNodeL3, GetNodeDisplayText, NodeType, SearchUpFromNodeForNodeMatchingX, Map, OrderKey, GetPathNodes, GetNodeLinks} from "dm_common";
-import {liveSkin} from "Utils/Styles/SkinManager";
-import {RunCommand_AddTimelineStep, RunCommand_DeleteTimelineStep, RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
-import {GetNodeColor} from "Store/db_ext/nodes";
-import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
-import {AudioFileMeta, AudioMeta, GetStepAudioClipEnhanced, StepAudioClip} from "Utils/OPFS/Map/AudioMeta";
 import {store} from "Store";
+import {RunCommand_AddTimelineStep, RunCommand_DeleteTimelineStep, RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
+import {AudioFileMeta, AudioMeta, GetStepAudioClipEnhanced, StepAudioClip} from "Utils/OPFS/Map/AudioMeta";
+import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
+import {liveSkin} from "Utils/Styles/SkinManager";
+import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
+import {DragInfo, MakeDraggable, Observer} from "web-vcore";
+import {Clone, E, GetEntries, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Button, Column, Pre, Row, Select, Spinner, Text, TextArea, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {NodeRevealUI} from "./NodeRevealUI.js";
+import {StepEffectUI} from "./StepEffectUI.js";
 
 export enum PositionOptionsEnum {
 	full = "full",
@@ -272,8 +272,38 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 										},
 										(step.nodeReveals == null || step.nodeReveals.length == 0) && {padding: "3px 5px"},
 									)}>
-									{(step.nodeReveals == null || step.nodeReveals.length == 0) && !dragIsOverDropArea &&
-									<div style={{fontSize: 11, opacity: 0.7, textAlign: "center"}}>Drag nodes here to have them display when the playback reaches this step.</div>}
+									<Row>
+										<Text>Effects:</Text>
+										<Button ml={5} mdIcon="plus" onClick={e=>{
+											const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
+											ShowVMenu(
+												{pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height)},
+												<>
+													<VMenuItem text="Set time-tracker state: visible" style={liveSkin.Style_VMenuItem()} onClick={()=>{
+														const newEffects = [
+															...(step.extras?.effects ?? []),
+															new TimelineStepEffect({setTimeTrackerState: true}),
+														];
+														RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+													}}/>
+													<VMenuItem text="Set time-tracker state: hidden" style={liveSkin.Style_VMenuItem()} onClick={()=>{
+														const newEffects = [
+															...(step.extras?.effects ?? []),
+															new TimelineStepEffect({setTimeTrackerState: false}),
+														];
+														RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+													}}/>
+												</>,
+											);
+										}}/>
+										{//(step.nodeReveals == null || step.nodeReveals.length == 0) && !dragIsOverDropArea &&
+										<div style={{flex: 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, opacity: 0.7, textAlign: "center"}}>
+											Drag nodes here to have them display when the playback reaches this step.
+										</div>}
+									</Row>
+									{step.extras?.effects && step.extras.effects.map((effect, index)=>{
+										return <StepEffectUI key={index} map={map} step={step} effect={effect} index={index}/>;
+									})}
 									{step.nodeReveals && step.nodeReveals.map((nodeReveal, index)=>{
 										return <NodeRevealUI key={index} map={map} step={step} nodeReveal={nodeReveal} editing={creatorOrMod} index={index}/>;
 									})}
@@ -338,162 +368,5 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		}
 
 		this.SetState({placeholderRect});
-	}
-}
-
-@Observer
-export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: TimelineStep, nodeReveal: NodeReveal, editing: boolean, index: number}, {detailsOpen: false}) {
-	render() {
-		const {map, step, nodeReveal, editing, index} = this.props;
-		const {detailsOpen} = this.state;
-
-		const {path} = nodeReveal;
-		const nodeID = GetNodeID(path);
-		let node = GetNodeL2(nodeID);
-		let nodeL3 = GetNodeL3(path);
-		// if one is null, make them both null to be consistent
-		if (node == null || nodeL3 == null) {
-			node = null;
-			nodeL3 = null;
-		}
-
-		const pathNodes = GetPathNodes(path);
-		// path is valid if every node in path, has the previous node as a parent
-		const pathValid = pathNodes.every((nodeID, index)=>{
-			const parentID = pathNodes[index - 1];
-			const parentLink = GetNodeLinks(parentID, nodeID)[0];
-			return index == 0 || (nodeID && parentID && parentLink != null);
-		});
-
-		const displayText = node && nodeL3 ? GetNodeDisplayText(node, nodeReveal.path) : `(Node no longer exists: ${GetNodeID(nodeReveal.path)})`;
-
-		const backgroundColor = GetNodeColor(nodeL3 || {type: NodeType.category} as any).desaturate(0.5).alpha(0.8);
-		// if (node == null || nodeL3 == null) return null;
-		return (
-			<>
-				<Row key={index} sel mt={index === 0 ? 0 : 5}
-					style={E(
-						{width: "100%", padding: 3, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)"},
-						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
-					)}
-					onMouseDown={e=>{
-						if (e.button !== 2) return false;
-						// this.SetState({ menuOpened: true });
-					}}
-					onClick={()=>this.SetState({detailsOpen: !detailsOpen})}
-				>
-					<span style={{position: "relative", paddingTop: 2, fontSize: 12, color: "rgba(20,20,20,1)"}}>
-						<span style={{
-							position: "absolute", left: -5, top: -8, lineHeight: "11px", fontSize: 10, color: "yellow",
-							background: "rgba(50,50,50,1)", borderRadius: 5, padding: "0 3px",
-						}}>
-							{[
-								nodeReveal.show && "show",
-								nodeReveal.changeFocusLevelTo != null && `focus:${nodeReveal.changeFocusLevelTo}`,
-								nodeReveal.setExpandedTo == true && `expand`,
-								nodeReveal.setExpandedTo == false && `collapse`,
-								nodeReveal.hide && "hide",
-							].filter(a=>a).join(", ")}
-							{!pathValid && <span style={{marginLeft: 5, color: "red"}}>[path invalid]</span>}
-						</span>
-						{displayText}
-					</span>
-					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					{/* <NodeUI_Menu_Stub {...{ node: nodeL3, path: `${node.id}`, inList: true }}/> */}
-					{editing &&
-					<Button ml="auto" mdIcon="delete" style={{margin: -3, padding: "3px 10px"}} onClick={()=>{
-						const newNodeReveals = step.nodeReveals.Exclude(nodeReveal);
-						RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-					}}/>}
-				</Row>
-				{detailsOpen &&
-				<Column sel mt={5}>
-					<Row>
-						<Text>Path: </Text>
-						<UUIDPathStub path={path}/>
-						{!pathValid && editing &&
-						<Button ml="auto" text="Fix path" enabled={node != null} onClick={async()=>{
-							const newPath = await GetAsync(()=>SearchUpFromNodeForNodeMatchingX(node!.id, id=>id == map.rootNode));
-							if (newPath == null) {
-								return void ShowMessageBox({title: "Could not find new path", message: "Failed to find new path between map root-node and this step's node."});
-							}
-							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-							newNodeReveals[index].path = newPath;
-							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-						}}/>}
-					</Row>
-					{editing &&
-					<Row>
-						<CheckBox ml={5} text="Show" value={nodeReveal.show ?? false} onChange={val=>{
-							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-							newNodeReveals[index].show = val;
-							if (val) newNodeReveals[index].hide = false;
-							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-						}}/>
-						{nodeReveal.show &&
-						<>
-							<Text ml={10}>Reveal depth:</Text>
-							<Spinner ml={5} min={0} max={50} value={nodeReveal.show_revealDepth ?? 0} onChange={val=>{
-								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-								//newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
-								newNodeReveals[index].show_revealDepth = val;
-								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-							}}/>
-						</>}
-					</Row>}
-					{editing &&
-					<Row>
-						<CheckBox ml={5} text="Change focus level to:" value={nodeReveal.changeFocusLevelTo != null} onChange={val=>{
-							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-							if (val) {
-								// when manually checking this box, setting to 0 is more common (since setting to 1 is auto-set for newly-dragged reveal-nodes)
-								newNodeReveals[index].changeFocusLevelTo = 0;
-							} else {
-								delete newNodeReveals[index].changeFocusLevelTo;
-							}
-							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-						}}/>
-						<InfoButton text="While a node has a focus-level of 1+, the timeline will keep it in view while progressing through its steps (ie. during automatic scrolling and zooming)."/>
-						{nodeReveal.changeFocusLevelTo != null &&
-						<>
-							<Spinner ml={5} value={nodeReveal.changeFocusLevelTo} onChange={val=>{
-								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-								newNodeReveals[index].changeFocusLevelTo = val;
-								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-							}}/>
-						</>}
-					</Row>}
-					{editing &&
-					<Row>
-						<CheckBox ml={5} text="Set expanded to:" value={nodeReveal.setExpandedTo != null} onChange={val=>{
-							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-							if (val) {
-								newNodeReveals[index].setExpandedTo = true;
-							} else {
-								delete newNodeReveals[index].setExpandedTo;
-							}
-							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-						}}/>
-						{nodeReveal.setExpandedTo != null &&
-						<>
-							<Select ml={5} options={{expanded: true, collapsed: false}} value={nodeReveal.setExpandedTo} onChange={(val: boolean)=>{
-								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-								newNodeReveals[index].setExpandedTo = val;
-								RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-							}}/>
-						</>}
-					</Row>}
-					{editing &&
-					<Row>
-						<CheckBox ml={5} text="Hide" value={nodeReveal.hide ?? false} onChange={val=>{
-							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
-							newNodeReveals[index].hide = val;
-							if (val) newNodeReveals[index].show = false;
-							RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
-						}}/>
-					</Row>}
-				</Column>}
-			</>
-		);
 	}
 }

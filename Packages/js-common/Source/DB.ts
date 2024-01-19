@@ -47,6 +47,7 @@ export * from "./DB/terms.js";
 export * from "./DB/terms/@Term.js";
 export * from "./DB/timelineSteps.js";
 export * from "./DB/timelineSteps/@TimelineStep.js";
+export * from "./DB/timelineSteps/@TimelineStepEffect.js";
 export * from "./DB/timelines.js";
 //export * from "./DB/timelines/$timeline.js";
 export * from "./DB/timelines/@Timeline.js";

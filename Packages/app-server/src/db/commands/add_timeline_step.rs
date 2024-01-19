@@ -59,6 +59,7 @@ pub async fn add_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		message: step_.message,
 		nodeReveals: step_.nodeReveals,
 		c_accessPolicyTargets: vec![], // auto-set by db
+		extras: json!({}),
 	};
 
 	upsert_db_entry_by_id_for_struct(&ctx, "timelineSteps".to_owned(), timeline_step.id.to_string(), timeline_step.clone()).await?;

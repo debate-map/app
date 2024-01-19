@@ -7,7 +7,8 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
 import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI.js";
+import {PositionOptionsEnum, StepEditorUI} from "../EditorSubpanel/StepEditorUI.js";
+import {NodeRevealUI} from "../EditorSubpanel/NodeRevealUI.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(

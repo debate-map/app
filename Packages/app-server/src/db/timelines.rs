@@ -46,6 +46,10 @@ impl From<Row> for Timeline {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
+/*#[derive(Clone, Serialize, Deserialize)]
+pub struct Timeline_Extras {
+}*/
+
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct TimelineInput {
     pub accessPolicy: String,
@@ -66,10 +70,6 @@ pub struct TimelineUpdates {
     pub videoHeightVSWidthPercent: FieldUpdate_Nullable<f64>,
 	//pub extras: FieldUpdate<JSONValue>,
 }
-
-/*#[derive(Clone, Serialize, Deserialize)]
-pub struct Timeline_Extras {
-}*/
 
 #[derive(Clone)] pub struct GQLSet_Timeline { pub nodes: Vec<Timeline> }
 #[Object] impl GQLSet_Timeline { async fn nodes(&self) -> &Vec<Timeline> { &self.nodes } }

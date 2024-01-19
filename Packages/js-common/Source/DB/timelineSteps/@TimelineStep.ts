@@ -1,6 +1,7 @@
 import {AddSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MarkerForNonScalarField, PickOnly} from "../../Utils/General/General.js";
+import {TimelineStepEffect} from "./@TimelineStepEffect.js";
 
 @MGLClass({table: "timelineSteps"})
 export class TimelineStep {
@@ -37,6 +38,9 @@ export class TimelineStep {
 
 	@Field({items: {$ref: "NodeReveal"}, ...MarkerForNonScalarField()})
 	nodeReveals: NodeReveal[];
+
+	@Field({$ref: "TimelineStep_Extras"})
+	extras = new TimelineStep_Extras();
 }
 
 @MGLClass()
@@ -65,6 +69,15 @@ export class NodeReveal {
 
 	/*@Field({type: "number"}, {opt: true})
 	hide_delay?: number|n;*/
+}
+
+@MGLClass()
+export class TimelineStep_Extras {
+	constructor(data?: Partial<TimelineStep_Extras>) {
+		Object.assign(this, data);
+	}
+
+	effects?: TimelineStepEffect[];
 }
 
 export function IsNodeRevealEmpty(nodeReveal: NodeReveal) {
