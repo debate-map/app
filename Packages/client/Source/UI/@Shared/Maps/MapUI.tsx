@@ -359,7 +359,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;
 		}
-		console.log("Loading scroll:", newScroll.toString());
+		console.log("Loading scroll:", newScroll.toString(), "@center:", posInContainer.toString());
 		this.scrollView!.SetScroll(newScroll);
 		// Log("Scrolling to position: " + newScroll);
 

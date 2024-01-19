@@ -201,7 +201,7 @@ export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineS
 		}
 	}
 
-	const visiblePathsAtEnd = pathVisibilitiesSoFar.VKeys();
+	const visiblePathsAtEnd = pathVisibilitiesSoFar.Pairs().filter(a=>a.value == true).map(a=>a.key);
 	return visiblePathsAtEnd.ToMapObj(path=>path, path=>{
 		if (baseOn == "first reveal") return pathRevealTimes_first[path];
 		if (baseOn == "last fresh reveal") return pathRevealTimes_lastFresh[path];
@@ -212,7 +212,6 @@ export const GetVisiblePathsAfterSteps = CreateAccessor((steps: TimelineStep[])=
 	return CE(GetVisiblePathRevealTimesInSteps(steps)).VKeys();
 });
 
-/** Note: This can return non-zero focus-levels even for nodes that aren't visible. */
 export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	const pathFocusLevels = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
@@ -220,46 +219,82 @@ export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[
 			if (reveal.changeFocusLevelTo != null) {
 				pathFocusLevels[reveal.path] = reveal.changeFocusLevelTo;
 			}
+
+			// hiding of nodes also unfocuses all of those nodes 
+			if (reveal.setExpandedTo == false) {
+				for (const path of CE(pathFocusLevels).VKeys()) {
+					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only unfocuses descendants)
+						pathFocusLevels[reveal.path] = 0;
+					}
+				}
+			}
+			if (reveal.hide) {
+				for (const path of CE(pathFocusLevels).VKeys()) {
+					if (path.startsWith(reveal.path)) {
+						pathFocusLevels[reveal.path] = 0;
+					}
+				}
+			}
 		}
 	}
 	return pathFocusLevels;
 });
-/** Note: This can return non-zero focus-levels even for nodes that aren't visible. */
 export const GetPathsWith1PlusFocusLevelAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	return Object.entries(GetPathFocusLevelsAfterSteps(steps)).filter(a=>a[1] >= 1).map(a=>a[0]);
 });
 
-/** Note: This can return non-zero focus-levels even for nodes that aren't visible. */
 export const GetPathFocusLevelRangesWithinSteps = CreateAccessor((steps: TimelineStep[])=>{
 	const ranges = [] as PathFocusLevelRange[];
+
+	const handleFocusLevelChange = (path: string, focusLevel: number, stepIndex: number)=>{
+		// if there is no focus-level-range added for this path yet, add one "synthetic" one with level-0, that starts at index 0 (this simplifies handling logic, to have all steps covered by a range)
+		if (ranges.filter(a=>a.path == path).length == 0) {
+			ranges.push(new PathFocusLevelRange({
+				path,
+				focusLevel: 0,
+				firstStep: 0,
+				//lastStep: index - 1, // have this filled in by regular logic below
+				//endStep: index, // have this filled in by regular logic below
+			}));
+		}
+
+		const currentRange = ranges.filter(a=>a.path == path && a.lastStep == null).LastOrX();
+		const currentFocusLevel = currentRange?.focusLevel ?? 0;
+
+		// if this step changes the focus-level for the node, add a new range for the new focus-level
+		if (focusLevel != currentFocusLevel) {
+			if (currentRange != null) {
+				currentRange.lastStep = stepIndex - 1;
+				currentRange.endStep = stepIndex;
+			}
+			ranges.push(new PathFocusLevelRange({
+				path,
+				focusLevel,
+				firstStep: stepIndex,
+			}));
+		}
+	};
+
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
 			if (reveal.changeFocusLevelTo != null) {
-				// if there is no focus-level-range added for this path yet, add one "synthetic" one with level-0, that starts at index 0 (this simplifies handling logic, to have all steps covered by a range)
-				if (ranges.filter(a=>a.path == reveal.path).length == 0) {
-					ranges.push(new PathFocusLevelRange({
-						path: reveal.path,
-						focusLevel: 0,
-						firstStep: 0,
-						//lastStep: index - 1, // have this filled in by regular logic below
-						//endStep: index, // have this filled in by regular logic below
-					}));
-				}
+				handleFocusLevelChange(reveal.path, reveal.changeFocusLevelTo, index);
+			}
 
-				const currentRange = ranges.filter(a=>a.path == reveal.path && a.lastStep == null).LastOrX();
-				const currentFocusLevel = currentRange?.focusLevel ?? 0;
-
-				// if this step changes the focus-level for the node, add a new range for the new focus-level
-				if (reveal.changeFocusLevelTo != currentFocusLevel) {
-					if (currentRange != null) {
-						currentRange.lastStep = index - 1;
-						currentRange.endStep = index;
+			// hiding of nodes also unfocuses all of those nodes 
+			const pathsAmongRanges = ranges.map(a=>a.path).Distinct();
+			if (reveal.setExpandedTo == false) {
+				for (const path of pathsAmongRanges) {
+					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only unfocuses descendants)
+						handleFocusLevelChange(path, 0, index);
 					}
-					ranges.push(new PathFocusLevelRange({
-						path: reveal.path,
-						focusLevel: reveal.changeFocusLevelTo,
-						firstStep: index,
-					}));
+				}
+			}
+			if (reveal.hide) {
+				for (const path of pathsAmongRanges) {
+					if (path.startsWith(reveal.path)) {
+						handleFocusLevelChange(path, 0, index);
+					}
 				}
 			}
 		}
