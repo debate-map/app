@@ -1,5 +1,5 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentWithConnector, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -13,8 +13,10 @@ import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel.js";
 import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel.js";
 import {AudioPanel} from "./TimelinePanel/AudioPanel.js";
 
+export const TimelinePanel_width = 600;
+
 @Observer
-export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
+export class TimelinePanel extends BaseComponent<{map: Map}, {}> {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.timelines;
@@ -28,7 +30,7 @@ export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 		}
 		return (
 			<Row style={{height: "100%", alignItems: "flex-start"}}>
-				<Column className="clickThrough" style={{width: 600, height: "100%", background: liveSkin.OverlayPanelBackgroundColor().css() /* borderRadius: "10px 10px 0 0" */}}>
+				<Column className="clickThrough" style={{width: TimelinePanel_width, height: "100%", background: liveSkin.OverlayPanelBackgroundColor().css() /* borderRadius: "10px 10px 0 0" */}}>
 					<Row>
 						<Button text="Collection" style={{flex: 1}} onClick={()=>SetSubpanel(TimelineSubpanel.collection)}/>
 						<Button text="Editor" style={{flex: 1}} onClick={()=>SetSubpanel(TimelineSubpanel.editor)}/>

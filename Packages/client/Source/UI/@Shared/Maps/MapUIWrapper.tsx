@@ -1,12 +1,12 @@
-import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, IsNodeL2, IsNodeL3, NodeL3, NodeType} from "dm_common";
+import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, GetTimeTrackerStateAtTimeX, GetTimelineSteps, IsNodeL2, IsNodeL3, NodeL3, NodeType} from "dm_common";
 import React, {useEffect, useMemo, useState} from "react";
 import {store} from "Store/index.js";
-import {GetMapState, GetPlayingTimeline, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetPlayingTimeline, GetTimelineOpenSubpanel, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph} from "tree-grapher";
 import {ShowHeader} from "UI/@SL/SL.js";
 import {ES, HTMLProps, Observer, UseWindowEventListener} from "web-vcore";
-import {Assert, Timer} from "web-vcore/nm/js-vextensions.js";
+import {Assert, Timer, ea, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
@@ -17,6 +17,7 @@ import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants.js";
 import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
 import {TimelineEffectApplier_Smooth} from "./MapUI/TimelineEffectApplier_Smooth.js";
+import {TimeTrackerUI} from "./MapUI/TimeTrackerUI.js";
 
 export class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
 	render() {
@@ -122,6 +123,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 		const uiState = store.main.timelines;
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
 		const playingTimeline = GetPlayingTimeline(map.id);
+		const timelineSteps = playingTimeline ? GetTimelineSteps(playingTimeline.id) : ea;
+		const timeTrackerVisible = mapState.playingTimeline_time != null ? GetTimeTrackerStateAtTimeX(timelineSteps, mapState.playingTimeline_time) : false;
 
 		//const subNavBarWidth = 104;
 		const subNavBarWidth = 0;
@@ -145,6 +148,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 				}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
+					{playingTimeline != null && timeTrackerVisible &&
+						<TimeTrackerUI map={map}/>}
 					<div style={{position: "relative", flex: 1, minWidth: 0, height: "100%"}}>
 						<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_main}/>
 						{playingTimeline && uiState.layoutHelperMap_load && <>

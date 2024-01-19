@@ -3,6 +3,7 @@ import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 import {GetNode, GetNodeChildren} from "./nodes.js";
+import {GetTimelineStepEffectsResolved} from "../DB.js";
 
 export const GetTimelineStep = CreateAccessor((id: string|n): TimelineStep|n=>{
 	return GetDoc({}, a=>a.timelineSteps.get(id!));
@@ -63,6 +64,51 @@ export const DoesTimelineStepMarkItselfActiveAtTimeX = CreateAccessor((step: Tim
 	const timeFromStart = GetTimelineStepTimeFromStart(step);
 	if (timeFromStart == null) return false;
 	return timeFromStart <= timeX;
+});
+
+export const GetTimeTrackerStateAtTimeX = CreateAccessor((steps: TimelineStep[], timeX: number)=>{
+	let timeTrackerState = false;
+
+	const effects = GetTimelineStepEffectsResolved(steps);
+	for (const effect of effects) {
+		if (effect.time_absolute > timeX) break;
+		if (effect.setTimeTrackerState != null) {
+			timeTrackerState = effect.setTimeTrackerState;
+		}
+	}
+
+	return timeTrackerState;
+});
+
+export const GetTalkTimeSummaryAtTimeX = CreateAccessor((steps: TimelineStep[], timeX: number)=>{
+	const talkTimeTotals = {} as {[key: string]: number};
+	let currentTalker: string|n = null;
+
+	const stepTimes = GetTimelineStepTimesFromStart(steps);
+	for (const [index, step] of steps.entries()) {
+		const stepTime = stepTimes[index];
+		const stepTime_safe = stepTime ?? 0;
+		if (stepTime_safe > timeX) break; // if this step's start is alraedy out of range, break loop
+
+		const endTime = stepTimes[index + 1];
+		const endTime_safe = endTime ?? timeX;
+		const endTime_safe_upToTimeX = Math.min(endTime_safe, timeX);
+
+		if (timeX >= stepTime_safe && timeX < endTime_safe) {
+			currentTalker = step.groupID;
+		}
+
+		const talker = ["left", "right"].includes(step.groupID) ? step.groupID : null; // todo: probably update this to check actual speaker-name later
+		if (talker != null) {
+			const talkDurationForThisStep = endTime_safe_upToTimeX - stepTime_safe;
+			talkTimeTotals[talker] = (talkTimeTotals[talker] ?? 0) + talkDurationForThisStep;
+		}
+	}
+
+	return {
+		talkTimeTotals,
+		currentTalker,
+	};
 });
 
 export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
