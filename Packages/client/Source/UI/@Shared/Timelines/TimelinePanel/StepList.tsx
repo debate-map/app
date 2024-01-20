@@ -18,6 +18,7 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm
 import {AudioFilePlayer} from "./StepList/AudioFilePlayer.js";
 import {StepUI} from "./StepList/StepUI.js";
 import {RecordDropdown} from "./StepList/RecordDropdown.js";
+import {AddTimelineStep_Simple} from "./StepList/Editing/StepEditorUI.js";
 
 // for use by react-beautiful-dnd (using text-replacement/node-modules-patching)
 G({LockMapEdgeScrolling});
@@ -421,6 +422,13 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 								return (
 									<Column ref={c=>provided.innerRef(GetDOM(c) as any)} {...provided.droppableProps}>
 										{reactList()}
+										{steps.length == 0 && !mapState.timelineEditMode && <Row>Switch to edit-mode to add steps.</Row>}
+										{mapState.timelineEditMode &&
+										<Row style={{justifyContent: "center"}}>
+											<Button text="Add timeline step" mt={5} mb={5} enabled={creatorOrMod} onClick={()=>{
+												AddTimelineStep_Simple(timeline.id, steps, steps.length);
+											}}/>
+										</Row>}
 									</Column>
 								);
 							}}
@@ -442,7 +450,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 		const {map, timeline, steps, creatorOrMod} = this.PropsStash;
 		if (steps == null) return <div key={key}/>;
 		const step = steps[index];
-		const nextStep = steps[index + 1];
+		//const nextStep = steps[index + 1];
 
 		//return <StepEditorUI key={step.id} index={index} map={map} timeline={timeline!} step={step} nextStep={nextStep} draggable={creatorOrMod}/>;
 		return <StepUI key={step.id} index={index} last={index == steps.length - 1} map={map} timeline={timeline} steps={steps} step={step} player={this.player}

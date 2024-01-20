@@ -66,6 +66,27 @@ export async function SetStepClipVolume(opfsForMap: OPFS_Map, audioMeta: AudioMe
 
 export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
 
+export async function AddTimelineStep_Simple(timelineID: string, steps: TimelineStep[], insertIndex: number) {
+	if (MeID() == null) return ShowSignInPopup();
+	if (steps == null) return; // steps must still be loading; just ignore the click
+
+	// calculate the insert-index to be just after the middle entry of the visible-step-range
+	/*const visibleStepRange = this.stepList?.getVisibleRange() ?? [steps.length - 1, steps.length - 1];
+	const insertIndex = Math.floor(visibleStepRange.Average() + 1);*/
+
+	const prevStepForInsert = steps[insertIndex - 1];
+	const nextStepForInsert = steps[insertIndex];
+
+	const newStep = new TimelineStep({
+		timelineID,
+		orderKey: OrderKey.between(prevStepForInsert?.orderKey, nextStepForInsert?.orderKey).toString(),
+		groupID: "full",
+		message: "",
+		nodeReveals: [],
+	});
+	await RunCommand_AddTimelineStep(newStep);
+}
+
 @MakeDraggable(({index, step, draggable}: StepEditorUIProps)=>{
 	if (draggable == false) return undefined as any; // completely disable draggable behavior (see web-vcore/.../DNDHelpers.tsx for more info)
 	// upgrade note: make sure dnd isn't broken from having to comment the next line out
@@ -127,26 +148,6 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		}
 
 		const steps = GetTimelineSteps(timeline.id);
-		const addStep = (insertIndex: number)=>{
-			if (MeID() == null) return ShowSignInPopup();
-			if (steps == null) return; // steps must still be loading; just ignore the click
-
-			// calculate the insert-index to be just after the middle entry of the visible-step-range
-			/*const visibleStepRange = this.stepList?.getVisibleRange() ?? [steps.length - 1, steps.length - 1];
-			const insertIndex = Math.floor(visibleStepRange.Average() + 1);*/
-
-			const prevStepForInsert = steps[insertIndex - 1];
-			const nextStepForInsert = steps[insertIndex];
-
-			const newStep = new TimelineStep({
-				timelineID: timeline.id,
-				orderKey: OrderKey.between(prevStepForInsert?.orderKey, nextStepForInsert?.orderKey).toString(),
-				groupID: "full",
-				message: "",
-				nodeReveals: [],
-			});
-			RunCommand_AddTimelineStep(newStep);
-		};
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
@@ -223,10 +224,10 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 									{pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height)},
 									<>
 										<VMenuItem text="Add step (above)" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()} onClick={()=>{
-											addStep(index);
+											AddTimelineStep_Simple(timeline.id, steps, index);
 										}}/>
 										<VMenuItem text="Add step (below)" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()} onClick={()=>{
-											addStep(index + 1);
+											AddTimelineStep_Simple(timeline.id, steps, index + 1);
 										}}/>
 										<VMenuItem text="Clone" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()}
 											onClick={e=>{

@@ -13,6 +13,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {autorun} from "web-vcore/nm/mobx";
 import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
 import {zIndexes} from "Utils/UI/ZIndexes";
+import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers";
 import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./StepList/Editing/StepEditorUI";
 
 class ParseData {
@@ -83,7 +84,7 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 			ParseWavesurferData();
 		}
 		useEffect(()=>{
-			const dispose = autorun(()=>{
+			const dispose = AutoRun_HandleBail(()=>{
 				if (uiState.act_startPlayAtTimeX != -1) {
 					const targetTime = uiState.act_startPlayAtTimeX;
 					// avoid recursive loop, by performing action out of call-stack (and thus mobx autorun's observation)

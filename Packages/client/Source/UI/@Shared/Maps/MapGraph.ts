@@ -3,7 +3,7 @@ import {useMemo} from "react";
 import {Graph, KeyframeInfo} from "tree-grapher";
 import {GetMapState, GetPlayingTimeline, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineRevealNodes_All} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
-import {GetPercentFromXToY} from "js-vextensions";
+import {AssertWarn, GetPercentFromXToY} from "js-vextensions";
 import {CatchBail, CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
 import {comparer} from "web-vcore/nm/mobx";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants";
@@ -21,8 +21,10 @@ export class NodeDataForTreeGrapher {
 }
 
 const animation_transitionPeriod = .5;
-export const GetPercentThroughTransition = (lastKeyframe_time: number, nextKeyframe_time: number, currentTime: number|n)=>{
-	if (currentTime == null) return 0;
+export const GetPercentThroughTransition = (lastKeyframe_time: number|n, nextKeyframe_time: number|n, currentTime: number|n)=>{
+	//AssertWarn(lastKeyframe_time != null, "lastKeyframe_time must be non-null.");
+	//AssertWarn(nextKeyframe_time != null, "nextKeyframe_time must be non-null.");
+	if (lastKeyframe_time == null || nextKeyframe_time == null || currentTime == null) return null;
 	return GetPercentFromXToY(lastKeyframe_time.KeepAtLeast(nextKeyframe_time - animation_transitionPeriod), nextKeyframe_time, currentTime);
 };
 
@@ -46,14 +48,17 @@ export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: compar
 
 	const stepTimes = GetTimelineStepTimesFromStart(steps);
 	const stepsReached = GetTimelineStepsReachedByTimeX(timeline.id, currentTime);
-	const currentStep_time: number|n = stepTimes[stepsReached.length - 1];
-	const nextStep_time: number|n = stepTimes[stepsReached.length];
-	const stepsReachedAtNext = stepsReached.concat(steps[stepsReached.length]);
+	const currentStep_time: number|null = stepTimes[stepsReached.length - 1];
+	const nextStep_time: number|null = stepTimes[stepsReached.length];
+	const stepsReachedAtNext = stepsReached.length < steps.length ? stepsReached.concat(steps[stepsReached.length]) : stepsReached;
 
 	return {
 		mapID, map, mapState, timeline, steps,
 		//currentTime, // exclude current-time field; this is because we don't know how precisely the caller needs to know this, so we don't want the cache being unnecessarily invalidated all the time
-		stepTimes, currentStep_time, nextStep_time, stepsReached, stepsReachedAtNext,
+		stepTimes,
+		currentStep_time: nextStep_time as number|n, // needs to be redeclared as nullable fsr
+		nextStep_time: nextStep_time as number|n, // needs to be redeclared as nullable fsr
+		stepsReached, stepsReachedAtNext,
 	};
 });
 
@@ -69,7 +74,7 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 			//const finalKeyframe_time = stepTimes.Last();
 			const nodePathsVisibleAtNextKeyframe = [map.rootNode].concat(GetVisiblePathsAfterSteps(stepsReachedAtNext));
 			const layout = layoutHelperGraph!.GetLayout(undefined, group=>RevealPathsIncludesNode(nodePathsVisibleAtNextKeyframe, group.leftColumn_userData?.["nodePath"] as string))!;
-			const percentThroughTransition = GetPercentThroughTransition(currentStep_time, nextStep_time, currentTime);
+			const percentThroughTransition = GetPercentThroughTransition(currentStep_time, nextStep_time, currentTime) ?? 0;
 			return {layout, percentThroughTransition};
 		};
 		const mainGraph_getNextKeyframeInfo = ()=>CatchBail(null, mainGraph_getNextKeyframeInfo_base);

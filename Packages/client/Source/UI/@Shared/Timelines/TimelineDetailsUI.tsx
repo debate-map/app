@@ -50,6 +50,7 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 						} else {
 							newData.videoID = null;
 						}
+						Change();
 					}}/>
 					{newData.videoID != null &&
 					<>

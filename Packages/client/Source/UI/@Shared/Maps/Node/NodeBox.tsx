@@ -22,8 +22,9 @@ import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
-import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {autorun} from "mobx";
+import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
+import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -151,7 +152,7 @@ export class NodeBox extends BaseComponentPlus(
 		//const playingTimeline = map ? GetPlayingTimeline(map.id) : null;
 		UseEffect(()=>{
 			//if (playingTimeline == null) return;
-			const dispose = autorun(()=>{
+			const dispose = AutoRun_HandleBail(()=>{
 				const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
 				const timeSinceRevealedByTimeline_simplified = map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true) : null;
 				const timeSinceRevealedByTimeline_precise = ()=>(map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, false) : null);
