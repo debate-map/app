@@ -8,8 +8,8 @@ import {store} from "Store";
 import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {PositionOptionsEnum, StepEditorUI} from "../EditorSubpanel/StepEditorUI.js";
-import {NodeRevealUI} from "../EditorSubpanel/NodeRevealUI.js";
+import {PositionOptionsEnum, StepEditorUI} from "./Editing/StepEditorUI.js";
+import {NodeRevealUI} from "./Editing/NodeRevealUI.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(
@@ -35,7 +35,7 @@ export class StepUI extends BaseComponentPlus(
 		const mapState = GetMapState(map.id);
 		const editMode = mapState?.timelineEditMode ?? false;
 		const editorOpen_final = editorOpen || editMode;
-		const playbackActive = mapState?.timelinePlayback ?? false;
+		//const playbackActive = mapState?.timelinePlayback ?? false;
 
 		// atm, hide first step (when not edit-mode, and playback is enabled), since just intro message
 		//if (index == 0 && !editMode && playbackActive) return null;
@@ -68,7 +68,7 @@ export class StepUI extends BaseComponentPlus(
 									player.SetPosition(timeFromStart);
 									// this.SetState({ targetTime: step.videoTime, autoScroll: true });
 									// this.SetState({ autoScroll: true });
-									RunInAction("PlayingSubpanel.StepUI.jumpToStep", ()=>store.main.timelines.autoScroll = true);
+									RunInAction("StepList.StepUI.jumpToStep", ()=>store.main.timelines.autoScroll = true);
 								})();
 							}
 						}}

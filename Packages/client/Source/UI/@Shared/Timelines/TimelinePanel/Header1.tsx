@@ -13,7 +13,6 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {RecordDropdown} from "./PlayingSubpanel/RecordDropdown";
 
 @Observer
 export class Header1 extends BaseComponent<{map: Map}, {}> {
@@ -75,6 +74,7 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 						</Row>
 					</DropDownContent>
 				</DropDown>
+				<CheckBox ml={5} text="Details" value={mapState.showTimelineDetails} onChange={val=>RunInAction_Set(this, ()=>mapState.showTimelineDetails = val)}/>
 				{/*<Button ml="auto" text="Play" title="Start playing this timeline" enabled={selectedTimeline != null} style={{ flexShrink: 0 }} onClick={() => {
 					store.dispatch(new ACTMap_PlayingTimelineSet({ mapID: map.id, timelineID: selectedTimeline.id }));
 					store.dispatch(new ACTMap_PlayingTimelineStepSet({ mapID: map.id, stepIndex: 0 }));
@@ -82,11 +82,9 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 				}}/>*/}
 
 				<Row ml="auto" style={{position: "relative"}}>
-					<CheckBox text="Details" value={mapState.showTimelineDetails} onChange={val=>RunInAction_Set(this, ()=>mapState.showTimelineDetails = val)}/>
-					<CheckBox ml={5} text="Edit mode" value={mapState.timelineEditMode} onChange={val=>RunInAction_Set(this, ()=>mapState.timelineEditMode = val)}/>
+					<CheckBox text="Edit mode" value={mapState.timelineEditMode} onChange={val=>RunInAction_Set(this, ()=>mapState.timelineEditMode = val)}/>
 					<CheckBox ml={5} text="Audio mode" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps."
 						value={uiState.audioMode} onChange={val=>RunInAction_Set(this, ()=>uiState.audioMode = val)}/>
-					<RecordDropdown/>
 					<OptionsDropdown/>
 				</Row>
 			</Row>

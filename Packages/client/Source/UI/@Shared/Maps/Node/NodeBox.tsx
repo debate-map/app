@@ -22,7 +22,7 @@ import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
-import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/PlayingSubpanel/RecordDropdown.js";
+import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
 import {autorun} from "mobx";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";

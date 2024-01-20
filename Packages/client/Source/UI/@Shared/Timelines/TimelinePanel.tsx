@@ -8,8 +8,7 @@ import {IsUserCreatorOrMod, Map, MeID} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Header1} from "./TimelinePanel/Header1.js";
-import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel.js";
-import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel.js";
+import {StepList} from "./TimelinePanel/StepList.js";
 import {AudioPanel} from "./TimelinePanel/AudioPanel.js";
 import {TimelineDetailsEditor} from "./TimelineDetailsUI.js";
 
@@ -34,7 +33,7 @@ export class TimelinePanel extends BaseComponent<{map: Map}, {}> {
 						<TimelineDetailsEditor timeline={timeline} editing={creatorOrMod}/>
 					</div>}
 					{timeline != null &&
-					<PlayingSubpanel map={map} timeline={timeline}/>}
+					<StepList map={map} timeline={timeline}/>}
 				</Column>
 				{uiState.audioMode && timeline != null &&
 				<Column style={{position: "absolute", zIndex: zIndexes.draggable + 1, left: 600, right: 0, top: 0, bottom: 0, background: "rgba(100,100,100,1)"}}>

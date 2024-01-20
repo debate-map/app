@@ -15,8 +15,9 @@ import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GetOpenMapID} from "Store/main.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
-import {AudioFilePlayer} from "./PlayingSubpanel/AudioFilePlayer.js";
-import {StepUI} from "./PlayingSubpanel/StepUI.js";
+import {AudioFilePlayer} from "./StepList/AudioFilePlayer.js";
+import {StepUI} from "./StepList/StepUI.js";
+import {RecordDropdown} from "./StepList/RecordDropdown.js";
 
 // for use by react-beautiful-dnd (using text-replacement/node-modules-patching)
 G({LockMapEdgeScrolling});
@@ -27,12 +28,12 @@ function LockMapEdgeScrolling() {
 }
 
 class NoVideoPlayer {
-	constructor(comp: PlayingSubpanel) {
+	constructor(comp: StepList) {
 		makeObservable(this);
 		this.comp = comp;
 	}
 
-	comp: PlayingSubpanel;
+	comp: StepList;
 
 	@O speed = 1;
 	SetSpeed(speed: number) {
@@ -81,8 +82,8 @@ class NoVideoPlayer {
 }
 
 @Observer
-export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
-	static instance: PlayingSubpanel|n;
+export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
+	static instance: StepList|n;
 	constructor(props) {
 		super(props);
 		makeObservable(this);
@@ -117,7 +118,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 		const {map} = this.props;
 		const mapState = GetMapState(map.id);
 		if (mapState == null) return;
-		RunInAction("PlayingSubpanel.SetTargetTime", ()=>{
+		RunInAction("StepList.SetTargetTime", ()=>{
 			this.targetTime = newTargetTime;
 
 			// commented; for node/line animation to work, the global timeline-time field must be updated
@@ -220,7 +221,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 
 		const newListY = GetViewportRect(this.listRootEl).y;
 		if (this.listY != newListY) {
-			RunInAction("PlayingSubpanel_timer.setListY", ()=>this.listY = newListY);
+			RunInAction("StepList_timer.setListY", ()=>this.listY = newListY);
 		}
 
 		const mapState = GetMapState(map.id);
@@ -240,7 +241,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 				const newAppliedStepIndex = newCurrentStepIndex; // for now, have applied-step always match the current-step
 				if (newCurrentStepIndex != oldCurrentStepIndex) {
 					//console.log("Target-step changing @Old:", oldCurrentStepIndex, "@New:", newCurrentStepIndex, "@Time:", this.targetTime);
-					RunInAction("PlayingSubpanel_timer.setStepAndAppliedStep", ()=>{
+					RunInAction("StepList_timer.setStepAndAppliedStep", ()=>{
 						mapState.playingTimeline_step = newCurrentStepIndex;
 						mapState.playingTimeline_appliedStep = newAppliedStepIndex;
 
@@ -274,7 +275,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 		// this processing is here rather than in timer, because only this OnScroll function is told whether the scroll was user-initiated
 		const {map} = this.props;
 		if (this.targetTimeDirection != "right") {
-			RunInAction("PlayingSubpanel.OnScroll", ()=>store.main.timelines.autoScroll = false);
+			RunInAction("StepList.OnScroll", ()=>store.main.timelines.autoScroll = false);
 		}
 	};
 
@@ -295,13 +296,13 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 		// this.Stash({ messageAreaHeight });
 		// todo: make sure this is correct
 		useEffect(()=>{
-			RunInAction("PlayingSubpanel.render.useEffect", ()=>this.messageAreaHeight = messageAreaHeight ?? 0); // set for other observers
+			RunInAction("StepList.render.useEffect", ()=>this.messageAreaHeight = messageAreaHeight ?? 0); // set for other observers
 		});
 
 		useEffect(()=>{
-			PlayingSubpanel.instance = this;
+			StepList.instance = this;
 			return ()=>{
-				if (PlayingSubpanel.instance == this) PlayingSubpanel.instance = null;
+				if (StepList.instance == this) StepList.instance = null;
 			};
 		});
 
@@ -314,8 +315,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 				// when component is unmounted...
 				// stop the non-component-based timers/players
 				this.noVideoPlayer.SetPlaying(false);
-				// store the exact timeline playing-time (so it can be restored exactly to PlayingSubpanel.targetTime when component is re-mounted)
-				RunInAction("PlayingSubpanel.onUnmount", ()=>mapState.playingTimeline_time = this.targetTime);
+				// store the exact timeline playing-time (so it can be restored exactly to StepList.targetTime when component is re-mounted)
+				RunInAction("StepList.onUnmount", ()=>mapState.playingTimeline_time = this.targetTime);
 			};
 		}, ["depToEnsureEffectRunsOnFirstNonBailedRender"]); // eslint-disable-line
 
@@ -343,7 +344,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 				{timeline.videoID == null && <div ref={c=>{
 					// if no video is attached, use this empty div as an alternative route to setting the targetTime field
 					if (c && this.targetTime == null) {
-						RunInAction("PlayingSubpanel.targetTimeInitializer.onAttach", ()=>this.targetTime = mapState.playingTimeline_time ?? 0);
+						RunInAction("StepList.targetTimeInitializer.onAttach", ()=>this.targetTime = mapState.playingTimeline_time ?? 0);
 					}
 				}}/>}
 				{timeline.videoID &&
@@ -363,19 +364,21 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 						playSpeedGetter={()=>this.noVideoPlayer.speed} isPlayingGetter={()=>this.noVideoPlayer.playing} timeGetter={()=>this.targetTime}/>;
 				})}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
-					<Row>
-						<CheckBox text="Playback:" value={mapState.timelinePlayback} onChange={val=>RunInAction_Set(this, ()=>mapState.timelinePlayback = val)}/>
-						<Button ml={5} mdIcon={this.noVideoPlayer.playing ? "pause" : "play"} size={30} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>
-						<Spinner style={{width: 45}} instant={true} min={0} max={10} step={.1} value={this.noVideoPlayer.speed} onChange={val=>this.noVideoPlayer.SetSpeed(val)}/>
-						<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} value={this.targetTime ?? 0} onChange={val=>{
-							this.SetTargetTime(val, "setPosition");
-						}}/>
-						<TextPlus ml={3} info="With mouse over button, mouse scroll-wheel moves forward/backward by X frames.">Seek:</TextPlus>
-						<Button text="±1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(1)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 1)}/>
-						<Button text="±5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 5)}/>
-						<Button text="±20" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(20)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 20)}/>
-						<Button text="±60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 60)}/>
-						<Button text="±600" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(600)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 600)}/>
+					<CheckBox text="Playback:" value={mapState.timelinePlayback} onChange={val=>RunInAction_Set(this, ()=>mapState.timelinePlayback = val)}/>
+					<Button ml={5} mdIcon={this.noVideoPlayer.playing ? "pause" : "play"} size={30} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>
+					<Spinner style={{width: 45}} instant={true} min={0} max={10} step={.1} value={this.noVideoPlayer.speed} onChange={val=>this.noVideoPlayer.SetSpeed(val)}/>
+					<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} value={this.targetTime ?? 0} onChange={val=>{
+						this.SetTargetTime(val, "setPosition");
+					}}/>
+					<TextPlus ml={3} info="With mouse over button, mouse scroll-wheel moves forward/backward by X frames.">Seek:</TextPlus>
+					<Button text="±1" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(1)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 1)}/>
+					<Button text="±5" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(5)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 5)}/>
+					<Button text="±20" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(20)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 20)}/>
+					<Button text="±60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 60)}/>
+					<Button text="±600" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(600)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 600)}/>
+
+					<Row ml="auto" style={{position: "relative"}}>
+						<RecordDropdown/>
 					</Row>
 				</Row>
 				<Row ref={c=>c && c.DOM && messageAreaRef(c.DOM)} style={{flex: 1, minHeight: 0}}>
@@ -399,7 +402,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline
 								}
 
 								const newAutoScroll = !store.main.timelines.autoScroll;
-								RunInAction("PlayingSubpanel.targetArrow.onClick", ()=>store.main.timelines.autoScroll = newAutoScroll);
+								RunInAction("StepList.targetArrow.onClick", ()=>store.main.timelines.autoScroll = newAutoScroll);
 							}, [targetStepIndex])}/>
 					</Column>
 					<ScrollView className="brightScrollBars" style={ES({flex: 1})}

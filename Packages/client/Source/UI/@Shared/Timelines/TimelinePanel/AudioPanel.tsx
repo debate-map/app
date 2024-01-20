@@ -13,7 +13,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {autorun} from "web-vcore/nm/mobx";
 import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./EditorSubpanel/StepEditorUI";
+import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./StepList/Editing/StepEditorUI";
 
 class ParseData {
 	audioData?: ParseData_Audio;

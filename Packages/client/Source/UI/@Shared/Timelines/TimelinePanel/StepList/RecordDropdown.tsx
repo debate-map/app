@@ -10,7 +10,7 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
-import {PlayingSubpanel} from "../PlayingSubpanel.js";
+import {StepList} from "../StepList.js";
 
 @Observer
 export class RecordDropdown extends BaseComponent<{}, {}> {
@@ -18,7 +18,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		const uiState = store.main.timelines.recordPanel;
 		return (
 			<DropDown>
-				<DropDownTrigger><Button ml={5} text="Record" style={{height: "100%"}}/></DropDownTrigger>
+				<DropDownTrigger><Button text="Record" style={{height: "100%"}}/></DropDownTrigger>
 				<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
 					<Row>
 						<Text style={{whiteSpace: "pre-wrap"}}>{`
@@ -115,7 +115,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 				return void this.StopRecording();
 			}
 
-			PlayingSubpanel.instance?.AdjustTargetTimeByFrames(1);
+			StepList.instance?.AdjustTargetTimeByFrames(1);
 		}
 	}
 
