@@ -1,5 +1,5 @@
 import {store} from "Store";
-import {GetMapState, GetSelectedTimeline, GetTimelineOpenSubpanel} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel";
 import {GetTalkTimeSummaryAtTimeX, GetTimelineSteps, Map} from "dm_common";
 import {Observer} from "web-vcore";

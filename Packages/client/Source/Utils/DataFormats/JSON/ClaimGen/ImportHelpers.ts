@@ -51,11 +51,10 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		type: nodeType,
 		//c_currentRevision: revID, // not needed; connected by server
 		accessPolicy: context.nodeAccessPolicyID,
-		// todo: get this included in the new node! (probably update backend to accept the "extras" field as part of initial node-creation -- perhaps by calling update-node internally to set it, within the same transaction)
-		/*extras: {
+		extras: {
 			// this isn't really needed (claim-gen's ids are currently transient), but might as well keep it
 			externalId: `claimgen:${data.id}`,
-		},*/
+		},
 	});
 
 	let orderKey = OrderKey.mid();

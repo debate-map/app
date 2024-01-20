@@ -12,13 +12,13 @@ use tracing::info;
 
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::timeline_steps::{TimelineStep, TimelineStepInput};
+use crate::db::timeline_steps::{TimelineStep, TimelineStepInput, timeline_step_extras_locked_subfields};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, update_field_of_extras, init_field_of_extras};
 
 wrap_slow_macros!{
 
@@ -58,8 +58,8 @@ pub async fn add_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		timeUntilNextStep: step_.timeUntilNextStep,
 		message: step_.message,
 		nodeReveals: step_.nodeReveals,
+        extras: init_field_of_extras(step_.extras, json!({}), timeline_step_extras_locked_subfields())?, // "extras" fields use special handling
 		c_accessPolicyTargets: vec![], // auto-set by db
-		extras: json!({}),
 	};
 
 	upsert_db_entry_by_id_for_struct(&ctx, "timelineSteps".to_owned(), timeline_step.id.to_string(), timeline_step.clone()).await?;

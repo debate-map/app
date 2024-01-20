@@ -7,6 +7,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
 import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {PositionOptionsEnum, StepEditorUI} from "../EditorSubpanel/StepEditorUI.js";
 import {NodeRevealUI} from "../EditorSubpanel/NodeRevealUI.js";
 
@@ -31,6 +32,14 @@ export class StepUI extends BaseComponentPlus(
 		const {showNodeReveals, editorOpen} = this.state;
 		const timeFromStart = GetTimelineStepTimeFromStart(step);
 
+		const mapState = GetMapState(map.id);
+		const editMode = mapState?.timelineEditMode ?? false;
+		const editorOpen_final = editorOpen || editMode;
+		const playbackActive = mapState?.timelinePlayback ?? false;
+
+		// atm, hide first step (when not edit-mode, and playback is enabled), since just intro message
+		//if (index == 0 && !editMode && playbackActive) return null;
+
 		let margin: string|undefined;
 		if (step.groupID == PositionOptionsEnum.center) margin = "0 30px";
 		if (step.groupID == PositionOptionsEnum.left) margin = "0 50px 0 0";
@@ -39,6 +48,7 @@ export class StepUI extends BaseComponentPlus(
 		return (
 			// wrapper needed to emulate margin-top (since react-list doesn't support margins)
 			<div style={{paddingTop: index == 0 ? 0 : 7}}>
+				{!editMode &&
 				<Column /* mt={index == 0 ? 0 : 7} */ m={margin}
 					style={E(
 						{background: liveSkin.BasePanelBackgroundColor().css(), borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"},
@@ -106,9 +116,9 @@ export class StepUI extends BaseComponentPlus(
 								this.SetState({editorOpen: !editorOpen});
 							}}/>
 					</VMenuStub>}
-				</Column>
-				{editorOpen &&
-					<StepEditorUI index={index} map={map} timeline={timeline} step={step} nextStep={nextStep} draggable={false}/>}
+				</Column>}
+				{editorOpen_final &&
+					<StepEditorUI index={index} map={map} timeline={timeline} step={step} nextStep={nextStep} draggable={editMode}/>}
 			</div>
 		);
 	}

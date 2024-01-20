@@ -3,7 +3,7 @@ import {O} from "web-vcore";
 import {AccessorCallPlan, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetVisiblePathsAfterSteps, GetMap, Timeline, GetVisiblePathRevealTimesInSteps, GetTimelineStep, GetTimelineSteps, GetTimeline, TimelineStep} from "dm_common";
 import {store} from "Store/index.js";
-import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
+import {ShowChangesSinceType} from "./@MapState.js";
 
 export const GetMapState = CreateAccessor({ctx: 1}, function(mapID: string|n) {
 	return this.store.main.maps.mapStates.get(mapID!); // nn: get() actually accepts undefined
@@ -24,8 +24,8 @@ export const GetMap_List_SelectedNode_OpenPanel = CreateAccessor({ctx: 1}, funct
 export const GetTimelinePanelOpen = CreateAccessor({ctx: 1}, function(mapID: string): boolean {
 	return this.store.main.maps.mapStates.get(mapID)?.timelinePanelOpen ?? false;
 });
-export const GetTimelineOpenSubpanel = CreateAccessor({ctx: 1}, function(mapID: string) {
-	return this.store.main.maps.mapStates.get(mapID)?.timelineOpenSubpanel;
+export const GetTimelineInEditMode = CreateAccessor({ctx: 1}, function(mapID: string) {
+	return this.store.main.maps.mapStates.get(mapID)?.timelineEditMode;
 });
 export const GetShowTimelineDetails = CreateAccessor({ctx: 1}, function(mapID: string): boolean {
 	return this.store.main.maps.mapStates.get(mapID)?.showTimelineDetails ?? false;
@@ -43,7 +43,7 @@ export const GetPlayingTimeline = CreateAccessor((mapID: string): Timeline|n=>{
 	if (mapID == null) return null;
 	const mapState = GetMapState(mapID);
 	if (mapState == null) return null;
-	if (!mapState.timelinePanelOpen || mapState.timelineOpenSubpanel != TimelineSubpanel.playing) return null;
+	if (!mapState.timelinePanelOpen || !mapState.timelinePlayback) return null;
 	const timelineID = mapState.selectedTimeline;
 	return GetTimeline(timelineID);
 });

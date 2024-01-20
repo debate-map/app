@@ -8,11 +8,6 @@ export enum SortType {
 	//updateDate: 1,
 	//viewerCount: 1,
 }
-export enum TimelineSubpanel {
-	collection = "collection",
-	editor = "editor",
-	playing = "playing",
-}
 
 export enum ShowChangesSinceType {
 	none = "none",
@@ -33,7 +28,8 @@ export class MapState {
 	@O list_selectedNode_openPanel: string|n;
 
 	@O timelinePanelOpen = false;
-	@O timelineOpenSubpanel = TimelineSubpanel.collection;
+	@O timelineEditMode = false;
+	@O timelinePlayback = false;
 	@O showTimelineDetails = false;
 	@O selectedTimeline: string|n;
 

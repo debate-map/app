@@ -1,11 +1,13 @@
 import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Pre, Row, RowLR, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput, TimeSpanInput, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {GetUpdates} from "web-vcore";
+import {GetUpdates, InfoButton} from "web-vcore";
 import {Timeline} from "dm_common";
 import React from "react";
 import {RunCommand_UpdateTimeline} from "Utils/DB/Command";
 import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
+import {liveSkin} from "Utils/Styles/SkinManager";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI";
 
 export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {
@@ -40,6 +42,37 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 						{text=><Button enabled={enabled} text={text} style={{width: "100%"}}/>}
 					</PolicyPicker>
 				</RowLR>
+				{!forNew &&
+				<Row mt={5} center>
+					<CheckBox text="Video:" enabled={enabled} value={newData.videoID != null} onChange={val=>{
+						if (val) {
+							newData.videoID = "";
+						} else {
+							newData.videoID = null;
+						}
+					}}/>
+					{newData.videoID != null &&
+					<>
+						<Pre ml={10}>ID (yt):</Pre>
+						<TextInput ml={5} enabled={enabled} value={newData.videoID} onChange={val=>Change(newData.videoID = val)}/>
+						<CheckBox ml={5} text="Start: " enabled={enabled} value={newData.videoStartTime != null} onChange={val=>Change(newData.videoStartTime = val ? 0 : null)}/>
+						<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}} enabled={enabled && newData.videoStartTime != null}
+							value={newData.videoStartTime ?? 0} onChange={val=>Change(newData.videoStartTime = val)}/>
+						<Row center>
+							<Text>Height</Text>
+							<InfoButton text={`
+								The height, as a percentage of the width.
+
+								4:3 = 75%
+								16:9 = 56.25%
+							`.AsMultiline(0)}/>
+							<Text>: </Text>
+						</Row>
+						<Spinner min={0} max={100} step={0.01} style={{width: 62}} enabled={enabled}
+							value={((newData.videoHeightVSWidthPercent ?? 0) * 100).RoundTo(0.01)} onChange={val=>Change(newData.videoHeightVSWidthPercent = (val / 100).RoundTo(0.0001))}/>
+						<Pre>%</Pre>
+					</>}
+				</Row>}
 			</Column>
 		);
 	}

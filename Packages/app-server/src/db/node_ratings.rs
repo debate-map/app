@@ -133,6 +133,7 @@ pub struct NodeRating {
     pub node: String,
     pub r#type: NodeRatingType,
 	pub value: f64,
+    
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }

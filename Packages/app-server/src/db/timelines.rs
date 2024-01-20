@@ -13,7 +13,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::_shared::attachments::Attachment;
-use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
+use super::commands::_command::{CanOmit, CanNullOrOmit};
 use super::{node_revisions::{get_node_revision}};
 
 pub async fn get_timeline(ctx: &AccessorContext<'_>, id: &str) -> Result<Timeline, Error> {
@@ -58,16 +58,16 @@ pub struct TimelineInput {
 	pub videoID: Option<String>,
 	pub videoStartTime: Option<f64>,
     pub videoHeightVSWidthPercent: Option<f64>,
-	//pub extras: JSONValue, // to set this, use updateNode command instead (this consolidates/simplifies the subfield-sensitive validation code)
+	//pub extras: JSONValue,
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct TimelineUpdates {
-    pub accessPolicy: FieldUpdate<String>,
-    pub name: FieldUpdate<String>,
-    pub videoID: FieldUpdate_Nullable<String>,
-    pub videoStartTime: FieldUpdate_Nullable<f64>,
-    pub videoHeightVSWidthPercent: FieldUpdate_Nullable<f64>,
+    pub accessPolicy: CanOmit<String>,
+    pub name: CanOmit<String>,
+    pub videoID: CanNullOrOmit<String>,
+    pub videoStartTime: CanNullOrOmit<f64>,
+    pub videoHeightVSWidthPercent: CanNullOrOmit<f64>,
 	//pub extras: FieldUpdate<JSONValue>,
 }
 

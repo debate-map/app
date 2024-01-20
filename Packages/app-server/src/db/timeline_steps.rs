@@ -17,7 +17,7 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::_shared::attachments::Attachment;
-use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
+use super::commands::_command::{CanOmit, CanNullOrOmit};
 use super::{node_revisions::{get_node_revision}};
 
 pub async fn get_timeline_step(ctx: &AccessorContext<'_>, id: &str) -> Result<TimelineStep, Error> {
@@ -42,27 +42,6 @@ pub enum TimelineStepGroup {
     #[graphql(name = "center")] center,
 }*/
 
-#[derive(SimpleObject, Clone, Serialize, Deserialize)]
-pub struct TimelineStep {
-    pub id: ID,
-	pub creator: String,
-	pub createdAt: i64,
-    pub timelineID: String,
-    pub orderKey: OrderKey,
-	pub groupID: String,
-    pub timeFromStart: Option<f64>,
-    pub timeFromLastStep: Option<f64>,
-    pub timeUntilNextStep: Option<f64>,
-	pub message: String,
-    pub nodeReveals: Vec<NodeReveal>,
-    #[graphql(name = "c_accessPolicyTargets")]
-    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
-	pub extras: JSONValue,
-}
-impl From<Row> for TimelineStep {
-    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
-}
-
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "NodeRevealInput")]
 pub struct NodeReveal {
@@ -76,7 +55,29 @@ pub struct NodeReveal {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct TimelineStep_Extras {
+pub struct TimelineStep_Extras {}
+pub fn timeline_step_extras_locked_subfields() -> Vec<&'static str> { vec![] }
+
+#[derive(SimpleObject, Clone, Serialize, Deserialize)]
+pub struct TimelineStep {
+    pub id: ID,
+	pub creator: String,
+	pub createdAt: i64,
+    pub timelineID: String,
+    pub orderKey: OrderKey,
+	pub groupID: String,
+    pub timeFromStart: Option<f64>,
+    pub timeFromLastStep: Option<f64>,
+    pub timeUntilNextStep: Option<f64>,
+	pub message: String,
+    pub nodeReveals: Vec<NodeReveal>,
+	pub extras: JSONValue,
+    
+    #[graphql(name = "c_accessPolicyTargets")]
+    pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
+}
+impl From<Row> for TimelineStep {
+    fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]
@@ -89,19 +90,19 @@ pub struct TimelineStepInput {
     pub timeUntilNextStep: Option<f64>,
 	pub message: String,
 	pub nodeReveals: Vec<NodeReveal>,
-	//pub extras: JSONValue, // to set this, use updateTimelineStep command instead (this consolidates/simplifies the subfield-sensitive validation code)
+	pub extras: CanOmit<JSONValue>,
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct TimelineStepUpdates {
-    pub orderKey: FieldUpdate<OrderKey>,
-    pub groupID: FieldUpdate<String>,
-	pub timeFromStart: FieldUpdate_Nullable<f64>,
-	pub timeFromLastStep: FieldUpdate_Nullable<f64>,
-	pub timeUntilNextStep: FieldUpdate_Nullable<f64>,
-	pub message: FieldUpdate<String>,
-	pub nodeReveals: FieldUpdate<Vec<NodeReveal>>,
-	pub extras: FieldUpdate<JSONValue>,
+    pub orderKey: CanOmit<OrderKey>,
+    pub groupID: CanOmit<String>,
+	pub timeFromStart: CanNullOrOmit<f64>,
+	pub timeFromLastStep: CanNullOrOmit<f64>,
+	pub timeUntilNextStep: CanNullOrOmit<f64>,
+	pub message: CanOmit<String>,
+	pub nodeReveals: CanOmit<Vec<NodeReveal>>,
+	pub extras: CanOmit<JSONValue>,
 }
 
 #[derive(Clone)] pub struct GQLSet_TimelineStep { pub nodes: Vec<TimelineStep> }

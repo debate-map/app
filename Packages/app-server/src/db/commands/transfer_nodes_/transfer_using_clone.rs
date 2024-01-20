@@ -17,7 +17,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use tracing::info;
 
 use crate::db::_shared::path_finder::search_up_from_node_for_node_matching_x;
-use crate::db::commands::_command::command_boilerplate;
+use crate::db::commands::_command::{command_boilerplate, CanOmit};
 use crate::db::commands::add_node_link::{AddNodeLinkInput, add_node_link};
 use crate::db::commands::add_node_tag::{add_node_tag, AddNodeTagInput};
 use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
@@ -68,6 +68,8 @@ pub async fn transfer_using_clone(ctx: &AccessorContext<'_>, actor: &User, trans
         rootNodeForMap: node.rootNodeForMap,
         multiPremiseArgument: node.multiPremiseArgument,
         argumentType: node.argumentType,
+        //extras: json!({}),
+        extras: CanOmit::None,
     };
 
     let rev = get_node_revision(ctx, &node.c_currentRevision).await?;

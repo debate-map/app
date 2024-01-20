@@ -34,6 +34,7 @@ pub struct MapNodeEdit {
 	pub node: String,
 	pub time: i64,
 	pub r#type: ChangeType,
+    
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }

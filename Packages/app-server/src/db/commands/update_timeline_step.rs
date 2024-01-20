@@ -14,7 +14,7 @@ use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
 use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_modify};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
-use crate::db::timeline_steps::{TimelineStep, TimelineStepInput, get_timeline_step, TimelineStepUpdates};
+use crate::db::timeline_steps::{TimelineStep, TimelineStepInput, get_timeline_step, TimelineStepUpdates, timeline_step_extras_locked_subfields};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -57,7 +57,7 @@ pub async fn update_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_r
 		timeUntilNextStep: update_field_nullable(updates.timeUntilNextStep, old_data.timeUntilNextStep),
 		message: update_field(updates.message, old_data.message),
 		nodeReveals: update_field(updates.nodeReveals, old_data.nodeReveals),
-		extras: update_field_of_extras(updates.extras, old_data.extras, vec![])?,
+		extras: update_field_of_extras(updates.extras, old_data.extras, timeline_step_extras_locked_subfields())?,
 		..old_data
 	};
 

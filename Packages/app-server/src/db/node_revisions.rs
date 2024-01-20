@@ -45,6 +45,7 @@ pub struct NodeRevision {
     pub phrasing_tsvector: String,*/
     pub displayDetails: Option<JSONValue>,
     pub attachments: Vec<Attachment>,
+    
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }

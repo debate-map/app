@@ -189,16 +189,58 @@ pub fn gql_placeholder() -> String {
     "Do not request this field; it's here transiently merely to satisfy graphql (see: https://github.com/graphql/graphql-spec/issues/568). Instead, request the hidden \"__typename\" field, as that will always exist.".to_owned()
 }
 
+/*pub type FieldInit<T> = T;
+pub type FieldInit_Nullable<T> = Option<T>;
+pub type FieldInit_Omittable<T> = Option<T>;
+pub type FieldInit_Nullable_Omittable<T> = MaybeUndefined<T>;
 pub type FieldUpdate<T> = Option<T>;
-pub type FieldUpdate_Nullable<T> = MaybeUndefined<T>;
+pub type FieldUpdate_Nullable<T> = MaybeUndefined<T>;*/
 
-pub fn update_field<T>(val_in_updates: FieldUpdate<T>, old_val: T) -> T {
+// todo: probably rename the "XXXInput" structs to "XXXInit"
+
+/// Under the hood, identical to `MaybeUndefined<T>`. However, this type-alias makes the name of the enum (which comes from async_graphql) more consistent with our custom `CanOmit`.
+///     (it also provides hoverable doc-text to explain the use-cases for db-struct fields)  
+/// * If field is not-nullable, and field-set is required during init: Use `T` in base-struct, `T` in init-struct, and `CanOmit<T>` in update-struct.  
+/// * If field is not-nullable, and field-set is optional during init: Use `T` in base-struct, `CanOmit<T>` in init-struct, and `CanOmit<T>` in update-struct.  
+/// * If field is nullable, and its default value at init (ie. if left unspecified) is null: Use `Option<T>` in base-struct, `Option<T>` in init-struct, and `CanNullOrOmit<T>` in update-struct.  
+/// * If field is nullable, and its default value at init (ie. if left unspecified) is non-null: Use `Option<T>` in base-struct, `CanNullOrOmit<T>` in init-struct, and `CanNullOrOmit<T>` in update-struct.  
+pub type CanOmit<T> = Option<T>;
+
+/// Under the hood, identical to `MaybeUndefined<T>`. However, this type-alias makes the name of the enum (which comes from async_graphql) more consistent with our custom `CanOmit`.
+///     (it also provides hoverable doc-text to explain the use-cases for db-struct fields)  
+/// * If field is not-nullable, and field-set is required during init: Use `T` in base-struct, `T` in init-struct, and `CanOmit<T>` in update-struct.  
+/// * If field is not-nullable, and field-set is optional during init: Use `T` in base-struct, `CanOmit<T>` in init-struct, and `CanOmit<T>` in update-struct.  
+/// * If field is nullable, and its default value at init (ie. if left unspecified) is null: Use `Option<T>` in base-struct, `Option<T>` in init-struct, and `CanNullOrOmit<T>` in update-struct.  
+/// * If field is nullable, and its default value at init (ie. if left unspecified) is non-null: Use `Option<T>` in base-struct, `CanNullOrOmit<T>` in init-struct, and `CanNullOrOmit<T>` in update-struct.  
+pub type CanNullOrOmit<T> = MaybeUndefined<T>;
+
+// init helpers
+// ==========
+
+/*pub fn init_field_omittable<T>(val_in_init: CanOmit<T>, default_val: T) -> T {
+    match val_in_init {
+        None => default_val,
+        Some(val) => val,
+    }
+}*/
+
+pub fn init_field_of_extras(val_in_init: CanOmit<JSONValue>, start_val: JSONValue, locked_subfields: Vec<&str>) -> Result<JSONValue, Error> {
+    // atm, the checks work the same in both cases
+    update_field_of_extras(val_in_init, start_val, locked_subfields)
+}
+
+// update helpers
+// ==========
+
+/// Always use this to update non-nullable fields within "update_xxx" command-functions. (exception: a struct's `extras` field, which should use `update_field_of_extras`)
+pub fn update_field<T>(val_in_updates: CanOmit<T>, old_val: T) -> T {
     match val_in_updates {
         None => old_val,
         Some(val) => val,
     }
 }
-pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val: Option<T>) -> Option<T> {
+/// Always use this to update nullable fields within "update_xxx" command-functions. (exception: a struct's `extras` field, which should use `update_field_of_extras`)
+pub fn update_field_nullable<T>(val_in_updates: CanNullOrOmit<T>, old_val: Option<T>) -> Option<T> {
     match val_in_updates {
         MaybeUndefined::Undefined => old_val,
         MaybeUndefined::Null => None,
@@ -207,7 +249,7 @@ pub fn update_field_nullable<T>(val_in_updates: FieldUpdate_Nullable<T>, old_val
 }
 
 /// Variant of `update_field` for use with the `extras` field of db-structs, allowing easy updating of its data through the standard `update_x` commands, while preserving locked subfields.
-pub fn update_field_of_extras(val_in_updates: FieldUpdate<JSONValue>, old_val: JSONValue, locked_subfields: Vec<&str>) -> Result<JSONValue, Error> {
+pub fn update_field_of_extras(val_in_updates: CanOmit<JSONValue>, old_val: JSONValue, locked_subfields: Vec<&str>) -> Result<JSONValue, Error> {
     let mut result = match val_in_updates {
         None => old_val.clone(),
         Some(val) => val,
@@ -233,6 +275,9 @@ pub fn update_field_of_extras(val_in_updates: FieldUpdate<JSONValue>, old_val: J
 
     Ok(result)
 }
+
+// others
+// ==========
 
 // Usage example: `command_boilerplate!(gql_ctx, input, only_validate, delete_map);`
 // Note: I've tried creating two variants of this (a pair of pre and post macros, and a regular function); if wanted for reference, view git history.

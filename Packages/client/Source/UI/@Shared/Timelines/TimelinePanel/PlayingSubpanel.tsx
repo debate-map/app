@@ -1,25 +1,30 @@
-import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn, emptyArray, ea} from "web-vcore/nm/js-vextensions.js";
-import {computed, makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
-import React, {useEffect} from "react";
-import ReactList from "react-list";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
-import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource, RunInAction, ES, RunInAction_Set, TextPlus, O} from "web-vcore";
-import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStep, GetTimelineSteps, GetTimelineStepTimeFromStart, Map, TimelineStep} from "dm_common";
-import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/AudioMeta.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
-import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
-import WaveSurfer from "wavesurfer.js";
-import {CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
-import {OPFS_Map} from "Utils/OPFS/OPFS_Map.js";
-import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/AudioMeta.js";
-import {RecordDropdown} from "./PlayingSubpanel/RecordDropdown.js";
-import {StepUI} from "./PlayingSubpanel/StepUI.js";
+import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import React, {useEffect} from "react";
+import ReactList from "react-list";
+import {ES, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
+import {GetPercentFromXToY, Lerp, Timer, Vector2, WaitXThenRun, ea} from "web-vcore/nm/js-vextensions.js";
+import {computed, makeObservable, observable} from "web-vcore/nm/mobx.js";
+import {Button, CheckBox, Column, Row, Spinner, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
+import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {GetOpenMapID} from "Store/main.js";
+import {DroppableInfo} from "Utils/UI/DNDStructures.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {AudioFilePlayer} from "./PlayingSubpanel/AudioFilePlayer.js";
+import {StepUI} from "./PlayingSubpanel/StepUI.js";
+
+// for use by react-beautiful-dnd (using text-replacement/node-modules-patching)
+G({LockMapEdgeScrolling});
+function LockMapEdgeScrolling() {
+	const mapID = GetOpenMapID();
+	if (mapID == null) return;
+	return store.main.maps.lockMapScrolling && GetTimelinePanelOpen(mapID) && GetTimelineInEditMode(mapID);
+}
 
 class NoVideoPlayer {
 	constructor(comp: PlayingSubpanel) {
@@ -76,7 +81,8 @@ class NoVideoPlayer {
 }
 
 @Observer
-export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageAreaHeight: number }> {
+export class PlayingSubpanel extends BaseComponent<{map: Map, timeline: Timeline}, {}, {/*messageAreaHeight: number,*/ steps: TimelineStep[], creatorOrMod: boolean}> {
+	static instance: PlayingSubpanel|n;
 	constructor(props) {
 		super(props);
 		makeObservable(this);
@@ -274,20 +280,29 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 
 	list: ReactList;
 	render() {
-		const {map} = this.props;
+		const {map, timeline} = this.props;
 		const mapState = GetMapState(map.id);
 		if (mapState == null) return null;
-		const timeline = GetSelectedTimeline(map.id);
 		const steps = timeline ? GetTimelineSteps(timeline.id) : ea;
 		const targetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
 
 		const audioFiles = timeline ? GetAudioFilesActiveForTimeline(map.id, timeline.id) : [];
+
+		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
+		this.Stash({steps, creatorOrMod});
 
 		const [messageAreaRef, {height: messageAreaHeight}] = UseSize(); // todo: maybe switch this to use `useResizeObserver()`, so reacts to [css/window]-only height changes
 		// this.Stash({ messageAreaHeight });
 		// todo: make sure this is correct
 		useEffect(()=>{
 			RunInAction("PlayingSubpanel.render.useEffect", ()=>this.messageAreaHeight = messageAreaHeight ?? 0); // set for other observers
+		});
+
+		useEffect(()=>{
+			PlayingSubpanel.instance = this;
+			return ()=>{
+				if (PlayingSubpanel.instance == this) PlayingSubpanel.instance = null;
+			};
 		});
 
 		// update some stuff based on timer (since user may have scrolled)
@@ -303,6 +318,23 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 				RunInAction("PlayingSubpanel.onUnmount", ()=>mapState.playingTimeline_time = this.targetTime);
 			};
 		}, ["depToEnsureEffectRunsOnFirstNonBailedRender"]); // eslint-disable-line
+
+		const droppableInfo = new DroppableInfo({type: "TimelineStepList", timelineID: timeline ? timeline.id : null});
+
+		const reactList = ()=>{
+			//return timelineSteps && timelineSteps.map((step, index) => <StepUI key={index} index={index} last={index == timeline.steps.length - 1} map={map} timeline={timeline} step={step}/>)
+			return <ReactList type='variable' length={steps?.length ?? 0}
+				ref={UseCallback(c=>{
+					this.list = c;
+					if (c) {
+						this.listRootEl = GetDOM(c) as any;
+					}
+				}, [])}
+				initialIndex={targetStepIndex ?? 0}
+				// pageSize={20} threshold={300}
+				itemSizeEstimator={this.EstimateStepHeight}
+				itemRenderer={this.RenderStep}/>;
+		};
 
 		// todo: make-so the UseCallbacks below can't break from this early-return changing the hook-count (atm, not triggering since timeline is always ready when this comp renders)
 		if (timeline == null) return null;
@@ -332,7 +364,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 				})}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>
 					<Row>
-						<Button text={this.noVideoPlayer.playing ? "⏸" : "▶"} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>
+						<CheckBox text="Playback:" value={mapState.timelinePlayback} onChange={val=>RunInAction_Set(this, ()=>mapState.timelinePlayback = val)}/>
+						<Button ml={5} mdIcon={this.noVideoPlayer.playing ? "pause" : "play"} size={30} onClick={()=>this.noVideoPlayer.SetPlaying(!this.noVideoPlayer.playing)}/>
 						<Spinner style={{width: 45}} instant={true} min={0} max={10} step={.1} value={this.noVideoPlayer.speed} onChange={val=>this.noVideoPlayer.SetSpeed(val)}/>
 						<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} value={this.targetTime ?? 0} onChange={val=>{
 							this.SetTargetTime(val, "setPosition");
@@ -343,10 +376,6 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						<Button text="±20" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(20)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 20)}/>
 						<Button text="±60" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(60)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 60)}/>
 						<Button text="±600" ml={3} p={5} onClick={()=>this.AdjustTargetTimeByFrames(600)} onWheel={e=>this.AdjustTargetTimeByFrames(Math.sign(e.deltaY) * 600)}/>
-					</Row>
-					<Row ml="auto" style={{position: "relative"}}>
-						<RecordDropdown playingSubpanel={this}/>
-						<OptionsDropdown/>
 					</Row>
 				</Row>
 				<Row ref={c=>c && c.DOM && messageAreaRef(c.DOM)} style={{flex: 1, minHeight: 0}}>
@@ -382,64 +411,42 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 						scrollVBarStyle={{width: 7}} // width:7 to match with container padding
 						onScroll={this.OnScroll}
 					>
-						{/* timelineSteps && timelineSteps.map((step, index) => <StepUI key={index} index={index} last={index == timeline.steps.length - 1} map={map} timeline={timeline} step={step}/>) */}
-						<ReactList type='variable' length={steps?.length ?? 0}
-							ref={UseCallback(c=>{
-								this.list = c;
-								if (c) {
-									this.listRootEl = GetDOM(c) as any;
-								}
-							}, [])}
-							initialIndex={targetStepIndex ?? 0}
-							// pageSize={20} threshold={300}
-							itemSizeEstimator={(index: number, cache: any)=>{
-								return 50; // keep at just 50; apparently if set significantly above the actual height of enough items, it causes a gap to sometimes appear at the bottom of the viewport
+						{!mapState.timelineEditMode && reactList()}
+						{mapState.timelineEditMode &&
+						<Droppable type="TimelineStep" droppableId={JSON.stringify(droppableInfo.VSet({timelineID: timeline.id}))} isDropDisabled={!creatorOrMod}>
+							{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
+								return (
+									<Column ref={c=>provided.innerRef(GetDOM(c) as any)} {...provided.droppableProps}>
+										{reactList()}
+									</Column>
+								);
 							}}
-							itemRenderer={(index: number, key: any)=>{
-								if (index == 0) return <div key={key}/>; // atm, hide first step, since just intro message
-								if (steps == null) return <div key={key}/>;
-								const step = steps[index];
-								return <StepUI key={step.id} index={index} last={index == steps.length - 1} map={map} timeline={timeline} steps={steps} step={step} player={this.player}
-									ref={c=>{
-										if (c == null || c.DOM_HTML == null) return;
-										this.stepElements[index] = c.DOM_HTML as any;
-										this.stepElements_updateTimes[index] = Date.now();
-									}}/>;
-							}}/>
+						</Droppable>}
 					</ScrollView>
 				</Row>
 			</Column>
 		);
 	}
-}
+	stepList: ReactList|n;
 
-@Observer
-class OptionsDropdown extends BaseComponent<{}, {}> {
-	render() {
-		const uiState = store.main.timelines;
-		return (
-			<DropDown>
-				<DropDownTrigger><Button text="Options" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
-					<Row>
-						<Text>Node-reveal highlight time:</Text>
-						<Spinner ml={5} min={0} value={uiState.nodeRevealHighlightTime} onChange={val=>RunInAction_Set(this, ()=>uiState.nodeRevealHighlightTime = val)}/>
-					</Row>
-					<Row>
-						<Text>Hide editing controls:</Text>
-						<CheckBox ml={5} value={uiState.hideEditingControls} onChange={val=>RunInAction_Set(this, ()=>uiState.hideEditingControls = val)}/>
-					</Row>
-					<Row>
-						<Text>Show focus-nodes:</Text>
-						<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
-					</Row>
-					<Row>
-						<Text>Layout-helper map:</Text>
-						<CheckBox ml={5} text="Load" value={uiState.layoutHelperMap_load} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_load = val)}/>
-						<CheckBox ml={5} text="Show" value={uiState.layoutHelperMap_show} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_show = val)}/>
-					</Row>
-				</Column></DropDownContent>
-			</DropDown>
-		);
-	}
+	/*EstimateStepHeight = (index: number, cache: any)=>{
+		return 50; // keep at just 50; apparently if set significantly above the actual height of enough items, it causes a gap to sometimes appear at the bottom of the viewport
+	};*/
+	EstimateStepHeight = (index: number, cache: any)=>{
+		return 100;
+	};
+	RenderStep = (index: number, key: any)=>{
+		const {map, timeline, steps, creatorOrMod} = this.PropsStash;
+		if (steps == null) return <div key={key}/>;
+		const step = steps[index];
+		const nextStep = steps[index + 1];
+
+		//return <StepEditorUI key={step.id} index={index} map={map} timeline={timeline!} step={step} nextStep={nextStep} draggable={creatorOrMod}/>;
+		return <StepUI key={step.id} index={index} last={index == steps.length - 1} map={map} timeline={timeline} steps={steps} step={step} player={this.player}
+			ref={c=>{
+				if (c == null || c.DOM_HTML == null) return;
+				this.stepElements[index] = c.DOM_HTML as any;
+				this.stepElements_updateTimes[index] = Date.now();
+			}}/>;
+	};
 }

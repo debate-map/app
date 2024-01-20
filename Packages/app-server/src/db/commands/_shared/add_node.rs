@@ -14,13 +14,13 @@ use rust_shared::{anyhow, async_graphql, serde_json, GQLError};
 use tracing::info;
 
 use crate::db::_shared::common_errors::err_should_be_null;
-use crate::db::commands::_command::{command_boilerplate, tbd, upsert_db_entry_by_id_for_struct};
+use crate::db::commands::_command::{command_boilerplate, tbd, upsert_db_entry_by_id_for_struct, update_field_of_extras, init_field_of_extras};
 use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::add_node_revision::{self, add_node_revision, AddNodeRevisionExtras, AddNodeRevisionInput, AddNodeRevisionResult};
 use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx, resolve_jwt_to_user_info};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::node_revisions::{NodeRevision, NodeRevisionInput};
-use crate::db::nodes_::_node::{Node, NodeInput};
+use crate::db::nodes_::_node::{Node, NodeInput, node_extras_locked_subfields};
 use crate::db::nodes_::_node_type::NodeType;
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
@@ -53,8 +53,7 @@ pub async fn add_node(ctx: &AccessorContext<'_>, actor: &User, node_: NodeInput,
         c_currentRevision: revision_id.clone(),
         multiPremiseArgument: node_.multiPremiseArgument,
         argumentType: node_.argumentType,
-        //extras: node_.extras,
-        extras: json!({}),
+        extras: init_field_of_extras(node_.extras, json!({}), node_extras_locked_subfields())?, // "extras" fields use special handling
     };
 
     // validate the node, then add it to db

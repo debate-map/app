@@ -15,7 +15,7 @@ use crate::utils::db::accessors::{AccessorContext, get_db_entries, get_db_entry}
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::commands::_command::{CanNullOrOmit, CanOmit};
 
 pub async fn get_user_hidden(ctx: &AccessorContext<'_>, id: &str) -> Result<UserHidden, Error> {
     get_db_entry(ctx, "userHiddens", &Some(json!({
@@ -61,16 +61,16 @@ impl From<Row> for UserHidden {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct UserHiddenUpdates {
-	pub backgroundID: FieldUpdate_Nullable<String>,
+	pub backgroundID: CanNullOrOmit<String>,
     #[graphql(name = "backgroundCustom_enabled")]
-	pub backgroundCustom_enabled: FieldUpdate_Nullable<bool>,
+	pub backgroundCustom_enabled: CanNullOrOmit<bool>,
     #[graphql(name = "backgroundCustom_color")]
-	pub backgroundCustom_color: FieldUpdate_Nullable<String>,
+	pub backgroundCustom_color: CanNullOrOmit<String>,
     #[graphql(name = "backgroundCustom_url")]
-	pub backgroundCustom_url: FieldUpdate_Nullable<String>,
+	pub backgroundCustom_url: CanNullOrOmit<String>,
     #[graphql(name = "backgroundCustom_position")]
-	pub backgroundCustom_position: FieldUpdate_Nullable<String>,
-	pub addToStream: FieldUpdate<bool>,
+	pub backgroundCustom_position: CanNullOrOmit<String>,
+	pub addToStream: CanOmit<bool>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

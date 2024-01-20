@@ -55,6 +55,7 @@ pub struct CommandRun {
     pub commandName: String,
     pub commandInput: serde_json::Value,
     pub commandResult: serde_json::Value,
+    
     #[graphql(name = "c_involvedNodes")]
     pub c_involvedNodes: Vec<String>,
     #[graphql(name = "c_accessPolicyTargets")]

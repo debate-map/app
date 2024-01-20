@@ -16,7 +16,7 @@ use rust_shared::tokio_postgres::Row;
 use crate::utils::db::accessors::{get_db_entry, get_db_entries, AccessorContext};
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}}};
 
-use super::super::commands::_command::FieldUpdate;
+use super::super::commands::_command::CanOmit;
 
 wrap_slow_macros!{
 

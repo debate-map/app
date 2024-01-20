@@ -13,7 +13,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::_shared::attachments::Attachment;
-use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
+use super::commands::_command::{CanOmit, CanNullOrOmit};
 use super::{node_revisions::{get_node_revision}};
 
 pub async fn get_term(ctx: &AccessorContext<'_>, id: &str) -> Result<Term, Error> {
@@ -76,14 +76,14 @@ pub struct TermInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct TermUpdates {
-    pub accessPolicy: FieldUpdate<String>,
-    pub name: FieldUpdate<String>,
-	pub forms: FieldUpdate<Vec<String>>,
-    pub disambiguation: FieldUpdate_Nullable<String>,
-    pub r#type: FieldUpdate<TermType>,
-    pub definition: FieldUpdate<String>,
-    pub note: FieldUpdate_Nullable<String>,
-    pub attachments: FieldUpdate<Vec<Attachment>>,
+    pub accessPolicy: CanOmit<String>,
+    pub name: CanOmit<String>,
+	pub forms: CanOmit<Vec<String>>,
+    pub disambiguation: CanNullOrOmit<String>,
+    pub r#type: CanOmit<TermType>,
+    pub definition: CanOmit<String>,
+    pub note: CanNullOrOmit<String>,
+    pub attachments: CanOmit<Vec<Attachment>>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Term { pub nodes: Vec<Term> }

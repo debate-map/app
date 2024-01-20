@@ -14,7 +14,7 @@ use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 
-use super::commands::_command::FieldUpdate;
+use super::commands::_command::CanOmit;
 
 pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Error> {
     get_db_entry(ctx, "medias", &Some(json!({
@@ -56,11 +56,11 @@ pub struct MediaInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct MediaUpdates {
-    pub accessPolicy: FieldUpdate<String>,
-    pub name: FieldUpdate<String>,
-    pub r#type: FieldUpdate<MediaType>,
-    pub url: FieldUpdate<String>,
-    pub description: FieldUpdate<String>,
+    pub accessPolicy: CanOmit<String>,
+    pub name: CanOmit<String>,
+    pub r#type: CanOmit<MediaType>,
+    pub url: CanOmit<String>,
+    pub description: CanOmit<String>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Media { pub nodes: Vec<Media> }

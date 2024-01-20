@@ -18,7 +18,7 @@ use crate::utils::db::accessors::{get_db_entry, get_db_entries, AccessorContext}
 use crate::utils::db::agql_ext::gql_utils::IndexMapAGQL;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}}};
 
-use super::super::commands::_command::FieldUpdate;
+use super::super::commands::_command::CanOmit;
 use super::_permission_set::{PermissionSet, PermissionSetForType, APTable, APAction};
 
 wrap_slow_macros!{
@@ -70,10 +70,10 @@ pub struct AccessPolicyInput {
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 pub struct AccessPolicyUpdates {
-    pub name: FieldUpdate<String>,
-    pub permissions: FieldUpdate<PermissionSet>,
+    pub name: CanOmit<String>,
+    pub permissions: CanOmit<PermissionSet>,
     #[graphql(name = "permissions_userExtends")]
-    pub permissions_userExtends: FieldUpdate<IndexMapAGQL<String, PermissionSet>>,
+    pub permissions_userExtends: CanOmit<IndexMapAGQL<String, PermissionSet>>,
 }
 
 }

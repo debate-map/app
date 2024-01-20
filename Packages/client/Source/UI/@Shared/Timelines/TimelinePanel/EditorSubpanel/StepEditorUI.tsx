@@ -5,7 +5,7 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
+import {GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
 import {DragInfo, MakeDraggable, Observer} from "web-vcore";
 import {Clone, E, GetEntries, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
@@ -14,6 +14,7 @@ import {Button, Column, Pre, Row, Select, Spinner, Text, TextArea, TimeSpanInput
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {NodeRevealUI} from "./NodeRevealUI.js";
 import {StepEffectUI} from "./StepEffectUI.js";
 
@@ -66,7 +67,7 @@ export async function SetStepClipVolume(opfsForMap: OPFS_Map, audioMeta: AudioMe
 export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
 
 @MakeDraggable(({index, step, draggable}: StepEditorUIProps)=>{
-	if (draggable == false) return null as any; // todo: is this "as any" valid?
+	if (draggable == false) return undefined as any; // completely disable draggable behavior (see web-vcore/.../DNDHelpers.tsx for more info)
 	// upgrade note: make sure dnd isn't broken from having to comment the next line out
 	// if (step == null) return null; // if step is not yet loaded, don't actually apply the draggable-wrapping
 	return {
@@ -124,6 +125,28 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 				}
 			}
 		}
+
+		const steps = GetTimelineSteps(timeline.id);
+		const addStep = (insertIndex: number)=>{
+			if (MeID() == null) return ShowSignInPopup();
+			if (steps == null) return; // steps must still be loading; just ignore the click
+
+			// calculate the insert-index to be just after the middle entry of the visible-step-range
+			/*const visibleStepRange = this.stepList?.getVisibleRange() ?? [steps.length - 1, steps.length - 1];
+			const insertIndex = Math.floor(visibleStepRange.Average() + 1);*/
+
+			const prevStepForInsert = steps[insertIndex - 1];
+			const nextStepForInsert = steps[insertIndex];
+
+			const newStep = new TimelineStep({
+				timelineID: timeline.id,
+				orderKey: OrderKey.between(prevStepForInsert?.orderKey, nextStepForInsert?.orderKey).toString(),
+				groupID: "full",
+				message: "",
+				nodeReveals: [],
+			});
+			RunCommand_AddTimelineStep(newStep);
+		};
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const result = (
@@ -194,30 +217,41 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							<Button ml={5} mdIcon="ray-start-arrow" enabled={creatorOrMod && store.main.timelines.audioPanel.selectedFile != null} onClick={()=>{
 								SetStepClipTimeInAudio(opfsForMap, audioMeta, audioUIState.selectedFile!, step.id, store.main.timelines.audioPanel.selection_start);
 							}}/>
-							<Button ml={5} mdIcon="delete" enabled={creatorOrMod} onClick={()=>{
-								ShowMessageBox({
-									title: `Delete step ${index + 1}`, cancelButton: true,
-									message: `
-										Delete timeline step with text:
-
-										${step.message}
-									`.AsMultiline(0),
-									onOK: ()=>{
-										RunCommand_DeleteTimelineStep({id: step.id});
-									},
-								});
+							<Button ml={5} mdIcon="dots-vertical" onClick={e=>{
+								const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
+								ShowVMenu(
+									{pos: new Vector2(buttonRect.left, buttonRect.top + buttonRect.height)},
+									<>
+										<VMenuItem text="Add step (above)" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()} onClick={()=>{
+											addStep(index);
+										}}/>
+										<VMenuItem text="Add step (below)" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()} onClick={()=>{
+											addStep(index + 1);
+										}}/>
+										<VMenuItem text="Clone" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()}
+											onClick={e=>{
+												if (e.button != 0) return;
+												const newTimelineStep = Clone(step);
+												newTimelineStep.orderKey = new OrderKey(step.orderKey).next().toString();
+												RunCommand_AddTimelineStep(newTimelineStep);
+											}}/>
+										<VMenuItem text="Delete" enabled={creatorOrMod} style={liveSkin.Style_VMenuItem()} onClick={()=>{
+											ShowMessageBox({
+												title: `Delete step ${index + 1}`, cancelButton: true,
+												message: `
+													Delete timeline step with text:
+			
+													${step.message}
+												`.AsMultiline(0),
+												onOK: ()=>{
+													RunCommand_DeleteTimelineStep({id: step.id});
+												},
+											});
+										}}/>
+									</>,
+								);
 							}}/>
 						</Row>
-						{creatorOrMod &&
-						<VMenuStub>
-							<VMenuItem text="Clone" style={liveSkin.Style_VMenuItem()}
-								onClick={e=>{
-									if (e.button != 0) return;
-									const newTimelineStep = Clone(step);
-									newTimelineStep.orderKey = new OrderKey(step.orderKey).next().toString();
-									RunCommand_AddTimelineStep(newTimelineStep);
-								}}/>
-						</VMenuStub>}
 					</Row>
 					{stepClipsInAudioFiles.map(stepClipPair=>{
 						const audioFileMeta = audioFileMetas.find(a=>a.key == stepClipPair.key)!;

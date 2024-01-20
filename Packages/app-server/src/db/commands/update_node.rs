@@ -16,7 +16,7 @@ use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_
 use crate::db::general::permission_helpers::{assert_user_can_delete, assert_user_can_modify};
 use crate::db::general::sign_in_::jwt_utils::{resolve_jwt_to_user_info, get_user_info_from_gql_ctx};
 use crate::db::nodes::{get_node};
-use crate::db::nodes_::_node::{Node, NodeUpdates};
+use crate::db::nodes_::_node::{Node, NodeUpdates, node_extras_locked_subfields};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
@@ -56,7 +56,7 @@ pub async fn update_node(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool
 		accessPolicy: update_field(updates.accessPolicy, old_data.accessPolicy),
 		//multiPremiseArgument: update_field_nullable(updates.multiPremiseArgument, old_data.multiPremiseArgument),
 		argumentType: update_field_nullable(updates.argumentType, old_data.argumentType),
-		extras: update_field_of_extras(updates.extras, old_data.extras, vec!["ratingSummaries"])?,
+		extras: update_field_of_extras(updates.extras, old_data.extras, node_extras_locked_subfields())?,
 		..old_data
 	};
 

@@ -16,7 +16,7 @@ use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
-use super::commands::_command::{FieldUpdate, FieldUpdate_Nullable};
+use super::commands::_command::{CanOmit, CanNullOrOmit};
 use super::nodes::get_node;
 
 pub async fn get_node_tag(ctx: &AccessorContext<'_>, id: &str) -> Result<NodeTag, Error> {
@@ -44,6 +44,7 @@ pub struct NodeTag {
     pub mutuallyExclusiveGroup: Option<TagComp_MutuallyExclusiveGroup>,
     pub restrictMirroringOfX: Option<TagComp_RestrictMirroringOfX>,
     pub cloneHistory: Option<TagComp_CloneHistory>,
+    
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
@@ -95,13 +96,13 @@ pub struct NodeTagInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeTagUpdates {
-    pub nodes: FieldUpdate<Vec<String>>,
-    pub labels: FieldUpdate_Nullable<TagComp_Labels>,
-    pub mirrorChildrenFromXToY: FieldUpdate_Nullable<TagComp_MirrorChildrenFromXToY>,
-    pub xIsExtendedByY: FieldUpdate_Nullable<TagComp_XIsExtendedByY>,
-    pub mutuallyExclusiveGroup: FieldUpdate_Nullable<TagComp_MutuallyExclusiveGroup>,
-    pub restrictMirroringOfX: FieldUpdate_Nullable<TagComp_RestrictMirroringOfX>,
-    pub cloneHistory: FieldUpdate_Nullable<TagComp_CloneHistory>,
+    pub nodes: CanOmit<Vec<String>>,
+    pub labels: CanNullOrOmit<TagComp_Labels>,
+    pub mirrorChildrenFromXToY: CanNullOrOmit<TagComp_MirrorChildrenFromXToY>,
+    pub xIsExtendedByY: CanNullOrOmit<TagComp_XIsExtendedByY>,
+    pub mutuallyExclusiveGroup: CanNullOrOmit<TagComp_MutuallyExclusiveGroup>,
+    pub restrictMirroringOfX: CanNullOrOmit<TagComp_RestrictMirroringOfX>,
+    pub cloneHistory: CanNullOrOmit<TagComp_CloneHistory>,
 }
 
 pub trait TagComp {

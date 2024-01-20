@@ -17,7 +17,7 @@ use crate::utils::general::order_key::OrderKey;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
-use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::commands::_command::{CanNullOrOmit, CanOmit};
 use super::nodes::get_node;
 use super::nodes_::_node::Node;
 use super::nodes_::_node_type::NodeType;
@@ -95,6 +95,7 @@ pub struct NodeLink {
 	pub seriesAnchor: Option<bool>,
 	pub seriesEnd: Option<bool>,
 	pub polarity: Option<Polarity>,
+    
     #[graphql(name = "c_parentType")]
 	pub c_parentType: NodeType,
     #[graphql(name = "c_childType")]
@@ -122,9 +123,9 @@ pub struct NodeLinkInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct NodeLinkUpdates {
-	pub orderKey: FieldUpdate<OrderKey>,
-	pub form: FieldUpdate_Nullable<ClaimForm>,
-	pub polarity: FieldUpdate_Nullable<Polarity>,
+	pub orderKey: CanOmit<OrderKey>,
+	pub form: CanNullOrOmit<ClaimForm>,
+	pub polarity: CanNullOrOmit<Polarity>,
 }
 
 #[derive(Clone)] pub struct GQLSet_NodeLink { pub nodes: Vec<NodeLink> }

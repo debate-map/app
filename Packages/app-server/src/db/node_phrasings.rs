@@ -17,7 +17,7 @@ use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries}
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::_shared::attachments::TermAttachment;
-use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::commands::_command::{CanNullOrOmit, CanOmit};
 use super::nodes::get_node;
 
 pub async fn get_node_phrasing(ctx: &AccessorContext<'_>, id: &str) -> Result<NodePhrasing, Error> {
@@ -77,6 +77,7 @@ pub struct NodePhrasing {
 	pub note: Option<String>,
 	pub terms: Vec<TermAttachment>,
 	pub references: Vec<String>,
+    
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
@@ -103,18 +104,18 @@ pub struct NodePhrasingInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct NodePhrasingUpdates {
-	pub r#type: FieldUpdate<NodePhrasingType>,
+	pub r#type: CanOmit<NodePhrasingType>,
     #[graphql(name = "text_base")]
-	pub text_base: FieldUpdate<String>,
+	pub text_base: CanOmit<String>,
     #[graphql(name = "text_negation")]
-	pub text_negation: FieldUpdate_Nullable<String>,
+	pub text_negation: CanNullOrOmit<String>,
     #[graphql(name = "text_question")]
-	pub text_question: FieldUpdate_Nullable<String>,
+	pub text_question: CanNullOrOmit<String>,
     #[graphql(name = "text_narrative")]
-	pub text_narrative: FieldUpdate_Nullable<String>,
-	pub note: FieldUpdate_Nullable<String>,
-	pub terms: FieldUpdate<Vec<TermAttachment>>,
-	pub references: FieldUpdate<Vec<String>>,
+	pub text_narrative: CanNullOrOmit<String>,
+	pub note: CanNullOrOmit<String>,
+	pub terms: CanOmit<Vec<TermAttachment>>,
+	pub references: CanOmit<Vec<String>>,
 }
 
 #[derive(Clone)] pub struct GQLSet_NodePhrasing { pub nodes: Vec<NodePhrasing> }

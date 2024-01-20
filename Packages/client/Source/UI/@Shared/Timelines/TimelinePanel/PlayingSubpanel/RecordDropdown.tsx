@@ -13,12 +13,12 @@ import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/Layo
 import {PlayingSubpanel} from "../PlayingSubpanel.js";
 
 @Observer
-export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpanel}, {}> {
+export class RecordDropdown extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main.timelines.recordPanel;
 		return (
 			<DropDown>
-				<DropDownTrigger><Button text="Record" style={{height: "100%"}}/></DropDownTrigger>
+				<DropDownTrigger><Button ml={5} text="Record" style={{height: "100%"}}/></DropDownTrigger>
 				<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
 					<Row>
 						<Text style={{whiteSpace: "pre-wrap"}}>{`
@@ -115,7 +115,7 @@ export class RecordDropdown extends BaseComponent<{playingSubpanel: PlayingSubpa
 				return void this.StopRecording();
 			}
 
-			this.props.playingSubpanel.AdjustTargetTimeByFrames(1);
+			PlayingSubpanel.instance?.AdjustTargetTimeByFrames(1);
 		}
 	}
 

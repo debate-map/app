@@ -13,7 +13,7 @@ use crate::utils::db::accessors::{AccessorContext, get_db_entry};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::commands::_command::{CanNullOrOmit, CanOmit};
 
 pub async fn get_share(ctx: &AccessorContext<'_>, id: &str) -> Result<Share, Error> {
     get_db_entry(ctx, "shares", &Some(json!({
@@ -52,10 +52,10 @@ pub struct ShareInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct ShareUpdates {
-    pub name: FieldUpdate<String>,
+    pub name: CanOmit<String>,
 	//pub r#type: FieldUpdate<ShareType>,
-    pub mapID: FieldUpdate_Nullable<String>,
-    pub mapView: FieldUpdate<JSONValue>,
+    pub mapID: CanNullOrOmit<String>,
+    pub mapView: CanOmit<JSONValue>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Share { pub nodes: Vec<Share> }

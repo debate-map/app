@@ -14,7 +14,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use tracing::info;
 
 use crate::db::_shared::path_finder::{search_up_from_node_for_node_matching_x, id_is_of_node_that_is_root_of_map};
-use crate::db::commands::_command::command_boilerplate;
+use crate::db::commands::_command::{command_boilerplate, CanOmit};
 use crate::db::commands::add_node_link::{AddNodeLinkInput, add_node_link};
 use crate::db::commands::delete_node::{delete_node, DeleteNodeInput};
 use crate::db::commands::delete_node_link::{self, delete_node_link, DeleteNodeLinkInput};
@@ -118,6 +118,8 @@ pub async fn link_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, i
 				argumentType: Some(ArgumentType::all),
 				rootNodeForMap: None,
 				multiPremiseArgument: None,
+				//extras: json!({}),
+				extras: CanOmit::None,
 			};
 			let argument_wrapper_revision = NodeRevisionInput {
 				phrasing: NodePhrasing_Embedded { text_base: "".o(), ..Default::default() },

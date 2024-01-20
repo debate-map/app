@@ -13,7 +13,7 @@ use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext}
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::commands::_command::FieldUpdate;
+use super::commands::_command::CanOmit;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)] //#[serde(crate = "rust_shared::serde")]
 #[allow(clippy::struct_excessive_bools)]
@@ -60,8 +60,8 @@ impl From<Row> for User {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct UserUpdates {
-	pub displayName: FieldUpdate<String>,
-	pub permissionGroups: FieldUpdate<PermissionGroups>,
+	pub displayName: CanOmit<String>,
+	pub permissionGroups: CanOmit<PermissionGroups>,
 }
 
 //#[derive(SimpleObject, Clone)] #[derive(Clone)] pub struct GQLSet_User<T> { pub nodes: Vec<T> }

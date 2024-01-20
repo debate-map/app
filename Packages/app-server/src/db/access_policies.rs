@@ -17,7 +17,7 @@ use crate::utils::db::accessors::{get_db_entry, get_db_entries, AccessorContext}
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}}};
 
 use super::access_policies_::_access_policy::AccessPolicy;
-use super::commands::_command::FieldUpdate;
+use super::commands::_command::CanOmit;
 
 pub async fn get_access_policy(ctx: &AccessorContext<'_>, id: &str) -> Result<AccessPolicy, Error> {
     get_db_entry(ctx, "accessPolicies", &Some(json!({

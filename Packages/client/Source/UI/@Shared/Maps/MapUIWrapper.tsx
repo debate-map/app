@@ -1,7 +1,7 @@
 import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, GetTimeTrackerStateAtTimeX, GetTimelineSteps, IsNodeL2, IsNodeL3, NodeL3, NodeType} from "dm_common";
 import React, {useEffect, useMemo, useState} from "react";
 import {store} from "Store/index.js";
-import {GetMapState, GetPlayingTimeline, GetTimelineOpenSubpanel, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetPlayingTimeline, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph} from "tree-grapher";
 import {ShowHeader} from "UI/@SL/SL.js";

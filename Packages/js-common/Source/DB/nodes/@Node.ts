@@ -108,7 +108,7 @@ AddSchema("Node_Partial", ["NodeL1"], ()=>{
 
 //export type NodeL1_NoExtras = Omit<NodeL1, "extras"> & {extras: never};
 //export type NodeL1Input = Pick<NodeL1, "accessPolicy" | "type" | "rootNodeForMap" | "multiPremiseArgument" | "argumentType">;
-export const NodeL1Input_keys = ["accessPolicy", "type", "rootNodeForMap", "multiPremiseArgument", "argumentType"] as const;
+export const NodeL1Input_keys = ["accessPolicy", "type", "rootNodeForMap", "multiPremiseArgument", "argumentType", "extras"] as const;
 export type NodeL1Input = PickOnly<NodeL1, typeof NodeL1Input_keys[number]>;
 export const AsNodeL1Input = (node: NodeL1)=>node.IncludeKeys(...NodeL1Input_keys) as NodeL1Input;
 
@@ -124,7 +124,7 @@ export class Node_Extras {
 	}, {opt: true})
 	ratingSummaries? = {} as {[key: string]: RatingSummary}; // derived from "nodeRatings" table
 
-	@Field({type: "boolean"}, {opt: true})
+	@Field({type: "string"}, {opt: true})
 	externalId?: string|n;
 }
 @MGLClass()

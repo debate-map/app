@@ -14,7 +14,7 @@ use crate::utils::db::accessors::{AccessorContext, get_db_entry};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
 
-use super::commands::_command::{FieldUpdate_Nullable, FieldUpdate};
+use super::commands::_command::{CanNullOrOmit, CanOmit};
 
 pub async fn get_map(ctx: &AccessorContext<'_>, id: &str) -> Result<Map, Error> {
     get_db_entry(ctx, "maps", &Some(json!({
@@ -63,15 +63,15 @@ pub struct MapInput {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct MapUpdates {
-    pub accessPolicy: FieldUpdate<String>,
-    pub name: FieldUpdate<String>,
-    pub note: FieldUpdate_Nullable<String>,
-    pub noteInline: FieldUpdate_Nullable<bool>,
-    pub defaultExpandDepth: FieldUpdate<i32>,
-    pub nodeAccessPolicy: FieldUpdate_Nullable<String>,
-    pub featured: FieldUpdate_Nullable<bool>,
-	pub editors: FieldUpdate<Vec<String>>,
-    pub extras: FieldUpdate<JSONValue>,
+    pub accessPolicy: CanOmit<String>,
+    pub name: CanOmit<String>,
+    pub note: CanNullOrOmit<String>,
+    pub noteInline: CanNullOrOmit<bool>,
+    pub defaultExpandDepth: CanOmit<i32>,
+    pub nodeAccessPolicy: CanNullOrOmit<String>,
+    pub featured: CanNullOrOmit<bool>,
+	pub editors: CanOmit<Vec<String>>,
+    pub extras: CanOmit<JSONValue>,
 }
 
 #[derive(Clone)] pub struct GQLSet_Map { pub nodes: Vec<Map> }
