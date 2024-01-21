@@ -57,7 +57,6 @@ pub async fn add_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root
 		timeFromLastStep: step_.timeFromLastStep,
 		timeUntilNextStep: step_.timeUntilNextStep,
 		message: step_.message,
-		nodeReveals: step_.nodeReveals,
         extras: init_field_of_extras(step_.extras, json!({}), timeline_step_extras_locked_subfields())?, // "extras" fields use special handling
 		c_accessPolicyTargets: vec![], // auto-set by db
 	};

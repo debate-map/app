@@ -70,9 +70,8 @@ pub struct TimelineStep {
     pub timeFromLastStep: Option<f64>,
     pub timeUntilNextStep: Option<f64>,
 	pub message: String,
-    pub nodeReveals: Vec<NodeReveal>,
 	pub extras: JSONValue,
-    
+
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
@@ -89,7 +88,6 @@ pub struct TimelineStepInput {
     pub timeFromLastStep: Option<f64>,
     pub timeUntilNextStep: Option<f64>,
 	pub message: String,
-	pub nodeReveals: Vec<NodeReveal>,
 	pub extras: CanOmit<JSONValue>,
 }
 
@@ -101,7 +99,6 @@ pub struct TimelineStepUpdates {
 	pub timeFromLastStep: CanNullOrOmit<f64>,
 	pub timeUntilNextStep: CanNullOrOmit<f64>,
 	pub message: CanOmit<String>,
-	pub nodeReveals: CanOmit<Vec<NodeReveal>>,
 	pub extras: CanOmit<JSONValue>,
 }
 

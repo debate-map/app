@@ -56,7 +56,6 @@ pub async fn update_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_r
 		timeFromLastStep: update_field_nullable(updates.timeFromLastStep, old_data.timeFromLastStep),
 		timeUntilNextStep: update_field_nullable(updates.timeUntilNextStep, old_data.timeUntilNextStep),
 		message: update_field(updates.message, old_data.message),
-		nodeReveals: update_field(updates.nodeReveals, old_data.nodeReveals),
 		extras: update_field_of_extras(updates.extras, old_data.extras, timeline_step_extras_locked_subfields())?,
 		..old_data
 	};
