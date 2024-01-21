@@ -41,7 +41,11 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 			<>
 				<Row key={index} sel mt={5}
 					style={E(
-						{width: "100%", padding: 3, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)"},
+						{
+							width: "100%", padding: 3, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer",
+							//border: "1px solid rgba(0,0,0,.5)"
+							border: "5px solid rgba(0,0,0,.5)", // temp, to signify an entry is using the node-reveal system (which is being replaced by the step-effects system)
+						},
 						// selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
 					)}
 					onMouseDown={e=>{

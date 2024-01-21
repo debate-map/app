@@ -4,10 +4,26 @@ import {GetTimelineStepTimesFromStart} from "../timelineSteps.js";
 
 export class TimelineStepEffect {
 	constructor(data?: Partial<TimelineStepEffect>) { Object.assign(this, data); }
+	/** Time that effect takes place, as seconds since start of step. */
 	time_relative = 0;
 
-	//nodeReveal?: NodeReveal;
+	nodeEffect?: NodeEffect;
 	setTimeTrackerState?: boolean;
+}
+
+export class NodeEffect {
+	constructor(data?: RequiredBy<Partial<NodeReveal>, "path">) {
+		Object.assign(this, data);
+	}
+
+	path: string;
+
+	show?: boolean|n;
+	show_revealDepth?: number|n;
+	changeFocusLevelTo?: number|n;
+	setExpandedTo?: boolean|n;
+	hide?: boolean|n;
+	//hide_delay?: number|n;
 }
 
 // after accessor-based processing (see GetTimelineStepEffectsResolved accessor)

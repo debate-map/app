@@ -10,6 +10,7 @@ import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {PositionOptionsEnum, StepEditorUI} from "./Editing/StepEditorUI.js";
 import {NodeRevealUI} from "./Editing/NodeRevealUI.js";
+import {StepEffectUI} from "./Editing/StepEffectUI.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(
@@ -103,6 +104,9 @@ export class StepUI extends BaseComponentPlus(
 						</div>
 						{showNodeReveals && step.nodeReveals &&
 						<Column p="0 5px 5px 5px">
+							{step.extras?.effects && step.extras.effects.map((effect, index)=>{
+								return <StepEffectUI key={index} map={map} step={step} effect={effect} editing={false} index={index}/>;
+							})}
 							{step.nodeReveals.map((nodeReveal, nodeRevealIndex)=>{
 								return <NodeRevealUI key={nodeRevealIndex} map={map} step={step} nodeReveal={nodeReveal} editing={false} index={nodeRevealIndex}/>;
 							})}

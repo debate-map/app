@@ -264,7 +264,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			}
 		}
 
-		this.SetState({placeholderRect});*/
+		if (!placeholderRect.Equals(this.state.placeholderRect)) {
+			this.SetState({placeholderRect});
+		}*/
 	}
 
 	get ShouldChildrenShow() {

@@ -249,7 +249,7 @@ export class NodeUI extends BaseComponentPlus(
 					<NodeBox ref={UseCallback(c=>{
 						this.nodeBox = GetInnerComp(c);
 						if (ref_nodeBox) ref_nodeBox(c);
-					}, [ref_nodeBox])} {...{indexInNodeList, map, node, path, treePath, width, standardWidthInGroup}} childrenShownByNodeExpandButton={childrenShownByNodeExpandButton.length}/>
+					}, [ref_nodeBox])} {...{indexInNodeList, map, node, path, treePath, forLayoutHelper, width, standardWidthInGroup}} childrenShownByNodeExpandButton={childrenShownByNodeExpandButton.length}/>
 					{/* these are for components shown just to the right of the NodeBox box */}
 					{nodeChildrenToShow == emptyArray_forLoading &&
 						<div style={{margin: "auto 0 auto 10px"}}>...</div>}

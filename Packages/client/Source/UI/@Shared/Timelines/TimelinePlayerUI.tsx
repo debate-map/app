@@ -79,7 +79,7 @@ class NodeUI_InMessage extends BaseComponentPlus({} as NodeUI_InMessageProps, {}
 
 		const path = `${nodeID}`;
 		return (
-			<NodeBox indexInNodeList={0} treePath="0" map={map} node={node} path={path} width={null} //widthOverride={null}
+			<NodeBox indexInNodeList={0} treePath="0" map={map} node={node} path={path} forLayoutHelper={false} width={null} //widthOverride={null}
 				panelsPosition="below" useLocalPanelState={true}
 				style={{
 					// zIndex: 1, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"

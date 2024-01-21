@@ -333,11 +333,11 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 										}}/>
 										{//(step.nodeReveals == null || step.nodeReveals.length == 0) && !dragIsOverDropArea &&
 										<div style={{flex: 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, opacity: 0.7, textAlign: "center"}}>
-											Drag nodes here to have them display when the playback reaches this step.
+											Drag nodes here to give them time-bound effects: display, expand, etc.
 										</div>}
 									</Row>
 									{step.extras?.effects && step.extras.effects.map((effect, index)=>{
-										return <StepEffectUI key={index} map={map} step={step} effect={effect} index={index}/>;
+										return <StepEffectUI key={index} map={map} step={step} effect={effect} editing={true} index={index}/>;
 									})}
 									{step.nodeReveals && step.nodeReveals.map((nodeReveal, index)=>{
 										return <NodeRevealUI key={index} map={map} step={step} nodeReveal={nodeReveal} editing={creatorOrMod} index={index}/>;
@@ -402,6 +402,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 			}
 		}
 
-		this.SetState({placeholderRect});
+		if (!placeholderRect.Equals(this.state.placeholderRect)) {
+			this.SetState({placeholderRect});
+		}
 	}
 }

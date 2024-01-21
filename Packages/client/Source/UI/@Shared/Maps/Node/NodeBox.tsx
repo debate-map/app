@@ -54,7 +54,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 export type NodeBox_Props = {
-	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map,
+	indexInNodeList: number, node: NodeL3, path: string, treePath: string, map?: Map, forLayoutHelper: boolean,
 	width?: number/*|string*/|n, standardWidthInGroup?: number|n, backgroundFillPercentOverride?: number,
 	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	childrenShownByNodeExpandButton?: number, usePortalForDetailBoxes?: boolean,
@@ -112,7 +112,7 @@ export class NodeBox extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, treePath, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
+		const {indexInNodeList, map, node, path, treePath, forLayoutHelper, width, standardWidthInGroup, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes, childrenShownByNodeExpandButton} = this.props;
 		let {hovered, moreButtonHovered, leftPanelHovered, hoverPanel, hoverTermIDs, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
@@ -486,6 +486,7 @@ export class NodeBox extends BaseComponentPlus(
 		// return result;
 
 		const GetDNDProps = ()=>{
+			if (forLayoutHelper) return null; // don't make draggable if part of layout-helper map (just extra overhead; and glitches atm, probably cause `forLayoutHelper` val isn't in DraggableInfo struct)
 			if (!IsUserCreatorOrMod(MeID(), node)) return null;
 			if (!path.includes("/")) return null; // don't make draggable if root-node of map
 			return {
@@ -525,6 +526,7 @@ export class NodeBox extends BaseComponentPlus(
 let portal: HTMLElement;
 WaitXThenRun(0, ()=>{
 	portal = document.createElement("div");
+	portal.id = "portalForDragging_NodeBox";
 	document.body.appendChild(portal);
 });
 

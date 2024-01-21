@@ -1,10 +1,10 @@
-import {CreateLinkCommand, GetMap, GetNode, GetNodeDisplayText, GetNodeID, GetNodeL3, GetParentNode, GetPathNodeIDs, GetTimeline, GetTimelineStep, GetTimelineSteps, NodeReveal, OrderKey, Polarity, TimelineStep} from "dm_common";
+import {CreateLinkCommand, GetMap, GetNode, GetNodeDisplayText, GetNodeID, GetNodeL3, GetParentNode, GetPathNodeIDs, GetTimeline, GetTimelineStep, GetTimelineSteps, NodeEffect, NodeReveal, OrderKey, Polarity, TimelineStep, TimelineStepEffect} from "dm_common";
 import {store} from "Store";
 import {RootUIWrapper} from "UI/Root";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {RunInAction} from "web-vcore";
-import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
+import {CatchBail, GetAsync} from "web-vcore/.yalc/mobx-graphlink";
 import {Assert, FromJSON, NN} from "web-vcore/nm/js-vextensions.js";
 import {DropResult, ResponderProvided} from "web-vcore/nm/react-beautiful-dnd";
 import {Button} from "web-vcore/nm/react-vcomponents.js";
@@ -90,21 +90,40 @@ export async function OnDragEnd(result: DropResult, provided: ResponderProvided)
 		RunCommand_UpdateTimelineStep({id: draggableInfo.stepID!, updates: {orderKey: newOrderKey.toString()}});
 	} else if (targetDroppableInfo.type == "TimelineStepNodeRevealList") {
 		const path = draggableInfo.nodePath!;
-		const draggedNode = GetNode(GetNodeID(path));
+
+		// NOTE: Our calling of the async versions of the accessors below can introduce unnecessary delay (of ~50ms, apparently due to reactjs doing a slow render at the await point).
+		// One solution is to try to call it synchronously, and then call it async only if the result is null and/or stale (as seen in commented lines below); but this makes the code messy.
+		// So for now we'll live with the extra delay -- at least until trying React 18+, which is supposed to be able to render ui-trees in smaller pieces (allowing this func to resume from an await-point with less delay).
+
+		const draggedNode = await GetNode.Async(GetNodeID(path));
+		//const draggedNode = CatchBail(null, arguments["a"] = (()=>GetNode(GetNodeID(path)))) ?? await GetAsync(()=>arguments["a"]());
+
 		/*const parentNode = GetParentNode(path);
 		// if dragged-node is the premise of a single-premise argument, use the argument-node instead (the UI for the argument and claim are combined, but user probably wanted the whole argument dragged)
 		if (IsPremiseOfSinglePremiseArgument(draggedNode, parentNode)) {
 			path = GetParentPath(path);
 		}*/
 
-		const step = GetTimelineStep(targetDroppableInfo.stepID);
+		const step = await GetTimelineStep.Async(targetDroppableInfo.stepID);
+		//const step = CatchBail(null, arguments["a"] = (()=>GetTimelineStep(targetDroppableInfo.stepID))) ?? await GetAsync(()=>arguments["a"]());
 		if (step == null) return;
-		const newNodeReveal = new NodeReveal({
+
+		/*const newNodeReveal = new NodeReveal({
 			path,
 			show: true,
 			changeFocusLevelTo: 1,
 		});
 		const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
-		RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});
+		RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});*/
+
+		const newStepEffect = new TimelineStepEffect({
+			nodeEffect: new NodeEffect({
+				path,
+				show: true,
+				changeFocusLevelTo: 1,
+			}),
+		});
+		const newStepEffects = (step.extras?.effects || []).concat(newStepEffect);
+		RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newStepEffects}}});
 	}
 }
