@@ -48,7 +48,7 @@ export async function ShowAddTimelineDialog(userID: string, mapID: string) {
 				message: defaultIntroMessage.trim(),
 				orderKey: OrderKey.mid().toString(),
 				groupID: "full",
-				nodeReveals: [],
+				//nodeReveals: [],
 			});
 			RunCommand_AddTimelineStep(step);
 		},

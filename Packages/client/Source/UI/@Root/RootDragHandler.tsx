@@ -1,4 +1,4 @@
-import {CreateLinkCommand, GetMap, GetNode, GetNodeDisplayText, GetNodeID, GetNodeL3, GetParentNode, GetPathNodeIDs, GetTimeline, GetTimelineStep, GetTimelineSteps, NodeEffect, NodeReveal, OrderKey, Polarity, TimelineStep, TimelineStepEffect} from "dm_common";
+import {CreateLinkCommand, GetMap, GetNode, GetNodeDisplayText, GetNodeID, GetNodeL3, GetParentNode, GetPathNodeIDs, GetTimeline, GetTimelineStep, GetTimelineSteps, NodeEffect, OrderKey, Polarity, TimelineStep, TimelineStepEffect} from "dm_common";
 import {store} from "Store";
 import {RootUIWrapper} from "UI/Root";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
@@ -107,14 +107,6 @@ export async function OnDragEnd(result: DropResult, provided: ResponderProvided)
 		const step = await GetTimelineStep.Async(targetDroppableInfo.stepID);
 		//const step = CatchBail(null, arguments["a"] = (()=>GetTimelineStep(targetDroppableInfo.stepID))) ?? await GetAsync(()=>arguments["a"]());
 		if (step == null) return;
-
-		/*const newNodeReveal = new NodeReveal({
-			path,
-			show: true,
-			changeFocusLevelTo: 1,
-		});
-		const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
-		RunCommand_UpdateTimelineStep({id: step.id, updates: {nodeReveals: newNodeReveals}});*/
 
 		const newStepEffect = new TimelineStepEffect({
 			nodeEffect: new NodeEffect({

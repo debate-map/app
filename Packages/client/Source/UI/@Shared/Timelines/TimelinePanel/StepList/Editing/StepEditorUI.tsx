@@ -5,7 +5,7 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
 import {DragInfo, MakeDraggable, Observer} from "web-vcore";
 import {Clone, E, GetEntries, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
@@ -15,7 +15,6 @@ import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
-import {NodeRevealUI} from "./NodeRevealUI.js";
 import {StepEffectUI} from "./StepEffectUI.js";
 
 export enum PositionOptionsEnum {
@@ -82,7 +81,7 @@ export async function AddTimelineStep_Simple(timelineID: string, steps: Timeline
 		orderKey: OrderKey.between(prevStepForInsert?.orderKey, nextStepForInsert?.orderKey).toString(),
 		groupID: "full",
 		message: "",
-		nodeReveals: [],
+		//nodeReveals: [],
 	});
 	await RunCommand_AddTimelineStep(newStep);
 }
@@ -118,6 +117,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		//const step = GetTimelineStep(stepID);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
 		const audioUIState = store.main.timelines.audioPanel;
+		const nodeEffects = GetNodeEffects(step);
 
 		if (step == null) {
 			return <div style={{height: 100}}><div {...(dragInfo && dragInfo.provided.draggableProps)} {...(dragInfo && dragInfo.provided.dragHandleProps)}/></div>;
@@ -305,7 +305,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 											position: "relative", padding: 7, background: "rgba(255,255,255,.3)", borderRadius: "0 0 10px 10px",
 											//border: "solid rgba(0,0,0,.7)", borderWidth: "0 1px 1px 1px"
 										},
-										(step.nodeReveals == null || step.nodeReveals.length == 0) && {padding: "3px 5px"},
+										nodeEffects.length == 0 && {padding: "3px 5px"},
 									)}>
 									<Row>
 										<Text>Effects:</Text>
@@ -338,9 +338,6 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 									</Row>
 									{step.extras?.effects && step.extras.effects.map((effect, index)=>{
 										return <StepEffectUI key={index} map={map} step={step} effect={effect} editing={true} index={index}/>;
-									})}
-									{step.nodeReveals && step.nodeReveals.map((nodeReveal, index)=>{
-										return <NodeRevealUI key={index} map={map} step={step} nodeReveal={nodeReveal} editing={creatorOrMod} index={index}/>;
 									})}
 									{provided.placeholder}
 									{dragIsOverDropArea && placeholderRect &&

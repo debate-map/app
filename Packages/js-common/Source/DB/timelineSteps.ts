@@ -3,7 +3,7 @@ import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 import {GetNode, GetNodeChildren} from "./nodes.js";
-import {GetTimelineStepEffectsResolved} from "../DB.js";
+import {GetNodeEffects, GetTimelineStepEffectsResolved} from "../DB.js";
 
 export const GetTimelineStep = CreateAccessor((id: string|n): TimelineStep|n=>{
 	return GetDoc({}, a=>a.timelineSteps.get(id!));
@@ -130,17 +130,18 @@ export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineS
 
 	const stepTimes = GetTimelineStepTimesFromStart(steps);
 	for (const [index, step] of steps.entries()) {
-		for (const reveal of step.nodeReveals || []) {
+		const nodeEffects = GetNodeEffects(step);
+		for (const effect of nodeEffects) {
 			const stepTime = stepTimes[index];
 			const stepTime_safe = stepTime ?? 0;
 
-			const nodesAreBeingRevealed = reveal.show || reveal.setExpandedTo == true;
+			const nodesAreBeingRevealed = effect.show || effect.setExpandedTo == true;
 			if (nodesAreBeingRevealed) {
 				// whether we're targeting the entry's main-node for revealing, or its descendents, the main-node will always get revealed
-				markPathRevealTime(reveal.path, stepTime_safe);
+				markPathRevealTime(effect.path, stepTime_safe);
 
 				// for each ancestor-path of the entry's main-node, mark that path as revealed at this reveal's target-time (since whenever a node is revealed, its ancestors are as well)
-				let ancestorPath = reveal.path;
+				let ancestorPath = effect.path;
 				while (ancestorPath.includes("/")) {
 					ancestorPath = ancestorPath.slice(0, ancestorPath.lastIndexOf("/"));
 					markPathRevealTime(ancestorPath, stepTime_safe);
@@ -148,17 +149,17 @@ export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineS
 
 				// also reveal any descendants that are within the specified subdepth/range
 				let descendentRevealDepth = 0;
-				if (reveal.show && reveal.show_revealDepth != null) {
-					descendentRevealDepth = Math.max(descendentRevealDepth, reveal.show_revealDepth);
+				if (effect.show && effect.show_revealDepth != null) {
+					descendentRevealDepth = Math.max(descendentRevealDepth, effect.show_revealDepth);
 				}
-				if (reveal.setExpandedTo == true) {
+				if (effect.setExpandedTo == true) {
 					descendentRevealDepth = Math.max(descendentRevealDepth, 1);
 				}
 				if (descendentRevealDepth >= 1) {
-					const node = GetNode(CE(reveal.path.split("/")).Last());
+					const node = GetNode(CE(effect.path.split("/")).Last());
 					if (node == null) continue;
 					// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
-					let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${reveal.path}/${child.id}`}));
+					let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${effect.path}/${child.id}`}));
 					if (CE(currentChildren).Any(a=>a.node == null)) {
 						// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
 						return emptyArray_forLoading;
@@ -183,17 +184,17 @@ export const GetVisiblePathRevealTimesInSteps = CreateAccessor((steps: TimelineS
 				}
 			}
 
-			if (reveal.setExpandedTo == false) {
+			if (effect.setExpandedTo == false) {
 				for (const path of CE(pathVisibilitiesSoFar).VKeys()) {
-					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only hides descendants)
+					if (path.startsWith(`${effect.path}/`)) { // note the slash at end (meaning it only hides descendants)
 						markPathHideTime(path, stepTime_safe);
 					}
 				}
 			}
 
-			if (reveal.hide) {
+			if (effect.hide) {
 				for (const path of CE(pathVisibilitiesSoFar).VKeys()) {
-					if (path.startsWith(reveal.path)) {
+					if (path.startsWith(effect.path)) {
 						markPathHideTime(path, stepTime_safe);
 					}
 				}
@@ -215,23 +216,23 @@ export const GetVisiblePathsAfterSteps = CreateAccessor((steps: TimelineStep[])=
 export const GetPathFocusLevelsAfterSteps = CreateAccessor((steps: TimelineStep[])=>{
 	const pathFocusLevels = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
-		for (const reveal of step.nodeReveals || []) {
-			if (reveal.changeFocusLevelTo != null) {
-				pathFocusLevels[reveal.path] = reveal.changeFocusLevelTo;
+		for (const effect of GetNodeEffects(step)) {
+			if (effect.changeFocusLevelTo != null) {
+				pathFocusLevels[effect.path] = effect.changeFocusLevelTo;
 			}
 
 			// hiding of nodes also unfocuses all of those nodes 
-			if (reveal.setExpandedTo == false) {
+			if (effect.setExpandedTo == false) {
 				for (const path of CE(pathFocusLevels).VKeys()) {
-					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only unfocuses descendants)
-						pathFocusLevels[reveal.path] = 0;
+					if (path.startsWith(`${effect.path}/`)) { // note the slash at end (meaning it only unfocuses descendants)
+						pathFocusLevels[effect.path] = 0;
 					}
 				}
 			}
-			if (reveal.hide) {
+			if (effect.hide) {
 				for (const path of CE(pathFocusLevels).VKeys()) {
-					if (path.startsWith(reveal.path)) {
-						pathFocusLevels[reveal.path] = 0;
+					if (path.startsWith(effect.path)) {
+						pathFocusLevels[effect.path] = 0;
 					}
 				}
 			}
@@ -276,23 +277,23 @@ export const GetPathFocusLevelRangesWithinSteps = CreateAccessor((steps: Timelin
 	};
 
 	for (const [index, step] of steps.entries()) {
-		for (const reveal of step.nodeReveals || []) {
-			if (reveal.changeFocusLevelTo != null) {
-				handleFocusLevelChange(reveal.path, reveal.changeFocusLevelTo, index);
+		for (const effect of GetNodeEffects(step)) {
+			if (effect.changeFocusLevelTo != null) {
+				handleFocusLevelChange(effect.path, effect.changeFocusLevelTo, index);
 			}
 
 			// hiding of nodes also unfocuses all of those nodes 
 			const pathsAmongRanges = ranges.map(a=>a.path).Distinct();
-			if (reveal.setExpandedTo == false) {
+			if (effect.setExpandedTo == false) {
 				for (const path of pathsAmongRanges) {
-					if (path.startsWith(`${reveal.path}/`)) { // note the slash at end (meaning it only unfocuses descendants)
+					if (path.startsWith(`${effect.path}/`)) { // note the slash at end (meaning it only unfocuses descendants)
 						handleFocusLevelChange(path, 0, index);
 					}
 				}
 			}
-			if (reveal.hide) {
+			if (effect.hide) {
 				for (const path of pathsAmongRanges) {
-					if (path.startsWith(reveal.path)) {
+					if (path.startsWith(effect.path)) {
 						handleFocusLevelChange(path, 0, index);
 					}
 				}

@@ -2,7 +2,7 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import chroma from "chroma-js";
-import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPathNodes, Map, NodeReveal, NodeType, SearchUpFromNodeForNodeMatchingX, TimelineStep} from "dm_common";
+import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPathNodes, Map, NodeType, SearchUpFromNodeForNodeMatchingX, TimelineStep} from "dm_common";
 import {NodeEffect, TimelineStepEffect} from "dm_common/Source/DB/timelineSteps/@TimelineStepEffect";
 import map from "updeep/types/map";
 import {InfoButton, Observer} from "web-vcore";

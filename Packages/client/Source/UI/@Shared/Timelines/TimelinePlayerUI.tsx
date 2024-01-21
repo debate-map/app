@@ -1,10 +1,10 @@
 import {Button, Column, Pre, Row, Span} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, FindReact, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GetEntries, E} from "web-vcore/nm/js-vextensions.js";
+import {GetEntries, E, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {VReactMarkdown_Remarkable, Segment, Observer} from "web-vcore";
 import {store} from "Store";
 import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {Polarity, TimelineStep, GetNodeL2, AsNodeL3, Map, GetTimelineSteps} from "dm_common";
+import {Polarity, TimelineStep, GetNodeL2, AsNodeL3, Map, GetTimelineSteps, GetNodeEffects} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {NodeBox} from "../Maps/Node/NodeBox.js";
 
@@ -100,12 +100,13 @@ export class TimelinePlayerUI extends BaseComponentPlus({} as {map: Map}, {}) {
 		const currentStep = GetPlayingTimelineStep(map.id);
 		const currentStepIndex = GetPlayingTimelineStepIndex(map.id);
 		const appliedStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
+		const currentStep_nodeEffects = currentStep ? GetNodeEffects(currentStep) : emptyArray;
 
 		if (!playingTimeline) return <div/>;
 		if (!currentStep) return <div/>;
 		if (appliedStepIndex == null || currentStepIndex == null) return null;
 
-		const stepApplied = appliedStepIndex >= currentStepIndex || (currentStep.nodeReveals || []).length == 0;
+		const stepApplied = appliedStepIndex >= currentStepIndex || currentStep_nodeEffects.length == 0;
 
 		const mapState = GetMapState.NN(map.id);
 		return (

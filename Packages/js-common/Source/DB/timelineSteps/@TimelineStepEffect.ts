@@ -1,5 +1,6 @@
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
-import {NodeReveal, TimelineStep} from "./@TimelineStep.js";
+import {emptyArray} from "web-vcore/.yalc/js-vextensions";
+import {TimelineStep} from "./@TimelineStep.js";
 import {GetTimelineStepTimesFromStart} from "../timelineSteps.js";
 
 export class TimelineStepEffect {
@@ -11,8 +12,12 @@ export class TimelineStepEffect {
 	setTimeTrackerState?: boolean;
 }
 
+export function IsStepEffectEmpty(stepEffect: TimelineStepEffect) {
+	return IsNodeEffectEmpty(stepEffect.nodeEffect) && stepEffect.setTimeTrackerState == null;
+}
+
 export class NodeEffect {
-	constructor(data?: RequiredBy<Partial<NodeReveal>, "path">) {
+	constructor(data?: RequiredBy<Partial<NodeEffect>, "path">) {
 		Object.assign(this, data);
 	}
 
@@ -24,6 +29,11 @@ export class NodeEffect {
 	setExpandedTo?: boolean|n;
 	hide?: boolean|n;
 	//hide_delay?: number|n;
+}
+
+export function IsNodeEffectEmpty(nodeEffect: NodeEffect|n) {
+	if (nodeEffect == null) return true;
+	return nodeEffect.show == null && nodeEffect.changeFocusLevelTo == null && nodeEffect.setExpandedTo == null && nodeEffect.hide == null;
 }
 
 // after accessor-based processing (see GetTimelineStepEffectsResolved accessor)

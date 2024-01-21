@@ -9,7 +9,7 @@ import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps, ToPathNodes, GetTimelineStepTimesFromStart} from "dm_common";
+import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps, ToPathNodes, GetTimelineStepTimesFromStart, GetNodeEffects} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 
 /*function AreSetsEqual(setA, setB) {
@@ -63,9 +63,9 @@ async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: n
 			}
 
 			// for the just-reached steps, apply node expand/collapse effects
-			for (const nodeReveal of targetSteps.SelectMany(a=>a.nodeReveals)) {
-				if (nodeReveal.setExpandedTo != null) {
-					ACTNodeExpandedSet({mapID, path: nodeReveal.path, expanded: nodeReveal.setExpandedTo});
+			for (const nodeEffect of targetSteps.SelectMany(a=>GetNodeEffects(a))) {
+				if (nodeEffect.setExpandedTo != null) {
+					ACTNodeExpandedSet({mapID, path: nodeEffect.path, expanded: nodeEffect.setExpandedTo});
 				}
 			}
 		});

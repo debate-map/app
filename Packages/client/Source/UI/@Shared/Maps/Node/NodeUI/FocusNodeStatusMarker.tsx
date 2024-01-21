@@ -1,4 +1,4 @@
-import {GetNode, GetNodeTagComps, GetNodeTags, NodeL3, TagComp_CloneHistory, Map, GetPathsWith1PlusFocusLevelAfterSteps, GetTimelineStep, GetTimelineSteps, GetNodeID, GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange, NodeReveal, IsNodeRevealEmpty, TimelineStep} from "dm_common";
+import {GetNode, GetNodeTagComps, GetNodeTags, NodeL3, TagComp_CloneHistory, Map, GetPathsWith1PlusFocusLevelAfterSteps, GetTimelineStep, GetTimelineSteps, GetNodeID, GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange, TimelineStep, NodeEffect, TimelineStepEffect, GetNodeEffects, IsNodeEffectEmpty} from "dm_common";
 import {Clone, E, Vector2} from "js-vextensions";
 import React from "react";
 import {store} from "Store";
@@ -139,17 +139,19 @@ async function AddOrUpdateFocusLevelRange(data: {
 }) {
 	const {baseSteps, baseRanges, oldRange, newRange} = data;
 	const nodePath = newRange.path;
-	const steps = Clone(baseSteps);
+	const steps = Clone(baseSteps) as TimelineStep[];
 	const updatedStepIndexes_forRemovingEffects = new Set<number>();
 	const updatedStepIndexes_forAddingEffects = new Set<number>();
+
+	//const getNodeEffectsInStep = (step: TimelineStep)=>(step.extras?.effects?.map(a=>a.nodeEffect).filter(a=>a) ?? []) as NodeEffect[];
 
 	// clear focus-level-setting at the old first-step (if any)
 	if (oldRange != null) {
 		const oldFirstStep = steps[oldRange.firstStep];
-		const nodeRevealToChangeOrRemove = oldFirstStep.nodeReveals.find(a=>a.path == oldRange.path && a.changeFocusLevelTo == oldRange.focusLevel);
-		if (nodeRevealToChangeOrRemove) {
-			// modify node-reveal to no longer change the focus-level
-			nodeRevealToChangeOrRemove.changeFocusLevelTo = null;
+		const nodeEffectToChangeOrRemove = GetNodeEffects(oldFirstStep).find(a=>a.path == oldRange.path && a.changeFocusLevelTo == oldRange.focusLevel);
+		if (nodeEffectToChangeOrRemove) {
+			// modify node-effect to no longer change the focus-level
+			nodeEffectToChangeOrRemove.changeFocusLevelTo = null;
 			updatedStepIndexes_forRemovingEffects.add(oldRange.firstStep);
 		}
 	}
@@ -157,11 +159,17 @@ async function AddOrUpdateFocusLevelRange(data: {
 	// set focus-level at new first-step
 	{
 		const newFirstStep = steps[newRange.firstStep];
-		const matchingRevealToModify = newFirstStep.nodeReveals.find(a=>a.path == newRange.path); // && a.changeFocusLevelTo == null);
-		if (matchingRevealToModify) {
-			matchingRevealToModify.changeFocusLevelTo = newRange.focusLevel;
+		const matchingNodeEffectToModify = GetNodeEffects(newFirstStep).find(a=>a.path == newRange.path); //&& a.changeFocusLevelTo == null);
+		if (matchingNodeEffectToModify) {
+			matchingNodeEffectToModify.changeFocusLevelTo = newRange.focusLevel;
 		} else {
-			newFirstStep.nodeReveals.push(new NodeReveal({path: newRange.path, changeFocusLevelTo: newRange.focusLevel}));
+			newFirstStep.extras = {...newFirstStep.extras};
+			newFirstStep.extras.effects = [
+				...(newFirstStep.extras.effects ?? []),
+				new TimelineStepEffect({
+					nodeEffect: new NodeEffect({path: newRange.path, changeFocusLevelTo: newRange.focusLevel}),
+				}),
+			];
 		}
 		updatedStepIndexes_forAddingEffects.add(newRange.firstStep);
 	}
@@ -169,9 +177,9 @@ async function AddOrUpdateFocusLevelRange(data: {
 	// clear focus-level-setting at the old end-step (if any)
 	const oldEndStep = oldRange?.endStep != null ? steps[oldRange.endStep] : null;
 	if (oldRange != null && oldEndStep != null) {
-		for (const nodeReveal of oldEndStep.nodeReveals) {
-			if (nodeReveal.path == oldRange.path) {
-				nodeReveal.changeFocusLevelTo = null;
+		for (const nodeEffect of GetNodeEffects(oldEndStep)) {
+			if (nodeEffect.path == oldRange.path) {
+				nodeEffect.changeFocusLevelTo = null;
 				updatedStepIndexes_forRemovingEffects.add(oldRange.endStep!);
 			}
 		}
@@ -191,11 +199,17 @@ async function AddOrUpdateFocusLevelRange(data: {
 			})?.focusLevel : null) ??
 			0;
 
-		const matchingRevealToModify = newEndStep.nodeReveals.find(a=>a.path == newRange.path); //&& a.changeFocusLevelTo == null);
-		if (matchingRevealToModify) {
-			matchingRevealToModify.changeFocusLevelTo = focusLevelToUseAfterThisRange;
+		const matchingNodeEffectToModify = GetNodeEffects(newEndStep).find(a=>a.path == newRange.path); //&& a.changeFocusLevelTo == null);
+		if (matchingNodeEffectToModify) {
+			matchingNodeEffectToModify.changeFocusLevelTo = focusLevelToUseAfterThisRange;
 		} else {
-			newEndStep.nodeReveals.push(new NodeReveal({path: newRange.path, changeFocusLevelTo: focusLevelToUseAfterThisRange}));
+			newEndStep.extras = {...newEndStep.extras};
+			newEndStep.extras.effects = [
+				...(newEndStep.extras.effects ?? []),
+				new TimelineStepEffect({
+					nodeEffect: new NodeEffect({path: newRange.path, changeFocusLevelTo: focusLevelToUseAfterThisRange}),
+				}),
+			];
 		}
 		updatedStepIndexes_forAddingEffects.add(newRange.endStep!);
 	}
@@ -207,15 +221,17 @@ async function AddOrUpdateFocusLevelRange(data: {
 
 	async function UpdateStepsAtIndexes(updatedStepIndexes: number[]) {
 		for (const stepIndex of updatedStepIndexes) {
-			const oldNodeRevealsJSON = JSON.stringify(baseSteps[stepIndex].nodeReveals);
-			const newNodeRevealsJSON = JSON.stringify(steps[stepIndex].nodeReveals);
-			if (newNodeRevealsJSON != oldNodeRevealsJSON) {
-				// if there are any node-reveals (with this node's path) that are empty, exclude them
-				const finalNodeReveals = steps[stepIndex].nodeReveals.filter(a=>{
-					if (a.path == nodePath && IsNodeRevealEmpty(a)) return false;
+			const step_old = baseSteps[stepIndex];
+			const step_new = steps[stepIndex];
+			const oldNodeEffectsJSON = JSON.stringify(GetNodeEffects(step_old));
+			const newNodeEffectsJSON = JSON.stringify(GetNodeEffects(step_new));
+			if (newNodeEffectsJSON != oldNodeEffectsJSON) {
+				// if there are any node-effects (with this node's path) that are empty, exclude them
+				const finalStepEffects = (step_new.extras?.effects ?? []).filter(a=>{
+					if (a.nodeEffect?.path == nodePath && IsNodeEffectEmpty(a.nodeEffect)) return false;
 					return true;
 				});
-				await RunCommand_UpdateTimelineStep({id: steps[stepIndex].id, updates: {nodeReveals: finalNodeReveals}});
+				await RunCommand_UpdateTimelineStep({id: step_new.id, updates: {extras: {...step_new.extras, effects: finalStepEffects}}});
 			}
 		}
 	}

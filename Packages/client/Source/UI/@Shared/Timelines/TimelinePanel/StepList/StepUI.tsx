@@ -5,33 +5,33 @@ import {E} from "web-vcore/nm/js-vextensions.js";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep} from "dm_common";
+import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {PositionOptionsEnum, StepEditorUI} from "./Editing/StepEditorUI.js";
-import {NodeRevealUI} from "./Editing/NodeRevealUI.js";
 import {StepEffectUI} from "./Editing/StepEffectUI.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(
 	{} as {index: number, last: boolean, map: Map, timeline: Timeline, steps: TimelineStep[], step: TimelineStep, player: YoutubePlayer},
-	{showNodeReveals: false, editorOpen: false},
+	{showStepEffects: false, editorOpen: false},
 ) {
 	constructor(props) {
 		super(props);
 		const {step} = this.props;
-		// if a timeline-step has no message, then start the step out with node-reveals shown (some timelines are used only for the node-reveals, and this makes the UI work better for that case)
+		// if a timeline-step has no message, then start the step out with node-effects shown (some timelines are used only for the node-effects, and this makes the UI work better for that case)
 		if (step.message.trim().length == 0) {
-			//this.SetState({showNodeReveals: true});
-			this.state = {...this.state, showNodeReveals: true};
+			//this.SetState({showStepEffects: true});
+			this.state = {...this.state, showStepEffects: true};
 		}
 	}
 
 	render() {
 		const {index, last, map, timeline, steps, step, player} = this.props;
 		const nextStep = steps[index + 1];
-		const {showNodeReveals, editorOpen} = this.state;
+		const {showStepEffects, editorOpen} = this.state;
 		const timeFromStart = GetTimelineStepTimeFromStart(step);
+		const nodeEffects = GetNodeEffects(step);
 
 		const mapState = GetMapState(map.id);
 		const editMode = mapState?.timelineEditMode ?? false;
@@ -93,22 +93,19 @@ export class StepUI extends BaseComponentPlus(
 							}}
 							source={step.message} replacements={{}} extraInfo={{}}/>
 					</Div>
-					{step.nodeReveals && step.nodeReveals.length > 0 &&
+					{nodeEffects.length > 0 &&
 					<Column style={E(
 						{position: "relative", background: "rgba(255,255,255,.3)", borderRadius: "0 0 10px 10px"},
 					)}>
 						<div style={{fontSize: 11, opacity: 0.7, textAlign: "center", padding: "3px 5px", cursor: "pointer"}} onClick={()=>{
-							this.SetState({showNodeReveals: !showNodeReveals});
+							this.SetState({showStepEffects: !showStepEffects});
 						}}>
-							Message affects display of {step.nodeReveals.length} node{step.nodeReveals.length > 1 ? "s" : ""}. (click to {showNodeReveals ? "hide" : "view"})
+							Message affects display of {nodeEffects.length} node{nodeEffects.length > 1 ? "s" : ""}. (click to {showStepEffects ? "hide" : "view"})
 						</div>
-						{showNodeReveals && step.nodeReveals &&
+						{showStepEffects &&
 						<Column p="0 5px 5px 5px">
 							{step.extras?.effects && step.extras.effects.map((effect, index)=>{
 								return <StepEffectUI key={index} map={map} step={step} effect={effect} editing={false} index={index}/>;
-							})}
-							{step.nodeReveals.map((nodeReveal, nodeRevealIndex)=>{
-								return <NodeRevealUI key={nodeRevealIndex} map={map} step={step} nodeReveal={nodeReveal} editing={false} index={nodeRevealIndex}/>;
 							})}
 						</Column>}
 					</Column>}
