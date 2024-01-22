@@ -1,7 +1,7 @@
 import {autorun, action} from "web-vcore/nm/mobx.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "Store/main";
-import {ACTNodeExpandedSet, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTNodeExpandedSet, GetNodeViewsAlongPath, GetNodeViewsBelowPath} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
 import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
 import {SleepAsync, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
@@ -9,7 +9,7 @@ import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, Map, GetNodeEffects} from "dm_common";
+import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, Map, GetNodeEffects, NodeView} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetPathsWith1PlusFocusLevelAfterEffects, GetPlaybackEffects, GetPlaybackEffectsReached, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
@@ -75,12 +75,22 @@ function ApplyEffectsOfType_show_hide_setExpandedTo(map: Map, effectsReached: Pl
 			//console.log("Applying node show/hide/setExpandTo effects. @effectIndex:", effectIndex, "@pathsVisibleAtThisPoint:", pathsVisibleAtThisPoint);
 
 			// first clear all expanded-states
-			ACTNodeExpandedSet({mapID: map.id, path: map.rootNode, expanded: false, resetSubtree: true});
-
+			/*ACTNodeExpandedSet({mapID: map.id, path: map.rootNode, expanded: false, resetSubtree: true});
 			// then apply node expandings necessary to reach the nodes that should be visible in the current step
 			if (pathsVisibleAtThisPoint.length) {
 				ExpandToNodes(map.id, pathsVisibleAtThisPoint);
-			}
+			}*/
+
+			// We want to collapse everything, then expand just the nodes that should be visible in the current step.
+			// However, the naive approach causes lots of unnecessary field changes. (eg. the clear-all collapses nodes that we're about to expand!)
+			// So, we first collect the lists of nodes to collapse and expand, then do the minimal set of changes required to yield the correct outcome.
+			const nodeViewsToCollapseAtStart = [...GetNodeViewsBelowPath(map.id, map.rootNode, true).values()];
+			const nodeViewsToExpandAtEnd = pathsVisibleAtThisPoint.SelectMany(path=>GetNodeViewsAlongPath(map.id, path, true)).Distinct();
+			const nodeViewsToCollapse_actual = nodeViewsToCollapseAtStart.filter(a=>a.expanded).Exclude(...nodeViewsToExpandAtEnd);
+			const nodeViewsToExpand_actual = nodeViewsToExpandAtEnd.filter(a=>!a.expanded);
+			//console.log("Collapsing:", nodeViewsToCollapse_actual.length, "Expanding:", nodeViewsToCollapse_actual.length);
+			nodeViewsToCollapse_actual.forEach(a=>a.expanded = false);
+			nodeViewsToExpand_actual.forEach(a=>a.expanded = true);
 		});
 	});
 }

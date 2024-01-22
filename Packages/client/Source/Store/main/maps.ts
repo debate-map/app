@@ -8,6 +8,7 @@ import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY} from "web-vcor
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
+import {GetPlaybackInfo} from "./maps/mapStates/PlaybackAccessors/Basic.js";
 
 export enum RatingPreviewType {
 	none = "none",
@@ -249,7 +250,8 @@ export const GetChildLimitInfoAtLocation = CreateAccessor({ctx: 1}, function(map
 	// if the map's root node, show all children
 	const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
 	const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelperMap);
-	const showAll = showAll_regular || showAll_forForcedExpand;
+	const showAll_forForcedExpand_vertical_forPlayback = GetPlaybackInfo() != null && !forLayoutHelperMap; // if playback is active, do forced vertical-expand (ie. no child-limit-bar) for all nodes in main map-ui
+	const showAll = showAll_regular || showAll_forForcedExpand || showAll_forForcedExpand_vertical_forPlayback;
 
 	const parentNodeView = GetNodeView(map.id, parentPath);
 	const childLayout = GetChildLayout_Final(parentNode.current, map);

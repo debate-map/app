@@ -27,10 +27,27 @@ export const GetPlaybackEffects = CreateAccessor(()=>{
 	}
 	return allEffects_resolved.OrderBy(a=>a.time_absolute);
 });
-export const GetPlaybackEffectsReached = CreateAccessor(()=>{
+
+// This naive implementation of GetPlaybackEffectsReached() is very inefficient, because it returns a new array each time the playback-time changes, breaking downstream caches.
+// To fix this, we "condense" the current-time into a "simpler value" (`farthestEffectTimeReached`), which only changes when a new effect is reached -- thus allowing GetPlaybackEffectsReached() to cache properly.
+/*export const GetPlaybackEffectsReached = CreateAccessor(()=>{
 	const effects = GetPlaybackEffects();
 	const time = GetPlaybackTime() ?? 0;
 	return effects.filter(effect=>time >= effect.time_absolute);
+});*/
+export const GetPlaybackEffectTimes = CreateAccessor(()=>{
+	const effects = GetPlaybackEffects();
+	return effects.map(effect=>effect.time_absolute).Distinct();
+});
+export const GetFarthestPlaybackEffectTimeReached = CreateAccessor(()=>{
+	const effectTimes = GetPlaybackEffectTimes();
+	const playbackTime = GetPlaybackTime() ?? 0;
+	return effectTimes.filter(effectTime=>effectTime <= playbackTime).LastOrX();
+});
+export const GetPlaybackEffectsReached = CreateAccessor(()=>{
+	const effects = GetPlaybackEffects();
+	const farthestEffectTimeReached = GetFarthestPlaybackEffectTimeReached() ?? 0;
+	return effects.filter(effect=>effect.time_absolute <= farthestEffectTimeReached);
 });
 
 export const GetPlaybackTimeTrackerState = CreateAccessor(()=>{
@@ -51,7 +68,9 @@ export const GetPlaybackVisiblePathRevealTimes = CreateAccessor((baseOn: "first 
 	return GetVisiblePathRevealTimesAfterEffects([playback.map.rootNode], effects, baseOn);
 });
 export const GetPlaybackVisiblePaths = CreateAccessor(()=>{
-	return CE(GetPlaybackVisiblePathRevealTimes()).VKeys();
+	const result = CE(GetPlaybackVisiblePathRevealTimes()).VKeys();
+	//console.log("New visible paths:", result);
+	return result;
 });
 
 export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{

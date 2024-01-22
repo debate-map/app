@@ -262,7 +262,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (this.mapUIEl == null || scrollContainer == null) return;
 		const scrollContainerRect = GetViewportRect(scrollContainer);
 		const scrollContainerSize_unzoomed = scrollContainerRect.Size.DividedBy(zoomLevel);
-		this.scrollView!.SetScroll(new Vector2(
+		this.SetScroll_IfChanged(new Vector2(
 			(mapCenter.x - (scrollContainerSize_unzoomed.x / 2)) * zoomLevel,
 			(mapCenter.y - (scrollContainerSize_unzoomed.y / 2)) * zoomLevel,
 		));
@@ -359,8 +359,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;
 		}
-		console.log("Loading scroll:", newScroll.toString(), "@center:", posInContainer.toString());
-		this.scrollView!.SetScroll(newScroll);
+		this.SetScroll_IfChanged(newScroll, ()=>console.log("Loading scroll:", newScroll.toString(), "@center:", posInContainer.toString()));
 		// Log("Scrolling to position: " + newScroll);
 
 		/* if (nextPathTry == nodePath)
@@ -383,13 +382,25 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 		const scrollNeededToEnactNewViewportRect = newViewportRect.Position.Minus(viewportRect.Position);
 		const newScroll = new Vector2(oldScroll).Plus(scrollNeededToEnactNewViewportRect);
-		console.log("Loading scroll:", newScroll.toString(), "@TargetRect", targetRect.toString());
-		this.scrollView.SetScroll(newScroll);
+		this.SetScroll_IfChanged(newScroll, ()=>console.log("Loading scroll:", newScroll.toString(), "@TargetRect", targetRect.toString()));
 
 		// the loadAnchorNodeTimer keeps running until it scrolls to the stored "anchor node"
 		// if timeline is playing, anchor-node is concealed, so timer keeps running
 		// this conflicts with the timeline's scrolling, so cancel the load-stored-anchor-node timer
 		if (stopLoadingStoredScroll) this.loadAnchorNodeTimer.Stop();
+	}
+
+	SetScroll_IfChanged(newScroll: Vector2, logFunc?: ()=>any) {
+		if (this.scrollView == null) return;
+		if (newScroll.Equals(this.scrollView.GetScroll())) return;
+
+		// when scroll-pos is actually applied to element, the browser (Chrome v120 anyway) floors the values, so we need to use the floored values for comparing
+		//if (newScroll.NewX(x=>Math.floor(x)).NewY(y=>Math.floor(y)).Equals(this.scrollView.GetScroll())) return;
+		const existingScroll = this.scrollView.GetScroll();
+		if (newScroll.x.Distance(existingScroll.x) < 1 && newScroll.y.Distance(existingScroll.y) < 1) return;
+
+		logFunc?.();
+		this.scrollView.SetScroll(newScroll);
 	}
 }
 

@@ -71,9 +71,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
 
 		// if the map's root node, show all children
-		const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
+		/*const showAll_regular = parentNode.id == map.rootNode; //|| parentNode.type == NodeType.argument;
 		const showAll_forForcedExpand = UseForcedExpandForPath(parentPath, forLayoutHelper);
-		const showAll = showAll_regular || showAll_forForcedExpand;
+		const showAll = showAll_regular || showAll_forForcedExpand;*/
 
 		const PrepPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
 			const direction = polarityGroup == "up" ? "up" : "down";
