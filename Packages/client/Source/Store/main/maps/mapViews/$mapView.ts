@@ -218,19 +218,28 @@ export function ACTNodeExpandedSet(opt: {
 	const pathNodes = ToPathNodes(opt.path);
 	const nodeViews = GetNodeViewsAlongPath(opt.mapID, pathNodes, true);
 
-	// first, expand/collapse the node-views that we know the final state of immediately
 	RunInAction("ACTNodeExpandedSet", ()=>{
+		// first, expand/collapse the node-views that we know the final state of immediately
 		if (opt.expandAncestors) {
 			nodeViews.slice(0, -1).forEach(a=>a && (a.expanded = true));
 		}
 		const nodeView = nodeViews.Last();
 		if (nodeView && opt.expanded != null) nodeView.expanded = opt.expanded;
+
+		// then, if "resetting" subtree, traverse descendent node-views and reset their expansion-fields to their defaults
+		if (opt.resetSubtree) {
+			const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
+			for (const [descendantPath, descendantNodeView] of descendantNodeViews.entries()) {
+				const defaultExpansionState = GetDefaultExpansionFieldsForNodeView(descendantPath);
+				descendantNodeView.Extend(defaultExpansionState);
+			}
+		}
 	});
 
 	// then, if "resetting" subtree, traverse descendent node-views and reset their expansion-fields to their defaults
 	// (it can take a moment to retrieve the default-expansion-states of all nodes in the node-view subtree, hence the resolve-waiter wrapper)
-	if (opt.resetSubtree) {
-		WaitTillResolvedThenExecuteSideEffects({onTimeout: "do nothing"}, addEffect=>{
+	/*if (opt.resetSubtree) {
+		return WaitTillResolvedThenExecuteSideEffects({onTimeout: "do nothing"}, addEffect=>{
 			let defaultExpansionStatesStillLoading = 0;
 			const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
 			for (const [descendantPath, descendantNodeView] of descendantNodeViews.entries()) {
@@ -244,7 +253,7 @@ export function ACTNodeExpandedSet(opt: {
 
 			if (defaultExpansionStatesStillLoading) throw new BailError(`Still loading the default-expansion-states for ${defaultExpansionStatesStillLoading} nodes.`);
 		});
-	}
+	}*/
 }
 
 /* export const ACTNodePanelOpen = StoreAction((mapID: string, path: string, panel: string)=> {

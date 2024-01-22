@@ -1,6 +1,7 @@
 import {store} from "Store";
 import {NodeStyleRule, NodeStyleRule_ThenType} from "Store/main/maps";
-import {GetPlaybackAppliedStepIndex, GetPlaybackInfo, GetPlaybackVisiblePaths_UpToAppliedStep} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
+import {GetPlaybackCurrentStepIndex, GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
+import {GetPlaybackVisiblePaths} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {SLMode} from "UI/@SL/SL";
 import {GetNodeChildrenL3, GetTimelineSteps, NodeL3, NodeType, Polarity} from "dm_common";
 import {Assert} from "js-vextensions";
@@ -112,11 +113,15 @@ export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: 
 	if (applyTimeline) {
 		const playback = GetPlaybackInfo();
 		const playingTimeline_steps = playback?.timeline ? GetTimelineSteps(playback.timeline.id) : null;
-		//const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(mapID);
-		const playingTimeline_appliedStepIndex = GetPlaybackAppliedStepIndex();
+
+		//const playingTimeline_appliedStepIndex = GetPlaybackAppliedStepIndex();
 		//const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
-		const playingTimelineVisiblePaths = GetPlaybackVisiblePaths_UpToAppliedStep(mapID, false); // false, so if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
-		if (playback?.timeline && playingTimeline_steps != null && playingTimeline_appliedStepIndex != null && playingTimeline_appliedStepIndex < playingTimeline_steps.length - 1) {
+		//const playingTimelineVisiblePaths = GetPlaybackVisiblePaths_UpToAppliedStep(mapID, false); // false, so if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
+
+		const playingTimeline_currentStepIndex = GetPlaybackCurrentStepIndex();
+		const playingTimelineVisiblePaths = GetPlaybackVisiblePaths();
+
+		if (playback?.timeline && playingTimeline_steps != null && playingTimeline_currentStepIndex != null && playingTimeline_currentStepIndex < playingTimeline_steps.length - 1) {
 			// for each child, if the child (or a descendent) is marked to be revealed by a currently-applied timeline-step, include the child in the revealed list/result
 			nodeChildrenL3 = nodeChildrenL3.filter(child=>child != null && playingTimelineVisiblePaths.Any(a=>a.startsWith(`${path}/${child.id}`)));
 		}

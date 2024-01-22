@@ -3,7 +3,7 @@ import {GetMap, GetTimeline, GetTimelineSteps, GetTimelineStep, TimelineStep} fr
 import {emptyArray} from "web-vcore/nm/js-vextensions";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMapState, GetNodeRevealHighlightTime} from "../$mapState.js";
-import {GetVisiblePathsAfterSteps, GetVisiblePathRevealTimesInSteps} from "./ForSteps.js";
+import {GetPlaybackVisiblePathRevealTimes} from "./ForEffects.js";
 
 /** Checks whether "playback of a timeline is active", and if so, returns some info for it. */
 export const GetPlaybackInfo = CreateAccessor(()=>{
@@ -55,20 +55,8 @@ export const GetPlaybackCurrentStep = CreateAccessor(()=>{
 	const step = steps[stepIndex];
 	return GetTimelineStep(step.id);
 });
-export const GetPlaybackCurrentStepRevealNodes = CreateAccessor((): string[]=>{
-	const playingTimeline_currentStep = GetPlaybackCurrentStep();
-	if (playingTimeline_currentStep == null) return emptyArray;
-	return GetVisiblePathsAfterSteps([playingTimeline_currentStep]);
-});
 
-export const GetPlaybackVisibleNodes_All = CreateAccessor((): string[]=>{
-	const playback = GetPlaybackInfo();
-	if (playback == null) return emptyArray;
-	const steps = playback ? GetTimelineSteps(playback.timeline.id) : emptyArray;
-	return [`${playback.map.rootNode}`].concat(GetVisiblePathsAfterSteps(steps));
-});
-
-export const GetPlaybackAppliedStepIndex = CreateAccessor((): number|n=>{
+/*export const GetPlaybackAppliedStepIndex = CreateAccessor((): number|n=>{
 	const playback = GetPlaybackInfo();
 	if (playback == null) return null;
 	return playback.mapState.playingTimeline_appliedStep;
@@ -90,10 +78,10 @@ export const GetPlaybackVisiblePaths_UpToAppliedStep = CreateAccessor((mapID: st
 
 	const appliedSteps = GetPlaybackAppliedSteps(mapID, excludeAfterCurrentStep);
 	return [`${map.rootNode}`].concat(GetVisiblePathsAfterSteps(appliedSteps));
-});
+});*/
+
 export const GetPlaybackTimeSinceNodeRevealed = CreateAccessor((mapID: string, nodePath: string, timeSinceLastReveal = false, limitToJustPastHighlightRange = false): number|n=>{
-	const appliedSteps = GetPlaybackAppliedSteps(mapID, true);
-	const nodeRevealTimes = GetVisiblePathRevealTimesInSteps(appliedSteps, timeSinceLastReveal ? "last fresh reveal" : "first reveal");
+	const nodeRevealTimes = GetPlaybackVisiblePathRevealTimes(timeSinceLastReveal ? "last fresh reveal" : "first reveal");
 	const nodeRevealTime = nodeRevealTimes[nodePath];
 	if (nodeRevealTime == null) return null;
 

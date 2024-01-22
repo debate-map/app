@@ -7,7 +7,7 @@ import {AssertWarn, GetPercentFromXToY} from "js-vextensions";
 import {CatchBail, CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
 import {comparer} from "web-vcore/nm/mobx";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
-import {GetVisiblePathsAfterSteps} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
+import {GetPlaybackEffects, GetVisiblePathsAfterEffects} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants";
 
 export class NodeDataForTreeGrapher {
@@ -43,20 +43,28 @@ export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: compar
 	if (steps.length == 0) return null;
 	const currentTime = playback.mapState.playingTimeline_time ?? 0;
 
-	const stepTimes = GetTimelineStepTimesFromStart(steps);
+	/*const stepTimes = GetTimelineStepTimesFromStart(steps);
 	const stepsReached = GetTimelineStepsReachedByTimeX(playback.timeline.id, currentTime);
 	const currentStep_time: number|null = stepTimes[stepsReached.length - 1];
 	const nextStep_time: number|null = stepTimes[stepsReached.length];
-	const stepsReachedAtNext = stepsReached.length < steps.length ? stepsReached.concat(steps[stepsReached.length]) : stepsReached;
+	const stepsReachedAtNext = stepsReached.length < steps.length ? stepsReached.concat(steps[stepsReached.length]) : stepsReached;*/
 
+	const effects = GetPlaybackEffects();
+	const effectTimes = effects.map(a=>a.time_absolute).Distinct();
+	const currentEffect_time = effectTimes.LastOrX(a=>a <= currentTime);
+	const nextEffect_time = effectTimes.LastOrX(a=>a > currentTime);
+
+	const effectsReached = currentEffect_time != null ? effects.filter(a=>a.time_absolute <= currentEffect_time) : [];
+	const effectsReachedAtNext = nextEffect_time != null ? effects.filter(a=>a.time_absolute <= nextEffect_time) : [];
 	return {
-		mapID: playback.mapID, map: playback.map, mapState: playback.mapState, timeline: playback.timeline,
-		steps,
+		playback,
+		effects,
 		//currentTime, // exclude current-time field; this is because we don't know how precisely the caller needs to know this, so we don't want the cache being unnecessarily invalidated all the time
-		stepTimes,
-		currentStep_time: nextStep_time as number|n, // needs to be redeclared as nullable fsr
-		nextStep_time: nextStep_time as number|n, // needs to be redeclared as nullable fsr
-		stepsReached, stepsReachedAtNext,
+		effectTimes,
+		currentEffect_time: currentEffect_time as number|n, // needs to be redeclared as nullable fsr
+		nextEffect_time: nextEffect_time as number|n, // needs to be redeclared as nullable fsr
+		effectsReached,
+		effectsReachedAtNext,
 	};
 });
 
@@ -66,13 +74,13 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 		const mainGraph_getNextKeyframeInfo_base = (): KeyframeInfo|null=>{
 			const data = GetTimelineApplyEssentials();
 			if (data == null) return null;
-			const {map, mapState, currentStep_time, nextStep_time, stepsReachedAtNext} = data;
-			const currentTime = mapState.playingTimeline_time ?? 0;
+			const {playback, currentEffect_time, nextEffect_time, effectsReachedAtNext} = data;
+			const currentTime = playback.mapState.playingTimeline_time ?? 0;
 
 			//const finalKeyframe_time = stepTimes.Last();
-			const nodePathsVisibleAtNextKeyframe = [map.rootNode].concat(GetVisiblePathsAfterSteps(stepsReachedAtNext));
+			const nodePathsVisibleAtNextKeyframe = GetVisiblePathsAfterEffects([playback.map.rootNode], effectsReachedAtNext);
 			const layout = layoutHelperGraph!.GetLayout(undefined, group=>RevealPathsIncludesNode(nodePathsVisibleAtNextKeyframe, group.leftColumn_userData?.["nodePath"] as string))!;
-			const percentThroughTransition = GetPercentThroughTransition(currentStep_time, nextStep_time, currentTime) ?? 0;
+			const percentThroughTransition = GetPercentThroughTransition(currentEffect_time, nextEffect_time, currentTime) ?? 0;
 			return {layout, percentThroughTransition};
 		};
 		const mainGraph_getNextKeyframeInfo = ()=>CatchBail(null, mainGraph_getNextKeyframeInfo_base);

@@ -15,7 +15,7 @@ import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GetOpenMapID} from "Store/main.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
-import {GetPlaybackAppliedStepIndex, GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
+import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {IsTimelineStepActive} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
 import {AudioFilePlayer} from "./StepList/AudioFilePlayer.js";
 import {StepUI} from "./StepList/StepUI.js";
@@ -232,7 +232,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 
 		const timeline = GetSelectedTimeline(map.id);
 		const oldCurrentStepIndex = GetPlaybackCurrentStepIndex() ?? 0;
-		const oldAppliedStepIndex = GetPlaybackAppliedStepIndex() ?? 0;
+		//const oldAppliedStepIndex = GetPlaybackAppliedStepIndex() ?? 0;
 		if (timeline && this.targetTime != null) {
 			const steps = GetTimelineSteps(timeline.id);
 			const firstStep = steps[0];
@@ -246,7 +246,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 					//console.log("Target-step changing @Old:", oldCurrentStepIndex, "@New:", newCurrentStepIndex, "@Time:", this.targetTime);
 					RunInAction("StepList_timer.setStepAndAppliedStep", ()=>{
 						mapState.playingTimeline_step = newCurrentStepIndex;
-						mapState.playingTimeline_appliedStep = newAppliedStepIndex;
+						//mapState.playingTimeline_appliedStep = newAppliedStepIndex;
 
 						// commented; see TimelineNodeFocuser.ts instead
 						/*if (newAppliedStepIndex > oldAppliedStepIndex) {
@@ -288,7 +288,8 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 		const mapState = GetMapState(map.id);
 		if (mapState == null) return null;
 		const steps = timeline ? GetTimelineSteps(timeline.id) : ea;
-		const targetStepIndex = GetPlaybackAppliedStepIndex();
+		//const targetStepIndex = GetPlaybackAppliedStepIndex();
+		const targetStepIndex = GetPlaybackCurrentStepIndex();
 
 		const audioFiles = timeline ? GetAudioFilesActiveForTimeline(map.id, timeline.id) : [];
 

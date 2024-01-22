@@ -42,5 +42,5 @@ export class MapState {
 	/** Step currently scrolled to, ie. the step to the right of the right-arrow in timeline-player ui. */
 	@O playingTimeline_step: number|n;
 	/** At the moment, this is always the same as playingTimeline_step. (only differs when using timeline-player floating panel with extra buttons; in that case, it's basically the "max step scrolled to" during session) */
-	@O playingTimeline_appliedStep: number|n;
+	//@O playingTimeline_appliedStep: number|n;
 }

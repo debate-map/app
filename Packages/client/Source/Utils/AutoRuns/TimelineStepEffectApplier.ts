@@ -4,89 +4,85 @@ import {GetOpenMapID} from "Store/main";
 import {ACTNodeExpandedSet, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
 import {MapUI, ACTUpdateAnchorNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
-import {SleepAsync, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
+import {SleepAsync, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, GetTimelineStepTimesFromStart, GetNodeEffects} from "dm_common";
+import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, Map, GetNodeEffects} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
-import {GetPathsWith1PlusFocusLevelAfterSteps, GetVisiblePathsAfterSteps} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
+import {GetPathsWith1PlusFocusLevelAfterEffects, GetPlaybackEffects, GetPlaybackEffectsReached, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
+import {AutoRun_HandleBail} from "./@Helpers";
 
 /*function AreSetsEqual(setA, setB) {
 	return setA.size === setB.size && [...setA].every((value) => setB.has(value));
 }*/
 
-let playingTimeline_lastStep: number|n;
-autorun(()=>{
-	// const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
-	const mapID = GetOpenMapID();
-	const mapState = GetMapState(mapID);
-	if (mapID == null || mapState == null) return;
-	const {playingTimeline_step} = mapState;
-	if (playingTimeline_step != playingTimeline_lastStep) {
-		playingTimeline_lastStep = playingTimeline_step;
-		if (playingTimeline_step != null) {
-			ApplyNodeEffectsForTimelineStepsUpToX(mapID, playingTimeline_step);
+/**
+ * The functions in this file apply *some* of the effects from the timeline, to the map:
+ * * Apply the "base expanding/collapsing" of nodes. (ie. makes the show-children arrow button show as expanded; node-hiding also occurs within accessor tree though, in GetNodeChildrenL3_Advanced)
+ * * Does scrolling to the current playback focus-nodes, IF the layout-helper-map is disabled.
+ * 
+ * Note: This is not the only place where effects are applied to the map. See also:
+ * * TimelineEffectApplier_Smooth: Applies scrolling and zooming effects, smoothly, IF the layout-helper-map is enabled.
+ * * GetNodeChildrenL3_Advanced: Does filtering on children, to hide nodes that should not be visible at the current point in playback.
+ */
+
+let playback_lastEffectIndexApplied: number|n;
+AutoRun_HandleBail(()=>{
+	const playback = GetPlaybackInfo();
+	if (playback == null) return;
+	//const effects = GetPlaybackEffects();
+	const effectsReached = GetPlaybackEffectsReached();
+	const effectIndex = effectsReached.length - 1;
+	if (effectIndex != -1 && effectIndex != playback_lastEffectIndexApplied) {
+		/*const effectsToApply =
+			playback_lastEffectIndexApplied == null ? effects.slice(0, effectIndex + 1) :
+			effectIndex > playback_lastEffectIndexApplied ? effects.slice(playback_lastEffectIndexApplied + 1, effectIndex + 1) :
+			[];
+		const effectsToUndo =
+			playback_lastEffectIndexApplied == null ? [] :
+			playback_lastEffectIndexApplied > effectIndex ? effects.slice(effectIndex + 1, playback_lastEffectIndexApplied + 1).reverse() : // reverse, so that effects are undone right-to-left
+			[];
+		if (effectsToApply.length || effectsToUndo.length) {
+			ApplyEffectsOfType_setExpandedTo(playback.map.id, effectsToApply, effectsToUndo, effectIndex);
+		}*/
+		//WaitXThenRun(0, ()=>{});
+		ApplyEffectsOfType_show_hide_setExpandedTo(playback.map, effectsReached, effectIndex);
+
+		// for all steps reached so far, apply scrolling and zooming such that the current list of focus-nodes are all visible (just sufficiently so)
+		// if layout-helper-map is enabled, node-focusing happens in a more precise way, in TimelineEffectApplier_Smooth.tsx
+		if (!store.main.timelines.layoutHelperMap_load) {
+			const focusNodes = GetPathsWith1PlusFocusLevelAfterEffects(effectsReached);
+			FocusOnNodes(playback.map.id, focusNodes);
 		}
+
+		playback_lastEffectIndexApplied = effectIndex;
 	}
 }, {name: "TimelineStepEffectApplier"});
 
-// todo: rework this to just calculate all effects from timeline start, for last-applied-step and new-current-step, then compare the difference to know what to "apply right now"
-async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: number) {
-	// since this GetAsync call may take a moment to complete, we need to make sure it returns the same data regardless of if the "current step" changes in the meantime
-	// (todo: make this a non-issue by finding a way to have such a delayed GetAsync call simply "canceled" if another call to ApplyNodeEffectsForTimelineStepsUpToX happens during that time)
-	const {stepsUpToTarget, targetSteps, newlyRevealedNodePaths, focusNodes} = await GetAsync(()=>{
-		//const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
-		const playback = GetPlaybackInfo();
-		if (playback?.timeline == null) return {stepsUpToTarget: null, targetSteps: [], newlyRevealedNodePaths: [], focusNodes: []};
-		const steps = GetTimelineSteps(playback.timeline.id);
-		const stepTimes = GetTimelineStepTimesFromStart(steps);
-		const stepsUpToTarget_ = steps.slice(0, stepIndex + 1);
-		//const targetSteps_last = steps[stepIndex];
-		const targetSteps_ = steps.filter((a, i)=>stepTimes[i] == stepTimes[stepIndex]); // we need to do this, since multiple steps get "applied" at the same time (ie. with the same timeFromStart)
-		const newlyRevealedNodePaths_ = GetVisiblePathsAfterSteps(targetSteps_);
-		const focusNodes_ = GetPathsWith1PlusFocusLevelAfterSteps(stepsUpToTarget_);
-		return {stepsUpToTarget: stepsUpToTarget_, targetSteps: targetSteps_, newlyRevealedNodePaths: newlyRevealedNodePaths_, focusNodes: focusNodes_};
-	});
-	if (stepsUpToTarget == null || targetSteps.length == 0) return;
+let ApplyEffectsOfType_show_hide_setExpandedTo_lastPathsVisible = [] as string[];
+function ApplyEffectsOfType_show_hide_setExpandedTo(map: Map, effectsReached: PlaybackEffect[], effectIndex: number) {
+	const pathsVisibleAtThisPoint = GetVisiblePathsAfterEffects([map.rootNode], effectsReached);
+	if (pathsVisibleAtThisPoint == ApplyEffectsOfType_show_hide_setExpandedTo_lastPathsVisible) return;
+	ApplyEffectsOfType_show_hide_setExpandedTo_lastPathsVisible = pathsVisibleAtThisPoint;
 
-	// apply the store changes all in one batch (so that any dependent UI components only have to re-render once)
+	// apply the store changes all in one react-batch, so that any dependent ui-components only have to re-render once
 	RunWithRenderingBatched(()=>{
-		RunInAction(`ApplyNodeEffectsForTimelineStepsUpToX.forStepIndex:${stepIndex}`, ()=>{
-			// for the just-reached steps, apply the expansion part required its node "show" effects (the actual showing/hiding of node-ui is handled within NodeUI.tsx)
-			//console.log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
-			if (newlyRevealedNodePaths.length) {
-				ExpandToNodes(mapID, newlyRevealedNodePaths);
-				// commented; for first project, we want the full-fledged automatic scroll-and-zoom system working, but...
-				// todo: make this configurable for the timeline creator and/or visitor (options: manual expand + zoom + scroll, auto expand + scroll-to-new, or auto expand + zoom + scroll to all focus-nodes)
-				//FocusOnNodes(mapID, newlyRevealedNodePaths);
-			}
+		// apply the store changes in one mobx-batch, so that any dependent accessors only have to re-execute once
+		RunInAction(`ApplyEffectsOfType_setExpandedTo.forEffectIndex:${effectIndex}`, ()=>{
+			//console.log("Applying node show/hide/setExpandTo effects. @effectIndex:", effectIndex, "@pathsVisibleAtThisPoint:", pathsVisibleAtThisPoint);
 
-			// for the just-reached steps, apply node expand/collapse effects
-			for (const nodeEffect of targetSteps.SelectMany(a=>GetNodeEffects(a))) {
-				if (nodeEffect.setExpandedTo != null) {
-					ACTNodeExpandedSet({mapID, path: nodeEffect.path, expanded: nodeEffect.setExpandedTo});
-				}
+			// first clear all expanded-states
+			ACTNodeExpandedSet({mapID: map.id, path: map.rootNode, expanded: false, resetSubtree: true});
+
+			// then apply node expandings necessary to reach the nodes that should be visible in the current step
+			if (pathsVisibleAtThisPoint.length) {
+				ExpandToNodes(map.id, pathsVisibleAtThisPoint);
 			}
 		});
 	});
-
-	// filter out focus-nodes that aren't actually valid atm (else FocusOnNodes func will wait for ~3s for them to become visible, which is not what we want)
-	// commented for now; since arg-nodes still show their premises even if "not expanded", for this to work, we'd need to check node-types along way -- which is overly complex/fragile atm
-	/*const focusNodes_valid = focusNodes.filter(path=>{
-		const pathNodes = ToPathNodes(path);
-		const nodeViews = GetNodeViewsAlongPath(mapID, path);
-		if (nodeViews.length < pathNodes.length || nodeViews.Any(a=>a?.expanded == false)) return false;
-		return true;
-	});*/
-
-	// for all steps reached so far, apply scrolling and zooming such that the current list of focus-nodes are all visible (just sufficiently so)
-	// if layout-helper-map is enabled, node-focusing happens in a more precise way, in TimelineEffectApplier_Smooth.tsx
-	if (!store.main.timelines.layoutHelperMap_load) {
-		FocusOnNodes(mapID, focusNodes);
-	}
 }
 
 function ExpandToNodes(mapID: string, paths: string[]) {

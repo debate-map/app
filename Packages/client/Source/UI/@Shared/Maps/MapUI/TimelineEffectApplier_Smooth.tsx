@@ -7,7 +7,7 @@ import {Map, TimelineStep} from "dm_common";
 import {MapState} from "Store/main/maps/mapStates/@MapState";
 import {GetOpenMapID} from "Store/main";
 import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "web-vcore/nm/mobx-graphlink";
-import {GetPathsWith1PlusFocusLevelAfterSteps, GetVisiblePathsAfterSteps} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
+import {GetPathsWith1PlusFocusLevelAfterEffects, GetVisiblePathsAfterEffects, PlaybackEffect} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";
 import {GetPercentThroughTransition, GetTimelineApplyEssentials, RevealPathsIncludesNode} from "../MapGraph";
 import {ACTUpdateAnchorNodeAndViewOffset, MapUI} from "../MapUI";
 
@@ -23,21 +23,21 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 
 	const data = GetTimelineApplyEssentials();
 	if (data == null) return null;
-	if (data.mapID != map.id) return null;
-	const {currentStep_time, nextStep_time, stepsReached, stepsReachedAtNext} = data;
-	if (currentStep_time == null || nextStep_time == null) return null;
+	if (data.playback.mapID != map.id) return null;
+	const {currentEffect_time, nextEffect_time, effectsReached, effectsReachedAtNext} = data;
+	if (currentEffect_time == null || nextEffect_time == null) return null;
 	const currentTime = mapState.playingTimeline_time ?? 0;
 
 	// todo: confirm that we don't need to filter the focus-node-paths to the visible-nodes here...
 	//const lastFocusNodePaths = GetFocusNodePaths(map.id, currentTime); // could also use currentStep_time
 	//const nextFocusNodePaths = GetFocusNodePaths(map.id, nextStep_time);
-	const lastFocusNodePaths = GetPathsWith1PlusFocusLevelAfterSteps(stepsReached);
-	const nextFocusNodePaths = GetPathsWith1PlusFocusLevelAfterSteps(stepsReachedAtNext);
+	const lastFocusNodePaths = GetPathsWith1PlusFocusLevelAfterEffects(effectsReached);
+	const nextFocusNodePaths = GetPathsWith1PlusFocusLevelAfterEffects(effectsReachedAtNext);
 
 	//const lastKeyframe_groupRects = GetGroupRectsAtKeyframe(map.id, mainGraph, layoutHelperGraph, currentStep_time);
 	//const nextKeyframe_groupRects = GetGroupRectsAtKeyframe(map.id, mainGraph, layoutHelperGraph, nextStep_time);
-	const lastKeyframe_groupRects = GetGroupRectsAtKeyframe(map.id, mainGraph, layoutHelperGraph, stepsReached);
-	const nextKeyframe_groupRects = GetGroupRectsAtKeyframe(map.id, mainGraph, layoutHelperGraph, stepsReachedAtNext);
+	const lastKeyframe_groupRects = GetGroupRectsAtKeyframe(map, mainGraph, layoutHelperGraph, effectsReached);
+	const nextKeyframe_groupRects = GetGroupRectsAtKeyframe(map, mainGraph, layoutHelperGraph, effectsReachedAtNext);
 	if (lastKeyframe_groupRects == null || nextKeyframe_groupRects == null) return null;
 
 	const MergeNodeRects = (nodePaths: string[], groupRectsAtTargetTime: NativeMap<string, VRect>)=>{
@@ -53,7 +53,7 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	const lastFocusNodeRectsMerged = MergeNodeRects(lastFocusNodePaths, lastKeyframe_groupRects);
 	const nextFocusNodeRectsMerged = MergeNodeRects(nextFocusNodePaths, nextKeyframe_groupRects);
 	if (lastFocusNodeRectsMerged == null || nextFocusNodeRectsMerged == null) return null;
-	const percentFromLastToNext = GetPercentThroughTransition(currentStep_time, nextStep_time, mapState.playingTimeline_time) ?? 0;
+	const percentFromLastToNext = GetPercentThroughTransition(currentEffect_time, nextEffect_time, mapState.playingTimeline_time) ?? 0;
 	const focusNodeRects_interpolated = InterpolateRect(lastFocusNodeRectsMerged, nextFocusNodeRectsMerged, percentFromLastToNext);
 	//console.log("percentFromLastToNext:", percentFromLastToNext);
 
@@ -120,17 +120,17 @@ export function InterpolateRect(rectA: VRect, rectB: VRect, percent: number) {
 	);
 }
 
-export function GetGroupRectsAtKeyframe(mapID: string, mainGraph: Graph, layoutHelperGraph: Graph|n, appliedSteps: TimelineStep[]) {
+export function GetGroupRectsAtKeyframe(map: Map, mainGraph: Graph, layoutHelperGraph: Graph|n, effects: PlaybackEffect[]) {
 	//return CE([...mainGraph.groupsByPath.entries()]).ToMap(a=>a[0], a=>a[1].InnerUIRect!);
 
-	const nodesVisibleAtStep = GetVisiblePathsAfterSteps(appliedSteps);
+	const nodesVisibleAfterEffects = GetVisiblePathsAfterEffects([map.rootNode], effects);
 
 	let tree: FlexNode<NodeGroup>;
 	if (layoutHelperGraph != null) {
 		tree = layoutHelperGraph.GetLayout(undefined, group=>{
 			//return mainGraph.groupsByPath.has(group.path);
 			//return nodesVisibleAtStep.includes(group.leftColumn_userData?.["nodePath"] as string);
-			return RevealPathsIncludesNode(nodesVisibleAtStep, group.leftColumn_userData?.["nodePath"] as string);
+			return RevealPathsIncludesNode(nodesVisibleAfterEffects, group.leftColumn_userData?.["nodePath"] as string);
 		})!;
 	} else {
 		tree = mainGraph.GetLayout()!;

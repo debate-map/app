@@ -10,7 +10,7 @@ import {Assert, Timer, ea, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
-import {GetTimeTrackerStateAtTimeX} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
+import {GetPlaybackTimeTrackerState} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects.js";
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
 import {useGraph} from "./MapGraph.js";
 import {MapUI} from "./MapUI.js";
@@ -125,8 +125,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 		const uiState = store.main.timelines;
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
 		const playback = GetPlaybackInfo();
-		const timelineSteps = playback?.timeline ? GetTimelineSteps(playback.timeline.id) : ea;
-		const timeTrackerVisible = mapState.playingTimeline_time != null ? GetTimeTrackerStateAtTimeX(timelineSteps, mapState.playingTimeline_time) : false;
+		//const timelineSteps = playback?.timeline ? GetTimelineSteps(playback.timeline.id) : ea;
+		const timeTrackerVisible = mapState.playingTimeline_time != null ? GetPlaybackTimeTrackerState() : false;
 
 		//const subNavBarWidth = 104;
 		const subNavBarWidth = 0;

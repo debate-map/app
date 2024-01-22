@@ -258,9 +258,9 @@ export function GetLoadActionFuncForURL(url: VURL) {
 				if (mapState) mapState.selectedTimeline = param.value;
 			} else if (param.name == "step") {
 				if (mapState) mapState.playingTimeline_step = ToInt(param.value) - 1;
-			} else if (param.name == "appliedStep") {
+			} /*else if (param.name == "appliedStep") {
 				if (mapState) mapState.playingTimeline_appliedStep = ToInt(param.value) - 1;
-			} else {
+			}*/ else {
 				store.main.urlOtherFlags.push({name: param.name, value: param.value});
 			}
 		}
@@ -353,10 +353,10 @@ export const GetNewURL = CreateAccessor({ctx: 1}, function(includeMapViewStr: bo
 			newURL.SetQueryVar("step", playingTimeline_step + 1);
 		}
 
-		const playingTimeline_appliedStep = mapID ? mapState.playingTimeline_appliedStep : null;
+		/*const playingTimeline_appliedStep = mapID ? mapState.playingTimeline_appliedStep : null;
 		if (playingTimeline_appliedStep != null) {
 			newURL.SetQueryVar("appliedStep", playingTimeline_appliedStep + 1);
-		}
+		}*/
 	}
 
 	// a default-child is only used (ie. removed from url) if there are no path-nodes after it
