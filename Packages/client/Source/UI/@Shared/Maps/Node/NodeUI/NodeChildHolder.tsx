@@ -3,7 +3,7 @@ import * as React from "react";
 import {useCallback} from "react";
 import {store} from "Store";
 import {GetChildLimitInfoAtLocation, UseForcedExpandForPath} from "Store/main/maps.js";
-import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {StripesCSS} from "tree-grapher";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
@@ -15,6 +15,7 @@ import {E, emptyObj, IsSpecialEmptyArray, nl, ToJSON, Vector2, VRect, WaitXThenR
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "../NodeLayoutConstants.js";
 import {ChildLimitBar} from "./ChildLimitBar.js";
@@ -47,9 +48,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const {map, parentNode, parentPath, parentTreePath, parentTreePath_priorChildCount, group, separateChildren, showArgumentsControlBar, belowNodeUI, minWidth, forLayoutHelper, nodeChildrenToShow} = this.props;
 		const {placeholderRect} = this.state;
 
-		const playingTimeline = GetPlayingTimeline(map.id);
+		const playback = GetPlaybackInfo();
 		const childLayout = GetChildLayout_Final(parentNode.current, map);
-		const showArgumentsControlBar_final = showArgumentsControlBar && !(playingTimeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
+		const showArgumentsControlBar_final = showArgumentsControlBar && !(playback?.timeline && store.main.timelines.hideEditingControls) && !IsSLModeOrLayout(childLayout) && !store.main.maps.screenshotMode;
 
 		const nodeView = GetNodeView(map.id, parentPath);
 		const orderingType = GetChildOrdering_Final(parentNode, group, map, store.main.maps.childOrdering);

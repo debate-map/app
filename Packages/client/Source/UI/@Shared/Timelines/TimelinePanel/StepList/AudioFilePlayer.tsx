@@ -1,4 +1,4 @@
-import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
+import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetStepAudioClipEnhanced} from "Utils/OPFS/Map/AudioMeta";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {GetTimelineStepTimesFromStart, Map, Timeline, TimelineStep} from "dm_common";
@@ -18,7 +18,7 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 	render() {
 		const {map, timeline, steps, audioFile, playSpeedGetter, isPlayingGetter, timeGetter} = this.props;
 		const stepTimes = GetTimelineStepTimesFromStart(steps);
-		const currentStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
+		const currentStepIndex = GetPlaybackCurrentStepIndex() ?? 0;
 		const currentStep = steps[currentStepIndex ?? -1];
 		const currentStepAudioClipEnhanced = currentStepIndex != null && currentStep ? GetStepAudioClipEnhanced(currentStep, steps[currentStepIndex + 1], map.id) : null;
 		const currentStep_startTimeInTimeline = stepTimes[currentStepIndex];

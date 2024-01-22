@@ -1,6 +1,6 @@
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
-import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX} from "dm_common";
 import {Assert, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
@@ -10,6 +10,7 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
+import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {StepList} from "../StepList.js";
 
 @Observer
@@ -157,12 +158,9 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 	}
 }
 
-export function GetPlayingTimelineTimeAsFrameNumber() {
-	const map = GetMap(GetOpenMapID());
-	if (map == null) return null;
-	const mapState = GetMapState(map.id);
-	if (mapState?.playingTimeline_time == null) return null;
-	const currentFrameTime = mapState.playingTimeline_time;
+export function GetPlaybackTimeAsFrameNumber() {
+	const currentFrameTime = GetPlaybackTime();
+	if (currentFrameTime == null) return null;
 	return GetTimelineTimeAsFrameNumber(currentFrameTime);
 }
 export function GetTimelineTimeAsFrameNumber(time: number, fps = 60) {

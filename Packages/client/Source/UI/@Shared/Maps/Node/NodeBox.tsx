@@ -3,7 +3,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {GetMapState, GetNodeRevealHighlightTime, GetPlayingTimeline, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {SLMode} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -25,6 +25,7 @@ import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {autorun} from "mobx";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers.js";
 import {GetClassForFrameRenderAtTime} from "UI/@Shared/Timelines/TimelinePanel/StepList/RecordDropdown.js";
+import {GetPlaybackTimeSinceNodeRevealed} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 import {NodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
@@ -154,8 +155,8 @@ export class NodeBox extends BaseComponentPlus(
 			//if (playingTimeline == null) return;
 			const dispose = AutoRun_HandleBail(()=>{
 				const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
-				const timeSinceRevealedByTimeline_simplified = map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true) : null;
-				const timeSinceRevealedByTimeline_precise = ()=>(map ? GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, false) : null);
+				const timeSinceRevealedByTimeline_simplified = map ? GetPlaybackTimeSinceNodeRevealed(map.id, path, true, true) : null;
+				const timeSinceRevealedByTimeline_precise = ()=>(map ? GetPlaybackTimeSinceNodeRevealed(map.id, path, true, false) : null);
 
 				const boxStyle = this.root?.DOM_HTML?.style;
 				if (boxStyle) {

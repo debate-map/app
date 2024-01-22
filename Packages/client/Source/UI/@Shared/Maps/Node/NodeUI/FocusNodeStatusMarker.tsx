@@ -1,29 +1,26 @@
-import {GetNode, GetNodeTagComps, GetNodeTags, NodeL3, TagComp_CloneHistory, Map, GetPathsWith1PlusFocusLevelAfterSteps, GetTimelineStep, GetTimelineSteps, GetNodeID, GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange, TimelineStep, NodeEffect, TimelineStepEffect, GetNodeEffects, IsNodeEffectEmpty} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsNodeEffectEmpty, Map, NodeEffect, NodeL3, TimelineStep, TimelineStepEffect} from "dm_common";
 import {Clone, E, Vector2} from "js-vextensions";
 import React from "react";
-import {store} from "Store";
-import {GetPlayingTimeline, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
-import {SearchResultRow} from "UI/@Shared/NavBar/SearchPanel.js";
+import {GetPlaybackCurrentStepIndex, GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
+import {GetPathFocusLevelRangesWithinSteps, PathFocusLevelRange} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {ES, Observer} from "web-vcore";
-import {MapWithBailHandling} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, Column, Row, Select, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Observer} from "web-vcore";
+import {Button, Column, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowVMenu, VMenuItem} from "web-vcore/nm/react-vmenu";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 @Observer
 export class FocusNodeStatusMarker extends BaseComponent<{map: Map, node: NodeL3, path: string}, {}> {
 	render() {
 		const {map, node, path} = this.props;
 
-		const playingTimeline = GetPlayingTimeline(map.id);
-		const currentStepIndex = GetPlayingTimelineStepIndex(map.id);
-		if (playingTimeline == null || currentStepIndex == null) return null;
+		const playback = GetPlaybackInfo();
+		const currentStepIndex = GetPlaybackCurrentStepIndex();
+		if (playback?.timeline == null || currentStepIndex == null) return null;
 
-		const steps = GetTimelineSteps(playingTimeline.id);
+		const steps = GetTimelineSteps(playback.timeline.id);
 		const stepsReached = steps.slice(0, currentStepIndex + 1);
 		const focusRanges = GetPathFocusLevelRangesWithinSteps(steps).filter(a=>a.path == path);
 		const focusRangesReached = GetPathFocusLevelRangesWithinSteps(stepsReached).filter(a=>a.path == path);

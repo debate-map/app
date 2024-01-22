@@ -1,5 +1,5 @@
 import {autorun, action} from "web-vcore/nm/mobx.js";
-import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTNodeExpandedSet, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {store} from "Store";
@@ -9,8 +9,10 @@ import {NodeBox} from "UI/@Shared/Maps/Node/NodeBox.js";
 import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {GetViewportRect, RunWithRenderingBatched} from "web-vcore";
 import {SlicePath, GetAsync, RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTimelineStep, GetVisiblePathsAfterSteps, TimelineStep, GetTimelineSteps, GetPathsWith1PlusFocusLevelAfterSteps, ToPathNodes, GetTimelineStepTimesFromStart, GetNodeEffects} from "dm_common";
+import {GetTimelineStep, TimelineStep, GetTimelineSteps, ToPathNodes, GetTimelineStepTimesFromStart, GetNodeEffects} from "dm_common";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General";
+import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
+import {GetPathsWith1PlusFocusLevelAfterSteps, GetVisiblePathsAfterSteps} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
 
 /*function AreSetsEqual(setA, setB) {
 	return setA.size === setB.size && [...setA].every((value) => setB.has(value));
@@ -37,9 +39,9 @@ async function ApplyNodeEffectsForTimelineStepsUpToX(mapID: string, stepIndex: n
 	// (todo: make this a non-issue by finding a way to have such a delayed GetAsync call simply "canceled" if another call to ApplyNodeEffectsForTimelineStepsUpToX happens during that time)
 	const {stepsUpToTarget, targetSteps, newlyRevealedNodePaths, focusNodes} = await GetAsync(()=>{
 		//const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
-		const timeline = GetPlayingTimeline(mapID);
-		if (timeline == null) return {stepsUpToTarget: null, targetSteps: [], newlyRevealedNodePaths: [], focusNodes: []};
-		const steps = GetTimelineSteps(timeline.id);
+		const playback = GetPlaybackInfo();
+		if (playback?.timeline == null) return {stepsUpToTarget: null, targetSteps: [], newlyRevealedNodePaths: [], focusNodes: []};
+		const steps = GetTimelineSteps(playback.timeline.id);
 		const stepTimes = GetTimelineStepTimesFromStart(steps);
 		const stepsUpToTarget_ = steps.slice(0, stepIndex + 1);
 		//const targetSteps_last = steps[stepIndex];

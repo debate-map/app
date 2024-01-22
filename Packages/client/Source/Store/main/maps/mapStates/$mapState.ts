@@ -1,8 +1,7 @@
-import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
-import {O} from "web-vcore";
-import {AccessorCallPlan, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNode, GetVisiblePathsAfterSteps, GetMap, Timeline, GetVisiblePathRevealTimesInSteps, GetTimelineStep, GetTimelineSteps, GetTimeline, TimelineStep} from "dm_common";
 import {store} from "Store/index.js";
+import {GetNode, GetTimeline, Timeline} from "dm_common";
+import {FromJSON, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ShowChangesSinceType} from "./@MapState.js";
 
 export const GetMapState = CreateAccessor({ctx: 1}, function(mapID: string|n) {
@@ -39,87 +38,9 @@ export const GetSelectedTimeline = CreateAccessor((mapID: string): Timeline|n=>{
 	const timelineID = GetMapState(mapID)?.selectedTimeline;
 	return GetTimeline(timelineID);
 });
-export const GetPlayingTimeline = CreateAccessor((mapID: string): Timeline|n=>{
-	if (mapID == null) return null;
-	const mapState = GetMapState(mapID);
-	if (mapState == null) return null;
-	if (!mapState.timelinePanelOpen || !mapState.timelinePlayback) return null;
-	const timelineID = mapState.selectedTimeline;
-	return GetTimeline(timelineID);
-});
-/* export const GetPlayingTimelineTime = StoreAccessor((mapID: string): number => {
-	if (mapID == null) return null;
-	return State('main', 'maps', mapID, 'playingTimeline_time');
-});*/
-export const GetPlayingTimelineStepIndex = CreateAccessor((mapID: string): number|n=>{
-	if (mapID == null) return null;
-	return GetMapState(mapID)?.playingTimeline_step;
-});
-export const GetPlayingTimelineStep = CreateAccessor((mapID: string)=>{
-	const playingTimeline = GetPlayingTimeline(mapID);
-	if (playingTimeline == null) return null;
-	const stepIndex = GetPlayingTimelineStepIndex(mapID) || 0;
-	const steps = GetTimelineSteps(playingTimeline.id);
-	const step = steps[stepIndex];
-	return GetTimelineStep(step.id);
-});
-export const GetPlayingTimelineCurrentStepRevealNodes = CreateAccessor((mapID: string): string[]=>{
-	const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
-	if (playingTimeline_currentStep == null) return emptyArray;
-	return GetVisiblePathsAfterSteps([playingTimeline_currentStep]);
-});
-
-export const GetPlayingTimelineRevealNodes_All = CreateAccessor((mapID: string): string[]=>{
-	const map = GetMap(mapID);
-	if (!map) return emptyArray;
-
-	const playingTimeline = GetPlayingTimeline(mapID);
-	const steps = playingTimeline ? GetTimelineSteps(playingTimeline.id) : emptyArray;
-	return [`${map.rootNode}`].concat(GetVisiblePathsAfterSteps(steps));
-});
-
-export const GetPlayingTimelineAppliedStepIndex = CreateAccessor((mapID: string): number|n=>{
-	if (mapID == null) return null;
-	return GetMapState(mapID)?.playingTimeline_appliedStep;
-});
-export const GetPlayingTimelineAppliedSteps = CreateAccessor((mapID: string, excludeAfterCurrentStep = false): TimelineStep[]=>{
-	const playingTimeline = GetPlayingTimeline(mapID);
-	if (playingTimeline == null) return emptyArray;
-	let stepIndex = GetPlayingTimelineAppliedStepIndex(mapID) ?? -1;
-	if (excludeAfterCurrentStep) {
-		const currentStep = GetPlayingTimelineStepIndex(mapID) ?? 0;
-		stepIndex = Math.min(currentStep, stepIndex);
-	}
-	const steps = GetTimelineSteps(playingTimeline.id);
-	return steps.slice(0, stepIndex + 1);
-});
-export const GetPlayingTimelineRevealPaths_UpToAppliedStep = CreateAccessor((mapID: string, excludeAfterCurrentStep = false): string[]=>{
-	const map = GetMap(mapID);
-	if (!map) return emptyArray;
-
-	const appliedSteps = GetPlayingTimelineAppliedSteps(mapID, excludeAfterCurrentStep);
-	return [`${map.rootNode}`].concat(GetVisiblePathsAfterSteps(appliedSteps));
-});
 
 export const GetNodeRevealHighlightTime = CreateAccessor({ctx: 1}, function() {
 	return this.store.main.timelines.nodeRevealHighlightTime;
-});
-export const GetTimeSinceNodeRevealedByPlayingTimeline = CreateAccessor((mapID: string, nodePath: string, timeSinceLastReveal = false, limitToJustPastHighlightRange = false): number|n=>{
-	const appliedSteps = GetPlayingTimelineAppliedSteps(mapID, true);
-	const nodeRevealTimes = GetVisiblePathRevealTimesInSteps(appliedSteps, timeSinceLastReveal ? "last fresh reveal" : "first reveal");
-	const nodeRevealTime = nodeRevealTimes[nodePath];
-	if (nodeRevealTime == null) return null;
-
-	// const timelineTime = GetPlayingTimelineTime(mapID);
-	const mapState = GetMapState(mapID);
-	if (mapState == null) return null;
-	const timelineTime = mapState.playingTimeline_time ?? 0;
-	let result = timelineTime - nodeRevealTime;
-	if (limitToJustPastHighlightRange) {
-		result = result.RoundTo(1); // round, to prevent unnecessary re-renders
-		result = result.KeepBetween(0, GetNodeRevealHighlightTime() + 1); // cap to 0 through [highlight-time]+1, to prevent unneeded re-renders after X+1
-	}
-	return result;
 });
 
 export const GetTimeFromWhichToShowChangedNodes = CreateAccessor((mapID: string|n)=>{

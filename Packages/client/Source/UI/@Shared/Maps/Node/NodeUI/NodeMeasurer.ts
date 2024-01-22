@@ -1,9 +1,10 @@
 import {GetFontSizeForNode, GetExpandedByDefaultAttachment, GetNodeDisplayText, NodeL3, NodeType_Info, GetSubPanelAttachments, Attachment, GetTitleIntegratedAttachment, Map, ShowNodeToolbar, NodeType, ChildGroup, GetToolbarItemsToShow} from "dm_common";
 import {GetAutoElement, GetContentSize} from "web-vcore";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetMapState, GetPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {AssertWarn} from "web-vcore/nm/js-vextensions";
 import {createAtom} from "web-vcore/nm/mobx";
+import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GUTTER_WIDTH_SMALL, TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_WIDTH_WITH_BORDER} from "../NodeLayoutConstants";
 
 /* keep func-name, for clearer profiling */ // eslint-disable-next-line
@@ -55,8 +56,8 @@ export const GetMeasurementInfoForNode = CreateAccessor(function GetMeasurementI
 
 	// If playing timeline, always try to use the max-width for the given node-type. (so we have consistent widths, so that automatic scrolling+zooming can work consistently)
 	// Exception: argument-nodes. We let these use dynamic-widths. Reason: They look really bad at max-width; and it's okay for this case, because they're not supposed to be used as focus-nodes anyway. (ie. for scrolling)
-	const playingTimeline = GetPlayingTimeline(map.id);
-	if (playingTimeline && node.type != NodeType.argument) {
+	const playback = GetPlaybackInfo();
+	if (playback?.timeline && node.type != NodeType.argument) {
 		expectedBoxWidth = maxWidth_final;
 	}
 

@@ -1,13 +1,13 @@
-import chroma, {Color} from "web-vcore/nm/chroma-js.js";
-import {GetNodeChildrenL3, GetNodeRevisions, GetTimelineSteps, NodeL3, NodeRevision, NodeType, Polarity} from "dm_common";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {SLMode} from "UI/@SL/SL";
-import {Chroma_Safe, HSLA} from "web-vcore";
-import {Assert} from "js-vextensions";
 import {store} from "Store";
-import {NodeStyleRule, NodeStyleRule_IfType, NodeStyleRule_ThenType} from "Store/main/maps";
+import {NodeStyleRule, NodeStyleRule_ThenType} from "Store/main/maps";
+import {GetPlaybackAppliedStepIndex, GetPlaybackInfo, GetPlaybackVisiblePaths_UpToAppliedStep} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
+import {SLMode} from "UI/@SL/SL";
+import {GetNodeChildrenL3, GetTimelineSteps, NodeL3, NodeType, Polarity} from "dm_common";
+import {Assert} from "js-vextensions";
+import {Chroma_Safe, HSLA} from "web-vcore";
+import chroma from "web-vcore/nm/chroma-js.js";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {GetPlayingTimeline, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineRevealPaths_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 
 export const nodeLightBackground = false;
 //export const nodeLightBackground = true; // experimental; toggle on for testing
@@ -110,13 +110,13 @@ export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: 
 
 	let nodeChildrenL3 = GetNodeChildrenL3(nodeID, path, includeMirrorChildren, tagsToIgnore);
 	if (applyTimeline) {
-		const playingTimeline = GetPlayingTimeline(mapID);
-		const playingTimeline_steps = playingTimeline ? GetTimelineSteps(playingTimeline.id) : null;
+		const playback = GetPlaybackInfo();
+		const playingTimeline_steps = playback?.timeline ? GetTimelineSteps(playback.timeline.id) : null;
 		//const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(mapID);
-		const playingTimeline_appliedStepIndex = GetPlayingTimelineAppliedStepIndex(mapID);
+		const playingTimeline_appliedStepIndex = GetPlaybackAppliedStepIndex();
 		//const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
-		const playingTimelineVisiblePaths = GetPlayingTimelineRevealPaths_UpToAppliedStep(mapID, false); // false, so if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
-		if (playingTimeline && playingTimeline_steps != null && playingTimeline_appliedStepIndex != null && playingTimeline_appliedStepIndex < playingTimeline_steps.length - 1) {
+		const playingTimelineVisiblePaths = GetPlaybackVisiblePaths_UpToAppliedStep(mapID, false); // false, so if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
+		if (playback?.timeline && playingTimeline_steps != null && playingTimeline_appliedStepIndex != null && playingTimeline_appliedStepIndex < playingTimeline_steps.length - 1) {
 			// for each child, if the child (or a descendent) is marked to be revealed by a currently-applied timeline-step, include the child in the revealed list/result
 			nodeChildrenL3 = nodeChildrenL3.filter(child=>child != null && playingTimelineVisiblePaths.Any(a=>a.startsWith(`${path}/${child.id}`)));
 		}

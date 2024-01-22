@@ -1,9 +1,9 @@
 import {store} from "Store";
-import {GetMapState, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStepIndex, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/AudioMeta.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
-import {DoesTimelineStepMarkItselfActiveAtTimeX, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
 import {ES, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
@@ -15,6 +15,8 @@ import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GetOpenMapID} from "Store/main.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {GetPlaybackAppliedStepIndex, GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
+import {IsTimelineStepActive} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
 import {AudioFilePlayer} from "./StepList/AudioFilePlayer.js";
 import {StepUI} from "./StepList/StepUI.js";
 import {RecordDropdown} from "./StepList/RecordDropdown.js";
@@ -149,7 +151,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 			const steps = GetTimelineSteps(timeline.id);
 			//const stepTimesFromStart = steps.map(step=>GetTimelineStepTimeFromStart(step.id));
 			const firstNormalStep = steps[1];
-			const targetStep = steps.Skip(1).LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a, this.targetTime)) ?? firstNormalStep!;
+			const targetStep = steps.Skip(1).LastOrX(a=>a && IsTimelineStepActive(a, this.targetTime)) ?? firstNormalStep!;
 			if (targetStep) {
 				targetStepIndex = steps.indexOf(targetStep);
 				//const postTargetStepIndex = targetStepIndex + 1 < steps.length ? targetStepIndex + 1 : -1;
@@ -229,13 +231,13 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 		if (mapState == null) return void console.warn("Map-state not found for map:", map.id);
 
 		const timeline = GetSelectedTimeline(map.id);
-		const oldCurrentStepIndex = GetPlayingTimelineStepIndex(map.id) ?? 0;
-		const oldAppliedStepIndex = GetPlayingTimelineAppliedStepIndex(map.id) ?? 0;
+		const oldCurrentStepIndex = GetPlaybackCurrentStepIndex() ?? 0;
+		const oldAppliedStepIndex = GetPlaybackAppliedStepIndex() ?? 0;
 		if (timeline && this.targetTime != null) {
 			const steps = GetTimelineSteps(timeline.id);
 			const firstStep = steps[0];
 
-			const targetStep = steps.LastOrX(a=>a && DoesTimelineStepMarkItselfActiveAtTimeX(a, this.targetTime)) ?? firstStep;
+			const targetStep = steps.LastOrX(a=>a && IsTimelineStepActive(a, this.targetTime)) ?? firstStep;
 			if (targetStep) {
 				const newCurrentStepIndex = steps.indexOf(targetStep);
 				//const newAppliedStepIndex = newCurrentStepIndex.KeepAtLeast(oldAppliedStepIndex);
@@ -286,7 +288,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 		const mapState = GetMapState(map.id);
 		if (mapState == null) return null;
 		const steps = timeline ? GetTimelineSteps(timeline.id) : ea;
-		const targetStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
+		const targetStepIndex = GetPlaybackAppliedStepIndex();
 
 		const audioFiles = timeline ? GetAudioFilesActiveForTimeline(map.id, timeline.id) : [];
 

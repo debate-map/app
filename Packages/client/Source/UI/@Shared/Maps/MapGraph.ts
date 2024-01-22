@@ -1,11 +1,13 @@
-import {GetMap, GetTimelineStepTimesFromStart, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetVisiblePathsAfterSteps, NodeType, TimelineStep} from "dm_common";
+import {GetMap, GetTimelineStepTimesFromStart, GetTimelineSteps, GetTimelineStepsReachedByTimeX, NodeType, TimelineStep} from "dm_common";
 import {useMemo} from "react";
 import {Graph, KeyframeInfo} from "tree-grapher";
-import {GetMapState, GetPlayingTimeline, GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineRevealNodes_All} from "Store/main/maps/mapStates/$mapState";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
 import {AssertWarn, GetPercentFromXToY} from "js-vextensions";
 import {CatchBail, CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
 import {comparer} from "web-vcore/nm/mobx";
+import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
+import {GetVisiblePathsAfterSteps} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants";
 
 export class NodeDataForTreeGrapher {
@@ -34,26 +36,22 @@ export const RevealPathsIncludesNode = (revealPaths: string[], nodePath: string)
 	return revealPaths.Any(a=>a.startsWith(nodePath));
 };
 
-export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: comparer.shallow}, (mapID: string|n)=>{
-	if (mapID == null) return null;
-	const map = GetMap(mapID);
-	if (map == null) return null;
-	const mapState = GetMapState(mapID);
-	if (mapState == null) return null;
-	const timeline = GetPlayingTimeline(mapID);
-	if (timeline == null) return null;
-	const steps = GetTimelineSteps(timeline.id);
+export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: comparer.shallow}, ()=>{
+	const playback = GetPlaybackInfo();
+	if (playback == null) return null;
+	const steps = GetTimelineSteps(playback.timeline.id);
 	if (steps.length == 0) return null;
-	const currentTime = mapState.playingTimeline_time ?? 0;
+	const currentTime = playback.mapState.playingTimeline_time ?? 0;
 
 	const stepTimes = GetTimelineStepTimesFromStart(steps);
-	const stepsReached = GetTimelineStepsReachedByTimeX(timeline.id, currentTime);
+	const stepsReached = GetTimelineStepsReachedByTimeX(playback.timeline.id, currentTime);
 	const currentStep_time: number|null = stepTimes[stepsReached.length - 1];
 	const nextStep_time: number|null = stepTimes[stepsReached.length];
 	const stepsReachedAtNext = stepsReached.length < steps.length ? stepsReached.concat(steps[stepsReached.length]) : stepsReached;
 
 	return {
-		mapID, map, mapState, timeline, steps,
+		mapID: playback.mapID, map: playback.map, mapState: playback.mapState, timeline: playback.timeline,
+		steps,
 		//currentTime, // exclude current-time field; this is because we don't know how precisely the caller needs to know this, so we don't want the cache being unnecessarily invalidated all the time
 		stepTimes,
 		currentStep_time: nextStep_time as number|n, // needs to be redeclared as nullable fsr
@@ -66,7 +64,7 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 	const graphInfo = useMemo(()=>{
 		const getGroupStablePath = group=>group.leftColumn_userData?.["nodePath"];
 		const mainGraph_getNextKeyframeInfo_base = (): KeyframeInfo|null=>{
-			const data = GetTimelineApplyEssentials(GetOpenMapID());
+			const data = GetTimelineApplyEssentials();
 			if (data == null) return null;
 			const {map, mapState, currentStep_time, nextStep_time, stepsReachedAtNext} = data;
 			const currentTime = mapState.playingTimeline_time ?? 0;

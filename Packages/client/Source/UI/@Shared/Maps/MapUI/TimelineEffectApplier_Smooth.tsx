@@ -3,10 +3,11 @@ import {observer} from "mobx-react";
 import React, {useContext} from "react";
 import {n} from "react-vcomponents/Dist/@Types.js";
 import {Graph, NodeGroup, FlexNode, GetTreeNodeBaseRect, GetTreeNodeOffset} from "tree-grapher";
-import {GetPathsWith1PlusFocusLevelAfterSteps, GetVisiblePathsAfterSteps, Map, TimelineStep} from "dm_common";
+import {Map, TimelineStep} from "dm_common";
 import {MapState} from "Store/main/maps/mapStates/@MapState";
 import {GetOpenMapID} from "Store/main";
 import {BailError, BailHandler, BailHandler_loadingUI_default, observer_mgl} from "web-vcore/nm/mobx-graphlink";
+import {GetPathsWith1PlusFocusLevelAfterSteps, GetVisiblePathsAfterSteps} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
 import {GetPercentThroughTransition, GetTimelineApplyEssentials, RevealPathsIncludesNode} from "../MapGraph";
 import {ACTUpdateAnchorNodeAndViewOffset, MapUI} from "../MapUI";
 
@@ -20,8 +21,9 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 		return null;
 	}*/
 
-	const data = GetTimelineApplyEssentials(GetOpenMapID());
+	const data = GetTimelineApplyEssentials();
 	if (data == null) return null;
+	if (data.mapID != map.id) return null;
 	const {currentStep_time, nextStep_time, stepsReached, stepsReachedAtNext} = data;
 	if (currentStep_time == null || nextStep_time == null) return null;
 	const currentTime = mapState.playingTimeline_time ?? 0;

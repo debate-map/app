@@ -1,30 +1,29 @@
-import {ChangeType, ChildGroup, GetChildLayout_Final, GetExtractedPrefixTextInfo, GetNodeChildrenL3, GetNodeDisplayText, GetNodeForm, GetParentNodeL3, GetParentPath, GetToolbarItemsToShow, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType, NodeType_Info, ShowNodeToolbar} from "dm_common";
+import {ChildGroup, GetNodeChildrenL3, GetToolbarItemsToShow, globalMapID, globalRootNodeID, IsChildGroupValidForNode, IsNodeL2, IsNodeL3, IsRootNode, Map, NodeL3, NodeType} from "dm_common";
 import React, {useCallback} from "react";
-import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced, GetNodeColor} from "Store/db_ext/nodes";
-import {GetPlayingTimeline, GetPlayingTimelineRevealPaths_UpToAppliedStep, GetPlayingTimelineStepIndex, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
+import {store} from "Store/index.js";
+import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {useRef_nodeLeftColumn} from "tree-grapher";
 import {NodeChildHolder} from "UI/@Shared/Maps/Node/NodeUI/NodeChildHolder.js";
+import {HKMode} from "UI/@SL/SL.js";
 import {logTypes} from "Utils/General/Logging.js";
+import {globalRootNodeID_hk} from "Utils/LibIntegrations/MobXHK/HKInitBackend.js";
+import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
 import {BailError, BailInfo} from "web-vcore/.yalc/mobx-graphlink";
-import {Assert, ea, emptyArray, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
+import {Assert, ea, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
-import {store} from "Store/index.js";
-import {UseForcedExpandForPath} from "Store/main/maps.js";
-import {globalRootNodeID_hk} from "Utils/LibIntegrations/MobXHK/HKInitBackend.js";
-import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
-import {HKMode} from "UI/@SL/SL.js";
+import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeDataForTreeGrapher} from "../MapGraph.js";
+import {NodeBox} from "./NodeBox.js";
 import {GUTTER_WIDTH, GUTTER_WIDTH_SMALL} from "./NodeLayoutConstants.js";
 import {CloneHistoryButton} from "./NodeUI/CloneHistoryButton.js";
+import {FocusNodeStatusMarker} from "./NodeUI/FocusNodeStatusMarker.js";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
-import {NodeBox} from "./NodeBox.js";
-import {FocusNodeStatusMarker} from "./NodeUI/FocusNodeStatusMarker.js";
 
 // class holding values that are derived entirely within CheckForChanges()
 class ObservedValues {
@@ -203,8 +202,8 @@ export class NodeUI extends BaseComponentPlus(
 		//const childrenShownByNodeExpandButton = nodeChildrenToShow.length + (hereArgChildrenToShow?.length ?? 0);
 		const childrenShownByNodeExpandButton = node.type == NodeType.argument ? ncToShow_relevance : nodeChildrenToShow;
 
-		const playingTimeline = GetPlayingTimeline(map.id);
-		const showFocusNodeStatusMarker = playingTimeline != null && store.main.timelines.showFocusNodes;
+		const playback = GetPlaybackInfo();
+		const showFocusNodeStatusMarker = playback?.timeline != null && store.main.timelines.showFocusNodes;
 
 		if (DEV_DYN) {
 			performance.mark("NodeUI_3");

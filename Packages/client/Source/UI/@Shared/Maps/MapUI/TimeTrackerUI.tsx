@@ -1,7 +1,8 @@
 import {store} from "Store";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
+import {GetTalkTimeSummaryAtTimeX} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps";
 import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel";
-import {GetTalkTimeSummaryAtTimeX, GetTimelineSteps, Map} from "dm_common";
+import {GetTimelineSteps, Map} from "dm_common";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
 import {Row} from "web-vcore/nm/react-vcomponents.js";

@@ -3,9 +3,10 @@ import {BaseComponent, FindReact, BaseComponentPlus} from "web-vcore/nm/react-ve
 import {GetEntries, E, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {VReactMarkdown_Remarkable, Segment, Observer} from "web-vcore";
 import {store} from "Store";
-import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Polarity, TimelineStep, GetNodeL2, AsNodeL3, Map, GetTimelineSteps, GetNodeEffects} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {GetPlaybackAppliedStepIndex, GetPlaybackCurrentStep, GetPlaybackCurrentStepIndex, GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {NodeBox} from "../Maps/Node/NodeBox.js";
 
 function GetPropsFromPropsStr(propsStr: string) {
@@ -94,15 +95,14 @@ export class TimelinePlayerUI extends BaseComponentPlus({} as {map: Map}, {}) {
 	root: Column|n;
 	render() {
 		const {map} = this.props;
-		const playingTimeline = GetPlayingTimeline(map.id);
-		if (playingTimeline == null) return null;
-		const steps = GetTimelineSteps(playingTimeline.id);
-		const currentStep = GetPlayingTimelineStep(map.id);
-		const currentStepIndex = GetPlayingTimelineStepIndex(map.id);
-		const appliedStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
+		const playback = GetPlaybackInfo();
+		if (playback == null) return null;
+		const steps = GetTimelineSteps(playback.timeline.id);
+		const currentStep = GetPlaybackCurrentStep();
+		const currentStepIndex = GetPlaybackCurrentStepIndex();
+		const appliedStepIndex = GetPlaybackAppliedStepIndex();
 		const currentStep_nodeEffects = currentStep ? GetNodeEffects(currentStep) : emptyArray;
 
-		if (!playingTimeline) return <div/>;
 		if (!currentStep) return <div/>;
 		if (appliedStepIndex == null || currentStepIndex == null) return null;
 

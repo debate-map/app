@@ -1,7 +1,7 @@
-import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, GetTimeTrackerStateAtTimeX, GetTimelineSteps, IsNodeL2, IsNodeL3, NodeL3, NodeType} from "dm_common";
+import {DoesMapPolicyGiveMeAccess_ExtraCheck, GetMap, GetNodeL3, GetTimelineSteps, IsNodeL2, IsNodeL3, NodeL3, NodeType} from "dm_common";
 import React, {useEffect, useMemo, useState} from "react";
 import {store} from "Store/index.js";
-import {GetMapState, GetPlayingTimeline, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph} from "tree-grapher";
 import {ShowHeader} from "UI/@SL/SL.js";
@@ -9,6 +9,8 @@ import {ES, HTMLProps, Observer, UseWindowEventListener} from "web-vcore";
 import {Assert, Timer, ea, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
+import {GetTimeTrackerStateAtTimeX} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
 import {useGraph} from "./MapGraph.js";
 import {MapUI} from "./MapUI.js";
@@ -122,8 +124,8 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 
 		const uiState = store.main.timelines;
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
-		const playingTimeline = GetPlayingTimeline(map.id);
-		const timelineSteps = playingTimeline ? GetTimelineSteps(playingTimeline.id) : ea;
+		const playback = GetPlaybackInfo();
+		const timelineSteps = playback?.timeline ? GetTimelineSteps(playback.timeline.id) : ea;
 		const timeTrackerVisible = mapState.playingTimeline_time != null ? GetTimeTrackerStateAtTimeX(timelineSteps, mapState.playingTimeline_time) : false;
 
 		//const subNavBarWidth = 104;
@@ -148,11 +150,11 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 				}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
-					{playingTimeline != null && timeTrackerVisible &&
+					{playback?.timeline != null && timeTrackerVisible &&
 						<TimeTrackerUI map={map}/>}
 					<div style={{position: "relative", flex: 1, minWidth: 0, height: "100%"}}>
 						<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_main}/>
-						{playingTimeline && uiState.layoutHelperMap_load && <>
+						{playback?.timeline && uiState.layoutHelperMap_load && <>
 							<TimelineEffectApplier_Smooth {...{map, mapState}} mainGraph={graph_main} layoutHelperGraph={graph_forLayoutHelper}/>
 							<div
 								className={[
