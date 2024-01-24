@@ -198,7 +198,7 @@ pub type FieldUpdate_Nullable<T> = MaybeUndefined<T>;*/
 
 // todo: probably rename the "XXXInput" structs to "XXXInit"
 
-/// Under the hood, identical to `MaybeUndefined<T>`. However, this type-alias makes the name of the enum (which comes from async_graphql) more consistent with our custom `CanOmit`.
+/// Under the hood, identical to `Option<T>`. However, this type-alias is used for db-struct fields (for updating), to signify the "type" of None value involved.  
 ///     (it also provides hoverable doc-text to explain the use-cases for db-struct fields)  
 /// * If field is not-nullable, and field-set is required during init: Use `T` in base-struct, `T` in init-struct, and `CanOmit<T>` in update-struct.  
 /// * If field is not-nullable, and field-set is optional during init: Use `T` in base-struct, `CanOmit<T>` in init-struct, and `CanOmit<T>` in update-struct.  

@@ -122,7 +122,7 @@ export class Node_Extras {
 		$gqlType: "JSON", // graphql doesn't support key-value-pair structures, so just mark as JSON
 		patternProperties: {".+": {$ref: "RatingSummary"}},
 	}, {opt: true})
-	ratingSummaries? = {} as {[key: string]: RatingSummary}; // derived from "nodeRatings" table
+	ratingSummaries?: {[key: string]: RatingSummary}|n; // derived from "nodeRatings" table
 
 	@Field({type: "string"}, {opt: true})
 	externalId?: string|n;

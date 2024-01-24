@@ -140,7 +140,7 @@ export class AddChildDialogState {
 export class ImportSubtreeDialogState {
 	constructor() { makeObservable(this); }
 
-	@O sourceType = DataExchangeFormat.csv_sl;
+	@O sourceType = DataExchangeFormat.json_cg;
 	@O autoSearchByTitle = true;
 	@O showAutoInsertTools = true;
 	@O autoInsert_interval = 1000;

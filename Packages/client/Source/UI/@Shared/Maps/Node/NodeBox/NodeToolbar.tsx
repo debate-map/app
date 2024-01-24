@@ -251,6 +251,9 @@ class ToolBarButton extends BaseComponent<{
 					panel == "extractedPrefixText" && {
 						//position: "absolute", left: 0,
 						padding: "0 10px",
+						// if we're showing prefix-text here, only set a min-width; while this can the layout system some imperfection (it expects fixed-widths), it's better than cutting off the prefix-text
+						width: null,
+						minWidth: TOOLBAR_BUTTON_WIDTH, // probably temp
 					},
 					SLMode && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: SLSkin.main.MainFont() /*fontSize: 15, letterSpacing: 1*/},
 					//(panel == "truth" || panel == "relevance") && {color: "transparent"},

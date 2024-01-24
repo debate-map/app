@@ -1,7 +1,7 @@
 import {IR_NodeAndRevision, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
 import {CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodeLink, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, OrderKey, systemUserID} from "dm_common";
-import {Assert} from "js-vextensions";
+import {Assert, IsString} from "js-vextensions";
 import {CG_Category, CG_Claim, CG_Debate, CG_Node, CG_Position, CG_Question} from "./DataModel.js";
 
 export class ImportContext {
@@ -38,13 +38,21 @@ export const GetResourcesInCategory_CG = CreateAccessor((context: ImportContext,
 	const result = [] as ImportResource[];
 	result.push(NewNodeResource(context, category, NodeType.category, path_indexes, path_titles, ChildGroup.freeform));
 	for (const [i, claim] of category.claims.entries()) {
-		// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
-		//result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim)), undefined, ClaimForm.question));
-		result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim))));
+		result.push(...GetResourcesInClaim_CG(context, claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim))));
 	}
 	return result;
 });
-export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node, nodeType: NodeType, path_indexes: number[], path_titles: string[], childGroup = ChildGroup.generic, claimForm?: ClaimForm)=>{
+export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, claim: CG_Claim, path_indexes: number[], path_titles: string[])=>{
+	const result = [] as ImportResource[];
+	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
+	//result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question));
+	result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles));
+	for (const [i, argument] of (claim.arguments ?? []).entries()) {
+		result.push(NewNodeResource(context, argument, NodeType.claim, path_indexes.concat(i), path_titles.concat(argument), ChildGroup.freeform));
+	}
+	return result;
+});
+export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node|string, nodeType: NodeType, path_indexes: number[], path_titles: string[], childGroup = ChildGroup.generic, claimForm?: ClaimForm)=>{
 	const node = new NodeL1({
 		//creator: systemUserID,
 		//createdAt: Date.now(),
@@ -53,7 +61,7 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		accessPolicy: context.nodeAccessPolicyID,
 		extras: {
 			// this isn't really needed (claim-gen's ids are currently transient), but might as well keep it
-			externalId: `claimgen:${data.id}`,
+			externalId: `claimgen:${IsString(data) ? "no-id" : data.id}`,
 		},
 	});
 
@@ -70,8 +78,8 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		form: claimForm,
 	});
 
-	const mainTitle = CG_Node.GetTitle_Main(data);
-	const narrativeTitle = CG_Node.GetTitle_Narrative(data);
+	const mainTitle = IsString(data) ? data : CG_Node.GetTitle_Main(data);
+	const narrativeTitle = IsString(data) ? null : CG_Node.GetTitle_Narrative(data);
 	//const placementInMapWantsQuestionFormSupplied = claimForm == ClaimForm.question;
 	if (narrativeTitle != null) {
 		Assert(nodeType == NodeType.claim, "Narrative-title should only be supplied for claims. (ui doesn't support editing other titles for non-claim nodes)");
