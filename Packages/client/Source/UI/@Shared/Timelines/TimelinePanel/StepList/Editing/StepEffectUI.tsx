@@ -11,6 +11,7 @@ import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert, Clone, E} from "web-vcore/nm/js-vextensions.js";
 import {Button, CheckBox, Column, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {StepEffectUI_Menu_Stub} from "./StepEffectUI_Menu";
 
 const GetNodeInfoForStepEffectUI = (nodeEffect: NodeEffect)=>{
 	const nodePath = nodeEffect.path;
@@ -56,6 +57,7 @@ export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						{width: "100%", padding: 3, background: backgroundColor.css(), borderRadius: 5, cursor: "pointer", border: "1px solid rgba(0,0,0,.5)"},
 					)}
 					onClick={()=>this.SetState({detailsOpen: !detailsOpen})}
+					onContextMenu={e=>e.preventDefault()}
 				>
 					{/*<Pre>{effect.time_relative.toFixed(1)}</Pre>*/}
 					<span style={{position: "relative", paddingTop: 2, fontSize: 12, color: "rgba(20,20,20,1)"}}>
@@ -80,6 +82,7 @@ export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
 						e.stopPropagation(); // prevent this click from causing details-section to open
 					}}/>
+					{editing && <StepEffectUI_Menu_Stub step={step} effect={effect} effectIndex={index}/>}
 				</Row>
 				{detailsOpen &&
 				<Column sel mt={5}>

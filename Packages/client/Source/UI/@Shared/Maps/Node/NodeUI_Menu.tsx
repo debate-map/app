@@ -39,7 +39,7 @@ export type MI_SharedProps = Props & {mapID: string|n, copiedNode: NodeL3|n, cop
 
 @WarnOfTransientObjectProps
 @Observer
-export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
+export class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
 		const {map, node, path, inList, childGroup} = this.props;
 
