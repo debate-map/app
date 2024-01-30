@@ -37,6 +37,7 @@ export const GetPlaybackInfoFor = CreateAccessor((mapID: string)=>{
 	if (playback == null) return emptyArray;
 	return GetTimelineSteps(playback.timeline.id);
 });*/
+/** Gets current time of active timeline's playback, in seconds. */
 export const GetPlaybackTime = CreateAccessor((): number|n=>{
 	const playback = GetPlaybackInfo();
 	if (playback == null) return null;

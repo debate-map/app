@@ -2,7 +2,7 @@ import {GetNodeColor} from "Store/db_ext/nodes";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import chroma from "chroma-js";
-import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPathNodes, Map, NodeType, SearchUpFromNodeForNodeMatchingX, TimelineStep} from "dm_common";
+import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPathNodes, GetTimelineStepTimeFromStart, Map, NodeType, SearchUpFromNodeForNodeMatchingX, TimelineStep} from "dm_common";
 import {NodeEffect, TimelineStepEffect} from "dm_common/Source/DB/timelineSteps/@TimelineStepEffect";
 import map from "updeep/types/map";
 import {InfoButton, Observer} from "web-vcore";
@@ -11,6 +11,8 @@ import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert, Clone, E} from "web-vcore/nm/js-vextensions.js";
 import {Button, CheckBox, Column, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {StepEffectUI_Menu_Stub} from "./StepEffectUI_Menu";
 
 const GetNodeInfoForStepEffectUI = (nodeEffect: NodeEffect)=>{
@@ -86,13 +88,29 @@ export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: Timel
 				</Row>
 				{detailsOpen &&
 				<Column sel mt={5}>
-					{/* controls to change the time_relative field of the effect */}
-					<Row center>
-						<Pre>Time (relative):</Pre>
-						<Spinner ml={5} min={0} value={effect.time_relative} onChange={val=>UpdateStepEffect(step, index, effect, a=>a.time_relative = val)}/>
-					</Row>
+					<EffectUIDetails_General map={map} step={step} stepEffect={effect} stepEffectIndex={index} editing={editing}/>
 					{effect.nodeEffect && <EffectUIDetails_NodeEffect map={map} step={step} stepEffect={effect} stepEffectIndex={index} effect={effect.nodeEffect} editing={editing}/>}
 				</Column>}
+			</>
+		);
+	}
+}
+
+@Observer
+class EffectUIDetails_General extends BaseComponent<{map: Map, step: TimelineStep, stepEffect: TimelineStepEffect, stepEffectIndex: number, editing: boolean}, {}> {
+	render() {
+		const {map, step, stepEffect, stepEffectIndex, editing} = this.props;
+		const playbackCurrentTime = GetPlaybackTime();
+		const stepStartTime = GetTimelineStepTimeFromStart(step);
+		return (
+			<>
+				{/* controls to change the time_relative field of the effect */}
+				<Row center>
+					<Pre>Time (relative):</Pre>
+					<Spinner ml={5} min={0} value={stepEffect.time_relative} onChange={val=>UpdateStepEffect(step, stepEffectIndex, stepEffect, a=>a.time_relative = val)}/>
+					{playbackCurrentTime != null && stepStartTime != null &&
+					<Pre>{` (that of current playback time: ${(playbackCurrentTime - stepStartTime).FloorTo_Str(.01)})`}</Pre>}
+				</Row>
 			</>
 		);
 	}

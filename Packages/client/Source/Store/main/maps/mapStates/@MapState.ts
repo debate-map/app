@@ -38,6 +38,7 @@ export class MapState {
 	@O showChangesSince_type = ShowChangesSinceType.sinceVisitX;
 	@O showChangesSince_visitOffset = 1;
 
+	/** Current time of active timeline's playback, in seconds. */
 	@O playingTimeline_time: number|n;
 	/** Step currently scrolled to, ie. the step to the right of the right-arrow in timeline-player ui. */
 	@O playingTimeline_step: number|n;
