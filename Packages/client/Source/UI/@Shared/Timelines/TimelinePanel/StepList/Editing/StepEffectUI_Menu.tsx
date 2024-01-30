@@ -47,7 +47,7 @@ export class StepEffectUI_Menu extends BaseComponent<Props, {}> {
 					onClick={e=>{
 						RunInAction_Set(this, ()=>store.main.timelines.copiedNodeEffectInfo = {stepID: step.id, effectIndex, effectData: Clone(effect), asCut: false});
 					}}/>
-				{copiedEffectInfo &&
+				{copiedEffectInfo && copiedEffectInfo.stepID != step.id &&
 					<VMenuItem text={[
 						`Paste copied effect`,
 						copiedEffectInfo_affectedNode ? ` (affecting node: ${GetNodeDisplayText(copiedEffectInfo_affectedNode).KeepAtMost(50)})` : "",
@@ -67,6 +67,18 @@ export class StepEffectUI_Menu extends BaseComponent<Props, {}> {
 							RunInAction_Set(this, ()=>store.main.timelines.copiedNodeEffectInfo = null); // we've removed the effect that was cut, so clear the step-effect "clipboard"
 						}
 					}}/>}
+				<VMenuItem text="Move up" style={liveSkin.Style_VMenuItem()}
+					onClick={e=>{
+						const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
+						newEffects.Move(newEffects[effectIndex], effectIndex - 1);
+						RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+					}}/>
+					<VMenuItem text="Move down" style={liveSkin.Style_VMenuItem()}
+						onClick={e=>{
+							const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
+							newEffects.Move(newEffects[effectIndex], effectIndex + 1);
+							RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+						}}/>
 			</>
 		);
 	}
