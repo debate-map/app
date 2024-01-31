@@ -1,4 +1,4 @@
-import {GetTimelines, GetTimelineStep, GetTimelineSteps, Map, MeID} from "dm_common";
+import {GetTimelines, GetTimelineStep, GetTimelineSteps, Map, MeID, Timeline, TimelineStep} from "dm_common";
 import React from "react";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUIWrapper.js";
@@ -7,12 +7,14 @@ import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
 import {RunCommand_DeleteTimeline} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, Observer, RunInAction, RunInAction_Set} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
+import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
+import {DateToString, TimeToString} from "Utils/UI/General";
 
 @Observer
 export class Header1 extends BaseComponent<{map: Map}, {}> {
@@ -85,7 +87,7 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 					<CheckBox text="Edit mode" value={mapState.timelineEditMode} onChange={val=>RunInAction_Set(this, ()=>mapState.timelineEditMode = val)}/>
 					<CheckBox ml={5} text="Audio mode" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps."
 						value={uiState.audioMode} onChange={val=>RunInAction_Set(this, ()=>uiState.audioMode = val)}/>
-					<OptionsDropdown/>
+					<OptionsDropdown timeline={timeline} steps={steps}/>
 				</Row>
 			</Row>
 		);
@@ -93,8 +95,9 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 }
 
 @Observer
-class OptionsDropdown extends BaseComponent<{}, {}> {
+class OptionsDropdown extends BaseComponent<{timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
 	render() {
+		const {timeline, steps} = this.props;
 		const uiState = store.main.timelines;
 		const uiState_maps = store.main.maps;
 		return (
@@ -104,6 +107,11 @@ class OptionsDropdown extends BaseComponent<{}, {}> {
 					<Row style={{fontWeight: "bold"}}>Editing</Row>
 					<CheckBox text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)"
 						value={uiState_maps.lockMapScrolling} onChange={val=>RunInAction_Set(this, ()=>uiState_maps.lockMapScrolling = val)}/>
+					<Button text="Export timeline data" title="Exports the data of the timeline, and all of its steps, to a json file." onClick={async()=>{
+						const data = {timeline, steps};
+						const json = JSON.stringify(data, null, "\t");
+						StartDownload(json, `TimelineExport_${TimeToString(Date.now(), true)}_ForTimeline_${timeline?.id}.json`);
+					}}/>
 
 					<Row mt={10} style={{fontWeight: "bold"}}>Playback</Row>
 					<Row>

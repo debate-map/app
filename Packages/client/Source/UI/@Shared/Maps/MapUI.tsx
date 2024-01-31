@@ -6,7 +6,7 @@ import {ACTNodeSelect, GetAnchorNodePath, GetMapView, GetNodeView, GetNodeViewsA
 import {ConnectorLinesUI, Graph, GraphColumnsVisualizer, GraphContext, SpaceTakerUI} from "tree-grapher";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {StandardCompProps, TreeGraphDebug} from "Utils/UI/General.js";
+import {TreeGraphDebug} from "Utils/UI/General.js";
 import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
 import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
 import {BaseComponent, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
@@ -92,7 +92,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 		//graphInfo.SetContentScaling(zoomLevel);
 
 		return (
-			<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
+			<ScrollView {...rest} ref={c=>this.scrollView = c}
 				backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.contentOuter) || a == this.scrollView!.content || a == this.mapUIEl}
 				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
 				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
