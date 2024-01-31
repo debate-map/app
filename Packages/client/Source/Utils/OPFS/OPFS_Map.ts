@@ -84,7 +84,7 @@ export class OPFS_Map {
 		}
 
 		RunInAction(`OPFS_Map.LoadFiles [mapID:${this.mapID}]`, ()=>{
-			this.files = newFiles.OrderBy(a=>a.name);
+			this.files = newFiles.OrderBy(a=>a.name.toLowerCase());
 			this.loaded = true;
 		});
 	}
@@ -109,7 +109,7 @@ export class OPFS_Map {
 		// update file list, to reflect changes
 		//await this.LoadFiles();
 		RunInAction(`OPFS_Map.SaveFile [mapID:${this.mapID}]`, ()=>{
-			this.files = this.files.filter(a=>a.name != fileName_final).concat(file).OrderBy(a=>a.name);
+			this.files = this.files.filter(a=>a.name != fileName_final).concat(file).OrderBy(a=>a.name.toLowerCase());
 		});
 	}
 

@@ -50,7 +50,7 @@ export async function ModifyAudioFileMeta(opfsForMap: OPFS_Map, audioMeta: Audio
 }
 export async function DeleteStepClip(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string) {
 	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
-		delete newAudioFileMeta[stepID];
+		delete newAudioFileMeta.stepClips[stepID];
 	});
 }
 export async function SetStepClipTimeInAudio(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string, startTime: number) {
@@ -258,7 +258,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 					{stepClipsInAudioFiles.map(stepClipPair=>{
 						const audioFileMeta = audioFileMetas.find(a=>a.key == stepClipPair.key)!;
 						return (
-							<Row key={index} mt={5} p="1px 5px">
+							<Row key={stepClipPair.index} mt={5} p="1px 5px">
 								<Text>{`In "${audioFileMeta.key}": Volume:`}</Text>
 								<Spinner ml={5} style={{width: 50}} enabled={creatorOrMod} value={stepClipPair.value.volume} onChange={async val=>{
 									SetStepClipVolume(opfsForMap, audioMeta, audioFileMeta.key, step.id, val);

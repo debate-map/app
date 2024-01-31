@@ -11,7 +11,7 @@ export class PolicyPicker extends BaseComponentPlus({} as {value: string|n, onCh
 	dropDown: DropDown|n;
 	render() {
 		const {value, onChange, containerStyle, children} = this.props;
-		const policies = GetAccessPolicies().OrderBy(a=>a.name);
+		const policies = GetAccessPolicies().OrderBy(a=>a.name.toLowerCase());
 		return (
 			<DropDown ref={c=>this.dropDown = c} style={E({flex: 1}, containerStyle)}>
 				<DropDownTrigger>{
