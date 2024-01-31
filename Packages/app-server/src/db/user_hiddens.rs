@@ -47,6 +47,7 @@ pub struct UserHidden {
     #[graphql(name = "backgroundCustom_position")]
     pub backgroundCustom_position: Option<String>,
     pub addToStream: bool,
+    // todo: fix that this is not actually getting updated when user creates choosen a different access-policy for a new entry (or, rename this field)
     pub lastAccessPolicy: Option<String>,
     pub extras: JSONValue,
 }
@@ -71,12 +72,15 @@ pub struct UserHiddenUpdates {
     #[graphql(name = "backgroundCustom_position")]
 	pub backgroundCustom_position: CanNullOrOmit<String>,
 	pub addToStream: CanOmit<bool>,
+	pub extras: CanOmit<JSONValue>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct UserHidden_Extras {
     pub userFollows: Option<IndexMap<String, UserFollow>>,
+    pub defaultAccessPolicy_nodeRatings: Option<String>,
 }
+pub fn user_hidden_extras_locked_subfields() -> Vec<&'static str> { vec![] }
 
 #[derive(InputObject, Clone, Serialize, Deserialize)]
 pub struct UserFollow {

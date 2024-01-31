@@ -1,6 +1,6 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {Timeline, MeID, TimelineStep, GetUserHidden, GetSystemAccessPolicyID, OrderKey} from "dm_common";
+import {Timeline, MeID, TimelineStep, GetUserHidden, GetSystemAccessPolicyID, OrderKey, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import {RunCommand_AddTimeline, RunCommand_AddTimelineStep} from "Utils/DB/Command.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {TimelineDetailsUI} from "./TimelineDetailsUI.js";
@@ -18,14 +18,14 @@ Continue to the next step to begin displaying the comments made by those involve
 export async function ShowAddTimelineDialog(userID: string, mapID: string) {
 	const prep = await GetAsync(()=>{
 		return {
-			accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy ?? GetSystemAccessPolicyID("Public, ungoverned (standard)"),
+			accessPolicy: GetFinalAccessPolicyForNewEntry(null, null, "timelines"),
 		};
 	});
 
 	let newTimeline = new Timeline({
 		mapID,
 		name: "",
-		accessPolicy: prep.accessPolicy,
+		accessPolicy: prep.accessPolicy.id,
 	});
 
 	let error = null;

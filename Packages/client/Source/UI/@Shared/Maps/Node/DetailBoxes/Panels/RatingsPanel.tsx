@@ -1,8 +1,8 @@
-import {DeleteNodeRating, GetAccessPolicy, GetRating, GetRatingTypeInfo, GetSystemAccessPolicyID, NodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, TransformRatingForContext} from "dm_common";
+import {DeleteNodeRating, GetAccessPolicy, GetRating, GetRatingTypeInfo, GetSystemAccessPolicyID, NodeL3, MeID, NodeRating, NodeRatingType, SetNodeRating, ShouldRatingTypeBeReversed, systemPolicy_publicGoverned_name, TransformRatingForContext, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import React from "react";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
+import {PolicyPicker, PolicyPicker_Button} from "UI/Database/Policies/PolicyPicker";
 import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command";
 import {ES, Observer, Slider} from "web-vcore";
 import {Button, Column, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -28,18 +28,18 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 		//const ratingsOfSelfAndFollowed = GetRatings.CatchBail(emptyArray, node.id, ratingType, [...meID ? [meID] : [], ...markRatingUsers]); // catch bail (ie. allow lazy-load)
 		const myRating_raw = GetRating.CatchBail(null, node.id, ratingType, meID); // catch bail (ie. allow lazy-load)
 		const myRating_displayVal = TransformRatingForContext(myRating_raw?.value, reverseRatings);
-		const myRating_accessPolicy = GetAccessPolicy(myRating_raw?.accessPolicy);
+		const newRating_accessPolicy_initial = GetFinalAccessPolicyForNewEntry(null, myRating_raw?.accessPolicy, "nodeRatings");
 
 		//const [showOptionalRatings, setExpanded] = useState(false);
 		const showOptionalRatings = store.main.ratingUI.showOptionalRatings;
 
-		function SetRating(newDisplayValue: number, accessPolicyID?: string) {
+		function SetRating(newDisplayValue: number, existingAccessPolicyID?: string) {
 			if (meID == null) return void ShowSignInPopup();
 
 			let newRating_xValue_final = newDisplayValue;
 			newRating_xValue_final = TransformRatingForContext(newRating_xValue_final, reverseRatings);
 			const newRating = new NodeRating({
-				accessPolicy: accessPolicyID ?? systemPolicy_publicGoverned_id,
+				accessPolicy: existingAccessPolicyID ?? newRating_accessPolicy_initial.id,
 				node: node.id,
 				type: ratingType,
 				value: newRating_xValue_final,
@@ -65,7 +65,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 							SetRating(val);
 						}}/>
 				</Row>
-				{myRating_raw != null && myRating_displayVal != null && myRating_accessPolicy != null &&
+				{myRating_raw != null && myRating_displayVal != null &&
 				<>
 					<Row>
 						<Slider min={0} max={100} value={myRating_displayVal} onChange={val=>{
@@ -79,17 +79,10 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {}
 							await RunCommand_DeleteNodeRating({id: myRating_raw.id!});
 						}}/>
 						<Text ml={10} mr={5}>Access-policy:</Text>
-						<PolicyPicker containerStyle={{flex: null}}
-							value={myRating_raw.accessPolicy}
-							onChange={policyID=>{
-								SetRating(myRating_displayVal, policyID);
-							}}
-						>
-							<Button text={
-								//`${myRating_accessPolicy.name} (id: ${myRating_accessPolicy.id})`
-								`${myRating_accessPolicy.name} [${myRating_accessPolicy.id.slice(0, 2)}]`
-								//myRating_accessPolicy.name
-							} style={{padding: "3px 10px"}}/>
+						<PolicyPicker containerStyle={{flex: null}} value={myRating_raw.accessPolicy} onChange={policyID=>{
+							SetRating(myRating_displayVal, policyID);
+						}}>
+							<PolicyPicker_Button policyID={myRating_raw.accessPolicy} idTrimLength={2} style={{padding: "3px 10px"}}/>
 						</PolicyPicker>
 					</Row>
 				</>}

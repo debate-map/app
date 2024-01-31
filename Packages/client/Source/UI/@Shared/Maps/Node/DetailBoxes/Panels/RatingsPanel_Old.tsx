@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, observer_mgl, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Chroma, Chroma_Safe, ES, GetPageRect, GetViewportRect, InfoButton, Observer, observer_simple, RunInAction_Set, uplotDefaults} from "web-vcore";
-import {NodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, NodeType, Polarity, GetUserFollows_List, GetRatingSummary} from "dm_common";
+import {NodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, ShouldRatingTypeBeReversed, TransformRatingForContext, GetNodeTypeDisplayName, SetNodeRating, DeleteNodeRating, GetUserHidden, GetAccessPolicy, GetRatings, NodeType, Polarity, GetUserFollows_List, GetRatingSummary, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import {MarkHandled} from "Utils/UI/General.js";
 import React, {createRef, useMemo} from "react";
 import {UPlot} from "web-vcore/nm/react-uplot.js";
@@ -17,7 +17,7 @@ import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {observer} from "web-vcore/nm/mobx-react";
 import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command.js";
-import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
+import {PolicyPicker, PolicyPicker_Button} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 import {TOOLBAR_BUTTON_HEIGHT, TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../../NodeLayoutConstants.js";
 
@@ -66,7 +66,6 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		// temp; to mitigate overwhelming of subscription plugin, do not load/show the symbols for self+followed ratings (since this requires a subscription per node)
 		const ratingsOfSelfAndFollowed = [] as NodeRating[];
 
-		const myDefaultAccessPolicy = GetUserHidden(meID)?.lastAccessPolicy;
 		const form = GetNodeForm(node, path);
 		const smoothing = GetRatingUISmoothing();
 
@@ -79,6 +78,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 		//const {labels, values} = ratingTypeInfo;
 		const myRating_displayVal = TransformRatingForContext(ratingsOfSelfAndFollowed.find(a=>a.creator == meID)?.value, reverseRatings);
 		const myRating_raw = ratingType == "impact" ? null : ratingsOfSelfAndFollowed.find(a=>a.creator == meID) as NodeRating;
+		const newRating_accessPolicy_initial = GetFinalAccessPolicyForNewEntry(null, myRating_raw?.accessPolicy, "nodeRatings");
 
 		const ratingsToMark = ratingsOfSelfAndFollowed.filter(a=>markRatingUsers.includes(a.creator));
 
@@ -178,7 +178,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 					const ratingOnChart_exact = Lerp(xValues_min, xValues_max, percentOnChart);
 					const closestXValueStep = xValues.OrderBy(a=>a.Distance(ratingOnChart_exact)).First();
 					let newRating_xValue = closestXValueStep;
-					let newRating_accessPolicyID = myRating_raw?.accessPolicy ?? myDefaultAccessPolicy;
+					let newRating_accessPolicyID = newRating_accessPolicy_initial.id;
 
 					// let finalRating = GetRatingForForm(rating, form);
 					const splitAt = 100;
@@ -197,7 +197,7 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 									<RowLR mt={5} splitAt={splitAt}>
 										<Pre>Access policy: </Pre>
 										<PolicyPicker value={newRating_accessPolicyID} onChange={val=>Change(newRating_accessPolicyID = val)}>
-											<Button text={newRating_accessPolicy ? `${newRating_accessPolicy.name} (id: ${newRating_accessPolicy.id})` : "(click to select policy)"} style={{width: "100%"}}/>
+											<PolicyPicker_Button policyID={newRating_accessPolicy?.id} style={{width: "100%"}}/>
 										</PolicyPicker>
 									</RowLR>
 								</Column>

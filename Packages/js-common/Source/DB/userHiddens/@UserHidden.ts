@@ -76,6 +76,9 @@ export class UserHidden_Extras {
 		patternProperties: {".{22}": {$ref: "UserFollow"}},
 	}, {opt: true})
 	userFollows? = {} as {[key: string]: UserFollow};
+
+	//@Field(...)
+	defaultAccessPolicy_nodeRatings?: string;
 }
 @MGLClass()
 export class UserFollow {

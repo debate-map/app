@@ -13,13 +13,13 @@ use tracing::info;
 use crate::db::access_policies::get_access_policy;
 use crate::db::commands::_command::{delete_db_entry_by_id, gql_placeholder, set_db_entry_by_id, update_field, update_field_nullable, command_boilerplate};
 use crate::db::general::permission_helpers::assert_user_can_modify;
-use crate::db::user_hiddens::{UserHidden, get_user_hidden, UserHiddenUpdates};
+use crate::db::user_hiddens::{UserHidden, get_user_hidden, UserHiddenUpdates, user_hidden_extras_locked_subfields};
 use crate::db::users::User;
 use crate::utils::db::accessors::AccessorContext;
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1};
 
-use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
+use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, update_field_of_extras};
 
 wrap_slow_macros!{
 
@@ -56,6 +56,7 @@ pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_roo
 		backgroundCustom_url: update_field_nullable(updates.backgroundCustom_url, old_data.backgroundCustom_url),
 		backgroundCustom_position: update_field_nullable(updates.backgroundCustom_position, old_data.backgroundCustom_position),
 		addToStream: update_field(updates.addToStream, old_data.addToStream),
+		extras: update_field_of_extras(updates.extras, old_data.extras, user_hidden_extras_locked_subfields())?,
 		..old_data
 	};
 

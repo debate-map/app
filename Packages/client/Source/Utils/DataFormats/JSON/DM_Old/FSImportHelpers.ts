@@ -1,4 +1,4 @@
-import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID} from "dm_common";
+import {ArgumentType, ChildGroup, ClaimForm, CullNodePhrasingToBeEmbedded, GetSystemAccessPolicyID, NodeL1, NodePhrasing, NodePhrasingType, NodeRevision, NodeType, NodeType_Info, MediaAttachment, NodeLink, Polarity, QuoteAttachment, ReferencesAttachment, Source, SourceChain, SourceType, systemUserID, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import {ModifyString} from "js-vextensions";
 import {Command, CreateAccessor, GenerateUUID} from "mobx-graphlink";
 import {ImportResource, IR_NodeAndRevision} from "Utils/DataFormats/DataExchangeFormat.js";
@@ -13,7 +13,7 @@ export const GetResourcesInImportSubtree = CreateAccessor((data: FS_NodeL3, id?:
 	const node = new NodeL1({
 		id: id ?? GenerateUUID(),
 		type: data.type ? ModifyString(FS_NodeType[data.type], m=>[m.startUpper_to_lower]) as NodeType : NodeType.category,
-		accessPolicy: GetSystemAccessPolicyID("Public, ungoverned (standard)"),
+		accessPolicy: GetFinalAccessPolicyForNewEntry(null, null, "nodes").id, // todo: maybe have this use map's node-access-policy, if it's set
 		argumentType: ModifyString(FS_ArgumentType[data.current.argumentType ?? FS_ArgumentType.All], m=>[m.startUpper_to_lower]) as ArgumentType,
 		c_currentRevision: data.currentRevision,
 		createdAt: data.createdAt,

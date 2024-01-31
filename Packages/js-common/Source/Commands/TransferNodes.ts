@@ -4,7 +4,7 @@ import {MaybeCloneAndRetargetNodeTag, NodeTag, TagComp_CloneHistory} from "../DB
 import {MapEdit} from "../CommandMacros/MapEdit.js";
 import {UserEdit} from "../CommandMacros/UserEdit.js";
 import {AsNodeL1, ChildGroup, GetHighestLexoRankUnderParent, GetNodeL2, GetNodeL3, NodeRevision, NodeType, NodeLink} from "../DB.js";
-import {GetAccessPolicy, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
+import {GetAccessPolicy, GetFinalAccessPolicyForNewEntry, GetSystemAccessPolicyID} from "../DB/accessPolicies.js";
 import {GetNodeLinks} from "../DB/nodeLinks.js";
 import {ClaimForm, NodeL1, NodeL3, Polarity} from "../DB/nodes/@Node.js";
 import {GetNodeTagComps, GetNodeTags} from "../DB/nodeTags.js";
@@ -119,7 +119,8 @@ export class TransferNodes extends Command<TransferNodesPayload, {/*id: string*/
 			const prevTransfer = nodes[i - 1];
 			const prevTransferData = this.transferData[i - 1];
 
-			const accessPolicyID = transfer.newAccessPolicyID != null ? GetAccessPolicy.NN(transfer.newAccessPolicyID)!.id : GetSystemAccessPolicyID("Public, ungoverned (standard)");
+			//const accessPolicyID = transfer.newAccessPolicyID != null ? GetAccessPolicy.NN(transfer.newAccessPolicyID)!.id : GetSystemAccessPolicyID("Public, ungoverned (standard)");
+			const accessPolicyID = GetFinalAccessPolicyForNewEntry(transfer.newAccessPolicyID, null, "nodes").id;
 
 			if (transfer.transferType == TransferType.ignore) {
 				// no processing needed

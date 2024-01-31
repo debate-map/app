@@ -62,6 +62,7 @@ export class GraphDBShape {
 	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//visibilityDirectives = DefineCollection(VisibilityDirective);
 }
+export type DBCollection = keyof GraphDBShape;
 
 /* export interface FirebaseDBShape {
 	modules: Collection_Closed<{

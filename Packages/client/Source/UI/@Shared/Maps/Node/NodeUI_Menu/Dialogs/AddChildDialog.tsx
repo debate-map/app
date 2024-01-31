@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2} from "dm_common";
+import {NodeType, GetNodeTypeDisplayName, NodeLink, Map, GetAccessPolicy, Polarity, NodeL1, ClaimForm, GetMap, GetNode, NodeRevision, ArgumentType, PermissionInfoType, NodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, NodePhrasing, GetSystemAccessPolicyID, systemUserID, systemPolicy_publicUngoverned_name, GetUserHidden, MeID, ChildGroup, GetNodeLinks, OrderKey, NodeL1Input_keys, AsNodeL1Input, IsSLModeOrLayout, GetChildLayout_Final, GetNodeL2, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import {BailError, CatchBail, GetAsync, observer_mgl} from "web-vcore/nm/mobx-graphlink.js";
 import {observer} from "web-vcore/nm/mobx-react.js";
 import {RunCommand_AddArgumentAndClaim, RunCommand_AddChildNode} from "Utils/DB/Command.js";
@@ -36,7 +36,7 @@ export class AddChildHelper {
 		}
 		this.node = new NodeL1({
 			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
-			accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
+			accessPolicy: GetFinalAccessPolicyForNewEntry(null, this.map?.nodeAccessPolicy, "nodes").id,
 			//parents: {[this.Node_ParentID]: {_: true}},
 			type: childType,
 		});
@@ -55,7 +55,7 @@ export class AddChildHelper {
 			this.node.argumentType = ArgumentType.all;
 			this.subNode = new NodeL1({
 				//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
-				accessPolicy: this.map?.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
+				accessPolicy: GetFinalAccessPolicyForNewEntry(null, this.map?.nodeAccessPolicy, "nodes").id,
 				type: NodeType.claim, creator: userID,
 			});
 			this.subNode_revision = new NodeRevision({phrasing: NodePhrasing.Embedded({text_base: title})});

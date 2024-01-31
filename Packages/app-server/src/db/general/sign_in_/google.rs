@@ -21,7 +21,7 @@ use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
 use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64, new_uuid_v4_as_b64_id};
-use rust_shared::db_constants::SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME;
+use rust_shared::db_constants::{SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME, SYSTEM_POLICY_PRIVATE_GOVERNED_NAME};
 use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general::get_uri_params;
 use rust_shared::indoc::indoc;
@@ -37,7 +37,7 @@ use crate::db::general::sign_in_::fake_user::username_to_fake_user_data;
 use crate::db::access_policies::{get_access_policy, get_system_access_policy};
 use crate::db::commands::_command::upsert_db_entry_by_id_for_struct;
 use crate::db::general::subtree_collector::params;
-use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden};
+use crate::db::user_hiddens::{UserHidden, get_user_hiddens, get_user_hidden, UserHidden_Extras};
 use crate::db::users::{get_user, User, PermissionGroups};
 use crate::store::storage::{AppStateArc, SignInMsg};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
@@ -107,19 +107,23 @@ pub async fn store_user_data_for_google_sign_in(profile: GoogleUserInfoResult, c
         lastEditAt: None,
 	};
     let new_user_id = user.id.as_str().to_owned();
-	let default_policy = get_system_access_policy(ctx, &SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?;
+	let policy_public_ungoverned = get_system_access_policy(ctx, &SYSTEM_POLICY_PUBLIC_UNGOVERNED_NAME).await?;
+	let policy_private_governed = get_system_access_policy(ctx, &SYSTEM_POLICY_PRIVATE_GOVERNED_NAME).await?;
 	let user_hidden = UserHidden {
         id: user.id.clone(),
 		email: email,
 		providerData: serde_json::to_value(vec![profile_clone])?,
-		lastAccessPolicy: Some(default_policy.id.as_str().to_owned()),
+		lastAccessPolicy: Some(policy_public_ungoverned.id.as_str().to_owned()),
         backgroundID: None,
         backgroundCustom_enabled: None,
         backgroundCustom_color: None,
         backgroundCustom_url: None,
         backgroundCustom_position: None,
         addToStream: true,
-        extras: serde_json::Value::Object(serde_json::Map::new()),
+        extras: serde_json::to_value(UserHidden_Extras {
+            defaultAccessPolicy_nodeRatings: Some(policy_private_governed.id.as_str().to_owned()),
+            userFollows: None,
+        })?,
 	};
 
     upsert_db_entry_by_id_for_struct(&ctx, "users".to_owned(), user.id.to_string(), user).await?;

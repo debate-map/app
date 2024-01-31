@@ -1,4 +1,4 @@
-import {AddMedia, GetAccessPolicy, GetNiceNameForMediaType, GetUserHidden, Media, MediaType, Media_namePattern, MeID} from "dm_common";
+import {AddMedia, GetAccessPolicy, GetNiceNameForMediaType, GetUserHidden, Media, MediaType, Media_namePattern, MeID, GetFinalAccessPolicyForNewEntry} from "dm_common";
 import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
@@ -86,11 +86,11 @@ export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 
 export async function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: string)=>void) {
 	const prep = await GetAsync(()=>{
-		return {accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy};
+		return {accessPolicy: GetFinalAccessPolicyForNewEntry(null, null, "medias")};
 	});
 
 	let newEntry = new Media(E({
-		accessPolicy: prep.accessPolicy,
+		accessPolicy: prep.accessPolicy.id,
 		name: "",
 		type: MediaType.image,
 		description: "",

@@ -1,4 +1,4 @@
-import {AddTerm, AttachmentType, GetAccessPolicy, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat} from "dm_common";
+import {AddTerm, AttachmentType, GetAccessPolicy, GetFinalAccessPolicyForNewEntry, GetUserHidden, MeID, Term, TermType, Term_disambiguationFormat} from "dm_common";
 import React from "react";
 import {store} from "Store/index.js";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
@@ -97,11 +97,11 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 
 export async function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: string)=>void) {
 	const prep = await GetAsync(()=>{
-		return {accessPolicy: GetUserHidden(MeID())?.lastAccessPolicy};
+		return {accessPolicy: GetFinalAccessPolicyForNewEntry(null, null, "terms")};
 	});
 
 	let newEntry = new Term(E({
-		accessPolicy: prep.accessPolicy,
+		accessPolicy: prep.accessPolicy.id,
 		name: "",
 		forms: [""],
 		type: TermType.commonNoun,

@@ -10,6 +10,7 @@ import {NodeType} from "../DB/nodes/@NodeType.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {AddNode} from "./AddNode.js";
+import {GetFinalAccessPolicyForNewEntry} from "../DB.js";
 
 @UserEdit
 @CommandMeta({
@@ -31,10 +32,10 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		map.editedAt = map.createdAt;
 
 		const userHidden = GetUserHidden.NN(this.userInfo.id);
+		//const accessPolicy_rootNode = GetFinalAccessPolicyForNewEntry(null, map.nodeAccessPolicy ?? map.accessPolicy, "nodes");
+		const accessPolicy_rootNode = GetFinalAccessPolicyForNewEntry(null, map.accessPolicy, "nodes"); // add-map dialog doesn't let user choose node-access-policy yet, so use the map's accessor policy for the root-node
 		const newRootNode = new NodeL1({
-			//accessPolicy: GetDefaultAccessPolicyID_ForNode(),
-			//accessPolicy: map.nodeAccessPolicy ?? userHidden.lastAccessPolicy,
-			accessPolicy: map.accessPolicy, // add-map dialog doesn't let user choose node-access-policy yet, so use the map's accessor policy for the root-node
+			accessPolicy: accessPolicy_rootNode.id,
 			type: NodeType.category, creator: map.creator, rootNodeForMap: map.id,
 		});
 		//const newRootNodeRevision = new NodeRevision(E(map.nodeDefaults, {phrasing: NodePhrasing.Embedded({text_base: "Root"})}));

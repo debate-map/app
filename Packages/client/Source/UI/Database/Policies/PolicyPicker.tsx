@@ -1,13 +1,31 @@
 import {GetAccessPolicies, GetAccessPolicy, GetUsers} from "dm_common";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, ButtonProps, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer, chroma_maxDarken} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import React from "react";
+
+/** Basic implementation of a button to be used as the child of the PolicyPicker wrapper component. (many components/use-cases will instead supply their own button with more customized styling) */
+@Observer
+export class PolicyPicker_Button extends BaseComponent<{enabled?: boolean, policyID: string|n, idTrimLength?: number, style?} & ButtonProps, {}> {
+	render() {
+		const {enabled, policyID, idTrimLength, style, ...rest} = this.props;
+		const policy = GetAccessPolicy(policyID);
+		return (
+			<Button {...rest} enabled={enabled} text={[
+				policy == null && "(click to select policy)",
+				policy && policy.name,
+				policy && idTrimLength == null && ` (id: ${policy.id})`,
+				policy && idTrimLength != null && ` [${policy.id.slice(0, idTrimLength)}]`,
+			].filter(a=>a).join("")} style={style}/>
+		);
+	}
+}
 
 @Observer
-export class PolicyPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}) {
+export class PolicyPicker extends BaseComponent<{value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}> {
 	dropDown: DropDown|n;
 	render() {
 		const {value, onChange, containerStyle, children} = this.props;

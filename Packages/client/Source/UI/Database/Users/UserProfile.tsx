@@ -1,19 +1,20 @@
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text, Spinner, RowLR} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
-import {PageContainer, Observer, ES, Chroma_Safe, RunInAction_Set, Chroma} from "web-vcore";
+import {PageContainer, Observer, ES, Chroma_Safe, RunInAction_Set, Chroma, TextPlus} from "web-vcore";
 import React, {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
-import {MeID, GetUser, GetUserHidden, GetUserPermissionGroups, SetUserData, SetUserData_Hidden, User, GetUserFollows_List, SetUserFollowData, UserFollow, UserHidden} from "dm_common";
+import {MeID, GetUser, GetUserHidden, GetUserPermissionGroups, SetUserData, SetUserData_Hidden, User, GetUserFollows_List, SetUserFollowData, UserFollow, UserHidden, accessPolicyFallbackInfo} from "dm_common";
 import chroma from "web-vcore/nm/chroma-js.js";
 import {ProfilePanel} from "Store/main/profile";
 import {store} from "Store";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_SetUserFollowData, RunCommand_UpdateUser, RunCommand_UpdateUserHidden} from "Utils/DB/Command";
 import {GetUserBackground} from "Store/db_ext/users/$user";
+import {PolicyPicker, PolicyPicker_Button} from "../Policies/PolicyPicker";
 
 // todo: move these to a better, more widely usable place
 /*type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
@@ -25,7 +26,7 @@ export type UserProfileUI_SharedProps = Omit<UserProfileUI_Props, "user"> & {
 	meID: string|n;
 	me: User|n,
 	ownProfile: boolean;
-	profileUser_h: UserHidden|n;
+	userHidden: UserHidden|n;
 };
 
 @Observer
@@ -39,10 +40,10 @@ export class UserProfileUI extends BaseComponentPlus({} as UserProfileUI_Props, 
 		const me = GetUser(meID);
 		const ownProfile = user.id == meID;
 		const panel_final = ownProfile ? state.panel : ProfilePanel.general;
-		const profileUser_h = ownProfile ? GetUserHidden(user.id) : null;
-		//if (profileUser_h == null) return <PageContainer>Loading...</PageContainer>;
+		const userHidden = ownProfile ? GetUserHidden(user.id) : null;
+		//if (userHidden == null) return <PageContainer>Loading...</PageContainer>;
 
-		const sharedProps: UserProfileUI_SharedProps = {...this.props, user, meID, me, ownProfile, profileUser_h};
+		const sharedProps: UserProfileUI_SharedProps = {...this.props, user, meID, me, ownProfile, userHidden};
 		return (
 			<PageContainer>
 				<Row>
@@ -67,11 +68,12 @@ export class UserProfileUI extends BaseComponentPlus({} as UserProfileUI_Props, 
 @Observer
 class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
-		const {user, meID, me, ownProfile, profileUser_h} = this.props;
+		const {user, meID, me, ownProfile, userHidden} = this.props;
 		const userPermissionGroups = GetUserPermissionGroups(user ? user.id : null);
 		const meFollows = GetUserFollows_List(meID);
 		const profileUserFollow = meFollows.find(a=>a.targetUser == user.id);
 
+		const splitAt = 250;
 		return <>
 			<Row mt={3}>
 				<Pre>Permissions: </Pre>
@@ -87,6 +89,25 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 					);
 				})}
 			</Row>
+			<Row mt={3} style={{fontWeight: "bold"}}>Default access policies:</Row>
+			{userHidden != null && <RowLR mt={3} splitAt={splitAt}>
+				<TextPlus info="The access-policy that is used when you give ratings to nodes (unless you manually override the policy during or after creation).">Node ratings:</TextPlus>
+				<PolicyPicker value={userHidden.extras.defaultAccessPolicy_nodeRatings} onChange={val=>{
+					RunCommand_UpdateUserHidden({id: user.id, updates: {extras: {...userHidden.extras, defaultAccessPolicy_nodeRatings: val}}});
+				}}>
+					<PolicyPicker_Button enabled={ownProfile} policyID={userHidden.extras.defaultAccessPolicy_nodeRatings} style={{width: "100%"}}/>
+				</PolicyPicker>
+			</RowLR>}
+			{userHidden != null && <RowLR mt={3} splitAt={splitAt}>
+				<TextPlus info={`
+					This is used as the access-policy for new entries you create, if does not have a default set by other means.
+
+					In more detail: ${accessPolicyFallbackInfo}
+				`.AsMultiline(0)}>Generic fallback:</TextPlus>
+				<PolicyPicker value={userHidden.lastAccessPolicy} onChange={val=>RunCommand_UpdateUserHidden({id: user.id, updates: {lastAccessPolicy: val}})}>
+					<PolicyPicker_Button enabled={ownProfile} policyID={userHidden?.lastAccessPolicy} style={{width: "100%"}}/>
+				</PolicyPicker>
+			</RowLR>}
 			{!ownProfile &&
 			<Row mt={3}>
 				<CheckBox text="Follow" value={profileUserFollow != null} onChange={async val=>{
@@ -163,7 +184,7 @@ class UserProfileUI_General extends BaseComponent<UserProfileUI_SharedProps, {}>
 @Observer
 class UserProfileUI_Appearance extends BaseComponent<UserProfileUI_SharedProps, {}> {
 	render() {
-		const {user, ownProfile, profileUser_h} = this.props;
+		const {user, ownProfile, userHidden: profileUser_h} = this.props;
 
 		return <>
 			{ownProfile && profileUser_h &&
