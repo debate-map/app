@@ -155,8 +155,8 @@ export class NodeBox extends BaseComponentPlus(
 			//if (playingTimeline == null) return;
 			const dispose = AutoRun_HandleBail(()=>{
 				const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
-				const timeSinceRevealedByTimeline_simplified = map ? GetPlaybackTimeSinceNodeRevealed(map.id, path, true, true) : null;
-				const timeSinceRevealedByTimeline_precise = ()=>(map ? GetPlaybackTimeSinceNodeRevealed(map.id, path, true, false) : null);
+				const timeSinceRevealedByTimeline_simplified = map ? GetPlaybackTimeSinceNodeRevealed(map.id, path, false, true) : null;
+				const timeSinceRevealedByTimeline_precise = ()=>(map ? GetPlaybackTimeSinceNodeRevealed(map.id, path, false, false) : null);
 
 				const boxStyle = this.root?.DOM_HTML?.style;
 				if (boxStyle) {

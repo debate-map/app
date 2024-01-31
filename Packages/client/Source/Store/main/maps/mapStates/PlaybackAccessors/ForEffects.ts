@@ -73,7 +73,7 @@ export const GetPlaybackVisiblePaths = CreateAccessor(()=>{
 	return result;
 });
 
-export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
+export const GetPathVisibilityInfoAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
 	const pathRevealTimes_first = {} as {[key: string]: number};
 	const pathRevealTimes_lastFresh = {} as {[key: string]: number};
 	const pathVisibilitiesSoFar = {} as {[key: string]: boolean};
@@ -127,7 +127,7 @@ export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsReveal
 				let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${effect.path}/${child.id}`}));
 				if (CE(currentChildren).Any(a=>a.node == null)) {
 					// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
-					return emptyArray_forLoading;
+					return null;
 				}
 
 				for (let childrenDepth = 1; childrenDepth <= descendentRevealDepth; childrenDepth++) {
@@ -139,7 +139,7 @@ export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsReveal
 							const childChildren = GetNodeChildren(child.node.id).map(child2=>({node: child2, path: child2 && `${child.path}/${child2.id}`}));
 							if (CE(childChildren).Any(a=>a == null)) {
 								// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
-								return emptyArray_forLoading;
+								return null;
 							}
 							CE(nextChildren).AddRange(childChildren);
 						}
@@ -166,10 +166,15 @@ export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsReveal
 		}
 	}
 
-	const visiblePathsAtEnd = pathVisibilitiesSoFar.Pairs().filter(a=>a.value == true).map(a=>a.key);
+	return {pathVisibilitiesSoFar, pathRevealTimes_first, pathRevealTimes_lastFresh};
+});
+export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
+	const states = GetPathVisibilityInfoAfterEffects(pathsRevealedAtStart, effects, baseOn);
+	if (states == null) return emptyArray_forLoading;
+	const visiblePathsAtEnd = states.pathVisibilitiesSoFar.Pairs().filter(a=>a.value == true).map(a=>a.key);
 	return visiblePathsAtEnd.ToMapObj(path=>path, path=>{
-		if (baseOn == "first reveal") return pathRevealTimes_first[path];
-		if (baseOn == "last fresh reveal") return pathRevealTimes_lastFresh[path];
+		if (baseOn == "first reveal") return states.pathRevealTimes_first[path];
+		if (baseOn == "last fresh reveal") return states.pathRevealTimes_lastFresh[path];
 		Assert(false, "Invalid baseOn value.");
 	});
 });

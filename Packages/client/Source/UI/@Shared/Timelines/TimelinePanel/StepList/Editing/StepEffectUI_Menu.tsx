@@ -14,7 +14,7 @@ import React from "react";
 import {GetCopiedNodeEffectInfo_IfValid} from "Store/main/timelines";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 
-type Props = {step: TimelineStep, effect: TimelineStepEffect, effectIndex: number};
+type Props = {step: TimelineStep, effect: TimelineStepEffect|n, effectIndex: number};
 
 export class StepEffectUI_Menu_Stub extends BaseComponent<Props & {delayEventHandler?: boolean}, {}> {
 	render() {
@@ -38,47 +38,59 @@ export class StepEffectUI_Menu extends BaseComponent<Props, {}> {
 
 		return (
 			<>
-				<VMenuItem text={<span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(for moving effect to another step)</span></span> as any}
+				{effect != null && <VMenuItem text={<span>Cut <span style={{fontSize: 10, opacity: 0.7}}>(for moving effect to another step)</span></span> as any}
 					style={liveSkin.Style_VMenuItem()}
 					onClick={e=>{
 						RunInAction_Set(this, ()=>store.main.timelines.copiedNodeEffectInfo = {stepID: step.id, effectIndex, effectData: Clone(effect), asCut: true});
-					}}/>
-				<VMenuItem text={<span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(for cloning effect to another step)</span></span> as any} style={liveSkin.Style_VMenuItem()}
+					}}/>}
+				{effect != null && <VMenuItem text={<span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(for cloning effect to another step)</span></span> as any} style={liveSkin.Style_VMenuItem()}
 					onClick={e=>{
 						RunInAction_Set(this, ()=>store.main.timelines.copiedNodeEffectInfo = {stepID: step.id, effectIndex, effectData: Clone(effect), asCut: false});
-					}}/>
-				{copiedEffectInfo && copiedEffectInfo.stepID != step.id &&
+					}}/>}
+				{copiedEffectInfo &&
 					<VMenuItem text={[
-						`Paste copied effect`,
+						`Paste ${copiedEffectInfo.asCut ? "cut" : "copied"} effect`,
 						copiedEffectInfo_affectedNode ? ` (affecting node: ${GetNodeDisplayText(copiedEffectInfo_affectedNode).KeepAtMost(50)})` : "",
 					].join("")} style={liveSkin.Style_VMenuItem()} onClick={async e=>{
-						const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
-						newEffects.Insert(effectIndex + 1, copiedEffectInfo.effectData);
-						await RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+						// if we're doing a cut->paste (ie. move) operation, and doing so within the same step, apply in one command
+						if (copiedEffectInfo.stepID == step.id && copiedEffectInfo.asCut) {
+							const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
+							newEffects.Move(newEffects[copiedEffectInfo.effectIndex], effectIndex + 1);
+							await RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+						} else {
+							// else, start by adding the effect to the target step
+							const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
+							newEffects.Insert(effectIndex + 1, copiedEffectInfo.effectData);
+							await RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
 
-						if (copiedEffectInfo.asCut && copiedEffectInfo_step) {
-							const newEffects_source = Clone(copiedEffectInfo_step.extras?.effects ?? []) as TimelineStepEffect[];
-							// only remove entry from source step if that slot's data still matches that at time of copy
-							if (DeepEquals(newEffects_source[copiedEffectInfo.effectIndex], copiedEffectInfo.effectData)) {
-								newEffects_source.RemoveAt(copiedEffectInfo.effectIndex);
-								await RunCommand_UpdateTimelineStep({id: copiedEffectInfo_step.id, updates: {extras: {...copiedEffectInfo_step.extras, effects: newEffects_source}}});
+							// then, if the effect was cut, remove it from the source step
+							if (copiedEffectInfo.asCut && copiedEffectInfo_step) {
+								const newEffects_source = Clone(copiedEffectInfo_step.extras?.effects ?? []) as TimelineStepEffect[];
+								// only remove entry from source step if that slot's data still matches that at time of copy
+								if (DeepEquals(newEffects_source[copiedEffectInfo.effectIndex], copiedEffectInfo.effectData)) {
+									newEffects_source.RemoveAt(copiedEffectInfo.effectIndex);
+									await RunCommand_UpdateTimelineStep({id: copiedEffectInfo_step.id, updates: {extras: {...copiedEffectInfo_step.extras, effects: newEffects_source}}});
+								}
 							}
+						}
 
-							RunInAction_Set(this, ()=>store.main.timelines.copiedNodeEffectInfo = null); // we've removed the effect that was cut, so clear the step-effect "clipboard"
+						// if the source effect was "cut", clear the step-effect "clipboard", since the cut->paste operation has now been completed
+						if (copiedEffectInfo.asCut) {
+							RunInAction_Set(this, ()=>store.main.timelines.copiedNodeEffectInfo = null);
 						}
 					}}/>}
-				<VMenuItem text="Move up" style={liveSkin.Style_VMenuItem()}
+				{effect != null && <VMenuItem text="Move up" style={liveSkin.Style_VMenuItem()}
 					onClick={e=>{
 						const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
 						newEffects.Move(newEffects[effectIndex], effectIndex - 1);
 						RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
-					}}/>
-					<VMenuItem text="Move down" style={liveSkin.Style_VMenuItem()}
-						onClick={e=>{
-							const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
-							newEffects.Move(newEffects[effectIndex], effectIndex + 1);
-							RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
-						}}/>
+					}}/>}
+				{effect != null && <VMenuItem text="Move down" style={liveSkin.Style_VMenuItem()}
+					onClick={e=>{
+						const newEffects = Clone(step.extras?.effects ?? []) as TimelineStepEffect[];
+						newEffects.Move(newEffects[effectIndex], effectIndex + 1);
+						RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+					}}/>}
 			</>
 		);
 	}

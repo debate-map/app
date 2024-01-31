@@ -16,6 +16,7 @@ import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {StepEffectUI} from "./StepEffectUI.js";
+import {StepEffectUI_Menu_Stub} from "./StepEffectUI_Menu.js";
 
 export enum PositionOptionsEnum {
 	full = "full",
@@ -332,8 +333,9 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 											);
 										}}/>
 										{//(step.nodeReveals == null || step.nodeReveals.length == 0) && !dragIsOverDropArea &&
-										<div style={{flex: 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, opacity: 0.7, textAlign: "center"}}>
+										<div style={{flex: 1, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, opacity: 0.7, textAlign: "center"}} onContextMenu={e=>e.preventDefault()}>
 											Drag nodes here to give them time-bound effects: display, expand, etc.
+											<StepEffectUI_Menu_Stub step={step} effect={null} effectIndex={-1}/>
 										</div>}
 									</Row>
 									{step.extras?.effects && step.extras.effects.map((effect, index)=>{
