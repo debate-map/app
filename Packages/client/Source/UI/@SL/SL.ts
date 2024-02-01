@@ -19,7 +19,8 @@ export const SLMode_COVID = startURL.GetQueryVar("extra") == "cov";
 export const SLMode_2020 = startURL.GetQueryVar("extra") == "2020";
 export const SLMode_AI = startURL.GetQueryVar("extra") == "ai";
 export const SLMode_IA = startURL.GetQueryVar("extra") == "ia";
-export const ShowHeader = startURL.GetQueryVar("header") != "0";
+export const ShowHeader = startURL.GetQueryVar("header") != "0"; // todo: probably rename to URL_HideHeader
+export const URL_HideNodeHover = startURL.GetQueryVar("nodeHover") == "0";
 export const HKMode = startURL.GetQueryVar("extra") == "hk";
 // These are utilized by the helper functions in $node_sl.ts.
 globalThis.SLDemo_forJSCommon = SLMode;

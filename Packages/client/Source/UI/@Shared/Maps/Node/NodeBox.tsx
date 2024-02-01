@@ -5,7 +5,7 @@ import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetMapState, GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState.js";
 import {ACTNodeExpandedSet, ACTNodeSelect, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {SLMode} from "UI/@SL/SL.js";
+import {SLMode, URL_HideNodeHover} from "UI/@SL/SL.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {FlashComp} from "ui-debug-kit";
@@ -76,7 +76,7 @@ export type NodeBox_Props = {
 export class NodeBox extends BaseComponentPlus(
 	{panelsPosition: "left"} as NodeBox_Props,
 	{
-		hovered: false, moreButtonHovered: false, leftPanelHovered: false, //openPanelSource: null as PanelOpenSource|n,
+		hovered: false, moreButtonHovered: false, leftPanelHovered: false,
 		hoverPanel: null as string|n, hoverTermIDs: null as string[]|n, lastWidthWhenNotPreview: 0,
 	},
 ) {
@@ -232,9 +232,7 @@ export class NodeBox extends BaseComponentPlus(
 		const toolbarShow = toolbarItemsToShow.length > 0;
 		const toolbar_hasRightAnchoredItems = toolbarItemsToShow.filter(a=>a.panel != "prefix").length > 0;
 		const panelToShow = hoverPanel || nodeView?.openPanel;
-		const leftPanelShow = leftPanelPinned || moreButtonHovered || leftPanelHovered
-			//|| (!toolbarShow && (nodeView?.selected || hovered)); // || (/*selected &&*/ panelToShow != null && openPanelSource == "left-panel");
-			|| nodeView?.selected || hovered;
+		const leftPanelShow = (leftPanelPinned || moreButtonHovered || leftPanelHovered || nodeView?.selected || hovered) && !URL_HideNodeHover;
 		const attachments_forSubPanel = GetSubPanelAttachments(node.current);
 		const subPanelShow = attachments_forSubPanel.length > 0;
 		const bottomPanelShow = /*(selected || hovered) &&*/ panelToShow != null;
@@ -295,8 +293,6 @@ export class NodeBox extends BaseComponentPlus(
 				//local_openPanel = null; // todo: reimplement equivalent (if still needed)
 			}
 			const onPanelButtonClick = (panel: string, source: "toolbar" | "left-panel")=>{
-				//this.SetState({openPanelSource: source});
-
 				/*if (useLocalPanelState) {
 					UpdateLocalNodeView({openPanel: undefined});
 					this.SetState({hoverPanel: null});
