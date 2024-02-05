@@ -9,7 +9,7 @@ export class TimelinesState {
 	constructor() { makeObservable(this); }
 
 	// editor
-	@O audioMode = true;
+	@O audioMode = false;
 	@O audioPanel = new AudioPanelState();
 	@O @ignore copiedNodeEffectInfo: {stepID: string, effectIndex: number, effectData: TimelineStepEffect, asCut: boolean}|n;
 

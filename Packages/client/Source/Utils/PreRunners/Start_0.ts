@@ -15,6 +15,9 @@ const isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slur
 // declare global { const isBot: string; } G({isBot});
 declare global { const isBot: string; } g.isBot = isBot;
 
+const inElectron = navigator.userAgent.toLowerCase().includes(" electron");
+declare global { const inElectron: boolean; } g.inElectron = inElectron;
+
 function ShowBotMessage(message) {
 	if (document.body == null) {
 		g.addEventListener('load', () => ShowBotMessage(message));

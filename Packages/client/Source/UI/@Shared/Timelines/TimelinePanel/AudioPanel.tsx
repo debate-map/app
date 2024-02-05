@@ -70,7 +70,7 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 			wavesurfer["lastFileLoaded"] = file;
 
 			// if selected file has an extension we know-about/create, but which are not media files, then just clear the parse-data and waveform-ui
-			if (file.name.EndsWithAny(".json")) {
+			if (file.name.EndsWithAny(".json", ".txt")) { // accept .txt as well, in case, eg. user wants to create a notes file
 				wavesurfer.empty();
 				await SleepAsync(0); // wait moment, so react warning doesn't happen (of setting state during render)
 				setParseData({

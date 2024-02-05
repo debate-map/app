@@ -3,6 +3,7 @@ import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {computed, makeObservable, observable} from "web-vcore/nm/mobx";
 import {AudioMeta} from "./Map/AudioMeta";
+import {OPFSDir_GetChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
 
 export class OPFS_Map {
 	static entries = new Map<string, OPFS_Map>();
@@ -60,7 +61,7 @@ export class OPFS_Map {
 	async GetStorageRoot() {
 		let storageRoot: FileSystemDirectoryHandle|n;
 		try {
-			storageRoot = await navigator.storage.getDirectory();
+			storageRoot = inElectron ? await electronOpfs_storage.getDirectory() : await navigator.storage.getDirectory();
 		} catch (err) {
 			//console.error(err);
 			ShowMessageBox({message: `Couldn't open OPFS for reading/storing audio-files locally. See notification or browser console for details.`});
@@ -76,10 +77,12 @@ export class OPFS_Map {
 			const mapsDir = await storageRoot.getDirectoryHandle("Maps");
 			const mapDir = await mapsDir.getDirectoryHandle(this.mapID);
 
-			for await (const handle of mapDir["values"]() as FileSystemFileHandle[]) {
-				newFiles.push(await handle.getFile());
+			for (const entry of await OPFSDir_GetFileChildren(mapDir)) {
+				const file = await entry.handle.getFile();
+				newFiles.push(file);
 			}
 		} catch (err) {
+			console.error("Error loading files from OPFS:", err);
 			// temp: for now, just ignore other errors (probably just no file having been saved yet)
 		}
 
