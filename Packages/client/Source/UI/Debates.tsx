@@ -1,12 +1,12 @@
-import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID} from "dm_common";
-import React from "react";
+import {CanGetBasicPermissions, GetMaps, GetUser, HasAdminPermissions, MeID, Map} from "dm_common";
+import React, {useState} from "react";
 import {store} from "Store";
 import {GetSelectedDebatesPageMapID} from "Store/main/debates";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {GetCinzelStyleForBold} from "Utils/Styles/Skins/SLSkin";
 import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Text, Column, Row, Select, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {SLMode, SLMode_AI, GetAIPrefixInfoFromMapName, SLMode_Main} from "./@SL/SL";
@@ -72,23 +72,28 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 		if (SLMode && maps_featured.length == 0) {
 			listType = "all";
 		}
-		const maps_finalToShow = listType == "featured" ? maps_featured : maps;
+		const maps_toShow_preFilter = listType == "featured" ? maps_featured : maps;
+		const [filter, setFilter] = useState("");
+		const maps_toShow_final = ApplyMapListFilter(maps_toShow_preFilter, filter);
+		const maps_nonFeatured_postFilter = ApplyMapListFilter(maps.filter(a=>!a.featured), filter);
 
 		const listTypeOptions = [{name: `Featured (${maps_featured.length})`, value: "featured"}, {name: `All (${maps.length})`, value: "all"}];
 		return (
 			<>
 				<Column className="clickThrough" style={E(
-					{height: 80, background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"},
+					{background: liveSkin.HeaderColor().css(), borderRadius: "10px 10px 0 0"},
 					SLMode && {
 						color: HSLA(221, 0.13, 0.42, 1),
 						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17,
 					},
 					SLMode && GetCinzelStyleForBold(),
 				)}>
-					<Row style={{height: 40, padding: 10}}>
+					<Row mt={10} p="0 10px">
 						<Select displayType="button bar" options={listTypeOptions} value={listType} onChange={val=>{
 							RunInAction("MapListUI.listTypeBar.onChange", ()=>uiState.listType = val);
 						}}/>
+						<Text ml={5}>Filter:</Text>
+						<TextInput ml={5} style={{width: 200}} instant value={filter} onChange={val=>setFilter(val)}/>
 						<Button text="Add map" ml="auto"
 							enabled={SLMode && !SLMode_Main ? HasAdminPermissions(MeID()) : CanGetBasicPermissions(MeID())} // in sl-mode, only admins can add maps (except "main" sl-mode, which wants user-contributed maps)
 							onClick={UseCallback(()=>{
@@ -96,7 +101,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 								ShowAddMapDialog();
 							}, [userID])}/>
 					</Row>
-					<Row style={{height: 40, padding: 10}}>
+					<Row mt={10} p="0 10px" style={{height: 30}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>
 						{!SLMode && <span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Edits</span>}
 						{!SLMode_AI && <span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Last edit</span>}
@@ -106,10 +111,16 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({
 					flex: 1, background: liveSkin.BasePanelBackgroundColor().alpha(1).css(), borderRadius: "0 0 10px 10px",
 				})}>
-					{maps_finalToShow.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>No results.</div>}
-					{maps_finalToShow.map((map, index)=><MapEntryUI key={index} index={index} last={index == maps_finalToShow.length - 1} map={map}/>)}
+					{maps_toShow_final.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>{[
+						`No results.`,
+						listType == "featured" && maps_nonFeatured_postFilter.length > 0 && ` (+${maps_nonFeatured_postFilter.length} results in "All")`,
+					].filter(a=>a).join("")}</div>}
+					{maps_toShow_final.map((map, index)=><MapEntryUI key={index} index={index} last={index == maps_toShow_final.length - 1} map={map}/>)}
 				</ScrollView>
 			</>
 		);
 	}
+}
+function ApplyMapListFilter(maps: Map[], filterStr: string) {
+	return maps.filter(a=>filterStr.length == 0 || a.name.toLowerCase().includes(filterStr.toLowerCase()));
 }
