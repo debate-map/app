@@ -93,7 +93,8 @@ pub struct LQGroup {
 impl LQGroup {
     fn new(lq_key: LQKey, db_pool: DBPoolArc) -> Self {
         let (s1, r1): (FSender<LQGroup_InMsg>, FReceiver<LQGroup_InMsg>) = flume::unbounded();
-        let (mut s2, r2): (ABSender<LQGroup_OutMsg>, ABReceiver<LQGroup_OutMsg>) = async_broadcast::broadcast(1000);
+        // 2024-02-05: 1k capacity too small; upped to 10k (not yet certain if issue was from capacity being too small, or some sort of deadlock)
+        let (mut s2, r2): (ABSender<LQGroup_OutMsg>, ABReceiver<LQGroup_OutMsg>) = async_broadcast::broadcast(10000);
 
         // nothing ever "consumes" the messages in the `messages_out` channel, so we must enable overflow (ie. deletion of old entries once queue-size cap is reached)
         s2.set_overflow(true);
