@@ -1,6 +1,9 @@
+import {Attachment, AttachmentType, SourceChain, SourceType} from "dm_common";
+
 export abstract class CG_Node {
 	id: string;
 	narrative?: string;
+	reference_urls?: string[];
 
 	//abstract GetTitle(): string;
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
@@ -14,6 +17,21 @@ export abstract class CG_Node {
 	static GetTitle_Narrative(node: CG_Node) {
 		const result = (node.narrative ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
 		return result.length ? result : null;
+	}
+	static GetReferenceURLsAsAttachments(node: CG_Node) {
+		const referenceURLs = node.reference_urls ?? [];
+		if (referenceURLs.length == 0) return [];
+		return [
+			new Attachment({
+				references: {
+					sourceChains: referenceURLs.map(url=>{
+						return new SourceChain([
+							{type: SourceType.webpage, link: url},
+						]);
+					}),
+				},
+			}),
+		];
 	}
 }
 

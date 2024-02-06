@@ -89,7 +89,7 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		//createdAt: Date.now(),
 		//creator: systemUserID,
 		displayDetails: undefined,
-		attachments: [],
+		attachments: IsString(data) ? [] : CG_Node.GetReferenceURLsAsAttachments(data),
 		node: node.id,
 		phrasing: CullNodePhrasingToBeEmbedded(new NodePhrasing({
 			id: GenerateUUID(),
