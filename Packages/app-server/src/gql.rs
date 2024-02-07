@@ -73,6 +73,7 @@ use crate::db::commands::delete_timeline::MutationShard_DeleteTimeline;
 use crate::db::commands::delete_timeline_step::MutationShard_DeleteTimelineStep;
 use crate::db::commands::import_firestore_dump::MutationShard_ImportFirestoreDump;
 use crate::db::commands::link_node::MutationShard_LinkNode;
+use crate::db::commands::run_command_batch::MutationShard_RunCommandBatch;
 use crate::db::commands::set_node_is_multi_premise_argument::MutationShard_SetNodeIsMultiPremiseArgument;
 use crate::db::commands::set_node_rating::MutationShard_SetNodeRating;
 use crate::db::commands::set_user_follow_data::MutationShard_SetUserFollowData;
@@ -146,6 +147,7 @@ pub struct MutationRoot(
     MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating, MutationShard_DeleteNodeRevision,
     MutationShard_ImportFirestoreDump,
     MutationShard_LinkNode,
+    MutationShard_RunCommandBatch,
     MutationShard_SetNodeIsMultiPremiseArgument, MutationShard_SetNodeRating, MutationShard_SetUserFollowData,
     MutationShard_TransferNodes,
     MutationShard_UpdateNode, MutationShard_UpdateUser, MutationShard_UpdateUserHidden,

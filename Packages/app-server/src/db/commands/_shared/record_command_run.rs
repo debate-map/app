@@ -51,23 +51,25 @@ async fn trim_old_command_runs(ctx: &AccessorContext<'_>) -> Result<(), Error> {
     let ctx_admin = AccessorContext::new_write(&mut anchor, gql_ctx, false).await?;*/
 
     let (_, command_runs) = get_entries_in_collection::<CommandRun>(ctx, "commandRuns".o(), &QueryFilter::empty(), None).await?;
-    let command_runs_to_remove = command_runs.into_iter()
-        .filter(|commandRun| {
+    let command_runs_to_remove = command_runs.into_iter().enumerate()
+        // sort by run-time, descending (so that latest ones are first)
+        .sorted_by_cached_key(|a| -a.1.runTime)
+        .filter(|(index, commandRun)| {
             // keep the most recent 100 entries
-            if commandRun.runTime > 100 { return false; }
+            if index < &100 { return false; }
 
-            // keep entries created in the last 3 days
+            // keep entries created in the last 3 days (so long as the total count is less than 1000)
             let timeSinceRun = time_since_epoch_ms_i64() - commandRun.runTime;
-            if timeSinceRun < 3 * 24 * 60 * 60 * 1000 { return false; }
+            if timeSinceRun < 3 * 24 * 60 * 60 * 1000 && index < &1000 { return false; }
 
             // delete the rest
             return true;
         })
-        // for now, limit command-runs-to-remove to 10 entries (else server can be overwhelmed and crash; exact diagnosis unknown, but happened for case of 227-at-once)
-        .take(10)
+        // for now, limit command-runs-to-remove to the oldest 10 entries (else server can be overwhelmed and crash; exact diagnosis unknown, but happened for case of 227-at-once)
+        .rev().take(10)
         .collect_vec();
     
-    let command_run_ids_to_remove = command_runs_to_remove.iter().map(|commandRun| commandRun.id.to_string()).collect_vec();
+    let command_run_ids_to_remove = command_runs_to_remove.iter().map(|commandRun| commandRun.1.id.to_string()).collect_vec();
     ctx.tx.execute(r#"DELETE FROM "commandRuns" WHERE id = ANY($1)"#, &[&command_run_ids_to_remove]).await?;
     Ok(())
 }

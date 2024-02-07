@@ -61,7 +61,13 @@ pub struct AddChildNodeResult {
 
 }
 
-pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, _extras: NoExtras) -> Result<AddChildNodeResult, Error> {
+#[derive(Default)]
+pub struct AddChildNodeExtras {
+	pub avoid_recording_command_run: bool,
+    pub avoid_incrementing_edit_counts: bool,
+}
+
+pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, extras: AddChildNodeExtras) -> Result<AddChildNodeResult, Error> {
     let AddChildNodeInput { mapID, parentID, node: node_, revision: revision_, link: link_ } = input.clone();
     
     let parent = get_node(ctx, &parentID).await?;
@@ -81,7 +87,9 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
     
     let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
     
-    increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+    if !extras.avoid_incrementing_edit_counts {
+        increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
+    }
     
     let result = AddChildNodeResult {
         nodeID: add_node_result.nodeID,
@@ -89,10 +97,12 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
         linkID: add_node_link_result.id,
         doneAt: time_since_epoch_ms_i64(),
     };
-    record_command_run(
-        ctx, actor,
-        "addChildNode".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
-        vec![input.parentID, result.nodeID.clone()],
-    ).await?;
+    if !extras.avoid_recording_command_run {
+        record_command_run(
+            ctx, actor,
+            "addChildNode".to_owned(), to_json_value_for_borrowed_obj(&input)?, to_json_value_for_borrowed_obj(&result)?,
+            vec![input.parentID, result.nodeID.clone()],
+        ).await?;
+    }
     Ok(result)
 }

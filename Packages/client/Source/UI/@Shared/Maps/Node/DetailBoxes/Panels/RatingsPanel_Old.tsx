@@ -17,6 +17,7 @@ import chroma from "web-vcore/nm/chroma-js.js";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
 import {observer} from "web-vcore/nm/mobx-react";
 import {RunCommand_DeleteNodeRating, RunCommand_SetNodeRating} from "Utils/DB/Command.js";
+import {SLMode} from "UI/@SL/SL.js";
 import {PolicyPicker, PolicyPicker_Button} from "../../../../../Database/Policies/PolicyPicker.js";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 import {TOOLBAR_BUTTON_HEIGHT, TOOLBAR_BUTTON_WIDTH, TOOLBAR_HEIGHT_BASE} from "../../NodeLayoutConstants.js";
@@ -98,8 +99,8 @@ export class RatingsPanel_Old extends BaseComponentPlus({} as RatingsPanel_Props
 				fill: Chroma("hsla(210,50%,50%,1)").alpha(.5 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),*/
 				/*stroke: Chroma("hsla(210,0%,10%,1)").alpha(1 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
 				fill: Chroma("hsla(210,0%,10%,1)").alpha(.7 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),*/
-				stroke: Chroma("hsla(210,30%,90%,1)").alpha(.4 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
-				fill: Chroma("hsla(210,30%,90%,1)").alpha(.3 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				stroke: Chroma(SLMode ? "hsla(210,30%,30%,1)" : "hsla(210,30%,90%,1)").alpha(.4 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
+				fill: Chroma(SLMode ? "hsla(210,30%,30%,1)" : "hsla(210,30%,90%,1)").alpha(.3 * asNodeUIOverlay_alphaMultiplier * customAlphaMultiplier).css(),
 
 				//fill: "#ff7300FF",
 				points: {show: false},

@@ -56,6 +56,7 @@ pub mod commands {
     pub mod delete_timeline_step;
     pub mod import_firestore_dump;
     pub mod link_node;
+    pub mod run_command_batch;
     pub mod set_node_is_multi_premise_argument;
     pub mod set_node_rating;
     pub mod set_user_follow_data;

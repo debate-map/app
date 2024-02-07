@@ -164,7 +164,7 @@ export function InitApollo() {
 				const {graphQLErrors, networkError, response, operation, forward} = info;
 
 				if (graphQLErrors) {
-					if (graphQLErrors[0]?.["ignoreInGlobalGQLErrorHandler"]) return;
+					if (graphQLErrors?.[0]?.["ignoreInGlobalGQLErrorHandler"]) return;
 
 					for (const err of graphQLErrors) {
 						const {message, locations, path} = err;
@@ -286,7 +286,7 @@ export async function AttachUserJWTToWebSocketConnection() {
 			// In this case, we don't want it to trigger an on-screen error-message, because the verification failure is likely benign. For example, it can happen when changing the "?db=[dev/prod]" url-flag.
 			(err: ApolloError)=>{
 				// tell global gql-error-handler (seen above) to not handle this error; that way we can provide a more helpful error-message here, without two errors being logged
-				const innerError = err.graphQLErrors[0];
+				const innerError = err.graphQLErrors?.[0]; // ts-def lies; graphQLErrors is null in some cases!
 				if (innerError) innerError["ignoreInGlobalGQLErrorHandler"] = true;
 
 				console.error(`Error attaching auth-data jwt to websocket connection; you'll likely need to sign-in again. This is likely benign, eg. when changing the "?db=[dev/prod]" url-flag. @error:`, err);

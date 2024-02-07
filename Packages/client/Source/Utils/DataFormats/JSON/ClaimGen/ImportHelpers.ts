@@ -18,41 +18,45 @@ export const GetResourcesInImportSubtree_CG = CreateAccessor((context: ImportCon
 });
 export const GetResourcesInQuestion_CG = CreateAccessor((context: ImportContext, question: CG_Question, path_indexes: number[], path_titles: string[])=>{
 	const result = [] as ImportResource[];
-	result.push(NewNodeResource(context, question, NodeType.category, path_indexes, path_titles));
+	const questionResource = NewNodeResource(context, question, NodeType.category, path_indexes, path_titles, null);
+	result.push(questionResource);
 	for (const [i, position] of question.positions.entries()) {
-		result.push(...GetResourcesInPosition_CG(context, position, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(position))));
+		result.push(...GetResourcesInPosition_CG(context, position, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(position)), questionResource));
 	}
 	return result;
 });
-export const GetResourcesInPosition_CG = CreateAccessor((context: ImportContext, position: CG_Position, path_indexes: number[], path_titles: string[])=>{
+export const GetResourcesInPosition_CG = CreateAccessor((context: ImportContext, position: CG_Position, path_indexes: number[], path_titles: string[], parentResource: ImportResource)=>{
 	const result = [] as ImportResource[];
 	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
-	//result.push(NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question));
-	result.push(NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles));
+	//const positionResource = NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question);
+	const positionResource = NewNodeResource(context, position, NodeType.claim, path_indexes, path_titles, parentResource);
+	result.push(positionResource);
 	for (const [i, category] of position.categories.entries()) {
-		result.push(...GetResourcesInCategory_CG(context, category, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(category))));
+		result.push(...GetResourcesInCategory_CG(context, category, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(category)), positionResource));
 	}
 	return result;
 });
-export const GetResourcesInCategory_CG = CreateAccessor((context: ImportContext, category: CG_Category, path_indexes: number[], path_titles: string[])=>{
+export const GetResourcesInCategory_CG = CreateAccessor((context: ImportContext, category: CG_Category, path_indexes: number[], path_titles: string[], parentResource: ImportResource)=>{
 	const result = [] as ImportResource[];
-	result.push(NewNodeResource(context, category, NodeType.category, path_indexes, path_titles, ChildGroup.freeform));
+	const categoryResource = NewNodeResource(context, category, NodeType.category, path_indexes, path_titles, parentResource, ChildGroup.freeform);
+	result.push(categoryResource);
 	for (const [i, claim] of category.claims.entries()) {
-		result.push(...GetResourcesInClaim_CG(context, claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim))));
+		result.push(...GetResourcesInClaim_CG(context, claim, path_indexes.concat(i), path_titles.concat(CG_Node.GetTitle_Main(claim)), categoryResource));
 	}
 	return result;
 });
-export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, claim: CG_Claim, path_indexes: number[], path_titles: string[])=>{
+export const GetResourcesInClaim_CG = CreateAccessor((context: ImportContext, claim: CG_Claim, path_indexes: number[], path_titles: string[], parentResource: ImportResource)=>{
 	const result = [] as ImportResource[];
 	// debate-map's ui defaults new claims under category-nodes to use form "question"; match that behavior for consistency, though these claim-gen imports won't fill text_question, so ui will fallback to showing text_base
-	//result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question));
-	result.push(NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles));
+	//const claimResource = NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles, undefined, ClaimForm.question);
+	const claimResource = NewNodeResource(context, claim, NodeType.claim, path_indexes, path_titles, parentResource);
+	result.push(claimResource);
 	for (const [i, argument] of (claim.arguments ?? []).entries()) {
-		result.push(NewNodeResource(context, argument, NodeType.claim, path_indexes.concat(i), path_titles.concat(argument), ChildGroup.freeform));
+		result.push(NewNodeResource(context, argument, NodeType.claim, path_indexes.concat(i), path_titles.concat(argument), claimResource, ChildGroup.freeform));
 	}
 	return result;
 });
-export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node|string, nodeType: NodeType, path_indexes: number[], path_titles: string[], childGroup = ChildGroup.generic, claimForm?: ClaimForm)=>{
+export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_Node|string, nodeType: NodeType, path_indexes: number[], path_titles: string[], parentResource: ImportResource|n, childGroup = ChildGroup.generic, claimForm?: ClaimForm)=>{
 	const node = new NodeL1({
 		//creator: systemUserID,
 		//createdAt: Date.now(),
@@ -106,6 +110,7 @@ export const NewNodeResource = CreateAccessor((context: ImportContext, data: CG_
 		pathInData: path_indexes,
 		link, node, revision,
 		insertPath_titles: path_titles.slice(0, -1), // insert-path should exclude this new node itself
+		insertPath_parentResourceLocalID: parentResource?.localID,
 		ownTitle: path_titles.Last(),
 	});
 });

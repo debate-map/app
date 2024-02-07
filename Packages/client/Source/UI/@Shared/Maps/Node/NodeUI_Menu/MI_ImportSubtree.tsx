@@ -24,7 +24,7 @@ import {GetOpenMapID} from "Store/main.js";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
-import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
+import {CommandEntry, RunCommand_AddChildNode, RunCommand_RunCommandBatch} from "Utils/DB/Command.js";
 import {CG_Debate, CG_Node} from "Utils/DataFormats/JSON/ClaimGen/DataModel.js";
 import {GetResourcesInImportSubtree_CG} from "Utils/DataFormats/JSON/ClaimGen/ImportHelpers.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
@@ -116,7 +116,7 @@ class ImportSubtreeUI extends BaseComponent<
 		// right-panel
 		showLeftPanel: boolean,
 		process: boolean,
-		importSelected: boolean, selectedIRs_nodeAndRev_atImportStart: number,
+		importSelected: boolean, selectedIRs_nodeAndRev_atImportStart: number, serverImportInProgress: boolean,
 		selectFromIndex: number,
 		searchQueryGen: number,
 	},
@@ -127,13 +127,13 @@ class ImportSubtreeUI extends BaseComponent<
 		rightTab: ImportSubtreeUI_RightTab.resources,
 		sourceText: "", showLeftPanel: true,
 		process: false,
-		importSelected: false, selectedIRs_nodeAndRev_atImportStart: 0,
+		importSelected: false, selectedIRs_nodeAndRev_atImportStart: 0, serverImportInProgress: false,
 		searchQueryGen: 0,
 	};
 
 	render() {
 		const {mapID, map, node, path, controller} = this.props;
-		const {sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process, importSelected, selectedIRs_nodeAndRev_atImportStart, leftTab, rightTab, showLeftPanel} = this.state;
+		const {sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process, importSelected, selectedIRs_nodeAndRev_atImportStart, serverImportInProgress, leftTab, rightTab, showLeftPanel} = this.state;
 		const uiState = store.main.maps.importSubtreeDialog;
 		if (map == null) return null;
 
@@ -157,7 +157,7 @@ class ImportSubtreeUI extends BaseComponent<
 		const selectedIRs_nodeAndRev_importedSoFar = selectedIRs_nodeAndRev_atImportStart - selectedIRs_nodeAndRev.length;
 		const importProgressStr = this.nodeCreationTimer.Enabled
 			? `${selectedIRs_nodeAndRev_importedSoFar}/${selectedIRs_nodeAndRev_atImportStart}`
-			: "start";
+			: "local";
 
 		return (
 			<Column style={{
@@ -286,10 +286,52 @@ class ImportSubtreeUI extends BaseComponent<
 							<CheckBox ml={5} text="Show left panel" value={showLeftPanel} onChange={val=>this.SetState({showLeftPanel: val})}/>
 							<Row ml="auto">
 								<CheckBox text="Extract resources" value={process} onChange={val=>this.SetState({process: val})}/>
-								<CheckBox ml={5} text={`Import selected (${importProgressStr})`} value={this.nodeCreationTimer.Enabled} onChange={val=>{
+								<CheckBox ml={5} text={`Import selected (${importProgressStr})`} enabled={!serverImportInProgress} value={this.nodeCreationTimer.Enabled} onChange={val=>{
 									this.SetTimerEnabled(val);
 									this.SetState({selectedIRs_nodeAndRev_atImportStart: selectedIRs_nodeAndRev.length});
 								}}/>
+								<Button ml={5} text={`Import ALL (server)`}
+									enabled={
+										// atm only the resource-extraction code for the json-cg format adds the "insertPath_parentResourceLocalID" field needed for server-side tree-importing
+										resources.length > 0 && uiState.sourceType == DataExchangeFormat.json_cg &&
+										!this.nodeCreationTimer.Enabled && !serverImportInProgress
+									}
+									onClick={async()=>{
+										ShowMessageBox({
+											title: `Start uncancellable import of all ${resources.length} resources?`, cancelButton: true,
+											message: `
+												This will start an import of all ${resources.length} resources (not just the ${selectedIRs_nodeAndRev.length} selected ones), run as a command-batch on the server.
+
+												If the import is large, this could take a long time.
+												
+												Note also: The import cannot be canceled once started. It's recommended to keep this dialog open until you get another dialog showing the result.
+											`.AsMultiline(0),
+											onOK: async()=>{
+												this.SetState({serverImportInProgress: true});
+												ShowMessageBox({
+													title: "Import in progress...",
+													message: `
+														If the import is large, this could take a long time.
+
+														Since the import cannot be canceled, it's recommended to sit tight, keep this dialog open, and wait until a second dialog opens showing the results.
+													`.AsMultiline(0),
+												});
+												const result = await ImportResourcesOnServer(resources, map.id, node.id);
+												const errors = (result.errors ?? []).length;
+												const success = result.data?.runCommandBatch.results.length == resources.length && errors == 0;
+												this.SetState({serverImportInProgress: false});
+												ShowMessageBox({
+													title: [
+														"Import ",
+														success && "succeeded",
+														!success && "failed",
+														` (with ${errors} errors)`,
+													].filter(a=>a).join(""),
+													message: "Import has completed. See dialog title for details.",
+												});
+											},
+										});
+									}}/>
 							</Row>
 						</Row>
 						{rightTab == ImportSubtreeUI_RightTab.resources &&
@@ -645,15 +687,41 @@ export async function CreateAncestorForResource(res: ImportResource, mapID: stri
 	return true;
 }
 
-export async function CreateResource(res: ImportResource, mapID: string|n, parentID: string) {
+async function ImportResourcesOnServer(resources: ImportResource[], mapID: string, importRootNodeID: string) {
+	const commandEntries = resources.map(res=>{
+		const parentResource = res instanceof IR_NodeAndRevision ? resources.find(a=>a.localID == res.insertPath_parentResourceLocalID) : null;
+		const parentResource_indexInBatch = parentResource ? resources.indexOf(parentResource) : -1;
+		if (res instanceof IR_NodeAndRevision && res.insertPath_parentResourceLocalID != null) {
+			Assert(parentResource != null && parentResource_indexInBatch != -1, "Parent-resource not found in batch.");
+		}
+
+		const parentNodeIDOrPlaceholder = parentResource_indexInBatch != -1 ? "[placeholder; should be replaced by command-entry's field-override]" : importRootNodeID;
+		const [commandFunc, args] = GetCommandFuncAndArgsToCreateResource(res, GetOpenMapID(), parentNodeIDOrPlaceholder);
+
+		let commandName: string;
+		if (commandFunc == RunCommand_AddChildNode) commandName = "addChildNode";
+		else Assert(false, "Unrecognized command function for batch import.");
+		return E(
+			{[commandName]: args},
+			parentResource_indexInBatch != -1 && {setParentNodeToResultOfCommandAtIndex: parentResource_indexInBatch},
+		) as CommandEntry;
+	});
+	const result = await RunCommand_RunCommandBatch({commands: commandEntries});
+	return result;
+}
+
+export function GetCommandFuncAndArgsToCreateResource(res: ImportResource, mapID: string|n, parentID: string) {
 	if (res instanceof IR_NodeAndRevision) {
-		await RunCommand_AddChildNode({
+		return [RunCommand_AddChildNode, {
 			mapID, parentID,
 			node: AsNodeL1Input(res.node),
 			revision: res.revision.ExcludeKeys("creator", "createdAt"),
 			link: res.link,
-		});
-	} else {
-		Assert(false, `Cannot generate command to create resource of type "${res.constructor.name}".`);
+		}] as const;
 	}
+	Assert(false, `Cannot generate command to create resource of type "${res.constructor.name}".`);
+}
+export async function CreateResource(res: ImportResource, mapID: string|n, parentID: string) {
+	const [commandFunc, args] = GetCommandFuncAndArgsToCreateResource(res, mapID, parentID);
+	await commandFunc(args);
 }

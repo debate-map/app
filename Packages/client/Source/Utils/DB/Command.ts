@@ -1,6 +1,6 @@
 import {AccessPolicy, NodeTag, Media, Share, Term, NodePhrasing, NodeRevision, Map, NodeRating, NodeLink, NodeL1, UserFollow, User, UserHidden, NodeL1Input, ClaimForm, ChildGroup, Polarity, NodeInfoForTransfer, NodeRevisionInput, Timeline, TimelineStep} from "dm_common";
 import {apolloClient} from "Utils/LibIntegrations/Apollo";
-import {gql} from "web-vcore/nm/@apollo/client";
+import {FetchResult, gql} from "web-vcore/nm/@apollo/client";
 
 // standardized add/update/delete commands
 // ==========
@@ -85,6 +85,16 @@ export const RunCommand_UpdateTimelineStep = CreateFunc_RunCommand_UpdateX(Timel
 // other commands
 // ==========
 
+export type CommandEntry = {addChildNode?: AddChildNodeInput, setParentNodeToResultOfCommandAtIndex?: number};
+export async function RunCommand_RunCommandBatch(inputFields: {commands: CommandEntry[]}) {
+	const result = await apolloClient.mutate({
+		mutation: gql`mutation($input: RunCommandBatchInput!) { runCommandBatch(input: $input) { results } }`,
+		variables: {input: inputFields},
+	});
+	//return result.data.runCommandBatch as {results: any[]};
+	return result as FetchResult<{runCommandBatch: {results: any[]}}>;
+}
+
 export async function RunCommand_AddArgumentAndClaim(inputFields: {
 	mapID: string|n,
 	argumentParentID: string,
@@ -102,13 +112,14 @@ export async function RunCommand_AddArgumentAndClaim(inputFields: {
 	return result.data.addArgumentAndClaim as {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string, doneAt: number};
 }
 
-export async function RunCommand_AddChildNode(inputFields: {
+export type AddChildNodeInput = {
 	mapID: string|n,
 	parentID: string,
 	node: NodeL1Input,
 	revision: Partial<NodeRevision>,
 	link: Partial<NodeLink>,
-}) {
+};
+export async function RunCommand_AddChildNode(inputFields: AddChildNodeInput) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: AddChildNodeInput!) { addChildNode(input: $input) { nodeID revisionID linkID doneAt } }`,
 		variables: {input: inputFields},
