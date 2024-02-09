@@ -97,11 +97,11 @@ export function InitApollo() {
 			const {graphQLErrors, networkError, response, operation, forward} = info;
 			if (graphQLErrors) {
 				graphQLErrors.forEach(({message, locations, path})=>{
-					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", operation);
+					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", JSON.stringify(operation));
 				});
 			}
 
-			if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", operation);
+			if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", JSON.stringify(operation));
 		}),
 		link,
 	]);

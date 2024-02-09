@@ -115,7 +115,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 				SLMode_2020 && {width: 500, height: 150, backgroundImage: "url(/Images/@SL/2020/2020ElectionDemo.png)"},
 				SLMode_AI && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/AI/Title_Cropped.png)", padding: "15px 0"},
 				SLMode_IA && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/IA/Title.png)", padding: "15px 0"},
-				SLMode_Climate && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/Climate/Title.png)", padding: "5px 0 15px 0px"},
+				SLMode_Climate && {width: 300, height: 150, backgroundImage: "url(/Images/@SL/Climate/Title.png)", padding: "5px 0 10px 0px"},
 			);
 			text = null as any;
 		}

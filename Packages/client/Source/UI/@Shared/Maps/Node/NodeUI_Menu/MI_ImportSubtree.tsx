@@ -304,7 +304,7 @@ class ImportSubtreeUI extends BaseComponent<
 
 												If the import is large, this could take a long time.
 												
-												Note also: The import cannot be canceled once started. It's recommended to keep this dialog open until you get another dialog showing the result.
+												Note also: The import cannot be canceled once started. (not through the ui controls anyway; unclear whether closing the page aborts the request server-side)
 											`.AsMultiline(0),
 											onOK: async()=>{
 												this.SetState({serverImportInProgress: true});
@@ -313,7 +313,9 @@ class ImportSubtreeUI extends BaseComponent<
 													message: `
 														If the import is large, this could take a long time.
 
-														Since the import cannot be canceled, it's recommended to sit tight, keep this dialog open, and wait until a second dialog opens showing the results.
+														Note: Now that the import has been started, it cannot be canceled. (not through the ui controls anyway; unclear whether closing the page aborts the request server-side)
+														
+														So, it's recommended to sit tight, keep this dialog open, and wait until a final dialog opens showing the results.
 													`.AsMultiline(0),
 												});
 												const result = await ImportResourcesOnServer(resources, map.id, node.id);
