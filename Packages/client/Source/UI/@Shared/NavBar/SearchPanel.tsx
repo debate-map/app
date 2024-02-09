@@ -21,7 +21,7 @@ import {NodeUI_Menu_Stub} from "../Maps/Node/NodeUI_Menu.js";
 const columnWidths = [0.68, 0.2, 0.12];
 
 @Observer
-export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr: string}) {
+export class SearchPanel extends BaseComponentPlus({} as {}, {searchInProgress: false}, {} as {queryStr: string}) {
 	ClearResults() {
 		RunInAction("SearchPanel.ClearResults", ()=>{
 			store.main.search.searchResults_partialTerms = ea;
@@ -32,71 +32,80 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		// first clear the old results
 		this.ClearResults();
 
-		let {queryStr} = this.stash;
-		const unrestricted = queryStr.endsWith(" /unrestricted");
-		if (unrestricted) {
-			queryStr = queryStr.slice(0, -" /unrestricted".length);
-		}
-
-		if (Validate("UUID", queryStr) == null) {
-			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
-			if (nodeRevisionMatch) {
-				RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
-					//store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
-					store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.node];
-				});
-				return;
+		this.SetState({searchInProgress: true});
+		try {
+			let {queryStr} = this.stash;
+			const unrestricted = queryStr.endsWith(" /unrestricted");
+			if (unrestricted) {
+				queryStr = queryStr.slice(0, -" /unrestricted".length);
 			}
-			const node = await GetAsync(()=>GetNodeL2(queryStr));
-			if (node) {
-				//const visibleNodeRevision = node.current;
-				RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
-					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
-					//store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
-					store.main.search.searchResults_nodeIDs = [node.id];
-				});
-				return;
-			}
-		}
 
-		const searchTerms = GetSearchTerms_Advanced(queryStr);
-		// if no whole-terms, and not unrestricted mode, cancel search (db would give too many results)
-		if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
-		const queryStr_withoutPartialTerms = searchTerms.wholeTerms.join(" ");
-
-		const result = await apolloClient.query({
-			query: gql`
-				query($input: SearchGloballyInput!) {
-					searchGlobally(input: $input) {
-						nodeId
-						rank
-						type
-						foundText
-						nodeText
-					}
+			if (Validate("UUID", queryStr) == null) {
+				const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
+				if (nodeRevisionMatch) {
+					RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
+						//store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
+						store.main.search.searchResults_nodeIDs = [nodeRevisionMatch.node];
+					});
+					return;
 				}
-			`,
-			variables: {input: {
-				//query: queryStr,
-				query: queryStr_withoutPartialTerms,
-				// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
-				searchLimit: 100,
-			}},
-		});
-		const foundNodeIDs = result.data.searchGlobally.map(a=>a.nodeId);
+				const node = await GetAsync(()=>GetNodeL2(queryStr));
+				if (node) {
+					//const visibleNodeRevision = node.current;
+					RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
+						//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
+						//store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
+						store.main.search.searchResults_nodeIDs = [node.id];
+					});
+					return;
+				}
+			}
 
-		RunInAction("SearchPanel.PerformSearch_part2", ()=>{
-			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
-			store.main.search.searchResults_nodeIDs = foundNodeIDs;
-		});
+			const searchTerms = GetSearchTerms_Advanced(queryStr);
+			// if no whole-terms, and not unrestricted mode, cancel search (db would give too many results)
+			if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
+			const queryStr_withoutPartialTerms = searchTerms.wholeTerms.join(" ");
+
+			const result = await apolloClient.query({
+				query: gql`
+					query($input: SearchGloballyInput!) {
+						searchGlobally(input: $input) {
+							nodeId
+							rank
+							type
+							foundText
+							nodeText
+						}
+					}
+				`,
+				variables: {input: {
+					//query: queryStr,
+					query: queryStr_withoutPartialTerms,
+					// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
+					searchLimit: 100,
+				}},
+			});
+			const foundNodeIDs = result.data.searchGlobally.map(a=>a.nodeId);
+
+			RunInAction("SearchPanel.PerformSearch_part2", ()=>{
+				store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
+				store.main.search.searchResults_nodeIDs = foundNodeIDs;
+			});
+		} finally {
+			// wait a moment before clearing search-in-progress marker (else it gets ignored, for early-return case -- presumably race condition with the set-true call above)
+			WaitXThenRun(0, ()=>this.SetState({searchInProgress: false}));
+		}
 	}
 
 	render() {
+		const {searchInProgress} = this.state;
 		const {searchResults_partialTerms} = store.main.search;
 		// atm, limit results to the first 100 matches (temp workaround for UI becoming unresponsive for huge result-sets)
 		const searchResultIDs = store.main.search.searchResults_nodeIDs.Take(100);
 
-		let results_nodeL2s = searchResultIDs.map(id=>GetNodeL2(id)).filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
+		let results_nodeL2s = searchResultIDs
+			.map(id=>GetNodeL2.CatchBail(null, id)) // catch bail per entry, so that we start showing the results even before we've loaded every result's data
+			.filter(a=>a != null) as NodeL2[]; // filter, since search-results may be old (before an entry's deletion)
 
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
 		// note: this narrows the results to nodes whose latest-revision still matches the partial-terms (which may be confusing, since this narrowing only happens for partial terms [edit: maybe not true, with changed postgres funcs])
@@ -109,7 +118,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			}
 		}
 
-		const results_nodeIDs = results_nodeL2s?.filter(a=>a).map(a=>a.id).Distinct();
+		const results_nodeIDs = results_nodeL2s.filter(a=>a).map(a=>a.id).Distinct();
 		const {queryStr} = store.main.search;
 
 		this.Stash({queryStr});
@@ -170,14 +179,16 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 					if (e.nativeEvent["handled"]) return true;
 					e.preventDefault();
 				}}>
-					{results_nodeIDs == null && "Search in progress..."}
-					{results_nodeIDs && results_nodeIDs.length == 0 && "No search results."}
-					{results_nodeIDs && results_nodeIDs.length > 0 && results_nodeIDs.map((nodeID, index)=>{
-						return (
-							// <ErrorBoundary key={nodeID}>
-							<SearchResultRow key={nodeID} nodeID={nodeID} index={index}/>
-						);
-					})}
+					{searchInProgress && "Searching..."}
+					{!searchInProgress && <>
+						{results_nodeIDs.length == 0 && "No search results."}
+						{results_nodeIDs.length > 0 && results_nodeIDs.map((nodeID, index)=>{
+							return (
+								// <ErrorBoundary key={nodeID}>
+								<SearchResultRow key={nodeID} nodeID={nodeID} index={index}/>
+							);
+						})}
+					</>}
 				</ScrollView>
 			</Column>
 		);

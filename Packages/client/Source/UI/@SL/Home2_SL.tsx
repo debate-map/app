@@ -4,7 +4,7 @@ import {VReactMarkdown, PageContainer} from "web-vcore";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import React, {useEffect} from "react";
 import {MapListUI} from "UI/Debates.js";
-import {SLMode_2020, SLMode_AI, SLMode_COVID, SLMode_GAD, SLMode_IA, SLMode_Main} from "./SL.js";
+import {SLMode_2020, SLMode_AI, SLMode_COVID, SLMode_Climate, SLMode_GAD, SLMode_IA, SLMode_Main} from "./SL.js";
 
 export class HomeUI2_SL extends BaseComponent<{}, {}> {
 	render() {
@@ -14,6 +14,7 @@ export class HomeUI2_SL extends BaseComponent<{}, {}> {
 		if (SLMode_2020) return <HomeUI2_SL2020/>;
 		if (SLMode_AI) return <HomeUI2_SLAI/>;
 		if (SLMode_IA) return null; // not needed atm
+		if (SLMode_Climate) return null; // not needed atm
 		return null;
 	}
 }

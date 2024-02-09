@@ -16,6 +16,7 @@ export class MI_MoveUpOrDown extends BaseComponent<MI_SharedProps & {direction: 
 		const {direction, map, node, path, childGroup} = this.props;
 
 		const orderingParentID = GetParentNodeID(path);
+		if (orderingParentID == null) return null;
 		const orderingParent = GetNodeL2(orderingParentID);
 		const orderingParent_childOrdering = orderingParent?.current ? GetChildOrdering_Final(orderingParent, childGroup, map, store.main.maps.childOrdering) : null;
 		const orderingParent_childLinks_ordered = GetNodeLinks(orderingParentID);

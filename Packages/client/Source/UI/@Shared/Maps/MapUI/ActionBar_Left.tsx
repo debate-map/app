@@ -4,7 +4,7 @@ import {Button, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {SLMode, SLMode_2020} from "UI/@SL/SL.js";
+import {SLMode, SLMode_2020, SLMode_Climate} from "UI/@SL/SL.js";
 import {HSLA, Observer, RunInAction} from "web-vcore";
 import {Map, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
@@ -39,7 +39,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 						// filter: 'drop-shadow(rgba(0,0,0,.5) 0px 0px 10px)',
 					},
 				)}>
-					{IsUserMap(map) && !SLMode_2020 &&
+					{IsUserMap(map) && !SLMode_2020 && !SLMode_Climate &&
 						<Button_Final text="Back" style={{height: "100%"}} onClick={()=>{
 							RunInAction("ActionBar_Left.Back.onClick", ()=>{
 								store.main.debates.selectedMapID = null;

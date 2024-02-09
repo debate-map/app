@@ -1,4 +1,4 @@
-use rust_shared::anyhow::{Error, anyhow};
+use rust_shared::anyhow::{Error, anyhow, ensure};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{SubError, serde_json, should_be_unreachable, to_anyhow};
@@ -35,6 +35,7 @@ pub async fn get_node_links(ctx: &AccessorContext<'_>, parent_id: Option<&str>, 
     if let Some(child_id) = child_id {
         filter_map.insert("child".to_owned(), json!({"equalTo": child_id}));
     }
+    ensure!(filter_map.len() > 0, "Must provide at least one of parent_id or child_id.");
     get_db_entries(ctx, "nodeLinks", &Some(JSONValue::Object(filter_map))).await
 }
 
