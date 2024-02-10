@@ -45,14 +45,22 @@ export function GetStepClipsInAudioFiles(mapID: string, stepID: string) {
 	return stepClipsInAudioFiles;
 }
 
-export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {}> {
+export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {isRecording: boolean}> {
 	recorder: MediaRecorder|n;
 	audioChunks = [] as Blob[];
 	audioChunks_asBlob: Blob|n;
 	audioChunks_asBlobObjectURL: string|n;
+	ClearRecording() {
+		this.recorder = null;
+		this.audioChunks = [];
+		this.audioChunks_asBlob = null;
+		this.audioChunks_asBlobObjectURL = null;
+		this.Update();
+	}
+
 	render() {
 		const {map, step, nextStep, creatorOrMod} = this.props;
-		const timelinesUIState = store.main.timelines;
+		const {isRecording} = this.state;
 		const audioUIState = store.main.timelines.audioPanel;
 
 		const opfsForMap = OPFS_Map.GetEntry(map.id);
@@ -90,45 +98,72 @@ export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {}> {
 				})}
 				<Row p="1px 5px" center>
 					<Text>Record new take:</Text>
-					<Button ml={5} text="Start" onClick={async()=>{
-						const audioInputs = await navigator.mediaDevices.enumerateDevices();
-						const audioSource = audioInputs.find(a=>a.deviceId == timelinesUIState.selectedAudioInputDeviceID);
-						//if (audioSource == null) return;
-						const stream = await navigator.mediaDevices.getUserMedia({
-							audio: {deviceId: audioSource ? {exact: audioSource.deviceId} : undefined},
-						});
-
-						this.audioChunks = [];
-						const recorder = new MediaRecorder(stream);
-						this.recorder = recorder;
-						recorder.ondataavailable = e=>{
-							this.audioChunks.push(e.data);
-							if (recorder.state == "inactive") {
-								console.log("Type:", recorder.mimeType);
-								this.audioChunks_asBlob = new Blob(this.audioChunks, {
-									//type: "audio/x-mpeg-3",
-									//type: "audio/wav",
-									type: recorder.mimeType,
-								});
-								this.audioChunks_asBlobObjectURL = URL.createObjectURL(this.audioChunks_asBlob);
-								this.Update();
-							}
-						};
-						recorder.start();
-					}}/>
-					<Button ml={5} text="Stop" onClick={()=>{
-						this.recorder?.stop();
+					<Button ml={5} mdIcon={isRecording ? "stop" : "record"} onClick={async()=>{
+						if (isRecording) {
+							this.SetState({isRecording: false});
+							this.StopRecording();
+						} else {
+							this.SetState({isRecording: true});
+							await this.StartRecording();
+						}
 					}}/>
 					{this.audioChunks_asBlobObjectURL != null && <>
-						<audio style={{marginLeft: 5}} src={this.audioChunks_asBlobObjectURL} controls={true} autoPlay={true}/>
+						<audio className="StepTab_Audio_audioElement" style={{marginLeft: 5, height: 28}} src={this.audioChunks_asBlobObjectURL} controls={true} autoPlay={true}/>
+						{/*<style>{`
+							.StepTab_Audio_audioElement::-webkit-media-controls-panel {
+								margin: 0;
+							}
+						`.AsMultiline(0)}</style>*/}
+						<Button ml={5} mdIcon="delete" onClick={()=>this.ClearRecording()}/>
 						<Button ml={5} mdIcon="download" onClick={()=>{
 							const ext = GuessAudioFileExtensionFromMimeType(this.recorder?.mimeType ?? "");
 							StartDownload(this.audioChunks_asBlob!, `StepAudioTake_${step.id.slice(0, 3)}_${DateToString(new Date(), true)}.${ext}`);
+						}}/>
+						<Button ml={5} mdIcon="ray-start-arrow" title="Save to file-system as new take." onClick={async()=>{
+							const opfsForStep = opfsForMap.GetStepFolder(step.id);
+							await opfsForStep.LoadFiles_IfNotStarted();
+							const ext = GuessAudioFileExtensionFromMimeType(this.recorder?.mimeType ?? "");
+							const priorTakeNumbers = opfsForStep.Files.map(a=>a.name.match(`Take(\\d+)_Orig\\.${ext}`)).filter(a=>a != null).map(a=>Number(a![1]));
+							const nextTakeNumber = priorTakeNumbers.length ? priorTakeNumbers.Max(a=>a) + 1 : 1;
+
+							const audioChunks_asFile = new File([this.audioChunks_asBlob!], `Take${nextTakeNumber}_Orig.${ext}`, {type: this.recorder!.mimeType});
+							await opfsForStep.SaveFile(audioChunks_asFile);
+							//this.ClearRecording();
 						}}/>
 					</>}
 				</Row>
 			</>
 		);
+	}
+	async StartRecording() {
+		const timelinesUIState = store.main.timelines;
+		const audioInputs = await navigator.mediaDevices.enumerateDevices();
+		const audioSource = audioInputs.find(a=>a.deviceId == timelinesUIState.selectedAudioInputDeviceID);
+		//if (audioSource == null) return;
+		const stream = await navigator.mediaDevices.getUserMedia({
+			audio: {deviceId: audioSource ? {exact: audioSource.deviceId} : undefined},
+		});
+
+		this.audioChunks = [];
+		const recorder = new MediaRecorder(stream);
+		this.recorder = recorder;
+		recorder.ondataavailable = e=>{
+			this.audioChunks.push(e.data);
+			if (recorder.state == "inactive") {
+				console.log("Type:", recorder.mimeType);
+				this.audioChunks_asBlob = new Blob(this.audioChunks, {
+					//type: "audio/x-mpeg-3",
+					//type: "audio/wav",
+					type: recorder.mimeType,
+				});
+				this.audioChunks_asBlobObjectURL = URL.createObjectURL(this.audioChunks_asBlob);
+				this.Update();
+			}
+		};
+		recorder.start();
+	}
+	StopRecording() {
+		this.recorder?.stop();
 	}
 }
 

@@ -16,6 +16,7 @@ import {zIndexes} from "Utils/UI/ZIndexes";
 import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
 import {DateToString, TimeToString} from "Utils/UI/General";
 import {StepTab} from "Store/main/maps/mapStates/@MapState";
+import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
 
 @Observer
 export class Header1 extends BaseComponent<{map: Map}, {}> {
@@ -90,7 +91,7 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 					<Text>Steps:</Text>
 					<CheckBox ml={5} text="Edit" value={mapState.timelineEditMode} onChange={val=>RunInAction_Set(this, ()=>mapState.timelineEditMode = val)}/>
 					<Select ml={5} options={GetEntries(StepTab)} displayType="dropdown" value={uiState.stepTabDefault} onChange={val=>RunInAction_Set(this, ()=>uiState.stepTabDefault = val)}/>
-					<OptionsDropdown timeline={timeline} steps={steps}/>
+					<OptionsDropdown map={map} timeline={timeline} steps={steps}/>
 				</Row>
 			</Row>
 		);
@@ -98,9 +99,9 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 }
 
 @Observer
-class OptionsDropdown extends BaseComponent<{timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
+class OptionsDropdown extends BaseComponent<{map: Map, timeline: Timeline|n, steps: TimelineStep[]|n}, {}> {
 	render() {
-		const {timeline, steps} = this.props;
+		const {map, timeline, steps} = this.props;
 		const uiState = store.main.timelines;
 		const uiState_maps = store.main.maps;
 
@@ -128,6 +129,11 @@ class OptionsDropdown extends BaseComponent<{timeline: Timeline|n, steps: Timeli
 						<Select ml={5} style={{flex: 1}} options={inputDevices.map(device=>({name: device.label, value: device.deviceId}))}
 							value={uiState.selectedAudioInputDeviceID} onChange={val=>RunInAction_Set(this, ()=>uiState.selectedAudioInputDeviceID = val)}/>
 					</Row>
+					{inElectron && <Row mt={3}>
+						<Text>Open folder:</Text>
+						<Button ml={5} text="Main-data" onClick={()=>desktopBridge.Call("OpenMainDataSubfolder", {pathSegments: []})}/>
+						<Button ml={5} text="For map" onClick={()=>desktopBridge.Call("OpenMainDataSubfolder", {pathSegments: ["Maps", map.id]})}/>
+					</Row>}
 
 					<Row mt={10} style={{fontWeight: "bold"}}>Playback</Row>
 					<Row mt={3}>

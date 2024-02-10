@@ -65,10 +65,22 @@ export class ElectronOPFS_Directory implements FileSystemDirectoryHandle /*, Asy
 	async resolve(): Promise<string[]> { throw new Error("Not yet implemented."); }
 	// implemented
 	async getDirectoryHandle(name: string, options?: FileSystemGetDirectoryOptions): Promise<FileSystemDirectoryHandle> {
-		return new ElectronOPFS_Directory(name, options, [...this.pathSegments, name]);
+		const result = new ElectronOPFS_Directory(name, options, [...this.pathSegments, name]);
+		if (options?.create) {
+			await desktopBridge.Call("ElectronOPFS_MainDataStorage_CreateDirectoryIfMissing", {pathSegments: result.pathSegments});
+		} else if (!await desktopBridge.Call("ElectronOPFS_MainDataStorage_DirectoryExists", {pathSegments: result.pathSegments})) {
+			throw new DOMException("A requested file or directory could not be found at the time an operation was processed."); // use same error-message as true OPFS
+		}
+		return result;
 	}
 	async getFileHandle(name: string, options?: FileSystemGetFileOptions): Promise<FileSystemFileHandle> {
-		return new ElectronOPFS_File(name, options, [...this.pathSegments, name]);
+		const result = new ElectronOPFS_File(name, options, [...this.pathSegments, name]);
+		if (options?.create) {
+			await desktopBridge.Call("ElectronOPFS_MainDataStorage_CreateFileIfMissing", {pathSegments: result.pathSegments});
+		} else if (!await desktopBridge.Call("ElectronOPFS_MainDataStorage_FileExists", {pathSegments: result.pathSegments})) {
+			throw new DOMException("A requested file or directory could not be found at the time an operation was processed."); // use same error-message as true OPFS
+		}
+		return result;
 	}
 	async removeEntry(name: string) {
 		desktopBridge.Call("ElectronOPFS_MainDataStorage_DeleteFile", {pathSegments: [...this.pathSegments, name]});
