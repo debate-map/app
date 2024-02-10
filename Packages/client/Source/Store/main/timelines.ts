@@ -4,6 +4,7 @@ import {O} from "web-vcore";
 import {DeepEquals} from "web-vcore/.yalc/js-vextensions";
 import {makeObservable} from "web-vcore/nm/mobx";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
+import {StepTab} from "./maps/mapStates/@MapState";
 
 export class TimelinesState {
 	constructor() { makeObservable(this); }
@@ -12,6 +13,7 @@ export class TimelinesState {
 	@O audioMode = false;
 	@O audioPanel = new AudioPanelState();
 	@O @ignore copiedNodeEffectInfo: {stepID: string, effectIndex: number, effectData: TimelineStepEffect, asCut: boolean}|n;
+	@O selectedAudioInputDeviceID: string|n;
 
 	// playing
 	@O recordPanel = new RecordPanelState();
@@ -21,6 +23,7 @@ export class TimelinesState {
 	@O layoutHelperMap_load = false;
 	@O layoutHelperMap_show = false;
 	@O @ignore autoScroll = true;
+	@O stepTabDefault = StepTab.none;
 }
 
 class AudioPanelState {

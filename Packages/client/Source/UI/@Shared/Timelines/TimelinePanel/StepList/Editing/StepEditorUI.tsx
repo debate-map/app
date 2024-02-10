@@ -6,8 +6,8 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
-import {DragInfo, MakeDraggable, Observer} from "web-vcore";
-import {Clone, E, GetEntries, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {DragInfo, MakeDraggable, Observer, RunInAction_Set} from "web-vcore";
+import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {Button, Column, Pre, Row, Select, Spinner, Text, TextArea, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
@@ -15,22 +15,12 @@ import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
+import {StepTab} from "Store/main/maps/mapStates/@MapState.js";
+import React, {useState} from "react";
 import {StepEffectUI} from "./StepEffectUI.js";
 import {StepEffectUI_Menu_Stub} from "./StepEffectUI_Menu.js";
-
-export enum PositionOptionsEnum {
-	full = "full",
-	left = "left",
-	right = "right",
-	center = "center",
-}
-/*export const positionOptions = [
-	{ name: 'Full', value: null },
-	{ name: 'Left', value: 1 },
-	{ name: 'Right', value: 2 },
-	{ name: 'Center', value: 3 },
-];*/
-export const positionOptions = GetEntries(PositionOptionsEnum);
+import {StepTab_General} from "./StepTabs/StepTab_General.js";
+import {GetStepClipsInAudioFiles, StepTab_Audio} from "./StepTabs/StepTab_Audio.js";
 
 /* let portal: HTMLElement;
 WaitXThenRun(0, () => {
@@ -38,33 +28,8 @@ WaitXThenRun(0, () => {
 	document.body.appendChild(portal);
 }); */
 
-export async function ModifyAudioFileMeta(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, modifierFunc: (newAudioFileMeta: AudioFileMeta)=>any, saveNewAudioMeta = true) {
-	const newAudioMeta = audioMeta ? Clone(audioMeta) as AudioMeta : new AudioMeta();
-	const newAudioFileMeta = AudioMeta.GetOrCreateFileMeta(newAudioMeta, audioFileName);
-	modifierFunc(newAudioFileMeta);
-	if (saveNewAudioMeta) {
-		const json = JSON.stringify(newAudioMeta, null, "\t"); // pretty-print the json; contents are small, so readability is more important than size
-		await opfsForMap.SaveFile_Text(json, "AudioMeta.json");
-	}
-	return newAudioMeta; // return this, so if multiple modifications are made, they can build on top of each others' changes rather than overwriting them 
-}
-export async function DeleteStepClip(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string) {
-	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
-		delete newAudioFileMeta.stepClips[stepID];
-	});
-}
-export async function SetStepClipTimeInAudio(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string, startTime: number) {
-	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
-		newAudioFileMeta.stepClips[stepID] = new StepAudioClip({...newAudioFileMeta.stepClips[stepID], timeInAudio: startTime});
-	});
-}
-export async function SetStepClipVolume(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, stepID: string, volume: number) {
-	return ModifyAudioFileMeta(opfsForMap, audioMeta, audioFileName, newAudioFileMeta=>{
-		newAudioFileMeta.stepClips[stepID] = new StepAudioClip({...newAudioFileMeta.stepClips[stepID], volume});
-	});
-}
-
 export type StepEditorUIProps = {index: number, map: Map, timeline: Timeline, step: TimelineStep, nextStep: TimelineStep|n, draggable?: boolean} & {dragInfo?: DragInfo};
+export type StepEditorUI_SharedProps = {map: Map, step: TimelineStep, nextStep: TimelineStep|n, creatorOrMod: boolean};
 
 export async function AddTimelineStep_Simple(timelineID: string, steps: TimelineStep[], insertIndex: number) {
 	if (MeID() == null) return ShowSignInPopup();
@@ -95,62 +60,37 @@ export async function AddTimelineStep_Simple(timelineID: string, steps: Timeline
 		type: "TimelineStep",
 		draggableInfo: new DraggableInfo({stepID: step.id}),
 		index,
-		// enabled: step != null, // if step is not yet loaded, don't actually apply the draggable-wrapping
+		//enabled: step != null, // if step is not yet loaded, don't actually apply the draggable-wrapping
 	};
 })
 @Observer
 // @SimpleShouldUpdate({ propsToIgnore: ['dragInfo'] })
 export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {placeholderRect: null as VRect|n}) {
-	/* static ValidateProps(props: StepUIProps) {
-		Assert(props.step != null);
-	} */
-
-	/* shouldComponentUpdate(newProps, newState) {
-		if (ShallowChanged(this.props.ExcludeKeys('dragInfo'), newProps.ExcludeKeys('dragInfo')) || ShallowChanged(this.state, newState)) return true;
-		// for dragInfo, do a json-based comparison (I think this is fine?)
-		if (ToJSON(this.props.dragInfo) != ToJSON(newProps.dragInfo)) return true;
-		return false;
-	} */
-
+	lastHeaderTabDefault: StepTab;
 	render() {
 		const {index, map, timeline, step, nextStep, dragInfo} = this.props;
 		const {placeholderRect} = this.state;
 		//const step = GetTimelineStep(stepID);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
-		const audioUIState = store.main.timelines.audioPanel;
+		const timelinesUIState = store.main.timelines;
 		const nodeEffects = GetNodeEffects(step);
+
+		const [tabOverride, setTabOverride] = useState<StepTab|n>(null);
+		const headerTab = tabOverride ?? timelinesUIState.stepTabDefault;
+		if (timelinesUIState.stepTabDefault != this.lastHeaderTabDefault) {
+			WaitXThenRun(0, ()=>setTabOverride(timelinesUIState.stepTabDefault));
+		}
+		this.lastHeaderTabDefault = timelinesUIState.stepTabDefault;
 
 		if (step == null) {
 			return <div style={{height: 100}}><div {...(dragInfo && dragInfo.provided.draggableProps)} {...(dragInfo && dragInfo.provided.dragHandleProps)}/></div>;
 		}
-		const timeType =
-			step?.timeFromStart != null ? "from start" :
-			step?.timeFromLastStep != null ? "from last step" :
-			"until next step";
-
-		const opfsForMap = OPFS_Map.GetEntry(map.id);
-		//const files = opfsForMap.Files;
-		const audioMeta = opfsForMap.AudioMeta;
-		const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
-		const stepClipsInAudioFiles = audioFileMetas.ToMapObj(a=>a.key, a=>a.value.stepClips[step.id]).Pairs().filter(a=>a.value != null);
-
-		const stepAudioSegment = GetStepAudioClipEnhanced(step, nextStep, map.id);
-		let stepDurationDerivedFromAudio = stepAudioSegment?.duration;
-		// if could not derive step-duration based on assumption of "step being one segment among many in audio file"...
-		if (stepDurationDerivedFromAudio == null) {
-			// ...then try to derive the step-duration from the audio-file's full-length (assuming this is the only step associated with that audio file)
-			for (const {value: audioFileMeta} of audioFileMetas) {
-				const stepClipPairs = audioFileMeta.stepClips.Pairs();
-				if (stepClipPairs.length == 1 && stepClipPairs[0].key == step.id) {
-					stepDurationDerivedFromAudio = audioFileMeta.duration;
-					break;
-				}
-			}
-		}
 
 		const steps = GetTimelineSteps(timeline.id);
+		const stepClipsInAudioFiles = GetStepClipsInAudioFiles(map.id, step.id);
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
+		const sharedProps = {map, step, nextStep, creatorOrMod};
 		const result = (
 			// wrapper needed to emulate margin-top (since react-list doesn't support margins)
 			<div style={{paddingTop: index == 0 ? 0 : 7}}>
@@ -173,52 +113,22 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						{/* <Button ml={5} text="Edit" title="Edit this step" style={{ flexShrink: 0 }} onClick={() => {
 							ShowEditTimelineStepDialog(MeID(), step);
 						}}/> */}
-						<div {...(dragInfo && dragInfo.provided.dragHandleProps)} style={E({flex: 1, alignSelf: "stretch", margin: "0 5px", borderRadius: 20, background: "rgba(0,0,0,.1)"})}/>
+						<div {...(dragInfo && dragInfo.provided.dragHandleProps)} style={E({flex: 1, maxWidth: 100, alignSelf: "stretch", margin: "0 5px", borderRadius: 20, background: "rgba(0,0,0,.1)"})}/>
 						<Row center ml="auto">
-							<Text>Time </Text>
-							<Select options={["from start", "from last step", "until next step"]} value={timeType} onChange={typeStr=>{
-								const val = (step.timeFromStart ?? step.timeFromLastStep ?? step.timeUntilNextStep) ?? 0;
-								if (typeStr == "from start") {
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val, timeFromLastStep: null, timeUntilNextStep: null}});
-								} else if (typeStr == "from last step") {
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: val, timeUntilNextStep: null}});
-								} else if (typeStr == "until next step") {
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: null, timeUntilNextStep: val}});
-								}
-							}}/>
-							<Text> : </Text>
-							{timeType == "from start" &&
-							<TimeSpanInput largeUnit="minute" smallUnit="second" style={{width: 60}} enabled={creatorOrMod} value={step.timeFromStart ?? 0} onChange={val=>{
-								RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: val}});
-							}}/>}
-							{timeType == "from last step" &&
-							<>
-								<Spinner style={{width: 60}} enabled={creatorOrMod} step="any" value={step.timeFromLastStep ?? 0} onChange={val=>{
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromLastStep: val}});
-								}}/>
-								<Text title="seconds">s</Text>
-							</>}
-							{timeType == "until next step" &&
-							<>
-								<Spinner style={{width: 60}} enabled={creatorOrMod} step="any" value={step.timeUntilNextStep ?? 0} onChange={val=>{
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeUntilNextStep: val}});
-								}}/>
-								<Text title="seconds">s</Text>
-							</>}
-							<Button mdIcon="creation" title={`Derive time from audio file(s) (${stepDurationDerivedFromAudio}s)`} ml={5}
-								enabled={creatorOrMod && nextStep != null && stepDurationDerivedFromAudio != null && stepDurationDerivedFromAudio.toFixed(3) != step.timeUntilNextStep?.toFixed(3)} // number stored in db can differ slightly, so round to 1ms
-								onClick={()=>{
-									RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: null, timeUntilNextStep: stepDurationDerivedFromAudio}});
-								}}/>
-							{/* <Pre>Speaker: </Pre>
-							<Select value={} onChange={val=> {}}/> */}
-							<Pre ml={5}>Pos: </Pre>
-							<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
-								RunCommand_UpdateTimelineStep({id: step.id, updates: {groupID: val}});
-							}}/>
-							<Button ml={5} mdIcon="ray-start-arrow" enabled={creatorOrMod && store.main.timelines.audioPanel.selectedFile != null} onClick={()=>{
-								SetStepClipTimeInAudio(opfsForMap, audioMeta, audioUIState.selectedFile!, step.id, store.main.timelines.audioPanel.selection_start);
-							}}/>
+							<Select displayType="button bar" value={tabOverride} onChange={val=>setTabOverride(val)}
+								/*ref={c=>{
+									const audioOptionEl: HTMLOptionElement|n = (c && c.DOM_HTML && Array.from(c.DOM_HTML.childNodes).find(a=>(a as HTMLElement).innerText == "  Audio  "));
+									if (audioOptionEl) audioOptionEl.style.whiteSpace = "pre";
+								}}*/
+								childStyle={{whiteSpace: "pre"}} // needed for "  Audio  " to show up with extra whitespace (to keep same width as the with-number instances)
+								options={GetEntries(StepTab, name=>{
+									name = ModifyString(name, m=>[m.startLower_to_upper]);
+									if (name == "Audio") {
+										if (stepClipsInAudioFiles.length == 0) return `  Audio  `;
+										return `Audio (${stepClipsInAudioFiles.length})`;
+									}
+									return name;
+								})}/>
 							<Button ml={5} mdIcon="dots-vertical" onClick={e=>{
 								const buttonRect = (e.target as HTMLElement).getBoundingClientRect();
 								ShowVMenu(
@@ -255,32 +165,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 							}}/>
 						</Row>
 					</Row>
-					{stepClipsInAudioFiles.map(stepClipPair=>{
-						const audioFileMeta = audioFileMetas.find(a=>a.key == stepClipPair.key)!;
-						return (
-							<Row key={stepClipPair.index} mt={5} p="1px 5px">
-								<Text>{`In "${audioFileMeta.key}": Volume:`}</Text>
-								<Spinner ml={5} style={{width: 50}} enabled={creatorOrMod} value={stepClipPair.value.volume} onChange={async val=>{
-									SetStepClipVolume(opfsForMap, audioMeta, audioFileMeta.key, step.id, val);
-								}}/>
-								<Text ml={5}>{`Step start time:`}</Text>
-								<TimeSpanInput ml={5} largeUnit="minute" smallUnit="second" style={{width: 80}} enabled={creatorOrMod} value={stepClipPair.value.timeInAudio} onChange={async val=>{
-									SetStepClipTimeInAudio(opfsForMap, audioMeta, audioFileMeta.key, step.id, val);
-								}}/>
-								<Button ml={5} mdIcon="play" enabled={audioUIState.selectedFile == audioFileMeta.key} onClick={()=>{
-									RunInAction("StepEditorUI.playAudio", ()=>{
-										//audioUIState.selectedFile = audioFileMeta.key;
-										//audioUIState.selection_start = startTime;
-										//audioUIState.act_startPlayAtTimeX = Date.now(); // this triggers the wavesurfer to actually start playing
-										audioUIState.act_startPlayAtTimeX = stepClipPair.value.timeInAudio;
-									});
-								}}/>
-								<Button ml={5} mdIcon="delete" onClick={()=>{
-									DeleteStepClip(opfsForMap, audioMeta, audioFileMeta.key, step.id);
-								}}/>
-							</Row>
-						);
-					})}
+					{headerTab == StepTab.general && <StepTab_General {...sharedProps}/>}
+					{headerTab == StepTab.audio && <StepTab_Audio {...sharedProps}/>}
 					{/* <Row ml={5} style={{ minHeight: 20 }}>{step.message}</Row> */}
 					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true}
 						style={{

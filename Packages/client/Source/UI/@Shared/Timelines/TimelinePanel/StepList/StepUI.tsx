@@ -8,8 +8,9 @@ import {store} from "Store";
 import {Map, Timeline, GetTimelineStep, IsUserCreatorOrMod, MeID, GetTimelineStepTimeFromStart, TimelineStep, GetNodeEffects} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {PositionOptionsEnum, StepEditorUI} from "./Editing/StepEditorUI.js";
+import {StepEditorUI} from "./Editing/StepEditorUI.js";
 import {StepEffectUI} from "./Editing/StepEffectUI.js";
+import {PositionOptionsEnum} from "./Editing/StepTabs/StepTab_General.js";
 
 @Observer
 export class StepUI extends BaseComponentPlus(

@@ -14,7 +14,7 @@ import {autorun} from "web-vcore/nm/mobx";
 import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers";
-import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./StepList/Editing/StepEditorUI";
+import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./StepList/Editing/StepTabs/StepTab_Audio";
 
 class ParseData {
 	audioData?: ParseData_Audio;

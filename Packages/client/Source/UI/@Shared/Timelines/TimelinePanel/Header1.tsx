@@ -1,5 +1,5 @@
 import {GetTimelines, GetTimelineStep, GetTimelineSteps, Map, MeID, Timeline, TimelineStep} from "dm_common";
-import React from "react";
+import React, {useEffect} from "react";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUIWrapper.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
@@ -7,14 +7,15 @@ import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
 import {RunCommand_DeleteTimeline} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {ES, Observer, RunInAction, RunInAction_Set} from "web-vcore";
-import {E, StartDownload} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox} from "web-vcore/nm/react-vcomponents.js";
+import {E, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions.js";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
 import {DateToString, TimeToString} from "Utils/UI/General";
+import {StepTab} from "Store/main/maps/mapStates/@MapState";
 
 @Observer
 export class Header1 extends BaseComponent<{map: Map}, {}> {
@@ -77,6 +78,8 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 					</DropDownContent>
 				</DropDown>
 				<CheckBox ml={5} text="Details" value={mapState.showTimelineDetails} onChange={val=>RunInAction_Set(this, ()=>mapState.showTimelineDetails = val)}/>
+				<CheckBox ml={5} text="Audio panel" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps."
+					value={uiState.audioMode} onChange={val=>RunInAction_Set(this, ()=>uiState.audioMode = val)}/>
 				{/*<Button ml="auto" text="Play" title="Start playing this timeline" enabled={selectedTimeline != null} style={{ flexShrink: 0 }} onClick={() => {
 					store.dispatch(new ACTMap_PlayingTimelineSet({ mapID: map.id, timelineID: selectedTimeline.id }));
 					store.dispatch(new ACTMap_PlayingTimelineStepSet({ mapID: map.id, stepIndex: 0 }));
@@ -84,9 +87,9 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 				}}/>*/}
 
 				<Row ml="auto" style={{position: "relative"}}>
-					<CheckBox text="Edit mode" value={mapState.timelineEditMode} onChange={val=>RunInAction_Set(this, ()=>mapState.timelineEditMode = val)}/>
-					<CheckBox ml={5} text="Audio mode" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps."
-						value={uiState.audioMode} onChange={val=>RunInAction_Set(this, ()=>uiState.audioMode = val)}/>
+					<Text>Steps:</Text>
+					<CheckBox ml={5} text="Edit" value={mapState.timelineEditMode} onChange={val=>RunInAction_Set(this, ()=>mapState.timelineEditMode = val)}/>
+					<Select ml={5} options={GetEntries(StepTab)} displayType="dropdown" value={uiState.stepTabDefault} onChange={val=>RunInAction_Set(this, ()=>uiState.stepTabDefault = val)}/>
 					<OptionsDropdown timeline={timeline} steps={steps}/>
 				</Row>
 			</Row>
@@ -100,33 +103,46 @@ class OptionsDropdown extends BaseComponent<{timeline: Timeline|n, steps: Timeli
 		const {timeline, steps} = this.props;
 		const uiState = store.main.timelines;
 		const uiState_maps = store.main.maps;
+
+		const [inputDevices, setInputDevices] = React.useState<MediaDeviceInfo[]>([]);
+		useEffect(()=>{
+			navigator.mediaDevices.enumerateDevices().then(devices=>{
+				setInputDevices(devices.filter(a=>a.kind == "audioinput"));
+			});
+		}, []);
+
 		return (
 			<DropDown>
 				<DropDownTrigger><Button ml={5} text="Options" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
+				<DropDownContent style={{right: 0, width: 350, zIndex: zIndexes.subNavBar}}><Column>
 					<Row style={{fontWeight: "bold"}}>Editing</Row>
-					<CheckBox text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)"
+					<CheckBox mt={3} text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)"
 						value={uiState_maps.lockMapScrolling} onChange={val=>RunInAction_Set(this, ()=>uiState_maps.lockMapScrolling = val)}/>
-					<Button text="Export timeline data" title="Exports the data of the timeline, and all of its steps, to a json file." onClick={async()=>{
+					<Button mt={3} text="Export timeline data" title="Exports the data of the timeline, and all of its steps, to a json file." onClick={async()=>{
 						const data = {timeline, steps};
 						const json = JSON.stringify(data, null, "\t");
 						StartDownload(json, `TimelineExport_${TimeToString(Date.now(), true)}_ForTimeline_${timeline?.id}.json`);
 					}}/>
+					<Row mt={3}>
+						<Text>Audio input:</Text>
+						<Select ml={5} style={{flex: 1}} options={inputDevices.map(device=>({name: device.label, value: device.deviceId}))}
+							value={uiState.selectedAudioInputDeviceID} onChange={val=>RunInAction_Set(this, ()=>uiState.selectedAudioInputDeviceID = val)}/>
+					</Row>
 
 					<Row mt={10} style={{fontWeight: "bold"}}>Playback</Row>
-					<Row>
+					<Row mt={3}>
 						<Text>Node-reveal highlight time:</Text>
 						<Spinner ml={5} min={0} value={uiState.nodeRevealHighlightTime} onChange={val=>RunInAction_Set(this, ()=>uiState.nodeRevealHighlightTime = val)}/>
 					</Row>
-					<Row>
+					<Row mt={3}>
 						<Text>Hide editing controls:</Text>
 						<CheckBox ml={5} value={uiState.hideEditingControls} onChange={val=>RunInAction_Set(this, ()=>uiState.hideEditingControls = val)}/>
 					</Row>
-					<Row>
+					<Row mt={3}>
 						<Text>Show focus-nodes:</Text>
 						<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
 					</Row>
-					<Row>
+					<Row mt={3}>
 						<Text>Layout-helper map:</Text>
 						<CheckBox ml={5} text="Load" value={uiState.layoutHelperMap_load} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_load = val)}/>
 						<CheckBox ml={5} text="Show" value={uiState.layoutHelperMap_show} onChange={val=>RunInAction_Set(this, ()=>uiState.layoutHelperMap_show = val)}/>

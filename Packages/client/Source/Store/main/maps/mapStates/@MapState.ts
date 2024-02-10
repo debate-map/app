@@ -9,6 +9,12 @@ export enum SortType {
 	//viewerCount: 1,
 }
 
+export enum StepTab {
+	none = "none",
+	general = "general",
+	audio = "audio",
+}
+
 export enum ShowChangesSinceType {
 	none = "none",
 	sinceVisitX = "sinceVisitX",
