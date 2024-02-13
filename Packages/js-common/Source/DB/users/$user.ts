@@ -10,40 +10,40 @@ import {PermissionGroupSet} from "./@User.js";
 /*export const GetUserJoinDate = CreateAccessor((userID: string): number=>{
 	return GetUser(userID)?.joinDate;
 });*/
-const emptyUserPerms = {basic: false, verified: false, mod: false, admin: false} as PermissionGroupSet; // temp
-const standardUserPerms = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
+
+const nullUser_emptyPerms = {basic: false, verified: false, mod: false, admin: false} as PermissionGroupSet; // temp
+const nullUser_standardPerms = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
+export function IsNullUserPerms(permissions: PermissionGroupSet|n, countNullPermsAsNullUserPerms = true) {
+	if (permissions == null && countNullPermsAsNullUserPerms) return true;
+	return permissions == nullUser_emptyPerms || permissions == nullUser_standardPerms;
+}
+
 export const GetUserPermissionGroups = CreateAccessor((userID: string|n, upgradeAnonToStandardUserPerms = false): PermissionGroupSet=>{
-	//if (userID == null) return null;
-	/*if (userID == null) return standardUserPerms;
-	return GetUser(userID)?.permissionGroups ?? standardUserPerms;*/
 	const user = GetUser(userID);
 	let result = user?.permissionGroups;
 	// if null, user is not logged in; handle based on passed flag
 	if (result == null) {
-		result = upgradeAnonToStandardUserPerms ? Clone(standardUserPerms) as PermissionGroupSet : emptyUserPerms;
+		//result = upgradeAnonToStandardUserPerms ? Clone(standardUserPerms) as PermissionGroupSet : emptyUserPerms;
+		result = upgradeAnonToStandardUserPerms ? nullUser_standardPerms : nullUser_emptyPerms;
 	}
 	return result;
 });
 
 export const CanGetBasicPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
-	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
-
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
-	return permissions == null || permissions.basic; // if anon/not-logged-in, assume user can get basic permissions once logged in
+	return permissions?.basic || IsNullUserPerms(permissions); // if anon/not-logged-in, assume user can get basic permissions once logged in
 });
 export const HasBasicPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
-	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
-
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
-	return permissions ? permissions.basic : false;
+	return permissions?.basic ?? false;
 });
 export const HasModPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
-	return permissions ? permissions.mod : false;
+	return permissions?.mod ?? false;
 });
 export const HasAdminPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
-	return permissions ? permissions.admin : false;
+	return permissions?.admin ?? false;
 });
 // /** If user is the creator, also requires that they (still) have basic permissions. */
 export const IsUserCreator = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
