@@ -5,10 +5,11 @@ import {TimelineStep, Map} from "dm_common";
 import {AudioFileMeta, AudioMeta, GetStepAudioClipEnhanced, StepAudioClip} from "Utils/OPFS/Map/AudioMeta";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {store} from "Store";
-import {RunInAction} from "web-vcore";
+import {Observer, RunInAction} from "web-vcore";
 import {Clone, StartDownload} from "js-vextensions";
 import {DateToString} from "Utils/UI/General";
 import {StepEditorUI_SharedProps} from "../StepEditorUI";
+import {StepAudio_TakeUI} from "./TakeUI";
 
 export async function ModifyAudioFileMeta(opfsForMap: OPFS_Map, audioMeta: AudioMeta|n, audioFileName: string, modifierFunc: (newAudioFileMeta: AudioFileMeta)=>any, saveNewAudioMeta = true) {
 	const newAudioMeta = audioMeta ? Clone(audioMeta) as AudioMeta : new AudioMeta();
@@ -45,6 +46,7 @@ export function GetStepClipsInAudioFiles(mapID: string, stepID: string) {
 	return stepClipsInAudioFiles;
 }
 
+@Observer
 export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {isRecording: boolean}> {
 	recorder: MediaRecorder|n;
 	audioChunks = [] as Blob[];
@@ -67,6 +69,9 @@ export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {isRe
 		const audioMeta = opfsForMap.AudioMeta;
 		const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
 		const stepClipsInAudioFiles = GetStepClipsInAudioFiles(map.id, step.id);
+
+		const opfsForStep = opfsForMap.GetStepFolder(step.id);
+		const takeNumbersForStep = opfsForStep.Files.map(a=>a.name.match(/^Take(\d+)_/)?.[1]?.ToInt()).filter(a=>a != null) as number[];
 
 		return (
 			<>
@@ -94,6 +99,11 @@ export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {isRe
 								DeleteStepClip(opfsForMap, audioMeta, audioFileMeta.key, step.id);
 							}}/>
 						</Row>
+					);
+				})}
+				{takeNumbersForStep.map(takeNumber=>{
+					return (
+						<StepAudio_TakeUI key={takeNumber} map={map} step={step} takeNumber={takeNumber}/>
 					);
 				})}
 				<Row p="1px 5px" center>

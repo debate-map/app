@@ -28,7 +28,7 @@ export class OPFS_Map extends OPFSFolder {
 	}
 
 	@computed get File_AudioMeta() {
-		return this.files.find(a=>a.name == "AudioMeta.json");
+		return this.Files.find(a=>a.name == "AudioMeta.json");
 	}
 	@O audioMeta_cache_data: AudioMeta|n;
 	@O audioMeta_cache_lastFileWithLoadStarted: File|n;

@@ -17,6 +17,7 @@ import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
 import {DateToString, TimeToString} from "Utils/UI/General";
 import {StepTab} from "Store/main/maps/mapStates/@MapState";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";
+import {voiceChangerBridge} from "Utils/Bridge/Bridge_VoiceChanger";
 
 @Observer
 export class Header1 extends BaseComponent<{map: Map}, {}> {
@@ -128,6 +129,10 @@ class OptionsDropdown extends BaseComponent<{map: Map, timeline: Timeline|n, ste
 						<Text>Audio input:</Text>
 						<Select ml={5} style={{flex: 1}} options={inputDevices.map(device=>({name: device.label, value: device.deviceId}))}
 							value={uiState.selectedAudioInputDeviceID} onChange={val=>RunInAction_Set(this, ()=>uiState.selectedAudioInputDeviceID = val)}/>
+					</Row>
+					<Row mt={3}>
+						<Text>Voice target:</Text>
+						<Select ml={5} style={{flex: 1}} options={voiceChangerBridge.GetVoiceOptionsForSelect()} value={voiceChangerBridge.activeSlotIndex} onChange={val=>voiceChangerBridge.SetActiveSlotIndex(val)}/>
 					</Row>
 					{inElectron && <Row mt={3}>
 						<Text>Open folder:</Text>
