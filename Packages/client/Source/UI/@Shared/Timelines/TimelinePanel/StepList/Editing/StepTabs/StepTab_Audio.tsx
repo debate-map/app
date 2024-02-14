@@ -71,7 +71,7 @@ export class StepTab_Audio extends BaseComponent<StepEditorUI_SharedProps, {isRe
 		const stepClipsInAudioFiles = GetStepClipsInAudioFiles(map.id, step.id);
 
 		const opfsForStep = opfsForMap.GetStepFolder(step.id);
-		const takeNumbersForStep = opfsForStep.Files.map(a=>a.name.match(/^Take(\d+)_/)?.[1]?.ToInt()).filter(a=>a != null) as number[];
+		const takeNumbersForStep = opfsForStep.Files.map(a=>a.name.match(/^Take(\d+)_/)?.[1]?.ToInt()).Distinct().filter(a=>a != null) as number[];
 
 		return (
 			<>

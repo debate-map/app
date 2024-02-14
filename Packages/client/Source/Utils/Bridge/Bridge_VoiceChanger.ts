@@ -13,6 +13,7 @@ export class Voice {
 	name: string;
 }
 
+export const voiceChangerHost = `http://localhost:18888`;
 export class VoiceChangerBridge {
 	//static main = new VoiceChangerInfo();
 	constructor() {
