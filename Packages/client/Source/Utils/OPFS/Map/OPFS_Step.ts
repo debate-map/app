@@ -48,4 +48,5 @@ export async function ModifyStepMeta(opfsForStep: OPFS_Step, stepMeta: StepMeta|
 
 export class StepMeta {
 	takeRatings: {[key: string]: number} = {};
+	takeVolumes: {[key: string]: number} = {};
 }

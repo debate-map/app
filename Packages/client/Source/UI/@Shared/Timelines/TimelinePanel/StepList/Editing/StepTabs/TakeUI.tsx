@@ -10,45 +10,7 @@ import {BaseComponent} from "react-vextensions";
 import {Observer} from "web-vcore";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IsInt, Timer} from "web-vcore/nm/js-vextensions";
-
-export class AudioFileMiniPlayer extends BaseComponent<{file: File|n, buttonProps: ButtonProps}, {}> {
-	audioEl: HTMLAudioElement|n;
-
-	updateWhilePlayingTimer = new Timer(100, ()=>{
-		this.Update();
-		if (this.audioEl?.paused) {
-			this.updateWhilePlayingTimer.Stop();
-		}
-	});
-
-	render() {
-		const {file, buttonProps} = this.props;
-
-		const [blobURL, setBlobURL] = useState<string|n>();
-		useEffect(()=>{
-			if (file == null) return void setBlobURL(null);
-			const url = URL.createObjectURL(file);
-			setBlobURL(url);
-			return ()=>URL.revokeObjectURL(url);
-		}, [file]);
-
-		return (
-			<>
-				{blobURL != null && <audio ref={c=>this.audioEl = c} src={blobURL}/>}
-				<Button {...buttonProps} enabled={blobURL != null} mdIcon={(this.audioEl == null || this.audioEl.paused) ? "play" : "stop"} onClick={()=>{
-					if (this.audioEl == null) return;
-					if (this.audioEl.paused) {
-						this.audioEl.play();
-						this.updateWhilePlayingTimer.Start();
-					} else {
-						this.audioEl.pause();
-						this.audioEl.currentTime = 0;
-					}
-				}}/>
-			</>
-		);
-	}
-}
+import {AudioFileMiniPlayer} from "Utils/ReactComponents/AudioFileMiniPlayer";
 
 @Observer
 export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineStep, takeNumber: number}, {}> {
@@ -58,6 +20,7 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 		const opfsForStep = opfsForMap.GetStepFolder(step.id);
 		const stepMeta = opfsForStep.StepMeta;
 		const takeRating = stepMeta?.takeRatings[takeNumber] ?? 0;
+		const takeVolume = stepMeta?.takeVolumes[takeNumber] ?? 1;
 
 		const origAudioFile = opfsForStep.Files.find(a=>a.name.startsWith(`Take${takeNumber}_Orig.`));
 		const convertedAudioFile = opfsForStep.Files.find(a=>a.name.startsWith(`Take${takeNumber}_Converted.`));
@@ -74,7 +37,7 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 					const outputFile = new File([outputFileBuffer], origAudioFile!.name.replace(/_Orig\..+$/, "_Converted.wav"), {type: "audio/wav"});
 					await opfsForStep.SaveFile(outputFile);
 				}}/>
-				<AudioFileMiniPlayer file={convertedAudioFile} buttonProps={{style: {marginLeft: 5}, title: "Play the voice-converted recorded audio-contents"}}/>
+				<AudioFileMiniPlayer file={convertedAudioFile} volume={takeVolume} buttonProps={{style: {marginLeft: 5}, title: "Play the voice-converted recorded audio-contents (with custom volume applied)"}}/>
 				<StarsRating ml={5} value={takeRating}
 					onChange={val=>{
 						ModifyStepMeta(opfsForStep, stepMeta, a=>a.takeRatings[takeNumber] = val);
@@ -104,14 +67,22 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 						});
 					}}/>
 				<Text ml={5}>({takeRating})</Text>
+				<Text ml={5}>Volume:</Text>
+				<Spinner ml={5} step="any" min={0} max={1} style={{width: 50}} value={takeVolume} onChange={val=>{
+					ModifyStepMeta(opfsForStep, stepMeta, a=>a.takeVolumes[takeNumber] = val);
+				}}/>
 				<Button ml={5} mdIcon="delete" title="Delete all files associated with this take" onClick={()=>{
 					ShowMessageBox({
 						title: `Delete ${filesForTake.length} files`, cancelButton: true,
-						message: `Delete all ${filesForTake.length} files associated with take #${takeNumber}?\n\nFiles associated:\n${filesForTake.map(a=>`* ${a.name}`).join("\n")}`,
+						message: `Delete all ${filesForTake.length} files/data associated with take #${takeNumber}?\n\nFiles associated:\n${filesForTake.map(a=>`* ${a.name}`).join("\n")}`,
 						onOK: ()=>{
 							for (const file of filesForTake) {
 								opfsForStep.DeleteFile(file.name);
 							}
+							ModifyStepMeta(opfsForStep, stepMeta, a=>{
+								delete a.takeRatings[takeNumber];
+								delete a.takeVolumes[takeNumber];
+							});
 						},
 					});
 				}}/>
