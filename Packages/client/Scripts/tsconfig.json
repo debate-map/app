@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		// general
-		"watch": true,
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
 		"resolveJsonModule": true,
 

@@ -1,9 +1,9 @@
 {
   "name": "@debate-map/app",
   "description": "Monorepo for the client, server, etc. of the Debate Map website (debatemap.app).",
+  "private": true,
   "version": "0.0.1",
   "author": "Venryx (https://venryx.com)",
-  "private": true,
   "main": "./Packages/deploy/Pulumi/index.ts",
   "workspaces": [
     "Packages/client",

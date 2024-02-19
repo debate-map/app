@@ -52,6 +52,9 @@ if (!HasLocalStorage()) {
 	});
 }
 
+// env/db handling
+// ==========
+
 let storeTemp = {} as RootState;
 try {
 	const storeTemp_json = localStorage.__mobx_sync__;
@@ -63,19 +66,12 @@ try {
 }
 // if "localStorage" is blocked, and something went wrong with our polyfill of it above, show an error message to user
 catch (ex) {
-	if (prompt(
-		"Debate Map failed to load map-data from local-storage; site cannot function without local-storage enabled.\n\n"
-		+ "If Debate Map is loaded in an iframe, you can most likely solve this by disabling the \"Block third-party cookies\" option in Chrome's incognito-mode new-tab, then refreshing.\n\n"
-		+ "For more info, you can copy and visit the link below.",
-		"https://stackoverflow.com/a/69004255",
-	)) {
-		// commented; modern browsers block this auto-navigation, so best to just leave it up to the user
-		/*try {
-			if (window.top) window.top.location.href = "https://stackoverflow.com/a/69004255";
-		} catch (ex) {
-			alert("Navigation to information page failed. To view it, you can refresh the page, then manually copy and visit the link.");
-		}*/
-	}
+	prompt([
+		"Debate Map failed to load data from local-storage; site cannot function without local-storage enabled.",
+		"If Debate Map is loaded in an iframe, you can most likely solve this by disabling the \"Block third-party cookies\" option in Chrome's incognito-mode new-tab, then refreshing.",
+		"For more info, you can visit the link below.",
+	].join("\n\n"), "https://stackoverflow.com/a/69004255");
+	// Why not auto-navigate to the given url when OK is pressed? Because most modern browsers block this auto-navigation. (so best to just leave it up to the user)
 }
 function AsNotNull(val: any) {
 	if (val == null || val == "null") return null;

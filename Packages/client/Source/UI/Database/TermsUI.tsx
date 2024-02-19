@@ -49,8 +49,9 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 							Terms
 						</Div>
 					</Row>
-					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=>{
-						if (e.target != e.currentTarget) return;
+					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={(e: React.MouseEvent)=>{
+						//if (e.target != e.currentTarget) return;
+						if ((e.target as HTMLElement|n)?.parentElement != e.currentTarget) return; // temp; till react-vscrollview updated to accept "content_onClick" prop
 						RunInAction("TermsUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
 					}}>
 						{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={GetSelectedTermID() == term.id}/>)}
