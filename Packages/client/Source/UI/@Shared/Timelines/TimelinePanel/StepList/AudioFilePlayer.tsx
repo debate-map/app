@@ -86,7 +86,7 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 					this.wavesurfer_onReady = ()=>doLoad();
 				}
 			}
-		} else {
+		} else if (wavesurfer.isPlaying()) {
 			wavesurfer.pause();
 		}
 

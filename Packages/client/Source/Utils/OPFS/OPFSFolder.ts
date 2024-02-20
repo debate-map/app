@@ -2,7 +2,7 @@ import {O, RunInAction} from "web-vcore";
 import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {computed, makeObservable, observable} from "web-vcore/nm/mobx";
-import {OPFSDir_GetChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
+import {OPFSDir_GetChildren, OPFSDir_GetDirectoryChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
 
 export class OPFSFolder {
 	constructor(pathSegments: string[]) {
@@ -22,12 +22,27 @@ export class OPFSFolder {
 		}
 		return storageRoot;
 	}
-	async GetTargetDirectoryHandle(createIfMissing: boolean) {
+	async GetTargetDirectoryHandle(actionIfMissing: "error"|"create"|"null") {
 		let currentFolder = await this.GetStorageRoot();
 		for (const pathSegment of this.pathSegments) {
-			currentFolder = await currentFolder.getDirectoryHandle(pathSegment, {create: createIfMissing});
+			if (actionIfMissing == "null" && !await this.DoesChildDirExist_NoCache(pathSegment)) return null;
+			currentFolder = await currentFolder.getDirectoryHandle(pathSegment, {create: actionIfMissing == "create"});
 		}
 		return currentFolder;
+	}
+	async GetTargetDirectoryHandle_EnsuringExists(actionIfMissing: "error"|"create") {
+		return (await this.GetTargetDirectoryHandle(actionIfMissing))!; // we only allow "error" or "create" as options, so func with always either return a value or throw
+	}
+
+	// there is no easy way in the OPFS API to simply check if a directory or file exists, so we use these helper functions
+	async DoesChildExist_NoCache(name: string) {
+		return (await OPFSDir_GetChildren(await this.GetStorageRoot())).some(a=>a.name == name);
+	}
+	async DoesChildDirExist_NoCache(name: string) {
+		return (await OPFSDir_GetDirectoryChildren(await this.GetStorageRoot())).some(a=>a.name == name);
+	}
+	async DoesChildFileExist_NoCache(name: string) {
+		return (await OPFSDir_GetFileChildren(await this.GetStorageRoot())).some(a=>a.name == name);
 	}
 
 	@O loadStarted = false;
@@ -49,10 +64,12 @@ export class OPFSFolder {
 	async LoadFiles() {
 		const newFiles = [] as File[];
 		try {
-			const targetDirectoryHandle = await this.GetTargetDirectoryHandle(false);
-			for (const entry of await OPFSDir_GetFileChildren(targetDirectoryHandle)) {
-				const file = await entry.handle.getFile();
-				newFiles.push(file);
+			const targetDirectoryHandle = await this.GetTargetDirectoryHandle("null");
+			if (targetDirectoryHandle) {
+				for (const entry of await OPFSDir_GetFileChildren(targetDirectoryHandle)) {
+					const file = await entry.handle.getFile();
+					newFiles.push(file);
+				}
 			}
 		} catch (err) {
 			console.error("Error loading files from OPFS:", err);
@@ -72,7 +89,7 @@ export class OPFSFolder {
 	async SaveFile(file: File, nameOverride?: string) {
 		Assert(this.loaded, "OPFSFolder must have its files loaded before saving files.");
 
-		const targetDirectoryHandle = await this.GetTargetDirectoryHandle(true);
+		const targetDirectoryHandle = await this.GetTargetDirectoryHandle_EnsuringExists("create");
 		const fileName_final = nameOverride ?? file.name;
 		const fileHandle = await targetDirectoryHandle.getFileHandle(fileName_final, {create: true});
 		const writable = await fileHandle.createWritable();
@@ -89,7 +106,7 @@ export class OPFSFolder {
 	async DeleteFile(fileName: string) {
 		Assert(this.loaded, "OPFS_Map must have its files loaded before deleting files.");
 
-		const targetDirectoryHandle = await this.GetTargetDirectoryHandle(false);
+		const targetDirectoryHandle = await this.GetTargetDirectoryHandle_EnsuringExists("error");
 		await targetDirectoryHandle.removeEntry(fileName);
 
 		// update file list, to reflect changes

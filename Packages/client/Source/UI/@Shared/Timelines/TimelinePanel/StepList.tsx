@@ -364,7 +364,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 						this.SetTargetTime(pos, source);
 					}}/>}
 				{audioFiles.map((audioFile, index)=>{
-					return <AudioFilePlayer key={audioFile.name} map={map} timeline={timeline} steps={steps} audioFile={audioFile}
+					return <AudioFilePlayer key={`${index}_${audioFile.name}`} map={map} timeline={timeline} steps={steps} audioFile={audioFile}
 						playSpeedGetter={()=>this.noVideoPlayer.speed} isPlayingGetter={()=>this.noVideoPlayer.playing} timeGetter={()=>this.targetTime}/>;
 				})}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>

@@ -41,7 +41,7 @@ export class AudioFileMiniPlayer extends BaseComponent<{file: File|n, volume?: n
 						this.audioEl.play();
 						this.updateWhilePlayingTimer.Start();
 					} else {
-						this.audioEl.pause();
+						if (!this.audioEl.paused) this.audioEl.pause();
 						this.audioEl.currentTime = 0;
 					}
 				}}/>
