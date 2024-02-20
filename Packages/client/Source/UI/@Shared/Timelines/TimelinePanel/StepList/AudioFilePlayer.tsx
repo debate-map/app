@@ -21,7 +21,7 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		const currentStepIndex = GetPlaybackCurrentStepIndex() ?? 0;
 		const currentStep = steps[currentStepIndex ?? -1];
 		const currentStep_audio = currentStep != null ? GetTopAudioForStep(currentStep.id, map.id) : null;
-		const currentStep_audio_meta = currentStep_audio?.meta?.value;
+		const currentStep_audio_meta = currentStep_audio?.meta;
 		const currentStep_startTimeInTimeline = stepTimes[currentStepIndex];
 		const currentStep_endTimeInTimeline = stepTimes[currentStepIndex + 1];
 

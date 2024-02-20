@@ -8,6 +8,7 @@ async function DecodeFileToAudioBuffer(arrayBuffer: ArrayBuffer) {
 	return decodedData;
 }
 
+export const wavFile_headerSize = 44;
 function ConvertAudioFloat32ArrayToWAVFileArrayBuffer(data: Float32Array) {
 	const writeString = (view, offset, string)=>{
 		for (var i = 0; i < string.length; i++) {
@@ -19,20 +20,20 @@ function ConvertAudioFloat32ArrayToWAVFileArrayBuffer(data: Float32Array) {
 	const view = new DataView(buffer);
 
 	// https://www.youfit.co.jp/archives/1418
-	writeString(view, 0, "RIFF"); // RIFFヘッダ
-	view.setUint32(4, 32 + data.length * 2, true); // これ以降のファイルサイズ
-	writeString(view, 8, "WAVE"); // WAVEヘッダ
-	writeString(view, 12, "fmt "); // fmtチャンク
-	view.setUint32(16, 16, true); // fmtチャンクのバイト数
-	view.setUint16(20, 1, true); // フォーマットID
-	view.setUint16(22, 1, true); // チャンネル数
-	view.setUint32(24, 48000, true); // サンプリングレート
-	view.setUint32(28, 48000 * 2, true); // データ速度
-	view.setUint16(32, 2, true); // ブロックサイズ
-	view.setUint16(34, 16, true); // サンプルあたりのビット数
-	writeString(view, 36, "data"); // dataチャンク
-	view.setUint32(40, data.length * 2, true); // 波形データのバイト数
-	FloatTo16BitPCM(view, 44, data); // 波形データ
+	writeString(view, 0, "RIFF"); // RIFF header
+	view.setUint32(4, 32 + data.length * 2, true); // File size after this
+	writeString(view, 8, "WAVE"); // WAVE header
+	writeString(view, 12, "fmt "); // fmt chunk
+	view.setUint32(16, 16, true); // number of bytes in fmt chunk
+	view.setUint16(20, 1, true); // Format ID
+	view.setUint16(22, 1, true); // Number of channels
+	view.setUint32(24, 48000, true); // sampling rate
+	view.setUint32(28, 48000 * 2, true); // data rate
+	view.setUint16(32, 2, true); // block size
+	view.setUint16(34, 16, true); // Bits per sample
+	writeString(view, 36, "data"); // data chunk
+	view.setUint32(40, data.length * 2, true); // Number of bytes of waveform data
+	FloatTo16BitPCM(view, 44, data); // Waveform data
 
 	//const audioBlob = new Blob([view], {type: "audio/wav"});
 	//const url = URL.createObjectURL(audioBlob);

@@ -1,10 +1,10 @@
-import {computed, makeObservable} from "web-vcore/nm/mobx";
-import {O, RunInAction} from "web-vcore";
+import {GetTimelineSteps} from "dm_common";
 import {Clone} from "js-vextensions";
 import {CreateAccessor} from "mobx-graphlink";
-import {GetTimelineSteps} from "dm_common";
+import {computed, makeObservable} from "web-vcore/nm/mobx";
 import {OPFSFolder} from "../OPFSFolder.js";
 import {OPFS_Map} from "../OPFS_Map.js";
+import {ReadFileText_AsJSON} from "../AccessorsForFiles.js";
 
 export class OPFS_Step extends OPFSFolder {
 	constructor(mapID: string, stepID: string) {
@@ -16,26 +16,10 @@ export class OPFS_Step extends OPFSFolder {
 	mapID: string;
 	stepID: string;
 
-	@computed get File_StepMeta() {
-		return this.Files.find(a=>a.name == "StepMeta.json");
-	}
-	@O stepMeta_cache_data: StepMeta|n;
-	@O stepMeta_cache_lastFileWithLoadStarted: File|n;
 	@computed get StepMeta() {
-		const file = this.File_StepMeta;
+		const file = this.Files.find(a=>a.name == "StepMeta.json");
 		if (file == null) return null;
-
-		// if this file instance hasn't had a load of its data started yet, start that now (once it's loaded, the getter will re-run)
-		if (file != this.stepMeta_cache_lastFileWithLoadStarted) {
-			RunInAction("StepMeta.fileLoadStarted", ()=>this.stepMeta_cache_lastFileWithLoadStarted = file);
-			(async()=>{
-				const json = await file.text();
-				if (file != this.stepMeta_cache_lastFileWithLoadStarted) return; // if another file-instance has started loading, abort (since this file-instance's data is no longer needed)
-				RunInAction("AudioMeta.fileLoadCompleted", ()=>this.stepMeta_cache_data = JSON.parse(json));
-			})();
-		}
-
-		return this.stepMeta_cache_data;
+		return ReadFileText_AsJSON(file) as StepMeta;
 	}
 }
 
@@ -76,15 +60,16 @@ export const GetTopAudioForStep = CreateAccessor((stepID: string, mapID: string)
 	const opfsForStep = OPFS_Map.GetEntry(mapID).GetStepFolder(stepID);
 	const stepMeta = opfsForStep.StepMeta;
 	const takeMetas = stepMeta?.takeMetas.Pairs() ?? [];
-	if (takeMetas.length == 0) return {file: undefined, meta: undefined};
+	if (takeMetas.length == 0) return {takeNumber: undefined, file: undefined, meta: undefined};
 
 	const topTakeMeta = takeMetas
 		.Reversed() // first reverse, so we prefer later takes (ie. for if ratings are equal)
 		.OrderByDescending(a=>a.value.rating).FirstOrX(); // then sort by rating
+	const topTakeNumber = topTakeMeta?.keyNum;
 
-	const topAudioFile = opfsForStep.Files.find(a=>a.name == `Take${topTakeMeta?.keyNum}_Converted.wav`);
-	if (topAudioFile == null) console.warn(`Could not find audio-file for take. @step(${stepID}) @takeNumber(${topTakeMeta?.keyNum})`);
-	return {file: topAudioFile, meta: topTakeMeta};
+	const topAudioFile = opfsForStep.Files.find(a=>a.name == `Take${topTakeNumber}_Converted.wav`);
+	if (topAudioFile == null) console.warn(`Could not find audio-file for take. @step(${stepID}) @takeNumber(${topTakeNumber})`);
+	return {takeNumber: topTakeNumber, file: topAudioFile, meta: topTakeMeta?.value};
 });
 export const GetAudioFilesActiveForTimeline = CreateAccessor((mapID: string, timelineID: string)=>{
 	const steps = GetTimelineSteps(timelineID);
