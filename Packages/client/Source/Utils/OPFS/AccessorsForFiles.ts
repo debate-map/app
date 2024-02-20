@@ -9,7 +9,7 @@ export const ReadFileText_AsJSON = CreateAsyncAccessor(async(file: File)=>{
 	return JSON.parse(json);
 });
 
-// note: this function assumes some things about the WAV file (these assumptions are based on the conversion pi from the voice-changer app, for step audio-take)
+// note: this function assumes some things about the WAV file (these assumptions are based on the conversion pipeline from the voice-changer app; see AudioSender.ts)
 export const GetDurationOfWAVAudioFile = CreateAsyncAccessor(async(audioFile: File)=>{
 	// the chunk containing the actual samples is an int16 array (AudioSender.ts calls `FloatTo16BitPCM` for inserting the samples into the buffer)
 	const bytesPerSample_singleChannel = Uint16Array.BYTES_PER_ELEMENT;
