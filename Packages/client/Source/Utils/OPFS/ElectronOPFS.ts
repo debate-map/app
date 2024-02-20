@@ -31,6 +31,17 @@ export async function OPFSDir_GetFileChildren(dir: FileSystemDirectoryHandle) {
 	return (await OPFSDir_GetChildren(dir)).filter(a=>a.isFile) as {name: string, handle: FileSystemFileHandle, isFile: true}[];
 }
 
+// there is no easy way in the OPFS API to simply check if a directory or file exists, so we use these helper functions
+export async function OPFSDir_DoesChildExist(parent: FileSystemDirectoryHandle, name: string) {
+	return (await OPFSDir_GetChildren(parent)).some(a=>a.name == name);
+}
+export async function OPFSDir_DoesChildDirExist(parent: FileSystemDirectoryHandle, name: string) {
+	return (await OPFSDir_GetDirectoryChildren(parent)).some(a=>a.name == name);
+}
+export async function OPFSDir_DoesChildFileExist(parent: FileSystemDirectoryHandle, name: string) {
+	return (await OPFSDir_GetFileChildren(parent)).some(a=>a.name == name);
+}
+
 export class ElectronOPFS_StorageManager implements StorageManager {
 	// internals
 	private rootDir = new ElectronOPFS_Directory("root", null, []);

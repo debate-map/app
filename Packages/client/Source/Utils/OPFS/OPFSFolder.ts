@@ -2,7 +2,7 @@ import {O, RunInAction} from "web-vcore";
 import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {computed, makeObservable, observable} from "web-vcore/nm/mobx";
-import {OPFSDir_GetChildren, OPFSDir_GetDirectoryChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
+import {OPFSDir_DoesChildDirExist, OPFSDir_GetChildren, OPFSDir_GetDirectoryChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
 
 export class OPFSFolder {
 	constructor(pathSegments: string[]) {
@@ -25,24 +25,13 @@ export class OPFSFolder {
 	async GetTargetDirectoryHandle(actionIfMissing: "error"|"create"|"null") {
 		let currentFolder = await this.GetStorageRoot();
 		for (const pathSegment of this.pathSegments) {
-			if (actionIfMissing == "null" && !await this.DoesChildDirExist_NoCache(pathSegment)) return null;
+			if (actionIfMissing == "null" && !await OPFSDir_DoesChildDirExist(currentFolder, pathSegment)) return null;
 			currentFolder = await currentFolder.getDirectoryHandle(pathSegment, {create: actionIfMissing == "create"});
 		}
 		return currentFolder;
 	}
 	async GetTargetDirectoryHandle_EnsuringExists(actionIfMissing: "error"|"create") {
 		return (await this.GetTargetDirectoryHandle(actionIfMissing))!; // we only allow "error" or "create" as options, so func with always either return a value or throw
-	}
-
-	// there is no easy way in the OPFS API to simply check if a directory or file exists, so we use these helper functions
-	async DoesChildExist_NoCache(name: string) {
-		return (await OPFSDir_GetChildren(await this.GetStorageRoot())).some(a=>a.name == name);
-	}
-	async DoesChildDirExist_NoCache(name: string) {
-		return (await OPFSDir_GetDirectoryChildren(await this.GetStorageRoot())).some(a=>a.name == name);
-	}
-	async DoesChildFileExist_NoCache(name: string) {
-		return (await OPFSDir_GetFileChildren(await this.GetStorageRoot())).some(a=>a.name == name);
 	}
 
 	@O loadStarted = false;
