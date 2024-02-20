@@ -6,7 +6,7 @@ import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Graph} from "tree-grapher";
 import {ShowHeader} from "UI/@SL/SL.js";
 import {ES, HTMLProps, Observer, UseWindowEventListener} from "web-vcore";
-import {Assert, Timer, ea, emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {Assert, E, Timer, ea, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
@@ -150,9 +150,18 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 				}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
-					{playback?.timeline != null && timeTrackerVisible &&
-						<TimeTrackerUI map={map}/>}
-					<div style={{position: "relative", flex: 1, minWidth: 0, height: "100%"}}>
+					<div style={ES(
+						{position: "relative", flex: 1, minWidth: 0, height: "100%"},
+						store.main.timelines.recordPanel.lockedMapSize && {
+							flex: null,
+							width: store.main.timelines.recordPanel.lockedMapSize_x,
+							height: store.main.timelines.recordPanel.lockedMapSize_y,
+							border: "solid 5px red", boxSizing: "content-box",
+							//boxShadow: "0 0 0 5px red", marginLeft: 5, marginTop: 5, // better than border in this case, since position:absolute children stay within border
+						},
+					)}>
+						{playback?.timeline != null && timeTrackerVisible &&
+							<TimeTrackerUI map={map}/>}
 						<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_main}/>
 						{playback?.timeline && uiState.layoutHelperMap_load && <>
 							<TimelineEffectApplier_Smooth {...{map, mapState}} mainGraph={graph_main} layoutHelperGraph={graph_forLayoutHelper}/>

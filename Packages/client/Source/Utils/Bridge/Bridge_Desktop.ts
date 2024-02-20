@@ -20,4 +20,8 @@ export const desktopBridge = new Bridge({
 		window["SendToDesktop"](channelMessage);
 	},
 	channel_stringifyChannelMessageObj: false,
+	//requireMainFuncForCalls: false, // needed for current impl of DebateMap_CaptureFrame_done listeners
 });
+
+// empty listener; added just so that bridge doesn't complain about there being no "main listener" (real listeners are dynamically added in RecordDropdown.tsx)
+desktopBridge.RegisterFunction("DebateMap_CaptureFrame_done", ()=>{});

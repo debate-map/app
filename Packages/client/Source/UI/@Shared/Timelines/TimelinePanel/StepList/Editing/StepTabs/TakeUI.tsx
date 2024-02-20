@@ -80,7 +80,7 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 				<Spinner ml={5} step="any" min={0} max={1} style={{width: 50}} value={takeMeta.volume} onChange={val=>{
 					ModifyTakeMeta(opfsForStep, stepMeta, takeNumber, a=>a.volume = val);
 				}}/>
-				<Button ml={5} mdIcon="creation" title={`Derive time from audio file(s) (${convertedAudioFile_duration}s)`}
+				<Button ml={5} mdIcon="creation" title={`Derive step duration from audio file(s) (${convertedAudioFile_duration}s)`}
 					style={E(stepDurationMatchesAudio && {backgroundColor: "rgba(0,255,0,.3)"})}
 					enabled={convertedAudioFile_duration != null && !stepDurationMatchesAudio}
 					onClick={()=>{

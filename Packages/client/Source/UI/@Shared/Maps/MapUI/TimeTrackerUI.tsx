@@ -29,7 +29,8 @@ export class TimeTrackerUI extends BaseComponent<{map: Map}, {}> {
 		return (
 			<Row style={{
 				position: "absolute", zIndex: 1,
-				left: `calc(${TimelinePanel_width}px + ((100% - ${TimelinePanel_width}px) / 2) - 60px)`,
+				//left: `calc(${TimelinePanel_width}px + ((100% - ${TimelinePanel_width}px) / 2) - 60px)`,
+				left: `calc(50% - 60px)`,
 				width: 120, height: 30, background: "rgba(0,0,0,.7)", borderRadius: 5,
 				color: "rgba(255,255,255,.7)", fontSize: 20,
 				border: "3px solid rgba(0,0,0,.7)",

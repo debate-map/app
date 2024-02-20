@@ -5,12 +5,13 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX} from "dm_common";
 import {Assert, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
-import {Observer, RunInAction_Set} from "web-vcore";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text} from "web-vcore/nm/react-vcomponents.js";
+import {AddNotificationMessage, Observer, RunInAction_Set} from "web-vcore";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
+import {desktopBridge} from "Utils/Bridge/Bridge_Desktop.js";
 import {StepList} from "../StepList.js";
 
 @Observer
@@ -20,7 +21,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button text="Record" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
+				<DropDownContent style={{right: 0, width: 400, zIndex: zIndexes.subNavBar}}><Column>
 					<Row>
 						<Text style={{whiteSpace: "pre-wrap"}}>{`
 						Notes:
@@ -31,6 +32,13 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 					</Row>
 					<Row>
 						<ScreenshotModeCheckbox text="Screenshot mode:"/>
+					</Row>
+					<Row>
+						<CheckBox text="Locked map-ui size:" value={uiState.lockedMapSize} onChange={val=>RunInAction_Set(this, ()=>uiState.lockedMapSize = val)}/>
+						<Text ml={5}>X:</Text>
+						<Spinner ml={5} value={uiState.lockedMapSize_x} onChange={val=>RunInAction_Set(uiState, ()=>uiState.lockedMapSize_x = val)}/>
+						<Text ml={5}>Y:</Text>
+						<Spinner ml={5} value={uiState.lockedMapSize_y} onChange={val=>RunInAction_Set(uiState, ()=>uiState.lockedMapSize_y = val)}/>
 					</Row>
 					<Row>
 						<Text>Start recording:</Text>
@@ -52,7 +60,10 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		document.addEventListener("keydown", this.keyHandler);
 		this.renderStartTime = Date.now();
 		//this.renderFrameTimer.Start();
-		this.StartRenderingLoop(map, mapState);
+		this.StartRenderingLoop(map, mapState).catch(error=>{
+			AddNotificationMessage(`Got error while doing rendering process: ${error}`);
+			this.StopRecording();
+		});
 	}
 	StopRecording() {
 		const uiState = store.main.timelines.recordPanel;
@@ -103,7 +114,11 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 					await this.CaptureFrame(map.id, currentFrameTime);
 					frameCaptured = true;
 				} catch (ex) {
-					await SleepAsync(50);
+					if (ex?.message?.includes("Image size mismatch")) {
+						throw ex;
+					} else {
+						await SleepAsync(50);
+					}
 				}
 			}
 
@@ -129,26 +144,45 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			const rect = VRect.FromLTWH(scrollViewEl.getBoundingClientRect());
 
 			const message = {
-				type: "DebateMap_CaptureFrame",
+				//type: "DebateMap_CaptureFrame",
 				mapID, rect,
 				renderStartTime: this.renderStartTime, currentFrameTime: frameTime, currentFrameNumber: frameNumber,
 			};
-			window.postMessage(message, "*");
+			type Message = typeof message;
+			//window.postMessage(message, "*"); // to extension
+			desktopBridge.Call("DebateMap_CaptureFrame", message); // to electron
 
-			const listener = (event: MessageEvent<any>)=>{
+			/*const listener = (event: MessageEvent<any>)=>{
 				// We only accept messages from ourselves
 				if (event.source != window) return;
 
 				if (event.data?.type == "DebateMap_CaptureFrame_done") {
 					if (DeepEquals(event.data.ExcludeKeys("type"), message.ExcludeKeys("type"))) {
 						console.log("Finished rendering frame:", frameNumber);
-						window.removeEventListener("message", listener);
+						//window.removeEventListener("message", listener); // from extension
+						desktopBridge.UnregisterFunction("DebateMap_CaptureFrame_done", listener); // from electron
 						resolved = true;
 						resolve();
 					}
 				}
 			};
-			window.addEventListener("message", listener);
+			window.addEventListener("message", listener); // from extension*/
+
+			const listener = (message2: Message, error?: string)=>{
+				if (error != null) {
+					console.error("Error occurred during frame capture:", error);
+					reject(new Error(error));
+					return;
+				}
+
+				if (DeepEquals(message2, message)) {
+					console.log("Finished rendering frame:", frameNumber);
+					desktopBridge.UnregisterFunction("DebateMap_CaptureFrame_done", listener); // from electron
+					resolved = true;
+					resolve();
+				}
+			};
+			desktopBridge.RegisterFunction("DebateMap_CaptureFrame_done", listener, false); // from electron
 
 			WaitXThenRun(500, ()=>{
 				if (resolved) return;

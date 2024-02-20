@@ -12,6 +12,7 @@ import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, Sle
 import {BaseComponent, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {store} from "Store/index.js";
 import {Padding} from "./MapUIWrapper.js";
 import {ExpandableBox} from "./Node/ExpandableBox.js";
 import {NodeBox} from "./Node/NodeBox.js";

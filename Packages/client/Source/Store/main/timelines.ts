@@ -41,6 +41,9 @@ class AudioPanelState {
 
 class RecordPanelState {
 	constructor() { makeObservable(this); }
+	@O lockedMapSize = false;
+	@O lockedMapSize_x = 1920;
+	@O lockedMapSize_y = 1080;
 	@O @ignore recording = false;
 }
 
