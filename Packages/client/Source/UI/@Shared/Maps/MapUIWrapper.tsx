@@ -150,16 +150,22 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 				}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}
-					<div style={ES(
-						{position: "relative", flex: 1, minWidth: 0, height: "100%"},
-						store.main.timelines.recordPanel.lockedMapSize && {
-							flex: null,
-							width: store.main.timelines.recordPanel.lockedMapSize_x,
-							height: store.main.timelines.recordPanel.lockedMapSize_y,
-							border: "solid 5px red", boxSizing: "content-box",
-							//boxShadow: "0 0 0 5px red", marginLeft: 5, marginTop: 5, // better than border in this case, since position:absolute children stay within border
-						},
-					)}>
+					<div
+						className={[
+							// disable all mouse interactions with the map-ui container, when recording
+							store.main.timelines.recordPanel.recording && "clickThroughChain",
+						].filter(a=>a).join(" ")}
+						style={ES(
+							{position: "relative", flex: 1, minWidth: 0, height: "100%"},
+							store.main.timelines.recordPanel.lockedMapSize && {
+								flex: null,
+								width: store.main.timelines.recordPanel.lockedMapSize_x,
+								height: store.main.timelines.recordPanel.lockedMapSize_y,
+								border: "solid 5px red", boxSizing: "content-box",
+								//boxShadow: "0 0 0 5px red", marginLeft: 5, marginTop: 5, // better than border in this case, since position:absolute children stay within border
+							},
+						)}
+					>
 						{playback?.timeline != null && timeTrackerVisible &&
 							<TimeTrackerUI map={map}/>}
 						<MapUI {...{mapID, map, mapState, mapView, rootNode}} graphInfo={graph_main}/>
