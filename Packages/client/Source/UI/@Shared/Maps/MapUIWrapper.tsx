@@ -116,7 +116,7 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 			return result;
 		})();
 		if (rootNode == null) return <MapUIWaitMessage message="Map's content is private/deleted."/>;
-		// if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
+		//if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
 
 		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
@@ -142,8 +142,6 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 					</SubNavBar>*/}
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>
 				</>}
-				{/*!withinPage && <TimelinePlayerUI map={map}/>*/}
-				{/*!withinPage && <TimelineOverlayUI map={map}/>*/}
 				<Row style={{
 					position: "relative", // needed for TimelinePanel->AudioPanel to be positioned correctly
 					marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start",
@@ -162,7 +160,7 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 								width: store.main.timelines.recordPanel.lockedMapSize_x,
 								height: store.main.timelines.recordPanel.lockedMapSize_y,
 								border: "solid 5px red", boxSizing: "content-box",
-								//boxShadow: "0 0 0 5px red", marginLeft: 5, marginTop: 5, // better than border in this case, since position:absolute children stay within border
+								//boxShadow: "0 0 0 5px red", marginLeft: 5, marginTop: 5,
 							},
 						)}
 					>

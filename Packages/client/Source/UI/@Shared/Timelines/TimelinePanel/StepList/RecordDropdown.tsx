@@ -6,12 +6,13 @@ import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX} from "dm_
 import {Assert, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {AddNotificationMessage, Observer, RunInAction_Set} from "web-vcore";
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
 import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop.js";
+import {TimeToString} from "Utils/UI/General.js";
 import {StepList} from "../StepList.js";
 
 @Observer
@@ -39,6 +40,11 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 						<Spinner ml={5} value={uiState.lockedMapSize_x} onChange={val=>RunInAction_Set(uiState, ()=>uiState.lockedMapSize_x = val)}/>
 						<Text ml={5}>Y:</Text>
 						<Spinner ml={5} value={uiState.lockedMapSize_y} onChange={val=>RunInAction_Set(uiState, ()=>uiState.lockedMapSize_y = val)}/>
+					</Row>
+					<Row>
+						<Text>Render folder:</Text>
+						<TextInput ml={5} value={uiState.renderFolderName} onChange={val=>RunInAction_Set(this, ()=>uiState.renderFolderName = val)}/>
+						<Button ml={5} text="Now" onClick={()=>RunInAction_Set(this, ()=>uiState.renderFolderName = TimeToString(Date.now(), true))}/>
 					</Row>
 					<Row>
 						<Text>Start recording:</Text>
@@ -111,7 +117,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			let frameCaptured = false;
 			while (uiState.recordPanel.recording && !frameCaptured) {
 				try {
-					await this.CaptureFrame(map.id, currentFrameTime);
+					await this.CaptureFrame(map.id, uiState.recordPanel.renderFolderName, currentFrameTime);
 					frameCaptured = true;
 				} catch (ex) {
 					if (ex?.message?.includes("Image size mismatch")) {
@@ -135,7 +141,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		}
 	}
 
-	CaptureFrame(mapID: string, frameTime: number): Promise<void> {
+	CaptureFrame(mapID: string, renderFolderName: string, frameTime: number): Promise<void> {
 		let resolved = false;
 		return new Promise<void>((resolve, reject)=>{
 			const frameNumber = GetTimelineTimeAsFrameNumber(frameTime);
@@ -146,7 +152,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			const message = {
 				//type: "DebateMap_CaptureFrame",
 				mapID, rect,
-				renderStartTime: this.renderStartTime, currentFrameTime: frameTime, currentFrameNumber: frameNumber,
+				renderFolderName, currentFrameTime: frameTime, currentFrameNumber: frameNumber,
 			};
 			type Message = typeof message;
 			//window.postMessage(message, "*"); // to extension

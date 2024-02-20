@@ -44,6 +44,7 @@ class RecordPanelState {
 	@O lockedMapSize = false;
 	@O lockedMapSize_x = 1920;
 	@O lockedMapSize_y = 1080;
+	@O renderFolderName = "RenderTest";
 	@O @ignore recording = false;
 }
 
