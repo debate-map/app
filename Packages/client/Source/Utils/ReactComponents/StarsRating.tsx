@@ -9,7 +9,7 @@ export type StarsRating_Props = {
 } & RowProps;
 
 export class StarsRating extends BaseComponent<StarsRating_Props, {}> {
-	static defaultProps = {titleFunc: starValue=>`Rate ${starValue} stars (right-click to clear)`, allowRightClickFor0: true};
+	static defaultProps = {titleFunc: starValue=>`Rate ${starValue} stars (right-click to clear)`, rightClickAction: "clear"};
 	render() {
 		const {value, onChange, rightClickAction, titleFunc, style, ...rest} = this.props;
 		return (

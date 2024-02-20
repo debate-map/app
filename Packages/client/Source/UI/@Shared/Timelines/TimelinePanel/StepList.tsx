@@ -1,6 +1,5 @@
 import {store} from "Store";
 import {GetMapState, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
-import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/AudioMeta.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
 import {GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
@@ -17,6 +16,7 @@ import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
 import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {IsTimelineStepActive} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
+import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/OPFS_Step.js";
 import {AudioFilePlayer} from "./StepList/AudioFilePlayer.js";
 import {StepUI} from "./StepList/StepUI.js";
 import {RecordDropdown} from "./StepList/RecordDropdown.js";

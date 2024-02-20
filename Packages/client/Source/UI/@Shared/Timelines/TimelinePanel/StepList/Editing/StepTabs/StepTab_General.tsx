@@ -2,12 +2,10 @@ import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {Button, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {TimelineStep, Map} from "dm_common";
-import {AudioFileMeta, AudioMeta, GetStepAudioClipEnhanced, StepAudioClip} from "Utils/OPFS/Map/AudioMeta";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {store} from "Store";
 import {GetEntries} from "web-vcore/nm/js-vextensions";
 import {StepEditorUI_SharedProps} from "../StepEditorUI.js";
-import {SetStepClipTimeInAudio} from "./StepTab_Audio.js";
 
 type SharedProps = {map: Map, step: TimelineStep, nextStep: TimelineStep|n, creatorOrMod: boolean};
 
@@ -29,11 +27,8 @@ export class StepTab_General extends BaseComponent<StepEditorUI_SharedProps, {}>
 			"until next step";
 
 		const opfsForMap = OPFS_Map.GetEntry(map.id);
-		//const files = opfsForMap.Files;
-		const audioMeta = opfsForMap.AudioMeta;
-		const audioFileMetas = audioMeta?.fileMetas.Pairs() ?? [];
 
-		const stepAudioSegment = GetStepAudioClipEnhanced(step, nextStep, map.id);
+		/*const stepAudioSegment = GetStepAudioClipEnhanced(step, nextStep, map.id);
 		let stepDurationDerivedFromAudio = stepAudioSegment?.duration;
 		// if could not derive step-duration based on assumption of "step being one segment among many in audio file"...
 		if (stepDurationDerivedFromAudio == null) {
@@ -45,7 +40,7 @@ export class StepTab_General extends BaseComponent<StepEditorUI_SharedProps, {}>
 					break;
 				}
 			}
-		}
+		}*/
 
 		return (
 			<Row center>
@@ -79,20 +74,20 @@ export class StepTab_General extends BaseComponent<StepEditorUI_SharedProps, {}>
 					}}/>
 					<Text title="seconds">s</Text>
 				</>}
-				<Button mdIcon="creation" title={`Derive time from audio file(s) (${stepDurationDerivedFromAudio}s)`} ml={5}
+				{/*<Button mdIcon="creation" title={`Derive time from audio file(s) (${stepDurationDerivedFromAudio}s)`} ml={5}
 					enabled={creatorOrMod && nextStep != null && stepDurationDerivedFromAudio != null && stepDurationDerivedFromAudio.toFixed(3) != step.timeUntilNextStep?.toFixed(3)} // number stored in db can differ slightly, so round to 1ms
 					onClick={()=>{
 						RunCommand_UpdateTimelineStep({id: step.id, updates: {timeFromStart: null, timeFromLastStep: null, timeUntilNextStep: stepDurationDerivedFromAudio}});
-					}}/>
+					}}/>*/}
 				{/* <Pre>Speaker: </Pre>
 				<Select value={} onChange={val=> {}}/> */}
 				<Pre ml={5}>Pos: </Pre>
 				<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
 					RunCommand_UpdateTimelineStep({id: step.id, updates: {groupID: val}});
 				}}/>
-				<Button ml={5} mdIcon="ray-start-arrow" enabled={creatorOrMod && store.main.timelines.audioPanel.selectedFile != null} onClick={()=>{
+				{/*<Button ml={5} mdIcon="ray-start-arrow" enabled={creatorOrMod && store.main.timelines.audioPanel.selectedFile != null} onClick={()=>{
 					SetStepClipTimeInAudio(opfsForMap, audioMeta, audioUIState.selectedFile!, step.id, store.main.timelines.audioPanel.selection_start);
-				}}/>
+				}}/>*/}
 			</Row>
 		);
 	}

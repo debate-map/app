@@ -1,6 +1,5 @@
 import {store} from "Store";
 import {RunCommand_AddTimelineStep, RunCommand_DeleteTimelineStep, RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
-import {AudioFileMeta, AudioMeta, GetStepAudioClipEnhanced, StepAudioClip} from "Utils/OPFS/Map/AudioMeta";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
@@ -20,7 +19,7 @@ import React, {useState} from "react";
 import {StepEffectUI} from "./StepEffectUI.js";
 import {StepEffectUI_Menu_Stub} from "./StepEffectUI_Menu.js";
 import {StepTab_General} from "./StepTabs/StepTab_General.js";
-import {GetStepClipsInAudioFiles, StepTab_Audio} from "./StepTabs/StepTab_Audio.js";
+import {StepTab_Audio} from "./StepTabs/StepTab_Audio.js";
 
 /* let portal: HTMLElement;
 WaitXThenRun(0, () => {
@@ -87,7 +86,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 		}
 
 		const steps = GetTimelineSteps(timeline.id);
-		const stepClipsInAudioFiles = GetStepClipsInAudioFiles(map.id, step.id);
+		const opfsForStep = OPFS_Map.GetEntry(map.id).GetStepFolder(step.id);
+		const takeMetas = opfsForStep.Files.map(a=>a.name.match(/^Take(\d+)_/)?.[1]?.ToInt()).Distinct().filter(a=>a != null) as number[];
 
 		const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 		const sharedProps = {map, step, nextStep, creatorOrMod};
@@ -124,8 +124,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								options={GetEntries(StepTab, name=>{
 									name = ModifyString(name, m=>[m.startLower_to_upper]);
 									if (name == "Audio") {
-										if (stepClipsInAudioFiles.length == 0) return `  Audio  `;
-										return `Audio (${stepClipsInAudioFiles.length})`;
+										if (takeMetas.length == 0) return `  Audio  `;
+										return `Audio (${takeMetas.length})`;
 									}
 									return name;
 								})}/>

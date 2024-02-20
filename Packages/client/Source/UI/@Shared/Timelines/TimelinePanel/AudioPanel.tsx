@@ -11,10 +11,8 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {GetTimelineSteps, Map, Timeline} from "dm_common";
 import {ShowMessageBox} from "react-vmessagebox";
 import {autorun} from "web-vcore/nm/mobx";
-import {AudioMeta} from "Utils/OPFS/Map/AudioMeta";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {AutoRun_HandleBail} from "Utils/AutoRuns/@Helpers";
-import {ModifyAudioFileMeta, SetStepClipTimeInAudio} from "./StepList/Editing/StepTabs/StepTab_Audio";
 
 class ParseData {
 	audioData?: ParseData_Audio;
@@ -155,13 +153,13 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 			const secondsPerRow = wavesurfer.getDuration() * rowFractionOfFull;
 
 			// update audio-file-meta, to store the audio's now-known duration
-			if (selectedFile != null) {
+			/*if (selectedFile != null) {
 				const audioMeta = opfsForMap.AudioMeta;
 				const audioFileMeta = audioMeta?.fileMetas[selectedFile.name ?? ""];
 				if (wavesurfer.getDuration() > 0 && wavesurfer.getDuration() != audioFileMeta?.duration) {
 					ModifyAudioFileMeta(opfsForMap, audioMeta, selectedFile?.name, newAudioFileMeta=>newAudioFileMeta.duration = wavesurfer.getDuration());
 				}
-			}
+			}*/
 
 			setParseData({
 				audioData: {
@@ -178,10 +176,6 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 		const files = opfsForMap.Files;
 		const selectedFile = files.find(a=>a.name == uiState.selectedFile);
 		LoadFileIntoWavesurfer_IfNotAlreadyAndValid(selectedFile); // todo: rework this to be less fragile (and to allow for "canceling" of one load, if another gets started afterward)
-
-		const audioMeta = opfsForMap.AudioMeta;
-		const audioFileMeta = audioMeta?.fileMetas[selectedFile?.name ?? ""];
-		const stepClipsInAudioFile = audioFileMeta?.stepClips.Pairs() ?? [];
 
 		return (
 			<Column style={{flex: 1}}>
@@ -207,15 +201,6 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 						</div>
 					</Column></DropDownContent>
 				</DropDown>
-					<Button ml={5} mdIcon="creation" title="Associate timeline-steps and audio-files whose names start with the same first 3 characters." onClick={async()=>{
-						let modifiedAudioMeta = audioMeta;
-						for (const step of timelineSteps) {
-							const stepNameStart = step.id.slice(0, 3);
-							for (const file of files.filter(a=>a.name.startsWith(stepNameStart))) {
-								modifiedAudioMeta = await SetStepClipTimeInAudio(opfsForMap, modifiedAudioMeta, file.name, step.id, 0);
-							}
-						}
-					}}/>
 					<Button ml={5} mdIcon="upload" onClick={async()=>{
 						const newFiles = await StartUpload(true);
 						for (const file of newFiles) {
@@ -285,11 +270,11 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 					}
 				}}>
 					{audioData != null && <>
-						{stepClipsInAudioFile.map((clip, index)=>{
+						{/*stepClipsInAudioFile.map((clip, index)=>{
 							return (
 								<TimeMarker key={index} audioData={audioData} timeGetter={()=>clip.value.timeInAudio} color="rgba(255,100,0,1)"/>
 							);
-						})}
+						})*/}
 						<TimeMarker audioData={audioData} timeGetter={()=>wavesurfer.getCurrentTime()} color="rgba(0,130,255,1)" updateInterval={1000 / 30}/>
 						<TimeMarker audioData={audioData} timeGetter={()=>uiState.selection_start} color="rgba(0,255,0,1)"/>
 						{Range(0, rows, 1, false).map(i=>{

@@ -2,7 +2,6 @@ import {O, RunInAction} from "web-vcore";
 import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {computed, makeObservable, observable} from "web-vcore/nm/mobx";
-import {AudioMeta} from "./Map/AudioMeta";
 import {OPFSDir_GetChildren, OPFSDir_GetFileChildren, electronOpfs_storage} from "./ElectronOPFS.js";
 
 export class OPFSFolder {

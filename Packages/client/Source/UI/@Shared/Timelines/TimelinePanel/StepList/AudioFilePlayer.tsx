@@ -1,5 +1,5 @@
 import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
-import {GetStepAudioClipEnhanced} from "Utils/OPFS/Map/AudioMeta";
+import {GetTopAudioForStep} from "Utils/OPFS/Map/OPFS_Step";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {GetTimelineStepTimesFromStart, Map, Timeline, TimelineStep} from "dm_common";
 import {useMemo} from "react";
@@ -20,7 +20,8 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		const stepTimes = GetTimelineStepTimesFromStart(steps);
 		const currentStepIndex = GetPlaybackCurrentStepIndex() ?? 0;
 		const currentStep = steps[currentStepIndex ?? -1];
-		const currentStepAudioClipEnhanced = currentStepIndex != null && currentStep ? GetStepAudioClipEnhanced(currentStep, steps[currentStepIndex + 1], map.id) : null;
+		const currentStep_audio = currentStep != null ? GetTopAudioForStep(currentStep.id, map.id) : null;
+		const currentStep_audio_meta = currentStep_audio?.meta?.value;
 		const currentStep_startTimeInTimeline = stepTimes[currentStepIndex];
 		const currentStep_endTimeInTimeline = stepTimes[currentStepIndex + 1];
 
@@ -52,17 +53,19 @@ export class AudioFilePlayer extends BaseComponent<{map: Map, timeline: Timeline
 		}
 
 		// ensure wavesurfer's volume matches the setting for the current-step's clip
-		if (currentStepAudioClipEnhanced?.volume != null && wavesurfer.getVolume() != currentStepAudioClipEnhanced.volume) {
-			wavesurfer.setVolume(currentStepAudioClipEnhanced.volume);
+		if (currentStep_audio_meta?.volume != null && wavesurfer.getVolume() != currentStep_audio_meta?.volume) {
+			wavesurfer.setVolume(currentStep_audio_meta?.volume);
 		}
 
 		// ensure wavesurfer's play-position matches the progression through the current-step
-		if (isPlayingGetter() && currentStepAudioClipEnhanced?.audio.file == audioFile && currentStepAudioClipEnhanced.endTime != null) {
+		if (isPlayingGetter() && currentStep_audio?.file == audioFile) {
 			const getTargetAudioTime = ()=>{
-				const percentThroughStep = GetPercentFromXToY(currentStep_startTimeInTimeline, currentStep_endTimeInTimeline, timeGetter());
+				/*const percentThroughStep = GetPercentFromXToY(currentStep_startTimeInTimeline, currentStep_endTimeInTimeline, timeGetter());
 				//if (currentStepAudioSegment.endTime == null) return null; // end-time unknown, so we can't know the exact point in the audio that we're supposed to target/seek-to
 				const targetAudioTime = Lerp(currentStepAudioClipEnhanced.startTime, currentStepAudioClipEnhanced.endTime!, percentThroughStep);
-				return targetAudioTime;
+				return targetAudioTime;*/
+				const timeSinceStepStart = timeGetter() - currentStep_startTimeInTimeline;
+				return timeSinceStepStart; // for now, time-in-step is same as time-in-audio-take
 			};
 
 			// if different segment is active than last time, or precise target audio-time is *less* than that of last render (ie. user skipped back a bit within same step), then do audio-load (with seeking)

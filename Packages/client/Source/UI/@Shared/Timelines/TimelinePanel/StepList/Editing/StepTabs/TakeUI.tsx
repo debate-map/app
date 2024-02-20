@@ -1,6 +1,6 @@
 import {voiceChangerBridge} from "Utils/Bridge/Bridge_VoiceChanger";
 import {ConvertAudioFileUsingVoiceChanger} from "Utils/Bridge/VoiceChanger/AudioSender";
-import {ModifyStepMeta} from "Utils/OPFS/Map/OPFS_Step";
+import {ModifyStepMeta, ModifyTakeMeta, TakeMeta} from "Utils/OPFS/Map/OPFS_Step";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {StarsRating} from "Utils/ReactComponents/StarsRating";
 import {Map, TimelineStep} from "dm_common";
@@ -19,8 +19,7 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 		const opfsForMap = OPFS_Map.GetEntry(map.id);
 		const opfsForStep = opfsForMap.GetStepFolder(step.id);
 		const stepMeta = opfsForStep.StepMeta;
-		const takeRating = stepMeta?.takeRatings[takeNumber] ?? 0;
-		const takeVolume = stepMeta?.takeVolumes[takeNumber] ?? 1;
+		const takeMeta = stepMeta?.takeMetas[takeNumber] ?? new TakeMeta();
 
 		const origAudioFile = opfsForStep.Files.find(a=>a.name.startsWith(`Take${takeNumber}_Orig.`));
 		const convertedAudioFile = opfsForStep.Files.find(a=>a.name.startsWith(`Take${takeNumber}_Converted.`));
@@ -37,15 +36,15 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 					const outputFile = new File([outputFileBuffer], origAudioFile!.name.replace(/_Orig\..+$/, "_Converted.wav"), {type: "audio/wav"});
 					await opfsForStep.SaveFile(outputFile);
 				}}/>
-				<AudioFileMiniPlayer file={convertedAudioFile} volume={takeVolume} buttonProps={{style: {marginLeft: 5}, title: "Play the voice-converted recorded audio-contents (with custom volume applied)"}}/>
-				<StarsRating ml={5} value={takeRating}
+				<AudioFileMiniPlayer file={convertedAudioFile} volume={takeMeta.volume} buttonProps={{style: {marginLeft: 5}, title: "Play the voice-converted recorded audio-contents (with custom volume applied)"}}/>
+				<StarsRating ml={5} value={takeMeta.rating}
 					onChange={val=>{
-						ModifyStepMeta(opfsForStep, stepMeta, a=>a.takeRatings[takeNumber] = val);
+						ModifyTakeMeta(opfsForStep, stepMeta, takeNumber, a=>a.rating = val);
 					}}
 					titleFunc={starValue=>`Rate ${starValue} stars (right-click for custom value)`}
 					rightClickAction={e=>{
 						e.preventDefault();
-						let newRating = takeRating;
+						let newRating = takeMeta.rating;
 						const boxController: BoxController = ShowMessageBox({
 							title: `Change rating for take #${takeNumber}`, cancelButton: true,
 							message: ()=>{
@@ -62,14 +61,14 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 								);
 							},
 							onOK: ()=>{
-								ModifyStepMeta(opfsForStep, stepMeta, a=>a.takeRatings[takeNumber] = newRating);
+								ModifyTakeMeta(opfsForStep, stepMeta, takeNumber, a=>a.rating = newRating);
 							},
 						});
 					}}/>
-				<Text ml={5}>({takeRating})</Text>
+				<Text ml={5}>({takeMeta.rating})</Text>
 				<Text ml={5}>Volume:</Text>
-				<Spinner ml={5} step="any" min={0} max={1} style={{width: 50}} value={takeVolume} onChange={val=>{
-					ModifyStepMeta(opfsForStep, stepMeta, a=>a.takeVolumes[takeNumber] = val);
+				<Spinner ml={5} step="any" min={0} max={1} style={{width: 50}} value={takeMeta.volume} onChange={val=>{
+					ModifyTakeMeta(opfsForStep, stepMeta, takeNumber, a=>a.volume = val);
 				}}/>
 				<Button ml={5} mdIcon="delete" title="Delete all files associated with this take" onClick={()=>{
 					ShowMessageBox({
@@ -79,10 +78,7 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 							for (const file of filesForTake) {
 								opfsForStep.DeleteFile(file.name);
 							}
-							ModifyStepMeta(opfsForStep, stepMeta, a=>{
-								delete a.takeRatings[takeNumber];
-								delete a.takeVolumes[takeNumber];
-							});
+							ModifyStepMeta(opfsForStep, stepMeta, a=>delete a.takeMetas[takeNumber]);
 						},
 					});
 				}}/>
