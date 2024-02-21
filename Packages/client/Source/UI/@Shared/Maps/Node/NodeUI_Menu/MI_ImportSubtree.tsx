@@ -1,5 +1,5 @@
 import {AddChildNode, ChildGroup, CullNodePhrasingToBeEmbedded, GetMap, GetNode, GetNodeChildrenL2, GetNodeDisplayText, GetNodeL2, HasAdminPermissions, NodeL1, NodeL3, NodePhrasing, NodeRevision, NodeType, MeID, NodeLink, Polarity, SourceType, systemUserID, AsNodeL1Input, MapNodeEdit, GetSystemAccessPolicyID, systemPolicy_publicUngoverned_name} from "dm_common";
-import React, {ComponentProps, ReactEventHandler, useMemo} from "react";
+import React, {ComponentProps, ReactEventHandler, useMemo, useState} from "react";
 import {store} from "Store";
 import {CSV_SL_Row} from "Utils/DataFormats/CSV/CSV_SL/DataModel.js";
 import {GetResourcesInImportSubtree_CSV_SL} from "Utils/DataFormats/CSV/CSV_SL/ImportHelpers.js";
@@ -8,7 +8,7 @@ import {FS_NodeL3} from "Utils/DataFormats/JSON/DM_Old/FSDataModel/FS_Node.js";
 import {GetResourcesInImportSubtree} from "Utils/DataFormats/JSON/DM_Old/FSImportHelpers.js";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
-import {AddNotificationMessage, ES, InfoButton, O, Observer, RunInAction_Set} from "web-vcore";
+import {AddNotificationMessage, ES, InfoButton, O, Observer, RunInAction_Set, UseWindowEventListener} from "web-vcore";
 import {gql} from "web-vcore/nm/@apollo/client";
 import {E, FromJSON, GetEntries, ModifyString, SleepAsync, Timer} from "web-vcore/nm/js-vextensions.js";
 import {makeObservable} from "web-vcore/nm/mobx";
@@ -24,9 +24,10 @@ import {GetOpenMapID} from "Store/main.js";
 import {Assert} from "react-vextensions/Dist/Internals/FromJSVE";
 import {Command, CreateAccessor, GetAsync} from "mobx-graphlink";
 import {MAX_TIMEOUT_DURATION} from "ui-debug-kit";
-import {CommandEntry, RunCommand_AddChildNode, RunCommand_RunCommandBatch} from "Utils/DB/Command.js";
+import {RunCommand_AddChildNode} from "Utils/DB/Command.js";
 import {CG_Debate, CG_Node} from "Utils/DataFormats/JSON/ClaimGen/DataModel.js";
 import {GetResourcesInImportSubtree_CG} from "Utils/DataFormats/JSON/ClaimGen/ImportHelpers.js";
+import {CommandEntry, RunCommandBatch, RunCommandBatchResult} from "Utils/DB/RunCommandBatch.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -116,7 +117,8 @@ class ImportSubtreeUI extends BaseComponent<
 		// right-panel
 		showLeftPanel: boolean,
 		process: boolean,
-		importSelected: boolean, selectedIRs_nodeAndRev_atImportStart: number, serverImportInProgress: boolean,
+		importSelected: boolean, selectedIRs_nodeAndRev_atImportStart: number,
+		serverImportInProgress: boolean, serverImport_commandsCompleted: number,
 		selectFromIndex: number,
 		searchQueryGen: number,
 	},
@@ -127,13 +129,19 @@ class ImportSubtreeUI extends BaseComponent<
 		rightTab: ImportSubtreeUI_RightTab.resources,
 		sourceText: "", showLeftPanel: true,
 		process: false,
-		importSelected: false, selectedIRs_nodeAndRev_atImportStart: 0, serverImportInProgress: false,
+		importSelected: false, selectedIRs_nodeAndRev_atImportStart: 0,
+		serverImportInProgress: false, serverImport_commandsCompleted: 0,
 		searchQueryGen: 0,
 	};
 
 	render() {
 		const {mapID, map, node, path, controller} = this.props;
-		const {sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process, importSelected, selectedIRs_nodeAndRev_atImportStart, serverImportInProgress, leftTab, rightTab, showLeftPanel} = this.state;
+		const {
+			sourceText, sourceText_parseError, forJSONDM_subtreeData, forJSONCG_subtreeData, forCSVSL_subtreeData, process,
+			importSelected, selectedIRs_nodeAndRev_atImportStart,
+			serverImportInProgress, serverImport_commandsCompleted,
+			leftTab, rightTab, showLeftPanel,
+		} = this.state;
 		const uiState = store.main.maps.importSubtreeDialog;
 		if (map == null) return null;
 
@@ -159,11 +167,14 @@ class ImportSubtreeUI extends BaseComponent<
 			? `${selectedIRs_nodeAndRev_importedSoFar}/${selectedIRs_nodeAndRev_atImportStart}`
 			: "local";
 
+		const [bodyHeight, setBodyHeight] = useState(document.body.clientHeight);
+		UseWindowEventListener("resize", ()=>setBodyHeight(document.body.clientHeight));
+
 		return (
 			<Column style={{
 				width: showLeftPanel ? 1300 : 800,
 				//height: 700,
-				height: document.body.clientHeight - 100,
+				height: bodyHeight - 100,
 			}}>
 				<Row style={{flex: 1, minHeight: 0}}>
 					{showLeftPanel &&
@@ -290,7 +301,11 @@ class ImportSubtreeUI extends BaseComponent<
 									this.SetTimerEnabled(val);
 									this.SetState({selectedIRs_nodeAndRev_atImportStart: selectedIRs_nodeAndRev.length});
 								}}/>
-								<Button ml={5} text={`Import ALL (server)`}
+								<Button ml={5}
+									text={[
+										`Import ALL (server)`,
+										serverImportInProgress && ` [${this.state.serverImport_commandsCompleted}/${resources.length}]`,
+									].filter(a=>a).join("")}
 									enabled={
 										// atm only the resource-extraction code for the json-cg format adds the "insertPath_parentResourceLocalID" field needed for server-side tree-importing
 										resources.length > 0 && uiState.sourceType == DataExchangeFormat.json_cg &&
@@ -302,35 +317,27 @@ class ImportSubtreeUI extends BaseComponent<
 											message: `
 												This will start an import of all ${resources.length} resources (not just the ${selectedIRs_nodeAndRev.length} selected ones), run as a command-batch on the server.
 
-												If the import is large, this could take a long time.
+												If the import is large, this could take a long time. You can view the progress in the text of the "Import ALL (server) [X/X]" button.
 												
-												Note also: The import cannot be canceled once started. (not through the ui controls anyway; unclear whether closing the page aborts the request server-side)
+												Note also: If you want to cancel the import, refresh the page while it's still running. (this will cancel the graphql subscription, causing the server to drop the operation)
 											`.AsMultiline(0),
 											onOK: async()=>{
-												this.SetState({serverImportInProgress: true});
-												ShowMessageBox({
-													title: "Import in progress...",
-													message: `
-														If the import is large, this could take a long time.
-
-														Note: Now that the import has been started, it cannot be canceled. (not through the ui controls anyway; unclear whether closing the page aborts the request server-side)
-														
-														So, it's recommended to sit tight, keep this dialog open, and wait until a final dialog opens showing the results.
-													`.AsMultiline(0),
-												});
-												const result = await ImportResourcesOnServer(resources, map.id, node.id);
-												const errors = (result.errors ?? []).length;
-												const success = result.data?.runCommandBatch.results.length == resources.length && errors == 0;
-												this.SetState({serverImportInProgress: false});
-												ShowMessageBox({
-													title: [
-														"Import ",
-														success && "succeeded",
-														!success && "failed",
-														` (with ${errors} errors)`,
-													].filter(a=>a).join(""),
-													message: "Import has completed. See dialog title for details.",
-												});
+												this.SetState({serverImportInProgress: true, serverImport_commandsCompleted: 0});
+												try {
+													const result = await ImportResourcesOnServer(resources, map.id, node.id, resourcesImported=>{
+														this.SetState({serverImport_commandsCompleted: resourcesImported});
+													});
+													ShowMessageBox({
+														title: "Import succeeded",
+														message: `Import has completed. Commands in batch completed: ${result.results.length ?? 0}`,
+													});
+												} catch (ex) {
+													ShowMessageBox({
+														title: `Import failed`,
+														message: `Import has failed. Error details: ${ex}`,
+													});
+												}
+												this.SetState({serverImportInProgress: false, serverImport_commandsCompleted: 0});
 											},
 										});
 									}}/>
@@ -689,7 +696,7 @@ export async function CreateAncestorForResource(res: ImportResource, mapID: stri
 	return true;
 }
 
-async function ImportResourcesOnServer(resources: ImportResource[], mapID: string, importRootNodeID: string) {
+async function ImportResourcesOnServer(resources: ImportResource[], mapID: string, importRootNodeID: string, onProgress: (resourcesImported: number)=>void) {
 	const commandEntries = resources.map(res=>{
 		const parentResource = res instanceof IR_NodeAndRevision ? resources.find(a=>a.localID == res.insertPath_parentResourceLocalID) : null;
 		const parentResource_indexInBatch = parentResource ? resources.indexOf(parentResource) : -1;
@@ -708,8 +715,8 @@ async function ImportResourcesOnServer(resources: ImportResource[], mapID: strin
 			parentResource_indexInBatch != -1 && {setParentNodeToResultOfCommandAtIndex: parentResource_indexInBatch},
 		) as CommandEntry;
 	});
-	const result = await RunCommand_RunCommandBatch({commands: commandEntries});
-	return result;
+
+	return await RunCommandBatch(commandEntries, onProgress);
 }
 
 export function GetCommandFuncAndArgsToCreateResource(res: ImportResource, mapID: string|n, parentID: string) {

@@ -4,6 +4,7 @@ export abstract class CG_Node {
 	id: string;
 	narrative?: string;
 	reference_urls?: string[];
+	//extras?: Object; // eg. {claimminer: {id: "123"}} // new (todo)
 
 	//abstract GetTitle(): string;
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
@@ -68,4 +69,10 @@ export class CG_Claim extends CG_Node {
 
 	// v2 (tool extending claim-gen)
 	arguments?: string[];
+
+	// v2+v3 (tool extending claim-gen)
+	//arguments?: (string | CG_Argument)[]; // new (todo)
 }
+/*export class CG_Argument extends CG_Node {
+	argument: string;
+}*/

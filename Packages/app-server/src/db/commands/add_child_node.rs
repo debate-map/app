@@ -64,7 +64,6 @@ pub struct AddChildNodeResult {
 #[derive(Default)]
 pub struct AddChildNodeExtras {
 	pub avoid_recording_command_run: bool,
-    pub avoid_incrementing_edit_counts: bool,
 }
 
 pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddChildNodeInput, extras: AddChildNodeExtras) -> Result<AddChildNodeResult, Error> {
@@ -87,9 +86,7 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
     
     let add_node_link_result = add_node_link(ctx, actor, false, AddNodeLinkInput { link }, Default::default()).await?;
     
-    if !extras.avoid_incrementing_edit_counts {
-        increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
-    }
+    increment_edit_counts_if_valid(&ctx, Some(actor), mapID, is_root).await?;
     
     let result = AddChildNodeResult {
         nodeID: add_node_result.nodeID,

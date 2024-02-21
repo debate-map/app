@@ -13,6 +13,7 @@
 	* DB response:
 		* 1\) Since so few entries, I just manually removed these fields from the 3 node-revisions using it.
 * 2\) Added an `Attachment.extras` field.
+* 3\) Changed the `runCommandBatch` endpoint from a mutation to a subscription. (see commit message for the benefits)
 
 ### Pushed on 2023-01-21
 

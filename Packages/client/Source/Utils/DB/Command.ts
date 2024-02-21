@@ -85,7 +85,7 @@ export const RunCommand_UpdateTimelineStep = CreateFunc_RunCommand_UpdateX(Timel
 // other commands
 // ==========
 
-export type CommandEntry = {addChildNode?: AddChildNodeInput, setParentNodeToResultOfCommandAtIndex?: number};
+/*export type CommandEntry = {addChildNode?: AddChildNodeInput, setParentNodeToResultOfCommandAtIndex?: number};
 export async function RunCommand_RunCommandBatch(inputFields: {commands: CommandEntry[]}) {
 	const result = await apolloClient.mutate({
 		mutation: gql`mutation($input: RunCommandBatchInput!) { runCommandBatch(input: $input) { results } }`,
@@ -93,7 +93,7 @@ export async function RunCommand_RunCommandBatch(inputFields: {commands: Command
 	});
 	//return result.data.runCommandBatch as {results: any[]};
 	return result as FetchResult<{runCommandBatch: {results: any[]}}>;
-}
+}*/
 
 export async function RunCommand_AddArgumentAndClaim(inputFields: {
 	mapID: string|n,
