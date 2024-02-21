@@ -468,7 +468,7 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 						isStep: data.get("isStep").map(|a| a.as_bool()).unwrap_or(None).o(),
 						explanation: data.get("explanation").map(|a| a.as_string()).unwrap_or(None).o(),
 					};
-					Attachment { expandedByDefault: Some(true), equation: Some(serde_json::to_value(equation).unwrap()), media: None, quote: None, references: None, description: None }
+					Attachment { expandedByDefault: Some(true), extras: None, equation: Some(serde_json::to_value(equation).unwrap()), media: None, quote: None, references: None, description: None }
 				}),
 				val.get("media").filter(|a| !a.is_null()).map(|data| {
 					let media = MediaAttachment {
@@ -477,20 +477,20 @@ pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_
 						previewWidth: data.get("previewWidth").map(|a| a.as_f64()).unwrap_or(None).o(),
 						sourceChains: source_chains_from_old_json_data(data.get("sourceChains")).unwrap(),
 					};
-					Attachment { expandedByDefault: Some(true), equation: None, media: Some(serde_json::to_value(media).unwrap()), quote: None, references: None, description: None }
+					Attachment { expandedByDefault: Some(true), extras: None, equation: None, media: Some(serde_json::to_value(media).unwrap()), quote: None, references: None, description: None }
 				}),
 				val.get("quote").filter(|a| !a.is_null()).map(|data| {
 					let quote = QuoteAttachment {
 						content: data.try_get("content").unwrap().try_as_string().unwrap(),
 						sourceChains: source_chains_from_old_json_data(data.get("sourceChains")).unwrap(),
 					};
-					Attachment { expandedByDefault: Some(true), equation: None, media: None, quote: Some(serde_json::to_value(quote).unwrap()), references: None, description: None }
+					Attachment { expandedByDefault: Some(true), extras: None, equation: None, media: None, quote: Some(serde_json::to_value(quote).unwrap()), references: None, description: None }
 				}),
 				val.get("references").filter(|a| !a.is_null()).map(|data| {
 					let references = ReferencesAttachment {
 						sourceChains: source_chains_from_old_json_data(data.get("sourceChains")).unwrap(),
 					};
-					Attachment { expandedByDefault: Some(true), equation: None, media: None, quote: None, references: Some(serde_json::to_value(references).unwrap()), description: None }
+					Attachment { expandedByDefault: Some(true), extras: None, equation: None, media: None, quote: None, references: Some(serde_json::to_value(references).unwrap()), description: None }
 				}),
 			].into_iter().filter_map(|a| a).collect_vec(),
 			c_accessPolicyTargets: vec![],

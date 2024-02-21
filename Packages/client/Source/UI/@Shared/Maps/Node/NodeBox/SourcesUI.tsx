@@ -16,7 +16,7 @@ export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sou
 				<Row>{headerText}:</Row>
 				{sourceChains.map((chain: SourceChain, chainIndex)=>{
 					const linkTitle = chain.sources
-						.filter(source=>![SourceType.claimMiner, SourceType.hypothesisAnnotation].includes(source.type))
+						.filter(source=>![SourceType.hypothesisAnnotation].includes(source.type))
 						.map((source, sourceIndex)=>{
 							if (source.link) {
 								// if this is the first source, it's the most important, so show the link's whole url

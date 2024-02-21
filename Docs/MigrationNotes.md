@@ -7,6 +7,13 @@
 
 ## Main series
 
+### Pushed on 2024-02-20
+
+* 1\) Removed the `Source.claimMinerId` field.
+	* DB response:
+		* 1\) Since so few entries, I just manually removed these fields from the 3 node-revisions using it.
+* 2\) Added an `Attachment.extras` field.
+
 ### Pushed on 2023-01-21
 
 * 1\) Removed the `nodeReveals` column from the `timelineSteps` table.

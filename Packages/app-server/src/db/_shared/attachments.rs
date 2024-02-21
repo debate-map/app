@@ -18,6 +18,7 @@ pub struct TermAttachment {
 #[graphql(input_name = "AttachmentInput")]
 pub struct Attachment {
 	pub expandedByDefault: Option<bool>,
+    pub extras: Option<JSONValue>,
 	
 	// components
     pub equation: Option<JSONValue>,

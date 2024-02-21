@@ -67,6 +67,9 @@ export class Attachment {
 	@Field({$ref: EquationAttachment.name}, {opt: true})
 	expandedByDefault?: boolean;
 
+	@Field({type: "object"}, {opt: true})
+	extras?: {[key: string]: any};
+
 	// components
 	// ==========
 

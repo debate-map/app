@@ -1,20 +1,20 @@
 import {GetValues_ForSchema, Assert, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 
-// export type SourceChain = { [key: number]: Source; };
-// export type SourceChainI = {[key: number]: Source;};
-// export class SourceChain /*implements SourceChainI*/ {
-/* export class SourceChain extends Array {
+//export type SourceChain = { [key: number]: Source; };
+//export type SourceChainI = {[key: number]: Source;};
+//export class SourceChain /*implements SourceChainI*/ {
+/*export class SourceChain extends Array {
 	[key: number]: Source;
 	0 = new Source();
-}; */
+};*/
 export class SourceChain {
 	constructor(sources: Source[] = []) {
 		this.sources = sources;
 	}
 	sources: Source[];
 }
-// AddSchema({patternProperties: {"^[A-Za-z0-9_-]+$": {$ref: "Source"}}, minProperties: 1}, "SourceChain");
+//AddSchema({patternProperties: {"^[A-Za-z0-9_-]+$": {$ref: "Source"}}, minProperties: 1}, "SourceChain");
 AddSchema("SourceChain", {
 	properties: {
 		sources: {items: {$ref: "Source"}, minItems: 1},
@@ -29,7 +29,6 @@ export enum SourceType {
 	video = "video",
 	webpage = "webpage",
 	// system-specific sources
-	claimMiner = "claimMiner",
 	hypothesisAnnotation = "hypothesisAnnotation",
 }
 AddSchema("SourceType", {enum: GetValues(SourceType)});
@@ -51,8 +50,7 @@ export class Source {
 	link?: string;
 
 	// for system-specific sources
-	claimMinerId?: string;
-	hypothesisAnnotationId?: string;
+	hypothesisAnnotationId?: string; // todo: remove this (use extras container instead)
 
 	extras?: {[key: string]: any};
 }
@@ -64,24 +62,22 @@ AddSchema("Source", {
 		location: {type: "string"},
 		time_min: {type: "number"},
 		time_max: {type: "number"},
-		//link: { format: 'uri' },
-		//link: { pattern: Source_linkURLPattern },
+		//link: {format: "uri"},
+		//link: {pattern: Source_linkURLPattern},
 		link: {type: "string"}, // allow overriding url pattern; it just highlights possible mistakes
-		claimMinerId: {type: "string"},
 		hypothesisAnnotationId: {type: "string"},
 		extras: {type: "object"},
 	},
 });
 
 type SourceTypeFieldSet = {main: Array<keyof Source>, extra: Array<keyof Source>};
-export const sourceType_allFieldsOfTypes: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", "claimMinerId", "hypothesisAnnotationId"];
+export const sourceType_allFieldsOfTypes: Array<keyof Source> = ["name", "author", "location", "time_min", "time_max", "link", /*"claimMinerId",*/ "hypothesisAnnotationId"];
 export const sourceType_fieldSets = new Map<SourceType, SourceTypeFieldSet>([
 	[SourceType.speech, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.text, {main: ["name", "author"], extra: ["time_min", "time_max"]}],
 	[SourceType.image, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.video, {main: ["location", "author"], extra: ["name", "time_min", "time_max"]}],
 	[SourceType.webpage, {main: ["link"], extra: ["author", "time_min", "time_max"]}],
-	[SourceType.claimMiner, {main: ["claimMinerId"], extra: []}],
 	[SourceType.hypothesisAnnotation, {main: ["hypothesisAnnotationId"], extra: []}],
 ]);
 

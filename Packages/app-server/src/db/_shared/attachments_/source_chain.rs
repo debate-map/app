@@ -16,7 +16,6 @@ pub enum SourceType {
 	#[graphql(name = "image")] image,
 	#[graphql(name = "video")] video,
 	#[graphql(name = "webpage")] webpage,
-	#[graphql(name = "claimMiner")] claimMiner,
 	#[graphql(name = "hypothesisAnnotation")] hypothesisAnnotation,
 }
 
@@ -35,10 +34,9 @@ pub struct Source {
 	pub time_max: Option<f64>,
 	pub link: Option<String>,
     
-	pub claimMinerId: Option<String>,
-	pub hypothesisAnnotationId: Option<String>,
+	pub hypothesisAnnotationId: Option<String>, // todo: remove this (use extras container instead)
 
-    pub extras: Option<JSONValue>, // used for, eg. additional targeting data from hypothesis
+    pub extras: Option<JSONValue>, // used for, eg. external-ids from claim-miner and hypothesis
 }
 
 }
@@ -73,7 +71,6 @@ pub fn source_chain_from_old_json_data(data: &JSONValue) -> Result<SourceChain, 
             time_min: source.get("time_min").map(|a| a.as_f64()).unwrap_or(None),
             time_max: source.get("time_max").map(|a| a.as_f64()).unwrap_or(None),
             link: source.get("link").map(|a| a.as_string()).unwrap_or(None),
-            claimMinerId: None,
             hypothesisAnnotationId: None,
             extras: None,
         }
