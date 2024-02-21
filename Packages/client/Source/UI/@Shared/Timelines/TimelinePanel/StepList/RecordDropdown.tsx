@@ -2,7 +2,7 @@ import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX} from "dm_common";
+import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart} from "dm_common";
 import {Assert, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {AddNotificationMessage, Observer, RunInAction_Set} from "web-vcore";
@@ -19,6 +19,9 @@ import {StepList} from "../StepList.js";
 export class RecordDropdown extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main.timelines.recordPanel;
+		const map = GetMap(GetOpenMapID());
+		const mapState = GetMapState(map?.id);
+
 		return (
 			<DropDown>
 				<DropDownTrigger><Button text="Record" style={{height: "100%"}}/></DropDownTrigger>
@@ -47,6 +50,17 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 						<Button ml={5} text="Now" onClick={()=>RunInAction_Set(this, ()=>uiState.renderFolderName = TimeToString(Date.now(), true))}/>
 					</Row>
 					<Row>
+						<Text>Current frame:</Text>
+						<Spinner ml={5} enabled={mapState?.playingTimeline_time != null} value={mapState?.playingTimeline_time != null ? GetTimelineTimeAsFrameNumber(mapState.playingTimeline_time) : 0} onChange={val=>{
+							//if (mapState?.playingTimeline_time == null) return;
+							//if (newTime == -1) return;
+							const newTime = GetFrameNumberAsTimelineTime(val);
+							StepList.instance?.SetTargetTime(newTime, "setPosition");
+						}}/>
+						{uiState.recording_endFrame != -1 &&
+						<Text>/{uiState.recording_endFrame}</Text>}
+					</Row>
+					<Row>
 						<Text>Start recording:</Text>
 						<CheckBox ml={5} value={uiState.recording} onChange={val=>(uiState.recording ? this.StopRecording() : this.StartRecording())}/>
 					</Row>
@@ -54,7 +68,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			</DropDown>
 		);
 	}
-	StartRecording() {
+	async StartRecording() {
 		const uiState = store.main.timelines.recordPanel;
 		Assert(!uiState.recording, "Cannot start recording, as already recording.");
 
@@ -62,7 +76,13 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		const mapState = GetMapState(map?.id);
 		Assert(map && mapState?.playingTimeline_time != null, "Cannot start recording, as no map is open, or timeline playing panel is not open.");
 
-		RunInAction_Set(this, ()=>uiState.recording = true);
+		const steps = await GetTimelineSteps.Async(mapState.selectedTimeline ?? "n/a");
+		const stepTimes = await GetTimelineStepTimesFromStart.Async(steps);
+
+		RunInAction_Set(this, ()=>{
+			uiState.recording = true;
+			uiState.recording_endFrame = GetTimelineTimeAsFrameNumber(stepTimes.LastOrX() ?? 0);
+		});
 		document.addEventListener("keydown", this.keyHandler);
 		this.renderStartTime = Date.now();
 		//this.renderFrameTimer.Start();
@@ -77,7 +97,10 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 
 		//this.renderFrameTimer.Stop();
 		document.removeEventListener("keydown", this.keyHandler);
-		RunInAction_Set(this, ()=>uiState.recording = false);
+		RunInAction_Set(this, ()=>{
+			uiState.recording = false;
+			uiState.recording_endFrame = -1;
+		});
 	}
 
 	keyHandler = (e: KeyboardEvent)=>{
@@ -98,6 +121,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 				return void this.StopRecording();
 			}
 			const currentFrameTime = mapState.playingTimeline_time;
+			const currentFrameNumber = GetTimelineTimeAsFrameNumber(currentFrameTime);
 
 			// wait for current-frame's data to finish rendering in the react tree
 			const renderWaitStartTime = Date.now();
@@ -129,11 +153,12 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			}
 
 			// if we're now past the last frame in the timeline, stop the timer
-			const steps = await GetTimelineSteps.Async(mapState.selectedTimeline ?? "n/a");
+			/*const steps = await GetTimelineSteps.Async(mapState.selectedTimeline ?? "n/a");
 			const reachedSteps = await GetTimelineStepsReachedByTimeX.Async(mapState.selectedTimeline ?? "n/a", currentFrameTime);
-			const justRenderedLastFrame = reachedSteps.length >= steps.length;
+			const justRenderedLastFrame = reachedSteps.length >= steps.length;*/
+			const justRenderedLastFrame = currentFrameNumber >= uiState.recordPanel.recording_endFrame;
 			if (justRenderedLastFrame) {
-				console.log(`Just rendered last frame (reached step ${reachedSteps.length} of ${steps.length}), so stopping recording.`);
+				console.log(`Just rendered last frame (reached frame ${currentFrameNumber}), so stopping recording.`);
 				return void this.StopRecording();
 			}
 
@@ -143,10 +168,15 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 
 	CaptureFrame(mapID: string, renderFolderName: string, frameTime: number): Promise<void> {
 		let resolved = false;
+		let rejected = false;
 		return new Promise<void>((resolve, reject)=>{
 			const frameNumber = GetTimelineTimeAsFrameNumber(frameTime);
 			const scrollViewEl = document.querySelector(".MapUI")?.parentElement?.parentElement;
-			if (scrollViewEl == null) return void reject(new Error("Could not find map-ui element."));
+			if (scrollViewEl == null) {
+				rejected = true;
+				reject(new Error("Could not find map-ui element."));
+				return;
+			}
 			const rect = VRect.FromLTWH(scrollViewEl.getBoundingClientRect());
 
 			const message = {
@@ -177,6 +207,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			const listener = (message2: Message, error?: string)=>{
 				if (error != null) {
 					console.error("Error occurred during frame capture:", error);
+					rejected = true;
 					reject(new Error(error));
 					return;
 				}
@@ -190,8 +221,9 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			};
 			desktopBridge.RegisterFunction("DebateMap_CaptureFrame_done", listener, false); // from electron
 
-			WaitXThenRun(500, ()=>{
-				if (resolved) return;
+			// 500ms was not enough
+			WaitXThenRun(1000, ()=>{
+				if (resolved || rejected) return;
 				reject(new Error(`Timed out waiting for frame ${frameNumber} to render.`));
 			});
 		});
@@ -205,6 +237,9 @@ export function GetPlaybackTimeAsFrameNumber() {
 }
 export function GetTimelineTimeAsFrameNumber(time: number, fps = 60) {
 	return (time * fps).RoundTo(1);
+}
+export function GetFrameNumberAsTimelineTime(frameNumber: number, fps = 60) {
+	return frameNumber / fps;
 }
 
 export function GetClassForFrameRenderAtTime(time: number|n) {

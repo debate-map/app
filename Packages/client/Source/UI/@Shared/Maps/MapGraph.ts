@@ -52,7 +52,7 @@ export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: compar
 	const effects = GetPlaybackEffects();
 	const effectTimes = effects.map(a=>a.time_absolute).Distinct();
 	const currentEffect_time = effectTimes.LastOrX(a=>a <= currentTime);
-	const nextEffect_time = effectTimes.LastOrX(a=>a > currentTime);
+	const nextEffect_time = effectTimes.FirstOrX(a=>a > currentTime);
 
 	const effectsReached = currentEffect_time != null ? effects.filter(a=>a.time_absolute <= currentEffect_time) : [];
 	const effectsReachedAtNext = nextEffect_time != null ? effects.filter(a=>a.time_absolute <= nextEffect_time) : [];

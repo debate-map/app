@@ -46,6 +46,7 @@ class RecordPanelState {
 	@O lockedMapSize_y = 1080;
 	@O renderFolderName = "RenderTest";
 	@O @ignore recording = false;
+	@O @ignore recording_endFrame = -1;
 }
 
 export const GetCopiedNodeEffectInfo_IfValid = CreateAccessor({ctx: 1}, function() {
