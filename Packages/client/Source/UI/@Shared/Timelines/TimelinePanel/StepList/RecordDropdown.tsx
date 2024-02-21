@@ -152,6 +152,9 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 				}
 			}
 
+			// if recording was stopped (during the "await" periods above), break rendering loop now (before code below)
+			if (!uiState.recordPanel.recording) break;
+
 			// if we're now past the last frame in the timeline, stop the timer
 			/*const steps = await GetTimelineSteps.Async(mapState.selectedTimeline ?? "n/a");
 			const reachedSteps = await GetTimelineStepsReachedByTimeX.Async(mapState.selectedTimeline ?? "n/a", currentFrameTime);

@@ -17,6 +17,7 @@ import {Padding} from "./MapUIWrapper.js";
 import {ExpandableBox} from "./Node/ExpandableBox.js";
 import {NodeBox} from "./Node/NodeBox.js";
 import {NodeUI} from "./Node/NodeUI.js";
+import {navBarHeight} from "../NavBar.js";
 
 export function GetViewOffsetForNodeBox(nodeBoxEl: Element) {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
@@ -349,13 +350,17 @@ export class MapUI extends BaseComponent<Props, {}> {
 		Assert(this.scrollView);
 		//const scrollContainerViewportSize = new Vector2(this.scrollView.vScrollableDOM.getBoundingClientRect().width, this.scrollView.vScrollableDOM.getBoundingClientRect().height);
 		const scrollContainerViewportSize = GetViewportRect(GetDOM(this.scrollView.contentOuter)!).Size;
-		const topBarsHeight = window.innerHeight - scrollContainerViewportSize.y;
+		//const topBarsHeight = window.innerHeight - scrollContainerViewportSize.y;
+		//const topBarsHeight = navBarHeight + 30; // todo: replace with subNavBarHeight const from web-vcore (once updated)
 
 		const oldScroll = this.scrollView.GetScroll();
 		const newScroll = new Vector2(
 			posInContainer.x - (scrollContainerViewportSize.x / 2),
+			posInContainer.y - (scrollContainerViewportSize.y / 2),
+
 			// scroll down a bit extra, such that node is center of window, not center of scroll-view container/viewport (I've tried both, and this way is more centered "perceptually")
-			(posInContainer.y - (scrollContainerViewportSize.y / 2)) + (topBarsHeight / 2),
+			// commented; this offset looks bad in recordings of just the map-view, so just disable the offset always (for consistency)
+			//(posInContainer.y - (scrollContainerViewportSize.y / 2)) + (topBarsHeight / 2),
 		);
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;

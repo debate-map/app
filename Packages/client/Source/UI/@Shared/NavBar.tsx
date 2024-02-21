@@ -7,7 +7,7 @@ import {E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Div} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {HasAdminPermissions, Me, MeID} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
@@ -18,22 +18,10 @@ import {SearchPanel} from "./NavBar/SearchPanel.js";
 import {StreamPanel} from "./NavBar/StreamPanel.js";
 import {UserPanel} from "./NavBar/UserPanel.js";
 
-// main
-// ==========
+export const navBarHeight = 45;
 
-const originSettings = {horizontal: "right", vertical: "top"};
-const buttonStyle = {color: "white", textDecoration: "none"};
-const avatarSize = 50;
-
-const avatarStyles = {
-	icon: {width: avatarSize, height: avatarSize},
-	button: {marginRight: "1.5rem", width: avatarSize, height: avatarSize},
-	wrapper: {marginTop: 45 - avatarSize},
-};
-
-// @Observer({ classHooks: false })
 @Observer
-export class NavBar extends BaseComponentPlus({} as {}, {}) {
+export class NavBar extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main;
 		//const dbNeedsInit = GetDocs({}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
@@ -50,7 +38,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						{HasAdminPermissions(MeID()) && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
 						{/* <NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton text={
-							<Div className="cursorSet" style={{position: "relative", height: 45}}>
+							<Div className="cursorSet" style={{position: "relative", height: navBarHeight}}>
 								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
 								{/*<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: 100</Div>
 								<Div style={{position: "absolute", bottom: 3, width: "100%", textAlign: "center",
@@ -59,14 +47,14 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						} panel="reputation" corner="top-left"/> */}
 					</span>
 					<div style={{
-						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
+						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: navBarHeight, maxHeight: `calc(100% - ${navBarHeight}px - 30px)`,
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
 						{uiState.topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{uiState.topLeftOpenPanel == "debug" && <DebugPanel/>}
 						{uiState.topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
-					<NotificationsUI placement="topLeft" navBarHeight={45}/>
+					<NotificationsUI placement="topLeft" navBarHeight={navBarHeight}/>
 
 					<span style={{margin: "0 auto", paddingRight: 20}}>
 						<NavBarPageButton page="database" text="Database"/>
@@ -85,7 +73,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
-						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
+						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: navBarHeight, maxHeight: `calc(100% - ${navBarHeight}px - 30px)`,
 						boxShadow: liveSkin.NavBarBoxShadow(), clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
 						{uiState.topRightOpenPanel == "search" && <SearchPanel/>}
@@ -115,7 +103,7 @@ export class NavBarPageButton extends BaseComponentPlus(
 		const finalStyle = E(
 			{
 				position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: 0.9,
+				lineHeight: `${navBarHeight}px`, color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: 0.9,
 			},
 			style,
 		);
