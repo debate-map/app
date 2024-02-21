@@ -4,7 +4,7 @@ import {RootState, store} from "Store/index.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, AddNotificationMessage, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
+import {ActionFunc, AddNotificationMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, stringifyError_errorOccurredPrefix} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
@@ -45,9 +45,23 @@ export function InitWVC() {
 		HasHotReloaded: ()=>hasHotReloaded,
 		logTypes,
 		mobxCompatMode: true,
-		PostHandleError: (error, errorStr)=>{
+		ShouldErrorBeIgnored: e=>{
+			const errorStr = BasicStringifyErrorlike(e);
+
 			// ignore the "Socket closed" error; this is redundant (and clutters the UI, since they pile up), because the UI already displays a dedicated "Websocket [...] Attempting reconnection..." message
+			if (errorStr == "Uncaught Error: Socket closed" || errorStr == "Socket closed") return true;
+
+			// fsr, this error sometimes occurs even when we check for `wavesurfer.isPlaying` and `audioEl.paused` before calling pause; so just ignore these (they cause no actual problems)
+			if (errorStr.startsWith(`The play() request was interrupted by a call to pause().`)) return true;
+
+			return false;
+		},
+		PostHandleError: (error, errorStr)=>{
+			/*// ignore the "Socket closed" error; this is redundant (and clutters the UI, since they pile up), because the UI already displays a dedicated "Websocket [...] Attempting reconnection..." message
 			if (errorStr == "Uncaught Error: Socket closed" || error?.message == "Socket closed") return true;
+
+			// fsr, this error sometimes occurs even when we check for `wavesurfer.isPlaying` and `audioEl.paused` before calling pause; so just ignore these (they cause no actual problems)
+			if (errorStr.startsWith(`${stringifyError_errorOccurredPrefix} The play() request was interrupted by a call to pause().`)) return true;*/
 
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{

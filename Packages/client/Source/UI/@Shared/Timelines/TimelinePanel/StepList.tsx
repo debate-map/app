@@ -2,10 +2,10 @@ import {store} from "Store";
 import {GetMapState, GetSelectedTimeline, GetTimelineInEditMode, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunWithRenderingBatchedAndBailsCaught} from "Utils/UI/General.js";
-import {GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GenerateSafeID, GetTimelineStepTimeFromStart, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
-import {ES, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
+import {ES, GetAutoElement, GetViewportRect, HSLA, Icon, O, Observer, PosChangeSource, RunInAction, RunInAction_Set, TextPlus, UseSize, YoutubePlayer, YoutubePlayerUI} from "web-vcore";
 import {GetPercentFromXToY, Lerp, Timer, Vector2, WaitXThenRun, ea} from "web-vcore/nm/js-vextensions.js";
 import {computed, makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {Button, CheckBox, Column, Row, Spinner, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
@@ -17,7 +17,7 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm
 import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {IsTimelineStepActive} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
 import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/OPFS_Step.js";
-import {AudioFilePlayer} from "./StepList/AudioFilePlayer.js";
+import {TimelineAudioFilePlayer} from "./StepList/TimelineAudioFilePlayer.js";
 import {StepUI} from "./StepList/StepUI.js";
 import {RecordDropdown} from "./StepList/RecordDropdown.js";
 import {AddTimelineStep_Simple} from "./StepList/Editing/StepEditorUI.js";
@@ -364,7 +364,12 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 						this.SetTargetTime(pos, source);
 					}}/>}
 				{audioFiles.map((audioFile, index)=>{
-					return <AudioFilePlayer key={`${index}_${audioFile.name}`} map={map} timeline={timeline} steps={steps} audioFile={audioFile}
+					// ensure that each audio File object has a unique ID, and thus a unique TimelineAudioFilePlayer associated with it (the comp is not resilient to audio file/blob switchouts atm)
+					if (audioFile["vID"] == null) audioFile["vID"] = GenerateSafeID();
+					//const key = `${index}_${audioFile.name}`;
+					const key = audioFile["vID"];
+
+					return <TimelineAudioFilePlayer key={key} map={map} timeline={timeline} steps={steps} audioFile={audioFile}
 						playSpeedGetter={()=>this.noVideoPlayer.speed} isPlayingGetter={()=>this.noVideoPlayer.playing} timeGetter={()=>this.targetTime}/>;
 				})}
 				<Row style={{height: 30, background: liveSkin.BasePanelBackgroundColor().css()}}>

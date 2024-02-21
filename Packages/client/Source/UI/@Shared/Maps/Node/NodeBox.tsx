@@ -377,103 +377,107 @@ export class NodeBox extends BaseComponentPlus(
 			//const isShowingToolbarButtonAtTopLeft = extractedPrefixTextInfo?.extractLocation == "toolbar";
 			const isShowingToolbarButtonAtTopLeft = toolbarItemsToShow.Any(a=>a.panel == "prefix");
 			return (
-				<ExpandableBox
-					ref={useCallback(c=>{
-						dragInfo?.provided.innerRef(GetDOM(c) as any);
-						this.root = c;
-						//if (c) FlashComp(this, {el: c.DOM_HTML, text: "NUI_Inner rendered"});
-						//ref_leftColumn.current = GetDOM(c) as any;
-					}, [dragInfo?.provided])}
-					parent={this}
-					{...{
-						outlineColor, outlineThickness, expanded,
-						backgroundFillPercent: SLMode ? 100 : backgroundFillPercent,
-						backgroundColor, markerPercent,
-						//width,
-						width: width_final,
-					}}
-					className={
-						//classNames("NodeBox", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
-						[
-							"NodeBox", "useLightText",
-							asDragPreview && "DragPreview",
-							pathNodeIDs.length == 0 && "root",
-							/*...(timelinesState.recordPanel.recording && mapState?.playingTimeline_time != null ? [
-								"forFrameRender",
-								GetClassForFrameRenderAtTime(mapState.playingTimeline_time),
-							] : []),*/
-						].filter(a=>a).join(" ")
-					}
-					onMouseEnter={onMouseEnter}
-					onMouseLeave={onMouseLeave}
-					{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, above
-					style={E(
-						{
-							color: liveSkin.NodeTextColor().css(),
-							//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
-							//minHeight: 25, // so that argument nodes remain 25px high, even when toolbar is hidden
-						},
-						style,
-						dragInfo?.provided.draggableProps.style,
-						asDragPreview && {zIndex: zIndexes.draggable},
-						//outerNode.link._mirrorLink && {border: `solid ${HSLA(0, 0, 1, .3)}`, borderWidth: "0 0 0 1px"}, // if mirror-child, show white border at left
-					)}
-					//padding={GetPaddingForNode(node/*, isSubnode*/)}
-					padding={0}
-					roundedTopLeftCorner={!isShowingToolbarButtonAtTopLeft}
-					onClick={onClick}
-					onDirectClick={onDirectClick}
-					beforeChildren={<>
-						{leftPanelShow &&
-						<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
-							ref={c=>this.leftPanel = c}
-							usePortal={usePortalForDetailBoxes} nodeUI={this}
-							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-							onPanelButtonClick={panel=>onPanelButtonClick(panel, "left-panel")}
-							onHoverChange={hovered=>this.SetState({leftPanelHovered: hovered})}
-						>
-							{/* fixes click-gap */}
-							{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
-						</NodeUI_LeftBox>}
-						{/* fixes click-gap */}
-						{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
-					</>}
-					//onTextHolderClick={onTextHolderClick}
-					//textHolderStyle={E(isMultiPremiseArg && {width: null})}
-					text={<>
-						{/*!GADDemo && (()=>{
-							// include this in "text" prop, because that makes the sizing exclude the +/- button
-							let ratingsPanel: JSX.Element;
-							if (node.type == NodeType.claim && combinedWithParentArgument) {
-								const argumentNode = NN(parent);
-								const argumentPath = NN(SlicePath(path, 1));
-								ratingsPanel = <RatingsPanel node={argumentNode} path={argumentPath} ratingType={NodeRatingType.impact} asNodeUIOverlay={true}/>;
-							} else {
-								ratingsPanel = <RatingsPanel node={node} path={path} ratingType={NodeRatingType.truth} asNodeUIOverlay={true}/>;
-							}
-							return <div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
-								{ratingsPanel}
-							</div>;
-						})()*/}
-						{toolbarAndTitleElements}
-						{subPanelShow &&
-						<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
-						<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
-					</>}
-					toggleExpanded={toggleExpanded}
-					expandButtonStyle={E(toolbar_hasRightAnchoredItems && {borderRadius: "0 0 5px 0"})}
-					isExpandButtonForNodeChildren={(childrenShownByNodeExpandButton ?? 0) > 0}
-					afterChildren={<>
-						{bottomPanelShow
-							&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}
-								ref={c=>this.bottomPanel = c}
+				<>
+					<ExpandableBox
+						ref={useCallback(c=>{
+							dragInfo?.provided.innerRef(GetDOM(c) as any);
+							this.root = c;
+							//if (c) FlashComp(this, {el: c.DOM_HTML, text: "NUI_Inner rendered"});
+							//ref_leftColumn.current = GetDOM(c) as any;
+						}, [dragInfo?.provided])}
+						parent={this}
+						{...{
+							outlineColor, outlineThickness, expanded,
+							backgroundFillPercent: SLMode ? 100 : backgroundFillPercent,
+							backgroundColor, markerPercent,
+							//width,
+							width: width_final,
+						}}
+						className={
+							//classNames("NodeBox", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
+							[
+								"NodeBox", "useLightText",
+								asDragPreview && "DragPreview",
+								pathNodeIDs.length == 0 && "root",
+								/*...(timelinesState.recordPanel.recording && mapState?.playingTimeline_time != null ? [
+									"forFrameRender",
+									GetClassForFrameRenderAtTime(mapState.playingTimeline_time),
+								] : []),*/
+							].filter(a=>a).join(" ")
+						}
+						onMouseEnter={onMouseEnter}
+						onMouseLeave={onMouseLeave}
+						{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, above
+						style={E(
+							{
+								color: liveSkin.NodeTextColor().css(),
+								//margin: "5px 0", // disabled temporarily, while debugging tree-grapher layout issues
+								//minHeight: 25, // so that argument nodes remain 25px high, even when toolbar is hidden
+							},
+							style,
+							dragInfo?.provided.draggableProps.style,
+							asDragPreview && {zIndex: zIndexes.draggable},
+							//outerNode.link._mirrorLink && {border: `solid ${HSLA(0, 0, 1, .3)}`, borderWidth: "0 0 0 1px"}, // if mirror-child, show white border at left
+						)}
+						//padding={GetPaddingForNode(node/*, isSubnode*/)}
+						padding={0}
+						roundedTopLeftCorner={!isShowingToolbarButtonAtTopLeft}
+						onClick={onClick}
+						onDirectClick={onDirectClick}
+						beforeChildren={<>
+							{leftPanelShow &&
+							<NodeUI_LeftBox {...{map, path, node, panelsPosition, backgroundColor}} local_nodeView={useLocalPanelState ? local_nodeView : null} asHover={hovered}
+								ref={c=>this.leftPanel = c}
 								usePortal={usePortalForDetailBoxes} nodeUI={this}
-								panelsPosition={panelsPosition!} panelToShow={panelToShow!}
-								hoverTermIDs={hoverTermIDs} onTermHover={termIDs=>this.SetState({hoverTermIDs: termIDs})}/>}
-						{reasonScoreValues && showReasonScoreValues
-							&& <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
-					</>}
-				/>
+								onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
+								onPanelButtonClick={panel=>onPanelButtonClick(panel, "left-panel")}
+								onHoverChange={hovered=>this.SetState({leftPanelHovered: hovered})}
+							>
+								{/* fixes click-gap */}
+								{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
+							</NodeUI_LeftBox>}
+							{/* fixes click-gap */}
+							{/*leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>*/}
+						</>}
+						//onTextHolderClick={onTextHolderClick}
+						//textHolderStyle={E(isMultiPremiseArg && {width: null})}
+						text={<>
+							{/*!GADDemo && (()=>{
+								// include this in "text" prop, because that makes the sizing exclude the +/- button
+								let ratingsPanel: JSX.Element;
+								if (node.type == NodeType.claim && combinedWithParentArgument) {
+									const argumentNode = NN(parent);
+									const argumentPath = NN(SlicePath(path, 1));
+									ratingsPanel = <RatingsPanel node={argumentNode} path={argumentPath} ratingType={NodeRatingType.impact} asNodeUIOverlay={true}/>;
+								} else {
+									ratingsPanel = <RatingsPanel node={node} path={path} ratingType={NodeRatingType.truth} asNodeUIOverlay={true}/>;
+								}
+								return <div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}>
+									{ratingsPanel}
+								</div>;
+							})()*/}
+							{toolbarAndTitleElements}
+							{subPanelShow &&
+							<SubPanel node={node} toolbarShowing={toolbarShow} /*onClick={onTextCompClick}*//>}
+							<NodeUI_Menu_Stub {...{map, node, path}} delayEventHandler={!usePortalForDetailBoxes} childGroup={ChildGroup.generic}/>
+						</>}
+						toggleExpanded={toggleExpanded}
+						expandButtonStyle={E(toolbar_hasRightAnchoredItems && {borderRadius: "0 0 5px 0"})}
+						isExpandButtonForNodeChildren={(childrenShownByNodeExpandButton ?? 0) > 0}
+						afterChildren={<>
+							{bottomPanelShow
+								&& <NodeUI_BottomPanel {...{map, node, path, parent, width: width_final, minWidth: standardWidthInGroup, hovered, backgroundColor}}
+									ref={c=>this.bottomPanel = c}
+									usePortal={usePortalForDetailBoxes} nodeUI={this}
+									panelsPosition={panelsPosition!} panelToShow={panelToShow!}
+									hoverTermIDs={hoverTermIDs} onTermHover={termIDs=>this.SetState({hoverTermIDs: termIDs})}/>}
+							{reasonScoreValues && showReasonScoreValues
+								&& <ReasonScoreValueMarkers {...{node, reasonScoreValues}}/>}
+						</>}
+					/>
+					<div style={{width: lastWidthWhenNotPreview}}/>
+					<FrameRenderSignal map={map}/>
+				</>
 			);
 		};
 
@@ -512,8 +516,6 @@ export class NodeBox extends BaseComponentPlus(
 						return renderInner(dragInfo);
 					}}
 				</Draggable>
-				<div style={{width: lastWidthWhenNotPreview}}/>
-				<FrameRenderSignal map={map}/>
 			</>
 		);
 	}

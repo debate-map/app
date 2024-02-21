@@ -34,7 +34,9 @@ export class AudioFileMiniPlayer extends BaseComponent<{file: File|n, volume?: n
 						this.audioEl = c;
 						if (c) c.volume = volume ?? 1;
 					}}
-					src={blobURL}/>}
+					src={blobURL}
+					style={{display: "none"}} // in case browser displays non-`controls` audio-elements
+				/>}
 				<Button {...buttonProps} enabled={blobURL != null} mdIcon={(this.audioEl == null || this.audioEl.paused) ? "play" : "stop"} onClick={()=>{
 					if (this.audioEl == null) return;
 					if (this.audioEl.paused) {

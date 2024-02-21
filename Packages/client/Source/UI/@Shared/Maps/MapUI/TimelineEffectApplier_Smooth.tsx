@@ -25,7 +25,7 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	if (data == null) return null;
 	if (data.playback.mapID != map.id) return null;
 	const {currentEffect_time, nextEffect_time, effectsReached, effectsReachedAtNext} = data;
-	if (currentEffect_time == null || nextEffect_time == null) return null;
+	//if (currentEffect_time == null || nextEffect_time == null) return null;
 	const currentTime = mapState.playingTimeline_time ?? 0;
 
 	// todo: confirm that we don't need to filter the focus-node-paths to the visible-nodes here...
@@ -33,6 +33,10 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	//const nextFocusNodePaths = GetFocusNodePaths(map.id, nextStep_time);
 	const lastFocusNodePaths = GetPathsWith1PlusFocusLevelAfterEffects(effectsReached);
 	const nextFocusNodePaths = GetPathsWith1PlusFocusLevelAfterEffects(effectsReachedAtNext);
+
+	// ensure that there is always at least one focus-node-path, so that map's positioning is always "determined" (needed for stability of recordings)
+	if (lastFocusNodePaths.length == 0) lastFocusNodePaths.push(map.rootNode);
+	if (nextFocusNodePaths.length == 0) nextFocusNodePaths.push(map.rootNode);
 
 	//const lastKeyframe_groupRects = GetGroupRectsAtKeyframe(map.id, mainGraph, layoutHelperGraph, currentStep_time);
 	//const nextKeyframe_groupRects = GetGroupRectsAtKeyframe(map.id, mainGraph, layoutHelperGraph, nextStep_time);
