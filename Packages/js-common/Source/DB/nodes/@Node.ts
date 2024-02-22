@@ -124,8 +124,9 @@ export class Node_Extras {
 	}, {opt: true})
 	ratingSummaries?: {[key: string]: RatingSummary}|n; // derived from "nodeRatings" table
 
-	@Field({type: "string"}, {opt: true})
-	externalId?: string|n;
+	// commented; new approach is to use extras.TOOL_NAMESPACE.id
+	//@Field({type: "string"}, {opt: true})
+	//externalId?: string|n;
 }
 @MGLClass()
 export class RatingSummary {

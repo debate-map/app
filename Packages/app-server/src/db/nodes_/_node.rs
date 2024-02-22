@@ -24,8 +24,10 @@ pub enum ArgumentType {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Node_Extras {
 	pub ratingSummaries: Option<IndexMap<String, RatingSummary>>,
+	
 	// namespaces/patterns used/expected atm: "claimgen:<uuid, full-form>"
-	pub externalId: Option<String>,
+	// commented; new approach is to use extras.TOOL_NAMESPACE.id
+	//pub externalId: Option<String>,
 }
 pub fn node_extras_locked_subfields() -> Vec<&'static str> { vec!["ratingSummaries"] }
 

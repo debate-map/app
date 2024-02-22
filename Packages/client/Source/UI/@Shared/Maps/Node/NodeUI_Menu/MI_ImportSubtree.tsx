@@ -313,7 +313,7 @@ class ImportSubtreeUI extends BaseComponent<
 									}
 									onClick={async()=>{
 										ShowMessageBox({
-											title: `Start uncancellable import of all ${resources.length} resources?`, cancelButton: true,
+											title: `Start import of all ${resources.length} resources?`, cancelButton: true,
 											message: `
 												This will start an import of all ${resources.length} resources (not just the ${selectedIRs_nodeAndRev.length} selected ones), run as a command-batch on the server.
 

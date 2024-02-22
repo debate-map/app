@@ -1,10 +1,17 @@
-import {Attachment, AttachmentType, SourceChain, SourceType} from "dm_common";
+import {Attachment, AttachmentType, QuoteAttachment, Source, SourceChain, SourceType} from "dm_common";
+
+export class CG_Quote {
+	quote: string;
+	source: Source;
+	extras?: Object; // eg. {claimMiner: {id: "123"}}
+}
 
 export abstract class CG_Node {
-	id: string;
+	id?: string; // deprecated, and ignored (and console.warn is called if input json uses this; new approach is to use extras.TOOL_NAMESPACE.id)
 	narrative?: string;
 	reference_urls?: string[];
-	//extras?: Object; // eg. {claimminer: {id: "123"}} // new (todo)
+	quotes?: CG_Quote[];
+	extras?: Object; // eg. {claimMiner: {id: "123"}}
 
 	//abstract GetTitle(): string;
 	/** Get the regular, "standalone" text of the claim. (stored in debate-map as text_base) */
@@ -19,20 +26,32 @@ export abstract class CG_Node {
 		const result = (node.narrative ?? "").trim(); // fsr, some json files contain line-breaks at start or end, so clean this up
 		return result.length ? result : null;
 	}
-	static GetReferenceURLsAsAttachments(node: CG_Node) {
-		const referenceURLs = node.reference_urls ?? [];
-		if (referenceURLs.length == 0) return [];
-		return [
-			new Attachment({
+	static GetAttachments(node: CG_Node) {
+		const result = [] as Attachment[];
+		if (node.reference_urls && node.reference_urls.length > 0) {
+			result.push(new Attachment({
 				references: {
-					sourceChains: referenceURLs.map(url=>{
+					sourceChains: node.reference_urls.map(url=>{
 						return new SourceChain([
 							{type: SourceType.webpage, link: url},
 						]);
 					}),
 				},
-			}),
-		];
+			}));
+		}
+		for (const quote of node.quotes ?? []) {
+			result.push(new Attachment({
+				//expandedByDefault: false,
+				quote: new QuoteAttachment({
+					content: quote.quote,
+					sourceChains: quote.source != null ? [
+						new SourceChain([quote.source]),
+					] : [],
+				}),
+				extras: quote.extras,
+			}));
+		}
+		return result;
 	}
 }
 
@@ -42,7 +61,7 @@ export class CG_Debate extends CG_Node {
 }
 export class CG_Question extends CG_Node {
 	// v1
-	questionText?: string;
+	questionText?: string; // deprecated, but processed atm
 	// v2
 	question?: string;
 
@@ -61,18 +80,18 @@ export class CG_Claim extends CG_Node {
 	claim?: string;
 
 	// v2
-	argument?: string;
+	argument?: string; // deprecated, but processed atm
 	/*generated?: string;
 	valid?: boolean;
 	similarity?: boolean;
 	edited?: boolean;*/
 
 	// v2 (tool extending claim-gen)
-	arguments?: string[];
+	//arguments?: string[];
 
-	// v2+v3 (tool extending claim-gen)
-	//arguments?: (string | CG_Argument)[]; // new (todo)
+	// v3 (tool extending claim-gen)
+	arguments?: (string | CG_Argument)[];
 }
-/*export class CG_Argument extends CG_Node {
+export class CG_Argument extends CG_Node {
 	argument: string;
-}*/
+}
