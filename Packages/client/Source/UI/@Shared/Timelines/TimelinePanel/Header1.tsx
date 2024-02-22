@@ -1,4 +1,4 @@
-import {GetTimelines, GetTimelineStep, GetTimelineSteps, Map, MeID, Timeline, TimelineStep} from "dm_common";
+import {GetTimelines, GetTimelineStep, GetTimelineSteps, HasAdminPermissions, Map, MeID, Timeline, TimelineStep} from "dm_common";
 import React, {useEffect} from "react";
 import {GetMapState, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState.js";
 import {MapUIWaitMessage} from "UI/@Shared/Maps/MapUIWrapper.js";
@@ -6,7 +6,7 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
 import {RunCommand_DeleteTimeline} from "Utils/DB/Command";
 import {liveSkin} from "Utils/Styles/SkinManager";
-import {ES, Observer, RunInAction, RunInAction_Set} from "web-vcore";
+import {CopyText, ES, Observer, RunInAction, RunInAction_Set} from "web-vcore";
 import {E, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Text, Spinner, CheckBox, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -152,6 +152,18 @@ class OptionsDropdown extends BaseComponent<{map: Map, timeline: Timeline|n, ste
 					<Row mt={3}>
 						<Text>Show focus-nodes:</Text>
 						<CheckBox ml={5} value={uiState.showFocusNodes} onChange={val=>RunInAction_Set(this, ()=>uiState.showFocusNodes = val)}/>
+						{HasAdminPermissions(MeID()) &&
+						<Button mdIcon="image-filter-center-focus" ml={5} title="Copy code to show red-dot at specified map-ui position." onClick={()=>{
+							CopyText(`
+								function SetDot(x, y) {
+									const tempDot = document.querySelector("#MapUI_tempDot") ?? document.createElement("div");
+									tempDot.id = "MapUI_tempDot";
+									document.querySelector(".MapUI")?.appendChild(tempDot);
+									tempDot.style.cssText = \`position: absolute; width: 4px; height: 4px; background: red; left: calc(\${x}px - 2px); top: calc(\${y}px - 2px); z-index: 100;\`;
+								}
+								SetDot(100, 100);
+							`.AsMultiline(0));
+						}}/>}
 					</Row>
 					<Row mt={3}>
 						<Text>Layout-helper map:</Text>

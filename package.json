@@ -58,7 +58,7 @@
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "sync-directory": "^2.2.22",
-    "tree-grapher": "0.0.8",
+    "tree-grapher": "0.0.9",
     "ui-debug-kit": "0.0.7",
     "wavesurfer.js": "7.6.0",
     "web-vcore": "0.0.97"
