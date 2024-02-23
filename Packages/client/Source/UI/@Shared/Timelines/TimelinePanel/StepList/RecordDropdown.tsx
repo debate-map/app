@@ -2,8 +2,8 @@ import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart} from "dm_common";
-import {Assert, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
+import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart, GetTimeline} from "dm_common";
+import {Assert, CopyText, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
 import {AddNotificationMessage, Observer, RunInAction_Set} from "web-vcore";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -13,6 +13,10 @@ import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/Layo
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop.js";
 import {TimeToString} from "Utils/UI/General.js";
+import {OPFS_Map} from "Utils/OPFS/OPFS_Map.js";
+import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
+import {OPFSDir_GetFileChildren} from "Utils/OPFS/ElectronOPFS.js";
+import {GetTopAudioForStep} from "Utils/OPFS/Map/OPFS_Step.js";
 import {StepList} from "../StepList.js";
 
 @Observer
@@ -20,7 +24,16 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 	render() {
 		const uiState = store.main.timelines.recordPanel;
 		const map = GetMap(GetOpenMapID());
+		if (map == null) return;
 		const mapState = GetMapState(map?.id);
+		const timelineID = mapState?.selectedTimeline;
+		const timeline = GetTimeline(timelineID);
+		if (timeline == null) return;
+
+		// we need these for the ffmpeg "prep" action
+		const steps = GetTimelineSteps(timeline.id);
+		const stepTimes = GetTimelineStepTimesFromStart(steps);
+		const stepTopAudios = steps.map(step=>GetTopAudioForStep(step.id, map.id));
 
 		return (
 			<DropDown>
@@ -47,7 +60,96 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 					<Row>
 						<Text>Render folder:</Text>
 						<TextInput ml={5} value={uiState.renderFolderName} onChange={val=>RunInAction_Set(this, ()=>uiState.renderFolderName = val)}/>
-						<Button ml={5} text="Now" onClick={()=>RunInAction_Set(this, ()=>uiState.renderFolderName = TimeToString(Date.now(), true))}/>
+						<Button ml={5} p="5px 10px" text="Now" onClick={()=>RunInAction_Set(this, ()=>uiState.renderFolderName = TimeToString(Date.now(), true))}/>
+						<Button ml={5} p="5px 10px" text="Go" onClick={()=>desktopBridge.Call("OpenMainDataSubfolder", {pathSegments: ["Maps", map!.id, "Renders", uiState.renderFolderName]})}/>
+					</Row>
+					<Row>
+						<Button text="Prep" onClick={async()=>{
+							const opfsForMap = OPFS_Map.GetEntry(map.id);
+							const renderFolder = opfsForMap.GetChildFolder("Renders").GetChildFolder(uiState.renderFolderName);
+							const renderFolderHandle = await renderFolder.GetTargetDirectoryHandle_EnsuringExists("create");
+
+							const filenames = [...await OPFSDir_GetFileChildren(renderFolderHandle)].map(a=>a.name);
+							const frameFilenames = filenames
+								.filter(a=>a.match(/(\d+)\.png/) != null)
+								.OrderBy(a=>{
+									const match = a.match(/(\d+)\.png/);
+									return match ? Number(match[1]) : 0;
+								});
+
+							// create an ffmpeg_input.txt file, with the filenames of the images in the given folder
+							//const ffmpegInputFile = await folderHandle.getFileHandle("ffmpeg_input.txt", {create: true});
+							const inputFileText_images = frameFilenames.map((filename, i)=>{
+								const nextFrameFilename = frameFilenames[i + 1] as string|n;
+								const durationInFrames = nextFrameFilename ? (nextFrameFilename.match(/(\d+)\.png/)![1].ToInt() - filename.match(/(\d+)\.png/)![1].ToInt()) : 1;
+								const durationInSeconds = durationInFrames / 60;
+								return `file '${filename}'\nduration ${durationInSeconds}`;
+							}).join("\n");
+							await renderFolder.SaveFile_Text(inputFileText_images, "ffmpeg_input_images.txt");
+
+							// also add the audio files
+							const steps_audioFilepaths = steps.map((step, i)=>{
+								const topAudio = stepTopAudios[i];
+								if (topAudio?.file == null) return null;
+								const audioFilename = topAudio.file?.name;
+								return `file:../../Step_${step.id}/${audioFilename}`;
+							});
+							const inputFileText_audios = steps.map((step, i)=>{
+								const audioFilepath = steps_audioFilepaths[i];
+								if (audioFilepath == null) return null;
+								const nextStepWithAudio_i = steps.findIndex((a, i2)=>i2 > i && steps_audioFilepaths[i2] != null);
+								const timeTillNextStepWithAudio = nextStepWithAudio_i != -1 ? stepTimes[nextStepWithAudio_i] - stepTimes[i] : step.timeUntilNextStep;
+								return [
+									`file '${audioFilepath}'`,
+									// commented; these don't do what I thought they did (they choose the slice from the file to include, not where to put it in the output file)
+									//`inpoint ${stepTimes[i]}`,
+									//stepTimes[i + 1] != null && `outpoint ${stepTimes[i + 1]}`,
+									`duration ${timeTillNextStepWithAudio}`,
+								].filter(a=>a != null).join("\n");
+							}).filter(a=>a != null).join("\n");
+							await renderFolder.SaveFile_Text(inputFileText_audios, "ffmpeg_input_audios.txt");
+
+							ShowMessageBox({
+								title: "Prep done", cancelButton: true,
+								message: `
+									Prep done; saved to ffmpeg_input.txt.
+									
+									Click OK to open its parent folder, to then inspect that file.
+								`.AsMultiline(0),
+								onOK: ()=>{
+									desktopBridge.Call("OpenMainDataSubfolder", {pathSegments: ["Maps", map!.id, "Renders", uiState.renderFolderName]});
+								},
+							});
+						}}/>
+						<Button ml={5} text="Copy ffmpeg command" onClick={()=>{
+							CopyText([
+								`ffmpeg`, // ffmpeg executable
+
+								// input approach: files in folder (could have tried glob approach, but doesn't work on windows)
+								//`-i %d.png`, // input files
+								//`-r 60`, // input framerate: 60fps
+
+								// input approach: file containing list of files (for images)
+								`-safe 0`, // accept any filename
+								`-f concat`,
+								`-i ffmpeg_input_images.txt`, // use the ffmpeg_input_images.txt file prepared earlier as the input to ffmpeg (needed since there are gaps in the frame filenames)
+
+								// input approach: file containing list of files (for audios)
+								`-safe 0`, // accept any filename
+								`-f concat`,
+								`-i ffmpeg_input_audios.txt`, // use the ffmpeg_input_audios.txt file prepared earlier as the input to ffmpeg
+
+								`-c:v libx264`, // use h264 codec
+								//`-c:v libx265` // use h265 codec
+								`-r 60`, // output framerate: 60fps
+								//`-vf fps=60`, // output framerate: 60fps
+								`-pix_fmt yuv420p`, // use yuv420p pixel format (supports lossless)
+								`-qp 0`, // use lossless encoding
+								//`-vf "crop=trunc(iw/2)*2:trunc(ih/2)*2"`, // ensure width/height are even (required for selected format/codec) // commented, since we lock to a valid resolution anyway
+
+								`output.mp4`, // output filename
+							].join(" "));
+						}}/>
 					</Row>
 					<Row>
 						<Text>Current frame:</Text>

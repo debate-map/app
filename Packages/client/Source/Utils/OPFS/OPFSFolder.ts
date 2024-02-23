@@ -11,6 +11,10 @@ export class OPFSFolder {
 	}
 	pathSegments: string[];
 
+	GetChildFolder(name: string) {
+		return new OPFSFolder([...this.pathSegments, name]);
+	}
+
 	async GetStorageRoot() {
 		let storageRoot: FileSystemDirectoryHandle|n;
 		try {
@@ -51,7 +55,7 @@ export class OPFSFolder {
 		}
 	}
 	async LoadFiles() {
-		const newFiles = [] as File[];
+		let newFiles = [] as File[];
 		try {
 			const targetDirectoryHandle = await this.GetTargetDirectoryHandle("null");
 			if (targetDirectoryHandle) {
@@ -64,19 +68,25 @@ export class OPFSFolder {
 			console.error("Error loading files from OPFS:", err);
 			// temp: for now, just ignore other errors (probably just no file having been saved yet)
 		}
+		newFiles = newFiles.OrderBy(a=>a.name.toLowerCase());
 
 		RunInAction(`OPFSFolder.LoadFiles @pathSegments:${JSON.stringify(this.pathSegments)}`, ()=>{
-			this.files = newFiles.OrderBy(a=>a.name.toLowerCase());
+			this.files = newFiles;
 			this.loaded = true;
 		});
+		return newFiles;
 	}
 
 	async SaveFile_Text(fileContents: string, fileName: string, fileType = "text/plain") {
+		// helps caller quickly notice if they accidentally pass the file-contents as the 2nd-arg
+		Assert(!fileName.includes("\n"), "File name cannot contain '\\n'.");
+
 		const file = new File([fileContents], fileName, {type: fileType});
 		return await this.SaveFile(file);
 	}
 	async SaveFile(file: File, nameOverride?: string) {
-		Assert(this.loaded, "OPFSFolder must have its files loaded before saving files.");
+		//Assert(!nameOverride?.includes("\n"), "File name cannot contain '\\n'.");
+		//Assert(this.loaded, "OPFSFolder must have its files loaded before saving files.");
 
 		const targetDirectoryHandle = await this.GetTargetDirectoryHandle_EnsuringExists("create");
 		const fileName_final = nameOverride ?? file.name;
@@ -85,23 +95,27 @@ export class OPFSFolder {
 		await writable.write(file);
 		await writable.close();
 
-		// update file list, to reflect changes
-		//await this.LoadFiles();
-		RunInAction(`OPFSFolder.SaveFile @pathSegments:${JSON.stringify(this.pathSegments)}`, ()=>{
-			this.files = this.files.filter(a=>a.name != fileName_final).concat(file).OrderBy(a=>a.name.toLowerCase());
-		});
+		// if file-list is already loaded, update the file list (reflecting just-saved file); else, do nothing (caller can check for this.loaded and call LoadFiles if needed)
+		if (this.loaded) {
+			//await this.LoadFiles();
+			RunInAction(`OPFSFolder.SaveFile @pathSegments:${JSON.stringify(this.pathSegments)}`, ()=>{
+				this.files = this.files.filter(a=>a.name != fileName_final).concat(file).OrderBy(a=>a.name.toLowerCase());
+			});
+		}
 	}
 
 	async DeleteFile(fileName: string) {
-		Assert(this.loaded, "OPFS_Map must have its files loaded before deleting files.");
+		//Assert(this.loaded, "OPFS_Map must have its files loaded before deleting files.");
 
 		const targetDirectoryHandle = await this.GetTargetDirectoryHandle_EnsuringExists("error");
 		await targetDirectoryHandle.removeEntry(fileName);
 
-		// update file list, to reflect changes
-		//await this.LoadFiles();
-		RunInAction(`OPFS_Map.DeleteFile @pathSegments:${JSON.stringify(this.pathSegments)}`, ()=>{
-			this.files = this.files.filter(a=>a.name != fileName);
-		});
+		// if file-list is already loaded, update the file list (reflecting just-deleted file); else, do nothing (caller can check for this.loaded and call LoadFiles if needed)
+		if (this.loaded) {
+			//await this.LoadFiles();
+			RunInAction(`OPFS_Map.DeleteFile @pathSegments:${JSON.stringify(this.pathSegments)}`, ()=>{
+				this.files = this.files.filter(a=>a.name != fileName);
+			});
+		}
 	}
 }
