@@ -88,7 +88,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 							await renderFolder.SaveFile_Text(inputFileText_images, "ffmpeg_input_images.txt");
 
 							// also add the audio files
-							const steps_audioFilepaths = steps.map((step, i)=>{
+							/*const steps_audioFilepaths = steps.map((step, i)=>{
 								const topAudio = stepTopAudios[i];
 								if (topAudio?.file == null) return null;
 								const audioFilename = topAudio.file?.name;
@@ -107,7 +107,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 									`duration ${timeTillNextStepWithAudio}`,
 								].filter(a=>a != null).join("\n");
 							}).filter(a=>a != null).join("\n");
-							await renderFolder.SaveFile_Text(inputFileText_audios, "ffmpeg_input_audios.txt");
+							await renderFolder.SaveFile_Text(inputFileText_audios, "ffmpeg_input_audios.txt");*/
 
 							ShowMessageBox({
 								title: "Prep done", cancelButton: true,
@@ -122,8 +122,56 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 							});
 						}}/>
 						<Button ml={5} text="Copy ffmpeg command" onClick={()=>{
+							const steps_audioFilepaths = steps.map((step, i)=>{
+								const topAudio = stepTopAudios[i];
+								if (topAudio?.file == null) return null;
+								const audioFilename = topAudio.file?.name;
+								return `file:../../Step_${step.id}/${audioFilename}`;
+							});
+							const audioEntries = steps.map((step, i)=>{
+								const audioFilepath = steps_audioFilepaths[i];
+								if (audioFilepath == null) return null;
+								//const nextStepWithAudio_i = steps.findIndex((a, i2)=>i2 > i && steps_audioFilepaths[i2] != null);
+								//const timeTillNextStepWithAudio = nextStepWithAudio_i != -1 ? stepTimes[nextStepWithAudio_i] - stepTimes[i] : step.timeUntilNextStep;
+								const stepEndTime = steps[i + 1] != null ? stepTimes[i + 1] : stepTimes[i] + (step.timeUntilNextStep ?? 0);
+								return {audioFilepath, startAt: stepTimes[i], endAt: stepEndTime, volume: stepTopAudios[i]?.meta?.volume ?? 1};
+							}).filter(a=>a != null) as {audioFilepath: string, startAt: number, endAt: number, volume: number}[];
+
+							const filterStrings = audioEntries.map((entry, i)=>{
+								const inputLabel = `[${i}]`;
+								const subfiltersStr = [
+									// note: we use the [adelay] filter since it's most straightforward, but you could also use [itsdelay+aresample] or [anullsrc] approaches
+									`adelay=${(entry.startAt * 1000).toFixed(0)}:all=1`, // convert to ms; and apply to all channels (not really needed for current files since mono-channeled, but worth future-proofing)
+									entry.volume != 1 && `volume=${entry.volume}`,
+								].filter(a=>a).join(",");
+								const outputLabel = `[o${i}]`;
+								return `${inputLabel}${subfiltersStr}${outputLabel}`;
+							});
+							const allFilterOutputLabels = audioEntries.map((entry, i)=>`[o${i}]`).join("");
+							// if the command errors saying amix has an unknown option, you'll need to update to a newer ffmpeg (~2021+); normalize flag needed as issue fix: https://stackoverflow.com/a/68503794
+							filterStrings.push(`${allFilterOutputLabels}amix=inputs=${audioEntries.length}:normalize=0[audioOutput]`);
+
+							const concatOfImages_inputIndex = audioEntries.length;
+
+							// NOTE: This command could exceed the limit of 8191 characters (for cmd.exe), if there are too many audio files.
+							// One way to resolve, is to have the command be written to a file, and then tell ffmpeg to read the command from that file. (https://superuser.com/a/1264453)
+							// (Some other mitigations could be changing file-name patterns, and/or using powershell, but these just kick the can down the road.)
 							CopyText([
 								`ffmpeg`, // ffmpeg executable
+
+								// audios
+								// ==========
+
+								...audioEntries.map((entry, i)=>`-i '${entry.audioFilepath}'`),
+								`-filter_complex "${filterStrings.join("; ")}"`,
+
+								// input approach: file containing list of files (for audios)
+								/*`-safe 0`, // accept any filename
+								`-f concat`,
+								`-i ffmpeg_input_audios.txt`, // use the ffmpeg_input_audios.txt file prepared earlier as the input to ffmpeg*/
+
+								// images
+								// ==========
 
 								// input approach: files in folder (could have tried glob approach, but doesn't work on windows)
 								//`-i %d.png`, // input files
@@ -134,10 +182,12 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 								`-f concat`,
 								`-i ffmpeg_input_images.txt`, // use the ffmpeg_input_images.txt file prepared earlier as the input to ffmpeg (needed since there are gaps in the frame filenames)
 
-								// input approach: file containing list of files (for audios)
-								`-safe 0`, // accept any filename
-								`-f concat`,
-								`-i ffmpeg_input_audios.txt`, // use the ffmpeg_input_audios.txt file prepared earlier as the input to ffmpeg
+								// the rest
+								// ==========
+
+								// for video output, use input X (result from concat of ...images.txt file)
+								// for audio output, use the "audioOutput" stream (result from the filter_complex above)
+								`-map ${concatOfImages_inputIndex}:v -map "[audioOutput]" -codec:v copy`,
 
 								`-c:v libx264`, // use h264 codec
 								//`-c:v libx265` // use h265 codec
