@@ -7,11 +7,13 @@ use rust_shared::anyhow::Error;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde;
 use rust_shared::serde::{Serialize, Deserialize};
+use rust_shared::GQLError;
 use rust_shared::tokio_postgres::{Row, Client};
 
 use crate::utils::db::accessors::AccessorContext;
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::maps::get_map;
@@ -49,15 +51,23 @@ impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
     fn nodes(&self) -> &Vec<MapNodeEdit> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_NodeEdit;
-#[Subscription]
-impl SubscriptionShard_NodeEdit {
-    async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
-        handle_generic_gql_collection_request::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
+#[derive(Default)] pub struct QueryShard_NodeEdit;
+#[Object] impl QueryShard_NodeEdit {
+	async fn nodeEdits(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<MapNodeEdit>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "mapNodeEdits", filter).await
+	}
+	async fn nodeEdit(&self, ctx: &Context<'_>, id: String) -> Result<Option<MapNodeEdit>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "mapNodeEdits", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_NodeEdit;
+#[Subscription] impl SubscriptionShard_NodeEdit {
+    async fn mapNodeEdits<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_MapNodeEdit, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<MapNodeEdit, GQLSet_MapNodeEdit>(ctx, "mapNodeEdits", filter).await
     }
     async fn mapNodeEdit<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<MapNodeEdit>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<MapNodeEdit>(ctx, "mapNodeEdits", id).await
+        handle_generic_gql_doc_subscription::<MapNodeEdit>(ctx, "mapNodeEdits", id).await
     }
 }
 

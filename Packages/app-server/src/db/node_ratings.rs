@@ -2,7 +2,7 @@ use rust_shared::itertools::Itertools;
 use rust_shared::utils::general::{as_debug_str, as_json_str, enum_to_string};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json};
+use rust_shared::{SubError, serde_json, GQLError};
 use rust_shared::anyhow::{anyhow, Error, ensure, bail};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::Enum;
@@ -15,11 +15,12 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::db::node_links::get_node_links;
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::db::nodes::get_node;
 use crate::utils::db::accessors::{get_db_entries, AccessorContext};
 use crate::utils::db::accessors::get_db_entry;
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::commands::_shared::rating_processor::get_argument_impact_pseudo_ratings;
@@ -156,15 +157,23 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
     fn nodes(&self) -> &Vec<NodeRating> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_NodeRating;
-#[Subscription]
-impl SubscriptionShard_NodeRating {
-    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRating, SubError>> + 'a {
-        handle_generic_gql_collection_request::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
+#[derive(Default)] pub struct QueryShard_NodeRating;
+#[Object] impl QueryShard_NodeRating {
+	async fn nodeRatings(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<NodeRating>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "nodeRatings", filter).await
+	}
+	async fn nodeRating(&self, ctx: &Context<'_>, id: String) -> Result<Option<NodeRating>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "nodeRatings", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_NodeRating;
+#[Subscription] impl SubscriptionShard_NodeRating {
+    async fn nodeRatings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRating, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<NodeRating, GQLSet_NodeRating>(ctx, "nodeRatings", filter).await
     }
     async fn nodeRating<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeRating>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<NodeRating>(ctx, "nodeRatings", id).await
+        handle_generic_gql_doc_subscription::<NodeRating>(ctx, "nodeRatings", id).await
     }
 }
 

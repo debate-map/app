@@ -15,6 +15,7 @@ use crate::store::storage::get_app_state_from_gql_ctx;
 use crate::utils::type_aliases::DBPool;
 use crate::{utils::{db::{sql_fragment::SQLFragment, filter::{FilterInput, QueryFilter}, queries::get_entries_in_collection_base}, general::{data_anchor::{DataAnchor, DataAnchorFor1}}, type_aliases::PGClientObject}, db::commands::_command::ToSqlWrapper};
 
+use super::generic_handlers::queries::{self, get_db_entry_base, get_db_entries_base};
 use super::transactions::{start_read_transaction, start_write_transaction};
 
 /// Helper function to defer constraints in a database transaction.
@@ -143,32 +144,10 @@ impl<'a> Drop for TxTempAdminUpgradeWrapper<'a> {
 }*/
 
 pub async fn get_db_entry<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<T, Error> {
-    let entries = get_db_entries(ctx, table_name, filter_json).await?;
-    let entry = entries.into_iter().nth(0);
-    let result = entry.ok_or(anyhow!(r#"No entries found in table "{table_name}" matching filter:{filter_json:?}"#))?;
+    let result_option = get_db_entry_base(ctx, table_name, filter_json).await?;
+    let result = result_option.ok_or(anyhow!(r#"No entries found in table "{table_name}" matching filter:{filter_json:?}"#))?;
     Ok(result)
 }
 pub async fn get_db_entries<'a, T: From<Row> + Serialize>(ctx: &AccessorContext<'a>, table_name: &str, filter_json: &Option<FilterInput>) -> Result<Vec<T>, Error> {
-    let query_func = |mut sql: SQLFragment| async move {
-        let (sql_text, params) = sql.into_query_args()?;
-        let debug_info_str = format!("@sqlText:{}\n@params:{:?}", &sql_text, &params);
-
-        let params_wrapped: Vec<ToSqlWrapper> = params.into_iter().map(|a| ToSqlWrapper { data: a }).collect();
-        let params_as_refs: Vec<&(dyn ToSql + Sync)> = params_wrapped.iter().map(|x| x as &(dyn ToSql + Sync)).collect();
-
-        // query_raw supposedly allows dynamically-constructed params-vecs, but the only way I've been able to get it working is by locking the vector to a single concrete type
-        // see here: https://github.com/sfackler/rust-postgres/issues/445#issuecomment-1086774095
-        //let params: Vec<String> = params.into_iter().map(|a| a.as_ref().to_string()).collect();
-        ctx.tx.query_raw(&sql_text, params_as_refs).await
-            .map_err(|err| {
-                anyhow!("Got error while running query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str)
-            })?
-            .try_collect().await.map_err(|err| {
-                anyhow!("Got error while collecting results of db-query, for getting db-entries. @error:{}\n{}", err.to_string(), &debug_info_str)
-            })
-    };
-
-    let filter = QueryFilter::from_filter_input_opt(filter_json)?;
-    let (_entries, entries_as_type) = get_entries_in_collection_base(query_func, table_name.to_owned(), &filter, None).await?; // pass no mtx, because we don't care about optimizing the "subtree" endpoint atm
-    Ok(entries_as_type)
+    get_db_entries_base(ctx, table_name, filter_json).await
 }

@@ -42,7 +42,7 @@ use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::{start_read_transaction, start_write_transaction};
 use rust_shared::utils::db::uuid::new_uuid_v4_as_b64;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}}};
 use crate::utils::type_aliases::{PGClientObject};
 
 use super::_command::{set_db_entry_by_id, upsert_db_entry_by_id_for_struct};

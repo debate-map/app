@@ -2,7 +2,7 @@ use futures_util::future::join_all;
 use rust_shared::indexmap::IndexMap;
 use rust_shared::anyhow::{Error, anyhow, bail};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json};
+use rust_shared::{SubError, serde_json, GQLError, to_gql_err};
 use rust_shared::async_graphql::{self, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -12,8 +12,9 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::general::permission_helpers::{is_user_creator_or_mod, assert_user_can_delete};
 use super::node_links::get_node_links;
@@ -26,20 +27,28 @@ wrap_slow_macros!{
 #[derive(Clone)] pub struct GQLSet_Node { pub nodes: Vec<Node> }
 #[Object] impl GQLSet_Node { async fn nodes(&self) -> &Vec<Node> { &self.nodes } }
 impl GQLSet<Node> for GQLSet_Node {
-    fn from(entries: Vec<Node>) -> GQLSet_Node { Self { nodes: entries } }
-    fn nodes(&self) -> &Vec<Node> { &self.nodes }
+	fn from(entries: Vec<Node>) -> GQLSet_Node { Self { nodes: entries } }
+	fn nodes(&self) -> &Vec<Node> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_Node;
-#[Subscription]
-impl SubscriptionShard_Node {
-    async fn nodes<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Node, SubError>> + 'a {
-        handle_generic_gql_collection_request::<Node, GQLSet_Node>(ctx, "nodes", filter).await
-    }
-    async fn node<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Node>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<Node>(ctx, "nodes", id).await
-    }
+#[derive(Default)] pub struct QueryShard_Node;
+#[Object] impl QueryShard_Node {
+	async fn nodes(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<Node>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "nodes", filter).await
+	}
+	async fn node(&self, ctx: &Context<'_>, id: String) -> Result<Option<Node>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "nodes", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_Node;
+#[Subscription] impl SubscriptionShard_Node {
+	async fn nodes<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Node, SubError>> + 'a {
+		handle_generic_gql_collection_subscription::<Node, GQLSet_Node>(ctx, "nodes", filter).await
+	}
+	async fn node<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Node>, SubError>> + 'a {
+		handle_generic_gql_doc_subscription::<Node>(ctx, "nodes", id).await
+	}
 }
 
 }

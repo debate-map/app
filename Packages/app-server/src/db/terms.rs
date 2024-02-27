@@ -1,5 +1,5 @@
 use rust_shared::anyhow::Error;
-use rust_shared::{SubError, serde_json, futures};
+use rust_shared::{SubError, serde_json, futures, GQLError};
 use rust_shared::async_graphql::{self, MaybeUndefined, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -9,8 +9,9 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::_shared::attachments::Attachment;
 use super::commands::_command::{CanOmit, CanNullOrOmit};
@@ -95,15 +96,23 @@ impl GQLSet<Term> for GQLSet_Term {
     fn nodes(&self) -> &Vec<Term> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_Term;
-#[Subscription]
-impl SubscriptionShard_Term {
+#[derive(Default)] pub struct QueryShard_Term;
+#[Object] impl QueryShard_Term {
+	async fn terms(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<Term>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "terms", filter).await
+	}
+	async fn term(&self, ctx: &Context<'_>, id: String) -> Result<Option<Term>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "terms", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_Term;
+#[Subscription] impl SubscriptionShard_Term {
     async fn terms<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Term, SubError>> + 'a {
-        handle_generic_gql_collection_request::<Term, GQLSet_Term>(ctx, "terms", filter).await
+        handle_generic_gql_collection_subscription::<Term, GQLSet_Term>(ctx, "terms", filter).await
     }
     async fn term<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Term>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<Term>(ctx, "terms", id).await
+        handle_generic_gql_doc_subscription::<Term>(ctx, "terms", id).await
     }
 }
 

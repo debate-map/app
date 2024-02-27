@@ -4,7 +4,7 @@ use futures_util::StreamExt;
 use rust_shared::{once_cell::sync::Lazy, anyhow::{anyhow, Error, bail}, itertools::Itertools, tokio, to_anyhow, db_constants::{SYSTEM_USER_ID, SYSTEM_USER_EMAIL}, utils::{auth::jwt_utils_base::UserJWTData, general_::extensions::ToOwnedV, time::tokio_sleep}, serde_json::{json, self}};
 use tracing::error;
 
-use crate::{db::{access_policies::{GQLSet_AccessPolicy}, users::{User, GQLSet_User}, access_policies_::_access_policy::AccessPolicy}, store::storage::AppStateArc, utils::db::handlers::handle_generic_gql_collection_request_base};
+use crate::{db::{access_policies::{GQLSet_AccessPolicy}, users::{User, GQLSet_User}, access_policies_::_access_policy::AccessPolicy}, store::storage::AppStateArc, utils::db::generic_handlers::subscriptions::handle_generic_gql_collection_subscription_base};
 
 pub fn start_db_live_cache(app_state: AppStateArc) {
     let app_state_c1 = app_state.clone();
@@ -12,7 +12,7 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
     tokio::spawn(async move {
         loop {
             let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
-            let mut stream = handle_generic_gql_collection_request_base::<User, GQLSet_User>(app_state_c1.live_queries.clone(), Some(system_user_jwt), "users".o(), Some(json!({
+            let mut stream = handle_generic_gql_collection_subscription_base::<User, GQLSet_User>(app_state_c1.live_queries.clone(), Some(system_user_jwt), "users".o(), Some(json!({
                 // todo: once live-query system supports matching on jsonb subfields, use that here
             }))).await;
             if let Result::<(), Error>::Err(err) = try {
@@ -39,7 +39,7 @@ pub fn start_db_live_cache(app_state: AppStateArc) {
     tokio::spawn(async move {
         loop {
             let system_user_jwt = UserJWTData { id: SYSTEM_USER_ID.o(), email: SYSTEM_USER_EMAIL.o(), readOnly: Some(true) };
-            let mut stream = handle_generic_gql_collection_request_base::<AccessPolicy, GQLSet_AccessPolicy>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "accessPolicies".o(), None).await;
+            let mut stream = handle_generic_gql_collection_subscription_base::<AccessPolicy, GQLSet_AccessPolicy>(app_state_c2.live_queries.clone(), Some(system_user_jwt), "accessPolicies".o(), None).await;
             if let Result::<(), Error>::Err(err) = try {
                 loop {
                     let next_stream_result = stream.next().await.ok_or(anyhow!("Stream unexpectedly ended."))?;

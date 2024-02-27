@@ -29,7 +29,7 @@ use crate::utils::db::filter::{QueryFilter, FilterInput};
 use crate::utils::db::sql_fragment::SQLFragment;
 use crate::utils::db::transactions::start_read_transaction;
 use crate::utils::general::data_anchor::{DataAnchorFor1, DataAnchor};
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}}};
 use crate::utils::type_aliases::{PGClientObject};
 use crate::utils::db::accessors::{AccessorContext};
 

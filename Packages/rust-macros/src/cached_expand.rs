@@ -57,7 +57,7 @@ pub fn cached_expand_impl(input: TokenStream) -> TokenStream {
         }
     }
     if group_id == "" {
-        panic!("Could not cached_expand args. Provide it using pattern: const ce_args: &str = r#\"id = \"<group name here>\"\"#;");
+        panic!("Could not find cached_expand args. Provide it using pattern: const ce_args: &str = r#\"id = \"<group name here>\"\"#;");
     }
     println!("Found args. @id:{group_id} @excludeLinesWith:{exclude_lines_with}");
     let cache_folder_path = env::current_dir().unwrap().join("target").join("cached_expand").join("expansions");

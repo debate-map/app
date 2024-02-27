@@ -1,5 +1,5 @@
 use rust_shared::anyhow::Error;
-use rust_shared::SubError;
+use rust_shared::{SubError, GQLError};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::Enum;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
@@ -11,7 +11,8 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 use crate::utils::db::accessors::{get_db_entry, AccessorContext};
 
 use super::commands::_command::CanOmit;
@@ -70,15 +71,23 @@ impl GQLSet<Media> for GQLSet_Media {
     fn nodes(&self) -> &Vec<Media> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_Media;
-#[Subscription]
-impl SubscriptionShard_Media {
-    async fn medias<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Media, SubError>> + 'a {
-        handle_generic_gql_collection_request::<Media, GQLSet_Media>(ctx, "medias", filter).await
+#[derive(Default)] pub struct QueryShard_Media;
+#[Object] impl QueryShard_Media {
+	async fn medias(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<Media>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "medias", filter).await
+	}
+	async fn media(&self, ctx: &Context<'_>, id: String) -> Result<Option<Media>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "medias", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_Media;
+#[Subscription] impl SubscriptionShard_Media {
+    async fn medias<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Media, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<Media, GQLSet_Media>(ctx, "medias", filter).await
     }
     async fn media<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Media>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<Media>(ctx, "medias", id).await
+        handle_generic_gql_doc_subscription::<Media>(ctx, "medias", id).await
     }
 }
 

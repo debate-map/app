@@ -1,6 +1,6 @@
 use rust_shared::anyhow::Error;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json};
+use rust_shared::{SubError, serde_json, GQLError};
 use rust_shared::async_graphql::{self, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -11,7 +11,8 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
@@ -125,15 +126,23 @@ impl GQLSet<NodePhrasing> for GQLSet_NodePhrasing {
     fn nodes(&self) -> &Vec<NodePhrasing> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_NodePhrasing;
-#[Subscription]
-impl SubscriptionShard_NodePhrasing {
-    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodePhrasing, SubError>> + 'a {
-        handle_generic_gql_collection_request::<NodePhrasing, GQLSet_NodePhrasing>(ctx, "nodePhrasings", filter).await
+#[derive(Default)] pub struct QueryShard_NodePhrasing;
+#[Object] impl QueryShard_NodePhrasing {
+	async fn nodePhrasings(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<NodePhrasing>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "nodePhrasings", filter).await
+	}
+	async fn nodePhrasing(&self, ctx: &Context<'_>, id: String) -> Result<Option<NodePhrasing>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "nodePhrasings", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_NodePhrasing;
+#[Subscription] impl SubscriptionShard_NodePhrasing {
+    async fn nodePhrasings<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodePhrasing, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<NodePhrasing, GQLSet_NodePhrasing>(ctx, "nodePhrasings", filter).await
     }
     async fn nodePhrasing<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodePhrasing>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<NodePhrasing>(ctx, "nodePhrasings", id).await
+        handle_generic_gql_doc_subscription::<NodePhrasing>(ctx, "nodePhrasings", id).await
     }
 }
 

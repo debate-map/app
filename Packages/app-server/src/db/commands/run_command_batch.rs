@@ -46,10 +46,8 @@ wrap_slow_macros!{
     // todo: probably add another version of run-command-batch that works in "streaming mode", ie. using a graphql "subscription" to let the caller know how the batch's execution is progressing
 }*/
 
-#[derive(Default)]
-pub struct SubscriptionShard_RunCommandBatch;
-#[Subscription]
-impl SubscriptionShard_RunCommandBatch {
+#[derive(Default)] pub struct SubscriptionShard_RunCommandBatch;
+#[Subscription] impl SubscriptionShard_RunCommandBatch {
     async fn run_command_batch<'a>(&self, gql_ctx: &'a async_graphql::Context<'a>, input: RunCommandBatchInput) -> impl Stream<Item = Result<RunCommandBatchResult, SubError>> + 'a {
         let base_stream = async_stream::stream! {
             let mut anchor = DataAnchorFor1::empty(); // holds pg-client

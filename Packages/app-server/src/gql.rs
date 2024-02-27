@@ -97,30 +97,30 @@ use crate::db::general::sign_in::SubscriptionShard_SignIn;
 use crate::db::general::subtree::{QueryShard_General_Subtree, MutationShard_General_Subtree};
 use crate::db::general::subtree_old::QueryShard_General_Subtree_Old;
 use crate::db::general::trusted_operators::QueryShard_General_TrustedOperators;
-use crate::db::timeline_steps::SubscriptionShard_TimelineStep;
-use crate::db::timelines::SubscriptionShard_Timeline;
+use crate::db::timeline_steps::{SubscriptionShard_TimelineStep, QueryShard_TimelineStep};
+use crate::db::timelines::{SubscriptionShard_Timeline, QueryShard_Timeline};
 use crate::store::storage::AppStateArc;
 use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 use crate::utils::general::general::body_to_str;
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
-use crate::db::access_policies::SubscriptionShard_AccessPolicy;
-use crate::db::command_runs::SubscriptionShard_CommandRun;
-use crate::db::feedback_proposals::SubscriptionShard_Proposal;
-use crate::db::feedback_user_infos::SubscriptionShard_UserInfo;
-use crate::db::global_data::SubscriptionShard_GlobalData;
-use crate::db::map_node_edits::SubscriptionShard_NodeEdit;
-use crate::db::maps::SubscriptionShard_Map;
-use crate::db::medias::SubscriptionShard_Media;
-use crate::db::node_links::SubscriptionShard_NodeLink;
-use crate::db::node_phrasings::SubscriptionShard_NodePhrasing;
-use crate::db::node_ratings::SubscriptionShard_NodeRating;
-use crate::db::node_revisions::SubscriptionShard_NodeRevision;
-use crate::db::node_tags::SubscriptionShard_NodeTag;
-use crate::db::nodes::SubscriptionShard_Node;
-use crate::db::shares::SubscriptionShard_Share;
-use crate::db::terms::SubscriptionShard_Term;
-use crate::db::user_hiddens::{SubscriptionShard_UserHidden};
-use crate::db::users::{SubscriptionShard_User};
+use crate::db::access_policies::{SubscriptionShard_AccessPolicy, QueryShard_AccessPolicy};
+use crate::db::command_runs::{SubscriptionShard_CommandRun, QueryShard_CommandRun};
+use crate::db::feedback_proposals::{SubscriptionShard_Proposal, QueryShard_Proposal};
+use crate::db::feedback_user_infos::{SubscriptionShard_UserInfo, QueryShard_UserInfo};
+use crate::db::global_data::{SubscriptionShard_GlobalData, QueryShard_GlobalData};
+use crate::db::map_node_edits::{SubscriptionShard_NodeEdit, QueryShard_NodeEdit};
+use crate::db::maps::{SubscriptionShard_Map, QueryShard_Map};
+use crate::db::medias::{SubscriptionShard_Media, QueryShard_Media};
+use crate::db::node_links::{SubscriptionShard_NodeLink, QueryShard_NodeLink};
+use crate::db::node_phrasings::{SubscriptionShard_NodePhrasing, QueryShard_NodePhrasing};
+use crate::db::node_ratings::{SubscriptionShard_NodeRating, QueryShard_NodeRating};
+use crate::db::node_revisions::{SubscriptionShard_NodeRevision, QueryShard_NodeRevision};
+use crate::db::node_tags::{SubscriptionShard_NodeTag, QueryShard_NodeTag};
+use crate::db::nodes::{SubscriptionShard_Node, QueryShard_Node};
+use crate::db::shares::{SubscriptionShard_Share, QueryShard_Share};
+use crate::db::terms::{SubscriptionShard_Term, QueryShard_Term};
+use crate::db::user_hiddens::{SubscriptionShard_UserHidden, QueryShard_UserHidden};
+use crate::db::users::{SubscriptionShard_User, QueryShard_User};
 use crate::store::live_queries::LQStorageArc;
 use rust_shared::{async_graphql_axum};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
@@ -130,6 +130,20 @@ wrap_slow_macros!{
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
     QueryShard_General, QueryShard_General_Backups, QueryShard_General_Subtree, QueryShard_General_Subtree_Old, QueryShard_General_Search, QueryShard_General_TrustedOperators,
+    // table-specific
+    QueryShard_User, QueryShard_UserHidden,
+    QueryShard_GlobalData,
+    QueryShard_Map,
+    QueryShard_Term,
+    QueryShard_Timeline, QueryShard_TimelineStep,
+    QueryShard_AccessPolicy,
+    QueryShard_Media,
+    QueryShard_CommandRun,
+    //QueryShard_RunCommandBatch,
+    QueryShard_Proposal,
+    QueryShard_UserInfo,
+    QueryShard_Node, QueryShard_NodeLink, QueryShard_NodeEdit, QueryShard_NodePhrasing, QueryShard_NodeRating, QueryShard_NodeRevision, QueryShard_NodeTag,
+    QueryShard_Share,
 );
 
 #[derive(MergedObject, Default)]
@@ -167,7 +181,7 @@ pub struct SubscriptionRoot(
     SubscriptionShard_RunCommandBatch,
     SubscriptionShard_Proposal,
     SubscriptionShard_UserInfo,
-    SubscriptionShard_Node,SubscriptionShard_NodeLink, SubscriptionShard_NodeEdit, SubscriptionShard_NodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_NodeRevision, SubscriptionShard_NodeTag,
+    SubscriptionShard_Node, SubscriptionShard_NodeLink, SubscriptionShard_NodeEdit, SubscriptionShard_NodePhrasing, SubscriptionShard_NodeRating, SubscriptionShard_NodeRevision, SubscriptionShard_NodeTag,
     SubscriptionShard_Share,
 );
 

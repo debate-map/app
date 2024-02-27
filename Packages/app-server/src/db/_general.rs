@@ -97,10 +97,8 @@ impl Ping_Result {
     async fn refreshPage(&self) -> &bool { &self.refreshPage }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_General;
-#[Subscription]
-impl SubscriptionShard_General {
+#[derive(Default)] pub struct SubscriptionShard_General;
+#[Subscription] impl SubscriptionShard_General {
     #[graphql(name = "_ping")]
     async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();

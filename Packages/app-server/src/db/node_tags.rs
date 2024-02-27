@@ -2,7 +2,7 @@ use rust_shared::indexmap::IndexSet;
 use rust_shared::anyhow::Error;
 use rust_shared::itertools::Itertools;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json};
+use rust_shared::{SubError, serde_json, GQLError};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -12,7 +12,8 @@ use rust_shared::serde_json::json;
 use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, pg_row_to_json::{postgres_row_to_json_value, postgres_row_to_struct}}};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput, pg_row_to_json::{postgres_row_to_json_value, postgres_row_to_struct}}};
 use crate::utils::db::accessors::{get_db_entry, AccessorContext, get_db_entries};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
@@ -181,15 +182,23 @@ impl GQLSet<NodeTag> for GQLSet_NodeTag {
     fn nodes(&self) -> &Vec<NodeTag> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_NodeTag;
-#[Subscription]
-impl SubscriptionShard_NodeTag {
-    async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeTag, SubError>> + 'a {
-        handle_generic_gql_collection_request::<NodeTag, GQLSet_NodeTag>(ctx, "nodeTags", filter).await
+#[derive(Default)] pub struct QueryShard_NodeTag;
+#[Object] impl QueryShard_NodeTag {
+	async fn nodeTags(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<NodeTag>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "nodeTags", filter).await
+	}
+	async fn nodeTag(&self, ctx: &Context<'_>, id: String) -> Result<Option<NodeTag>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "nodeTags", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_NodeTag;
+#[Subscription] impl SubscriptionShard_NodeTag {
+    async fn nodeTags<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeTag, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<NodeTag, GQLSet_NodeTag>(ctx, "nodeTags", filter).await
     }
     async fn nodeTag<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeTag>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<NodeTag>(ctx, "nodeTags", id).await
+        handle_generic_gql_doc_subscription::<NodeTag>(ctx, "nodeTags", id).await
     }
 }
 

@@ -16,7 +16,7 @@ use rust_shared::tokio_postgres::Row;
 
 use crate::utils::db::accessors::{get_db_entry, get_db_entries, AccessorContext};
 use crate::utils::db::agql_ext::gql_utils::IndexMapAGQL;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::{QueryFilter, FilterInput}}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::{QueryFilter, FilterInput}}};
 
 use super::super::commands::_command::CanOmit;
 use super::_permission_set::{PermissionSet, PermissionSetForType, APTable, APAction};

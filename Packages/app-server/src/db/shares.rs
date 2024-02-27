@@ -1,6 +1,6 @@
 use rust_shared::serde_json::json;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json, async_graphql};
+use rust_shared::{SubError, serde_json, async_graphql, GQLError};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject, Enum};
 use futures_util::{Stream, stream, TryFutureExt};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -10,8 +10,9 @@ use rust_shared::serde;
 use rust_shared::anyhow::Error;
 
 use crate::utils::db::accessors::{AccessorContext, get_db_entry};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
 use super::commands::_command::{CanNullOrOmit, CanOmit};
 
@@ -65,15 +66,23 @@ impl GQLSet<Share> for GQLSet_Share {
     fn nodes(&self) -> &Vec<Share> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_Share;
-#[Subscription]
-impl SubscriptionShard_Share {
-    async fn shares<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Share, SubError>> + 'a {
-        handle_generic_gql_collection_request::<Share, GQLSet_Share>(ctx, "shares", filter).await
+#[derive(Default)] pub struct QueryShard_Share;
+#[Object] impl QueryShard_Share {
+	async fn shares(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<Share>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "shares", filter).await
+	}
+	async fn share(&self, ctx: &Context<'_>, id: String) -> Result<Option<Share>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "shares", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_Share;
+#[Subscription] impl SubscriptionShard_Share {
+    async fn shares<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_Share, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<Share, GQLSet_Share>(ctx, "shares", filter).await
     }
     async fn share<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<Share>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<Share>(ctx, "shares", id).await
+        handle_generic_gql_doc_subscription::<Share>(ctx, "shares", id).await
     }
 }
 

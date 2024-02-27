@@ -1,7 +1,7 @@
 use rust_shared::indexmap::IndexMap;
 use rust_shared::serde_json::json;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json};
+use rust_shared::{SubError, serde_json, GQLError};
 use rust_shared::anyhow::{Error};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
@@ -12,8 +12,9 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::utils::db::accessors::{AccessorContext, get_db_entries, get_db_entry};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
 use super::commands::_command::{CanNullOrOmit, CanOmit};
 
@@ -100,15 +101,23 @@ impl GQLSet<UserHidden> for GQLSet_UserHidden {
     fn nodes(&self) -> &Vec<UserHidden> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_UserHidden;
-#[Subscription]
-impl SubscriptionShard_UserHidden {
-    async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserHidden, SubError>> + 'a {
-        handle_generic_gql_collection_request::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
+#[derive(Default)] pub struct QueryShard_UserHidden;
+#[Object] impl QueryShard_UserHidden {
+	async fn userHiddens(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<UserHidden>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "userHiddens", filter).await
+	}
+	async fn userHidden(&self, ctx: &Context<'_>, id: String) -> Result<Option<UserHidden>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "userHiddens", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_UserHidden;
+#[Subscription] impl SubscriptionShard_UserHidden {
+    async fn userHiddens<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_UserHidden, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<UserHidden, GQLSet_UserHidden>(ctx, "userHiddens", filter).await
     }
     async fn userHidden<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<UserHidden>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<UserHidden>(ctx, "userHiddens", id).await
+        handle_generic_gql_doc_subscription::<UserHidden>(ctx, "userHiddens", id).await
     }
 }
 

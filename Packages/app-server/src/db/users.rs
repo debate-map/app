@@ -1,6 +1,6 @@
-use rust_shared::{SubError, serde, serde_json, async_graphql};
-use rust_shared::anyhow::{Context, Error};
-use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject};
+use rust_shared::{SubError, serde, serde_json, async_graphql, GQLError};
+use rust_shared::anyhow::{Error};
+use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject, Context};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
 use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
@@ -10,8 +10,9 @@ use rust_shared::tokio_postgres::{Row, Client};
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::utils::db::accessors::{get_db_entries, get_db_entry, AccessorContext};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
 use super::commands::_command::CanOmit;
 
@@ -74,15 +75,23 @@ impl GQLSet<User> for GQLSet_User {
     fn nodes(&self) -> &Vec<User> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_User;
-#[Subscription]
-impl SubscriptionShard_User {
-    async fn users<'a>(&self, ctx: &'a async_graphql::Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
-        handle_generic_gql_collection_request::<User, GQLSet_User>(ctx, "users", filter).await
+#[derive(Default)] pub struct QueryShard_User;
+#[Object] impl QueryShard_User {
+	async fn users(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<User>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "users", filter).await
+	}
+	async fn user(&self, ctx: &Context<'_>, id: String) -> Result<Option<User>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "users", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_User;
+#[Subscription] impl SubscriptionShard_User {
+    async fn users<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_User, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<User, GQLSet_User>(ctx, "users", filter).await
     }
-    async fn user<'a>(&self, ctx: &'a async_graphql::Context<'_>, id: String) -> impl Stream<Item = Result<Option<User>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<User>(ctx, "users", id).await
+    async fn user<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<User>, SubError>> + 'a {
+        handle_generic_gql_doc_subscription::<User>(ctx, "users", id).await
     }
 }
 

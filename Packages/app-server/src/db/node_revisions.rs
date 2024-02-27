@@ -1,6 +1,6 @@
 use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::anyhow::Error;
-use rust_shared::SubError;
+use rust_shared::{SubError, GQLError};
 use rust_shared::async_graphql;
 use rust_shared::async_graphql::ComplexObject;
 use rust_shared::async_graphql::Enum;
@@ -14,7 +14,8 @@ use rust_shared::tokio_postgres::{Client};
 use rust_shared::utils::type_aliases::JSONValue;
 
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput, accessors::{AccessorContext, get_db_entry}}};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::_shared::attachments::Attachment;
@@ -109,15 +110,23 @@ impl GQLSet<NodeRevision> for GQLSet_NodeRevision {
     fn nodes(&self) -> &Vec<NodeRevision> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_NodeRevision;
-#[Subscription]
-impl SubscriptionShard_NodeRevision {
-    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRevision, SubError>> + 'a {
-        handle_generic_gql_collection_request::<NodeRevision, GQLSet_NodeRevision>(ctx, "nodeRevisions", filter).await
+#[derive(Default)] pub struct QueryShard_NodeRevision;
+#[Object] impl QueryShard_NodeRevision {
+	async fn nodeRevisions(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<NodeRevision>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "nodeRevisions", filter).await
+	}
+	async fn nodeRevision(&self, ctx: &Context<'_>, id: String) -> Result<Option<NodeRevision>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "nodeRevisions", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_NodeRevision;
+#[Subscription] impl SubscriptionShard_NodeRevision {
+    async fn nodeRevisions<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeRevision, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<NodeRevision, GQLSet_NodeRevision>(ctx, "nodeRevisions", filter).await
     }
     async fn nodeRevision<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeRevision>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<NodeRevision>(ctx, "nodeRevisions", id).await
+        handle_generic_gql_doc_subscription::<NodeRevision>(ctx, "nodeRevisions", id).await
     }
 }
 

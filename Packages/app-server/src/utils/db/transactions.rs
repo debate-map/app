@@ -13,6 +13,7 @@ pub async fn get_client_from_gql_ctx<'a>(ctx: &async_graphql::Context<'_>) -> Re
     let pool = &get_app_state_from_gql_ctx(ctx).db_pool;
     Ok(pool.get().await.unwrap())
 }
+/// You should almost always use `AccessorContext::new_read` (or variant) instead, since that's higher-level and will handle RLS and such for you. (safer)
 pub async fn start_read_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<Transaction<'a>, Error> {
     // get client, then store it in anchor object the caller gave us a mut-ref to
     *anchor = DataAnchor::holding1(db_pool.get().await?);
@@ -26,6 +27,7 @@ pub async fn start_read_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientO
         .start().await?;
     Ok(tx)
 }
+/// You should almost always use `AccessorContext::new_write` (or variant) instead, since that's higher-level and will handle RLS and such for you. (safer)
 pub async fn start_write_transaction<'a>(anchor: &'a mut DataAnchorFor1<PGClientObject>, db_pool: &DBPool) -> Result<Transaction<'a>, Error> {
     // get client, then store it in anchor object the caller gave us a mut-ref to
     *anchor = DataAnchor::holding1(db_pool.get().await?);

@@ -1,7 +1,7 @@
 use rust_shared::anyhow::{Error, anyhow, ensure};
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{SubError, serde_json, should_be_unreachable, to_anyhow};
+use rust_shared::{SubError, serde_json, should_be_unreachable, to_anyhow, GQLError};
 use rust_shared::async_graphql::{self, Enum};
 use rust_shared::async_graphql::{Context, Object, Schema, Subscription, ID, OutputType, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt};
@@ -12,9 +12,10 @@ use rust_shared::tokio_postgres::{Row, Client};
 use rust_shared::serde;
 
 use crate::utils::db::accessors::get_db_entry;
+use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::db::pg_row_to_json::postgres_row_to_struct;
 use crate::utils::general::order_key::OrderKey;
-use crate::utils::{db::{handlers::{handle_generic_gql_collection_request, handle_generic_gql_doc_request, GQLSet}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
+use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput, accessors::{AccessorContext, get_db_entries}}};
 
 use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::commands::_command::{CanNullOrOmit, CanOmit};
@@ -136,15 +137,23 @@ impl GQLSet<NodeLink> for GQLSet_NodeLink {
     fn nodes(&self) -> &Vec<NodeLink> { &self.nodes }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_NodeLink;
-#[Subscription]
-impl SubscriptionShard_NodeLink {
-    async fn nodeLinks<'a>(&self, ctx: &'a Context<'_>, _id: Option<String>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeLink, SubError>> + 'a {
-        handle_generic_gql_collection_request::<NodeLink, GQLSet_NodeLink>(ctx, "nodeLinks", filter).await
+#[derive(Default)] pub struct QueryShard_NodeLink;
+#[Object] impl QueryShard_NodeLink {
+	async fn nodeLinks(&self, ctx: &Context<'_>, filter: Option<FilterInput>) -> Result<Vec<NodeLink>, GQLError> {
+		handle_generic_gql_collection_query(ctx, "nodeLinks", filter).await
+	}
+	async fn nodeLink(&self, ctx: &Context<'_>, id: String) -> Result<Option<NodeLink>, GQLError> {
+		handle_generic_gql_doc_query(ctx, "nodeLinks", id).await
+	}
+}
+
+#[derive(Default)] pub struct SubscriptionShard_NodeLink;
+#[Subscription] impl SubscriptionShard_NodeLink {
+    async fn nodeLinks<'a>(&self, ctx: &'a Context<'_>, filter: Option<FilterInput>) -> impl Stream<Item = Result<GQLSet_NodeLink, SubError>> + 'a {
+        handle_generic_gql_collection_subscription::<NodeLink, GQLSet_NodeLink>(ctx, "nodeLinks", filter).await
     }
     async fn nodeLink<'a>(&self, ctx: &'a Context<'_>, id: String) -> impl Stream<Item = Result<Option<NodeLink>, SubError>> + 'a {
-        handle_generic_gql_doc_request::<NodeLink>(ctx, "nodeLinks", id).await
+        handle_generic_gql_doc_subscription::<NodeLink>(ctx, "nodeLinks", id).await
     }
 }
 

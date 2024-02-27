@@ -7,8 +7,11 @@ pub mod db {
         pub mod gql_utils;
     }
     pub mod filter;
+    pub mod generic_handlers {
+        pub mod queries;
+        pub mod subscriptions;
+    }
     pub mod sql_fragment;
-    pub mod handlers;
     pub mod pg_stream_parsing;
     pub mod pg_row_to_json;
     pub mod queries;

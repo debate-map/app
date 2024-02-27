@@ -316,9 +316,6 @@ struct StartMigration_Result {
 // subscriptions
 // ==========
 
-#[derive(Default)]
-pub struct SubscriptionShard_General;
-
 #[derive(SimpleObject)]
 struct Ping_Result {
     pong: String,
@@ -334,8 +331,8 @@ pub struct TestingLogEntry {
 }
 //#[derive(Clone, SimpleObject)] pub struct GQLSet_LogEntry { pub nodes: Vec<LogEntry> }
 
-#[Subscription]
-impl SubscriptionShard_General {
+#[derive(Default)] pub struct SubscriptionShard_General;
+#[Subscription] impl SubscriptionShard_General {
     #[graphql(name = "_ping")]
     async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
         let pong = "pong".to_owned();

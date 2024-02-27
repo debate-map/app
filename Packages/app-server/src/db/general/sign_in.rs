@@ -115,10 +115,8 @@ impl SignInStartResult {
     async fn resultJWT(&self) -> Option<String> { self.result_jwt.clone() }
 }
 
-#[derive(Default)]
-pub struct SubscriptionShard_SignIn;
-#[Subscription]
-impl SubscriptionShard_SignIn {
+#[derive(Default)] pub struct SubscriptionShard_SignIn;
+#[Subscription] impl SubscriptionShard_SignIn {
     /// Begin sign-in flow, resulting in a JWT string being returned. (to then be passed in an `authorization` header for queries/mutations, or to the `signInAttach` endpoint for subscriptions)
     /// * `provider` - The authentication flow/website/sign-in-service that will be used. [string, options: "google", "dev"]
     /// * `jwtDuration` - How long until the generated JWT should expire, in seconds. [i64]
