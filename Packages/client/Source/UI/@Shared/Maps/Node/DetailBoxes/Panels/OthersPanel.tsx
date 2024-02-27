@@ -1,4 +1,4 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAccessPolicy, GetAttachmentType_Node, GetNodeLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, HasAdminPermissions, IsUserCreatorOrMod, Map, NodeL3, NodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink, UpdateNodeAccessPolicy, GetLinkUnderParent, GetLinkAtPath, ReversePolarity, Polarity, OrderKey, DoesPolicyAllowX, AsNodeL1} from "dm_common";
 import React, {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
@@ -6,9 +6,10 @@ import {RunCommand_UpdateNodeLink, RunCommand_UpdateNode} from "Utils/DB/Command
 import {Observer} from "web-vcore";
 import {Assert, E, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Button, CheckBox, Column, Pre, Row, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {PolicyPicker} from "../../../../../Database/Policies/PolicyPicker.js";
 
 @Observer
@@ -98,6 +99,16 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 							<UUIDStub id={childID}/>
 						</Fragment>;
 					})}
+				</Row>
+				<Row>
+					<Text>View:</Text>
+					<Button ml={5} p="0 5px" text="JSON" title="View node data (as json)" onClick={()=>{
+						ShowMessageBox({
+							title: "Node data (as json)",
+							//message: ()=><TextArea autoSize={true} style={{minWidth: 500, maxWidth: 800}} value={JSON.stringify(node, null, "\t")}/>,
+							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(AsNodeL1(node), null, "\t")}/>,
+						});
+					}}/>
 				</Row>
 
 				{nodeArgOrParentSPArg_info && <>

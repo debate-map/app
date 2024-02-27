@@ -1,7 +1,9 @@
 import {A, DEL, GetEntries, GetValues, NN} from "web-vcore/nm/js-vextensions.js";
-import {CheckBox, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {Button, CheckBox, Row, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {GetAttachmentType_Node, AttachmentType, ResetAttachment, NodeType, NodeL1, Attachment, GetAttachmentType, AttachmentTarget} from "dm_common";
+import {ShowMessageBox} from "react-vmessagebox";
+import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
 import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
@@ -34,6 +36,12 @@ export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: 
 						Change();
 					}}/>
 					<CheckBox ml={5} enabled={enabled} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
+					{/*<Button ml={5} p="0 5px" text="JSON" title="View attachment data (as json)" onClick={()=>{
+						ShowMessageBox({
+							title: "Attachment data (as json)",
+							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(newData, null, "\t")}/>,
+						});
+					}}/>*/}
 				</Row>
 				{attachmentType == AttachmentType.equation &&
 					<EquationEditorUI phase={phase} baseData={NN(newData.equation)} onChange={val=>Change(newData.equation = val)}/>}

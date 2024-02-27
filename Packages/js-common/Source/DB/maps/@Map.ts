@@ -116,7 +116,7 @@ export class Map {
 
 @MGLClass({
 	schemaDeps: ["ToolbarItem"],
-})
+}, {additionalProperties: true})
 export class Map_Extras {
 	constructor(data?: Partial<Map_Extras>) {
 		Object.assign(this, data);

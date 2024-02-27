@@ -23,7 +23,7 @@ export class GlobalData {
 	extras = new GlobalData_Extras();
 }
 
-@MGLClass()
+@MGLClass({}, {additionalProperties: true})
 export class GlobalData_Extras {
 	constructor(data?: Partial<GlobalData_Extras>) {
 		Object.assign(this, data);

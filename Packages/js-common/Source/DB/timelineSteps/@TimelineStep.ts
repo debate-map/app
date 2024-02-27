@@ -43,7 +43,7 @@ export class TimelineStep {
 	extras = new TimelineStep_Extras();
 }
 
-@MGLClass()
+@MGLClass({}, {additionalProperties: true})
 export class TimelineStep_Extras {
 	constructor(data?: Partial<TimelineStep_Extras>) {
 		Object.assign(this, data);

@@ -112,7 +112,7 @@ export const NodeL1Input_keys = ["accessPolicy", "type", "rootNodeForMap", "mult
 export type NodeL1Input = PickOnly<NodeL1, typeof NodeL1Input_keys[number]>;
 export const AsNodeL1Input = (node: NodeL1)=>node.IncludeKeys(...NodeL1Input_keys) as NodeL1Input;
 
-@MGLClass()
+@MGLClass({}, {additionalProperties: true})
 export class Node_Extras {
 	constructor(data?: Partial<Node_Extras>) {
 		Object.assign(this, data);

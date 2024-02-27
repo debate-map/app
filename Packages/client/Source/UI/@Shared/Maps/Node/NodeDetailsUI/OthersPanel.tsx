@@ -2,8 +2,10 @@ import {ArgumentType, ChildLayout, ChildLayout_niceNames, ChildLayout_optionsStr
 import React from "react";
 import {TextPlus} from "web-vcore";
 import {GetEntries, ModifyString, ToNumber} from "web-vcore/nm/js-vextensions.js";
-import {Text, Pre, Row, Select, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {Text, Pre, Row, Select, Spinner, Button} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "react-vmessagebox";
+import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 
 export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
@@ -48,6 +50,15 @@ export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<TextPlus info={ChildOrdering_infoText}>Child ordering:</TextPlus>
 					<Select ml={5} enabled={enabled} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildOrdering, "ui")]}
 						value={newRevisionData.displayDetails?.childOrdering} onChange={val=>SetDisplayDetail("childOrdering", val)}/>
+				</Row>
+				<Row mt={5}>
+					<Text>View:</Text>
+					<Button ml={5} p="0 5px" text="JSON" title="View node-revision data (as json)" onClick={()=>{
+						ShowMessageBox({
+							title: "Node-revision data (as json)",
+							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(newRevisionData, null, "\t")}/>,
+						});
+					}}/>
 				</Row>
 			</>
 		);

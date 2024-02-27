@@ -61,11 +61,12 @@ export class UserHidden {
 	lastAccessPolicy?: string;
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: "UserHidden_Extras"})
+	//@Field({$ref: "UserHidden_Extras"})
+	@Field({type: "object"})
 	extras = new UserHidden_Extras();
 }
 
-@MGLClass()
+@MGLClass({}, {additionalProperties: true})
 export class UserHidden_Extras {
 	constructor(data?: Partial<UserHidden_Extras>) {
 		Object.assign(this, data);

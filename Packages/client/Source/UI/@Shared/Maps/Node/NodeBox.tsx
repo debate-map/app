@@ -1,5 +1,5 @@
 import {ChildGroup, ClaimForm, GetChangeTypeOutlineColor, GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, GetPathNodeIDs, IsUserCreatorOrMod, Map, NodeL3, NodeType, NodeType_Info, NodeView, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ChildOrdering, GetExpandedByDefaultAttachment, GetSubPanelAttachments, ShowNodeToolbar, GetExtractedPrefixTextInfo, GetToolbarItemsToShow} from "dm_common";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {store} from "Store";
 import {GetNodeChangeType} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeColor} from "Store/db_ext/nodes";
@@ -19,7 +19,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
-import {useRef_nodeLeftColumn} from "tree-grapher";
+import {GraphContext, useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {autorun} from "mobx";
@@ -127,6 +127,9 @@ export class NodeBox extends BaseComponentPlus(
 			local_nodeView.VSet(updates);
 			this.Update();
 		};
+
+		const graph = useContext(GraphContext);
+		//const group = graph.groupsByPath.get(treePath);
 
 		const sinceTime = GetTimeFromWhichToShowChangedNodes(map?.id);
 		/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
@@ -279,6 +282,7 @@ export class NodeBox extends BaseComponentPlus(
 		const toggleExpanded = UseCallback(e=>{
 			const newExpanded = !expanded;
 			const recursivelyCollapsing = newExpanded == false && e.altKey;
+			graph.SetAnchorNode(treePath);
 			ACTNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working

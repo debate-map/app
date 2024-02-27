@@ -1,5 +1,5 @@
 import Moment from "web-vcore/nm/moment";
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {Button, Column, Row, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus, cssHelper} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
@@ -10,6 +10,7 @@ import {Map, NodeL3, GetUser, NodeRevision, GetParentNodeL3, GetLinkUnderParent,
 
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_DeleteNodePhrasing, RunCommand_DeleteNodeRevision} from "Utils/DB/Command.js";
+import {GetMaxSafeDialogContentHeight, TextArea_Div} from "Utils/ReactComponents/TextArea_Div.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
@@ -81,7 +82,7 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 							title: `Details for revision #${revision.id}`, cancelOnOverlayClick: true,
 							message: ()=>{
 								return (
-									<div style={{minWidth: 500}}>
+									<div style={{minWidth: 500, maxWidth: 800}}>
 										<NodeDetailsUI map={map} parent={parent}
 											baseData={node} baseRevisionData={revision} baseLinkData={link}
 											forNew={false} forOldRevision={true} enabled={false}/>
