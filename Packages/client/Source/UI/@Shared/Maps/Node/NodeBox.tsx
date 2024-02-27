@@ -121,12 +121,12 @@ export class NodeBox extends BaseComponentPlus(
 
 		const [local_nodeView, setLocal_nodeView] = useState({} as NodeView);
 		const nodeView = useLocalPanelState ? local_nodeView : GetNodeView(map?.id, path);
-		const UpdateLocalNodeView = (updates: Partial<NodeView>)=>{
+		const UpdateLocalNodeView = UseCallback((updates: Partial<NodeView>)=>{
 			//setLocal_nodeView({...local_nodeView, ...updates});
 			// rather than call setLocal_nodeView, mutate the existing object, then force-update; this way multiple UpdateLocalNodeView calls in the same tick will succeed (eg. onClick and onPanelButtonClick)
 			local_nodeView.VSet(updates);
 			this.Update();
-		};
+		}, [local_nodeView]);
 
 		const graph = useContext(GraphContext);
 		//const group = graph.groupsByPath.get(treePath);
@@ -260,10 +260,12 @@ export class NodeBox extends BaseComponentPlus(
 				return;
 			}
 
+			// anchoring arguably not necessary, but can help when other people add/remove nodes while user is scrolling + clicking nodes (without expanding/collapsing)
+			graph.SetAnchorNode(treePath, {nodePath: path});
 			if (!nodeView?.selected && map) {
 				ACTNodeSelect(map.id, path);
 			}
-		}, [local_nodeView.selected, map, nodeView?.selected, path, useLocalPanelState]);
+		}, [UpdateLocalNodeView, graph, local_nodeView.selected, map, nodeView?.selected, path, treePath, useLocalPanelState]);
 		if (usePortalForDetailBoxes) {
 			UseDocumentEventListener("click", e=>{
 				const uiRoots = [this.root?.DOM, this.leftPanel?.DOM, this.bottomPanel?.DOM].filter(a=>a);
@@ -277,17 +279,17 @@ export class NodeBox extends BaseComponentPlus(
 			RunInAction("NodeBox.onDirectClick", ()=>{
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
-		}, [node.id, parent]);
+		}, [node.id]);
 		const onTextCompClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
 			const newExpanded = !expanded;
 			const recursivelyCollapsing = newExpanded == false && e.altKey;
-			graph.SetAnchorNode(treePath);
+			graph.SetAnchorNode(treePath, {nodePath: path});
 			ACTNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
 			//return false;
-		}, [expanded, map?.id, parentPath, path]);
+		}, [expanded, graph, map?.id, path, treePath]);
 
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;

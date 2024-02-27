@@ -85,8 +85,17 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 		};
 		const mainGraph_getNextKeyframeInfo = ()=>CatchBail(null, mainGraph_getNextKeyframeInfo_base);
 
-		const graph = new Graph({
+		const graph: Graph = new Graph({
 			//uiDebugKit: {FlashComp},
+			getScrollElFromContainerEl: containerEl=>containerEl.parentElement!.parentElement,
+			anchorNode_targetFinderFunc: nodeLayouts=>{
+				return graph.anchorNode_targetInfo && nodeLayouts.find(a=>{
+					//return a.treeNode.data.path == graph.anchorNode_targetInfo?.treePath;
+					//const nodeData = a.treeNode.data.leftColumn_userData as NodeDataForTreeGrapher;
+					const nodeData = a.lcUserData as NodeDataForTreeGrapher;
+					return nodeData.nodePath == graph.anchorNode_targetInfo?.extras?.nodePath;
+				});
+			},
 			layoutOpts: {
 				nodeSpacing: (nodeA, nodeB)=>{
 					const nodeAParentPath = nodeA.data.path_parts.slice(0, -1).join("/");
