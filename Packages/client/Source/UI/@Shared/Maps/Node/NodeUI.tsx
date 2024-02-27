@@ -132,7 +132,9 @@ export class NodeUI extends BaseComponentPlus(
 		//const usesToolbarForPrefixText = extractedPrefixTextInfo?.extractLocation == "toolbar";
 		//const aboveToolbar_visible = ShowNodeToolbars(map) && ((node.type != NodeType.argument && node.type != NodeType.category) || usesToolbarForPrefixText);
 		const toolbarItemsToShow = GetToolbarItemsToShow(node, path, map);
-		const aboveToolbar_visible = toolbarItemsToShow.length > 0 && node.type != NodeType.argument; // if node is argument, toolbar is not shown above the node, but rather to the right of its regular content
+		const aboveToolbar_visible = toolbarItemsToShow.length > 0 &&
+			// if argument, toolbar's shown to right of its regular content, rather than above -- unless the prefix-button is visible, in which case an "above toolbar" is shown instead/also
+			(node.type != NodeType.argument || toolbarItemsToShow.Any(a=>a.panel == "prefix"));
 
 		const {ref_leftColumn_storage, ref_leftColumn, ref_group} = useRef_nodeLeftColumn(
 			treePath,
