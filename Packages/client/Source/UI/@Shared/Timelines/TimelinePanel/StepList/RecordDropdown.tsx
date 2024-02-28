@@ -137,7 +137,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 								return {audioFilepath, startAt: stepTimes[i], endAt: stepEndTime, volume: stepTopAudios[i]?.meta?.volume ?? 1};
 							}).filter(a=>a != null) as {audioFilepath: string, startAt: number, endAt: number, volume: number}[];
 
-							const filterStrings = audioEntries.map((entry, i)=>{
+							const audioFilterStrings = audioEntries.map((entry, i)=>{
 								const inputLabel = `[${i}]`;
 								const subfiltersStr = [
 									// note: we use the [adelay] filter since it's most straightforward, but you could also use [itsdelay+aresample] or [anullsrc] approaches
@@ -149,7 +149,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 							});
 							const allFilterOutputLabels = audioEntries.map((entry, i)=>`[o${i}]`).join("");
 							// if the command errors saying amix has an unknown option, you'll need to update to a newer ffmpeg (~2021+); normalize flag needed as issue fix: https://stackoverflow.com/a/68503794
-							filterStrings.push(`${allFilterOutputLabels}amix=inputs=${audioEntries.length}:normalize=0[audioOutput]`);
+							audioFilterStrings.push(`${allFilterOutputLabels}amix=inputs=${audioEntries.length}:normalize=0[audioOutput]`);
 
 							const concatOfImages_inputIndex = audioEntries.length;
 
@@ -163,7 +163,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 								// ==========
 
 								...audioEntries.map((entry, i)=>`-i '${entry.audioFilepath}'`),
-								`-filter_complex "${filterStrings.join("; ")}"`,
+								audioEntries.length > 0 && `-filter_complex "${audioFilterStrings.join("; ")}"`,
 
 								// input approach: file containing list of files (for audios)
 								/*`-safe 0`, // accept any filename
@@ -187,7 +187,9 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 
 								// for video output, use input X (result from concat of ...images.txt file)
 								// for audio output, use the "audioOutput" stream (result from the filter_complex above)
-								`-map ${concatOfImages_inputIndex}:v -map "[audioOutput]" -codec:v copy`,
+								`-map ${concatOfImages_inputIndex}:v`,
+								audioEntries.length > 0 && `-map "[audioOutput]"`,
+								`-codec:v copy`,
 
 								`-c:v libx264`, // use h264 codec
 								//`-c:v libx265` // use h265 codec
@@ -198,7 +200,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 								//`-vf "crop=trunc(iw/2)*2:trunc(ih/2)*2"`, // ensure width/height are even (required for selected format/codec) // commented, since we lock to a valid resolution anyway
 
 								`output.mp4`, // output filename
-							].join(" "));
+							].filter(a=>a).join(" "));
 						}}/>
 					</Row>
 					<Row>
