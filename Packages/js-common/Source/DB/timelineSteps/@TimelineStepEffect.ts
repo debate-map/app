@@ -1,3 +1,5 @@
+export const TimelineStepEffect_defaultTransitionPeriod = 0.5; // in seconds
+
 export class TimelineStepEffect {
 	constructor(data?: Partial<TimelineStepEffect>) { Object.assign(this, data); }
 	/** Time that effect takes place, as seconds since start of step. */
@@ -5,10 +7,11 @@ export class TimelineStepEffect {
 
 	nodeEffect?: NodeEffect;
 	setTimeTrackerState?: boolean;
+	setTransitionPeriod?: number;
 }
 
 export function IsStepEffectEmpty(stepEffect: TimelineStepEffect) {
-	return IsNodeEffectEmpty(stepEffect.nodeEffect) && stepEffect.setTimeTrackerState == null;
+	return IsNodeEffectEmpty(stepEffect.nodeEffect) && stepEffect.setTimeTrackerState == null && stepEffect.setTransitionPeriod == null;
 }
 
 export class NodeEffect {

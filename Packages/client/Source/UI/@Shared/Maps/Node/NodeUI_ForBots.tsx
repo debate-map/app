@@ -31,7 +31,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 		return (
 			<ScrollView
 				// backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.refs.scrollView.contentOuter) || a == this.refs.mapUI}
-				scrollVBarStyle={{width: 10}} /* contentStyle={{willChange: "transform"}} */>
+				scrollVBarStyle={{width: 10}} /*contentOuterStyle={{willChange: "transform"}}*/>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=>{
 						return (

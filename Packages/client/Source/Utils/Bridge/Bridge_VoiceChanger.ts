@@ -25,7 +25,7 @@ export class VoiceChangerBridge {
 
 	// stored info
 	@O voices: Voice[] = [];
-	@O activeSlotIndex = -1;
+	@O activeSlotIndex: number|n;
 
 	// getters
 	@computed get Voices() {

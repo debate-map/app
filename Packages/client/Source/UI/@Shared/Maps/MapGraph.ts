@@ -1,4 +1,4 @@
-import {GetMap, GetTimelineStepTimesFromStart, GetTimelineSteps, GetTimelineStepsReachedByTimeX, NodeType, TimelineStep} from "dm_common";
+import {GetMap, GetTimelineStepTimesFromStart, GetTimelineSteps, GetTimelineStepsReachedByTimeX, NodeType, TimelineStep, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
 import {useMemo} from "react";
 import {Graph, KeyframeInfo} from "tree-grapher";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
@@ -22,8 +22,7 @@ export class NodeDataForTreeGrapher {
 	aboveToolbar_hasLeftButton?: boolean;
 }
 
-const animation_transitionPeriod = .5;
-export const GetPercentThroughTransition = (lastKeyframe_time: number|n, nextKeyframe_time: number|n, currentTime: number|n)=>{
+export const GetPercentThroughTransition = (lastKeyframe_time: number|n, nextKeyframe_time: number|n, currentTime: number|n, animation_transitionPeriod: number)=>{
 	//AssertWarn(lastKeyframe_time != null, "lastKeyframe_time must be non-null.");
 	//AssertWarn(nextKeyframe_time != null, "nextKeyframe_time must be non-null.");
 	if (lastKeyframe_time == null || nextKeyframe_time == null || currentTime == null) return null;
@@ -56,6 +55,8 @@ export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: compar
 
 	const effectsReached = currentEffect_time != null ? effects.filter(a=>a.time_absolute <= currentEffect_time) : [];
 	const effectsReachedAtNext = nextEffect_time != null ? effects.filter(a=>a.time_absolute <= nextEffect_time) : [];
+
+	const currentTransitionPeriod = effectsReached.LastOrX(a=>a.setTransitionPeriod != null)?.setTransitionPeriod ?? TimelineStepEffect_defaultTransitionPeriod;
 	return {
 		playback,
 		effects,
@@ -65,6 +66,7 @@ export const GetTimelineApplyEssentials = CreateAccessor({cache_comparer: compar
 		nextEffect_time: nextEffect_time as number|n, // needs to be redeclared as nullable fsr
 		effectsReached,
 		effectsReachedAtNext,
+		currentTransitionPeriod,
 	};
 });
 
@@ -74,13 +76,13 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 		const mainGraph_getNextKeyframeInfo_base = (): KeyframeInfo|null=>{
 			const data = GetTimelineApplyEssentials();
 			if (data == null) return null;
-			const {playback, currentEffect_time, nextEffect_time, effectsReachedAtNext} = data;
+			const {playback, currentEffect_time, nextEffect_time, effectsReachedAtNext, currentTransitionPeriod} = data;
 			const currentTime = playback.mapState.playingTimeline_time ?? 0;
 
 			//const finalKeyframe_time = stepTimes.Last();
 			const nodePathsVisibleAtNextKeyframe = GetVisiblePathsAfterEffects([playback.map.rootNode], effectsReachedAtNext);
 			const layout = layoutHelperGraph!.GetLayout(undefined, group=>RevealPathsIncludesNode(nodePathsVisibleAtNextKeyframe, group.leftColumn_userData?.["nodePath"] as string))!;
-			const percentThroughTransition = GetPercentThroughTransition(currentEffect_time, nextEffect_time, currentTime) ?? 0;
+			const percentThroughTransition = GetPercentThroughTransition(currentEffect_time, nextEffect_time, currentTime, currentTransitionPeriod) ?? 0;
 			return {layout, percentThroughTransition};
 		};
 		const mainGraph_getNextKeyframeInfo = ()=>CatchBail(null, mainGraph_getNextKeyframeInfo_base);

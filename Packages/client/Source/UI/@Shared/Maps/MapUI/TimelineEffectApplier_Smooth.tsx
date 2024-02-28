@@ -24,7 +24,7 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	const data = GetTimelineApplyEssentials();
 	if (data == null) return null;
 	if (data.playback.mapID != map.id) return null;
-	const {currentEffect_time, nextEffect_time, effectsReached, effectsReachedAtNext} = data;
+	const {currentEffect_time, nextEffect_time, effectsReached, effectsReachedAtNext, currentTransitionPeriod} = data;
 	//if (currentEffect_time == null || nextEffect_time == null) return null;
 	const currentTime = mapState.playingTimeline_time ?? 0;
 
@@ -57,7 +57,7 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	const lastFocusNodeRectsMerged = MergeNodeRects(lastFocusNodePaths, lastKeyframe_groupRects);
 	const nextFocusNodeRectsMerged = MergeNodeRects(nextFocusNodePaths, nextKeyframe_groupRects);
 	if (lastFocusNodeRectsMerged == null || nextFocusNodeRectsMerged == null) return null;
-	const percentFromLastToNext = GetPercentThroughTransition(currentEffect_time, nextEffect_time, mapState.playingTimeline_time) ?? 0;
+	const percentFromLastToNext = GetPercentThroughTransition(currentEffect_time, nextEffect_time, mapState.playingTimeline_time, currentTransitionPeriod) ?? 0;
 	const focusNodeRects_interpolated = InterpolateRect(lastFocusNodeRectsMerged, nextFocusNodeRectsMerged, percentFromLastToNext);
 	//console.log("percentFromLastToNext:", percentFromLastToNext);
 

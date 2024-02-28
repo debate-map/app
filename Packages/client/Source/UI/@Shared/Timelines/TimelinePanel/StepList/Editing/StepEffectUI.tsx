@@ -44,9 +44,16 @@ export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: Timel
 
 		const nodeInfo = effect.nodeEffect ? GetNodeInfoForStepEffectUI(effect.nodeEffect) : null;
 
-		let displayText: string = "[unknown effect type]";
+		let displayText: string|JSX.Element = "[unknown effect type]";
 		if (effect.nodeEffect) displayText = nodeInfo && nodeInfo.node && nodeInfo.nodeL3 ? GetNodeDisplayText(nodeInfo.node, nodeInfo.path) : `(Node no longer exists: ${GetNodeID(nodeInfo?.path)})`;
 		else if (effect.setTimeTrackerState != null) displayText = `Set time-tracker state: ${effect.setTimeTrackerState ? "visible" : "hidden"}`;
+		else if (effect.setTransitionPeriod != null) {
+			displayText = <Row>
+				<Text>Set transition period:</Text>
+				<Spinner ml={5} step="any" value={effect.setTransitionPeriod} onChange={val=>UpdateStepEffect(step, index, effect, a=>a.setTransitionPeriod = val)}/>
+				<Text>s</Text>
+			</Row>;
+		}
 
 		let backgroundColor: chroma.Color;
 		if (effect.nodeEffect) backgroundColor = GetNodeColor(nodeInfo?.nodeL3 || {type: NodeType.category} as any).desaturate(0.5).alpha(0.8);
@@ -64,7 +71,7 @@ export class StepEffectUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					{/*<Pre>{effect.time_relative.toFixed(1)}</Pre>*/}
 					<span style={{position: "relative", paddingTop: 2, fontSize: 12, color: "rgba(20,20,20,1)"}}>
 						<span style={{
-							position: "absolute", left: -5, top: -8, lineHeight: "11px", fontSize: 10, color: "yellow",
+							position: "absolute", left: -5, top: -8, lineHeight: "11px", fontSize: 10, whiteSpace: "pre", color: "yellow",
 							background: "rgba(50,50,50,1)", borderRadius: 5, padding: "0 3px",
 						}}>
 							{[

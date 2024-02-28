@@ -115,8 +115,8 @@ export const GetNodeChildren = CreateAccessor((nodeID: string, includeMirrorChil
 		if (c.catchItemBails) return GetNode.CatchBail(c.catchItemBails_asX, link.child);
 		return GetNode(link.child);
 	});*/
-	//let result = MapWithBailHandling(childLinks, link=>GetNode.BIN(link.child)); // BIN: we know link exists, so child-node should as well (so null must mean change loading)
-	let result = MapWithBailHandling(childLinks, link=>GetNode(link.child) as NodeL1);
+	let result = MapWithBailHandling(childLinks, link=>GetNode.BIN(link.child)); // BIN: we know link exists, so child-node should as well (so null must mean change loading)
+	//let result = MapWithBailHandling(childLinks, link=>GetNode(link.child) as NodeL1);
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
 		const tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);

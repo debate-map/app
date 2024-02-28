@@ -98,7 +98,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 				backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.contentOuter) || a == this.scrollView!.content || a == this.mapUIEl}
 				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
 				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-				contentStyle={E(
+				contentOuterStyle={E(
 					{willChange: "transform"}, // keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization
 					withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
 					withinPage && inFirefox && {overflow: "hidden"},

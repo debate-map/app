@@ -40,7 +40,7 @@ export class StepAudio_TakeUI extends BaseComponent<{map: Map, step: TimelineSte
 				}</Text>
 				<AudioFileMiniPlayer file={origAudioFile} buttonProps={{style: {marginLeft: 5}, title: "Play the original recorded audio-contents"}}/>
 				{/*<Select ml={5} options={voiceChangerBridge.GetVoiceOptionsForSelect()} style={{flex: 1, minWidth: 0}} value={selectedVoice?.slotIndex} onChange={val=>this.SetState({selectedVoiceIndex: val?.slot})}/>*/}
-				<Button ml={5} mdIcon="account-voice" enabled={origAudioFile != null && voiceChangerBridge.activeSlotIndex > -1} title="Send to voice-converter, using selected voice" onClick={async()=>{
+				<Button ml={5} mdIcon="account-voice" enabled={origAudioFile != null && voiceChangerBridge.activeSlotIndex != null} title="Send to voice-converter, using selected voice" onClick={async()=>{
 					const audioFileBuffer = await origAudioFile!.arrayBuffer();
 					const outputFileBuffer = await ConvertAudioFileUsingVoiceChanger(audioFileBuffer);
 					const outputFile = new File([outputFileBuffer], origAudioFile!.name.replace(/_Orig\..+$/, "_Converted.wav"), {type: "audio/wav"});

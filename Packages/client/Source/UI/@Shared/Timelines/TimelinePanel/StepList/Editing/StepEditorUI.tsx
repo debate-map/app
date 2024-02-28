@@ -4,7 +4,7 @@ import {OPFS_Map} from "Utils/OPFS/OPFS_Map";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect} from "dm_common";
+import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKey, Timeline, TimelineStep, TimelineStepEffect, TimelineStepEffect_defaultTransitionPeriod} from "dm_common";
 import {DragInfo, MakeDraggable, Observer, RunInAction_Set} from "web-vcore";
 import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
@@ -212,6 +212,13 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 														const newEffects = [
 															...(step.extras?.effects ?? []),
 															new TimelineStepEffect({setTimeTrackerState: false}),
+														];
+														RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
+													}}/>
+													<VMenuItem text="Set transition period" style={liveSkin.Style_VMenuItem()} onClick={()=>{
+														const newEffects = [
+															...(step.extras?.effects ?? []),
+															new TimelineStepEffect({setTransitionPeriod: TimelineStepEffect_defaultTransitionPeriod}),
 														];
 														RunCommand_UpdateTimelineStep({id: step.id, updates: {extras: {...step.extras, effects: newEffects}}});
 													}}/>
