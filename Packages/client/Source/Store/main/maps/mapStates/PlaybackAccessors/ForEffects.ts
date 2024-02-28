@@ -73,7 +73,7 @@ export const GetPlaybackVisiblePaths = CreateAccessor(()=>{
 	return result;
 });
 
-export const GetPathVisibilityInfoAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
+export const GetPathVisibilityInfoAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[])=>{
 	const pathRevealTimes_first = {} as {[key: string]: number};
 	const pathRevealTimes_lastFresh = {} as {[key: string]: number};
 	const pathVisibilitiesSoFar = {} as {[key: string]: boolean};
@@ -169,7 +169,7 @@ export const GetPathVisibilityInfoAfterEffects = CreateAccessor((pathsRevealedAt
 	return {pathVisibilitiesSoFar, pathRevealTimes_first, pathRevealTimes_lastFresh};
 });
 export const GetVisiblePathRevealTimesAfterEffects = CreateAccessor((pathsRevealedAtStart: string[], effects: PlaybackEffect[], baseOn: "first reveal" | "last fresh reveal" = "last fresh reveal")=>{
-	const states = GetPathVisibilityInfoAfterEffects(pathsRevealedAtStart, effects, baseOn);
+	const states = GetPathVisibilityInfoAfterEffects(pathsRevealedAtStart, effects);
 	if (states == null) return emptyArray_forLoading;
 	const visiblePathsAtEnd = states.pathVisibilitiesSoFar.Pairs().filter(a=>a.value == true).map(a=>a.key);
 	return visiblePathsAtEnd.ToMapObj(path=>path, path=>{

@@ -1,14 +1,16 @@
-import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout} from "dm_common";
+import {GetNodeL3, ChildOrdering, MapView, NodeL3, GetPathNodeIDs, Map, ChildLayout, GetChildLayout_Final, NodeType, IsSLModeOrLayout, GetMap} from "dm_common";
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
-import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CreateStringEnum, GetEntries, GetPercentFromXToY, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {DataExchangeFormat, ImportResource} from "Utils/DataFormats/DataExchangeFormat.js";
+import {GetOpenMapID} from "Store/main.js";
 import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView, GetNodeView} from "./maps/mapViews/$mapView.js";
 import {GetPlaybackInfo} from "./maps/mapStates/PlaybackAccessors/Basic.js";
+import {GetPathVisibilityInfoAfterEffects, GetPlaybackEffects} from "./maps/mapStates/PlaybackAccessors/ForEffects.js";
 
 export enum RatingPreviewType {
 	none = "none",
@@ -182,13 +184,30 @@ export const GetCopiedNode = CreateAccessor(()=>{
 	return GetNodeL3(path);
 });
 
+export const GetPathsRevealedAtAnyPointByPlayback = CreateAccessor((): string[]=>{
+	const effects = GetPlaybackEffects();
+	//const mapRootNodeID = nodeIDsInPath[0];
+	const map = GetMap(GetOpenMapID());
+	const mapRootNodeID = map?.rootNode;
+	if (mapRootNodeID == null) return emptyArray;
+
+	const visibilityInfo = GetPathVisibilityInfoAfterEffects([mapRootNodeID], effects);
+	return Object.keys(visibilityInfo?.pathRevealTimes_first ?? {});
+});
+
 const idChars = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".split("");
 export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHelperMap: boolean)=>{
 	const nodeIDsInPath = GetPathNodeIDs(path);
 	const pathHasCycle = nodeIDsInPath.Distinct().length != nodeIDsInPath.length;
 	if (pathHasCycle) return false; // never force-expand a path that has a cycle
 
-	if (forLayoutHelperMap) return true;
+	//if (forLayoutHelperMap) return true;
+	if (forLayoutHelperMap) {
+		// optimization; have layout-helper map only force-expand nodes that are shown at some point during the active playback/timeline (helpful for huge maps, for which each video only shows a portion)
+		const pathsRevealedAtAnyPointByPlayback = GetPathsRevealedAtAnyPointByPlayback();
+		if (pathsRevealedAtAnyPointByPlayback.some(a=>a.startsWith(`${path}/`))) return true;
+	}
+
 	const uiState = store.main.maps;
 	if (uiState.forcedExpand) {
 		const pathNodeIDs = GetPathNodeIDs(path);
