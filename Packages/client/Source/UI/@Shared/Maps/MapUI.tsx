@@ -302,9 +302,13 @@ export class MapUI extends BaseComponent<Props, {}> {
 		return this.ScrollToNode(anchorNode_target);
 	}
 
-	GetNodeBoxes() {
+	GetNodeBoxes(filterOutInvisible = true) {
 		if (this.mapUIEl == null) return [];
-		const nodeBoxes = Array.from(this.mapUIEl.querySelectorAll(".NodeBox")).map(nodeUI_boxEl=>{
+		const selector = filterOutInvisible
+			//? `.NodeUI:not(.opacity0) > .NodeBox` // this doesn't work, since the opacity:0 is being set by the tree-grapher lib
+			? `.NodeUI:not([style*="opacity: 0"]) > .NodeBox`
+			: `.NodeBox`;
+		const nodeBoxes = Array.from(this.mapUIEl.querySelectorAll(selector)).map(nodeUI_boxEl=>{
 			const boxEl = FindReact(nodeUI_boxEl) as ExpandableBox;
 			const result = boxEl.props.parent as NodeBox;
 			Assert(result instanceof NodeBox);
@@ -317,8 +321,8 @@ export class MapUI extends BaseComponent<Props, {}> {
 		const nodeBoxes = this.GetNodeBoxes();
 		return nodeBoxes.filter(box=>box.DOM != null).Min(box=>GetDistanceBetweenRectAndPoint(GetViewportRect(box.DOM!), viewCenter_onScreen));
 	}
-	FindNodeBox(nodePath: string, ifMissingFindAncestor = false) {
-		const nodeBoxes = this.GetNodeBoxes();
+	FindNodeBox(nodePath: string, ifMissingFindAncestor = false, filterOutInvisible = true) {
+		const nodeBoxes = this.GetNodeBoxes(filterOutInvisible);
 
 		let targetNodeBox: NodeBox|n;
 		let nextPathTry = nodePath;

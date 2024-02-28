@@ -227,7 +227,7 @@ export class NodeUI extends BaseComponentPlus(
 							if (ref_group.current) dom.classList.add(`lcForNodeGroup_${ref_group.current.path}`);
 						}
 					}, [ref_leftColumn, ref_group])}
-					className="NodeUI innerBoxColumn clickThrough"
+					className={["NodeUI", "innerBoxColumn", "clickThrough"].filter(a=>a).join(" ")}
 					style={css(
 						{
 							//position: "relative",
