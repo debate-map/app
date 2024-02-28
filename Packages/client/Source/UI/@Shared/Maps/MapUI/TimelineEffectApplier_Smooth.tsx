@@ -78,21 +78,16 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	const zoomRequired = Math.min(viewportSize.x / focusNodeRects_interpolated.width, viewportSize.y / focusNodeRects_interpolated.height);
 	const newZoom = CE(zoomRequired * .9).KeepBetween(.1, 1);
 
-	function doScroll() {
-		//ScrollToPosition_Center(scrollEl!, focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
-		mapUI!.ScrollToPosition_Center(focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
-		ACTUpdateAnchorNodeAndViewOffset(map.id);
-	}
-
 	(async()=>{
-		await SleepAsync(1);
+		await SleepAsync(1); // without this wait, the scroll is not correctly/reliably applied (eg. at point of new node becoming visible) -- unsure exactly why
 		//ignoreNextZoomChange = true;
 		mapState.zoomLevel = newZoom;
-		// re-call this function, since we need to recalc // edit: Actually, is this even necessary? I don't think it should be... (well, the ACTUpdateAnchorNodeAndViewOffset call might need the delay)
-		//setTimeout(()=>FocusOnNodes(mapID, paths), 100);
-		//return;
-		await SleepAsync(1);
-		doScroll();
+
+		//ScrollToPosition_Center(scrollEl!, focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
+		mapUI!.ScrollToPosition_Center(focusNodeRects_interpolated.Center.Times(mapState.zoomLevel));
+
+		//await SleepAsync(1);
+		ACTUpdateAnchorNodeAndViewOffset(map.id);
 	})();
 
 	return <></>;
@@ -113,7 +108,11 @@ export const TimelineEffectApplier_Smooth = observer_mgl((props: {map: Map, mapS
 	SetScroll(scrollEl, newScroll);
 }*/
 export const GetScroll = (scrollEl: HTMLElement)=>new Vector2(scrollEl.scrollLeft, scrollEl.scrollTop);
-export const SetScroll = (scrollEl: HTMLElement, scroll: Vector2)=>{ scrollEl.scrollLeft = scroll.x; scrollEl.scrollTop = scroll.y; };
+export const SetScroll = (scrollEl: HTMLElement, scroll: Vector2)=>{
+	//scrollEl.scrollTo({left: scroll.x, top: scroll.y});
+	scrollEl.scrollLeft = scroll.x;
+	scrollEl.scrollTop = scroll.y;
+};
 
 export function InterpolateRect(rectA: VRect, rectB: VRect, percent: number) {
 	return new VRect(

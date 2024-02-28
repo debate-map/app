@@ -89,6 +89,10 @@ export function useGraph(forLayoutHelper: boolean, layoutHelperGraph: Graph|null
 			//uiDebugKit: {FlashComp},
 			getScrollElFromContainerEl: containerEl=>containerEl.parentElement!.parentElement,
 			anchorNode_targetFinderFunc: nodeLayouts=>{
+				// if a timeline is playing, don't anchor to any node (might interfere with the timeline's scrolling system)
+				const timelinePlaybackInfo = GetPlaybackInfo.CatchBail(null);
+				if (timelinePlaybackInfo?.timeline != null) return null;
+
 				return graph.anchorNode_targetInfo && nodeLayouts.find(a=>{
 					//return a.treeNode.data.path == graph.anchorNode_targetInfo?.treePath;
 					//const nodeData = a.treeNode.data.leftColumn_userData as NodeDataForTreeGrapher;
