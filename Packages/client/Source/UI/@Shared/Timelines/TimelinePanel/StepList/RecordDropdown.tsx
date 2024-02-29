@@ -67,7 +67,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 						<Button ml={5} p="5px 10px" text="Go" onClick={()=>desktopBridge.Call("OpenMainDataSubfolder", {pathSegments: ["Maps", map!.id, "Renders", uiState.renderFolderName]})}/>
 					</Row>
 					<Row>
-						<Button text="Prep" onClick={async()=>{
+						<Button p="5px 10px" text="Prep" onClick={async()=>{
 							const opfsForMap = OPFS_Map.GetEntry(map.id);
 							const renderFolder = opfsForMap.GetChildFolder("Renders").GetChildFolder(uiState.renderFolderName);
 							const renderFolderHandle = await renderFolder.GetTargetDirectoryHandle_EnsuringExists("create");
@@ -124,7 +124,8 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 								},
 							});
 						}}/>
-						<Button ml={5} text="Copy ffmpeg command" onClick={()=>{
+						<Text ml={5}>{`ffmpeg (copy->run):`}</Text>
+						<Button ml={5} p="5px 10px" text="Stitch" onClick={()=>{
 							const steps_audioFilepaths = steps.map((step, i)=>{
 								const topAudio = stepTopAudios[i];
 								if (topAudio?.file == null) return null;
@@ -194,6 +195,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 								audioEntries.length > 0 && `-map "[audioOutput]"`,
 								`-codec:v copy`,
 
+								// todo: confirm that this produces a true lossless video (if not, maybe try the recommendation here: https://video.stackexchange.com/a/33681)
 								`-c:v libx264`, // use h264 codec
 								//`-c:v libx265` // use h265 codec
 								`-r 60`, // output framerate: 60fps (slightly increases file-size, and arguably not needed; but kept for now since may increase compatibility?)
@@ -204,6 +206,13 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 
 								`output.mp4`, // output filename
 							].filter(a=>a).join(" "));
+						}}/>
+						<Button ml={5} p="5px 10px" text="Compress" onClick={()=>{
+							CopyText([
+								`ffmpeg`,
+								`-i output.mp4`,
+								`output.webm`,
+							].join(" "));
 						}}/>
 					</Row>
 					<Row>
