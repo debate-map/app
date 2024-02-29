@@ -9,6 +9,7 @@ import {observer} from "web-vcore/nm/mobx-react.js";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {zIndexes} from "UI/ZIndexes.js";
 import {MtxGroupsUI} from "./Requests/MtxGroupsUI.js";
 import {MtxResultUI} from "./Requests/MtxResultUI.js";
 
@@ -132,13 +133,13 @@ export const RequestsUI = observer(()=>{
 				<Row ml="auto">
 					<DropDown autoHide={false}>
 						<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
-						<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
+						<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
 							<MtxGroupsUI/>
 						</DropDownContent>
 					</DropDown>
 					<DropDown style={{marginLeft: 5}}>
 						<DropDownTrigger><Button style={{height: "100%"}} text="Others"/></DropDownTrigger>
-						<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
+						<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", right: 0, width: 500, borderRadius: "0 0 0 5px"}}><Column>
 							<Row center>
 								<Text>Significant duration threshold:</Text>
 								<Spinner ml={5} value={uiState.significantDurationThreshold} onChange={val=>RunInAction_Set(()=>uiState.significantDurationThreshold = val)}/>

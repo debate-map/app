@@ -7,6 +7,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {LogGroupsUI} from "./Logs/LogGroupsUI.js";
 import {LogsUI_Realtime} from "./Logs/Realtime.js";
 import {LogsUI_Stored} from "./Logs/Stored.js";
+import {zIndexes} from "./ZIndexes.js";
 
 @Observer
 export class LogsUI extends BaseComponent<{}, {}> {
@@ -22,7 +23,7 @@ export class LogsUI extends BaseComponent<{}, {}> {
 							{uiState.panel == "realtime" && // atm, the Groups panel only applies for the Realtime panel
 							<DropDown autoHide={false}>
 								<DropDownTrigger><Button style={{height: "100%"}} text="Groups"/></DropDownTrigger>
-								<DropDownContent style={{zIndex: 1, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
+								<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", right: 0, width: 1000, borderRadius: "0 0 0 5px"}}>
 									<LogGroupsUI/>
 								</DropDownContent>
 							</DropDown>}

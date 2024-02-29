@@ -13,6 +13,8 @@ import {liveSkin} from "Utils/Styles/SkinManager";
 import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown.js";
 import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown.js";
 
+export const actionBarHeight = SLMode ? 40 : 30;
+
 @Observer
 export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number, backOnly?: boolean}, {}) {
 	render() {
@@ -30,7 +32,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 				<Row center style={E(
 					{
 						justifyContent: "flex-start", background: liveSkin.NavBarPanelBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
-						width: "100%", height: SLMode ? 40 : 30, borderRadius: "0 0 10px 0",
+						width: "100%", height: actionBarHeight, borderRadius: "0 0 10px 0",
 					},
 					SLMode && {
 						background: HSLA(0, 0, 1, 1),

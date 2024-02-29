@@ -10,6 +10,7 @@ import {ShareTab} from "Store/main/shareUI.js";
 import {Observer, RunInAction_Set, GetCurrentURL, InfoButton} from "web-vcore";
 import moment from "web-vcore/nm/moment";
 import {RunCommand_DeleteShare} from "Utils/DB/Command.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
 
 export function GetShareShortURL(share: Share) {
@@ -30,7 +31,7 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button mr={5} text="Share"/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", right: 0, width: 700, borderRadius: "0 0 0 5px"}}
+				<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", right: 0, width: 700, borderRadius: "0 0 0 5px"}}
 					// use render-prop approach here, because NewShareUI can be heavy
 					content={()=>(
 						<Column>

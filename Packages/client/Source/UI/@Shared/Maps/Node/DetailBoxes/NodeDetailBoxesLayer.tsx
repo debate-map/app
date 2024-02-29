@@ -11,7 +11,7 @@ export class NodeDetailBoxesLayer extends BaseComponentPlus({}, {}) {
 		let {} = this.props;
 		return (
 			<div ref={c=>nodeDetailBoxesLayer_container = c!} style={{
-				position: "relative", zIndex: zIndexes.overNavBarDropdowns,
+				position: "relative", zIndex: zIndexes.overNavBarDropdown,
 				//filter: GetMapUICSSFilter(),
 			}}>
 			</div>

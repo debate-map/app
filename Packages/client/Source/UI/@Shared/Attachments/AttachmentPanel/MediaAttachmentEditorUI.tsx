@@ -8,6 +8,7 @@ import {Link, Observer, InfoButton} from "web-vcore";
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {SourceChainsEditorUI} from "../../Maps/Node/SourceChainsEditorUI.js";
 import {TermDefinitionPanel} from "../../Maps/Node/DetailBoxes/Panels/DefinitionsPanel.js";
 
@@ -34,7 +35,7 @@ export class MediaAttachmentEditorUI extends DetailsUI_Base<MediaAttachment, Med
 									? `${image.name}: ${image.url}`
 									: `(click to search/create)`}/>
 						</DropDownTrigger>
-						<DropDownContent style={{left: 0, width: 600, zIndex: 1, borderRadius: "0 5px 5px 5px", padding: image ? 10 : 0}}><Column>
+						<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, width: 600, borderRadius: "0 5px 5px 5px", padding: image ? 10 : 0}}><Column>
 							{image &&
 							<Row>
 								<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{

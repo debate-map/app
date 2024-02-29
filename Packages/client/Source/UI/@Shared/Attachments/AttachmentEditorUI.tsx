@@ -36,12 +36,6 @@ export class AttachmentEditorUI extends DetailsUI_Base<Attachment, {}, {target: 
 						Change();
 					}}/>
 					<CheckBox ml={5} enabled={enabled} text="Expanded by default" value={newData.expandedByDefault ?? false} onChange={val=>setExpandedByDefault(val)}/>
-					{/*<Button ml={5} p="0 5px" text="JSON" title="View attachment data (as json)" onClick={()=>{
-						ShowMessageBox({
-							title: "Attachment data (as json)",
-							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(newData, null, "\t")}/>,
-						});
-					}}/>*/}
 				</Row>
 				{attachmentType == AttachmentType.equation &&
 					<EquationEditorUI phase={phase} baseData={NN(newData.equation)} onChange={val=>Change(newData.equation = val)}/>}

@@ -6,6 +6,7 @@ import {InfoButton, Link, Observer} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerm, GetTermsByForm, TermAttachment, Term, GetUser} from "dm_common";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {TermDefinitionPanel} from "../../@Shared/Maps/Node/DetailBoxes/Panels/DefinitionsPanel.js";
 import {NodeDetailsUI_SharedProps} from "../../@Shared/Maps/Node/NodeDetailsUI.js";
 import {PhrasingDetailsUI_SharedProps} from "./PhrasingDetailsUI.js";
@@ -57,7 +58,7 @@ export class TermAttachmentsUI extends BaseComponent<PhrasingDetailsUI_SharedPro
 												? `${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}: ${term.definition}`
 												: `(click to search/create)`}/>
 									</DropDownTrigger>
-									<DropDownContent style={{left: 0, width: 600, zIndex: 1, borderRadius: "0 5px 5px 5px", padding: term ? 10 : 0}}><Column>
+									<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, width: 600, borderRadius: "0 5px 5px 5px", padding: term ? 10 : 0}}><Column>
 										{term && <TermDefinitionPanel term={term} showID={false}/>}
 										{!term &&
 										<Column>

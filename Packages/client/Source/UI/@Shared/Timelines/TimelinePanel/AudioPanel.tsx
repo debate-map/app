@@ -182,7 +182,7 @@ export class AudioPanel extends BaseComponent<{map: Map, timeline: Timeline}, {}
 				<Row plr={5} style={{height: 30}}>
 				<DropDown>
 					<DropDownTrigger><Button text={`Files (${files.Any(a=>a.name == uiState.selectedFile) ? uiState.selectedFile : "none selected"})`} style={{height: "100%"}}/></DropDownTrigger>
-					<DropDownContent style={{left: 0, width: 500, zIndex: zIndexes.subNavBar}}><Column>
+					<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, width: 500}}><Column>
 						<Text>Files:</Text>
 						<div style={{display: "flex", flexWrap: "wrap", gap: 5}}>
 							{files.map((file, index)=>{

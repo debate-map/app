@@ -34,7 +34,7 @@ export class NavBar_SL extends BaseComponent<{}, {}> {
 			}}>
 				<Row center style={{height: "100%"}}>
 					<span style={{position: "absolute", left: 0}}>
-						{HasAdminPermissions(MeID()) && store.main.maps.forcedExpand && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
+						{HasAdminPermissions(MeID()) && (DEV_DYN || store.main.maps.forcedExpand) && <NavBarPanelButton text="Debug" panel="debug" corner="top-left"/>}
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",

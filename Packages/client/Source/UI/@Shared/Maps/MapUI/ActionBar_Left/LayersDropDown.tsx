@@ -22,7 +22,7 @@
 // 		return (
 // 			<DropDown>
 // 				<DropDownTrigger><Button ml={5} text="Layers"/></DropDownTrigger>
-// 				<DropDownContent style={{position: "fixed", left: 0, padding: null, background: null, borderRadius: null}}>
+// 				<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", left: 0, padding: null, background: null, borderRadius: null}}>
 // 					<Row style={{alignItems: "flex-start"}}>
 // 						<Column style={{width: 600}}>
 // 							<Column className="clickThrough" style={{height: 80, background: liveSkin.MainBackgroundColor().css() /* borderRadius: "10px 10px 0 0" */, maxHeight: 320}}>

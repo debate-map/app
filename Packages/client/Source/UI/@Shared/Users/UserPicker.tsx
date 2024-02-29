@@ -5,6 +5,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer, chroma_maxDarken} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 
 @Observer
 export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChange: (value: string)=>any, containerStyle?: any}, {}) {
@@ -23,7 +24,7 @@ export class UserPicker extends BaseComponentPlus({} as {value: string|n, onChan
 						})()
 						: children
 				}</DropDownTrigger>
-				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: 5, zIndex: 1}}>
+				<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, padding: null, background: null, borderRadius: 5}}>
 					<Row style={{alignItems: "flex-start"}}>
 						<Column style={{width: 600}}>
 							<ScrollView style={ES({flex: 1})} contentStyle={{

@@ -19,7 +19,7 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
-import {GraphContext, useRef_nodeLeftColumn} from "tree-grapher";
+import {Graph, GraphContext, useRef_nodeLeftColumn} from "tree-grapher";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {UseForcedExpandForPath} from "Store/main/maps.js";
 import {autorun} from "mobx";
@@ -128,7 +128,7 @@ export class NodeBox extends BaseComponentPlus(
 			this.Update();
 		}, [local_nodeView]);
 
-		const graph = useContext(GraphContext);
+		const graph = useContext(GraphContext) as Graph|n;
 		//const group = graph.groupsByPath.get(treePath);
 
 		const sinceTime = GetTimeFromWhichToShowChangedNodes(map?.id);
@@ -261,7 +261,7 @@ export class NodeBox extends BaseComponentPlus(
 			}
 
 			// anchoring arguably not necessary, but can help when other people add/remove nodes while user is scrolling + clicking nodes (without expanding/collapsing)
-			graph.SetAnchorNode(treePath, {nodePath: path});
+			graph?.SetAnchorNode(treePath, {nodePath: path});
 			if (!nodeView?.selected && map) {
 				ACTNodeSelect(map.id, path);
 			}
@@ -284,7 +284,7 @@ export class NodeBox extends BaseComponentPlus(
 		const toggleExpanded = UseCallback(e=>{
 			const newExpanded = !expanded;
 			const recursivelyCollapsing = newExpanded == false && e.altKey;
-			graph.SetAnchorNode(treePath, {nodePath: path});
+			graph?.SetAnchorNode(treePath, {nodePath: path});
 			ACTNodeExpandedSet({mapID: map?.id, path, expanded: newExpanded, resetSubtree: recursivelyCollapsing});
 
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working

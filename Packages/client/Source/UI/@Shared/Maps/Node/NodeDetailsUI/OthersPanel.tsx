@@ -53,7 +53,7 @@ export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 				</Row>
 				<Row mt={5}>
 					<Text>View:</Text>
-					<Button ml={5} p="0 5px" text="JSON" title="View node-revision data (as json)" onClick={()=>{
+					<Button ml={5} p="0 5px" text="JSON" title="View this node-revision's data (as json)" onClick={()=>{
 						ShowMessageBox({
 							title: "Node-revision data (as json)",
 							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(newRevisionData, null, "\t")}/>,

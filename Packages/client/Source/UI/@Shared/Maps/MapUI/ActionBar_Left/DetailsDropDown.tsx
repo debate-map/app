@@ -10,6 +10,7 @@ import {Button_SL} from "UI/@SL/SLButton.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
 import {RunCommand_DeleteMap, RunCommand_UpdateMap} from "Utils/DB/Command.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
@@ -54,7 +55,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="Details"/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", left: 0, borderRadius: "0 0 5px 0"}}><Column>
+				<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", left: 0, borderRadius: "0 0 5px 0"}}><Column>
 					<MapDetailsUI ref={c=>this.detailsUI = c} baseData={map} phase={creatorOrMod ? "edit" : "view"} onChange={newData=>{
 						this.SetState({dataError: this.detailsUI!.GetValidationError()});
 					}}/>

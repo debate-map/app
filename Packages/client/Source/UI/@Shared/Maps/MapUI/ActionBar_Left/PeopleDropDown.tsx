@@ -9,6 +9,7 @@ import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, Map} from "dm
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {RunCommand_UpdateMap} from "Utils/DB/Command";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 
 export const userIDPlaceholder = "[user-id placeholder]";
 
@@ -24,7 +25,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="People"/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", left: 0, width: 500, borderRadius: "0 0 5px 0"}} content={()=>(
+				<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", left: 0, width: 500, borderRadius: "0 0 5px 0"}} content={()=>(
 					<Column>
 						<Row center style={{justifyContent: "center"}}>
 							<Text style={{color: "red", fontSize: 13}}>{`Note: Actual access/edit permissions are set by nodes' access-policies.`}</Text>

@@ -115,7 +115,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 					//background: liveSkin.BasePanelBackgroundColor().alpha(.9).css(),
 					color: liveSkin.NodeTextColor().css(), // needed, in case this panel is portaled
 				},
-				panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdowns},
+				panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdown},
 				!usePortal && {
 					left: panelsPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
 					width: width ?? "100%",

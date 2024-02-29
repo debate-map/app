@@ -14,7 +14,7 @@ import {GetPlaybackTimeTrackerState} from "Store/main/maps/mapStates/PlaybackAcc
 import {TimelinePanel} from "../Timelines/TimelinePanel.js";
 import {useGraph} from "./MapGraph.js";
 import {MapUI} from "./MapUI.js";
-import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
+import {ActionBar_Left, actionBarHeight} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ARG_MAX_WIDTH_FOR_IT_AND_ARG_BAR_TO_FIT_BEFORE_PREMISE_TOOLBAR, ARG_MAX_WIDTH_FOR_IT_TO_FIT_BEFORE_PREMISE_TOOLBAR, TOOLBAR_HEIGHT_BASE} from "./Node/NodeLayoutConstants.js";
 import {NodeUI_ForBots} from "./Node/NodeUI_ForBots.js";
@@ -130,7 +130,7 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 
 		//const subNavBarWidth = 104;
 		const subNavBarWidth = 0;
-		const actionBarHeight = ShowHeader ? 30 : 0;
+		const actionBarHeight_final = ShowHeader ? actionBarHeight : 0;
 		return (
 			<Column style={ES({flex: 1})}>
 				{!withinPage && ShowHeader &&
@@ -144,7 +144,7 @@ export class MapUIWrapper extends BaseComponent<Props, {}> {
 				</>}
 				<Row style={{
 					position: "relative", // needed for TimelinePanel->AudioPanel to be positioned correctly
-					marginTop: actionBarHeight, height: `calc(100% - ${actionBarHeight}px)`, alignItems: "flex-start",
+					marginTop: actionBarHeight_final, height: `calc(100% - ${actionBarHeight_final}px)`, alignItems: "flex-start",
 				}}>
 					{!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>}

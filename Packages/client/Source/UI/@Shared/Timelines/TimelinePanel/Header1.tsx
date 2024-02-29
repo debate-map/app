@@ -37,15 +37,19 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 				<Text>Timeline:</Text>
 				<DropDown ref={c=>this.timelineSelect = c}>
 					<DropDownTrigger><Button ml={5} text={timeline ? timeline.name : "[none]"}/></DropDownTrigger>
-					<DropDownContent style={{position: "fixed", left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
+					<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", left: 0, padding: null, background: null, borderRadius: null}}>
 						<Row style={{alignItems: "flex-start"}}>
 							<Column style={{width: 600}}>
-								<Row>
+								<Row mb={5}>
 									<Text>Timelines:</Text>
 									<Button ml={5} mdIcon="plus" title="Add new timeline" onClick={e=>{
 										const meID = MeID();
 										if (meID == null) return ShowSignInPopup();
 										ShowAddTimelineDialog(meID, map.id);
+									}}/>
+									<Button ml="auto" text="Select: none" onClick={()=>{
+										RunInAction("TimelinePanel.Header1.setTimelineSelectionToNone", ()=>mapState.selectedTimeline = null);
+										if (this.timelineSelect) this.timelineSelect.Hide();
 									}}/>
 								</Row>
 								<ScrollView style={ES({flex: 1})} contentStyle={{flex: 0.8, position: "relative", maxHeight: 500}}>
@@ -116,7 +120,7 @@ class OptionsDropdown extends BaseComponent<{map: Map, timeline: Timeline|n, ste
 		return (
 			<DropDown>
 				<DropDownTrigger><Button ml={5} text="Options" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 350, zIndex: zIndexes.subNavBar}}><Column>
+				<DropDownContent style={{zIndex: zIndexes.overNavBarDropdown, right: 0, width: 350}}><Column>
 					<Row style={{fontWeight: "bold"}}>Editing</Row>
 					<CheckBox mt={3} text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)"
 						value={uiState_maps.lockMapScrolling} onChange={val=>RunInAction_Set(this, ()=>uiState_maps.lockMapScrolling = val)}/>

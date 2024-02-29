@@ -205,6 +205,7 @@ export const UseForcedExpandForPath = CreateAccessor((path: string, forLayoutHel
 	if (forLayoutHelperMap) {
 		// optimization; have layout-helper map only force-expand nodes that are shown at some point during the active playback/timeline (helpful for huge maps, for which each video only shows a portion)
 		const pathsRevealedAtAnyPointByPlayback = GetPathsRevealedAtAnyPointByPlayback();
+		//const pathsRevealedAtAnyPointByPlayback = GetPathsRevealedAtAnyPointByPlayback.CatchBail([] as string[]); // if this info is still loading, don't let it hold up rest of function
 		if (pathsRevealedAtAnyPointByPlayback.some(a=>a.startsWith(`${path}/`))) return true;
 	}
 

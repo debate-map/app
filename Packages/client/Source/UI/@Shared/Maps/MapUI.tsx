@@ -99,7 +99,9 @@ export class MapUI extends BaseComponent<Props, {}> {
 				style={ES({width: "100%", height: "100%"}, withinPage && {overflow: "visible"})}
 				scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 				contentOuterStyle={E(
-					{willChange: "transform"}, // keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization
+					// optimization for smoother scrolling [2024-02-28: confirmed to help]
+					// (note: keeping willChange:transform can normally make text blurry after zooming, but we're good, since we have the zoom button trigger a re-rasterization)
+					{willChange: "transform"}, // todo: maybe change to {willChange: "scroll-position"}
 					withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
 					withinPage && inFirefox && {overflow: "hidden"},
 				)}

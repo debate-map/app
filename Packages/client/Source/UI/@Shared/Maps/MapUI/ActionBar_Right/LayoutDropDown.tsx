@@ -13,6 +13,7 @@ import {PolicyPicker} from "UI/Database/Policies/PolicyPicker";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import * as htmlToImage from "html-to-image";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {MapUI} from "../../MapUI.js";
 
 const changesSince_options = [] as {name: string, value: string}[];
@@ -44,7 +45,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button_Final text="Layout" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{position: "fixed", right: 0, width: uiState.nodeStyleRules.length ? 700 : 550, borderRadius: "0 0 0 5px"}}><Column>
+				<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", right: 0, width: uiState.nodeStyleRules.length ? 700 : 550, borderRadius: "0 0 0 5px"}}><Column>
 					<RowLR splitAt={splitAt}>
 						<Pre>Initial child limit:</Pre>
 						<Spinner min={1} style={{width: 100}} value={uiState.initialChildLimit} onChange={val=>{

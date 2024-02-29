@@ -239,6 +239,9 @@ export class NodeUI extends BaseComponentPlus(
 							//paddingLeft: inBelowGroup ? 20 : 30,
 							boxSizing: "content-box",
 							paddingLeft: GUTTER_WIDTH + (inBelowGroup ? GUTTER_WIDTH_SMALL : 0),
+
+							// optimization for smoother scrolling [2024-02-28: confirmed to help]
+							willChange: "transform", // todo: maybe change to {willChange: "left, top"}
 						},
 						style,
 					)}

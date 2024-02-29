@@ -13,6 +13,7 @@ import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
 import {MapUI} from "../MapUI.js";
+import {actionBarHeight} from "./ActionBar_Left.js";
 
 @Observer
 export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
@@ -57,7 +58,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 				<Row style={E(
 					{
 						justifyContent: "flex-end", background: liveSkin.NavBarPanelBackgroundColor().css(), boxShadow: liveSkin.NavBarBoxShadow(),
-						width: "100%", height: SLMode ? 40 : 30, borderRadius: "0 0 0 10px",
+						width: "100%", height: actionBarHeight, borderRadius: "0 0 0 10px",
 					},
 					SLMode && {
 						background: HSLA(0, 0, 1, 1),

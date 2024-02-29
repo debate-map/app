@@ -107,7 +107,7 @@ export class NodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} a
 						position: "absolute", width: NodeUI_LeftBox_width,
 						//top: "calc(100% + 1px)",
 						top: "100%", paddingTop: 1,
-						zIndex: zIndexes.overNavBarDropdowns,
+						zIndex: zIndexes.overNavBarDropdown,
 					},
 					!usePortal && {
 						display: "flex",

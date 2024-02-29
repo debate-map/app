@@ -6,6 +6,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {ES, Observer, chroma_maxDarken} from "web-vcore";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import React from "react";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 
 /** Basic implementation of a button to be used as the child of the PolicyPicker wrapper component. (many components/use-cases will instead supply their own button with more customized styling) */
 @Observer
@@ -41,7 +42,7 @@ export class PolicyPicker extends BaseComponent<{value: string|n, onChange: (val
 						})()
 						: children
 				}</DropDownTrigger>
-				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: 5, zIndex: 1}}>
+				<DropDownContent style={{zIndex: zIndexes.dropdown, left: 0, padding: null, background: null, borderRadius: 5}}>
 					<Row style={{alignItems: "flex-start"}}>
 						<Column style={{width: 600}}>
 							<ScrollView style={ES({flex: 1})} contentStyle={{

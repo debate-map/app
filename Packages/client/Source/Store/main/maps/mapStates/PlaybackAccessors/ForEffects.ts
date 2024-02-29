@@ -123,7 +123,6 @@ export const GetPathVisibilityInfoAfterEffects = CreateAccessor((pathsRevealedAt
 			if (descendentRevealDepth >= 1) {
 				const node = GetNode(CE(effect.path.split("/")).Last());
 				if (node == null) continue;
-				// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
 				let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${effect.path}/${child.id}`}));
 				if (CE(currentChildren).Any(a=>a.node == null)) {
 					// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;

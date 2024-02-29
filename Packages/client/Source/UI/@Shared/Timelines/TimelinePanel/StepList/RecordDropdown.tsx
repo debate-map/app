@@ -38,7 +38,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		return (
 			<DropDown>
 				<DropDownTrigger><Button text="Record" style={{height: "100%"}}/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 400, zIndex: zIndexes.subNavBar}}><Column>
+				<DropDownContent style={{zIndex: zIndexes.overNavBarDropdown, right: 0, width: 400}}><Column>
 					<Row>
 						<Text style={{whiteSpace: "pre-wrap"}}>{`
 						Notes:
@@ -193,7 +193,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 
 								`-c:v libx264`, // use h264 codec
 								//`-c:v libx265` // use h265 codec
-								`-r 60`, // output framerate: 60fps
+								`-r 60`, // output framerate: 60fps (slightly increases file-size, and arguably not needed; but kept for now since may increase compatibility?)
 								//`-vf fps=60`, // output framerate: 60fps
 								`-pix_fmt yuv420p`, // use yuv420p pixel format (supports lossless)
 								`-qp 0`, // use lossless encoding

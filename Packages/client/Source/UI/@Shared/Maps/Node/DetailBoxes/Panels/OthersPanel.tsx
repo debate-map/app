@@ -100,16 +100,6 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						</Fragment>;
 					})}
 				</Row>
-				<Row>
-					<Text>View:</Text>
-					<Button ml={5} p="0 5px" text="JSON" title="View node data (as json)" onClick={()=>{
-						ShowMessageBox({
-							title: "Node data (as json)",
-							//message: ()=><TextArea autoSize={true} style={{minWidth: 500, maxWidth: 800}} value={JSON.stringify(node, null, "\t")}/>,
-							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(AsNodeL1(node), null, "\t")}/>,
-						});
-					}}/>
-				</Row>
 
 				{nodeArgOrParentSPArg_info && <>
 					<Row mt={10} style={{fontWeight: "bold"}}>Argument:</Row>
@@ -168,6 +158,27 @@ class AtThisLocation extends BaseComponent<{node: NodeL3, path: string}, {}> {
 		return (
 			<Column mt={10}>
 				<Row style={{fontWeight: "bold"}}>At this location:</Row>
+				<Row>
+					<Text>View data (json):</Text>
+					<Button ml={5} p="0 5px" text="Link" title="View parent->self link's data (as json)" onClick={()=>{
+						ShowMessageBox({
+							title: "Link data (as json)",
+							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(node.link, null, "\t")}/>,
+						});
+					}}/>
+					<Button ml={5} p="0 5px" text="Node" title="View node's data (as json)" onClick={()=>{
+						ShowMessageBox({
+							title: "Node data (as json)",
+							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(AsNodeL1(node), null, "\t")}/>,
+						});
+					}}/>
+					<Button ml={5} p="0 5px" text="Revision (latest)" title="View latest node-revision's data (as json)" onClick={()=>{
+						ShowMessageBox({
+							title: "Node-revision data (as json)",
+							message: ()=><TextArea_Div style={{minWidth: 500, maxWidth: 800, maxHeight: GetMaxSafeDialogContentHeight(), overflow: "auto"}} value={JSON.stringify(node.current, null, "\t")}/>,
+						});
+					}}/>
+				</Row>
 				<Row style={{whiteSpace: "normal"}}>
 					<Text>Path: </Text>
 					<UUIDPathStub path={path}/>
