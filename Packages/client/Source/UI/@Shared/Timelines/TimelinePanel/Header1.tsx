@@ -34,9 +34,8 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 
 		return (
 			<Row>
-				<Text>Timeline:</Text>
 				<DropDown ref={c=>this.timelineSelect = c}>
-					<DropDownTrigger><Button ml={5} text={timeline ? timeline.name : "[none]"}/></DropDownTrigger>
+					<DropDownTrigger><Button style={{maxWidth: 200}} text={`Timeline: ${timeline ? timeline.name : "[none]"}`}/></DropDownTrigger>
 					<DropDownContent style={{zIndex: zIndexes.dropdown, position: "fixed", left: 0, padding: null, background: null, borderRadius: null}}>
 						<Row style={{alignItems: "flex-start"}}>
 							<Column style={{width: 600}}>
@@ -84,7 +83,7 @@ export class Header1 extends BaseComponent<{map: Map}, {}> {
 					</DropDownContent>
 				</DropDown>
 				<CheckBox ml={5} text="Details" value={mapState.showTimelineDetails} onChange={val=>RunInAction_Set(this, ()=>mapState.showTimelineDetails = val)}/>
-				<CheckBox ml={5} text="Audio panel" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps."
+				<CheckBox ml={5} text="Audio" title="Special UI mode, where map-ui is replaced with panel where audio file can be dragged and viewed, for splicing onto timeline-steps."
 					value={uiState.audioMode} onChange={val=>RunInAction_Set(this, ()=>uiState.audioMode = val)}/>
 				{/*<Button ml="auto" text="Play" title="Start playing this timeline" enabled={selectedTimeline != null} style={{ flexShrink: 0 }} onClick={() => {
 					store.dispatch(new ACTMap_PlayingTimelineSet({ mapID: map.id, timelineID: selectedTimeline.id }));

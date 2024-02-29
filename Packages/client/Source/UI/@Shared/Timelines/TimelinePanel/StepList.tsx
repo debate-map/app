@@ -419,6 +419,7 @@ export class StepList extends BaseComponent<{map: Map, timeline: Timeline}, {}, 
 							flex: 1, position: "relative", padding: 7,
 							//filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)",
 							background: "rgba(0,0,0,1)",
+							minHeight: "100%", // since we're setting a background, make sure it fills the whole scroll-view area
 						})}
 						scrollVBarStyle={{width: 7}} // width:7 to match with container padding
 						onScroll={this.OnScroll}
