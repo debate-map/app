@@ -1,4 +1,12 @@
 import {Attachment, AttachmentType, QuoteAttachment, Source, SourceChain, SourceType} from "dm_common";
+import {IsString} from "js-vextensions";
+
+export type CG_RefURLOrQuoteOld = string | CG_QuoteOld;
+// non-standard quote structure, as exported from alt claimgen instance (ie. the non-claim-miner one)
+export class CG_QuoteOld {
+	quote: string;
+	url: string;
+}
 
 export class CG_Quote {
 	quote: string;
@@ -9,7 +17,7 @@ export class CG_Quote {
 export abstract class CG_Node {
 	id?: string; // deprecated, and ignored (and console.warn is called if input json uses this; new approach is to use extras.TOOL_NAMESPACE.id)
 	narrative?: string;
-	reference_urls?: string[];
+	reference_urls?: CG_RefURLOrQuoteOld[];
 	quotes?: CG_Quote[];
 	extras?: Object; // eg. {claimMiner: {id: "123"}}
 
@@ -28,10 +36,13 @@ export abstract class CG_Node {
 	}
 	static GetAttachments(node: CG_Node) {
 		const result = [] as Attachment[];
-		if (node.reference_urls && node.reference_urls.length > 0) {
+
+		const referenceURLs = node.reference_urls && node.reference_urls.length > 0 ? node.reference_urls.filter(a=>IsString(a)) as string[] : [];
+		const oldQuotes = node.reference_urls && node.reference_urls.length > 0 ? node.reference_urls.filter(a=>!IsString(a)) as CG_QuoteOld[] : [];
+		if (referenceURLs.length > 0) {
 			result.push(new Attachment({
 				references: {
-					sourceChains: node.reference_urls.map(url=>{
+					sourceChains: referenceURLs.map(url=>{
 						return new SourceChain([
 							{type: SourceType.webpage, link: url},
 						]);
@@ -39,9 +50,21 @@ export abstract class CG_Node {
 				},
 			}));
 		}
+
+		for (const quoteOld of oldQuotes) {
+			result.push(new Attachment({
+				quote: new QuoteAttachment({
+					content: quoteOld.quote,
+					sourceChains: [
+						new SourceChain([
+							{type: SourceType.webpage, link: quoteOld.url},
+						]),
+					],
+				}),
+			}));
+		}
 		for (const quote of node.quotes ?? []) {
 			result.push(new Attachment({
-				//expandedByDefault: false,
 				quote: new QuoteAttachment({
 					content: quote.quote,
 					sourceChains: quote.source != null ? [
@@ -51,6 +74,7 @@ export abstract class CG_Node {
 				extras: quote.extras,
 			}));
 		}
+
 		return result;
 	}
 }

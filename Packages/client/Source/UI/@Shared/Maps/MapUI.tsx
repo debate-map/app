@@ -353,7 +353,8 @@ export class MapUI extends BaseComponent<Props, {}> {
 	}
 	ScrollToPosition_Center(posInContainer: Vector2) {
 		const {withinPage} = this.props;
-		Assert(this.scrollView);
+		if (this.scrollView == null) return;
+
 		//const scrollContainerViewportSize = new Vector2(this.scrollView.vScrollableDOM.getBoundingClientRect().width, this.scrollView.vScrollableDOM.getBoundingClientRect().height);
 		const scrollContainerViewportSize = GetViewportRect(GetDOM(this.scrollView.contentOuter)!).Size;
 		//const topBarsHeight = window.innerHeight - scrollContainerViewportSize.y;
@@ -380,7 +381,7 @@ export class MapUI extends BaseComponent<Props, {}> {
 
 	ScrollToMakeRectVisible(targetRect: VRect, padding = 0, stopLoadingStoredScroll = true) {
 		if (padding != 0) targetRect = targetRect.Grow(padding);
-		Assert(this.scrollView && this.mapUIEl);
+		if (this.scrollView == null || this.mapUIEl == null) return;
 
 		const mapUIBackgroundRect = GetViewportRect(this.mapUIEl);
 		const oldScroll = this.scrollView.GetScroll();
