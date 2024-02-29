@@ -9,7 +9,7 @@ import {AddNotificationMessage, Observer, RunInAction_Set} from "web-vcore";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
-import {ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
+import {FastScrollModeCheckbox, ScreenshotModeCheckbox} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown.js";
 import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop.js";
 import {TimeToString} from "Utils/UI/General.js";
@@ -49,6 +49,9 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 					</Row>
 					<Row>
 						<ScreenshotModeCheckbox text="Screenshot mode:"/>
+					</Row>
+					<Row>
+						<FastScrollModeCheckbox/>
 					</Row>
 					<Row>
 						<CheckBox text="Locked map-ui size:" value={uiState.lockedMapSize} onChange={val=>RunInAction_Set(this, ()=>uiState.lockedMapSize = val)}/>

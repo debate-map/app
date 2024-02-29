@@ -50,6 +50,7 @@ export class MapsState {
 	@O @ignore forcedExpand = false;
 	@O forcedExpand_depth = 1;
 	@O @ignore screenshotMode = false;
+	@O @ignore fastScrollMode = false;
 	//@O nodeLeftBoxEnabled = false;
 	// needs cleanup/formalization to be recommendable, but needed atm for some SL use-cases
 	@O @version(2) nodeStyleRules = [] as NodeStyleRule[];

@@ -128,6 +128,9 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 						}}/>
 					</RowLR>
 					<Row mt={3}>
+						<FastScrollModeCheckbox/>
+					</Row>
+					<Row mt={3}>
 						<Button text="Clear map-view state" onClick={()=>{
 							RunInAction_Set(this, ()=>{
 								uiState.mapViews.delete(map.id);
@@ -181,6 +184,28 @@ export class ScreenshotModeCheckbox extends BaseComponent<{text: string}, {}> {
 					}
 					nav, nav > div {
 						box-shadow: none !important;
+					}
+				`}</style>}
+			</>
+		);
+	}
+}
+
+@Observer
+export class FastScrollModeCheckbox extends BaseComponent<{}, {}> {
+	render() {
+		const {} = this.props;
+		const uiState = store.main.maps;
+		return (
+			<>
+				<TextPlus sel info={`
+					When enabled, scrolling is faster in huge maps (eg. 1000+), but currently causes some UI glitches. (eg. node's bottom panel showing *under* other nodes)
+				`.AsMultiline(0)}>Fast-scroll mode</TextPlus>
+				<CheckBox ml={5} value={uiState.fastScrollMode} onChange={val=>RunInAction_Set(this, ()=>uiState.fastScrollMode = val)}/>
+				{uiState.fastScrollMode && // NOTE: This scrollbar-hiding css applies globally when the fastScrollMode state is set to true, even when panel is "closed", ie. hidden. (hacky, but fine for now)
+				<style>{`
+					.MapUI > .NodeUI {
+						will-change: transform;
 					}
 				`}</style>}
 			</>
