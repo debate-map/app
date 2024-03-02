@@ -14,6 +14,7 @@ import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import * as htmlToImage from "html-to-image";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {TimelinePanel_width} from "UI/@Shared/Timelines/TimelinePanel.js";
 import {MapUI} from "../../MapUI.js";
 
 const changesSince_options = [] as {name: string, value: string}[];
@@ -174,6 +175,8 @@ export class ScreenshotModeCheckbox extends BaseComponent<{text: string}, {}> {
 					4) Child limit-bars are hidden. (not relevant to non-interactive viewing)
 					5) Reduces map-padding to 100px. (for faster full-page screenshots from extension; switch page away and back to apply)
 					6) Node outlines (eg. for recent changes) are hidden.
+					7) Notification-popups are restricted to the left-most 600px of page. (so they don't cover the map-ui)
+					8) Tooltips are restricted to the left-most 600px of page. (so they don't cover the map-ui)
 					Recommended extension for actually taking the full-page screenshot: https://chrome.google.com/webstore/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl
 				`.AsMultiline(0)}>{text}</TextPlus>
 				<CheckBox ml={5} value={uiState.screenshotMode} onChange={val=>RunInAction_Set(this, ()=>uiState.screenshotMode = val)}/>
@@ -184,6 +187,13 @@ export class ScreenshotModeCheckbox extends BaseComponent<{text: string}, {}> {
 					}
 					nav, nav > div {
 						box-shadow: none !important;
+					}
+					.NotificationsUI {
+						max-width: calc(${TimelinePanel_width}px - 10px - 20px) !important;
+					}
+					.rc-tooltip {
+						left: 0 !important;
+						right: calc(100% - 600px);
 					}
 				`}</style>}
 			</>

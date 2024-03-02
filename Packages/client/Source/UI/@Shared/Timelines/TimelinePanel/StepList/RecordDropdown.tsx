@@ -5,7 +5,7 @@ import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Map, GetMap, GetTimelineSteps, GetTimelineStepsReachedByTimeX, GetTimelineStepTimesFromStart, GetTimeline} from "dm_common";
 import {Assert, CopyText, DeepEquals, ShallowEquals, SleepAsync, Timer, VRect, WaitXThenRun} from "js-vextensions";
 import React from "react";
-import {AddNotificationMessage, Observer, RunInAction_Set} from "web-vcore";
+import {AddNotificationMessage, Observer, RunInAction_Set, TextPlus} from "web-vcore";
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {MapState} from "Store/main/maps/mapStates/@MapState.js";
@@ -20,9 +20,12 @@ import {GetTopAudioForStep} from "Utils/OPFS/Map/OPFS_Step.js";
 import {StepList} from "../StepList.js";
 
 @Observer
-export class RecordDropdown extends BaseComponent<{}, {}> {
+export class RecordDropdown extends BaseComponent<{}, {forcedRerenders: number}> {
+	static initialState = {forcedRerenders: 0};
 	render() {
+		const {forcedRerenders} = this.state;
 		const uiState = store.main.timelines.recordPanel;
+
 		const map = GetMap(GetOpenMapID());
 		if (map == null) return;
 		const mapState = GetMapState(map?.id);
@@ -224,7 +227,13 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 							StepList.instance?.SetTargetTime(newTime, "setPosition");
 						}}/>
 						{uiState.recording_endFrame != -1 &&
-						<Text>/{uiState.recording_endFrame}</Text>}
+						<Text>/{uiState.recording_endFrame} (forced rerenders: {forcedRerenders})</Text>}
+					</Row>
+					<Row>
+						<TextPlus info={`Minimum time (in ms) to wait before considering a given frame-render finished. (ie. to save and move past it)`}>Frame min-wait:</TextPlus>
+						<Spinner ml={5} value={uiState.frameRender_minWait} onChange={val=>RunInAction_Set(this, ()=>uiState.frameRender_minWait = val)}/>
+						<TextPlus ml={5} info={`How many ms of "stability" (ie. unchanging pixels in map-ui viewport) before considering a given frame-render finished. (ie. to save and move past it)`}>Stability-wait:</TextPlus>
+						<Spinner ml={5} value={uiState.frameRender_stabilityWait} onChange={val=>RunInAction_Set(this, ()=>uiState.frameRender_stabilityWait = val)}/>
 					</Row>
 					<Row>
 						<Text>Start recording:</Text>
@@ -250,9 +259,22 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			uiState.recording_endFrame = GetTimelineTimeAsFrameNumber(stepTimes.LastOrX() ?? 0);
 		});
 		document.addEventListener("keydown", this.keyHandler);
+		//desktopBridge.RegisterFunction("DebateMap_CaptureFrame_forceBrowserRender", this.ForceBrowserRender, false);
 		this.renderStartTime = Date.now();
 		//this.renderFrameTimer.Start();
-		this.StartRenderingLoop(map, mapState).catch(error=>{
+
+		// first send configuration for the rendering process
+		const scrollViewEl = document.querySelector(".MapUI")?.parentElement?.parentElement;
+		if (scrollViewEl == null) throw new Error("Could not find map-ui element.");
+		const rect = VRect.FromLTWH(scrollViewEl.getBoundingClientRect());
+		const renderConfig: Render_Config = {
+			mapID: map.id, rect, renderFolderName: uiState.renderFolderName,
+			frameRender_minWait: uiState.frameRender_minWait, frameRender_stabilityWait: uiState.frameRender_stabilityWait,
+		};
+		await desktopBridge.Call("DebateMap_FrameCapture_Start", renderConfig);
+
+		// then start the rendering loop
+		this.StartRenderingLoop(renderConfig, mapState).catch(error=>{
 			AddNotificationMessage(`Got error while doing rendering process: ${error}`);
 			this.StopRecording();
 		});
@@ -263,11 +285,18 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 
 		//this.renderFrameTimer.Stop();
 		document.removeEventListener("keydown", this.keyHandler);
+		//desktopBridge.UnregisterFunction("DebateMap_CaptureFrame_forceBrowserRender", this.ForceBrowserRender);
 		RunInAction_Set(this, ()=>{
 			uiState.recording = false;
 			uiState.recording_endFrame = -1;
 		});
+
+		desktopBridge.Call("DebateMap_FrameCapture_Stop");
 	}
+
+	ForceBrowserRender = ()=>{
+		this.SetState({forcedRerenders: (this.state.forcedRerenders ?? 0) + 1});
+	};
 
 	keyHandler = (e: KeyboardEvent)=>{
 		if (e.key == "p") {
@@ -280,7 +309,7 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 	};
 
 	renderStartTime = 0;
-	async StartRenderingLoop(map: Map, mapState: MapState) {
+	async StartRenderingLoop(renderConfig: Render_Config, mapState: MapState) {
 		const uiState = store.main.timelines;
 		while (uiState.recordPanel.recording) {
 			if (mapState.playingTimeline_time == null) {
@@ -303,16 +332,23 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 				await SleepAsync(50);
 			}
 
-			// capture current frame (this requires that the debate-map chrome-extension is installed)
+			// capture current frame (this requires the site to be open in the debate-map electron app)
 			let frameCaptured = false;
 			while (uiState.recordPanel.recording && !frameCaptured) {
 				try {
-					await this.CaptureFrame(map.id, uiState.recordPanel.renderFolderName, currentFrameTime);
+					await this.CaptureFrame(currentFrameNumber);
 					frameCaptured = true;
 				} catch (ex) {
+					// if we hit a "fatal error", stop the whole rendering loop (else, just show it in console, but continue)
 					if (ex?.message?.includes("Image size mismatch")) {
 						throw ex;
+					} else if (ex?.message?.includes("Did not obtain a valid frame-capture within time-limit.")) {
+						// we may just have missed the initial frame-render, so force rerender of ui, such that the backend's frame-render listener can see a new entry
+						this.ForceBrowserRender();
+						console.error(ex);
+						await SleepAsync(50);
 					} else {
+						console.error(ex);
 						await SleepAsync(50);
 					}
 				}
@@ -322,9 +358,6 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 			if (!uiState.recordPanel.recording) break;
 
 			// if we're now past the last frame in the timeline, stop the timer
-			/*const steps = await GetTimelineSteps.Async(mapState.selectedTimeline ?? "n/a");
-			const reachedSteps = await GetTimelineStepsReachedByTimeX.Async(mapState.selectedTimeline ?? "n/a", currentFrameTime);
-			const justRenderedLastFrame = reachedSteps.length >= steps.length;*/
 			const justRenderedLastFrame = currentFrameNumber >= uiState.recordPanel.recording_endFrame;
 			if (justRenderedLastFrame) {
 				console.log(`Just rendered last frame (reached frame ${currentFrameNumber}), so stopping recording.`);
@@ -335,45 +368,27 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 		}
 	}
 
-	CaptureFrame(mapID: string, renderFolderName: string, frameTime: number): Promise<void> {
+	CaptureFrame(frameNumber: number): Promise<void> {
 		let resolved = false;
 		let rejected = false;
 		return new Promise<void>((resolve, reject)=>{
-			const frameNumber = GetTimelineTimeAsFrameNumber(frameTime);
 			const scrollViewEl = document.querySelector(".MapUI")?.parentElement?.parentElement;
 			if (scrollViewEl == null) {
 				rejected = true;
 				reject(new Error("Could not find map-ui element."));
 				return;
 			}
-			const rect = VRect.FromLTWH(scrollViewEl.getBoundingClientRect());
 
-			const message = {
-				//type: "DebateMap_CaptureFrame",
-				mapID, rect,
-				renderFolderName, currentFrameTime: frameTime, currentFrameNumber: frameNumber,
-			};
-			type Message = typeof message;
-			//window.postMessage(message, "*"); // to extension
-			desktopBridge.Call("DebateMap_CaptureFrame", message); // to electron
-
-			/*const listener = (event: MessageEvent<any>)=>{
-				// We only accept messages from ourselves
-				if (event.source != window) return;
-
-				if (event.data?.type == "DebateMap_CaptureFrame_done") {
-					if (DeepEquals(event.data.ExcludeKeys("type"), message.ExcludeKeys("type"))) {
-						console.log("Finished rendering frame:", frameNumber);
-						//window.removeEventListener("message", listener); // from extension
-						desktopBridge.UnregisterFunction("DebateMap_CaptureFrame_done", listener); // from electron
-						resolved = true;
-						resolve();
-					}
+			const listener = (renderedFrameNumber: number, error?: string)=>{
+				//if (!DeepEquals(message2, message)) {
+				if (renderedFrameNumber != frameNumber) {
+					console.error("Received frame number doesn't match expected frame number. @received:", renderedFrameNumber, "@expected:", frameNumber);
+					return;
 				}
-			};
-			window.addEventListener("message", listener); // from extension*/
+				// only remove listener once we receive *our* callback (ie. if we receive a callback for a different frame [as handled above], don't remove our listener yet)
+				removeListener();
 
-			const listener = (message2: Message, error?: string)=>{
+				//console.log("Received:", renderedFrameNumber, "@error:", error);
 				if (error != null) {
 					console.error("Error occurred during frame capture:", error);
 					rejected = true;
@@ -381,23 +396,25 @@ export class RecordDropdown extends BaseComponent<{}, {}> {
 					return;
 				}
 
-				if (DeepEquals(message2, message)) {
-					console.log("Finished rendering frame:", frameNumber);
-					desktopBridge.UnregisterFunction("DebateMap_CaptureFrame_done", listener); // from electron
-					resolved = true;
-					resolve();
-				}
+				console.log("Finished rendering frame:", frameNumber);
+				resolved = true;
+				resolve();
 			};
-			desktopBridge.RegisterFunction("DebateMap_CaptureFrame_done", listener, false); // from electron
+			const removeListener = ()=>desktopBridge.UnregisterFunction("DebateMap_CaptureFrame_done", listener);
+			desktopBridge.RegisterFunction("DebateMap_CaptureFrame_done", listener, false); // set up listener
+			desktopBridge.Call("DebateMap_CaptureFrame", {currentFrameNumber: frameNumber}); // make call
 
-			// 500ms was not enough
-			WaitXThenRun(1000, ()=>{
+			// backend has its own "give-up timeout", so wait a long time here before calling it quits (could happen, eg. if an unhandled error occurred -- currently also happens for last frame)
+			WaitXThenRun(5000, ()=>{
 				if (resolved || rejected) return;
-				reject(new Error(`Timed out waiting for frame ${frameNumber} to render.`));
+				removeListener(); // once we've given up, don't allow our listener to trigger anymore
+				reject(new Error(`Timed out waiting for frame ${frameNumber} to render. (error probably occurred in backend)`));
 			});
 		});
 	}
 }
+// sync:desktop
+type Render_Config = {mapID: string, rect: VRect, renderFolderName: string, frameRender_minWait: number, frameRender_stabilityWait: number};
 
 export function GetPlaybackTimeAsFrameNumber() {
 	const currentFrameTime = GetPlaybackTime();

@@ -45,6 +45,8 @@ class RecordPanelState {
 	@O lockedMapSize_x = 1920;
 	@O lockedMapSize_y = 1080;
 	@O renderFolderName = "RenderTest";
+	@O frameRender_minWait = 100;
+	@O frameRender_stabilityWait = 300;
 	@O @ignore recording = false;
 	@O @ignore recording_endFrame = -1;
 }
