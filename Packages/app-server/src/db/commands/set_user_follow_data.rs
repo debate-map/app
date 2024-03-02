@@ -49,8 +49,8 @@ pub struct SetUserFollowDataResult {
 pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetUserFollowDataInput, _extras: NoExtras) -> Result<SetUserFollowDataResult, Error> {
 	let SetUserFollowDataInput { targetUser, userFollow } = input;
 
-	let user_hidden = get_user_hidden(ctx, &targetUser).await?;
-	assert_user_can_modify(ctx, actor, &user_hidden).await?;
+	let actor_hidden_data = get_user_hidden(ctx, &actor.id).await?;
+	assert_user_can_modify(ctx, actor, &actor_hidden_data).await?;
 	
 	let user_follow_as_json_value = if let Some(userFollow) = userFollow { Some(serde_json::to_value(userFollow)?) } else { None };
 	jsonb_set(&ctx.tx, "userHiddens", &actor.id, "extras", vec!["userFollows".to_owned(), targetUser], user_follow_as_json_value).await?;

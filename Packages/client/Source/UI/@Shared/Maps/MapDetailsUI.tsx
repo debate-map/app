@@ -82,7 +82,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 
 								${ChildLayout_optionsStr}
 							`.AsMultiline(0)}>Default:</TextPlus>
-							<Select ml={5} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
+							<Select ml={5} enabled={enabled} options={[{name: "Unchanged", value: null} as any, ...GetEntries(ChildLayout, a=>ChildLayout_niceNames[a])]}
 								value={newData.extras.defaultChildLayout} onChange={val=>Change(newData.extras.defaultChildLayout = val)}/>
 						</>}
 					</RowLR>}
