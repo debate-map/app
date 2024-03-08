@@ -3,15 +3,18 @@ use std::net::{IpAddr, Ipv4Addr};
 use std::str::FromStr;
 use rust_shared::anyhow::{anyhow, Error, bail, ensure};
 use rust_shared::axum::extract::Path;
+use rust_shared::bytes::Bytes;
 use rust_shared::domains::DomainsConstants;
+use rust_shared::http_body_util::Full;
+use rust_shared::hyper::StatusCode;
+use rust_shared::hyper_util::client::legacy::connect::HttpConnector;
 use rust_shared::itertools::Itertools;
 use rust_shared::reqwest::header::SET_COOKIE;
+use rust_shared::utils::general_::extensions::ToOwnedV;
+use rust_shared::utils::net::full_body_from_str;
 use rust_shared::{futures, axum, tower, tower_http, async_graphql_axum, base64};
 use axum::body::HttpBody;
-use rust_shared::hyper::server::conn::AddrStream;
-use rust_shared::hyper::{client::HttpConnector, Body, Server, StatusCode};
-use rust_shared::hyper::client::{Client};
-use rust_shared::hyper::service::{service_fn, make_service_fn};
+use rust_shared::hyper::service::{service_fn};
 use axum::extract::{FromRequest, Extension};
 use axum::http::{Method, HeaderValue};
 use axum::http::header::CONTENT_TYPE;
@@ -27,25 +30,25 @@ use rust_shared::utils::type_aliases::JSONValue;
 use tracing::info;
 use rust_shared::url::Url;
 use std::{convert::TryFrom, net::SocketAddr};
-use tower_http::cors::{CorsLayer, Origin};
+use tower_http::cors::{CorsLayer};
 use futures::future::{self, Future};
 
 use crate::gql::_general::ensure_admin_key_is_correct;
 
-pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
+pub type HyperClient = rust_shared::hyper_util::client::legacy::Client<HttpConnector, Full<Bytes>>;
 
 pub const PROMETHEUS_URL: &str = "http://loki-stack-prometheus-server.monitoring.svc.cluster.local:80"; //:9090";
 pub const ALERTMANAGER_URL: &str = "http://loki-stack-prometheus-alertmanager.monitoring.svc.cluster.local:80"; //:9093";
 
 /// Endpoint needed to workaround cross-domain cookie restrictions, for when monitor-client is served by webpack.
 /// See CookieTransferHelper.tsx for the client-side handling of the exchange.
-pub async fn store_admin_key_cookie(_req: Request<Body>) -> Response<Body> {
+pub async fn store_admin_key_cookie(_req: Request<Full<Bytes>>) -> Response<Full<Bytes>> {
     let response_result: Result<_, Error> = try {
         if !DomainsConstants::new().on_server_and_dev { Err(anyhow!("Can only use this helper in a dev cluster."))?; }
 
         let response = Response::builder()
             .header(CONTENT_TYPE, "text/html; charset=utf-8")
-            .body(Body::from(r#"<html><head><script>
+            .body(full_body_from_str(r#"<html><head><script>
                 window.addEventListener('message', e=>{
                     if (e.origin !== 'http://localhost:5131') return;
                     if (e.data.adminKey != null) {
@@ -66,7 +69,7 @@ pub async fn store_admin_key_cookie(_req: Request<Body>) -> Response<Body> {
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 //.header(CONTENT_TYPE, "text/html; charset=utf-8")
                 .header(CONTENT_TYPE, "application/json; charset=utf-8")
-                .body(Body::from(response_json.to_string()))
+                .body(full_body_from_str(response_json.to_string()))
                 .unwrap();
             response
         }

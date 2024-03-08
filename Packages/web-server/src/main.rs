@@ -28,7 +28,7 @@ use axum::{
         header::{CONTENT_TYPE}
     }, middleware,
 };
-use rust_shared::{serde_json::json, tokio};
+use rust_shared::{serde_json::json, tokio, http_body_util::BodyExt};
 use tower_http::cors::{CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::{Level, info};
@@ -82,8 +82,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         //_ => res.map(boxed),
                         _ => {
                             let (parts, body) = res.into_parts();
-                            let body2 = body.into();
-                            Response::from_parts(parts, body2)
+                            let bytes = body.collect().await.unwrap().to_bytes();
+                            Response::from_parts(parts, Body::from(bytes))
                         }
                     }
                 },

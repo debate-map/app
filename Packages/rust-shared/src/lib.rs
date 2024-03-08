@@ -45,7 +45,9 @@ pub extern crate once_cell;
 pub extern crate uuid;
 pub extern crate url;
 pub extern crate futures;
+pub extern crate http_body_util;
 pub extern crate hyper;
+pub extern crate hyper_util;
 pub extern crate reqwest;
 pub extern crate serde;
 pub extern crate serde_json;
@@ -104,6 +106,7 @@ pub mod utils {
     pub mod mtx {
         pub mod mtx;
     }
+    pub mod net;
     pub mod time;
     pub mod type_aliases;
 }
