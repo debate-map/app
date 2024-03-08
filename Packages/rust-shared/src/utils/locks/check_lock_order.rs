@@ -1,4 +1,6 @@
-#[derive(PartialEq, Eq)]
+use std::marker::ConstParamTy;
+
+#[derive(PartialEq, Eq, ConstParamTy)]
 pub enum Lock {
     unknown_prior = 0,
     //LQGroup_groups_x = 1,

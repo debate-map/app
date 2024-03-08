@@ -2,7 +2,6 @@ use rust_shared::{SubError, serde, serde_json, async_graphql, GQLError};
 use rust_shared::anyhow::{Error};
 use rust_shared::async_graphql::{Object, Result, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject, Context};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use rust_shared::hyper::{Body, Method};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;

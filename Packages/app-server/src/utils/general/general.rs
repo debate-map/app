@@ -3,7 +3,7 @@ use rust_shared::{anyhow::{anyhow, bail, Context, Error}, serde_json, utils::{ty
 use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputType, Object, Positioned, parser::types::Field};
 use deadpool_postgres::Pool;
 use rust_shared::flume::Sender;
-use flurry::Guard;
+//use flurry::Guard;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
 use rust_shared::hyper::Body;
 use rust_shared::itertools::Itertools;
@@ -13,7 +13,7 @@ use rust_shared::tokio::sync::RwLock;
 use rust_shared::tokio_postgres::{Client, Row, types::ToSql};
 use rust_shared::uuid::Uuid;
 //use rust_shared::tokio::sync::Mutex;
-use metrics::{counter, histogram, increment_counter};
+use metrics::{counter, histogram};
 use std::hash::Hash;
 
 use crate::{store::live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}};
@@ -54,7 +54,7 @@ pub async fn rw_locked_hashmap__get_entry_or_insert_with<K: std::fmt::Debug, V: 
     (val_clone, true, count)
 }
 
-pub fn flurry_hashmap_into_hashmap<K: Hash + Eq + Clone, V: Clone>(map: &flurry::HashMap<K, V>, guard: Guard<'_>) -> HashMap<K, V> {
+/*pub fn flurry_hashmap_into_hashmap<K: Hash + Eq + Clone, V: Clone>(map: &flurry::HashMap<K, V>, guard: Guard<'_>) -> HashMap<K, V> {
     let mut result = HashMap::new();
     for (key, value) in map.iter(&guard) {
         result.insert(key.clone(), value.clone());
@@ -73,7 +73,7 @@ pub fn flurry_hashmap_into_json_map<K: Hash + Ord + Eq + Clone + Display, V: Ser
         }
     }
     Ok(result)
-}
+}*/
 
 pub fn match_cond_to_iter<T>(cond_x: bool, iter_y: impl Iterator<Item = T> + 'static, iter_z: impl Iterator<Item = T> + 'static) -> Box<dyn Iterator<Item = T>> {
     match cond_x {

@@ -13,17 +13,17 @@ async-broadcast = "0.4.0"
 deadpool = {version = "0.9.2", features = ["rt_tokio_1"]}
 deadpool-postgres = "0.10.1"
 #dashmap = "4.0.2" # the API is hard to use correctly/safely (there are rules you have to follow that aren't compiled-ensured)
-flurry = "0.4.0"
+#flurry = "0.4.0"
 async-recursion = "1.0.0"
 #refinery = { version = "0.8.4", features = ["tokio-postgres"]}
-metrics = "0.18.1"
+metrics = "0.22.1"
 lazy_static = "1.4.0"
 num_cpus = "1.0"
-jsonschema = "0.16"
+jsonschema = "0.17.1"
 #tokio-pg-mapper = "0.2.0"
 #tokio-pg-mapper-derive = "0.2.0"
 dyn-clone = "1.0.4"
-oauth2 = "4.3.0"
+oauth2 = "4.4.2"
 dotenv = "0.15.0"
 lexicon_fractional_index = "0.0.3"
 

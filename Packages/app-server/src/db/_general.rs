@@ -1,7 +1,6 @@
 use rust_shared::anyhow::{Context, Error, anyhow, ensure};
 use rust_shared::async_graphql::{Object, Schema, Subscription, ID, async_stream, OutputType, scalar, EmptySubscription, SimpleObject, InputObject};
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use rust_shared::hyper::{Body, Method};
 use rust_shared::indoc::indoc;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::db_constants::SYSTEM_USER_ID;

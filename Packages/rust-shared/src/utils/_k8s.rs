@@ -2,8 +2,10 @@ use std::{env, fs::{self, File}, str::FromStr, sync::Arc, io::Read, time::System
 
 use anyhow::{Context, anyhow, Error, bail, ensure};
 use axum::http;
+use bytes::Bytes;
 use futures::StreamExt;
-use hyper::{upgrade, Body, client::HttpConnector};
+use http_body_util::Full;
+use hyper::{upgrade, body::Body};
 use hyper_rustls::HttpsConnector;
 use itertools::Itertools;
 use reqwest::Url;
@@ -143,8 +145,9 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     let req = tungstenite::http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
         .header("Authorization", format!("Bearer {token}"))
-        .body(vec![]).unwrap();
         //.body(()).unwrap();
+        //.body(vec![]).unwrap();
+        .body(Full::new(Bytes::new())).unwrap();
 
     // commented; this doesn't work for endpoints that require https->ws upgrade (eg. exec), so we just always use the semi-manual approach below instead
     /*let pods: Api<Pod> = Api::namespaced(client, pod_namespace);

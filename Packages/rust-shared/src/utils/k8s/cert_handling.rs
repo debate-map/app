@@ -1,9 +1,12 @@
 use std::{sync::Arc, fs::File, io::Read};
 
 use anyhow::Error;
-use hyper::client::HttpConnector;
+use bytes::Bytes;
+use http_body_util::Full;
+use hyper::body::{self, Body};
 use hyper_rustls::HttpsConnector;
-use rustls::ClientConfig;
+use hyper_util::{client::legacy::{connect::HttpConnector, Client}, rt::TokioExecutor};
+use rustls::{client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier}, internal::msgs::codec::Codec, pki_types::{CertificateDer, ServerName, UnixTime}, ClientConfig, DigitallySignedStruct};
 
 pub fn get_reqwest_client_with_k8s_certs() -> Result<reqwest::Client, Error> {
     /*let mut buf = Vec::new();
@@ -22,7 +25,7 @@ pub fn get_reqwest_client_with_k8s_certs() -> Result<reqwest::Client, Error> {
 }
 
 // this function was created for use by exec_command_in_another_pod; it may need tweaking to support other use-cases
-pub fn get_hyper_client_with_k8s_certs() -> Result<hyper::Client<HttpsConnector<HttpConnector>>, Error> {
+pub fn get_hyper_client_with_k8s_certs() -> Result<Client<HttpsConnector<HttpConnector>, Full<Bytes>>, Error> {
     // to implement/workaround tls handling, see here: https://stackoverflow.com/a/72847362/2441655
     //hyper::client::Builder::build(&self, connect_with_config(request, config, max_redirects))
     let https = hyper_rustls::HttpsConnectorBuilder::new()
@@ -32,9 +35,11 @@ pub fn get_hyper_client_with_k8s_certs() -> Result<hyper::Client<HttpsConnector<
         .enable_http1()
         .build();
 
-    let client: hyper::Client<_, hyper::Body> = hyper::Client::builder().build(https);
-    Ok(client)
+    /*let client: Client<_, hyper::body::Body> = Client::builder().build(https);
+    Ok(client)*/
+    Ok(Client::builder(TokioExecutor::new()).build(https))
 }
+
 pub fn get_rustls_config_dangerous() -> Result<ClientConfig, Error> {
     let mut store = rustls::RootCertStore::empty();
 
@@ -42,10 +47,11 @@ pub fn get_rustls_config_dangerous() -> Result<ClientConfig, Error> {
     File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?
         .read_to_end(&mut buf)?;
     //let cert = reqwest::Certificate::from_pem(&buf)?;
-    store.add_parsable_certificates(&[buf]);
+    let cert = CertificateDer::read_bytes(&buf);
+    store.add_parsable_certificates(cert);
     
     let mut config = ClientConfig::builder()
-        .with_safe_defaults()
+        //.with_safe_defaults()
         .with_root_certificates(store)
         .with_no_client_auth();
 
@@ -58,17 +64,39 @@ pub fn get_rustls_config_dangerous() -> Result<ClientConfig, Error> {
 
     Ok(config)
 }
+#[derive(Debug)]
 pub struct NoCertificateVerification {}
-impl rustls::client::ServerCertVerifier for NoCertificateVerification {
+impl ServerCertVerifier for NoCertificateVerification {
     fn verify_server_cert(
         &self,
-        _end_entity: &rustls::Certificate,
-        _intermediates: &[rustls::Certificate],
-        _server_name: &rustls::ServerName,
-        _scts: &mut dyn Iterator<Item = &[u8]>,
-        _ocsp: &[u8],
-        _now: std::time::SystemTime,
-    ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
-        Ok(rustls::client::ServerCertVerified::assertion())
+        _end_entity: &CertificateDer<'_>,
+        _intermediates: &[CertificateDer<'_>],
+        _server_name: &ServerName<'_>,
+        _ocsp_response: &[u8],
+        _now: UnixTime,
+    ) -> Result<ServerCertVerified, rustls::Error> {
+        Ok(ServerCertVerified::assertion())
+    }
+
+    fn verify_tls12_signature(
+        &self,
+        _message: &[u8],
+        _cert: &CertificateDer<'_>,
+        _dss: &DigitallySignedStruct,
+    ) -> Result<HandshakeSignatureValid, rustls::Error> {
+        Ok(HandshakeSignatureValid::assertion())
+    }
+    
+    fn verify_tls13_signature(
+        &self,
+        message: &[u8],
+        cert: &CertificateDer<'_>,
+        dss: &DigitallySignedStruct,
+    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+        Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+    }
+    
+    fn supported_verify_schemes(&self) -> Vec<rustls::SignatureScheme> {
+        vec![]
     }
 }

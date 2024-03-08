@@ -19,7 +19,7 @@
     dead_code,
 )]
 
-use rust_shared::{futures, axum::{self, response::{IntoResponse, Response}, body::{Empty, self, Full, Body, boxed}, extract::Path, http::{header, HeaderValue, StatusCode}}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, tokio::fs, utils::general::k8s_env};
+use rust_shared::{axum::{self, body::Body, extract::Path, http::{header, HeaderValue, StatusCode}, response::{IntoResponse, Response}}, futures, tokio::{fs, net::TcpListener}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, utils::{general::k8s_env, general_::extensions::ToOwnedV}};
 use axum::{
     response::{Html},
     routing::{get},
@@ -29,7 +29,7 @@ use axum::{
     }, middleware,
 };
 use rust_shared::{serde_json::json, tokio};
-use tower_http::cors::{CorsLayer, Origin};
+use tower_http::cors::{CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::{Level, info};
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, filter, Layer};
@@ -69,22 +69,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 Err(_) => {
                                     return Response::builder()
                                         .status(StatusCode::NOT_FOUND)
-                                        .body(boxed(Body::from("Index file not found.")))
+                                        .body(Body::new("Index file not found.".o()))
                                         .unwrap()
                                 }
                             };
 
                             Response::builder()
                                 .status(StatusCode::OK)
-                                .body(boxed(Body::from(index_content)))
+                                .body(Body::new(index_content))
                                 .unwrap()
                         },
-                        _ => res.map(boxed),
+                        //_ => res.map(boxed),
+                        _ => {
+                            let (parts, body) = res.into_parts();
+                            let body2 = body.into();
+                            Response::from_parts(parts, body2)
+                        }
                     }
                 },
                 Err(err) => Response::builder()
                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(boxed(Body::from(format!("Error: {err}")))).unwrap()
+                    .body(Body::new(format!("Error: {err}"))).unwrap()
             }
         }))
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));    
@@ -93,9 +98,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Web-server launched. @env:{:?} Listening on http://{}", k8s_env(), addr);
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await?;
+    let listener = TcpListener::bind(&addr).await.unwrap();
+    axum::serve(listener, app.into_make_service()).await?;
 
     Ok(())
 }

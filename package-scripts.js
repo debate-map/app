@@ -145,6 +145,16 @@ const {nmWatchPaths} = require("./Scripts/NodeModuleWatchPaths.js");
 const startBestShellCmd = `sh -c "clear; (bash || ash || sh)"`;
 Object.assign(scripts, {
 	//"cargo-test": `${SetEnvVarsCmd({RUSTC_BOOTSTRAP: 1})} cargo test`, // for powershell: "$env:RUSTC_BOOTSTRAP = '1'; cargo test"
+
+	//"cargo-match-ra": "$env:FOR_RUST_ANALYZER = '1'; $env:STRIP_ASYNC_GRAPHQL = '1';",
+	//"cargo-match-ra": "cmd /C \"set FOR_RUST_ANALYZER=1 && set STRIP_ASYNC_GRAPHQL=1 && pwsh\"",
+	"env-ra": "cmd /C \"set FOR_RUST_ANALYZER=1 && set STRIP_ASYNC_GRAPHQL=1 && pwsh\"",
+	// this lets you do `npm start cargo-check-ra` to get nicely formatted error messages, while keeping the compile cache of rust-analyzer (much faster!)
+	/*"cargo-match-ra-old": "node -e \"process.env.FOR_RUST_ANALYZER = '1'; process.env.STRIP_ASYNC_GRAPHQL = '1';\"",
+	"cargo-match-ra1": "node -e \"Object.assign(process.env, {FOR_RUST_ANALYZER: '1', STRIP_ASYNC_GRAPHQL: '1'});\"",
+	"cargo-match-ra2": "cmd /C \"set FOR_RUST_ANALYZER=2 && pwsh\"",*/
+	"cargo-check-ra": "cmd /C \"set FOR_RUST_ANALYZER=1 && set STRIP_ASYNC_GRAPHQL=1 && cargo check --target-dir ./Temp/rust-analyzer-check\"",
+
 	"cargo-test": `cargo test`,
 	// gets stuff we might want, from the k8s pods
 	kget: {

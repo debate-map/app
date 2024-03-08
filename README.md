@@ -21,7 +21,7 @@ Areas where help would be welcome:
 * Completing development tasks in TypeScript (frontend) or Rust (backend). You can find a [structured view here](https://github.com/orgs/debate-map/projects/1/views/1), or the unstructured [list of tasks/issues here](https://github.com/debate-map/app/issues).
 * Contributing to the content on the debate-map website. (eg. expanding existing maps, creating new ones, improving phrasing or organization, voting on existing claims/arguments)
 * Assisting with creation of videos demonstrating site functionality and usefulness. (whether creating your own, or getting in touch to assist with a video-series I'm working on for YouTube)
-* Providing feedback on the site (or general direction of debate-mapping tools) by joining the [Canonical Debate Lab slack server](https://join.slack.com/t/canonicaldebatelab/shared_invite/zt-408acfmb-qhowbidwY0aKaET7wP_IEQ) (Debate Map is one of several projects associated with the CDL group)
+* Providing feedback on the site (or general direction of debate-mapping tools) by joining the [Canonical Debate Lab slack server](https://join.slack.com/t/canonicaldebatelab/shared_invite/zt-408acfmb-qhowbidwY0aKaET7wP_IEQ). (Debate Map is one of several projects associated with the CDL group)
 
 # Associated projects
 
@@ -45,14 +45,14 @@ Development of Debate Map is partially supported by [The Society Library](https:
 # Packages
 
 * [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
-* [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. (Rust)
-* [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Serves database queries and backend commands. (Rust)
-* [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. (TypeScript)
-* [monitor-backend](https://github.com/debate-map/app/tree/master/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/master/Packages/monitor-backend#design-goals)). (Rust)
-* [js-common](https://github.com/debate-map/app/tree/master/Packages/js-common): Code shared between the various JS packages. (TypeScript)
+* [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. \[Rust]
+* [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Serves database queries and backend commands. \[Rust]
+* [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. \[TypeScript]
+* [monitor-backend](https://github.com/debate-map/app/tree/master/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/master/Packages/monitor-backend#design-goals)). \[Rust]
+* [js-common](https://github.com/debate-map/app/tree/master/Packages/js-common): Code shared between the various JS packages. \[TypeScript]
 * [deploy](https://github.com/debate-map/app/tree/master/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
-* [rust-shared](https://github.com/debate-map/app/tree/master/Packages/rust-shared): Code shared between the various Rust packages. (Rust)
-* [rust-macros](https://github.com/debate-map/app/tree/master/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in)
+* [rust-shared](https://github.com/debate-map/app/tree/master/Packages/rust-shared): Code shared between the various Rust packages. \[Rust]
+* [rust-macros](https://github.com/debate-map/app/tree/master/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in) \[Rust]
 <!--
 // planned packages
 * [graphlink-server](https://github.com/debate-map/app/tree/master/Packages/graphlink-server): Library providing a GraphQL endpoint based on a PostgreSQL database, with support for live-queries. (Rust) [to be split into separate repo]

@@ -1,5 +1,6 @@
+use bytes::Bytes;
+use http_body_util::Full;
 use hyper::http::{self, Response, StatusCode};
-use hyper::Body;
 use jwt_simple::reexports::rand;
 use thiserror::Error;
 use tokio_tungstenite::tungstenite as ws;
@@ -44,7 +45,7 @@ pub enum UpgradeConnectionError {
 
 // Verify upgrade response according to RFC6455.
 // Based on `tungstenite` and added subprotocol verification.
-pub fn verify_response(res: &Response<Body>, key: &str) -> Result<(), UpgradeConnectionError> {
+pub fn verify_response(res: &Response<Full<Bytes>>, key: &str) -> Result<(), UpgradeConnectionError> {
     if res.status() != StatusCode::SWITCHING_PROTOCOLS {
         return Err(UpgradeConnectionError::ProtocolSwitch(res.status()));
     }

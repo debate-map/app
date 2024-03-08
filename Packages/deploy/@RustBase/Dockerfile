@@ -4,8 +4,8 @@
 	#FROM rust:1.65.0-bullseye
 
 	# use the instrumentisto mirror of rust-nightly, so we can pin to a specific build (avoiding a rebuild of the whole build-chain every 24hrs, when the regular rust-nightly image gets re-pushed)
-	# NOTE: sync with entry in Tiltfile
-	FROM instrumentisto/rust:nightly-bullseye-2023-05-24
+	# NOTE: sync with version in rust-toolchain.toml (and entry in Tiltfile [edit: this part seems outdated?])
+	FROM instrumentisto/rust:nightly-bullseye-2024-03-05
 
 	# commented; these args aren't used in this dockerfile anyway, so leave them out, to allow complete skipping of this dockerfile (execution can be fast anyway when most steps cached, but this way keeps the logs leaner)
 	#ARG env_ENV

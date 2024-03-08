@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::once_cell::sync::{Lazy, OnceCell};
-use rust_shared::hyper::{Request, Body, Method};
+use rust_shared::hyper::{Request};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use oauth2::{PkceCodeChallenge, RevocationUrl, RedirectUrl, TokenUrl, AuthUrl, Scope, CsrfToken, ClientSecret, ClientId, AuthorizationCode, StandardRevocableToken};

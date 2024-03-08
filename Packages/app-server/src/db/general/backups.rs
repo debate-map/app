@@ -1,7 +1,7 @@
 use std::process::Command;
 
 use rust_shared::{axum::{self, response::{self, IntoResponse}, extract::Extension}, tower_http, utils::{general::k8s_env, _k8s::{exec_command_in_another_pod, get_k8s_pod_basic_infos}, general_::extensions::ToOwnedV}, anyhow::{bail, ensure}, itertools::Itertools};
-use rust_shared::hyper::{Request, Body, Method};
+use rust_shared::hyper::{Request, Method};
 use rust_shared::async_graphql::{ID, SimpleObject, InputObject};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde_json::{Value, json};

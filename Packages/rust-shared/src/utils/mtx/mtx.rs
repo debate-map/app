@@ -8,7 +8,7 @@ use serde_json;
 use tokio;
 use flume::{Sender, Receiver};
 
-use crate::hyper::{Client, Method, Request, Body};
+use crate::hyper::{Method, Request};
 use indexmap::IndexMap;
 use crate::rust_macros::wrap_slow_macros;
 use crate::utils::time::time_since_epoch_ms;
