@@ -16,7 +16,7 @@ use tower::ServiceBuilder;
 use super::{type_aliases::JSONValue, k8s::cert_handling::get_reqwest_client_with_k8s_certs};
 use tracing::{info, error, instrument::WithSubscriber, warn};
 
-use crate::{domains::{get_server_url, DomainsConstants}, utils::k8s::{cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_dangerous}, k8s_client::{upgrade_to_websocket, upgrade_to_websocket_reqwest}, k8s_structs::K8sSecret}};
+use crate::{domains::{get_server_url, DomainsConstants}, utils::k8s::{cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_dangerous}, k8s_client::{upgrade_to_websocket}, k8s_structs::K8sSecret}};
 
 #[derive(Debug)]
 pub struct K8sPodBasicInfo {
@@ -135,28 +135,19 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     }
     query_str.push_str("&stdin=true&stderr=true&stdout=true&tty=true");
 
-    // this route gets error: "URL error: URL scheme not supported"
-    // (seems the issue is that the function used expects a websocket connection from the start, ie. it cannot handle the tricky upgrade part)
-    //let res_as_str = process_exec_ws_messages(req).await?;
-
     // using hyper
     let client = get_hyper_client_with_k8s_certs().context("Failed to create hyper client with k8s certs.")?;
-    //let req = tungstenite::http::Request::builder().uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-    let req = http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
+    let req = hyper::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
         .header("Authorization", format!("Bearer {token}"))
-        //.body(())
-        //.body(vec![])
         //.body(Full::new(Bytes::new()))
         .body(Empty::<Bytes>::new())
-        //.body(ReqwestBody::empty())
         .unwrap();
     let response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")?;
 
     // using reqwest
     /*let client = get_reqwest_client_with_k8s_certs().context("Failed to create reqwest client with k8s certs.")?;
     let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-        //.header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
         //.body(vec![])
         .body(Bytes::new())
@@ -209,29 +200,3 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     info!("Got response from k8s server, on trying to run command using exec. @command:\"{} {}\" @response_len: {}", command_name, command_args.join(" "), res_as_str.len());
     Ok(res_as_str)
 }
-
-/*pub async fn process_exec_ws_messages(req: tokio_tungstenite::tungstenite::http::Request<()>) -> Result<String, Error> {
-    //let (mut socket, response) = connect_async(req).await?;
-    let (mut socket, response) = connect_async_tls_with_config(req, None, Some(tokio_tungstenite::Connector::Rustls(Arc::new(get_rustls_config_dangerous()?)))).await?;
-    info!("Connection made with k8s api's exec endpoint. @response:{response:?}");
-
-    let mut combined_result = String::new();
-    loop {
-        let msg = match socket.next().await {
-            None => {
-                // when None is returned, it means stream has ended, so break this loop
-                break;
-            },
-            Some(entry) => match entry {
-                Ok(msg) => msg,
-                Err(err) => {
-                    bail!("Error reading message from websocket connection:{}", err);
-                }
-            },
-        };
-        let msg_as_str = msg.into_text().unwrap();
-        info!("Got websocket message: {}", msg_as_str);
-        combined_result.push_str(&msg_as_str);
-    }
-    Ok(combined_result)
-}*/

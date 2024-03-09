@@ -11,6 +11,13 @@ use tokio_tungstenite::tungstenite as ws;
 // Binary subprotocol v4. See `Client::connect`.
 pub const WS_PROTOCOL: &str = "v4.channel.k8s.io";
 
+/// Generate a random key for the `Sec-WebSocket-Key` header.
+/// This must be nonce consisting of a randomly selected 16-byte value in base64.
+pub fn sec_websocket_key() -> String {
+    let r: [u8; 16] = rand::random();
+    base64::encode(r)
+}
+
 /// Possible errors from upgrading to a WebSocket connection
 #[derive(Debug, Error)]
 pub enum UpgradeConnectionError {
@@ -71,7 +78,7 @@ pub fn verify_response(res: &Response<impl Body>, key: &str) -> Result<(), Upgra
     Ok(())
 }
 
-/// Verify upgrade response according to RFC6455.
+/*/// Verify upgrade response according to RFC6455.
 /// Based on `tungstenite` and added subprotocol verification.
 pub fn verify_response_reqwest(res: &reqwest::Response, key: &str) -> Result<(), UpgradeConnectionError> {
     if res.status() != StatusCode::SWITCHING_PROTOCOLS {
@@ -97,11 +104,4 @@ pub fn verify_response_reqwest(res: &reqwest::Response, key: &str) -> Result<(),
     }
 
     Ok(())
-}
-
-/// Generate a random key for the `Sec-WebSocket-Key` header.
-/// This must be nonce consisting of a randomly selected 16-byte value in base64.
-pub fn sec_websocket_key() -> String {
-    let r: [u8; 16] = rand::random();
-    base64::encode(r)
-}
+}*/
