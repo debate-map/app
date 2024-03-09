@@ -19,7 +19,7 @@
     dead_code,
 )]
 
-use rust_shared::{axum::{self, body::Body, extract::Path, http::{header, HeaderValue, StatusCode}, response::{IntoResponse, Response}}, futures, tokio::{fs, net::TcpListener}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, utils::{general::k8s_env, general_::extensions::ToOwnedV}};
+use rust_shared::{axum::{self, body::Body, extract::Path, http::{header, HeaderValue, StatusCode}, response::{IntoResponse, Response}}, futures, tokio::{fs, net::TcpListener}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, utils::{general::k8s_env, general_::extensions::ToOwnedV, net::body_to_bytes}};
 use axum::{
     response::{Html},
     routing::{get},
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 Err(_) => {
                                     return Response::builder()
                                         .status(StatusCode::NOT_FOUND)
-                                        .body(Body::new("Index file not found.".o()))
+                                        .body(Body::new("Tried loading url-specified file, which wasn't found; then tried loading index.html as fallback, but it also wasn't found.".o()))
                                         .unwrap()
                                 }
                             };
@@ -82,7 +82,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         //_ => res.map(boxed),
                         _ => {
                             let (parts, body) = res.into_parts();
-                            let bytes = body.collect().await.unwrap().to_bytes();
+                            let bytes = body_to_bytes(body).await.unwrap();
                             Response::from_parts(parts, Body::from(bytes))
                         }
                     }

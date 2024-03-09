@@ -6,12 +6,12 @@ use rust_shared::axum::extract::Path;
 use rust_shared::bytes::Bytes;
 use rust_shared::domains::DomainsConstants;
 use rust_shared::http_body_util::Full;
-use rust_shared::hyper::StatusCode;
+use rust_shared::hyper::{body::Body, StatusCode};
 use rust_shared::hyper_util::client::legacy::connect::HttpConnector;
 use rust_shared::itertools::Itertools;
 use rust_shared::reqwest::header::SET_COOKIE;
 use rust_shared::utils::general_::extensions::ToOwnedV;
-use rust_shared::utils::net::full_body_from_str;
+use rust_shared::utils::net::{full_body_from_str, hyper_response_to_axum_response, AxumBody, AxumResult, AxumResultE, AxumResultI, HyperClient};
 use rust_shared::{futures, axum, tower, tower_http, async_graphql_axum, base64};
 use axum::body::HttpBody;
 use rust_shared::hyper::service::{service_fn};
@@ -35,20 +35,18 @@ use futures::future::{self, Future};
 
 use crate::gql::_general::ensure_admin_key_is_correct;
 
-pub type HyperClient = rust_shared::hyper_util::client::legacy::Client<HttpConnector, Full<Bytes>>;
-
 pub const PROMETHEUS_URL: &str = "http://loki-stack-prometheus-server.monitoring.svc.cluster.local:80"; //:9090";
 pub const ALERTMANAGER_URL: &str = "http://loki-stack-prometheus-alertmanager.monitoring.svc.cluster.local:80"; //:9093";
 
 /// Endpoint needed to workaround cross-domain cookie restrictions, for when monitor-client is served by webpack.
 /// See CookieTransferHelper.tsx for the client-side handling of the exchange.
-pub async fn store_admin_key_cookie(_req: Request<Full<Bytes>>) -> Response<Full<Bytes>> {
+pub async fn store_admin_key_cookie(_req: Request<AxumBody>) -> AxumResultI {
     let response_result: Result<_, Error> = try {
         if !DomainsConstants::new().on_server_and_dev { Err(anyhow!("Can only use this helper in a dev cluster."))?; }
 
         let response = Response::builder()
             .header(CONTENT_TYPE, "text/html; charset=utf-8")
-            .body(full_body_from_str(r#"<html><head><script>
+            .body(AxumBody::new(r#"<html><head><script>
                 window.addEventListener('message', e=>{
                     if (e.origin !== 'http://localhost:5131') return;
                     if (e.data.adminKey != null) {
@@ -57,26 +55,26 @@ pub async fn store_admin_key_cookie(_req: Request<Full<Bytes>>) -> Response<Full
                     }
                 }, false);
                 top.postMessage({readyForAdminKey: true}, 'http://localhost:5131');
-            </script></head></html>"#))
+            </script></head></html>"#.o()))
             .unwrap();
         response
     };
     match response_result {
-        Ok(response) => response,
+        Ok(response) => Ok(response),
         Err(err) => {
             let response_json = json!({ "error": format!("Error occurred. @error:{}", err) });
             let response = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 //.header(CONTENT_TYPE, "text/html; charset=utf-8")
                 .header(CONTENT_TYPE, "application/json; charset=utf-8")
-                .body(full_body_from_str(response_json.to_string()))
+                .body(AxumBody::new(response_json.to_string()))
                 .unwrap();
-            response
+            Ok(response)
         }
     }
 }
 
-pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, Error> {
+pub fn get_admin_key_from_proxy_request(req: &Request<AxumBody>) -> Result<String, Error> {
     // use cookies (instead of eg. an "admin-key" header) so the key gets sent with every proxy-request (ie. from the proxied page loading its subresources)
     if let Some(cookie_str) = req.headers().get("cookie") {
         let cookie_entries = cookie_str.to_str()?.split("; ").collect_vec();
@@ -92,7 +90,7 @@ pub fn get_admin_key_from_proxy_request(req: &Request<Body>) -> Result<String, E
     bail!("A \"cookie\" header must be provided, with an \"adminKey\" cookie.");
 }
 
-pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Response<Body> {
+pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>, req: Request<AxumBody>) -> AxumResultI {
     let response_result: Result<_, Error> = try {
         let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
@@ -100,7 +98,7 @@ pub async fn maybe_proxy_to_prometheus(Extension(client): Extension<HyperClient>
     };
     finalize_proxy_response(response_result, "prometheus").await
 }
-pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClient>, req: Request<Body>) -> Response<Body> {
+pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClient>, req: Request<AxumBody>) -> AxumResultI {
     let response_result: Result<_, Error> = try {
         let admin_key = get_admin_key_from_proxy_request(&req)?;
         ensure_admin_key_is_correct(admin_key, true)?;
@@ -109,22 +107,22 @@ pub async fn maybe_proxy_to_alertmanager(Extension(client): Extension<HyperClien
     finalize_proxy_response(response_result, "alertmanager").await
 }
 
-async fn finalize_proxy_response(response_result: Result<Response<Body>, Error>, service_name: &str) -> Response<Body> {
+async fn finalize_proxy_response(response_result: AxumResultE, service_name: &str) -> AxumResultI {
     match response_result {
-        Ok(response) => response,
+        Ok(response) => Ok(response),
         Err(err) => {
             let response_json = json!({ "error": format!("Error occurred during setup of proxy to {} service. @error:{}", service_name, err) });
             let response = Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .header(CONTENT_TYPE, "application/json; charset=utf-8")
-                .body(Body::from(response_json.to_string()))
+                .body(AxumBody::new(response_json.to_string()))
                 .unwrap();
-            response
+            Ok(response)
         }
     }
 }
 
-pub async fn proxy_to_service_at_port(client: HyperClient, mut req: Request<Body>, uri_base: String) -> Result<Response<Body>, Error> {
+pub async fn proxy_to_service_at_port(client: HyperClient, mut req: Request<AxumBody>, uri_base: String) -> AxumResultE {
     let path = req.uri().path();
     let path_and_query = req
         .uri()
@@ -140,13 +138,13 @@ pub async fn proxy_to_service_at_port(client: HyperClient, mut req: Request<Body
     *req.uri_mut() = Uri::try_from(uri.clone())?;
 
     match client.request(req).await {
-        Ok(response) => Ok(response),
+        Ok(response) => Ok(hyper_response_to_axum_response(response).await),
         // one example of why this can fail: if the target pod crashed
         Err(err) => {
             let json = json!({ "error": format!("Error occurred while trying to send get command to pod at uri \"{}\":{}", uri, err) });
             Ok(Response::builder().status(StatusCode::BAD_GATEWAY)
                 .header(CONTENT_TYPE, "application/json; charset=utf-8")
-                .body(Body::from(json.to_string()))?)
+                .body(AxumBody::new(json.to_string()))?)
         },
     }
 }

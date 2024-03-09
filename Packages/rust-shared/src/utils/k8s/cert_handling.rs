@@ -25,7 +25,7 @@ pub fn get_reqwest_client_with_k8s_certs() -> Result<reqwest::Client, Error> {
 }
 
 // this function was created for use by exec_command_in_another_pod; it may need tweaking to support other use-cases
-pub fn get_hyper_client_with_k8s_certs() -> Result<Client<HttpsConnector<HttpConnector>, Full<Bytes>>, Error> {
+pub fn get_hyper_client_with_k8s_certs<B: Body + Send>() -> Result<Client<HttpsConnector<HttpConnector>, B>, Error> where <B as Body>::Data: Send {
     // to implement/workaround tls handling, see here: https://stackoverflow.com/a/72847362/2441655
     //hyper::client::Builder::build(&self, connect_with_config(request, config, max_redirects))
     let https = hyper_rustls::HttpsConnectorBuilder::new()
@@ -59,6 +59,7 @@ pub fn get_rustls_config_dangerous() -> Result<ClientConfig, Error> {
     // This step won't be necessary once the issue below is resolved:
     // * issue in rustls (key comment): https://github.com/rustls/rustls/issues/184#issuecomment-1116235856
     // * pull-request in webpki subdep: https://github.com/briansmith/webpki/pull/260
+    // EDIT(2024-03-08, after on version with supposed fix): Tried removing this section, and got error: "invalid peer certificate: UnknownIssuer"
     let mut dangerous_config = ClientConfig::dangerous(&mut config);
     dangerous_config.set_certificate_verifier(Arc::new(NoCertificateVerification {}));
 
@@ -89,9 +90,9 @@ impl ServerCertVerifier for NoCertificateVerification {
     
     fn verify_tls13_signature(
         &self,
-        message: &[u8],
-        cert: &CertificateDer<'_>,
-        dss: &DigitallySignedStruct,
+        _message: &[u8],
+        _cert: &CertificateDer<'_>,
+        _dss: &DigitallySignedStruct,
     ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
         Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
     }

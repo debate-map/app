@@ -1,8 +1,9 @@
 use std::borrow::Borrow;
+use std::error::Error as StdError;
 
-use anyhow::{anyhow, Error, bail};
+use anyhow::{anyhow, bail, Context, Error};
 use bytes::Bytes;
-use http_body_util::{BodyExt, Full};
+use http_body_util::{BodyExt, Empty, Full};
 use hyper::http::HeaderValue;
 use hyper::rt::{Read, ReadBuf, ReadBufCursor, Write};
 use hyper::{http, Request, Method, Uri};
@@ -16,7 +17,11 @@ use crate::utils::k8s::upgrade;
 
 /// Initiates an HTTPS connection to the URI specified within `request`, then immediately upgrades it to a WebSocket connection.
 /// This is different from simply connecting to a websocket endpoint, and it's necessary to connect to certain k8s endpoints. (eg. `exec` for pods)
-pub async fn upgrade_to_websocket(client: Client<HttpsConnector<HttpConnector>, Full<Bytes>>, request: hyper::Request<Full<Bytes>>) -> Result<WebSocketStream<UpgradedWrapper>, Error> {
+pub async fn upgrade_to_websocket<B: Body + Send + Unpin + 'static>(client: Client<HttpsConnector<HttpConnector>, B>, request: hyper::Request<B>) -> Result<WebSocketStream<UpgradedWrapper>, Error>
+    where
+        <B as Body>::Data: std::marker::Send,
+        <B as Body>::Error: Into<std::boxed::Box<(dyn StdError + std::marker::Send + Sync + 'static)>>
+{
     let (mut parts, body) = request.into_parts();
     parts.headers.insert(http::header::CONNECTION, HeaderValue::from_static("Upgrade"));
     parts.headers.insert(http::header::UPGRADE, HeaderValue::from_static("websocket"));
@@ -30,34 +35,19 @@ pub async fn upgrade_to_websocket(client: Client<HttpsConnector<HttpConnector>, 
     // [`kublet/cri/streaming/remotecommand/httpstream.go`](https://git.io/JLQEh).
     parts.headers.insert(http::header::SEC_WEBSOCKET_PROTOCOL, HeaderValue::from_static(upgrade::WS_PROTOCOL));
 
-    let req = Request::from_parts(parts, body);
-
-    //let client = hyper::Client::new();
-    let mut req_final = hyper::Request::builder()
-        .method(req.method())
-        .uri(req.uri());
-    {
-        //req_final.headers_mut().replace(req.headers_mut()); // this doesn't work fsr
-        let headers = req_final.headers_mut().unwrap();
-        //headers.extend(req.headers().iter());
-        for (key, value) in req.headers().iter() {
-            headers.insert(key, value.clone());
-        }
-    }
-    let req_final = req_final
-        .body(req.into_body())?;
+    let req_final = Request::from_parts(parts, body);
 
     //let res = client.get(parts.uri.to_string()).headers(parts.headers).body(body).send().await?;
     //let res = client.get(Request::from_parts(parts, Body::from(body)));
-    let res = client.request(req_final).await?;
+    let res = client.request(req_final).await.context("Failed in client.request.")?;
 
     //let res_body_read = Full::from(res.into_body());
     let (res_parts, body) = res.into_parts();
-    let bytes = body.collect().await?.to_bytes();
+    let bytes = body.collect().await.context("Failed to collect body.")?.to_bytes();
     let res_body_read = Full::from(bytes);
     let res_read = hyper::Response::from_parts(res_parts, res_body_read);
 
-    upgrade::verify_response(&res_read, &key)?; //.map_err(Error::UpgradeConnection)?;
+    upgrade::verify_response(&res_read, &key).context("Failed to verify response.")?; //.map_err(Error::UpgradeConnection)?;
     match hyper::upgrade::on(res_read).await {
         Ok(upgraded) => {
             let upgraded_wrapped = UpgradedWrapper::new(upgraded);

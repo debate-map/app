@@ -13,6 +13,7 @@ use rust_shared::hyper::header::CONTENT_LENGTH;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::tokio_postgres::{Client};
 use rust_shared::utils::db::agql_ext::gql_general_extension::CustomExtensionCreator;
+use rust_shared::utils::net::{body_to_str, AxumBody};
 use rust_shared::utils::type_aliases::JSONValue;
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};
@@ -39,7 +40,6 @@ use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, Tr
 use crate::{GeneralMessage};
 use crate::gql::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::store::storage::AppStateArc;
-use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::{ABSender, ABReceiver};
 use rust_shared::async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 use rust_shared::flume::{Sender, Receiver, unbounded};
@@ -82,7 +82,7 @@ async fn graphql_playground() -> impl IntoResponse {
     schema.execute(req.into_inner()).await.into()
 }*/
 
-pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> String {
+pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: RootSchema) -> String {
     // read request's body (from frontend)
     let req_as_str: String = body_to_str(req.into_body()).await.unwrap();
     let req_as_json = JSONValue::from_str(&req_as_str).unwrap();
@@ -103,7 +103,7 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     
     response_str
 }
-pub async fn graphql_handler(Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
+pub async fn graphql_handler(Extension(schema): Extension<RootSchema>, req: Request<AxumBody>) -> Response<AxumBody> {
     let response_str = have_own_graphql_handle_request(req, schema).await;
 
     // send response (to frontend)

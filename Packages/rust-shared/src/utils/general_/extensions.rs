@@ -78,7 +78,7 @@ impl<T, E> ResultV<T, E> for Result<T, E> {
             Ok(t) => t,
             Err(err) => {
                 let err_str = format!("{err:?}");
-                let err_str_simplified = simplify_backtrace_str(err_str);
+                let err_str_simplified = simplify_backtrace_str(err_str, true);
                 let msg = msg_getter(err);
                 panic!("{}\n\t@base_error:{}", msg, indent_all_lines(&err_str_simplified, 1));
             },

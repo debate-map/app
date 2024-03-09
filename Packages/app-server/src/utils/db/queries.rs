@@ -4,13 +4,12 @@ use rust_shared::async_graphql::{Result, async_stream::{stream, self}, OutputTyp
 use deadpool_postgres::{Pool, Transaction};
 use rust_shared::flume::Sender;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt, TryStreamExt};
-use rust_shared::hyper::Body;
 use rust_shared::serde::{Serialize, Deserialize, de::DeserializeOwned};
 use rust_shared::serde_json::{json, Map};
 use rust_shared::tokio_postgres::{Client, Row, types::ToSql, Statement};
 use tracing::{info, trace, debug};
 use rust_shared::uuid::Uuid;
-use metrics::{counter, histogram, increment_counter};
+use metrics::{counter, histogram};
 
 use crate::{store::{live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}, storage::get_app_state_from_gql_ctx}, utils::{db::{sql_fragment::{SQLFragment}, sql_ident::SQLIdent}, type_aliases::PGClientObject,}, db::commands::_command::ToSqlWrapper};
 use super::{filter::QueryFilter, accessors::AccessorContext};

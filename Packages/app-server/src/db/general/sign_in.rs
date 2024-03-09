@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use deadpool_postgres::tokio_postgres::Row;
 use rust_shared::domains::{get_server_url, ServerPod, GetServerURL_Options};
+use rust_shared::hyper::body::Body;
 use rust_shared::once_cell::sync::{Lazy, OnceCell};
 use rust_shared::hyper::{Request};
 use oauth2::basic::BasicClient;
@@ -45,14 +46,13 @@ use crate::store::storage::{AppStateArc, SignInMsg, get_app_state_from_gql_ctx};
 use crate::utils::db::accessors::{AccessorContext, get_db_entries};
 use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
 use crate::utils::general::data_anchor::DataAnchorFor1;
-use crate::utils::general::general::{body_to_str};
 use crate::utils::type_aliases::{ABSender};
 
 use rust_shared::utils::auth::jwt_utils_base::{UserJWTData, get_or_create_jwt_key_hs256};
 
 use super::sign_in_::jwt_utils::{try_get_referrer_from_gql_ctx, resolve_and_verify_jwt_string};
 
-async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Request<Body>) -> impl IntoResponse {
+async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Request<impl Body>) -> impl IntoResponse {
     let uri = req.uri();
     let params = get_uri_params(uri);
     let attempt_id = params.get("state").map(|a| a.clone()).unwrap_or("n/a".to_owned());

@@ -4,12 +4,16 @@ use std::str::FromStr;
 use rust_shared::chrono::{Utc, SecondsFormat};
 use rust_shared::hyper::Method;
 use rust_shared::anyhow::{anyhow, Error};
+use rust_shared::hyper_util::client::legacy::connect::HttpConnector;
+use rust_shared::hyper_util::client::legacy::Client;
+use rust_shared::hyper_util::rt::TokioExecutor;
 use rust_shared::jwt_simple::prelude::{Claims, MACLike};
 use rust_shared::serde_json::json;
 use rust_shared::utils::auth::jwt_utils_base::{get_or_create_jwt_key_hs256, UserJWTData};
 use rust_shared::utils::db::uuid::{new_uuid_v4_as_b64_id, new_uuid_v4_as_b64};
 use rust_shared::utils::general::{f64_to_str_rounded, f64_to_percent_str};
 use rust_shared::utils::general_::extensions::ToOwnedV;
+use rust_shared::utils::net::{body_to_str, new_hyper_client_http};
 use rust_shared::utils::time::{time_since_epoch_ms_i64, tokio_sleep, tokio_sleep_until, time_since_epoch_ms};
 use rust_shared::utils::type_aliases::JWTDuration;
 use rust_shared::{async_graphql, async_graphql::{SimpleObject, InputObject}};
@@ -22,7 +26,6 @@ use rust_shared::serde;
 use tracing::{error, info};
 use rust_shared::utils::type_aliases::{JSONValue, FSender, FReceiver};
 
-use crate::utils::general::body_to_str;
 use crate::{GeneralMessage, pgclient::create_client_advanced, utils::type_aliases::{ABSender}};
 
 wrap_slow_macros!{
@@ -266,7 +269,7 @@ async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONVa
     let jwt = key.authenticate(claims).map_err(to_sub_err)?;
     //info!("Generated dev JWT:{}", jwt);
 
-    let client = rust_shared::hyper::Client::new();
+    let client = new_hyper_client_http();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::POST)
         .uri("http://dm-app-server.default.svc.cluster.local:5110/graphql")

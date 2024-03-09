@@ -54,7 +54,8 @@ pub struct GetDBDumpResult {
 pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
     ensure!(actor.permissionGroups.admin, "Only admins can access this endpoint.");
     
-    let target_pod = get_k8s_pod_basic_infos("postgres-operator", true).await?.into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?;
+    let target_pod = get_k8s_pod_basic_infos("postgres-operator", true).await.context("Failed to retrieve basic-info of the k8s pods.")?
+        .into_iter().find(|a| a.name.starts_with("debate-map-instance1")).map(|a| a.name).ok_or_else(|| anyhow!("Could not find debate-map-instance1-XXX pod."))?;
     let container = "database"; // pod's list of containers: postgres-startup nss-wrapper-init database replication-cert-copy pgbackrest pgbackrest-config
 
     // raw command string: pg_dump -U postgres debate-map
@@ -62,7 +63,7 @@ pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
         "-E".o(), "UTF-8".o(),
         "-U".o(), "postgres".o(),
         "debate-map".o()
-    ], true).await?;
+    ], true).await.context("Failed to run pg_dump command in PG pod.")?;
 
     // Above, we request utf-8 encoding; however, some chars in prod-cluster's db-dump still fail to parse as utf-8!
     // So, we pass `true` above to allow lossy utf-8 conversion, and then we log a warning if any chars failed to convert.

@@ -1,5 +1,6 @@
 use crate::anyhow::{Error, ensure};
 use crate::itertools::Itertools;
+use crate::utils::general_::extensions::ToOwnedV;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -24,13 +25,18 @@ impl StackTraceLine {
 }
 
 #[allow(non_upper_case_globals)]
-pub fn simplify_backtrace_str(source: String) -> String {
+pub fn simplify_backtrace_str(source: String, remove_spammy_trace_lines: bool) -> String {
     let lines_raw = source.split("\n");
+
+    // regexes for general categorization
     static regex__func_name: Lazy<Regex> = Lazy::new(|| Regex::new(r"^ +(\d+):").unwrap());
     static regex__code_path: Lazy<Regex> = Lazy::new(|| Regex::new(r"^ +at ").unwrap());
     static regex__code_path_for_own_code: Lazy<Regex> = Lazy::new(|| Regex::new(r"^ +at \./").unwrap());
+    // regexes for *simplifying* stack-entry lines
     static regex__github_path: Lazy<Regex> = Lazy::new(|| Regex::new("/usr/local/cargo/registry/src/github.com-([0-9a-f]+)/").unwrap());
     static regex__rustc_path: Lazy<Regex> = Lazy::new(|| Regex::new("/rustc/([0-9a-f]+)/").unwrap());
+    // regexes for *omitting* stack-entry lines
+    static regex__tokio: Lazy<Regex> = Lazy::new(|| Regex::new(r"\/tokio-\d").unwrap());
 
     let lines = lines_raw.map(|line| {
         if regex__func_name.is_match(line) {
@@ -73,6 +79,29 @@ pub fn simplify_backtrace_str(source: String) -> String {
             StackTraceLine::CodePath(_) => {
                 let path_line_str = old_lines.get(i).unwrap().get_str();
                 let func_line_str = match &old_lines.get(i - 1) { Some(StackTraceLine::FuncName(str)) => Some(str), _ => None };
+
+                if remove_spammy_trace_lines {
+                    let last_path_line_str = match &old_lines.get(i - 2) { Some(StackTraceLine::CodePath(str)) => Some(str), _ => None };
+
+                    // if this stack-entry's path was to a "spammy" tokio-related stack-line, and true for last stack-entry as well, replace with 
+                    if regex__tokio.is_match(path_line_str) {
+                        match regex__tokio.is_match(last_path_line_str.unwrap_or(&"".o())) {
+                            true => return None,
+                            false => {
+                                //let new_path_line_str = "   ===== [spammy segment of stack-trace; removed by backtrace_simplifier.rs; stack-entry type: tokio] =====";
+                                let new_path_line_str = "   [spammy segment of stack-trace; removed by backtrace_simplifier.rs; stack-entry type: tokio]";
+                                let spaces_to_reach_c2_indent = indent_for_column_2 - new_path_line_str.len();
+                                let new_line = StackTraceLine::CodePathPlusFuncName(
+                                    new_path_line_str.to_owned()
+                                    + &" ".repeat(spaces_to_reach_c2_indent)
+                                    + "===== " + &func_line_str.unwrap_or(&"".o()) + " ====="
+                                );
+                                return Some((i, new_line));
+                            },
+                        }
+                    }
+                }
+
                 if let Some(func_line_str) = func_line_str {
                     let spaces_to_reach_c2_indent = indent_for_column_2 - path_line_str.len();
                     let new_line = StackTraceLine::CodePathPlusFuncName(path_line_str.to_owned() + &" ".repeat(spaces_to_reach_c2_indent) + &func_line_str);

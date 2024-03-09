@@ -1,9 +1,9 @@
 use std::{fmt::{self, Debug, Display, Formatter}};
-use anyhow::{anyhow};
+use anyhow::{anyhow, Error};
 
-use async_graphql::async_stream;
+use async_graphql::{async_stream, ErrorExtensions};
 use futures::Stream;
-use tracing::log::{self, error};
+use tracing::{log::{self, error}, warn};
 
 /// Use this as a "safer alternative" to `option.unwrap()`; it returns an error (as well as immediately `error!(...)` logging it) rather than panicking.
 pub fn should_be_unreachable() -> anyhow::Error {
@@ -140,6 +140,13 @@ impl Display for GQLError {
 impl<E> From<E> for GQLError where E: Into<anyhow::Error> + Send + Sync + 'static {
 	fn from(error: E) -> Self {
 		let as_anyhow_error_with_backtrace: anyhow::Error = error.into();
+        /*for cause in as_anyhow_error_with_backtrace.chain() {
+            warn!("New GQLError cause: {:?}", cause);
+            /*if let Some(ref app_err) = cause.downcast_ref::<Error>() { // cast to AppError
+                error!("New GQLError cause2:{:?}", app_err);
+            }*/
+        }
+        warn!("New GQLError: {:?}", as_anyhow_error_with_backtrace);*/
 		GQLError {
 			full_error_info_string: format!("{:?}", as_anyhow_error_with_backtrace),
 		}

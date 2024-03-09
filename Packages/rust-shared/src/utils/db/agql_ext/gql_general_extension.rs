@@ -57,7 +57,7 @@ impl Extension for CustomExtension {
         let mut resp = next.run(ctx).await;
         for err in &resp.errors {
             // todo: find way to have logs for errors here include the query-string and variables as well (helpful for debugging other devs' failed query attempts, as well as catching abuse attempts)
-            let error_message_cleaned = simplify_backtrace_str(err.message.o());
+            let error_message_cleaned = simplify_backtrace_str(err.message.o(), true);
             let error_message_final = indent_all_lines(&error_message_cleaned, 1);
             warn!(target: "async-graphql", "[error in gql.request] path={} locations={:?} message={}", path_to_str(&err.path), err.locations, error_message_final);
         }

@@ -1,4 +1,5 @@
 #![feature(try_blocks)]
+//#![feature(type_alias_impl_trait)]
 
 // sync among all rust crates
 #![warn(clippy::all, clippy::pedantic, clippy::cargo)]
@@ -22,9 +23,20 @@
 )]
 
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use rust_shared::axum::http::HeaderName;
+use rust_shared::axum::routing::{on_service, MethodFilter};
 use rust_shared::axum::Extension;
+use rust_shared::bytes::Bytes;
+use rust_shared::http_body_util::combinators::BoxBody;
+use rust_shared::http_body_util::Full;
+use rust_shared::hyper::body::Body;
+use rust_shared::hyper_util::client::legacy::Client;
+use rust_shared::hyper_util::rt::TokioExecutor;
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
+use rust_shared::tokio::net::TcpListener;
+use rust_shared::tower_http::cors::AllowOrigin;
 use rust_shared::utils::general::k8s_env;
+use rust_shared::utils::net::{body_to_bytes, new_hyper_client_http, AxumBody};
 use rust_shared::{futures, axum, tower, tower_http, tokio};
 use axum::{
     response::{Html, self, IntoResponse},
@@ -33,11 +45,11 @@ use axum::{
         Method,
         header::{CONTENT_TYPE}
     },
-    headers::HeaderName, middleware, body::{BoxBody, boxed},
+    middleware,
 };
-use rust_shared::hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
+use rust_shared::hyper::{Request, Response, StatusCode, header::{FORWARDED, self}, Uri};
 use tower::ServiceExt;
-use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
+use tower_http::{cors::{CorsLayer}, services::ServeFile};
 use tracing::{error, info, Level, Metadata};
 use tracing_subscriber::{Layer, filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
 use rust_shared::{utils::type_aliases::{FSender, FReceiver}};
@@ -50,7 +62,7 @@ use rust_shared::tokio::{sync::{broadcast, Mutex}, runtime::Runtime};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 use tower_http::{services::ServeDir};
 
-use crate::links::pod_proxies::{maybe_proxy_to_prometheus, maybe_proxy_to_alertmanager, HyperClient, store_admin_key_cookie};
+use crate::links::pod_proxies::{maybe_proxy_to_prometheus, maybe_proxy_to_alertmanager, store_admin_key_cookie};
 use crate::{store::storage::{AppState, AppStateArc}, links::app_server_link::connect_to_app_server, utils::type_aliases::{ABReceiver, ABSender}};
 
 mod gql_;
@@ -63,7 +75,7 @@ mod links {
     pub mod pod_proxies;
 }
 mod utils {
-    pub mod general;
+    //pub mod general;
     pub mod type_aliases;
 }
 mod store {
@@ -82,7 +94,7 @@ mod migrations {
 pub fn get_cors_layer() -> CorsLayer {
     // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
     CorsLayer::new()
-        .allow_origin(Origin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
+        .allow_origin(AllowOrigin::predicate(|_, _| { true })) // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
         .allow_methods(vec![
             Method::GET,
             Method::POST,
@@ -177,7 +189,7 @@ async fn main() {
 
     let app = gql_::extend_router(app, msg_sender, msg_receiver, /*msg_sender_test, msg_receiver_test,*/ app_state.clone()).await;
 
-    let client_for_proxying = HyperClient::new();
+    let client_for_proxying = new_hyper_client_http();
     // cors layer apparently must be added after the stuff it needs to apply to
     let app = app
         .layer(Extension(app_state))
@@ -185,12 +197,13 @@ async fn main() {
         .layer(get_cors_layer());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5130)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
-    let server_fut = axum::Server::bind(&addr).serve(app.into_make_service_with_connect_info::<SocketAddr>());
+    let listener = TcpListener::bind(&addr).await.unwrap();
+    let server_fut = axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>());
     info!("Monitor-backend launched. @env:{:?}", k8s_env());
     server_fut.await.unwrap();
 }
 
-async fn handler(req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, String)> {
+async fn handler(req: Request<AxumBody>) -> Result<axum::response::Response<AxumBody>, (StatusCode, String)> {
     //println!("BaseURI:{}", uri);
     let uri = req.uri();
     let (scheme, authority, path, _query) = {
@@ -226,13 +239,17 @@ async fn handler(req: Request<Body>) -> Result<Response<BoxBody>, (StatusCode, S
     return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong; failed to resolve URI to a resource.")));
 }
 
-async fn get_static_file(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
-    let req = Request::builder().uri(uri).body(Body::empty()).unwrap();
+async fn get_static_file(uri: Uri) -> Result<Response<AxumBody>, (StatusCode, String)> {
+    let req = Request::builder().uri(uri).body(Full::new(Bytes::new())).unwrap();
     let root_resolve_folder = "../monitor-client";
 
     // `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
     match ServeDir::new(root_resolve_folder).oneshot(req).await {
-        Ok(res) => Ok(res.map(boxed)),
+        Ok(res) => {
+            let (parts, body) = res.into_parts();
+            let bytes = body_to_bytes(body).await.unwrap();
+            Ok(Response::from_parts(parts, AxumBody::from(bytes)))
+        },
         Err(err) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
             format!("Something went wrong: {}", err),

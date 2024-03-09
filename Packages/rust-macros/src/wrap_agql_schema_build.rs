@@ -2,6 +2,8 @@ use std::{env};
 use std::str::FromStr;
 use proc_macro2::{TokenStream};
 
+use crate::wrap_async_graphql::SKIP_AGQL_WRAPPING;
+
 /// Only needed to be used if you need to have the `Schema<X, Y, Z>` type present.
 /// 
 /// Usage example:
@@ -11,6 +13,8 @@ use proc_macro2::{TokenStream};
 /// };
 /// ```
 pub fn wrap_agql_schema_type_impl(input: TokenStream, force_proceed: bool) -> TokenStream {
+    if SKIP_AGQL_WRAPPING { return input; } // can set this flag to true temporarily, to make debugging easier
+
     let proceed = force_proceed || {
         let mut temp = false;
         if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {
@@ -31,6 +35,8 @@ pub fn wrap_agql_schema_type_impl(input: TokenStream, force_proceed: bool) -> To
 }
 
 pub fn wrap_agql_schema_build_impl(input: TokenStream, force_proceed: bool) -> TokenStream {
+    if SKIP_AGQL_WRAPPING { return input; } // can set this flag to true temporarily, to make debugging easier
+
     let proceed = force_proceed || {
         let mut temp = false;
         if let Ok(val) = env::var("STRIP_ASYNC_GRAPHQL") {

@@ -14,7 +14,7 @@ pub fn set_up_globals() -> Option<ClientInitGuard> {
     panic::set_hook(Box::new(|info| {
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
-        let stacktrace_str_simplified = simplify_backtrace_str(stacktrace.to_string());
+        let stacktrace_str_simplified = simplify_backtrace_str(stacktrace.to_string(), true);
 
         // if panic occurs, first do a simple logging with println!, in case the panic occurred within the logging-system
         println!("Got panic. @info:{} [see next log-message for stack-trace]", info);

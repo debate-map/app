@@ -16,7 +16,6 @@ use std::path::Path;
 use std::{time::Duration, pin::Pin, task::Poll};
 
 use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
-use crate::utils::general::general::body_to_str;
 
 use super::commands::add_term::{AddTermResult};
 use super::commands::refresh_lq_data::refresh_lq_data;

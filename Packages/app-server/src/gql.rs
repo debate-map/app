@@ -10,14 +10,19 @@ use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfi
 use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables, extensions};
 use rust_shared::bytes::Bytes;
 use deadpool_postgres::{Pool, Manager};
+use rust_shared::http_body_util::Full;
+use rust_shared::hyper::body::Body;
 use rust_shared::hyper::header::CONTENT_LENGTH;
 use rust_shared::hyper::{service};
 use rust_shared::anyhow::Error;
+use rust_shared::hyper_util::client::legacy::connect::HttpConnector;
+use rust_shared::hyper_util::client::legacy::Client;
+use rust_shared::hyper_util::rt::TokioExecutor;
 use rust_shared::rust_macros::{wrap_async_graphql, wrap_agql_schema_build, wrap_slow_macros, wrap_agql_schema_type};
 use rust_shared::serde_json::json;
-use rust_shared::tokio_postgres::{Client};
 use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::db::agql_ext::gql_general_extension::CustomExtensionCreator;
+use rust_shared::utils::net::{body_to_str, full_body_from_str, new_hyper_client_http, AxumBody, HyperClient, HyperClient_};
 use rust_shared::utils::type_aliases::JSONValue;
 use rust_shared::{axum, tower, tower_http, serde_json};
 use tower::make::Shared;
@@ -99,7 +104,6 @@ use crate::db::timeline_steps::{SubscriptionShard_TimelineStep, QueryShard_Timel
 use crate::db::timelines::{SubscriptionShard_Timeline, QueryShard_Timeline};
 use crate::store::storage::AppStateArc;
 use crate::utils::db::agql_ext::gql_request_storage::GQLRequestStorage;
-use crate::utils::general::general::body_to_str;
 use crate::db::_general::{MutationShard_General, QueryShard_General, SubscriptionShard_General};
 use crate::db::access_policies::{SubscriptionShard_AccessPolicy, QueryShard_AccessPolicy};
 use crate::db::command_runs::{SubscriptionShard_CommandRun, QueryShard_CommandRun};
@@ -263,6 +267,7 @@ async fn graphql_websocket_handler(/*Extension(state): Extension<AppStateArc>,*/
     }
 }*/
 
+//pub type HyperClient = Client<HttpConnector, Full<Bytes>>;
 pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router {
     let schema =
         wrap_agql_schema_build!{
@@ -272,7 +277,7 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
         .extension(CustomExtensionCreator)
         .finish();
 
-    let client_to_asjs = HyperClient::new();
+    let client_to_asjs = new_hyper_client_http();
     //let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
@@ -294,8 +299,7 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
     result
 }
 
-pub type HyperClient = rust_shared::hyper::client::Client<HttpConnector, Body>;
-pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<Body>) -> Response<Body> {
+pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<AxumBody>) -> Response<AxumBody> {
     let response_str = match have_own_graphql_handle_request(req, schema).await {
         Ok(a) => a,
         Err(err) => json!({
@@ -308,11 +312,13 @@ pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperCli
     response.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("content-type: application/json; charset=utf-8"));*/
     let response = Response::builder()
         .header(CONTENT_TYPE, "application/json")
-        .body(Body::from(response_str))
+        .body(response_str.into())
         .unwrap();
     response
 }
-pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSchema) -> Result<String, Error> {
+pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: RootSchema) -> Result<String, Error> {
+    use async_graphql::futures_util::TryFutureExt;
+    
     // retrieve auth-data/JWT and such from http-headers
     let gql_data_from_http_request = get_gql_data_from_http_request(&req)?;
     
@@ -333,14 +339,29 @@ pub async fn have_own_graphql_handle_request(req: Request<Body>, schema: RootSch
     let gql_req = gql_req.data(gql_data_from_http_request);
 
     // send request to graphql engine, and read response
-    let gql_response = schema.execute(gql_req).await;
+    let temp1 = schema.execute(gql_req).await.into_result();
+    match temp1 {
+        Ok(_) => {},
+        Err(ref errors) => {
+            for err in errors {
+                error!("Test1:{:?}", err);
+                if let Some(ref source) = err.source { // get the error source
+                    error!("Test1.5:{:?}", source);
+                    if let Some(ref app_err) = source.downcast_ref::<Error>() { // cast to AppError
+                        error!("Test2:{:?}", app_err);
+                    }
+                }
+            }
+        },
+    }
+    let gql_response = temp1;
     //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
     let response_str: String = serde_json::to_string(&gql_response)?;
     
     Ok(response_str)
 }
 
-pub fn get_gql_data_from_http_request(req: &Request<Body>) -> Result<GQLDataFromHTTPRequest, Error> {
+pub fn get_gql_data_from_http_request(req: &Request<AxumBody>) -> Result<GQLDataFromHTTPRequest, Error> {
     let mut data = GQLDataFromHTTPRequest { jwt: None, referrer: None };
     if let Some(header) = req.headers().get("authorization") {
         //info!("Found authorization header:{}", header.to_str()?);

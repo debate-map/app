@@ -5,7 +5,6 @@ use deadpool_postgres::Pool;
 use rust_shared::flume::Sender;
 //use flurry::Guard;
 use futures_util::{Stream, StreamExt, Future, stream, TryFutureExt};
-use rust_shared::hyper::Body;
 use rust_shared::itertools::Itertools;
 use rust_shared::serde::{Serialize, Deserialize, de::DeserializeOwned};
 use rust_shared::serde_json::{json, Map};
@@ -17,12 +16,6 @@ use metrics::{counter, histogram};
 use std::hash::Hash;
 
 use crate::{store::live_queries::{LQStorageArc, LQStorage, DropLQWatcherMsg}};
-
-pub async fn body_to_str(body: Body) -> Result<String, Error> {
-    let bytes1 = rust_shared::hyper::body::to_bytes(body).await?;
-    let req_as_str: String = String::from_utf8_lossy(&bytes1).as_ref().to_owned();
-    Ok(req_as_str)
-}
 
 /// Alternative to `my_hash_map.entry(key).or_insert_with(...)`, for when the hashmap is wrapped in a RwLock, and you want a "write" lock to only be obtained if a "read" lock is insufficient. (see: https://stackoverflow.com/a/57057033)
 /// Returns tuple of:

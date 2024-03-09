@@ -463,7 +463,7 @@ impl LQGroupImpl {
 
             // now that we've "committed" this batch's lqi's to the lq-group, remove their lq-keys from the `lq_keys_awaiting_population` list
             for lq_key in instances_in_batch_lq_keys {
-                if let Some(info) = self.meta.lqis_awaiting_population.remove(&lq_key) {
+                if let Some(info) = self.meta.lqis_awaiting_population.shift_remove(&lq_key) {
                     self.send_message_out(LQGroup_OutMsg::LQInstanceIsInitialized(lq_key, info.lqi, true)).await;
                 }
             }
@@ -537,7 +537,7 @@ impl LQGroupImpl {
             entry_watchers.len()
         };
         if new_watcher_count == 0 {
-            self.meta.lqis_committed.remove(lq_key);
+            self.meta.lqis_committed.shift_remove(lq_key);
             debug!("Watcher count for live-query entry dropped to 0, so removing.");
 
             //let lq_key = get_lq_instance_key(&self.table_name, &self.filter);

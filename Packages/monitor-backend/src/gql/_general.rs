@@ -8,12 +8,13 @@ use rust_shared::utils::futures::make_reliable;
 use rust_shared::utils::general_::extensions::ToOwnedV;
 use rust_shared::utils::k8s::cert_handling::get_reqwest_client_with_k8s_certs;
 use rust_shared::utils::mtx::mtx::{MtxData, MtxDataForAGQL};
+use rust_shared::utils::net::{body_to_str, new_hyper_client_http};
 use rust_shared::utils::time::time_since_epoch_ms_i64;
 use rust_shared::{futures, axum, tower, tower_http, GQLError, base64, reqwest};
 use rust_shared::utils::type_aliases::JSONValue;
 use futures::executor::block_on;
 use futures_util::{Stream, stream, TryFutureExt, StreamExt, Future};
-use rust_shared::hyper::{Body, Method, Request};
+use rust_shared::hyper::{Method, Request};
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::SubError;
 use rust_shared::serde::{Serialize, Deserialize};
@@ -32,7 +33,6 @@ use crate::testing::general::{execute_test_sequence, TestSequence};
 use crate::{GeneralMessage};
 use crate::migrations::v2::migrate_db_to_v2;
 use crate::store::storage::{AppStateArc, LQInstance_Partial};
-use crate::utils::general::body_to_str;
 use crate::utils::type_aliases::{ABSender, ABReceiver};
 
 pub fn admin_key_is_correct(admin_key: String, log_message_if_wrong: bool) -> bool {
@@ -187,7 +187,7 @@ pub async fn query_loki(query: String, startTime: i64, endTime: i64, limit: i64)
 }
 
 pub async fn get_basic_info_from_app_server() -> Result<JSONValue, Error> {
-    let client = rust_shared::hyper::Client::new();
+    let client = new_hyper_client_http();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::GET)
         .uri("http://dm-app-server.default.svc.cluster.local:5110/basic-info")

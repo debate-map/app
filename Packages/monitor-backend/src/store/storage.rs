@@ -7,15 +7,14 @@ use axum::{
         Method,
         header::{CONTENT_TYPE}
     },
-    headers::HeaderName, middleware, body::{BoxBody, boxed},
 };
-use rust_shared::hyper::{server::conn::AddrStream, service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{FORWARDED, self}, Uri};
+use rust_shared::hyper::{service::{service_fn}, Request, Response, StatusCode, header::{FORWARDED, self}, Uri};
 use rust_shared::indexmap::IndexMap;
 use rust_shared::rust_macros::wrap_slow_macros;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::Serializer;
 use tower::ServiceExt;
-use tower_http::{cors::{CorsLayer, Origin, AnyOr}, services::ServeFile};
+use tower_http::{cors::{CorsLayer}, services::ServeFile};
 use rust_shared::uuid::Uuid;
 use std::{
     collections::{HashSet, HashMap, BTreeMap},

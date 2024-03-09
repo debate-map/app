@@ -4,11 +4,11 @@ use anyhow::{Context, anyhow, Error, bail, ensure};
 use axum::http;
 use bytes::Bytes;
 use futures::StreamExt;
-use http_body_util::Full;
+use http_body_util::{Empty, Full};
 use hyper::{upgrade, body::Body};
 use hyper_rustls::HttpsConnector;
 use itertools::Itertools;
-use reqwest::Url;
+use reqwest::{Url, Body as ReqwestBody};
 use rustls::ClientConfig;
 use serde_json::{json, self};
 use tokio_tungstenite::{WebSocketStream, connect_async, connect_async_tls_with_config, tungstenite::{self, Message, protocol::WebSocketConfig}};
@@ -122,7 +122,7 @@ pub async fn get_or_create_k8s_secret(name: String, namespace: &str, new_data_if
 
 pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, container: Option<&str>, command_name: &str, command_args: Vec<String>, allow_utf8_lossy: bool) -> Result<String, Error> {
     info!("Beginning request to run command in another pod. @target_pod:{} @command_name:{} @command_args:{:?}", pod_name, command_name, command_args);
-    let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token")?;
+    let token = fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/token").context("Failed to retrieve k8s service-account token.")?;
     /*let k8s_host = env::var("KUBERNETES_SERVICE_HOST")?;
     let k8s_port = env::var("KUBERNETES_PORT_443_TCP_PORT")?;*/
 
@@ -135,19 +135,22 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     }
     query_str.push_str("&stdin=true&stderr=true&stdout=true&tty=true");
 
-    let client = get_hyper_client_with_k8s_certs()?;
+    let client = get_hyper_client_with_k8s_certs().context("Failed to create hyper client with k8s certs.")?;
     //let client = get_reqwest_client_with_k8s_certs()?;
     /*let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
         .body(vec![]).build()?;*/
     //let req = tungstenite::http::Request::builder().uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-    let req = tungstenite::http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
+    let req = http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
         .header("Authorization", format!("Bearer {token}"))
-        //.body(()).unwrap();
-        //.body(vec![]).unwrap();
-        .body(Full::new(Bytes::new())).unwrap();
+        //.body(())
+        //.body(vec![])
+        //.body(Full::new(Bytes::new()))
+        .body(Empty::<Bytes>::new())
+        //.body(ReqwestBody::empty())
+        .unwrap();
 
     // commented; this doesn't work for endpoints that require https->ws upgrade (eg. exec), so we just always use the semi-manual approach below instead
     /*let pods: Api<Pod> = Api::namespaced(client, pod_namespace);
@@ -160,7 +163,14 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
 
     // if desired, the websocket connection code is probably not that hard to extract; for ref: https://github.com/kubernetes-client/python/issues/409#issuecomment-1241425302
     // this route gets error (using direct hyper): "failed to switch protocol: 403 Forbidden"
-    let mut response = upgrade_to_websocket(client, req).await?;
+    let mut response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")
+        /*.map_err(|err| {
+            // print full stack-trace of err
+            error!("Error upgrading to websocket (test1 info): {:?}", err);
+            error!("Error upgrading to websocket (test2 info): {:#?}", err);
+            err
+        })*/
+        ?;
     let mut res_as_str = String::new();
     loop {
         let (next_item, rest_of_response) = response.into_future().await;
