@@ -4,7 +4,7 @@ import {RootState, store} from "Store/index.js";
 import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, AddNotificationMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, stringifyError_errorOccurredPrefix} from "web-vcore";
+import {ActionFunc, AddNotificationMessage, AddWVCSchemas, BasicStringifyErrorlike, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored, stringifyError_errorOccurredPrefix} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
@@ -47,6 +47,9 @@ export function InitWVC() {
 		mobxCompatMode: true,
 		ShouldErrorBeIgnored: e=>{
 			const errorStr = BasicStringifyErrorlike(e);
+
+			// ignore errors that web-vcore already defaults to ignoring
+			if (ShouldErrorBeIgnored(e)) return true;
 
 			// ignore the "Socket closed" error; this is redundant (and clutters the UI, since they pile up), because the UI already displays a dedicated "Websocket [...] Attempting reconnection..." message
 			if (errorStr == "Uncaught Error: Socket closed" || errorStr == "Socket closed") return true;

@@ -16,7 +16,7 @@ use tower::ServiceBuilder;
 use super::{type_aliases::JSONValue, k8s::cert_handling::get_reqwest_client_with_k8s_certs};
 use tracing::{info, error, instrument::WithSubscriber, warn};
 
-use crate::{domains::{get_server_url, DomainsConstants}, utils::k8s::{cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_dangerous}, k8s_client::{upgrade_to_websocket}, k8s_structs::K8sSecret}};
+use crate::{domains::{get_server_url, DomainsConstants}, utils::k8s::{cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_that_accepts_k8s_certs}, k8s_client::{upgrade_to_websocket}, k8s_structs::K8sSecret}};
 
 #[derive(Debug)]
 pub struct K8sPodBasicInfo {
@@ -145,15 +145,6 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
         .unwrap();
     let response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")?;
 
-    // using reqwest
-    /*let client = get_reqwest_client_with_k8s_certs().context("Failed to create reqwest client with k8s certs.")?;
-    let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-        .header("Authorization", format!("Bearer {token}"))
-        //.body(vec![])
-        .body(Bytes::new())
-        .build()?;
-    let response = upgrade_to_websocket_reqwest(client, req).await.context("Failed to upgrade to websocket (reqwest).")?;*/
-
     let mut res_as_str = String::new();
     let mut response_remaining = response;
     loop {
@@ -190,7 +181,6 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
                 // chop off the `0x0001` char (SOH control character) at start of each "actual data" chunk
                 let item_as_str_cleaned = item_as_chars[1..].iter().cloned().collect::<String>();
                 res_as_str.push_str(&item_as_str_cleaned);
-                //info!("Res_as_str so far length:{}", res_as_str.len()); // only log length, otherwise logs so much that docker stops streaming-logs/responding-to-commands
             }
             Some(Err(e)) => return Err(e.into()),
             None => break,

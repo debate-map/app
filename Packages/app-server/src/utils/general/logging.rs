@@ -17,12 +17,6 @@ use tracing_subscriber::{filter, Layer, prelude::__tracing_subscriber_Subscriber
 
 use crate::{utils::type_aliases::ABSender, links::monitor_backend_link::{MESSAGE_SENDER_TO_MONITOR_BACKEND}};
 
-/*pub fn does_event_match_conditions(metadata: &Metadata, levels_to_exclude: &[Level]) -> bool {
-    if levels_to_exclude.contains(metadata.level()) {
-        return false;
-    }
-    true
-}*/
 pub fn does_event_match_conditions(metadata: &Metadata, levels_to_include: &[Level]) -> bool {
     if !levels_to_include.contains(metadata.level()) {
         return false;
@@ -61,7 +55,7 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN])
         },
         // temp
-        t if target_matches(t, &["hyper"]) => true,
+        //t if target_matches(t, &["hyper"]) => true,
         // fallback
         _ => false,
     }
@@ -81,39 +75,12 @@ pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
     }
 }
 
-// test
-/*struct MyLogger;
-impl log::Log for MyLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Info
-    }
-    fn log(&self, record: &Record) {
-        if self.enabled(record.metadata()) {
-            println!("{} - {}", record.level(), record.args());
-        }
-    }
-    fn flush(&self) {}
-}*/
-
-pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {
-    //tracing::log::set_logger(MyLogger); // test
-
-    //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::unbounded();
-    //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::bounded(10000);
-
-    // install global collector configured based on RUST_LOG env var.
-    //tracing_subscriber::fmt::init();
-
-    /*let printing_layer_func = filter::dynamic_filter_fn(move |metadata, cx| {
-        should_event_be_kept(metadata)
-    });*/
+pub fn set_up_logging() {
     let printing_layer_func = filter::filter_fn(move |metadata| {
         should_event_be_printed(metadata)
     });
 
     let printing_layer = tracing_subscriber::fmt::layer().with_filter(printing_layer_func);
-    //let sending_layer = Layer_WithIntercept::new(s1, r1.clone());
-    //let sending_layer = Layer_WithIntercept::new(s1);
     let sending_layer = Layer_WithIntercept {};
     
     // IMPORTANT NOTE: For some reason, calls to `log::warn` and such get logged to the standard-out (probably passing through `printing_layer` above), but NOT to the `sending_layer`.
@@ -123,12 +90,9 @@ pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {
         .with(printing_layer)
         .with(sentry::integrations::tracing::layer())
         .init();
-
-    //r1
 }
 
 pub struct Layer_WithIntercept {}
-//impl<S: Subscriber, F: 'static + Layer<S>> Layer<S> for Layer_WithIntercept<F> {
 impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
     fn on_event(&self, event: &Event<'_>, _ctx: Context<'_, S>) {
         let metadata = event.metadata();
@@ -138,11 +102,8 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
                 level: metadata.level().to_string(),
                 target: metadata.target().to_owned(),
                 span_name: metadata.name().to_owned(),
-                //message: format!("{:?}", metadata),
-                //message: metadata.fields().field("message").map(|a| a.to_string()).unwrap_or("[n/a]".to_string()),
                 message: "[to be loaded...]".to_owned(),
             };
-            //self.event_1st_part_sender.send(entry);
 
             let mut visitor = CollectorVisitor::default();
             event.record(&mut visitor);
@@ -151,15 +112,6 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
 
             //let start = std::time::Instant::now();
             block_on(async {
-                /*match self.event_sender.broadcast(entry).await {
-                    Ok(_) => {},
-                    // if a send fails (ie. no receivers attached yet), that's fine; just print a message
-                    Err(entry) => println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")
-                };*/
-                /*if let Err(err) =  {
-                    //error!("Errored while broadcasting LogEntryAdded message. @error:{}", err);
-                    println!("Local-only log-entry (since bridge to monitor not yet set up):{entry:?}")
-                }*/
                 match MESSAGE_SENDER_TO_MONITOR_BACKEND.0.broadcast(Message_ASToMB::LogEntryAdded { entry }).await {
                     Ok(_) => {},
                     // if a send fails (ie. no receivers attached yet), that's fine; just print a message
@@ -168,44 +120,7 @@ impl<S: Subscriber> Layer<S> for Layer_WithIntercept {
             });
             // typical results: 0.01ms (which seems fine; if we're logging so much that 0.01ms is a problem, we're very likely logging too much...)
             //println!("Time taken:{}", start.elapsed().as_secs_f64() * 1000f64);
-
-            //self.event_sender.try_send(entry).unwrap();
-
-            /*let mut target_open_slots = 10;
-            loop {
-                // remove messages from start of queue, until there are at least X slots open
-                let entries_to_consume_to_reach_target_open_slots = self.event_sender.len().checked_sub(self.event_sender.capacity().unwrap() - target_open_slots).unwrap_or(0);
-                for _i in 0..entries_to_consume_to_reach_target_open_slots {
-                    #[allow(unused_must_use)] {
-                        self.event_receiver.recv();
-                    }
-                }
-
-                entry = match self.event_sender.try_send(entry) {
-                    Ok(_) => {
-                        break; // break loop, because send succeeded
-                    },
-                    Err(err) => {
-                        match err {
-                            TrySendError::Full(entry) => {
-                                // no need to print error; the loop will restart, and clear enough space for new entry
-                                // however, increase the target-open-slots each time (to prevent case where it keeps refilling so quickly the send can never occur)
-                                target_open_slots = usize::min(self.event_sender.capacity().unwrap(), target_open_slots * 2);
-
-                                // pass entry back (entry was consumed by try_send, so if couldn't send it, we use this line to re-bind it to the entry variable)
-                                entry
-                            },
-                            TrySendError::Disconnected(_) => {
-                                println!("Hit error while trying to send log-entry through flume channel: all receivers were dropped. Ending send-loop...");
-                                break;
-                            },
-                        }
-                    }
-                };
-            }*/
         }
-        
-        //dbg!(self.base_layer.on_event(event, ctx));
     }
 }
 

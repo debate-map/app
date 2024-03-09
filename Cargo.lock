@@ -1334,7 +1334,8 @@ dependencies = [
 [[package]]
 name = "hyper"
 version = "1.2.0"
-source = "git+https://github.com/Venryx/hyper.git?rev=0f7a1ee5cacdcbd4ed24d8685fee2e0d416f6e49#0f7a1ee5cacdcbd4ed24d8685fee2e0d416f6e49"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "186548d73ac615b32a73aafe38fb4f56c0d340e110e5a200bcadbaf2e199263a"
 dependencies = [
  "bytes",
  "futures-channel",
