@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use http_body_util::Full;
-use hyper::http::{self, Response, StatusCode};
+use hyper::{body::Body, http::{self, Response, StatusCode}};
 use jwt_simple::reexports::rand;
 use thiserror::Error;
 use tokio_tungstenite::tungstenite as ws;
@@ -43,94 +43,56 @@ pub enum UpgradeConnectionError {
 }
 
 
-// Verify upgrade response according to RFC6455.
-// Based on `tungstenite` and added subprotocol verification.
-pub fn verify_response(res: &Response<Full<Bytes>>, key: &str) -> Result<(), UpgradeConnectionError> {
+/// Verify upgrade response according to RFC6455.
+/// Based on `tungstenite` and added subprotocol verification.
+pub fn verify_response(res: &Response<impl Body>, key: &str) -> Result<(), UpgradeConnectionError> {
     if res.status() != StatusCode::SWITCHING_PROTOCOLS {
         return Err(UpgradeConnectionError::ProtocolSwitch(res.status()));
     }
 
     let headers = res.headers();
-    if !headers
-        .get(http::header::UPGRADE)
-        .and_then(|h| h.to_str().ok())
-        .map(|h| h.eq_ignore_ascii_case("websocket"))
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::UPGRADE).and_then(|h| h.to_str().ok()).map(|h| h.eq_ignore_ascii_case("websocket")).unwrap_or(false) {
         return Err(UpgradeConnectionError::MissingUpgradeWebSocketHeader);
     }
 
-    if !headers
-        .get(http::header::CONNECTION)
-        .and_then(|h| h.to_str().ok())
-        .map(|h| h.eq_ignore_ascii_case("Upgrade"))
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::CONNECTION).and_then(|h| h.to_str().ok()).map(|h| h.eq_ignore_ascii_case("Upgrade")).unwrap_or(false) {
         return Err(UpgradeConnectionError::MissingConnectionUpgradeHeader);
     }
 
     let accept_key = ws::handshake::derive_accept_key(key.as_ref());
-    if !headers
-        .get(http::header::SEC_WEBSOCKET_ACCEPT)
-        .map(|h| h == &accept_key)
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::SEC_WEBSOCKET_ACCEPT).map(|h| h == &accept_key).unwrap_or(false) {
         return Err(UpgradeConnectionError::SecWebSocketAcceptKeyMismatch);
     }
-
     // Make sure that the server returned the correct subprotocol.
-    if !headers
-        .get(http::header::SEC_WEBSOCKET_PROTOCOL)
-        .map(|h| h == WS_PROTOCOL)
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::SEC_WEBSOCKET_PROTOCOL).map(|h| h == WS_PROTOCOL).unwrap_or(false) {
         return Err(UpgradeConnectionError::SecWebSocketProtocolMismatch);
     }
 
     Ok(())
 }
 
-// Verify upgrade response according to RFC6455.
-// Based on `tungstenite` and added subprotocol verification.
+/// Verify upgrade response according to RFC6455.
+/// Based on `tungstenite` and added subprotocol verification.
 pub fn verify_response_reqwest(res: &reqwest::Response, key: &str) -> Result<(), UpgradeConnectionError> {
     if res.status() != StatusCode::SWITCHING_PROTOCOLS {
         return Err(UpgradeConnectionError::ProtocolSwitch(res.status()));
     }
 
     let headers = res.headers();
-    if !headers
-        .get(http::header::UPGRADE)
-        .and_then(|h| h.to_str().ok())
-        .map(|h| h.eq_ignore_ascii_case("websocket"))
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::UPGRADE).and_then(|h| h.to_str().ok()).map(|h| h.eq_ignore_ascii_case("websocket")).unwrap_or(false) {
         return Err(UpgradeConnectionError::MissingUpgradeWebSocketHeader);
     }
 
-    if !headers
-        .get(http::header::CONNECTION)
-        .and_then(|h| h.to_str().ok())
-        .map(|h| h.eq_ignore_ascii_case("Upgrade"))
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::CONNECTION).and_then(|h| h.to_str().ok()).map(|h| h.eq_ignore_ascii_case("Upgrade")).unwrap_or(false) {
         return Err(UpgradeConnectionError::MissingConnectionUpgradeHeader);
     }
 
     let accept_key = ws::handshake::derive_accept_key(key.as_ref());
-    if !headers
-        .get(http::header::SEC_WEBSOCKET_ACCEPT)
-        .map(|h| h == &accept_key)
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::SEC_WEBSOCKET_ACCEPT).map(|h| h == &accept_key).unwrap_or(false) {
         return Err(UpgradeConnectionError::SecWebSocketAcceptKeyMismatch);
     }
-
     // Make sure that the server returned the correct subprotocol.
-    if !headers
-        .get(http::header::SEC_WEBSOCKET_PROTOCOL)
-        .map(|h| h == WS_PROTOCOL)
-        .unwrap_or(false)
-    {
+    if !headers.get(http::header::SEC_WEBSOCKET_PROTOCOL).map(|h| h == WS_PROTOCOL).unwrap_or(false) {
         return Err(UpgradeConnectionError::SecWebSocketProtocolMismatch);
     }
 

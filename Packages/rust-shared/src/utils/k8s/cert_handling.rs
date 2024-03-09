@@ -1,12 +1,15 @@
 use std::{sync::Arc, fs::File, io::Read};
 
-use anyhow::Error;
+use anyhow::{ensure, Context, Error};
 use bytes::Bytes;
 use http_body_util::Full;
 use hyper::body::{self, Body};
 use hyper_rustls::HttpsConnector;
 use hyper_util::{client::legacy::{connect::HttpConnector, Client}, rt::TokioExecutor};
-use rustls::{client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier}, internal::msgs::codec::Codec, pki_types::{CertificateDer, ServerName, UnixTime}, ClientConfig, DigitallySignedStruct};
+use rustls::{client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier}, internal::msgs::codec::Codec, pki_types::{CertificateDer, ServerName, UnixTime}, version::TLS12, ClientConfig, DigitallySignedStruct, SupportedProtocolVersion};
+use tracing::{info, warn};
+
+use crate::to_anyhow;
 
 pub fn get_reqwest_client_with_k8s_certs() -> Result<reqwest::Client, Error> {
     /*let mut buf = Vec::new();
@@ -41,17 +44,40 @@ pub fn get_hyper_client_with_k8s_certs<B: Body + Send>() -> Result<Client<HttpsC
 }
 
 pub fn get_rustls_config_dangerous() -> Result<ClientConfig, Error> {
-    let mut store = rustls::RootCertStore::empty();
+    let cert_file = File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?;
+    /*let mut buf = Vec::new();
+    cert_file.read_to_end(&mut buf)?;*/
+    let cert_file_reader = &mut std::io::BufReader::new(cert_file);
 
-    let mut buf = Vec::new();
-    File::open("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")?
-        .read_to_end(&mut buf)?;
+    /*let mut store = rustls::RootCertStore::empty();
+    warn!("BytesRead:{} @firstBytes:{:?}", buf.len(), Bytes::copy_from_slice(&buf[..100]));
     //let cert = reqwest::Certificate::from_pem(&buf)?;
-    let cert = CertificateDer::read_bytes(&buf);
-    store.add_parsable_certificates(cert);
+    let cert = CertificateDer::read_bytes(&buf).map_err(to_anyhow).context("Failed to parse k8s certificate file.")?;
+    let (certs_added, certs_ignored) = store.add_parsable_certificates(vec![cert]);
+    warn!("CertsAdded:{} CertsIgnored:{}", certs_added, certs_ignored);
+    ensure!(certs_added > 0, "No certificates were added to the store.");
+    ensure!(certs_ignored == 0, "Some certificates were ignored.");*/
+
+    let mut store = rustls::RootCertStore::empty();
+    //let cert = rustls_pemfile::certs(&mut std::io::BufReader::new(&buf)).unwrap().pop().unwrap();
+    //store.add(&rustls::Certificate(cert)).unwrap();
+    for cert in rustls_pemfile::certs(cert_file_reader) {
+        match cert {
+            Ok(cert) => store.add(cert).unwrap(),
+            Err(err) => warn!("Failed to parse a certificate from the k8s certificate file. @err:{}", err),
+        }
+    }
     
-    let mut config = ClientConfig::builder()
+    let mut config =
+    //ClientConfig::builder()
+    ClientConfig::builder_with_protocol_versions(&[&TLS12])
         //.with_safe_defaults()
+        // new equivalent of with_safe_defaults()
+        /*.with_safe_default_cipher_suites()
+        .with_safe_default_kx_groups()
+        .with_safe_default_protocol_versions()*/
+        //.with_protocol_versions(&[rustls::version::TLS12])
+        
         .with_root_certificates(store)
         .with_no_client_auth();
 
@@ -98,6 +124,21 @@ impl ServerCertVerifier for NoCertificateVerification {
     }
     
     fn supported_verify_schemes(&self) -> Vec<rustls::SignatureScheme> {
-        vec![]
+        use rustls::SignatureScheme::*;
+        vec![
+            RSA_PKCS1_SHA1,
+            ECDSA_SHA1_Legacy,
+            RSA_PKCS1_SHA256,
+            ECDSA_NISTP256_SHA256,
+            RSA_PKCS1_SHA384,
+            ECDSA_NISTP384_SHA384,
+            RSA_PKCS1_SHA512,
+            ECDSA_NISTP521_SHA512,
+            RSA_PSS_SHA256,
+            RSA_PSS_SHA384,
+            RSA_PSS_SHA512,
+            ED25519,
+            ED448,
+        ]
     }
 }

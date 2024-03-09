@@ -88,6 +88,9 @@ tokio-tungstenite = {version = "0.21.0", features = ["rustls-tls-native-roots"]}
 #rustls = "*"
 #tokio-util = "0.6.9" # probably temp (only used once in _k8s.rs, so would like to avoid another dep)
 
+rustls-pemfile = "2.1.1"
+pin-project-lite = "*"
+
 rust-macros = { path = "../rust-macros" }
 
 # sync among all rust crates (ie. deps that have issues being subdeps accessed through rust_shared)

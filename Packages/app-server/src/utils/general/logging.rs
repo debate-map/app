@@ -42,7 +42,17 @@ pub fn target_matches(target: &str, module_paths: &[&str]) -> bool {
     false
 }
 pub fn should_event_be_printed(metadata: &Metadata) -> bool {
-    match metadata.target() {
+    let target = metadata.target();
+    
+    // when you enable this, only do it temporarily, to check the list of tracing targets
+    /*let mut cache = OBSERVED_TRACING_EVENT_TARGETS.lock().unwrap();
+    if !cache.contains(&target.to_owned()) {
+        cache.push(target.to_owned());
+        //println!("Tracing targets observed so far: {}", cache.iter().format(", "));
+        println!("Observed new target in tracing: {}", target);
+    }*/
+    
+    match target {
         t if target_matches(t, &["app_server", "rust_shared"]) => {
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO])
             //should_event_be_kept_according_to_x(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
@@ -53,16 +63,7 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
         // temp
         t if target_matches(t, &["hyper"]) => true,
         // fallback
-        _target => {
-            // when you enable this, only do it temporarily, to check the list of tracing targets
-            /*let mut cache = OBSERVED_TRACING_EVENT_TARGETS.lock().unwrap();
-            if !cache.contains(&target.to_owned()) {
-                cache.push(target.to_owned());
-                //println!("Tracing targets observed so far: {}", cache.iter().format(", "));
-                println!("Observed new target in tracing: {}", cache.iter().format(", "));
-            }*/
-            false
-        },
+        _ => false,
     }
 }
 pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
@@ -80,7 +81,23 @@ pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {
     }
 }
 
+// test
+/*struct MyLogger;
+impl log::Log for MyLogger {
+    fn enabled(&self, metadata: &Metadata) -> bool {
+        metadata.level() <= Level::Info
+    }
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            println!("{} - {}", record.level(), record.args());
+        }
+    }
+    fn flush(&self) {}
+}*/
+
 pub fn set_up_logging(/*s1: ABSender<LogEntry>*/) /*-> Receiver<LogEntry>*/ {
+    //tracing::log::set_logger(MyLogger); // test
+
     //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::unbounded();
     //let (s1, r1): (Sender<LogEntry>, Receiver<LogEntry>) = flume::bounded(10000);
 

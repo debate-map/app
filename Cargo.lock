@@ -1334,7 +1334,7 @@ dependencies = [
 [[package]]
 name = "hyper"
 version = "1.2.0"
-source = "git+https://github.com/Venryx/hyper.git?rev=7ede2d586b2e0274807486b54a509bc94b179c63#7ede2d586b2e0274807486b54a509bc94b179c63"
+source = "git+https://github.com/Venryx/hyper.git?rev=0f7a1ee5cacdcbd4ed24d8685fee2e0d416f6e49#0f7a1ee5cacdcbd4ed24d8685fee2e0d416f6e49"
 dependencies = [
  "bytes",
  "futures-channel",
@@ -2565,11 +2565,13 @@ dependencies = [
  "itertools",
  "jwt-simple",
  "once_cell",
+ "pin-project-lite",
  "postgres-protocol",
  "regex",
  "reqwest 0.11.25 (git+https://github.com/seanmonstar/reqwest.git?rev=2c11ef000b151c2eebeed2c18a7b81042220c6b0)",
  "rust-macros",
  "rustls 0.22.2",
+ "rustls-pemfile 2.1.1",
  "sentry",
  "serde",
  "serde_json",

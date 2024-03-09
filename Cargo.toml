@@ -39,4 +39,5 @@ tokio-postgres = {git = "https://github.com/MaterializeInc/rust-postgres.git", r
 #reqwest = {git = "https://github.com/seanmonstar/reqwest.git", rev = "2c11ef000b151c2eebeed2c18a7b81042220c6b0", default-features = false, features = ["rustls-tls", "json"] }
 
 # temp, for testing
-hyper = {git = "https://github.com/Venryx/hyper.git", rev = "7ede2d586b2e0274807486b54a509bc94b179c63", features = ["client"]}
+#hyper = {git = "https://github.com/Venryx/hyper.git", rev = "7ede2d586b2e0274807486b54a509bc94b179c63", features = ["client"]}
+hyper = {git = "https://github.com/Venryx/hyper.git", rev = "0f7a1ee5cacdcbd4ed24d8685fee2e0d416f6e49", features = ["client"]}

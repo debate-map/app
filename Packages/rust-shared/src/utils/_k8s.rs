@@ -140,7 +140,7 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     //let res_as_str = process_exec_ws_messages(req).await?;
 
     // using hyper
-    /*let client = get_hyper_client_with_k8s_certs().context("Failed to create hyper client with k8s certs.")?;
+    let client = get_hyper_client_with_k8s_certs().context("Failed to create hyper client with k8s certs.")?;
     //let req = tungstenite::http::Request::builder().uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
     let req = http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
@@ -151,17 +151,17 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
         .body(Empty::<Bytes>::new())
         //.body(ReqwestBody::empty())
         .unwrap();
-    let response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")?;*/
+    let response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")?;
 
     // using reqwest
-    let client = get_reqwest_client_with_k8s_certs().context("Failed to create reqwest client with k8s certs.")?;
+    /*let client = get_reqwest_client_with_k8s_certs().context("Failed to create reqwest client with k8s certs.")?;
     let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         //.header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {token}"))
         //.body(vec![])
         .body(Bytes::new())
         .build()?;
-    let response = upgrade_to_websocket_reqwest(client, req).await.context("Failed to upgrade to websocket (reqwest).")?;
+    let response = upgrade_to_websocket_reqwest(client, req).await.context("Failed to upgrade to websocket (reqwest).")?;*/
 
     let mut res_as_str = String::new();
     let mut response_remaining = response;
@@ -199,6 +199,7 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
                 // chop off the `0x0001` char (SOH control character) at start of each "actual data" chunk
                 let item_as_str_cleaned = item_as_chars[1..].iter().cloned().collect::<String>();
                 res_as_str.push_str(&item_as_str_cleaned);
+                //info!("Res_as_str so far length:{}", res_as_str.len()); // only log length, otherwise logs so much that docker stops streaming-logs/responding-to-commands
             }
             Some(Err(e)) => return Err(e.into()),
             None => break,
