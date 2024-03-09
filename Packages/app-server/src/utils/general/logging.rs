@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+use std::sync::Mutex;
 use std::{fmt, collections::HashMap, ops::Sub};
 
 use rust_shared::flume::{Sender, Receiver, TrySendError};
@@ -5,7 +7,8 @@ use rust_shared::futures::executor::block_on;
 use rust_shared::indexmap::IndexMap;
 use rust_shared::itertools::Itertools;
 use rust_shared::links::app_server_to_monitor_backend::{LogEntry, Message_ASToMB};
-use rust_shared::sentry;
+use rust_shared::once_cell::sync::Lazy;
+use rust_shared::{sentry, to_anyhow};
 use rust_shared::utils::time::time_since_epoch_ms;
 use rust_shared::serde::{Serialize, Deserialize};
 use rust_shared::serde_json::json;
@@ -27,16 +30,39 @@ pub fn does_event_match_conditions(metadata: &Metadata, levels_to_include: &[Lev
     true
 }
 
+// create index-map in once cell
+static OBSERVED_TRACING_EVENT_TARGETS: Lazy<Mutex<Vec<String>>> = Lazy::new(|| Mutex::new(Vec::new()));
+
+pub fn target_matches(target: &str, module_paths: &[&str]) -> bool {
+    for module_path in module_paths {
+        if target == *module_path || target.starts_with(&format!("{}::", module_path)) {
+            return true;
+        }
+    }
+    false
+}
 pub fn should_event_be_printed(metadata: &Metadata) -> bool {
     match metadata.target() {
-        a if a.starts_with("app_server") || a.starts_with("rust_shared") => {
+        t if target_matches(t, &["app_server", "rust_shared"]) => {
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN, Level::INFO])
             //should_event_be_kept_according_to_x(metadata, &[Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG])
         },
-        "async-graphql" => {
+        t if target_matches(t, &["async-graphql"]) => {
             does_event_match_conditions(metadata, &[Level::ERROR, Level::WARN])
         },
-        _ => false
+        // temp
+        t if target_matches(t, &["hyper"]) => true,
+        // fallback
+        _target => {
+            // when you enable this, only do it temporarily, to check the list of tracing targets
+            /*let mut cache = OBSERVED_TRACING_EVENT_TARGETS.lock().unwrap();
+            if !cache.contains(&target.to_owned()) {
+                cache.push(target.to_owned());
+                //println!("Tracing targets observed so far: {}", cache.iter().format(", "));
+                println!("Observed new target in tracing: {}", cache.iter().format(", "));
+            }*/
+            false
+        },
     }
 }
 pub fn should_event_be_sent_to_monitor(metadata: &Metadata) -> bool {

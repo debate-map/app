@@ -16,7 +16,7 @@ use tower::ServiceBuilder;
 use super::{type_aliases::JSONValue, k8s::cert_handling::get_reqwest_client_with_k8s_certs};
 use tracing::{info, error, instrument::WithSubscriber, warn};
 
-use crate::{utils::k8s::{k8s_structs::K8sSecret, k8s_client::upgrade_to_websocket, cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_dangerous}}, domains::{get_server_url, DomainsConstants}};
+use crate::{domains::{get_server_url, DomainsConstants}, utils::k8s::{cert_handling::{get_hyper_client_with_k8s_certs, get_rustls_config_dangerous}, k8s_client::{upgrade_to_websocket, upgrade_to_websocket_reqwest}, k8s_structs::K8sSecret}};
 
 #[derive(Debug)]
 pub struct K8sPodBasicInfo {
@@ -135,12 +135,12 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
     }
     query_str.push_str("&stdin=true&stderr=true&stdout=true&tty=true");
 
-    let client = get_hyper_client_with_k8s_certs().context("Failed to create hyper client with k8s certs.")?;
-    //let client = get_reqwest_client_with_k8s_certs()?;
-    /*let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
-        .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {token}"))
-        .body(vec![]).build()?;*/
+    // this route gets error: "URL error: URL scheme not supported"
+    // (seems the issue is that the function used expects a websocket connection from the start, ie. it cannot handle the tricky upgrade part)
+    //let res_as_str = process_exec_ws_messages(req).await?;
+
+    // using hyper
+    /*let client = get_hyper_client_with_k8s_certs().context("Failed to create hyper client with k8s certs.")?;
     //let req = tungstenite::http::Request::builder().uri(format!("https://{k8s_host}:{k8s_port}/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
     let req = http::Request::builder().uri(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
         .method("GET")
@@ -151,30 +151,23 @@ pub async fn exec_command_in_another_pod(pod_namespace: &str, pod_name: &str, co
         .body(Empty::<Bytes>::new())
         //.body(ReqwestBody::empty())
         .unwrap();
+    let response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")?;*/
 
-    // commented; this doesn't work for endpoints that require https->ws upgrade (eg. exec), so we just always use the semi-manual approach below instead
-    /*let pods: Api<Pod> = Api::namespaced(client, pod_namespace);
-    let attached = pods.exec(pod_name, command_name_and_args, &AttachParams::default().tty(false).stderr(true)).await?;
-    //Api::attach(&self, name, ap).await.unwrap().*/
+    // using reqwest
+    let client = get_reqwest_client_with_k8s_certs().context("Failed to create reqwest client with k8s certs.")?;
+    let req = client.get(format!("https://kubernetes.default.svc.cluster.local/api/v1/namespaces/{}/pods/{}/exec{}", pod_namespace, pod_name, query_str))
+        //.header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {token}"))
+        //.body(vec![])
+        .body(Bytes::new())
+        .build()?;
+    let response = upgrade_to_websocket_reqwest(client, req).await.context("Failed to upgrade to websocket (reqwest).")?;
 
-    // this route gets error: "URL error: URL scheme not supported"
-    // (seems the issue is that the function used expects a websocket connection from the start, ie. it cannot handle the tricky upgrade part)
-    //let res_as_str = process_exec_ws_messages(req).await?;
-
-    // if desired, the websocket connection code is probably not that hard to extract; for ref: https://github.com/kubernetes-client/python/issues/409#issuecomment-1241425302
-    // this route gets error (using direct hyper): "failed to switch protocol: 403 Forbidden"
-    let mut response = upgrade_to_websocket(client, req).await.context("Failed to upgrade to websocket.")
-        /*.map_err(|err| {
-            // print full stack-trace of err
-            error!("Error upgrading to websocket (test1 info): {:?}", err);
-            error!("Error upgrading to websocket (test2 info): {:#?}", err);
-            err
-        })*/
-        ?;
     let mut res_as_str = String::new();
+    let mut response_remaining = response;
     loop {
-        let (next_item, rest_of_response) = response.into_future().await;
-        response = rest_of_response;
+        let (next_item, rest_of_response) = response_remaining.into_future().await;
+        response_remaining = rest_of_response;
         match next_item {
             Some(Ok(item)) => {
                 let item_into_text = match item {
