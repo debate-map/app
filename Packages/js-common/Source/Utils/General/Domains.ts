@@ -1,13 +1,13 @@
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 
-const recognizedWebServerHosts = [
+/*const recognizedWebServerHosts = [
 	"localhost:5100", "localhost:5101", // web-server, dev/local
 	"localhost:5130", "localhost:5131", // monitor, dev/local
 	"debatemap.app",
 	"debates.app",
 	"debating.app",
 	"9m2x1z.nodes.c1.or1.k8s.ovh.us",
-];
+];*/
 const prodDomain = "debatemap.app";
 //const prodDomain = "debates.app"; // temp
 
@@ -15,9 +15,9 @@ const prodDomain = "debatemap.app";
 	return defaultOpts;
 }*/
 
-const ON_SERVER = globalThis.process?.env?.ENV != null;
-const ON_SERVER_AND_DEV = ON_SERVER && process.env.ENV == "dev";
-const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
+//const ON_SERVER = globalThis.process?.env?.ENV != null;
+//const ON_SERVER_AND_DEV = ON_SERVER && process.env.ENV == "dev";
+//const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
 
 export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana";
 
@@ -40,13 +40,14 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClien
 	// ==========
 
 	// if there is a client-url, and its host is recognized (OR on app-server pod running with DEV), trust that host as being the server host
-	if (claimedClientURL && (recognizedWebServerHosts.includes(claimedClientURL.host) || ON_SERVER_AND_DEV)) {
+	//if (claimedClientURL && (recognizedWebServerHosts.includes(claimedClientURL.host) || ON_SERVER_AND_DEV)) {
+	if (claimedClientURL) {
 		serverURL = new URL(`${claimedClientURL.protocol}//${claimedClientURL.hostname}`);
 	}
 	// else, just guess at the correct origin
 	else {
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-		const guessedToBeLocal = opts.forceLocalhost || ON_SERVER_AND_DEV;
+		const guessedToBeLocal = opts.forceLocalhost;
 		if (guessedToBeLocal) {
 			//webServerURL = new URL("http://localhost:5100");
 			serverURL = new URL("http://localhost"); // port to be set shortly (see section below)
@@ -58,37 +59,24 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClien
 	// section 2: set subdomain/port
 	// ==========
 
+	if (serverURL.hostname != "localhost") {
+		serverURL.host = `${serverURL.host}`;
+	}
+
+	let pathPrefix = "";
 	if (serverPod == "web-server") {
-		if (serverURL.hostname == "localhost") {
-			serverURL.port = {5100: 5100, 5101: 5101}[claimedClientURL?.port as any] ?? "5100";
-		} else {
-			// no need to change; web-server is the base-url, in production (ie. no subdomain/port)
-		}
 	} else if (serverPod == "app-server") {
-		if (serverURL.hostname == "localhost") {
-			serverURL.port = "5110";
-		} else {
-			serverURL.host = `app-server.${serverURL.host}`;
-		}
+		pathPrefix = "/app-server";
 	} else if (serverPod == "monitor") {
-		if (serverURL.hostname == "localhost") {
-			//serverURL.port = {5130: 5130, 5131: 5131}[claimedClientURL?.port as any] ?? "5130";
-			serverURL.port = "5130"; // always return the actual k8s pod (since caller may be intending a backend call)
-		} else {
-			serverURL.host = `monitor.${serverURL.host}`;
-		}
+		pathPrefix = "/monitor";
 	} else if (serverPod == "grafana") {
-		if (serverURL.hostname == "localhost") {
-			serverURL.port = "3000";
-		} else {
-			serverURL.host = `grafana.${serverURL.host}`;
-		}
+		pathPrefix = "/grafana";
 	}
 
 	// section 3: set path
 	// ==========
 
-	serverURL.pathname = subpath;
+	serverURL.pathname = pathPrefix + subpath;
 
 	// section 4: special-case handling
 	// ==========
