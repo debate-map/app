@@ -17,7 +17,7 @@ webhooks:
   clientConfig:
     service:
       name: gateway-api-admission-server
-      namespace: gateway-system
+      namespace: default
       path: "/validate"
 ---
 apiVersion: v1
@@ -26,7 +26,7 @@ metadata:
   labels:
     name: gateway-api-webhook-server
   name: gateway-api-admission-server
-  namespace: gateway-system
+  namespace: default
 spec:
   type: ClusterIP
   ports:
@@ -40,7 +40,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-api-admission-server
-  namespace: gateway-system
+  namespace: default
   labels:
     name: gateway-api-admission-server
 spec:

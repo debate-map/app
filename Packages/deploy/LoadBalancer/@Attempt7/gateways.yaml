@@ -1,10 +1,10 @@
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: gateway-class-main
-spec:
-  controllerName: nginx/gateway-controller
+# ---
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: GatewayClass
+# metadata:
+#   name: gateway-class-main
+# spec:
+#   controllerName: nginx/gateway-controller
 
 # The HTTP (ie. non-HTTPS) gateway. It's used for:
 # 1) Serving the proxy requests coming from Cloudflare/[debatemap/debates].app. (will probably switch it to use the HTTPS gateway in the future)
@@ -19,7 +19,7 @@ metadata:
   #annotations:
   #  cert-manager.io/cluster-issuer: zerossl-issuer
 spec:
-  gatewayClassName: gateway-class-main
+  gatewayClassName: nginx
   # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
   listeners:
   - name: http
@@ -45,7 +45,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: zerossl-issuer
 spec:
-  gatewayClassName: gateway-class-main
+  gatewayClassName: nginx
   # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
   listeners:
     # origin/ovh

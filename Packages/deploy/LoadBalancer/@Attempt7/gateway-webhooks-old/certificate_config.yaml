@@ -4,7 +4,7 @@ metadata:
   name: gateway-api-admission
   labels:
     name: gateway-api-webhook
-  namespace: gateway-system
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -35,7 +35,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-api-admission
-  namespace: gateway-system
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -44,7 +44,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-system
+  namespace: default
 rules:
 - apiGroups:
   - ''
@@ -61,7 +61,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-system
+  namespace: default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -69,7 +69,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-api-admission
-  namespace: gateway-system
+  namespace: default
 ---
 apiVersion: batch/v1
 kind: Job
@@ -78,7 +78,7 @@ metadata:
   annotations:
   labels:
     name: gateway-api-webhook
-  namespace: gateway-system
+  namespace: default
 spec:
   template:
     metadata:
@@ -124,7 +124,7 @@ metadata:
   name: gateway-api-admission-patch
   labels:
     name: gateway-api-webhook
-  namespace: gateway-system
+  namespace: default
 spec:
   template:
     metadata:

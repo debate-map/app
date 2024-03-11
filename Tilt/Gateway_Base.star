@@ -12,8 +12,8 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 # ==========
 
 def Start_Gateway_Base(g):
-	CreateNamespace(g, k8s_yaml, "gateway-system")
-	CreateNamespace(g, k8s_yaml, "nginx") # test
+	#CreateNamespace(g, k8s_yaml, "gateway-system")
+	#CreateNamespace(g, k8s_yaml, "nginx") # test
 	
 	# gateway api
 	# NOTE: This apparently has to be added *before* traefik, else "traefik-other-objects" batch gets error:
@@ -70,17 +70,17 @@ def Start_Gateway_Base(g):
 		},
 	])
 
-	NEXT_k8s_resource_batch(g, [
-		{
-			"new_name": "gateway-api-other-objects", "labels": ["gateway"],
-			"objects": [
-				"gateway-class-main:gatewayclass",
+	# NEXT_k8s_resource_batch(g, [
+	# 	{
+	# 		"new_name": "gateway-api-other-objects", "labels": ["gateway"],
+	# 		"objects": [
+	# 			"nginx:gatewayclass",
 
-				# "gateway-role:clusterrole",
-				# "gateway-controller:clusterrolebinding",
-			],
-		},
-	])
+	# 			# "gateway-role:clusterrole",
+	# 			# "gateway-controller:clusterrolebinding",
+	# 		],
+	# 	},
+	# ])
 
 	# custom routes
 	# ==========
