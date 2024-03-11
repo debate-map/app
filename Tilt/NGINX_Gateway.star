@@ -43,4 +43,4 @@ def Start_NGINXGateway(g):
 	# 		],
 	# 	},
 	# ])
-	k8s_resource(new_name="nginx-gateway-node-port-tilt", objects=["nginx-gateway-node-port"], pod_readiness='ignore')
+	k8s_resource(new_name="nginx-gateway-node-port-tilt", objects=["nginx-gateway-node-port"]) #, pod_readiness='ignore')
