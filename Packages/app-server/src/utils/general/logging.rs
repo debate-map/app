@@ -39,12 +39,12 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
     let target = metadata.target();
     
     // when you enable this, only do it temporarily, to check the list of tracing targets
-    /*let mut cache = OBSERVED_TRACING_EVENT_TARGETS.lock().unwrap();
+    let mut cache = OBSERVED_TRACING_EVENT_TARGETS.lock().unwrap();
     if !cache.contains(&target.to_owned()) {
         cache.push(target.to_owned());
         //println!("Tracing targets observed so far: {}", cache.iter().format(", "));
         println!("Observed new target in tracing: {}", target);
-    }*/
+    }
     
     match target {
         t if target_matches(t, &["app_server", "rust_shared"]) => {
@@ -56,6 +56,8 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
         },
         // temp
         //t if target_matches(t, &["hyper"]) => true,
+        //t if target_matches(t, &["tower_http::trace::on_request", "tower_http::trace::on_response"]) => true,
+        t if target_matches(t, &["tower_http::"]) => true,
         // fallback
         _ => false,
     }

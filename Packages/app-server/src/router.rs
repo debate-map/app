@@ -1,4 +1,4 @@
-use rust_shared::{anyhow::{bail, ensure}, axum::{self, extract::Extension, middleware::Next, response::{self, IntoResponse, Response}}, tokio::net::TcpListener, tower_http::{self, cors::AllowOrigin}, utils::general::k8s_env};
+use rust_shared::{anyhow::{bail, ensure}, axum::{self, extract::Extension, middleware::Next, response::{self, IntoResponse, Response}}, tokio::net::TcpListener, tower_http::{self, cors::AllowOrigin, trace::TraceLayer}, utils::general::k8s_env};
 use rust_shared::hyper::{Request, Method};
 use axum::{
     response::{Html},
@@ -73,7 +73,8 @@ pub async fn start_router(app_state: AppStateArc) {
         .layer(Extension(app_state.clone()))
         //.with_state(app_state.clone()) // for new version of axum apparently
         .layer(Extension(middleware::from_fn::<_, Response<axum::body::Body>>(print_request_response)))
-        .layer(get_cors_layer());
+        .layer(get_cors_layer())
+        .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 5110)); // ip of 0.0.0.0 means it can receive connections from outside this pod (eg. other pods, the load-balancer)
     let listener = TcpListener::bind(&addr).await.unwrap();

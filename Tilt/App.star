@@ -87,31 +87,31 @@ def Start_App(g):
 	# port forwards (see readme's [project-service-urls] guide-module for details)
 	# ==========
 
-	# NEXT_k8s_resource_batch(g, [
-	# 	{
-	# 		"workload": 'dm-monitor-backend',
-	# 		"trigger_mode": TRIGGER_MODE_MANUAL,
-	# 		"port_forwards": '5230:5130' if g["REMOTE"] else '5130',
-	# 		"labels": ["app"],
-	# 	},
-	# 	{
-	# 		"workload": 'dm-web-server',
-	# 		"trigger_mode": TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
-	# 		"port_forwards": '5200:5100' if g["REMOTE"] else '5100',
-	# 		"labels": ["app"],
-	# 	},
-	# 	{
-	# 		"workload": 'dm-app-server',
-	# 		# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
-	# 		"trigger_mode": TRIGGER_MODE_MANUAL,
-	# 		"port_forwards": '5210:5110' if g["REMOTE"] else '5110',
-	# 		"labels": ["app"],
-	# 	},
-	# 	{
-	# 		"workload": 'nginx-gateway-node-port-tilt',
-	# 		# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
-	# 		"trigger_mode": TRIGGER_MODE_MANUAL,
-	# 		"port_forwards": '80' if g["REMOTE"] else '8000:80',
-	# 		"labels": ["app"],
-	# 	},
-	# ])
+	NEXT_k8s_resource_batch(g, [
+		{
+			"workload": 'dm-monitor-backend',
+			"trigger_mode": TRIGGER_MODE_MANUAL,
+			#"port_forwards": '5230:5130' if g["REMOTE"] else '5130',
+			"labels": ["app"],
+		},
+		{
+			"workload": 'dm-web-server',
+			"trigger_mode": TRIGGER_MODE_MANUAL, # probably temp (can remove once client.build.prodQuick stops clearing the Dist folder prior to the new contents being available)
+			#"port_forwards": '5200:5100' if g["REMOTE"] else '5100',
+			"labels": ["app"],
+		},
+		{
+			"workload": 'dm-app-server',
+			# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
+			"trigger_mode": TRIGGER_MODE_MANUAL,
+			#"port_forwards": '5210:5110' if g["REMOTE"] else '5110',
+			"labels": ["app"],
+		},
+		{
+			"workload": 'nginx-gateway-node-port-tilt',
+			# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
+			"trigger_mode": TRIGGER_MODE_MANUAL,
+			#"port_forwards": '80' if g["REMOTE"] else '8000:80',
+			"labels": ["app"],
+		},
+	])
