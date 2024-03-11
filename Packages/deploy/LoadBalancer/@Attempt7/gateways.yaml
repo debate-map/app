@@ -15,7 +15,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: gateway-http
-  namespace: nginx # test
+  namespace: default # test
   #annotations:
   #  cert-manager.io/cluster-issuer: zerossl-issuer
 spec:
@@ -41,7 +41,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: gateway-https
-  namespace: nginx
+  namespace: default
   annotations:
     cert-manager.io/cluster-issuer: zerossl-issuer
 spec:

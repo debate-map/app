@@ -28,3 +28,9 @@ def Start_NGINXGateway(g):
 		'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
 		#namespace='default'
 	)
+	# todo
+	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')
+
+	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
+	# todo
+	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')

@@ -29,8 +29,8 @@ spec:
           #serviceType: ClusterIP
           parentRefs:
             - name: gateway-http
-              namespace: nginx
+              namespace: default
               kind: Gateway
             # - name: gateway-https
-            #   namespace: nginx
+            #   namespace: default
             #   kind: Gateway
