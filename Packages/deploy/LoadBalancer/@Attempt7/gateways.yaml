@@ -25,8 +25,11 @@ spec:
   - name: http
     #hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us
     protocol: HTTP
+    #containerPort: 31099
+    #nodePort: 31099
     port: 80
-    # port: 8000
+    #targetPort: 31099
+    #port: 8009
     #port: 8005
     allowedRoutes:
       namespaces:

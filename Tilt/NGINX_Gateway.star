@@ -27,6 +27,8 @@ def Start_NGINXGateway(g):
 		'ngf',
 		'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
 		#namespace='default'
+		#flags=['--set=service.type=NodePort']
+		flags=['--set=service.create=false']
 	)
 	# todo
 	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')
