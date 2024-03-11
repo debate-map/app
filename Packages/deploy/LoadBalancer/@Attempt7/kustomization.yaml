@@ -2,15 +2,15 @@ resources:
 
 # gateway templates
 - gateway-crds
+
 # not needed in kubernetes 1.25+ (according to: https://docs.nginx.com/nginx-gateway-fabric/installation/installing-ngf/helm/)
-#- gateway-webhooks/admission_webhook.yaml
-#- gateway-webhooks/certificate_config.yaml
+# EDIT: while not needed in k8s 1.25+ *by NGINX*, it appears to still be required by the Gateway API itself
+# - gateway-webhooks-old/admission_webhook.yaml
+# - gateway-webhooks-old/certificate_config.yaml
 
 # gateway customizations
 - gateways.yaml
 - routes.yaml
 
-# traefik templates
-- rbac.yaml
-# traefik customizations: 
-# [customizations are set in the traefik-values.yaml file]
+# templates (maybe not needed anymore; was needed before nginx)
+#- rbac.yaml

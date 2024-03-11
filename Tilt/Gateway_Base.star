@@ -26,9 +26,9 @@ def Start_Gateway_Base(g):
 
 	# NEXT_k8s_resource_batch(g, [
 	# 	# relating to admission-webhook system
-	# 	{"workload": "gateway-api-admission-server", "labels": ["traefik"]},
+	# 	{"workload": "gateway-api-admission-server", "labels": ["gateway"]},
 	# 	{
-	# 		"workload": "gateway-api-admission", "labels": ["traefik"],
+	# 		"workload": "gateway-api-admission", "labels": ["gateway"],
 	# 		"objects": [
 	# 			"gateway-api-admission:serviceaccount",
 	# 			"gateway-api-admission:role",
@@ -38,13 +38,13 @@ def Start_Gateway_Base(g):
 	# 			"gateway-api-admission:validatingwebhookconfiguration",
 	# 		]
 	# 	},
-	# 	{"workload": "gateway-api-admission-patch", "labels": ["traefik"]},
+	# 	{"workload": "gateway-api-admission-patch", "labels": ["gateway"]},
 	# ])
 
 	# test1-added
 	NEXT_k8s_resource_batch(g, [
 		{
-			"new_name": "gateway-api-crd-early", "labels": ["traefik"],
+			"new_name": "gateway-api-crd-early", "labels": ["gateway"],
 			"objects": [
 				"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition",
 			],
@@ -53,7 +53,7 @@ def Start_Gateway_Base(g):
 
 	NEXT_k8s_resource_batch(g, [
 		{
-			"new_name": "gateway-api-crd", "labels": ["traefik"],
+			"new_name": "gateway-api-crd", "labels": ["gateway"],
 			"objects": [
 				#"gateway-api:namespace",
 				#"gatewayclasses.gateway.networking.k8s.io:customresourcedefinition", # test1-removed
@@ -72,11 +72,12 @@ def Start_Gateway_Base(g):
 
 	NEXT_k8s_resource_batch(g, [
 		{
-			"new_name": "gateway-api-other-objects", "labels": ["traefik"],
+			"new_name": "gateway-api-other-objects", "labels": ["gateway"],
 			"objects": [
-				"gateway-role:clusterrole",
-				"gateway-controller:clusterrolebinding",
 				"gateway-class-main:gatewayclass",
+
+				# "gateway-role:clusterrole",
+				# "gateway-controller:clusterrolebinding",
 			],
 		},
 	])
@@ -86,13 +87,12 @@ def Start_Gateway_Base(g):
 
 	NEXT_k8s_resource_batch(g, [
 		{
-			"new_name": "app-routes", "labels": ["traefik"],
+			"new_name": "app-routes", "labels": ["gateway"],
 			"objects": [
 				"gateway-http:gateway",
 				
 				# relating to certificate-provisioning
-				# temp-disabled (traefik issue 9158)
-				#"gateway-https:gateway",
+				"gateway-https:gateway",
 				
 				"route-web-server:httproute",
 				"route-app-server:httproute",

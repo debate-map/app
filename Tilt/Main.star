@@ -97,9 +97,9 @@ g = {
 CreateNamespaces(g, k8s_yaml, [
 	"app",
 	#"gateway-system", # namespace added in Gateway.star
-	#"monitoring", # used by Traefik_Gateway.star and Monitoring.star
+	#"monitoring", # used by Monitoring.star
 ])
-CreateNamespace(g, k8s_yaml, "monitoring") # used by Traefik_Gateway.star and Monitoring.star (using separate call atm, to avoid bug in CreateNamespaces)
+CreateNamespace(g, k8s_yaml, "monitoring") # used by Monitoring.star (using separate call atm, to avoid bug in CreateNamespaces)
 # empty namespaces, created just to be used as a target for the required "objects=[...]" fields, for Tilt new-resources (which only have pod-selectors, not an objects list)
 CreateNamespaces(g, k8s_yaml, [
 	"empty1",
@@ -127,17 +127,9 @@ Start_Postgres(g)
 # load('./Kyverno.star', 'Start_Kyverno')
 # Start_Kyverno(g)
 
-# load-balancer/reverse-proxy (traefik, ingress-based [old])
-# load('./Traefik_Ingress.star', 'Start_TraefikIngress')
-# Start_TraefikIngress(g)
-
 # general gateway resources
 load('./Gateway_Base.star', 'Start_Gateway_Base')
 Start_Gateway_Base(g)
-
-# load-balancer/reverse-proxy (traefik, gateway-based [old2])
-# load('./Traefik_Gateway.star', 'Start_TraefikGateway')
-# Start_TraefikGateway(g)
 
 # load-balancer/reverse-proxy (nginx, gateway-based [new])
 load('./NGINX_Gateway.star', 'Start_NGINXGateway')

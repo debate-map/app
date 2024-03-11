@@ -26,18 +26,3 @@ def Start_Kyverno(g):
 	# ==========
 
 	k8s_yaml("../Packages/deploy/Kyverno/ProtectCertManagerServices.yaml")
-
-	# NEXT_k8s_resource_batch(g, [
-	# 	{"workload": "gateway-api-admission-server", "labels": ["traefik"]},
-	# 	{
-	# 		"workload": "gateway-api-admission", "labels": ["traefik"],
-	# 		"objects": [
-	# 			"gateway-api-admission:serviceaccount",
-	# 			"gateway-api-admission:role",
-	# 			"gateway-api-admission:clusterrole",
-	# 			"gateway-api-admission:rolebinding",
-	# 			"gateway-api-admission:clusterrolebinding",
-	# 			"gateway-api-admission:validatingwebhookconfiguration",
-	# 		]
-	# 	},
-	# ])
