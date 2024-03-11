@@ -32,5 +32,12 @@ def Start_NGINXGateway(g):
 	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')
 
 	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
-	# todo
-	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')
+	#NEXT_k8s_resource(g, "nginx-node-port-service", pod_readiness='ignore')
+	NEXT_k8s_resource_batch(g, [
+		{
+			"new_name": "nginx-node-port-service", "labels": ["gateway"],
+			"objects": [
+				"nginx-gateway:service",
+			],
+		},
+	])
