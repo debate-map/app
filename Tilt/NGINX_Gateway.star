@@ -32,12 +32,15 @@ def Start_NGINXGateway(g):
 	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')
 
 	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
-	#NEXT_k8s_resource(g, "nginx-node-port-service", pod_readiness='ignore')
-	NEXT_k8s_resource_batch(g, [
-		{
-			"new_name": "nginx-node-port-service", "labels": ["gateway"],
-			"objects": [
-				"nginx-gateway:service",
-			],
-		},
-	])
+	#k8s_resource("nginx-gateway-node-port", pod_readiness='ignore')
+	#NEXT_k8s_resource(g, "nginx-gateway-node-port", pod_readiness='ignore')
+	# NEXT_k8s_resource_batch(g, [
+	# 	{
+	# 		"new_name": "nginx-node-port-service-tilt", "labels": ["gateway"],
+	# 		"objects": [
+	# 			#"nginx-gateway:service",
+	# 			"nginx-gateway-node-port",
+	# 		],
+	# 	},
+	# ])
+	k8s_resource(new_name="nginx-gateway-node-port-tilt", objects=["nginx-gateway-node-port"], pod_readiness='ignore')
