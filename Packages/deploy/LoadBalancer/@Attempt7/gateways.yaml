@@ -25,8 +25,8 @@ spec:
   - name: http
     #hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us
     protocol: HTTP
-    #port: 80
-    port: 8000
+    port: 80
+    # port: 8000
     #port: 8005
     allowedRoutes:
       namespaces:
