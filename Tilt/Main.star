@@ -51,13 +51,13 @@ dotenv(fn="../.env")
 launchArgs = sys.argv
 print("Tilt launch args:", launchArgs)
 
-ENV = os.getenv("ENV")
+ENV = os.getenv("ENVIRONMENT")
 DEV = ENV == "dev"
 PROD = ENV == "prod"
 print("Env:", ENV)
 
 CONTEXT = os.getenv("CONTEXT")
-REMOTE = CONTEXT != "local"
+REMOTE = CONTEXT not in ("local", "docker-desktop")
 print("Context:", CONTEXT, "Remote:", REMOTE)
 
 pulumiOutput = decode_json(str(read_file("../PulumiOutput_Public.json")))
@@ -154,7 +154,8 @@ Start_App(g)
 
 # hyperknowledge experiment (as alternative backend)
 load('./Hyperknowledge.star', 'Start_Hyperknowledge')
-Start_Hyperknowledge(g)
+if os.path.exists('../@HK'):
+	Start_Hyperknowledge(g)
 
 # monitoring
 load('./Monitoring.star', 'Start_Monitoring')

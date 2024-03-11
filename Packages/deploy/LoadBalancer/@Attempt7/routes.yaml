@@ -7,7 +7,7 @@ metadata:
 spec:
   parentRefs:
     - name: gateway-http
-    #- name: gateway-https # temp-disabled (traefik issue 9158)
+    - name: gateway-https
   hostnames:
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "debating.app"
@@ -31,7 +31,7 @@ spec:
         # 2) https://gateway-api.sigs.k8s.io/references/spec/#gateway.networking.k8s.io%2fv1beta1.PathMatchType
         # 3) https://doc.traefik.io/traefik/routing/routers/#rule
         #- {path: {type: "ImplementationSpecific", value: "/{path:(?i:[a-zA-Z0-9_-])}"}} # basically, match everything except a path that starts with "/." (see above)
-        
+
       # since Traefik doesn't support regular-expressions or the like, try doing it with a bunch of "PathPrefix" matches instead # edit: this doesn't work; gateway api apparently limits the matches to 8
       # matches: [
       #   {path: {type: "PathPrefix", value: "/a"}},{path: {type: "PathPrefix", value: "/b"}},{path: {type: "PathPrefix", value: "/c"}},{path: {type: "PathPrefix", value: "/d"}},{path: {type: "PathPrefix", value: "/e"}},
@@ -57,7 +57,7 @@ metadata:
 spec:
   parentRefs:
     - name: gateway-http
-    #- name: gateway-https # temp-disabled (traefik issue 9158)
+    - name: gateway-https
   hostnames:
   - "app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "app-server.debating.app"
@@ -77,7 +77,7 @@ metadata:
 spec:
   parentRefs:
     - name: gateway-http
-    #- name: gateway-https # temp-disabled (traefik issue 9158)
+    - name: gateway-https
   hostnames:
   - "monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "monitor.debating.app"
@@ -102,9 +102,8 @@ spec:
   parentRefs:
     - name: gateway-http
       namespace: default
-    # temp-disabled (traefik issue 9158)
-    # - name: gateway-https
-    #   namespace: default
+    - name: gateway-https
+      namespace: default
   hostnames:
   - "grafana.9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "grafana.debating.app"

@@ -29,8 +29,8 @@ spec:
           #serviceType: ClusterIP
           parentRefs:
             - name: gateway-http
-              #namespace: traefik
+              namespace: nginx
               kind: Gateway
             # - name: gateway-https
-            #   #namespace: traefik
+            #   namespace: nginx
             #   kind: Gateway

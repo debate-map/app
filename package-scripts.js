@@ -453,7 +453,7 @@ function SetTileEnvCmd(prod, context) {
 	return SetEnvVarsCmd({
 		TILT_WATCH_WINDOWS_BUFFER_SIZE: "65536999",
 		// todo: probably make-so these are passed as Tiltfile-args (see config.parse() in Main.star) rather than environment-variables
-		ENV: prod ? "prod" : "dev",
+		ENVIRONMENT: prod ? "prod" : "dev",
 		CONTEXT: context,
 	});
 }
@@ -500,7 +500,7 @@ Object.assign(scripts, {
 function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 	/*const getPasswordCmd = `${KubeCTLCmd(commandArgs[0])} -n postgres-operator get secrets debate-map-pguser-admin -o go-template='{{.data.password | base64decode}}')`;
 	const password = execSync(getPasswordCmd).toString().trim();
-	
+
 	execSync(`$env:PGPASSWORD=${password}; psql -h localhost -p [5120/5220] -U admin -d debate-map`);
 	execSync(`Add-Type -AssemblyName System.Web; psql "postgresql://admin:$([System.Web.HTTPUtility]::UrlEncode("${password}"))@localhost:[5120/5220]/debate-map"`);*/
 
@@ -514,7 +514,8 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 		//...process.env,
 		//PGDATABASE: "debate-map",
 		//PGUSER: "admin",
-		PGPASSWORD: secret.GetField("password"),
+		PATH: process.env["PATH"],
+		PGPASSWORD: secret.GetField("password").toString(),
 	};
 	//if (startType == "spawn") {
 	return spawn(`psql`, argsStr.split(" "), {

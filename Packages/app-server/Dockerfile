@@ -17,11 +17,6 @@
 	ARG copy_from_path
 # ----------
 
-# initial arg processing
-WORKDIR "/dm_repo"
-ENV ENV=$env_ENV
-RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
-
 # copy the shared packages
 COPY Packages/rust-macros/ /dm_repo/Packages/rust-macros/
 COPY Packages/rust-shared/ /dm_repo/Packages/rust-shared/
@@ -36,6 +31,11 @@ RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); 
 COPY Packages/web-server/Cargo.toml Packages/web-server/Cargo.toml
 RUN mkdir Packages/web-server/src/
 RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); }" > Packages/web-server/src/main.rs
+
+# initial arg processing
+WORKDIR "/dm_repo"
+ENV ENV=$env_ENV
+RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
 
 # now build everything
 WORKDIR /dm_repo/Packages/app-server
@@ -85,7 +85,7 @@ COPY --from=cargo-build /dm_repo/Packages/app-server/kgetOutput_buildTime/ ./kge
 
 # temp
 #COPY --from=cargo-build /dm_repo/Packages/app-server/app-server-binary .
-COPY Packages/app-server/@Temp_FirestoreImport.json /dm_repo/Packages/app-server/
+# COPY Packages/app-server/@Temp_FirestoreImport.json /dm_repo/Packages/app-server/
 
 # other files needed
 COPY .env .

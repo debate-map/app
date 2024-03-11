@@ -13,7 +13,7 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 
 # this unfortunately is a separate instance from that in root Tiltfile; might be okay in some cases
 #g = {"appliedResourceNames_batches": []}
-	
+
 def Start_App(g):
 	#nmWatchPathsStr = str(local(['node', '-e', "console.log(require('../Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"]))
 	#nmWatchPaths = nmWatchPathsStr.strip().split(",")
@@ -22,22 +22,22 @@ def Start_App(g):
 
 	# rust
 	# -----
-
+	ENV = os.getenv("ENVIRONMENT") or "dev"
 	# this is the nodejs-base dockerfile used for all subsequent rust images
-	imageURL_rustBase = g["registryURL"] + '/dm-rust-base-' + os.getenv("ENV")
+	imageURL_rustBase = g["registryURL"] + '/dm-rust-base-' + ENV
 	docker_build(imageURL_rustBase, '..', dockerfile='../Packages/deploy/@RustBase/Dockerfile',
 		build_args={
-			"env_ENV": os.getenv("ENV") or "dev",
+			"env_ENV": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 		},
 	)
 
-	imageURL_monitorBackend = g["registryURL"] + '/dm-monitor-backend-' + os.getenv("ENV")
+	imageURL_monitorBackend = g["registryURL"] + '/dm-monitor-backend-' + ENV
 	docker_build(imageURL_monitorBackend, '..', dockerfile='../Packages/monitor-backend/Dockerfile',
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
-			"env_ENV": os.getenv("ENV") or "dev",
+			"env_ENV": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
@@ -46,11 +46,11 @@ def Start_App(g):
 			"copy_from_path": "/dm_repo/target/" + ("release" if g["compileWithRelease"] else "debug") + "/monitor-backend",
 		},
 	)
-	imageURL_webServer = g["registryURL"] + '/dm-web-server-' + os.getenv("ENV")
+	imageURL_webServer = g["registryURL"] + '/dm-web-server-' + ENV
 	docker_build(imageURL_webServer, '..', dockerfile='../Packages/web-server/Dockerfile',
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
-			"env_ENV": os.getenv("ENV") or "dev",
+			"env_ENV": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
@@ -58,11 +58,11 @@ def Start_App(g):
 			"copy_from_path": "/dm_repo/target/" + ("release" if g["compileWithRelease"] else "debug") + "/web-server",
 		},
 	)
-	imageURL_appServer = g["registryURL"] + '/dm-app-server-' + os.getenv("ENV")
+	imageURL_appServer = g["registryURL"] + '/dm-app-server-' + ENV
 	docker_build(imageURL_appServer, '..', dockerfile='../Packages/app-server/Dockerfile',
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
-			"env_ENV": os.getenv("ENV") or "dev",
+			"env_ENV": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),

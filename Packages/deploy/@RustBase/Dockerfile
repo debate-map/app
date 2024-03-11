@@ -48,11 +48,11 @@ RUN apt-get install -y tree
 RUN mold --version
 
 # install the cranelift compiler
-RUN mkdir /cg_clif && \
-	cd /cg_clif && \
-	curl -o cg_clif-x86_64-unknown-linux-gnu.tar.xz -L https://github.com/bjorn3/rustc_codegen_cranelift/releases/download/dev/cg_clif-x86_64-unknown-linux-gnu.tar.xz && \
-	tar -xf cg_clif-x86_64-unknown-linux-gnu.tar.xz && \
-	ls
+# RUN mkdir /cg_clif && \
+# 	cd /cg_clif && \
+# 	curl -o cg_clif-x86_64-unknown-linux-gnu.tar.xz -L https://github.com/bjorn3/rustc_codegen_cranelift/releases/download/dev/cg_clif-x86_64-unknown-linux-gnu.tar.xz && \
+# 	tar -xf cg_clif-x86_64-unknown-linux-gnu.tar.xz && \
+# 	ls
 
 WORKDIR /dm_repo
 
@@ -60,7 +60,7 @@ WORKDIR /dm_repo
 COPY .cargo/config.toml .cargo/config.toml
 # this makes-so the cargo-build commands ignore warnings in their output (warnings in own code should be noticed/resolved through VSCode squigglies, not clutter in build-output)
 #ENV RUSTFLAGS=-Awarnings # moved to config.toml (we cannot set RUSTFLAGS from multiple places, so chose config.toml as the location for now)
-# this sets the debugging-info granularity to "per line", rather than the default "2" which is more detailed; this speeds up builds a bit 
+# this sets the debugging-info granularity to "per line", rather than the default "2" which is more detailed; this speeds up builds a bit
 ENV CARGO_PROFILE_DEV_DEBUG=1
 
 # rust-base may end up with an old version of the cargo components cached (see next section); to break this cache, we can toggle the number in the next line
@@ -72,7 +72,7 @@ WORKDIR /dm_repo/cargo-build-prepper
 # add one tiny dependency (with no subdeps), so cargo-build updates the index
 RUN echo "void = \"1\"" >> Cargo.toml
 # compile once with cranelift, so that it can download and install the cargo components it needs (mount-cache attempt in main build command not working fsr)
-RUN /cg_clif/dist/bin/cargo-clif build
+# RUN /cg_clif/dist/bin/cargo-clif build
 
 WORKDIR /dm_repo
 COPY Cargo.toml Cargo.toml
