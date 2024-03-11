@@ -10,6 +10,7 @@ spec:
     - name: gateway-https
   hostnames:
   - "localhost"
+  - "debatemap.societylibrary.org"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
   - "debating.app"
   - "debatemap.app"
@@ -60,10 +61,12 @@ spec:
     - name: gateway-http
     - name: gateway-https
   hostnames:
-  - "app-server.9m2x1z.nodes.c1.or1.k8s.ovh.us"
-  - "app-server.debating.app"
-  - "app-server.debatemap.app"
-  - "app-server.debates.app"
+  - "localhost"
+  - "debatemap.societylibrary.org"
+  - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "debating.app"
+  - "debatemap.app"
+  - "debates.app"
   rules:
     - backendRefs:
       - name: dm-app-server
@@ -76,7 +79,7 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefixMatch: /app-server
+              replacePrefixMatch: /
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -88,10 +91,12 @@ spec:
     - name: gateway-http
     - name: gateway-https
   hostnames:
-  - "monitor.9m2x1z.nodes.c1.or1.k8s.ovh.us"
-  - "monitor.debating.app"
-  - "monitor.debatemap.app"
-  - "monitor.debates.app"
+  - "localhost"
+  - "debatemap.societylibrary.org"
+  - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "debating.app"
+  - "debatemap.app"
+  - "debates.app"
   rules:
     - backendRefs:
       - name: dm-monitor-backend
@@ -104,7 +109,7 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefixMatch: /monitor
+              replacePrefixMatch: /
 
 # in other namespaces
 # ==========
@@ -122,10 +127,12 @@ spec:
     - name: gateway-https
       namespace: default
   hostnames:
-  - "grafana.9m2x1z.nodes.c1.or1.k8s.ovh.us"
-  - "grafana.debating.app"
-  - "grafana.debatemap.app"
-  - "grafana.debates.app"
+  - "localhost"
+  - "debatemap.societylibrary.org"
+  - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "debating.app"
+  - "debatemap.app"
+  - "debates.app"
   rules:
     - backendRefs:
       - name: loki-stack-grafana
@@ -139,4 +146,4 @@ spec:
           urlRewrite:
             path:
               type: ReplacePrefixMatch
-              replacePrefixMatch: /grafana
+              replacePrefixMatch: /
