@@ -68,7 +68,15 @@ spec:
     - backendRefs:
       - name: dm-app-server
         port: 5110
-      #matches: [{path: {type: Exact, value: "/test1"}}]
+      matches: [
+        {path: {type: PathPrefix, value: "/app-server/"}}
+      ]
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /app-server
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -88,7 +96,15 @@ spec:
     - backendRefs:
       - name: dm-monitor-backend
         port: 5130
-      #matches: [{path: {type: Exact, value: "/test1"}}]
+      matches: [
+        {path: {type: PathPrefix, value: "/monitor/"}}
+      ]
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /monitor
 
 # in other namespaces
 # ==========
@@ -115,4 +131,12 @@ spec:
       - name: loki-stack-grafana
         port: 3000
         #port: 80
-      #matches: [{path: {type: Exact, value: "/test1"}}]
+      matches: [
+        {path: {type: PathPrefix, value: "/grafana/"}}
+      ]
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /grafana
