@@ -5543,7 +5543,11 @@ spec:
       storage: true
       subresources:
         status: {}
-    - name: v1alpha2
+
+    # v-replaced
+    #- name: v1alpha2
+    - name: v1
+
       schema:
         openAPIV3Schema:
           description: OperatorGroup is the unit of multitenancy for OLM managed operators. It constrains the installation of operators in its namespace to a specified set of target namespaces.

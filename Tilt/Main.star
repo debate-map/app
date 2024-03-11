@@ -131,9 +131,17 @@ Start_Postgres(g)
 # load('./Traefik_Ingress.star', 'Start_TraefikIngress')
 # Start_TraefikIngress(g)
 
-# load-balancer/reverse-proxy (traefik, gateway-based [new])
-load('./Traefik_Gateway.star', 'Start_TraefikGateway')
-Start_TraefikGateway(g)
+# general gateway resources
+load('./Gateway_Base.star', 'Start_Gateway_Base')
+Start_Gateway_Base(g)
+
+# load-balancer/reverse-proxy (traefik, gateway-based [old2])
+# load('./Traefik_Gateway.star', 'Start_TraefikGateway')
+# Start_TraefikGateway(g)
+
+# load-balancer/reverse-proxy (nginx, gateway-based [new])
+load('./NGINX_Gateway.star', 'Start_NGINXGateway')
+Start_NGINXGateway(g)
 
 # cert-manager (for creating/renewing SSL certificates)
 # temp-disabled (traefik issue 9158)

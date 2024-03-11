@@ -2,8 +2,9 @@ resources:
 
 # gateway templates
 - gateway-crds
-- gateway-webhooks/admission_webhook.yaml
-- gateway-webhooks/certificate_config.yaml
+# not needed in kubernetes 1.25+ (according to: https://docs.nginx.com/nginx-gateway-fabric/installation/installing-ngf/helm/)
+#- gateway-webhooks/admission_webhook.yaml
+#- gateway-webhooks/certificate_config.yaml
 
 # gateway customizations
 - gateways.yaml
