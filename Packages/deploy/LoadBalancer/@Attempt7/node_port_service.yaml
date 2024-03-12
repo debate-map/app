@@ -52,8 +52,7 @@ spec:
     port: 80
     targetPort: 80
   externalIPs:
-    # hard-coded atm to the ovh node ip; may automate this later (eg. in the NGINX_Gateway.star file, using the ReadFileWithReplacements function)
-    - 15.204.30.179
+    - bind_to_address
   ## The externalTrafficPolicy of the service. The value Local preserves the client source IP.
   externalTrafficPolicy: Local
   #internalTrafficPolicy: Local
