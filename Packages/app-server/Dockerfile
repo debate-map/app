@@ -10,7 +10,7 @@
 # ----------
 	# see: ./Tilt/Main.star (or source: Packages/deploy/@RustBase/Dockerfile)
 	FROM $RUST_BASE_URL as cargo-build
-	ARG env_ENV
+	ARG ENVIRONMENT
 	ARG debug_vs_release
 	ARG debug_vs_release_flag
 	ARG cargo_path
@@ -34,8 +34,8 @@ RUN echo "fn main() { println!(\"If this println executes, the build broke.\"); 
 
 # initial arg processing
 WORKDIR "/dm_repo"
-ENV ENV=$env_ENV
-RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
+ENV ENVIRONMENT=$ENVIRONMENT
+RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release CargoPath:$cargo_path"
 
 # now build everything
 WORKDIR /dm_repo/Packages/app-server
@@ -64,11 +64,11 @@ RUN mkdir -p ./kgetOutput_buildTime && (cp cargo-timing.html ./kgetOutput_buildT
 	# use debian v12 (bookworm), because that is what our linker (mold) was built on [mold only has releases for debian v12+], which makes the produced binary require it as well
 	#FROM debian:bookworm-slim@sha256:5007b106fd828d768975b21cfdcecb51a8eeea9aab815a9e4a169acde464fb89
 	FROM debian:bookworm-20221114-slim
-	ARG env_ENV
+	ARG ENVIRONMENT
 # ----------
 
 WORKDIR /dm_repo/Packages/app-server
-ENV ENV=$env_ENV
+ENV ENVIRONMENT=$ENVIRONMENT
 
 # temp (for ssl connections; will look for cleaner way soon)
 #RUN apt-get update && apt-get install -y ca-certificates

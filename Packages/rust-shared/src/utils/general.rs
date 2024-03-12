@@ -18,7 +18,7 @@ impl std::fmt::Debug for K8sEnv {
 }
 
 pub fn k8s_env() -> K8sEnv {
-    match env::var("ENV").expect("An environment-variable named `ENV` must be provided, with value `dev` or `prod`.").as_str() {
+    match env::var("ENVIRONMENT").expect("An environment-variable named `ENVIRONMENT` must be provided, with value `dev` or `prod`.").as_str() {
         "dev" => K8sEnv::Dev,
         "prod" => K8sEnv::Prod,
         _ => panic!("The environment-variable named `ENV` must be either `dev` or `prod`."),

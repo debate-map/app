@@ -9,12 +9,12 @@
 	FROM node:16-alpine
 
 	# image-internal args
-	ARG env_ENV
+	ARG ENVIRONMENT
 # ----------
 
 # initial arg processing
-ENV ENV=$env_ENV
-RUN echo "Env:$ENV"
+ENV ENVIRONMENT=$ENVIRONMENT
+RUN echo "Env:$ENVIRONMENT"
 
 WORKDIR "/dm_repo"
 

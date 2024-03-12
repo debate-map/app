@@ -51,6 +51,7 @@ dotenv(fn="../.env")
 launchArgs = sys.argv
 print("Tilt launch args:", launchArgs)
 
+# Why "ENVIRONMENT" rather than "ENV"? Because an env-var with name "ENV" cannot be read using `os.getenv` on some platforms (was true for a dev on mac).
 ENV = os.getenv("ENVIRONMENT")
 DEV = ENV == "dev"
 PROD = ENV == "prod"

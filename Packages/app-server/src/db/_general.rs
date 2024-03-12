@@ -85,31 +85,61 @@ pub struct GenericMutation_Result {
 // subscriptions
 // ==========
 
-struct Ping_Result {
-    pong: String,
-    refreshPage: bool,
+#[derive(InputObject, Serialize, Deserialize)]
+pub struct LinkPreserverInput {
+	pub updateInterval: u64,
 }
-#[Object]
-impl Ping_Result {
-    async fn pong(&self) -> &str { &self.pong }
-    async fn refreshPage(&self) -> &bool { &self.refreshPage }
+
+#[derive(SimpleObject)]
+struct LinkPreserverResult {
+    alive: bool,
+    // probably move effects like this (unrelated to link-preserving) into a separate subscription eventually
+    pageRefreshRequested: bool,
+}
+
+#[derive(SimpleObject)]
+struct PingResult {
+    pong: String,
 }
 
 #[derive(Default)] pub struct SubscriptionShard_General;
 #[Subscription] impl SubscriptionShard_General {
+    /// This endpoint serves two purposes:
+    /// * Keeps cloudflare from terminating the websocket for inactivity, in cases where >100s pass without data changing or the user navigating anywhere.
+    /// * Keeps the frontend from closing the websocket, in cases where the client is not watching any data. (eg. on homepage when not signed-in)
+    async fn linkPreserver(&self, _ctx: &async_graphql::Context<'_>, input: LinkPreserverInput) -> impl Stream<Item = Result<LinkPreserverResult, SubError>> {
+        let base_stream = async_stream::stream! {
+            let LinkPreserverInput { updateInterval } = input;
+            if (updateInterval < 10000) { Err(SubError::new(format!("Update-interval cannot be lower than 10000ms.")))?; }
+
+            let mut refresh_requested_last_iteration = Path::new("./refreshPageForAllUsers_enabled").exists();
+            loop {
+                // create the listed file in the app-server pod (eg. using Lens), if you've made an update that you need all clients to refresh for
+                let refresh_requested_new = Path::new("./refreshPageForAllUsers_enabled").exists();
+                let refresh_just_requested = refresh_requested_new && !refresh_requested_last_iteration;
+                let result = LinkPreserverResult {
+                    alive: true,
+                    pageRefreshRequested: refresh_just_requested,
+                };
+                refresh_requested_last_iteration = refresh_requested_new;
+
+                yield Ok(result);
+                rust_shared::tokio::time::sleep(Duration::from_millis(updateInterval)).await;
+            }
+        };
+        base_stream
+    }
+
+    // for testing (eg. in gql-playground) [temporarily also used by frontend as a websocket keep-alive -- inferior to above since doesn't work in the no-data-watched case]
     #[graphql(name = "_ping")]
-    async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = Ping_Result> {
+    async fn _ping(&self, _ctx: &async_graphql::Context<'_>) -> impl Stream<Item = PingResult> {
         let pong = "pong".to_owned();
-        // create the listed file in the app-server pod (eg. using Lens), if you've made an update that you need all clients to refresh for
-        let refreshPage = Path::new("./refreshPageForAllUsers_enabled").exists();
-        
-        stream::once(async move { Ping_Result {
+        stream::once(async move { PingResult {
             pong,
-            refreshPage,
         } })
     }
 
-    // meant only for debugging, so hide from gql api introspection
+    // for debugging only, so hide from gql api introspection
     #[graphql(visible = false)]
     async fn checkUser<'a>(&self, ctx: &'a async_graphql::Context<'a>) -> impl Stream<Item = Result<CheckUserResult, SubError>> + 'a {
         let base_stream = async_stream::stream! {

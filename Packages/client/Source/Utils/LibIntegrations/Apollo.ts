@@ -6,43 +6,7 @@ import {GetUserInfoJWTString, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoChe
 import {RunInAction} from "web-vcore";
 import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from, gql, HttpLink, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
 import {getMainDefinition, GraphQLWsLink, onError} from "web-vcore/nm/@apollo/client_deep.js";
-import {Timer} from "web-vcore/nm/js-vextensions";
 import {VoidCache} from "./Apollo/VoidCache.js";
-
-/*export function GetWebServerURL(subpath: string) {
-	Assert(subpath.startsWith("/"));
-	/*if (location.host == "localhost:5100") return subpath;
-	if (location.host == "localhost:31005") return subpath; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
-	return `https://debatemap.app/${subpath.slice(1)}`;*#/
-	return subpath;
-}
-export function GetAppServerURL(subpath: string): string {
-	Assert(subpath.startsWith("/"));
-
-	// temp
-	/*if (location.host == "debates.app" || DB == "prod") return `https://app-server.debates.app/${subpath.slice(1)}`;
-
-	if (location.host == "localhost:5100" || location.host == "localhost:5101") return `http://localhost:5110/${subpath.slice(1)}`;
-	//if (location.host == "localhost:31005") return `http://localhost:31006/${subpath.slice(1)}`; // because of tilt-proxy, this usually isn't needed, but keeping for raw access
-
-	// if we're in remote k8s, but accessing it from the raw cluster-url, just change the port
-	//if (location.host.endsWith(":31005")) return `${location.protocol}//${location.host.replace(":31005", ":31006")}/${subpath.slice(1)}`;
-
-	return `https://app-server.debatemap.app/${subpath.slice(1)}`;*#/
-
-	if (DB == "dev") return `http://localhost:5110/${subpath.slice(1)}`;
-	if (DB == "prod") {
-		// maybe temp: for graphql/websocket to OVH host directly, use unencrypted http/ws rather than https/wss (since the server hasn't yet been set up with TLS itself)
-		/*if (window.location.host.endsWith(".ovh.us") && subpath == "/graphql") {
-			return `http://app-server.${window.location.host}/${subpath.slice(1)}`;
-		}*#/
-
-		//return `https://app-server.debates.app/${subpath.slice(1)}`;
-		//return `https://app-server.${window.location.host}/${subpath.slice(1)}`;
-		return `${window.location.protocol}//app-server.${window.location.host}/${subpath.slice(1)}`;
-	}
-	Assert(false, `Invalid database specified:${DB}`);
-}*/
 
 export function GetWebServerURL(subpath: string, preferredServerOrigin?: string) {
 	return GetServerURL("web-server", subpath, preferredServerOrigin ?? window.location.origin);
@@ -71,17 +35,6 @@ let wsLink: GraphQLWsLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
-
-/*function Test1() {
-	const websocket = new WebSocket(GRAPHQL_URL.replace(/^http/, "ws"));
-	websocket.onopen = ()=>{
-		console.log("connection opened");
-		//websocket.send(username.value);
-	};
-	websocket.onclose = ()=>console.log("connection closed");
-	websocket.onmessage = e=>console.log(`received message: ${e.data}`);
-	document.onclick = e=>websocket.send(`Hi:${Date.now()}`);
-}*/
 
 export function InitApollo() {
 	httpLink = new HttpLink({
@@ -138,12 +91,6 @@ export function InitApollo() {
 	});
 	wsLink = new GraphQLWsLink(wsClient);
 
-	// every 45s, send a "keepalive message" through the WS; this avoids Cloudflare's "100 seconds of dormancy" timeout (https://community.cloudflare.com/t/cloudflare-websocket-timeout/5865)
-	// (we use a <60s interval, so that it will reliably hit each 60s timer-interval that Chrome 88+ allows for hidden pages: https://developer.chrome.com/blog/timer-throttling-in-chrome-88/#intensive-throttling)
-	const keepAliveTimer = new Timer(45000, ()=>{
-		SendPingOverWebSocket();
-	}).Start();
-
 	// using the ability to split links, you can send data to each link depending on what kind of operation is being sent
 	link = split(
 		// split based on operation type
@@ -190,26 +137,7 @@ export function InitApollo() {
 	]);
 	apolloClient = new ApolloClient({
 		//credentials: "include", // allows cookies to be sent with "graphql" calls (eg. for passing passportjs session-token with mutation/command calls) // this way doesn't work, I think because we send a custom "link"
-		//link,
 		link: link_withErrorHandling,
-		/*cache: new InMemoryCache({
-			//dataIdFromObject: a=>a.nodeId as string ?? null,
-			dataIdFromObject: a=>a.id as string ?? null,
-			typePolicies: {
-				Query: {
-					fields: {
-						...GetTypePolicyFieldsMappingSingleDocQueriesToCache(),
-					},
-				},
-				// temp fix for: https://github.com/apollographql/apollo-client/issues/8677#issuecomment-925661998
-				Map: {
-					fields: {
-						featured(rawVal: boolean, {args}) { return rawVal ?? null; },
-						note(rawVal: string, {args}) { return rawVal ?? null; },
-					},
-				},
-			},
-		}),*/
 		// replace InMemoryCache with VoidCache, because even a "not used" InMemoryCache has significant overhead, for checking for cache matches and such (>1s over ~25s map-load)
 		cache: new VoidCache(),
 		// default to not using the cache (it does nothing for subscriptions, and often does *opposite* of what we want for queries [eg. search]; and even when wanted, it's better to explicitly set it)
@@ -229,35 +157,6 @@ export function InitApollo() {
 	// While this has some confusion potential (eg. "user panel shows my name, but commands say auth-data missing"), it's arguably still better than the alternative (causing user to start a redundant sign-in).
 	// Note also that, once the auth-data is attached, mobx-graphlink will clear its cache and redo its queries; in most cases this happens fast enough to not be annoying, but is worth noting.
 	SendUserJWTToMGL();
-}
-
-export async function SendPingOverWebSocket() {
-	const fetchResult_subscription = apolloClient.subscribe({
-		query: gql`
-			subscription {
-				_ping {
-					pong
-					refreshPage
-				}
-			}
-		`,
-		variables: {},
-	});
-	const fetchResult = await new Promise<FetchResult<any>>(resolve=>{
-		const subscription = fetchResult_subscription.subscribe(data=>{
-			subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
-			resolve(data);
-		});
-	});
-	//console.log("Got response to ping:", fetchResult);
-
-	const {pong, refreshPage} = fetchResult.data._ping;
-	if (refreshPage) {
-		console.log("Refreshing page due to server request.");
-		window.location.reload();
-	}
-
-	return fetchResult;
 }
 
 // todo: ensure that this request gets sent before any others, on the websocket connection (else those ones will fail)

@@ -36,6 +36,7 @@ import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
 import {apolloClient} from "../Utils/LibIntegrations/Apollo.js";
+import {LinkPreserver} from "./@Root/LinkPreserver";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -213,6 +214,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 				<RootStyles/>
 				<ErrorBoundary>
 					<AddressBarWrapper/>
+					<LinkPreserver/>
 					<OverlayUI/>
 				</ErrorBoundary>
 				{ShowHeader &&

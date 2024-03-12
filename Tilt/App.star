@@ -15,6 +15,8 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 #g = {"appliedResourceNames_batches": []}
 
 def Start_App(g):
+	ENV = g["ENV"]
+
 	#nmWatchPathsStr = str(local(['node', '-e', "console.log(require('../Scripts/NodeModuleWatchPaths.js').nmWatchPaths.join(','))"]))
 	#nmWatchPaths = nmWatchPathsStr.strip().split(",")
 	# this keeps the NMOverwrites folder up-to-date, with the live contents of the node-module watch-paths (as retrieved above)
@@ -22,12 +24,12 @@ def Start_App(g):
 
 	# rust
 	# -----
-	ENV = os.getenv("ENVIRONMENT") or "dev"
+	
 	# this is the nodejs-base dockerfile used for all subsequent rust images
 	imageURL_rustBase = g["registryURL"] + '/dm-rust-base-' + ENV
 	docker_build(imageURL_rustBase, '..', dockerfile='../Packages/deploy/@RustBase/Dockerfile',
 		build_args={
-			"env_ENV": ENV,
+			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 		},
@@ -37,7 +39,7 @@ def Start_App(g):
 	docker_build(imageURL_monitorBackend, '..', dockerfile='../Packages/monitor-backend/Dockerfile',
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
-			"env_ENV": ENV,
+			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
@@ -50,7 +52,7 @@ def Start_App(g):
 	docker_build(imageURL_webServer, '..', dockerfile='../Packages/web-server/Dockerfile',
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
-			"env_ENV": ENV,
+			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),
@@ -62,7 +64,7 @@ def Start_App(g):
 	docker_build(imageURL_appServer, '..', dockerfile='../Packages/app-server/Dockerfile',
 		build_args={
 			"RUST_BASE_URL": imageURL_rustBase,
-			"env_ENV": ENV,
+			"ENVIRONMENT": ENV,
 			"debug_vs_release": "release" if g["compileWithRelease"] else "debug",
 			"debug_vs_release_flag": "--release" if g["compileWithRelease"] else "",
 			"cargo_path": ("/cg_clif/dist/bin/cargo-clif" if g["compileWithCranelift"] else "cargo"),

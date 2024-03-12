@@ -8,14 +8,14 @@
 	FROM instrumentisto/rust:nightly-bullseye-2024-03-05
 
 	# commented; these args aren't used in this dockerfile anyway, so leave them out, to allow complete skipping of this dockerfile (execution can be fast anyway when most steps cached, but this way keeps the logs leaner)
-	#ARG env_ENV
+	#ARG ENVIRONMENT
 	#ARG debug_vs_release
 	#ARG debug_vs_release_flag
 # ----------
 
 # initial arg processing
-#ENV ENV=$env_ENV
-#RUN echo "Env:$ENV DebugVSRelease:$debug_vs_release"
+#ENV ENVIRONMENT=$ENVIRONMENT
+#RUN echo "Env:$ENVIRONMENT DebugVSRelease:$debug_vs_release"
 
 # generic env-var for code to know if its running as part of a Dockerfile
 ENV IN_DOCKER=1

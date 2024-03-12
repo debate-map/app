@@ -196,8 +196,8 @@ pub type RootSchema = wrap_agql_schema_type!{
 const GRAPHQL_PATH: &str = "/app-server/graphql";
 
 async fn graphiql() -> impl IntoResponse {
-    // use the DEV/PROD value from the "ENV" env-var, to determine what the app-server's URL is (maybe temp)
-    let app_server_host = if env::var("ENV").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "app-server.debatemap.app" };
+    // use the DEV/PROD value from the "ENVIRONMENT" env-var, to determine what the app-server's URL is (maybe temp)
+    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "app-server.debatemap.app" };
     response::Html(graphiql_source(GRAPHQL_PATH, Some(&format!("wss://{app_server_host}{GRAPHQL_PATH}"))))
 }
 async fn graphql_playground() -> impl IntoResponse {
