@@ -19,14 +19,13 @@ def Start_NGINXGateway(g):
 		#flags=['--set=service.type=NodePort'],
 		flags=['--set=service.create=false'],
 	)
-	# NEXT_k8s_resource_batch(g, [
-	# 	{
-	# 		"new_name": "gateway-api-other-objects", "labels": ["gateway"],
-	# 		"objects": [
-	# 			# todo
-	# 		],
-	# 	},
-	# ])
+	NEXT_k8s_resource_batch(g, [
+		{"workload": "ngf", "labels": ["gateway"]},
+		{"workload": "gateway-api-admission", "labels": ["gateway"]},
+		{"workload": "gateway-api-admission-server", "labels": ["gateway"]},
+		{"workload": "gateway-api-admission-patch", "labels": ["gateway"]},
+	])
+	#k8s_resource(workload='ngf', labels=["gateway"], port_forwards='80' if g["REMOTE"] else None)
 
 	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
 	NEXT_k8s_resource_batch(g, [

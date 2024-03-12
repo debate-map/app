@@ -12,14 +12,16 @@ pub static GLOBAL: Trallocator<System> = Trallocator::new(System);
 pub fn set_up_globals() -> Option<ClientInitGuard> {
     //panic::always_abort();
     panic::set_hook(Box::new(|info| {
-        // if panic occurs, first do a simple logging with println!, in case the panic occurred within the logging-system
-        println!("Got panic. @info:{} [see next log-message for stack-trace]", info);
+        // do a simple println! first, to confirm our handler started running
+        println!("Got panic.");
+        // now do basic log of raw info, in case the panic occurred within the logging-system
+        println!("Panic info:{} [see next log-message for stack-trace]", info);
 
         //let stacktrace = Backtrace::capture();
         let stacktrace = Backtrace::force_capture();
         let stacktrace_str_simplified = simplify_backtrace_str(stacktrace.to_string(), true);
 
-        error!("Got panic. @info:{}\n@stackTrace:\n==========\n{}", info, stacktrace_str_simplified);
+        error!("Panic stack-trace:\n==========\n{}", stacktrace_str_simplified);
         std::process::abort();
     }));
 
