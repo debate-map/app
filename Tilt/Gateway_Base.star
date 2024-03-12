@@ -14,7 +14,7 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 def Start_Gateway_Base(g):
 	#CreateNamespace(g, k8s_yaml, "gateway-system")
 	#CreateNamespace(g, k8s_yaml, "nginx") # test
-	
+
 	# gateway api
 	# NOTE: This apparently has to be added *before* traefik, else "traefik-other-objects" batch gets error:
 	# * Build Failed: kubernetes apply: error mapping traefik.io/IngressRoute: no matches for kind "IngressRoute" in version "traefik.io/v1alpha1"
@@ -90,10 +90,10 @@ def Start_Gateway_Base(g):
 			"new_name": "app-routes", "labels": ["gateway"],
 			"objects": [
 				"gateway-http:gateway",
-				
+
 				# relating to certificate-provisioning
-				"gateway-https:gateway",
-				
+				# "gateway-https:gateway",
+
 				"route-web-server:httproute",
 				"route-app-server:httproute",
 				"route-monitor:httproute",
