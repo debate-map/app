@@ -4,7 +4,7 @@
 
 Sign in:
 1) Sign in button in frontend navigates to Google auth page. (with config set with correct origins and redirect uris)
-2) Google auth page redirects to "/auth/google/callback".
+2) Google auth page redirects to "/app-server/auth/google/callback".
 3) In server handler, server reads/adds user in db, then tells frontend to redirect to homepage.
 
 Regular operation:

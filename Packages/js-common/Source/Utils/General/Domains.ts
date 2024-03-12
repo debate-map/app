@@ -1,83 +1,85 @@
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 
-/*const recognizedWebServerHosts = [
-	"localhost:5100", "localhost:5101", // web-server, dev/local
-	"localhost:5130", "localhost:5131", // monitor, dev/local
-	"debatemap.app",
-	"debates.app",
-	"debating.app",
-	"9m2x1z.nodes.c1.or1.k8s.ovh.us",
-];*/
-const prodDomain = "debatemap.app";
-//const prodDomain = "debates.app"; // temp
+// sync:rs
+// ==========
 
-/*function AsPartial<T>(defaultOpts: T): Partial<T> {
-	return defaultOpts;
-}*/
-
-//const ON_SERVER = globalThis.process?.env?.ENV != null;
-//const ON_SERVER_AND_DEV = ON_SERVER && process.env.ENV == "dev";
-//const ON_SERVER_AND_PROD = ON_SERVER && process.env.ENV == "prod";
+const domainConstants = {
+	prodDomain: "debatemap.app",
+	recognizedWebServerHosts: [
+		"localhost:5100", "localhost:5101", // web-server, dev/local
+		"localhost:5130", "localhost:5131", // monitor, dev/local
+		// direct to server
+		"9m2x1z.nodes.c1.or1.k8s.ovh.us",
+		"debating.app",
+		"debatemap.societylibrary.org",
+		// through cloudflare
+		"debatemap.app",
+		"debates.app",
+	],
+	// since in client code, these are always false (vars are kept to match server code)
+	onServerAndDev: false,
+	onServerAndProd: false,
+};
 
 export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana";
+export type GetServerURL_Options = {
+	claimedClientURL: string|n,
+	restrict_to_recognized_hosts: boolean,
 
-/*export class GetServerURL_Options {
-	forceLocalhost = false;
-	forceHTTPS = false;
-}*/
-// sync:rs (along with constants above)
-export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClientURLStr: string|n, opts = {} as {forceLocalhost?: boolean, forceHTTPS?: boolean}) {
-	//const opts = {...new GetServerURL_Options(), ...options};
+	forceLocalhost?: boolean,
+	forceHTTPS?: boolean,
+};
+
+export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetServerURL_Options) {
 	Assert(subpath.startsWith("/"));
 
-	//console.log("GetServerURL_claimedClientURLStr:", claimedClientURLStr);
-	const claimedClientURL = claimedClientURLStr ? new URL(claimedClientURLStr) : null;
-	//const origin = referrerURL?.origin;
+	// process claimed-client-url
+	const claimedClientURL = opts.claimedClientURL ? new URL(opts.claimedClientURL) : null;
+	const shouldTrustClaimedClientURL = claimedClientURL != null
+		? !opts.restrict_to_recognized_hosts || domainConstants.recognizedWebServerHosts.includes(claimedClientURL.host) || domainConstants.onServerAndDev
+		: false;
+	const claimedClientURL_trusted = shouldTrustClaimedClientURL ? claimedClientURL : null;
 
 	let serverURL: URL;
 
 	// section 1: set protocol and hostname
 	// ==========
 
-	// if there is a client-url, and its host is recognized (OR on app-server pod running with DEV), trust that host as being the server host
-	//if (claimedClientURL && (recognizedWebServerHosts.includes(claimedClientURL.host) || ON_SERVER_AND_DEV)) {
-	if (claimedClientURL) {
-		const portStr = claimedClientURL.port ? `:${claimedClientURL.port}` : "";
-		serverURL = new URL(`${claimedClientURL.protocol}//${claimedClientURL.hostname}${portStr}`);
-	}
-	// else, just guess at the correct origin
-	else {
+	if (claimedClientURL_trusted != null) {
+		const portStr = claimedClientURL_trusted.port ? `:${claimedClientURL_trusted.port}` : "";
+		serverURL = new URL(`${claimedClientURL_trusted.protocol}//${claimedClientURL_trusted.hostname}${portStr}`);
+	} else {
+		// if we don't have a claimed-client-url that we can trust, then just guess at the correct origin
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-		const guessedToBeLocal = opts.forceLocalhost;
+		const guessedToBeLocal = opts.forceLocalhost || domainConstants.onServerAndDev;
 		if (guessedToBeLocal) {
-			//webServerURL = new URL("http://localhost:5100");
-			serverURL = new URL("http://localhost"); // port to be set shortly (see section below)
+			serverURL = new URL("http://localhost:5100"); // standard local-k8s entry-point
 		} else {
-			serverURL = new URL(`https://${prodDomain}`);
+			serverURL = new URL(`https://${domainConstants.prodDomain}`);
 		}
 	}
 
 	// section 2: set subdomain/port
 	// ==========
 
-	if (serverURL.hostname != "localhost") {
-		serverURL.host = `${serverURL.host}`;
-	}
-
-	let pathPrefix = "";
-	if (serverPod == "web-server") {
-	} else if (serverPod == "app-server") {
-		pathPrefix = "/app-server";
-	} else if (serverPod == "monitor") {
-		pathPrefix = "/monitor";
-	} else if (serverPod == "grafana") {
-		pathPrefix = "/grafana";
+	// for simply deciding between localhost:5100 and localhost:5101, we don't need the claimed-client-url to be "trusted"
+	if (serverPod == "web-server" && claimedClientURL?.port == "5101") {
+		serverURL.port = "5101";
 	}
 
 	// section 3: set path
 	// ==========
 
-	serverURL.pathname = pathPrefix + subpath;
+	Assert(subpath.startsWith("/"), "Subpath must start with a forward-slash.");
+	let subpathFinal = subpath;
+	if (serverPod == "app-server") {
+		subpathFinal = `/app-server${subpathFinal}`;
+	} else if (serverPod == "monitor") {
+		subpathFinal = `/monitor${subpathFinal}`;
+	} else if (serverPod == "grafana") {
+		subpathFinal = `/grafana${subpathFinal}`;
+	}
+	serverURL.pathname = subpathFinal;
 
 	// section 4: special-case handling
 	// ==========

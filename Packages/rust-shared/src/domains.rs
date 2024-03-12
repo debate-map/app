@@ -1,7 +1,18 @@
 use std::env;
 
-use anyhow::Error;
+use anyhow::{ensure, Error};
 use reqwest::Url;
+
+use crate::utils::general_::extensions::ToOwnedV;
+
+pub fn get_env() -> String {
+    env::var("ENVIRONMENT").unwrap_or("<unknown>".to_string())
+}
+pub fn is_dev() -> bool { get_env() == "dev" }
+pub fn is_prod() -> bool { get_env() == "prod" }
+
+// sync:js
+// ==========
 
 pub struct DomainsConstants {
     pub prod_domain: &'static str,
@@ -9,11 +20,6 @@ pub struct DomainsConstants {
     pub on_server_and_dev: bool,
     pub on_server_and_prod: bool,
 }
-pub fn get_env() -> String {
-    env::var("ENVIRONMENT").unwrap_or("<unknown>".to_string())
-}
-pub fn is_dev() -> bool { get_env() == "dev" }
-pub fn is_prod() -> bool { get_env() == "prod" }
 impl DomainsConstants {
     pub fn new() -> Self {
         //let ON_SERVER = env::var("ENVIRONMENT").is_some();
@@ -23,12 +29,15 @@ impl DomainsConstants {
             prod_domain: "debatemap.app",
             //prod_domain: "debates.app", // temp
             recognized_web_server_hosts: &[
-                "localhost:5100", "localhost:5101",
-                "localhost:5130", "localhost:5131",
+                "localhost:5100", "localhost:5101", // web-server, dev/local
+                "localhost:5130", "localhost:5131", // monitor, dev/local
+                // direct to server
+                "9m2x1z.nodes.c1.or1.k8s.ovh.us",
+                "debating.app",
+                "debatemap.societylibrary.org",
+		        // through cloudflare
                 "debatemap.app",
                 "debates.app",
-                "debating.app",
-                "9m2x1z.nodes.c1.or1.k8s.ovh.us"
             ],
             on_server_and_dev: ON_SERVER && ENV == "dev",
             on_server_and_prod: ON_SERVER && ENV == "prod",
@@ -45,48 +54,37 @@ pub enum ServerPod {
 }
 
 pub struct GetServerURL_Options {
+    pub claimed_client_url: Option<String>,
+    pub restrict_to_recognized_hosts: bool,
+    
     pub force_localhost: bool,
     pub force_https: bool,
 }
 
-// sync:js (along with constants above)
-pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_str: Option<String>, opts: GetServerURL_Options) -> Result<String, Error> {
+pub fn get_server_url(server_pod: ServerPod, subpath: &str, opts: GetServerURL_Options) -> Result<String, Error> {
     let DomainsConstants { prod_domain, recognized_web_server_hosts, on_server_and_dev, on_server_and_prod: _ } = DomainsConstants::new();
-    
-	//const opts = {...new GetServerURL_Options(), ...options};
-	assert!(subpath.starts_with("/"));
 
-	println!("GetServerURL_claimedClientURLStr: {:?}", claimed_client_url_str);
-	let claimed_client_url = claimed_client_url_str.map(|str| Url::parse(&str).unwrap());
-	//const origin = referrerURL?.origin;
+    // process claimed-client-url
+	println!("GetServerURL_claimedClientURL: {:?}", opts.claimed_client_url);
+	let claimed_client_url = opts.claimed_client_url.map(|str| Url::parse(&str).unwrap());
+    let should_trust_claimed_client_url = if let Some(client_url) = &claimed_client_url {
+        !opts.restrict_to_recognized_hosts || recognized_web_server_hosts.contains(&client_url.host_str().unwrap()) || on_server_and_dev
+    } else { false };
+    let claimed_client_url_trusted = if should_trust_claimed_client_url { claimed_client_url.clone() } else { None };
 
 	let mut server_url: Url;
 
 	// section 1: set protocol and hostname
 	// ==========
 
-	// if there is a client-url, and its host is recognized (OR on app-server pod running with DEV), trust that host as being the server host
-	if let Some(claimed_client_url) = claimed_client_url.as_ref() {
-		if recognized_web_server_hosts.contains(&claimed_client_url.host_str().unwrap()) || on_server_and_dev {
-			server_url = Url::parse(&format!("{}//{}", claimed_client_url.scheme(), claimed_client_url.host_str().unwrap())).unwrap();
-		}
-		// else, just guess at the correct origin
-		else {
-			//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
-			let guessed_to_be_local = opts.force_localhost || on_server_and_dev;
-			if guessed_to_be_local {
-				//webServerURL = new URL("http://localhost:5100");
-				server_url = Url::parse("http://localhost").unwrap(); // port to be set shortly (see section below)
-			} else {
-				server_url = Url::parse(&format!("https://{}", prod_domain)).unwrap();
-			}
-		}
+	if let Some(client_url) = claimed_client_url_trusted.as_ref() {
+		let port_str = if let Some(port) = client_url.port() { format!(":{}", port) } else { "".o() };
+        server_url = Url::parse(&format!("{}//{}{}", client_url.scheme(), client_url.host_str().unwrap(), port_str)).unwrap();
 	} else {
 		//Assert(webServerHosts.includes(referrerURL.host), `Client sent invalid referrer host (${referrerURL.host}).`);
 		let guessed_to_be_local = opts.force_localhost || on_server_and_dev;
 		if guessed_to_be_local {
-			//webServerURL = new URL("http://localhost:5100");
-			server_url = Url::parse("http://localhost").unwrap(); // port to be set shortly (see section below)
+			server_url = Url::parse("http://localhost:5100").unwrap(); // standard local-k8s entry-point
 		} else {
 			server_url = Url::parse(&format!("https://{}", prod_domain))?;
         }
@@ -97,48 +95,32 @@ pub fn get_server_url(server_pod: ServerPod, subpath: &str, claimed_client_url_s
 
     match server_pod {
         ServerPod::WebServer => {
-            if server_url.host_str().unwrap() == "localhost" {
-                server_url.set_port(match claimed_client_url.as_ref().unwrap().port() {
-                    Some(5100) => Some(5100),
-                    Some(5101) => Some(5101),
-                    _ => Some(5100),
-                }).unwrap();
-            } else {
-                // no need to change; web-server is the base-url, in production (ie. no subdomain/port)
+            // for simply deciding between localhost:5100 and localhost:5101, we don't need the claimed-client-url to be "trusted"
+            if claimed_client_url.map(|a| a.port()) == Some(Some(5101)) {
+                server_url.set_port(Some(5101)).unwrap();
             }
         },
-        ServerPod::AppServer => {
-            if server_url.host_str().unwrap() == "localhost" {
-                server_url.set_port(Some(5110)).unwrap();
-            } else {
-                server_url.set_host(Some(&format!("app-server.{}", server_url.host_str().unwrap())))?;
-            }
-        },
-        ServerPod::Monitor => {
-            if server_url.host_str().unwrap() == "localhost" {
-                /*server_url.set_port(match claimed_client_url.as_ref().unwrap().port() {
-                    Some(5130) => Some(5130),
-                    Some(5131) => Some(5131),
-                    _ => Some(5130),
-                }).unwrap();*/
-                server_url.set_port(Some(5130)).unwrap(); // always return the actual k8s pod (since caller may be intending a backend call)
-            } else {
-                server_url.set_host(Some(&format!("monitor.{}", server_url.host_str().unwrap())))?;
-            }
-        },
-        ServerPod::Grafana => {
-            if server_url.host_str().unwrap() == "localhost" {
-                server_url.set_port(Some(3000)).unwrap();
-            } else {
-                server_url.set_host(Some(&format!("grafana.{}", server_url.host_str().unwrap())))?;
-            }
-        },
+        _ => {},
     }
 
     // section 3: set path
     // ==========
 
-    server_url.set_path(subpath);
+	ensure!(subpath.starts_with("/"), "Subpath must start with a forward-slash.");
+    let mut subpath_final = subpath.to_string();
+    match server_pod {
+        ServerPod::WebServer => {},
+        ServerPod::AppServer => {
+            subpath_final = format!("/app-server{}", subpath_final);
+        },
+        ServerPod::Monitor => {
+            subpath_final = format!("/monitor{}", subpath_final);
+        },
+        ServerPod::Grafana => {
+            subpath_final = format!("/grafana{}", subpath_final);
+        },
+    }
+    server_url.set_path(&subpath_final);
 
     // section 4: special-case handling
     // ==========

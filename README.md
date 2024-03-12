@@ -144,8 +144,8 @@ Remote (private port-forwards/proxies):
 
 Remote (public): \[note: the new version of debate-map is not yet served at these endpoints; these are the target urls, however, for when it's ready for public access]
 * `debatemap.app`: remote (k8s), web-server
-* `app-server.debatemap.app`: remote (k8s), app-server
-* `monitor.debatemap.app`: remote (k8s), monitor-backend (with web-serving of monitor-client's files)
+* `debatemap.app/app-server`: remote (k8s), app-server
+* `debatemap.app/monitor`: remote (k8s), monitor-backend (with web-serving of monitor-client's files)
 
 Port-assignment scheme: (ie. meaning of each digit in `ABCD`)
 * A) app/project [5: debate-map]
@@ -666,14 +666,15 @@ Authorized JavaScript Origins:
 * https://debates.app
 
 Authorized redirect URIs:
-* http://localhost:5110/auth/google/callback
-* http://[::1]:5110/auth/google/callback
-* https://app-server.CLUSTER_IP_IN_CLOUD/auth/google/callback
-* https://app-server.debatemap.app/auth/google/callback
-* https://app-server.debates.app/auth/google/callback
-* https://app-server.debatemap.app/auth/google/callback_returnToLocalhost
-* https://app-server.debates.app/auth/google/callback_returnToLocalhost
+* http://localhost:5100/app-server/auth/google/callback
+* http://[::1]:5100/app-server/auth/google/callback
+* https://CLUSTER_IP_IN_CLOUD/app-server/auth/google/callback
+* https://debatemap.app/app-server/auth/google/callback
+* https://debates.app/app-server/auth/google/callback
+* https://debatemap.app/app-server/auth/google/callback_returnToLocalhost
+* https://debates.app/app-server/auth/google/callback_returnToLocalhost
 ```
+<!-- The list above is somewhat "inconsistent" between domains/callback-types. Should decide on what pattern to use. -->
 
 </details>
 

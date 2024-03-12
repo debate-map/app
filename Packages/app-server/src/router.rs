@@ -47,12 +47,13 @@ pub fn get_cors_layer() -> CorsLayer {
 
 pub async fn start_router(app_state: AppStateArc) {
     let app = Router::new()
-        .route("/", get(|| async {
+        .route("/app-server", get(|| async {
             Html(r#"
                 <p>This is the URL for the app-server, which is not meant to be opened directly by your browser.</p>
                 <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
             "#)
         }))
+        // for better or worse, these endpoints are currently only accessible from within the cluster (till the url-rewrites in routes.yaml work)
         .route("/basic-info", get(|| async {
             let memUsed = GLOBAL.get();
             println!("Memory used: {memUsed} bytes");

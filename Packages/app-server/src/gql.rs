@@ -197,7 +197,7 @@ const GRAPHQL_PATH: &str = "/app-server/graphql";
 
 async fn graphiql() -> impl IntoResponse {
     // use the DEV/PROD value from the "ENVIRONMENT" env-var, to determine what the app-server's URL is (maybe temp)
-    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "app-server.debatemap.app" };
+    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "debatemap.app/app-server" };
     response::Html(graphiql_source(GRAPHQL_PATH, Some(&format!("wss://{app_server_host}{GRAPHQL_PATH}"))))
 }
 async fn graphql_playground() -> impl IntoResponse {
@@ -283,8 +283,8 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
     //let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        .route("/graphiql", get(graphiql))
-        .route("/gql-playground", get(graphql_playground))
+        .route("/app-server/graphiql", get(graphiql))
+        .route("/app-server/gql-playground", get(graphql_playground))
         .route(GRAPHQL_PATH,
             // approach 1 (using standard routing functions)
             //on_service(MethodFilter::GET, gql_subscription_service).post(handle_gql_query_or_mutation)

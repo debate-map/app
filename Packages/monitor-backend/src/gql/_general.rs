@@ -190,7 +190,7 @@ pub async fn get_basic_info_from_app_server() -> Result<JSONValue, Error> {
     let client = new_hyper_client_http();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::GET)
-        .uri("http://dm-app-server.default.svc.cluster.local:5110/basic-info")
+        .uri("http://dm-app-server.default.svc.cluster.local:5110/app-server/basic-info")
         .header("Content-Type", "application/json")
         .body(json!({}).to_string().into())?;
     let res = client.request(req).await?;

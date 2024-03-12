@@ -272,7 +272,7 @@ async fn post_request_to_app_server(message: serde_json::Value) -> Result<JSONVa
     let client = new_hyper_client_http();
     let req = rust_shared::hyper::Request::builder()
         .method(Method::POST)
-        .uri("http://dm-app-server.default.svc.cluster.local:5110/graphql")
+        .uri("http://dm-app-server.default.svc.cluster.local:5110/app-server/graphql")
         .header("Content-Type", "application/json")
         // temp; use db-password as way to prove this request is from an internal pod, and thus doesn't need to be signed-in
         //.header("SecretForRunAsSystem", env::var("DB_PASSWORD").unwrap())

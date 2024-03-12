@@ -16,7 +16,7 @@ program
 
 		const fetch = (await import("node-fetch")).default;
 		try {
-			const origin = dev ? "http://localhost:5110" : "https://app-server.debatemap.app";
+			const origin = dev ? "http://localhost:5100/app-server" : "https://debatemap.app/app-server";
 			//console.log("Origin:", origin);
 
 			const jwtTokenEnvVarName = `DM_USER_JWT${dev ? `_DEV` : "_PROD"}`;
@@ -25,7 +25,7 @@ program
 				console.error(`
 			No environment-variable named "${jwtTokenEnvVarName}" found! The recommended way to provide it is through a ".env" file in repo-root; see ".env.template" file for expected format.
 			As for retrieving the jwt-token in the first place, you can either:
-			1) Go to https://app-server.debatemap.app/gql-playground (or dev/localhost equivalent), and use the "signInStart" endpoint.
+			1) Go to https://debatemap.app/app-server/gql-playground (or dev/localhost equivalent), and use the "signInStart" endpoint.
 			2) Sign in on "debatemap.app" website (or dev/localhost equivalent), open dev-tools, and copy your JWT from the Application->LocalStorage panel. (these expire ~4 weeks after sign-in time)
 				`.trim());
 				return void WaitForEnterKeyThenExit(1);

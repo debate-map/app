@@ -70,7 +70,7 @@ async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Req
 
 pub async fn extend_router(app: Router) -> Router {
     let result = app
-        .route("/auth/google/callback", get(auth_google_callback));
+        .route("/app-server/auth/google/callback", get(auth_google_callback));
     result
 }
 
@@ -131,7 +131,10 @@ impl SignInStartResult {
         let token_url = TokenUrl::new("https://www.googleapis.com/oauth2/v3/token".to_string()).expect("Invalid token endpoint URL");
 
         let referrer = try_get_referrer_from_gql_ctx(gql_ctx);
-        let callback_url = get_server_url(ServerPod::AppServer, "/auth/google/callback", referrer, GetServerURL_Options { force_localhost: false, force_https: false }).expect("Could not construct callback URL");
+        let callback_url = get_server_url(ServerPod::AppServer, "/auth/google/callback", GetServerURL_Options {
+            claimed_client_url: referrer, restrict_to_recognized_hosts: true,
+            force_localhost: false, force_https: false,
+        }).expect("Could not construct callback URL");
 
         // Set up the config for the Google OAuth2 process.
         let client = BasicClient::new(google_client_id, Some(google_client_secret), auth_url, Some(token_url))

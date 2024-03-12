@@ -1,5 +1,5 @@
 import {setContext} from "@apollo/client/link/context";
-import {GetServerURL} from "dm_common";
+import {GetServerURL, GetServerURL_Options} from "dm_common";
 import {Client, createClient} from "graphql-ws";
 import {store} from "Store";
 import {GetUserInfoJWTString, SendUserJWTToMGL} from "Utils/AutoRuns/UserInfoCheck.js";
@@ -8,19 +8,22 @@ import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from
 import {getMainDefinition, GraphQLWsLink, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {VoidCache} from "./Apollo/VoidCache.js";
 
-export function GetWebServerURL(subpath: string, preferredServerOrigin?: string) {
-	return GetServerURL("web-server", subpath, preferredServerOrigin ?? window.location.origin);
+export function GetWebServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options) {
+	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
+	return GetServerURL("web-server", subpath, opts);
 }
-export function GetAppServerURL(subpath: string, preferredServerOrigin?: string): string {
+export function GetAppServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
+	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
 	// if on localhost, but user has set the db/server override to "prod", do so
 	if (window.location.hostname == "localhost" && DB == "prod") {
-		return `https://app-server.debatemap.app/${subpath.slice(1)}`;
+		return `https://debatemap.app/app-server/${subpath.slice(1)}`;
 	}
 
-	return GetServerURL("app-server", subpath, preferredServerOrigin ?? window.location.origin);
+	return GetServerURL("app-server", subpath, opts);
 }
-export function GetMonitorURL(subpath: string, preferredServerOrigin?: string): string {
-	return GetServerURL("monitor", subpath, preferredServerOrigin ?? window.location.origin);
+export function GetMonitorURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
+	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
+	return GetServerURL("monitor", subpath, opts);
 }
 
 const GRAPHQL_URL = GetAppServerURL("/graphql");
