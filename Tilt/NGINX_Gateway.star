@@ -51,8 +51,12 @@ def Start_NGINXGateway(g):
 			"new_name": "entry-point-service-tilt", "labels": ["gateway"],
 			"objects": [
 				"entry-point-service",
-			]
+			],
 			#"trigger_mode": TRIGGER_MODE_MANUAL,
-			#"port_forwards": '80' if g["REMOTE"] else '8000:80',
+			
+			# Note: This port-forward entry actually works for all of the load-balancer-exposed services in the cluster. (since they differentiate using url-prefixes now)
+			# Also: We only create a port-forwards for the remote cluster, since the local cluster doesn't need it. (k8s creates one for us, due to the entry-point-service)
+			# NOTE: This port-forward doesn't currently work! (config may need to be more complex since now targeting a load-balancer service)
+			"port_forwards": '5200:80' if g["REMOTE"] else None,
 		},
 	])

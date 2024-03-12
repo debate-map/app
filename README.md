@@ -134,9 +134,9 @@ Local:
 * `localhost:5141`: local (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)
 
 Remote (private port-forwards/proxies):
-* `localhost:n/a`: remote (k8s), web-server (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:n/a`: remote (k8s), app-server (`backend.[forward/tiltUp]_ovh` must be running)
-* `localhost:n/a`: remote (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5200`: remote (k8s), web-server (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5200/app-server`: remote (k8s), app-server (`backend.[forward/tiltUp]_ovh` must be running)
+* `localhost:5200/monitor`: remote (k8s), monitor-backend (with web-serving of monitor-client's files) (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5220`: remote (k8s), postgres instance (`backend.[forward/tiltUp]_ovh` must be running)
 * `localhost:5240`: remote (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5241`: remote (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)

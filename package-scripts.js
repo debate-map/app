@@ -252,13 +252,12 @@ function GetPortForwardCommandsStr(context) {
 	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} 5${d2}20:5432`;
 	if (commandArgs.includes("onlyDB")) return forDB;
 
-	const forWebServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:5100`;
-	const forAppServer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}10:5110`;
-	const forMonitor = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_AppServer(context)} 5${d2}30:5130`;
+	// NOTE: This port-forward doesn't currently work! (config may need to be more complex since now targeting a load-balancer service)
+	const forLoadBalancer = `${KubeCTLCmd(context)} -n ${appNamespace} port-forward ${GetPodName_WebServer(context)} 5${d2}00:80`;
 	/*const forHKServer = `TODO`;
 	const forHKPostgres = `TODO`;*/
 
-	return `concurrently --kill-others --names db,ws,asr,mo "${forDB}" "${forWebServer}" "${forAppServer}" "${forMonitor}"`;
+	return `concurrently --kill-others --names db,lb "${forDB}" "${forLoadBalancer}"`;
 }
 
 function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {

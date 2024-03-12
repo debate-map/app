@@ -6,8 +6,9 @@ import {Assert} from "web-vcore/nm/js-vextensions.js";
 const domainConstants = {
 	prodDomain: "debatemap.app",
 	recognizedWebServerHosts: [
-		"localhost:5100", "localhost:5101", // web-server, dev/local
-		"localhost:5130", "localhost:5131", // monitor, dev/local
+		"localhost:5100", "localhost:5101", // web-server, local-k8s and local-webpack
+		"localhost:5130", "localhost:5131", // monitor, local-k8s and local-webpack
+		"localhost:5200", // all of the load-balancer-exposed services, on the remote-k8s
 		// direct to server
 		"9m2x1z.nodes.c1.or1.k8s.ovh.us",
 		"debating.app",
