@@ -41,6 +41,7 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [Migration notes](https://github.com/debate-map/app/tree/master/Docs/MigrationNotes.md)
 * [Package code-syncing](https://github.com/debate-map/app/tree/master/Docs/PackageCodeSyncing.md)
 * [Compilation speed](https://github.com/debate-map/app/tree/master/Docs/CompilationSpeed.md)
+* [Common errors](https://github.com/debate-map/app/tree/master/Docs/CommonErrors.md)
 
 # Packages
 
@@ -83,8 +84,6 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * 5\) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. At the moment, regular frontend and backend devs don't need to make any modifications to the new `.env` file; only backend deployers/maintainers (ie. those pushing changes to the cloud for production) have environment-variables they need to fill in.
 
 > If you're looking for a higher-level "quick start" guide, see here: [Quick start](https://github.com/debate-map/app/tree/master/Docs/QuickStart.md)
-
-</details>
 
 </details>
 
