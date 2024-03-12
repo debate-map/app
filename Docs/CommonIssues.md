@@ -2,7 +2,7 @@
 
 This document is where various issues are logged, which have a good chance of being encountered, or which are very hard to understand if they are encountered. The intention is that when devs encounter a difficult problem, or one which they vaguely recall having dealt with before, they can quickly search here to find the "cached solution" (if one exists).
 
-The document is split into a few categories, based on the "context" in which the error is expected to be seen. And each issue entry is split into a few seconds as well.
+The document is split into a few categories, based on the "context" in which the error is expected to be seen. And each issue entry is split into a few sections as well.
 
 Issue sections:
 * Header: The explicit error message, if it exists. (unless very unwieldy)
