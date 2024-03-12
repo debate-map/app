@@ -24,7 +24,7 @@ use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::db::agql_ext::gql_general_extension::CustomExtensionCreator;
 use rust_shared::utils::net::{body_to_str, full_body_from_str, new_hyper_client_http, AxumBody, HyperClient, HyperClient_};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{axum, tower, tower_http, serde_json};
+use rust_shared::{axum, serde_json, to_anyhow, tower, tower_http};
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};
 use tower_http::cors::{CorsLayer};
@@ -356,7 +356,7 @@ pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: Roo
             }
         },
     }
-    let gql_response = temp1;
+    let gql_response: async_graphql::Response = temp1.map_err(to_anyhow)?;
     //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
     let response_str: String = serde_json::to_string(&gql_response)?;
     

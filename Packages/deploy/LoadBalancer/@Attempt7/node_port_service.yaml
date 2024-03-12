@@ -17,13 +17,14 @@
 #   ports: # Update the following ports to match your Gateway Listener ports
 #   - name: http
 #     protocol: TCP
-#     #nodePort: 81
-#     port: 81
+#     nodePort: 31099
+#     port: 80
 #     targetPort: 80
-#   - name: https
-#     port: 8443
-#     protocol: TCP
-#     targetPort: 443
+#   # - name: https
+#   #   port: 8443
+#   #   protocol: TCP
+#   #   targetPort: 443
+
 ---
 apiVersion: v1
 kind: Service
@@ -45,9 +46,14 @@ spec:
     #app.kubernetes.io/name: nginx-gateway-fabric
     app.kubernetes.io/instance: ngf
   ports:
-  - port: 80
-    targetPort: 80
+  - name: http
     protocol: TCP
-    name: http
-  #externalTrafficPolicy: Local
+    #nodePort: 32010 # this field seems ignored by LoadBalancer services
+    port: 80
+    targetPort: 80
+  externalIPs:
+    # hard-coded atm to the ovh node ip; may automate this later (eg. in the NGINX_Gateway.star file, using the ReadFileWithReplacements function)
+    - 15.204.30.179
+  ## The externalTrafficPolicy of the service. The value Local preserves the client source IP.
+  externalTrafficPolicy: Local
   #internalTrafficPolicy: Local
