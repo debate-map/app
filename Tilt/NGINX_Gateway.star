@@ -16,8 +16,12 @@ def Start_NGINXGateway(g):
 		'ngf',
 		'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
 		namespace='default',
-		#flags=['--set=service.type=NodePort'],
-		flags=['--set=service.create=false'],
+		flags=[
+			#'--set=service.create=false',
+			#'--set=service.type=NodePort',
+			'--set=service.type=LoadBalancer',
+			'--set=gateway=default/nginx-gateway-node-port',
+		],
 	)
 	NEXT_k8s_resource_batch(g, [
 		{"workload": "ngf", "labels": ["gateway"]},
@@ -27,14 +31,14 @@ def Start_NGINXGateway(g):
 	])
 	#k8s_resource(workload='ngf', labels=["gateway"], port_forwards='80' if g["REMOTE"] else None)
 
-	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
-	NEXT_k8s_resource_batch(g, [
-		{
-			"new_name": "nginx-node-port-service-tilt", "labels": ["gateway"],
-			"objects": [
-				"nginx-gateway-node-port",
-			]
-			#"trigger_mode": TRIGGER_MODE_MANUAL,
-			#"port_forwards": '80' if g["REMOTE"] else '8000:80',
-		},
-	])
+	# k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
+	# NEXT_k8s_resource_batch(g, [
+	# 	{
+	# 		"new_name": "nginx-node-port-service-tilt", "labels": ["gateway"],
+	# 		"objects": [
+	# 			"nginx-gateway-node-port",
+	# 		]
+	# 		#"trigger_mode": TRIGGER_MODE_MANUAL,
+	# 		#"port_forwards": '80' if g["REMOTE"] else '8000:80',
+	# 	},
+	# ])
