@@ -32,19 +32,25 @@ def Start_NGINXGateway(g):
 	])
 	#k8s_resource(workload='ngf', labels=["gateway"], port_forwards='80' if g["REMOTE"] else None)
 
-	bind_to_address = "127.0.0.1"  # This will actually fail, but we always want a value
-	cluster_data = decode_yaml(local("kubectl get node -A -o yaml --context %s " % (g["CONTEXT"])))
-	for node in cluster_data['items']:
-		for address in node['status']['addresses']:
-			if address['type'] == "InternalIP":
-				bind_to_address = address["address"]
+	bind_to_address = ""
+	if g["REMOTE"]:
+		cluster_data = decode_yaml(local("kubectl get node -A -o yaml --context %s " % (g["CONTEXT"]), quiet = True))
+		for node in cluster_data['items']:
+			for address in node['status']['addresses']:
+				if address['type'] == "InternalIP":
+					bind_to_address = address["address"]
+					print("Assigning external-ip to nginx load-balancer: " + bind_to_address)
 
-	k8s_yaml(ReadFileWithReplacements('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml', {"bind_to_address": bind_to_address}))
+	k8s_yaml(ReadFileWithReplacements('../Packages/deploy/LoadBalancer/@Attempt7/entry_point_service.yaml', {
+		"TILT_PLACEHOLDER:port": "80" if g["REMOTE"] else "5100",
+		"TILT_PLACEHOLDER:externalIPs": "externalIPs" if len(bind_to_address) > 0 else "externalIPs_disabled",
+		"TILT_PLACEHOLDER:bind_to_address": bind_to_address,
+	}))
 	NEXT_k8s_resource_batch(g, [
 		{
-			"new_name": "nginx-node-port-service-tilt", "labels": ["gateway"],
+			"new_name": "entry-point-service-tilt", "labels": ["gateway"],
 			"objects": [
-				"nginx-gateway-node-port",
+				"entry-point-service",
 			]
 			#"trigger_mode": TRIGGER_MODE_MANUAL,
 			#"port_forwards": '80' if g["REMOTE"] else '8000:80',
