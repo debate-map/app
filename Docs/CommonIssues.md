@@ -15,6 +15,6 @@ Issue sections:
 
 > #### `Build Failed: Internal error occurred: failed calling webhook "validate.gateway.networking.k8s.io": failed to call webhook: Post "https://gateway-api-admission-server.default.svc:443/validate?timeout=10s": service "gateway-api-admission-server" not found`
 
-**TLDR:** Open the k8s cluster in Lens, go to Config -> Validating Webhook Configs, then delete the stuck entry (there should only be one).
+**TLDR:** Open the k8s cluster in Lens, go to Config -> Validating Webhook Configs, delete the stuck entry (there should only be one), then trigger update of `app-routes` in the Tilt ui.
 
 **Trigger:** When deploying to the k8s cluster, using Tilt. (only happens sometimes; unsure of the exact trigger)

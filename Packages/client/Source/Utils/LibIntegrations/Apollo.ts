@@ -8,21 +8,29 @@ import {ApolloClient, ApolloError, ApolloLink, DefaultOptions, FetchResult, from
 import {getMainDefinition, GraphQLWsLink, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {VoidCache} from "./Apollo/VoidCache.js";
 
+export function GetPageOrigin_WithWebpackToK8sRetargeting() {
+	let pageOrigin_targetingK8sCluster = window.location.origin;
+	// if on localhost, but one of the webpack ports, change the port to target the k8s entry-point (webpack knows nothing of the app-server)
+	if (window.location.hostname == "localhost" && (window.location.port == "5101" || window.location.port == "5131")) {
+		pageOrigin_targetingK8sCluster = `${window.location.protocol}//${window.location.hostname}:5100`;
+	}
+	return pageOrigin_targetingK8sCluster;
+}
+
 export function GetWebServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options) {
 	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
 	return GetServerURL("web-server", subpath, opts);
 }
 export function GetAppServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrict_to_recognized_hosts: false}, ...opts};
 	// if on localhost, but user has set the db/server override to "prod", do so
 	if (window.location.hostname == "localhost" && DB == "prod") {
 		return `https://debatemap.app/app-server/${subpath.slice(1)}`;
 	}
-
 	return GetServerURL("app-server", subpath, opts);
 }
 export function GetMonitorURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrict_to_recognized_hosts: false}, ...opts};
 	return GetServerURL("monitor", subpath, opts);
 }
 
