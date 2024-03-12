@@ -1,10 +1,10 @@
 # common exclusions (not based on project-specific folder-structure or file-names)
 # ==========
 
+**/node_modules
 **/.DS_Store
 **/.idea
 **/*.log
-/node_modules
 /tilt_modules
 /.yalc
 /yalc.lock
@@ -30,6 +30,7 @@ Others/Secrets/*
 
 # others
 /NMOverwrites
+/Scripts/OVH/.env
 /Temp
 /Temp_Synced
 /PulumiOutput_Private.json
