@@ -12,37 +12,30 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 # ==========
 
 def Start_NGINXGateway(g):
-	# helm_remote('nginx-gateway-fabric',
-	# 	#repo_url='oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
-	# 	#repo_url='https://charts.jetstack.io',
-	# 	repo_url='https://charts.helm.sh/stable',
-	# 	version='1.1.0', # helm-chart version can be different from package version
-	# 	#values=["../Packages/deploy/LoadBalancer/@Attempt7/@Helm/nginx-values.yaml"],
-	# )
-	
-	#helm_repo('nginxinc', 'https://helm.nginx.com/stable')
-	#helm_repo('jetstack', 'https://charts.jetstack.io')
-	#helm_repo('nginxinc', 'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric')
 	helm_resource(
 		'ngf',
 		'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
-		#namespace='default'
-		#flags=['--set=service.type=NodePort']
-		flags=['--set=service.create=false']
+		namespace='default',
+		#flags=['--set=service.type=NodePort'],
+		flags=['--set=service.create=false'],
 	)
-	# todo
-	#NEXT_k8s_resource(g, "node-setup", pod_readiness='ignore')
-
-	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
-	#k8s_resource("nginx-gateway-node-port", pod_readiness='ignore')
-	#NEXT_k8s_resource(g, "nginx-gateway-node-port", pod_readiness='ignore')
 	# NEXT_k8s_resource_batch(g, [
 	# 	{
-	# 		"new_name": "nginx-node-port-service-tilt", "labels": ["gateway"],
+	# 		"new_name": "gateway-api-other-objects", "labels": ["gateway"],
 	# 		"objects": [
-	# 			#"nginx-gateway:service",
-	# 			"nginx-gateway-node-port",
+	# 			# todo
 	# 		],
 	# 	},
 	# ])
-	k8s_resource(new_name="nginx-gateway-node-port-tilt", objects=["nginx-gateway-node-port"]) #, pod_readiness='ignore')
+
+	k8s_yaml('../Packages/deploy/LoadBalancer/@Attempt7/node_port_service.yaml')
+	NEXT_k8s_resource_batch(g, [
+		{
+			"new_name": "nginx-node-port-service-tilt", "labels": ["gateway"],
+			"objects": [
+				"nginx-gateway-node-port",
+			]
+			#"trigger_mode": TRIGGER_MODE_MANUAL,
+			#"port_forwards": '80' if g["REMOTE"] else '8000:80',
+		},
+	])

@@ -70,17 +70,18 @@ def Start_Gateway_Base(g):
 		},
 	])
 
-	# NEXT_k8s_resource_batch(g, [
-	# 	{
-	# 		"new_name": "gateway-api-other-objects", "labels": ["gateway"],
-	# 		"objects": [
-	# 			"nginx:gatewayclass",
-
-	# 			# "gateway-role:clusterrole",
-	# 			# "gateway-controller:clusterrolebinding",
-	# 		],
-	# 	},
-	# ])
+	NEXT_k8s_resource_batch(g, [
+		{
+			"new_name": "gateway-api-other-objects", "labels": ["gateway"],
+			"objects": [
+				"gateway-api-admission:serviceaccount",
+				"gateway-api-admission:role",
+				"gateway-api-admission:clusterrole",
+				"gateway-api-admission:rolebinding",
+				"gateway-api-admission:validatingwebhookconfiguration",
+			],
+		},
+	])
 
 	# custom routes
 	# ==========

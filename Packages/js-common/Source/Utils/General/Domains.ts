@@ -42,7 +42,8 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, claimedClien
 	// if there is a client-url, and its host is recognized (OR on app-server pod running with DEV), trust that host as being the server host
 	//if (claimedClientURL && (recognizedWebServerHosts.includes(claimedClientURL.host) || ON_SERVER_AND_DEV)) {
 	if (claimedClientURL) {
-		serverURL = new URL(`${claimedClientURL.protocol}//${claimedClientURL.hostname}:${claimedClientURL.port}`);
+		const portStr = claimedClientURL.port ? `:${claimedClientURL.port}` : "";
+		serverURL = new URL(`${claimedClientURL.protocol}//${claimedClientURL.hostname}${portStr}`);
 	}
 	// else, just guess at the correct origin
 	else {
