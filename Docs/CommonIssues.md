@@ -5,8 +5,8 @@ This document is where various issues are logged, which have a good chance of be
 The document is split into a few categories, based on the "context" in which the error is expected to be seen. And each issue entry is split into a few sections as well.
 
 Issue sections:
-* Header: The explicit error message, if it exists. (unless very unwieldy)
-* TLDR: Quick way to to solve the problem, if one exists.
+* Header: The explicit error message, if it exists (unless very unwieldy); else a summary of what the user sees having gone wrong.
+* TLDR: The quick way to to solve the problem, if one exists.
 * Trigger: What user/dev actions cause the issue to occur, if known.
 * Reason: Explanation of what's happening behind the scenes, such that the user/dev action above causes the issue.
 * Solution: If there isn't a "TLDR" way of solving the problem (or if it's not always the best way to do so), a longer explanation of how to solve it can be described here.
