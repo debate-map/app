@@ -31,6 +31,8 @@
 		//"strictFunctionTypes": true,
 		//"strictPropertyInitialization": true,
 
+		"forceConsistentCasingInFileNames": false,
+
 		// modules/paths
 		"module": "ESNext",
 		"moduleResolution": "node",
