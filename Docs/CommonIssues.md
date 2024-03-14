@@ -13,10 +13,20 @@ Issue sections:
 
 ## Context: Error in the logs of a kubernetes pod/resource
 
-Might be solved, watching.
-
 > #### `Build Failed: Internal error occurred: failed calling webhook "validate.gateway.networking.k8s.io": failed to call webhook: Post "https://gateway-api-admission-server.default.svc:443/validate?timeout=10s": service "gateway-api-admission-server" not found`
 
 **TLDR:** Open the k8s cluster in Lens, go to Config -> Validating Webhook Configs, delete the stuck entry (there should only be one), then trigger update of `app-routes` in the Tilt ui.
 
 **Trigger:** When deploying to the k8s cluster, using Tilt. (only happens sometimes; unsure of the exact trigger)
+
+Might be solved, watching. [edit: one of the causes was solved, but the error still happens sometimes, with a slightly different error message -- about unknown signing source rather than service not being found]
+
+> #### `It appears that more than one copy of the web-vcore package has been loaded, which is almost certainly not desired.` and/or `Uncaught TypeError: Cannot redefine property: AV`
+
+**TLDR:** Note the version for `web-vcore` listed in package.json, run `npm add web-vcore`, change package.json to again use the version noted earlier, redeploy the web-server pod (if using k8s for the JS file-serving), then refresh the page.
+
+**Trigger:** Not completely clear, but in the general space of doing yarn installs and/or zalc publishes of web-vcore.
+
+**Reason:** Two instances of web-vcore got installed by yarn: one with its file at "./node_modules/web-vcore", the other with its files at ".yalc/web-vcore". This duplication was probably caused by a usage of zalc that ended up botching the yarn.lock file (exact reasons this can happen are not yet clear).
+
+As for why the TLDR solution can fix it: Despite the package.json ending up the same, the process forces yarn to create a single entry for web-vcore in the lock file, removing the duplication; and this fix persists through future yarn-installs, since the regular resolution rules are then able to merge the two web-vcore instances (from the workspaces entry for .yalc/web-vcore, and the regular npm dependency), resulting in yarn creating a symlink from "node_modules/web-vcore" to ".yalc/web-vcore", which is what we want.
