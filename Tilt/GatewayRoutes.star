@@ -11,7 +11,7 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 # main
 # ==========
 
-def Start_Gateway_Base(g):
+def Start_GatewayRoutes(g):
 	# custom routes
 	# ==========
 
