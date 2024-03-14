@@ -82,23 +82,3 @@ def Start_Gateway_Base(g):
 			],
 		},
 	])
-
-	# custom routes
-	# ==========
-
-	NEXT_k8s_resource_batch(g, [
-		{
-			"new_name": "app-routes", "labels": ["gateway"],
-			"objects": [
-				"gateway-http:gateway",
-
-				# relating to certificate-provisioning
-				# "gateway-https:gateway",
-
-				"route-web-server:httproute",
-				"route-app-server:httproute",
-				"route-monitor:httproute",
-				"route-grafana:httproute",
-			],
-		},
-	])

@@ -136,6 +136,10 @@ Start_Gateway_Base(g)
 load('./NGINX_Gateway.star', 'Start_NGINXGateway')
 Start_NGINXGateway(g)
 
+# routes (must come after nginx-gateway)
+load('./GatewayRoutes.star', 'Start_GatewayRoutes')
+Start_GatewayRoutes(g)
+
 # cert-manager (for creating/renewing SSL certificates)
 # temp-disabled (traefik issue 9158)
 # load('./CertManager.star', 'Start_CertManager')
