@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: entry-point-service
+  #name: entry-point-service
+  name: ngf-nginx-gateway-fabric
   namespace: default
   labels:
     app.kubernetes.io/name: nginx-gateway

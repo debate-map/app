@@ -20,7 +20,7 @@ def Start_NGINXGateway(g):
 			'--set=service.create=false',
 			#'--set=service.type=NodePort',
 			#'--set=service.type=LoadBalancer',
-			'--set=gateway=default/nginx-gateway-node-port',
+			#'--set=gateway=default/entry-point-service',
 			#'--set=service.externalIPs={15.204.30.179}',
 		],
 	)
@@ -60,7 +60,7 @@ def Start_NGINXGateway(g):
 		{
 			"new_name": "entry-point-service-tilt", "labels": ["gateway"],
 			"objects": [
-				"entry-point-service",
+				"ngf-nginx-gateway-fabric",
 			],
 			#"trigger_mode": TRIGGER_MODE_MANUAL,
 

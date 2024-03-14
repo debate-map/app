@@ -22,7 +22,7 @@ def Start_GatewayRoutes(g):
 				"gateway-http:gateway",
 
 				# relating to certificate-provisioning
-				"gateway-https:gateway",
+				# "gateway-https:gateway",
 
 				"route-web-server:httproute",
 				"route-app-server:httproute",

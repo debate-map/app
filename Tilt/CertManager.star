@@ -16,7 +16,7 @@ def Start_CertManager(g):
 	if g["REMOTE"]:
 		helm_remote('cert-manager',
 			repo_url='https://charts.jetstack.io',
-			version='1.12.1',
+			version='1.14.4',
 			namespace="cert-manager",
 			create_namespace=True,
 			set=[
@@ -40,7 +40,7 @@ def Start_CertManager(g):
 					"cert-manager-cainjector:ServiceAccount:cert-manager",
 					"cert-manager:ServiceAccount:cert-manager",
 					"cert-manager-webhook:ServiceAccount:cert-manager",
-					"cert-manager-webhook:ConfigMap:cert-manager",
+					#"cert-manager-webhook:ConfigMap:cert-manager",
 					"cert-manager-cainjector:ClusterRole:cert-manager",
 					"cert-manager-controller-issuers:ClusterRole:cert-manager",
 					"cert-manager-controller-clusterissuers:ClusterRole:cert-manager",
