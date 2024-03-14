@@ -133,9 +133,9 @@ pub async fn extend_router(
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        //.route("/graphiql", get(graphiql))
-        .route("/gql-playground", get(graphql_playground))
-        .route("/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
+        //.route("/monitor/graphiql", get(graphiql))
+        .route("/monitor/gql-playground", get(graphql_playground))
+        .route("/monitor/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
         .layer(Extension(schema));
 
     result

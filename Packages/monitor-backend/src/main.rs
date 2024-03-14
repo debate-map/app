@@ -171,16 +171,16 @@ async fn main() {
     let app_state = AppStateArc::new(AppState::default());
 
     let app = Router::new()
-        /*.route("/", get(|| async { Html(r#"
+        /*.route("/monitor", get(|| async { Html(r#"
             <p>This is the URL for the monitor-backend.</p>
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/
-        //.route("/send-mtx-results", post(send_mtx_results))
-        .route("/storeAdminKeyCookie", get(store_admin_key_cookie))
-        .route("/proxy/prometheus", get(maybe_proxy_to_prometheus))
-        .route("/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
-        .route("/proxy/alertmanager", get(maybe_proxy_to_alertmanager))
-        .route("/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
+        //.route("/monitor/send-mtx-results", post(send_mtx_results))
+        .route("/monitor/storeAdminKeyCookie", get(store_admin_key_cookie))
+        .route("/monitor/proxy/prometheus", get(maybe_proxy_to_prometheus))
+        .route("/monitor/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
+        .route("/monitor/proxy/alertmanager", get(maybe_proxy_to_alertmanager))
+        .route("/monitor/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
         .fallback(get(handler));
 
     let (mut msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = async_broadcast::broadcast(10000);
