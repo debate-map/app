@@ -31,6 +31,8 @@ def Start_NGINXGateway(g):
 		{"workload": "gateway-api-admission-server", "labels": ["gateway"]},
 		{"workload": "gateway-api-admission-patch", "labels": ["gateway"]},
 	])
+	# todo: ngf still sometimes errors here on tilt fresh-deploys; I think it's because the admission-server above is not finished initializing by this point (even if "ready" according to tilt)
+	# (alternatively, maybe the admission-server gets initialized incorrectly due to one of *its* deps not having initialized early enough, eg. "gateway-api-admission" [job])
 	NEXT_k8s_resource_batch(g, [{"workload": "ngf", "labels": ["gateway"]}])
 
 	bind_to_address = None
