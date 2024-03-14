@@ -25,7 +25,7 @@ spec:
   - name: https
     protocol: TCP
     port: TILT_PLACEHOLDER:https_port
-    targetPort: 8443
+    targetPort: 443
   "TILT_PLACEHOLDER:externalIPs":
     - TILT_PLACEHOLDER:bind_to_address
   ## The externalTrafficPolicy of the service. The value Local preserves the client source IP.
