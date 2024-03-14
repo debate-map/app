@@ -29,6 +29,7 @@ def Start_CertManager(g):
 		)
 
 		NEXT_k8s_resource_batch(g, [
+			{"new_name": "cert-manager-namespace", "labels": ["cert-manager"], "objects": ["cert-manager:Namespace:default"]},
 			{"workload": "cert-manager", "labels": ["cert-manager"]},
 			{"workload": "cert-manager-cainjector", "labels": ["cert-manager"]},
 			{"workload": "cert-manager-webhook", "labels": ["cert-manager"]},
@@ -36,7 +37,6 @@ def Start_CertManager(g):
 			{
 				"new_name": "cert-manager-other-objects", "labels": ["cert-manager"],
 				"objects": [
-					"cert-manager:Namespace:default",
 					"cert-manager-cainjector:ServiceAccount:cert-manager",
 					"cert-manager:ServiceAccount:cert-manager",
 					"cert-manager-webhook:ServiceAccount:cert-manager",

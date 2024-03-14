@@ -142,8 +142,8 @@ Start_GatewayRoutes(g)
 
 # cert-manager (for creating/renewing SSL certificates)
 # temp-disabled (traefik issue 9158)
-# load('./CertManager.star', 'Start_CertManager')
-# Start_CertManager(g)
+load('./CertManager.star', 'Start_CertManager')
+Start_CertManager(g)
 
 # own app (docker build and such)
 load('./App.star', 'Start_App')

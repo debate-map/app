@@ -17,8 +17,8 @@ kind: Gateway
 metadata:
   name: gateway-http
   namespace: default # test
-  #annotations:
-  #  cert-manager.io/cluster-issuer: zerossl-issuer
+  annotations:
+   cert-manager.io/cluster-issuer: zerossl-issuer
 spec:
   gatewayClassName: nginx
   # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
