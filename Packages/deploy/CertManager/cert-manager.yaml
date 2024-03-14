@@ -28,9 +28,6 @@ spec:
         gatewayHTTPRoute:
           #serviceType: ClusterIP
           parentRefs:
-            - name: gateway-http
+            - name: main-gateway
               namespace: default
               kind: Gateway
-            # - name: gateway-https
-            #   namespace: default
-            #   kind: Gateway

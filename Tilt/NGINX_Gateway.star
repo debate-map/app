@@ -21,8 +21,8 @@ def Start_NGINXGateway(g):
 			#'--set=service.type=NodePort',
 			#'--set=service.type=LoadBalancer',
 			#'--set=gateway=default/entry-point-service',
-			#'--set=nginxGateway.gatewayControllerName=gateway.nginx.org/gateway-http',
-			#'--set=gateway-name=gateway.nginx.org/gateway-http',
+			#'--set=nginxGateway.gatewayControllerName=gateway.nginx.org/main-gateway',
+			#'--set=gateway-name=gateway.nginx.org/main-gateway',
 			#'--set=service.externalIPs={15.204.30.179}',
 		],
 	)
