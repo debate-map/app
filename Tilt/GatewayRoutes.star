@@ -19,7 +19,7 @@ def Start_GatewayRoutes(g):
 		{
 			"new_name": "app-routes", "labels": ["gateway"],
 			"objects": [
-				"gateway-http:gateway",
+				"nginx-gateway-controller:gateway",
 
 				# relating to certificate-provisioning
 				# "gateway-https:gateway",

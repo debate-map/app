@@ -6,8 +6,11 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - name: gateway-http
-    # - name: gateway-https
+    - {name: nginx-gateway-controller, sectionName: http}
+    - {name: nginx-gateway-controller, sectionName: https-d2}
+    - {name: nginx-gateway-controller, sectionName: https-d3}
+    - {name: nginx-gateway-controller, sectionName: https-d4}
+    - {name: nginx-gateway-controller, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
@@ -58,8 +61,11 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - name: gateway-http
-    # - name: gateway-https
+    - {name: nginx-gateway-controller, sectionName: http}
+    - {name: nginx-gateway-controller, sectionName: https-d2}
+    - {name: nginx-gateway-controller, sectionName: https-d3}
+    - {name: nginx-gateway-controller, sectionName: https-d4}
+    - {name: nginx-gateway-controller, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
@@ -88,8 +94,11 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - name: gateway-http
-    # - name: gateway-https
+    - {name: nginx-gateway-controller, sectionName: http}
+    - {name: nginx-gateway-controller, sectionName: https-d2}
+    - {name: nginx-gateway-controller, sectionName: https-d3}
+    - {name: nginx-gateway-controller, sectionName: https-d4}
+    - {name: nginx-gateway-controller, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
@@ -122,10 +131,11 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: gateway-http
-      namespace: default
-    # - name: gateway-https
-    #   namespace: default
+    - {name: nginx-gateway-controller, sectionName: http}
+    - {name: nginx-gateway-controller, sectionName: https-d2}
+    - {name: nginx-gateway-controller, sectionName: https-d3}
+    - {name: nginx-gateway-controller, sectionName: https-d4}
+    - {name: nginx-gateway-controller, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"

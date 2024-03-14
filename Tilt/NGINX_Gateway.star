@@ -21,14 +21,16 @@ def Start_NGINXGateway(g):
 			#'--set=service.type=NodePort',
 			#'--set=service.type=LoadBalancer',
 			#'--set=gateway=default/entry-point-service',
+			#'--set=nginxGateway.gatewayControllerName=gateway.nginx.org/gateway-http',
+			#'--set=gateway-name=gateway.nginx.org/gateway-http',
 			#'--set=service.externalIPs={15.204.30.179}',
 		],
 	)
 	NEXT_k8s_resource_batch(g, [
-		{"workload": "ngf", "labels": ["gateway"]},
 		{"workload": "gateway-api-admission", "labels": ["gateway"]},
 		{"workload": "gateway-api-admission-server", "labels": ["gateway"]},
 		{"workload": "gateway-api-admission-patch", "labels": ["gateway"]},
+		{"workload": "ngf", "labels": ["gateway"]},
 	])
 	#k8s_resource(workload='ngf', labels=["gateway"], port_forwards='80' if g["REMOTE"] else None)
 

@@ -111,6 +111,7 @@ const GetPodName_DB = context=>{
 };
 const GetPodName_WebServer = context=>GetPodInfos(context, appNamespace, ["app=dm-web-server"])[0].name;
 const GetPodName_AppServer = context=>GetPodInfos(context, appNamespace, ["app=dm-app-server"])[0].name;
+const GetPodName_NginxGatewayFabric = context=>GetPodInfos(context, "default", ["app.kubernetes.io/name=nginx-gateway-fabric"])[0].name;
 
 /** Gets the k8s context that is selected as the "current" one, in Docker Desktop. */
 function K8sContext_Current() {
@@ -326,6 +327,13 @@ Object.assign(scripts, {
 			const pathToKillScript = paths.resolve("./Scripts/KillKubeNS.sh");
 			const pathToKillScript_wsl = pathToKillScript.replace(/\\/g, "/").replace("C:/", "/mnt/c/");
 			return `wsl ${pathToKillScript_wsl} ${commandArgs.join(" ")}`;
+		}),
+
+		// nginx
+		ngGetConf: Dynamic(()=>{
+			const context = K8sContext_Arg_Required();
+			const str = execSync(`${KubeCTLCmd(context)} exec -ti -n ${appNamespace} ${GetPodName_NginxGatewayFabric(context)} -c nginx -- nginx -T`).toString().trim();
+			console.log("Str:", str);
 		}),
 
 		// dumps (ie. pg_dump backups)

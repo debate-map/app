@@ -28,7 +28,7 @@ spec:
         gatewayHTTPRoute:
           #serviceType: ClusterIP
           parentRefs:
-            - name: gateway-http
+            - name: nginx-gateway-controller
               namespace: default
               kind: Gateway
             # - name: gateway-https
