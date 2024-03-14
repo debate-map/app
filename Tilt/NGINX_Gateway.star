@@ -42,7 +42,17 @@ def Start_NGINXGateway(g):
 				break
 
 	k8s_yaml(ReadFileWithReplacements('../Packages/deploy/LoadBalancer/@Attempt7/entry_point_service.yaml', {
-		"TILT_PLACEHOLDER:port": "80" if g["REMOTE"] else "5100",
+		# The below is a comparison between using type:NodePort and type:LoadBalancer. (since both have been confirmed to work both locally and in OVH)
+		# Advantages of NodePort:
+		# 1) Slightly simpler mechanics.
+		# 2) Ensures than an (unneeded) external load-balancer resource isn't provisioned by the cloud-provider. (although OVH *seems* to avoid this, when an external-ip is provided)
+		# Advantages of LoadBalancer:
+		# 1) Works for a dev's local k8s cluster. (without needing to create a port-forward)
+		# 2) Matches with the type of service that (normally) would get created by nginx-gateway-fabric.
+		# For now, we've chosen to go with "type:LoadBalancer" for local, and "type:NodePort" for remote.
+		"TILT_PLACEHOLDER:service_type": "NodePort" if g["REMOTE"] else "LoadBalancer",
+		"TILT_PLACEHOLDER:http_port": "80" if g["REMOTE"] else "5100",
+		"TILT_PLACEHOLDER:https_port": "443" if g["REMOTE"] else "5443", # just placeholder
 		"TILT_PLACEHOLDER:externalIPs": "externalIPs" if bind_to_address else "externalIPs_disabled",
 		"TILT_PLACEHOLDER:bind_to_address": bind_to_address or '',
 	}))

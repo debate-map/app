@@ -13,23 +13,19 @@ metadata:
   #   meta.helm.sh/release-name: "release-test-1"
   #   meta.helm.sh/release-namespace: "default"
 spec:
-  # The below is a comparison between using type:NodePort and type:LoadBalancer. (since both have been confirmed to work both locally and in OVH)
-  # Advantages of NodePort:
-  # 1) Slightly simpler mechanics.
-  # 2) Ensures than an (unneeded) external load-balancer resource isn't provisioned by the cloud-provider. (although OVH *seems* to avoid this, when an external-ip is provided)
-  # Advantages of LoadBalancer:
-  # 1) Works for a dev's local k8s cluster. (without needing to create a port-forward)
-  # 2) Matches with the type of service that (normally) would get created by nginx-gateway-fabric.
-  # For now, we've chosen to go with "type:LoadBalancer". (mainly because of its advantage #1)
-  type: LoadBalancer
+  type: TILT_PLACEHOLDER:service_type
   selector:
     #app.kubernetes.io/name: nginx-gateway-fabric
     app.kubernetes.io/instance: ngf
   ports:
   - name: http
     protocol: TCP
-    port: TILT_PLACEHOLDER:port
+    port: TILT_PLACEHOLDER:http_port
     targetPort: 80
+  - name: https
+    protocol: TCP
+    port: TILT_PLACEHOLDER:https_port
+    targetPort: 8443
   "TILT_PLACEHOLDER:externalIPs":
     - TILT_PLACEHOLDER:bind_to_address
   ## The externalTrafficPolicy of the service. The value Local preserves the client source IP.
