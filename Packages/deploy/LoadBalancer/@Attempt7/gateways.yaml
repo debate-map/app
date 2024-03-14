@@ -17,8 +17,8 @@ kind: Gateway
 metadata:
   name: gateway-http
   namespace: default # test
-  annotations:
-   cert-manager.io/cluster-issuer: zerossl-issuer
+  # annotations:
+  #  cert-manager.io/cluster-issuer: zerossl-issuer
 spec:
   gatewayClassName: nginx
   # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
@@ -35,12 +35,29 @@ spec:
     allowedRoutes:
       namespaces:
         from: All
+
+# The HTTPS gateway. It's used for:
+# 1) Serving requests coming from debating.app. (which is the alternate domain that avoids the cloudflare-cdn, eg. to fully avoid the websocket-timeout concern)
+# 2) As backup for the ".app" domains, since they are required to be served as HTTPS. (if Cloudflare has issues, I want the origin server to be able to provide HTTPS connections)
+# temp-disabled, till traefik (and/or cert-manager) issue is resolved: https://github.com/traefik/traefik/issues/9158
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway-https
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: zerossl-issuer
+spec:
+  gatewayClassName: nginx
+  # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
+  listeners:
   # origin/ovh
-  - {name: https-d1, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1, kind: Secret, group: core}]}}
-  - {name: https-d2, hostname: debating.app,                   protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2, kind: Secret, group: core}]}}
-  - {name: https-d3, hostname: debatemap.app,                  protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d3, kind: Secret, group: core}]}}
-  - {name: https-d4, hostname: debates.app,                    protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d4, kind: Secret, group: core}]}}
-  - {name: https-d5, hostname: debatemap.societylibrary.org,   protocol: HTTPS, port: 8443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d5, kind: Secret, group: core}]}}
+  #- {name: https-d1, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1, kind: Secret, group: core}]}}
+  - {name: https-d2, hostname: debating.app,                   protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2, kind: Secret, group: core}]}}
+  - {name: https-d3, hostname: debatemap.app,                  protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d3, kind: Secret, group: core}]}}
+  - {name: https-d4, hostname: debates.app,                    protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d4, kind: Secret, group: core}]}}
+  - {name: https-d5, hostname: debatemap.societylibrary.org,   protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d5, kind: Secret, group: core}]}}
 
 
 # gateway for the "monitoring" namespace
