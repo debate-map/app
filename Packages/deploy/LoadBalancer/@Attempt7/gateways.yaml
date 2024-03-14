@@ -15,7 +15,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: nginx-gateway-controller
+  name: gateway-http
   namespace: default # test
   annotations:
    cert-manager.io/cluster-issuer: zerossl-issuer
@@ -37,11 +37,13 @@ spec:
     #   namespaces:
     #     from: All
   # origin/ovh
-  #- {name: https-d1, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1, kind: Secret, group: core}]}}
-  - {name: https-d2, hostname: debating.app,                   protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2, kind: Secret, group: core}]}}
-  - {name: https-d3, hostname: debatemap.app,                  protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d3, kind: Secret, group: core}]}}
-  - {name: https-d4, hostname: debates.app,                    protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d4, kind: Secret, group: core}]}}
-  - {name: https-d5, hostname: debatemap.societylibrary.org,   protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d5, kind: Secret, group: core}]}}
+  # todo: maybe switch to having these all part of the same certificate (just re-use the same cert name: https://cert-manager.io/v1.9-docs/usage/gateway/#two-listeners-with-the-same-secret-name)
+  # first entry commented, because zerossl doesn't support certs for hostnames with so many subdomain layers ("DNS identifier has too many labels")
+  #- {name: https-d1, hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d1, kind: Secret}]}}
+  - {name: https-d2, hostname: debating.app,                   protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d2, kind: Secret}]}}
+  - {name: https-d3, hostname: debatemap.app,                  protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d3, kind: Secret}]}}
+  - {name: https-d4, hostname: debates.app,                    protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d4, kind: Secret}]}}
+  - {name: https-d5, hostname: debatemap.societylibrary.org,   protocol: HTTPS, port: 443, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-d5, kind: Secret}]}}
 
 
 # gateway for the "monitoring" namespace

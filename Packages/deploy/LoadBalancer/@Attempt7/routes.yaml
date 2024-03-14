@@ -6,11 +6,11 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - {name: nginx-gateway-controller, sectionName: http}
-    - {name: nginx-gateway-controller, sectionName: https-d2}
-    - {name: nginx-gateway-controller, sectionName: https-d3}
-    - {name: nginx-gateway-controller, sectionName: https-d4}
-    - {name: nginx-gateway-controller, sectionName: https-d5}
+    - {name: gateway-http, sectionName: http}
+    - {name: gateway-http, sectionName: https-d2}
+    - {name: gateway-http, sectionName: https-d3}
+    - {name: gateway-http, sectionName: https-d4}
+    - {name: gateway-http, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
@@ -61,11 +61,11 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - {name: nginx-gateway-controller, sectionName: http}
-    - {name: nginx-gateway-controller, sectionName: https-d2}
-    - {name: nginx-gateway-controller, sectionName: https-d3}
-    - {name: nginx-gateway-controller, sectionName: https-d4}
-    - {name: nginx-gateway-controller, sectionName: https-d5}
+    - {name: gateway-http, sectionName: http}
+    - {name: gateway-http, sectionName: https-d2}
+    - {name: gateway-http, sectionName: https-d3}
+    - {name: gateway-http, sectionName: https-d4}
+    - {name: gateway-http, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
@@ -94,11 +94,11 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - {name: nginx-gateway-controller, sectionName: http}
-    - {name: nginx-gateway-controller, sectionName: https-d2}
-    - {name: nginx-gateway-controller, sectionName: https-d3}
-    - {name: nginx-gateway-controller, sectionName: https-d4}
-    - {name: nginx-gateway-controller, sectionName: https-d5}
+    - {name: gateway-http, sectionName: http}
+    - {name: gateway-http, sectionName: https-d2}
+    - {name: gateway-http, sectionName: https-d3}
+    - {name: gateway-http, sectionName: https-d4}
+    - {name: gateway-http, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
@@ -131,11 +131,11 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - {name: nginx-gateway-controller, sectionName: http}
-    - {name: nginx-gateway-controller, sectionName: https-d2}
-    - {name: nginx-gateway-controller, sectionName: https-d3}
-    - {name: nginx-gateway-controller, sectionName: https-d4}
-    - {name: nginx-gateway-controller, sectionName: https-d5}
+    - {name: gateway-http, sectionName: http}
+    - {name: gateway-http, sectionName: https-d2}
+    - {name: gateway-http, sectionName: https-d3}
+    - {name: gateway-http, sectionName: https-d4}
+    - {name: gateway-http, sectionName: https-d5}
   hostnames:
   - "localhost"
   - "debatemap.societylibrary.org"
