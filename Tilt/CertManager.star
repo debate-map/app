@@ -29,6 +29,20 @@ def Start_CertManager(g):
 		)
 
 		NEXT_k8s_resource_batch(g, [
+			{
+				"new_name": "cert-manager-crds", "labels": ["cert-manager"],
+				"objects": [
+					"certificaterequests.cert-manager.io:customresourcedefinition",
+					"certificates.cert-manager.io:customresourcedefinition",
+					"challenges.acme.cert-manager.io:customresourcedefinition",
+					"clusterissuers.cert-manager.io:customresourcedefinition",
+					"issuers.cert-manager.io:customresourcedefinition",
+					"orders.acme.cert-manager.io:customresourcedefinition",
+				],
+			}
+		]);
+
+		NEXT_k8s_resource_batch(g, [
 			{"new_name": "cert-manager-namespace", "labels": ["cert-manager"], "objects": ["cert-manager:Namespace:default"]},
 			{"workload": "cert-manager", "labels": ["cert-manager"]},
 			{"workload": "cert-manager-cainjector", "labels": ["cert-manager"]},
@@ -40,7 +54,7 @@ def Start_CertManager(g):
 					"cert-manager-cainjector:ServiceAccount:cert-manager",
 					"cert-manager:ServiceAccount:cert-manager",
 					"cert-manager-webhook:ServiceAccount:cert-manager",
-					#"cert-manager-webhook:ConfigMap:cert-manager",
+					#"cert-manager-webhook:ConfigMap:cert-manager", # commented; this resource is only created in certain cases
 					"cert-manager-cainjector:ClusterRole:cert-manager",
 					"cert-manager-controller-issuers:ClusterRole:cert-manager",
 					"cert-manager-controller-clusterissuers:ClusterRole:cert-manager",
@@ -74,7 +88,7 @@ def Start_CertManager(g):
 					"cert-manager-startupapicheck:ServiceAccount:cert-manager",
 					"cert-manager-startupapicheck\\:create-cert:Role:cert-manager",
 					"cert-manager-startupapicheck\\:create-cert:RoleBinding:cert-manager",
-					#"zerossl-eab:Secret:cert-manager",
+					"cert-manager-cluster-view:clusterrole",
 				],
 			},
 		])
@@ -83,10 +97,6 @@ def Start_CertManager(g):
 			"TILT_PLACEHOLDER:eab_hmacKey": os.getenv("EAB_HMAC_KEY"),
 			"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
 		}))
-		# NEXT_k8s_resource_batch(g, [
-		# 	{"workload": "zerossl-issuer", "labels": ["cert-manager"]},
-		# ])
-
 		NEXT_k8s_resource(g, new_name="zerossl-issuer", labels=["cert-manager"],
 			objects=[
 				"zerossl-eab:secret",

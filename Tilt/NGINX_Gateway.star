@@ -30,9 +30,8 @@ def Start_NGINXGateway(g):
 		{"workload": "gateway-api-admission", "labels": ["gateway"]},
 		{"workload": "gateway-api-admission-server", "labels": ["gateway"]},
 		{"workload": "gateway-api-admission-patch", "labels": ["gateway"]},
-		{"workload": "ngf", "labels": ["gateway"]},
 	])
-	#k8s_resource(workload='ngf', labels=["gateway"], port_forwards='80' if g["REMOTE"] else None)
+	NEXT_k8s_resource_batch(g, [{"workload": "ngf", "labels": ["gateway"]}])
 
 	bind_to_address = None
 	cluster_data = decode_yaml(local("kubectl get node -A -o yaml --context %s " % (g["CONTEXT"]), quiet = True))

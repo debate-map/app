@@ -60,12 +60,6 @@ def Start_Gateway_Base(g):
 				"gateways.gateway.networking.k8s.io:customresourcedefinition",
 				"httproutes.gateway.networking.k8s.io:customresourcedefinition",
 				"referencegrants.gateway.networking.k8s.io:customresourcedefinition",
-
-				# these objects commented during update of gateway-api crds from 0.4.3 to 0.7.0
-				# "referencepolicies.gateway.networking.k8s.io:customresourcedefinition",
-				# "tcproutes.gateway.networking.k8s.io:customresourcedefinition",
-				# "tlsroutes.gateway.networking.k8s.io:customresourcedefinition",
-				# "udproutes.gateway.networking.k8s.io:customresourcedefinition",
 			],
 		},
 	])
@@ -78,6 +72,7 @@ def Start_Gateway_Base(g):
 				"gateway-api-admission:role",
 				"gateway-api-admission:clusterrole",
 				"gateway-api-admission:rolebinding",
+				"gateway-api-admission:clusterrolebinding",
 				"gateway-api-admission:validatingwebhookconfiguration",
 			],
 		},
