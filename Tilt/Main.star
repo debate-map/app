@@ -95,7 +95,7 @@ g = {
 # ==========
 
 if ENV not in ("dev", "prod"):
-	fail("Invalid ENVIRONMENT env-var value (must be \"dev\" or \"prod\"):" + ENV)
+	fail("Invalid ENVIRONMENT env-var value (must be \"dev\" or \"prod\"): " + ENV)
 
 # if deploying to prod, check some of the values from the ".env" file to see if they appear valid
 if PROD:

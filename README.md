@@ -663,6 +663,7 @@ Authorized JavaScript Origins:
 * https://CLUSTER_IP_IN_CLOUD
 * https://debatemap.app
 * https://debates.app
+* https://debatemap.societylibrary.org
 
 Authorized redirect URIs:
 * http://localhost:5100/app-server/auth/google/callback
@@ -670,8 +671,8 @@ Authorized redirect URIs:
 * https://CLUSTER_IP_IN_CLOUD/app-server/auth/google/callback
 * https://debatemap.app/app-server/auth/google/callback
 * https://debates.app/app-server/auth/google/callback
+* https://debatemap.societylibrary.org/app-server/auth/google/callback
 * https://debatemap.app/app-server/auth/google/callback_returnToLocalhost
-* https://debates.app/app-server/auth/google/callback_returnToLocalhost
 ```
 <!-- The list above is somewhat "inconsistent" between domains/callback-types. Should decide on what pattern to use. -->
 
