@@ -56,6 +56,8 @@ ENV = os.getenv("ENVIRONMENT")
 DEV = ENV == "dev"
 PROD = ENV == "prod"
 print("Env:", ENV)
+if not (DEV or PROD):
+	fail("Invalid ENVIRONMENT env-var value (must be \"dev\" or \"prod\"):" + ENV)
 
 CONTEXT = os.getenv("CONTEXT")
 REMOTE = CONTEXT not in ("local", "docker-desktop")
