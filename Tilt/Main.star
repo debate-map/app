@@ -59,6 +59,13 @@ print("Env:", ENV)
 if not (DEV or PROD):
 	fail("Invalid ENVIRONMENT env-var value (must be \"dev\" or \"prod\"):" + ENV)
 
+# if deploying to prod, check some of the values from the ".env" file to see if they appear valid
+if PROD:
+	if len(os.getenv("CLIENT_ID", "")) < 60:
+		fail("Invalid CLIENT_ID env-var value (should be at least 60 chars long): " + os.getenv("CLIENT_ID"))
+	if len(os.getenv("CLIENT_SECRET", "")) < 20:
+		fail("Invalid CLIENT_SECRET env-var value (should be at least 20 chars long): " + os.getenv("CLIENT_SECRET"))
+
 CONTEXT = os.getenv("CONTEXT")
 REMOTE = CONTEXT not in ("local", "docker-desktop")
 print("Context:", CONTEXT, "Remote:", REMOTE)
