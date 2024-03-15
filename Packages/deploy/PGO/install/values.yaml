@@ -1,42 +1,39 @@
 ---
-# controllerImages are used to run the PostgresCluster and PGUpgrade controllers.
+# controllerImages are used to run the operator's controllers.
+# The cluster image defined below runs the PostgresCluster and PGUpgrade controllers.
 controllerImages:
-  cluster: registry.developers.crunchydata.com/crunchydata/postgres-operator:ubi8-5.3.0-0
-  upgrade: registry.developers.crunchydata.com/crunchydata/postgres-operator-upgrade:ubi8-5.3.0-0
+  cluster: registry.developers.crunchydata.com/crunchydata/postgres-operator:ubi8-5.4.3-0
 
 # relatedImages are used when an image is omitted from PostgresCluster or PGUpgrade specs.
 relatedImages:
+  postgres_16:
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-16.0-0
+  postgres_16_gis_3.4:
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-16.0-3.4-0
+  postgres_16_gis_3.3:
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-16.0-3.3-0
   postgres_15:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0
-    # using the mirror in the private-registry (not yet working in prod, since need to provide auth-data to the pg-operator, eg.: https://access.crunchydata.com/documentation/postgres-operator/5.3.1/guides/private-registries)
-    #image: gcr.io/debate-map-prod/crunchy-postgres:ubi8-15.1-0
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.4-1
   postgres_15_gis_3.3:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-15.1-3.3-0
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-15.4-3.3-1
   postgres_14:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.6-2
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.9-1
   postgres_14_gis_3.1:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-14.6-3.1-2
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-14.9-3.1-1
   postgres_14_gis_3.2:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-14.6-3.2-2
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-14.9-3.2-1
   postgres_14_gis_3.3:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-14.6-3.3-2
-  postgres_13:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-13.9-2
-    #image: crunchydata/crunchy-postgres:centos8-13.6-4.7.5
-  postgres_13_gis_3.0:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-13.9-3.0-2
-  postgres_13_gis_3.1:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-13.9-3.1-2
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi8-14.9-3.3-1
   pgadmin:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-8
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgadmin4:ubi8-4.30-18
   pgbackrest:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.47-1
   pgbouncer:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbouncer:ubi8-1.17-5
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbouncer:ubi8-1.19-5
   pgexporter:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-exporter:ubi8-5.3.0-0
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-exporter:ubi8-5.4.3-0
   pgupgrade:
-    image: registry.developers.crunchydata.com/crunchydata/crunchy-upgrade:ubi8-5.3.0-0
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-upgrade:ubi8-5.4.3-0
 
 # singleNamespace controls where PGO watches for PostgresClusters. When false,
 # PGO watches for and responds to PostgresClusters in all namespaces. When true,
@@ -53,4 +50,9 @@ imagePullSecretNames: []
 # Resource configuration of the PostgresCluster and PGUpgrade controllers.
 resources:
   controller: {}
-  upgrade: {}
+
+# Define custom labels for PGO pods
+# Note: Defining labels that overlap with any Crunchy Data label, for example,
+# postgres-operator.crunchydata.com, will cause an error
+# customPodLabels:
+#  example.com: custom-label
