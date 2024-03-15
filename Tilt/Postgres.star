@@ -18,13 +18,13 @@ def Start_Postgres(g):
 	CreateNamespace(g, k8s_yaml, "postgres-operator")
 
 	#print("bucket_uniformPrivate_url:", bucket_uniformPrivate_url)
-
+	install_values = decode_yaml(read_file("../Packages/deploy/PGO/install/values.yaml"))
 	# temp: before deploying the postgres-resources, run "docker pull X" for the large postgres images
 	# ----------
 	# (fix for bug in Kubernetes 1.24.2-1.25.0-? where in-container image-pulls that take longer than 2m get interrupted/timed-out: https://github.com/docker/for-mac/issues/6300#issuecomment-1324044788)
-	local_resource("pre-pull-large-image-1", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-2")
+	local_resource("pre-pull-large-image-1", "docker pull %s" % (install_values["relatedImages"]["pgbackrest"]["image"],))
 	#local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-13.9-2")
-	local_resource("pre-pull-large-image-2", "docker pull registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-15.1-0")
+	local_resource("pre-pull-large-image-2", "docker pull %s" % (install_values["relatedImages"]["postgres_15"]["image"],))
 	#local_resource("pre-pull-large-image-2", "docker pull gcr.io/debate-map-prod/crunchy-postgres:ubi8-15.1-0")
 	# ----------
 
@@ -114,13 +114,6 @@ def Start_Postgres(g):
 		},
 		{"workload": "pgo", "labels": ["database"]},
 	])
-	NEXT_k8s_resource(g, 'pgo-upgrade', labels=["database"],
-		objects=[
-			"pgo-upgrade:serviceaccount",
-			"pgo-upgrade:clusterrole",
-       	"pgo-upgrade:clusterrolebinding",
-		],
-	)
 	# this is in separate group, so pod_readiness="ignore" only applies to it
 	NEXT_k8s_resource(g, new_name='pgo_late', labels=["database"],
 		#objects=["pgo-gcs-creds:secret"],
