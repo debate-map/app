@@ -1,9 +1,13 @@
 # tilt config
 # ==========
 
+recognizedLocalContexts = ["dm-local", "docker-desktop"]
+recognizedRemoteContexts = ["dm-ovh", "ovh-debatemap"]
+recognizedContexts = recognizedLocalContexts + recognizedRemoteContexts
+
 # allow using tilt to also push to the remote OVHcloud k8s cluster
-allow_k8s_contexts('ovh')
-allow_k8s_contexts('ovh-debatemap')
+for context in recognizedRemoteContexts:
+	allow_k8s_contexts(context)
 
 # tilt config settings
 # For now, we just completely disable tilt's docker-prune behavior (doing so fixes issue #169); there might be a better solution, but this is fine for now.
@@ -26,8 +30,6 @@ load('ext://helm_resource', 'helm_resource', 'helm_repo')
 # load modified version of helm_remote (with better caching, for faster tilt startup @before:34.4s,17.7s,19s @after:10.5s,10.4,12.3s,10.6s)
 #load('ext://helm_remote', 'helm_remote')
 load('./@Extensions/helm_remote.star', 'helm_remote')
-
-
 
 # custom tilt files
 load('./Utils.star', 'ReplaceInBlob', 'ReadFileWithReplacements', 'ModifyLineRange', 'Base64Encode', 'GetDateTime')
@@ -59,7 +61,7 @@ PROD = ENV == "prod"
 print("Env:", ENV)
 
 CONTEXT = os.getenv("CONTEXT")
-REMOTE = CONTEXT not in ("local", "docker-desktop")
+REMOTE = CONTEXT not in recognizedLocalContexts
 print("Context:", CONTEXT, "Remote:", REMOTE)
 
 pulumiOutput = decode_json(str(read_file("../PulumiOutput_Public.json")))
@@ -96,7 +98,11 @@ g = {
 # ==========
 
 if ENV not in ("dev", "prod"):
-	fail("Invalid ENVIRONMENT env-var value (must be \"dev\" or \"prod\"): " + ENV)
+	fail("Invalid ENVIRONMENT env-var value: " + ENV + ' (must be "dev" or "prod")')
+
+if (CONTEXT not in recognizedLocalContexts) and (CONTEXT not in recognizedRemoteContexts):
+	contextNames_quoted = '"' + '", "'.join(recognizedContexts) + '"'
+	fail("Invalid CONTEXT env-var value: " + ENV + " (must be one of " + contextNames_quoted + ")")
 
 # if deploying to prod, check some of the values from the ".env" file to see if they appear valid
 if PROD:

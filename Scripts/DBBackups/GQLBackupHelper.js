@@ -12,7 +12,7 @@ program
 	.option("--backupFolder <>", `Path to folder where the db dump/backup should be placed. (path is relative to repo root, which is "<this-folder>/../../")`)
 	.action(async command=>{
 		const {dev, backupFolder} = command;
-		const backupFolder_final_relToRepoRoot = backupFolder ?? `../Others/@Backups/DBDumps_${dev ? "local" : "ovh"}/`;
+		const backupFolder_final_relToRepoRoot = backupFolder ?? `../Others/@Backups/DBDumps_${dev ? "dm-local" : "dm-ovh"}/`;
 
 		const fetch = (await import("node-fetch")).default;
 		try {

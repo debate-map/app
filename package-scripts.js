@@ -251,7 +251,7 @@ Object.assign(scripts, {
 });
 
 function GetPortForwardCommandsStr(context) {
-	const d2 = context == "ovh" ? "2" : "1"; // second-digit of port-numbers (signifying cluster)
+	const d2 = context == "dm-ovh" ? "2" : "1"; // second-digit of port-numbers (signifying cluster)
 	const forDB = `${KubeCTLCmd(context)} -n postgres-operator port-forward ${GetPodName_DB(context)} 5${d2}20:5432`;
 	if (commandArgs.includes("onlyDB")) return forDB;
 
@@ -264,7 +264,7 @@ function GetPortForwardCommandsStr(context) {
 }
 
 function RunTiltUp_ForSpecificPod(podName, port, tiltfileArgsStr) {
-	let command = `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt up ${podName} --stream      -f ./Tilt/Main.star --context ovh --port ${port}`;
+	let command = `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt up ${podName} --stream      -f ./Tilt/Main.star --context dm-ovh --port ${port}`;
 	if (tiltfileArgsStr) command += ` -- ${tiltfileArgsStr}`;
 	//const command_parts = command.split(" ");
 	const commandProcess = spawn("cmd", ["/c", command]);
@@ -295,10 +295,10 @@ Object.assign(scripts, {
 
 		// port-forwarding (standalone; without tilt)
 		forward_local: Dynamic(()=>{
-			return GetPortForwardCommandsStr("local");
+			return GetPortForwardCommandsStr("dm-local");
 		}),
 		forward_remote: Dynamic(()=>{
-			return GetPortForwardCommandsStr("ovh");
+			return GetPortForwardCommandsStr("dm-ovh");
 		}),
 		/*k8s_proxyOn8081: Dynamic(()=>{
 			console.log("Test");
@@ -306,13 +306,13 @@ Object.assign(scripts, {
 		}),*/
 
 		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
-		tiltUp_local:              `${PrepDockerCmd()} ${SetTileEnvCmd(false, "local")}          tilt up   -f ./Tilt/Main.star --context local`,
-		tiltDown_local:            `${PrepDockerCmd()} ${SetTileEnvCmd(false, "local")}          tilt down -f ./Tilt/Main.star --context local`,
-		tiltUp_docker:             `${PrepDockerCmd()} ${SetTileEnvCmd(false, "docker-desktop")} tilt up   -f ./Tilt/Main.star --context docker-desktop`,
-		tiltUp_k3d:                `${PrepDockerCmd()} ${SetTileEnvCmd(false, "k3d-main-1")}     tilt up   -f ./Tilt/Main.star --context k3d-main-1`,
-		tiltUp_kind:               `${PrepDockerCmd()} ${SetTileEnvCmd(false, "kind-main-1")}    tilt up   -f ./Tilt/Main.star --context kind-main-1`,
-		tiltUp_ovh:                `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt up   -f ./Tilt/Main.star --context ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
-		tiltDown_ovh:              `${PrepDockerCmd()} ${SetTileEnvCmd(true, "ovh")}             tilt down -f ./Tilt/Main.star --context ovh`,
+		tiltUp_local:              `${PrepDockerCmd()} ${SetTileEnvCmd(false, "dm-local")}          tilt up   -f ./Tilt/Main.star --context dm-local`,
+		tiltDown_local:            `${PrepDockerCmd()} ${SetTileEnvCmd(false, "dm-local")}          tilt down -f ./Tilt/Main.star --context dm-local`,
+		tiltUp_docker:             `${PrepDockerCmd()} ${SetTileEnvCmd(false, "docker-desktop")}    tilt up   -f ./Tilt/Main.star --context docker-desktop`,
+		tiltUp_k3d:                `${PrepDockerCmd()} ${SetTileEnvCmd(false, "k3d-main-1")}        tilt up   -f ./Tilt/Main.star --context k3d-main-1`,
+		tiltUp_kind:               `${PrepDockerCmd()} ${SetTileEnvCmd(false, "kind-main-1")}       tilt up   -f ./Tilt/Main.star --context kind-main-1`,
+		tiltUp_ovh:                `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt up   -f ./Tilt/Main.star --context dm-ovh --port 10351`, // tilt-port +1, so can coexist with tilt dev-instance
+		tiltDown_ovh:              `${PrepDockerCmd()} ${SetTileEnvCmd(true, "dm-ovh")}             tilt down -f ./Tilt/Main.star --context dm-ovh`,
 		// these are pod-specific tilt-up commands, for when you want to only update a single pod (well technically, that one pod plus all its dependencies, currently -- but still useful to avoid updating other 1st-party pods)
 		tiltUp_ovh_webServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-web-server", 10361)), // tilt-port +(10+1), as targeted tilt-up #1
 		tiltUp_ovh_appServer:          Dynamic(()=>RunTiltUp_ForSpecificPod("dm-app-server", 10362)), // tilt-port +(10+2), as targeted tilt-up #2
@@ -486,8 +486,8 @@ function ImportPGUserSecretAsEnvVars(context) {
 		DB_ADDR: "localhost",
 		//DB_PORT: secret.GetField("port"),
 		DB_PORT:
-			context == "ovh" ? 5220 :
-			context == "local" ? 5120 :
+			context == "dm-ovh" ? 5220 :
+			context == "dm-local" ? 5120 :
 			null,
 		DB_DATABASE: secret.GetField("dbname"),
 		DB_USER: secret.GetField("user"),
@@ -517,7 +517,7 @@ function StartPSQLInK8s(context, database = "debate-map", spawnOptions = null) {
 	const secret = GetK8sPGUserAdminSecretData(context);
 	//console.log("Got psql secret:", secret, "@password:", secret.GetField("password").toString());
 
-	const argsStr = `-h localhost -p ${context == "ovh" ? 5220 : 5120} -U admin -d ${database}`;
+	const argsStr = `-h localhost -p ${context == "dm-ovh" ? 5220 : 5120} -U admin -d ${database}`;
 
 	const env = {
 		//...process.env,

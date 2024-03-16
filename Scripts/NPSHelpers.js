@@ -87,7 +87,7 @@ exports.FindPackagePath = (packageName, asAbsolute = true)=>{
 };
 
 //console.log("Argv:", process.argv);
-// process.argv example: ["XXX/node.exe", "XXX/nps.js", "app-server.initDB_k8s ovh"]
+// process.argv example: ["XXX/node.exe", "XXX/nps.js", "app-server.initDB_k8s dm-ovh"]
 const commandNameAndArgs = process.argv[2];
 const argsStr_start = commandNameAndArgs.includes(" ") ? commandNameAndArgs.indexOf(" ") : null;
 exports.commandName = argsStr_start != null ? commandNameAndArgs.slice(0, argsStr_start) : commandNameAndArgs;

@@ -617,13 +617,13 @@ Note: We use OVHCloud's Public Cloud servers here, but others could be used.
 	* 2.1\) In the "node pool" step, select "1". (Debate Map does not currently need more than one node)  
 	* 2.2\) In the "node type" step, select an option. (cheapest is Discovery d2-4 at ~$12/mo, but I use d2-8 at ~$22/mo to avoid occasional OOM issues)
 * 3\) Run the commands needed to integrate the kubeconfig file into your local kube config.
-* 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "ovh". (open `$HOME/.kube/config`, copy the aforementioned context section, then change the copy's name to `ovh`)
+* 4\) Create an alias/copy of the "kubernetes-admin@Main_1" k8s context, renaming it to "dm-ovh". (open `$HOME/.kube/config`, copy the aforementioned context section, then change the copy's name to `dm-ovh`)
 * 5\) Add your Docker authentication data to your OVH Kubernetes cluster.
 	* 5.1\) Ensure that your credentials are loaded, in plain text, in your docker `config.json` file. By default, Docker Desktop does not do this! So most likely, you will need to:
 		* 5.1.1\) Disable the credential-helper, by opening `$HOME/.docker/config.json`, and setting the `credsStore` field to **an empty string** (ie. `""`).
 		* 5.1.2\) Log in to your image registry again. (ie. rerun step 3.5 of [cloud-project-init](#cloud-project-init))
-		* 5.1.3\) Submit the credentials to OVH: `kubectl --context ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
-	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context ovh get --namespace default -o json secret registry-credentials` (currently we are pushing the secret to the `default` namespace, as that's where the `web-server` and `app-server` pods currently are; if these pods are moved to another namespace, adjust this line accordingly)
+		* 5.1.3\) Submit the credentials to OVH: `kubectl --context dm-ovh create secret --namespace app generic registry-credentials --from-file=.dockerconfigjson=PATH_TO_DOCKER_CONFIG --type=kubernetes.io/dockerconfigjson` (the default path to the docker-config is `$HOME/.docker/config.json`, eg. `C:/Users/YOUR_USERNAME/.docker/config.json`)
+	* 5.1\) You can verify that the credential-data was uploaded properly, using: `kubectl --context dm-ovh get --namespace default -o json secret registry-credentials` (currently we are pushing the secret to the `default` namespace, as that's where the `web-server` and `app-server` pods currently are; if these pods are moved to another namespace, adjust this line accordingly)
 
 </details>
 
@@ -714,13 +714,13 @@ For database pod:
 <details><summary><b>[k8s-psql] How to connect to postgres in your kubernetes cluster, using psql</b></summary>
 
 Approach 1: (by ssh'ing directly in the k8s pod)
-* 1\) Run: `npm start "ssh.db [local/ovh]"`
+* 1\) Run: `npm start "ssh.db [dm-local/dm-ovh]"`
 * 2\) Run (in vm shell that opens): `psql`
 * 3\) The shell should now have you logged in as the `postgres` user.
 
 Approach 2: (by using external psql with port-forwarding; requires that PostgreSQL be installed on your host computer)
 * 1\) Set up a port-forward from `localhost:[5120/5220]` to your k8s database pod. (see: [port-forwarding](#port-forwarding))
-* 2\) Run: `npm start "db.psql_k8s [local/ovh]"`
+* 2\) Run: `npm start "db.psql_k8s [dm-local/dm-ovh]"`
 * 3\) The shell should now have you logged in as the `admin` user.
 
 </details>
@@ -754,9 +754,9 @@ New steps:
 	* 5.1\) Open the (locally-served) new frontend's code, connecting to the draft database (by adding the `?db=prod-draft` flag to the url -- not yet implemented), and confirm that things work correctly.
 	* 5.2\) You could also connect to the draft database using a tool like DBeaver, and confirm that the contents look correct there.
 * 6\) Demote the main `debate-map` database. (ie. renaming it to `debate-map-old-XXX`)
-	* 6.1\) Run: `npm start "db.demoteDebateMapDB_k8s ovh"`
+	* 6.1\) Run: `npm start "db.demoteDebateMapDB_k8s dm-ovh"`
 * 7\) Promote the draft `debate-map-draft` database. (ie. renaming it to `debate-map`)
-	* 7.1\) Run: `npm start "db.promoteDebateMapDraftDB_k8s ovh"` [not yet implemented]
+	* 7.1\) Run: `npm start "db.promoteDebateMapDraftDB_k8s dm-ovh"` [not yet implemented]
 * 8\) Disable the `dbReadOnly` flag in the `globalData` table. (see step 2)
 
 </details>
@@ -776,7 +776,7 @@ Prerequisite steps: [pulumi-init](#pulumi-init), [ovh-init](#ovh-init)
 * 2\) Run: `npm start backend.tiltUp_ovh`
 * 3\) Wait till Tilt has finished deploying everything to your local k8s cluster. (to monitor, press space to open the Tilt web-ui, or `s` for an in-terminal display)
 * 4\) Verify that the deployment was successful, by visiting the web-server: `http://CLUSTER_URL:5200`. (replace `CLUSTER_URL` with the url listed in the OVH control panel)
-* 5\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `local` context listed in the commands with `ovh`.
+* 5\) If you haven't yet, initialize the DB, by following the steps in [reset-db-local](#reset-db-local) -- except replacing the `dm-local` context listed in the commands with `dm-ovh`.
 * 6\) You should now be able to sign in, on the web-server page above. The first user that signs in is assumed to be one of the owner/developer, and thus granted admin permissions.
 
 > For additional notes on using Tilt, see here: [tilt-notes](#tilt-notes)
