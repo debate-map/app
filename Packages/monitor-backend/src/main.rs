@@ -206,7 +206,7 @@ async fn main() {
 
 async fn handler(req: Request<AxumBody>) -> Result<axum::response::Response<AxumBody>, (StatusCode, String)> {
     let uri = req.uri();
-    info!("BaseURI:{}", uri);
+    //info!("BaseURI:{}", uri);
     let (scheme, authority, path, _query) = {
         let temp = uri.clone().into_parts();
         let scheme = "https"; //temp.scheme.map_or("".to_owned(), |a| a.to_string());
@@ -242,7 +242,7 @@ async fn handler(req: Request<AxumBody>) -> Result<axum::response::Response<Axum
 }
 
 async fn get_static_file(uri: Uri) -> Result<Response<AxumBody>, (StatusCode, String)> {
-    println!("URI:{}", uri);
+    //println!("URI:{}", uri);
     let req = Request::builder().uri(uri).body(Full::new(Bytes::new())).unwrap();
     let root_resolve_folder = "../monitor-client";
 
