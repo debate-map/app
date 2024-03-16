@@ -49,7 +49,7 @@ export class LogsUI_Stored extends BaseComponent<{}, {}> {
 					<Row center>
 						<Button ml={5} text="Refresh" onClick={async()=>{
 							//await fetch("http://localhost:3000/api/datasources/proxy/1/loki/api/v1/query_range?direction=BACKWARD&limit=1000&query=%7Bapp%3D%22dm-app-server%22%7D&start=1673399447849000000&end=1673485847849000000&step=30");
-							const graphqlEndpoint = GetServerURL("monitor", "/graphql", window.location.href);
+							const graphqlEndpoint = GetServerURL("monitor", "/graphql", {restrictToRecognizedHosts: true, claimedClientURL: window.location.href});
 							const response = await fetch(graphqlEndpoint, {
 								method: "POST",
 								body: JSON.stringify({

@@ -1,6 +1,6 @@
 # Debate Map (package: monitor-client)
 
-Frontend code for `monitor.debatemap.app`; see [monitor-backend](https://github.com/debate-map/app/tree/main/Packages/monitor-backend) for more info.
+Frontend code for `debatemap.app/monitor`; see [monitor-backend](https://github.com/debate-map/app/tree/main/Packages/monitor-backend) for more info.
 
 ## Guide modules
 

@@ -15,7 +15,7 @@ export class AlertManagerUI extends BaseComponent<{}, {}> {
 		return (
 			<Column style={{flex: 1, height: "100%"}}>
 				<CookieTransferHelper adminKey={adminKey}>
-					<iframe src={GetServerURL("monitor", `/proxy/alertmanager`, window.location.href)} style={{height: "100%"}}/>
+					<iframe src={GetServerURL("monitor", `/proxy/alertmanager`, {restrictToRecognizedHosts: true, claimedClientURL: window.location.href})} style={{height: "100%"}}/>
 				</CookieTransferHelper>
 			</Column>
 		);

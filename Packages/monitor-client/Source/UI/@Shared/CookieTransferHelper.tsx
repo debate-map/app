@@ -11,7 +11,7 @@ export class CookieTransferHelper extends BaseComponent<{adminKey: string}, {}> 
 	render() {
 		const {adminKey, children} = this.props;
 
-		const iframeExampleURL = GetServerURL("monitor", `/example-path`, window.location.href);
+		const iframeExampleURL = GetServerURL("monitor", `/example-path`, {restrictToRecognizedHosts: true, claimedClientURL: window.location.href});
 		const canSetCookieDirectly = window.location.origin == new URL(iframeExampleURL).origin;
 		const canUseCookieHelper = window.location.origin == "http://localhost:5131";
 
@@ -26,7 +26,7 @@ export class CookieTransferHelper extends BaseComponent<{adminKey: string}, {}> 
 		return (
 			<>
 				{!cookieSet && canUseCookieHelper &&
-				<iframe src={GetServerURL("monitor", `/storeAdminKeyCookie`, window.location.href)} style={{height: "100%"}} ref={iframeEl=>{
+				<iframe src={GetServerURL("monitor", `/storeAdminKeyCookie`, {restrictToRecognizedHosts: true, claimedClientURL: window.location.href})} style={{height: "100%"}} ref={iframeEl=>{
 					if (iframeEl) {
 						AssertWarn(messageListenerForIframe == null);
 						messageListenerForIframe = e=>{

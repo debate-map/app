@@ -37,7 +37,7 @@ export class GrafanaUI extends BaseComponent<{}, {}> {
 						<CheckBox ml={5} text="Show" value={showPassword} onChange={val=>setShowPassword(val)}/>
 					</Row>
 				</div>
-				<iframe src={GetServerURL("grafana", "/", window.location.href)} style={{height: "100%"}}/>
+				<iframe src={GetServerURL("grafana", "/", {restrictToRecognizedHosts: true, claimedClientURL: window.location.href})} style={{height: "100%"}}/>
 			</Column>
 		);
 	}

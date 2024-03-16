@@ -1,4 +1,4 @@
-use rust_shared::{anyhow::{bail, ensure}, axum::{self, extract::Extension, middleware::Next, response::{self, IntoResponse, Response}}, tokio::net::TcpListener, tower_http::{self, cors::AllowOrigin, trace::TraceLayer}, utils::general::k8s_env};
+use rust_shared::{anyhow::{bail, ensure}, axum::{self, extract::{ConnectInfo, Extension}, middleware::Next, response::{self, IntoResponse, Response}}, http_body_util::Full, tokio::net::TcpListener, tower_http::{self, cors::AllowOrigin, trace::TraceLayer}, utils::general::k8s_env};
 use rust_shared::hyper::{Request, Method};
 use axum::{
     response::{Html},
@@ -17,7 +17,7 @@ use std::{
 use tracing::{info, error};
 use tracing_subscriber::{self, Layer};
 
-use crate::{store::{storage::{AppState, AppStateArc}}, utils::{axum_logging_layer::print_request_response, db::accessors::AccessorContext, general::data_anchor::DataAnchorFor1}, links::{monitor_backend_link::{monitor_backend_link_handle_ws_upgrade}, pgclient}, db::general::{sign_in, sign_in_::jwt_utils::resolve_jwt_to_user_info, backups::try_get_db_dump}, globals::{set_up_globals, GLOBAL}, gql::{self, get_gql_data_from_http_request}};
+use crate::{db::general::{backups::try_get_db_dump, sign_in, sign_in_::jwt_utils::resolve_jwt_to_user_info}, globals::{set_up_globals, GLOBAL}, gql::{self, get_gql_data_from_http_request}, links::{monitor_backend_link::{is_addr_from_pod, monitor_backend_link_handle_ws_upgrade, http_response_of_bad_gateway_for_non_pod_caller}, pgclient}, store::storage::{AppState, AppStateArc}, utils::{axum_logging_layer::print_request_response, db::accessors::AccessorContext, general::data_anchor::DataAnchorFor1}};
 
 pub fn get_cors_layer() -> CorsLayer {
     // ref: https://docs.rs/tower-http/latest/tower_http/cors/index.html
@@ -54,14 +54,19 @@ pub async fn start_router(app_state: AppStateArc) {
             "#)
         }))
         // for better or worse, these endpoints are currently only accessible from within the cluster (till the url-rewrites in routes.yaml work)
-        .route("/basic-info", get(|| async {
+        .route("/app-server/basic-info", get(|ConnectInfo(addr): ConnectInfo<SocketAddr>| async move {
+            if !is_addr_from_pod(&addr) { return http_response_of_bad_gateway_for_non_pod_caller("/monitor-backend-link", &addr); }
+
             let memUsed = GLOBAL.get();
             println!("Memory used: {memUsed} bytes");
-            axum::response::Json(json!({
+            let res_json = json!({
                 "memUsed": memUsed,
-            }))
+            });
+            //axum::response::Json(res_json)
+            //Full::from(res_json)
+            Response::builder().body(res_json.to_string()).unwrap().into_response()
         }))
-        .route("/monitor-backend-link", get(monitor_backend_link_handle_ws_upgrade));
+        .route("/app-server/monitor-backend-link", get(monitor_backend_link_handle_ws_upgrade));
 
     //let (client, connection) = pgclient::create_client(false).await;
     let app = gql::extend_router(app, app_state.clone()).await;

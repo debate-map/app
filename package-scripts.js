@@ -43,7 +43,8 @@ Object.assign(scripts, {
 		build: {
 			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
 			dev: `cross-env NODE_ENV=development npm start client.build`,
-			prod: `cross-env NODE_ENV=production npm start client.build`,
+			// non-quick prod builds are broken atm, so disabled
+			//prod: `cross-env NODE_ENV=production npm start client.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.build`,
 		},
 		//justDeploy: 'ts-node ./Scripts/Build/Deploy',
@@ -79,7 +80,8 @@ Object.assign(scripts, {
 		build: {
 			default: `cross-env-shell "npm start monitorClient.clean && npm start monitorClient.compile"`,
 			dev: `cross-env NODE_ENV=development npm start monitorClient.build`,
-			prod: `cross-env NODE_ENV=production npm start monitorClient.build`,
+			// non-quick prod builds are broken atm, so disabled
+			//prod: `cross-env NODE_ENV=production npm start monitorClient.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start monitorClient.build`,
 		},
 	},

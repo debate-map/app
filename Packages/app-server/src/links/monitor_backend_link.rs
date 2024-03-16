@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
-use rust_shared::{axum, futures, http_body_util::BodyExt, links::app_server_to_monitor_backend::Message_ASToMB, tower, tower_http};
-use axum::{body::{Body}, Error, extract::{ws::{WebSocket, Message}, WebSocketUpgrade, Extension, ConnectInfo}, response::IntoResponse, body::HttpBody};
+use rust_shared::{axum, futures, http_body_util::{BodyExt, Full}, links::app_server_to_monitor_backend::Message_ASToMB, tower, tower_http};
+use axum::{Error, extract::{ws::{WebSocket, Message}, WebSocketUpgrade, Extension, ConnectInfo}, response::IntoResponse, body::HttpBody};
 use rust_shared::flume::Receiver;
 use futures::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
 use rust_shared::hyper::{StatusCode, Response};
@@ -15,18 +15,29 @@ use crate::utils::{type_aliases::{ABReceiver, ABSender}};
 pub fn is_addr_from_pod(addr: &SocketAddr) -> bool {
     addr.ip().is_ipv4() && addr.ip().to_string().starts_with("10.")
 }
+pub fn message_of_bad_gateway_for_non_pod_caller(endpoint_name: &str, addr: &SocketAddr) -> String {
+    error!("The endpoint \"{endpoint_name}\" was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
+    let body_json_val = json!({"error": format!("This endpoint is only meant to be used for in-cluster callers (ie. pods) atm.")});
+    let message = body_json_val.to_string();
+    return message;
+}
+pub fn http_response_of_bad_gateway_for_non_pod_caller(endpoint_name: &str, addr: &SocketAddr) -> Response<axum::body::Body> {
+    let message = message_of_bad_gateway_for_non_pod_caller(endpoint_name, addr);
+    let body = axum::body::Body::from(message).boxed_unsync();
+    //let body = Full::from(message);
+    Response::builder().status(StatusCode::BAD_GATEWAY).body(body).unwrap().into_response()
+}
+/*pub fn axum_response_of_bad_gateway_for_non_pod_caller(endpoint_name: &str, addr: &SocketAddr) -> Response<axum::body::Body> {
+    let message = message_of_bad_gateway_for_non_pod_caller(endpoint_name, addr);
+    (StatusCode::BAD_GATEWAY, message).into_response()
+}*/
 
 pub async fn monitor_backend_link_handle_ws_upgrade(
     //Extension(s1): Extension<ABSender<LogEntry>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     ws: WebSocketUpgrade
 ) -> impl IntoResponse {
-    if !is_addr_from_pod(&addr) {
-        error!("/monitor-backend-link endpoint was called, but the caller was not an in-cluster pod! @callerIP:{}", addr.ip());
-        let body_json_val = json!({"error": format!("This endpoint is only meant to be used for in-cluster callers (ie. pods) atm.")});
-        let body = Body::from(body_json_val.to_string()).boxed_unsync();
-        return Response::builder().status(StatusCode::BAD_GATEWAY).body(body).unwrap().into_response();
-    }
+    if !is_addr_from_pod(&addr) { return http_response_of_bad_gateway_for_non_pod_caller("/monitor-backend-link", &addr);}
 
     //let r1 = s1.new_receiver();
     ws.on_upgrade(move |socket| handle_socket(socket, addr)).into_response()

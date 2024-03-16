@@ -32,6 +32,7 @@ use rust_shared::http_body_util::Full;
 use rust_shared::hyper::body::Body;
 use rust_shared::hyper_util::client::legacy::Client;
 use rust_shared::hyper_util::rt::TokioExecutor;
+use rust_shared::itertools::Itertools;
 use rust_shared::links::app_server_to_monitor_backend::LogEntry;
 use rust_shared::tokio::net::TcpListener;
 use rust_shared::tower_http::cors::AllowOrigin;
@@ -166,7 +167,7 @@ pub fn should_event_be_printed(metadata: &Metadata) -> bool {
 #[tokio::main]
 async fn main() {
     set_up_globals();
-    println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
+    info!("Setup of globals completed."); // have one regular print-line, in case logger has issues
     
     let app_state = AppStateArc::new(AppState::default());
 
@@ -204,16 +205,17 @@ async fn main() {
 }
 
 async fn handler(req: Request<AxumBody>) -> Result<axum::response::Response<AxumBody>, (StatusCode, String)> {
-    //println!("BaseURI:{}", uri);
     let uri = req.uri();
+    info!("BaseURI:{}", uri);
     let (scheme, authority, path, _query) = {
         let temp = uri.clone().into_parts();
-        (
-            "https", //temp.scheme.map_or("".to_owned(), |a| a.to_string()),
-            "debatemap.app", //temp.authority.map_or("".to_owned(), |a| a.to_string()),
-            temp.path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string()),
-            temp.path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned()),
-        )
+        let scheme = "https"; //temp.scheme.map_or("".to_owned(), |a| a.to_string());
+        let authority = "debatemap.app"; //temp.authority.map_or("".to_owned(), |a| a.to_string());
+        let path = temp.path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string());
+        let path_after_initial_slash_char = path.chars().skip(1).collect::<String>();
+        let path_after_service_prefix = path_after_initial_slash_char.split("/").skip(1).collect_vec().join("/");
+        let query = temp.path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned());
+        (scheme, authority, path_after_service_prefix, query)
     };
     
     // try resolving path from "/Dist" folder
@@ -240,6 +242,7 @@ async fn handler(req: Request<AxumBody>) -> Result<axum::response::Response<Axum
 }
 
 async fn get_static_file(uri: Uri) -> Result<Response<AxumBody>, (StatusCode, String)> {
+    println!("URI:{}", uri);
     let req = Request::builder().uri(uri).body(Full::new(Bytes::new())).unwrap();
     let root_resolve_folder = "../monitor-client";
 

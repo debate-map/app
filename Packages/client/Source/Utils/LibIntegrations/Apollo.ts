@@ -18,11 +18,11 @@ export function GetPageOrigin_WithWebpackToK8sRetargeting() {
 }
 
 export function GetWebServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options) {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrict_to_recognized_hosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? window.location.origin, restrictToRecognizedHosts: false}, ...opts};
 	return GetServerURL("web-server", subpath, opts);
 }
 export function GetAppServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrict_to_recognized_hosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
 	// if on localhost, but user has set the db/server override to "prod", do so
 	if (window.location.hostname == "localhost" && DB == "prod") {
 		return `https://debatemap.app/app-server/${subpath.slice(1)}`;
@@ -30,7 +30,7 @@ export function GetAppServerURL(subpath: string, preferredServerOrigin?: string,
 	return GetServerURL("app-server", subpath, opts);
 }
 export function GetMonitorURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
-	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrict_to_recognized_hosts: false}, ...opts};
+	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
 	return GetServerURL("monitor", subpath, opts);
 }
 

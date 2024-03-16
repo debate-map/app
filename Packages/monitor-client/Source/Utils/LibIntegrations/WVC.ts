@@ -1,7 +1,7 @@
 import {MeID} from "dm_common";
 import {RootState, store} from "Store/index.js";
 import {MainSkin} from "Utils/Styles/MainSkin.js";
-import {ActionFunc, AddNotificationMessage, AddWVCSchemas, DefaultSkin, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
+import {ActionFunc, AddNotificationMessage, AddWVCSchemas, DefaultSkin, GetMirrorOfMobXTree, manager as manager_framework, RunInAction, ShouldErrorBeIgnored} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "../../Utils/URL/URLs.js";
@@ -51,6 +51,7 @@ export function InitWVC() {
 
 		globalConnectorPropGetters: {},
 
+		ShouldErrorBeIgnored: e=>ShouldErrorBeIgnored(e),
 		PostHandleError: (error, errorStr)=>{
 			if (errorStr == "Uncaught Error: Socket closed" || error?.message == "Socket closed") return true;
 

@@ -48,8 +48,8 @@ Development of Debate Map is partially supported by [The Society Library](https:
 * [client](https://github.com/debate-map/app/tree/main/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
 * [web-server](https://github.com/debate-map/app/tree/main/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. \[Rust]
 * [app-server](https://github.com/debate-map/app/tree/main/Packages/app-server): Serves database queries and backend commands. \[Rust]
-* [monitor-client](https://github.com/debate-map/app/tree/main/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. \[TypeScript]
-* [monitor-backend](https://github.com/debate-map/app/tree/main/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/main/Packages/monitor-backend#design-goals)). \[Rust]
+* [monitor-client](https://github.com/debate-map/app/tree/main/Packages/monitor-client): Frontend code for `debatemap.app/monitor`; see `monitor-backend` for more info. \[TypeScript]
+* [monitor-backend](https://github.com/debate-map/app/tree/main/Packages/monitor-backend): Backend code for `debatemap.app/monitor`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/main/Packages/monitor-backend#design-goals)). \[Rust]
 * [js-common](https://github.com/debate-map/app/tree/main/Packages/js-common): Code shared between the various JS packages. \[TypeScript]
 * [deploy](https://github.com/debate-map/app/tree/main/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
 * [rust-shared](https://github.com/debate-map/app/tree/main/Packages/rust-shared): Code shared between the various Rust packages. \[Rust]

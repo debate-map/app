@@ -8,11 +8,12 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 
 export function GetAppServerURL(subpath: string): string {
 	Assert(subpath.startsWith("/"));
-	if (ENV == "dev" || location.host.startsWith("localhost:513")) {
-		return `http://localhost:5130/${subpath.slice(1)}`;
+	if (ENV == "dev" || location.host == "localhost:5100" || location.host.startsWith("localhost:513")) {
+		//return `http://localhost:5130/${subpath.slice(1)}`;
+		return `http://localhost:5100/monitor/${subpath.slice(1)}`;
 	}
 	if (ENV == "prod") {
-		return `https://monitor.debatemap.app/${subpath.slice(1)}`;
+		return `https://debatemap.app/monitor/${subpath.slice(1)}`;
 	}
 	Assert(false, `Invalid env specified:${ENV}`);
 }

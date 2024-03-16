@@ -25,7 +25,7 @@ const domainConstants = {
 export type ServerPod = "web-server" | "app-server" | "monitor" | "grafana";
 export type GetServerURL_Options = {
 	claimedClientURL: string|n,
-	restrict_to_recognized_hosts: boolean,
+	restrictToRecognizedHosts: boolean,
 
 	forceLocalhost?: boolean,
 	forceHTTPS?: boolean,
@@ -37,7 +37,7 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 	// process claimed-client-url
 	const claimedClientURL = opts.claimedClientURL ? new URL(opts.claimedClientURL) : null;
 	const shouldTrustClaimedClientURL = claimedClientURL != null
-		? !opts.restrict_to_recognized_hosts || domainConstants.recognizedWebServerHosts.includes(claimedClientURL.host) || domainConstants.onServerAndDev
+		? !opts.restrictToRecognizedHosts || domainConstants.recognizedWebServerHosts.includes(claimedClientURL.host) || domainConstants.onServerAndDev
 		: false;
 	const claimedClientURL_trusted = shouldTrustClaimedClientURL ? claimedClientURL : null;
 
