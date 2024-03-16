@@ -172,16 +172,16 @@ async fn main() {
     let app_state = AppStateArc::new(AppState::default());
 
     let app = Router::new()
-        /*.route("/monitor", get(|| async { Html(r#"
+        /*.route("/", get(|| async { Html(r#"
             <p>This is the URL for the monitor-backend.</p>
             <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
         "#) }))*/
-        //.route("/monitor/send-mtx-results", post(send_mtx_results))
-        .route("/monitor/storeAdminKeyCookie", get(store_admin_key_cookie))
-        .route("/monitor/proxy/prometheus", get(maybe_proxy_to_prometheus))
-        .route("/monitor/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
-        .route("/monitor/proxy/alertmanager", get(maybe_proxy_to_alertmanager))
-        .route("/monitor/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
+        //.route("/send-mtx-results", post(send_mtx_results))
+        .route("/storeAdminKeyCookie", get(store_admin_key_cookie))
+        .route("/proxy/prometheus", get(maybe_proxy_to_prometheus))
+        .route("/proxy/prometheus/*path", get(maybe_proxy_to_prometheus))
+        .route("/proxy/alertmanager", get(maybe_proxy_to_alertmanager))
+        .route("/proxy/alertmanager/*path", get(maybe_proxy_to_alertmanager))
         .fallback(get(handler));
 
     let (mut msg_sender, msg_receiver): (ABSender<GeneralMessage>, ABReceiver<GeneralMessage>) = async_broadcast::broadcast(10000);
@@ -212,10 +212,8 @@ async fn handler(req: Request<AxumBody>) -> Result<axum::response::Response<Axum
         let scheme = "https"; //temp.scheme.map_or("".to_owned(), |a| a.to_string());
         let authority = "debatemap.app"; //temp.authority.map_or("".to_owned(), |a| a.to_string());
         let path = temp.path_and_query.clone().map_or("".to_owned(), |a| a.path().to_string());
-        let path_after_initial_slash_char = path.chars().skip(1).collect::<String>();
-        let path_after_service_prefix = path_after_initial_slash_char.split("/").skip(1).collect_vec().join("/");
         let query = temp.path_and_query.map_or("".to_owned(), |a| a.query().unwrap_or("").to_owned());
-        (scheme, authority, path_after_service_prefix, query)
+        (scheme, authority, path, query)
     };
     
     // try resolving path from "/Dist" folder

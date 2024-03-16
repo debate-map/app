@@ -70,7 +70,7 @@ async fn auth_google_callback(Extension(state): Extension<AppStateArc>, req: Req
 
 pub async fn extend_router(app: Router) -> Router {
     let result = app
-        .route("/app-server/auth/google/callback", get(auth_google_callback));
+        .route("/auth/google/callback", get(auth_google_callback));
     result
 }
 

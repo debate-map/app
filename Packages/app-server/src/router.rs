@@ -47,14 +47,13 @@ pub fn get_cors_layer() -> CorsLayer {
 
 pub async fn start_router(app_state: AppStateArc) {
     let app = Router::new()
-        .route("/app-server", get(|| async {
+        .route("/", get(|| async {
             Html(r#"
                 <p>This is the URL for the app-server, which is not meant to be opened directly by your browser.</p>
                 <p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or localhost:5100/localhost:5101, if running Debate Map locally)</p>
             "#)
         }))
-        // for better or worse, these endpoints are currently only accessible from within the cluster (till the url-rewrites in routes.yaml work)
-        .route("/app-server/basic-info", get(|ConnectInfo(addr): ConnectInfo<SocketAddr>| async move {
+        .route("/basic-info", get(|ConnectInfo(addr): ConnectInfo<SocketAddr>| async move {
             if !is_addr_from_pod(&addr) { return http_response_of_bad_gateway_for_non_pod_caller("/monitor-backend-link", &addr); }
 
             let memUsed = GLOBAL.get();
@@ -66,7 +65,7 @@ pub async fn start_router(app_state: AppStateArc) {
             //Full::from(res_json)
             Response::builder().body(res_json.to_string()).unwrap().into_response()
         }))
-        .route("/app-server/monitor-backend-link", get(monitor_backend_link_handle_ws_upgrade));
+        .route("/monitor-backend-link", get(monitor_backend_link_handle_ws_upgrade));
 
     //let (client, connection) = pgclient::create_client(false).await;
     let app = gql::extend_router(app, app_state.clone()).await;

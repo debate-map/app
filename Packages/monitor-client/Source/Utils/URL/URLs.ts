@@ -35,6 +35,12 @@ export function PushHistoryEntry() {
 
 export function NormalizeURL(url: VURL) {
 	const result = url.Clone();
+
+	// remove service prefix-segment from url-path (for internal processing, we don't want to care about where this service is hosted / accessed from)
+	if (result.pathNodes[0] == "monitor") {
+		result.pathNodes.RemoveAt(0);
+	}
+
 	if (!rootPages.Contains(result.pathNodes[0])) {
 		result.pathNodes.Insert(0, "home");
 	}
@@ -107,6 +113,10 @@ export function GetNewURL() {
 
 	const newURL = new VURL();
 	const page = GetPage();
+
+	// add service prefix-segment to url-path
+	newURL.pathNodes.push("monitor");
+
 	newURL.pathNodes.push(page);
 
 	var subpage = GetSubpage();

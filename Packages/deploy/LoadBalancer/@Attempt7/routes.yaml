@@ -23,13 +23,6 @@ spec:
     - backendRefs:
         - name: dm-web-server
           port: 5100
-      # commented; nginx-gateway-fabric does not currently support the URLRewrite filter: https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility
-      # filters:
-      #   - type: URLRewrite
-      #     urlRewrite:
-      #       path:
-      #         type: ReplacePrefixMatch
-      #         replacePrefixMatch: /
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -55,8 +48,14 @@ spec:
       - name: dm-app-server
         port: 5110
       matches: [
-        {path: {type: PathPrefix, value: "/app-server/"}}
+        {path: {type: PathPrefix, value: "/app-server"}}
       ]
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -82,8 +81,14 @@ spec:
       - name: dm-monitor-backend
         port: 5130
       matches: [
-        {path: {type: PathPrefix, value: "/monitor/"}}
+        {path: {type: PathPrefix, value: "/monitor"}}
       ]
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
 
 # in other namespaces
 # ==========
@@ -114,5 +119,11 @@ spec:
         port: 3000
         #port: 80
       matches: [
-        {path: {type: PathPrefix, value: "/grafana/"}}
+        {path: {type: PathPrefix, value: "/grafana"}}
       ]
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /

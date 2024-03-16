@@ -22,7 +22,7 @@ pub async fn connect_to_app_server(app_state: AppStateArc, sender: ABSender<Gene
     loop {
         tokio::time::sleep(Duration::from_secs(5)).await;
 
-        let url = Url::parse("ws://dm-app-server.default.svc.cluster.local:5110/app-server/monitor-backend-link").unwrap();
+        let url = Url::parse("ws://dm-app-server.default.svc.cluster.local:5110/monitor-backend-link").unwrap();
         let connect_attempt_fut = connect_async(url);
         let (mut socket, response) = match time::timeout(Duration::from_secs(3), connect_attempt_fut).await {
             // if timeout happens, just ignore (there might have been local network glitch or something)

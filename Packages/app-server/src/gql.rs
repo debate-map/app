@@ -193,16 +193,17 @@ pub type RootSchema = wrap_agql_schema_type!{
     Schema<QueryRoot, MutationRoot, SubscriptionRoot>
 };
 
-const GRAPHQL_PATH: &str = "/app-server/graphql";
+const GRAPHQL_PATH_EXTERNAL: &str = "/app-server/graphql";
+const GRAPHQL_PATH_INTERNAL: &str = "/graphql";
 
 async fn graphiql() -> impl IntoResponse {
     // use the DEV/PROD value from the "ENVIRONMENT" env-var, to determine what the app-server's URL is (maybe temp)
-    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "debatemap.app/app-server" };
-    response::Html(graphiql_source(GRAPHQL_PATH, Some(&format!("wss://{app_server_host}{GRAPHQL_PATH}"))))
+    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5100" } else { "debatemap.app" };
+    response::Html(graphiql_source(GRAPHQL_PATH_EXTERNAL, Some(&format!("wss://{app_server_host}{GRAPHQL_PATH_EXTERNAL}"))))
 }
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
-        GraphQLPlaygroundConfig::new(GRAPHQL_PATH).subscription_endpoint(GRAPHQL_PATH),
+        GraphQLPlaygroundConfig::new(GRAPHQL_PATH_EXTERNAL).subscription_endpoint(GRAPHQL_PATH_EXTERNAL),
     ))
 }
 
@@ -283,9 +284,9 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
     //let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        .route("/app-server/graphiql", get(graphiql))
-        .route("/app-server/gql-playground", get(graphql_playground))
-        .route(GRAPHQL_PATH,
+        .route("/graphiql", get(graphiql))
+        .route("/gql-playground", get(graphql_playground))
+        .route(GRAPHQL_PATH_INTERNAL,
             // approach 1 (using standard routing functions)
             //on_service(MethodFilter::GET, gql_subscription_service).post(handle_gql_query_or_mutation)
             get(graphql_websocket_handler).post(handle_gql_query_or_mutation)

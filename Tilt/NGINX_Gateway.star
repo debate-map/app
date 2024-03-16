@@ -15,8 +15,11 @@ def Start_NGINXGateway(g):
 	helm_resource(
 		'ngf',
 		'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
+
 		namespace='default',
 		flags=[
+			#'--version=1.1.0',
+			'--version=0.0.0-edge', # needed to support gateway-api's URLRewrite filter
 			'--set=service.create=false',
 			#'--set=service.type=NodePort',
 			#'--set=service.type=LoadBalancer',

@@ -69,12 +69,12 @@ pub type RootSchema = wrap_agql_schema_type!{
 
 /*async fn graphiql() -> impl IntoResponse {
     // use the DEV/PROD value from the "ENVIRONMENT" env-var, to determine what the app-server's URL is (maybe temp)
-    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5110" } else { "debates.app/app-server" };
-    response::Html(graphiql_source("/graphql", Some(&format!("wss://{app_server_host}/graphql"))))
+    let app_server_host = if env::var("ENVIRONMENT").unwrap_or("DEV".to_owned()) == "DEV" { "localhost:5100" } else { "debates.app" };
+    response::Html(graphiql_source("/graphql", Some(&format!("wss://{app_server_host}/app-server/graphql"))))
 }*/
 async fn graphql_playground() -> impl IntoResponse {
     response::Html(playground_source(
-        GraphQLPlaygroundConfig::new("/graphql").subscription_endpoint("/graphql"),
+        GraphQLPlaygroundConfig::new("/app-server/graphql").subscription_endpoint("/app-server/graphql"),
     ))
 }
 
@@ -133,9 +133,9 @@ pub async fn extend_router(
     let gql_subscription_service = GraphQLSubscription::new(schema.clone());
 
     let result = app
-        //.route("/monitor/graphiql", get(graphiql))
-        .route("/monitor/gql-playground", get(graphql_playground))
-        .route("/monitor/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
+        //.route("/graphiql", get(graphiql))
+        .route("/gql-playground", get(graphql_playground))
+        .route("/graphql", on_service(MethodFilter::GET, gql_subscription_service).post(graphql_handler))
         .layer(Extension(schema));
 
     result
