@@ -3,6 +3,7 @@
 
 # allow using tilt to also push to the remote OVHcloud k8s cluster
 allow_k8s_contexts('ovh')
+allow_k8s_contexts('ovh-debatemap')
 
 # tilt config settings
 # For now, we just completely disable tilt's docker-prune behavior (doing so fixes issue #169); there might be a better solution, but this is fine for now.
