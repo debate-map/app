@@ -64,16 +64,16 @@ def Start_Gateway_Base(g):
 		},
 	])
 
-	NEXT_k8s_resource_batch(g, [
-		{
-			"new_name": "gateway-api-other-objects", "labels": ["gateway"],
-			"objects": [
-				"gateway-api-admission:serviceaccount",
-				"gateway-api-admission:role",
-				"gateway-api-admission:clusterrole",
-				"gateway-api-admission:rolebinding",
-				"gateway-api-admission:clusterrolebinding",
-				"gateway-api-admission:validatingwebhookconfiguration",
-			],
-		},
-	])
+	# NEXT_k8s_resource_batch(g, [
+	# 	{
+	# 		"new_name": "gateway-api-other-objects", "labels": ["gateway"],
+	# 		"objects": [
+	# 			"gateway-api-admission:serviceaccount",
+	# 			"gateway-api-admission:role",
+	# 			"gateway-api-admission:clusterrole",
+	# 			"gateway-api-admission:rolebinding",
+	# 			"gateway-api-admission:clusterrolebinding",
+	# 			"gateway-api-admission:validatingwebhookconfiguration",
+	# 		],
+	# 	},
+	# ])

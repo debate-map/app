@@ -4,9 +4,8 @@ resources:
 - gateway-crds
 
 # not needed in kubernetes 1.25+ (according to: https://docs.nginx.com/nginx-gateway-fabric/installation/installing-ngf/helm/)
-# EDIT: while not needed in k8s 1.25+ *by NGINX*, it appears to still be required by the Gateway API itself
-- gateway-webhooks-old/admission_webhook.yaml
-- gateway-webhooks-old/certificate_config.yaml
+# - gateway-webhooks-old/admission_webhook.yaml
+# - gateway-webhooks-old/certificate_config.yaml
 
 # gateway customizations
 - gateways.yaml
