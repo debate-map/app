@@ -12,6 +12,9 @@ export const webpackConfig = CreateWebpackConfig({
 	npmPatch_replacerConfig,
 	name: "monitor-client",
 	ext_deep: {
+		output: {
+			publicPath: "/monitor/",
+		},
 		resolve: {
 			fallback: {
 				stream: require.resolve("stream-browserify"),
