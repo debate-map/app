@@ -31,39 +31,39 @@ Development of Debate Map is partially supported by [The Society Library](https:
 
 # Freeform documentation
 
-* [**Quick start**](https://github.com/debate-map/app/tree/master/Docs/QuickStart.md) (new devs should start here)
-* [Coding style](https://github.com/debate-map/app/tree/master/Docs/CodingStyle.md)
-* [General conventions](https://github.com/debate-map/app/tree/master/Docs/GeneralConventions.md)
-* [Authentication](https://github.com/debate-map/app/tree/master/Docs/Authentication.md) (outdated)
-* [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md) (slightly outdated)
-* [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md) (ideas phase)
-* [Node revisions](https://github.com/debate-map/app/tree/master/Docs/NodeRevisions.md) (outdated)
-* [Migration notes](https://github.com/debate-map/app/tree/master/Docs/MigrationNotes.md)
-* [Package code-syncing](https://github.com/debate-map/app/tree/master/Docs/PackageCodeSyncing.md)
-* [Compilation speed](https://github.com/debate-map/app/tree/master/Docs/CompilationSpeed.md)
-* [Common issues](https://github.com/debate-map/app/tree/master/Docs/CommonIssues.md)
+* [**Quick start**](https://github.com/debate-map/app/tree/main/Docs/QuickStart.md) (new devs should start here)
+* [Coding style](https://github.com/debate-map/app/tree/main/Docs/CodingStyle.md)
+* [General conventions](https://github.com/debate-map/app/tree/main/Docs/GeneralConventions.md)
+* [Authentication](https://github.com/debate-map/app/tree/main/Docs/Authentication.md) (outdated)
+* [Access policies](https://github.com/debate-map/app/tree/main/Docs/AccessPolicies.md) (slightly outdated)
+* [User reputation](https://github.com/debate-map/app/tree/main/Docs/UserReputation.md) (ideas phase)
+* [Node revisions](https://github.com/debate-map/app/tree/main/Docs/NodeRevisions.md) (outdated)
+* [Migration notes](https://github.com/debate-map/app/tree/main/Docs/MigrationNotes.md)
+* [Package code-syncing](https://github.com/debate-map/app/tree/main/Docs/PackageCodeSyncing.md)
+* [Compilation speed](https://github.com/debate-map/app/tree/main/Docs/CompilationSpeed.md)
+* [Common issues](https://github.com/debate-map/app/tree/main/Docs/CommonIssues.md)
 
 # Packages
 
-* [client](https://github.com/debate-map/app/tree/master/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
-* [web-server](https://github.com/debate-map/app/tree/master/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. \[Rust]
-* [app-server](https://github.com/debate-map/app/tree/master/Packages/app-server): Serves database queries and backend commands. \[Rust]
-* [monitor-client](https://github.com/debate-map/app/tree/master/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. \[TypeScript]
-* [monitor-backend](https://github.com/debate-map/app/tree/master/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/master/Packages/monitor-backend#design-goals)). \[Rust]
-* [js-common](https://github.com/debate-map/app/tree/master/Packages/js-common): Code shared between the various JS packages. \[TypeScript]
-* [deploy](https://github.com/debate-map/app/tree/master/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
-* [rust-shared](https://github.com/debate-map/app/tree/master/Packages/rust-shared): Code shared between the various Rust packages. \[Rust]
-* [rust-macros](https://github.com/debate-map/app/tree/master/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in) \[Rust]
+* [client](https://github.com/debate-map/app/tree/main/Packages/client): Frontend code that runs in the browser; connects to the `app-server` pod. (and the `monitor-backend` pod, if the user is an admin) \[TypeScript]
+* [web-server](https://github.com/debate-map/app/tree/main/Packages/web-server): Serves the static frontend files for the website -- see "client" package above. \[Rust]
+* [app-server](https://github.com/debate-map/app/tree/main/Packages/app-server): Serves database queries and backend commands. \[Rust]
+* [monitor-client](https://github.com/debate-map/app/tree/main/Packages/monitor-client): Frontend code for `monitor.debatemap.app`; see `monitor-backend` for more info. \[TypeScript]
+* [monitor-backend](https://github.com/debate-map/app/tree/main/Packages/monitor-backend): Backend code for `monitor.debatemap.app`, which is meant for admin-related functionality, and has several unique design goals (see [here](https://github.com/debate-map/app/tree/main/Packages/monitor-backend#design-goals)). \[Rust]
+* [js-common](https://github.com/debate-map/app/tree/main/Packages/js-common): Code shared between the various JS packages. \[TypeScript]
+* [deploy](https://github.com/debate-map/app/tree/main/Packages/deploy): Miscellaneous scripts and such, used in the deployment process.
+* [rust-shared](https://github.com/debate-map/app/tree/main/Packages/rust-shared): Code shared between the various Rust packages. \[Rust]
+* [rust-macros](https://github.com/debate-map/app/tree/main/Packages/rust-macros): Procedural macros used by other Rust packages. (proc-macros can't be used from the crate they're defined in) \[Rust]
 <!--
 // planned packages
-* [graphlink-server](https://github.com/debate-map/app/tree/master/Packages/graphlink-server): Library providing a GraphQL endpoint based on a PostgreSQL database, with support for live-queries. (Rust) [to be split into separate repo]
+* [graphlink-server](https://github.com/debate-map/app/tree/main/Packages/graphlink-server): Library providing a GraphQL endpoint based on a PostgreSQL database, with support for live-queries. (Rust) [to be split into separate repo]
 -->
 
 # Guide modules
 
-* Note: The section below is for the "active guide modules" that are likely to be used. Ones unlikely to be used are placed in the [ExtraGuideModules.md](https://github.com/debate-map/app/tree/master/Docs/ExtraGuideModules.md) file.
+* Note: The section below is for the "active guide modules" that are likely to be used. Ones unlikely to be used are placed in the [ExtraGuideModules.md](https://github.com/debate-map/app/tree/main/Docs/ExtraGuideModules.md) file.
 * Tip: You can link someone to a specific guide-module by adding `#MODULE_NAME` to the end of the url. (eg: `https://github.com/debate-map/app#setup-general`)
-* Tip: If you want to search the text of collapsed guide-modules, you can either view the [readme's source text](https://github.com/debate-map/app/blob/master/README.md?plain=1), or open the dev-tools "Elements" tab and use its ctrl+f search function.
+* Tip: If you want to search the text of collapsed guide-modules, you can either view the [readme's source text](https://github.com/debate-map/app/blob/main/README.md?plain=1), or open the dev-tools "Elements" tab and use its ctrl+f search function.
 
 
 
@@ -80,10 +80,10 @@ Development of Debate Map is partially supported by [The Society Library](https:
 	* Note: Installation of a new command-line tool generally requires that you restart your terminal/IDE in order for its binaries to be accessible simply by name (assuming the installer has added its folder to the `Path` environment-variable automatically). So if a step fails due to "Command X is not recognized", check this first. (To save space, this "restart your terminal/IDE before proceeding" note will not be repeated in other guide-modules/steps.)
 * 2\) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
 * 3\) Install this repo's dependencies by running: `yarn install`
-* 4\) There is an ugly additional step that used to be required here, relating to a messy transition in the NPM ecosystem from commonjs to esm modules. For now, this issue is being worked around in this repo through use of [these](https://github.com/debate-map/app/tree/master/patches) and [these](https://github.com/Venryx/web-vcore/tree/master/patches) patch files (which are auto-applied by npm/yarn). However, if you get strange webpack/typescript build errors relating to commonjs/esm modules, it's probably related to [this issue](https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662), which may then require another look at the patch files (or attempting to find a more reliable solution).
+* 4\) There is an ugly additional step that used to be required here, relating to a messy transition in the NPM ecosystem from commonjs to esm modules. For now, this issue is being worked around in this repo through use of [these](https://github.com/debate-map/app/tree/main/patches) and [these](https://github.com/Venryx/web-vcore/tree/master/patches) patch files (which are auto-applied by npm/yarn). However, if you get strange webpack/typescript build errors relating to commonjs/esm modules, it's probably related to [this issue](https://github.com/apollographql/apollo-client/pull/8396#issuecomment-894563662), which may then require another look at the patch files (or attempting to find a more reliable solution).
 * 5\) Copy the `.env.template` file in the repo root, rename the copy to `.env`, and fill in the necessary environment-variables. At the moment, regular frontend and backend devs don't need to make any modifications to the new `.env` file; only backend deployers/maintainers (ie. those pushing changes to the cloud for production) have environment-variables they need to fill in.
 
-> If you're looking for a higher-level "quick start" guide, see here: [Quick start](https://github.com/debate-map/app/tree/master/Docs/QuickStart.md)
+> If you're looking for a higher-level "quick start" guide, see here: [Quick start](https://github.com/debate-map/app/tree/main/Docs/QuickStart.md)
 
 </details>
 
@@ -153,7 +153,7 @@ Port-assignment scheme: (ie. meaning of each digit in `ABCD`)
 * D) variant [0: main, 1: served from webpack, etc.]
 
 > Note: Not all web-accessible k8s services are shown in the list above. Specifically:
-> * Mere "subcomponents" of the monitoring service: grafana, prometheus, alertmanager (Reason: They're accessible through the monitor tool's subpages/iframes. See [Domains.ts](https://github.com/debate-map/app/blob/master/Packages/js-common/Source/Utils/General/Domains.ts) or [domains.rs](https://github.com/debate-map/app/blob/master/Packages/rust-shared/src/domains.rs) for more details.)
+> * Mere "subcomponents" of the monitoring service: grafana, prometheus, alertmanager (Reason: They're accessible through the monitor tool's subpages/iframes. See [Domains.ts](https://github.com/debate-map/app/blob/main/Packages/js-common/Source/Utils/General/Domains.ts) or [domains.rs](https://github.com/debate-map/app/blob/main/Packages/rust-shared/src/domains.rs) for more details.)
 
 </details>
 

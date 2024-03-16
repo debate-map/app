@@ -3,13 +3,13 @@
 ## Overview
 
 There are a few tables involved:
-* [nodes](https://github.com/debate-map/app/tree/master/Packages/js-common/Source/DB/nodes/@MapNode.ts): These entries never change; they hold a node's static properties like its type, original creator, etc.
-* [nodeRevisions](https://github.com/debate-map/app/tree/master/Packages/js-common/Source/DB/nodeRevisions/@MapNodeRevision.ts): These entries represent the history of "accepted drafts" for a node; the latest entries represents the "current state" of the node's details. (title, tags, etc.)
-* [nodeDrafts](https://github.com/debate-map/app/tree/master/Packages/js-common/Source/DB/nodeDrafts/@MapNodeDraft.ts): These entries contain "proposed changes" for a node's details, like changing its title or adding a tag. Generally, these drafts will only change one or two properties at a time, in order to maximize the chance they'll be accepted.
+* [nodes](https://github.com/debate-map/app/tree/main/Packages/js-common/Source/DB/nodes/@MapNode.ts): These entries never change; they hold a node's static properties like its type, original creator, etc.
+* [nodeRevisions](https://github.com/debate-map/app/tree/main/Packages/js-common/Source/DB/nodeRevisions/@MapNodeRevision.ts): These entries represent the history of "accepted drafts" for a node; the latest entries represents the "current state" of the node's details. (title, tags, etc.)
+* [nodeDrafts](https://github.com/debate-map/app/tree/main/Packages/js-common/Source/DB/nodeDrafts/@MapNodeDraft.ts): These entries contain "proposed changes" for a node's details, like changing its title or adding a tag. Generally, these drafts will only change one or two properties at a time, in order to maximize the chance they'll be accepted.
 
 ## Acceptance process (planned)
 
-The acceptance process for a draft depends a lot on the [reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md) of the users involved.
+The acceptance process for a draft depends a lot on the [reputation](https://github.com/debate-map/app/tree/main/Docs/UserReputation.md) of the users involved.
 
 A draft is accepted (ie. added as the current "official revision") if:
 TODO
