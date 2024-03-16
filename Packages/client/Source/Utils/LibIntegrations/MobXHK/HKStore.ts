@@ -1,6 +1,6 @@
 import {O, RunInAction} from "web-vcore";
-import {Clone, SleepAsync} from "web-vcore/.yalc/js-vextensions";
-import {CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
+import {Clone, SleepAsync} from "js-vextensions";
+import {CreateAccessor} from "mobx-graphlink";
 import {makeObservable} from "web-vcore/nm/mobx";
 import {hkHandlers, hkHandlers_active} from "./HKHandlers";
 import {hkAddress} from "./HKInitBackend";

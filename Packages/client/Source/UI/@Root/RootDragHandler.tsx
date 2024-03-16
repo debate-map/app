@@ -4,7 +4,7 @@ import {RootUIWrapper} from "UI/Root";
 import {RunCommand_UpdateTimelineStep} from "Utils/DB/Command";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {RunInAction} from "web-vcore";
-import {CatchBail, GetAsync} from "web-vcore/.yalc/mobx-graphlink";
+import {CatchBail, GetAsync} from "mobx-graphlink";
 import {Assert, FromJSON, NN} from "web-vcore/nm/js-vextensions.js";
 import {DropResult, ResponderProvided} from "web-vcore/nm/react-beautiful-dnd";
 import {Button} from "web-vcore/nm/react-vcomponents.js";

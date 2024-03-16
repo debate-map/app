@@ -1,6 +1,6 @@
 import {O, RunInAction} from "web-vcore";
 import {computed, makeObservable} from "web-vcore/nm/mobx";
-import {IsNumber} from "web-vcore/.yalc/js-vextensions";
+import {IsNumber} from "js-vextensions";
 import {desktopBridge} from "./Bridge_Desktop";
 
 type VoiceChangerInfoResponse = {

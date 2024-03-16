@@ -14,7 +14,7 @@ import {GetPlaybackTime} from "Store/main/maps/mapStates/PlaybackAccessors/Basic
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop.js";
 import {TimeToString} from "Utils/UI/General.js";
 import {OPFS_Map} from "Utils/OPFS/OPFS_Map.js";
-import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {OPFSDir_GetFileChildren} from "Utils/OPFS/ElectronOPFS.js";
 import {GetTopAudioForStep} from "Utils/OPFS/Map/OPFS_Step.js";
 import {StepList} from "../StepList.js";

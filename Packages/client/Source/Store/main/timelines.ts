@@ -1,7 +1,7 @@
 import {GetTimelineStep, NodeEffect, TimelineStepEffect} from "dm_common";
 import {CreateAccessor} from "mobx-graphlink";
 import {O} from "web-vcore";
-import {DeepEquals} from "web-vcore/.yalc/js-vextensions";
+import {DeepEquals} from "js-vextensions";
 import {makeObservable} from "web-vcore/nm/mobx";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {StepTab} from "./maps/mapStates/@MapState";

@@ -12,7 +12,7 @@ import {globalRootNodeID_hk} from "Utils/LibIntegrations/MobXHK/HKInitBackend.js
 import {NodeUI_HK} from "Utils/LibIntegrations/MobXHK/NodeUI_HK.js";
 import {liveSkin} from "Utils/Styles/SkinManager";
 import {DefaultLoadingUI, EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
-import {BailError, BailInfo} from "web-vcore/.yalc/mobx-graphlink";
+import {BailError, BailInfo} from "mobx-graphlink";
 import {Assert, ea, emptyArray_forLoading, IsNaN, nl, ShallowEquals} from "web-vcore/nm/js-vextensions.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, cssHelper, GetDOM, GetInnerComp, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";

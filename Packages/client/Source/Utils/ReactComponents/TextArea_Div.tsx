@@ -2,7 +2,7 @@ import {navBarHeight} from "UI/@Shared/NavBar";
 import {E} from "js-vextensions";
 import {BaseComponent} from "react-vextensions";
 import {subNavBarHeight} from "web-vcore";
-import {TextArea} from "web-vcore/.yalc/react-vcomponents";
+import {TextArea} from "react-vcomponents";
 
 export const GetMaxSafeDialogContentHeight = ()=>window.innerHeight - navBarHeight - subNavBarHeight - 100;
 

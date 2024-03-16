@@ -13,7 +13,7 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
+import {GetAsync} from "mobx-graphlink";
 import {DateToString, TimeToString} from "Utils/UI/General";
 import {StepTab} from "Store/main/maps/mapStates/@MapState";
 import {desktopBridge} from "Utils/Bridge/Bridge_Desktop";

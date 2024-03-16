@@ -6,8 +6,8 @@ import {GetNodeDisplayText, GetNodeID, GetNodeL2, GetNodeL3, GetNodeLinks, GetPa
 import {NodeEffect, TimelineStepEffect} from "dm_common/Source/DB/timelineSteps/@TimelineStepEffect";
 import map from "updeep/types/map";
 import {InfoButton, Observer} from "web-vcore";
-import {GetAsync} from "web-vcore/.yalc/mobx-graphlink";
-import {ShowMessageBox} from "web-vcore/.yalc/react-vmessagebox";
+import {GetAsync} from "mobx-graphlink";
+import {ShowMessageBox} from "react-vmessagebox";
 import {Assert, Clone, E} from "web-vcore/nm/js-vextensions.js";
 import {Button, CheckBox, Column, Pre, Row, Select, Spinner, Text, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";

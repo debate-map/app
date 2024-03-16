@@ -4,7 +4,7 @@ import {Graph, KeyframeInfo} from "tree-grapher";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
 import {AssertWarn, GetPercentFromXToY} from "js-vextensions";
-import {CatchBail, CreateAccessor} from "web-vcore/.yalc/mobx-graphlink";
+import {CatchBail, CreateAccessor} from "mobx-graphlink";
 import {comparer} from "web-vcore/nm/mobx";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic";
 import {GetPlaybackEffects, GetVisiblePathsAfterEffects} from "Store/main/maps/mapStates/PlaybackAccessors/ForEffects";

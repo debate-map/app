@@ -23,7 +23,7 @@ Might be solved, watching. [edit: one of the causes was solved, but the error st
 
 > #### `It appears that more than one copy of the web-vcore package has been loaded, which is almost certainly not desired.` and/or `Uncaught TypeError: Cannot redefine property: AV`
 
-**TLDR:** Note the version for `web-vcore` listed in package.json, run `npm add web-vcore`, change package.json to again use the version noted earlier, redeploy the web-server pod (if using k8s for the JS file-serving), then refresh the page.
+**TLDR:** Note the version for `web-vcore` listed in package.json, run `yarn add web-vcore`, change package.json to again use the version noted earlier, redeploy the web-server pod (if using k8s for the JS file-serving), then refresh the page.
 
 **Trigger:** Not completely clear, but in the general space of doing yarn installs and/or zalc publishes of web-vcore.
 
