@@ -19,87 +19,26 @@
     dead_code,
 )]
 
-use rust_shared::{axum::{self, body::Body, extract::Path, http::{header, HeaderValue, StatusCode}, response::{IntoResponse, Response}}, futures, tokio::{fs, net::TcpListener}, tower::{self, ServiceBuilder, ServiceExt}, tower_http::{self, services::ServeDir}, utils::{general::k8s_env, general_::extensions::ToOwnedV, net::body_to_bytes}};
-use axum::{
-    response::{Html},
-    routing::{get},
-    Router, http::{
-        Method,
-        header::{CONTENT_TYPE}
-    }, middleware,
-};
-use rust_shared::{serde_json::json, tokio, http_body_util::BodyExt};
-use tower_http::cors::{CorsLayer};
-use tower_http::trace::TraceLayer;
-use tracing::{Level, info};
-use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, filter, Layer};
-use std::{
-    net::{SocketAddr}, panic, backtrace::Backtrace, path::PathBuf, env,
-};
-use std::alloc::System;
+use rust_shared::anyhow::Error;
+use static_web_server::Settings;
+use std::path::PathBuf;
 //use include_dir::{include_dir, Dir};
+
+//use axum_server::main_axum;
+//mod axum_server;
 
 static STATIC_DIR_PATH: &'static str  = "../client/Dist";
 
-fn set_up_globals() /*-> (ABSender<LogEntry>, ABReceiver<LogEntry>)*/ {
-    // set up logging
-    let printing_layer_func = filter::filter_fn(move |metadata| {
-        let levels_to_exclude = &[Level::TRACE, Level::DEBUG];
-        !levels_to_exclude.contains(metadata.level())
-    });
-    let printing_layer = tracing_subscriber::fmt::layer().with_filter(printing_layer_func);
-    tracing_subscriber::registry().with(printing_layer).init();
-}
+fn main() -> Result<(), Error> {
+    //return main_axum();
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    set_up_globals();
-    println!("Setup of globals completed."); // have one regular print-line, in case logger has issues
-
-    let app = Router::new()
-        .fallback(get(|req| async move {
-            match ServeDir::new(&STATIC_DIR_PATH).oneshot(req).await {
-                Ok(res) => {
-                    let status = res.status();
-                    match status {
-                        StatusCode::NOT_FOUND => {
-                            let index_path = PathBuf::from(&STATIC_DIR_PATH).join("index.html");
-                            let index_content = match fs::read_to_string(index_path).await {
-                                Ok(index_content) => index_content,
-                                Err(_) => {
-                                    return Response::builder()
-                                        .status(StatusCode::NOT_FOUND)
-                                        .body(Body::new("Tried loading url-specified file, which wasn't found; then tried loading index.html as fallback, but it also wasn't found.".o()))
-                                        .unwrap()
-                                }
-                            };
-
-                            Response::builder()
-                                .status(StatusCode::OK)
-                                .body(Body::new(index_content))
-                                .unwrap()
-                        },
-                        //_ => res.map(boxed),
-                        _ => {
-                            let (parts, body) = res.into_parts();
-                            let bytes = body_to_bytes(body).await.unwrap();
-                            Response::from_parts(parts, Body::from(bytes))
-                        }
-                    }
-                },
-                Err(err) => Response::builder()
-                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(Body::new(format!("Error: {err}"))).unwrap()
-            }
-        }))
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));    
-
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 5100));
-
-    info!("Web-server launched. @env:{:?} Listening on http://{}", k8s_env(), addr);
-
-    let listener = TcpListener::bind(&addr).await.unwrap();
-    axum::serve(listener, app.into_make_service()).await?;
+    let mut opts = Settings::get(true)?;
+    opts.general.port = 5100;
+    opts.general.root = PathBuf::from(STATIC_DIR_PATH);
+    opts.general.health = true;
+    opts.general.compression_static = true;
+    opts.general.page_fallback = format!("{STATIC_DIR_PATH}/index.html").into();
+    static_web_server::Server::new(opts)?.run_standalone(None)?;
 
     Ok(())
 }

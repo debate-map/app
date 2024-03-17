@@ -20,8 +20,8 @@ def Start_GatewayRoutes(g):
 			"new_name": "app-routes", "labels": ["gateway"],
 			"objects": [
 				"main-gateway:gateway",
-				# "route-web-server:httproute",
-				"route-sws:httproute",
+				"route-web-server:httproute",
+				# "route-sws:httproute",
 				"route-app-server:httproute",
 				"route-monitor:httproute",
 				"route-grafana:httproute",

@@ -10,6 +10,7 @@ tracing = "0.1"
 tracing-subscriber = { version="0.3", features = ["env-filter"] }
 #include_dir = "0.7.3"
 #mime_guess = "2.0.4"
+static-web-server = "2.28.0"
 
 #rust-macros = { path = "../rust-macros" }
 rust-shared = { path = "../rust-shared" }
