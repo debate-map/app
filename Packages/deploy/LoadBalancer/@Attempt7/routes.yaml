@@ -1,29 +1,29 @@
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: route-web-server
-  namespace: default
-spec:
-  parentRefs:
-    - {name: main-gateway, sectionName: http}
-    #- {name: main-gateway, sectionName: https-ovh-us}
-    - {name: main-gateway, sectionName: https-debating-app}
-    - {name: main-gateway, sectionName: https-debatemap-app}
-    - {name: main-gateway, sectionName: https-debates-app}
-    - {name: main-gateway, sectionName: https-dm-sl-org}
-  hostnames:
-  - "localhost"
-  - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
-  - "debating.app"
-  - "debatemap.app"
-  - "debates.app"
-  - "debatemap.societylibrary.org"
-  rules:
-    - backendRefs:
-        - name: dm-web-server
-          port: 5100
----
+# ---
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: HTTPRoute
+# metadata:
+#   name: route-web-server
+#   namespace: default
+# spec:
+#   parentRefs:
+#     - {name: main-gateway, sectionName: http}
+#     #- {name: main-gateway, sectionName: https-ovh-us}
+#     - {name: main-gateway, sectionName: https-debating-app}
+#     - {name: main-gateway, sectionName: https-debatemap-app}
+#     - {name: main-gateway, sectionName: https-debates-app}
+#     - {name: main-gateway, sectionName: https-dm-sl-org}
+#   hostnames:
+#   - "localhost"
+#   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
+#   - "debating.app"
+#   - "debatemap.app"
+#   - "debates.app"
+#   - "debatemap.societylibrary.org"
+#   rules:
+#     - backendRefs:
+#         - name: dm-web-server
+#           port: 5100
+# ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -127,3 +127,31 @@ spec:
             path:
               type: ReplacePrefixMatch
               replacePrefixMatch: /
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: route-sws
+  namespace: default
+spec:
+  parentRefs:
+    - {name: main-gateway, sectionName: http}
+    - {name: main-gateway, sectionName: https-debating-app}
+    - {name: main-gateway, sectionName: https-debatemap-app}
+    - {name: main-gateway, sectionName: https-debates-app}
+    - {name: main-gateway, sectionName: https-dm-sl-org}
+  hostnames:
+  - "localhost"
+  rules:
+    - backendRefs:
+        - name: dm-sws
+          port: 80
+      # matches: [
+      #   {path: {type: PathPrefix, value: "/sws"}}
+      # ]
+      # filters:
+      #   - type: URLRewrite
+      #     urlRewrite:
+      #       path:
+      #         type: ReplacePrefixMatch
+      #         replacePrefixMatch: /

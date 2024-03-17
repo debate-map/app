@@ -24,7 +24,7 @@ def Start_App(g):
 
 	# rust
 	# -----
-	
+
 	# this is the nodejs-base dockerfile used for all subsequent rust images
 	imageURL_rustBase = g["registryURL"] + '/dm-rust-base-' + ENV
 	docker_build(imageURL_rustBase, '..', dockerfile='../Packages/deploy/@RustBase/Dockerfile',
@@ -60,6 +60,8 @@ def Start_App(g):
 			"copy_from_path": "/dm_repo/target/" + ("release" if g["compileWithRelease"] else "debug") + "/web-server",
 		},
 	)
+	imageURL_sws = g["registryURL"] + '/dm-sws-' + ENV
+	docker_build(imageURL_sws, '..', dockerfile='../Packages/sws/Dockerfile')
 	imageURL_appServer = g["registryURL"] + '/dm-app-server-' + ENV
 	docker_build(imageURL_appServer, '..', dockerfile='../Packages/app-server/Dockerfile',
 		build_args={
@@ -82,6 +84,9 @@ def Start_App(g):
 	k8s_yaml(ReadFileWithReplacements('../Packages/web-server/deployment.yaml', {
 		"TILT_PLACEHOLDER:imageURL_webServer": imageURL_webServer,
 	}))
+	k8s_yaml(ReadFileWithReplacements('../Packages/sws/deployment.yaml', {
+		"TILT_PLACEHOLDER:imageURL_sws": imageURL_sws,
+	}))
 	k8s_yaml(ReadFileWithReplacements('../Packages/app-server/deployment.yaml', {
 		"TILT_PLACEHOLDER:imageURL_appServer": imageURL_appServer,
 	}))
@@ -101,6 +106,11 @@ def Start_App(g):
 		},
 		{
 			"workload": 'dm-monitor-backend', "labels": ["app"],
+			"trigger_mode": TRIGGER_MODE_MANUAL,
+		},
+		{
+			"workload": 'dm-sws', "labels": ["app"],
+			# Why manual? Because I want to avoid: type, save, [compile starts without me wanting it to], type and save again, [now I have to wait longer because the previous build is still running!]
 			"trigger_mode": TRIGGER_MODE_MANUAL,
 		},
 	])
