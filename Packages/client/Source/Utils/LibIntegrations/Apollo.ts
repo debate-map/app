@@ -23,9 +23,9 @@ export function GetWebServerURL(subpath: string, preferredServerOrigin?: string,
 }
 export function GetAppServerURL(subpath: string, preferredServerOrigin?: string, opts?: GetServerURL_Options): string {
 	opts = {...{claimedClientURL: preferredServerOrigin ?? GetPageOrigin_WithWebpackToK8sRetargeting(), restrictToRecognizedHosts: false}, ...opts};
-	// if on localhost, but user has set the db/server override to "prod", do so
-	if (window.location.hostname == "localhost" && DB == "prod") {
-		return `https://debatemap.app/app-server/${subpath.slice(1)}`;
+	// if we're trying to connect to the prod app-server, be consistent and just always use the OVH origin domain (we want to avoid reaching the Cloudflare proxy limit for websocket connections)
+	if (DB == "prod") {
+		return `https://9m2x1z.nodes.c1.or1.k8s.ovh.us/app-server/${subpath.slice(1)}`;
 	}
 	return GetServerURL("app-server", subpath, opts);
 }

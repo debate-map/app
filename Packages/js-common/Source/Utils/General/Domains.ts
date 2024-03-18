@@ -46,6 +46,7 @@ export function GetServerURL(serverPod: ServerPod, subpath: string, opts: GetSer
 	// section 1: set protocol and hostname
 	// ==========
 
+	//if (claimedClientURL_trusted != null) {
 	if (claimedClientURL_trusted != null) {
 		const portStr = claimedClientURL_trusted.port ? `:${claimedClientURL_trusted.port}` : "";
 		serverURL = new URL(`${claimedClientURL_trusted.protocol}//${claimedClientURL_trusted.hostname}${portStr}`);
