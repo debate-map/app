@@ -8,7 +8,7 @@ import {GetNodeEffects, GetTimelineSteps, IsUserCreatorOrMod, Map, MeID, OrderKe
 import {DragInfo, MakeDraggable, Observer, RunInAction_Set} from "web-vcore";
 import {Clone, E, GetEntries, ModifyString, ToJSON, VRect, Vector2, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {RunInAction} from "web-vcore/nm/mobx-graphlink.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/hello-pangea-dnd.js";
 import {Button, Column, Pre, Row, Select, Spinner, Text, TextArea, TimeSpanInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ShowVMenu, VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";

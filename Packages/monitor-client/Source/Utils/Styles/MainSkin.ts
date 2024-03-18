@@ -1,6 +1,5 @@
 import {Chroma, chroma_maxDarken, DefaultSkin, PageContainer, Skin, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
-import {ProposalsColumn, ProposalEntryUI, ProposalsUserRankingColumn, ProposalUI_Inner, ProposalUI, ProposalsUI} from "web-vcore/nm/graphql-feedback.js";
 import {Button} from "web-vcore/nm/react-vcomponents";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
 

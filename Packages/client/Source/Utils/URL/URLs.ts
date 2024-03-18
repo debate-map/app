@@ -22,7 +22,8 @@ export const pageTree = new Page({}, {
 		policies: new Page(),
 	}),
 	feedback: new Page({}, {
-		proposals: new Page(),
+		new: new Page(),
+		//proposals: new Page(),
 		//roadmap: new Page(),
 		//neutrality: new Page(),
 	}),

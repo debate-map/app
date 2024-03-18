@@ -22,6 +22,7 @@
     "postinstall_test": "echo 'Test101'; exit(1)"
   },
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "4.1.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "file-syncer": "^0.0.8",
@@ -61,7 +62,7 @@
     "tree-grapher": "0.0.11",
     "ui-debug-kit": "0.0.7",
     "wavesurfer.js": "7.6.0",
-    "web-vcore": "0.0.100"
+    "web-vcore": "0.0.101"
   },
   "packageManager": "yarn@4.0.2"
 }

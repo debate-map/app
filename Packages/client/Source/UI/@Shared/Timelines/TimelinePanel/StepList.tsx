@@ -13,7 +13,7 @@ import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions
 import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GetOpenMapID} from "Store/main.js";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/hello-pangea-dnd.js";
 import {GetPlaybackCurrentStepIndex} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";
 import {IsTimelineStepActive} from "Store/main/maps/mapStates/PlaybackAccessors/ForSteps.js";
 import {GetAudioFilesActiveForTimeline} from "Utils/OPFS/Map/OPFS_Step.js";
@@ -22,7 +22,7 @@ import {StepUI} from "./StepList/StepUI.js";
 import {RecordDropdown} from "./StepList/RecordDropdown.js";
 import {AddTimelineStep_Simple} from "./StepList/Editing/StepEditorUI.js";
 
-// for use by react-beautiful-dnd (using text-replacement/node-modules-patching)
+// for use by hello-pangea-dnd (using text-replacement/node-modules-patching)
 G({LockMapEdgeScrolling});
 function LockMapEdgeScrolling() {
 	const mapID = GetOpenMapID();

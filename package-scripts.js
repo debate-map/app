@@ -44,7 +44,7 @@ Object.assign(scripts, {
 			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
 			dev: `cross-env NODE_ENV=development npm start client.build`,
 			// non-quick prod builds are broken atm, so disabled
-			//prod: `cross-env NODE_ENV=production npm start client.build`,
+			prod: `cross-env NODE_ENV=production npm start client.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.build`,
 		},
 		//justDeploy: 'ts-node ./Scripts/Build/Deploy',

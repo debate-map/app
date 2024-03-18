@@ -7,7 +7,6 @@ def ReplaceInBlob(fileBlob, replacements):
 		if op_useBase64:
 			key_final = Base64Encode(key.replace("[@base64]", ""))
 			value_final = Base64Encode(value)
-			print("Replacing: " + key_final + " with " + value_final + "")
 			blobAsStr = blobAsStr.replace(key_final, value_final)
 		else:
 			blobAsStr = blobAsStr.replace(key, value)

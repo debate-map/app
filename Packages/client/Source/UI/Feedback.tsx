@@ -1,6 +1,5 @@
 import {Column, Switch} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {ProposalsUI} from "UI/Feedback/ProposalsUI.js";
 import {store} from "Store";
 import {Observer, PageContainer, SubNavBar, SubNavBarButton, VReactMarkdown} from "web-vcore";
 import React from "react";
@@ -14,15 +13,13 @@ export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
 			<>
 				<SubNavBar>
 					<SubNavBarButton page={page} subpage="new" text="New" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
-					<SubNavBarButton page={page} subpage="old" text="Old" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
-					{/* <SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
-					<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/> */}
+					{/*<SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
+					<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/>*/}
 				</SubNavBar>
 				<Switch>
 					<ProposalsUI_Stub/>
-					{currentSubpage == "old" && <ProposalsUI/>}
-					{/* currentSubpage == "roadmap" && <RoadmapUI/>}
-					{currentSubpage == "neutrality" && <NeutralityUI/> */}
+					{/*currentSubpage == "roadmap" && <RoadmapUI/>}
+					{currentSubpage == "neutrality" && <NeutralityUI/>*/}
 				</Switch>
 			</>
 		);

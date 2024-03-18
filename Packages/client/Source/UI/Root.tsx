@@ -11,7 +11,7 @@ import {Clone, E, SleepAsync, SleepAsyncUntil, Vector2} from "web-vcore/nm/js-ve
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
 import {autorun, makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {deepObserve} from "mobx-utils";
-import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
+import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/hello-pangea-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
 import {ColorPickerBox, Column, Div, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";

@@ -16,7 +16,7 @@ import chroma, {Color} from "web-vcore/nm/chroma-js.js";
 //import classNames from "classnames";
 import {DEL, DoNothing, E, GetPercentFromXToY, IsNumber, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Draggable} from "web-vcore/nm/hello-pangea-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {Graph, GraphContext, useRef_nodeLeftColumn} from "tree-grapher";

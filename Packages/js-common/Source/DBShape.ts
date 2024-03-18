@@ -1,5 +1,4 @@
 import {Collection} from "web-vcore/nm/mobx-graphlink.js";
-import {Proposal, Feedback_UserInfo} from "web-vcore/nm/graphql-feedback.js";
 import {CommandRun} from "./DB/commandRuns/@CommandRun.js";
 import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
 import {MapNodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
@@ -35,8 +34,8 @@ export class GraphDBShape {
 	/*modules: Collection_Closed<{
 		// feedback: FeedbackDBShape;
 	}>;*/
-	feedback_proposals = DefineCollection(Proposal);
-	feedback_userInfos = DefineCollection(Feedback_UserInfo);
+	/*feedback_proposals = DefineCollection(Proposal);
+	feedback_userInfos = DefineCollection(Feedback_UserInfo);*/
 
 	//accessPolicies: Collection<AccessPolicy>;
 	accessPolicies = DefineCollection(AccessPolicy);

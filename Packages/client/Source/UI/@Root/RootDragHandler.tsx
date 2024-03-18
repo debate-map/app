@@ -6,7 +6,7 @@ import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {RunInAction} from "web-vcore";
 import {CatchBail, GetAsync} from "mobx-graphlink";
 import {Assert, FromJSON, NN} from "web-vcore/nm/js-vextensions.js";
-import {DropResult, ResponderProvided} from "web-vcore/nm/react-beautiful-dnd";
+import {DropResult, ResponderProvided} from "web-vcore/nm/hello-pangea-dnd.js";
 import {Button} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
@@ -72,7 +72,7 @@ export async function OnDragEnd(result: DropResult, provided: ResponderProvided)
 			</>,
 		});
 	} else if (targetDroppableInfo.type == "TimelineStepList") {
-		// if we're moving an item to later in the same list, increment the target-index again (since react-beautiful-dnd pre-applies target-index adjustment, unlike the rest of our code that uses UpdateTimelineStepsOrder/Array.Move())
+		// if we're moving an item to later in the same list, increment the target-index again (since hello-pangea-dnd pre-applies target-index adjustment, unlike the rest of our code that uses UpdateTimelineStepsOrder/Array.Move())
 		if (sourceDroppableInfo.type == targetDroppableInfo.type && sourceIndex < targetIndex) {
 			targetIndex++;
 		}

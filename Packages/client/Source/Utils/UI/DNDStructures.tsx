@@ -1,6 +1,5 @@
 import {ChildGroup} from "dm_common";
 import {UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {DraggableProvided, DraggableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd";
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {

@@ -12,7 +12,7 @@ import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {TreeGraphDebug} from "Utils/UI/General.js";
 import {GetViewportRect, MaybeLog, Observer, WaitXThenRun_Deduped} from "web-vcore";
 import {E, emptyObj, IsSpecialEmptyArray, nl, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/hello-pangea-dnd.js";
 import {Column} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, RenderSource, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GetPlaybackInfo} from "Store/main/maps/mapStates/PlaybackAccessors/Basic.js";

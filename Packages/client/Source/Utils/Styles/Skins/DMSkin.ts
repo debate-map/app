@@ -1,7 +1,6 @@
 import {nodeLightBackground} from "Store/db_ext/nodes";
 import {Chroma, chroma_maxDarken, DefaultSkin, PageContainer, Skin, SubNavBar} from "web-vcore";
 import chroma from "web-vcore/nm/chroma-js.js";
-import {ProposalsColumn, ProposalEntryUI, ProposalsUserRankingColumn, ProposalUI_Inner, ProposalUI, ProposalsUI} from "web-vcore/nm/graphql-feedback.js";
 import {Button} from "web-vcore/nm/react-vcomponents";
 import {addHook_css} from "web-vcore/nm/react-vextensions";
 
@@ -161,33 +160,6 @@ export class DMSkin extends Skin {
 			if (ctx.key == "innerStyle_base" && !!ctx.styleArgs[1]) {
 				ctx.styleArgs.push({background: this.BasePanelBackgroundColor().css()});
 			}
-		});
-
-		// graphql-feedback
-		addHook_css(ProposalsUI, ctx=>{
-			if (ctx.callIndex == 0) ctx.styleArgs.push({filter: this.BasePanelDropShadowFilter()});
-		});
-		addHook_css(ProposalsColumn, ctx=>{
-			if (ctx.callIndex == 1) ctx.styleArgs.push({background: this.HeaderColor().css()});
-		});
-		addHook_css(ProposalsUserRankingColumn, ctx=>{
-			if (ctx.callIndex == 1) ctx.styleArgs.push({background: this.HeaderColor().css()});
-		});
-		//addHook_css(ProposalEntryUI, ctx=>{
-		// ProposalEntryUI is wrapped, so attach by string/name instead
-		addHook_css("ProposalEntryUI", ctx=>{
-			if (ctx.callIndex == 0) {
-				ctx.styleArgs.push({
-					background: ctx.self["props"].index % 2 == 0 ? this.ListEntryBackgroundColor_Light().css() : this.ListEntryBackgroundColor_Dark().css(),
-				});
-			}
-		});
-		addHook_css(ProposalUI, ctx=>{
-			if (ctx.callIndex == 2) ctx.styleArgs.push({filter: this.BasePanelDropShadowFilter()});
-		});
-		addHook_css(ProposalUI_Inner, ctx=>{
-			if (ctx.callIndex == 0) ctx.styleArgs.push({background: this.BasePanelBackgroundColor().css()});
-			else if (ctx.callIndex == 2 || ctx.callIndex == 3) ctx.styleArgs.push({color: this.TextColor().css()});
 		});
 
 		/*let asBaseFor: (new(..._)=>Skin)|undefined;
