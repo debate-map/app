@@ -1,5 +1,7 @@
 import {CreateWebpackConfig, FindNodeModule_FromUserProjectRoot} from "web-vcore/Scripts_Dist/Build/WebpackConfig.js";
 import {createRequire} from "module";
+import TerserPlugin from "terser-webpack-plugin";
+import {QUICK} from "web-vcore/Scripts_Dist/EnvVars/ReadEnvVars.js";
 import {config} from "../Config.js";
 import {npmPatch_replacerConfig} from "./NPMPatches.js";
 
@@ -25,6 +27,24 @@ export const webpackConfig = CreateWebpackConfig({
 			fallback: {
 				stream: require.resolve("stream-browserify"),
 			},
+		},
+		optimization: {
+			minimize: !QUICK,
+			mangleExports: false,
+			minimizer: [
+				new TerserPlugin({
+					minify: TerserPlugin.terserMinify,
+					terserOptions: {
+						keep_classnames: true,
+						mangle: {
+							reserved: [
+								"makeObservable",
+								"observer",
+							],
+						},
+					},
+				}),
+			],
 		},
 	},
 	//sourcesFromRoot: true,
