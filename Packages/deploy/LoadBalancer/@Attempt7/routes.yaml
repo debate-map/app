@@ -5,13 +5,7 @@ metadata:
   name: route-web-server
   namespace: default
 spec:
-  parentRefs:
-    - {name: main-gateway, sectionName: http}
-    #- {name: main-gateway, sectionName: https-ovh-us}
-    - {name: main-gateway, sectionName: https-debating-app}
-    - {name: main-gateway, sectionName: https-debatemap-app}
-    - {name: main-gateway, sectionName: https-debates-app}
-    - {name: main-gateway, sectionName: https-dm-sl-org}
+  parentRefs: []  # Populated by Tilt from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -30,12 +24,7 @@ metadata:
   name: route-app-server
   namespace: default
 spec:
-  parentRefs:
-    - {name: main-gateway, sectionName: http}
-    - {name: main-gateway, sectionName: https-debating-app}
-    - {name: main-gateway, sectionName: https-debatemap-app}
-    - {name: main-gateway, sectionName: https-debates-app}
-    - {name: main-gateway, sectionName: https-dm-sl-org}
+  parentRefs: []  # Populated by Tilt from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -63,12 +52,7 @@ metadata:
   name: route-monitor
   namespace: default
 spec:
-  parentRefs:
-    - {name: main-gateway, sectionName: http}
-    - {name: main-gateway, sectionName: https-debating-app}
-    - {name: main-gateway, sectionName: https-debatemap-app}
-    - {name: main-gateway, sectionName: https-debates-app}
-    - {name: main-gateway, sectionName: https-dm-sl-org}
+  parentRefs: []  # Populated by Tilt from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -100,12 +84,7 @@ metadata:
   name: route-grafana
   namespace: monitoring
 spec:
-  parentRefs:
-    - {name: main-gateway, sectionName: http}
-    - {name: main-gateway, sectionName: https-debating-app}
-    - {name: main-gateway, sectionName: https-debatemap-app}
-    - {name: main-gateway, sectionName: https-debates-app}
-    - {name: main-gateway, sectionName: https-dm-sl-org}
+  parentRefs: []  # Populated by Tilt from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
