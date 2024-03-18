@@ -43,7 +43,7 @@ Object.assign(scripts, {
 		build: {
 			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
 			dev: `cross-env NODE_ENV=development npm start client.build`,
-			// non-quick prod builds are broken atm, so disabled
+			// 2024-03-18: for venryx, "quick" takes 45s, and "non-quick" takes 75s
 			prod: `cross-env NODE_ENV=production npm start client.build`,
 			prodQuick: `cross-env NODE_ENV=production QUICK=true npm start client.build`,
 		},
