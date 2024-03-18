@@ -1702,7 +1702,7 @@ __metadata:
     typescript: "npm:5.3.3"
     ui-debug-kit: "npm:0.0.7"
     wavesurfer.js: "npm:7.6.0"
-    web-vcore: "npm:0.0.100"
+    web-vcore: "npm:0.0.102"
   languageName: unknown
   linkType: soft
 
@@ -13660,7 +13660,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-vcore@npm:0.0.100, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@npm:0.0.102, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
