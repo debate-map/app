@@ -13,7 +13,7 @@ metadata:
   name: main-gateway
   namespace: default # test
   annotations:
-   cert-manager.io/cluster-issuer: zerossl-issuer
+   cert-manager.io/cluster-issuer: cert-issuer
 spec:
   gatewayClassName: nginx
   # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
@@ -28,9 +28,9 @@ spec:
     allowedRoutes: {namespaces: {from: All}}
   # origin/ovh
   # todo: maybe switch to having these all part of the same certificate (just re-use the same cert name: https://cert-manager.io/v1.9-docs/usage/gateway/#two-listeners-with-the-same-secret-name)
-  # first entry commented, because zerossl doesn't support certs for hostnames with so many subdomain layers ("DNS identifier has too many labels")
-  #- {name: https-ovh-us,       hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-ovh-us, kind: Secret}]}}
-  - {name: https-debating-app,  hostname: debating.app,                   protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-debating-app, kind: Secret}]}}
-  - {name: https-debatemap-app, hostname: debatemap.app,                  protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-debatemap-app, kind: Secret}]}}
-  - {name: https-debates-app,   hostname: debates.app,                    protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-debates-app, kind: Secret}]}}
-  - {name: https-dm-sl-org,     hostname: debatemap.societylibrary.org,   protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: zerossl-key-dm-sl-org, kind: Secret}]}}
+  # NOTE: zerossl doesn't support certs for hostnames with so many subdomain layers ("DNS identifier has too many labels")
+  - {name: https-ovh-us,        hostname: 9m2x1z.nodes.c1.or1.k8s.ovh.us, protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: cert-key-ovh-us, kind: Secret}]}}
+  - {name: https-debating-app,  hostname: debating.app,                   protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: cert-key-debating-app, kind: Secret}]}}
+  - {name: https-debatemap-app, hostname: debatemap.app,                  protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: cert-key-debatemap-app, kind: Secret}]}}
+  - {name: https-debates-app,   hostname: debates.app,                    protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: cert-key-debates-app, kind: Secret}]}}
+  - {name: https-dm-sl-org,     hostname: debatemap.societylibrary.org,   protocol: HTTPS, port: 443, allowedRoutes: {namespaces: {from: All}}, tls: {mode: Terminate, certificateRefs: [{name: cert-key-dm-sl-org, kind: Secret}]}}

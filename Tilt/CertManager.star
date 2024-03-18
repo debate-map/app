@@ -97,9 +97,9 @@ def Start_CertManager(g):
 			"TILT_PLACEHOLDER:eab_hmacKey": os.getenv("EAB_HMAC_KEY"),
 			"TILT_PLACEHOLDER:eab_kid": os.getenv("EAB_KID"),
 		}))
-		NEXT_k8s_resource(g, new_name="zerossl-issuer", labels=["cert-manager"],
+		NEXT_k8s_resource(g, new_name="cert-issuer", labels=["cert-manager"],
 			objects=[
-				"zerossl-eab:secret",
-				"zerossl-issuer:clusterissuer",
+				"cert-eab:secret",
+				"cert-issuer:clusterissuer",
 			],
 		)
