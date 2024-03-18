@@ -8,6 +8,10 @@ grafana:
   grafana.ini:
     security:
       allow_embedding: true
+    server:
+      #domain: localhost:5100
+      root_url: "%(protocol)s://%(domain)s/grafana"
+      serve_from_sub_path: true
 
 prometheus:
   enabled: true

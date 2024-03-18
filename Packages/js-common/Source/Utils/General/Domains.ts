@@ -11,11 +11,11 @@ const domainConstants = {
 		"localhost:5200", // all of the load-balancer-exposed services, on the remote-k8s
 		// direct to server
 		"9m2x1z.nodes.c1.or1.k8s.ovh.us",
-		"debating.app",
 		"debatemap.societylibrary.org",
 		// through cloudflare
 		"debatemap.app",
 		"debates.app",
+		"debating.app",
 	],
 	// since in client code, these are always false (vars are kept to match server code)
 	onServerAndDev: false,

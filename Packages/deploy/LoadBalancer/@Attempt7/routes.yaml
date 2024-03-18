@@ -5,7 +5,7 @@ metadata:
   name: route-web-server
   namespace: default
 spec:
-  parentRefs: []  # Populated by Tilt from gateways.yaml
+  parentRefs: []  # Populated by Tilt (in Gateway_Base.star) from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -24,7 +24,7 @@ metadata:
   name: route-app-server
   namespace: default
 spec:
-  parentRefs: []  # Populated by Tilt from gateways.yaml
+  parentRefs: []  # Populated by Tilt (in Gateway_Base.star) from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -52,7 +52,7 @@ metadata:
   name: route-monitor
   namespace: default
 spec:
-  parentRefs: []  # Populated by Tilt from gateways.yaml
+  parentRefs: []  # Populated by Tilt (in Gateway_Base.star) from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -83,8 +83,9 @@ kind: HTTPRoute
 metadata:
   name: route-grafana
   namespace: monitoring
+  #namespace: default
 spec:
-  parentRefs: []  # Populated by Tilt from gateways.yaml
+  parentRefs: []  # Populated by Tilt (in Gateway_Base.star) from gateways.yaml
   hostnames:
   - "localhost"
   - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
@@ -95,8 +96,9 @@ spec:
   rules:
     - backendRefs:
       - name: loki-stack-grafana
-        port: 3000
-        #port: 80
+        #namespace: monitoring
+        #port: 3000
+        port: 80
       matches: [
         {path: {type: PathPrefix, value: "/grafana"}}
       ]

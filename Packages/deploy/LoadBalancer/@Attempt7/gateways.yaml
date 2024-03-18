@@ -19,9 +19,8 @@ spec:
   # cert-manager is picky about the values of these fields; reference this before making changes: https://cert-manager.io/docs/usage/gateway
   listeners:
   # The HTTP (ie. non-HTTPS) listener. It's used for:
-  # 1) Serving the proxy requests coming from Cloudflare/[debatemap/debates].app. (will probably switch it to use the HTTPS gateway in the future)
-  # 2) Serving the ECMA tls-certificate provisioning process.
-  # 3) For various debugging/development purposes.
+  # 1) Serving the ECMA tls-certificate provisioning process.
+  # 2) For various debugging/development purposes.
   - name: http
     protocol: HTTP
     port: 80

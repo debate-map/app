@@ -34,11 +34,11 @@ impl DomainsConstants {
                 "localhost:5200", // all of the load-balancer-exposed services, on the remote-k8s
                 // direct to server
                 "9m2x1z.nodes.c1.or1.k8s.ovh.us",
-                "debating.app",
                 "debatemap.societylibrary.org",
 		        // through cloudflare
                 "debatemap.app",
                 "debates.app",
+                "debating.app",
             ],
             on_server_and_dev: ON_SERVER && ENV == "dev",
             on_server_and_prod: ON_SERVER && ENV == "prod",
