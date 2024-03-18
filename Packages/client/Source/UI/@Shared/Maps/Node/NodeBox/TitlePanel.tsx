@@ -7,13 +7,14 @@ import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProp
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, NodeRevision_titlePattern, NodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, NodeRevision, TitleKey, GetExpandedByDefaultAttachment, AsNodeRevisionInput, Attachment, GetTitleIntegratedAttachment, GetParentNodeL3, Polarity, NodeL3, GetNodeRawTitleAndSuch} from "dm_common";
-import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA} from "web-vcore";
+import {ES, InfoButton, IsDoubleClick, Observer, ParseTextForPatternMatchSegments, RunInAction, VReactMarkdown_Remarkable, HTMLProps_Fixed, HSLA, EB_ShowError, EB_StoreError, DefaultLoadingUI} from "web-vcore";
 import React from "react";
-import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {BailError, BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {SLMode, ShowHeader} from "UI/@SL/SL.js";
 import {SLSkin} from "Utils/Styles/Skins/SLSkin.js";
 import {liveSkin} from "Utils/Styles/SkinManager.js";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
+import {DraggableProvidedDragHandleProps} from "web-vcore/nm/hello-pangea-dnd.js";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeBox} from "../NodeBox.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
@@ -61,7 +62,10 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @WarnOfTransientObjectProps
 @Observer
 export class TitlePanel extends BaseComponentPlus(
-	{} as {parent: NodeBox, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style} & HTMLProps_Fixed<"div">,
+	{} as {
+		parent: NodeBox, map: Map|n, node: NodeL3, path: string, indexInNodeList: number, style,
+		dragHandleProps: DraggableProvidedDragHandleProps|n,
+	} & HTMLProps_Fixed<"div">,
 	{editing: false, edit_newTitle: null as string|n, edit_titleKey: null as TitleKey|n, applyingEdit: false},
 ) {
 	OnDoubleClick = async()=>{
@@ -101,9 +105,16 @@ export class TitlePanel extends BaseComponentPlus(
 		});
 	};
 
+	loadingUI(bailInfo: BailInfo) {
+		return (
+			<DefaultLoadingUI comp={bailInfo.comp} bailMessage={bailInfo.bailMessage}
+				// TitlePanel *must* render an element with the drag-handle-props to avoid dnd-lib complaining, so if bail-error is present atm (ie. data loading), render those props onto an empty div
+				extraUI_inRoot={<div {...this.props.dragHandleProps}/>}/>
+		);
+	}
 	render() {
 		// const { map, parent, node, nodeView, path, displayText, equationNumber, style, ...rest } = this.props;
-		const {map, parent, node, path, style, onClick, ...rest} = this.props;
+		const {map, parent, node, path, style, onClick, dragHandleProps, ...rest} = this.props;
 		const {editing, edit_newTitle, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 		/*const parentNode = GetParentNodeL3(path);
@@ -126,6 +137,7 @@ export class TitlePanel extends BaseComponentPlus(
 		return (
 			// <Row style={{position: "relative"}}>
 			<Row {...FilterOutUnrecognizedProps(rest, "div")}
+				{...dragHandleProps}
 				style={E(
 					{
 						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, path),

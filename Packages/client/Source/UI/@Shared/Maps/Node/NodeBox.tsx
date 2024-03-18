@@ -334,7 +334,9 @@ export class NodeBox extends BaseComponentPlus(
 			width_final = width_final.KeepAtLeast(NodeType_Info.for[node.type].minWidth);
 
 			const titlePanel = (
-				<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
+				<TitlePanel {...{indexInNodeList, parent: this, map, node, path}}
+					//{...dragInfo?.provided.dragHandleProps}
+					dragHandleProps={dragInfo?.provided.dragHandleProps}
 					ref={c=>this.titlePanel = c}
 					//onClick={onTextHolderClick} // not needed; TitlePanel already handles double-clicks
 					style={{padding: GetPaddingForNode(node/*, isSubnode*/)}}/>
