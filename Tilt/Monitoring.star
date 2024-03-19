@@ -19,35 +19,34 @@ def Start_Monitoring(g):
 	# ==========
 
 	# only install the netdata pods if we're in remote cluster (it can't collect anything useful in docker-desktop anyway; and removing it saves memory)
-	# temp-disabled (to make sure it's not messing up the cert-manager stuff, since some netdata pods were showing in its logs)
-	# if g["REMOTE"]:
-	# 	helm_remote('netdata',
-	# 		repo_url='https://netdata.github.io/helmchart',
-	# 		#version='1.33.1',
-	# 		version='3.7.12', # helm-chart version is different from netdata version
-	# 	)
+	if g["REMOTE"]:
+		helm_remote('netdata',
+			repo_url='https://netdata.github.io/helmchart',
+			#version='1.33.1',
+			version='3.7.84', # helm-chart version is different from netdata version
+		)
 
-	# 	NEXT_k8s_resource_batch(g, [
-	# 		{"workload": "netdata-parent", "labels": ["monitoring"]},
-	# 		{"workload": "netdata-child", "labels": ["monitoring"]},
-	# 		{
-	# 			"new_name": "netdata-other-objects", "labels": ["monitoring"],
-	# 			"objects": [
-	# 				"netdata:serviceaccount",
-	# 				"netdata-psp:podsecuritypolicy",
-	# 				"netdata:clusterrole",
-	# 				"netdata-psp:clusterrole",
-	# 				"netdata:clusterrolebinding",
-	# 				"netdata-psp:clusterrolebinding",
-	# 				"netdata-parent-database:persistentvolumeclaim",
-	# 				"netdata-parent-alarms:persistentvolumeclaim",
-	# 				"netdata-conf-parent:configmap",
-	# 				"netdata-conf-child:configmap",
-	# 				"netdata-child-sd-config-map:configmap",
-	# 				"netdata:ingress",
-	# 			],
-	# 		},
-	# 	])
+		NEXT_k8s_resource_batch(g, [
+			{"workload": "netdata-parent", "labels": ["monitoring"]},
+			{"workload": "netdata-child", "labels": ["monitoring"]},
+			{
+				"new_name": "netdata-other-objects", "labels": ["monitoring"],
+				"objects": [
+					"netdata:serviceaccount",
+					#"netdata-psp:podsecuritypolicy",
+					#"netdata-psp:clusterrolebinding",
+					#"netdata-psp:clusterrole",
+					"netdata:clusterrole",
+					"netdata:clusterrolebinding",
+					"netdata-parent-database:persistentvolumeclaim",
+					"netdata-parent-alarms:persistentvolumeclaim",
+					"netdata-conf-parent:configmap",
+					"netdata-conf-child:configmap",
+					"netdata-child-sd-config-map:configmap",
+					"netdata:ingress",
+				],
+			},
+		])
 
 	# loki + prometheus + grafana
 	# ==========

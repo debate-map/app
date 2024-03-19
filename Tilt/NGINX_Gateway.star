@@ -27,6 +27,10 @@ def Start_NGINXGateway(g):
 			#'--set=nginxGateway.gatewayControllerName=gateway.nginx.org/main-gateway',
 			#'--set=gateway-name=gateway.nginx.org/main-gateway',
 			#'--set=service.externalIPs={15.204.30.179}',
+
+			# attempted fix for NGF pod and deployment (and probably the gateway-class) being removed for some reason
+			'--set=nginxGateway.image.pullPolicy=IfNotPresent',
+			'--set=nginx.image.pullPolicy=IfNotPresent',
 		],
 	)
 	# NEXT_k8s_resource_batch(g, [

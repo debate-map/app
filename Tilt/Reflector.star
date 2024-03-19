@@ -45,9 +45,10 @@ def Start_Reflector(g):
 	helm_resource(
 		'reflector',
 		'emberstack/reflector',
+		'--set=version=7.1.262',
 		#labels=['reflector'],
-		#resource_deps=['helm-repo-bitnami']
-		resource_deps=['pgo_late'] # this maybe fixes the errors we were hitting in postgres-operator pods, from reflector's code?
+		#resource_deps=['helm-repo-bitnami'],
+		resource_deps=['pgo_late'], # this maybe fixes the errors we were hitting in postgres-operator pods, from reflector's code?
 	)
 	k8s_yaml(ReadFileWithReplacements('../Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml', {
 		#"TILT_PLACEHOLDER:currentTime": timeOfThisTiltfileUpdate,
