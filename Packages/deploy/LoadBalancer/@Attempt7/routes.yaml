@@ -102,9 +102,10 @@ spec:
       matches: [
         {path: {type: PathPrefix, value: "/grafana"}}
       ]
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
+      # we actually *don't* want rewriting for this route, because grafana expects to be accessed under "<domain>/grafana" subpath (as set in LokiStack/values.yaml)
+      # filters:
+      #   - type: URLRewrite
+      #     urlRewrite:
+      #       path:
+      #         type: ReplacePrefixMatch
+      #         replacePrefixMatch: /
