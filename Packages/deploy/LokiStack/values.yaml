@@ -28,28 +28,16 @@ loki:
     #storageClassName: nfs-client
     size: 5Gi
   
-  # first, based on: https://github.com/grafana/loki/issues/9190#issue-1674565430
-  # second, updated "compactor" section to match: https://github.com/grafana/loki/issues/9821#issuecomment-1718865483
-  # third, did some manual fixes/tweaks (eg. commenting out invalid "compactor.retention_table_timeout", and modifying deletion-delay fields [to "temp" values, temporarily])
+  # History summary:
+  # * first, based on: https://github.com/grafana/loki/issues/9190#issue-1674565430
+  # * second, updated "compactor" section to match: https://github.com/grafana/loki/issues/9821#issuecomment-1718865483
+  # * third, did some manual fixes/tweaks (eg. commenting out invalid "compactor.retention_table_timeout", and modifying deletion-delay fields [to "fast" values, temporarily])
+  # * fourth, did some further manual tweaks (eg. retain for 1w), to better match preferences (not yet confirmed working; remove this when confirmed, ie. pvc storage confirmed to not keep filling up)
+  # NOTE: To confirm if your config changes have been applied, open shell in loki-stack-0 pod, and run: `cd /etc/loki; cat loki.yaml`
   config:
     auth_enabled: false
-    chunk_store_config:
-      max_look_back_period: 0s
-    compactor:
-      working_directory: /data/loki/retention
-      shared_store: filesystem
-      retention_enabled: true
-      retention_delete_worker_count: 150
-
-      # deletion-delay: regular (todo: probably adjust these regular delays to be longer actually...)
-      compaction_interval: 10m
-      retention_delete_delay: 5m
-      delete_request_cancel_period: 5m
-
-      # deletion-delay: temp (for fast purging of the massive amount of old logs)
-      # compaction_interval: 1m
-      # retention_delete_delay: 1m
-      # delete_request_cancel_period: 1m
+    server:
+      http_listen_port: 3100
     ingester:
       chunk_block_size: 262144
       chunk_idle_period: 3m
@@ -62,10 +50,14 @@ loki:
       max_transfer_retries: 0
       wal:
         dir: /data/loki/wal
-    limits_config:
-      enforce_metric_name: false
-      reject_old_samples: true
-      reject_old_samples_max_age: 168h
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /data/loki/boltdb-shipper-active
+        cache_location: /data/loki/boltdb-shipper-cache
+        cache_ttl: 24h
+        shared_store: filesystem
+      filesystem:
+        directory: /data/loki/chunks
     schema_config:
       configs:
       - from: "2020-01-01"
@@ -75,16 +67,36 @@ loki:
         object_store: filesystem
         schema: v11
         store: boltdb-shipper
-    server:
-      http_listen_port: 3100
-    storage_config:
-      boltdb_shipper:
-        active_index_directory: /data/loki/boltdb-shipper-active
-        cache_location: /data/loki/boltdb-shipper-cache
-        cache_ttl: 24h
-        shared_store: filesystem
-      filesystem:
-        directory: /data/loki/chunks
+      # 2024-03-18: Tried updating to tsdb (removing boltdb section above), but it failed. Found an error in pod saying "Not using boltdb-shipper index, not starting compactor". (maybe related)
+      # - from: "2024-03-08"
+      #   store: tsdb
+      #   object_store: filesystem
+      #   schema: v12
+      #   index:
+      #     prefix: tsdb_index_
+      #     period: 24h
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h # 1 week (in hrs, to ensure accepted as multiple of 24h)
+      retention_period: 168h # 1 week (in hrs, to ensure accepted as multiple of 24h)
     table_manager:
       retention_deletes_enabled: true
-      retention_period: 24h
+      retention_period: 168h # 1 week (in hrs, to ensure accepted as multiple of 24h)
+    chunk_store_config:
+      max_look_back_period: 168h # 1 week (in hrs, to ensure accepted as multiple of 24h)
+    compactor:
+      working_directory: /data/loki/retention
+      shared_store: filesystem
+      retention_enabled: true
+      retention_delete_worker_count: 150
+
+      # deletion-delay: regular
+      compaction_interval: 10m
+      retention_delete_delay: 1h
+      delete_request_cancel_period: 1h
+
+      # deletion-delay: fast (for fast purging of old logs; should only be used temporarily)
+      # compaction_interval: 1m
+      # retention_delete_delay: 1m
+      # delete_request_cancel_period: 1m
