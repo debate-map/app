@@ -1,4 +1,4 @@
-# note: loki-stack installs loki + prometheus + grafana
+# note: loki-stack installs loki + prometheus + grafana + alert-manager
 
 # Values for configuring the deployment of Grafana.
 # * For deployment options, see: https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md
@@ -22,98 +22,34 @@ prometheus:
     persistentVolume:
       enabled: false
 
-# loki:
-#   persistence:
-#     enabled: true
-#     #storageClassName: nfs-client
-#     size: 5Gi
-#
-#   # set up retention policy (else will just keep filling up)
-#   # based on: https://github.com/grafana/loki/issues/7068#issuecomment-1250682559
-#   # limits_config:
-#   #   retention_period: 7d
-#   #   reject_old_samples: true
-#   #   reject_old_samples_max_age: 168h # not sure what this is for...
-#   #   #enforce_metric_name: false
-#   #   #max_cache_freshness_per_query: 10m
-#   #   #split_queries_by_interval: 15m
-#   # compactor:
-#   #   retention_enabled: true
-#   #   retention_delete_delay: 2h
-#   #   #retention_delete_worker_count: 150
-#   #   #compaction_interval: 10m
-#   # table_manager:
-#   #   retention_deletes_enabled: true
-#   #   retention_period: 7d
-#
-#   # set up retention policy (else will just keep filling up)
-#   # based on: https://github.com/apecloud/kubeblocks/blob/1ccec1637fbb53e62d7736796d45b19412ab81f4/deploy/helm/values.yaml
-#   limits_config:
-#     max_query_lookback: 24h
-#     retention_period: 24h
-#   chunk_store_config:
-#     max_look_back_period: 24h
-#   compactor:
-#     working_directory: /var/loki/retention
-#     shared_store: filesystem
-#     #compaction_interval: 10m
-#     compaction_interval: 1m
-#     retention_enabled: true
-#     #retention_delete_delay: 2h # if you want to purge old data quickly, set this to 1m
-#     retention_delete_delay: 1m
-#     retention_delete_worker_count: 150
-#     #delete_request_cancel_period: 2h
-#     delete_request_cancel_period: 1m
-#   # custom added
-#   table_manager:
-#     retention_deletes_enabled: true
-#     retention_period: 24h
-#
-#   # loki v2 also needs this, to complete retention-policy/cleanup (from: https://github.com/grafana/loki/issues/7068#issuecomment-1250682559)
-#   config:
-#     schema_config:
-#       configs:
-#         - from: 2020-01-01
-#           store: boltdb-shipper
-#           object_store: filesystem
-#           schema: v11
-#           index:
-#             prefix: index_
-#             period: 24h # loki-stack complains if another value is chosen (it says 24h works best)
-
-
-
 loki:
   persistence:
     enabled: true
     #storageClassName: nfs-client
     size: 5Gi
+  
+  # first, based on: https://github.com/grafana/loki/issues/9190#issue-1674565430
+  # second, updated "compactor" section to match: https://github.com/grafana/loki/issues/9821#issuecomment-1718865483
+  # third, did some manual fixes/tweaks (eg. commenting out invalid "compactor.retention_table_timeout", and modifying deletion-delay fields [to "temp" values, temporarily])
   config:
     auth_enabled: false
     chunk_store_config:
       max_look_back_period: 0s
-    
-    # compactor:
-    #   shared_store: filesystem
-    #   working_directory: /data/loki/boltdb-shipper-compactor
     compactor:
       working_directory: /data/loki/retention
       shared_store: filesystem
       retention_enabled: true
-      #retention_table_timeout: 1h # v-late-commented
       retention_delete_worker_count: 150
 
-      # deletion-delay: regular
-      # compaction_interval: 10m
-      # retention_delete_delay: 5m
-      # delete_request_cancel_period: 5m
+      # deletion-delay: regular (todo: probably adjust these regular delays to be longer actually...)
+      compaction_interval: 10m
+      retention_delete_delay: 5m
+      delete_request_cancel_period: 5m
 
       # deletion-delay: temp (for fast purging of the massive amount of old logs)
-      compaction_interval: 1m
-      retention_delete_delay: 1m
-      delete_request_cancel_period: 1m
-
-      
+      # compaction_interval: 1m
+      # retention_delete_delay: 1m
+      # delete_request_cancel_period: 1m
     ingester:
       chunk_block_size: 262144
       chunk_idle_period: 3m
@@ -132,7 +68,7 @@ loki:
       reject_old_samples_max_age: 168h
     schema_config:
       configs:
-      - from: "2020-10-26"
+      - from: "2020-01-01"
         index:
           period: 24h
           prefix: index_
@@ -152,8 +88,3 @@ loki:
     table_manager:
       retention_deletes_enabled: true
       retention_period: 24h
-    # table_manager:
-    #   enforce_metric_name: false
-    #   reject_old_samples: true
-    #   reject_old_samples_max_age: 168h
-    #   retention_period: 168h
