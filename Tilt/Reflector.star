@@ -15,23 +15,9 @@ def Start_Reflector(g):
 	# reflector
 	# ==========
 
-	# from: https://github.com/emberstack/kubernetes-reflector/releases/tag/v6.1.47
-	# k8s_yaml("../Packages/deploy/Reflector/reflector.yaml")
-	# k8s_yaml('../Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml')
-	# NEXT_k8s_resource(g, "reflector",
-	# 	objects=[
-	# 		"reflector:clusterrole",
-	# 		"reflector:clusterrolebinding",
-	# 		"reflector:serviceaccount",
-	# 	],
-	# )
-
 	# helm_remote('reflector',
-	# 	#repo_name='stable',
-	# 	#repo_url='https://charts.helm.sh/stable',
 	# 	repo_url='https://emberstack.github.io/helm-charts',
-	# 	#version='5.4.17',
-	# 	version='6.1.47',
+	# 	version='7.1.262',
 	# )
 	# NEXT_k8s_resource(g, "reflector",
 	# 	objects=[
@@ -41,15 +27,19 @@ def Start_Reflector(g):
 	# 	],
 	# )
 
+	# avoiding helm_resource for now, until helm_resource unreliability is resolved: https://github.com/debate-map/app/issues/281
 	helm_repo('emberstack', 'https://emberstack.github.io/helm-charts')
 	helm_resource(
 		'reflector',
 		'emberstack/reflector',
-		'--set=version=7.1.262',
 		#labels=['reflector'],
-		#resource_deps=['helm-repo-bitnami'],
-		resource_deps=['pgo_late'], # this maybe fixes the errors we were hitting in postgres-operator pods, from reflector's code?
+		flags=['--set=version=7.1.262'],
+		resource_deps=[
+			'emberstack',
+			'pgo_late', # this maybe fixes the errors we were hitting in postgres-operator pods, from reflector's code?
+		],
 	)
+
 	k8s_yaml(ReadFileWithReplacements('../Packages/deploy/Reflector/Reflections/debate-map-pguser-admin.yaml', {
 		#"TILT_PLACEHOLDER:currentTime": timeOfThisTiltfileUpdate,
 		# only update this each time the "tilt up" command is started, not each iteration (switch back to using "timeOfThisTiltfileUpdate" if situation still problematic for new devs)

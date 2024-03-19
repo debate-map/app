@@ -85,6 +85,32 @@ exports.FindPackagePath = (packageName, asAbsolute = true)=>{
 	}
 	throw new Error(`Could not find package: "${packageName}"`);
 };
+// log the start and end times of scripts; this is useful for a variety of purposes (basic benchmarking, remembering precise time of command being run [vsc only shows estimate], etc.)
+exports.SetUpLoggingOfScriptStartAndEndTimes = ()=>{
+	const startTime = new Date();
+	let scriptStartTimePrinted = false;
+	const PrintStartTimeIfNotYet = ()=>{
+		if (scriptStartTimePrinted) return;
+		scriptStartTimePrinted = true;
+		console.log(`Script start: ${startTime.toLocaleString("sv")}`);
+	};
+
+	let scriptEndTimePrinted = false;
+	const PrintEndTimeIfNotYet = ()=>{
+		if (scriptEndTimePrinted) return;
+		scriptStartTimePrinted = true; // we're also logging the start-time in this call, so interrupt timeout-based log of start-time (if still active)
+		scriptEndTimePrinted = true;
+		const endTime = new Date();
+		const timeTaken = endTime.valueOf() - startTime.valueOf();
+		console.log(`Script time:${(timeTaken / 1000).toFixed(3)}s @start:${startTime.toLocaleString("sv")} @end:${endTime.toLocaleString("sv")}`);
+	};
+
+	// log start-time 1s after startup, so early screenshot includes it (if script ends quickly, start-time gets shown only in end-time log)
+	setTimeout(PrintStartTimeIfNotYet, 1000).unref(); // call unref, so timer doesn't keep script from exiting
+	process.on("SIGINT", ()=>PrintEndTimeIfNotYet()); //process.exit(); });
+	process.on("exit", ()=>PrintEndTimeIfNotYet());
+};
+exports.CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 
 //console.log("Argv:", process.argv);
 // process.argv example: ["XXX/node.exe", "XXX/nps.js", "app-server.initDB_k8s dm-ovh"]

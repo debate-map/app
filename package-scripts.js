@@ -1,13 +1,12 @@
 const fs = require("fs");
 const paths = require("path");
 const {spawn, exec, execSync} = require("child_process");
-const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, FindPackagePath, commandName, commandArgs, Dynamic, Dynamic_Async} = require("./Scripts/NPSHelpers.js");
+const {OpenFileExplorerToPath, SetEnvVarsCmd, _packagesRootStr, pathToNPMBin, JSScript, TSScript, commandArgs, Dynamic, CurrentTime_SafeStr, SetUpLoggingOfScriptStartAndEndTimes} = require("./Scripts/NPSHelpers.js");
+
+SetUpLoggingOfScriptStartAndEndTimes();
 
 const scripts = {};
 module.exports.scripts = scripts;
-
-//const CurrentTime_SafeStr = ()=>new Date().toISOString().replace(/:/g, "-");
-const CurrentTime_SafeStr = ()=>new Date().toLocaleString("sv").replace(/[ :]/g, "-"); // ex: 2021-12-10-09-18-52
 
 // ungrouped scripts
 Object.assign(scripts, {

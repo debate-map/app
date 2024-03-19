@@ -147,7 +147,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
 
     # ======== Initialize
     # -------- targets
-    pull_target = os.path.join(helm_remote_cache_dir, repo_name, version)
+    pull_target = os.path.join(helm_remote_cache_dir, repo_name.replace(':', ''), version)
     chart_target = os.path.join(pull_target, chart)
 
     cached_chart_exists = os.path.exists(chart_target)
@@ -157,12 +157,10 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
     if cached_chart_exists:
         # v-replaced (my uses of helm_remote have always specified the version, so this code-block is unnecessary, and causes significant slowdown [~3.5s per remote-version-check])
         '''# Helm chart structure is concrete, we can trust this YAML file to exist
-        print("Cached chart exists: %s" % chart_target) # v-added
         cached_chart_details = read_yaml(os.path.join(chart_target, 'Chart.yaml'))
 
         # check if our local cached chart matches latest remote
         remote_chart_details = fetch_chart_details(chart, repo_name, (username, password), version)
-        print("remote_chart_details: %s" % remote_chart_details) # v-added
 
         # pull when version mismatch
         needs_pull = cached_chart_details['version'] != remote_chart_details['version']'''

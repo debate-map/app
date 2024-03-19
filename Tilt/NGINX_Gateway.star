@@ -12,10 +12,40 @@ load('./K8sUtils.star', 'NEXT_k8s_resource', 'GetLastResourceNamesBatch', 'AddRe
 # ==========
 
 def Start_NGINXGateway(g):
-	helm_resource(
-		'ngf',
-		'oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
+	# helm_remote(
+	# 	chart='nginx-gateway-fabric',
+	# 	repo_name='oci://ghcr.io/nginxinc/charts',
+	# 	release_name='ngf', # affects naming of pods and such; be consistent with helm_resource below
+	# 	#version='1.1.0',
+	# 	version='0.0.0-edge',
+	# 	set=[
+	# 		"service.create=false",
+	# 		#"service.type=NodePort",
+	# 		#"service.type=LoadBalancer",
+	# 		#"service.externalIPs={15.204.30.179}",
+	# 	],
+	# )
+	# NEXT_k8s_resource_batch(g, [
+	# 	{
+	# 		"workload": "ngf-nginx-gateway-fabric", "new_name": "ngf", "labels": ["gateway"],
+	# 		#"new_name": "ngf", "labels": ["gateway"],
+	# 		"objects": [
+	# 			"nginxgateways.gateway.nginx.org:customresourcedefinition",
+	# 			"nginx:gatewayclass",
+	# 			"ngf-nginx-gateway-fabric:serviceaccount",
+	# 			"ngf-nginx-gateway-fabric:clusterrole",
+	# 			"ngf-nginx-gateway-fabric:clusterrolebinding",
+	# 			"ngf-config:nginxgateway",
+	# 		]
+	# 	},
+	# ])
 
+	# avoiding helm_resource for now, until helm_resource unreliability is resolved: https://github.com/debate-map/app/issues/281
+	helm_resource(
+		chart='oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
+		release_name='ngf', # affects naming of pods and such; be consistent with helm_remote above
+		name='ngf', # tilt resource name
+	
 		namespace='default',
 		flags=[
 			#'--version=1.1.0',
@@ -23,21 +53,13 @@ def Start_NGINXGateway(g):
 			'--set=service.create=false',
 			#'--set=service.type=NodePort',
 			#'--set=service.type=LoadBalancer',
-			#'--set=gateway=default/entry-point-service',
-			#'--set=nginxGateway.gatewayControllerName=gateway.nginx.org/main-gateway',
-			#'--set=gateway-name=gateway.nginx.org/main-gateway',
 			#'--set=service.externalIPs={15.204.30.179}',
-
+	
 			# attempted fix for NGF pod and deployment (and probably the gateway-class) being removed for some reason
 			'--set=nginxGateway.image.pullPolicy=IfNotPresent',
 			'--set=nginx.image.pullPolicy=IfNotPresent',
 		],
 	)
-	# NEXT_k8s_resource_batch(g, [
-	# 	{"workload": "gateway-api-admission", "labels": ["gateway"]},
-	# 	{"workload": "gateway-api-admission-server", "labels": ["gateway"]},
-	# 	{"workload": "gateway-api-admission-patch", "labels": ["gateway"]},
-	# ])
 	NEXT_k8s_resource_batch(g, [{"workload": "ngf", "labels": ["gateway"]}])
 
 	bind_to_address = None
@@ -64,11 +86,12 @@ def Start_NGINXGateway(g):
 		"TILT_PLACEHOLDER:externalIPs": "externalIPs" if bind_to_address else "externalIPs_disabled",
 		"TILT_PLACEHOLDER:bind_to_address": bind_to_address or '',
 	}))
+	# this must be commented when using "helm_remote" approach above (the "workload":"ngf-nginx-gateway-fabric" part grabs deployment by that name AND the service -- which is what the below references)
 	NEXT_k8s_resource_batch(g, [
 		{
 			"new_name": "entry-point-service-tilt", "labels": ["gateway"],
 			"objects": [
-				"ngf-nginx-gateway-fabric",
+				"ngf-nginx-gateway-fabric:service",
 			],
 			#"trigger_mode": TRIGGER_MODE_MANUAL,
 
