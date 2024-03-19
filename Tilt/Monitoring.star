@@ -54,20 +54,25 @@ def Start_Monitoring(g):
 
 	helm_remote('loki-stack',
 		repo_url='https://grafana.github.io/helm-charts',
-		version='2.8.9', # helm-chart version may differ from vector version
+		version='2.10.2', # helm-chart version may differ from vector version
 		namespace='monitoring',
 		# create_namespace=True,
 		# set=[],
 		values=["../Packages/deploy/LokiStack/values.yaml"],
 	)
 	NEXT_k8s_resource_batch(g, [
-		{"labels": ["monitoring"], "workload": 'loki-stack', "objects": [
+		{"labels": ["monitoring"], "new_name": 'loki-stack-early', "objects": [
 			"loki-stack:configmap",
 			"loki-stack:secret",
 			"loki-stack:serviceaccount",
 			"loki-stack:rolebinding",
 			"loki-stack:role",
 		]},
+	]);
+	NEXT_k8s_resource_batch(g, [
+		{"labels": ["monitoring"], "workload": 'loki-stack'},
+	]);
+	NEXT_k8s_resource_batch(g, [
 		{"labels": ["monitoring"], "workload": 'loki-stack-grafana', "port_forwards": '3200:3000' if g["REMOTE"] else '3000', "objects": [
 			"loki-stack-grafana:serviceaccount",
 			"loki-stack-grafana:secret",
@@ -91,15 +96,19 @@ def Start_Monitoring(g):
 		{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-node-exporter', "objects": [
 			"loki-stack-prometheus-node-exporter:serviceaccount",
 		]},
-		{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-alertmanager', "objects": [
-			"loki-stack-prometheus-alertmanager:configmap",
-			"loki-stack-prometheus-alertmanager:clusterrolebinding",
-			"loki-stack-prometheus-alertmanager:clusterrole",
-			"loki-stack-prometheus-alertmanager:serviceaccount",
+		# {"labels": ["monitoring"], "workload": 'loki-stack-prometheus-alertmanager', "objects": [
+		# 	"loki-stack-prometheus-alertmanager:configmap",
+		# 	"loki-stack-prometheus-alertmanager:clusterrolebinding",
+		# 	"loki-stack-prometheus-alertmanager:clusterrole",
+		# 	"loki-stack-prometheus-alertmanager:serviceaccount",
+		# ]},
+		{"labels": ["monitoring"], "workload": 'loki-stack-alertmanager', "objects": [
+			"loki-stack-alertmanager:configmap",
+			"loki-stack-alertmanager:serviceaccount",
 		]},
 		{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-pushgateway', "objects": [
-			"loki-stack-prometheus-pushgateway:clusterrolebinding",
-			"loki-stack-prometheus-pushgateway:clusterrole",
+			# "loki-stack-prometheus-pushgateway:clusterrolebinding",
+			# "loki-stack-prometheus-pushgateway:clusterrole",
 			"loki-stack-prometheus-pushgateway:serviceaccount",
 		]},
 		{"labels": ["monitoring"], "workload": 'loki-stack-prometheus-server', "objects": [
