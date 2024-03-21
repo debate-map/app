@@ -60,7 +60,7 @@ spec:
         volume:
           volumeClaimSpec:
             {{- if $repo.volume.backupsStorageClassName }}
-            storageClassName: {{ .Values.backupsStorageClassName | quote }}
+            storageClassName: {{ $repo.volume.backupsStorageClassName | quote }}
             {{- end }}
             accessModes:
             - "ReadWriteOnce"
@@ -79,6 +79,14 @@ spec:
         azure:
           container: {{ $repo.azure.container | quote }}
         {{- end }}
+        {{- if $repo.schedules}}
+        schedules:
+{{ toYaml $repo.schedules | indent 10 }}
+        {{- end}}
+        {{- if $repo.restore}}
+        restore:
+{{ toYaml $repo.restore | indent 10 }}
+        {{- end}}
       {{- end }}
       {{- else if .Values.s3 }}
       configuration:
@@ -129,6 +137,11 @@ spec:
               requests:
                 storage: {{ default "1Gi" .Values.backupsSize | quote }}
       {{- end }}
+      {{- if .Values.pgBackRestManual}}
+      manual:
+{{ toYaml .Values.pgBackRestManual | indent 8 }}
+      {{- end}}
+
   {{- if or .Values.pgBouncerReplicas .Values.pgBouncerConfig }}
   proxy:
     pgBouncer:

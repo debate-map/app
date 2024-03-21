@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    tilt.dev/down-policy: keep
+    volume.beta.kubernetes.io/storage-provisioner: docker.io/hostpath
+    volume.kubernetes.io/storage-provisioner: docker.io/hostpath
+  labels:
+  name: debate-map-repo1
+  namespace: postgres-operator
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: persistent-storage
+  volumeMode: Filesystem
+  volumeName: TILT_PLACEHOLDER:volume_name
