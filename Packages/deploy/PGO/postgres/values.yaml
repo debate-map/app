@@ -173,22 +173,25 @@ users:
     options: "SUPERUSER"
 
 # dataSource specifies a data source for bootstrapping a Postgres cluster.
-TILTFILE_MANAGED_BLOCK_Restore_1ForDev: {}
-TILTFILE_MANAGED_BLOCK_Restore_2ForProd: {}
-  # dataSource:
-  #   postgresCluster:
-  #     clusterName: debate-map
-  #     repoName: repo2
-  #     options:
-  #     # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
-  #     # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
-  #     - --set 20221218-030022F_20221220-031024D
-  #     - --type=immediate
-  #     #- --target-action=promote
-  #     # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
-  #     # - --type=time
-  #     # - --target="2021-09-01 07:42:06+00"
-TILTFILE_MANAGED_BLOCK_Restore_3End: {}
+# The whole stanza will be deleted unless TILT_PLACEHOLDER:restoreFromBackup is defined
+dataSource:
+  # postgresCluster:
+  #   clusterName: debate-map
+  #   repoName: repo1
+  pgbackrest:
+    stanza: db
+    clusterName: debate-map
+    repo: {}
+    options:
+      - --type=immediate
+    # use this to restore to a base-backup, without wal-archive replaying (modify "set" to the base-backup folder-name seen in the cloud-bucket)
+    # NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+    # - --set TILT_PLACEHOLDER:restoreFromBackup
+    # - --type=immediate
+    #- --target-action=promote
+    # use this to restore to a specific point-in-time, with wal-archive replaying (modifying "target" to the time you want to restore to, with specified timezone [UTC recommended])
+    # - --type=time
+    # - --target="2021-09-01 07:42:06+00"
 
 # customTLSSecret references a Secret that contains the relevant information for
 # bringing external TLS artifacts to a PostgreSQL cluster. This provides the
@@ -289,71 +292,45 @@ TILTFILE_MANAGED_BLOCK_Restore_3End: {}
 # Below is an example that enables one of each backup type.
 # All available quickstart options are presented below; please see the backup types
 # if you want to see how each option works.
-multiBackupRepos:
-- volume:
-    backupsSize: 10Gi
-# - s3:
-#     bucket: ""
-#     endpoint: ""
-#     region: ""
-#     key: ""
-#     keySecret: ""
-#     keyType: ""
-- gcs:
-    bucket: "TILT_PLACEHOLDER:bucket_uniformPrivate_name"
-    key: |
-      TILT_PLACEHOLDER:gcsKeyAsString
-# - azure:
-#     account: ""
-#     key: ""
-#     container: ""
 
 # pgBackRestConfig allows for the configuration of every pgBackRest option
 # except for "image", which is set by "pgBackRest".
-pgBackRestConfig:
-  TILTFILE_MANAGED_BLOCK1_whenGCSOff:
-    repoHost:
-      dedicated: {}
-    repos:
-    - name: repo1
-      volume:
+multiBackupRepos:
+    - volume:
+        backupsSize: 10Gi
+        backupsStorageClassName: persistent-storage
         volumeClaimSpec:
           accessModes:
           - "ReadWriteOnce"
-          resources:
-            requests:
-              storage: 10Gi
-  TILTFILE_MANAGED_BLOCK2_whenGCSOn:
-    repoHost:
-      dedicated: {}
-    configuration:
-    - secret:
-        name: debate-map-pgbackrest-secret
-    global:
-      repo2-path: /db-backups-pgbackrest
-    repos:
-    - name: repo1
-      volume:
-        volumeClaimSpec:
-          accessModes:
-          - "ReadWriteOnce"
-          resources:
-            requests:
-              storage: 10Gi
-    - name: repo2
-      gcs:
-        bucket: "TILT_PLACEHOLDER:bucket_uniformPrivate_name"
       schedules:
-        # at 3am, each Sunday (cron schedule syntax)
-        full: "0 3 * * 0"
-        # at 3:10am, each day (cron schedule syntax)
-        differential: "10 3 * * *"
+        # at 3am, each day (cron schedule syntax)
+        differential: "0 3 * * *"
+        # at 3:10am, each Sunday (cron schedule syntax)
+        full: "10 3 * * 0"
+    # The following stanza will be deleted unless gcs is enabled
+    - gcs:
+        bucket: "TILT_PLACEHOLDER:bucket_uniformPrivate_name"
+        key: |
+          TILT_PLACEHOLDER:gcsKeyAsString
+      schedules:
+        # at 4am, each day (cron schedule syntax)
+        differential: "0 4 * * *"
+        # at 4:10am, each Sunday (cron schedule syntax)
+        full: "10 4 * * 0"
     # configuration for the next manual backup to be triggered (see deploy/pg-backups guide-module for more info)
-    manual:
-      repoName: repo2
-      options:
-      - --type=full
-  TILTFILE_MANAGED_BLOCK3: {}
+    # - name: repo3
+    #   - s3:
+    #     bucket: ""
+    #     endpoint: ""
+    #     region: ""
+    #     key: ""
+    #     keySecret: ""
+    #     keyType: ""
+    # -name repo4
+    #   - azure:
+    #     account: ""
+    #     key: ""
+    #     container: ""
 
   # configuration for the next restore to be triggered # commented; now set using the restoreDBBackup_prep script
   # restore:
@@ -373,6 +350,11 @@ pgBackRestConfig:
   #     "--set 20210828-074206F"
   #   ]
   # }
+
+pgBackRestManual:
+  repoName: repo1
+  options:
+  - --type=full
 
 ################################
 # Pooling / pgBouncer Settings #
@@ -406,6 +388,7 @@ metadata:
     reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "default"
     #reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
     #reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "app"
+    tilt.dev/down-policy: keep
 
 # service customizes the Service that exposes the Postgres primary.
 # service: {}

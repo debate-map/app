@@ -28,34 +28,95 @@ def Start_Postgres(g):
 	#local_resource("pre-pull-large-image-2", "docker pull gcr.io/debate-map-prod/crunchy-postgres:ubi8-15.1-0")
 	# ----------
 
+	k8s_yaml('../Packages/deploy/PGO/storage/persistent_storage.yaml')
+
+	restoreFromLocalBackup = None
+	volumes = decode_yaml(local("kubectl get persistentVolume -A -o yaml --context %s " % (g["CONTEXT"]), quiet = True))
+	for v in volumes['items']:
+		if v['spec'].get('claimRef', {}).get('name', None) == 'debate-map-repo1':
+			print(v)
+			if v['status']['phase'] in ('Released', 'Available'):
+				restoreFromLocalBackup = v['metadata']['name']
+				print(restoreFromLocalBackup)
+			break
+	if restoreFromLocalBackup:
+		local_resource('pgo-backup-disk-detached', labels=["database_DO-NOT-RESTART-THESE"],
+			cmd="python ../Packages/deploy/PGO/restore/detach_persistent_volume.py "+restoreFromLocalBackup,
+			env=dict(CONTEXT=g['CONTEXT'])
+		)
+		k8s_yaml(ReadFileWithReplacements('../Packages/deploy/PGO/restore/claim.yaml', {
+			"TILT_PLACEHOLDER:volume_name": restoreFromLocalBackup
+		}))
+		NEXT_k8s_resource(g, new_name='pgo-backup-disk-claim',
+			labels=["database_DO-NOT-RESTART-THESE"],
+			objects=["debate-map-repo1:PersistentVolumeClaim:postgres-operator"],
+			resource_deps_extra=['pgo-backup-disk-detached'],
+		)
+		# Note: This last step is optional, because of the detach step earlier.
+		# But it does ensure that the claim is bound by the time we get to pgo
+		local_resource('pgo-backup-disk-updated', labels=["database_DO-NOT-RESTART-THESE"],
+			cmd="python ../Packages/deploy/PGO/restore/reattach_persistent_volume.py",
+			resource_deps=['pgo-backup-disk-claim'], env=dict(CONTEXT=g['CONTEXT'])
+		)
+
 	k8s_yaml(helm('../Packages/deploy/PGO/install', namespace="postgres-operator"))
 
-	gcsMissingMessage = "[gcs-key.json was not found]"
-	gcsKeyFileContents = str(read_file("../Others/Secrets/gcs-key.json", gcsMissingMessage))
-	if gcsKeyFileContents == gcsMissingMessage:
-		print("Warning: File \"Others/Secrets/gcs-key.json\" was not found; pgbackrest will not be enabled in this cluster. (this is normal if you're not a backend-deployer)")
+	postgresYaml = helm('../Packages/deploy/PGO/postgres', namespace="postgres-operator")
+	# print(str(postgresYaml))
+	gcsKeyFileContents = None
+	# Restore from pgBackRest at startup. Can be the local (repo1) or Gcs remote (repo2)
+	restoreFromGcs = False
+	restoreFromBackupFolder = None   # Specify a backup folder-name, such as 20221218-030022F_20221220-031024D, as found in the cloud-bucket (gcs) or volume /pgbackrest/repo1/backup/db/20240320-071854F/ in repo-host-0
+	# NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+	restoreFromTime = None # Alternately, specify a backup time
+	doRestore = restoreFromGcs or restoreFromLocalBackup
+	if g['ENV'] == 'PROD':
+		gcsKeyFileContents = str(read_file("../Others/Secrets/gcs-key.json", None))
+		if not gcsKeyFileContents:
+			print("Warning: File \"Others/Secrets/gcs-key.json\" was not found; pgbackrest will not be enabled in this cluster. (this is normal if you're not a backend-deployer)")
 
-	postgresYaml = str(ReplaceInBlob(helm('../Packages/deploy/PGO/postgres', namespace="postgres-operator"), {
-		"TILT_PLACEHOLDER:bucket_uniformPrivate_name": g["bucket_uniformPrivate_name"],
-		"[@base64]TILT_PLACEHOLDER:gcsKeyAsString": gcsKeyFileContents.replace("\n", "\n    ")
-	}))
-	if gcsKeyFileContents == gcsMissingMessage:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="reduceIndent")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="omit")
-	else:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="omit")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="reduceIndent")
+	if gcsKeyFileContents:
+		postgresYaml = ReplaceInBlob(postgresYaml, {
+			"TILT_PLACEHOLDER:bucket_uniformPrivate_name": g["bucket_uniformPrivate_name"],
+			"[@base64]TILT_PLACEHOLDER:gcsKeyAsString": gcsKeyFileContents.replace("\n", "\n    ")
+		})
+	postgresData = decode_yaml_stream(postgresYaml)
+	for data in postgresData:
+		if data['kind'] == 'PostgresCluster':
+			backupData = data['spec']['backups']['pgbackrest']
+			if not gcsKeyFileContents:
+				backupData['repos'].pop()
+				backupData.pop('global')
+			if doRestore:
+				# Attempt 1: restoreData using dataSource. Seems not to work.
+				# restoreData = data['spec']['dataSource']['pgbackrest']
+				# restoreData['repo'] = backupData['repos'][1 if restoreFromGcs else 0]
+				# if restoreFromGcs:
+				# 	restoreData['repo'] = backupData['repos'][1]
+				# 	restoreData['global'] = backupData['global']
+				# else:
+				# 	# emulate deepcopy
+				# 	restoreData['repo'] = dict(**backupData['repos'][0])
+				# 	restoreData['repo']['volume'] = dict(**restoreData['repo']['volume'])
+				# 	restoreData['repo']['volume']['volumeClaimSpec'] = dict(**restoreData['repo']['volume']['volumeClaimSpec'])
+				# 	# Set dataSource
+				# 	restoreData['repo']['volume']['volumeClaimSpec']['dataSource'] = dict(kind='VolumeClaimSpec', name='debate-map-repo1')
 
-	# enableRestoreForProd = True
-	# enableRestore = enableRestoreForProd if PROD else False
-	if g["DEV"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="reduceIndent")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="omit")
-	elif g["PROD"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="omit")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="reduceIndent")
+				# Attempt 2: Restore stanza in backupData
+				data['spec'].pop('dataSource')
+				restoreData = dict(enabled=True, repoName='repo2' if restoreFromGcs else 'repo1', options=[])
+				if restoreFromBackupFolder:
+					restoreData['options'].extend(['--target-option=promote', '--set '+restoreFromBackupFolder])
+				elif restoreFromTime:
+					restoreData['options'].extend(['--type=time', '--target "%s"' % restoreFromTime])
+				backupData['restore'] = restoreData
+				data['spec']['metadata']['annotations']['postgres-operator.crunchydata.com/pgbackrest-restore']='2023-03-21 21:15:00' # TODO
+			else:
+				data['spec'].pop('dataSource')
 
-	k8s_yaml(blob(postgresYaml))
+	postgresYaml = encode_yaml_stream(postgresData)
+	print(postgresYaml)
+	k8s_yaml(postgresYaml)
 
 	# now package up the postgres objects into the Tilt "database" section
 	# ----------
@@ -97,6 +158,7 @@ def Start_Postgres(g):
 				"pgo:clusterrole",
 				"pgo:clusterrolebinding",
 			],
+			resource_deps_extra=["pgo-backup-disk-updated"] if restoreFromLocalBackup else [],
 		},
 		{
 			"new_name": 'pgo-secrets', "labels": ["database"],
