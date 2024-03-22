@@ -11,20 +11,29 @@ Notes:
 2) Changes that affect the data-structure of nodes, or otherwise "change what people enter into the map" (eg. bracketed prefix-text), should be done via the child-layout setting.
 */
 
-const GAD_extraFlags = ["sl", "gad", "cov", "2020", "ai", "ia", "climate"]; // if entry is changed/added, do the same for line in index.html
-export const SLMode = startURL.domain == "demo.greatamericandebate.org" || GAD_extraFlags.includes(startURL.GetQueryVar("extra") ?? "");
-export const SLMode_Main = startURL.GetQueryVar("extra") == "sl";
-export const SLMode_GAD = startURL.GetQueryVar("extra") == "gad";
-export const SLMode_COVID = startURL.GetQueryVar("extra") == "cov";
-export const SLMode_2020 = startURL.GetQueryVar("extra") == "2020";
-export const SLMode_AI = startURL.GetQueryVar("extra") == "ai";
-export const SLMode_IA = startURL.GetQueryVar("extra") == "ia";
-export const SLMode_Climate = startURL.GetQueryVar("extra") == "climate";
+export const SL_extraFlags = ["sl", "gad", "cov", "2020", "ai", "ia", "climate"]; // if entry is changed/added, do the same for line in index.html
+export const slSkin_fromExtra = SL_extraFlags.includes(startURL.GetQueryVar("extra") ?? "") ? startURL.GetQueryVar("extra") : null;
+export const slSkin = (()=>{
+	if (slSkin_fromExtra != null) return slSkin_fromExtra;
+	if (startURL.DomainWithoutProtocol == "demo.greatamericandebate.org") return "gad";
+	if (startURL.DomainWithoutProtocol == "debatemap.societylibrary.org") return "ai";
+	return null; // if null is returned, it means no sl-mode is active (ie. use default debate-map styling)
+})();
+
+export const SLMode = slSkin != null;
+export const SLMode_Main = slSkin == "sl";
+export const SLMode_GAD = slSkin == "gad";
+export const SLMode_COVID = slSkin == "cov";
+export const SLMode_2020 = slSkin == "2020";
+export const SLMode_AI = slSkin == "ai";
+export const SLMode_IA = slSkin == "ia";
+export const SLMode_Climate = slSkin == "climate";
+
 export const ShowHeader = startURL.GetQueryVar("header") != "0"; // todo: probably rename to URL_HideHeader
 export const URL_HideNodeHover = startURL.GetQueryVar("nodeHover") == "0";
 export const HKMode = startURL.GetQueryVar("extra") == "hk";
 // These are utilized by the helper functions in $node_sl.ts.
-globalThis.SLDemo_forJSCommon = SLMode;
+globalThis.SLMode_forJSCommon = SLMode;
 globalThis.ShowHeader_forJSCommon = ShowHeader;
 globalThis.HKMode_forJSCommon = HKMode;
 

@@ -20,7 +20,7 @@
 			// this allows React DevTools to work in an iframe (if we're in Cypress running our app)
 			window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = window.parent.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 		}
-		// if has an SL flag, delay title loading till GAD.ts runs
+		// if has an SL flag, delay title loading till SL.ts runs
 		if (["sl", "gad", "cov", "2020", "ai", "ia", "climate"].find(flag=>window.location.href.includes(`?extra=${flag}`))) {
 			document.getElementById("title").innerText = "";
 		}

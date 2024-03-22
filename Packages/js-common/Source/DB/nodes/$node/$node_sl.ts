@@ -13,8 +13,8 @@ import {NodePhrasing_Embedded, TitleKey_values} from "../../nodePhrasings/@NodeP
 
 // See "GAD.ts" for definition of these globals.
 // (Yes, this is hacky; there's not a straightforward alternative atm though, since startURL + derived-consts are in the "client" package, and moving it to js-common doesn't really fit conceptually.)
-export function SLDemo_ForJSCommon(): boolean {
-	return globalThis.SLDemo_forJSCommon;
+export function SLMode_ForJSCommon(): boolean {
+	return globalThis.SLMode_forJSCommon;
 }
 export function ShowHeader_ForJSCommon(): boolean {
 	return globalThis.ShowHeader_forJSCommon;
@@ -24,7 +24,7 @@ export function HKMode_ForJSCommon(): boolean {
 }
 
 export function IsSLModeOrLayout(childLayout: ChildLayout) {
-	return childLayout == ChildLayout.slStandard || SLDemo_ForJSCommon(); // see GAD.ts for definition
+	return childLayout == ChildLayout.slStandard || SLMode_ForJSCommon(); // see GAD.ts for definition
 }
 
 export function ShouldShowNarrativeFormForEditing(childLayout: ChildLayout, phrasing: NodePhrasing_Embedded) {

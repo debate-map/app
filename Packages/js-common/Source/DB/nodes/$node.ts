@@ -20,7 +20,7 @@ import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js"
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodePhrasing_Embedded, TitleKey, TitleKey_values} from "../nodePhrasings/@NodePhrasing.js";
 import {Attachment} from "../@Shared/Attachments/@Attachment.js";
-import {SLDemo_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
+import {SLMode_ForJSCommon, GetExtractedPrefixTextInfo, ShouldExtractPrefixText, ShowHeader_ForJSCommon} from "./$node/$node_sl.js";
 import {IsNodeToolbarEnabled, ShowNodeToolbar} from "../maps/$map.js";
 
 export function PreProcessLatex(text: string) {
@@ -365,7 +365,7 @@ export const GetNodeRawTitleAndSuch = CreateAccessor((node: NodeL2, path?: strin
 export const UseStandardArgTitleOverCustom = CreateAccessor((rawTitle: string|undefined)=>{
 	// in sl-mode, allow custom titles for arguments to actually display in-place of the standard "True, because..." etc. texts
 	// (normally, we enforce those standard-texts for arguments, to avoid rhetorical advantage from overriding the "generic container text" -- but sl mostly avoids this concern with a consistent editor team)
-	if (SLDemo_ForJSCommon() && rawTitle != null) return false;
+	if (SLMode_ForJSCommon() && rawTitle != null) return false;
 	// todo: maybe extend branch above (for sl-mode) to accept "sl-layout" as well (for allowing custom arg-titles)
 	return true;
 });
@@ -415,7 +415,7 @@ export const GetNodeDisplayText = CreateAccessor((node: NodeL2, path?: string|n,
 	}
 
 	// in SL+NoHeader mode: if there are special sl-related chars at start of text (part-1 of the prefix-text, ie. the symbol/arrow), remove those chars
-	if (SLDemo_ForJSCommon() && !ShowHeader_ForJSCommon()) {
+	if (SLMode_ForJSCommon() && !ShowHeader_ForJSCommon()) {
 		resultTitle = resultTitle.replace(/^([➸ ]*)/, "");
 	}
 
