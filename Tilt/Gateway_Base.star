@@ -17,21 +17,33 @@ def Start_Gateway_Base(g):
 
 	# gateway api
 	# ==========
+	
 	load_balancer_data = kustomize("../Packages/deploy/LoadBalancer/@Attempt7")
 	load_balancer_data2 = decode_yaml_stream(load_balancer_data)
 	listener_names = None
-	# Look for the listeners in the gateway
+
+	# if in local cluster, omit the redirect-to-https route (only the remote cluster uses https)
+	redirect_to_https_route = [x for x in load_balancer_data2 if x["kind"] == "HTTPRoute" and x["metadata"]["name"] == "redirect-to-https"][0]
+	if not g["REMOTE"]:
+		load_balancer_data2.remove(redirect_to_https_route)
+
+	# Find all of the listeners in the gateway that match the target environment (local: only http, remote: only https)
 	for item in load_balancer_data2:
 		if item["kind"] == "Gateway":
-			listener_names = [l['name'] for l in item['spec']['listeners']
-				if (l['protocol'] == 'HTTPS') == g['REMOTE']]  # HTTP only if local, HTTPS only if remote
+			listener_names = [
+				l['name'] for l in item['spec']['listeners'] if (
+					(not g['REMOTE'] and l['protocol'] == 'HTTP') # if local, retrieve the HTTP listeners only
+					or (g['REMOTE'] and l['protocol'] == 'HTTPS') # if remote, retrieve the HTTPS listeners only
+				)
+			]
 			break
 	if not listener_names:
 		fail("Missing Gateway")
-	# Add the listeners to the HTTPRoutes
+	# Use the listeners retrieved above as the parent-refs for the HTTPRoutes. (other than the redirect-to-https route)
 	for item in load_balancer_data2:
-		if item["kind"] == "HTTPRoute":
-			item['spec']['parentRefs']= [dict(name='main-gateway', namespace='default', sectionName=ln) for ln in listener_names]
+		if item["kind"] == "HTTPRoute" and item != redirect_to_https_route:
+			item["spec"]["parentRefs"] = [dict(name="main-gateway", namespace="default", sectionName=ln) for ln in listener_names]
+
 	load_balancer_data = encode_yaml_stream(load_balancer_data2)
 	k8s_yaml(load_balancer_data) # from: https://github.com/kubernetes-sigs/gateway-api/tree/v0.8.0/config/crd
 

@@ -109,3 +109,29 @@ spec:
       #       path:
       #         type: ReplacePrefixMatch
       #         replacePrefixMatch: /
+
+# redirect routes
+# ==========
+
+# NOTE: In local deploys, this http->https redirect route is disabled (in Gateway_Base.star), by removing the route entry from the yaml-contents entirely.
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: redirect-to-https
+spec:
+  parentRefs:
+  - {name: main-gateway, sectionName: http}
+  hostnames:
+  #- "localhost"
+  - "9m2x1z.nodes.c1.or1.k8s.ovh.us"
+  - "debating.app" # cloudflare does this redirect for us, but no harm in ensuring so ourselves
+  - "debatemap.app" # cloudflare does this redirect for us, but no harm in ensuring so ourselves
+  - "debates.app" # cloudflare does this redirect for us, but no harm in ensuring so ourselves
+  - "debatemap.societylibrary.org"
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301

@@ -69,8 +69,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>}
 				<Title_Base {...sharedProps}/>
-				{node.type == NodeType.claim &&
-					<OtherTitles {...sharedProps}/>}
+				<OtherTitles {...sharedProps}/>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>{noteField_label}: </Pre>
 					<TextArea enabled={enabled} autoSize={true} style={E({flex: 1, minWidth: 0})}
@@ -139,16 +138,18 @@ class OtherTitles extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 		const showNarrativeForm = ShouldShowNarrativeFormForEditing(childLayout, node.current.phrasing);
 		return (
 			<>
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Title (negation): </Pre>
-					<TitleInput {...OmitRef(this.props)} titleKey="text_negation"/>
-				</RowLR>
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Title (question): </Pre>
-					{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
-						value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
-					<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
-				</RowLR>
+				{node.type == NodeType.claim && <>
+					<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+						<Pre>Title (negation): </Pre>
+						<TitleInput {...OmitRef(this.props)} titleKey="text_negation"/>
+					</RowLR>
+					<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+						<Pre>Title (question): </Pre>
+						{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
+							value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
+						<TitleInput {...OmitRef(this.props)} titleKey="text_question"/>
+					</RowLR>
+				</>}
 				{showNarrativeForm &&
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Title (narrative): </Pre>
