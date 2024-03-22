@@ -1702,7 +1702,7 @@ __metadata:
     typescript: "npm:5.3.3"
     ui-debug-kit: "npm:0.0.7"
     wavesurfer.js: "npm:7.6.0"
-    web-vcore: "npm:0.0.102"
+    web-vcore: "npm:0.0.103"
   languageName: unknown
   linkType: soft
 
@@ -10820,18 +10820,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-vscrollview@npm:1.0.10":
-  version: 1.0.10
-  resolution: "react-vscrollview@npm:1.0.10"
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-vextensions: ^1.0.18
-  checksum: 7c3c125eb5129d617c1ad622aaa7c20295cbde5c46b7f3d92c1e112395cbd333d723d3e02989ddecd46d062ec7d53a98d13251192dfc680a02b78bf5349338e5
-  languageName: node
-  linkType: hard
-
-"react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview":
+"react-vscrollview@npm:1.0.11, react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview":
   version: 0.0.0-use.local
   resolution: "react-vscrollview@workspace:.yalc/web-vcore/.yalc/react-vscrollview"
   peerDependencies:
@@ -13660,7 +13649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-vcore@npm:0.0.102, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@npm:0.0.103, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -13735,7 +13724,7 @@ __metadata:
     react-vmarkdown: "npm:1.0.4"
     react-vmenu: "npm:1.0.14"
     react-vmessagebox: "npm:1.0.17"
-    react-vscrollview: "npm:1.0.10"
+    react-vscrollview: "npm:1.0.11"
     remarkable: "npm:^2.0.1"
     remarkable-react: "npm:^1.4.3"
     sass: "npm:^1.56.1"
