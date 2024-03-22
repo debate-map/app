@@ -20,6 +20,8 @@ def NEXT_k8s_resource_batch(g, entries = []):
 
 	results = []
 	for entry in entries:
+		thisResourceName = entry["new_name"] if "new_name" in entry else entry["workload"]
+		batch_resourceNames.append(thisResourceName)
 		if "resource_deps" in entry:
 			fail("Cannot directly specify resource_deps, for resource \"" + thisResourceName + "\", since that field is handled by NEXT_k8s_resource_batch."
 				+ " (if you want to add resource_deps beyond those added by NEXT_k8s_resource_batch, use the the resource_deps_extra field, or the regular k8s_resource function)")
@@ -29,12 +31,9 @@ def NEXT_k8s_resource_batch(g, entries = []):
 				entry["resource_deps"].append(extra_dep)
 			entry.pop("resource_deps_extra", None)
 
-		thisResourceName = entry["new_name"] if "new_name" in entry else entry["workload"]
-		batch_resourceNames.append(thisResourceName)
-
 		results.append(k8s_resource(**entry))
 	AddResourceNamesBatch_IfValid(g, batch_resourceNames)
-	
+
 	return results
 
 def k8s_yaml_grouped(g, pathOrBlob, groupName, resourcesToIgnore = []):
