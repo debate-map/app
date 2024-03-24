@@ -58,13 +58,21 @@ use super::super::add_child_node::{add_child_node, AddChildNodeInput};
                     match subresult {
                         Err(e) => {
                             last_result = Err(e).map_err(to_sub_err);
-                            yield last_result.clone();
+                            //yield last_result.clone();
+                            last_result.clone()?; // use this syntax, to halt if error is hit
                         },
                         Ok((new_map_id, _node_id)) => {
                             nodes_cloned += 1;
                             last_result = Ok(CloneMapSpecialResult { newMapID: new_map_id.clone(), nodesCloned: nodes_cloned, doneAt: None });
-                            // only update every 10 nodes (else eg. gql-playground UI can become unresponsive)
-                            if nodes_cloned < 10 || nodes_cloned % 10 == 0 {
+
+                            // only update every X nodes (else eg. gql-playground UI can become unresponsive)
+                            let interval = match nodes_cloned {
+                                x if x < 10 => 1,
+                                x if x < 100 => 10,
+                                x if x < 10000 => 100,
+                                _ => 1000,
+                            };
+                            if nodes_cloned % interval == 0 {
                                 yield last_result.clone();
                             }
                         },
@@ -135,7 +143,7 @@ pub fn clone_map_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User, _is_
         let stream = clone_node_tree_special(ctx, actor, map.id.as_str(), root_node, new_root_node);
         for await result in stream {
             match result {
-                Err(e) => yield Err(e),
+                Err(e) => Err(e)?, // use this syntax, to halt if error is hit
                 Ok(node_id) => yield Ok((new_map_result.id.clone(), node_id)),
             }
         }
@@ -205,7 +213,7 @@ pub fn clone_node_tree_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 
                         //Box::pin(clone_node_tree_special(ctx, actor, map_id, grandchild, new_node)).await?;
                         for await result in Box::pin(clone_node_tree_special(ctx, actor, map_id, grandchild, new_node)) {
-                            yield result;
+                            yield Ok(result?); // use this syntax, to halt if error is hit
                         }
                     }
                     // we've done special processing for this argument node, so skip the generic processing below
@@ -226,7 +234,7 @@ pub fn clone_node_tree_special<'a>(ctx: &'a AccessorContext<'_>, actor: &'a User
 
             //Box::pin(clone_node_tree_special(ctx, actor, map_id, child, new_child)).await?;
             for await result in Box::pin(clone_node_tree_special(ctx, actor, map_id, child, new_child)) {
-                yield result;
+                yield Ok(result?); // use this syntax, to halt if error is hit
             }
         }
     };
