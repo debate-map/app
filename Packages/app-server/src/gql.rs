@@ -47,7 +47,7 @@ use std::{convert::TryFrom, net::SocketAddr};
 use futures_util::future::{BoxFuture, Ready};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{future, Sink, SinkExt, StreamExt, FutureExt, TryFutureExt, TryStreamExt};
-use crate::db::commands::_temp::clone_map_special::MutationShard_CloneMapSpecial;
+use crate::db::commands::_temp::clone_map_special::{SubscriptionShard_CloneMapSpecial};
 use crate::db::commands::add_access_policy::MutationShard_AddAccessPolicy;
 use crate::db::commands::add_argument_and_claim::MutationShard_AddArgumentAndClaim;
 use crate::db::commands::add_child_node::MutationShard_AddChildNode;
@@ -161,7 +161,6 @@ pub struct MutationRoot(
         MutationShard_UpdateShare, MutationShard_UpdateTerm, MutationShard_UpdateTimeline, MutationShard_UpdateTimelineStep,
     // commands, others
     MutationShard_AddArgumentAndClaim, MutationShard_AddChildNode, MutationShard_AddNodeRevision,
-    MutationShard_CloneMapSpecial,
     MutationShard_DeleteArgument, MutationShard_DeleteNode, MutationShard_DeleteNodeRating, MutationShard_DeleteNodeRevision,
     MutationShard_ImportFirestoreDump,
     MutationShard_LinkNode,
@@ -172,7 +171,7 @@ pub struct MutationRoot(
 
 #[derive(MergedSubscription, Default)]
 pub struct SubscriptionRoot(
-    SubscriptionShard_General, SubscriptionShard_SignIn,
+    SubscriptionShard_CloneMapSpecial, SubscriptionShard_General, SubscriptionShard_SignIn,
     // table-specific
     SubscriptionShard_User, SubscriptionShard_UserHidden,
     SubscriptionShard_GlobalData,
