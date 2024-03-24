@@ -14,6 +14,7 @@ use rust_shared::utils::time::{time_since_epoch_ms_i64};
 use rust_shared::serde::{Serialize, Deserialize};
 use tracing::info;
 
+use crate::db::_shared::common_errors::err_should_be_null;
 use crate::db::commands::_command::command_boilerplate;
 use crate::db::commands::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use crate::db::commands::_shared::record_command_run::record_command_run;
@@ -73,6 +74,7 @@ pub async fn add_child_node(ctx: &AccessorContext<'_>, actor: &User, is_root: bo
     assert_user_can_add_child(ctx, actor, &parent).await?; // defensive
     
     let node_id = new_uuid_v4_as_b64();
+    ensure!(link_.parent.is_none() && link_.child.is_none(), err_should_be_null("[input.link.parent and input.link.child]").to_string());
     let link = NodeLinkInput {
         // set by server
         parent: Some(parentID.clone()),

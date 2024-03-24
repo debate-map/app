@@ -105,6 +105,20 @@ pub struct NodeLink {
     #[graphql(name = "c_accessPolicyTargets")]
     pub c_accessPolicyTargets: Vec<AccessPolicyTarget>,
 }
+impl NodeLink {
+    pub fn into_input(self, keep_parent_and_child: bool) -> NodeLinkInput {
+        NodeLinkInput {
+            parent: if keep_parent_and_child { Some(self.parent) } else { None },
+            child: if keep_parent_and_child { Some(self.child) } else { None },
+            group: self.group,
+            orderKey: self.orderKey,
+            form: self.form,
+            seriesAnchor: self.seriesAnchor,
+            seriesEnd: self.seriesEnd,
+            polarity: self.polarity,
+        }
+    }
+}
 impl From<Row> for NodeLink {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

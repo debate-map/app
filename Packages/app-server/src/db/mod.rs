@@ -21,6 +21,9 @@ pub mod commands {
         pub mod record_command_run;
         pub mod update_node_rating_summaries;
     }
+    pub mod _temp {
+        pub mod clone_map_special;
+    }
     pub mod transfer_nodes_ {
         pub mod transfer_using_clone;
         pub mod transfer_using_shim;

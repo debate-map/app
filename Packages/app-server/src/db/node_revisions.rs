@@ -67,6 +67,16 @@ impl NodeRevision {
         self.phrasing.note.clone()
     }
 }
+impl NodeRevision {
+    pub fn into_input(self, keep_node: bool) -> NodeRevisionInput {
+		NodeRevisionInput {
+            node: if keep_node { Some(self.node) } else { None },
+            phrasing: self.phrasing,
+            displayDetails: self.displayDetails,
+            attachments: self.attachments,
+		}
+	}
+}
 impl From<Row> for NodeRevision {
     fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }
 }

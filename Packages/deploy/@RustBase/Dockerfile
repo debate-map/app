@@ -47,7 +47,7 @@ RUN apt-get install -y tree
 # ensure mold is installed
 RUN mold --version
 
-# install the cranelift compiler
+# install the cranelift compiler # commented, since had issues on MA's machine (since ARM)
 # RUN mkdir /cg_clif && \
 # 	cd /cg_clif && \
 # 	curl -o cg_clif-x86_64-unknown-linux-gnu.tar.xz -L https://github.com/bjorn3/rustc_codegen_cranelift/releases/download/dev/cg_clif-x86_64-unknown-linux-gnu.tar.xz && \

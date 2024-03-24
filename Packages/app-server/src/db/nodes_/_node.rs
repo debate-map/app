@@ -59,6 +59,27 @@ impl Node {
 	pub fn extras_known(&self) -> Result<Node_Extras, Error> {
 		Ok(serde_json::from_value(self.extras.clone())?)
 	}
+    pub fn into_input(self, try_keep_extras: bool) -> NodeInput {
+		let extras = match try_keep_extras {
+			false => None,
+			true => match self.extras {
+				JSONValue::Object(map) => {
+					let mut map = map;
+					map.remove("ratingSummaries"); // this subfield is protected / can't be set in addChildNode command
+					Some(serde_json::Value::Object(map))
+				}
+				_ => None,
+			},
+		};
+		NodeInput {
+			accessPolicy: self.accessPolicy,
+			r#type: self.r#type,
+			rootNodeForMap: self.rootNodeForMap,
+			multiPremiseArgument: self.multiPremiseArgument,
+			argumentType: self.argumentType,
+			extras,
+		}
+	}
 }
 impl From<Row> for Node {
 	fn from(row: Row) -> Self { postgres_row_to_struct(row).unwrap() }

@@ -47,6 +47,7 @@ pub struct AddMapInput {
 #[derive(SimpleObject, Debug)]
 pub struct AddMapResult {
 	pub id: String,
+	pub root_node_id: String,
 }
 
 }
@@ -97,7 +98,10 @@ pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, in
 		displayDetails: None,
 		attachments: vec![],
 	};
-	add_node(ctx, actor, new_root_node, Some(root_node_id), new_root_node_rev).await?;
+	add_node(ctx, actor, new_root_node, Some(root_node_id.clone()), new_root_node_rev).await?;
 
-	Ok(AddMapResult { id: map.id.to_string() })
+	Ok(AddMapResult {
+		id: map.id.to_string(),
+		root_node_id,
+	})
 }
