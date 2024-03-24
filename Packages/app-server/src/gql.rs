@@ -307,7 +307,7 @@ pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperCli
     let response_str = match have_own_graphql_handle_request(req, schema).await {
         Ok(a) => a,
         Err(err) => json!({
-            "error": format!("Got error during passing/execution of graphql request to/in app-server's gql engine:{:?}", err),
+            "error": format!("GQL error:{:?}", err),
         }).to_string(),
     };
 
