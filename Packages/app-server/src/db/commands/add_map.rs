@@ -30,7 +30,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd, insert_db_entry_by_id_for_struct, CanOmit};
 use super::_shared::add_node::add_node;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddMap;
 #[Object] impl MutationShard_AddMap {
@@ -50,7 +50,7 @@ pub struct AddMapResult {
 	pub root_node_id: String,
 }
 
-}
+// }
 
 pub async fn add_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddMapInput, _extras: NoExtras) -> Result<AddMapResult, Error> {
 	let AddMapInput { map: map_ } = input;

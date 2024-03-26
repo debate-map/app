@@ -34,7 +34,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
 use super::_shared::add_node::add_node;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddChildNode;
 #[Object] impl MutationShard_AddChildNode {
@@ -60,7 +60,7 @@ pub struct AddChildNodeResult {
     pub doneAt: i64,
 }
 
-}
+// }
 
 #[derive(Default)]
 pub struct AddChildNodeExtras {

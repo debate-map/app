@@ -25,7 +25,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteAccessPolicy;
 #[Object] impl MutationShard_DeleteAccessPolicy {
@@ -44,7 +44,7 @@ pub struct DeleteAccessPolicyResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn delete_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteAccessPolicyInput, _extras: NoExtras) -> Result<DeleteAccessPolicyResult, Error> {
 	let DeleteAccessPolicyInput { id } = input;

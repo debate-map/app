@@ -23,7 +23,7 @@ pub async fn get_map(ctx: &AccessorContext<'_>, id: &str) -> Result<Map, Error> 
     }))).await
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Map {
@@ -102,4 +102,4 @@ impl GQLSet<Map> for GQLSet_Map {
     }
 }
 
-}
+// }

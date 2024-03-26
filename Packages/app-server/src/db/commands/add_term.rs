@@ -20,7 +20,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddTerm;
 #[Object] impl MutationShard_AddTerm {
@@ -39,7 +39,7 @@ pub struct AddTermResult {
 	pub id: String,
 }
 
-}
+//}
 
 pub async fn add_term(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddTermInput, _extras: NoExtras) -> Result<AddTermResult, Error> {
 	let AddTermInput { term: term_ } = input;

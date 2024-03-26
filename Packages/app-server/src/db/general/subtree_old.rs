@@ -47,7 +47,7 @@ pub async fn get_subtree_old(ctx: &AccessorContext<'_>, root_node_id: String, ma
     Ok(subtree)
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)]
 pub struct QueryShard_General_Subtree_Old;
@@ -70,4 +70,4 @@ impl QueryShard_General_Subtree_Old {
     }
 }
 
-}
+// }

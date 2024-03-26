@@ -19,7 +19,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodeTag;
 #[Object] impl MutationShard_AddNodeTag {
@@ -38,7 +38,7 @@ pub struct AddNodeTagResult {
 	pub id: String,
 }
 
-}
+// }
 
 pub async fn add_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodeTagInput, _extras: NoExtras) -> Result<AddNodeTagResult, Error> {
 	let AddNodeTagInput { tag: tag_ } = input;

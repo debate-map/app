@@ -30,7 +30,7 @@ use super::_shared::add_node::add_node;
 use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddArgumentAndClaim;
 #[Object] impl MutationShard_AddArgumentAndClaim {
@@ -62,7 +62,7 @@ pub struct AddArgumentAndClaimResult {
     pub doneAt: i64,
 }
 
-}
+// }
 
 pub async fn add_argument_and_claim(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: AddArgumentAndClaimInput, _extras: NoExtras) -> Result<AddArgumentAndClaimResult, Error> {
     let AddArgumentAndClaimInput { mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink } = input;

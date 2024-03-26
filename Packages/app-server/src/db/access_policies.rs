@@ -40,7 +40,7 @@ pub async fn get_system_access_policy(ctx: &AccessorContext<'_>, name: &str) -> 
 	Ok(matching_policy)
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Clone)] pub struct GQLSet_AccessPolicy { pub nodes: Vec<AccessPolicy> }
 #[Object] impl GQLSet_AccessPolicy { async fn nodes(&self) -> &Vec<AccessPolicy> { &self.nodes } }
@@ -69,4 +69,4 @@ impl GQLSet<AccessPolicy> for GQLSet_AccessPolicy {
     }
 }
 
-}
+// }

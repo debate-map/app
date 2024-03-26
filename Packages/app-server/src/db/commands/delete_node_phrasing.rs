@@ -22,7 +22,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteNodePhrasing;
 #[Object] impl MutationShard_DeleteNodePhrasing {
@@ -41,7 +41,7 @@ pub struct DeleteNodePhrasingResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn delete_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodePhrasingInput, _extras: NoExtras) -> Result<DeleteNodePhrasingResult, Error> {
 	let DeleteNodePhrasingInput { id } = input;

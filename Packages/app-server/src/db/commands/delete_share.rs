@@ -22,7 +22,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteShare;
 #[Object] impl MutationShard_DeleteShare {
@@ -41,7 +41,7 @@ pub struct DeleteShareResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn delete_share(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteShareInput, _extras: NoExtras) -> Result<DeleteShareResult, Error> {
 	let DeleteShareInput { id } = input;

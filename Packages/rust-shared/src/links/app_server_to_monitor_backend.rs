@@ -10,7 +10,7 @@ use crate::{utils::{mtx::mtx::{MtxData, MtxDataWithExtraInfo}, type_aliases::{JS
 // this alias is needed, since `wrap_serde_macros.rs` inserts refs to, eg. `rust_shared::rust_macros::Serialize_Stub`
 use crate as rust_shared;
 
-wrap_slow_macros! {
+//wrap_slow_macros! {
 
 // This struct is basically only used by logging.rs in app-server, but is placed here, since we also use it in the Message_ASToMB struct.
 #[derive(SimpleObject, Clone, Serialize, Deserialize, Debug, Default)]
@@ -49,4 +49,4 @@ pub enum Message_ASToMB {
     },
 }
 
-}
+// }

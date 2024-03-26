@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 
 use super::attachments_::source_chain::SourceChain;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "TermAttachmentInput")]
@@ -63,4 +63,4 @@ pub struct DescriptionAttachment {
 	pub text: String,
 }
 
-}
+// }

@@ -24,7 +24,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::jsonb_utils::jsonb_set;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_SetUserFollowData;
 #[Object] impl MutationShard_SetUserFollowData {
@@ -44,7 +44,7 @@ pub struct SetUserFollowDataResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn set_user_follow_data(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetUserFollowDataInput, _extras: NoExtras) -> Result<SetUserFollowDataResult, Error> {
 	let SetUserFollowDataInput { targetUser, userFollow } = input;

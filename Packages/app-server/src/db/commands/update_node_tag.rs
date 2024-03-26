@@ -23,7 +23,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateNodeTag;
 #[Object] impl MutationShard_UpdateNodeTag {
@@ -43,7 +43,7 @@ pub struct UpdateNodeTagResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn update_node_tag(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateNodeTagInput, _extras: NoExtras) -> Result<UpdateNodeTagResult, Error> {
 	let UpdateNodeTagInput { id, updates } = input;

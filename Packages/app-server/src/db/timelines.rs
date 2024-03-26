@@ -23,7 +23,7 @@ pub async fn get_timeline(ctx: &AccessorContext<'_>, id: &str) -> Result<Timelin
     }))).await
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct Timeline {
@@ -99,4 +99,4 @@ impl GQLSet<Timeline> for GQLSet_Timeline {
     }
 }
 
-}
+// }

@@ -29,7 +29,7 @@ pub async fn get_node_revision(ctx: &AccessorContext<'_>, id: &str) -> Result<No
     }))).await
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(complex)]
@@ -140,4 +140,4 @@ impl GQLSet<NodeRevision> for GQLSet_NodeRevision {
     }
 }
 
-}
+// }

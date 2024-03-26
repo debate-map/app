@@ -59,7 +59,7 @@ pub async fn get_highest_order_key_under_parent(ctx: &AccessorContext<'_>, paren
     }
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
 pub enum ChildGroup {
@@ -171,4 +171,4 @@ impl GQLSet<NodeLink> for GQLSet_NodeLink {
     }
 }
 
-}
+// }

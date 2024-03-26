@@ -8,7 +8,7 @@ use rust_shared::async_graphql::{Enum};
 use rust_shared::utils::general::average;
 use serde::{Serialize, Deserialize};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash)]
 pub enum NodeRatingType {
@@ -19,7 +19,7 @@ pub enum NodeRatingType {
     #[graphql(name = "impact")] impact,
 }
 
-}
+//}
 
 //#[derive(Clone)]
 pub struct ValueRange {

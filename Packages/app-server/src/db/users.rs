@@ -41,7 +41,7 @@ pub async fn get_users(ctx: &AccessorContext<'_>) -> Result<Vec<User>, Error> {
 
 // for postgresql<>rust scalar-type mappings (eg. pg's i8 = rust's i64), see: https://kotiri.com/2018/01/31/postgresql-diesel-rust-types.html
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 //type User = String;
 #[derive(SimpleObject, Clone, Serialize, Deserialize, Debug)]
@@ -94,4 +94,4 @@ impl GQLSet<User> for GQLSet_User {
     }
 }
 
-}
+// }

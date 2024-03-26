@@ -18,7 +18,7 @@ use crate::db::general::sign_in_::jwt_utils::{get_user_info_from_gql_ctx};
 use crate::db::map_node_edits::{ChangeType, MapNodeEdit};
 use crate::db::node_revisions::{NodeRevisionInput, NodeRevision};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct QueryShard_General_Backups;
 #[Object] impl QueryShard_General_Backups {
@@ -49,7 +49,7 @@ pub struct GetDBDumpResult {
 	pub pgdump_sql: String,
 }
 
-}
+// }
 
 pub async fn try_get_db_dump(actor: &User) -> Result<String, Error> {
     ensure!(actor.permissionGroups.admin, "Only admins can access this endpoint.");

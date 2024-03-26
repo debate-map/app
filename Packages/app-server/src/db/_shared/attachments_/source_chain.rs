@@ -1,7 +1,7 @@
 use rust_shared::{async_graphql::{self, Enum, SimpleObject, InputObject}, rust_macros::wrap_slow_macros, utils::{type_aliases::JSONValue, general_::serde::JSONValueV}, anyhow::Error};
 use serde::{Serialize, Deserialize};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "SourceChainInput")]
@@ -39,7 +39,7 @@ pub struct Source {
     pub extras: Option<JSONValue>, // used for, eg. external-ids from claim-miner and hypothesis
 }
 
-}
+// }
 
 pub fn source_chains_from_old_json_data(data: Option<&JSONValue>) -> Result<Vec<SourceChain>, Error> {
     match data {

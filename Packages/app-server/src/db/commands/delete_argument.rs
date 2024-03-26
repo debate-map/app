@@ -25,7 +25,7 @@ use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::delete_node::{delete_node, DeleteNodeInput};
 use super::delete_node_link::{DeleteNodeLinkInput, delete_node_link};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteArgument;
 #[Object] impl MutationShard_DeleteArgument {
@@ -47,7 +47,7 @@ pub struct DeleteArgumentResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+// }
 
 // todo: eventually remove (or rework) this command, since unused
 pub async fn delete_argument(ctx: &AccessorContext<'_>, actor: &User, is_root: bool, input: DeleteArgumentInput, _extras: NoExtras) -> Result<DeleteArgumentResult, Error> {

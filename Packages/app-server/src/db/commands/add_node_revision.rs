@@ -32,7 +32,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::record_command_run::{record_command_run, record_command_run_if_root};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodeRevision;
 #[Object] impl MutationShard_AddNodeRevision {
@@ -52,7 +52,7 @@ pub struct AddNodeRevisionResult {
 	pub id: String,
 }
 
-}
+//}
 
 #[derive(Default)]
 pub struct AddNodeRevisionExtras {

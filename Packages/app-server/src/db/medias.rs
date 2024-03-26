@@ -23,7 +23,7 @@ pub async fn get_media(ctx: &AccessorContext<'_>, id: &str) -> Result<Media, Err
     }))).await
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum MediaType {
@@ -91,4 +91,4 @@ impl GQLSet<Media> for GQLSet_Media {
     }
 }
 
-}
+// }

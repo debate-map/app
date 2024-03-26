@@ -49,7 +49,7 @@ pub fn ensure_trusted_operator_passkey_is_correct(passkey: String, log_message_i
     Ok(())
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 // queries
 // ==========
@@ -155,4 +155,4 @@ struct CheckUserResult {
     userID: String,
 }
 
-}
+// }

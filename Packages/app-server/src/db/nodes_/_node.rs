@@ -12,7 +12,7 @@ use crate::{db::node_links::{get_node_links, ClaimForm, get_first_link_under_par
 
 use super::_node_type::NodeType;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ArgumentType {
@@ -103,7 +103,7 @@ pub struct NodeUpdates {
 	pub extras: CanOmit<JSONValue>,
 }
 
-}
+//}
 
 pub async fn get_node_form(ctx: &AccessorContext<'_>, node_id: &str, parent_id: &str) -> Result<ClaimForm, Error> {
 	let link = get_first_link_under_parent(ctx, &node_id, &parent_id).await?;

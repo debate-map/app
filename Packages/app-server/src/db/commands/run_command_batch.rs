@@ -35,7 +35,7 @@ use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, tbd};
 use super::_shared::add_node::add_node;
 use super::add_child_node::{AddChildNodeInput, add_child_node, AddChildNodeExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 /*#[derive(Default)] pub struct MutationShard_RunCommandBatch;
 #[Object] impl MutationShard_RunCommandBatch {
@@ -110,4 +110,4 @@ pub struct RunCommandBatchResult {
     pub committed: bool,
 }
 
-}
+//}

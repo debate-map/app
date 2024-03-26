@@ -199,7 +199,9 @@ fn clone_ldchange_val_0with_type_fixes(value: &JSONValue, typ: &str) -> JSONValu
         _ => value.clone(),
     }
 }
-wrap_slow_macros!{
+
+//wrap_slow_macros!{
+    
 #[derive(Debug, Clone, Deserialize)]
 pub struct OldKeys {
     pub keynames: Vec<String>,
@@ -209,7 +211,9 @@ pub struct OldKeys {
     // custom
     pub needs_wal2json_jsonval_fixes: Option<bool>,
 }
-}
+
+//}
+
 impl OldKeys {
     pub fn data_as_map(&self) -> RowData {
         let mut new_entry: RowData = Map::new();

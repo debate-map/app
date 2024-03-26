@@ -123,7 +123,7 @@ fn ratings_to_average(ratings: Vec<NodeRating>) -> Result<f64, Error> {
     Ok(result)
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeRating {
@@ -177,4 +177,4 @@ impl GQLSet<NodeRating> for GQLSet_NodeRating {
     }
 }
 
-}
+// }

@@ -29,7 +29,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodeLink;
 #[Object] impl MutationShard_AddNodeLink {
@@ -49,7 +49,7 @@ pub struct AddNodeLinkResult {
 	pub id: String,
 }
 
-}
+// }
 
 pub async fn add_node_link(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodeLinkInput, _extras: NoExtras) -> Result<AddNodeLinkResult, Error> {
 	let AddNodeLinkInput { link: link_ } = input;

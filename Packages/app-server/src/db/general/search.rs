@@ -39,7 +39,7 @@ use crate::utils::db::accessors::{AccessorContext};
 
 use super::subtree_collector::{get_node_subtree, params, get_node_subtree2};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 // queries
 // ==========
@@ -182,7 +182,7 @@ impl QueryShard_General_Search {
     }
 }
 
-}
+// }
 
 // limit the number of searches that are being executed at the same time (we don't want expensive searches to drown out other requests, such as live-query execution)
 pub static SEMAPHORE__SEARCH_EXECUTION: Lazy<Semaphore> = Lazy::new(|| Semaphore::new(get_search_execution_concurrency_limit()));

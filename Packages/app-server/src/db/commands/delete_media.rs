@@ -22,7 +22,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteMedia;
 #[Object] impl MutationShard_DeleteMedia {
@@ -41,7 +41,7 @@ pub struct DeleteMediaResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn delete_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteMediaInput, _extras: NoExtras) -> Result<DeleteMediaResult, Error> {
 	let DeleteMediaInput { id } = input;

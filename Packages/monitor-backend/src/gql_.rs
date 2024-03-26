@@ -44,7 +44,7 @@ use crate::utils::type_aliases::{ABSender, ABReceiver};
 use rust_shared::async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 use rust_shared::flume::{Sender, Receiver, unbounded};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
@@ -61,7 +61,7 @@ pub struct SubscriptionRoot(
     SubscriptionShard_General,
 );
 
-}
+// }
 
 pub type RootSchema = wrap_agql_schema_type!{
     Schema<QueryRoot, MutationRoot, SubscriptionRoot>

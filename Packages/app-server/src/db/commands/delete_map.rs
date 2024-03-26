@@ -24,7 +24,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::delete_node::DeleteNodeExtras;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteMap;
 #[Object] impl MutationShard_DeleteMap {
@@ -43,7 +43,7 @@ pub struct DeleteMapResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn delete_map(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteMapInput, _extras: NoExtras) -> Result<DeleteMapResult, Error> {
 	let DeleteMapInput { id } = input;

@@ -86,7 +86,7 @@ pub fn get_err_auth_data_required() -> Error {
     "})
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct SignInStartInput {
@@ -312,4 +312,4 @@ struct SignInAttachResult {
     success: bool,
 }
 
-}
+//}

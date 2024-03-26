@@ -28,7 +28,7 @@ use rust_shared::utils::type_aliases::{JSONValue, FSender, FReceiver};
 
 use crate::{GeneralMessage, pgclient::create_client_advanced, utils::type_aliases::{ABSender}};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, InputObject, Debug, Clone, Serialize, Deserialize)] //#[serde(crate = "rust_shared::serde")]
 pub struct TestSequence {
@@ -61,7 +61,7 @@ pub struct TS_AddNodeRevision {
     text: Option<String>,
 }
 
-}
+// }
 
 fn flatten_steps(steps: Vec<TestStep>) -> Vec<TestStep> {
     let mut result: Vec<TestStep> = vec![];

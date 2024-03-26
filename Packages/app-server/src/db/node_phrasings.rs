@@ -32,7 +32,7 @@ pub async fn get_node_phrasings(ctx: &AccessorContext<'_>, node_id: &str) -> Res
     }))).await
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum NodePhrasingType {
@@ -146,4 +146,4 @@ impl GQLSet<NodePhrasing> for GQLSet_NodePhrasing {
     }
 }
 
-}
+// }

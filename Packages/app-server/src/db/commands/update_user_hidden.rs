@@ -21,7 +21,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, update_field_of_extras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateUserHidden;
 #[Object] impl MutationShard_UpdateUserHidden {
@@ -41,7 +41,7 @@ pub struct UpdateUserHiddenResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn update_user_hidden(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateUserHiddenInput, _extras: NoExtras) -> Result<UpdateUserHiddenResult, Error> {
 	let UpdateUserHiddenInput { id, updates } = input;

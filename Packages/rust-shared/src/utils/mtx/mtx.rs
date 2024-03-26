@@ -386,7 +386,7 @@ impl MtxSection {
 // this alias is needed, since `wrap_serde_macros.rs` inserts refs to, eg. `rust_shared::rust_macros::Serialize_Stub`
 use crate as rust_shared;
 
-wrap_slow_macros! {
+//wrap_slow_macros! {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MtxSection {
@@ -444,4 +444,4 @@ impl MtxDataForAGQL {
     }
 }
 
-}
+// }

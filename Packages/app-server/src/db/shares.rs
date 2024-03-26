@@ -22,7 +22,7 @@ pub async fn get_share(ctx: &AccessorContext<'_>, id: &str) -> Result<Share, Err
     }))).await
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ShareType {
@@ -86,4 +86,4 @@ impl GQLSet<Share> for GQLSet_Share {
     }
 }
 
-}
+// }

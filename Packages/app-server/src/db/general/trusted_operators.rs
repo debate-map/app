@@ -39,7 +39,7 @@ use crate::utils::db::accessors::{AccessorContext};
 
 use super::subtree_collector::{get_node_subtree, params, get_node_subtree2};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 // queries
 // ==========
@@ -77,4 +77,4 @@ impl QueryShard_General_TrustedOperators {
     }
 }
 
-}
+// }

@@ -22,7 +22,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateMedia;
 #[Object] impl MutationShard_UpdateMedia {
@@ -42,7 +42,7 @@ pub struct UpdateMediaResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn update_media(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateMediaInput, _extras: NoExtras) -> Result<UpdateMediaResult, Error> {
 	let UpdateMediaInput { id, updates } = input;

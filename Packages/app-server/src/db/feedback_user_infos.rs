@@ -10,7 +10,7 @@ use rust_shared::serde;
 use crate::utils::db::generic_handlers::queries::{handle_generic_gql_doc_query, handle_generic_gql_collection_query};
 use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_collection_subscription, handle_generic_gql_doc_subscription, GQLSet}}, filter::FilterInput}};
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 /*cached_expand!{
 const ce_args: &str = r##"
@@ -61,4 +61,4 @@ impl GQLSet<UserInfo> for GQLSet_UserInfo {
     }
 }
 
-}
+// }

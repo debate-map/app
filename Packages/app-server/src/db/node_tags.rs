@@ -31,7 +31,7 @@ pub async fn get_node_tags(ctx: &AccessorContext<'_>, node_id: &str) -> Result<V
     }))).await
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct NodeTag {
@@ -202,4 +202,4 @@ impl GQLSet<NodeTag> for GQLSet_NodeTag {
     }
 }
 
-}
+// }

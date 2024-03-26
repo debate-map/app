@@ -23,7 +23,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddNodePhrasing;
 #[Object] impl MutationShard_AddNodePhrasing {
@@ -42,7 +42,7 @@ pub struct AddNodePhrasingResult {
 	pub id: String,
 }
 
-}
+// }
 
 pub async fn add_node_phrasing(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddNodePhrasingInput, _extras: NoExtras) -> Result<AddNodePhrasingResult, Error> {
 	let AddNodePhrasingInput { phrasing: phrasing_ } = input;

@@ -14,14 +14,14 @@ use super::{sql_fragment::{SQLFragment, SF}, sql_ident::{SQLIdent}, sql_param::S
 //pub type Filter = Option<Map<String, JSONValue>>;
 pub type FilterInput = JSONValue; // we use JSONValue, because it has the InputType trait (unlike Map<...>, for some reason)
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QueryFilter {
     pub field_filters: IndexMap<String, FieldFilter>,
 }
 
-}
+//}
 
 impl QueryFilter {
     pub fn empty() -> Self {
@@ -135,7 +135,7 @@ impl Display for QueryFilter {
     }
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
 pub struct FieldFilter {
@@ -149,7 +149,7 @@ pub enum FilterOp {
     ContainsAllOfX(Vec<JSONValue>),
 }
 
-}
+//}
 
 impl FilterOp {
     pub fn get_sql_for_value(&self) -> Result<SQLFragment, Error> {

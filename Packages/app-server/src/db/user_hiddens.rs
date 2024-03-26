@@ -31,7 +31,7 @@ pub async fn get_user_hiddens(ctx: &AccessorContext<'_>, email: Option<String>) 
     get_db_entries(ctx, "userHiddens", &Some(JSONValue::Object(filter_map))).await
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct UserHidden {
@@ -121,4 +121,4 @@ impl GQLSet<UserHidden> for GQLSet_UserHidden {
     }
 }
 
-}
+// }

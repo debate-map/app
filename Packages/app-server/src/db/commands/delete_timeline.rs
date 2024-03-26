@@ -23,7 +23,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteTimeline;
 #[Object] impl MutationShard_DeleteTimeline {
@@ -42,7 +42,7 @@ pub struct DeleteTimelineResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+// }
 
 pub async fn delete_timeline(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteTimelineInput, _extras: NoExtras) -> Result<DeleteTimelineResult, Error> {
 	let DeleteTimelineInput { id } = input;

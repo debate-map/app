@@ -128,7 +128,7 @@ use crate::store::live_queries::LQStorageArc;
 use rust_shared::{async_graphql_axum};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription, GraphQLProtocol, GraphQLWebSocket, GraphQLBatchRequest};
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
@@ -188,7 +188,7 @@ pub struct SubscriptionRoot(
     SubscriptionShard_Share,
 );
 
-}
+// }
 
 pub type RootSchema = wrap_agql_schema_type!{
     Schema<QueryRoot, MutationRoot, SubscriptionRoot>

@@ -20,7 +20,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddTimeline;
 #[Object] impl MutationShard_AddTimeline {
@@ -39,7 +39,7 @@ pub struct AddTimelineResult {
 	pub id: String,
 }
 
-}
+//}
 
 pub async fn add_timeline(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddTimelineInput, _extras: NoExtras) -> Result<AddTimelineResult, Error> {
 	let AddTimelineInput { timeline: timeline_ } = input;

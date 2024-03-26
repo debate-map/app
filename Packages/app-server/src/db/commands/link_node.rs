@@ -38,7 +38,7 @@ use super::_shared::increment_edit_counts::increment_edit_counts_if_valid;
 use super::add_child_node::{add_child_node, AddChildNodeInput};
 use super::add_node_link::assert_link_is_valid;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_LinkNode;
 #[Object] impl MutationShard_LinkNode {
@@ -66,7 +66,7 @@ pub struct LinkNodeResult {
 	argumentWrapperID: Option<String>,
 }
 
-}
+//}
 
 #[derive(Default)]
 pub struct LinkNodeExtras {

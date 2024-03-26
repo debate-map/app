@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 
 use crate::db::node_links::ChildGroup;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
 pub enum NodeType {
@@ -21,7 +21,7 @@ pub enum NodeType {
     #[graphql(name = "argument")] argument,
 }
 
-}
+// }
 
 static FREEFORM_TYPES: Lazy<Vec<NodeType>> = Lazy::new(|| vec![NodeType::category, NodeType::package, NodeType::multiChoiceQuestion, NodeType::claim, NodeType::argument]);
 

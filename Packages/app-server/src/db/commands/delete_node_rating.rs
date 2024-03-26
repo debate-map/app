@@ -23,7 +23,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 use super::_shared::update_node_rating_summaries::update_node_rating_summaries;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteNodeRating;
 #[Object] impl MutationShard_DeleteNodeRating {
@@ -42,7 +42,7 @@ pub struct DeleteNodeRatingResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn delete_node_rating(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: DeleteNodeRatingInput, _extras: NoExtras) -> Result<DeleteNodeRatingResult, Error> {
 	let DeleteNodeRatingInput { id } = input;

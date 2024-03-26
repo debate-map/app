@@ -34,7 +34,7 @@ pub async fn get_terms_attached(ctx: &AccessorContext<'_>, node_rev_id: &str) ->
     Ok(terms)
 }
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum TermType {
@@ -116,4 +116,4 @@ impl GQLSet<Term> for GQLSet_Term {
     }
 }
 
-}
+// }

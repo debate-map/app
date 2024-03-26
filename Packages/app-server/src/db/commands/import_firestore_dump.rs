@@ -51,7 +51,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{insert_db_entry_by_id_for_struct, NoExtras, gql_placeholder};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_ImportFirestoreDump;
 #[Object] impl MutationShard_ImportFirestoreDump {
@@ -70,7 +70,7 @@ pub struct ImportFirestoreDumpResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn import_firestore_dump(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: ImportFirestoreDumpInput, _extras: NoExtras) -> Result<ImportFirestoreDumpResult, Error> {
 	let ImportFirestoreDumpInput { placeholder: _placeholder } = input;

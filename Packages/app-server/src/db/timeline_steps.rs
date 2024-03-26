@@ -32,7 +32,7 @@ pub async fn get_timeline_steps(ctx: &AccessorContext<'_>, timeline_id: &str) ->
     }))).await
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 // commented; these are the only options for now, but later we want the "group" to be a freeform field, eg. for marking which person is speaking for a given step
 /*#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Hash, Debug)]
@@ -130,4 +130,4 @@ impl GQLSet<TimelineStep> for GQLSet_TimelineStep {
     }
 }
 
-}
+// }

@@ -21,7 +21,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddAccessPolicy;
 #[Object] impl MutationShard_AddAccessPolicy {
@@ -40,7 +40,7 @@ pub struct AddAccessPolicyResult {
 	pub id: String,
 }
 
-}
+// }
 
 pub async fn add_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddAccessPolicyInput, _extras: NoExtras) -> Result<AddAccessPolicyResult, Error> {
 	let AddAccessPolicyInput { policy: policy_ } = input;

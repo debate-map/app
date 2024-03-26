@@ -33,7 +33,7 @@ impl <'de> serde::Deserialize<'de> for Test2 {
     }
 }*/
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 /*cached_expand!{
 const ce_args: &str = r##"
@@ -93,4 +93,4 @@ impl GQLSet<CommandRun> for GQLSet_CommandRun {
     }
 }
 
-}
+// }

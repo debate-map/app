@@ -24,7 +24,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_DeleteNode;
 #[Object] impl MutationShard_DeleteNode {
@@ -45,7 +45,7 @@ pub struct DeleteNodeResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 #[derive(Default)]
 pub struct DeleteNodeExtras {

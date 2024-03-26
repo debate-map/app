@@ -22,7 +22,7 @@ use super::nodes_::_node::{Node};
 use super::nodes_::_node_type::NodeType;
 use super::users::User;
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Clone)] pub struct GQLSet_Node { pub nodes: Vec<Node> }
 #[Object] impl GQLSet_Node { async fn nodes(&self) -> &Vec<Node> { &self.nodes } }
@@ -51,7 +51,7 @@ impl GQLSet<Node> for GQLSet_Node {
 	}
 }
 
-}
+// }
 
 pub async fn get_node(ctx: &AccessorContext<'_>, id: &str) -> Result<Node, Error> {
     get_db_entry(ctx, "nodes", &Some(json!({

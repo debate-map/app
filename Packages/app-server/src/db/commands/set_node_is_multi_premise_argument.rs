@@ -24,7 +24,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, command_boilerplate, NoExtras, update_field_nullable, gql_placeholder};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_SetNodeIsMultiPremiseArgument;
 #[Object] impl MutationShard_SetNodeIsMultiPremiseArgument {
@@ -44,7 +44,7 @@ pub struct SetNodeIsMultiPremiseArgumentResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+// }
 
 // todo: eventually remove this command, since unused
 pub async fn set_node_is_multi_premise_argument(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: SetNodeIsMultiPremiseArgumentInput, _extras: NoExtras) -> Result<SetNodeIsMultiPremiseArgumentResult, Error> {

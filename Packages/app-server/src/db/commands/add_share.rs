@@ -19,7 +19,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, command_boilerplate};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_AddShare;
 #[Object] impl MutationShard_AddShare {
@@ -38,7 +38,7 @@ pub struct AddShareResult {
 	pub id: String,
 }
 
-}
+//}
 
 pub async fn add_share(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: AddShareInput, _extras: NoExtras) -> Result<AddShareResult, Error> {
 	let AddShareInput { share: share_ } = input;

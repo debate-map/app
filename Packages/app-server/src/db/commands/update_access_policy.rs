@@ -23,7 +23,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateAccessPolicy;
 #[Object] impl MutationShard_UpdateAccessPolicy {
@@ -43,7 +43,7 @@ pub struct UpdateAccessPolicyResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn update_access_policy(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateAccessPolicyInput, _extras: NoExtras) -> Result<UpdateAccessPolicyResult, Error> {
 	let UpdateAccessPolicyInput { id, updates } = input;

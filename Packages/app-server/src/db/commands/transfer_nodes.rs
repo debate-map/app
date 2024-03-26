@@ -40,7 +40,7 @@ use super::transfer_nodes_::transfer_using_clone::TransferResult_Clone;
 use super::transfer_nodes_::transfer_using_shim::TransferResult_Shim;
 use super::transfer_nodes_::{transfer_using_clone::transfer_using_clone, transfer_using_shim::transfer_using_shim};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_TransferNodes;
 #[Object] impl MutationShard_TransferNodes {
@@ -96,7 +96,7 @@ pub struct TransferNodesResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub enum TransferResult {
     Ignore,

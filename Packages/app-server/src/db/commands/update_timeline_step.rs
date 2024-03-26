@@ -22,7 +22,7 @@ use crate::utils::general::data_anchor::{DataAnchorFor1};
 
 use super::_command::{upsert_db_entry_by_id_for_struct, NoExtras, update_field_of_extras};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(Default)] pub struct MutationShard_UpdateTimelineStep;
 #[Object] impl MutationShard_UpdateTimelineStep {
@@ -42,7 +42,7 @@ pub struct UpdateTimelineStepResult {
 	#[graphql(name = "_useTypenameFieldInstead")] __: String,
 }
 
-}
+//}
 
 pub async fn update_timeline_step(ctx: &AccessorContext<'_>, actor: &User, _is_root: bool, input: UpdateTimelineStepInput, _extras: NoExtras) -> Result<UpdateTimelineStepResult, Error> {
 	let UpdateTimelineStepInput { id, updates } = input;

@@ -49,7 +49,7 @@ pub fn ensure_admin_key_is_correct(admin_key: String, log_message_if_wrong: bool
     Ok(())
 }
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 // queries
 // ==========
@@ -459,4 +459,4 @@ pub struct TestingLogEntry {
     }
 }
 
-}
+// }

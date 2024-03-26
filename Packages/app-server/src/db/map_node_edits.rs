@@ -19,7 +19,7 @@ use super::_shared::access_policy_target::AccessPolicyTarget;
 use super::maps::get_map;
 use super::nodes::get_node;
 
-wrap_slow_macros!{
+// wrap_slow_macros!{
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ChangeType {
@@ -71,4 +71,4 @@ impl GQLSet<MapNodeEdit> for GQLSet_MapNodeEdit {
     }
 }
 
-}
+// }

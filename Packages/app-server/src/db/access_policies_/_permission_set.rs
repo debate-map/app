@@ -18,7 +18,7 @@ use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_co
 
 use super::super::commands::_command::CanOmit;
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, InputObject, Clone, Serialize, Deserialize)]
 #[graphql(input_name = "PermissionSetInput")]
@@ -136,4 +136,4 @@ pub enum APAction {
     vote,
 }
 
-}
+// }

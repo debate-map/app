@@ -21,7 +21,7 @@ use crate::utils::{db::{generic_handlers::{subscriptions::{handle_generic_gql_co
 use super::super::commands::_command::CanOmit;
 use super::_permission_set::{PermissionSet, PermissionSetForType, APTable, APAction};
 
-wrap_slow_macros!{
+//wrap_slow_macros!{
 
 #[derive(SimpleObject, Clone, Serialize, Deserialize)]
 pub struct AccessPolicy {
@@ -76,4 +76,4 @@ pub struct AccessPolicyUpdates {
     pub permissions_userExtends: CanOmit<IndexMapAGQL<String, PermissionSet>>,
 }
 
-}
+// }
