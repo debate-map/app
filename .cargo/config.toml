@@ -13,10 +13,13 @@ protocol = "sparse"
 # profile customization
 # ==========
 
+[profile.release]
+# customize opt-level; default: 3 (see: https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html#optimize-for-speed)
+# (regarding [incrBuildTime,fileSize] when 2/3, as of 2024-03-26: @2+incr:[~3m01s,47.1mb] @2:[~4m47s,46.7mb] @3:[~4m55s,47.7mb])
+#opt-level = 2
 # have release builds use incremental compilation
 # (regarding [incrBuildTime,fileSize] when on/off, as of 2024-03-26: @whenOff:[~4m55s,47.7mb] @whenOn:[~3m10s,48.0mb])
-# [profile.release]
-# incremental = true
+#incremental = true
 
 # linker: mold
 # ==========
