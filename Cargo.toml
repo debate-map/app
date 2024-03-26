@@ -8,6 +8,8 @@ members = [
 	#"Packages/graphlink-server",
 ]
 
+resolver = "2"
+
 # NOTE: This file is not currently being used for build-flags. See ".cargo/config.toml" for rust build-flags.
 
 #[profile.dev]

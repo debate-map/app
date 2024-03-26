@@ -7,8 +7,8 @@ use crate::utils::{remove_token_sequences_for_derive_macros, remove_token_sequen
 // ==========
 
 // can set this flag to true temporarily, to make debugging easier
-//pub const SKIP_AGQL_WRAPPING: bool = false;
-pub const SKIP_AGQL_WRAPPING: bool = true;
+pub const SKIP_AGQL_WRAPPING: bool = false;
+//pub const SKIP_AGQL_WRAPPING: bool = true;
 
 pub fn wrap_async_graphql_impl(input: TokenStream, force_proceed: bool) -> TokenStream {
     if SKIP_AGQL_WRAPPING { return input; } // can set this flag to true temporarily, to make debugging easier
