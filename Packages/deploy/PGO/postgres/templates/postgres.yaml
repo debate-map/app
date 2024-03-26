@@ -48,6 +48,8 @@ spec:
         {{- range $index, $repo := .Values.multiBackupRepos }}
         {{- if or $repo.s3 $repo.gcs $repo.azure }}
         repo{{ add $index 1 }}-path: /pgbackrest/{{ $.Release.Namespace }}/{{ default $.Release.Name $.Values.name }}/repo{{ add $index 1 }}
+        {{else}}
+        repo{{ add $index 1 }}-path: /pgbackrest/repo{{ add $index 1 }}
         {{- end }}
         {{- end }}
       repos:
@@ -56,6 +58,9 @@ spec:
         {{- if $repo.volume }}
         volume:
           volumeClaimSpec:
+            {{- if $repo.volume.backupsStorageClassName }}
+            storageClassName: {{ $repo.volume.backupsStorageClassName | quote }}
+            {{- end }}
             accessModes:
             - "ReadWriteOnce"
             resources:
@@ -73,6 +78,10 @@ spec:
         azure:
           container: {{ $repo.azure.container | quote }}
         {{- end }}
+        {{- if $repo.schedules}}
+        schedules:
+{{ toYaml $repo.schedules | indent 10 }}
+        {{- end}}
       {{- end }}
       {{- else if .Values.s3 }}
       configuration:
@@ -114,12 +123,19 @@ spec:
       - name: repo1
         volume:
           volumeClaimSpec:
+            {{- if .Values.backupsStorageClassName }}
+            storageClassName: {{ .Values.backupsStorageClassName | quote }}
+            {{- end }}
             accessModes:
             - "ReadWriteOnce"
             resources:
               requests:
                 storage: {{ default "1Gi" .Values.backupsSize | quote }}
       {{- end }}
+      {{- if .Values.pgBackRestManual}}
+      manual:
+{{ toYaml .Values.pgBackRestManual | indent 8 }}
+      {{- end}}
   {{- if or .Values.pgBouncerReplicas .Values.pgBouncerConfig }}
   proxy:
     pgBouncer:
