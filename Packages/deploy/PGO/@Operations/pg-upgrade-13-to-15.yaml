@@ -4,7 +4,7 @@ metadata:
   name: pg-upgrade-13-to-15
   namespace: postgres-operator
 spec:
-  image: registry.developers.crunchydata.com/crunchydata/crunchy-upgrade:ubi8-5.4.3-0
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-upgrade:ubi8-5.5.1-0
   postgresClusterName: debate-map
   fromPostgresVersion: 13
   toPostgresVersion: 15
