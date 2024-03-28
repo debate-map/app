@@ -739,6 +739,8 @@ To view the pg config files `postgresql.conf`, `pg_hba.conf`, etc.:
 
 Old overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
 
+##### Note: This module is outdated; database migrations are currently done manually. You can check the [Migration notes](https://github.com/debate-map/app/tree/main/Docs/MigrationNotes.md) doc for the log of structural changes, along with (generally) the db queries required to align with those changes.
+
 New steps:
 * 1\) Write a KnexJS script that modifies the db contents to match the new desired shape. (using native PG commands, for fast execution)
 	* 1.1\) Make a copy of the latest migration in `Knex/Migrations`, and give it an appropriate name.
