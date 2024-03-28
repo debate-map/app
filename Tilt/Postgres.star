@@ -30,32 +30,59 @@ def Start_Postgres(g):
 
 	k8s_yaml(helm('../Packages/deploy/PGO/install', namespace="postgres-operator"))
 
-	gcsMissingMessage = "[gcs-key.json was not found]"
-	gcsKeyFileContents = str(read_file("../Others/Secrets/gcs-key.json", gcsMissingMessage))
-	if gcsKeyFileContents == gcsMissingMessage:
-		print("Warning: File \"Others/Secrets/gcs-key.json\" was not found; pgbackrest will not be enabled in this cluster. (this is normal if you're not a backend-deployer)")
+	# print(str(postgresYaml))
+	gcsKeyFileContents = None
+	# Restore from pgBackRest at startup. Can be the S3 or Gcs remote
+	restoreFromGcs = False  # Change if restoring
+ 	restoreFromS3 = True  # Change if restoring
+	restoreFromRepo = None
+	if restoreFromGcs and restoreFromS3:
+		fail("Can't restore from both S3 and GCS")
+	restoreFromBackupFolder = None   # Specify a backup folder-name, such as 20221218-030022F_20221220-031024D, as found in the cloud-bucket (gcs) or volume /pgbackrest/repo1/backup/db/20240320-071854F/ in repo-host-0
+	# NOTE: This approach doesn't currently work, unless you add a workaround. See here: https://github.com/CrunchyData/postgres-operator/issues/1886#issuecomment-907784977
+	restoreFromTime = None # Alternately, specify a backup time
+	doRestore = restoreFromGcs or restoreFromS3
+	s3KeyFileContents = decode_yaml(str(read_file("../Others/Secrets/s3.yaml", None)))
 
-	postgresYaml = str(ReplaceInBlob(helm('../Packages/deploy/PGO/postgres', namespace="postgres-operator"), {
-		"TILT_PLACEHOLDER:bucket_uniformPrivate_name": g["bucket_uniformPrivate_name"],
-		"[@base64]TILT_PLACEHOLDER:gcsKeyAsString": gcsKeyFileContents.replace("\n", "\n    ")
-	}))
-	if gcsKeyFileContents == gcsMissingMessage:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="reduceIndent")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="omit")
-	else:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK1_whenGCSOff", "TILTFILE_MANAGED_BLOCK2_whenGCSOn", action="omit")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK2_whenGCSOn", "TILTFILE_MANAGED_BLOCK3", action="reduceIndent")
+	if g['ENV'] == 'PROD':
+		gcsKeyFileContents = str(read_file("../Others/Secrets/gcs-key.json", None))
+		if not gcsKeyFileContents:
+			print("Warning: File \"Others/Secrets/gcs-key.json\" was not found; pgbackrest will not be enabled in this cluster. (this is normal if you're not a backend-deployer)")
 
-	# enableRestoreForProd = True
-	# enableRestore = enableRestoreForProd if PROD else False
-	if g["DEV"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="reduceIndent")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="omit")
-	elif g["PROD"]:
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_1ForDev", "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", action="omit")
-		postgresYaml = ModifyLineRange(postgresYaml, "TILTFILE_MANAGED_BLOCK_Restore_2ForProd", "TILTFILE_MANAGED_BLOCK_Restore_3End", action="reduceIndent")
+	set_vars = []
+	repo_num = 0
+	if s3KeyFileContents:
+		for key, val in s3KeyFileContents.items():
+			set_vars.append("multiBackupRepos.%d.s3.%s=%s" % (repo_num, key, val))
+		repo_num += 1
+	if gcsKeyFileContents:
+		set_vars.append("multiBackupRepos.%d.gcs.bucket=%s" % (repo_num, g['bucket_uniformPrivate_url']))
 
-	k8s_yaml(blob(postgresYaml))
+	postgresYaml = helm('../Packages/deploy/PGO/postgres', namespace="postgres-operator", set=set_vars)
+	print(postgresYaml)
+
+	postgresData = decode_yaml_stream(postgresYaml)
+	for data in postgresData:
+		if data['kind'] != 'PostgresCluster':
+			continue
+		backupData = data['spec']['backups']['pgbackrest']
+		print(backupData)
+		for repo in backupData['repos']:
+			if 'gcs' in repo and restoreFromGcs:
+				restoreFromRepo = repo
+			if 's3' in repo:
+				backupData['global']['repo1-s3-uri-style'] = 'path'  # For Minio vs S3. Should make configurable.
+				if restoreFromS3:
+					restoreFromRepo = repo
+
+		if restoreFromRepo:
+			restoreData = dict(configuration=backupData['configuration'], stanza='db', repo=restoreFromRepo)
+			restoreData['global'] = backupData['global']  # fails as an argument?
+			data['spec']['dataSource'] = dict(pgbackrest=restoreData)
+
+	postgresYaml = encode_yaml_stream(postgresData)
+	print(postgresYaml)
+	k8s_yaml(postgresYaml)
 
 	# now package up the postgres objects into the Tilt "database" section
 	# ----------
