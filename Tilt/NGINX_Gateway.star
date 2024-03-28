@@ -30,7 +30,7 @@ def Start_NGINXGateway(g):
 			"workload": "ngf-nginx-gateway-fabric", "new_name": "ngf", "labels": ["gateway"],
 			#"new_name": "ngf", "labels": ["gateway"],
 			"objects": [
-				"nginxgateways.gateway.nginx.org:customresourcedefinition",
+				# "nginxgateways.gateway.nginx.org:customresourcedefinition",
 				"nginx:gatewayclass",
 				"ngf-nginx-gateway-fabric:serviceaccount",
 				"ngf-nginx-gateway-fabric:clusterrole",
@@ -45,7 +45,7 @@ def Start_NGINXGateway(g):
 	# 	chart='oci://ghcr.io/nginxinc/charts/nginx-gateway-fabric',
 	# 	release_name='ngf', # affects naming of pods and such; be consistent with helm_remote above
 	# 	name='ngf', # tilt resource name
-	
+
 	# 	namespace='default',
 	# 	flags=[
 	# 		#'--version=1.1.0',
@@ -54,7 +54,7 @@ def Start_NGINXGateway(g):
 	# 		#'--set=service.type=NodePort',
 	# 		#'--set=service.type=LoadBalancer',
 	# 		#'--set=service.externalIPs={15.204.30.179}',
-	
+
 	# 		# attempted fix for NGF pod and deployment (and probably the gateway-class) being removed for some reason
 	# 		'--set=nginxGateway.image.pullPolicy=IfNotPresent',
 	# 		'--set=nginx.image.pullPolicy=IfNotPresent',
