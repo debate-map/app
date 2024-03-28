@@ -118,7 +118,7 @@ const GetPodName_NginxGatewayFabric = context=>GetPodInfos(context, "default", [
 function K8sContext_Current() {
 	return execSync(`kubectl config current-context`).toString().trim();
 }
-/** Gets the k8s context passed to the current nps script. (for example, "local", if this was run: npm start "db.psql_k8s local") */
+/** Gets the k8s context passed to the current nps script. (for example, "dm-local", if this was run: npm start "db.psql_k8s dm-local") */
 function K8sContext_Arg(throwErrorIfNotPassed = false) {
 	let contextArg;
 	if (commandArgs[0] && !commandArgs[0].includes(":")) {
@@ -299,7 +299,6 @@ Object.assign(scripts, {
 			return KubeCTLCommand(commandArgs[0], `-n postgres-operator port-forward $(${GetPodNameCmd_DB(commandArgs[0])}) 8081:5432`);
 		}),*/
 
-		// commented; tilt doesn't recognize "local" context as local, so it then tries to actually deploy images to local.tilt.dev, which then fails
 		tiltUp_local:              `${PrepDockerCmd()} ${SetTileEnvCmd(false, "dm-local")}          tilt up   -f ./Tilt/Main.star --context dm-local`,
 		tiltDown_local:            `${PrepDockerCmd()} ${SetTileEnvCmd(false, "dm-local")}          tilt down -f ./Tilt/Main.star --context dm-local`,
 		tiltUp_docker:             `${PrepDockerCmd()} ${SetTileEnvCmd(false, "docker-desktop")}    tilt up   -f ./Tilt/Main.star --context docker-desktop`,
@@ -370,7 +369,7 @@ Object.assign(scripts, {
 
 		// backups
 		viewDBBackups: Dynamic(()=>{
-			const devEnv = commandArgs[0] == "dev" || K8sContext_Current() == "local";
+			const devEnv = commandArgs[0] == "dev" || K8sContext_Current() == "dm-local";
 			const {bucket_dev_uniformPrivate_name, bucket_prod_uniformPrivate_name} = require("./PulumiOutput_Public.json"); // eslint-disable-line
 			const bucket_uniformPrivate_name = devEnv ? bucket_dev_uniformPrivate_name : bucket_prod_uniformPrivate_name;
 			// this works for links as well on windows; not sure on linux/mac

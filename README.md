@@ -301,7 +301,7 @@ Prerequisite steps: [setup-backend](#setup-backend)
 
 #### After steps
 
-* 1\) Create an alias/copy of the k8s context you just created, renaming it to "local":
+* 1\) Create an alias/copy of the k8s context you just created, renaming it to "dm-local":
 	* 1.1\) For Docker Desktop, this means:
 		* 1.1.1\) Open: `$HOME/.kube/config`
 		* 1.1.2\) Find the section with these contents:
@@ -311,7 +311,7 @@ Prerequisite steps: [setup-backend](#setup-backend)
 		    user: docker-desktop
 		  name: docker-desktop
 		```
-		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: local`.
+		* 1.1.3\) Copy that section and paste it just below, changing the copy's `name: docker-desktop` to `name: dm-local`.
 * 2\) [opt] To make future kubectl commands more convenient, set the context's default namespace: `kubectl config set-context --current --namespace=app`
 
 #### Troubleshooting
@@ -522,11 +522,11 @@ Note: If you merely want to explore the file-system of a running pod, it's recom
 
 Prerequisite steps: [setup-k8s](#setup-k8s), [setup-psql](#setup-psql)
 
-* 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s local"`
-	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s local db:postgres"`)
-* 2\) Run: `npm start "db.initDB local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@InitDB.sql` script)
-* 3\) Run: `npm start "db.seedDB local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
-	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run `npm start "db.seedDB_freshScript local"`.
+* 1\) If there already exists a `debate-map` database in your local k8 cluster's postgres instance, "delete" it by running: `npm start "db.demoteDebateMapDB_k8s dm-local"`
+	* 1.1\) For safety, this command does not technically delete the database; rather, it renames it to `debate-map-old-XXX` (with `XXX` being the date/time of the rename). You can restore the database by changing its name back to `debate-map`. To find the modified name of the database, run the query: `SELECT datname FROM pg_database WHERE datistemplate = false;` (to connect to the postgres server in order to run this query, run: `npm start "db.psql_k8s dm-local db:postgres"`)
+* 2\) Run: `npm start "db.initDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/InitDB/@InitDB.sql` script)
+* 3\) Run: `npm start "db.seedDB dm-local"` (or manually: connect to postgres server/pod and apply the `./Scripts/SeedDB/@SeedDB.sql` script)
+	* 3.1\) If you get an error, changes may have been made to the expected database structure, with it being forgotten to update the `GenerateSeedDB.ts` code (or to regenerate its `@SeedDB.sql` output script). Open the `Scripts\SeedDBGenerator\GenerateSeedDB.ts` file, check for TypeScript errors, fix any you see, then run `npm start "db.seedDB_freshScript dm-local"`.
 
 </details>
 
