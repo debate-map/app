@@ -79,6 +79,10 @@ spec:
         azure:
           container: {{ $repo.azure.container | quote }}
         {{- end }}
+        {{- if $repo.schedules}}
+        schedules:
+{{ toYaml $repo.schedules | indent 10 }}
+        {{- end}}
       {{- end }}
       {{- else if .Values.s3 }}
       configuration:
