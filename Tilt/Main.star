@@ -154,13 +154,13 @@ if not REMOTE:
 	k8s_yaml('../Packages/deploy/Monitors/metrics-server/components.yaml')
 	NEXT_k8s_resource(g, "metrics-server", labels=["monitoring"], pod_readiness='ignore')
 
-# secrets-reflector
-load('./Reflector.star', 'Start_Reflector')
-Start_Reflector(g)
-
 # postgres
 load('./Postgres.star', 'Start_Postgres')
 Start_Postgres(g)
+
+# secrets-reflector
+load('./Reflector.star', 'Start_Reflector')
+Start_Reflector(g)
 
 # policy manager (eg. to block deletion of certain resources)
 # load('./Kyverno.star', 'Start_Kyverno')
