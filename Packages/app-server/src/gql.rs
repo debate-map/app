@@ -7,7 +7,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use rust_shared::anyhow::{anyhow, bail};
 use rust_shared::async_graphql::http::{playground_source, GraphQLPlaygroundConfig, graphiql_source};
-use rust_shared::async_graphql::{Schema, MergedObject, MergedSubscription, ObjectType, Data, Result, SubscriptionType, EmptyMutation, EmptySubscription, Variables, extensions};
+use rust_shared::async_graphql::{extensions, Data, EmptyMutation, EmptySubscription, MergedObject, MergedSubscription, ObjectType, Result, Schema, ServerError, SubscriptionType, Variables};
 use rust_shared::bytes::Bytes;
 use deadpool_postgres::{Pool, Manager};
 use rust_shared::http_body_util::Full;
@@ -24,7 +24,7 @@ use rust_shared::utils::auth::jwt_utils_base::UserJWTData;
 use rust_shared::utils::db::agql_ext::gql_general_extension::CustomExtensionCreator;
 use rust_shared::utils::net::{body_to_str, full_body_from_str, new_hyper_client_http, AxumBody, HyperClient, HyperClient_};
 use rust_shared::utils::type_aliases::JSONValue;
-use rust_shared::{axum, serde_json, to_anyhow, tower, tower_http};
+use rust_shared::{axum, serde_json, thiserror, to_anyhow, tower, tower_http};
 use tower::make::Shared;
 use tower::{Service, ServiceExt, BoxError, service_fn};
 use tower_http::cors::{CorsLayer};
@@ -306,9 +306,14 @@ pub async fn extend_router(app: Router, storage_wrapper: AppStateArc) -> Router 
 pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperClient>, Extension(schema): Extension<RootSchema>, req: Request<AxumBody>) -> Response<AxumBody> {
     let response_str = match have_own_graphql_handle_request(req, schema).await {
         Ok(a) => a,
-        Err(err) => json!({
-            "error": format!("GQL error:{:?}", err),
-        }).to_string(),
+        Err(err) => match err {
+            HandleGQLRequestError::Early(err) => json!({
+                "errors": [{"message": err.to_string()}],
+            }).to_string(),
+            HandleGQLRequestError::Late(errors) => json!({
+                "errors": errors,
+            }).to_string(),
+        },
     };
 
     // send response (to frontend)
@@ -320,7 +325,26 @@ pub async fn handle_gql_query_or_mutation(Extension(_client): Extension<HyperCli
         .unwrap();
     response
 }
-pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: RootSchema) -> Result<String, Error> {
+
+#[derive(thiserror::Error, Debug)]
+pub enum HandleGQLRequestError {
+    #[error("Early gql error: {0:?}")]
+    Early(Error),
+    #[error("Late gql error: {0:?}")]
+    Late(Vec<ServerError>),
+}
+impl From<Error> for HandleGQLRequestError {
+    fn from(err: Error) -> Self {
+        HandleGQLRequestError::Early(err)
+    }
+}
+/*impl From<Vec<ServerError>> for HandleGQLRequestError {
+    fn from(errors: Vec<ServerError>) -> Self {
+        HandleGQLRequestError::Late(errors)
+    }
+}*/
+
+pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: RootSchema) -> Result<String, HandleGQLRequestError> {
     use async_graphql::futures_util::TryFutureExt;
     
     // retrieve auth-data/JWT and such from http-headers
@@ -328,7 +352,7 @@ pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: Roo
     
     // read request's body (from frontend)
     let req_as_str = body_to_str(req.into_body()).await?;
-    let req_as_json = JSONValue::from_str(&req_as_str)?;
+    let req_as_json = JSONValue::from_str(&req_as_str).map_err(to_anyhow)?;
 
     // prepare request for graphql engine
     //let gql_req = async_graphql::Request::new(req_as_str);
@@ -358,9 +382,9 @@ pub async fn have_own_graphql_handle_request(req: Request<AxumBody>, schema: Roo
             }
         },
     }
-    let gql_response: async_graphql::Response = temp1.map_err(to_anyhow)?;
+    let gql_response: async_graphql::Response = temp1.map_err(HandleGQLRequestError::Late)?;
     //let response_body: String = gql_response.data.to_string(); // this doesn't output valid json (eg. no quotes around keys)
-    let response_str: String = serde_json::to_string(&gql_response)?;
+    let response_str: String = serde_json::to_string(&gql_response).map_err(to_anyhow)?;
     
     Ok(response_str)
 }
