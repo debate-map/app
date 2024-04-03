@@ -1,6 +1,7 @@
 import {AddWVCSchemas, ExposeModuleExports, Log} from "web-vcore";
 import {WRR} from "webpack-runtime-require";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {wrr} from "web-vcore/nm/webpack-runtime-require.js";
 import {InitWVC} from "./WVC.js";
 import {InitReactJS} from "./ReactJS.js";
 import {InitSentry} from "./Sentry.js";
@@ -14,21 +15,43 @@ function ExposeGlobals() {
 	// set some globals
 	G({Log});
 }
+
+class WW {
+	/** Short for "modules". */
+	get m() {
+		wrr.ParseModuleData();
+		return wrr.moduleExports;
+	}
+	/** Short for "modulesSimple". */
+	get ms() {
+		wrr.ParseModuleData();
+		return wrr.moduleExports_byShortName;
+	}
+	/** Short for "exports". */
+	get e() {
+		wrr.ParseModuleData();
+		return wrr.moduleExports_flat;
+	}
+}
 function ExposeModuleExports_Final() {
 	// expose exports
 	if (DEV) {
 		setTimeout(()=>{
-			const wrr = ExposeModuleExports();
+			const wrr2 = ExposeModuleExports();
 			//FixStoreAccessorFuncNames(wrr);
 		}, 500); // wait a bit, since otherwise some modules are missed/empty during ParseModuleData it seems
 	} else {
 		G({RR: ()=>{
-			const wrr = ExposeModuleExports();
+			const wrr2 = ExposeModuleExports();
 			//FixStoreAccessorFuncNames(wrr);
-			return wrr.moduleExports_flat;
+			return wrr2.moduleExports_flat;
 		}});
 	}
+
+	// new approach
+	G({ww: new WW()});
 }
+
 // not needed; NPMPatches.ts in web-vcore already passes the store-accessor-funcs their names
 /*function FixStoreAccessorFuncNames(wrr: WRR) {
 	for (const [exportName, exportValue] of Object.entries(wrr.moduleExports["dm_common"])) {

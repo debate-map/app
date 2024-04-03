@@ -13832,12 +13832,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-runtime-require@npm:1.0.0":
-  version: 1.0.0
-  resolution: "webpack-runtime-require@npm:1.0.0"
-  checksum: 83fe9bfbaa89ed6258c7b54f6b437d7d8a72d284aa1fe2473f7b738a02513fd923ea3c9651d907f1121508201c54ade44348e3742d3a495eb755c4d08e90a1fc
-  languageName: node
-  linkType: hard
+"webpack-runtime-require@npm:1.0.0, webpack-runtime-require@workspace:.yalc/web-vcore/.yalc/webpack-runtime-require":
+  version: 0.0.0-use.local
+  resolution: "webpack-runtime-require@workspace:.yalc/web-vcore/.yalc/webpack-runtime-require"
+  languageName: unknown
+  linkType: soft
 
 "webpack-sources@npm:^1.1.0":
   version: 1.4.3

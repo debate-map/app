@@ -25,6 +25,8 @@ Might be solved, watching. [edit: one of the causes was solved, but the error st
 
 **TLDR:** Note the version for `web-vcore` listed in package.json, run `yarn add web-vcore`, change package.json to again use the version noted earlier, redeploy the web-server pod (if using k8s for the JS file-serving), then refresh the page.
 
+EDIT: From a test in another repo, it *seems* a couple steps may be missing from the TLDR above (insert these before the "redeploying web-server pod" step): 1) remove non-workspace entry for the lib in yarn.lock, 2) run `yarn` again.
+
 **Trigger:** Not completely clear, but in the general space of doing yarn installs and/or zalc publishes of web-vcore.
 
 **Reason:** Two instances of web-vcore got installed by yarn: one with its file at "./node_modules/web-vcore", the other with its files at ".yalc/web-vcore". This duplication was probably caused by a usage of zalc that ended up botching the yarn.lock file (exact reasons this can happen are not yet clear).
