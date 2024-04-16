@@ -25,6 +25,10 @@ def _find_root_tiltfile_dir():
         if os.path.exists(os.path.join(current, 'tilt_modules')):
             return current
 
+        # v-added (fix for infinite traverse-up loop when no tilt_modules folder is found, as is true for the fresh-from-clone state)
+        if os.path.exists(os.path.join(current, '.env.template')):
+            return current
+
         current = os.path.dirname(current)
 
     fail('Could not find root Tiltfile')

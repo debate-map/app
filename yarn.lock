@@ -1702,7 +1702,7 @@ __metadata:
     typescript: "npm:5.3.3"
     ui-debug-kit: "npm:0.0.7"
     wavesurfer.js: "npm:7.6.0"
-    web-vcore: "npm:0.0.103"
+    web-vcore: "npm:0.0.104"
   languageName: unknown
   linkType: soft
 
@@ -12678,9 +12678,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tree-grapher@npm:0.0.11":
-  version: 0.0.11
-  resolution: "tree-grapher@npm:0.0.11"
+"tree-grapher@npm:0.0.11, tree-grapher@workspace:.yalc/tree-grapher":
+  version: 0.0.0-use.local
+  resolution: "tree-grapher@workspace:.yalc/tree-grapher"
   dependencies:
     "@types/d3-hierarchy": "npm:^3.0.2"
     d3-hierarchy: "npm:^3.1.1"
@@ -12695,9 +12695,8 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-  checksum: dd797f61d187a956aa1d8f973e7356a75d3fa669c478d6465d4785d1f52e11a041f03beae51614b9ce681ae685f6c40c7385585b8016399bbe61a06703b51110
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "tree-kill@npm:^1.2.2":
   version: 1.2.2
@@ -13649,7 +13648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-vcore@npm:0.0.103, web-vcore@workspace:.yalc/web-vcore":
+"web-vcore@npm:0.0.104, web-vcore@workspace:.yalc/web-vcore":
   version: 0.0.0-use.local
   resolution: "web-vcore@workspace:.yalc/web-vcore"
   dependencies:
@@ -13741,7 +13740,7 @@ __metadata:
     webpack-cli: "npm:5.1.4"
     webpack-dependency-tools: "npm:0.0.1"
     webpack-dev-middleware: "npm:7.0.0"
-    webpack-runtime-require: "npm:1.0.0"
+    webpack-runtime-require: "npm:2.0.0"
     webpack-string-replacer: "npm:0.0.20"
   peerDependencies:
     firebase: ^9.0.0
@@ -13832,7 +13831,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-runtime-require@npm:1.0.0, webpack-runtime-require@workspace:.yalc/web-vcore/.yalc/webpack-runtime-require":
+"webpack-runtime-require@npm:2.0.0, webpack-runtime-require@workspace:.yalc/web-vcore/.yalc/webpack-runtime-require":
   version: 0.0.0-use.local
   resolution: "webpack-runtime-require@workspace:.yalc/web-vcore/.yalc/webpack-runtime-require"
   languageName: unknown

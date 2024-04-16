@@ -141,7 +141,7 @@ Remote (private port-forwards/proxies):
 * `localhost:5240`: remote (k8s), hyperknowledge server (experimental backend) (`backend.[forward/tiltUp]_local` must be running)
 * `localhost:5241`: remote (k8s), hyperknowledge postgres (`backend.[forward/tiltUp]_local` must be running)
 
-Remote (public): \[note: the new version of debate-map is not yet served at these endpoints; these are the target urls, however, for when it's ready for public access]
+Remote (public):
 * `debatemap.app`: remote (k8s), web-server
 * `debatemap.app/app-server`: remote (k8s), app-server
 * `debatemap.app/monitor`: remote (k8s), monitor-backend (with web-serving of monitor-client's files)
