@@ -66,8 +66,6 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: AsNodeRevisionInput(newRevision)});
 							RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 							this.SetState({saveState: "success"});
-							setTimeout(()=>this.SetState({saveState: "idle"}), 5000);
-
 						}}/>
 						<div style={{
 							display: "flex", alignItems: "center", paddingLeft: "0.5rem",
