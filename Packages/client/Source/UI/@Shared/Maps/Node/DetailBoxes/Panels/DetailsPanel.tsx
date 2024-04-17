@@ -1,5 +1,5 @@
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {AddGlobalStyle, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {GetUpdates, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -12,16 +12,25 @@ import {gql} from "web-vcore/nm/@apollo/client";
 import {RunCommand_AddNodeRevision} from "Utils/DB/Command.js";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
+AddGlobalStyle(`
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+`);
+
 @Observer
-export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {dataError: null as string|n}) {
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: NodeL3, path: string}, {dataError: null as string|n, saveState: "idle" as "idle" | "saving" | "success" | "error"}) {
 	detailsUI: NodeDetailsUI|n;
 	render() {
 		const {show, map, node, path} = this.props;
-		const {dataError} = this.state;
+		const {dataError, saveState} = this.state;
 
 		const parentNode = GetParentNodeL3(path);
 		const link = GetLinkUnderParent(node.id, parentNode);
 		const creator = GetUser(node.creator);
+
+		console.log(saveState);
 
 		//const isSubnode = IsNodeSubnode(node);
 
@@ -45,6 +54,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 				{canEdit &&
 					<Row>
 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
+							this.SetState({saveState: "saving"});
 							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).ExcludeKeys("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							/*if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI!.GetNewLinkData());
@@ -57,7 +67,15 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							//const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							const {id: revisionID} = await RunCommand_AddNodeRevision({mapID: map?.id, revision: AsNodeRevisionInput(newRevision)});
 							RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
+							this.SetState({saveState: "success"});
 						}}/>
+						<div style={{
+							display: "flex", alignItems: "center", paddingLeft: "0.5rem",
+						}}>
+							{saveState === "saving" && <span style={{animation: "spin 1s linear infinite"}} className="mdi mdi-loading"/>}
+							{saveState === "success" && <span style={{color: "rgba(0,255,0,1)"}} className="mdi mdi-check"/>}
+							{saveState === "error" && <span style={{color: "red"}} className="mdi mdi-alert-circle"/>}
+						</div>
 						{/* error && <Pre>{error.message}</Pre> */}
 						{HasModPermissions(MeID()) &&
 						<Button ml="auto" text="Force refresh" onClick={async()=>{
