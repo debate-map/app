@@ -1,7 +1,12 @@
 {
 	"typescript.tsdk": "../node_modules/typescript/lib",
+	"typescript.preferences.importModuleSpecifierEnding": "js",
+	"javascript.preferences.importModuleSpecifierEnding": "js",
 	"javascript.preferences.quoteStyle": "double",
 	"typescript.preferences.quoteStyle": "double",
+	// needed for "Packages/common", since the others import its source files directly (which would break any non-relative paths it was using)
+	"typescript.preferences.importModuleSpecifier": "relative",
+	"javascript.preferences.importModuleSpecifier": "relative",
 	"eslint.validate": [
 		"javascript",
 		"javascriptreact",
