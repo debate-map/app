@@ -30,8 +30,6 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		const link = GetLinkUnderParent(node.id, parentNode);
 		const creator = GetUser(node.creator);
 
-		console.log(saveState);
-
 		//const isSubnode = IsNodeSubnode(node);
 
 		// if parent-node not loaded yet, don't render yet
